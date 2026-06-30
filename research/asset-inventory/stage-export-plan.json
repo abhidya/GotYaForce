@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/export-all-stages.mjs",
-  "generatedAt": "2026-06-30T21:32:15.345Z",
+  "generatedAt": "2026-06-30T21:37:20.404Z",
   "region": "GG4E",
   "mode": "export",
   "scope": "Direct stage ARC/PZZ export coverage only; does not edit browser runtime source or infer arena-name mappings.",
@@ -100,32 +100,27 @@
   "summary": {
     "sourceStageArchiveCount": 40,
     "sourcePairsWithModelAndPzz": 40,
-    "publicStageFolderCount": 7,
-    "publicStageWithAnyDaeCount": 7,
-    "verifiedVisualStageCount": 7,
-    "exportedCollisionHitStageCount": 7,
+    "publicStageFolderCount": 8,
+    "publicStageWithAnyDaeCount": 8,
+    "verifiedVisualStageCount": 8,
+    "exportedCollisionHitStageCount": 8,
     "sourceCompleteCollisionTripletCount": 18,
     "sourceAnyCollisionHitCount": 18,
     "sourceAnySetArcCount": 16,
-    "missingOrPartialExportCount": 33,
-    "safeMissingExportCount": 33,
-    "proofCandidate": "st07",
+    "missingOrPartialExportCount": 32,
+    "safeMissingExportCount": 32,
+    "proofCandidate": "st08",
     "executedExports": [
-      "st04",
-      "st05",
-      "st06"
+      "st07"
     ],
     "refreshedManifests": [
-      "st04",
-      "st05",
-      "st06"
+      "st07"
     ]
   },
   "exportPlan": {
     "defaultIsDryRun": true,
     "selectedStageIds": [],
     "allMissingOrPartialStageIds": [
-      "st07",
       "st08",
       "st09",
       "st0a",
@@ -160,7 +155,6 @@
       "stff"
     ],
     "safeMissingStageIds": [
-      "st07",
       "st08",
       "st09",
       "st0a",
@@ -197,15 +191,8 @@
     "skippedUnsafeExistingStageIds": [],
     "proofCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --proof",
     "selectedCommand": null,
-    "allSafeMissingCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07,st08,st09,st0a,st0b,st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff",
+    "allSafeMissingCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st08,st09,st0a,st0b,st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff",
     "exactPerStageCommands": [
-      {
-        "stage": "st07",
-        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07",
-        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 07",
-        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07",
-        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 07"
-      },
       {
         "stage": "st08",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st08",
@@ -2520,76 +2507,107 @@
         }
       },
       "public": {
-        "exists": false,
+        "exists": true,
         "directory": "apps/game/public/stages/st07",
         "manifest": {
           "path": "apps/game/public/stages/st07/manifest.json",
-          "exists": false,
-          "parses": false,
-          "error": "missing",
-          "status": null
+          "exists": true,
+          "parses": true,
+          "error": null,
+          "status": "verified-visual-and-collision"
         },
         "raw": {
-          "hasStageArc": false,
-          "hasStagePzz": false,
-          "stageArc": null,
-          "stagePzz": null,
-          "stageArcMatchesSource": false,
-          "stagePzzMatchesSource": false
+          "hasStageArc": true,
+          "hasStagePzz": true,
+          "stageArc": {
+            "path": "apps/game/public/stages/st07/raw/st07_mdl.arc",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st07\\raw\\st07_mdl.arc",
+            "bytes": 208607
+          },
+          "stagePzz": {
+            "path": "apps/game/public/stages/st07/raw/st07.pzz",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st07\\raw\\st07.pzz",
+            "bytes": 235520
+          },
+          "stageArcMatchesSource": true,
+          "stagePzzMatchesSource": true
         },
         "visual": {
           "directory": "apps/game/public/stages/st07/model",
-          "hasDaePieces": false,
-          "hasContiguousDaeSequence": false,
-          "hasCompleteDaeExport": false,
-          "daeCount": 0,
-          "nonEmptyDaeCount": 0,
+          "hasDaePieces": true,
+          "hasContiguousDaeSequence": true,
+          "hasCompleteDaeExport": true,
+          "daeCount": 4,
+          "nonEmptyDaeCount": 4,
           "zeroByteDaeFiles": [],
-          "maxModelIndex": null,
+          "maxModelIndex": 3,
           "missingModelIndices": [],
-          "expectedDaeIndices": [],
+          "expectedDaeIndices": [
+            0,
+            1,
+            2,
+            3
+          ],
           "missingExpectedDaeIndices": [],
           "unexpectedDaeIndices": [],
-          "sampleDaeFiles": [],
-          "textureCount": 0,
-          "textureFiles": [],
+          "sampleDaeFiles": [
+            "apps/game/public/stages/st07/model/model_00.dae",
+            "apps/game/public/stages/st07/model/model_01.dae",
+            "apps/game/public/stages/st07/model/model_02.dae",
+            "apps/game/public/stages/st07/model/model_03.dae"
+          ],
+          "textureCount": 7,
+          "textureFiles": [
+            "apps/game/public/stages/st07/model/model_00_Texture_0_CMP.png",
+            "apps/game/public/stages/st07/model/model_00_Texture_1_CMP.png",
+            "apps/game/public/stages/st07/model/model_00_Texture_2_RGBA8.png",
+            "apps/game/public/stages/st07/model/model_01_Texture_0_CMP.png",
+            "apps/game/public/stages/st07/model/model_02_Texture_0_CMP.png",
+            "apps/game/public/stages/st07/model/model_02_Texture_1_CMP.png",
+            "apps/game/public/stages/st07/model/model_02_Texture_2_RGBA8.png"
+          ],
           "exportSummary": {
             "path": "apps/game/public/stages/st07/model/export-summary.json",
-            "exists": false,
-            "parses": false,
-            "error": "missing",
-            "exporter": null,
-            "expectedSlotCount": null,
-            "expectedDaeCount": 0,
-            "exportedModelCount": null,
+            "exists": true,
+            "parses": true,
+            "error": null,
+            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+            "expectedSlotCount": 4,
+            "expectedDaeCount": 4,
+            "exportedModelCount": 4,
             "failedModelIndices": [],
             "skippedNullRootJointIndices": [],
-            "complete": null
+            "complete": true
           }
         },
         "collision": {
-          "hasHitFiles": false,
-          "exportedHitCount": 0,
-          "exportedHitFiles": [],
-          "missingSourceHitFiles": [
-            "hit070.bin",
-            "hit071.bin",
-            "hit072.bin"
+          "hasHitFiles": true,
+          "exportedHitCount": 3,
+          "exportedHitFiles": [
+            "apps/game/public/stages/st07/collision/hit070.bin",
+            "apps/game/public/stages/st07/collision/hit071.bin",
+            "apps/game/public/stages/st07/collision/hit072.bin"
           ],
+          "missingSourceHitFiles": [],
           "extraExportedHitFiles": []
         },
         "sets": {
-          "exportedSetCount": 0,
-          "exportedSetFiles": []
+          "exportedSetCount": 4,
+          "exportedSetFiles": [
+            "apps/game/public/stages/st07/set/set0700.arc",
+            "apps/game/public/stages/st07/set/set0701.arc",
+            "apps/game/public/stages/st07/set/set0702.arc",
+            "apps/game/public/stages/st07/set/set0703.arc"
+          ]
         }
       },
       "export": {
         "canExportWithExistingTools": true,
-        "needsExport": true,
-        "needsRaw": true,
-        "needsVisual": true,
-        "needsCollision": true,
-        "safeToRunExistingTools": true,
+        "needsExport": false,
+        "needsRaw": false,
+        "needsVisual": false,
+        "needsCollision": false,
+        "safeToRunExistingTools": false,
         "unsafeReason": null,
         "commands": {
           "stage": "st07",

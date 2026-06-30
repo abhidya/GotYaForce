@@ -64,6 +64,15 @@
       "visualComplete": true,
       "collisionCount": 3,
       "setArcCount": 4
+    },
+    {
+      "id": "st07",
+      "status": "verified-visual-and-collision",
+      "modelCount": 4,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 3,
+      "setArcCount": 4
     }
   ]
 }
