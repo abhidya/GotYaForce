@@ -12,7 +12,7 @@
 // so every combatant in the sim is visible.
 
 import * as THREE from "three";
-import type { BorgRuntime } from "@gf/combat";
+import type { BorgRuntime, Projectile } from "@gf/combat";
 
 /** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
 export interface BorgAssets {
@@ -54,17 +54,27 @@ interface Actor {
   isPlaceholder: boolean;
 }
 
+interface ProjectileActor {
+  sprite: THREE.Sprite;
+  material: THREE.SpriteMaterial;
+}
+
 /** Team-tinted placeholder material colors. */
 const TEAM_COLORS: Record<number, number> = { 0: 0x4cc7ff, 1: 0xff5a4d };
+const PROJECTILE_TEXTURE_URL = "/fx/energy_dot.png"; // ptcl00.txg#5, exported original particle.
 
 export class BattleScene {
   private actors = new Map<string, Actor>();
+  private projectileActors = new Map<string, ProjectileActor>();
   private pending = new Set<string>();
+  private projectileTexture = new THREE.TextureLoader().load(PROJECTILE_TEXTURE_URL);
 
   constructor(
     private readonly root: THREE.Group,
     private readonly assets: BorgAssets,
-  ) {}
+  ) {
+    this.projectileTexture.colorSpace = THREE.SRGBColorSpace;
+  }
 
   /** Map a sim state/action to one of the exported game animation groups. */
   private slotForBorg(b: BorgRuntime): AnimSlot {
@@ -86,7 +96,7 @@ export class BattleScene {
   }
 
   /** Reconcile the scene with the current list of live borgs. Call once per frame. */
-  sync(borgs: readonly BorgRuntime[]): void {
+  sync(borgs: readonly BorgRuntime[], projectiles: readonly Projectile[] = []): void {
     const live = new Set<string>();
     for (const b of borgs) {
       live.add(b.uid);
@@ -111,6 +121,7 @@ export class BattleScene {
         this.actors.delete(uid);
       }
     }
+    this.syncProjectiles(projectiles);
   }
 
   /** Advance all per-actor animation mixers. */
@@ -121,7 +132,9 @@ export class BattleScene {
   /** Remove every actor (call when leaving a battle). */
   clear(): void {
     for (const actor of this.actors.values()) this.root.remove(actor.group);
+    for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
     this.actors.clear();
+    this.projectileActors.clear();
     this.pending.clear();
   }
 
@@ -226,6 +239,48 @@ export class BattleScene {
     for (const [s, a] of Object.entries(actor.actions)) {
       if (s !== slot && a.isRunning()) a.crossFadeTo(action, 0.18, false);
     }
+  }
+
+  private syncProjectiles(projectiles: readonly Projectile[]): void {
+    const live = new Set<string>();
+    for (const projectile of projectiles) {
+      live.add(projectile.uid);
+      let actor = this.projectileActors.get(projectile.uid);
+      if (!actor) {
+        actor = this.spawnProjectile(projectile);
+        this.projectileActors.set(projectile.uid, actor);
+      }
+      actor.sprite.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
+      actor.material.opacity = Math.max(0.35, Math.min(1, projectile.life / 12));
+    }
+
+    for (const [uid, actor] of this.projectileActors) {
+      if (!live.has(uid)) {
+        this.disposeProjectileActor(actor);
+        this.projectileActors.delete(uid);
+      }
+    }
+  }
+
+  private spawnProjectile(projectile: Projectile): ProjectileActor {
+    const material = new THREE.SpriteMaterial({
+      map: this.projectileTexture,
+      color: projectile.team === 0 ? 0x91eaff : 0xff7a4d,
+      transparent: true,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
+    sprite.scale.setScalar(Math.max(42, projectile.hitRadius * 1.8));
+    this.root.add(sprite);
+    return { sprite, material };
+  }
+
+  private disposeProjectileActor(actor: ProjectileActor): void {
+    this.root.remove(actor.sprite);
+    actor.material.dispose();
   }
 }
 

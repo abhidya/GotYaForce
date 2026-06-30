@@ -717,7 +717,7 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   battleScene.clear();
   flow.screen = "battle";
   // Prime the scene + HUD on frame 0.
-  battleScene.sync(battle.state.borgs);
+  battleScene.sync(battle.state.borgs, battle.state.projectiles);
   updateHud();
 }
 
@@ -820,7 +820,7 @@ function stepBattle(dt: number): void {
     if (battle.state.result !== "ongoing") break;
   }
 
-  battleScene.sync(battle.state.borgs);
+  battleScene.sync(battle.state.borgs, battle.state.projectiles);
   updateHud();
 
   if (battle.state.result !== "ongoing") resolveBattle();
