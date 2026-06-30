@@ -1,0 +1,158 @@
+{
+  "region": "GG4E",
+  "id": "st06",
+  "source": "user-data/GG4E/afs_data/root",
+  "status": "verified-visual-and-collision",
+  "verifiedBy": "scripts/export-all-stages.mjs",
+  "verifiedAt": "2026-06-30T21:32:15.149Z",
+  "copied": {
+    "stageArc": "st06/raw/st06_mdl.arc",
+    "stagePzz": "st06/raw/st06.pzz",
+    "hitBins": [
+      "st06/collision/hit060.bin",
+      "st06/collision/hit061.bin",
+      "st06/collision/hit062.bin"
+    ],
+    "setArcs": [
+      "st06/set/set0600.arc",
+      "st06/set/set0601.arc",
+      "st06/set/set0602.arc",
+      "st06/set/set0603.arc"
+    ]
+  },
+  "visual": {
+    "hasDaePieces": true,
+    "hasContiguousDaeSequence": true,
+    "hasCompleteDaeExport": true,
+    "daeCount": 4,
+    "nonEmptyDaeCount": 4,
+    "maxModelIndex": 3,
+    "missingModelIndices": [],
+    "expectedDaeIndices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "missingExpectedDaeIndices": [],
+    "unexpectedDaeIndices": [],
+    "zeroByteDaeFiles": [],
+    "textureCount": 7,
+    "exportSummary": {
+      "path": "model/export-summary.json",
+      "exists": true,
+      "parses": true,
+      "error": null,
+      "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+      "expectedSlotCount": 4,
+      "expectedDaeCount": 4,
+      "exportedModelCount": 4,
+      "failedModelIndices": [],
+      "skippedNullRootJointIndices": [],
+      "complete": true
+    }
+  },
+  "collision": [
+    {
+      "path": "collision/hit060.bin",
+      "bytes": 20824
+    },
+    {
+      "path": "collision/hit061.bin",
+      "bytes": 14216
+    },
+    {
+      "path": "collision/hit062.bin",
+      "bytes": 14288
+    }
+  ],
+  "sets": {
+    "sourceSetFiles": [
+      "set0600.arc",
+      "set0601.arc",
+      "set0602.arc",
+      "set0603.arc"
+    ],
+    "exportedSetCount": 4,
+    "filesNotCopiedByCurrentTool": []
+  },
+  "commands": {
+    "stage": "st06",
+    "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st06",
+    "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 06",
+    "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st06",
+    "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 06"
+  },
+  "notes": [
+    "Verified by comparing source stage assets against the browser public stage folder.",
+    "Visual DAE pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
+  ],
+  "modelCount": 4,
+  "models": [
+    {
+      "path": "model/model_00.dae",
+      "bytes": 206674
+    },
+    {
+      "path": "model/model_01.dae",
+      "bytes": 22604
+    },
+    {
+      "path": "model/model_02.dae",
+      "bytes": 144268
+    },
+    {
+      "path": "model/model_03.dae",
+      "bytes": 877
+    }
+  ],
+  "textures": [
+    {
+      "path": "model/model_00_Texture_0_CMP.png",
+      "bytes": 18564
+    },
+    {
+      "path": "model/model_00_Texture_1_CMP.png",
+      "bytes": 101983
+    },
+    {
+      "path": "model/model_00_Texture_2_RGBA8.png",
+      "bytes": 2413
+    },
+    {
+      "path": "model/model_01_Texture_0_CMP.png",
+      "bytes": 56757
+    },
+    {
+      "path": "model/model_02_Texture_0_CMP.png",
+      "bytes": 26428
+    },
+    {
+      "path": "model/model_02_Texture_1_CMP.png",
+      "bytes": 18564
+    },
+    {
+      "path": "model/model_02_Texture_2_RGBA8.png",
+      "bytes": 2413
+    }
+  ],
+  "setArcs": [
+    {
+      "path": "set/set0600.arc",
+      "bytes": 71680
+    },
+    {
+      "path": "set/set0601.arc",
+      "bytes": 55296
+    },
+    {
+      "path": "set/set0602.arc",
+      "bytes": 65536
+    },
+    {
+      "path": "set/set0603.arc",
+      "bytes": 55296
+    }
+  ],
+  "renderStatus": "dae-complete"
+}

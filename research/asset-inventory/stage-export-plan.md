@@ -1,18 +1,18 @@
 # Stage Export Plan
 
-Generated: 2026-06-30T21:08:41.143Z
+Generated: 2026-06-30T21:32:15.345Z
 
 ## Summary
 
 - Region: GG4E
 - Source direct stage pairs: 40/40
-- Browser public stage folders: 4
-- Browser stages with visual DAE pieces: 4
-- Browser stages with complete DAE sequences: 4
+- Browser public stage folders: 7
+- Browser stages with visual DAE pieces: 7
+- Browser stages with complete DAE sequences: 7
 - Source stages with any hit collision bins: 18
-- Missing or partial exports: 36
-- Safe missing exports with current tools: 36
-- Proof candidate: st04
+- Missing or partial exports: 33
+- Safe missing exports with current tools: 33
+- Proof candidate: st07
 
 Adventure-flow note: Runtime hard-codes st00 and 40 DAE pieces; extracted root has many st##_mdl.arc/st##.pzz pairs but no verified arena-name to stage-code table in source.
 
@@ -33,7 +33,7 @@ rtk node scripts/export-all-stages.mjs GG4E --export --proof
 All safe missing exports:
 
 ```bash
-rtk node scripts/export-all-stages.mjs GG4E --export --stage st04,st05,st06,st07,st08,st09,st0a,st0b,st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff
+rtk node scripts/export-all-stages.mjs GG4E --export --stage st07,st08,st09,st0a,st0b,st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff
 ```
 
 ## Coverage Table
@@ -44,9 +44,9 @@ rtk node scripts/export-all-stages.mjs GG4E --export --stage st04,st05,st06,st07
 | st01 | ARC+PZZ | 78 DAE complete | 3 source / 3 public | 4 source / 4 public | covered |
 | st02 | ARC+PZZ | 51 DAE complete | 3 source / 3 public | 4 source / 4 public | covered |
 | st03 | ARC+PZZ | 43 DAE complete | 3 source / 3 public | 4 source / 4 public | covered |
-| st04 | ARC+PZZ | not exported | 3 source / 0 public | 4 source / 0 public | `rtk node scripts/export-all-stages.mjs GG4E --export --stage st04` |
-| st05 | ARC+PZZ | not exported | 3 source / 0 public | 4 source / 0 public | `rtk node scripts/export-all-stages.mjs GG4E --export --stage st05` |
-| st06 | ARC+PZZ | not exported | 3 source / 0 public | 4 source / 0 public | `rtk node scripts/export-all-stages.mjs GG4E --export --stage st06` |
+| st04 | ARC+PZZ | 52 DAE complete | 3 source / 3 public | 4 source / 4 public | covered |
+| st05 | ARC+PZZ | 28 DAE complete | 3 source / 3 public | 4 source / 4 public | covered |
+| st06 | ARC+PZZ | 4 DAE complete | 3 source / 3 public | 4 source / 4 public | covered |
 | st07 | ARC+PZZ | not exported | 3 source / 0 public | 4 source / 0 public | `rtk node scripts/export-all-stages.mjs GG4E --export --stage st07` |
 | st08 | ARC+PZZ | not exported | 3 source / 0 public | 4 source / 0 public | `rtk node scripts/export-all-stages.mjs GG4E --export --stage st08` |
 | st09 | ARC+PZZ | not exported | 3 source / 0 public | 1 source / 0 public | `rtk node scripts/export-all-stages.mjs GG4E --export --stage st09` |
@@ -82,36 +82,6 @@ rtk node scripts/export-all-stages.mjs GG4E --export --stage st04,st05,st06,st07
 | stff | ARC+PZZ | not exported | 3 source / 0 public | 0 source / 0 public | `rtk node scripts/export-all-stages.mjs GG4E --export --stage stff` |
 
 ## Exact Per-Stage Commands
-
-### st04
-```bash
-rtk node scripts/export-all-stages.mjs GG4E --export --stage st04
-# equivalent single-stage raw copy tool, which also rewrites apps/game/public/stages/manifest.json:
-rtk node scripts/export-stage-assets.mjs GG4E 04
-# legacy visual exporter; retained for comparison, not used by the batch orchestrator:
-rtk node scripts/export-stage-hsd.mjs GG4E 04
-rtk node scripts/export-all-stages.mjs GG4E --export --stage st04
-```
-
-### st05
-```bash
-rtk node scripts/export-all-stages.mjs GG4E --export --stage st05
-# equivalent single-stage raw copy tool, which also rewrites apps/game/public/stages/manifest.json:
-rtk node scripts/export-stage-assets.mjs GG4E 05
-# legacy visual exporter; retained for comparison, not used by the batch orchestrator:
-rtk node scripts/export-stage-hsd.mjs GG4E 05
-rtk node scripts/export-all-stages.mjs GG4E --export --stage st05
-```
-
-### st06
-```bash
-rtk node scripts/export-all-stages.mjs GG4E --export --stage st06
-# equivalent single-stage raw copy tool, which also rewrites apps/game/public/stages/manifest.json:
-rtk node scripts/export-stage-assets.mjs GG4E 06
-# legacy visual exporter; retained for comparison, not used by the batch orchestrator:
-rtk node scripts/export-stage-hsd.mjs GG4E 06
-rtk node scripts/export-all-stages.mjs GG4E --export --stage st06
-```
 
 ### st07
 ```bash
