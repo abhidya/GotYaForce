@@ -25,6 +25,7 @@ import borgs from "../../../packages/assets/data/borgs.json";
 import {
   setBorgStats,
   createBattle,
+  DEFAULT_BOUNDS,
   emptyInput,
   type Battle,
   type BorgStats,
@@ -366,6 +367,10 @@ async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.Animation
 }
 
 const battleScene = new BattleScene(battleRoot, { loadModel: loadBorgModel, loadClip: loadBorgClip });
+const cameraFocus = new THREE.Vector3();
+const cameraGoal = new THREE.Vector3();
+const cameraForward = new THREE.Vector3();
+const cameraInward = new THREE.Vector3();
 
 // ------------------------------------------------------------------------------------------
 // Stage loading (preserved)
@@ -826,15 +831,31 @@ function followCamera(): void {
   const active = localActiveBorg();
   const target = active ? battleScene.positionOf(active.uid) : null;
   const focus = target ?? new THREE.Vector3(0, 80, 0);
-  controls.target.lerp(new THREE.Vector3(focus.x, focus.y + 90, focus.z), 0.08);
+  cameraFocus.set(focus.x, focus.y + 90, focus.z);
+  controls.target.lerp(cameraFocus, 0.08);
   // Trail the camera behind the active borg.
   if (active) {
-    const behind = new THREE.Vector3(
-      focus.x - Math.sin(active.rotY) * 700,
+    cameraForward.set(Math.sin(active.rotY), 0, Math.cos(active.rotY));
+    cameraGoal.set(
+      focus.x - cameraForward.x * 700,
       focus.y + 420,
-      focus.z - Math.cos(active.rotY) * 700,
+      focus.z - cameraForward.z * 700,
     );
-    camera.position.lerp(behind, 0.04);
+
+    // Until the original gameplay camera collision path is traced, keep the
+    // browser camera inside the exported arena shell instead of letting the
+    // normal trailing point sit behind a wall/ceiling at spawn.
+    const currentRadius = Math.hypot(focus.x, focus.z);
+    const goalRadius = Math.hypot(cameraGoal.x, cameraGoal.z);
+    const shellGuardRadius = Math.min(DEFAULT_BOUNDS.x, DEFAULT_BOUNDS.z) * 0.25;
+    if (currentRadius > shellGuardRadius && goalRadius > currentRadius + 80) {
+      cameraInward.set(-focus.x, 0, -focus.z);
+      if (cameraInward.lengthSq() < 0.0001) cameraInward.copy(cameraForward).multiplyScalar(-1);
+      cameraInward.normalize();
+      cameraGoal.set(focus.x + cameraInward.x * 1100, focus.y + 560, focus.z + cameraInward.z * 1100);
+    }
+
+    camera.position.lerp(cameraGoal, 0.08);
   }
 }
 

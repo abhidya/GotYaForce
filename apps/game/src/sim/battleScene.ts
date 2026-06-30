@@ -174,6 +174,7 @@ export class BattleScene {
       disposeMesh(placeholder);
       actor.group.add(model);
       actor.mixer = new THREE.AnimationMixer(model);
+      actor.current = null;
       actor.isPlaceholder = false;
     }
     actor.ready = true;
@@ -182,7 +183,6 @@ export class BattleScene {
   private playSlot(actor: Actor, slot: AnimSlot): void {
     if (actor.current === slot) return;
     if (!actor.mixer) {
-      actor.current = slot;
       return; // placeholder has no animation
     }
     actor.current = slot;

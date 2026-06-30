@@ -1,0 +1,909 @@
+{
+  "generatedBy": "scripts/audit-real-asset-coverage.mjs",
+  "generatedAt": "2026-06-30T22:47:10.453Z",
+  "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
+  "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
+  "summary": {
+    "screens": 10,
+    "screensUsingAnyRealExportedAsset": 5,
+    "screensWithHandcodedSurfaceSignals": 10,
+    "screensWithRealSceneModel": 1,
+    "publicUiTextureExportedImages": 831,
+    "requestedUiSceneModelsExported": 1,
+    "publicStagesCompleteVisual": 40,
+    "publicStagesTotal": 40,
+    "runtimeStageFallback": "st00"
+  },
+  "screens": [
+    {
+      "id": "main-menu",
+      "runtimeScreen": "menu",
+      "file": "apps/game/src/ui/screens/MainMenu.ts",
+      "exportName": "createMainMenu",
+      "originalMode": "Challenge mode hub",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/tl00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/optn00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/staff00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/titles.tpl",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
+          "exists": false
+        }
+      ],
+      "nextReplacement": "Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:53",
+      "coverageLevel": "handcoded-or-unverified",
+      "realExportedAssetsUsed": [],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "css-menu-gear",
+          "pattern": "gf-menu-gear",
+          "line": 85
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 86
+        }
+      ],
+      "replacementStatus": "No direct exported UI asset usage observed in this component."
+    },
+    {
+      "id": "select-difficulty",
+      "runtimeScreen": "difficulty",
+      "file": "apps/game/src/ui/screens/SelectDifficulty.ts",
+      "exportName": "createSelectDifficulty",
+      "originalMode": "Challenge",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel01_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
+          "exists": false
+        }
+      ],
+      "nextReplacement": "Use the original Challenge select scene textures/models for the three GF-energy pads and cursor.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:41",
+      "coverageLevel": "handcoded-or-unverified",
+      "realExportedAssetsUsed": [],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "css-grid-backdrop",
+          "pattern": "gf-grid-bg",
+          "line": 48
+        },
+        {
+          "kind": "css-gradient-surface",
+          "pattern": "linear-gradient",
+          "line": 23
+        },
+        {
+          "kind": "css-menu-gear",
+          "pattern": "gf-menu-gear",
+          "line": 67
+        },
+        {
+          "kind": "css-option-pad",
+          "pattern": "gf-pad",
+          "line": 66
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 49
+        }
+      ],
+      "replacementStatus": "No direct exported UI asset usage observed in this component."
+    },
+    {
+      "id": "select-players",
+      "runtimeScreen": "players",
+      "file": "apps/game/src/ui/screens/SelectPlayers.ts",
+      "exportName": "createSelectPlayers",
+      "originalMode": "Challenge",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel01_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
+          "exists": false
+        }
+      ],
+      "nextReplacement": "Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/SelectPlayers.ts:47",
+      "coverageLevel": "handcoded-or-unverified",
+      "realExportedAssetsUsed": [],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "css-grid-backdrop",
+          "pattern": "gf-grid-bg",
+          "line": 55
+        },
+        {
+          "kind": "css-option-pad",
+          "pattern": "gf-pad",
+          "line": 77
+        },
+        {
+          "kind": "css-label-pill",
+          "pattern": "gf-pill",
+          "line": 78
+        },
+        {
+          "kind": "handcoded-player-silhouette",
+          "pattern": "personSilhouette",
+          "line": 27
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 42
+        }
+      ],
+      "replacementStatus": "No direct exported UI asset usage observed in this component."
+    },
+    {
+      "id": "load-box-data",
+      "runtimeScreen": "load-box",
+      "file": "apps/game/src/ui/screens/LoadBoxData.ts",
+      "exportName": "createLoadBoxData",
+      "originalMode": "Challenge",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/box00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/firstld.pzz",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
+          "exists": false
+        }
+      ],
+      "nextReplacement": "Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/LoadBoxData.ts:24",
+      "coverageLevel": "real-scene-partial-layout",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "literal-public-path",
+          "publicPath": "/ui/scenes/box00/model_00.dae",
+          "exists": true
+        }
+      ],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "css-grid-backdrop",
+          "pattern": "gf-grid-bg",
+          "line": 29
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 30
+        }
+      ],
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
+    },
+    {
+      "id": "select-force",
+      "runtimeScreen": "select-force",
+      "file": "apps/game/src/ui/screens/SelectForce.ts",
+      "exportName": "createSelectForce",
+      "originalMode": "Challenge",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/entry00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/box00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/unitall_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/plcmndata.bin",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/allbox.bin",
+          "exists": false
+        },
+        {
+          "pattern": "bn####.tpl",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        },
+        {
+          "pattern": "mn####.tpl",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        },
+        {
+          "pattern": "face####_mdl.arc",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        }
+      ],
+      "nextReplacement": "Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:27",
+      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.entryControls",
+          "publicPath": "/ui/hsd/entry00_mdl/texture_002_CI8.png",
+          "exists": true
+        },
+        {
+          "kind": "borg-ui-helper",
+          "symbol": "borgBannerPath",
+          "publicPathPattern": "/ui/tpl/bn<borgUiCode>/image_00_CI4.png",
+          "exists": "per-borg"
+        },
+        {
+          "kind": "borg-ui-helper",
+          "symbol": "borgMiniPath",
+          "publicPathPattern": "/ui/tpl/mn<borgUiCode>/image_00_CI4.png",
+          "exists": "per-borg"
+        },
+        {
+          "kind": "borg-ui-helper",
+          "symbol": "borgFacePath",
+          "publicPathPattern": "/ui/hsd/face<borgUiCode>_mdl/texture_000_CI8.png",
+          "exists": "per-borg"
+        }
+      ],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "css-grid-backdrop",
+          "pattern": "gf-grid-bg",
+          "line": 39
+        },
+        {
+          "kind": "css-force-platform",
+          "pattern": "gf-select-platform",
+          "line": 45
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 40
+        }
+      ],
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
+    },
+    {
+      "id": "force-builder",
+      "runtimeScreen": "force",
+      "file": "apps/game/src/ui/screens/ForceBuilder.ts",
+      "exportName": "createForceBuilder",
+      "originalMode": "Challenge edit force",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/unitall_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/plcmndata.bin",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/allbox.bin",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/gets.pzz",
+          "exists": false
+        },
+        {
+          "pattern": "gets##_mdl.arc",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        },
+        {
+          "pattern": "bn####.tpl",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        },
+        {
+          "pattern": "mn####.tpl",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        }
+      ],
+      "nextReplacement": "Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/ForceBuilder.ts:53",
+      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "borg-ui-helper",
+          "symbol": "borgBannerPath",
+          "publicPathPattern": "/ui/tpl/bn<borgUiCode>/image_00_CI4.png",
+          "exists": "per-borg"
+        },
+        {
+          "kind": "borg-ui-helper",
+          "symbol": "borgMiniPath",
+          "publicPathPattern": "/ui/tpl/mn<borgUiCode>/image_00_CI4.png",
+          "exists": "per-borg"
+        }
+      ],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "handcoded-force-grid",
+          "pattern": "gf-force-grid",
+          "line": 73
+        },
+        {
+          "kind": "handcoded-force-ring",
+          "pattern": "gf-force-ring",
+          "line": 85
+        },
+        {
+          "kind": "handcoded-force-slot",
+          "pattern": "gf-slot",
+          "line": 154
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 68
+        }
+      ],
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
+    },
+    {
+      "id": "battle-intro",
+      "runtimeScreen": "briefing",
+      "file": "apps/game/src/ui/screens/BattleIntro.ts",
+      "exportName": "createBattleIntro",
+      "originalMode": "Challenge briefing/VS",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/brif00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/entry00_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel00_mdl.arc",
+          "exists": false
+        },
+        {
+          "pattern": "msg*.mdt",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        },
+        {
+          "pattern": "face####_mdl.arc",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        }
+      ],
+      "nextReplacement": "Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/BattleIntro.ts:25",
+      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.briefingVs",
+          "publicPath": "/ui/hsd/brif00_mdl/texture_000_IA4.png",
+          "exists": true
+        },
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.vsSelectLabels",
+          "publicPath": "/ui/hsd/vsel00_mdl/texture_004_CI8.png",
+          "exists": true
+        },
+        {
+          "kind": "borg-ui-helper",
+          "symbol": "borgMiniPath",
+          "publicPathPattern": "/ui/tpl/mn<borgUiCode>/image_00_CI4.png",
+          "exists": "per-borg"
+        }
+      ],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 49
+        }
+      ],
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
+    },
+    {
+      "id": "battle-hud",
+      "runtimeScreen": "battle",
+      "file": "apps/game/src/ui/hud/BattleHud.ts",
+      "exportName": "createBattleHud",
+      "originalMode": "Challenge battle HUD",
+      "expectedSourceArchives": [
+        {
+          "pattern": "bn####.tpl",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        },
+        {
+          "pattern": "face####_mdl.arc",
+          "exists": false,
+          "sampleCount": 0,
+          "samples": []
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/arrow_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/comhit.bin",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/comhit2.bin",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/cmn_data.bin",
+          "exists": false
+        }
+      ],
+      "nextReplacement": "Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:101",
+      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "borg-ui-helper",
+          "symbol": "borgBannerPath",
+          "publicPathPattern": "/ui/tpl/bn<borgUiCode>/image_00_CI4.png",
+          "exists": "per-borg"
+        }
+      ],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "svg-hud-gauge",
+          "pattern": "ringGauge",
+          "line": 73
+        },
+        {
+          "kind": "css-lockon-reticle",
+          "pattern": "gf-reticle",
+          "line": 139
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 107
+        }
+      ],
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
+    },
+    {
+      "id": "results",
+      "runtimeScreen": "results",
+      "file": "apps/game/src/ui/screens/Results.ts",
+      "exportName": "createResults",
+      "originalMode": "Challenge results",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/rpot20_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/rpot21_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/rpot22_mdl.arc",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/rpot23_mdl.arc",
+          "exists": false
+        }
+      ],
+      "nextReplacement": "Export and mount the real result/podium scenes instead of CSS rows and sky backdrop.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/Results.ts:54",
+      "coverageLevel": "handcoded-or-unverified",
+      "realExportedAssetsUsed": [],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "css-results-backdrop",
+          "pattern": "gf-results-sky",
+          "line": 56
+        },
+        {
+          "kind": "css-results-row",
+          "pattern": "gf-result-pill",
+          "line": 90
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 64
+        }
+      ],
+      "replacementStatus": "No direct exported UI asset usage observed in this component."
+    },
+    {
+      "id": "pause-menu",
+      "runtimeScreen": "pause",
+      "file": "apps/game/src/ui/screens/PauseMenu.ts",
+      "exportName": "createPauseMenu",
+      "originalMode": "In-battle",
+      "expectedSourceArchives": [
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
+          "exists": false
+        },
+        {
+          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/cmn_data.bin",
+          "exists": false
+        }
+      ],
+      "nextReplacement": "Find the original pause menu data/assets; current overlay is entirely recreated CSS/text.",
+      "fileExists": true,
+      "fileRef": "apps/game/src/ui/screens/PauseMenu.ts:27",
+      "coverageLevel": "handcoded-or-unverified",
+      "realExportedAssetsUsed": [],
+      "handcodedSurfaceSignals": [
+        {
+          "kind": "css-pause-box",
+          "pattern": "gf-pause-box",
+          "line": 32
+        },
+        {
+          "kind": "runtime-text-layout",
+          "pattern": "text:",
+          "line": 33
+        }
+      ],
+      "replacementStatus": "No direct exported UI asset usage observed in this component."
+    }
+  ],
+  "stageCoverage": {
+    "publicManifest": {
+      "path": "apps/game/public/stages/manifest.json",
+      "parses": true,
+      "stageCount": 40,
+      "completeVisualCount": 40,
+      "collisionCoveredCount": 18,
+      "stageIds": [
+        "st00",
+        "st01",
+        "st02",
+        "st03",
+        "st04",
+        "st05",
+        "st06",
+        "st07",
+        "st08",
+        "st09",
+        "st0a",
+        "st0b",
+        "st0c",
+        "st0d",
+        "st0e",
+        "st0f",
+        "st10",
+        "st20",
+        "st21",
+        "st22",
+        "st23",
+        "st24",
+        "st25",
+        "st29",
+        "st2a",
+        "st2b",
+        "st2c",
+        "st2e",
+        "st40",
+        "st41",
+        "st42",
+        "st43",
+        "st44",
+        "st45",
+        "st49",
+        "st4a",
+        "st4b",
+        "st4c",
+        "st4e",
+        "stff"
+      ]
+    },
+    "exportPlan": {
+      "path": "research/asset-inventory/stage-export-plan.json",
+      "parses": true,
+      "sourceStageArchiveCount": 40,
+      "sourcePairsWithModelAndPzz": 40,
+      "verifiedVisualStageCount": 40,
+      "missingOrPartialExportCount": 0,
+      "sourceStageCodes": [
+        "st00",
+        "st01",
+        "st02",
+        "st03",
+        "st04",
+        "st05",
+        "st06",
+        "st07",
+        "st08",
+        "st09",
+        "st0a",
+        "st0b",
+        "st0c",
+        "st0d",
+        "st0e",
+        "st0f",
+        "st10",
+        "st20",
+        "st21",
+        "st22",
+        "st23",
+        "st24",
+        "st25",
+        "st29",
+        "st2a",
+        "st2b",
+        "st2c",
+        "st2e",
+        "st40",
+        "st41",
+        "st42",
+        "st43",
+        "st44",
+        "st45",
+        "st49",
+        "st4a",
+        "st4b",
+        "st4c",
+        "st4e",
+        "stff"
+      ]
+    },
+    "runtimeUse": {
+      "defaultStage": "st00",
+      "literalStageIdsInAdapter": [
+        "st00",
+        "stea",
+        "stab"
+      ],
+      "adapterRefs": {
+        "defaultArenaStage": "apps/game/src/sim/adapter.ts:21",
+        "fallback": "apps/game/src/sim/adapter.ts:33"
+      },
+      "mainRefs": {
+        "loadStage": "apps/game/src/main.ts:416",
+        "fetchStageManifest": "apps/game/src/main.ts:420",
+        "loadDefaultArena": "apps/game/src/main.ts:457",
+        "loadConvertedStage": "apps/game/src/main.ts:685"
+      },
+      "assessment": "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
+    }
+  },
+  "uiSceneExports": {
+    "path": "apps/game/public/ui/scenes/manifest.json",
+    "parses": true,
+    "counts": {
+      "candidates": 85,
+      "requestedCandidates": 12,
+      "faceCandidates": 73,
+      "copyReady": 1,
+      "exported": 1,
+      "modelFiles": 1,
+      "textureFiles": 4
+    },
+    "requestedScenes": [
+      {
+        "id": "box00",
+        "status": "exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/box00_mdl.arc",
+        "modelFiles": [
+          "apps/game/public/ui/scenes/box00/model_00.dae"
+        ],
+        "textureCount": 4,
+        "nextCommand": null
+      },
+      {
+        "id": "brif00",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/brif00_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/brif00_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "entry00",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/entry00_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/entry00_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "optn00",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/optn00_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/optn00_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "rpot20",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/rpot20_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/rpot20_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "rpot21",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/rpot21_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/rpot21_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "rpot22",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/rpot22_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/rpot22_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "rpot23",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/rpot23_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/rpot23_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "staff00",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/staff00_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/staff00_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "tl00",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/tl00_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/tl00_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "vsel00",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/vsel00_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/vsel00_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      },
+      {
+        "id": "vsel01",
+        "status": "not-exported",
+        "sourceArchive": "user-data/GG4E/afs_data/root/vsel01_mdl.arc",
+        "modelFiles": [],
+        "textureCount": 0,
+        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/vsel01_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+      }
+    ]
+  },
+  "uiTextureExports": {
+    "path": "apps/game/public/ui/manifest.json",
+    "parses": true,
+    "counts": {
+      "sourceAssets": 543,
+      "exportedAssets": 542,
+      "exportedImages": 831,
+      "blockedAssets": 1,
+      "skippedNonUiTxg": 1
+    },
+    "blockedAssets": [
+      {
+        "sourcePath": "user-data/GG4E/afs_data/root/arrow_mdl.arc",
+        "status": "no-decodable-textures",
+        "categoryLabels": [
+          "Adventure select",
+          "battle HUD"
+        ]
+      }
+    ]
+  },
+  "modeNamingRisks": {
+    "stageDataMode": "Story Mode",
+    "stageDataPath": "packages/assets/data/stages.json",
+    "adventureInventoryScope": "Adventure flow and CPU AI mapping only; no story-mode proposal or fake UI work.",
+    "uniqueArenaCount": 20,
+    "finding": "Runtime screen comments and flow are Challenge-oriented, while packages/assets/data/stages.json declares Story Mode data and adventure-flow inventory discusses Adventure. Do not use Story/Adventure mission rows as a verified Challenge stage/menu mapping.",
+    "evidence": [
+      "packages/assets/data/stages.json:3",
+      "research/asset-inventory/adventure-flow-ai.json:78",
+      "9 audited runtime screens identify themselves as Challenge or in-battle Challenge UI."
+    ]
+  },
+  "nextMostUsefulReplacements": [
+    "Wire stageIdForArena to a traced arena-name -> st## table; public exports now cover 40 visual stages, but runtime fallback still collapses non-st## arenas to st00.",
+    "Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.",
+    "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
+    "Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges."
+  ]
+}
