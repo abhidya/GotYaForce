@@ -1,0 +1,233 @@
+{
+  "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+  "expectedSlotCount": 20,
+  "expectedDaeCount": 20,
+  "exportedModelCount": 20,
+  "failedModelCount": 0,
+  "skippedNullRootJointCount": 0,
+  "expectedDaeIndices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "failedModelIndices": [],
+  "skippedNullRootJointIndices": [],
+  "complete": true,
+  "models": [
+    {
+      "index": 0,
+      "status": "exported",
+      "daeFile": "model_00.dae",
+      "textureFiles": [
+        "model_00_Texture_0_CMP.png",
+        "model_00_Texture_1_CMP.png",
+        "model_00_Texture_2_CMP.png",
+        "model_00_Texture_3_CMP.png",
+        "model_00_Texture_4_CMP.png",
+        "model_00_Texture_5_CMP.png",
+        "model_00_Texture_6_I4.png",
+        "model_00_Texture_7_RGB5A3.png",
+        "model_00_Texture_8_RGB5A3.png",
+        "model_00_Texture_9_RGB5A3.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 1,
+      "status": "exported",
+      "daeFile": "model_01.dae",
+      "textureFiles": [
+        "model_01_Texture_0_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 2,
+      "status": "exported",
+      "daeFile": "model_02.dae",
+      "textureFiles": [
+        "model_02_Texture_0_CMP.png",
+        "model_02_Texture_1_CMP.png",
+        "model_02_Texture_2_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 3,
+      "status": "exported",
+      "daeFile": "model_03.dae",
+      "textureFiles": [
+        "model_03_Texture_0_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 4,
+      "status": "exported",
+      "daeFile": "model_04.dae",
+      "textureFiles": [
+        "model_04_Texture_0_CMP.png",
+        "model_04_Texture_1_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 5,
+      "status": "exported",
+      "daeFile": "model_05.dae",
+      "textureFiles": [
+        "model_05_Texture_0_CMP.png",
+        "model_05_Texture_1_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 6,
+      "status": "exported",
+      "daeFile": "model_06.dae",
+      "textureFiles": [
+        "model_06_Texture_0_CMP.png",
+        "model_06_Texture_1_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 7,
+      "status": "exported",
+      "daeFile": "model_07.dae",
+      "textureFiles": [
+        "model_07_Texture_0_CMP.png",
+        "model_07_Texture_1_CMP.png",
+        "model_07_Texture_2_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 8,
+      "status": "exported",
+      "daeFile": "model_08.dae",
+      "textureFiles": [
+        "model_08_Texture_0_CMP.png",
+        "model_08_Texture_1_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 9,
+      "status": "exported",
+      "daeFile": "model_09.dae",
+      "textureFiles": [
+        "model_09_Texture_0_CMP.png",
+        "model_09_Texture_1_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 10,
+      "status": "exported",
+      "daeFile": "model_10.dae",
+      "textureFiles": [
+        "model_10_Texture_0_CMP.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 11,
+      "status": "exported",
+      "daeFile": "model_11.dae",
+      "textureFiles": [
+        "model_11_Texture_0_I4.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 12,
+      "status": "exported",
+      "daeFile": "model_12.dae",
+      "textureFiles": [
+        "model_12_Texture_0_I4.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 13,
+      "status": "exported",
+      "daeFile": "model_13.dae",
+      "textureFiles": [
+        "model_13_Texture_0_I4.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 14,
+      "status": "exported",
+      "daeFile": "model_14.dae",
+      "textureFiles": [
+        "model_14_Texture_0_I4.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 15,
+      "status": "exported",
+      "daeFile": "model_15.dae",
+      "textureFiles": [
+        "model_15_Texture_0_I4.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 16,
+      "status": "exported",
+      "daeFile": "model_16.dae",
+      "textureFiles": [
+        "model_16_Texture_0_I4.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 17,
+      "status": "exported",
+      "daeFile": "model_17.dae",
+      "textureFiles": [
+        "model_17_Texture_0_I4.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 18,
+      "status": "exported",
+      "daeFile": "model_18.dae",
+      "textureFiles": [
+        "model_18_Texture_0_I4.png"
+      ],
+      "error": null
+    },
+    {
+      "index": 19,
+      "status": "exported",
+      "daeFile": "model_19.dae",
+      "textureFiles": [
+        "model_19_Texture_0_I4.png"
+      ],
+      "error": null
+    }
+  ]
+}

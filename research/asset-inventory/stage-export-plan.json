@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/export-all-stages.mjs",
-  "generatedAt": "2026-06-30T21:42:44.801Z",
+  "generatedAt": "2026-06-30T21:47:26.135Z",
   "region": "GG4E",
   "mode": "export",
   "scope": "Direct stage ARC/PZZ export coverage only; does not edit browser runtime source or infer arena-name mappings.",
@@ -100,27 +100,27 @@
   "summary": {
     "sourceStageArchiveCount": 40,
     "sourcePairsWithModelAndPzz": 40,
-    "publicStageFolderCount": 12,
-    "publicStageWithAnyDaeCount": 12,
-    "verifiedVisualStageCount": 11,
-    "exportedCollisionHitStageCount": 12,
+    "publicStageFolderCount": 15,
+    "publicStageWithAnyDaeCount": 15,
+    "verifiedVisualStageCount": 15,
+    "exportedCollisionHitStageCount": 15,
     "sourceCompleteCollisionTripletCount": 18,
     "sourceAnyCollisionHitCount": 18,
     "sourceAnySetArcCount": 16,
-    "missingOrPartialExportCount": 29,
-    "safeMissingExportCount": 28,
-    "proofCandidate": "st0c",
+    "missingOrPartialExportCount": 25,
+    "safeMissingExportCount": 25,
+    "proofCandidate": "st09",
     "executedExports": [
-      "st08",
-      "st09",
-      "st0a",
-      "st0b"
+      "st0c",
+      "st0d",
+      "st0e",
+      "st0f"
     ],
     "refreshedManifests": [
-      "st08",
-      "st09",
-      "st0a",
-      "st0b"
+      "st0c",
+      "st0d",
+      "st0e",
+      "st0f"
     ]
   },
   "exportPlan": {
@@ -128,10 +128,6 @@
     "selectedStageIds": [],
     "allMissingOrPartialStageIds": [
       "st09",
-      "st0c",
-      "st0d",
-      "st0e",
-      "st0f",
       "st10",
       "st20",
       "st21",
@@ -158,10 +154,7 @@
       "stff"
     ],
     "safeMissingStageIds": [
-      "st0c",
-      "st0d",
-      "st0e",
-      "st0f",
+      "st09",
       "st10",
       "st20",
       "st21",
@@ -187,12 +180,10 @@
       "st4e",
       "stff"
     ],
-    "skippedUnsafeExistingStageIds": [
-      "st09"
-    ],
+    "skippedUnsafeExistingStageIds": [],
     "proofCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --proof",
     "selectedCommand": null,
-    "allSafeMissingCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff",
+    "allSafeMissingCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff",
     "exactPerStageCommands": [
       {
         "stage": "st09",
@@ -200,34 +191,6 @@
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 09",
         "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09",
         "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 09"
-      },
-      {
-        "stage": "st0c",
-        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c",
-        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0c",
-        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c",
-        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0c"
-      },
-      {
-        "stage": "st0d",
-        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0d",
-        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0d",
-        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0d",
-        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0d"
-      },
-      {
-        "stage": "st0e",
-        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0e",
-        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0e",
-        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0e",
-        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0e"
-      },
-      {
-        "stage": "st0f",
-        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0f",
-        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0f",
-        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0f",
-        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0f"
       },
       {
         "stage": "st10",
@@ -2974,126 +2937,77 @@
         }
       },
       "public": {
-        "exists": true,
+        "exists": false,
         "directory": "apps/game/public/stages/st09",
         "manifest": {
           "path": "apps/game/public/stages/st09/manifest.json",
-          "exists": true,
-          "parses": true,
-          "error": null,
-          "status": "partial-visual-export-failed"
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
         },
         "raw": {
-          "hasStageArc": true,
-          "hasStagePzz": true,
-          "stageArc": {
-            "path": "apps/game/public/stages/st09/raw/st09_mdl.arc",
-            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st09\\raw\\st09_mdl.arc",
-            "bytes": 365151
-          },
-          "stagePzz": {
-            "path": "apps/game/public/stages/st09/raw/st09.pzz",
-            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st09\\raw\\st09.pzz",
-            "bytes": 395264
-          },
-          "stageArcMatchesSource": true,
-          "stagePzzMatchesSource": true
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
         },
         "visual": {
           "directory": "apps/game/public/stages/st09/model",
-          "hasDaePieces": true,
+          "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
           "hasCompleteDaeExport": false,
-          "daeCount": 7,
-          "nonEmptyDaeCount": 7,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
-          "maxModelIndex": 8,
-          "missingModelIndices": [
-            6,
-            7
-          ],
-          "expectedDaeIndices": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8
-          ],
-          "missingExpectedDaeIndices": [
-            6,
-            7
-          ],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
           "unexpectedDaeIndices": [],
-          "sampleDaeFiles": [
-            "apps/game/public/stages/st09/model/model_00.dae",
-            "apps/game/public/stages/st09/model/model_01.dae",
-            "apps/game/public/stages/st09/model/model_02.dae",
-            "apps/game/public/stages/st09/model/model_03.dae",
-            "apps/game/public/stages/st09/model/model_04.dae",
-            "apps/game/public/stages/st09/model/model_05.dae",
-            "apps/game/public/stages/st09/model/model_08.dae"
-          ],
-          "textureCount": 11,
-          "textureFiles": [
-            "apps/game/public/stages/st09/model/model_00_Texture_0_CMP.png",
-            "apps/game/public/stages/st09/model/model_00_Texture_1_CMP.png",
-            "apps/game/public/stages/st09/model/model_00_Texture_2_CMP.png",
-            "apps/game/public/stages/st09/model/model_01_Texture_0_CMP.png",
-            "apps/game/public/stages/st09/model/model_02_Texture_0_CMP.png",
-            "apps/game/public/stages/st09/model/model_03_Texture_0_CMP.png",
-            "apps/game/public/stages/st09/model/model_03_Texture_1_CMP.png",
-            "apps/game/public/stages/st09/model/model_04_Texture_0_CMP.png",
-            "apps/game/public/stages/st09/model/model_04_Texture_1_I4.png",
-            "apps/game/public/stages/st09/model/model_05_Texture_0_CMP.png",
-            "apps/game/public/stages/st09/model/model_08_Texture_0_I4.png"
-          ],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": [],
           "exportSummary": {
             "path": "apps/game/public/stages/st09/model/export-summary.json",
-            "exists": true,
-            "parses": true,
-            "error": null,
-            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
-            "expectedSlotCount": 9,
-            "expectedDaeCount": 9,
-            "exportedModelCount": 7,
-            "failedModelIndices": [
-              6,
-              7
-            ],
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
             "skippedNullRootJointIndices": [],
-            "complete": false
+            "complete": null
           }
         },
         "collision": {
-          "hasHitFiles": true,
-          "exportedHitCount": 3,
-          "exportedHitFiles": [
-            "apps/game/public/stages/st09/collision/hit090.bin",
-            "apps/game/public/stages/st09/collision/hit091.bin",
-            "apps/game/public/stages/st09/collision/hit092.bin"
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit090.bin",
+            "hit091.bin",
+            "hit092.bin"
           ],
-          "missingSourceHitFiles": [],
           "extraExportedHitFiles": []
         },
         "sets": {
-          "exportedSetCount": 1,
-          "exportedSetFiles": [
-            "apps/game/public/stages/st09/set/set0904.arc"
-          ]
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
         }
       },
       "export": {
         "canExportWithExistingTools": true,
         "needsExport": true,
-        "needsRaw": false,
+        "needsRaw": true,
         "needsVisual": true,
-        "needsCollision": false,
-        "safeToRunExistingTools": false,
-        "unsafeReason": "public stage folder exists; scripts/export-stage-assets.mjs removes the output folder before copying",
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
         "commands": {
           "stage": "st09",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09",
@@ -3742,76 +3656,158 @@
         }
       },
       "public": {
-        "exists": false,
+        "exists": true,
         "directory": "apps/game/public/stages/st0c",
         "manifest": {
           "path": "apps/game/public/stages/st0c/manifest.json",
-          "exists": false,
-          "parses": false,
-          "error": "missing",
-          "status": null
+          "exists": true,
+          "parses": true,
+          "error": null,
+          "status": "verified-visual-and-collision"
         },
         "raw": {
-          "hasStageArc": false,
-          "hasStagePzz": false,
-          "stageArc": null,
-          "stagePzz": null,
-          "stageArcMatchesSource": false,
-          "stagePzzMatchesSource": false
+          "hasStageArc": true,
+          "hasStagePzz": true,
+          "stageArc": {
+            "path": "apps/game/public/stages/st0c/raw/st0c_mdl.arc",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st0c\\raw\\st0c_mdl.arc",
+            "bytes": 458543
+          },
+          "stagePzz": {
+            "path": "apps/game/public/stages/st0c/raw/st0c.pzz",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st0c\\raw\\st0c.pzz",
+            "bytes": 544768
+          },
+          "stageArcMatchesSource": true,
+          "stagePzzMatchesSource": true
         },
         "visual": {
           "directory": "apps/game/public/stages/st0c/model",
-          "hasDaePieces": false,
-          "hasContiguousDaeSequence": false,
-          "hasCompleteDaeExport": false,
-          "daeCount": 0,
-          "nonEmptyDaeCount": 0,
+          "hasDaePieces": true,
+          "hasContiguousDaeSequence": true,
+          "hasCompleteDaeExport": true,
+          "daeCount": 20,
+          "nonEmptyDaeCount": 20,
           "zeroByteDaeFiles": [],
-          "maxModelIndex": null,
+          "maxModelIndex": 19,
           "missingModelIndices": [],
-          "expectedDaeIndices": [],
+          "expectedDaeIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
           "missingExpectedDaeIndices": [],
           "unexpectedDaeIndices": [],
-          "sampleDaeFiles": [],
-          "textureCount": 0,
-          "textureFiles": [],
+          "sampleDaeFiles": [
+            "apps/game/public/stages/st0c/model/model_00.dae",
+            "apps/game/public/stages/st0c/model/model_01.dae",
+            "apps/game/public/stages/st0c/model/model_02.dae",
+            "apps/game/public/stages/st0c/model/model_03.dae",
+            "apps/game/public/stages/st0c/model/model_04.dae",
+            "apps/game/public/stages/st0c/model/model_05.dae",
+            "apps/game/public/stages/st0c/model/model_06.dae",
+            "apps/game/public/stages/st0c/model/model_07.dae"
+          ],
+          "textureCount": 38,
+          "textureFiles": [
+            "apps/game/public/stages/st0c/model/model_00_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_1_CMP.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_2_CMP.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_3_CMP.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_4_CMP.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_5_CMP.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_6_I4.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_7_RGB5A3.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_8_RGB5A3.png",
+            "apps/game/public/stages/st0c/model/model_00_Texture_9_RGB5A3.png",
+            "apps/game/public/stages/st0c/model/model_01_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_02_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_02_Texture_1_CMP.png",
+            "apps/game/public/stages/st0c/model/model_02_Texture_2_CMP.png",
+            "apps/game/public/stages/st0c/model/model_03_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_04_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_04_Texture_1_CMP.png",
+            "apps/game/public/stages/st0c/model/model_05_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_05_Texture_1_CMP.png",
+            "apps/game/public/stages/st0c/model/model_06_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_06_Texture_1_CMP.png",
+            "apps/game/public/stages/st0c/model/model_07_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_07_Texture_1_CMP.png",
+            "apps/game/public/stages/st0c/model/model_07_Texture_2_CMP.png",
+            "apps/game/public/stages/st0c/model/model_08_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_08_Texture_1_CMP.png",
+            "apps/game/public/stages/st0c/model/model_09_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_09_Texture_1_CMP.png",
+            "apps/game/public/stages/st0c/model/model_10_Texture_0_CMP.png",
+            "apps/game/public/stages/st0c/model/model_11_Texture_0_I4.png",
+            "apps/game/public/stages/st0c/model/model_12_Texture_0_I4.png",
+            "apps/game/public/stages/st0c/model/model_13_Texture_0_I4.png",
+            "apps/game/public/stages/st0c/model/model_14_Texture_0_I4.png",
+            "apps/game/public/stages/st0c/model/model_15_Texture_0_I4.png",
+            "apps/game/public/stages/st0c/model/model_16_Texture_0_I4.png",
+            "apps/game/public/stages/st0c/model/model_17_Texture_0_I4.png",
+            "apps/game/public/stages/st0c/model/model_18_Texture_0_I4.png",
+            "apps/game/public/stages/st0c/model/model_19_Texture_0_I4.png"
+          ],
           "exportSummary": {
             "path": "apps/game/public/stages/st0c/model/export-summary.json",
-            "exists": false,
-            "parses": false,
-            "error": "missing",
-            "exporter": null,
-            "expectedSlotCount": null,
-            "expectedDaeCount": 0,
-            "exportedModelCount": null,
+            "exists": true,
+            "parses": true,
+            "error": null,
+            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+            "expectedSlotCount": 20,
+            "expectedDaeCount": 20,
+            "exportedModelCount": 20,
             "failedModelIndices": [],
             "skippedNullRootJointIndices": [],
-            "complete": null
+            "complete": true
           }
         },
         "collision": {
-          "hasHitFiles": false,
-          "exportedHitCount": 0,
-          "exportedHitFiles": [],
-          "missingSourceHitFiles": [
-            "hit0c0.bin",
-            "hit0c1.bin",
-            "hit0c2.bin"
+          "hasHitFiles": true,
+          "exportedHitCount": 3,
+          "exportedHitFiles": [
+            "apps/game/public/stages/st0c/collision/hit0c0.bin",
+            "apps/game/public/stages/st0c/collision/hit0c1.bin",
+            "apps/game/public/stages/st0c/collision/hit0c2.bin"
           ],
+          "missingSourceHitFiles": [],
           "extraExportedHitFiles": []
         },
         "sets": {
-          "exportedSetCount": 0,
-          "exportedSetFiles": []
+          "exportedSetCount": 4,
+          "exportedSetFiles": [
+            "apps/game/public/stages/st0c/set/set0c00.arc",
+            "apps/game/public/stages/st0c/set/set0c01.arc",
+            "apps/game/public/stages/st0c/set/set0c02.arc",
+            "apps/game/public/stages/st0c/set/set0c03.arc"
+          ]
         }
       },
       "export": {
         "canExportWithExistingTools": true,
-        "needsExport": true,
-        "needsRaw": true,
-        "needsVisual": true,
-        "needsCollision": true,
-        "safeToRunExistingTools": true,
+        "needsExport": false,
+        "needsRaw": false,
+        "needsVisual": false,
+        "needsCollision": false,
+        "safeToRunExistingTools": false,
         "unsafeReason": null,
         "commands": {
           "stage": "st0c",
@@ -3905,76 +3901,145 @@
         }
       },
       "public": {
-        "exists": false,
+        "exists": true,
         "directory": "apps/game/public/stages/st0d",
         "manifest": {
           "path": "apps/game/public/stages/st0d/manifest.json",
-          "exists": false,
-          "parses": false,
-          "error": "missing",
-          "status": null
+          "exists": true,
+          "parses": true,
+          "error": null,
+          "status": "verified-visual-and-collision"
         },
         "raw": {
-          "hasStageArc": false,
-          "hasStagePzz": false,
-          "stageArc": null,
-          "stagePzz": null,
-          "stageArcMatchesSource": false,
-          "stagePzzMatchesSource": false
+          "hasStageArc": true,
+          "hasStagePzz": true,
+          "stageArc": {
+            "path": "apps/game/public/stages/st0d/raw/st0d_mdl.arc",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st0d\\raw\\st0d_mdl.arc",
+            "bytes": 349419
+          },
+          "stagePzz": {
+            "path": "apps/game/public/stages/st0d/raw/st0d.pzz",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st0d\\raw\\st0d.pzz",
+            "bytes": 401408
+          },
+          "stageArcMatchesSource": true,
+          "stagePzzMatchesSource": true
         },
         "visual": {
           "directory": "apps/game/public/stages/st0d/model",
-          "hasDaePieces": false,
-          "hasContiguousDaeSequence": false,
-          "hasCompleteDaeExport": false,
-          "daeCount": 0,
-          "nonEmptyDaeCount": 0,
+          "hasDaePieces": true,
+          "hasContiguousDaeSequence": true,
+          "hasCompleteDaeExport": true,
+          "daeCount": 17,
+          "nonEmptyDaeCount": 17,
           "zeroByteDaeFiles": [],
-          "maxModelIndex": null,
+          "maxModelIndex": 16,
           "missingModelIndices": [],
-          "expectedDaeIndices": [],
+          "expectedDaeIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
           "missingExpectedDaeIndices": [],
           "unexpectedDaeIndices": [],
-          "sampleDaeFiles": [],
-          "textureCount": 0,
-          "textureFiles": [],
+          "sampleDaeFiles": [
+            "apps/game/public/stages/st0d/model/model_00.dae",
+            "apps/game/public/stages/st0d/model/model_01.dae",
+            "apps/game/public/stages/st0d/model/model_02.dae",
+            "apps/game/public/stages/st0d/model/model_03.dae",
+            "apps/game/public/stages/st0d/model/model_04.dae",
+            "apps/game/public/stages/st0d/model/model_05.dae",
+            "apps/game/public/stages/st0d/model/model_06.dae",
+            "apps/game/public/stages/st0d/model/model_07.dae"
+          ],
+          "textureCount": 28,
+          "textureFiles": [
+            "apps/game/public/stages/st0d/model/model_00_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_00_Texture_1_CMP.png",
+            "apps/game/public/stages/st0d/model/model_00_Texture_2_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_01_Texture_0_CMP.png",
+            "apps/game/public/stages/st0d/model/model_02_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_03_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_03_Texture_1_CMP.png",
+            "apps/game/public/stages/st0d/model/model_03_Texture_2_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_04_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_04_Texture_1_CMP.png",
+            "apps/game/public/stages/st0d/model/model_04_Texture_2_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_05_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_05_Texture_1_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_06_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_06_Texture_1_CMP.png",
+            "apps/game/public/stages/st0d/model/model_07_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_07_Texture_1_CMP.png",
+            "apps/game/public/stages/st0d/model/model_08_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_08_Texture_1_CMP.png",
+            "apps/game/public/stages/st0d/model/model_09_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0d/model/model_09_Texture_1_CMP.png",
+            "apps/game/public/stages/st0d/model/model_10_Texture_0_I4.png",
+            "apps/game/public/stages/st0d/model/model_11_Texture_0_I4.png",
+            "apps/game/public/stages/st0d/model/model_12_Texture_0_I4.png",
+            "apps/game/public/stages/st0d/model/model_13_Texture_0_I4.png",
+            "apps/game/public/stages/st0d/model/model_14_Texture_0_I4.png",
+            "apps/game/public/stages/st0d/model/model_15_Texture_0_I4.png",
+            "apps/game/public/stages/st0d/model/model_16_Texture_0_I4.png"
+          ],
           "exportSummary": {
             "path": "apps/game/public/stages/st0d/model/export-summary.json",
-            "exists": false,
-            "parses": false,
-            "error": "missing",
-            "exporter": null,
-            "expectedSlotCount": null,
-            "expectedDaeCount": 0,
-            "exportedModelCount": null,
+            "exists": true,
+            "parses": true,
+            "error": null,
+            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+            "expectedSlotCount": 17,
+            "expectedDaeCount": 17,
+            "exportedModelCount": 17,
             "failedModelIndices": [],
             "skippedNullRootJointIndices": [],
-            "complete": null
+            "complete": true
           }
         },
         "collision": {
-          "hasHitFiles": false,
-          "exportedHitCount": 0,
-          "exportedHitFiles": [],
-          "missingSourceHitFiles": [
-            "hit0d0.bin",
-            "hit0d1.bin",
-            "hit0d2.bin"
+          "hasHitFiles": true,
+          "exportedHitCount": 3,
+          "exportedHitFiles": [
+            "apps/game/public/stages/st0d/collision/hit0d0.bin",
+            "apps/game/public/stages/st0d/collision/hit0d1.bin",
+            "apps/game/public/stages/st0d/collision/hit0d2.bin"
           ],
+          "missingSourceHitFiles": [],
           "extraExportedHitFiles": []
         },
         "sets": {
-          "exportedSetCount": 0,
-          "exportedSetFiles": []
+          "exportedSetCount": 4,
+          "exportedSetFiles": [
+            "apps/game/public/stages/st0d/set/set0d00.arc",
+            "apps/game/public/stages/st0d/set/set0d01.arc",
+            "apps/game/public/stages/st0d/set/set0d02.arc",
+            "apps/game/public/stages/st0d/set/set0d03.arc"
+          ]
         }
       },
       "export": {
         "canExportWithExistingTools": true,
-        "needsExport": true,
-        "needsRaw": true,
-        "needsVisual": true,
-        "needsCollision": true,
-        "safeToRunExistingTools": true,
+        "needsExport": false,
+        "needsRaw": false,
+        "needsVisual": false,
+        "needsCollision": false,
+        "safeToRunExistingTools": false,
         "unsafeReason": null,
         "commands": {
           "stage": "st0d",
@@ -4068,76 +4133,206 @@
         }
       },
       "public": {
-        "exists": false,
+        "exists": true,
         "directory": "apps/game/public/stages/st0e",
         "manifest": {
           "path": "apps/game/public/stages/st0e/manifest.json",
-          "exists": false,
-          "parses": false,
-          "error": "missing",
-          "status": null
+          "exists": true,
+          "parses": true,
+          "error": null,
+          "status": "verified-visual-and-collision"
         },
         "raw": {
-          "hasStageArc": false,
-          "hasStagePzz": false,
-          "stageArc": null,
-          "stagePzz": null,
-          "stageArcMatchesSource": false,
-          "stagePzzMatchesSource": false
+          "hasStageArc": true,
+          "hasStagePzz": true,
+          "stageArc": {
+            "path": "apps/game/public/stages/st0e/raw/st0e_mdl.arc",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st0e\\raw\\st0e_mdl.arc",
+            "bytes": 502335
+          },
+          "stagePzz": {
+            "path": "apps/game/public/stages/st0e/raw/st0e.pzz",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st0e\\raw\\st0e.pzz",
+            "bytes": 636928
+          },
+          "stageArcMatchesSource": true,
+          "stagePzzMatchesSource": true
         },
         "visual": {
           "directory": "apps/game/public/stages/st0e/model",
-          "hasDaePieces": false,
-          "hasContiguousDaeSequence": false,
-          "hasCompleteDaeExport": false,
-          "daeCount": 0,
-          "nonEmptyDaeCount": 0,
+          "hasDaePieces": true,
+          "hasContiguousDaeSequence": true,
+          "hasCompleteDaeExport": true,
+          "daeCount": 43,
+          "nonEmptyDaeCount": 43,
           "zeroByteDaeFiles": [],
-          "maxModelIndex": null,
+          "maxModelIndex": 42,
           "missingModelIndices": [],
-          "expectedDaeIndices": [],
+          "expectedDaeIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42
+          ],
           "missingExpectedDaeIndices": [],
           "unexpectedDaeIndices": [],
-          "sampleDaeFiles": [],
-          "textureCount": 0,
-          "textureFiles": [],
+          "sampleDaeFiles": [
+            "apps/game/public/stages/st0e/model/model_00.dae",
+            "apps/game/public/stages/st0e/model/model_01.dae",
+            "apps/game/public/stages/st0e/model/model_02.dae",
+            "apps/game/public/stages/st0e/model/model_03.dae",
+            "apps/game/public/stages/st0e/model/model_04.dae",
+            "apps/game/public/stages/st0e/model/model_05.dae",
+            "apps/game/public/stages/st0e/model/model_06.dae",
+            "apps/game/public/stages/st0e/model/model_07.dae"
+          ],
+          "textureCount": 63,
+          "textureFiles": [
+            "apps/game/public/stages/st0e/model/model_00_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_01_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_02_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_03_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_04_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_05_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_06_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_07_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_07_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_07_Texture_2_CMP.png",
+            "apps/game/public/stages/st0e/model/model_07_Texture_3_CMP.png",
+            "apps/game/public/stages/st0e/model/model_08_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_09_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_10_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_10_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_10_Texture_2_CMP.png",
+            "apps/game/public/stages/st0e/model/model_10_Texture_3_CMP.png",
+            "apps/game/public/stages/st0e/model/model_11_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_12_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_13_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_14_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_15_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_16_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_17_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_18_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_18_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_18_Texture_2_CMP.png",
+            "apps/game/public/stages/st0e/model/model_19_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_20_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_20_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_21_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_21_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_22_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_22_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_23_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_23_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_23_Texture_2_CMP.png",
+            "apps/game/public/stages/st0e/model/model_24_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_24_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_24_Texture_2_CMP.png",
+            "apps/game/public/stages/st0e/model/model_25_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_25_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_25_Texture_2_CMP.png",
+            "apps/game/public/stages/st0e/model/model_25_Texture_3_CMP.png",
+            "apps/game/public/stages/st0e/model/model_26_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_26_Texture_1_CMP.png",
+            "apps/game/public/stages/st0e/model/model_26_Texture_2_CMP.png",
+            "apps/game/public/stages/st0e/model/model_27_Texture_0_CMP.png",
+            "apps/game/public/stages/st0e/model/model_28_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_29_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_30_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_31_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_32_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_33_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_34_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_35_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_36_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_37_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_38_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_39_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_40_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_41_Texture_0_I4.png",
+            "apps/game/public/stages/st0e/model/model_42_Texture_0_I4.png"
+          ],
           "exportSummary": {
             "path": "apps/game/public/stages/st0e/model/export-summary.json",
-            "exists": false,
-            "parses": false,
-            "error": "missing",
-            "exporter": null,
-            "expectedSlotCount": null,
-            "expectedDaeCount": 0,
-            "exportedModelCount": null,
+            "exists": true,
+            "parses": true,
+            "error": null,
+            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+            "expectedSlotCount": 43,
+            "expectedDaeCount": 43,
+            "exportedModelCount": 43,
             "failedModelIndices": [],
             "skippedNullRootJointIndices": [],
-            "complete": null
+            "complete": true
           }
         },
         "collision": {
-          "hasHitFiles": false,
-          "exportedHitCount": 0,
-          "exportedHitFiles": [],
-          "missingSourceHitFiles": [
-            "hit0e0.bin",
-            "hit0e1.bin",
-            "hit0e2.bin"
+          "hasHitFiles": true,
+          "exportedHitCount": 3,
+          "exportedHitFiles": [
+            "apps/game/public/stages/st0e/collision/hit0e0.bin",
+            "apps/game/public/stages/st0e/collision/hit0e1.bin",
+            "apps/game/public/stages/st0e/collision/hit0e2.bin"
           ],
+          "missingSourceHitFiles": [],
           "extraExportedHitFiles": []
         },
         "sets": {
-          "exportedSetCount": 0,
-          "exportedSetFiles": []
+          "exportedSetCount": 4,
+          "exportedSetFiles": [
+            "apps/game/public/stages/st0e/set/set0e00.arc",
+            "apps/game/public/stages/st0e/set/set0e01.arc",
+            "apps/game/public/stages/st0e/set/set0e02.arc",
+            "apps/game/public/stages/st0e/set/set0e03.arc"
+          ]
         }
       },
       "export": {
         "canExportWithExistingTools": true,
-        "needsExport": true,
-        "needsRaw": true,
-        "needsVisual": true,
-        "needsCollision": true,
-        "safeToRunExistingTools": true,
+        "needsExport": false,
+        "needsRaw": false,
+        "needsVisual": false,
+        "needsCollision": false,
+        "safeToRunExistingTools": false,
         "unsafeReason": null,
         "commands": {
           "stage": "st0e",
@@ -4231,76 +4426,134 @@
         }
       },
       "public": {
-        "exists": false,
+        "exists": true,
         "directory": "apps/game/public/stages/st0f",
         "manifest": {
           "path": "apps/game/public/stages/st0f/manifest.json",
-          "exists": false,
-          "parses": false,
-          "error": "missing",
-          "status": null
+          "exists": true,
+          "parses": true,
+          "error": null,
+          "status": "verified-visual-and-collision"
         },
         "raw": {
-          "hasStageArc": false,
-          "hasStagePzz": false,
-          "stageArc": null,
-          "stagePzz": null,
-          "stageArcMatchesSource": false,
-          "stagePzzMatchesSource": false
+          "hasStageArc": true,
+          "hasStagePzz": true,
+          "stageArc": {
+            "path": "apps/game/public/stages/st0f/raw/st0f_mdl.arc",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st0f\\raw\\st0f_mdl.arc",
+            "bytes": 336671
+          },
+          "stagePzz": {
+            "path": "apps/game/public/stages/st0f/raw/st0f.pzz",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st0f\\raw\\st0f.pzz",
+            "bytes": 385024
+          },
+          "stageArcMatchesSource": true,
+          "stagePzzMatchesSource": true
         },
         "visual": {
           "directory": "apps/game/public/stages/st0f/model",
-          "hasDaePieces": false,
-          "hasContiguousDaeSequence": false,
-          "hasCompleteDaeExport": false,
-          "daeCount": 0,
-          "nonEmptyDaeCount": 0,
+          "hasDaePieces": true,
+          "hasContiguousDaeSequence": true,
+          "hasCompleteDaeExport": true,
+          "daeCount": 13,
+          "nonEmptyDaeCount": 13,
           "zeroByteDaeFiles": [],
-          "maxModelIndex": null,
+          "maxModelIndex": 12,
           "missingModelIndices": [],
-          "expectedDaeIndices": [],
+          "expectedDaeIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
           "missingExpectedDaeIndices": [],
           "unexpectedDaeIndices": [],
-          "sampleDaeFiles": [],
-          "textureCount": 0,
-          "textureFiles": [],
+          "sampleDaeFiles": [
+            "apps/game/public/stages/st0f/model/model_00.dae",
+            "apps/game/public/stages/st0f/model/model_01.dae",
+            "apps/game/public/stages/st0f/model/model_02.dae",
+            "apps/game/public/stages/st0f/model/model_03.dae",
+            "apps/game/public/stages/st0f/model/model_04.dae",
+            "apps/game/public/stages/st0f/model/model_05.dae",
+            "apps/game/public/stages/st0f/model/model_06.dae",
+            "apps/game/public/stages/st0f/model/model_07.dae"
+          ],
+          "textureCount": 21,
+          "textureFiles": [
+            "apps/game/public/stages/st0f/model/model_00_Texture_0_CMP.png",
+            "apps/game/public/stages/st0f/model/model_00_Texture_1_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0f/model/model_00_Texture_2_CMP.png",
+            "apps/game/public/stages/st0f/model/model_00_Texture_3_RGB5A3.png",
+            "apps/game/public/stages/st0f/model/model_01_Texture_0_CMP.png",
+            "apps/game/public/stages/st0f/model/model_02_Texture_0_CMP.png",
+            "apps/game/public/stages/st0f/model/model_02_Texture_1_CMP.png",
+            "apps/game/public/stages/st0f/model/model_02_Texture_2_CMP.png",
+            "apps/game/public/stages/st0f/model/model_03_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0f/model/model_03_Texture_1_RGB5A3.png",
+            "apps/game/public/stages/st0f/model/model_04_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0f/model/model_04_Texture_1_CMP.png",
+            "apps/game/public/stages/st0f/model/model_05_Texture_0_CI8_RGB5A3.png",
+            "apps/game/public/stages/st0f/model/model_05_Texture_1_CMP.png",
+            "apps/game/public/stages/st0f/model/model_06_Texture_0_I4.png",
+            "apps/game/public/stages/st0f/model/model_07_Texture_0_I4.png",
+            "apps/game/public/stages/st0f/model/model_08_Texture_0_I4.png",
+            "apps/game/public/stages/st0f/model/model_09_Texture_0_I4.png",
+            "apps/game/public/stages/st0f/model/model_10_Texture_0_I4.png",
+            "apps/game/public/stages/st0f/model/model_11_Texture_0_I4.png",
+            "apps/game/public/stages/st0f/model/model_12_Texture_0_I4.png"
+          ],
           "exportSummary": {
             "path": "apps/game/public/stages/st0f/model/export-summary.json",
-            "exists": false,
-            "parses": false,
-            "error": "missing",
-            "exporter": null,
-            "expectedSlotCount": null,
-            "expectedDaeCount": 0,
-            "exportedModelCount": null,
+            "exists": true,
+            "parses": true,
+            "error": null,
+            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+            "expectedSlotCount": 13,
+            "expectedDaeCount": 13,
+            "exportedModelCount": 13,
             "failedModelIndices": [],
             "skippedNullRootJointIndices": [],
-            "complete": null
+            "complete": true
           }
         },
         "collision": {
-          "hasHitFiles": false,
-          "exportedHitCount": 0,
-          "exportedHitFiles": [],
-          "missingSourceHitFiles": [
-            "hit0f0.bin",
-            "hit0f1.bin",
-            "hit0f2.bin"
+          "hasHitFiles": true,
+          "exportedHitCount": 3,
+          "exportedHitFiles": [
+            "apps/game/public/stages/st0f/collision/hit0f0.bin",
+            "apps/game/public/stages/st0f/collision/hit0f1.bin",
+            "apps/game/public/stages/st0f/collision/hit0f2.bin"
           ],
+          "missingSourceHitFiles": [],
           "extraExportedHitFiles": []
         },
         "sets": {
-          "exportedSetCount": 0,
-          "exportedSetFiles": []
+          "exportedSetCount": 4,
+          "exportedSetFiles": [
+            "apps/game/public/stages/st0f/set/set0f00.arc",
+            "apps/game/public/stages/st0f/set/set0f01.arc",
+            "apps/game/public/stages/st0f/set/set0f02.arc",
+            "apps/game/public/stages/st0f/set/set0f03.arc"
+          ]
         }
       },
       "export": {
         "canExportWithExistingTools": true,
-        "needsExport": true,
-        "needsRaw": true,
-        "needsVisual": true,
-        "needsCollision": true,
-        "safeToRunExistingTools": true,
+        "needsExport": false,
+        "needsRaw": false,
+        "needsVisual": false,
+        "needsCollision": false,
+        "safeToRunExistingTools": false,
         "unsafeReason": null,
         "commands": {
           "stage": "st0f",

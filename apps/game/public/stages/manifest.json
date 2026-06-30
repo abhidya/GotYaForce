@@ -100,6 +100,42 @@
       "visualComplete": true,
       "collisionCount": 3,
       "setArcCount": 4
+    },
+    {
+      "id": "st0c",
+      "status": "verified-visual-and-collision",
+      "modelCount": 20,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 3,
+      "setArcCount": 4
+    },
+    {
+      "id": "st0d",
+      "status": "verified-visual-and-collision",
+      "modelCount": 17,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 3,
+      "setArcCount": 4
+    },
+    {
+      "id": "st0e",
+      "status": "verified-visual-and-collision",
+      "modelCount": 43,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 3,
+      "setArcCount": 4
+    },
+    {
+      "id": "st0f",
+      "status": "verified-visual-and-collision",
+      "modelCount": 13,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 3,
+      "setArcCount": 4
     }
   ]
 }
