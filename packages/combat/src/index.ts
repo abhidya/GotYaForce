@@ -1,116 +1,71 @@
-// Source: research/PHASE0_RESEARCH.md section 6 documents GG4E wake-up
-// invincibility at 0x8005d4b0 / 0x8005c7d8, static 60.0 at 0x80437448,
-// and countdown at 0x80055c00.
-export const WAKE_UP_INVINCIBILITY_FRAMES = 60;
+// @gf/combat — deterministic gameplay simulation core for the Gotcha Force browser
+// recreation. Pure TypeScript: NO DOM, NO three.js, NO network. Single source of truth for
+// movement, combat, and battle state; shared by single-player and the netcode server.
+//
+// Decomp grounding (see research/decomp/*.md):
+//   - position vec3 @ struct+0x44 (flat ground plane, Y const ~10 grounded)
+//   - heading/yaw s16 @ struct+0x72 (rotY here, radians)
+//   - main state enum @ struct+0x544 (idle/move/attack/damage/down/death -> our BorgState)
+//   - invincibility f32 @ struct+0x720 (60-frame wake-up i-frames, counts down 1/frame)
+// HP and the damage formula could NOT be recovered from the ROM (behavior-notes.md s4f);
+// those are DERIVED from the stat table with a tuned formula — flagged in stats.ts/constants.ts.
 
-export type BorgStats = {
-  id: string;
-  name: string;
-  energy: number;
-  hp?: string | number;
-  defense: number;
-  shot: number;
-  attack: number;
-  speed: number;
-  jump?: string | number;
-};
+import { createBattle as createBattleWithStats } from "./battle.js";
+import type { BorgStats } from "./stats.js";
+import type { Battle, BattleConfig } from "./types.js";
 
-export type ForceBudgetResult =
-  | {
-      ok: true;
-      energy: number;
-      budget: number;
-      count: number;
-    }
-  | {
-      ok: false;
-      error: "unknown-borg" | "too-many-borgs" | "over-budget";
-      energy: number;
-      budget: number;
-      count: number;
-      missingIds?: string[];
-      max?: number;
-      overBy?: number;
-    };
+// --- Re-exports (the public API surface) ------------------------------------------------
+export type { Vec3 } from "@gf/physics";
+export * from "./types.js";
+export {
+  buildProfile,
+  forceEnergy,
+  parseHp,
+  parseJump,
+  validateForceBudget,
+  type BorgProfile,
+  type BorgStats,
+  type ForceBudgetResult,
+  type RangePref,
+} from "./stats.js";
+export {
+  DASH,
+  DAMAGE,
+  DEFAULT_BOUNDS,
+  JUMP,
+  LOCK,
+  MELEE,
+  MOVE,
+  SHOT,
+  SIM,
+  SPECIAL,
+  STATE,
+  WAKE_UP_INVINCIBILITY_FRAMES,
+} from "./constants.js";
+export { stepAI } from "./ai.js";
 
-export function forceEnergy(
-  forceIds: readonly string[],
-  borgs: readonly BorgStats[],
-): number {
-  const byId = borgsById(borgs);
-  let energy = 0;
+// --- Borg-stats registry ----------------------------------------------------------------
+// The brief's createBattle signature is `createBattle(cfg): Battle`, but the sim needs the
+// per-borg stat table. We support both: register the table once via setBorgStats(...), or
+// pass it explicitly as the second argument (which takes precedence).
 
-  for (const id of forceIds) {
-    const borg = byId.get(id);
-    if (borg === undefined) {
-      throw new RangeError(`Unknown borg id: ${id}`);
-    }
-    energy += borg.energy;
-  }
+let registeredStats: readonly BorgStats[] = [];
 
-  return energy;
+/** Register the global borg stat table (from packages/assets/data/borgs.json). */
+export function setBorgStats(borgs: readonly BorgStats[]): void {
+  registeredStats = borgs;
 }
 
-export function validateForceBudget(
-  forceIds: readonly string[],
-  borgs: readonly BorgStats[],
-  budget: number,
-  max = 30,
-): ForceBudgetResult {
-  const byId = borgsById(borgs);
-  const missingIds: string[] = [];
-  let energy = 0;
-
-  for (const id of forceIds) {
-    const borg = byId.get(id);
-    if (borg === undefined) {
-      missingIds.push(id);
-      continue;
-    }
-    energy += borg.energy;
+/**
+ * Create a deterministic battle. Uses the explicitly-passed stat table if given, else the
+ * table registered via setBorgStats(). Throws if no stats are available.
+ */
+export function createBattle(cfg: BattleConfig, borgStats?: readonly BorgStats[]): Battle {
+  const stats = borgStats ?? registeredStats;
+  if (stats.length === 0) {
+    throw new Error(
+      "createBattle: no borg stats available. Call setBorgStats(borgs) or pass borgStats as the 2nd argument.",
+    );
   }
-
-  if (missingIds.length > 0) {
-    return {
-      ok: false,
-      error: "unknown-borg",
-      energy,
-      budget,
-      count: forceIds.length,
-      missingIds,
-    };
-  }
-
-  if (forceIds.length > max) {
-    return {
-      ok: false,
-      error: "too-many-borgs",
-      energy,
-      budget,
-      count: forceIds.length,
-      max,
-    };
-  }
-
-  if (energy > budget) {
-    return {
-      ok: false,
-      error: "over-budget",
-      energy,
-      budget,
-      count: forceIds.length,
-      overBy: energy - budget,
-    };
-  }
-
-  return {
-    ok: true,
-    energy,
-    budget,
-    count: forceIds.length,
-  };
-}
-
-function borgsById(borgs: readonly BorgStats[]): ReadonlyMap<string, BorgStats> {
-  return new Map(borgs.map((borg) => [borg.id, borg]));
+  return createBattleWithStats(cfg, stats);
 }

@@ -8,5 +8,6 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --noEmit"
-  }
+  },
+  "module": "src/index.ts"
 }

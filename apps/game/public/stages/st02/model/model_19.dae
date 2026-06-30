@@ -1,25 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="1.4.1" xmlns="http://www.collada.org/2005/11/COLLADASchema">
     <asset>
-        <created>2026-06-30T03:50:44.7461161-04:00</created>
-        <modified>2026-06-30T03:50:44.7461199-04:00</modified>
+        <created>1970-01-01T00:00:00Z</created>
+        <modified>1970-01-01T00:00:00Z</modified>
         <unit name="Meter" />
         <contributor>
             <authoring_tool>IONET Exporter</authoring_tool>
         </contributor>
     </asset>
     <library_images>
-        <image id="Texture_0_CMP-image" name="Texture_0_CMP">
-            <init_from>Texture_0_CMP.png</init_from>
+        <image id="model_19_Texture_0_CMP-image" name="model_19_Texture_0_CMP">
+            <init_from>model_19_Texture_0_CMP.png</init_from>
         </image>
-        <image id="Texture_1_RGB5A3-image" name="Texture_1_RGB5A3">
-            <init_from>Texture_1_RGB5A3.png</init_from>
+        <image id="model_19_Texture_1_RGB5A3-image" name="model_19_Texture_1_RGB5A3">
+            <init_from>model_19_Texture_1_RGB5A3.png</init_from>
         </image>
-        <image id="Texture_1_RGB5A3-image_0" name="Texture_1_RGB5A3">
-            <init_from>Texture_1_RGB5A3.png</init_from>
+        <image id="model_19_Texture_1_RGB5A3-image_0" name="model_19_Texture_1_RGB5A3">
+            <init_from>model_19_Texture_1_RGB5A3.png</init_from>
         </image>
-        <image id="Texture_2_RGB5A3-image" name="Texture_2_RGB5A3">
-            <init_from>Texture_2_RGB5A3.png</init_from>
+        <image id="model_19_Texture_2_RGB5A3-image" name="model_19_Texture_2_RGB5A3">
+            <init_from>model_19_Texture_2_RGB5A3.png</init_from>
         </image>
     </library_images>
     <library_materials>
@@ -39,14 +39,14 @@
     <library_effects>
         <effect id="Material_C22CC633-effect" name="Material_C22CC633">
             <profile_COMMON>
-                <newparam sid="Texture_0_CMP-image_surface">
+                <newparam sid="model_19_Texture_0_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_0_CMP-image</init_from>
+                        <init_from>model_19_Texture_0_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_0_CMP-image_sampler">
+                <newparam sid="model_19_Texture_0_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_0_CMP-image_surface</source>
+                        <source>model_19_Texture_0_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -58,7 +58,7 @@
                             <color sid="ambient">0.7019608 0.7529412 0.7019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_0_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_19_Texture_0_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -81,14 +81,14 @@
         </effect>
         <effect id="Material_A5882680-effect" name="Material_A5882680">
             <profile_COMMON>
-                <newparam sid="Texture_1_RGB5A3-image_surface">
+                <newparam sid="model_19_Texture_1_RGB5A3-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_1_RGB5A3-image</init_from>
+                        <init_from>model_19_Texture_1_RGB5A3-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_1_RGB5A3-image_sampler">
+                <newparam sid="model_19_Texture_1_RGB5A3-image_sampler">
                     <sampler2D>
-                        <source>Texture_1_RGB5A3-image_surface</source>
+                        <source>model_19_Texture_1_RGB5A3-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -100,7 +100,7 @@
                             <color sid="ambient">0.5019608 0.5019608 0.5019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_1_RGB5A3-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_19_Texture_1_RGB5A3-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -123,14 +123,14 @@
         </effect>
         <effect id="Material_27699B84-effect" name="Material_27699B84">
             <profile_COMMON>
-                <newparam sid="Texture_1_RGB5A3-image_0_surface">
+                <newparam sid="model_19_Texture_1_RGB5A3-image_0_surface">
                     <surface type="2D">
-                        <init_from>Texture_1_RGB5A3-image_0</init_from>
+                        <init_from>model_19_Texture_1_RGB5A3-image_0</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_1_RGB5A3-image_0_sampler">
+                <newparam sid="model_19_Texture_1_RGB5A3-image_0_sampler">
                     <sampler2D>
-                        <source>Texture_1_RGB5A3-image_0_surface</source>
+                        <source>model_19_Texture_1_RGB5A3-image_0_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -142,7 +142,7 @@
                             <color sid="ambient">0.19215687 0.29411766 0.20784314 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_1_RGB5A3-image_0_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_19_Texture_1_RGB5A3-image_0_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -165,14 +165,14 @@
         </effect>
         <effect id="Material_C414BB27-effect" name="Material_C414BB27">
             <profile_COMMON>
-                <newparam sid="Texture_2_RGB5A3-image_surface">
+                <newparam sid="model_19_Texture_2_RGB5A3-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_2_RGB5A3-image</init_from>
+                        <init_from>model_19_Texture_2_RGB5A3-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_2_RGB5A3-image_sampler">
+                <newparam sid="model_19_Texture_2_RGB5A3-image_sampler">
                     <sampler2D>
-                        <source>Texture_2_RGB5A3-image_surface</source>
+                        <source>model_19_Texture_2_RGB5A3-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -184,7 +184,7 @@
                             <color sid="ambient">0.19215687 0.29411766 0.20784314 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_2_RGB5A3-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_19_Texture_2_RGB5A3-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>

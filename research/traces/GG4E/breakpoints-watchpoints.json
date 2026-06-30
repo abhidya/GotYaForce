@@ -6,6 +6,7 @@
   "inputs": {
     "dolphin": "D:\\GotYaForce\\dolphin\\Dolphin.exe",
     "iso": "D:\\GotYaForce\\Gotcha Force.iso",
+    "main_menu_e2e_save_state": "D:\\GotYaForce\\main menu gotchaforce.sav",
     "dol": "D:\\GotYaForce\\user-data\\GG4E\\disc\\sys\\boot.dol",
     "symbol_map": "D:\\GotYaForce\\research\\symbols\\GG4E-CSM-20220412.map",
     "playbook": "D:\\GotYaForce\\research\\traces\\GG4E-dol-trace-playbook.md",
@@ -883,6 +884,174 @@
         "active-borg-action-state",
         "active-borg-wakeup-invulnerability-timer"
       ]
+    },
+    {
+      "name": "MAIN_MENU_E2E",
+      "event_window": "Load D:\\GotYaForce\\main menu gotchaforce.sav, then manually navigate main menu -> mode select -> Adventure/Story -> load path. Keep this trace focused on file/save/load and battle-entry anchors; PAD breakpoints are intentionally excluded because they fill traces before the load path.",
+      "breakpoints": [
+        {
+          "id": "main-menu-e2e-dvd-open",
+          "type": "execute",
+          "address": "0x8020d1ec",
+          "dol_offset": "0x0020a1ec",
+          "section": "text1",
+          "symbol": "gnt4-DVDOpen-bl",
+          "event": "Disc file open during title/menu, mode select, Adventure/Story load, briefing, or stage transition.",
+          "capture": [
+            "r3 path string pointer",
+            "string at r3 if valid",
+            "r4 DVDFileInfo pointer",
+            "lr caller",
+            "callstack",
+            "watch for titles.tpl, as_icon.tpl, vsel00_mdl.arc, vsel01_mdl.arc, firstld.pzz, brif00_mdl.arc, entry00_mdl.arc, msg*.mdt, st##_mdl.arc, st##.pzz, set####.arc, hit###.bin, comhit.bin"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "main-menu-e2e-dvd-read-async-prio",
+          "type": "execute",
+          "address": "0x8020d4fc",
+          "dol_offset": "0x0020a4fc",
+          "section": "text1",
+          "symbol": "gnt4-DVDReadAsyncPrio-bl",
+          "event": "Async disc read after a menu/select/load file opens.",
+          "capture": [
+            "r3 DVDFileInfo pointer",
+            "r4 destination buffer",
+            "r5 length",
+            "r6 offset",
+            "r7 callback",
+            "r8 priority",
+            "lr caller",
+            "0x40 bytes at r3 if valid",
+            "0x40 bytes at r4 if valid"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "main-menu-e2e-fst-load",
+          "type": "execute",
+          "address": "0x8021051c",
+          "dol_offset": "0x0020d51c",
+          "section": "text1",
+          "symbol": "gnt4-__fstLoad-bl",
+          "event": "Filesystem table/name load boundary before menu assets are resolved.",
+          "capture": [
+            "r0-r31",
+            "lr caller",
+            "callstack",
+            "candidate FST/name-table pointers if present"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "main-menu-e2e-hsd-archive-parse",
+          "type": "execute",
+          "address": "0x8025b00c",
+          "dol_offset": "0x0025800c",
+          "section": "text1",
+          "symbol": "gnt4-HSD_ArchiveParse-bl",
+          "event": "HSD archive parse after menu/select/briefing/stage ARC data is read.",
+          "capture": [
+            "r3 archive/source pointer",
+            "r4 archive buffer pointer",
+            "lr caller",
+            "callstack",
+            "0x40 bytes at r3 if valid",
+            "0x40 bytes at r4 if valid"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "main-menu-e2e-hsd-archive-public-address",
+          "type": "execute",
+          "address": "0x8025b1b0",
+          "dol_offset": "0x002581b0",
+          "section": "text1",
+          "symbol": "gnt4-HSD_ArchiveGetPublicAddress-bl",
+          "event": "Public symbol lookup from parsed menu/select/briefing/stage archives.",
+          "capture": [
+            "r3 HSD archive pointer",
+            "r4 public symbol/name pointer",
+            "string at r4 if valid",
+            "r3 return value after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "main-menu-e2e-save-game-id-change",
+          "type": "execute",
+          "address": "0x80231c70",
+          "dol_offset": "0x0022ec70",
+          "section": "text1",
+          "symbol": "SaveLoad::DidGameIDChange(void)",
+          "event": "Save/load boundary while entering Adventure/Story load flow.",
+          "capture": [
+            "r3 return value after step",
+            "r0-r31",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "main-menu-e2e-card-check-async",
+          "type": "execute",
+          "address": "0x80220e64",
+          "dol_offset": "0x0021de64",
+          "section": "text1",
+          "symbol": "CARDCheckAsync",
+          "event": "Memory-card check during Adventure/Story load path.",
+          "capture": [
+            "r3 channel",
+            "r4 callback",
+            "r5 user data if present",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "main-menu-e2e-team-get-player",
+          "type": "execute",
+          "address": "0x802a3938",
+          "dol_offset": "0x002a0938",
+          "section": "text1",
+          "symbol": "cTeam::GetPlayer(int)",
+          "event": "Adventure/Story load reached player/team setup.",
+          "capture": [
+            "r3 cTeam pointer",
+            "r4 player index",
+            "r3 return value after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "main-menu-e2e-battle-camera-lookat",
+          "type": "execute",
+          "address": "0x8020b61c",
+          "dol_offset": "0x0020861c",
+          "section": "text1",
+          "symbol": "gnt4-C_MTXLookAt-bl",
+          "event": "Battle camera matrix build proves the load path reached an arena.",
+          "capture": [
+            "r3 matrix pointer",
+            "r4 eye vector pointer",
+            "r5 up vector pointer",
+            "r6 interest vector pointer",
+            "lr caller",
+            "3 floats at r4",
+            "3 floats at r5",
+            "3 floats at r6"
+          ],
+          "confidence": "symbol_named"
+        }
+      ],
+      "watchpoints": []
     },
     {
       "name": "CPU AI",

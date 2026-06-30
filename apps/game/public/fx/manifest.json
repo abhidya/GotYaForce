@@ -1,0 +1,20 @@
+{
+  "generatedBy": "agent: extract particle/effect textures",
+  "region": "GG4E",
+  "sources": [
+    "user-data/GG4E/afs_data/root/ptcl00.txg",
+    "user-data/GG4E/afs_data/root/efct00.tpl"
+  ],
+  "notes": "The disc has NO efct.txg. The real particle-image container is ptcl00.txg ('particle image container'), an 8-entry GameCube texture group (offset table at 0x0, each entry a 32-byte header: imageCount, GXTexFmt, unk, width, height, unk, dataOffset, paletteWord). All ptcl00 entries are non-paletted (I4 / I8 / RGB565) soft particle billboards. RGB565 sprites have no alpha and are meant for additive blending (black = transparent); I4/I8 sprites are intensity masks used as the alpha channel. efct00.tpl is one RGB5A3 atlas of soft blob/ring puffs (has real alpha). efct.pzz, efct00_mdl.arc, efct01_mdl.arc are the effect billboard MESHES that reference these textures (the .arc HSD models contain no embedded textures; efct.pzz is PZZ-compressed and not unpacked by current tooling).",
+  "images": [
+    { "file": "spark_star.png",   "w": 32, "h": 32, "format": "I4",      "source": "ptcl00.txg#0", "blend": "additive/mask", "guessLabel": "spark / wispy star burst (white, intensity mask)" },
+    { "file": "flame_core.png",   "w": 32, "h": 32, "format": "RGB565",  "source": "ptcl00.txg#1", "blend": "additive",      "guessLabel": "flame / explosion core (orange-red, yellow hot center)" },
+    { "file": "hit_spark.png",    "w": 16, "h": 16, "format": "RGB565",  "source": "ptcl00.txg#2", "blend": "additive",      "guessLabel": "hit spark / ember (small bright orange dot)" },
+    { "file": "glow_falloff.png", "w": 32, "h": 32, "format": "I8",       "source": "ptcl00.txg#3", "blend": "additive/mask", "guessLabel": "soft glow falloff gradient (white, intensity mask)" },
+    { "file": "smoke_soft.png",   "w": 16, "h": 16, "format": "I8",       "source": "ptcl00.txg#4", "blend": "additive/mask", "guessLabel": "soft round smoke/dust puff (white, intensity mask)" },
+    { "file": "energy_dot.png",   "w": 16, "h": 16, "format": "RGB565",  "source": "ptcl00.txg#5", "blend": "additive",      "guessLabel": "energy / beam dot (blue-purple)" },
+    { "file": "muzzle_flash.png", "w": 32, "h": 32, "format": "RGB565",  "source": "ptcl00.txg#6", "blend": "additive",      "guessLabel": "muzzle flash / flare with rays (orange-yellow)" },
+    { "file": "aura_glow.png",    "w": 64, "h": 64, "format": "RGB565",  "source": "ptcl00.txg#7", "blend": "additive",      "guessLabel": "large radial aura/glow (magenta-pink halo)" },
+    { "file": "efct00_atlas.png", "w": 256, "h": 64, "format": "RGB5A3", "source": "efct00.tpl#0", "blend": "alpha",         "guessLabel": "effect atlas: soft blob/ring/explosion-puff sprites of varying sizes (has alpha)" }
+  ]
+}

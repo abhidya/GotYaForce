@@ -2467,5 +2467,6029 @@
         "sha1": "6bfee60a9207211cf3c423d0f982d328e7266d7d"
       }
     ]
+  },
+  {
+    "id": "pl0000",
+    "name": "NORMAL NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 150,
+    "dae": "pl0000.dae",
+    "bones": 20,
+    "meshes": 17,
+    "tris": 3086,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17898,
+        "sha1": "cbcde5119f9600defe4b2e542a2b4b1f1b061e5a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17972,
+        "sha1": "45e5ac29e59b6e40f963bb5f88283549fe82ac0d"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6629,
+        "sha1": "4a0bc27336e5a37d37f5118bbddc0b02537273e4"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2288,
+        "sha1": "f9e8a205990fdbae428ac27e84333301580c3224"
+      }
+    ]
+  },
+  {
+    "id": "pl0001",
+    "name": "SHURIKEN NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 310,
+    "dae": "pl0001.dae",
+    "bones": 20,
+    "meshes": 33,
+    "tris": 3609,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 3595,
+        "sha1": "8f3016b7e935a216886a8ad2268fc3be712983fe"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2569,
+        "sha1": "5d5e9df6becdaa142a8e7155a74b2a05a6a69c49"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 16802,
+        "sha1": "dd03360e56631e8319bc981bd2f1b58430353b8b"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 563,
+        "sha1": "3334a08e1fc0faab77a0cafc827e865a93baf371"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 910,
+        "sha1": "6b967294a67a13600e5e5f98ee23c38779a60c4e"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 18610,
+        "sha1": "2aa28ec3d01c96ca72fd5579a4bdab4e58a1aaf8"
+      }
+    ]
+  },
+  {
+    "id": "pl0002",
+    "name": "ARROW NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 300,
+    "dae": "pl0002.dae",
+    "bones": 21,
+    "meshes": 15,
+    "tris": 3038,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 10955,
+        "sha1": "a08fd06280ebb43acbe5548113835cf5e1b0e41b"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3809,
+        "sha1": "553fdfdf64d463e002c759b4b944d3a717464a25"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18929,
+        "sha1": "91b10a046272cc416047070ddea2efdc90c94641"
+      }
+    ]
+  },
+  {
+    "id": "pl0003",
+    "name": "DOUBLE NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 210,
+    "dae": "pl0003.dae",
+    "bones": 20,
+    "meshes": 14,
+    "tris": 2610,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 10237,
+        "sha1": "80da4250fe1a3378bdbbc5da83ccec83d18ebc67"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18266,
+        "sha1": "2f8229a450fc8f48a0c00a81dd7ea0e134639203"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 8682,
+        "sha1": "8764980f3d508f706c2addfdd63293b5e47c162e"
+      }
+    ]
+  },
+  {
+    "id": "pl0004",
+    "name": "ACCELERATION NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 380,
+    "dae": "pl0004.dae",
+    "bones": 22,
+    "meshes": 20,
+    "tris": 2852,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 7861,
+        "sha1": "ed106e4ddfc307efcea0382d371815b730a24cc1"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4385,
+        "sha1": "d816a16037d76aeb6d02062fdb05c211c994eca3"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3669,
+        "sha1": "4573d90580e639ba0320e3887e11520c3e030e2b"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3054,
+        "sha1": "71996ff9f89c8c06a2591669a00b526d08f02795"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 17330,
+        "sha1": "a77c1c45cccc4ea3b2a3ccca5846b7987ec24463"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 3882,
+        "sha1": "78a1100d2d86577440ee061bba2a2d661c8e794e"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 19224,
+        "sha1": "c6ad8294dea25ba8ba04cfe54204792ac31752c6"
+      }
+    ]
+  },
+  {
+    "id": "pl0005",
+    "name": "TELEPORT NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 400,
+    "dae": "pl0005.dae",
+    "bones": 25,
+    "meshes": 17,
+    "tris": 2816,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 640,
+        "sha1": "8b4493a2e7cfe39b0589bf61e1568e22af690f04"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16521,
+        "sha1": "0cdd9fbc3e612f05937778a82938fbbc92bc3d75"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15315,
+        "sha1": "cc6f32b682aba24472c9f1e140590746cd6e0636"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2314,
+        "sha1": "66206386e68c79a0bf425d3ea60139a6aa5e2b65"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4121,
+        "sha1": "ca19992c8f3ee4888c6eb677d481d377f2059479"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 2374,
+        "sha1": "e685a9fef26d1e71824f23de36a6b79cf1325765"
+      }
+    ]
+  },
+  {
+    "id": "pl0006",
+    "name": "FLAME NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 590,
+    "dae": "pl0006.dae",
+    "bones": 24,
+    "meshes": 43,
+    "tris": 4537,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 10426,
+        "sha1": "bdc070c79aee093a1012bcb5fb0dabc2cffba3d5"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17898,
+        "sha1": "cbcde5119f9600defe4b2e542a2b4b1f1b061e5a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 17785,
+        "sha1": "732e55d5a500cd5a08e5947efb3587ac95f422ed"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4568,
+        "sha1": "65f19faf4684ab4c5de7e6168642ec1db6e826b7"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 16026,
+        "sha1": "e9c6cdd78725cff8fb2d61d1f5e5b299bf67e001"
+      }
+    ]
+  },
+  {
+    "id": "pl0007",
+    "name": "CYBER NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 640,
+    "dae": "pl0007.dae",
+    "bones": 20,
+    "meshes": 52,
+    "tris": 3431,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19816,
+        "sha1": "1525589b95bd540fa86752e7533460a6dddc3162"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18301,
+        "sha1": "4913c81020bc3aaf5bd3923d8cbf9e8d1994c0ef"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18188,
+        "sha1": "86ceaf0807e481507f939db2b2995f8d352ea2cb"
+      }
+    ]
+  },
+  {
+    "id": "pl0009",
+    "name": "SWITCHING NINJA",
+    "tribe": "Ninja Borg",
+    "energy": 380,
+    "dae": "pl0009.dae",
+    "bones": 27,
+    "meshes": 18,
+    "tris": 2948,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 548,
+        "sha1": "bd4cfd9f7cc189e7202159215db94c39b7752fb5"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 11300,
+        "sha1": "b4533a7dbe52e260d41d376d49ed818179abd1cb"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 2326,
+        "sha1": "eb653c463aecbea6952af216cac3c5d7e3ab8fc1"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3330,
+        "sha1": "154ddc9dd53c1f0843a422b1ab4e7be1c575c66a"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 15035,
+        "sha1": "1202a2bdbcb3422e8717f915e62ecf40e5714d9d"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 3093,
+        "sha1": "143bd24d701cb9cb96c4f8cb595c9924c92f73d6"
+      }
+    ]
+  },
+  {
+    "id": "pl000a",
+    "name": "SASUKE",
+    "tribe": "Ninja Borg",
+    "energy": 150,
+    "dae": "pl000a.dae",
+    "bones": 20,
+    "meshes": 21,
+    "tris": 3081,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17898,
+        "sha1": "cbcde5119f9600defe4b2e542a2b4b1f1b061e5a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18493,
+        "sha1": "1ebeb97cebf50ed6d20ed274a1a145102d628889"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6921,
+        "sha1": "1c9bd4c57feda3a246550998610f07db900fd74c"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3804,
+        "sha1": "4142d752699616e8a06f647ac5c85d73144b5fd2"
+      }
+    ]
+  },
+  {
+    "id": "pl000b",
+    "name": "SHIJIMA",
+    "tribe": "Ninja Borg",
+    "energy": 300,
+    "dae": "pl000b.dae",
+    "bones": 21,
+    "meshes": 15,
+    "tris": 3057,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 10996,
+        "sha1": "37956067983fcc2a8541af0a900836e222ccbb64"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3810,
+        "sha1": "61f07b7ee0c8db12cd23675b40ab77a0f6f1c3cb"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18301,
+        "sha1": "4913c81020bc3aaf5bd3923d8cbf9e8d1994c0ef"
+      }
+    ]
+  },
+  {
+    "id": "pl0100",
+    "name": "REVOLVER GUNMAN",
+    "tribe": "Gun Borg",
+    "energy": 250,
+    "dae": "pl0100.dae",
+    "bones": 20,
+    "meshes": 24,
+    "tris": 2947,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5373,
+        "sha1": "35e045b874d9db03548be38a5b80bad77925711a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 21537,
+        "sha1": "c58715acb0722853b8cfa0f4b962b87ddcbec1d0"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18882,
+        "sha1": "bd5b84f881e615310853f8d1c15635f53088d264"
+      }
+    ]
+  },
+  {
+    "id": "pl0101",
+    "name": "POWERED GUNMAN",
+    "tribe": "Gun Borg",
+    "energy": 350,
+    "dae": "pl0101.dae",
+    "bones": 20,
+    "meshes": 22,
+    "tris": 3298,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19435,
+        "sha1": "25d986b55175afe0dd89fca42b249417b038cd11"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5310,
+        "sha1": "905d7791a6dbb2514d7f65ef647ee49a689c8ad5"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6469,
+        "sha1": "2d46671a5ac902e89b0705bd23fce9c6cd344b96"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5474,
+        "sha1": "d1816a397987fdc528721dba370729ad82796cdf"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4881,
+        "sha1": "11e7f9398cd1f97618ddc18a7c3c37e761617cfd"
+      }
+    ]
+  },
+  {
+    "id": "pl0103",
+    "name": "WIRE GUNNER",
+    "tribe": "Gun Borg",
+    "energy": 270,
+    "dae": "pl0103.dae",
+    "bones": 20,
+    "meshes": 24,
+    "tris": 3015,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png",
+      "Texture_7_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5284,
+        "sha1": "afd4dff2685934de60186e1e9ebe42c387d8a359"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2603,
+        "sha1": "b5644b38ef9bb35d89e72b726f5adde68efcabcc"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5593,
+        "sha1": "01f6a562c24f6876a68cec69edc7800704a1b0d0"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2869,
+        "sha1": "98a371d78278082fc47bf8098c8ab7af2f644784"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3790,
+        "sha1": "e2eff26bdd4b3bb87cb051b16b76c328a1b314e2"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 4751,
+        "sha1": "b9dd52003f9f89c3800ea89837a0e177cbf1e200"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 4829,
+        "sha1": "2a552d47064e0a922abb53456267aa5252dc7368"
+      },
+      {
+        "name": "Texture_7_CMP.png",
+        "bytes": 2431,
+        "sha1": "f6981fe361702ca1a60ea580f67b660e2cd727db"
+      }
+    ]
+  },
+  {
+    "id": "pl0104",
+    "name": "BEAM GUNNER",
+    "tribe": "Gun Borg",
+    "energy": 650,
+    "dae": "pl0104.dae",
+    "bones": 20,
+    "meshes": 30,
+    "tris": 3429,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17895,
+        "sha1": "3c8bdc68327cdd834a9bcd963c7a15c578b6e925"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17893,
+        "sha1": "5414b6df24b7a6033901d4373c94a323fd82fbd2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 8316,
+        "sha1": "686c593f47b1879342b2d20468312a1ea45b4ec9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17525,
+        "sha1": "8403742394ce998fce8ad8b5e76fcf0d4831f618"
+      }
+    ]
+  },
+  {
+    "id": "pl0106",
+    "name": "TIME BOMBER",
+    "tribe": "Gun Borg",
+    "energy": 220,
+    "dae": "pl0106.dae",
+    "bones": 20,
+    "meshes": 30,
+    "tris": 2983,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png",
+      "Texture_7_CMP.png",
+      "Texture_8_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 4387,
+        "sha1": "839f72ea207a9d7f0200f5d5af2a6cd542829fa6"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2640,
+        "sha1": "8e8d5feafa95d3faea255fcf745877962e59d7ab"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5593,
+        "sha1": "01f6a562c24f6876a68cec69edc7800704a1b0d0"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2435,
+        "sha1": "1b6509e26d6c5e256da23526622dda0da52842bf"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4604,
+        "sha1": "421904aab146923b7a0b2bf72f7fcfb88269845b"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 4648,
+        "sha1": "b15f7907930fb18bd5116043d31a865fa9ec181b"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 4621,
+        "sha1": "048791d15c2c31cc925d372b06069bb285598312"
+      },
+      {
+        "name": "Texture_7_CMP.png",
+        "bytes": 4460,
+        "sha1": "145e15adf9a8600905b5d70ad7c819b155d630b3"
+      },
+      {
+        "name": "Texture_8_CMP.png",
+        "bytes": 1962,
+        "sha1": "a8f43619d070384921bc167c581370a8d2e74194"
+      }
+    ]
+  },
+  {
+    "id": "pl0107",
+    "name": "REMOTE BOMBER",
+    "tribe": "Gun Borg",
+    "energy": 180,
+    "dae": "pl0107.dae",
+    "bones": 20,
+    "meshes": 27,
+    "tris": 3118,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png",
+      "Texture_7_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 4282,
+        "sha1": "ed766313c155801ad4026773d1fde4e66b57bbf8"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2513,
+        "sha1": "8fc5ff82c22ff3cab52969b3a6c5423b8600b8fd"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5593,
+        "sha1": "01f6a562c24f6876a68cec69edc7800704a1b0d0"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2478,
+        "sha1": "174b39848015c9eabb78f2ad822e73be9a4f7cee"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4621,
+        "sha1": "048791d15c2c31cc925d372b06069bb285598312"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 8634,
+        "sha1": "fc6f9a8d6c0c6699c0a40ea2b5564ab9f255f43a"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 4399,
+        "sha1": "35e69a9336260bec018c750e4e60bd62289c5641"
+      },
+      {
+        "name": "Texture_7_CMP.png",
+        "bytes": 1962,
+        "sha1": "a8f43619d070384921bc167c581370a8d2e74194"
+      }
+    ]
+  },
+  {
+    "id": "pl0108",
+    "name": "BILLY",
+    "tribe": "Gun Borg",
+    "energy": 250,
+    "dae": "pl0108.dae",
+    "bones": 20,
+    "meshes": 25,
+    "tris": 3029,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5373,
+        "sha1": "35e045b874d9db03548be38a5b80bad77925711a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 21563,
+        "sha1": "bbab0a39c9ec5c42d98384f340511040f1aa5e0e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18882,
+        "sha1": "bd5b84f881e615310853f8d1c15635f53088d264"
+      }
+    ]
+  },
+  {
+    "id": "pl0200",
+    "name": "SWORD KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 280,
+    "dae": "pl0200.dae",
+    "bones": 20,
+    "meshes": 28,
+    "tris": 3310,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 25691,
+        "sha1": "4d5b9cca294b8718e202936ddd198bf33fc223af"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18069,
+        "sha1": "4480d246e00633bda175487b4eb9c71936ca0ea2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5711,
+        "sha1": "72afeb50ecfb82ab10ce3554b53e42f14895856a"
+      }
+    ]
+  },
+  {
+    "id": "pl0201",
+    "name": "CHAINSAW KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 370,
+    "dae": "pl0201.dae",
+    "bones": 20,
+    "meshes": 16,
+    "tris": 3218,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 16457,
+        "sha1": "f0aebcc1da055a1ed07593e7e9f7cc03c8f703bf"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 15668,
+        "sha1": "a86a5fff83e6d9c85b4f27d4b0c32f363f88f7ae"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 8971,
+        "sha1": "60679f823775266cc312612743c6533861bd77fe"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 9796,
+        "sha1": "1b30fb8ec07de1725a146da8610cfc82a126a860"
+      }
+    ]
+  },
+  {
+    "id": "pl0202",
+    "name": "ELEMENTAL KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 540,
+    "dae": "pl0202.dae",
+    "bones": 1,
+    "meshes": 7,
+    "tris": 986,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12108,
+        "sha1": "521d65c10098b6d4d57288bd470c3f77570a9a70"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 15516,
+        "sha1": "3f06945b514d0dc31f164e64d1d6d9726ccb76c5"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3019,
+        "sha1": "ce71fe60ab9554d3f0d289729cd1bc97ef505e43"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3203,
+        "sha1": "9de3bba815257ddf7031195956b01d50121c3eda"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3103,
+        "sha1": "4959e1ec53c0347501d4b40be68c4cb649a19e90"
+      }
+    ]
+  },
+  {
+    "id": "pl0203",
+    "name": "SPIKE KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 520,
+    "dae": "pl0203.dae",
+    "bones": 20,
+    "meshes": 41,
+    "tris": 3111,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5706,
+        "sha1": "75c3bf8fda4f7773d94c4206a6825fe9679915e4"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18069,
+        "sha1": "4480d246e00633bda175487b4eb9c71936ca0ea2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6154,
+        "sha1": "ca977c9672efed22d85ba9a8c307b1d1c241f16a"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1823,
+        "sha1": "ffac993a01a9966b240f395c9d158fbb12a415ea"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3689,
+        "sha1": "2135ff72a3d76a4483850854225a928b36835e44"
+      }
+    ]
+  },
+  {
+    "id": "pl0204",
+    "name": "AXE KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 590,
+    "dae": "pl0204.dae",
+    "bones": 20,
+    "meshes": 19,
+    "tris": 3636,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 10417,
+        "sha1": "5bdb83ca5fb061d14115ac86c76408cb1eb81521"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18323,
+        "sha1": "f4d738ddafba367ce7ef1db70b189f1b95be4d29"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4393,
+        "sha1": "191bfc57e302e81fddb2753a862d971d98038c84"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6694,
+        "sha1": "67e9e8e4c63eb501466f8fd97b54d0886621ec72"
+      }
+    ]
+  },
+  {
+    "id": "pl0205",
+    "name": "DARK KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 610,
+    "dae": "pl0205.dae",
+    "bones": 22,
+    "meshes": 38,
+    "tris": 3380,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 14529,
+        "sha1": "c53866264e6acb2cfb5a091b4625f8c660ca72d3"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 20568,
+        "sha1": "29e57241689a586dd7f7483af58495ba5c71a5f4"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7734,
+        "sha1": "00d25c639ba610ed513f38f43c32d1960dbe3958"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 16567,
+        "sha1": "0399a175da416ccde7f4e48a54c6bdd6998ce5f3"
+      }
+    ]
+  },
+  {
+    "id": "pl0207",
+    "name": "ALIEN INSECT",
+    "tribe": "Bug Borg",
+    "energy": 350,
+    "dae": "pl0207.dae",
+    "bones": 24,
+    "meshes": 47,
+    "tris": 3780,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png",
+      "Texture_7_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 7648,
+        "sha1": "b16563a2b02c8ff33e117131f2678213a1a90228"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17612,
+        "sha1": "aa7e34ac1ff98ac1c53edba2480a897ada0f90a7"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6214,
+        "sha1": "a54aa294901c77904275e7c24609cbecefc92b6e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6095,
+        "sha1": "5b03e30c6bb3c5efedb7fb92caf5ab458366196f"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 17686,
+        "sha1": "289809eec33c8c3a9325adaa0cbb7d304b049953"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 3400,
+        "sha1": "bc79b47205d30536cad686ac28c9fb85f70303fc"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 4687,
+        "sha1": "a5ea0a582f19d69aaf52f8dff2bc83f1e15e3ce9"
+      },
+      {
+        "name": "Texture_7_CMP.png",
+        "bytes": 240,
+        "sha1": "20803e12d98e0d97de0119df3eccf4bc6f880fd6"
+      }
+    ]
+  },
+  {
+    "id": "pl0208",
+    "name": "SAPPHIRE KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 630,
+    "dae": "pl0208.dae",
+    "bones": 20,
+    "meshes": 35,
+    "tris": 3626,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5878,
+        "sha1": "e6d205ac4333dcdc98c42cc604efc7892c68e5a4"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18292,
+        "sha1": "fbf8f66cfb3f5e1ec1b3936578d440efd198e65a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18069,
+        "sha1": "4480d246e00633bda175487b4eb9c71936ca0ea2"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 15815,
+        "sha1": "9caefa6c8b774e003f6fc12d79d21471a480e1c0"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 2105,
+        "sha1": "32387faf96d87c32dca8c1012d412e2aae17e66d"
+      }
+    ]
+  },
+  {
+    "id": "pl0209",
+    "name": "IMPERIAL KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 550,
+    "dae": "pl0209.dae",
+    "bones": 22,
+    "meshes": 41,
+    "tris": 3429,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19001,
+        "sha1": "433a0846323e3774dbcfa67d8307293cd76a0fa8"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17903,
+        "sha1": "454dbdb86f31542b63afe3b2daf06a824430f253"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7857,
+        "sha1": "b3483ab6f4a5cc2ab66d2faaf9b4539c9431a676"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 16567,
+        "sha1": "0399a175da416ccde7f4e48a54c6bdd6998ce5f3"
+      }
+    ]
+  },
+  {
+    "id": "pl020a",
+    "name": "NORMAL KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 180,
+    "dae": "pl020a.dae",
+    "bones": 20,
+    "meshes": 28,
+    "tris": 3243,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 25467,
+        "sha1": "3d04d65880dca4e1234182323ae613c03491b57e"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19003,
+        "sha1": "e88ecdc6d4fc261c135b6a72a35ebb7286000b4e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5494,
+        "sha1": "8bc98fa0002f228d57086ea9c5d8377d0da9ce53"
+      }
+    ]
+  },
+  {
+    "id": "pl020b",
+    "name": "GHOST KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 590,
+    "dae": "pl020b.dae",
+    "bones": 2,
+    "meshes": 7,
+    "tris": 986,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12192,
+        "sha1": "28d34a5272e7ffa93191040cbc4c93768f568daf"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16543,
+        "sha1": "3d772dd982738c9366e30fda421a4011af43fffe"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3060,
+        "sha1": "13a2a18e379b01d0f33d93acdaa1abcc774f2f0d"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3151,
+        "sha1": "8dd123d19a7becc1197b89c1ccb59c4d7cfff5f3"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3108,
+        "sha1": "4c8b81eb075cd9ee09ebf4a4b0a35983db6c1128"
+      }
+    ]
+  },
+  {
+    "id": "pl020c",
+    "name": "HAMMER KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 450,
+    "dae": "pl020c.dae",
+    "bones": 20,
+    "meshes": 39,
+    "tris": 3009,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5661,
+        "sha1": "aa9e2d530787746b8937c934e0a3c31977a225da"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18300,
+        "sha1": "83895fe02dbaf48225a57ca90c0905d8bc04999b"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7405,
+        "sha1": "b10b8908337e0742bcdfb67df89949932093e459"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1963,
+        "sha1": "953c74f5908fa2070aa82760597cc536c7a8f4fc"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 5176,
+        "sha1": "eb33803a385b5da7e0d273092ccc7a8fbc4af71b"
+      }
+    ]
+  },
+  {
+    "id": "pl020d",
+    "name": "HATCHET KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 490,
+    "dae": "pl020d.dae",
+    "bones": 20,
+    "meshes": 19,
+    "tris": 3611,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 10288,
+        "sha1": "5c08421cf431c0f98af5bfbd7ed0ba84b17d1de7"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18479,
+        "sha1": "24887a3fef94c1d3a71a6125d93448d368cb5cb2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4398,
+        "sha1": "e26fde225121f612dca848644045f055df7d038a"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6797,
+        "sha1": "579d36bd3bd76fdc3a04099b99110cdb4f82f92b"
+      }
+    ]
+  },
+  {
+    "id": "pl020e",
+    "name": "RUBY KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 590,
+    "dae": "pl020e.dae",
+    "bones": 20,
+    "meshes": 36,
+    "tris": 3672,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5734,
+        "sha1": "a0795b51bca2cdd43d1a398fae92fa5f297f98fc"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16552,
+        "sha1": "75693940842bc70478163fec16dd3207a5073ab3"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18300,
+        "sha1": "83895fe02dbaf48225a57ca90c0905d8bc04999b"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 12578,
+        "sha1": "3cfc0e95857ff6df15e25d3fdb4cc77a35e68c1c"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 2071,
+        "sha1": "589c62098938a208e9d4c106b9de94471d6f14df"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 17823,
+        "sha1": "2490d40944625bfd8c75a9f57fb89fadbbb3a9ee"
+      }
+    ]
+  },
+  {
+    "id": "pl0300",
+    "name": "BATTLE GIRL",
+    "tribe": "Girl Borg",
+    "energy": 230,
+    "dae": "pl0300.dae",
+    "bones": 20,
+    "meshes": 21,
+    "tris": 3513,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 21562,
+        "sha1": "3187706e8a15823ac630b9843376c55cd49327da"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5846,
+        "sha1": "1c85fc4c0e3b2ad33313c338a88de5a73155952b"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18404,
+        "sha1": "6c04fece4214f80aa8933432bcc77e152ee6e175"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 19240,
+        "sha1": "a675204c4844ea50de0af9e3318fd70ba3a79998"
+      }
+    ]
+  },
+  {
+    "id": "pl0301",
+    "name": "WIRE GIRL",
+    "tribe": "Girl Borg",
+    "energy": 220,
+    "dae": "pl0301.dae",
+    "bones": 25,
+    "meshes": 17,
+    "tris": 2979,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 7792,
+        "sha1": "76a9a2fbb65d49ba06319737995acc0e6b321cd3"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18767,
+        "sha1": "31a5b0aed4b165b52a091ef58fbbd659c08058fe"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 8003,
+        "sha1": "41631ba922e934d7b6ee78bfecf3cddaf349fe20"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 11182,
+        "sha1": "409b6ef321414170fce2c27ac407063ef520a322"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3538,
+        "sha1": "5efed856f29b57f6af68c0b29ad3c9924e7596cd"
+      }
+    ]
+  },
+  {
+    "id": "pl0302",
+    "name": "BARRIER GIRL",
+    "tribe": "Girl Borg",
+    "energy": 500,
+    "dae": "pl0302.dae",
+    "bones": 20,
+    "meshes": 38,
+    "tris": 3299,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 10388,
+        "sha1": "31d1cc075c804ca9bf75ddc3e6a68682e9051ec2"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4291,
+        "sha1": "1d0d43eaead372f1122e6914bfec74e7ef868165"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18296,
+        "sha1": "40873f32b984c90de9971dba52f580de62526404"
+      }
+    ]
+  },
+  {
+    "id": "pl0304",
+    "name": "KILLER GIRL",
+    "tribe": "Girl Borg",
+    "energy": 580,
+    "dae": "pl0304.dae",
+    "bones": 25,
+    "meshes": 24,
+    "tris": 3298,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 4102,
+        "sha1": "51c5a0630d8007e533d101ad0462e49ce8b05e87"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5463,
+        "sha1": "06682df6a24148b77bddc47ec28fc45169c41d7a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5787,
+        "sha1": "df7473765e356867cc80931257b393fed11ead71"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4773,
+        "sha1": "0fc0344844192f7171f8a2ce7d2bc12350d256cb"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 6134,
+        "sha1": "6ecb747f7b9b899ef0dfeef3647123f5478ab231"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 8099,
+        "sha1": "a66e96288281baccb128b15e9bd7c099e4e5f5a1"
+      }
+    ]
+  },
+  {
+    "id": "pl0305",
+    "name": "CYBER GIRL SUPER",
+    "tribe": "Girl Borg",
+    "energy": 590,
+    "dae": "pl0305.dae",
+    "bones": 20,
+    "meshes": 30,
+    "tris": 3461,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18018,
+        "sha1": "c2f7e4c28c54cab3a9924a851933fa5d61782e31"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 24771,
+        "sha1": "f8bc64e048cef651ea0ea7d5faa3c0787eef88c2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19902,
+        "sha1": "d6697a2bea449d6f429c7498651bf66c12c2562e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5858,
+        "sha1": "d18cab18c54d9bcb56eff7a12cb11f51190538b5"
+      }
+    ]
+  },
+  {
+    "id": "pl0306",
+    "name": "COMMAND GIRL",
+    "tribe": "Girl Borg",
+    "energy": 330,
+    "dae": "pl0306.dae",
+    "bones": 20,
+    "meshes": 31,
+    "tris": 3305,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 9599,
+        "sha1": "fb44bc7e7d597c09a7e814678bca2c419d952db2"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4111,
+        "sha1": "4a28c7490ba2ff99d4e32f9501b3475577836fb0"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4307,
+        "sha1": "e06ed3f445da00609196eaaf70f65f0323d6e834"
+      }
+    ]
+  },
+  {
+    "id": "pl0307",
+    "name": "SPINNER GIRL",
+    "tribe": "Girl Borg",
+    "energy": 250,
+    "dae": "pl0307.dae",
+    "bones": 20,
+    "meshes": 30,
+    "tris": 3095,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 9481,
+        "sha1": "4586c7d99252063da1ffc281112455028c74dea4"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17771,
+        "sha1": "223a3d68522d41587398d0b84d5b1740d54945b0"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4111,
+        "sha1": "4a28c7490ba2ff99d4e32f9501b3475577836fb0"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4375,
+        "sha1": "2d2863395b8bf17621cb759f316a1168d124233f"
+      }
+    ]
+  },
+  {
+    "id": "pl0308",
+    "name": "SHADOW GIRL",
+    "tribe": "Girl Borg",
+    "energy": 340,
+    "dae": "pl0308.dae",
+    "bones": 25,
+    "meshes": 24,
+    "tris": 3281,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 4024,
+        "sha1": "08fdde2451889797345c3dd1c8ac297528b7c62f"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5455,
+        "sha1": "f61d854d25a399117b210e8a7d875d4b886905fe"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4653,
+        "sha1": "93d03fa9a759995d746030196cfecf72b0576001"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4918,
+        "sha1": "50c58d2c8a4940bf7d7ba0d94aceb4318b501d52"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 6397,
+        "sha1": "06b574744c4d7b9bb2a5aaa05acf4ef9c6a7d3c4"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 5189,
+        "sha1": "faa1b01edee1c75e4b7159edbc065e5e0a90673a"
+      }
+    ]
+  },
+  {
+    "id": "pl0309",
+    "name": "CYBER GIRL",
+    "tribe": "Girl Borg",
+    "energy": 440,
+    "dae": "pl0309.dae",
+    "bones": 20,
+    "meshes": 30,
+    "tris": 3446,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19301,
+        "sha1": "3678fbfb7872d471a5305e0886b8fe399a38ba55"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 24749,
+        "sha1": "85ae32699d63c63b12b74b4459fa358775efd42f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18684,
+        "sha1": "5639e8a018a856045fdcd40aedb09b0a4691d099"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4503,
+        "sha1": "e34b67ae39d9691c3d94a5c3c141fa1fef8cf71d"
+      }
+    ]
+  },
+  {
+    "id": "pl030a",
+    "name": "CYBER GIRL HYPER",
+    "tribe": "Girl Borg",
+    "energy": 620,
+    "dae": "pl030a.dae",
+    "bones": 20,
+    "meshes": 30,
+    "tris": 3549,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 14978,
+        "sha1": "5fe783d82d36ad4c3565166d8ead139e5df5d410"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 24271,
+        "sha1": "fbb1de36119aecfd9697cb9f1b4f98faa4ad1414"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18835,
+        "sha1": "8c84a85a4db1d9fc819153123532ec6f8cc86665"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2952,
+        "sha1": "b736d35acb9d27cbb544e8e518ebcfbe0393aa8b"
+      }
+    ]
+  },
+  {
+    "id": "pl030b",
+    "name": "KEI",
+    "tribe": "Girl Borg",
+    "energy": 230,
+    "dae": "pl030b.dae",
+    "bones": 20,
+    "meshes": 24,
+    "tris": 3611,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 21669,
+        "sha1": "b22c528612a083667617b45fc84717210104aed6"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5833,
+        "sha1": "63a85c28d8e581b898ae6368007af4f974badbc9"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 16049,
+        "sha1": "e6611dc5a3e56f8519e6019f3c917fda708508cc"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 19186,
+        "sha1": "b6b962947f670062a5d3d4318ccc85f3d799042f"
+      }
+    ]
+  },
+  {
+    "id": "pl0400",
+    "name": "CLAW ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 350,
+    "dae": "pl0400.dae",
+    "bones": 24,
+    "meshes": 37,
+    "tris": 3728,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 23671,
+        "sha1": "cab97b807b29c7afd2ca8ef3e91dfd2d2ac59d58"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2177,
+        "sha1": "b73b88e6c491908da70f31f801a57be7d3d36faf"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18625,
+        "sha1": "991ef2dba413c04ce915844f7bb84bb88bf32e24"
+      }
+    ]
+  },
+  {
+    "id": "pl0401",
+    "name": "DRILL ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 500,
+    "dae": "pl0401.dae",
+    "bones": 23,
+    "meshes": 40,
+    "tris": 3759,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17898,
+        "sha1": "cbcde5119f9600defe4b2e542a2b4b1f1b061e5a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7562,
+        "sha1": "291a5a2c23b4211ef3ba2fa178e45fba4e390cd7"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3098,
+        "sha1": "48d7f3041022425fee5d4a28d5b599fd01e3533e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17785,
+        "sha1": "732e55d5a500cd5a08e5947efb3587ac95f422ed"
+      }
+    ]
+  },
+  {
+    "id": "pl0402",
+    "name": "BUILD ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 410,
+    "dae": "pl0402.dae",
+    "bones": 20,
+    "meshes": 59,
+    "tris": 3554,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17423,
+        "sha1": "fc7df08d61949261ed6891a8917a575086447025"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2056,
+        "sha1": "30dd29a5c882b58e380165fc91e2f42c78b5c5c8"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1046,
+        "sha1": "7f9276a7186155d2b9277bfc1325cff556ff86b7"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 10262,
+        "sha1": "dd7d32aba34a0c0ec2b161a213e668dc1bd10000"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 443,
+        "sha1": "17e5108701fc54caffff711ea32e61bd22125ddd"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 3781,
+        "sha1": "68234128c8717e8a37372ad2e889bdf776f73952"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 4945,
+        "sha1": "8f6b5454ddacaae00b62d1d998403eedf1f35f42"
+      }
+    ]
+  },
+  {
+    "id": "pl0403",
+    "name": "HAMMER ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 460,
+    "dae": "pl0403.dae",
+    "bones": 20,
+    "meshes": 49,
+    "tris": 3280,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17423,
+        "sha1": "fc7df08d61949261ed6891a8917a575086447025"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2112,
+        "sha1": "2f1e8fb18652210e2ca47e4ccdf65e7231b285a2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 2614,
+        "sha1": "9a7df0e08a1c53e302b2e199e9a27752c7745ada"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5615,
+        "sha1": "2b4388746c81ed3121bc0a67a9a1c243a3004ad5"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 5240,
+        "sha1": "28856c51b68c09a774b0d67df825c95b4353952d"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 1761,
+        "sha1": "b76cf5880dd30b10f07d469db0c540f8bcc6880d"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 2760,
+        "sha1": "439e034cdd1b7c906dda2953113e14f56bdbb5de"
+      }
+    ]
+  },
+  {
+    "id": "pl0404",
+    "name": "THUNDER ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 400,
+    "dae": "pl0404.dae",
+    "bones": 20,
+    "meshes": 55,
+    "tris": 3516,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18368,
+        "sha1": "6e44a649e8c88f07c3ea6c598de2cc01f0b84fd3"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2120,
+        "sha1": "e2f879fbccc16c7bf7f14ebe0c0b921f44ae5165"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 2685,
+        "sha1": "7281812d2cf1efa8644ac99f3bf987d399fe1070"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6012,
+        "sha1": "a048c6dc4cc7a01f762f6abae5bfdbdf2984e998"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 2026,
+        "sha1": "9b832018d62a45c1b5be99a30c8ce2cff60d0ab7"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 2832,
+        "sha1": "726bf153b47f74ff8847925badb0601063ec37df"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 11710,
+        "sha1": "0a26f8fa2ce1d37bdfcb251d24353e79aac54410"
+      }
+    ]
+  },
+  {
+    "id": "pl0405",
+    "name": "MAGNET ROBOT (\u002B)",
+    "tribe": "Machine Borg",
+    "energy": 400,
+    "dae": "pl0405.dae",
+    "bones": 21,
+    "meshes": 49,
+    "tris": 3991,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17792,
+        "sha1": "eb38d366126f61763e8ee0f1a72c34e25a120842"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5276,
+        "sha1": "8d19c371564520f5088e58c7f850daf70e78133f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4037,
+        "sha1": "ae80ba66db463e073bb312ede0c37d6dee8af2f8"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2857,
+        "sha1": "8bdd8adea2e9a64d2203eacff5a1f5b71a155b3b"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4648,
+        "sha1": "19e01308e7b2e0502202bb4bbc15349f6e4adf5c"
+      }
+    ]
+  },
+  {
+    "id": "pl0407",
+    "name": "MEGATON ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 470,
+    "dae": "pl0407.dae",
+    "bones": 20,
+    "meshes": 55,
+    "tris": 3490,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17423,
+        "sha1": "fc7df08d61949261ed6891a8917a575086447025"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2445,
+        "sha1": "8d44ad2c8a1b2a70f7c49d95d7d44914a6f2d724"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3259,
+        "sha1": "cd8192f1b048de28515f2f2c3590911975f711a5"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 10022,
+        "sha1": "774eabf5b8a350d1ebe937b11e09da3217916cd0"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3852,
+        "sha1": "a26dd5dc71cabf1d8efc117d460d95dcf6f3995f"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 4723,
+        "sha1": "12435ec640be4b653fb245ac223736755fb4878a"
+      }
+    ]
+  },
+  {
+    "id": "pl0408",
+    "name": "ARMY ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 400,
+    "dae": "pl0408.dae",
+    "bones": 20,
+    "meshes": 63,
+    "tris": 3743,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17423,
+        "sha1": "fc7df08d61949261ed6891a8917a575086447025"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2295,
+        "sha1": "0afc8f920c95606e2bd3ed500c61eabebb2497ea"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3207,
+        "sha1": "d59c919e1cdc105622937159bb75402ac5c92275"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 8372,
+        "sha1": "bced4f9042e19b701078f8457dbeba964d355a07"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 1154,
+        "sha1": "53622952a5c1fe5869d4b6ac7dcd43b52a993cb3"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 10133,
+        "sha1": "b071960161803e6361306070d3aed4970564d0d1"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 4807,
+        "sha1": "a1212fb092900dc73b2f691fc19949f94741dc54"
+      }
+    ]
+  },
+  {
+    "id": "pl0409",
+    "name": "MAGNET ROBOT (-)",
+    "tribe": "Machine Borg",
+    "energy": 410,
+    "dae": "pl0409.dae",
+    "bones": 24,
+    "meshes": 54,
+    "tris": 4009,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18849,
+        "sha1": "69db708c7650e850c74ecfcf9cd05de2ab78e133"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5407,
+        "sha1": "571d2fcef911947aa6e64c9f54a1cd22870ffe6f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4092,
+        "sha1": "caabbc191239a3620b8826cb79036570f478f650"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2861,
+        "sha1": "fd27180287587f4147a965a71c652c06f7b72c24"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4800,
+        "sha1": "8eb5b5090f56d6abdcf91050c5bf979496e1f93f"
+      }
+    ]
+  },
+  {
+    "id": "pl040a",
+    "name": "ISAAC",
+    "tribe": "Machine Borg",
+    "energy": 350,
+    "dae": "pl040a.dae",
+    "bones": 24,
+    "meshes": 40,
+    "tris": 3802,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 22946,
+        "sha1": "f3ea240d63c7435fb6db18cbca88b6f9f14b40d9"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3686,
+        "sha1": "9be27580bf240d36620142868a9e8aa0fb62c943"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18625,
+        "sha1": "991ef2dba413c04ce915844f7bb84bb88bf32e24"
+      }
+    ]
+  },
+  {
+    "id": "pl0501",
+    "name": "ALIEN WORM",
+    "tribe": "Bug Borg",
+    "energy": 600,
+    "dae": "pl0501.dae",
+    "bones": 32,
+    "meshes": 29,
+    "tris": 4101,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 20226,
+        "sha1": "0add3d52d72028e8185851844a9f71ec6bc25eed"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 14923,
+        "sha1": "7bb93f24d5d9f1bf7b4991509c17d3af13c0a70e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19002,
+        "sha1": "9349c7a7cf8be949ab33a7eb11c70f9101b5cd45"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4462,
+        "sha1": "188fd6c8ad9ad2d954b78b9bbb1431ffebe0dd76"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4830,
+        "sha1": "4518217ff37933b8e1abd046f052791d45d3be0c"
+      }
+    ]
+  },
+  {
+    "id": "pl050b",
+    "name": "VENOM WORM",
+    "tribe": "Bug Borg",
+    "energy": 500,
+    "dae": "pl050b.dae",
+    "bones": 32,
+    "meshes": 29,
+    "tris": 4100,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 20465,
+        "sha1": "cb54726b9cf314c68c80ab380e6be97e0e43cfec"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 11131,
+        "sha1": "05668fc422d5dda78755f55c90d8afbdec6e5fc7"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19558,
+        "sha1": "947f9a9ad2ac131be4bad904aa4afc6908aaaafa"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6160,
+        "sha1": "ec3dc48ad0d212c0ac24a2d90d493a33e1f10a15"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4910,
+        "sha1": "de08ce8be79a25a50cbbd23720d7440c8ae05e7e"
+      }
+    ]
+  },
+  {
+    "id": "pl050d",
+    "name": "CLAW WORM",
+    "tribe": "Bug Borg",
+    "energy": 390,
+    "dae": "pl050d.dae",
+    "bones": 32,
+    "meshes": 29,
+    "tris": 4098,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 20226,
+        "sha1": "0add3d52d72028e8185851844a9f71ec6bc25eed"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 14923,
+        "sha1": "7bb93f24d5d9f1bf7b4991509c17d3af13c0a70e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19002,
+        "sha1": "9349c7a7cf8be949ab33a7eb11c70f9101b5cd45"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4462,
+        "sha1": "188fd6c8ad9ad2d954b78b9bbb1431ffebe0dd76"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4830,
+        "sha1": "4518217ff37933b8e1abd046f052791d45d3be0c"
+      }
+    ]
+  },
+  {
+    "id": "pl0517",
+    "name": "POISON WORM",
+    "tribe": "Bug Borg",
+    "energy": 300,
+    "dae": "pl0517.dae",
+    "bones": 32,
+    "meshes": 29,
+    "tris": 4098,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 20465,
+        "sha1": "cb54726b9cf314c68c80ab380e6be97e0e43cfec"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 11131,
+        "sha1": "05668fc422d5dda78755f55c90d8afbdec6e5fc7"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19558,
+        "sha1": "947f9a9ad2ac131be4bad904aa4afc6908aaaafa"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6160,
+        "sha1": "ec3dc48ad0d212c0ac24a2d90d493a33e1f10a15"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4910,
+        "sha1": "de08ce8be79a25a50cbbd23720d7440c8ae05e7e"
+      }
+    ]
+  },
+  {
+    "id": "pl0600",
+    "name": "MACHINE RED",
+    "tribe": "Machine Borg",
+    "energy": 900,
+    "dae": "pl0600.dae",
+    "bones": 32,
+    "meshes": 43,
+    "tris": 3529,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 27415,
+        "sha1": "df53661fdeccb1625629de5ed6f33de37340b211"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7018,
+        "sha1": "5af0cfc1fff5498aad610f8dde5a5de5cc9c7de0"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      }
+    ]
+  },
+  {
+    "id": "pl0601",
+    "name": "MACHINE BLUE",
+    "tribe": "Machine Borg",
+    "energy": 850,
+    "dae": "pl0601.dae",
+    "bones": 31,
+    "meshes": 53,
+    "tris": 3912,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 27813,
+        "sha1": "345a2426f3339bb1ecb3d9560d1111efd37babfe"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7018,
+        "sha1": "be2cfd87998850d788935cbcc739aca75882129b"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3016,
+        "sha1": "b1250e446dac03d4366fcddba4ff4163d0295da5"
+      }
+    ]
+  },
+  {
+    "id": "pl0602",
+    "name": "CYBER MACHINE SEIRYU",
+    "tribe": "Machine Borg",
+    "energy": 1750,
+    "dae": "pl0602.dae",
+    "bones": 24,
+    "meshes": 92,
+    "tris": 7395,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 27813,
+        "sha1": "345a2426f3339bb1ecb3d9560d1111efd37babfe"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 27415,
+        "sha1": "df53661fdeccb1625629de5ed6f33de37340b211"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 7018,
+        "sha1": "5af0cfc1fff5498aad610f8dde5a5de5cc9c7de0"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 7018,
+        "sha1": "be2cfd87998850d788935cbcc739aca75882129b"
+      }
+    ]
+  },
+  {
+    "id": "pl0604",
+    "name": "TITAN ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 1000,
+    "dae": "pl0604.dae",
+    "bones": 30,
+    "meshes": 47,
+    "tris": 3741,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 25744,
+        "sha1": "5c16c6d76d60b8415694150e815e1877beb20d74"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16943,
+        "sha1": "6decf48c41f18c8068f5fd3a93542bf065c6d836"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7713,
+        "sha1": "ed2c8e1e20ae6906bae3a6533cfb9a085cbc0404"
+      }
+    ]
+  },
+  {
+    "id": "pl0606",
+    "name": "EAGLE ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 1000,
+    "dae": "pl0606.dae",
+    "bones": 29,
+    "meshes": 59,
+    "tris": 4183,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18762,
+        "sha1": "0680e76bd663089e35e71b7c1f681445ae01ba31"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7277,
+        "sha1": "f57f53b01afce7cd2036281d14650d248cf98415"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 14634,
+        "sha1": "6fa52470498d7cc8aa11c95749a6ae10451a2134"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3964,
+        "sha1": "fe4167db41d725af8c4b74f2df45df971643a8ad"
+      }
+    ]
+  },
+  {
+    "id": "pl0608",
+    "name": "CYBER MARS",
+    "tribe": "Machine Borg",
+    "energy": 950,
+    "dae": "pl0608.dae",
+    "bones": 32,
+    "meshes": 49,
+    "tris": 3912,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18635,
+        "sha1": "80f26e1caed4e0cc8bab1cc8ddb8a94f485c3e76"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 22093,
+        "sha1": "7044d93eb566b340e1a4a92174f3257081f92adc"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7002,
+        "sha1": "bf452505a08ceb801c51ac6f00a5647434ac2ec3"
+      }
+    ]
+  },
+  {
+    "id": "pl0609",
+    "name": "CYBER ATLAS",
+    "tribe": "Machine Borg",
+    "energy": 900,
+    "dae": "pl0609.dae",
+    "bones": 31,
+    "meshes": 52,
+    "tris": 3860,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18635,
+        "sha1": "80f26e1caed4e0cc8bab1cc8ddb8a94f485c3e76"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 27178,
+        "sha1": "952d5a058a8fc26423140858cb201426e516db4c"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7014,
+        "sha1": "7428f5f193c2349531845f604106ca07338f1620"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3104,
+        "sha1": "fb69afb159ebce06886c41afcabfe8e9a75e3a27"
+      }
+    ]
+  },
+  {
+    "id": "pl060a",
+    "name": "CYBER MACHINE SUZAKU",
+    "tribe": "Machine Borg",
+    "energy": 1850,
+    "dae": "pl060a.dae",
+    "bones": 24,
+    "meshes": 96,
+    "tris": 7651,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18635,
+        "sha1": "80f26e1caed4e0cc8bab1cc8ddb8a94f485c3e76"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 27178,
+        "sha1": "952d5a058a8fc26423140858cb201426e516db4c"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7002,
+        "sha1": "bf452505a08ceb801c51ac6f00a5647434ac2ec3"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 18635,
+        "sha1": "80f26e1caed4e0cc8bab1cc8ddb8a94f485c3e76"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 22093,
+        "sha1": "7044d93eb566b340e1a4a92174f3257081f92adc"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 7014,
+        "sha1": "7428f5f193c2349531845f604106ca07338f1620"
+      }
+    ]
+  },
+  {
+    "id": "pl060c",
+    "name": "CYBER MACHINE BYAKKO",
+    "tribe": "Machine Borg",
+    "energy": 1800,
+    "dae": "pl060c.dae",
+    "bones": 24,
+    "meshes": 91,
+    "tris": 7331,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18635,
+        "sha1": "80f26e1caed4e0cc8bab1cc8ddb8a94f485c3e76"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 27178,
+        "sha1": "952d5a058a8fc26423140858cb201426e516db4c"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 27415,
+        "sha1": "df53661fdeccb1625629de5ed6f33de37340b211"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 7018,
+        "sha1": "5af0cfc1fff5498aad610f8dde5a5de5cc9c7de0"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 7014,
+        "sha1": "7428f5f193c2349531845f604106ca07338f1620"
+      }
+    ]
+  },
+  {
+    "id": "pl060e",
+    "name": "CYBER MACHINE GENBU",
+    "tribe": "Machine Borg",
+    "energy": 1800,
+    "dae": "pl060e.dae",
+    "bones": 24,
+    "meshes": 97,
+    "tris": 7714,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 27813,
+        "sha1": "345a2426f3339bb1ecb3d9560d1111efd37babfe"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7002,
+        "sha1": "bf452505a08ceb801c51ac6f00a5647434ac2ec3"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 18635,
+        "sha1": "80f26e1caed4e0cc8bab1cc8ddb8a94f485c3e76"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 22093,
+        "sha1": "7044d93eb566b340e1a4a92174f3257081f92adc"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 7018,
+        "sha1": "be2cfd87998850d788935cbcc739aca75882129b"
+      }
+    ]
+  },
+  {
+    "id": "pl0610",
+    "name": "VICTORY KING",
+    "tribe": "Machine Borg",
+    "energy": 1000,
+    "dae": "pl0610.dae",
+    "bones": 32,
+    "meshes": 57,
+    "tris": 3487,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18948,
+        "sha1": "34603efbbfea73d11f30ddbd22f6c577463f2d3a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16774,
+        "sha1": "45b51392a27964d88cd3472618812e254c685e09"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7469,
+        "sha1": "30253310201124c0fe1fb37db023bb69fe25bc26"
+      }
+    ]
+  },
+  {
+    "id": "pl0613",
+    "name": "PANTHER ROBOT",
+    "tribe": "Machine Borg",
+    "energy": 1000,
+    "dae": "pl0613.dae",
+    "bones": 30,
+    "meshes": 67,
+    "tris": 3594,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 20759,
+        "sha1": "60720676e8f528071d7459dfa3938c91d2353ba4"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 2769,
+        "sha1": "61ec13714b327d48028bf1c4ef4d45e9b5c5a2eb"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4330,
+        "sha1": "085c97725f467a9ffac8d51388351bd864b7afad"
+      }
+    ]
+  },
+  {
+    "id": "pl0616",
+    "name": "PROTO RED",
+    "tribe": "Machine Borg",
+    "energy": 850,
+    "dae": "pl0616.dae",
+    "bones": 32,
+    "meshes": 44,
+    "tris": 3138,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7002,
+        "sha1": "e86eda4f21640b85bc340989035687e57154634c"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 23746,
+        "sha1": "f5160f99341fc493e0b1bb732482255f7ff6d953"
+      }
+    ]
+  },
+  {
+    "id": "pl0617",
+    "name": "PROTO BLUE",
+    "tribe": "Machine Borg",
+    "energy": 800,
+    "dae": "pl0617.dae",
+    "bones": 31,
+    "meshes": 43,
+    "tris": 3277,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 26030,
+        "sha1": "6f8d11f62a9e26d31cc7c2bcaefc402f987739ce"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16268,
+        "sha1": "bec6846c4dfac803b672687b20ac54295b198e9e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7015,
+        "sha1": "a9f206ac4d13b87d87ead0fc120320f14292365e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3016,
+        "sha1": "b1250e446dac03d4366fcddba4ff4163d0295da5"
+      }
+    ]
+  },
+  {
+    "id": "pl0618",
+    "name": "PROTO TITAN",
+    "tribe": "Machine Borg",
+    "energy": 800,
+    "dae": "pl0618.dae",
+    "bones": 30,
+    "meshes": 49,
+    "tris": 3855,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 26032,
+        "sha1": "94c0bc50953f40d12d39c3847d05c1c555054891"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18934,
+        "sha1": "9db9578a4ef8c54fc54d745e371ccf8f3e1f9c31"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5569,
+        "sha1": "31c54ac250a769a2f27cff586c530c26ea15bb6e"
+      }
+    ]
+  },
+  {
+    "id": "pl0619",
+    "name": "TITAN TANK",
+    "tribe": "Tank Borg",
+    "energy": 620,
+    "dae": "pl0619.dae",
+    "bones": 30,
+    "meshes": 43,
+    "tris": 3580,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 25738,
+        "sha1": "025f40bd11b2744dc98bf0c29719bed332f74ac9"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18934,
+        "sha1": "9db9578a4ef8c54fc54d745e371ccf8f3e1f9c31"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5367,
+        "sha1": "38a7127661d1c1e1595e8688c1d6758a10b8134a"
+      }
+    ]
+  },
+  {
+    "id": "pl061a",
+    "name": "PROTO EAGLE",
+    "tribe": "Machine Borg",
+    "energy": 850,
+    "dae": "pl061a.dae",
+    "bones": 29,
+    "meshes": 67,
+    "tris": 4499,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18762,
+        "sha1": "0680e76bd663089e35e71b7c1f681445ae01ba31"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7278,
+        "sha1": "f940dd5994eac3c026bb9acf1f595f057f68b351"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 11650,
+        "sha1": "d0531b9dae31868b3f8cef8e12faa2494039f502"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3990,
+        "sha1": "8ba8cba322b3881b84f242af5c5eeeb37a3edee4"
+      }
+    ]
+  },
+  {
+    "id": "pl061b",
+    "name": "EAGLE JET",
+    "tribe": "Air Borg",
+    "energy": 380,
+    "dae": "pl061b.dae",
+    "bones": 29,
+    "meshes": 50,
+    "tris": 3933,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18762,
+        "sha1": "0680e76bd663089e35e71b7c1f681445ae01ba31"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7276,
+        "sha1": "45c68278c62b70bb6c9aceb6abc2a5cf447c5115"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 14355,
+        "sha1": "5de285ac8d6b2406ace3f82bd65af5d8862345a2"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4025,
+        "sha1": "e6a21d66d81a38d7d570f2ba1b45ca9b82721b9c"
+      }
+    ]
+  },
+  {
+    "id": "pl061c",
+    "name": "PROTO MARS",
+    "tribe": "Machine Borg",
+    "energy": 900,
+    "dae": "pl061c.dae",
+    "bones": 32,
+    "meshes": 48,
+    "tris": 3449,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18635,
+        "sha1": "80f26e1caed4e0cc8bab1cc8ddb8a94f485c3e76"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 6999,
+        "sha1": "dd92ee9f7020d43683357bb08612eacf3bb92abe"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 20987,
+        "sha1": "ea777520fdb3f5ed2743ece5779d4ca4feb420f7"
+      }
+    ]
+  },
+  {
+    "id": "pl061d",
+    "name": "PROTO ATLAS",
+    "tribe": "Machine Borg",
+    "energy": 850,
+    "dae": "pl061d.dae",
+    "bones": 31,
+    "meshes": 43,
+    "tris": 3535,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 16268,
+        "sha1": "bec6846c4dfac803b672687b20ac54295b198e9e"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 27193,
+        "sha1": "d7704f8d1948d7c91b5e6988fca87a72add4a840"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6997,
+        "sha1": "758409fe88c0667d88761c7f6a7ee173aa00668f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3103,
+        "sha1": "5b336c56974c19e4b37f7ab170794df2d4a53fe5"
+      }
+    ]
+  },
+  {
+    "id": "pl061e",
+    "name": "PROTO KING",
+    "tribe": "Machine Borg",
+    "energy": 800,
+    "dae": "pl061e.dae",
+    "bones": 32,
+    "meshes": 48,
+    "tris": 3443,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18948,
+        "sha1": "34603efbbfea73d11f30ddbd22f6c577463f2d3a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17600,
+        "sha1": "aa2cc50ecb305af70ec5837217e12267c973a9ff"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7241,
+        "sha1": "e0169079e8f29aa4c83490dbfe5aa7a6340e909f"
+      }
+    ]
+  },
+  {
+    "id": "pl061f",
+    "name": "VICTORY TANK",
+    "tribe": "Tank Borg",
+    "energy": 560,
+    "dae": "pl061f.dae",
+    "bones": 32,
+    "meshes": 54,
+    "tris": 3757,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18948,
+        "sha1": "34603efbbfea73d11f30ddbd22f6c577463f2d3a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17201,
+        "sha1": "b47a429799536728b246c2fe318443e7cc87127f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7289,
+        "sha1": "a23f96e699198d62efe6f1bfaf2b5a8576456ef3"
+      }
+    ]
+  },
+  {
+    "id": "pl0620",
+    "name": "VICTORY JET",
+    "tribe": "Air Borg",
+    "energy": 380,
+    "dae": "pl0620.dae",
+    "bones": 32,
+    "meshes": 57,
+    "tris": 3780,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18948,
+        "sha1": "34603efbbfea73d11f30ddbd22f6c577463f2d3a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17713,
+        "sha1": "3b2f1c4b9514b85914cba4831e8d969d685b16c2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7425,
+        "sha1": "32a3a043819129796b07a8d3131da6dbc0c98e70"
+      }
+    ]
+  },
+  {
+    "id": "pl0621",
+    "name": "VICTORY DUKE",
+    "tribe": "Machine Borg",
+    "energy": 850,
+    "dae": "pl0621.dae",
+    "bones": 32,
+    "meshes": 55,
+    "tris": 3509,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18948,
+        "sha1": "34603efbbfea73d11f30ddbd22f6c577463f2d3a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17614,
+        "sha1": "2b45706f323ae130e262a87e2d170295b4c60a5a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7083,
+        "sha1": "60b608ec4a545aec34f5ad70fcc43a29c4938591"
+      }
+    ]
+  },
+  {
+    "id": "pl0623",
+    "name": "VICTORY BARON",
+    "tribe": "Machine Borg",
+    "energy": 850,
+    "dae": "pl0623.dae",
+    "bones": 32,
+    "meshes": 60,
+    "tris": 3894,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18948,
+        "sha1": "34603efbbfea73d11f30ddbd22f6c577463f2d3a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16854,
+        "sha1": "26067466f84b84f03987035a32076553474cf6e3"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 8146,
+        "sha1": "0cde92e868078cdb682291ef6c66f6ba284a1fa1"
+      }
+    ]
+  },
+  {
+    "id": "pl0625",
+    "name": "VICTORY MACHINE",
+    "tribe": "Tank Borg",
+    "energy": 600,
+    "dae": "pl0625.dae",
+    "bones": 32,
+    "meshes": 55,
+    "tris": 3525,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18948,
+        "sha1": "34603efbbfea73d11f30ddbd22f6c577463f2d3a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18175,
+        "sha1": "f0fa7cd7fb1e472a19939ea7a0e3e6178f5f6ab9"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7334,
+        "sha1": "f2e1df5c17a52c97d1660d5c7f9569e30ce93ba0"
+      }
+    ]
+  },
+  {
+    "id": "pl0627",
+    "name": "PROTO PANTHER",
+    "tribe": "Machine Borg",
+    "energy": 800,
+    "dae": "pl0627.dae",
+    "bones": 30,
+    "meshes": 74,
+    "tris": 3582,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4394,
+        "sha1": "21bdf5ebb295c7d706a5819150d70a0c20d27de2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 21867,
+        "sha1": "6911a8cdc0bc94e134d1ca939d44b95fc9f78fb1"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2835,
+        "sha1": "6b5f29fc10bf79b050165ef18be26d46050f0d79"
+      }
+    ]
+  },
+  {
+    "id": "pl0628",
+    "name": "PANTHER VEHICLE",
+    "tribe": "Tank Borg",
+    "energy": 620,
+    "dae": "pl0628.dae",
+    "bones": 30,
+    "meshes": 66,
+    "tris": 3384,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 22624,
+        "sha1": "dfb78386b0bb44188e05c72a53310ed852b706ec"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 2967,
+        "sha1": "159a91db56b8f7f9ea133ab320447f1f36bade76"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4276,
+        "sha1": "6a384aae8706b6cfc6b0f0f5ef0ec33b90285ed0"
+      }
+    ]
+  },
+  {
+    "id": "pl0629",
+    "name": "NEO G RED",
+    "tribe": "Machine Borg",
+    "energy": 500,
+    "dae": "pl0629.dae",
+    "bones": 26,
+    "meshes": 46,
+    "tris": 3909,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7428,
+        "sha1": "71dc8ddea5821454ab245d4840e8df4a61f61599"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 22187,
+        "sha1": "ab5ff18cb177d8bc7db7303a27d8016c492d9711"
+      }
+    ]
+  },
+  {
+    "id": "pl062a",
+    "name": "G BLACK",
+    "tribe": "Machine Borg",
+    "energy": 600,
+    "dae": "pl062a.dae",
+    "bones": 26,
+    "meshes": 43,
+    "tris": 3868,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7410,
+        "sha1": "0ef8933804111079b962818e7978cbf4625eb6a9"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 21277,
+        "sha1": "89c2a304e67e1c2a184c2085c0f9a98f9ce13f6c"
+      }
+    ]
+  },
+  {
+    "id": "pl0700",
+    "name": "NORMAL SAMURAI",
+    "tribe": "Musha Borg",
+    "energy": 300,
+    "dae": "pl0700.dae",
+    "bones": 20,
+    "meshes": 22,
+    "tris": 3474,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 21080,
+        "sha1": "766da82359aa051c606c8a52d920ad435f8bde48"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5928,
+        "sha1": "65af18d0742bcf1d81a23225c3b2cd40a98be951"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18395,
+        "sha1": "49f08d9243c16cd073aaa9283a56ba7e2e02d5bf"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17641,
+        "sha1": "59c51462da201e5958ad99b092cf9ca9f994ee9f"
+      }
+    ]
+  },
+  {
+    "id": "pl0701",
+    "name": "DEMON SAMURAI",
+    "tribe": "Demon Borg",
+    "energy": 480,
+    "dae": "pl0701.dae",
+    "bones": 22,
+    "meshes": 18,
+    "tris": 3177,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 3839,
+        "sha1": "22617fc72c340d62947c43d6059b1178696c8736"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 6240,
+        "sha1": "4d731c9b96de4df478d1a5983f4025ae0be67c7c"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5099,
+        "sha1": "85ff97690d57957e535729dec50bd649de1a8fa4"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 19309,
+        "sha1": "8ba7b23c66c77a87a958139a0342d47faa4691df"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 5429,
+        "sha1": "cc3db5a0b5dc7db4d53386b828cf8a04beff729f"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 6792,
+        "sha1": "c240dd6fccbf7095e96145692920346e4015614e"
+      }
+    ]
+  },
+  {
+    "id": "pl0702",
+    "name": "VAMPIRE KNIGHT",
+    "tribe": "Knight Borg",
+    "energy": 330,
+    "dae": "pl0702.dae",
+    "bones": 20,
+    "meshes": 31,
+    "tris": 2952,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png",
+      "Texture_7_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5656,
+        "sha1": "deaced971055c69b011c0c129761097ccffd0264"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 947,
+        "sha1": "f9926fbfba927364b75f9353c4e87bdd40f7411e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 17507,
+        "sha1": "c73f6a9221d866c4aa396b4716d3c51039870cb8"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5151,
+        "sha1": "f9deb927d8caae1b85362522a69d0cb06d93b7cb"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 17074,
+        "sha1": "0e65b862870fe4d61e8267f762700ff3ca598bd4"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 3847,
+        "sha1": "cfeb77c09b23dd31ac289c9f9929d7e15438b661"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 6420,
+        "sha1": "c073a8f83bfa584625e893d5547b63fe9e41daf1"
+      },
+      {
+        "name": "Texture_7_CMP.png",
+        "bytes": 7224,
+        "sha1": "e7fecba6e4efbd84969a488046010fb0f42367c4"
+      }
+    ]
+  },
+  {
+    "id": "pl0703",
+    "name": "SONIC SAMURAI",
+    "tribe": "Musha Borg",
+    "energy": 330,
+    "dae": "pl0703.dae",
+    "bones": 20,
+    "meshes": 36,
+    "tris": 3182,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 16226,
+        "sha1": "46058401ec62668b091c58fbf7a18bdd54a70a03"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17940,
+        "sha1": "2c7f196690942bff31d4c0f0642f8f65e2d86a09"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3809,
+        "sha1": "7682050e01bab5557c4b16cd7e09dae4de0183c2"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5932,
+        "sha1": "f16bceb73c0442fd7274d45b2d38c8da6e56d6d5"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4664,
+        "sha1": "7ad2890df534aec48e97fc8661e89039372b49b4"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 1209,
+        "sha1": "79e23e73e3501a54302ed764eb67963b3606b41f"
+      }
+    ]
+  },
+  {
+    "id": "pl0704",
+    "name": "SAMURAI SHOGUN",
+    "tribe": "Musha Borg",
+    "energy": 620,
+    "dae": "pl0704.dae",
+    "bones": 20,
+    "meshes": 36,
+    "tris": 3385,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 790,
+        "sha1": "a30c7fb5e623b424f875a2f9c42e1a02f9750bda"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17701,
+        "sha1": "57894c4aa833e225d6ae40a4c91f0fb91ba83db5"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7537,
+        "sha1": "299574c39724e5069758adc5773efd52ff4dca88"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 8175,
+        "sha1": "7381b4938f5d3dc8387084a3ff7038cfba95edf3"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 16226,
+        "sha1": "46058401ec62668b091c58fbf7a18bdd54a70a03"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 383,
+        "sha1": "277585509ab6a75196fc29c165d1608f411d7c02"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 3790,
+        "sha1": "afffefe36b6353e7263be429102cd84ec4ecc01a"
+      }
+    ]
+  },
+  {
+    "id": "pl0706",
+    "name": "BEAM SAMURAI",
+    "tribe": "Musha Borg",
+    "energy": 550,
+    "dae": "pl0706.dae",
+    "bones": 22,
+    "meshes": 31,
+    "tris": 3750,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17605,
+        "sha1": "5b2f3b444709d6efcd5d1be6305dc03307ca7588"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10164,
+        "sha1": "8c908488d99d86c0afd903c8870e9c6a6f006ba9"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5100,
+        "sha1": "dd9e58d89638bd637957213b3a9d05f174ea88b3"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 14896,
+        "sha1": "1fcaeddff06b028348db6b7cc8001044078313ea"
+      }
+    ]
+  },
+  {
+    "id": "pl0707",
+    "name": "CHRONO SAMURAI",
+    "tribe": "Musha Borg",
+    "energy": 600,
+    "dae": "pl0707.dae",
+    "bones": 20,
+    "meshes": 30,
+    "tris": 3007,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 466,
+        "sha1": "50988eebd4417b8a35d98d1bb560831b95664cc6"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 15695,
+        "sha1": "33ec57e8cff36c31294a501401ba4d91d8c8c193"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19463,
+        "sha1": "754ff7ad88b98b199366d42a8e68092bc8cf7384"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 16226,
+        "sha1": "46058401ec62668b091c58fbf7a18bdd54a70a03"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 7417,
+        "sha1": "1e1f3090401d1b45c0cead03bae2672b738395fa"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 8950,
+        "sha1": "1848960996b57274786cb95d757e97d3fd9d1d5a"
+      }
+    ]
+  },
+  {
+    "id": "pl0708",
+    "name": "AKUMA SAMURAI",
+    "tribe": "Demon Borg",
+    "energy": 480,
+    "dae": "pl0708.dae",
+    "bones": 22,
+    "meshes": 19,
+    "tris": 3180,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 3839,
+        "sha1": "22617fc72c340d62947c43d6059b1178696c8736"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3809,
+        "sha1": "0d254cd23944f71875e1a5721cb46f7a16dc18ca"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6484,
+        "sha1": "965dba91247f592f2dc72774225bd5d3a267f7a9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6584,
+        "sha1": "404112892e73a39a9e28830b629ffc8fe086ac49"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 17077,
+        "sha1": "b168d1dcab2c45b11b213d3594c892437b2af4d1"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 5200,
+        "sha1": "defee59c4d46e8a028f383b407c34823216a5437"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 6625,
+        "sha1": "8bb94641089d69cf23e78f27882f17c54e1aad5b"
+      }
+    ]
+  },
+  {
+    "id": "pl0709",
+    "name": "MUSASHI",
+    "tribe": "Musha Borg",
+    "energy": 300,
+    "dae": "pl0709.dae",
+    "bones": 20,
+    "meshes": 23,
+    "tris": 3482,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 21444,
+        "sha1": "87d14d02443cd0f4fba829d9e897c37c0740fde7"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 6527,
+        "sha1": "bf8a6fff4a5ddd17bbcf6a621030ba76f8cd7042"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19138,
+        "sha1": "1409d1bfc7e61968ec28a5d70ac2c057350bbc80"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17641,
+        "sha1": "59c51462da201e5958ad99b092cf9ca9f994ee9f"
+      }
+    ]
+  },
+  {
+    "id": "pl070a",
+    "name": "VLAD",
+    "tribe": "Knight Borg",
+    "energy": 330,
+    "dae": "pl070a.dae",
+    "bones": 20,
+    "meshes": 30,
+    "tris": 2912,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png",
+      "Texture_7_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 15607,
+        "sha1": "5a7e27ad5395e96552205ee2561aeed0e8b38207"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5664,
+        "sha1": "d3aa976a341c7b696714f6d7c2d97824d757f012"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 956,
+        "sha1": "0c5c2097dbbad6d4f65bdf19e95cb40dd5f272c8"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17987,
+        "sha1": "c909fea3f2abf555998b14f52292ab58ae333d5a"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 5658,
+        "sha1": "2b3ecc8d465028c4fc4c1461bf71f9d646f2dac3"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 3849,
+        "sha1": "f85e18d71f24c568df0826fb07026824122070ae"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 6201,
+        "sha1": "ae2ca78b4384db5fb882a5b1ea1701df0c45f3d4"
+      },
+      {
+        "name": "Texture_7_CMP.png",
+        "bytes": 5116,
+        "sha1": "d00057b869bcd7d63c0084d48ea7be510c99900e"
+      }
+    ]
+  },
+  {
+    "id": "pl0800",
+    "name": "KUNG-FU MASTER",
+    "tribe": "Knuckle Borg",
+    "energy": 260,
+    "dae": "pl0800.dae",
+    "bones": 25,
+    "meshes": 21,
+    "tris": 3452,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18852,
+        "sha1": "7ffcc4f16725f159294e783ad592e5d2cb2b4c2c"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 34879,
+        "sha1": "15ef3d7defeb84d3d5fd65786a695b7c1ffbcaa8"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5811,
+        "sha1": "1af6a8265e1b1ab30919b535e7bb4d5d98f3f86e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5389,
+        "sha1": "d52c39d5e2fc2c8d42cd5a07f43c6a28002cd4ef"
+      }
+    ]
+  },
+  {
+    "id": "pl0801",
+    "name": "TAO MASTER",
+    "tribe": "Knuckle Borg",
+    "energy": 300,
+    "dae": "pl0801.dae",
+    "bones": 28,
+    "meshes": 22,
+    "tris": 3368,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png",
+      "Texture_7_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 3797,
+        "sha1": "072d79be250b3639fe8c26d94a6f1b8c0eb5dc49"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4382,
+        "sha1": "73d231100ff4ca6af940c0c4d63f0163a3f3cabc"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3391,
+        "sha1": "666b683dac50939eb2d23c519cdc292931c03f05"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4912,
+        "sha1": "a5bbc4be227da7d16d1af054212dcca8e52c1481"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 6532,
+        "sha1": "e6f0e4e99ab74d5f04232b86e23a142e50a69772"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 3930,
+        "sha1": "56624555c42df6205543b1295d0c5a650cc88eb4"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 2855,
+        "sha1": "63dc2a2ed0fd23c83c858005627fa8954e2b3f4d"
+      },
+      {
+        "name": "Texture_7_CMP.png",
+        "bytes": 5563,
+        "sha1": "e9ee827fcda35954b1136f000eb60aacdfaccdab"
+      }
+    ]
+  },
+  {
+    "id": "pl0805",
+    "name": "JELLY DIVER",
+    "tribe": "Knuckle Borg",
+    "energy": 280,
+    "dae": "pl0805.dae",
+    "bones": 23,
+    "meshes": 35,
+    "tris": 5258,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 58961,
+        "sha1": "c943af3a911073f4dda890a840fa747c0a4e7a4b"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 6075,
+        "sha1": "6b21f3f47ac9f5921e3fd29ca04651f1c94c1166"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 17612,
+        "sha1": "aa7e34ac1ff98ac1c53edba2480a897ada0f90a7"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1129,
+        "sha1": "2a76693e07e71044fba3e87f681c67f337b70f72"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 2455,
+        "sha1": "49690ffe3856e2e8e3f16a1201ddf003bd21fe03"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 5323,
+        "sha1": "a9987471236208cc5e2cce1394c1fd59ef54233e"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 1182,
+        "sha1": "00c4233fda6c813e28d222b3d67a7282fdaf0884"
+      }
+    ]
+  },
+  {
+    "id": "pl0806",
+    "name": "COPY MAN",
+    "tribe": "Knuckle Borg",
+    "energy": 350,
+    "dae": "pl0806.dae",
+    "bones": 20,
+    "meshes": 15,
+    "tris": 2187,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17802,
+        "sha1": "4313fd885d141c82199ab9aa797f9a20b8972938"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18292,
+        "sha1": "fbf8f66cfb3f5e1ec1b3936578d440efd198e65a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4720,
+        "sha1": "27bcfcabf940fc40f3b0e7b43eef5548b6823dfa"
+      }
+    ]
+  },
+  {
+    "id": "pl0809",
+    "name": "WALKING BOMB",
+    "tribe": "Knuckle Borg",
+    "energy": 400,
+    "dae": "pl0809.dae",
+    "bones": 20,
+    "meshes": 18,
+    "tris": 2348,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17826,
+        "sha1": "6a6d18826b58d9d20d8845c1389a8df34044a6b4"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3753,
+        "sha1": "608a557964d5011c1bafd43012cbb36dc973a4c8"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18300,
+        "sha1": "83895fe02dbaf48225a57ca90c0905d8bc04999b"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 14866,
+        "sha1": "5bd9f295842a66fa8b4bfe4dae077bd9b576d6cd"
+      }
+    ]
+  },
+  {
+    "id": "pl080d",
+    "name": "TAR DIVER",
+    "tribe": "Knuckle Borg",
+    "energy": 340,
+    "dae": "pl080d.dae",
+    "bones": 23,
+    "meshes": 36,
+    "tris": 4826,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 47453,
+        "sha1": "453230518b7c521aedff8f819ec23a7702d9072a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 6432,
+        "sha1": "6a409bd55d77de90e4e4d3988f7672b3bdb00b2f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 16931,
+        "sha1": "1a2f5d64cdc43d7132b73bb354eb6b92e7cface3"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1129,
+        "sha1": "2a76693e07e71044fba3e87f681c67f337b70f72"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 2476,
+        "sha1": "fd6b695bd4890b0c49b98538d15a3c9291577446"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 5323,
+        "sha1": "a9987471236208cc5e2cce1394c1fd59ef54233e"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 1193,
+        "sha1": "cff48e2ecfccb6e4b9adf05fd8aa37735d3bcf93"
+      }
+    ]
+  },
+  {
+    "id": "pl080e",
+    "name": "JACK",
+    "tribe": "Knuckle Borg",
+    "energy": 280,
+    "dae": "pl080e.dae",
+    "bones": 23,
+    "meshes": 38,
+    "tris": 5185,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 58295,
+        "sha1": "649ff58bbcdc29ad8837751fa2319aeec181cf5e"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 6652,
+        "sha1": "cacd4c7bb9b8316b7e1c1b33a933e93bc60f7d3a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19480,
+        "sha1": "15b83905e6d153a6e21e7cfe8be0c264a5655d46"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1129,
+        "sha1": "2a76693e07e71044fba3e87f681c67f337b70f72"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 2455,
+        "sha1": "49690ffe3856e2e8e3f16a1201ddf003bd21fe03"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 5323,
+        "sha1": "a9987471236208cc5e2cce1394c1fd59ef54233e"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 1837,
+        "sha1": "3a395511300781acd82b7876000911a8ccd391a1"
+      }
+    ]
+  },
+  {
+    "id": "pl0900",
+    "name": "ANGEL NURSE",
+    "tribe": "Nurse Borg",
+    "energy": 240,
+    "dae": "pl0900.dae",
+    "bones": 28,
+    "meshes": 9,
+    "tris": 3260,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19817,
+        "sha1": "9987e8d76b73d304373a03ec536653948fb5769a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19240,
+        "sha1": "a675204c4844ea50de0af9e3318fd70ba3a79998"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5489,
+        "sha1": "cca3cdfb1cc70f970a87d540d7edfa60bdabfa5c"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5697,
+        "sha1": "8b3ec80c17e26841795ebe5ebdbbb6e7bcfa76ca"
+      }
+    ]
+  },
+  {
+    "id": "pl0901",
+    "name": "BUG WITCH",
+    "tribe": "Wizard Borg",
+    "energy": 300,
+    "dae": "pl0901.dae",
+    "bones": 32,
+    "meshes": 14,
+    "tris": 3379,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 8431,
+        "sha1": "95cac5dc4a7be0d52ed4601ca0e06d82f3be3564"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17094,
+        "sha1": "59b98e2fb79c4a169bf4519765bde0534f7a559c"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 2776,
+        "sha1": "4c668b2ec6d9fcb14da7d29bffa65f2b4dd8bb32"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 13135,
+        "sha1": "938840ef581ebc2888a8fa1e8fab1419ad040dd5"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3937,
+        "sha1": "07c082939e8205d931a510ced2f73e5dc8201f3d"
+      }
+    ]
+  },
+  {
+    "id": "pl0902",
+    "name": "PATRA WITCH",
+    "tribe": "Wizard Borg",
+    "energy": 150,
+    "dae": "pl0902.dae",
+    "bones": 28,
+    "meshes": 17,
+    "tris": 3361,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12295,
+        "sha1": "37072f7941c27ce8b42cb8f9dbf7604f569d7f95"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 15068,
+        "sha1": "3563f15e9ce635cfc5012070636f1b9cc34db7bd"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5282,
+        "sha1": "a89d3f1bfcd8b936c304e8be9304f315fac3284a"
+      }
+    ]
+  },
+  {
+    "id": "pl0903",
+    "name": "GUARD WITCH",
+    "tribe": "Wizard Borg",
+    "energy": 250,
+    "dae": "pl0903.dae",
+    "bones": 28,
+    "meshes": 10,
+    "tris": 3115,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 9367,
+        "sha1": "638415cf383a79daf13804eb4e00bbf15957e48c"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18381,
+        "sha1": "ea0034d3f22f5e2f5dc8cdd70772d1fcb085c785"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5140,
+        "sha1": "a644d8bff5339c62daa2ebe3c70432cdfc32a57f"
+      }
+    ]
+  },
+  {
+    "id": "pl0904",
+    "name": "POP HONEY",
+    "tribe": "Idol Borg",
+    "energy": 250,
+    "dae": "pl0904.dae",
+    "bones": 28,
+    "meshes": 9,
+    "tris": 3335,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 7278,
+        "sha1": "732c7b7c570ae5c3da919d8c559acc65e4d50f5b"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17975,
+        "sha1": "68440b4bf81238f610c7b96b2edab7b09d73710a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5749,
+        "sha1": "355fb6842109e7e6f6b2a2e4ffb8a3a769593f09"
+      }
+    ]
+  },
+  {
+    "id": "pl0907",
+    "name": "BASTET WITCH",
+    "tribe": "Wizard Borg",
+    "energy": 230,
+    "dae": "pl0907.dae",
+    "bones": 28,
+    "meshes": 16,
+    "tris": 3235,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12322,
+        "sha1": "80afb0c22fcf6fe62d682190a83c790b341f2acc"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 15361,
+        "sha1": "d651e4b1c5288c21f8e658e4dfe953db6069645a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5161,
+        "sha1": "727e01bfbfbfd6fe6a2e9cbd41c352d13de12942"
+      }
+    ]
+  },
+  {
+    "id": "pl0908",
+    "name": "ANGEL RESCUE",
+    "tribe": "Nurse Borg",
+    "energy": 300,
+    "dae": "pl0908.dae",
+    "bones": 28,
+    "meshes": 13,
+    "tris": 3275,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 26249,
+        "sha1": "b158a4675c0cd5fd9835f8ea1ca5fa689e41279a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19240,
+        "sha1": "a675204c4844ea50de0af9e3318fd70ba3a79998"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5338,
+        "sha1": "28656c0bd3b2e60c8f6ee83ff254813e15cc6835"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5784,
+        "sha1": "38b9c2a446ce325c35701ca7b568926a8a34e29e"
+      }
+    ]
+  },
+  {
+    "id": "pl0909",
+    "name": "ISIS WITCH",
+    "tribe": "Wizard Borg",
+    "energy": 190,
+    "dae": "pl0909.dae",
+    "bones": 28,
+    "meshes": 17,
+    "tris": 3361,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12200,
+        "sha1": "463c94e5de3187d55dfe20d56caa8660c0dc8c71"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17560,
+        "sha1": "90bc82f46aeb8a2b5bdd21098d65f55f6924bc61"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5347,
+        "sha1": "0e9b388437529e5b46dc7f1cdd95961c5e9fe05a"
+      }
+    ]
+  },
+  {
+    "id": "pl090a",
+    "name": "SHIELD WITCH",
+    "tribe": "Wizard Borg",
+    "energy": 330,
+    "dae": "pl090a.dae",
+    "bones": 28,
+    "meshes": 10,
+    "tris": 3115,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 9539,
+        "sha1": "a573fe5645d6c30b7f0b0faa2b961a8d495a8a75"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18470,
+        "sha1": "593472369d8b1acbbdb27143e25d3a47cc8a490e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5210,
+        "sha1": "59dcb41fa2f76ee9b0be9b1dc8a785503aea7c40"
+      }
+    ]
+  },
+  {
+    "id": "pl090c",
+    "name": "SEKHMET WITCH",
+    "tribe": "Wizard Borg",
+    "energy": 330,
+    "dae": "pl090c.dae",
+    "bones": 28,
+    "meshes": 16,
+    "tris": 3235,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12420,
+        "sha1": "61bd0f1b81f5a000766b6b61d92938fff5713985"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17489,
+        "sha1": "40e2ba6193ece05552378ef8eb2c4d07a84c0cb5"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5272,
+        "sha1": "24e775a4f344ec1307a281f9283a05150d31e921"
+      }
+    ]
+  },
+  {
+    "id": "pl090d",
+    "name": "NAO",
+    "tribe": "Nurse Borg",
+    "energy": 240,
+    "dae": "pl090d.dae",
+    "bones": 28,
+    "meshes": 11,
+    "tris": 3324,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 22430,
+        "sha1": "51a195cd12b57d6541d23ee1fb8c5fd45cf855ff"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19240,
+        "sha1": "a675204c4844ea50de0af9e3318fd70ba3a79998"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3327,
+        "sha1": "8eabadcb5f496e1881621f17c59de3146661aaa9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5763,
+        "sha1": "05348009cb3532eacfd31b7bb11e5c433530bfe4"
+      }
+    ]
+  },
+  {
+    "id": "pl0a00",
+    "name": "WING SOLDIER",
+    "tribe": "Wing Borg",
+    "energy": 200,
+    "dae": "pl0a00.dae",
+    "bones": 28,
+    "meshes": 16,
+    "tris": 3594,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 16332,
+        "sha1": "8faa0412945891e1cb926ad77bc18ee76f075983"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17435,
+        "sha1": "2f973f953f3420fc602f2afa75b4ea8cf375fca4"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18062,
+        "sha1": "fe7ffe4ad34eefd7691107251ff07345cc2b84b3"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4772,
+        "sha1": "3f176b032b172f3cad40b26557f7847e5f072ade"
+      }
+    ]
+  },
+  {
+    "id": "pl0a02",
+    "name": "DEMON WING",
+    "tribe": "Demon Borg",
+    "energy": 610,
+    "dae": "pl0a02.dae",
+    "bones": 28,
+    "meshes": 31,
+    "tris": 3861,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png",
+      "Texture_7_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 2339,
+        "sha1": "4d8bd544dcaa4268bb67546b9d0f8b418f9250ce"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19086,
+        "sha1": "d0e7bc2fe24c0a957054e92381d83b03f6f4af7e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15675,
+        "sha1": "534d060fd0f2a1166b6da3a8d497e2429267e45e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5937,
+        "sha1": "da33060c2cbc3fb1d5f2edc20dfc50d5e4c2206c"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4949,
+        "sha1": "16db12e3c336bad56bad3b002bb2765e727226fe"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 2660,
+        "sha1": "5538b94f33b90778e51ced1770a2549c392f74e5"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 4798,
+        "sha1": "3c3b1ab9fecf3f0d366444b19b69eab200606a24"
+      },
+      {
+        "name": "Texture_7_CMP.png",
+        "bytes": 13313,
+        "sha1": "6447bd8e7f42d42b0699594113e9064c672f675b"
+      }
+    ]
+  },
+  {
+    "id": "pl0a03",
+    "name": "BEAM WING BLUE",
+    "tribe": "Wing Borg",
+    "energy": 350,
+    "dae": "pl0a03.dae",
+    "bones": 28,
+    "meshes": 21,
+    "tris": 3587,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 7540,
+        "sha1": "90afe1997f8fdb0422b4b74b3d14377cb37a2c62"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 12686,
+        "sha1": "8fec4f3d7e15c682a27680e5035bf77135703dc1"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18965,
+        "sha1": "b7d5c3d6548dd7ccbf246a11db6bbebfbde40dc2"
+      }
+    ]
+  },
+  {
+    "id": "pl0a04",
+    "name": "ANUBIS WING",
+    "tribe": "Wing Borg",
+    "energy": 750,
+    "dae": "pl0a04.dae",
+    "bones": 29,
+    "meshes": 38,
+    "tris": 3403,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12498,
+        "sha1": "88c8dd0d32fb7e547766078c6e627dd4275bea96"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 8265,
+        "sha1": "8553777e4d0f5452c9e256e2d2cb1d45a93090d5"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15248,
+        "sha1": "5d63356c2745861fb0f202e8265016d0d5e5e2e3"
+      }
+    ]
+  },
+  {
+    "id": "pl0a06",
+    "name": "BEAM WING RED",
+    "tribe": "Wing Borg",
+    "energy": 400,
+    "dae": "pl0a06.dae",
+    "bones": 28,
+    "meshes": 21,
+    "tris": 3571,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 7572,
+        "sha1": "9df52f57995c77107f4d542585b570aae834892f"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 12995,
+        "sha1": "9aabc462e21e67b15193f4d3c9a958a1d0739490"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19133,
+        "sha1": "66c9061c06c12b6f07712e3a91ae7666c4ad6a0a"
+      }
+    ]
+  },
+  {
+    "id": "pl0a07",
+    "name": "DEATH WING",
+    "tribe": "Demon Borg",
+    "energy": 550,
+    "dae": "pl0a07.dae",
+    "bones": 28,
+    "meshes": 13,
+    "tris": 4054,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17857,
+        "sha1": "6e3e43a2275250dddb48dc74f03a3c35cfab6b13"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16511,
+        "sha1": "c3a89ad3c3f2556c490e1066c142e8b6b73a8f0a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3961,
+        "sha1": "b3cd254fc887ce51fb5dfe4f9faa3aec0329f971"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5095,
+        "sha1": "1af30a0ac92e7557e6a976a710a61d62c307eea0"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 5877,
+        "sha1": "9f8ebe3fecd5c92e3a7f2ab00a40e1512740b177"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 13262,
+        "sha1": "a94500eca600812ffe432a8eb21ab9d22ba250f1"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 15263,
+        "sha1": "f5c2bfacac3297bccd2cd31e04a90ce4c063255f"
+      }
+    ]
+  },
+  {
+    "id": "pl0a08",
+    "name": "BLADE WING",
+    "tribe": "Wing Borg",
+    "energy": 650,
+    "dae": "pl0a08.dae",
+    "bones": 29,
+    "meshes": 38,
+    "tris": 3471,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12498,
+        "sha1": "88c8dd0d32fb7e547766078c6e627dd4275bea96"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10297,
+        "sha1": "8dcb31dc86312f41375ae82664b1be2766cdd999"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 16090,
+        "sha1": "eab80e25f750646272bc0d34235ebe8012802092"
+      }
+    ]
+  },
+  {
+    "id": "pl0a09",
+    "name": "GARUDA",
+    "tribe": "Wing Borg",
+    "energy": 750,
+    "dae": "pl0a09.dae",
+    "bones": 29,
+    "meshes": 42,
+    "tris": 3612,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12531,
+        "sha1": "b9f4b87039bb9eba1ad506730701c316f698bc11"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17392,
+        "sha1": "796bea95eb966b3e4fd8e83370b11805881f5c1d"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 14335,
+        "sha1": "5e25545695bfde397e169dc6aab8c5e61181d9f8"
+      }
+    ]
+  },
+  {
+    "id": "pl0b00",
+    "name": "QUICK VALKRIE",
+    "tribe": "Angel Borg",
+    "energy": 230,
+    "dae": "pl0b00.dae",
+    "bones": 28,
+    "meshes": 18,
+    "tris": 3532,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 15577,
+        "sha1": "c9bebdee554ea70cf2703b25868ad00c0f16e55c"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17435,
+        "sha1": "2f973f953f3420fc602f2afa75b4ea8cf375fca4"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1490,
+        "sha1": "70a59e0b38280dbc51a0d02403b4809e827f6836"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5650,
+        "sha1": "b7e4320e7e5d75ede21b1e3218028db8fb5cbfe5"
+      }
+    ]
+  },
+  {
+    "id": "pl0b01",
+    "name": "ICE VALKRIE",
+    "tribe": "Angel Borg",
+    "energy": 240,
+    "dae": "pl0b01.dae",
+    "bones": 28,
+    "meshes": 18,
+    "tris": 4063,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19574,
+        "sha1": "234271f4a1a5dc81247dcfb9ab221d1afdb7a73a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10822,
+        "sha1": "9a9957ca59e4d3ecf03127aee964176edeba8f75"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5257,
+        "sha1": "804079276a37de492b689bcf088cee5414c8f10e"
+      }
+    ]
+  },
+  {
+    "id": "pl0b02",
+    "name": "TORNADO VALKRIE",
+    "tribe": "Angel Borg",
+    "energy": 200,
+    "dae": "pl0b02.dae",
+    "bones": 28,
+    "meshes": 14,
+    "tris": 3653,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 9480,
+        "sha1": "3c66201635974411b42869ecff84fba29560c98c"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4868,
+        "sha1": "6ed863fb8585c8971d36de7f019abd7e334774af"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18155,
+        "sha1": "87e5e0ee0928bcd0d8182195be999a03366bf0e2"
+      }
+    ]
+  },
+  {
+    "id": "pl0b03",
+    "name": "WIND VALKRIE",
+    "tribe": "Angel Borg",
+    "energy": 200,
+    "dae": "pl0b03.dae",
+    "bones": 28,
+    "meshes": 25,
+    "tris": 2864,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5167,
+        "sha1": "339a8692146bf8985f1839f21409fa5316eb2e72"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4572,
+        "sha1": "e49f20dc59ac817e47c756706a7b9494ea10795e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 2390,
+        "sha1": "b12af6800226b74bcea195bb4229f8f72aebffdf"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5845,
+        "sha1": "0b73cf386d56f3c2f14f3d90473c59e2817d0ae1"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 5651,
+        "sha1": "a5fad85b039a04ed6db899d8c9ee53e106999a92"
+      }
+    ]
+  },
+  {
+    "id": "pl0b04",
+    "name": "RING VALKRIE",
+    "tribe": "Angel Borg",
+    "energy": 280,
+    "dae": "pl0b04.dae",
+    "bones": 28,
+    "meshes": 23,
+    "tris": 4185,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 4084,
+        "sha1": "3672c037f0b5353bf65fed70ce31cbab9ab66e8d"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17435,
+        "sha1": "2f973f953f3420fc602f2afa75b4ea8cf375fca4"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 7070,
+        "sha1": "822cffc2e1820101fda0cbe2330fe6ad7dbc2516"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 26202,
+        "sha1": "89333645bd2b86070f3fae425a4095c3ca16b563"
+      }
+    ]
+  },
+  {
+    "id": "pl0b06",
+    "name": "SLOW VALKRIE",
+    "tribe": "Angel Borg",
+    "energy": 350,
+    "dae": "pl0b06.dae",
+    "bones": 28,
+    "meshes": 20,
+    "tris": 3410,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 16787,
+        "sha1": "321ee4c111d667bb68ea653c0497d166de9c9db1"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18318,
+        "sha1": "12d0465fae9e12a5d6b07ef5e8167c6944a311fa"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1557,
+        "sha1": "d3d7af815dbb892074fe5bcea7eac27c4e4dca3e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5820,
+        "sha1": "f255c8e754de59945f767cb3c3355fc99a0ca360"
+      }
+    ]
+  },
+  {
+    "id": "pl0c00",
+    "name": "NORMAL TANK",
+    "tribe": "Tank Borg",
+    "energy": 450,
+    "dae": "pl0c00.dae",
+    "bones": 14,
+    "meshes": 32,
+    "tris": 3255,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 21609,
+        "sha1": "ff3bcfdcc012f1aa266007b1a3cf59b72ea0a74f"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18062,
+        "sha1": "fe7ffe4ad34eefd7691107251ff07345cc2b84b3"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3785,
+        "sha1": "7e8056a7e3ad5f35946813e2c272dfb5f4660e4d"
+      }
+    ]
+  },
+  {
+    "id": "pl0c01",
+    "name": "GATLING TANK",
+    "tribe": "Tank Borg",
+    "energy": 690,
+    "dae": "pl0c01.dae",
+    "bones": 14,
+    "meshes": 31,
+    "tris": 3184,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 24807,
+        "sha1": "ac617693afdd49ca65dfde75fa214b5a249f2b7b"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18649,
+        "sha1": "36c61b3101b06be2589a1206be9b21f1292c0217"
+      }
+    ]
+  },
+  {
+    "id": "pl0c02",
+    "name": "BEAM TANK",
+    "tribe": "Tank Borg",
+    "energy": 780,
+    "dae": "pl0c02.dae",
+    "bones": 11,
+    "meshes": 31,
+    "tris": 3081,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 16445,
+        "sha1": "f7f5952eb8b575988f8230b12d8ecfe8b42c3df2"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1126,
+        "sha1": "264aaef791efd4e2d38980af031acc8bc00f2f67"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 29233,
+        "sha1": "9025ca529e795ab09a6dd6e08812a3e11bffc704"
+      }
+    ]
+  },
+  {
+    "id": "pl0c04",
+    "name": "ULTIMATE CANNON",
+    "tribe": "Tank Borg",
+    "energy": 1500,
+    "dae": "pl0c04.dae",
+    "bones": 17,
+    "meshes": 36,
+    "tris": 4340,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1591,
+        "sha1": "f837c22c6c3ab574a9019a72569786b26b60e64b"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4121,
+        "sha1": "97517e817f09042207e64679114fac60fcf562ef"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 2384,
+        "sha1": "13834344a7756db9258c25ed3682ccd154278c16"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 18062,
+        "sha1": "fe7ffe4ad34eefd7691107251ff07345cc2b84b3"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3816,
+        "sha1": "557784a686a001ca143dd12d23045165514e3ea9"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 4765,
+        "sha1": "0a5bf34d9b039b5f16018ed87a3b4ffa82f460f7"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 2324,
+        "sha1": "5901ba1627bf720f391277592c2f0028d503d12f"
+      }
+    ]
+  },
+  {
+    "id": "pl0c05",
+    "name": "ICBM TANK",
+    "tribe": "Tank Borg",
+    "energy": 1000,
+    "dae": "pl0c05.dae",
+    "bones": 9,
+    "meshes": 17,
+    "tris": 2225,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 28480,
+        "sha1": "92a6f05732f06df17045086b110cd970e83061ca"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18062,
+        "sha1": "fe7ffe4ad34eefd7691107251ff07345cc2b84b3"
+      }
+    ]
+  },
+  {
+    "id": "pl0c06",
+    "name": "LEOPARD",
+    "tribe": "Tank Borg",
+    "energy": 450,
+    "dae": "pl0c06.dae",
+    "bones": 16,
+    "meshes": 36,
+    "tris": 3546,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 20418,
+        "sha1": "f7d647c4e105e93abb71c85807387ac11fc2e5dd"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18062,
+        "sha1": "fe7ffe4ad34eefd7691107251ff07345cc2b84b3"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4445,
+        "sha1": "8ca245a445cbba3f54df7b1474732f50fcd14d39"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1052,
+        "sha1": "9e5c65c2763be4415b6cbafa7a37b33e6ebe7a18"
+      }
+    ]
+  },
+  {
+    "id": "pl0d00",
+    "name": "BLUE STRIKER",
+    "tribe": "Air Borg",
+    "energy": 200,
+    "dae": "pl0d00.dae",
+    "bones": 14,
+    "meshes": 26,
+    "tris": 3243,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 14034,
+        "sha1": "e8f23f222630200e1ec5e99f6c78f4ef8d51af2c"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19017,
+        "sha1": "d3cd1fd3a68980d1a14d4cae48e990ccfacc6ca0"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4668,
+        "sha1": "fde7fd0e9ad9bb7326c85d65fcfb44ecbbd1c249"
+      }
+    ]
+  },
+  {
+    "id": "pl0d01",
+    "name": "RED ATTACKER",
+    "tribe": "Air Borg",
+    "energy": 290,
+    "dae": "pl0d01.dae",
+    "bones": 9,
+    "meshes": 16,
+    "tris": 2632,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19091,
+        "sha1": "9ba3bd67ab7eceb32923b060060b611ada567e39"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18648,
+        "sha1": "05d6eac21f549f0f26e80afdab6708fde915ade3"
+      }
+    ]
+  },
+  {
+    "id": "pl0d02",
+    "name": "CARRIER HELICOPTER",
+    "tribe": "Air Borg",
+    "energy": 390,
+    "dae": "pl0d02.dae",
+    "bones": 12,
+    "meshes": 22,
+    "tris": 3554,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18553,
+        "sha1": "dc817c87b5c8a6172ead6d9861f2e018e21edd8e"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4698,
+        "sha1": "fc2cc4677263df1a5e5705cd5c2d201414c8396d"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 19079,
+        "sha1": "3e0aaae0a980e20ee4cf39dc5298cf3547516e10"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5521,
+        "sha1": "de31d3afcffaac12cc52983a0d01f70e30e57d80"
+      }
+    ]
+  },
+  {
+    "id": "pl0d03",
+    "name": "FLYING SAUCER",
+    "tribe": "Air Borg",
+    "energy": 600,
+    "dae": "pl0d03.dae",
+    "bones": 5,
+    "meshes": 19,
+    "tris": 3005,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 7147,
+        "sha1": "c8c3b9cbb734779d85510ebbfd3703acf16bd97f"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18494,
+        "sha1": "625b5b1f9af22fa5309158a3c1289216e9b5e2dc"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3866,
+        "sha1": "3b7330dfaf0fe0e4cd26b1486f109d5a4dca4818"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 16560,
+        "sha1": "37864fca3094e5912f84289f1f0426fb70a96b1f"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 16340,
+        "sha1": "4e9ed304919abe8877df8bd61fec160bfaa58a6a"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 2646,
+        "sha1": "ee4a1e823e3fa212c1e24a5fc793f65ebc37b547"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 3229,
+        "sha1": "109725a33f82f7490f26073e180dddcc481362f8"
+      }
+    ]
+  },
+  {
+    "id": "pl0d04",
+    "name": "ORANGE FIGHTER",
+    "tribe": "Air Borg",
+    "energy": 200,
+    "dae": "pl0d04.dae",
+    "bones": 14,
+    "meshes": 26,
+    "tris": 3307,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 14098,
+        "sha1": "0c5e4b73e263c3f28bf9fd943de4b9343eb6e237"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19017,
+        "sha1": "d3cd1fd3a68980d1a14d4cae48e990ccfacc6ca0"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4668,
+        "sha1": "fde7fd0e9ad9bb7326c85d65fcfb44ecbbd1c249"
+      }
+    ]
+  },
+  {
+    "id": "pl0d05",
+    "name": "VIOLET ATTACKER",
+    "tribe": "Air Borg",
+    "energy": 290,
+    "dae": "pl0d05.dae",
+    "bones": 9,
+    "meshes": 18,
+    "tris": 2815,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19091,
+        "sha1": "9ba3bd67ab7eceb32923b060060b611ada567e39"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19162,
+        "sha1": "ba22b7a7c8c9bc041e07655bd8e7344a9f903e84"
+      }
+    ]
+  },
+  {
+    "id": "pl0e00",
+    "name": "SIRIUS",
+    "tribe": "Fortress Borg",
+    "energy": 1000,
+    "dae": "pl0e00.dae",
+    "bones": 18,
+    "meshes": 48,
+    "tris": 4621,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 11236,
+        "sha1": "d54f804c6c98c39c9721faa01ffa351ce81996bb"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 9361,
+        "sha1": "a4bbc29cc8d2118f7448c2cfc8d9812fe2099d82"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18265,
+        "sha1": "4ae3a4a928dd26dc1f78c95e91063d5507aec708"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2125,
+        "sha1": "fbde2c074f4462c8e4ee9e90678d2f13e4d97f6f"
+      }
+    ]
+  },
+  {
+    "id": "pl0e01",
+    "name": "BEAM SATELLITE",
+    "tribe": "Fortress Borg",
+    "energy": 800,
+    "dae": "pl0e01.dae",
+    "bones": 9,
+    "meshes": 28,
+    "tris": 4022,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17403,
+        "sha1": "83c1c9cf3a5e1bc1b848a00dacc04a7849e698dc"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17389,
+        "sha1": "3f7665be2ee01a2f7f53798dd802db98fbc4e917"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18613,
+        "sha1": "66699b812b1822c255aa21ed4b22d5340fde73d3"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 8037,
+        "sha1": "a6773866e1f122f67604596021140e4bfa7d417d"
+      }
+    ]
+  },
+  {
+    "id": "pl0e02",
+    "name": "DEATH SAUCER",
+    "tribe": "Fortress Borg",
+    "energy": 1000,
+    "dae": "pl0e02.dae",
+    "bones": 19,
+    "meshes": 36,
+    "tris": 3974,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19189,
+        "sha1": "2f8d9af9b1341861acba88138fc86978799f04bf"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1499,
+        "sha1": "3d0ac8543b279d415f1090bc1a5b3954bba53e94"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6564,
+        "sha1": "586f318e1b55bf3ffbe7f1315903f80476f61e0f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17063,
+        "sha1": "c15700377bab5efc3d8780fb2db30e48cb9430ff"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 2123,
+        "sha1": "6c24771e02437a21cb854cf517275f638fda28ed"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 2648,
+        "sha1": "0e4e18b30c70b4459b0b84f2a06e295fb83ed745"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 12370,
+        "sha1": "e1ca4d025779002a61f180adc52726b63bc62fd9"
+      }
+    ]
+  },
+  {
+    "id": "pl0e03",
+    "name": "ANTARES",
+    "tribe": "Fortress Borg",
+    "energy": 1300,
+    "dae": "pl0e03.dae",
+    "bones": 13,
+    "meshes": 54,
+    "tris": 4780,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1226,
+        "sha1": "63107ba36bc6e36ec6e4ba5c5535c0ee891d36b5"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18441,
+        "sha1": "b140b20650cd79439a8f5b7cc24aefdf4f6c7b85"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 10517,
+        "sha1": "fc3a73a22a82491832ef02a3c4437700d0dd1b75"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2628,
+        "sha1": "5dc43e6e7ca23df254b9aa10df866e2b01b6315f"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 9181,
+        "sha1": "49f90f382c936d4a3fa2dd0e2b47109b3919bf48"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 1932,
+        "sha1": "afbc5b8650b259813f81020283fe97c887eacc76"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 5046,
+        "sha1": "492881f45e6a894f6d73046a117971a1a85d0da3"
+      }
+    ]
+  },
+  {
+    "id": "pl0e04",
+    "name": "GALACTIC EMPEROR",
+    "tribe": "Fortress Borg",
+    "energy": 3000,
+    "dae": "pl0e04.dae",
+    "bones": 15,
+    "meshes": 47,
+    "tris": 5310,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png",
+      "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5770,
+        "sha1": "e71408bd5a251c8ed7981c0cb57135eb08686f1f"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 6424,
+        "sha1": "bc7d4e9709d8429c77845d0b9b0d582c0fe32223"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5297,
+        "sha1": "8fad6dd24781740c7affe17328b547b2a04b7c30"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3363,
+        "sha1": "e65192e06f0c204fbd1e91cdf4c50c3bac1da69f"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 2345,
+        "sha1": "2afcaa72c2cb9c7fe6947a8caf748c1d6554f3b3"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 1818,
+        "sha1": "945aac2288243a10a9b0fcdabab52c1e52d3457b"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 16811,
+        "sha1": "f5bbd79de4f620c385cf3c432ffccf8805411057"
+      }
+    ]
+  },
+  {
+    "id": "pl0e05",
+    "name": "DEATH ARC",
+    "tribe": "Fortress Borg",
+    "energy": 1000,
+    "dae": "pl0e05.dae",
+    "bones": 18,
+    "meshes": 47,
+    "tris": 4520,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 10287,
+        "sha1": "d771609635bafc818ab1b9226b5c231bc91d4602"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 9361,
+        "sha1": "a4bbc29cc8d2118f7448c2cfc8d9812fe2099d82"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 16543,
+        "sha1": "ccfdcfd2db6d7ed12e23cca527a14f287215a993"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1853,
+        "sha1": "eadcad2db18e4454c9e8f2b3f8d6f985e3964251"
+      }
+    ]
+  },
+  {
+    "id": "pl0f05",
+    "name": "ROACH",
+    "tribe": "Bug Borg",
+    "energy": 30,
+    "dae": "pl0f05.dae",
+    "bones": 2,
+    "meshes": 3,
+    "tris": 437,
+    "textures": [],
+    "files": []
   }
 ]

@@ -1,7 +1,84 @@
-// @gf/missions — story/mission progression and the gacha/GET economy. JSON state machine
-// for mission -> win/lose -> flags -> unlock/GET, plus weighted GET RNG enforcing the
-// 2000-borg / 1000-crystal caps (caps "exact", rates "close"). Sources: mission *.bin/*.mdt
-// data + RE wiki GET section. (PHASE0 §7 mission/gacha, §8.)
+// @gf/missions — barrel exports for the CHALLENGE + ADVENTURE run/progression
+// layer, plus the legacy story-stage resolver below.
+//
+// Modules:
+//   battle-config.ts — local mirror of the @gf/combat BattleConfig API.
+//   borg-data.ts     — Borg roster types + `enemyForceForBudget` assembler.
+//   scoring.ts       — results model (computeResults) matching the real screen.
+//   challenge.ts     — createChallengeRun(): escalating run of BattleConfigs.
+//   adventure.ts     — createAdventureCampaign(): stages.json → BattleConfigs.
+
+// --- BattleConfig API surface (mirror of @gf/combat) ---
+export type {
+  Team,
+  BattleForce,
+  BattleConfig,
+  BattleMeta,
+} from "./battle-config.js";
+
+// --- Borg roster + enemy-force assembler ---
+export {
+  readBorgs,
+  enemyForceForBudget,
+  deathBorgPool,
+} from "./borg-data.js";
+export type {
+  Borg,
+  BorgData,
+  EnemyForce,
+  EnemyForceOptions,
+} from "./borg-data.js";
+
+// --- Scoring / results ---
+export {
+  computeResults,
+  accumulateScore,
+  DEFAULT_SCORE_WEIGHTS,
+} from "./scoring.js";
+export type {
+  BattleOutcome,
+  BattleResults,
+  ScoreWeights,
+} from "./scoring.js";
+
+// --- Challenge mode ---
+export {
+  createChallengeRun,
+  enemyTargetForBattle,
+  CHALLENGE_DIFFICULTIES,
+  DEFAULT_ESCALATION,
+} from "./challenge.js";
+export type {
+  ChallengeDifficulty,
+  ChallengeRun,
+  ChallengeRunOptions,
+  ChallengeProgress,
+  PlayerForce,
+  EscalationCurve,
+} from "./challenge.js";
+
+// --- Adventure mode ---
+export {
+  createAdventureCampaign,
+  readStages,
+  parseCounts,
+  buildNameIndex,
+  matchBorg,
+  normalizeName,
+} from "./adventure.js";
+export type {
+  AdventureCampaign,
+  AdventureStage as AdventureCampaignStage,
+  AdventureStageEntry,
+  AdventureOptions,
+  ResolvedEnemy,
+  StagesData,
+  NameIndex,
+} from "./adventure.js";
+
+// ===========================================================================
+// Legacy story-stage resolver (kept for existing callers).
+// ===========================================================================
 
 export type AdventureStageId = string | number;
 

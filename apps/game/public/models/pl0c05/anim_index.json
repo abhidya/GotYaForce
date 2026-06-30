@@ -1,0 +1,292 @@
+{
+  "borg": "pl0c05",
+  "bankCount": 26,
+  "banks": [
+    {
+      "file": "anim_g00_s00_idle.json",
+      "group": 0,
+      "slot": 0,
+      "label": "idle",
+      "frames": 2,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s01_move.json",
+      "group": 0,
+      "slot": 1,
+      "label": "move",
+      "frames": 31,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s02_dash_fwd.json",
+      "group": 0,
+      "slot": 2,
+      "label": "dash_fwd",
+      "frames": 59,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 389.47
+    },
+    {
+      "file": "anim_g00_s03_dash_back.json",
+      "group": 0,
+      "slot": 3,
+      "label": "dash_back",
+      "frames": 59,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s05_dash_right.json",
+      "group": 0,
+      "slot": 5,
+      "label": "dash_right",
+      "frames": 59,
+      "animJoints": 10,
+      "rootSpanX": 389.47,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s06_jump_takeoff.json",
+      "group": 0,
+      "slot": 6,
+      "label": "jump_takeoff",
+      "frames": 19,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s09_fly_transition.json",
+      "group": 0,
+      "slot": 9,
+      "label": "fly_transition",
+      "frames": 39,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s23_boost.json",
+      "group": 0,
+      "slot": 23,
+      "label": "boost",
+      "frames": 26,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s24_pose_short.json",
+      "group": 0,
+      "slot": 24,
+      "label": "pose_short",
+      "frames": 2,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s25_move_s25.json",
+      "group": 0,
+      "slot": 25,
+      "label": "move_s25",
+      "frames": 57,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g00_s26_move_s26.json",
+      "group": 0,
+      "slot": 26,
+      "label": "move_s26",
+      "frames": 57,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g04_s00_special_s0.json",
+      "group": 4,
+      "slot": 0,
+      "label": "special_s0",
+      "frames": 76,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 100
+    },
+    {
+      "file": "anim_g05_s02_victory.json",
+      "group": 5,
+      "slot": 2,
+      "label": "victory",
+      "frames": 61,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g06_s00_g6_s0.json",
+      "group": 6,
+      "slot": 0,
+      "label": "g6_s0",
+      "frames": 61,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 100.09
+    },
+    {
+      "file": "anim_g06_s01_g6_s1.json",
+      "group": 6,
+      "slot": 1,
+      "label": "g6_s1",
+      "frames": 61,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 100
+    },
+    {
+      "file": "anim_g06_s03_g6_s3.json",
+      "group": 6,
+      "slot": 3,
+      "label": "g6_s3",
+      "frames": 61,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g07_s00_g7_s0.json",
+      "group": 7,
+      "slot": 0,
+      "label": "g7_s0",
+      "frames": 37,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g07_s01_g7_s1.json",
+      "group": 7,
+      "slot": 1,
+      "label": "g7_s1",
+      "frames": 37,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g07_s03_g7_s3.json",
+      "group": 7,
+      "slot": 3,
+      "label": "g7_s3",
+      "frames": 37,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g07_s05_g7_s5.json",
+      "group": 7,
+      "slot": 5,
+      "label": "g7_s5",
+      "frames": 13,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g07_s06_g7_s6.json",
+      "group": 7,
+      "slot": 6,
+      "label": "g7_s6",
+      "frames": 13,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g07_s08_g7_s8.json",
+      "group": 7,
+      "slot": 8,
+      "label": "g7_s8",
+      "frames": 13,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g08_s00_g8_s0.json",
+      "group": 8,
+      "slot": 0,
+      "label": "g8_s0",
+      "frames": 2,
+      "animJoints": 9,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g08_s01_g8_s1.json",
+      "group": 8,
+      "slot": 1,
+      "label": "g8_s1",
+      "frames": 63,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 0
+    },
+    {
+      "file": "anim_g08_s02_g8_s2.json",
+      "group": 8,
+      "slot": 2,
+      "label": "g8_s2",
+      "frames": 77,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 290
+    },
+    {
+      "file": "anim_g08_s03_g8_s3.json",
+      "group": 8,
+      "slot": 3,
+      "label": "g8_s3",
+      "frames": 77,
+      "animJoints": 10,
+      "rootSpanX": 0,
+      "rootSpanY": 0,
+      "rootSpanZ": 290
+    }
+  ]
+}

@@ -1,0 +1,603 @@
+{
+  "generated": "2026-06-30",
+  "source": "Gotcha Force (GG4E) poq_adx_usa.afs \u2014 CRI ADX, decoded with ffmpeg",
+  "format": "OGG Vorbis",
+  "counts": {
+    "bgm": 33,
+    "sfx": 5,
+    "voice": 46
+  },
+  "totalBytes": 39818078,
+  "totalMB": 37.97,
+  "notes": "Voices are a representative sample (first 2 clips per character pl00-pl12) out of ~2075 total. bgm tracks <5s are jingles/stingers (loop=false).",
+  "files": [
+    {
+      "key": "bgm00",
+      "type": "bgm",
+      "path": "audio/bgm/bgm00.ogg",
+      "durationSec": 96.967,
+      "loop": true
+    },
+    {
+      "key": "bgm01",
+      "type": "bgm",
+      "path": "audio/bgm/bgm01.ogg",
+      "durationSec": 87.706,
+      "loop": true
+    },
+    {
+      "key": "bgm01x",
+      "type": "bgm",
+      "path": "audio/bgm/bgm01x.ogg",
+      "durationSec": 85.807,
+      "loop": true
+    },
+    {
+      "key": "bgm02",
+      "type": "bgm",
+      "path": "audio/bgm/bgm02.ogg",
+      "durationSec": 40.868,
+      "loop": true
+    },
+    {
+      "key": "bgm03",
+      "type": "bgm",
+      "path": "audio/bgm/bgm03.ogg",
+      "durationSec": 57.215,
+      "loop": true
+    },
+    {
+      "key": "bgm04",
+      "type": "bgm",
+      "path": "audio/bgm/bgm04.ogg",
+      "durationSec": 61.673,
+      "loop": true
+    },
+    {
+      "key": "bgm05",
+      "type": "bgm",
+      "path": "audio/bgm/bgm05.ogg",
+      "durationSec": 60.651,
+      "loop": true
+    },
+    {
+      "key": "bgm06",
+      "type": "bgm",
+      "path": "audio/bgm/bgm06.ogg",
+      "durationSec": 2.299,
+      "loop": false
+    },
+    {
+      "key": "bgm07",
+      "type": "bgm",
+      "path": "audio/bgm/bgm07.ogg",
+      "durationSec": 51.967,
+      "loop": true
+    },
+    {
+      "key": "bgm08",
+      "type": "bgm",
+      "path": "audio/bgm/bgm08.ogg",
+      "durationSec": 134.491,
+      "loop": true
+    },
+    {
+      "key": "bgm09",
+      "type": "bgm",
+      "path": "audio/bgm/bgm09.ogg",
+      "durationSec": 46.626,
+      "loop": true
+    },
+    {
+      "key": "bgm10",
+      "type": "bgm",
+      "path": "audio/bgm/bgm10.ogg",
+      "durationSec": 53.389,
+      "loop": true
+    },
+    {
+      "key": "bgm11",
+      "type": "bgm",
+      "path": "audio/bgm/bgm11.ogg",
+      "durationSec": 137.231,
+      "loop": true
+    },
+    {
+      "key": "bgm12",
+      "type": "bgm",
+      "path": "audio/bgm/bgm12.ogg",
+      "durationSec": 57.4,
+      "loop": true
+    },
+    {
+      "key": "bgm13",
+      "type": "bgm",
+      "path": "audio/bgm/bgm13.ogg",
+      "durationSec": 50.342,
+      "loop": true
+    },
+    {
+      "key": "bgm14",
+      "type": "bgm",
+      "path": "audio/bgm/bgm14.ogg",
+      "durationSec": 91.116,
+      "loop": true
+    },
+    {
+      "key": "bgm15",
+      "type": "bgm",
+      "path": "audio/bgm/bgm15.ogg",
+      "durationSec": 98.421,
+      "loop": true
+    },
+    {
+      "key": "bgm16",
+      "type": "bgm",
+      "path": "audio/bgm/bgm16.ogg",
+      "durationSec": 260.459,
+      "loop": true
+    },
+    {
+      "key": "bgm16x",
+      "type": "bgm",
+      "path": "audio/bgm/bgm16x.ogg",
+      "durationSec": 166.07,
+      "loop": true
+    },
+    {
+      "key": "bgm17",
+      "type": "bgm",
+      "path": "audio/bgm/bgm17.ogg",
+      "durationSec": 20.388,
+      "loop": true
+    },
+    {
+      "key": "bgm18",
+      "type": "bgm",
+      "path": "audio/bgm/bgm18.ogg",
+      "durationSec": 13.19,
+      "loop": true
+    },
+    {
+      "key": "bgm19",
+      "type": "bgm",
+      "path": "audio/bgm/bgm19.ogg",
+      "durationSec": 11.037,
+      "loop": true
+    },
+    {
+      "key": "bgm20",
+      "type": "bgm",
+      "path": "audio/bgm/bgm20.ogg",
+      "durationSec": 5.596,
+      "loop": true
+    },
+    {
+      "key": "bgm21",
+      "type": "bgm",
+      "path": "audio/bgm/bgm21.ogg",
+      "durationSec": 10.077,
+      "loop": true
+    },
+    {
+      "key": "bgm22",
+      "type": "bgm",
+      "path": "audio/bgm/bgm22.ogg",
+      "durationSec": 54.986,
+      "loop": true
+    },
+    {
+      "key": "bgm23",
+      "type": "bgm",
+      "path": "audio/bgm/bgm23.ogg",
+      "durationSec": 57.096,
+      "loop": true
+    },
+    {
+      "key": "bgm24",
+      "type": "bgm",
+      "path": "audio/bgm/bgm24.ogg",
+      "durationSec": 85.264,
+      "loop": true
+    },
+    {
+      "key": "bgm25",
+      "type": "bgm",
+      "path": "audio/bgm/bgm25.ogg",
+      "durationSec": 151.952,
+      "loop": true
+    },
+    {
+      "key": "bgm26",
+      "type": "bgm",
+      "path": "audio/bgm/bgm26.ogg",
+      "durationSec": 82.513,
+      "loop": true
+    },
+    {
+      "key": "bgm27",
+      "type": "bgm",
+      "path": "audio/bgm/bgm27.ogg",
+      "durationSec": 138.508,
+      "loop": true
+    },
+    {
+      "key": "bgm28",
+      "type": "bgm",
+      "path": "audio/bgm/bgm28.ogg",
+      "durationSec": 15.023,
+      "loop": true
+    },
+    {
+      "key": "bgm29",
+      "type": "bgm",
+      "path": "audio/bgm/bgm29.ogg",
+      "durationSec": 26.703,
+      "loop": true
+    },
+    {
+      "key": "bgm30",
+      "type": "bgm",
+      "path": "audio/bgm/bgm30.ogg",
+      "durationSec": 17.555,
+      "loop": true
+    },
+    {
+      "key": "se00_00",
+      "type": "sfx",
+      "path": "audio/sfx/se00_00.ogg",
+      "durationSec": 12.0,
+      "loop": false
+    },
+    {
+      "key": "se00_01",
+      "type": "sfx",
+      "path": "audio/sfx/se00_01.ogg",
+      "durationSec": 2.983,
+      "loop": false
+    },
+    {
+      "key": "se00_02",
+      "type": "sfx",
+      "path": "audio/sfx/se00_02.ogg",
+      "durationSec": 12.0,
+      "loop": false
+    },
+    {
+      "key": "se00_03",
+      "type": "sfx",
+      "path": "audio/sfx/se00_03.ogg",
+      "durationSec": 12.0,
+      "loop": false
+    },
+    {
+      "key": "se00_04",
+      "type": "sfx",
+      "path": "audio/sfx/se00_04.ogg",
+      "durationSec": 3.033,
+      "loop": false
+    },
+    {
+      "key": "pl00_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl00_00_00.ogg",
+      "durationSec": 1.35,
+      "loop": false
+    },
+    {
+      "key": "pl00_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl00_00_01.ogg",
+      "durationSec": 1.86,
+      "loop": false
+    },
+    {
+      "key": "pl01_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl01_00_00.ogg",
+      "durationSec": 1.096,
+      "loop": false
+    },
+    {
+      "key": "pl01_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl01_00_01.ogg",
+      "durationSec": 1.009,
+      "loop": false
+    },
+    {
+      "key": "pl02_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl02_00_00.ogg",
+      "durationSec": 1.486,
+      "loop": false
+    },
+    {
+      "key": "pl02_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl02_00_01.ogg",
+      "durationSec": 1.268,
+      "loop": false
+    },
+    {
+      "key": "pl03_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl03_00_00.ogg",
+      "durationSec": 1.179,
+      "loop": false
+    },
+    {
+      "key": "pl03_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl03_00_01.ogg",
+      "durationSec": 0.991,
+      "loop": false
+    },
+    {
+      "key": "pl04_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl04_00_00.ogg",
+      "durationSec": 0.961,
+      "loop": false
+    },
+    {
+      "key": "pl04_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl04_00_01.ogg",
+      "durationSec": 0.921,
+      "loop": false
+    },
+    {
+      "key": "pl05_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl05_00_00.ogg",
+      "durationSec": 0.594,
+      "loop": false
+    },
+    {
+      "key": "pl05_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl05_00_01.ogg",
+      "durationSec": 0.808,
+      "loop": false
+    },
+    {
+      "key": "pl06_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl06_00_00.ogg",
+      "durationSec": 1.242,
+      "loop": false
+    },
+    {
+      "key": "pl06_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl06_00_01.ogg",
+      "durationSec": 1.533,
+      "loop": false
+    },
+    {
+      "key": "pl07_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl07_00_00.ogg",
+      "durationSec": 1.837,
+      "loop": false
+    },
+    {
+      "key": "pl07_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl07_00_01.ogg",
+      "durationSec": 1.848,
+      "loop": false
+    },
+    {
+      "key": "pl08_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl08_00_00.ogg",
+      "durationSec": 2.724,
+      "loop": false
+    },
+    {
+      "key": "pl08_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl08_00_01.ogg",
+      "durationSec": 2.613,
+      "loop": false
+    },
+    {
+      "key": "pl09_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl09_00_00.ogg",
+      "durationSec": 1.009,
+      "loop": false
+    },
+    {
+      "key": "pl09_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl09_00_01.ogg",
+      "durationSec": 1.342,
+      "loop": false
+    },
+    {
+      "key": "pl0a_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl0a_00_00.ogg",
+      "durationSec": 3.029,
+      "loop": false
+    },
+    {
+      "key": "pl0a_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl0a_00_01.ogg",
+      "durationSec": 1.968,
+      "loop": false
+    },
+    {
+      "key": "pl0b_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl0b_00_00.ogg",
+      "durationSec": 1.248,
+      "loop": false
+    },
+    {
+      "key": "pl0b_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl0b_00_01.ogg",
+      "durationSec": 0.976,
+      "loop": false
+    },
+    {
+      "key": "pl0c_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl0c_00_00.ogg",
+      "durationSec": 2.694,
+      "loop": false
+    },
+    {
+      "key": "pl0c_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl0c_00_01.ogg",
+      "durationSec": 2.202,
+      "loop": false
+    },
+    {
+      "key": "pl0d_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl0d_00_00.ogg",
+      "durationSec": 4.54,
+      "loop": false
+    },
+    {
+      "key": "pl0d_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl0d_00_01.ogg",
+      "durationSec": 3.646,
+      "loop": false
+    },
+    {
+      "key": "pl0e_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl0e_00_00.ogg",
+      "durationSec": 0.778,
+      "loop": false
+    },
+    {
+      "key": "pl0e_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl0e_00_01.ogg",
+      "durationSec": 0.868,
+      "loop": false
+    },
+    {
+      "key": "pl0f_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl0f_00_00.ogg",
+      "durationSec": 3.927,
+      "loop": false
+    },
+    {
+      "key": "pl0f_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl0f_00_01.ogg",
+      "durationSec": 3.352,
+      "loop": false
+    },
+    {
+      "key": "pl10_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl10_00_00.ogg",
+      "durationSec": 0.742,
+      "loop": false
+    },
+    {
+      "key": "pl10_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl10_00_01.ogg",
+      "durationSec": 0.689,
+      "loop": false
+    },
+    {
+      "key": "pl11_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl11_00_00.ogg",
+      "durationSec": 1.753,
+      "loop": false
+    },
+    {
+      "key": "pl11_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl11_00_01.ogg",
+      "durationSec": 2.171,
+      "loop": false
+    },
+    {
+      "key": "pl12_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl12_00_00.ogg",
+      "durationSec": 0.406,
+      "loop": false
+    },
+    {
+      "key": "pl12_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl12_00_01.ogg",
+      "durationSec": 0.444,
+      "loop": false
+    },
+    {
+      "key": "pl13_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl13_00_00.ogg",
+      "durationSec": 0.656,
+      "loop": false
+    },
+    {
+      "key": "pl13_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl13_00_01.ogg",
+      "durationSec": 0.734,
+      "loop": false
+    },
+    {
+      "key": "pl14_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl14_00_00.ogg",
+      "durationSec": 0.576,
+      "loop": false
+    },
+    {
+      "key": "pl14_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl14_00_01.ogg",
+      "durationSec": 0.546,
+      "loop": false
+    },
+    {
+      "key": "pl15_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl15_00_00.ogg",
+      "durationSec": 0.614,
+      "loop": false
+    },
+    {
+      "key": "pl15_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl15_00_01.ogg",
+      "durationSec": 0.776,
+      "loop": false
+    },
+    {
+      "key": "pl16_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl16_00_00.ogg",
+      "durationSec": 0.895,
+      "loop": false
+    },
+    {
+      "key": "pl16_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl16_00_01.ogg",
+      "durationSec": 1.384,
+      "loop": false
+    }
+  ]
+}

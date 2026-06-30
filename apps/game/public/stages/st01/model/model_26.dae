@@ -1,16 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="1.4.1" xmlns="http://www.collada.org/2005/11/COLLADASchema">
     <asset>
-        <created>2026-06-30T03:43:59.1863229-04:00</created>
-        <modified>2026-06-30T03:43:59.1863273-04:00</modified>
+        <created>1970-01-01T00:00:00Z</created>
+        <modified>1970-01-01T00:00:00Z</modified>
         <unit name="Meter" />
         <contributor>
             <authoring_tool>IONET Exporter</authoring_tool>
         </contributor>
     </asset>
     <library_images>
-        <image id="Texture_0_CMP-image" name="Texture_0_CMP">
-            <init_from>Texture_0_CMP.png</init_from>
+        <image id="model_26_Texture_0_CMP-image" name="model_26_Texture_0_CMP">
+            <init_from>model_26_Texture_0_CMP.png</init_from>
         </image>
     </library_images>
     <library_materials>
@@ -56,14 +56,14 @@
         </effect>
         <effect id="Material_C63A7B36-effect" name="Material_C63A7B36">
             <profile_COMMON>
-                <newparam sid="Texture_0_CMP-image_surface">
+                <newparam sid="model_26_Texture_0_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_0_CMP-image</init_from>
+                        <init_from>model_26_Texture_0_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_0_CMP-image_sampler">
+                <newparam sid="model_26_Texture_0_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_0_CMP-image_surface</source>
+                        <source>model_26_Texture_0_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -75,7 +75,7 @@
                             <color sid="ambient">0.5019608 0.5019608 0.5019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_0_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_26_Texture_0_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>

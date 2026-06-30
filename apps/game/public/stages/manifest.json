@@ -4,15 +4,28 @@
   "stages": [
     {
       "id": "st00",
+      "status": "verified-visual-and-collision",
       "modelCount": 40,
-      "renderStatus": "dae-exported",
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
       "collisionCount": 3,
       "setArcCount": 4
     },
     {
       "id": "st01",
-      "modelCount": 63,
-      "renderStatus": "dae-exported",
+      "status": "verified-visual-and-collision",
+      "modelCount": 78,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 3,
+      "setArcCount": 4
+    },
+    {
+      "id": "st02",
+      "status": "verified-visual-and-collision",
+      "modelCount": 51,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
       "collisionCount": 3,
       "setArcCount": 4
     }

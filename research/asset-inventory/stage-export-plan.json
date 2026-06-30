@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/export-all-stages.mjs",
-  "generatedAt": "2026-06-30T07:52:23.669Z",
+  "generatedAt": "2026-06-30T08:27:55.930Z",
   "region": "GG4E",
   "mode": "dry-run",
   "scope": "Direct stage ARC/PZZ export coverage only; does not edit browser runtime source or infer arena-name mappings.",
@@ -11,6 +11,7 @@
       "scripts\\export-stage-assets.mjs",
       "scripts\\export-stage-hsd.mjs"
     ],
+    "batchVisualExporter": "embedded stage-batch-exporter in scripts/export-all-stages.mjs",
     "adventureFlow": {
       "path": "research/asset-inventory/adventure-flow-ai.json",
       "exists": true,
@@ -101,12 +102,12 @@
     "sourcePairsWithModelAndPzz": 40,
     "publicStageFolderCount": 3,
     "publicStageWithAnyDaeCount": 3,
-    "verifiedVisualStageCount": 1,
+    "verifiedVisualStageCount": 3,
     "exportedCollisionHitStageCount": 3,
     "sourceCompleteCollisionTripletCount": 18,
     "sourceAnyCollisionHitCount": 18,
     "sourceAnySetArcCount": 16,
-    "missingOrPartialExportCount": 39,
+    "missingOrPartialExportCount": 37,
     "safeMissingExportCount": 37,
     "proofCandidate": "st03",
     "executedExports": [],
@@ -154,8 +155,6 @@
       "stff"
     ],
     "allMissingOrPartialStageIds": [
-      "st01",
-      "st02",
       "st03",
       "st04",
       "st05",
@@ -233,247 +232,269 @@
       "st4e",
       "stff"
     ],
-    "skippedUnsafeExistingStageIds": [
-      "st01",
-      "st02"
-    ],
+    "skippedUnsafeExistingStageIds": [],
     "proofCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --proof",
     "selectedCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03,st04,st05,st06,st07,st08,st09,st0a,st0b,st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff",
     "allSafeMissingCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03,st04,st05,st06,st07,st08,st09,st0a,st0b,st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff",
     "exactPerStageCommands": [
       {
-        "stage": "st01",
-        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st01",
-        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 01",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 01"
-      },
-      {
-        "stage": "st02",
-        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st02",
-        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 02",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 02"
-      },
-      {
         "stage": "st03",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 03",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 03"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 03"
       },
       {
         "stage": "st04",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st04",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 04",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 04"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st04",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 04"
       },
       {
         "stage": "st05",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st05",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 05",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 05"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st05",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 05"
       },
       {
         "stage": "st06",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st06",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 06",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 06"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st06",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 06"
       },
       {
         "stage": "st07",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 07",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 07"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 07"
       },
       {
         "stage": "st08",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st08",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 08",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 08"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st08",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 08"
       },
       {
         "stage": "st09",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 09",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 09"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 09"
       },
       {
         "stage": "st0a",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0a",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0a",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0a"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0a",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0a"
       },
       {
         "stage": "st0b",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0b",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0b",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0b"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0b",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0b"
       },
       {
         "stage": "st0c",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0c",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0c"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0c"
       },
       {
         "stage": "st0d",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0d",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0d",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0d"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0d",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0d"
       },
       {
         "stage": "st0e",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0e",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0e",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0e"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0e",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0e"
       },
       {
         "stage": "st0f",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0f",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0f",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0f"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0f",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0f"
       },
       {
         "stage": "st10",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st10",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 10",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 10"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st10",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 10"
       },
       {
         "stage": "st20",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st20",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 20",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 20"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st20",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 20"
       },
       {
         "stage": "st21",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st21",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 21",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 21"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st21",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 21"
       },
       {
         "stage": "st22",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st22",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 22",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 22"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st22",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 22"
       },
       {
         "stage": "st23",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st23",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 23",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 23"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st23",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 23"
       },
       {
         "stage": "st24",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st24",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 24",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 24"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st24",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 24"
       },
       {
         "stage": "st25",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st25",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 25",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 25"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st25",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 25"
       },
       {
         "stage": "st29",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st29",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 29",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 29"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st29",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 29"
       },
       {
         "stage": "st2a",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2a",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2a",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2a"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2a",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2a"
       },
       {
         "stage": "st2b",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2b",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2b",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2b"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2b",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2b"
       },
       {
         "stage": "st2c",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2c",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2c",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2c"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2c",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2c"
       },
       {
         "stage": "st2e",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2e",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2e",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2e"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2e",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2e"
       },
       {
         "stage": "st40",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st40",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 40",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 40"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st40",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 40"
       },
       {
         "stage": "st41",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st41",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 41",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 41"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st41",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 41"
       },
       {
         "stage": "st42",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st42",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 42",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 42"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st42",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 42"
       },
       {
         "stage": "st43",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st43",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 43",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 43"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st43",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 43"
       },
       {
         "stage": "st44",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st44",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 44",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 44"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st44",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 44"
       },
       {
         "stage": "st45",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st45",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 45",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 45"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st45",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 45"
       },
       {
         "stage": "st49",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st49",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 49",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 49"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st49",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 49"
       },
       {
         "stage": "st4a",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4a",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4a",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4a"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4a",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4a"
       },
       {
         "stage": "st4b",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4b",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4b",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4b"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4b",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4b"
       },
       {
         "stage": "st4c",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4c",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4c",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4c"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4c",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4c"
       },
       {
         "stage": "st4e",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4e",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4e",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4e"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4e",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4e"
       },
       {
         "stage": "stff",
         "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage stff",
         "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E ff",
-        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E ff"
+        "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage stff",
+        "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E ff"
       }
     ]
   },
@@ -568,7 +589,7 @@
           "exists": true,
           "parses": true,
           "error": null,
-          "status": "raw-copied"
+          "status": "verified-visual-and-collision"
         },
         "raw": {
           "hasStageArc": true,
@@ -590,11 +611,56 @@
           "directory": "apps/game/public/stages/st00/model",
           "hasDaePieces": true,
           "hasContiguousDaeSequence": true,
+          "hasCompleteDaeExport": true,
           "daeCount": 40,
           "nonEmptyDaeCount": 40,
           "zeroByteDaeFiles": [],
           "maxModelIndex": 39,
           "missingModelIndices": [],
+          "expectedDaeIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+          ],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [
             "apps/game/public/stages/st00/model/model_00.dae",
             "apps/game/public/stages/st00/model/model_01.dae",
@@ -605,14 +671,74 @@
             "apps/game/public/stages/st00/model/model_06.dae",
             "apps/game/public/stages/st00/model/model_07.dae"
           ],
-          "textureCount": 5,
+          "textureCount": 52,
           "textureFiles": [
-            "apps/game/public/stages/st00/model/Texture_0_CMP.png",
-            "apps/game/public/stages/st00/model/Texture_0_I4.png",
-            "apps/game/public/stages/st00/model/Texture_1_CMP.png",
-            "apps/game/public/stages/st00/model/Texture_2_CMP.png",
-            "apps/game/public/stages/st00/model/Texture_2_I4.png"
-          ]
+            "apps/game/public/stages/st00/model/model_00_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_01_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_02_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_03_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_03_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_04_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_04_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_05_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_05_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_06_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_06_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_07_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_07_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_07_Texture_2_I4.png",
+            "apps/game/public/stages/st00/model/model_08_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_09_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_10_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_10_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_11_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_11_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_11_Texture_2_CMP.png",
+            "apps/game/public/stages/st00/model/model_12_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_13_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_14_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_15_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_16_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_16_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_16_Texture_2_CMP.png",
+            "apps/game/public/stages/st00/model/model_17_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_18_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_19_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_20_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_21_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_22_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_23_Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/model_23_Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/model_23_Texture_2_I4.png",
+            "apps/game/public/stages/st00/model/model_25_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_26_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_27_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_28_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_29_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_30_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_31_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_32_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_33_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_34_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_35_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_36_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_37_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_38_Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/model_39_Texture_0_I4.png"
+          ],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st00/model/export-summary.json",
+            "exists": true,
+            "parses": true,
+            "error": null,
+            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+            "expectedSlotCount": 40,
+            "expectedDaeCount": 40,
+            "exportedModelCount": 40,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": true
+          }
         },
         "collision": {
           "hasHitFiles": true,
@@ -647,7 +773,8 @@
           "stage": "st00",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st00",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 00",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 00"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st00",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 00"
         }
       }
     },
@@ -741,7 +868,7 @@
           "exists": true,
           "parses": true,
           "error": null,
-          "status": "raw-copied"
+          "status": "verified-visual-and-collision"
         },
         "raw": {
           "hasStageArc": true,
@@ -762,12 +889,48 @@
         "visual": {
           "directory": "apps/game/public/stages/st01/model",
           "hasDaePieces": true,
-          "hasContiguousDaeSequence": false,
-          "daeCount": 63,
-          "nonEmptyDaeCount": 63,
+          "hasContiguousDaeSequence": true,
+          "hasCompleteDaeExport": true,
+          "daeCount": 78,
+          "nonEmptyDaeCount": 78,
           "zeroByteDaeFiles": [],
           "maxModelIndex": 77,
-          "missingModelIndices": [
+          "missingModelIndices": [],
+          "expectedDaeIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
             34,
             35,
             36,
@@ -782,8 +945,39 @@
             45,
             46,
             47,
-            48
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77
           ],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [
             "apps/game/public/stages/st01/model/model_00.dae",
             "apps/game/public/stages/st01/model/model_01.dae",
@@ -794,16 +988,131 @@
             "apps/game/public/stages/st01/model/model_06.dae",
             "apps/game/public/stages/st01/model/model_07.dae"
           ],
-          "textureCount": 7,
+          "textureCount": 109,
           "textureFiles": [
-            "apps/game/public/stages/st01/model/Texture_0_CMP.png",
-            "apps/game/public/stages/st01/model/Texture_0_I4.png",
-            "apps/game/public/stages/st01/model/Texture_1_CMP.png",
-            "apps/game/public/stages/st01/model/Texture_2_CMP.png",
-            "apps/game/public/stages/st01/model/Texture_2_I4.png",
-            "apps/game/public/stages/st01/model/Texture_3_CMP.png",
-            "apps/game/public/stages/st01/model/Texture_3_I4.png"
-          ]
+            "apps/game/public/stages/st01/model/model_00_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_00_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_00_Texture_2_CMP.png",
+            "apps/game/public/stages/st01/model/model_00_Texture_3_I4.png",
+            "apps/game/public/stages/st01/model/model_01_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_02_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_03_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_04_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_05_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_06_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_06_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_06_Texture_2_CMP.png",
+            "apps/game/public/stages/st01/model/model_07_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_07_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_08_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_08_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_09_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_09_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_10_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_10_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_11_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_11_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_11_Texture_2_CMP.png",
+            "apps/game/public/stages/st01/model/model_12_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_12_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_13_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_13_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_14_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_14_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_15_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_15_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_16_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_16_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_16_Texture_2_CMP.png",
+            "apps/game/public/stages/st01/model/model_17_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_17_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_18_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_18_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_19_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_19_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_20_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_20_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_26_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_28_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_29_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_30_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_31_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_31_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_31_Texture_2_I4.png",
+            "apps/game/public/stages/st01/model/model_31_Texture_3_CMP.png",
+            "apps/game/public/stages/st01/model/model_32_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_32_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_33_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_33_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_33_Texture_2_CMP.png",
+            "apps/game/public/stages/st01/model/model_34_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_35_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_35_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_36_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_36_Texture_1_I4.png",
+            "apps/game/public/stages/st01/model/model_36_Texture_2_CMP.png",
+            "apps/game/public/stages/st01/model/model_37_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_37_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_38_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_39_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_39_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_40_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_40_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_41_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_41_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_42_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_42_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_43_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_44_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_44_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_45_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_46_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_46_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_47_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_47_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_48_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_48_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_49_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_49_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_57_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_57_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_58_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_58_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_59_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_60_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_60_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_61_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_61_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_62_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_62_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_63_Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/model_63_Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/model_64_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_65_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_66_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_67_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_68_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_69_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_70_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_71_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_72_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_73_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_74_Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/model_75_Texture_0_I4.png"
+          ],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st01/model/export-summary.json",
+            "exists": true,
+            "parses": true,
+            "error": null,
+            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+            "expectedSlotCount": 78,
+            "expectedDaeCount": 78,
+            "exportedModelCount": 78,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": true
+          }
         },
         "collision": {
           "hasHitFiles": true,
@@ -828,17 +1137,18 @@
       },
       "export": {
         "canExportWithExistingTools": true,
-        "needsExport": true,
+        "needsExport": false,
         "needsRaw": false,
-        "needsVisual": true,
+        "needsVisual": false,
         "needsCollision": false,
         "safeToRunExistingTools": false,
-        "unsafeReason": "public stage folder exists; scripts/export-stage-assets.mjs removes the output folder before copying",
+        "unsafeReason": null,
         "commands": {
           "stage": "st01",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st01",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 01",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 01"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st01",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 01"
         }
       }
     },
@@ -932,7 +1242,7 @@
           "exists": true,
           "parses": true,
           "error": null,
-          "status": "partial-visual-dae-missing-slots"
+          "status": "verified-visual-and-collision"
         },
         "raw": {
           "hasStageArc": true,
@@ -953,44 +1263,152 @@
         "visual": {
           "directory": "apps/game/public/stages/st02/model",
           "hasDaePieces": true,
-          "hasContiguousDaeSequence": false,
-          "daeCount": 44,
-          "nonEmptyDaeCount": 44,
+          "hasContiguousDaeSequence": true,
+          "hasCompleteDaeExport": true,
+          "daeCount": 51,
+          "nonEmptyDaeCount": 51,
           "zeroByteDaeFiles": [],
           "maxModelIndex": 50,
-          "missingModelIndices": [
+          "missingModelIndices": [],
+          "expectedDaeIndices": [
+            0,
+            1,
             2,
             3,
             4,
             5,
             6,
             7,
-            8
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50
           ],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [
             "apps/game/public/stages/st02/model/model_00.dae",
             "apps/game/public/stages/st02/model/model_01.dae",
-            "apps/game/public/stages/st02/model/model_09.dae",
-            "apps/game/public/stages/st02/model/model_10.dae",
-            "apps/game/public/stages/st02/model/model_11.dae",
-            "apps/game/public/stages/st02/model/model_12.dae",
-            "apps/game/public/stages/st02/model/model_13.dae",
-            "apps/game/public/stages/st02/model/model_14.dae"
+            "apps/game/public/stages/st02/model/model_02.dae",
+            "apps/game/public/stages/st02/model/model_03.dae",
+            "apps/game/public/stages/st02/model/model_04.dae",
+            "apps/game/public/stages/st02/model/model_05.dae",
+            "apps/game/public/stages/st02/model/model_06.dae",
+            "apps/game/public/stages/st02/model/model_07.dae"
           ],
-          "textureCount": 11,
+          "textureCount": 58,
           "textureFiles": [
-            "apps/game/public/stages/st02/model/Texture_0_CMP.png",
-            "apps/game/public/stages/st02/model/Texture_0_I4.png",
-            "apps/game/public/stages/st02/model/Texture_0_RGB5A3.png",
-            "apps/game/public/stages/st02/model/Texture_1_CMP.png",
-            "apps/game/public/stages/st02/model/Texture_1_RGB5A3.png",
-            "apps/game/public/stages/st02/model/Texture_2_CMP.png",
-            "apps/game/public/stages/st02/model/Texture_2_RGB5A3.png",
-            "apps/game/public/stages/st02/model/Texture_3_CMP.png",
-            "apps/game/public/stages/st02/model/Texture_4_CMP.png",
-            "apps/game/public/stages/st02/model/Texture_5_CMP.png",
-            "apps/game/public/stages/st02/model/Texture_6_CMP.png"
-          ]
+            "apps/game/public/stages/st02/model/model_00_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_00_Texture_1_CMP.png",
+            "apps/game/public/stages/st02/model/model_00_Texture_2_CMP.png",
+            "apps/game/public/stages/st02/model/model_00_Texture_3_CMP.png",
+            "apps/game/public/stages/st02/model/model_00_Texture_4_CMP.png",
+            "apps/game/public/stages/st02/model/model_00_Texture_5_CMP.png",
+            "apps/game/public/stages/st02/model/model_00_Texture_6_CMP.png",
+            "apps/game/public/stages/st02/model/model_01_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_02_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_02_Texture_1_CMP.png",
+            "apps/game/public/stages/st02/model/model_02_Texture_2_CMP.png",
+            "apps/game/public/stages/st02/model/model_02_Texture_3_CMP.png",
+            "apps/game/public/stages/st02/model/model_03_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_03_Texture_1_CMP.png",
+            "apps/game/public/stages/st02/model/model_04_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_05_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_06_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_07_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_08_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_13_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_14_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_15_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_17_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_17_Texture_1_CMP.png",
+            "apps/game/public/stages/st02/model/model_17_Texture_2_CMP.png",
+            "apps/game/public/stages/st02/model/model_19_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_19_Texture_1_RGB5A3.png",
+            "apps/game/public/stages/st02/model/model_19_Texture_2_RGB5A3.png",
+            "apps/game/public/stages/st02/model/model_20_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_20_Texture_1_RGB5A3.png",
+            "apps/game/public/stages/st02/model/model_20_Texture_2_RGB5A3.png",
+            "apps/game/public/stages/st02/model/model_21_Texture_0_RGB5A3.png",
+            "apps/game/public/stages/st02/model/model_22_Texture_0_RGB5A3.png",
+            "apps/game/public/stages/st02/model/model_23_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_24_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_25_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_28_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_29_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_30_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_31_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_32_Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/model_34_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_35_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_36_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_37_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_38_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_39_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_40_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_41_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_42_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_43_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_44_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_45_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_46_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_47_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_48_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_49_Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/model_50_Texture_0_I4.png"
+          ],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st02/model/export-summary.json",
+            "exists": true,
+            "parses": true,
+            "error": null,
+            "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+            "expectedSlotCount": 51,
+            "expectedDaeCount": 51,
+            "exportedModelCount": 51,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": true
+          }
         },
         "collision": {
           "hasHitFiles": true,
@@ -1015,17 +1433,18 @@
       },
       "export": {
         "canExportWithExistingTools": true,
-        "needsExport": true,
+        "needsExport": false,
         "needsRaw": false,
-        "needsVisual": true,
+        "needsVisual": false,
         "needsCollision": false,
         "safeToRunExistingTools": false,
-        "unsafeReason": "public stage folder exists; scripts/export-stage-assets.mjs removes the output folder before copying",
+        "unsafeReason": null,
         "commands": {
           "stage": "st02",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st02",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 02",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 02"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st02",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 02"
         }
       }
     },
@@ -1133,14 +1552,31 @@
           "directory": "apps/game/public/stages/st03/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st03/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -1170,7 +1606,8 @@
           "stage": "st03",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 03",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 03"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 03"
         }
       }
     },
@@ -1278,14 +1715,31 @@
           "directory": "apps/game/public/stages/st04/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st04/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -1315,7 +1769,8 @@
           "stage": "st04",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st04",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 04",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 04"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st04",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 04"
         }
       }
     },
@@ -1423,14 +1878,31 @@
           "directory": "apps/game/public/stages/st05/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st05/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -1460,7 +1932,8 @@
           "stage": "st05",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st05",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 05",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 05"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st05",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 05"
         }
       }
     },
@@ -1568,14 +2041,31 @@
           "directory": "apps/game/public/stages/st06/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st06/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -1605,7 +2095,8 @@
           "stage": "st06",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st06",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 06",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 06"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st06",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 06"
         }
       }
     },
@@ -1713,14 +2204,31 @@
           "directory": "apps/game/public/stages/st07/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st07/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -1750,7 +2258,8 @@
           "stage": "st07",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 07",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 07"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 07"
         }
       }
     },
@@ -1858,14 +2367,31 @@
           "directory": "apps/game/public/stages/st08/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st08/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -1895,7 +2421,8 @@
           "stage": "st08",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st08",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 08",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 08"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st08",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 08"
         }
       }
     },
@@ -1985,14 +2512,31 @@
           "directory": "apps/game/public/stages/st09/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st09/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -2022,7 +2566,8 @@
           "stage": "st09",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 09",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 09"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 09"
         }
       }
     },
@@ -2130,14 +2675,31 @@
           "directory": "apps/game/public/stages/st0a/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st0a/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -2167,7 +2729,8 @@
           "stage": "st0a",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0a",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0a",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0a"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0a",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0a"
         }
       }
     },
@@ -2275,14 +2838,31 @@
           "directory": "apps/game/public/stages/st0b/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st0b/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -2312,7 +2892,8 @@
           "stage": "st0b",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0b",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0b",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0b"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0b",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0b"
         }
       }
     },
@@ -2420,14 +3001,31 @@
           "directory": "apps/game/public/stages/st0c/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st0c/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -2457,7 +3055,8 @@
           "stage": "st0c",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0c",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0c"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0c"
         }
       }
     },
@@ -2565,14 +3164,31 @@
           "directory": "apps/game/public/stages/st0d/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st0d/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -2602,7 +3218,8 @@
           "stage": "st0d",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0d",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0d",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0d"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0d",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0d"
         }
       }
     },
@@ -2710,14 +3327,31 @@
           "directory": "apps/game/public/stages/st0e/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st0e/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -2747,7 +3381,8 @@
           "stage": "st0e",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0e",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0e",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0e"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0e",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0e"
         }
       }
     },
@@ -2855,14 +3490,31 @@
           "directory": "apps/game/public/stages/st0f/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st0f/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -2892,7 +3544,8 @@
           "stage": "st0f",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0f",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0f",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0f"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0f",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0f"
         }
       }
     },
@@ -2974,14 +3627,31 @@
           "directory": "apps/game/public/stages/st10/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st10/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3011,7 +3681,8 @@
           "stage": "st10",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st10",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 10",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 10"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st10",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 10"
         }
       }
     },
@@ -3081,14 +3752,31 @@
           "directory": "apps/game/public/stages/st20/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st20/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3114,7 +3802,8 @@
           "stage": "st20",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st20",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 20",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 20"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st20",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 20"
         }
       }
     },
@@ -3184,14 +3873,31 @@
           "directory": "apps/game/public/stages/st21/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st21/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3217,7 +3923,8 @@
           "stage": "st21",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st21",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 21",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 21"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st21",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 21"
         }
       }
     },
@@ -3287,14 +3994,31 @@
           "directory": "apps/game/public/stages/st22/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st22/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3320,7 +4044,8 @@
           "stage": "st22",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st22",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 22",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 22"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st22",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 22"
         }
       }
     },
@@ -3390,14 +4115,31 @@
           "directory": "apps/game/public/stages/st23/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st23/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3423,7 +4165,8 @@
           "stage": "st23",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st23",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 23",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 23"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st23",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 23"
         }
       }
     },
@@ -3493,14 +4236,31 @@
           "directory": "apps/game/public/stages/st24/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st24/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3526,7 +4286,8 @@
           "stage": "st24",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st24",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 24",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 24"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st24",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 24"
         }
       }
     },
@@ -3596,14 +4357,31 @@
           "directory": "apps/game/public/stages/st25/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st25/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3629,7 +4407,8 @@
           "stage": "st25",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st25",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 25",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 25"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st25",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 25"
         }
       }
     },
@@ -3699,14 +4478,31 @@
           "directory": "apps/game/public/stages/st29/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st29/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3732,7 +4528,8 @@
           "stage": "st29",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st29",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 29",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 29"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st29",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 29"
         }
       }
     },
@@ -3802,14 +4599,31 @@
           "directory": "apps/game/public/stages/st2a/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st2a/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3835,7 +4649,8 @@
           "stage": "st2a",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2a",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2a",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2a"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2a",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2a"
         }
       }
     },
@@ -3905,14 +4720,31 @@
           "directory": "apps/game/public/stages/st2b/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st2b/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -3938,7 +4770,8 @@
           "stage": "st2b",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2b",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2b",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2b"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2b",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2b"
         }
       }
     },
@@ -4008,14 +4841,31 @@
           "directory": "apps/game/public/stages/st2c/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st2c/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4041,7 +4891,8 @@
           "stage": "st2c",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2c",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2c",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2c"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2c",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2c"
         }
       }
     },
@@ -4111,14 +4962,31 @@
           "directory": "apps/game/public/stages/st2e/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st2e/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4144,7 +5012,8 @@
           "stage": "st2e",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2e",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2e",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2e"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2e",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2e"
         }
       }
     },
@@ -4214,14 +5083,31 @@
           "directory": "apps/game/public/stages/st40/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st40/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4247,7 +5133,8 @@
           "stage": "st40",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st40",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 40",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 40"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st40",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 40"
         }
       }
     },
@@ -4317,14 +5204,31 @@
           "directory": "apps/game/public/stages/st41/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st41/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4350,7 +5254,8 @@
           "stage": "st41",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st41",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 41",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 41"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st41",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 41"
         }
       }
     },
@@ -4420,14 +5325,31 @@
           "directory": "apps/game/public/stages/st42/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st42/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4453,7 +5375,8 @@
           "stage": "st42",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st42",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 42",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 42"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st42",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 42"
         }
       }
     },
@@ -4523,14 +5446,31 @@
           "directory": "apps/game/public/stages/st43/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st43/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4556,7 +5496,8 @@
           "stage": "st43",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st43",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 43",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 43"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st43",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 43"
         }
       }
     },
@@ -4626,14 +5567,31 @@
           "directory": "apps/game/public/stages/st44/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st44/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4659,7 +5617,8 @@
           "stage": "st44",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st44",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 44",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 44"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st44",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 44"
         }
       }
     },
@@ -4729,14 +5688,31 @@
           "directory": "apps/game/public/stages/st45/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st45/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4762,7 +5738,8 @@
           "stage": "st45",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st45",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 45",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 45"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st45",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 45"
         }
       }
     },
@@ -4832,14 +5809,31 @@
           "directory": "apps/game/public/stages/st49/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st49/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4865,7 +5859,8 @@
           "stage": "st49",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st49",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 49",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 49"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st49",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 49"
         }
       }
     },
@@ -4935,14 +5930,31 @@
           "directory": "apps/game/public/stages/st4a/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st4a/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -4968,7 +5980,8 @@
           "stage": "st4a",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4a",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4a",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4a"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4a",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4a"
         }
       }
     },
@@ -5038,14 +6051,31 @@
           "directory": "apps/game/public/stages/st4b/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st4b/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -5071,7 +6101,8 @@
           "stage": "st4b",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4b",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4b",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4b"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4b",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4b"
         }
       }
     },
@@ -5141,14 +6172,31 @@
           "directory": "apps/game/public/stages/st4c/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st4c/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -5174,7 +6222,8 @@
           "stage": "st4c",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4c",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4c",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4c"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4c",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4c"
         }
       }
     },
@@ -5244,14 +6293,31 @@
           "directory": "apps/game/public/stages/st4e/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/st4e/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -5277,7 +6343,8 @@
           "stage": "st4e",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4e",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4e",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4e"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4e",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4e"
         }
       }
     },
@@ -5359,14 +6426,31 @@
           "directory": "apps/game/public/stages/stff/model",
           "hasDaePieces": false,
           "hasContiguousDaeSequence": false,
+          "hasCompleteDaeExport": false,
           "daeCount": 0,
           "nonEmptyDaeCount": 0,
           "zeroByteDaeFiles": [],
           "maxModelIndex": null,
           "missingModelIndices": [],
+          "expectedDaeIndices": [],
+          "missingExpectedDaeIndices": [],
+          "unexpectedDaeIndices": [],
           "sampleDaeFiles": [],
           "textureCount": 0,
-          "textureFiles": []
+          "textureFiles": [],
+          "exportSummary": {
+            "path": "apps/game/public/stages/stff/model/export-summary.json",
+            "exists": false,
+            "parses": false,
+            "error": "missing",
+            "exporter": null,
+            "expectedSlotCount": null,
+            "expectedDaeCount": 0,
+            "exportedModelCount": null,
+            "failedModelIndices": [],
+            "skippedNullRootJointIndices": [],
+            "complete": null
+          }
         },
         "collision": {
           "hasHitFiles": false,
@@ -5396,15 +6480,16 @@
           "stage": "stff",
           "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage stff",
           "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E ff",
-          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E ff"
+          "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage stff",
+          "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E ff"
         }
       }
     }
   ],
   "notes": [
-    "The existing raw exporter removes a stage output folder before copying; this orchestrator marks existing public folders unsafe unless --force-existing is used.",
+    "The legacy visual exporter writes every model texture into one directory; this orchestrator isolates per-model texture writes and publishes a clean model folder from a single run.",
     "Visual coverage means non-empty model_*.dae files exist in apps/game/public/stages/<stage>/model.",
-    "Complete visual coverage additionally requires a contiguous model_00.dae..model_NN.dae sequence with no zero-byte DAE files.",
+    "Complete visual coverage requires all expected non-null model slots from the current export summary, no exporter failures, and no zero-byte DAE files.",
     "Collision coverage means hit*.bin files are present; hit body records are copied but not decoded here.",
     "Adventure flow currently lists arena names, but the repo does not contain a verified arena-name to st## table."
   ]

@@ -11,3 +11,4 @@ export * as tpl from "./tpl.js";
 export * as mot from "./mot.js";
 export * as mdt from "./mdt.js";
 export * as mdlArc from "./mdl-arc.js";
+export * as hsdAnim from "./hsd-anim.js";

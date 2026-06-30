@@ -1,0 +1,211 @@
+// BattleScene — syncs a @gf/combat Battle's BorgRuntime[] to three.js models.
+//
+// One three.js Group per live BorgRuntime (keyed by uid). Each frame:
+//   - spawn a model for any new uid, despawn models whose uid is gone,
+//   - copy pos -> position, rotY -> rotation.y,
+//   - pick a baked clip from the borg's state (idle/move/death) and play it,
+//   - advance per-borg AnimationMixers.
+//
+// Models + baked clips are provided by main.ts via the BorgAssets interface so we
+// reuse the existing Collada loader, model normalization, and clip cache instead
+// of duplicating them. Borgs without a model fall back to a simple colored capsule
+// so every combatant in the sim is visible.
+
+import * as THREE from "three";
+import type { BorgRuntime, BorgState } from "@gf/combat";
+
+/** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
+export interface BorgAssets {
+  /** Resolve a cloneable source model for a borg id (cached upstream). Null if unavailable. */
+  loadModel(borgId: string): Promise<THREE.Object3D | null>;
+  /** Resolve a baked AnimationClip for (borgId, slot). Null if unavailable. slots: "idle"|"move"|"death". */
+  loadClip(borgId: string, slot: AnimSlot): Promise<THREE.AnimationClip | null>;
+}
+
+export type AnimSlot = "idle" | "move" | "death";
+
+interface Actor {
+  group: THREE.Group;
+  borgId: string;
+  mixer: THREE.AnimationMixer | null;
+  /** Cached actions per slot for this actor. */
+  actions: Partial<Record<AnimSlot, THREE.AnimationAction>>;
+  current: AnimSlot | null;
+  /** True once the (async) model has been attached. */
+  ready: boolean;
+  isPlaceholder: boolean;
+}
+
+/** Team-tinted placeholder material colors. */
+const TEAM_COLORS: Record<number, number> = { 0: 0x4cc7ff, 1: 0xff5a4d };
+
+export class BattleScene {
+  private actors = new Map<string, Actor>();
+  private pending = new Set<string>();
+
+  constructor(
+    private readonly root: THREE.Group,
+    private readonly assets: BorgAssets,
+  ) {}
+
+  /** Map a sim BorgState to one of the baked animation slots we have. */
+  private slotForState(state: BorgState): AnimSlot {
+    if (state === "death" || state === "down") return "death";
+    if (state === "move" || state === "jump" || state === "fly" || state === "attack" || state === "special")
+      return "move";
+    return "idle";
+  }
+
+  /** Reconcile the scene with the current list of live borgs. Call once per frame. */
+  sync(borgs: readonly BorgRuntime[]): void {
+    const live = new Set<string>();
+    for (const b of borgs) {
+      live.add(b.uid);
+      let actor = this.actors.get(b.uid);
+      if (!actor) {
+        actor = this.spawn(b);
+        this.actors.set(b.uid, actor);
+      }
+      // Position + facing (sim units map 1:1 to the existing world scale).
+      actor.group.position.set(b.pos.x, b.pos.y, b.pos.z);
+      actor.group.rotation.y = b.rotY;
+      // Animation slot from state.
+      const slot = this.slotForState(b.state);
+      if (actor.ready) this.playSlot(actor, slot);
+      // Dim/hide once dead so the death pose reads (sim culls dead borgs next frame).
+      if (!b.alive) actor.group.visible = true;
+    }
+    // Despawn actors whose borg is gone.
+    for (const [uid, actor] of this.actors) {
+      if (!live.has(uid)) {
+        this.root.remove(actor.group);
+        this.actors.delete(uid);
+      }
+    }
+  }
+
+  /** Advance all per-actor animation mixers. */
+  update(dt: number): void {
+    for (const actor of this.actors.values()) actor.mixer?.update(dt);
+  }
+
+  /** Remove every actor (call when leaving a battle). */
+  clear(): void {
+    for (const actor of this.actors.values()) this.root.remove(actor.group);
+    this.actors.clear();
+    this.pending.clear();
+  }
+
+  /** World position of an actor (for the camera to follow). */
+  positionOf(uid: string): THREE.Vector3 | null {
+    return this.actors.get(uid)?.group.position ?? null;
+  }
+
+  private spawn(b: BorgRuntime): Actor {
+    const group = new THREE.Group();
+    group.position.set(b.pos.x, b.pos.y, b.pos.z);
+    group.rotation.y = b.rotY;
+    // Start with a placeholder so the borg is visible immediately; swap in the
+    // real model when it finishes loading.
+    const placeholder = this.makePlaceholder(b.team);
+    group.add(placeholder);
+    this.root.add(group);
+    const actor: Actor = {
+      group,
+      borgId: b.borgId,
+      mixer: null,
+      actions: {},
+      current: null,
+      ready: false,
+      isPlaceholder: true,
+    };
+    void this.attachModel(b.uid, actor, b.borgId, placeholder);
+    return actor;
+  }
+
+  private makePlaceholder(team: number): THREE.Mesh {
+    const geo = new THREE.CapsuleGeometry(28, 64, 4, 8);
+    const mat = new THREE.MeshLambertMaterial({ color: TEAM_COLORS[team] ?? 0xcccccc });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.y = 60; // sit the capsule on the ground plane
+    return mesh;
+  }
+
+  private async attachModel(
+    uid: string,
+    actor: Actor,
+    borgId: string,
+    placeholder: THREE.Object3D,
+  ): Promise<void> {
+    const model = await this.assets.loadModel(borgId).catch(() => null);
+    // The actor may have been despawned while loading.
+    if (!this.actors.has(uid)) return;
+    if (model) {
+      actor.group.remove(placeholder);
+      disposeMesh(placeholder);
+      actor.group.add(model);
+      actor.mixer = new THREE.AnimationMixer(model);
+      actor.isPlaceholder = false;
+    }
+    actor.ready = true;
+  }
+
+  private playSlot(actor: Actor, slot: AnimSlot): void {
+    if (actor.current === slot) return;
+    if (!actor.mixer) {
+      actor.current = slot;
+      return; // placeholder has no animation
+    }
+    actor.current = slot;
+    const existing = actor.actions[slot];
+    if (existing) {
+      this.crossfadeTo(actor, existing, slot);
+      return;
+    }
+    // Lazily load the clip; apply when ready if still current.
+    void this.assets.loadClip(actor.borgId, slot).then((clip) => {
+      if (!actor.mixer || actor.current !== slot) return;
+      // Fall back to idle clip if the requested slot has no baked clip.
+      const useClip = clip ?? (slot !== "idle" ? null : null);
+      const finalClip = useClip ?? clip;
+      if (!finalClip) {
+        // No clip for this slot; try idle as a fallback.
+        if (slot !== "idle") {
+          void this.assets.loadClip(actor.borgId, "idle").then((idle) => {
+            if (!actor.mixer || actor.current !== slot || !idle) return;
+            const a = actor.mixer.clipAction(idle);
+            actor.actions[slot] = a;
+            this.crossfadeTo(actor, a, slot);
+          });
+        }
+        return;
+      }
+      const action = actor.mixer.clipAction(finalClip);
+      actor.actions[slot] = action;
+      this.crossfadeTo(actor, action, slot);
+    });
+  }
+
+  private crossfadeTo(actor: Actor, action: THREE.AnimationAction, slot: AnimSlot): void {
+    const looping = slot !== "death";
+    action
+      .reset()
+      .setLoop(looping ? THREE.LoopRepeat : THREE.LoopOnce, looping ? Infinity : 1)
+      .play();
+    action.clampWhenFinished = !looping;
+    // Fade out any other playing action.
+    for (const [s, a] of Object.entries(actor.actions)) {
+      if (s !== slot && a.isRunning()) a.crossFadeTo(action, 0.18, false);
+    }
+  }
+}
+
+function disposeMesh(obj: THREE.Object3D): void {
+  obj.traverse((node) => {
+    if (node instanceof THREE.Mesh) {
+      node.geometry.dispose();
+      const mats = Array.isArray(node.material) ? node.material : [node.material];
+      for (const m of mats) m.dispose();
+    }
+  });
+}

@@ -1,0 +1,27 @@
+=== INVINCIBILITY SET @ 0x8005d494 (state handler entry) ===
+  80055be8:  c05f0720  lfs      f2, 0x720(r31)
+  80055bec:  c0228830  lfs      f1, -0x77d0(r2)
+  80055bf0:  fc020840  fcmpu    cr0, f2, f1
+  80055bf4:  4081002c  ble      0x80055c20
+  80055bf8:  c01f1dcc  lfs      f0, 0x1dcc(r31)
+  80055bfc:  ec020028  fsubs    f0, f2, f0
+  80055c00:  d01f0720  stfs     f0, 0x720(r31)
+  80055c04:  c01f0720  lfs      f0, 0x720(r31)
+  80055c08:  fc000840  fcmpu    cr0, f0, f1
+  80055c0c:  4c401382  cror     cr0eq, cr0lt, cr0eq
+  80055c10:  40820010  bne      0x80055c20
+  80055c14:  d03f0720  stfs     f1, 0x720(r31)
+  80055c18:  38000000  li       r0, 0
+  80055c1c:  b01f0272  sth      r0, 0x272(r31)
+  80055c20:  39000000  li       r8, 0
+  80055c24:  7fe7fb78  mr       r7, r31
+
+=== SET 60.0 @ 0x8005d4b0 ===
+  8005d494:  9421fff0  stwu     r1, -0x10(r1)
+  8005d498:  7c0802a6  mflr     r0
+  8005d49c:  c0028a28  lfs      f0, -0x75d8(r2)
+  8005d4a0:  90010014  stw      r0, 0x14(r1)
+  8005d4a4:  93e1000c  stw      r31, 0xc(r1)
+  8005d4a8:  7c7f1b78  mr       r31, r3
+  8005d4ac:  93c10008  stw      r30, 8(r1)
+  8005d4b0:  d0030720  stfs     f0, 0x720(r3)

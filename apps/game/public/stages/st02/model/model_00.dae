@@ -1,34 +1,34 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="1.4.1" xmlns="http://www.collada.org/2005/11/COLLADASchema">
     <asset>
-        <created>2026-06-30T03:50:43.8491252-04:00</created>
-        <modified>2026-06-30T03:50:43.8512639-04:00</modified>
+        <created>1970-01-01T00:00:00Z</created>
+        <modified>1970-01-01T00:00:00Z</modified>
         <unit name="Meter" />
         <contributor>
             <authoring_tool>IONET Exporter</authoring_tool>
         </contributor>
     </asset>
     <library_images>
-        <image id="Texture_0_CMP-image" name="Texture_0_CMP">
-            <init_from>Texture_0_CMP.png</init_from>
+        <image id="model_00_Texture_0_CMP-image" name="model_00_Texture_0_CMP">
+            <init_from>model_00_Texture_0_CMP.png</init_from>
         </image>
-        <image id="Texture_1_CMP-image" name="Texture_1_CMP">
-            <init_from>Texture_1_CMP.png</init_from>
+        <image id="model_00_Texture_1_CMP-image" name="model_00_Texture_1_CMP">
+            <init_from>model_00_Texture_1_CMP.png</init_from>
         </image>
-        <image id="Texture_2_CMP-image" name="Texture_2_CMP">
-            <init_from>Texture_2_CMP.png</init_from>
+        <image id="model_00_Texture_2_CMP-image" name="model_00_Texture_2_CMP">
+            <init_from>model_00_Texture_2_CMP.png</init_from>
         </image>
-        <image id="Texture_3_CMP-image" name="Texture_3_CMP">
-            <init_from>Texture_3_CMP.png</init_from>
+        <image id="model_00_Texture_3_CMP-image" name="model_00_Texture_3_CMP">
+            <init_from>model_00_Texture_3_CMP.png</init_from>
         </image>
-        <image id="Texture_4_CMP-image" name="Texture_4_CMP">
-            <init_from>Texture_4_CMP.png</init_from>
+        <image id="model_00_Texture_4_CMP-image" name="model_00_Texture_4_CMP">
+            <init_from>model_00_Texture_4_CMP.png</init_from>
         </image>
-        <image id="Texture_5_CMP-image" name="Texture_5_CMP">
-            <init_from>Texture_5_CMP.png</init_from>
+        <image id="model_00_Texture_5_CMP-image" name="model_00_Texture_5_CMP">
+            <init_from>model_00_Texture_5_CMP.png</init_from>
         </image>
-        <image id="Texture_6_CMP-image" name="Texture_6_CMP">
-            <init_from>Texture_6_CMP.png</init_from>
+        <image id="model_00_Texture_6_CMP-image" name="model_00_Texture_6_CMP">
+            <init_from>model_00_Texture_6_CMP.png</init_from>
         </image>
     </library_images>
     <library_materials>
@@ -57,14 +57,14 @@
     <library_effects>
         <effect id="Material_F42EDBCB-effect" name="Material_F42EDBCB">
             <profile_COMMON>
-                <newparam sid="Texture_0_CMP-image_surface">
+                <newparam sid="model_00_Texture_0_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_0_CMP-image</init_from>
+                        <init_from>model_00_Texture_0_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_0_CMP-image_sampler">
+                <newparam sid="model_00_Texture_0_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_0_CMP-image_surface</source>
+                        <source>model_00_Texture_0_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -76,7 +76,7 @@
                             <color sid="ambient">0.5019608 0.5019608 0.5019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_0_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_00_Texture_0_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -99,14 +99,14 @@
         </effect>
         <effect id="Material_DEF1B69B-effect" name="Material_DEF1B69B">
             <profile_COMMON>
-                <newparam sid="Texture_1_CMP-image_surface">
+                <newparam sid="model_00_Texture_1_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_1_CMP-image</init_from>
+                        <init_from>model_00_Texture_1_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_1_CMP-image_sampler">
+                <newparam sid="model_00_Texture_1_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_1_CMP-image_surface</source>
+                        <source>model_00_Texture_1_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -118,7 +118,7 @@
                             <color sid="ambient">1 1 1 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_1_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_00_Texture_1_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -141,14 +141,14 @@
         </effect>
         <effect id="Material_D0DFF209-effect" name="Material_D0DFF209">
             <profile_COMMON>
-                <newparam sid="Texture_2_CMP-image_surface">
+                <newparam sid="model_00_Texture_2_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_2_CMP-image</init_from>
+                        <init_from>model_00_Texture_2_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_2_CMP-image_sampler">
+                <newparam sid="model_00_Texture_2_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_2_CMP-image_surface</source>
+                        <source>model_00_Texture_2_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -160,7 +160,7 @@
                             <color sid="ambient">0.7019608 0.7019608 0.7019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_2_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_00_Texture_2_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -183,14 +183,14 @@
         </effect>
         <effect id="Material_5D5A626D-effect" name="Material_5D5A626D">
             <profile_COMMON>
-                <newparam sid="Texture_3_CMP-image_surface">
+                <newparam sid="model_00_Texture_3_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_3_CMP-image</init_from>
+                        <init_from>model_00_Texture_3_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_3_CMP-image_sampler">
+                <newparam sid="model_00_Texture_3_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_3_CMP-image_surface</source>
+                        <source>model_00_Texture_3_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -202,7 +202,7 @@
                             <color sid="ambient">0.5019608 0.5019608 0.5019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_3_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_00_Texture_3_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -225,14 +225,14 @@
         </effect>
         <effect id="Material_83909F1F-effect" name="Material_83909F1F">
             <profile_COMMON>
-                <newparam sid="Texture_4_CMP-image_surface">
+                <newparam sid="model_00_Texture_4_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_4_CMP-image</init_from>
+                        <init_from>model_00_Texture_4_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_4_CMP-image_sampler">
+                <newparam sid="model_00_Texture_4_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_4_CMP-image_surface</source>
+                        <source>model_00_Texture_4_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -244,7 +244,7 @@
                             <color sid="ambient">0.5019608 0.5019608 0.5019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_4_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_00_Texture_4_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -267,14 +267,14 @@
         </effect>
         <effect id="Material_6EF5CBE5-effect" name="Material_6EF5CBE5">
             <profile_COMMON>
-                <newparam sid="Texture_5_CMP-image_surface">
+                <newparam sid="model_00_Texture_5_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_5_CMP-image</init_from>
+                        <init_from>model_00_Texture_5_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_5_CMP-image_sampler">
+                <newparam sid="model_00_Texture_5_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_5_CMP-image_surface</source>
+                        <source>model_00_Texture_5_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -286,7 +286,7 @@
                             <color sid="ambient">0.5019608 0.5019608 0.5019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_5_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_00_Texture_5_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>
@@ -309,14 +309,14 @@
         </effect>
         <effect id="Material_41094055-effect" name="Material_41094055">
             <profile_COMMON>
-                <newparam sid="Texture_6_CMP-image_surface">
+                <newparam sid="model_00_Texture_6_CMP-image_surface">
                     <surface type="2D">
-                        <init_from>Texture_6_CMP-image</init_from>
+                        <init_from>model_00_Texture_6_CMP-image</init_from>
                     </surface>
                 </newparam>
-                <newparam sid="Texture_6_CMP-image_sampler">
+                <newparam sid="model_00_Texture_6_CMP-image_sampler">
                     <sampler2D>
-                        <source>Texture_6_CMP-image_surface</source>
+                        <source>model_00_Texture_6_CMP-image_surface</source>
                     </sampler2D>
                 </newparam>
                 <technique sid="standard">
@@ -328,7 +328,7 @@
                             <color sid="ambient">0.7019608 0.7019608 0.7019608 1</color>
                         </ambient>
                         <diffuse>
-                            <texture texture="Texture_6_CMP-image_sampler" texcoord="CHANNEL0" />
+                            <texture texture="model_00_Texture_6_CMP-image_sampler" texcoord="CHANNEL0" />
                         </diffuse>
                         <specular>
                             <color sid="specular">1 1 1 1</color>

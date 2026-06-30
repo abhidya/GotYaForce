@@ -6,6 +6,8 @@ build/
 .vite/
 coverage/
 *.log
+__pycache__/
+*.pyc
 
 # --- Editor / OS noise ---
 .DS_Store
@@ -36,3 +38,6 @@ research/disc/*/
 # tools/ is populated by another agent cloning NeoGF etc.; dolphin/ is a local install.
 tools/
 dolphin/
+
+# User save files (local)
+*.sav

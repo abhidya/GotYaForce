@@ -11,6 +11,7 @@ const DEFAULT_PLAN_JSON = path.join("research", "asset-inventory", "stage-export
 const DEFAULT_PLAN_MD = path.join("research", "asset-inventory", "stage-export-plan.md");
 const EXPORT_ASSETS_SCRIPT = path.join("scripts", "export-stage-assets.mjs");
 const EXPORT_HSD_SCRIPT = path.join("scripts", "export-stage-hsd.mjs");
+const VISUAL_EXPORT_SUMMARY = "export-summary.json";
 
 const repoRoot = process.cwd();
 const options = parseArgs(process.argv.slice(2));
@@ -26,7 +27,7 @@ if (options.export) {
     console.log("export-all-stages: no safe export jobs matched the filters");
   }
   for (const job of jobs) {
-    runStageExport(job);
+    await runStageExport(job);
     executedExports.push(job.stageId);
   }
   plan = buildPlan({ executedExports });
@@ -168,6 +169,7 @@ function buildPlan({ executedExports = [], refreshedManifests = [] } = {}) {
       assetRoot: relRepo(sourceRoot),
       publicStages: relRepo(publicRoot),
       singleStageExporters: [EXPORT_ASSETS_SCRIPT, EXPORT_HSD_SCRIPT],
+      batchVisualExporter: "embedded stage-batch-exporter in scripts/export-all-stages.mjs",
       adventureFlow,
     },
     summary: {
@@ -175,7 +177,7 @@ function buildPlan({ executedExports = [], refreshedManifests = [] } = {}) {
       sourcePairsWithModelAndPzz: sourceStages.filter((stage) => stage.source.hasStageArc && stage.source.hasStagePzz).length,
       publicStageFolderCount: publicStageIds.length,
       publicStageWithAnyDaeCount: records.filter((stage) => stage.public.visual.hasDaePieces).length,
-      verifiedVisualStageCount: records.filter((stage) => stage.public.visual.hasContiguousDaeSequence).length,
+      verifiedVisualStageCount: records.filter((stage) => stage.public.visual.hasCompleteDaeExport).length,
       exportedCollisionHitStageCount: records.filter((stage) => stage.public.collision.hasHitFiles).length,
       sourceCompleteCollisionTripletCount: records.filter((stage) => stage.source.collision.hasCompleteHitTriplet).length,
       sourceAnyCollisionHitCount: records.filter((stage) => stage.source.collision.hasHitFiles).length,
@@ -201,9 +203,9 @@ function buildPlan({ executedExports = [], refreshedManifests = [] } = {}) {
     },
     stages: records,
     notes: [
-      "The existing raw exporter removes a stage output folder before copying; this orchestrator marks existing public folders unsafe unless --force-existing is used.",
+      "The legacy visual exporter writes every model texture into one directory; this orchestrator isolates per-model texture writes and publishes a clean model folder from a single run.",
       "Visual coverage means non-empty model_*.dae files exist in apps/game/public/stages/<stage>/model.",
-      "Complete visual coverage additionally requires a contiguous model_00.dae..model_NN.dae sequence with no zero-byte DAE files.",
+      "Complete visual coverage requires all expected non-null model slots from the current export summary, no exporter failures, and no zero-byte DAE files.",
       "Collision coverage means hit*.bin files are present; hit body records are copied but not decoded here.",
       "Adventure flow currently lists arena names, but the repo does not contain a verified arena-name to st## table.",
     ],
@@ -304,16 +306,18 @@ function inspectPublicStage(publicRoot, sourceRecord) {
   const setDir = path.join(stageDir, "set");
   const rawArc = fileInfo(path.join(rawDir, `${sourceRecord.id}_mdl.arc`));
   const rawPzz = fileInfo(path.join(rawDir, `${sourceRecord.id}.pzz`));
-  const daeInfos = listFileInfos(modelDir, (file) => /^model_[0-9]{2}\.dae$/i.test(file));
+  const daeInfos = listFileInfos(modelDir, (file) => /^model_[0-9]+\.dae$/i.test(file));
   const textureInfos = listFileInfos(modelDir, (file) => /\.(png|tpl)$/i.test(file));
   const hitInfos = listFileInfos(collisionDir, (file) => /^hit[0-9a-f]{3}\.bin$/i.test(file));
   const setInfos = listFileInfos(setDir, (file) => /^set[0-9a-f]{4}\.arc$/i.test(file));
   const manifestPath = path.join(stageDir, "manifest.json");
   const manifest = readJsonIfExists(manifestPath);
+  const exportSummaryPath = path.join(modelDir, VISUAL_EXPORT_SUMMARY);
+  const exportSummary = readJsonIfExists(exportSummaryPath);
   const sourceHitNames = sourceRecord.source.collision.files.map((file) => path.basename(file.path));
   const publicHitNames = hitInfos.map((file) => path.basename(file.path));
   const modelIndices = daeInfos
-    .map((file) => path.basename(file.path).match(/^model_([0-9]{2})\.dae$/i))
+    .map((file) => path.basename(file.path).match(/^model_([0-9]+)\.dae$/i))
     .filter(Boolean)
     .map((match) => Number(match[1]))
     .sort((a, b) => a - b);
@@ -321,6 +325,19 @@ function inspectPublicStage(publicRoot, sourceRecord) {
   const missingModelIndices =
     maxModelIndex == null ? [] : range(0, maxModelIndex).filter((index) => !modelIndices.includes(index));
   const zeroByteDaeFiles = daeInfos.filter((file) => file.bytes === 0).map((file) => file.path);
+  const expectedDaeIndices = expectedDaeIndicesFromSummary(exportSummary.value, modelIndices);
+  const missingExpectedDaeIndices = expectedDaeIndices.filter((index) => !modelIndices.includes(index));
+  const unexpectedDaeIndices = modelIndices.filter((index) => expectedDaeIndices.length > 0 && !expectedDaeIndices.includes(index));
+  const failedModelIndices = numericArray(exportSummary.value?.failedModelIndices);
+  const skippedNullRootJointIndices = numericArray(exportSummary.value?.skippedNullRootJointIndices);
+  const hasCompleteDaeExport =
+    daeInfos.length > 0 &&
+    zeroByteDaeFiles.length === 0 &&
+    missingExpectedDaeIndices.length === 0 &&
+    unexpectedDaeIndices.length === 0 &&
+    exportSummary.ok &&
+    exportSummary.value?.complete === true &&
+    failedModelIndices.length === 0;
 
   return {
     exists: fs.existsSync(stageDir),
@@ -344,14 +361,31 @@ function inspectPublicStage(publicRoot, sourceRecord) {
       directory: relRepo(modelDir),
       hasDaePieces: daeInfos.length > 0 && zeroByteDaeFiles.length === 0,
       hasContiguousDaeSequence: daeInfos.length > 0 && zeroByteDaeFiles.length === 0 && missingModelIndices.length === 0,
+      hasCompleteDaeExport,
       daeCount: daeInfos.length,
       nonEmptyDaeCount: daeInfos.filter((file) => file.bytes > 0).length,
       zeroByteDaeFiles,
       maxModelIndex,
       missingModelIndices,
+      expectedDaeIndices,
+      missingExpectedDaeIndices,
+      unexpectedDaeIndices,
       sampleDaeFiles: daeInfos.slice(0, 8).map((file) => file.path),
       textureCount: textureInfos.length,
       textureFiles: textureInfos.map((file) => file.path),
+      exportSummary: {
+        path: relRepo(exportSummaryPath),
+        exists: fs.existsSync(exportSummaryPath),
+        parses: exportSummary.ok,
+        error: exportSummary.error,
+        exporter: exportSummary.value?.exporter ?? null,
+        expectedSlotCount: exportSummary.value?.expectedSlotCount ?? null,
+        expectedDaeCount: exportSummary.value?.expectedDaeCount ?? expectedDaeIndices.length,
+        exportedModelCount: exportSummary.value?.exportedModelCount ?? null,
+        failedModelIndices,
+        skippedNullRootJointIndices,
+        complete: exportSummary.value?.complete ?? null,
+      },
     },
     collision: {
       hasHitFiles: hitInfos.length > 0,
@@ -369,7 +403,7 @@ function inspectPublicStage(publicRoot, sourceRecord) {
 
 function buildStageRecord(sourceRecord, publicExport) {
   const canExport = sourceRecord.source.hasStageArc && sourceRecord.source.hasStagePzz;
-  const needsVisual = !publicExport.visual.hasContiguousDaeSequence;
+  const needsVisual = !publicExport.visual.hasCompleteDaeExport;
   const needsRaw = !publicExport.raw.hasStageArc || !publicExport.raw.hasStagePzz;
   const needsCollision =
     sourceRecord.source.collision.files.length > 0 && publicExport.collision.missingSourceHitFiles.length > 0;
@@ -432,8 +466,6 @@ function selectExportJobs(plan) {
   return selectStageRecordsForCommand(plan.stages).map((stage) => ({
     stageId: stage.id,
     code: stage.code,
-    rawCopyArgs: [EXPORT_ASSETS_SCRIPT, options.region, stage.code],
-    visualExportArgs: [EXPORT_HSD_SCRIPT, options.region, stage.code],
   }));
 }
 
@@ -445,11 +477,11 @@ function selectManifestRefreshRecords(plan) {
   return records;
 }
 
-function runStageExport(job) {
+async function runStageExport(job) {
   console.log(`export ${job.stageId}: safe raw/collision/set copy`);
   copyRawStageAssets(job);
-  console.log(`export ${job.stageId}: visual DAE export`);
-  runNode(job.visualExportArgs);
+  console.log(`export ${job.stageId}: isolated visual DAE export`);
+  exportStageVisual(job);
 }
 
 function copyRawStageAssets(job) {
@@ -460,11 +492,12 @@ function copyRawStageAssets(job) {
     fail(`refusing to overwrite existing stage folder without --force-existing: ${relRepo(outDir)}`);
   }
   if (fs.existsSync(outDir)) {
-    const resolved = path.resolve(outDir);
-    if (!resolved.startsWith(`${publicRoot}${path.sep}`)) {
-      fail(`refusing to remove path outside public stages: ${relRepo(resolved)}`);
+    assertInside(outDir, publicRoot, "stage output folder");
+    for (const subdir of ["raw", "collision", "set"]) {
+      const target = path.join(outDir, subdir);
+      assertInside(target, outDir, "stage asset subfolder");
+      fs.rmSync(target, { recursive: true, force: true });
     }
-    fs.rmSync(resolved, { recursive: true, force: true });
   }
 
   const copies = [
@@ -486,6 +519,254 @@ function copyRawStageAssets(job) {
     const targetDir = path.join(outDir, copy.subdir);
     fs.mkdirSync(targetDir, { recursive: true });
     fs.copyFileSync(source, path.join(targetDir, copy.name));
+  }
+}
+
+function exportStageVisual(job) {
+  const sourceRoot = path.resolve(repoRoot, "user-data", options.region, "afs_data", "root");
+  const publicRoot = path.resolve(repoRoot, "apps", "game", "public", "stages");
+  const stageDir = path.join(publicRoot, job.stageId);
+  const arcPath = path.join(sourceRoot, `${job.stageId}_mdl.arc`);
+  if (!fs.existsSync(arcPath)) fail(`missing stage model archive: ${relRepo(arcPath)}`);
+
+  const exporterRoot = path.resolve(repoRoot, "user-data", options.region, "stage-batch-exporter");
+  const runRoot = path.join(exporterRoot, "runs", `${job.stageId}-${process.pid}`);
+  const stagingModelDir = path.join(runRoot, "model");
+  const summaryPath = path.join(runRoot, VISUAL_EXPORT_SUMMARY);
+  assertInside(runRoot, path.join(exporterRoot, "runs"), "stage visual export workspace");
+
+  fs.rmSync(runRoot, { recursive: true, force: true });
+  fs.mkdirSync(stagingModelDir, { recursive: true });
+  ensureBatchExporterProject(exporterRoot);
+
+  const csproj = path.join(exporterRoot, "stage-batch-exporter.csproj");
+  const result = spawnSync("dotnet", ["run", "--project", csproj, "-c", "Release", "--", arcPath, stagingModelDir, summaryPath], {
+    cwd: repoRoot,
+    shell: false,
+    stdio: "inherit",
+  });
+  if (result.status !== 0 && !fs.existsSync(summaryPath)) {
+    fail(`visual exporter failed before writing a summary for ${job.stageId}`);
+  }
+
+  const summary = readJsonIfExists(summaryPath);
+  if (!summary.ok) fail(`visual exporter wrote an unreadable summary for ${job.stageId}: ${summary.error}`);
+  if ((summary.value.exportedModelCount ?? 0) === 0) {
+    fail(`visual exporter produced no models for ${job.stageId}`);
+  }
+
+  publishModelDirectory(stageDir, stagingModelDir);
+  fs.copyFileSync(summaryPath, path.join(stageDir, "model", VISUAL_EXPORT_SUMMARY));
+  fs.rmSync(runRoot, { recursive: true, force: true });
+
+  if (summary.value.complete !== true) {
+    console.warn(
+      `export ${job.stageId}: partial visual export; failed model indices ${compactNumberList(
+        numericArray(summary.value.failedModelIndices),
+      )}`,
+    );
+  }
+}
+
+function ensureBatchExporterProject(exporterRoot) {
+  fs.mkdirSync(exporterRoot, { recursive: true });
+  fs.writeFileSync(path.join(exporterRoot, "Program.cs"), batchExporterSource());
+  fs.writeFileSync(
+    path.join(exporterRoot, "stage-batch-exporter.csproj"),
+    String.raw`<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\tools\HSDLib\HSDRawViewer\HSDRawViewer.csproj" />
+  </ItemGroup>
+</Project>
+`,
+  );
+}
+
+function batchExporterSource() {
+  return String.raw`
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using HSDRaw;
+using HSDRaw.Common;
+using HSDRawViewer.Converters;
+using HSDRawViewer.Tools.Animation;
+
+class StageBatchExporter {
+  static int Main(string[] args) {
+    if (args.Length < 3) throw new Exception("usage: stage-batch-exporter <arc> <outDir> <summaryPath>");
+    var arc = args[0];
+    var outDir = args[1];
+    var summaryPath = args[2];
+    var runDir = Path.GetDirectoryName(summaryPath);
+    if (runDir == null) throw new Exception("summaryPath must include a directory");
+    var isolatedRoot = Path.Combine(runDir, "isolated");
+
+    Directory.CreateDirectory(outDir);
+    Directory.CreateDirectory(isolatedRoot);
+
+    var data = File.ReadAllBytes(arc);
+    var hsd = new HSDRawFile(data);
+    var records = new List<ModelRecord>();
+    int model = 0, ok = 0, fail = 0, skippedNull = 0;
+
+    foreach (var root in hsd.Roots) {
+      if (root?.Data == null) continue;
+      var sobj = new HSD_SOBJ(){ _s = root.Data._s };
+      if (sobj.JOBJDescs?.Array == null) continue;
+      foreach (var jd in sobj.JOBJDescs.Array) {
+        var index = model++;
+        if (jd?.RootJoint == null) {
+          records.Add(new ModelRecord {
+            Index = index,
+            Status = "skipped-null-root-joint",
+            DaeFile = null,
+            TextureFiles = Array.Empty<string>(),
+            Error = null
+          });
+          skippedNull++;
+          continue;
+        }
+
+        var isolatedModelDir = Path.Combine(isolatedRoot, $"model_{index:D2}");
+        Directory.CreateDirectory(isolatedModelDir);
+        var isolatedDae = Path.Combine(isolatedModelDir, $"model_{index:D2}.dae");
+        try {
+          var settings = new ModelExportSettings {
+            ExportMesh = true,
+            ExportTextures = true,
+            ExportBindPose = true,
+            Optimize = true
+          };
+          ModelExporter.ExportFile(isolatedDae, jd.RootJoint, settings, new JointMap());
+          var textureFiles = PublishModel(index, isolatedModelDir, isolatedDae, outDir);
+          records.Add(new ModelRecord {
+            Index = index,
+            Status = "exported",
+            DaeFile = $"model_{index:D2}.dae",
+            TextureFiles = textureFiles,
+            Error = null
+          });
+          Console.WriteLine($"OK model_{index:D2}.dae textures={textureFiles.Length}");
+          ok++;
+        } catch (Exception e) {
+          records.Add(new ModelRecord {
+            Index = index,
+            Status = "failed",
+            DaeFile = null,
+            TextureFiles = Array.Empty<string>(),
+            Error = e.GetType().Name + ": " + e.Message
+          });
+          Console.WriteLine($"ERR model_{index:D2}: {e.GetType().Name} {e.Message}");
+          fail++;
+        }
+      }
+    }
+
+    var expectedDaeIndices = records.Where(r => r.Status != "skipped-null-root-joint").Select(r => r.Index).ToArray();
+    var failedModelIndices = records.Where(r => r.Status == "failed").Select(r => r.Index).ToArray();
+    var skippedNullRootJointIndices = records.Where(r => r.Status == "skipped-null-root-joint").Select(r => r.Index).ToArray();
+    var exportedModelCount = records.Count(r => r.Status == "exported");
+    var summary = new ExportSummary {
+      Exporter = "scripts/export-all-stages.mjs stage-batch-exporter",
+      ExpectedSlotCount = model,
+      ExpectedDaeCount = expectedDaeIndices.Length,
+      ExportedModelCount = exportedModelCount,
+      FailedModelCount = fail,
+      SkippedNullRootJointCount = skippedNull,
+      ExpectedDaeIndices = expectedDaeIndices,
+      FailedModelIndices = failedModelIndices,
+      SkippedNullRootJointIndices = skippedNullRootJointIndices,
+      Complete = fail == 0,
+      Models = records
+    };
+
+    var json = JsonSerializer.Serialize(summary, new JsonSerializerOptions {
+      WriteIndented = true,
+      PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    });
+    File.WriteAllText(summaryPath, json + Environment.NewLine, new UTF8Encoding(false));
+    Console.WriteLine($"stage-batch-export expected={expectedDaeIndices.Length} ok={ok} fail={fail} skipped-null={skippedNull}");
+    return ok == 0 ? 2 : 0;
+  }
+
+  static string[] PublishModel(int modelIndex, string isolatedModelDir, string isolatedDae, string outDir) {
+    var dae = File.ReadAllText(isolatedDae);
+    dae = Regex.Replace(dae, "<created>.*?</created>", "<created>1970-01-01T00:00:00Z</created>");
+    dae = Regex.Replace(dae, "<modified>.*?</modified>", "<modified>1970-01-01T00:00:00Z</modified>");
+
+    var textures = Directory.GetFiles(isolatedModelDir, "*.png").OrderBy(Path.GetFileName).ToArray();
+    var renamedTextures = new List<string>();
+    var replacements = new Dictionary<string, string>();
+    foreach (var texture in textures) {
+      var oldBase = Path.GetFileNameWithoutExtension(texture);
+      var newBase = $"model_{modelIndex:D2}_{oldBase}";
+      replacements[oldBase] = newBase;
+    }
+
+    foreach (var pair in replacements.OrderByDescending(p => p.Key.Length)) {
+      dae = dae.Replace(pair.Key, pair.Value);
+    }
+
+    File.WriteAllText(Path.Combine(outDir, $"model_{modelIndex:D2}.dae"), dae, new UTF8Encoding(false));
+    foreach (var texture in textures) {
+      var oldBase = Path.GetFileNameWithoutExtension(texture);
+      var targetName = replacements[oldBase] + ".png";
+      File.Copy(texture, Path.Combine(outDir, targetName), true);
+      renamedTextures.Add(targetName);
+    }
+
+    return renamedTextures.ToArray();
+  }
+}
+
+public class ExportSummary {
+  public string Exporter { get; set; }
+  public int ExpectedSlotCount { get; set; }
+  public int ExpectedDaeCount { get; set; }
+  public int ExportedModelCount { get; set; }
+  public int FailedModelCount { get; set; }
+  public int SkippedNullRootJointCount { get; set; }
+  public int[] ExpectedDaeIndices { get; set; }
+  public int[] FailedModelIndices { get; set; }
+  public int[] SkippedNullRootJointIndices { get; set; }
+  public bool Complete { get; set; }
+  public List<ModelRecord> Models { get; set; }
+}
+
+public class ModelRecord {
+  public int Index { get; set; }
+  public string Status { get; set; }
+  public string DaeFile { get; set; }
+  public string[] TextureFiles { get; set; }
+  public string Error { get; set; }
+}
+`;
+}
+
+function publishModelDirectory(stageDir, stagingModelDir) {
+  const publicRoot = path.resolve(repoRoot, "apps", "game", "public", "stages");
+  const modelDir = path.join(stageDir, "model");
+  assertInside(stageDir, publicRoot, "stage folder");
+  assertInside(modelDir, stageDir, "stage model folder");
+  fs.mkdirSync(stageDir, { recursive: true });
+  fs.rmSync(modelDir, { recursive: true, force: true });
+  try {
+    fs.renameSync(stagingModelDir, modelDir);
+  } catch (error) {
+    if (error.code !== "EXDEV") throw error;
+    fs.cpSync(stagingModelDir, modelDir, { recursive: true });
+    fs.rmSync(stagingModelDir, { recursive: true, force: true });
   }
 }
 
@@ -520,11 +801,16 @@ async function writeVerifiedStageManifest(record) {
     visual: {
       hasDaePieces: record.public.visual.hasDaePieces,
       hasContiguousDaeSequence: record.public.visual.hasContiguousDaeSequence,
+      hasCompleteDaeExport: record.public.visual.hasCompleteDaeExport,
       daeCount: record.public.visual.daeCount,
       nonEmptyDaeCount: record.public.visual.nonEmptyDaeCount,
       maxModelIndex: record.public.visual.maxModelIndex,
       missingModelIndices: record.public.visual.missingModelIndices,
+      expectedDaeIndices: record.public.visual.expectedDaeIndices,
+      missingExpectedDaeIndices: record.public.visual.missingExpectedDaeIndices,
+      unexpectedDaeIndices: record.public.visual.unexpectedDaeIndices,
       textureCount: record.public.visual.textureCount,
+      exportSummary: record.public.visual.exportSummary,
     },
     collision: {
       sourceHitFiles: record.source.collision.files.map((file) => path.basename(file.path)),
@@ -551,7 +837,12 @@ async function writeVerifiedStageManifest(record) {
 
 function verifiedStatus(record) {
   if (!record.public.visual.hasDaePieces) return "missing-visual-dae";
-  if (!record.public.visual.hasContiguousDaeSequence) return "partial-visual-dae-missing-slots";
+  if (record.public.visual.zeroByteDaeFiles.length > 0) return "partial-visual-zero-byte-dae";
+  if (!record.public.visual.exportSummary.exists) return "partial-visual-export-unverified";
+  if (record.public.visual.exportSummary.exists && record.public.visual.exportSummary.failedModelIndices.length > 0) {
+    return "partial-visual-export-failed";
+  }
+  if (!record.public.visual.hasCompleteDaeExport) return "partial-visual-dae-missing-slots";
   if (!record.public.raw.stageArcMatchesSource || !record.public.raw.stagePzzMatchesSource) return "visual-exported-raw-mismatch";
   if (record.source.collision.hasHitFiles && record.public.collision.missingSourceHitFiles.length > 0) {
     return "visual-exported-missing-hit-files";
@@ -572,15 +863,15 @@ async function writePlanFiles(plan) {
 function renderMarkdown(plan) {
   const missing = plan.stages.filter((stage) => stage.export.needsExport);
   const visual = plan.stages.filter((stage) => stage.public.visual.hasDaePieces);
-  const completeVisual = plan.stages.filter((stage) => stage.public.visual.hasContiguousDaeSequence);
+  const completeVisual = plan.stages.filter((stage) => stage.public.visual.hasCompleteDaeExport);
   const collision = plan.stages.filter((stage) => stage.source.collision.hasHitFiles);
   const rows = plan.stages
     .map((stage) => {
       const source = stage.source.hasModelAndPzzPair ? "ARC+PZZ" : stage.source.hasStageArc ? "ARC only" : "missing";
       const publicState = stage.public.visual.hasDaePieces
-        ? stage.public.visual.hasContiguousDaeSequence
-          ? `${stage.public.visual.daeCount} DAE`
-          : `${stage.public.visual.daeCount} DAE, gaps ${compactNumberList(stage.public.visual.missingModelIndices)}`
+        ? stage.public.visual.hasCompleteDaeExport
+          ? `${stage.public.visual.daeCount} DAE complete`
+          : `${stage.public.visual.daeCount} DAE, missing ${compactNumberList(stage.public.visual.missingExpectedDaeIndices)}`
         : stage.public.exists
           ? "public folder, no DAE"
           : "not exported";
@@ -604,6 +895,8 @@ function renderMarkdown(plan) {
 ${stage.export.commands.orchestrated}
 # equivalent single-stage raw copy tool, which also rewrites apps/game/public/stages/manifest.json:
 ${stage.export.commands.singleStageRawCopy}
+# legacy visual exporter; retained for comparison, not used by the batch orchestrator:
+${stage.export.commands.legacyVisualExport}
 ${stage.export.commands.visualExport}
 \`\`\`
 `,
@@ -699,7 +992,8 @@ function makeStageCommands(sourceRecord) {
     stage: sourceRecord.id,
     orchestrated: commandForExportAll([sourceRecord.id]),
     singleStageRawCopy: `rtk node ${slash(EXPORT_ASSETS_SCRIPT)} ${options.region} ${sourceRecord.code}`,
-    visualExport: `rtk node ${slash(EXPORT_HSD_SCRIPT)} ${options.region} ${sourceRecord.code}`,
+    visualExport: commandForExportAll([sourceRecord.id]),
+    legacyVisualExport: `rtk node ${slash(EXPORT_HSD_SCRIPT)} ${options.region} ${sourceRecord.code}`,
   };
 }
 
@@ -771,6 +1065,19 @@ function readJsonIfExists(file) {
   }
 }
 
+function expectedDaeIndicesFromSummary(summary, modelIndices) {
+  const expected = numericArray(summary?.expectedDaeIndices);
+  if (expected.length > 0) return expected;
+  const maxModelIndex = modelIndices.length > 0 ? modelIndices.at(-1) : null;
+  return maxModelIndex == null ? [] : range(0, maxModelIndex);
+}
+
+function numericArray(value) {
+  return Array.isArray(value)
+    ? value.filter((item) => Number.isInteger(item) && item >= 0).sort((left, right) => left - right)
+    : [];
+}
+
 function addStageCodes(target, value) {
   for (const part of value.split(",")) {
     if (!part.trim()) continue;
@@ -824,6 +1131,14 @@ function compactNumberList(values) {
   }
   ranges.push(start === previous ? `${start}` : `${start}-${previous}`);
   return ranges.join(",");
+}
+
+function assertInside(child, parent, label) {
+  const resolvedChild = path.resolve(child);
+  const resolvedParent = path.resolve(parent);
+  if (resolvedChild !== resolvedParent && !resolvedChild.startsWith(`${resolvedParent}${path.sep}`)) {
+    fail(`refusing to use ${label} outside ${relRepo(resolvedParent)}: ${relRepo(resolvedChild)}`);
+  }
 }
 
 function relRepo(file) {
