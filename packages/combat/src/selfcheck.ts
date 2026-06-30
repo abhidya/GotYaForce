@@ -114,11 +114,56 @@ function assertTriangleFloorGrounding(borgs: BorgStats[]): void {
   console.log(`[selfcheck] STIH triangle floor grounded p1 at y=${active.pos.y}`);
 }
 
+function assertTriangleWallCollision(borgs: BorgStats[]): void {
+  const wallX = 20;
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
+      ],
+      bounds: { minX: -100, maxX: 100, minZ: -100, maxZ: 100 },
+      collision: {
+        triangles: [
+          {
+            index: 0,
+            layerIndex: null,
+            marker: 0xcccccccc,
+            vertices: [
+              { x: wallX, y: -20, z: -100 },
+              { x: wallX, y: 100, z: 100 },
+              { x: wallX, y: -20, z: 100 },
+            ],
+            normal: { x: -1, y: 0, z: 0 },
+            planeD: wallX,
+            bounds2d: { minX: wallX, maxX: wallX, minZ: -100, maxZ: 100 },
+          },
+        ],
+      },
+    },
+    borgs,
+  );
+  const moveRight: PlayerInput = { ...emptyInput(), moveX: 1 };
+  for (let f = 0; f < 40; f += 1) {
+    battle.step(1 / 60, { p1: moveRight, p2: emptyInput() });
+    assertSane(battle.state.borgs, f);
+  }
+  const activeUid = battle.state.activeUidByPlayer["p1"];
+  const active = battle.state.borgs.find((b) => b.uid === activeUid);
+  if (!active) throw new Error("[selfcheck] triangle wall test lost active p1 borg");
+  if (active.pos.x >= wallX) {
+    throw new Error(`[selfcheck] triangle wall collision failed: x=${active.pos.x}`);
+  }
+  console.log(`[selfcheck] STIH triangle wall stopped p1 at x=${active.pos.x}`);
+}
+
 export function main(): number {
   const borgs = loadBorgs();
   console.log(`[selfcheck] loaded ${borgs.length} borgs from borgs.json`);
   assertRectBoundsClamp(borgs);
   assertTriangleFloorGrounding(borgs);
+  assertTriangleWallCollision(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

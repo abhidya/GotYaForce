@@ -25,6 +25,8 @@ import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
 
 const GROUND_SNAP_UP = 35;
+const WALL_NORMAL_MAX_Y = 0.5;
+const WALL_CLEARANCE = 0.25;
 
 export interface MoveContext {
   /** Resolved lock-on target position, if locked (face toward it). */
@@ -130,13 +132,15 @@ export function stepMovement(
   b.vel.y = Math.max(b.vel.y - JUMP.GRAVITY, -JUMP.MAX_FALL);
 
   // --- Integrate ----------------------------------------------------------------------
+  const prevPos = { ...b.pos };
   b.pos = add(b.pos, b.vel as Vec3);
 
   // Bounds clamp on XZ. Real STIH stage bounds are rectangular and slightly
   // asymmetric around origin (for st00: -11000..10000), so clamp to min/max
-  // before querying the floor triangle under the borg.
+  // before resolving collision and querying the floor triangle under the borg.
   b.pos.x = clamp(b.pos.x, ctx.bounds.minX, ctx.bounds.maxX);
   b.pos.z = clamp(b.pos.z, ctx.bounds.minZ, ctx.bounds.maxZ);
+  resolveLateralCollision(ctx.collision, prevPos, b.pos, b.vel);
 
   const groundY = groundYAt(ctx.collision, b.pos.x, b.pos.z, b.pos.y);
   if (b.pos.y <= groundY) {
@@ -237,6 +241,94 @@ function candidateTriangles(collision: StageCollision, x: number, z: number): St
   return out;
 }
 
+function candidateTrianglesForSegment(collision: StageCollision, a: Vec3, b: Vec3): StageCollisionTriangle[] {
+  const grid = collision.grid;
+  if (!grid) return collision.triangles;
+  const indices = new Set<number>();
+  addNeighborCellTriangles(indices, collision, a.x, a.z);
+  addNeighborCellTriangles(indices, collision, b.x, b.z);
+  if (indices.size === 0) return collision.triangles;
+  const out: StageCollisionTriangle[] = [];
+  for (const index of indices) {
+    const tri = collision.triangles[index];
+    if (tri) out.push(tri);
+  }
+  return out;
+}
+
+function addNeighborCellTriangles(out: Set<number>, collision: StageCollision, x: number, z: number): void {
+  const grid = collision.grid;
+  if (!grid) return;
+  const cx = Math.floor((x - grid.origin.x) / grid.cellSize.x);
+  const cz = Math.floor((z - grid.origin.z) / grid.cellSize.z);
+  for (let dz = -1; dz <= 1; dz += 1) {
+    for (let dx = -1; dx <= 1; dx += 1) {
+      const nx = cx + dx;
+      const nz = cz + dz;
+      if (nx < 0 || nz < 0 || nx >= grid.gridCells.x || nz >= grid.gridCells.z) continue;
+      const cell = grid.cells[nz * grid.gridCells.x + nx];
+      if (!cell) continue;
+      for (const index of cell.triangleIndices) out.add(index);
+    }
+  }
+}
+
+function resolveLateralCollision(
+  collision: StageCollision | null,
+  previous: Vec3,
+  current: Vec3,
+  velocity: Vec3,
+): void {
+  if (!collision || collision.triangles.length === 0) return;
+  let best: { tri: StageCollisionTriangle; point: Vec3; t: number; side: number } | null = null;
+  for (const tri of candidateTrianglesForSegment(collision, previous, current)) {
+    const hit = segmentTriangleWallHit(tri, previous, current);
+    if (!hit) continue;
+    if (!best || hit.t < best.t) best = { tri, ...hit };
+  }
+  if (!best) return;
+
+  const wallNormal = horizontalNormal(best.tri.normal);
+  if (!wallNormal) return;
+  const away = { x: wallNormal.x * best.side, z: wallNormal.z * best.side };
+  current.x = best.point.x + away.x * WALL_CLEARANCE;
+  current.z = best.point.z + away.z * WALL_CLEARANCE;
+
+  const intoWall = velocity.x * away.x + velocity.z * away.z;
+  if (intoWall < 0) {
+    velocity.x -= away.x * intoWall;
+    velocity.z -= away.z * intoWall;
+  }
+}
+
+function segmentTriangleWallHit(
+  tri: StageCollisionTriangle,
+  previous: Vec3,
+  current: Vec3,
+): { point: Vec3; t: number; side: number } | null {
+  if (tri.marker !== 0xcccccccc) return null;
+  if (!isFiniteVec(tri.normal) || !tri.vertices.every(isFiniteVec)) return null;
+  if (Math.abs(tri.normal.y) > WALL_NORMAL_MAX_Y) return null;
+  if (!horizontalNormal(tri.normal)) return null;
+
+  const a = tri.vertices[0];
+  const d0 = signedDistanceToPlane(previous, a, tri.normal);
+  const d1 = signedDistanceToPlane(current, a, tri.normal);
+  if (!Number.isFinite(d0) || !Number.isFinite(d1)) return null;
+  if (Math.abs(d0 - d1) < 1e-5) return null;
+  if (d0 === 0 || d0 * d1 > 0) return null;
+
+  const t = d0 / (d0 - d1);
+  if (t < -1e-4 || t > 1 + 1e-4) return null;
+  const point = {
+    x: previous.x + (current.x - previous.x) * t,
+    y: previous.y + (current.y - previous.y) * t,
+    z: previous.z + (current.z - previous.z) * t,
+  };
+  if (!pointInTriangle3d(point, tri.vertices)) return null;
+  return { point, t, side: d0 >= 0 ? 1 : -1 };
+}
+
 function bestFloorFromCandidates(
   triangles: readonly StageCollisionTriangle[],
   x: number,
@@ -266,6 +358,41 @@ function yAtTriangleXZ(tri: StageCollisionTriangle, x: number, z: number): numbe
   const wc = 1 - wa - wb;
   if (wa < -1e-4 || wb < -1e-4 || wc < -1e-4) return null;
   return wa * a.y + wb * b.y + wc * c.y;
+}
+
+function signedDistanceToPlane(point: Vec3, planePoint: Vec3, normal: Vec3): number {
+  return (
+    (point.x - planePoint.x) * normal.x +
+    (point.y - planePoint.y) * normal.y +
+    (point.z - planePoint.z) * normal.z
+  );
+}
+
+function pointInTriangle3d(point: Vec3, [a, b, c]: [Vec3, Vec3, Vec3]): boolean {
+  const v0 = { x: c.x - a.x, y: c.y - a.y, z: c.z - a.z };
+  const v1 = { x: b.x - a.x, y: b.y - a.y, z: b.z - a.z };
+  const v2 = { x: point.x - a.x, y: point.y - a.y, z: point.z - a.z };
+  const dot00 = dot(v0, v0);
+  const dot01 = dot(v0, v1);
+  const dot02 = dot(v0, v2);
+  const dot11 = dot(v1, v1);
+  const dot12 = dot(v1, v2);
+  const denom = dot00 * dot11 - dot01 * dot01;
+  if (Math.abs(denom) < 1e-8) return false;
+  const inv = 1 / denom;
+  const u = (dot11 * dot02 - dot01 * dot12) * inv;
+  const v = (dot00 * dot12 - dot01 * dot02) * inv;
+  return u >= -1e-4 && v >= -1e-4 && u + v <= 1.0001;
+}
+
+function horizontalNormal(normal: Vec3): { x: number; z: number } | null {
+  const length = Math.hypot(normal.x, normal.z);
+  if (length < 1e-5) return null;
+  return { x: normal.x / length, z: normal.z / length };
+}
+
+function dot(a: Vec3, b: Vec3): number {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 function isFiniteVec(v: Vec3): boolean {
