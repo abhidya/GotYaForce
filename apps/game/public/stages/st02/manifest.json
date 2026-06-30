@@ -1,0 +1,70 @@
+{
+  "region": "GG4E",
+  "id": "st02",
+  "source": "user-data/GG4E/afs_data/root",
+  "status": "partial-visual-dae-missing-slots",
+  "verifiedBy": "scripts/export-all-stages.mjs",
+  "verifiedAt": "2026-06-30T07:52:17.336Z",
+  "copied": {
+    "stageArc": "st02/raw/st02_mdl.arc",
+    "stagePzz": "st02/raw/st02.pzz",
+    "hitBins": [
+      "st02/collision/hit020.bin",
+      "st02/collision/hit021.bin",
+      "st02/collision/hit022.bin"
+    ],
+    "setArcs": [
+      "st02/set/set0200.arc",
+      "st02/set/set0201.arc",
+      "st02/set/set0202.arc",
+      "st02/set/set0203.arc"
+    ]
+  },
+  "visual": {
+    "hasDaePieces": true,
+    "hasContiguousDaeSequence": false,
+    "daeCount": 44,
+    "nonEmptyDaeCount": 44,
+    "maxModelIndex": 50,
+    "missingModelIndices": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "textureCount": 11
+  },
+  "collision": {
+    "sourceHitFiles": [
+      "hit020.bin",
+      "hit021.bin",
+      "hit022.bin"
+    ],
+    "exportedHitCount": 3,
+    "missingSourceHitFiles": [],
+    "hasCompleteSourceHitTriplet": true
+  },
+  "sets": {
+    "sourceSetFiles": [
+      "set0200.arc",
+      "set0201.arc",
+      "set0202.arc",
+      "set0203.arc"
+    ],
+    "exportedSetCount": 4,
+    "filesNotCopiedByCurrentTool": []
+  },
+  "commands": {
+    "stage": "st02",
+    "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st02",
+    "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 02",
+    "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 02"
+  },
+  "notes": [
+    "Verified by comparing source stage assets against the browser public stage folder.",
+    "Visual DAE pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
+  ]
+}

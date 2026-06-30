@@ -68,6 +68,7 @@ Rotation→matrix convention (from `HSDRawViewer Math3D.CreateMatrix4FromEuler`)
   - `animtest.exe scan` — dumps model JOBJ counts vs anim root tree-node counts.
   - `animtest.exe exportmodel <arc> <skip> <modelIdx> <out.dae>` — exports rigged+skinned+textured Collada (bones named `JOBJ_i`).
   - `animtest.exe <mot.bin> <arc> <skip> <blobOffHex> <modelIdx> <out.json>` — extracts a clip-blob, loads with HSDRaw, bakes per-bone TRS **per frame** (rest pose overridden by FOBJ tracks), emits JSON: `{frameCount, fps:60, rotFormat:"quat_xyzw", bones:[{i, pos:[xyz…], rot:[xyzw…], scl:[xyz…]}]}`. Bone `i` ↔ Collada node `JOBJ_i`.
+- **Repeatable repo script:** `node scripts/export-borg-animation-hsd.mjs GG4E pl0615` regenerates `apps/game/public/models/pl0615/anim_b00_idle.json` from blob `0x240` and `anim_b00_clip1.json` from blob `0x1a40`. Additional clips use `offset[:filename]`, for example `node scripts/export-borg-animation-hsd.mjs GG4E pl0615 0x240:idle.json`.
 - **Browser:** `apps/slice/index.html` builds a `THREE.AnimationClip` (Quaternion/VectorKeyframeTrack per `JOBJ_i.{quaternion,position,scale}`) and plays it on the loaded Collada skeleton via `THREE.AnimationMixer`, looping. Keys 1/2 switch clips.
 
 ## Remaining / not yet done

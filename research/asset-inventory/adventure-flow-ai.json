@@ -1,0 +1,1631 @@
+{
+  "generatedBy": "scripts/inventory-adventure-flow.mjs",
+  "generatedAt": "2026-06-30T07:36:38.988Z",
+  "scope": "Adventure flow and CPU AI mapping only; no story-mode proposal or fake UI work.",
+  "sources": {
+    "data": [
+      {
+        "path": "packages/assets/data/stages.json",
+        "exists": true,
+        "bytes": 19505
+      },
+      {
+        "path": "packages/assets/data/borgs.json",
+        "exists": true,
+        "bytes": 80101
+      },
+      {
+        "path": "packages/missions/src/index.ts",
+        "exists": true,
+        "bytes": 4087
+      }
+    ],
+    "extracted": [
+      {
+        "path": "user-data/GG4E/afs_data/root",
+        "exists": true,
+        "bytes": 0
+      },
+      {
+        "path": "user-data/GG4E/disc",
+        "exists": true,
+        "bytes": 0
+      },
+      {
+        "path": "user-data/GG4E/disc/sys/boot.dol",
+        "exists": true,
+        "bytes": 3888928
+      }
+    ],
+    "reverseEngineering": [
+      {
+        "path": "research/symbols/GG4E-CSM-20220412.map",
+        "exists": true,
+        "bytes": 260909
+      },
+      {
+        "path": "research/traces/GG4E-dol-trace-playbook.md",
+        "exists": true,
+        "bytes": 5383
+      }
+    ],
+    "currentRuntime": [
+      {
+        "path": "packages/ai/src/index.ts",
+        "exists": true,
+        "bytes": 278
+      },
+      {
+        "path": "apps/game/src/main.ts",
+        "exists": true,
+        "bytes": 28578
+      },
+      {
+        "path": "apps/game/public/stages",
+        "exists": true,
+        "bytes": 0
+      },
+      {
+        "path": "apps/game/public/models/library/manifest.json",
+        "exists": true,
+        "bytes": 57992
+      }
+    ]
+  },
+  "data": {
+    "stages": {
+      "path": "packages/assets/data/stages.json",
+      "metaMode": "Story Mode",
+      "metaSource": "Fury_Hikari FAQ/Walkthrough v1.21 (GameFAQs/Neoseeker/Cheathappens mirror), cross-checked vs Wikipedia, Fandom, JP wikiwiki",
+      "count": 70,
+      "first": {
+        "stage": 1,
+        "name": "The name is G Red!",
+        "arena": "Little Hill",
+        "enemies": [
+          "DEATH BORG BETA II",
+          "DEATH BORG OMEGA"
+        ],
+        "boss": null,
+        "notes": "7x Beta II, 1x Omega. Reward 10 GF + map. Chapter 1.",
+        "confidence": "Likely"
+      },
+      "last": {
+        "stage": "M7",
+        "name": "Major Mission: The final battle! Defeat the Galactic Emperor!",
+        "arena": "Greater Tricity Area (Stratosphere)",
+        "enemies": [
+          "GALACTIC EMPEROR"
+        ],
+        "boss": "GALACTIC EMPEROR",
+        "notes": "FINAL BOSS. Roster #205, energy 3000 (highest). Chapter 5 climax / story completion.",
+        "confidence": "Confirmed"
+      },
+      "confidenceCounts": {
+        "Confirmed": 5,
+        "Likely": 52,
+        "Speculative": 13
+      },
+      "uniqueArenaCount": 20,
+      "uniqueArenas": [
+        "Construction Town",
+        "Construction Zone",
+        "Greater Tricity Area",
+        "Greater Tricity Area (Blue Death Base)",
+        "Greater Tricity Area (Blue Death Lair)",
+        "Greater Tricity Area (Red Death Lair)",
+        "Greater Tricity Area (Sky Fortress)",
+        "Greater Tricity Area (Stratosphere)",
+        "Kakeru's Home",
+        "Kou's Home",
+        "Little Hill",
+        "Mana's Home",
+        "Neo Elementary",
+        "Safaritown Marketplace",
+        "Serenity Street",
+        "Stone River",
+        "Stone River (Death Base)",
+        "Sunnyside Park",
+        "The Pit",
+        "Your Home"
+      ],
+      "uniqueEnemyNames": 131,
+      "unresolvedEnemyNames": [
+        "Random"
+      ]
+    },
+    "borgs": {
+      "path": "packages/assets/data/borgs.json",
+      "count": 208,
+      "hasModelCount": 208,
+      "hasAnimCount": 102
+    },
+    "missionsPackage": {
+      "path": "packages/missions/src/index.ts",
+      "resolvesEnemyNames": "packages/missions/src/index.ts:52",
+      "enemyForceEnergySum": "packages/missions/src/index.ts:77",
+      "limitation": "Resolves guide/data rows to borg stats; it does not map original Adventure menus, load sequencing, CPU controller ownership, or battle runtime state."
+    }
+  },
+  "extractedAssets": {
+    "root": {
+      "path": "user-data/GG4E/afs_data/root",
+      "fileCount": 2857
+    },
+    "rootGroups": [
+      {
+        "id": "mainMenuSelect",
+        "label": "main menu / Adventure select candidates",
+        "pattern": "^(titles|as_icon|font_00|icon|vsel00_mdl|vsel01_mdl)\\.(tpl|bin|arc)$",
+        "count": 6,
+        "samples": [
+          "as_icon.tpl",
+          "font_00.tpl",
+          "icon.bin",
+          "titles.tpl",
+          "vsel00_mdl.arc",
+          "vsel01_mdl.arc"
+        ],
+        "note": "Menu/select textures and select-screen models."
+      },
+      {
+        "id": "missionIntroLoad",
+        "label": "mission intro / load candidates",
+        "pattern": "^(firstld|brif00_mdl|entry00_mdl|msg00|msg01|mc_msg00|nm_msg|sh_msg|tr_msg)\\.(pzz|arc|mdt)$",
+        "count": 9,
+        "samples": [
+          "brif00_mdl.arc",
+          "entry00_mdl.arc",
+          "firstld.pzz",
+          "mc_msg00.mdt",
+          "msg00.mdt",
+          "msg01.mdt",
+          "nm_msg.mdt",
+          "sh_msg.mdt",
+          "tr_msg.mdt"
+        ],
+        "note": "Load, briefing, entry, and message archives."
+      },
+      {
+        "id": "hudTextures",
+        "label": "battle HUD / portrait / banner candidates",
+        "pattern": "^(bn[0-9a-f]{4}|face[0-9a-f]{4}|as_icon|font_00|arrow_mdl|comhit|comhit2|cmn_data)\\.(tpl|arc|bin|pzz)$",
+        "count": 226,
+        "samples": [
+          "arrow_mdl.arc",
+          "as_icon.tpl",
+          "bn0000.tpl",
+          "bn0001.tpl",
+          "bn0002.tpl",
+          "bn0003.tpl",
+          "bn0004.tpl",
+          "bn0005.tpl",
+          "bn0006.tpl",
+          "bn0007.tpl",
+          "bn0008.tpl",
+          "bn0009.tpl"
+        ],
+        "note": "HUD banners, portraits, fonts/icons, targeting arrow, and common battle hit data."
+      },
+      {
+        "id": "battleStages",
+        "label": "battle stage model/collision/set candidates",
+        "pattern": "^(st[0-9a-f]{2}(_mdl\\.arc|\\.pzz)|set[0-9a-f]{4}\\.arc|hit[0-9a-f]{3}\\.bin)$",
+        "count": 195,
+        "samples": [
+          "hit000.bin",
+          "hit001.bin",
+          "hit002.bin",
+          "hit010.bin",
+          "hit011.bin",
+          "hit012.bin",
+          "hit020.bin",
+          "hit021.bin",
+          "hit022.bin",
+          "hit030.bin",
+          "hit031.bin",
+          "hit032.bin"
+        ],
+        "note": "Arena archives, object set archives, and collision bins."
+      },
+      {
+        "id": "stageVariants",
+        "label": "stage variant ARZ candidates",
+        "pattern": "^st[cfms][0-9a-f]{2}_mdl\\.arz$",
+        "count": 94,
+        "samples": [
+          "stc01_mdl.arz",
+          "stc02_mdl.arz",
+          "stc03_mdl.arz",
+          "stc04_mdl.arz",
+          "stc05_mdl.arz",
+          "stc06_mdl.arz",
+          "stc07_mdl.arz",
+          "stc08_mdl.arz",
+          "stc09_mdl.arz",
+          "stc0a_mdl.arz",
+          "stc0b_mdl.arz",
+          "stc0c_mdl.arz"
+        ],
+        "note": "Compressed stage/scene variants that need separate decoding before use."
+      },
+      {
+        "id": "cpuActors",
+        "label": "CPU actor borg asset candidates",
+        "pattern": "^pl[0-9a-f]{4}",
+        "count": 1858,
+        "samples": [
+          "pl0000_mdl.arc",
+          "pl0000.pzz",
+          "pl0000b_mdl.arc",
+          "pl0000c_mdl.arc",
+          "pl0000data.bin",
+          "pl0000g_mdl.arc",
+          "pl0000hit.bin",
+          "pl0000k_mdl.arc",
+          "pl0000mot.bin",
+          "pl0000s_mdl.arc",
+          "pl0001_mdl.arc",
+          "pl0001.pzz"
+        ],
+        "note": "Borg pzz/model/data/hit/MOT files used by player and CPU-controlled actors."
+      },
+      {
+        "id": "forceCollection",
+        "label": "force setup / collection candidates",
+        "pattern": "^(unitall_mdl|plcmndata|allbox|gets|gets[0-9]{2}_mdl)\\.(arc|bin|pzz)$",
+        "count": 11,
+        "samples": [
+          "allbox.bin",
+          "gets.pzz",
+          "gets00_mdl.arc",
+          "gets01_mdl.arc",
+          "gets02_mdl.arc",
+          "gets03_mdl.arc",
+          "gets04_mdl.arc",
+          "gets05_mdl.arc",
+          "gets06_mdl.arc",
+          "plcmndata.bin",
+          "unitall_mdl.arc"
+        ],
+        "note": "Roster, common player data, collection/get assets."
+      }
+    ],
+    "stageAssets": {
+      "directStageArchives": {
+        "count": 40,
+        "pairsWithModelAndPzz": 40,
+        "codes": [
+          "st00",
+          "st01",
+          "st02",
+          "st03",
+          "st04",
+          "st05",
+          "st06",
+          "st07",
+          "st08",
+          "st09",
+          "st0a",
+          "st0b",
+          "st0c",
+          "st0d",
+          "st0e",
+          "st0f",
+          "st10",
+          "st20",
+          "st21",
+          "st22",
+          "st23",
+          "st24",
+          "st25",
+          "st29",
+          "st2a",
+          "st2b",
+          "st2c",
+          "st2e",
+          "st40",
+          "st41",
+          "st42",
+          "st43",
+          "st44",
+          "st45",
+          "st49",
+          "st4a",
+          "st4b",
+          "st4c",
+          "st4e",
+          "stff"
+        ]
+      },
+      "setArchives": {
+        "count": 61,
+        "byStageCode": {
+          "00": 4,
+          "01": 4,
+          "02": 4,
+          "03": 4,
+          "04": 4,
+          "05": 4,
+          "06": 4,
+          "07": 4,
+          "08": 4,
+          "09": 1,
+          "0a": 4,
+          "0b": 4,
+          "0c": 4,
+          "0d": 4,
+          "0e": 4,
+          "0f": 4
+        }
+      },
+      "collisionBins": {
+        "count": 54,
+        "byStageCode": {
+          "10": 3,
+          "00": 3,
+          "01": 3,
+          "02": 3,
+          "03": 3,
+          "04": 3,
+          "05": 3,
+          "06": 3,
+          "07": 3,
+          "08": 3,
+          "09": 3,
+          "0a": 3,
+          "0b": 3,
+          "0c": 3,
+          "0d": 3,
+          "0e": 3,
+          "0f": 3,
+          "ff": 3
+        }
+      },
+      "stageVariantArz": {
+        "count": 94,
+        "samples": [
+          "stc01_mdl.arz",
+          "stc02_mdl.arz",
+          "stc03_mdl.arz",
+          "stc04_mdl.arz",
+          "stc05_mdl.arz",
+          "stc06_mdl.arz",
+          "stc07_mdl.arz",
+          "stc08_mdl.arz",
+          "stc09_mdl.arz",
+          "stc0a_mdl.arz",
+          "stc0b_mdl.arz",
+          "stc0c_mdl.arz"
+        ]
+      }
+    },
+    "introLoadHud": {
+      "mainMenuSelect": {
+        "id": "mainMenuSelect",
+        "label": "main menu / Adventure select candidates",
+        "pattern": "^(titles|as_icon|font_00|icon|vsel00_mdl|vsel01_mdl)\\.(tpl|bin|arc)$",
+        "count": 6,
+        "samples": [
+          "as_icon.tpl",
+          "font_00.tpl",
+          "icon.bin",
+          "titles.tpl",
+          "vsel00_mdl.arc",
+          "vsel01_mdl.arc"
+        ],
+        "note": "Menu/select textures and select-screen models."
+      },
+      "missionIntroLoad": {
+        "id": "missionIntroLoad",
+        "label": "mission intro / load candidates",
+        "pattern": "^(firstld|brif00_mdl|entry00_mdl|msg00|msg01|mc_msg00|nm_msg|sh_msg|tr_msg)\\.(pzz|arc|mdt)$",
+        "count": 9,
+        "samples": [
+          "brif00_mdl.arc",
+          "entry00_mdl.arc",
+          "firstld.pzz",
+          "mc_msg00.mdt",
+          "msg00.mdt",
+          "msg01.mdt",
+          "nm_msg.mdt",
+          "sh_msg.mdt",
+          "tr_msg.mdt"
+        ],
+        "note": "Load, briefing, entry, and message archives."
+      },
+      "hudTextures": {
+        "id": "hudTextures",
+        "label": "battle HUD / portrait / banner candidates",
+        "pattern": "^(bn[0-9a-f]{4}|face[0-9a-f]{4}|as_icon|font_00|arrow_mdl|comhit|comhit2|cmn_data)\\.(tpl|arc|bin|pzz)$",
+        "count": 226,
+        "samples": [
+          "arrow_mdl.arc",
+          "as_icon.tpl",
+          "bn0000.tpl",
+          "bn0001.tpl",
+          "bn0002.tpl",
+          "bn0003.tpl",
+          "bn0004.tpl",
+          "bn0005.tpl",
+          "bn0006.tpl",
+          "bn0007.tpl",
+          "bn0008.tpl",
+          "bn0009.tpl"
+        ],
+        "note": "HUD banners, portraits, fonts/icons, targeting arrow, and common battle hit data."
+      },
+      "forceCollection": {
+        "id": "forceCollection",
+        "label": "force setup / collection candidates",
+        "pattern": "^(unitall_mdl|plcmndata|allbox|gets|gets[0-9]{2}_mdl)\\.(arc|bin|pzz)$",
+        "count": 11,
+        "samples": [
+          "allbox.bin",
+          "gets.pzz",
+          "gets00_mdl.arc",
+          "gets01_mdl.arc",
+          "gets02_mdl.arc",
+          "gets03_mdl.arc",
+          "gets04_mdl.arc",
+          "gets05_mdl.arc",
+          "gets06_mdl.arc",
+          "plcmndata.bin",
+          "unitall_mdl.arc"
+        ],
+        "note": "Roster, common player data, collection/get assets."
+      }
+    },
+    "disc": {
+      "path": "user-data/GG4E/disc",
+      "fileCount": 10,
+      "bootDol": {
+        "path": "user-data/GG4E/disc/sys/boot.dol",
+        "exists": true,
+        "bytes": 3888928
+      },
+      "samples": [
+        "user-data/GG4E/disc/GG4E.hashes.json",
+        "user-data/GG4E/disc/root/afs_data.afs",
+        "user-data/GG4E/disc/root/opening.bnr",
+        "user-data/GG4E/disc/root/poq_adx_usa.afs",
+        "user-data/GG4E/disc/sys/apploader.img",
+        "user-data/GG4E/disc/sys/bi2.bin",
+        "user-data/GG4E/disc/sys/boot.bin",
+        "user-data/GG4E/disc/sys/boot.dol",
+        "user-data/GG4E/disc/sys/fst.bin",
+        "user-data/GG4E/disc/sys/system.conf"
+      ]
+    }
+  },
+  "enemyForce": {
+    "sourceStageData": "packages/assets/data/stages.json",
+    "sourceBorgData": "packages/assets/data/borgs.json",
+    "uniqueEnemyNames": 131,
+    "uniqueConcreteEnemies": 130,
+    "unresolvedEnemyNames": [
+      "Random"
+    ],
+    "assetCoverage": {
+      "pzz": 130,
+      "model": 129,
+      "data": 120,
+      "hit": 130,
+      "mot": 70
+    },
+    "missingDirectModel": [
+      {
+        "id": "pl0507",
+        "name": "CYBER DEATH DRAGON",
+        "hasPzz": true,
+        "samples": [
+          "pl0507.pzz",
+          "pl0507data.bin",
+          "pl0507hit.bin"
+        ]
+      }
+    ],
+    "missingMot": {
+      "count": 60,
+      "samples": [
+        {
+          "id": "pl0908",
+          "name": "ANGEL RESCUE"
+        },
+        {
+          "id": "pl0e03",
+          "name": "ANTARES"
+        },
+        {
+          "id": "pl0e01",
+          "name": "BEAM SATELLITE"
+        },
+        {
+          "id": "pl0a08",
+          "name": "BLADE WING"
+        },
+        {
+          "id": "pl050a",
+          "name": "BLIZZARD DRAGON"
+        },
+        {
+          "id": "pl0d00",
+          "name": "BLUE STRIKER"
+        },
+        {
+          "id": "pl0609",
+          "name": "CYBER ATLAS"
+        },
+        {
+          "id": "pl0507",
+          "name": "CYBER DEATH DRAGON"
+        },
+        {
+          "id": "pl030a",
+          "name": "CYBER GIRL HYPER"
+        },
+        {
+          "id": "pl0e05",
+          "name": "DEATH ARC"
+        },
+        {
+          "id": "pl0008",
+          "name": "DEATH BORG ALPHA"
+        },
+        {
+          "id": "pl000c",
+          "name": "DEATH BORG ALPHA II"
+        },
+        {
+          "id": "pl0206",
+          "name": "DEATH BORG GAMMA"
+        },
+        {
+          "id": "pl020f",
+          "name": "DEATH BORG GAMMA II"
+        },
+        {
+          "id": "pl090b",
+          "name": "DEATH BORG IOTA"
+        },
+        {
+          "id": "pl0b05",
+          "name": "DEATH BORG LAMBDA"
+        },
+        {
+          "id": "pl0f00",
+          "name": "DEATH BORG MU"
+        },
+        {
+          "id": "pl0f01",
+          "name": "DEATH BORG NU"
+        },
+        {
+          "id": "pl0f02",
+          "name": "DEATH BORG NU II"
+        },
+        {
+          "id": "pl0f03",
+          "name": "DEATH BORG NU III"
+        }
+      ]
+    },
+    "actorSamples": [
+      {
+        "name": "AKUMA SAMURAI",
+        "id": "pl0708",
+        "borgName": "AKUMA SAMURAI",
+        "energy": 480,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0708c_mdl.arc",
+            "pl0708g_mdl.arc",
+            "pl0708k_mdl.arc",
+            "pl0708s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 9,
+          "samples": [
+            "pl0708_mdl.arc",
+            "pl0708.pzz",
+            "pl0708c_mdl.arc",
+            "pl0708data.bin",
+            "pl0708g_mdl.arc",
+            "pl0708hit.bin",
+            "pl0708k_mdl.arc",
+            "pl0708mot.bin",
+            "pl0708s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "ALIEN INSECT",
+        "id": "pl0207",
+        "borgName": "ALIEN INSECT",
+        "energy": 350,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0207b_mdl.arc",
+            "pl0207c_mdl.arc",
+            "pl0207g_mdl.arc",
+            "pl0207k_mdl.arc",
+            "pl0207s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0207_mdl.arc",
+            "pl0207.pzz",
+            "pl0207b_mdl.arc",
+            "pl0207c_mdl.arc",
+            "pl0207data.bin",
+            "pl0207g_mdl.arc",
+            "pl0207hit.bin",
+            "pl0207k_mdl.arc",
+            "pl0207mot.bin",
+            "pl0207s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "ANGEL NURSE",
+        "id": "pl0900",
+        "borgName": "ANGEL NURSE",
+        "energy": 240,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0900b_mdl.arc",
+            "pl0900c_mdl.arc",
+            "pl0900g_mdl.arc",
+            "pl0900k_mdl.arc",
+            "pl0900s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0900_mdl.arc",
+            "pl0900.pzz",
+            "pl0900b_mdl.arc",
+            "pl0900c_mdl.arc",
+            "pl0900data.bin",
+            "pl0900g_mdl.arc",
+            "pl0900hit.bin",
+            "pl0900k_mdl.arc",
+            "pl0900mot.bin",
+            "pl0900s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "ANGEL RESCUE",
+        "id": "pl0908",
+        "borgName": "ANGEL RESCUE",
+        "energy": 300,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0908c_mdl.arc",
+            "pl0908g_mdl.arc",
+            "pl0908k_mdl.arc",
+            "pl0908s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": false,
+          "fileCount": 8,
+          "samples": [
+            "pl0908_mdl.arc",
+            "pl0908.pzz",
+            "pl0908c_mdl.arc",
+            "pl0908data.bin",
+            "pl0908g_mdl.arc",
+            "pl0908hit.bin",
+            "pl0908k_mdl.arc",
+            "pl0908s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "ANTARES",
+        "id": "pl0e03",
+        "borgName": "ANTARES",
+        "energy": 1300,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0e03b_mdl.arc",
+            "pl0e03c_mdl.arc",
+            "pl0e03g_mdl.arc",
+            "pl0e03k_mdl.arc",
+            "pl0e03s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": false,
+          "fileCount": 9,
+          "samples": [
+            "pl0e03_mdl.arc",
+            "pl0e03.pzz",
+            "pl0e03b_mdl.arc",
+            "pl0e03c_mdl.arc",
+            "pl0e03data.bin",
+            "pl0e03g_mdl.arc",
+            "pl0e03hit.bin",
+            "pl0e03k_mdl.arc",
+            "pl0e03s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "ARROW NINJA",
+        "id": "pl0002",
+        "borgName": "ARROW NINJA",
+        "energy": 300,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0002b_mdl.arc",
+            "pl0002c_mdl.arc",
+            "pl0002g_mdl.arc",
+            "pl0002k_mdl.arc",
+            "pl0002s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0002_mdl.arc",
+            "pl0002.pzz",
+            "pl0002b_mdl.arc",
+            "pl0002c_mdl.arc",
+            "pl0002data.bin",
+            "pl0002g_mdl.arc",
+            "pl0002hit.bin",
+            "pl0002k_mdl.arc",
+            "pl0002mot.bin",
+            "pl0002s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "AXE KNIGHT",
+        "id": "pl0204",
+        "borgName": "AXE KNIGHT",
+        "energy": 590,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0204b_mdl.arc",
+            "pl0204c_mdl.arc",
+            "pl0204g_mdl.arc",
+            "pl0204k_mdl.arc",
+            "pl0204s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0204_mdl.arc",
+            "pl0204.pzz",
+            "pl0204b_mdl.arc",
+            "pl0204c_mdl.arc",
+            "pl0204data.bin",
+            "pl0204g_mdl.arc",
+            "pl0204hit.bin",
+            "pl0204k_mdl.arc",
+            "pl0204mot.bin",
+            "pl0204s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "BATTLE GIRL",
+        "id": "pl0300",
+        "borgName": "BATTLE GIRL",
+        "energy": 230,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0300b_mdl.arc",
+            "pl0300c_mdl.arc",
+            "pl0300g_mdl.arc",
+            "pl0300k_mdl.arc",
+            "pl0300s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0300_mdl.arc",
+            "pl0300.pzz",
+            "pl0300b_mdl.arc",
+            "pl0300c_mdl.arc",
+            "pl0300data.bin",
+            "pl0300g_mdl.arc",
+            "pl0300hit.bin",
+            "pl0300k_mdl.arc",
+            "pl0300mot.bin",
+            "pl0300s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "BEAM GUNNER",
+        "id": "pl0104",
+        "borgName": "BEAM GUNNER",
+        "energy": 650,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0104b_mdl.arc",
+            "pl0104c_mdl.arc",
+            "pl0104g_mdl.arc",
+            "pl0104k_mdl.arc",
+            "pl0104s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0104_mdl.arc",
+            "pl0104.pzz",
+            "pl0104b_mdl.arc",
+            "pl0104c_mdl.arc",
+            "pl0104data.bin",
+            "pl0104g_mdl.arc",
+            "pl0104hit.bin",
+            "pl0104k_mdl.arc",
+            "pl0104mot.bin",
+            "pl0104s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "BEAM SAMURAI",
+        "id": "pl0706",
+        "borgName": "BEAM SAMURAI",
+        "energy": 550,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0706b_mdl.arc",
+            "pl0706c_mdl.arc",
+            "pl0706g_mdl.arc",
+            "pl0706k_mdl.arc",
+            "pl0706s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0706_mdl.arc",
+            "pl0706.pzz",
+            "pl0706b_mdl.arc",
+            "pl0706c_mdl.arc",
+            "pl0706data.bin",
+            "pl0706g_mdl.arc",
+            "pl0706hit.bin",
+            "pl0706k_mdl.arc",
+            "pl0706mot.bin",
+            "pl0706s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "BEAM SATELLITE",
+        "id": "pl0e01",
+        "borgName": "BEAM SATELLITE",
+        "energy": 800,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0e01b_mdl.arc",
+            "pl0e01c_mdl.arc",
+            "pl0e01g_mdl.arc",
+            "pl0e01k_mdl.arc",
+            "pl0e01s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": false,
+          "fileCount": 9,
+          "samples": [
+            "pl0e01_mdl.arc",
+            "pl0e01.pzz",
+            "pl0e01b_mdl.arc",
+            "pl0e01c_mdl.arc",
+            "pl0e01data.bin",
+            "pl0e01g_mdl.arc",
+            "pl0e01hit.bin",
+            "pl0e01k_mdl.arc",
+            "pl0e01s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "BEAM TANK",
+        "id": "pl0c02",
+        "borgName": "BEAM TANK",
+        "energy": 780,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0c02b_mdl.arc",
+            "pl0c02c_mdl.arc",
+            "pl0c02g_mdl.arc",
+            "pl0c02k_mdl.arc",
+            "pl0c02s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0c02_mdl.arc",
+            "pl0c02.pzz",
+            "pl0c02b_mdl.arc",
+            "pl0c02c_mdl.arc",
+            "pl0c02data.bin",
+            "pl0c02g_mdl.arc",
+            "pl0c02hit.bin",
+            "pl0c02k_mdl.arc",
+            "pl0c02mot.bin",
+            "pl0c02s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "BLADE WING",
+        "id": "pl0a08",
+        "borgName": "BLADE WING",
+        "energy": 650,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0a08c_mdl.arc",
+            "pl0a08g_mdl.arc",
+            "pl0a08k_mdl.arc",
+            "pl0a08s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": false,
+          "fileCount": 8,
+          "samples": [
+            "pl0a08_mdl.arc",
+            "pl0a08.pzz",
+            "pl0a08c_mdl.arc",
+            "pl0a08data.bin",
+            "pl0a08g_mdl.arc",
+            "pl0a08hit.bin",
+            "pl0a08k_mdl.arc",
+            "pl0a08s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "BLIZZARD DRAGON",
+        "id": "pl050a",
+        "borgName": "BLIZZARD DRAGON",
+        "energy": 1550,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl050ac_mdl.arc",
+            "pl050ag_mdl.arc",
+            "pl050ak_mdl.arc",
+            "pl050as_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": false,
+          "fileCount": 8,
+          "samples": [
+            "pl050a_mdl.arc",
+            "pl050a.pzz",
+            "pl050ac_mdl.arc",
+            "pl050adata.bin",
+            "pl050ag_mdl.arc",
+            "pl050ahit.bin",
+            "pl050ak_mdl.arc",
+            "pl050as_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "BLUE STRIKER",
+        "id": "pl0d00",
+        "borgName": "BLUE STRIKER",
+        "energy": 200,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0d00b_mdl.arc",
+            "pl0d00c_mdl.arc",
+            "pl0d00g_mdl.arc",
+            "pl0d00k_mdl.arc",
+            "pl0d00s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": false,
+          "fileCount": 9,
+          "samples": [
+            "pl0d00_mdl.arc",
+            "pl0d00.pzz",
+            "pl0d00b_mdl.arc",
+            "pl0d00c_mdl.arc",
+            "pl0d00data.bin",
+            "pl0d00g_mdl.arc",
+            "pl0d00hit.bin",
+            "pl0d00k_mdl.arc",
+            "pl0d00s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "CHAINSAW KNIGHT",
+        "id": "pl0201",
+        "borgName": "CHAINSAW KNIGHT",
+        "energy": 370,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0201b_mdl.arc",
+            "pl0201c_mdl.arc",
+            "pl0201g_mdl.arc",
+            "pl0201k_mdl.arc",
+            "pl0201s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0201_mdl.arc",
+            "pl0201.pzz",
+            "pl0201b_mdl.arc",
+            "pl0201c_mdl.arc",
+            "pl0201data.bin",
+            "pl0201g_mdl.arc",
+            "pl0201hit.bin",
+            "pl0201k_mdl.arc",
+            "pl0201mot.bin",
+            "pl0201s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "CHRONO SAMURAI",
+        "id": "pl0707",
+        "borgName": "CHRONO SAMURAI",
+        "energy": 600,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0707c_mdl.arc",
+            "pl0707g_mdl.arc",
+            "pl0707k_mdl.arc",
+            "pl0707s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 9,
+          "samples": [
+            "pl0707_mdl.arc",
+            "pl0707.pzz",
+            "pl0707c_mdl.arc",
+            "pl0707data.bin",
+            "pl0707g_mdl.arc",
+            "pl0707hit.bin",
+            "pl0707k_mdl.arc",
+            "pl0707mot.bin",
+            "pl0707s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "CLAW ROBOT",
+        "id": "pl0400",
+        "borgName": "CLAW ROBOT",
+        "energy": 350,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0400b_mdl.arc",
+            "pl0400c_mdl.arc",
+            "pl0400g_mdl.arc",
+            "pl0400k_mdl.arc",
+            "pl0400s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0400_mdl.arc",
+            "pl0400.pzz",
+            "pl0400b_mdl.arc",
+            "pl0400c_mdl.arc",
+            "pl0400data.bin",
+            "pl0400g_mdl.arc",
+            "pl0400hit.bin",
+            "pl0400k_mdl.arc",
+            "pl0400mot.bin",
+            "pl0400s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "COPY MAN",
+        "id": "pl0806",
+        "borgName": "COPY MAN",
+        "energy": 350,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0806b_mdl.arc",
+            "pl0806c_mdl.arc",
+            "pl0806g_mdl.arc",
+            "pl0806k_mdl.arc",
+            "pl0806s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0806_mdl.arc",
+            "pl0806.pzz",
+            "pl0806b_mdl.arc",
+            "pl0806c_mdl.arc",
+            "pl0806data.bin",
+            "pl0806g_mdl.arc",
+            "pl0806hit.bin",
+            "pl0806k_mdl.arc",
+            "pl0806mot.bin",
+            "pl0806s_mdl.arc"
+          ]
+        }
+      },
+      {
+        "name": "COSMIC DRAGON",
+        "id": "pl0504",
+        "borgName": "COSMIC DRAGON",
+        "energy": 1700,
+        "assets": {
+          "pzz": true,
+          "model": true,
+          "modelVariants": [
+            "pl0504b_mdl.arc",
+            "pl0504c_mdl.arc",
+            "pl0504g_mdl.arc",
+            "pl0504k_mdl.arc",
+            "pl0504s_mdl.arc"
+          ],
+          "data": true,
+          "hit": true,
+          "mot": true,
+          "fileCount": 10,
+          "samples": [
+            "pl0504_mdl.arc",
+            "pl0504.pzz",
+            "pl0504b_mdl.arc",
+            "pl0504c_mdl.arc",
+            "pl0504data.bin",
+            "pl0504g_mdl.arc",
+            "pl0504hit.bin",
+            "pl0504k_mdl.arc",
+            "pl0504mot.bin",
+            "pl0504s_mdl.arc"
+          ]
+        }
+      }
+    ]
+  },
+  "dolCandidates": {
+    "symbolMap": "research/symbols/GG4E-CSM-20220412.map",
+    "tracePlaybook": "research/traces/GG4E-dol-trace-playbook.md",
+    "namedSymbols": [
+      {
+        "address": "0x802a3938",
+        "size": "0x00000010",
+        "name": "cTeam::GetPlayer(int)",
+        "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5695",
+        "why": "team/player lookup anchor for resolving Adventure participants and CPU target ownership"
+      },
+      {
+        "address": "0x802807ac",
+        "size": "0x00000018",
+        "name": "cPlayer::ClearSwapControllerTimer(void)",
+        "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5493",
+        "why": "player swap/death-transition anchor needed for ordered-force spawning"
+      },
+      {
+        "address": "0x80231c70",
+        "size": "0x00000010",
+        "name": "SaveLoad::DidGameIDChange(void)",
+        "sourceRef": "research/symbols/GG4E-CSM-20220412.map:4367",
+        "why": "save/load boundary candidate for Adventure select/load proof"
+      },
+      {
+        "address": "0x8025b34c",
+        "size": "0x0000003c",
+        "name": "gnt4-HSD_Randi-bl",
+        "sourceRef": "research/symbols/GG4E-CSM-20220412.map:4987",
+        "why": "random/reward helper to trace only around GET or randomized enemy-force selection"
+      }
+    ],
+    "traceBands": [
+      {
+        "range": "0x8005ec04..0x800660b8",
+        "use": "dense action/state handlers touching active borg state byte +0x544; likely CPU/player action-control proof point",
+        "sourceRef": "research/traces/GG4E-dol-trace-playbook.md:101"
+      },
+      {
+        "range": "0x800660b8..0x80068004",
+        "use": "action/helper cluster adjacent to dense state handlers",
+        "sourceRef": "research/traces/GG4E-dol-trace-playbook.md:102"
+      },
+      {
+        "range": "0x80281c38..0x80281e60",
+        "use": "death/swap lead; calls cPlayer::ClearSwapControllerTimer and should anchor ordered-force replacement",
+        "sourceRef": "research/traces/GG4E-dol-trace-playbook.md:104"
+      },
+      {
+        "range": "0x80297538..0x802a5e70",
+        "use": "team/player lookup band with cTeam::GetPlayer callers; likely CPU target/team ownership path",
+        "sourceRef": "research/traces/GG4E-dol-trace-playbook.md:105"
+      }
+    ],
+    "mapBands": {
+      "actionStateHandlers": {
+        "range": "0x8005ec04..0x800660b8",
+        "count": 20,
+        "samples": [
+          {
+            "address": "0x8005ec04",
+            "size": "0x0000001c",
+            "name": "zz_005ec04_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:728"
+          },
+          {
+            "address": "0x8005ec20",
+            "size": "0x00000090",
+            "name": "zz_005ec20_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:729"
+          },
+          {
+            "address": "0x8005ecb0",
+            "size": "0x00000088",
+            "name": "zz_005ecb0_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:730"
+          },
+          {
+            "address": "0x8005ee0c",
+            "size": "0x000000fc",
+            "name": "zz_005ee0c_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:731"
+          },
+          {
+            "address": "0x8005efc4",
+            "size": "0x00000048",
+            "name": "zz_005efc4_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:732"
+          },
+          {
+            "address": "0x8005f00c",
+            "size": "0x00000108",
+            "name": "zz_005f00c_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:733"
+          },
+          {
+            "address": "0x8005f114",
+            "size": "0x00000074",
+            "name": "zz_005f114_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:734"
+          },
+          {
+            "address": "0x8005f188",
+            "size": "0x000000b0",
+            "name": "zz_005f188_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:735"
+          },
+          {
+            "address": "0x8005f318",
+            "size": "0x00000088",
+            "name": "zz_005f318_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:736"
+          },
+          {
+            "address": "0x8005f554",
+            "size": "0x00000024",
+            "name": "zz_005f554_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:737"
+          }
+        ]
+      },
+      "deathSwap": {
+        "range": "0x80281c38..0x80281e60",
+        "count": 2,
+        "samples": [
+          {
+            "address": "0x80281c38",
+            "size": "0x00000228",
+            "name": "zz_0281c38_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5509"
+          },
+          {
+            "address": "0x80281e60",
+            "size": "0x0000006c",
+            "name": "zz_0281e60_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5510"
+          }
+        ]
+      },
+      "teamPlayerLookup": {
+        "range": "0x80297538..0x802a5e70",
+        "count": 176,
+        "samples": [
+          {
+            "address": "0x80297538",
+            "size": "0x000001f4",
+            "name": "zz_0297538_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5561"
+          },
+          {
+            "address": "0x80297ec4",
+            "size": "0x0000037c",
+            "name": "zz_0297ec4_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5562"
+          },
+          {
+            "address": "0x802982c4",
+            "size": "0x00000054",
+            "name": "zz_02982c4_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5563"
+          },
+          {
+            "address": "0x802987d8",
+            "size": "0x0000007c",
+            "name": "zz_02987d8_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5564"
+          },
+          {
+            "address": "0x80298854",
+            "size": "0x00000080",
+            "name": "zz_0298854_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5565"
+          },
+          {
+            "address": "0x802988d4",
+            "size": "0x0000008c",
+            "name": "zz_02988d4_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5566"
+          },
+          {
+            "address": "0x80298960",
+            "size": "0x00000090",
+            "name": "zz_0298960_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5567"
+          },
+          {
+            "address": "0x802989f0",
+            "size": "0x00000130",
+            "name": "zz_02989f0_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5568"
+          },
+          {
+            "address": "0x80298b20",
+            "size": "0x00000010",
+            "name": "zz_0298b20_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5569"
+          },
+          {
+            "address": "0x80298b30",
+            "size": "0x00000010",
+            "name": "zz_0298b30_",
+            "sourceRef": "research/symbols/GG4E-CSM-20220412.map:5570"
+          }
+        ]
+      }
+    },
+    "excludedAmbiguousSymbols": [
+      {
+        "pattern": "AIInit/AIStartDMA/AISetStream*",
+        "reason": "GameCube Audio Interface symbols, not CPU player AI."
+      }
+    ]
+  },
+  "currentRuntime": {
+    "aiPackage": {
+      "path": "packages/ai/src/index.ts",
+      "emptyExportRef": "packages/ai/src/index.ts:4"
+    },
+    "browserGates": {
+      "path": "apps/game/src/main.ts",
+      "screenStartsArenaRef": "apps/game/src/main.ts:131",
+      "defaultStageRef": "apps/game/src/main.ts:89",
+      "stageModelCountRef": "apps/game/src/main.ts:90",
+      "animatedBorgsRef": "apps/game/src/main.ts:91",
+      "noCpuActorsRef": "apps/game/src/main.ts:551",
+      "enemyForceTextOnlyRef": "apps/game/src/main.ts:561"
+    },
+    "publicStageExport": {
+      "path": "apps/game/public/stages",
+      "stageDirs": [
+        "st00"
+      ],
+      "fileCount": 56,
+      "daeCount": 40,
+      "collisionBinCount": 3,
+      "setArcCount": 4
+    },
+    "publicModelExport": {
+      "fileCount": 300,
+      "manifest": {
+        "path": "apps/game/public/models/library/manifest.json",
+        "exists": true,
+        "bytes": 57992
+      }
+    }
+  },
+  "flow": [
+    {
+      "step": "main menu -> Adventure select/load",
+      "originalEvidence": [
+        "titles.tpl, as_icon.tpl, font_00.tpl, icon.bin",
+        "vsel00_mdl.arc and vsel01_mdl.arc select-screen model archives",
+        "Adventure Flow Trace snapshots requested in the trace playbook"
+      ],
+      "sourceRefs": [
+        "user-data/GG4E/afs_data/root/titles.tpl",
+        "user-data/GG4E/afs_data/root/as_icon.tpl",
+        "research/traces/GG4E-dol-trace-playbook.md:109",
+        "apps/game/src/main.ts:552",
+        "apps/game/src/main.ts:131"
+      ],
+      "currentRepoStatus": "Browser has an Adventure shell but no original menu/load state machine mapping."
+    },
+    {
+      "step": "Adventure select/load -> force/player setup",
+      "originalEvidence": [
+        "unitall_mdl.arc, plcmndata.bin, allbox.bin, gets.pzz, gets##_mdl.arc candidates",
+        "cTeam::GetPlayer(int) named symbol and 0x80297538..0x802a5e70 team/player lookup band"
+      ],
+      "sourceRefs": [
+        "user-data/GG4E/afs_data/root/unitall_mdl.arc",
+        "user-data/GG4E/afs_data/root/plcmndata.bin",
+        "research/symbols/GG4E-CSM-20220412.map:5695",
+        "research/traces/GG4E-dol-trace-playbook.md:105",
+        "apps/game/src/main.ts:91"
+      ],
+      "currentRepoStatus": "Force selection is browser-local and only exposes verified animated exported borgs."
+    },
+    {
+      "step": "force/player setup -> mission intro/load",
+      "originalEvidence": [
+        "firstld.pzz, brif00_mdl.arc, entry00_mdl.arc, msg*.mdt and face assets",
+        "stages.json mission rows provide names, arenas, enemy names, bosses, and confidence fields"
+      ],
+      "sourceRefs": [
+        "user-data/GG4E/afs_data/root/firstld.pzz",
+        "user-data/GG4E/afs_data/root/brif00_mdl.arc",
+        "user-data/GG4E/afs_data/root/entry00_mdl.arc",
+        "packages/assets/data/stages.json:12",
+        "packages/missions/src/index.ts:52"
+      ],
+      "currentRepoStatus": "Mission data resolves text/enemy names, but original intro/load asset sequencing is unmapped."
+    },
+    {
+      "step": "mission intro/load -> battle HUD/gameplay",
+      "originalEvidence": [
+        "st##_mdl.arc, st##.pzz, set####.arc, hit###.bin, comhit*.bin, bn####.tpl, face#### assets",
+        "Dense action/state and death/swap DOL bands from trace playbook"
+      ],
+      "sourceRefs": [
+        "user-data/GG4E/afs_data/root/st00_mdl.arc",
+        "user-data/GG4E/afs_data/root/set0000.arc",
+        "user-data/GG4E/afs_data/root/hit000.bin",
+        "user-data/GG4E/afs_data/root/comhit.bin",
+        "research/traces/GG4E-dol-trace-playbook.md:101",
+        "research/traces/GG4E-dol-trace-playbook.md:104",
+        "apps/game/src/main.ts:551"
+      ],
+      "currentRepoStatus": "Battle scene loads st00 exported DAE pieces and local G Red only; CPU actors, enemy force spawning, HUD semantics, death/swap, and original camera/control remain unmapped."
+    }
+  ],
+  "implementationGaps": [
+    {
+      "area": "Adventure menu/load flow",
+      "finding": "The browser starts in arena and offers a local Adventure shell; original main-menu to Adventure select/load state transitions are not mapped.",
+      "fileRefs": [
+        "apps/game/src/main.ts:131",
+        "apps/game/src/main.ts:552",
+        "research/traces/GG4E-dol-trace-playbook.md:109"
+      ]
+    },
+    {
+      "area": "Stage selection to arena asset mapping",
+      "finding": "Runtime hard-codes st00 and 40 DAE pieces; extracted root has many st##_mdl.arc/st##.pzz pairs but no verified arena-name to stage-code table in source.",
+      "fileRefs": [
+        "apps/game/src/main.ts:89",
+        "apps/game/src/main.ts:90",
+        "user-data/GG4E/afs_data/root/st00_mdl.arc",
+        "packages/assets/data/stages.json"
+      ]
+    },
+    {
+      "area": "Enemy force spawning",
+      "finding": "Mission package computes enemy names and energy, while the browser renders enemy force as text only and does not spawn ordered enemy borgs.",
+      "fileRefs": [
+        "packages/missions/src/index.ts:52",
+        "packages/missions/src/index.ts:77",
+        "apps/game/src/main.ts:561"
+      ]
+    },
+    {
+      "area": "CPU AI behavior",
+      "finding": "@gf/ai is an empty export and the browser explicitly avoids CPU actors until model, MOT, and AI path are verified.",
+      "fileRefs": [
+        "packages/ai/src/index.ts:4",
+        "apps/game/src/main.ts:551",
+        "research/traces/GG4E-dol-trace-playbook.md:101",
+        "research/traces/GG4E-dol-trace-playbook.md:105"
+      ]
+    },
+    {
+      "area": "Force/player ownership and death/swap",
+      "finding": "Original team/player lookup and player swap/death anchors are identified, but not connected to runtime force order, respawn, or CPU ownership.",
+      "fileRefs": [
+        "research/symbols/GG4E-CSM-20220412.map:5695",
+        "research/traces/GG4E-dol-trace-playbook.md:104",
+        "apps/game/src/main.ts:91"
+      ]
+    },
+    {
+      "area": "Mission intro/load and HUD semantics",
+      "finding": "Extracted briefing/load/HUD candidate assets exist, but current HUD is handwritten status text rather than mapped original Adventure intro/load/HUD assets.",
+      "fileRefs": [
+        "user-data/GG4E/afs_data/root/firstld.pzz",
+        "user-data/GG4E/afs_data/root/brif00_mdl.arc",
+        "user-data/GG4E/afs_data/root/comhit.bin",
+        "apps/game/src/main.ts:551"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,314 @@
+{
+  "region": "GG4E",
+  "id": "st01",
+  "source": "user-data/GG4E/afs_data/root",
+  "status": "raw-copied",
+  "copied": {
+    "stageArc": "st01/raw/st01_mdl.arc",
+    "stagePzz": "st01/raw/st01.pzz",
+    "hitBins": [
+      "st01/collision/hit010.bin",
+      "st01/collision/hit011.bin",
+      "st01/collision/hit012.bin"
+    ],
+    "setArcs": [
+      "st01/set/set0100.arc",
+      "st01/set/set0101.arc",
+      "st01/set/set0102.arc",
+      "st01/set/set0103.arc"
+    ]
+  },
+  "notes": [
+    "Raw stage assets copied from local ISO extraction.",
+    "Rendering still needs HSD stage ARC export to DAE/GLB.",
+    "Collision hit*.bin copied but not decoded."
+  ],
+  "modelCount": 63,
+  "models": [
+    {
+      "path": "model/model_00.dae",
+      "bytes": 24794
+    },
+    {
+      "path": "model/model_01.dae",
+      "bytes": 22645
+    },
+    {
+      "path": "model/model_02.dae",
+      "bytes": 10838
+    },
+    {
+      "path": "model/model_03.dae",
+      "bytes": 12416
+    },
+    {
+      "path": "model/model_04.dae",
+      "bytes": 20124
+    },
+    {
+      "path": "model/model_05.dae",
+      "bytes": 8435
+    },
+    {
+      "path": "model/model_06.dae",
+      "bytes": 51533
+    },
+    {
+      "path": "model/model_07.dae",
+      "bytes": 17129
+    },
+    {
+      "path": "model/model_08.dae",
+      "bytes": 16934
+    },
+    {
+      "path": "model/model_09.dae",
+      "bytes": 17216
+    },
+    {
+      "path": "model/model_10.dae",
+      "bytes": 17030
+    },
+    {
+      "path": "model/model_11.dae",
+      "bytes": 51407
+    },
+    {
+      "path": "model/model_12.dae",
+      "bytes": 17096
+    },
+    {
+      "path": "model/model_13.dae",
+      "bytes": 16973
+    },
+    {
+      "path": "model/model_14.dae",
+      "bytes": 17211
+    },
+    {
+      "path": "model/model_15.dae",
+      "bytes": 17030
+    },
+    {
+      "path": "model/model_16.dae",
+      "bytes": 51580
+    },
+    {
+      "path": "model/model_17.dae",
+      "bytes": 17151
+    },
+    {
+      "path": "model/model_18.dae",
+      "bytes": 16768
+    },
+    {
+      "path": "model/model_19.dae",
+      "bytes": 17250
+    },
+    {
+      "path": "model/model_20.dae",
+      "bytes": 17058
+    },
+    {
+      "path": "model/model_21.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_22.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_23.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_24.dae",
+      "bytes": 905
+    },
+    {
+      "path": "model/model_25.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_26.dae",
+      "bytes": 15657
+    },
+    {
+      "path": "model/model_27.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_28.dae",
+      "bytes": 16090
+    },
+    {
+      "path": "model/model_29.dae",
+      "bytes": 14931
+    },
+    {
+      "path": "model/model_30.dae",
+      "bytes": 14324
+    },
+    {
+      "path": "model/model_31.dae",
+      "bytes": 50609
+    },
+    {
+      "path": "model/model_32.dae",
+      "bytes": 26029
+    },
+    {
+      "path": "model/model_33.dae",
+      "bytes": 51662
+    },
+    {
+      "path": "model/model_49.dae",
+      "bytes": 20354
+    },
+    {
+      "path": "model/model_50.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_51.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_52.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_53.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_54.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_55.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_56.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_57.dae",
+      "bytes": 22436
+    },
+    {
+      "path": "model/model_58.dae",
+      "bytes": 35106
+    },
+    {
+      "path": "model/model_59.dae",
+      "bytes": 8553
+    },
+    {
+      "path": "model/model_60.dae",
+      "bytes": 19901
+    },
+    {
+      "path": "model/model_61.dae",
+      "bytes": 19865
+    },
+    {
+      "path": "model/model_62.dae",
+      "bytes": 19750
+    },
+    {
+      "path": "model/model_63.dae",
+      "bytes": 19803
+    },
+    {
+      "path": "model/model_64.dae",
+      "bytes": 7732
+    },
+    {
+      "path": "model/model_65.dae",
+      "bytes": 8669
+    },
+    {
+      "path": "model/model_66.dae",
+      "bytes": 8854
+    },
+    {
+      "path": "model/model_67.dae",
+      "bytes": 8263
+    },
+    {
+      "path": "model/model_68.dae",
+      "bytes": 8272
+    },
+    {
+      "path": "model/model_69.dae",
+      "bytes": 8225
+    },
+    {
+      "path": "model/model_70.dae",
+      "bytes": 13938
+    },
+    {
+      "path": "model/model_71.dae",
+      "bytes": 13743
+    },
+    {
+      "path": "model/model_72.dae",
+      "bytes": 12079
+    },
+    {
+      "path": "model/model_73.dae",
+      "bytes": 14653
+    },
+    {
+      "path": "model/model_74.dae",
+      "bytes": 16105
+    },
+    {
+      "path": "model/model_75.dae",
+      "bytes": 16986
+    },
+    {
+      "path": "model/model_76.dae",
+      "bytes": 906
+    },
+    {
+      "path": "model/model_77.dae",
+      "bytes": 904
+    }
+  ],
+  "collision": [
+    {
+      "path": "collision/hit010.bin",
+      "bytes": 38260
+    },
+    {
+      "path": "collision/hit011.bin",
+      "bytes": 108564
+    },
+    {
+      "path": "collision/hit012.bin",
+      "bytes": 28332
+    }
+  ],
+  "setArcs": [
+    {
+      "path": "set/set0100.arc",
+      "bytes": 139264
+    },
+    {
+      "path": "set/set0101.arc",
+      "bytes": 114688
+    },
+    {
+      "path": "set/set0102.arc",
+      "bytes": 122880
+    },
+    {
+      "path": "set/set0103.arc",
+      "bytes": 116736
+    }
+  ],
+  "renderStatus": "dae-exported"
+}

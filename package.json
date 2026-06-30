@@ -15,6 +15,8 @@
     "clean": "pnpm -r exec rimraf dist tsconfig.tsbuildinfo",
     "extract": "node scripts/extract-user-disc.mjs",
     "sync:assets": "node scripts/sync-exported-assets.mjs",
+    "export:borg-anim": "node scripts/export-borg-animation-hsd.mjs",
+    "manifest:stages": "node scripts/build-stage-manifests.mjs",
     "convert": "node scripts/asset-convert.mjs",
     "manifest": "node scripts/build-manifest.mjs"
   },

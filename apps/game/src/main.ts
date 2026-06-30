@@ -38,6 +38,32 @@ type StageEntry = {
   confidence: string;
 };
 
+type StageManifest = {
+  id: string;
+  modelCount: number;
+  renderStatus?: string;
+  models: Array<{ path: string; bytes: number }>;
+  collision?: Array<{ path: string; bytes: number }>;
+  setArcs?: Array<{ path: string; bytes: number }>;
+};
+
+type StageRenderState = {
+  camera?: {
+    fovDegrees?: number;
+    near?: number;
+    far?: number;
+  };
+  fog?: {
+    colorRgbHex?: string;
+    start?: number;
+    end?: number;
+  };
+  lights?: {
+    ambient?: { colorRgbHex?: string; intensity?: number };
+    directional?: { colorRgbHex?: string; intensity?: number; position?: [number, number, number] };
+  };
+};
+
 type NetPlayer = {
   id: string;
   name: string;
@@ -48,6 +74,13 @@ type NetPlayer = {
   ry: number;
   borg: string;
   anim?: string;
+};
+
+type RemoteActor = {
+  rig: THREE.Group;
+  mixer: THREE.AnimationMixer;
+  action: THREE.AnimationAction | null;
+  borg: string;
 };
 
 type NetStage = {
@@ -73,12 +106,61 @@ type BakedClip = {
   bones: Array<{ i: number; pos?: number[]; rot?: number[]; scl?: number[] }>;
 };
 
+type ActionName = "idle" | "move" | "boost" | "jump" | "fly" | "attack" | "hit" | "down";
+type InputState = { x: number; y: number; turn: number };
+
 const GF_RED = "pl0615";
 const DEFAULT_ENERGY = 1000;
 const BROWSER_UNITS_PER_SPEED_POINT = 66; // Unit conversion placeholder; relative speed comes from extracted borg stats.
 const DEFAULT_STAGE_ID = "st00";
-const DEFAULT_STAGE_MODEL_COUNT = 40;
-const ANIMATED_BORGS = new Set([GF_RED]);
+const ACTION_NAMES = new Set<ActionName>(["idle", "move", "boost", "jump", "fly", "attack", "hit", "down"]);
+const DEFAULT_RENDER_STATE = {
+  fogColor: 0xfff6e5,
+  fogNear: 900,
+  fogFar: 40000,
+  fov: 43.191872,
+  near: 10,
+  far: 80000,
+  ambientColor: 0xd8d0c2,
+  lightColor: 0xfff0e6,
+  lightPosition: new THREE.Vector3(-385.512512, 956.0448, -377.986603),
+};
+const LOOPING_ACTIONS = new Set<ActionName>(["idle", "move"]);
+const BORG_ACTION_FILES: Record<string, Partial<Record<ActionName, string>>> = {
+  [GF_RED]: {
+    idle: "/models/pl0615/anim_b00_idle.json",
+    move: "/models/pl0615/anim_b00_move.json",
+    boost: "/models/pl0615/anim_b00_boost_forward.json",
+    jump: "/models/pl0615/anim_b00_jump_takeoff_candidate.json",
+    fly: "/models/pl0615/anim_b00_fly_transition_candidate.json",
+    attack: "/models/pl0615/anim_b00_attack_arm_candidate.json",
+    hit: "/models/pl0615/anim_b00_hit_flinch_candidate.json",
+    down: "/models/pl0615/anim_b00_down_candidate.json",
+  },
+  pl0109: {
+    idle: "/models/pl0109/anim_b00_s00_candidate.json",
+  },
+};
+const ANIMATED_BORGS = new Set(Object.keys(BORG_ACTION_FILES));
+const KEY_ACTIONS: Partial<Record<string, ActionName>> = {
+  Space: "jump",
+  ShiftLeft: "boost",
+  ShiftRight: "boost",
+  KeyF: "fly",
+  KeyJ: "attack",
+  KeyH: "hit",
+  KeyK: "down",
+};
+const GAMEPAD_BUTTON_ACTIONS = new Map<number, ActionName>([
+  [0, "jump"],
+  [1, "boost"],
+  [2, "attack"],
+  [3, "fly"],
+  [4, "hit"],
+  [5, "attack"],
+  [7, "attack"],
+  [8, "down"],
+]);
 
 const catalog = (borgs as { borgs: BorgEntry[] }).borgs.filter((borg) => borg.id && borg.name);
 const byId = new Map(catalog.map((borg) => [borg.id, borg]));
@@ -109,20 +191,21 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x07101a);
-scene.fog = new THREE.Fog(0x07101a, 900, 3600);
+scene.background = new THREE.Color(DEFAULT_RENDER_STATE.fogColor);
+scene.fog = new THREE.Fog(DEFAULT_RENDER_STATE.fogColor, DEFAULT_RENDER_STATE.fogNear, DEFAULT_RENDER_STATE.fogFar);
 
-const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 1, 80000);
+const camera = new THREE.PerspectiveCamera(DEFAULT_RENDER_STATE.fov, window.innerWidth / window.innerHeight, DEFAULT_RENDER_STATE.near, DEFAULT_RENDER_STATE.far);
 camera.position.set(950, 520, 1320);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.target.set(0, 80, 0);
 
-scene.add(new THREE.HemisphereLight(0xb8d9ff, 0x14202c, 1.35));
-const key = new THREE.DirectionalLight(0xffffff, 1.6);
-key.position.set(260, 520, 360);
-scene.add(key);
+const stageAmbient = new THREE.AmbientLight(DEFAULT_RENDER_STATE.ambientColor, 1);
+scene.add(stageAmbient);
+const stageLight = new THREE.DirectionalLight(DEFAULT_RENDER_STATE.lightColor, 1);
+stageLight.position.copy(DEFAULT_RENDER_STATE.lightPosition);
+scene.add(stageLight);
 
 const stageRoot = new THREE.Group();
 scene.add(stageRoot);
@@ -133,16 +216,31 @@ scene.add(localRig);
 let sourceModel: THREE.Object3D | null = null;
 let localModel: THREE.Object3D | null = null;
 let localMixer: THREE.AnimationMixer | null = null;
-const clips = new Map<string, THREE.AnimationClip>();
+const borgClips = new Map<string, Map<ActionName, THREE.AnimationClip>>();
 const sourceModels = new Map<string, THREE.Object3D>();
 let currentAction: THREE.AnimationAction | null = null;
+let currentActionName: ActionName | null = null;
+let queuedAction: ActionName | null = null;
+let oneShotAction: ActionName | null = null;
+let oneShotTimeRemaining = 0;
 let currentBorgId = GF_RED;
-const remotes = new Map<string, { rig: THREE.Group; mixer: THREE.AnimationMixer; action: THREE.AnimationAction | null; borg: string }>();
+const remotes = new Map<string, RemoteActor>();
 let loadedStagePieceCount = 0;
+let expectedStagePieceCount = 0;
 let assetStatus = "Loading extracted stage assets";
+let previousGamepadButtons = new Set<number>();
 
 const keys = new Set<string>();
-window.addEventListener("keydown", (event) => keys.add(event.code));
+window.addEventListener("keydown", (event) => {
+  if (isTextInputTarget(event.target)) return;
+  keys.add(event.code);
+  if (event.repeat) return;
+  const action = KEY_ACTIONS[event.code];
+  if (action) {
+    event.preventDefault();
+    queueAction(action);
+  }
+});
 window.addEventListener("keyup", (event) => keys.delete(event.code));
 window.addEventListener("gamepadconnected", (event) => {
   controllerName = event.gamepad.id;
@@ -261,16 +359,76 @@ function buildClip(json: BakedClip): THREE.AnimationClip {
   return new THREE.AnimationClip(json.name ?? "mot", json.frameCount / fps, tracks);
 }
 
+function setClip(borgId: string, name: ActionName, clip: THREE.AnimationClip): void {
+  let clips = borgClips.get(borgId);
+  if (!clips) {
+    clips = new Map<ActionName, THREE.AnimationClip>();
+    borgClips.set(borgId, clips);
+  }
+  clips.set(name, clip);
+}
+
+function getClip(borgId: string, name: ActionName): THREE.AnimationClip | undefined {
+  return borgClips.get(borgId)?.get(name);
+}
+
+function hasClip(borgId: string, name: ActionName): boolean {
+  return Boolean(getClip(borgId, name));
+}
+
+function fallbackAction(borgId: string, requested: ActionName): ActionName {
+  if (hasClip(borgId, requested)) return requested;
+  return hasClip(borgId, "idle") ? "idle" : requested;
+}
+
+function parseHexColor(value: string | undefined, fallback: number): number {
+  if (!value || !/^#[0-9a-f]{6}$/i.test(value)) return fallback;
+  return Number.parseInt(value.slice(1), 16);
+}
+
+function applyStageRenderState(renderState: StageRenderState | null): void {
+  const fogColor = parseHexColor(renderState?.fog?.colorRgbHex, DEFAULT_RENDER_STATE.fogColor);
+  const fogNear = renderState?.fog?.start ?? DEFAULT_RENDER_STATE.fogNear;
+  const fogFar = renderState?.fog?.end ?? DEFAULT_RENDER_STATE.fogFar;
+  scene.background = new THREE.Color(fogColor);
+  scene.fog = new THREE.Fog(fogColor, fogNear, fogFar);
+
+  camera.fov = renderState?.camera?.fovDegrees ?? DEFAULT_RENDER_STATE.fov;
+  camera.near = renderState?.camera?.near ?? DEFAULT_RENDER_STATE.near;
+  camera.far = renderState?.camera?.far ?? DEFAULT_RENDER_STATE.far;
+  camera.updateProjectionMatrix();
+
+  stageAmbient.color.setHex(parseHexColor(renderState?.lights?.ambient?.colorRgbHex, DEFAULT_RENDER_STATE.ambientColor));
+  stageAmbient.intensity = renderState?.lights?.ambient?.intensity ?? 1;
+
+  stageLight.color.setHex(parseHexColor(renderState?.lights?.directional?.colorRgbHex, DEFAULT_RENDER_STATE.lightColor));
+  stageLight.intensity = renderState?.lights?.directional?.intensity ?? 1;
+  const lightPosition = renderState?.lights?.directional?.position;
+  if (lightPosition) stageLight.position.set(lightPosition[0], lightPosition[1], lightPosition[2]);
+  else stageLight.position.copy(DEFAULT_RENDER_STATE.lightPosition);
+}
+
+async function loadStageRenderState(stageId: string): Promise<StageRenderState | null> {
+  const response = await fetch(`/stages/${stageId}/render-state.json`);
+  if (!response.ok) return null;
+  return response.json() as Promise<StageRenderState>;
+}
+
 async function loadInitialAssets(): Promise<void> {
-  const [manifest, idle, clip1] = await Promise.all([
+  const [manifest, actionEntries] = await Promise.all([
     fetch("/models/library/manifest.json").then((r) => r.json() as Promise<ModelManifestEntry[]>),
-    fetch("/models/pl0615/anim_b00_idle.json").then((r) => r.json() as Promise<BakedClip>),
-    fetch("/models/pl0615/anim_b00_clip1.json").then((r) => r.json() as Promise<BakedClip>),
+    Promise.all(
+      Object.entries(BORG_ACTION_FILES).flatMap(([borgId, files]) =>
+        Object.entries(files).map(async ([name, url]) => {
+          const json = await fetch(url).then((r) => r.json() as Promise<BakedClip>);
+          return [borgId, name as ActionName, buildClip(json)] as const;
+        }),
+      ),
+    ),
   ]);
 
   modelManifest = manifest;
-  clips.set("idle", buildClip(idle));
-  clips.set("move", buildClip(clip1));
+  for (const [borgId, name, clip] of actionEntries) setClip(borgId, name, clip);
   await loadStage(DEFAULT_STAGE_ID);
   await mountLocalModel(selectedForce[0] ?? GF_RED);
   renderUi();
@@ -279,13 +437,17 @@ async function loadInitialAssets(): Promise<void> {
 async function loadStage(stageId: string): Promise<void> {
   stageRoot.clear();
   loadedStagePieceCount = 0;
+  expectedStagePieceCount = 0;
   assetStatus = `Loading ${stageId}_mdl.arc export`;
+  const [manifest, renderState] = await Promise.all([
+    fetch(`/stages/${stageId}/manifest.json`).then((r) => r.json() as Promise<StageManifest>),
+    loadStageRenderState(stageId).catch(() => null),
+  ]);
+  applyStageRenderState(renderState);
+  expectedStagePieceCount = manifest.models.length;
 
   const loader = new ColladaLoader();
-  const urls = Array.from(
-    { length: DEFAULT_STAGE_MODEL_COUNT },
-    (_, index) => `/stages/${stageId}/model/model_${String(index).padStart(2, "0")}.dae`,
-  );
+  const urls = manifest.models.map((model) => `/stages/${stageId}/${model.path}`);
   const results = await Promise.allSettled(urls.map((url) => loader.loadAsync(url)));
 
   for (const result of results) {
@@ -367,18 +529,30 @@ async function mountLocalModel(id: string): Promise<void> {
   localMixer = new THREE.AnimationMixer(localModel);
   currentBorgId = id;
   currentAction = null;
-  if (id === GF_RED) playLocal("idle");
+  currentActionName = null;
+  oneShotAction = null;
+  oneShotTimeRemaining = 0;
+  playLocal("idle");
 }
 
-function playLocal(name: string): void {
+function playLocal(name: ActionName): void {
   if (!localMixer) return;
-  const clip = clips.get(name);
+  const actionName = fallbackAction(currentBorgId, name);
+  const clip = getClip(currentBorgId, actionName);
   if (!clip) return;
   const next = localMixer.clipAction(clip);
-  if (currentAction === next) return;
-  next.reset().setLoop(THREE.LoopRepeat, Infinity).play();
+  if (currentAction === next && LOOPING_ACTIONS.has(actionName)) return;
+  const looping = LOOPING_ACTIONS.has(actionName);
+  next
+    .reset()
+    .setLoop(looping ? THREE.LoopRepeat : THREE.LoopOnce, looping ? Infinity : 1)
+    .play();
+  next.clampWhenFinished = !looping;
   if (currentAction && currentAction !== next) currentAction.crossFadeTo(next, 0.18, false);
   currentAction = next;
+  currentActionName = actionName;
+  oneShotAction = looping ? null : actionName;
+  oneShotTimeRemaining = looping ? 0 : clip.duration;
 }
 
 async function syncRemotePlayers(): Promise<void> {
@@ -400,29 +574,36 @@ async function syncRemotePlayers(): Promise<void> {
       rig.add(clone(remoteSource));
       scene.add(rig);
       const mixer = new THREE.AnimationMixer(rig);
-      const idle = clips.get("idle");
-      const action = player.borg === GF_RED && idle ? mixer.clipAction(idle) : null;
+      const idle = getClip(player.borg, "idle");
+      const action = idle ? mixer.clipAction(idle) : null;
       action?.play();
       remote = { rig, mixer, action, borg: player.borg };
       remotes.set(player.id, remote);
     }
     remote.rig.position.set(player.x, player.y, player.z);
     remote.rig.rotation.y = player.ry;
-    if (player.borg === GF_RED) playRemote(remote, player.anim === "move" ? "move" : "idle");
+    if (ANIMATED_BORGS.has(player.borg)) playRemote(remote, toActionName(player.anim, "idle"));
   }
 }
 
-function playRemote(
-  remote: { mixer: THREE.AnimationMixer; action: THREE.AnimationAction | null },
-  name: string,
-): void {
-  const clip = clips.get(name);
+function playRemote(remote: RemoteActor, name: ActionName): void {
+  const actionName = fallbackAction(remote.borg, name);
+  const clip = getClip(remote.borg, actionName);
   if (!clip) return;
   const next = remote.mixer.clipAction(clip);
   if (remote.action === next) return;
-  next.reset().setLoop(THREE.LoopRepeat, Infinity).play();
+  const looping = LOOPING_ACTIONS.has(actionName);
+  next
+    .reset()
+    .setLoop(looping ? THREE.LoopRepeat : THREE.LoopOnce, looping ? Infinity : 1)
+    .play();
+  next.clampWhenFinished = !looping;
   remote.action?.crossFadeTo(next, 0.18, false);
   remote.action = next;
+}
+
+function toActionName(value: string | undefined, fallback: ActionName): ActionName {
+  return value && ACTION_NAMES.has(value as ActionName) ? (value as ActionName) : fallback;
 }
 
 function renderUi(): void {
@@ -472,7 +653,7 @@ function renderUi(): void {
       .error { color:#ff8f86; margin-top:10px; min-height:18px; }
       .badge { color:#ffd95b; font-weight:800; }
     </style>
-    ${screen === "arena" ? `<div class="panel hud"><b>Adventure ${escapeHtml(displayStage.id)}</b><div>${escapeHtml(displayStage.name)}</div><div>World: ${escapeHtml(assetStatus)} (${loadedStagePieceCount}/${DEFAULT_STAGE_MODEL_COUNT})</div><div>Actor: ${escapeHtml(currentBorgStats()?.name ?? currentBorgId)} · MOT-backed idle/move</div><div>${controllerName ? `Controller: ${escapeHtml(controllerName)}` : "Keyboard active"}</div><div class="fine">No CPU actors spawned until their model, MOT action set, and AI path are verified.</div></div>` : ""}
+    ${screen === "arena" ? `<div class="panel hud"><b>Adventure ${escapeHtml(displayStage.id)}</b><div>${escapeHtml(displayStage.name)}</div><div>World: ${escapeHtml(assetStatus)} (${loadedStagePieceCount}/${expectedStagePieceCount || loadedStagePieceCount})</div><div>Actor: ${escapeHtml(currentBorgStats()?.name ?? currentBorgId)} · MOT action candidates</div><div>${controllerName ? `Controller: ${escapeHtml(controllerName)}` : "Keyboard active"}</div><div class="fine">No CPU actors spawned until their model, MOT action set, and AI path are verified.</div></div>` : ""}
     ${screen !== "arena" ? `<section class="panel title"><div class="brand">Gotcha Force</div><div class="subtitle">Adventure</div><div class="modes">${modeRows}</div><p class="fine">Only Adventure is enabled in this build.</p></section>` : ""}
     ${screen === "lobby" || screen === "force" ? `
       <section class="panel lobby">
@@ -541,7 +722,7 @@ function toggleBorg(id: string): void {
   renderUi();
 }
 
-function readInput(): { x: number; y: number; turn: number } {
+function readInput(): InputState {
   let x = 0;
   let y = 0;
   let turn = 0;
@@ -552,15 +733,38 @@ function readInput(): { x: number; y: number; turn: number } {
   if (keys.has("KeyQ")) turn += 1;
   if (keys.has("KeyE")) turn -= 1;
 
-  const pad = navigator.getGamepads().find((gamepad) => gamepad?.connected && gamepad.mapping === "standard");
+  const pad = navigator.getGamepads().find((gamepad) => gamepad?.connected);
   if (pad) {
     controllerName = pad.id;
     x = chooseAnalog(x, pad.axes[0] ?? 0);
     y = chooseAnalog(y, -(pad.axes[1] ?? 0));
     turn = chooseAnalog(turn, -(pad.axes[2] ?? 0));
+    pollGamepadActions(pad);
   }
 
   return { x: deadzone(x), y: deadzone(y), turn: deadzone(turn) };
+}
+
+function pollGamepadActions(pad: Gamepad): void {
+  const pressed = new Set<number>();
+  pad.buttons.forEach((button, index) => {
+    if (!button.pressed) return;
+    pressed.add(index);
+    if (!previousGamepadButtons.has(index)) {
+      const action = GAMEPAD_BUTTON_ACTIONS.get(index);
+      if (action) queueAction(action);
+    }
+  });
+  previousGamepadButtons = pressed;
+}
+
+function queueAction(action: ActionName): void {
+  if (screen !== "arena" || !hasClip(currentBorgId, action)) return;
+  queuedAction = action;
+}
+
+function isTextInputTarget(target: EventTarget | null): boolean {
+  return target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement;
 }
 
 function chooseAnalog(keyboardValue: number, analogValue: number): number {
@@ -571,10 +775,9 @@ function deadzone(value: number): number {
   return Math.abs(value) < 0.16 ? 0 : Math.max(-1, Math.min(1, value));
 }
 
-function updateLocal(dt: number): void {
+function updateLocal(dt: number, input: InputState): void {
   const turn = 2.7;
   const speed = (currentBorgStats()?.speed ?? 5) * BROWSER_UNITS_PER_SPEED_POINT;
-  const input = readInput();
   localRig.rotation.y += input.turn * turn * dt;
   const forward = new THREE.Vector3(Math.sin(localRig.rotation.y), 0, Math.cos(localRig.rotation.y));
   const right = new THREE.Vector3(forward.z, 0, -forward.x);
@@ -583,7 +786,16 @@ function updateLocal(dt: number): void {
     .addScaledVector(forward, input.y);
   const moving = velocity.lengthSq() > 0;
   if (moving) localRig.position.add(velocity.normalize().multiplyScalar(speed * dt));
-  if (currentBorgId === GF_RED) playLocal(moving ? "move" : "idle");
+  if (queuedAction) {
+    const nextAction = queuedAction;
+    queuedAction = null;
+    playLocal(nextAction);
+  } else if (oneShotAction) {
+    oneShotTimeRemaining -= dt;
+    if (oneShotTimeRemaining <= 0) playLocal(moving ? "move" : "idle");
+  } else if (ANIMATED_BORGS.has(currentBorgId)) {
+    playLocal(moving ? "move" : "idle");
+  }
   controls.target.lerp(new THREE.Vector3(localRig.position.x, localRig.position.y + 90, localRig.position.z), 0.08);
 }
 
@@ -591,20 +803,20 @@ let lastPoseSend = 0;
 const clock = new THREE.Clock();
 function tick(): void {
   const dt = Math.min(clock.getDelta(), 0.05);
-  if (screen === "arena") updateLocal(dt);
+  const input = readInput();
+  if (screen === "arena") updateLocal(dt, input);
   localMixer?.update(dt);
   for (const remote of remotes.values()) remote.mixer.update(dt);
   lastPoseSend += dt;
   if (screen === "arena" && lastPoseSend > 1 / 20) {
     lastPoseSend = 0;
-    const input = readInput();
     send({
       type: "pose",
       x: localRig.position.x,
       y: localRig.position.y,
       z: localRig.position.z,
       ry: localRig.rotation.y,
-      anim: currentBorgId === GF_RED && (input.x || input.y || input.turn) ? "move" : "idle",
+      anim: ANIMATED_BORGS.has(currentBorgId) ? currentActionName ?? (input.x || input.y || input.turn ? "move" : "idle") : "idle",
     });
   }
   controls.update();

@@ -1,0 +1,983 @@
+{
+  "schema_version": 1,
+  "region": "GG4E",
+  "created_utc": "2026-06-30",
+  "purpose": "Small targeted Dolphin/static trace kit for original Gotcha Force mechanics import.",
+  "inputs": {
+    "dolphin": "D:\\GotYaForce\\dolphin\\Dolphin.exe",
+    "iso": "D:\\GotYaForce\\Gotcha Force.iso",
+    "dol": "D:\\GotYaForce\\user-data\\GG4E\\disc\\sys\\boot.dol",
+    "symbol_map": "D:\\GotYaForce\\research\\symbols\\GG4E-CSM-20220412.map",
+    "playbook": "D:\\GotYaForce\\research\\traces\\GG4E-dol-trace-playbook.md",
+    "combat_package": "D:\\GotYaForce\\packages\\combat"
+  },
+  "launch": {
+    "command": "rtk .\\dolphin\\Dolphin.exe --debugger --logger --exec=\"D:\\GotYaForce\\Gotcha Force.iso\"",
+    "symbol_map_setup": [
+      "Open Dolphin user folder.",
+      "Create or open Maps.",
+      "Copy D:\\GotYaForce\\research\\symbols\\GG4E-CSM-20220412.map to Maps\\GG4E08.map.",
+      "If auto-load fails, also try Maps\\GG4E.map or use Symbols > Load Symbol Map."
+    ]
+  },
+  "dol_sections_used": [
+    {
+      "name": "text1",
+      "file_offset": "0x000025e0",
+      "runtime_address": "0x800055e0",
+      "size": "0x002aab80"
+    },
+    {
+      "name": "data3",
+      "file_offset": "0x002b7e60",
+      "runtime_address": "0x802bae60",
+      "size": "0x000f42c0"
+    },
+    {
+      "name": "data5",
+      "file_offset": "0x003aec40",
+      "runtime_address": "0x80436a20",
+      "size": "0x00006ae0"
+    }
+  ],
+  "capture_policy": {
+    "dolphin_use": "Targeted only: one event window per save state, no broad instruction logs.",
+    "default_registers": [
+      "pc",
+      "lr",
+      "ctr",
+      "cr",
+      "r0-r31",
+      "f0-f13"
+    ],
+    "default_stack": {
+      "base": "r1",
+      "bytes": 128
+    },
+    "default_memory": [
+      "If r3, r4, r5, or r31 are valid MEM1 pointers, capture 0x40 bytes at each.",
+      "Capture the callstack and one pre-hit/one post-hit value for each watched memory field."
+    ]
+  },
+  "runtime_field_watchpoints": [
+    {
+      "id": "active-borg-action-state",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x544",
+      "dol_offset": null,
+      "size": 1,
+      "install_after": "Capture active_borg_base from r3 at 0x8005d4b0 or from r31 at 0x80055c00.",
+      "capture": [
+        "old/new byte value",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
+      "id": "active-borg-flags",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x5e0",
+      "dol_offset": null,
+      "size": 4,
+      "install_after": "Capture active_borg_base from r3 at 0x8005d4b0 or from r31 at 0x80055c00.",
+      "capture": [
+        "old/new word value",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
+      "id": "active-borg-countdown-a",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x6b4",
+      "dol_offset": null,
+      "size": 2,
+      "install_after": "Capture active_borg_base from r3 at 0x8005d4b0 or from r31 at 0x80055c00.",
+      "capture": [
+        "old/new halfword value",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
+      "id": "active-borg-countdown-b",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x6b6",
+      "dol_offset": null,
+      "size": 2,
+      "install_after": "Capture active_borg_base from r3 at 0x8005d4b0 or from r31 at 0x80055c00.",
+      "capture": [
+        "old/new halfword value",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
+      "id": "active-borg-action-index",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x6fe",
+      "dol_offset": null,
+      "size": 2,
+      "install_after": "Capture active_borg_base from r3 at 0x8005d4b0 or from r31 at 0x80055c00.",
+      "capture": [
+        "old/new halfword value",
+        "pc",
+        "lr",
+        "callstack",
+        "action table entry near 0x802d35a4 when index is used"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
+      "id": "active-borg-wakeup-invulnerability-timer",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x720",
+      "dol_offset": null,
+      "size": 4,
+      "install_after": "Capture active_borg_base from r3 at 0x8005d4b0 or from r31 at 0x80055c00.",
+      "capture": [
+        "old/new float or word value",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "confirmed_field_runtime_address_required"
+    },
+    {
+      "id": "target-borg-pointer",
+      "type": "read_write",
+      "address": "runtime:target_pointer_field_after_writer_backtrace",
+      "dol_offset": null,
+      "size": 4,
+      "install_after": "Use lock-on/targeting event to backtrace the writer before installing this watchpoint.",
+      "capture": [
+        "old/new pointer",
+        "pc",
+        "lr",
+        "callstack",
+        "active_borg_base",
+        "candidate target borg base"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
+      "id": "hp-field",
+      "type": "write",
+      "address": "runtime:target_borg_base+hp_offset_after_damage_writer_backtrace",
+      "dol_offset": null,
+      "size": 2,
+      "install_after": "Use one damage event to identify the HP write; do not assume an HP offset from current static evidence.",
+      "capture": [
+        "old/new hp value",
+        "pc",
+        "lr",
+        "callstack",
+        "attacker borg base",
+        "target borg base",
+        "damage registers"
+      ],
+      "status": "runtime_capture_required"
+    }
+  ],
+  "groups": [
+    {
+      "name": "camera",
+      "event_window": "Arena loaded; enable for one frame, then slight movement/turn and lock-on.",
+      "breakpoints": [
+        {
+          "id": "camera-manager-has-camera",
+          "type": "execute",
+          "address": "0x80008998",
+          "dol_offset": "0x00005998",
+          "section": "text1",
+          "symbol": "cCameraManager::HasCamera(cBaseCamera...)",
+          "event": "First camera manager check after arena unpauses.",
+          "capture": [
+            "r3 camera manager pointer",
+            "r4 cBaseCamera pointer",
+            "lr caller",
+            "callstack",
+            "0x40 bytes at r3 if valid",
+            "0x40 bytes at r4 if valid"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "game-camera-update-cluster",
+          "type": "execute",
+          "address": "0x80174adc",
+          "dol_offset": "0x00171adc",
+          "section": "text1",
+          "range_end": "0x80174ce8",
+          "range_end_dol_offset": "0x00171ce8",
+          "symbol": "unnamed likely game camera/update cluster",
+          "event": "One frame of follow/lock camera update.",
+          "capture": [
+            "pc",
+            "lr",
+            "r0-r31",
+            "f0-f13",
+            "callstack",
+            "candidate active borg pointer",
+            "candidate target pointer"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "camera-lookat-final",
+          "type": "execute",
+          "address": "0x8020b61c",
+          "dol_offset": "0x0020861c",
+          "section": "text1",
+          "symbol": "gnt4-C_MTXLookAt-bl",
+          "event": "Final look-at matrix build for active camera.",
+          "capture": [
+            "r3 matrix pointer",
+            "r4 eye vector pointer",
+            "r5 up vector pointer",
+            "r6 interest vector pointer",
+            "3 floats at r4",
+            "3 floats at r5",
+            "3 floats at r6",
+            "12 floats at r3 after step"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "camera-set-interest",
+          "type": "execute",
+          "address": "0x80247198",
+          "dol_offset": "0x00244198",
+          "section": "text1",
+          "symbol": "gnt4-HSD_CObjSetInterest-bl",
+          "event": "Camera interest target set.",
+          "capture": [
+            "r3 HSD CObj pointer",
+            "r4 interest WObj/vector pointer",
+            "lr caller",
+            "0x60 bytes at r3",
+            "0x30 bytes at r4 if valid"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "camera-set-eye",
+          "type": "execute",
+          "address": "0x80247270",
+          "dol_offset": "0x00244270",
+          "section": "text1",
+          "symbol": "gnt4-HSD_CObjSetEyePosition-bl",
+          "event": "Camera eye position set.",
+          "capture": [
+            "r3 HSD CObj pointer",
+            "r4 eye WObj/vector pointer",
+            "lr caller",
+            "0x60 bytes at r3",
+            "0x30 bytes at r4 if valid"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "camera-set-up-vector",
+          "type": "execute",
+          "address": "0x80247810",
+          "dol_offset": "0x00244810",
+          "section": "text1",
+          "symbol": "gnt4-HSD_CObjSetUpVector-bl",
+          "event": "Camera up vector set.",
+          "capture": [
+            "r3 HSD CObj pointer",
+            "r4 up vector pointer",
+            "lr caller",
+            "3 floats at r4 if valid"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "camera-set-fov",
+          "type": "execute",
+          "address": "0x8024807c",
+          "dol_offset": "0x0024507c",
+          "section": "text1",
+          "symbol": "gnt4-HSD_CObjSetFov-bl",
+          "event": "Camera FOV set or refreshed.",
+          "capture": [
+            "r3 HSD CObj pointer",
+            "f1 FOV value if ABI uses float arg",
+            "r4 raw arg",
+            "cobj+0x40 fov",
+            "cobj+0x50 projection type byte"
+          ],
+          "confidence": "symbol_named"
+        }
+      ],
+      "watchpoints": []
+    },
+    {
+      "name": "lock-on/targeting",
+      "event_window": "Two enemies visible; tap/hold lock-on once and target-cycle once if available.",
+      "breakpoints": [
+        {
+          "id": "pad-read",
+          "type": "execute",
+          "address": "0x8021379c",
+          "dol_offset": "0x0021079c",
+          "section": "text1",
+          "symbol": "likely PADRead cluster",
+          "event": "Input sample before lock/target change.",
+          "capture": [
+            "r3 pad output pointer",
+            "0x30 bytes at r3 after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "pad-clamp-circle",
+          "type": "execute",
+          "address": "0x80212a14",
+          "dol_offset": "0x0020fa14",
+          "section": "text1",
+          "symbol": "PADClampCircle",
+          "event": "Clamped stick input used by camera/targeting.",
+          "capture": [
+            "r3 pad/stick pointer",
+            "0x20 bytes at r3 before and after step",
+            "lr caller"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "game-pad-normalization-cluster",
+          "type": "execute",
+          "address": "0x8010d450",
+          "dol_offset": "0x0010a450",
+          "section": "text1",
+          "symbol": "unnamed likely game-side PAD read/normalization cluster",
+          "event": "Input normalization for lock-on/targeting frame.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "lr caller",
+            "callstack",
+            "candidate active player pointer",
+            "candidate active borg pointer"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "team-get-player",
+          "type": "execute",
+          "address": "0x802a3938",
+          "dol_offset": "0x002a0938",
+          "section": "text1",
+          "symbol": "cTeam::GetPlayer(int)",
+          "event": "Resolve player/team object while target selection changes.",
+          "capture": [
+            "r3 cTeam pointer",
+            "r4 player index",
+            "r3 return value after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "action-state-entry",
+          "type": "execute",
+          "address": "0x8005ec04",
+          "dol_offset": "0x0005bc04",
+          "section": "text1",
+          "symbol": "zz_005ec04_ / dense action-state handler lead",
+          "event": "First action-state update after target changes.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "active_borg_base if present",
+            "base+0x544",
+            "base+0x5e0",
+            "base+0x6fe",
+            "candidate target pointer"
+          ],
+          "confidence": "playbook_lead"
+        }
+      ],
+      "watchpoints": [
+        "target-borg-pointer",
+        "active-borg-action-state",
+        "active-borg-action-index"
+      ]
+    },
+    {
+      "name": "jump/fly",
+      "event_window": "Grounded borg; press jump, then air-jump or hold boost/fly in separate short runs.",
+      "breakpoints": [
+        {
+          "id": "action-state-entry",
+          "type": "execute",
+          "address": "0x8005ec04",
+          "dol_offset": "0x0005bc04",
+          "section": "text1",
+          "symbol": "zz_005ec04_ / dense action-state handler lead",
+          "event": "Jump/fly action transition begins.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "base+0x544",
+            "base+0x5e0",
+            "base+0x6b4",
+            "base+0x6b6",
+            "base+0x6fe"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "action-helper-cluster",
+          "type": "execute",
+          "address": "0x800660b8",
+          "dol_offset": "0x000630b8",
+          "section": "text1",
+          "range_end": "0x80068004",
+          "range_end_dol_offset": "0x00065004",
+          "symbol": "zz_00660b8_ / action helper cluster",
+          "event": "Jump/fly helper called from action transition.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "lr caller",
+            "active_borg_base",
+            "candidate position and velocity pointer if register points into MEM1"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "movement-helper-cluster",
+          "type": "execute",
+          "address": "0x8006a104",
+          "dol_offset": "0x00067104",
+          "section": "text1",
+          "range_end": "0x8006ae60",
+          "range_end_dol_offset": "0x00067e60",
+          "symbol": "zz_006a104_ / helper called from wake/action cluster",
+          "event": "Velocity/grounded/fly-state helper during jump or boost.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "lr caller",
+            "active_borg_base",
+            "candidate position/velocity fields touched by caller"
+          ],
+          "confidence": "playbook_lead"
+        }
+      ],
+      "watchpoints": [
+        "active-borg-action-state",
+        "active-borg-flags",
+        "active-borg-countdown-a",
+        "active-borg-countdown-b",
+        "active-borg-action-index"
+      ]
+    },
+    {
+      "name": "shoot",
+      "event_window": "Enemy locked at mid range; tap one ranged shot per run.",
+      "breakpoints": [
+        {
+          "id": "game-pad-normalization-cluster",
+          "type": "execute",
+          "address": "0x8010d450",
+          "dol_offset": "0x0010a450",
+          "section": "text1",
+          "symbol": "unnamed likely game-side PAD read/normalization cluster",
+          "event": "Shot button sampled.",
+          "capture": [
+            "raw and normalized PAD state",
+            "r0-r31",
+            "lr caller"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "action-state-entry",
+          "type": "execute",
+          "address": "0x8005ec04",
+          "dol_offset": "0x0005bc04",
+          "section": "text1",
+          "symbol": "zz_005ec04_ / dense action-state handler lead",
+          "event": "Shot action transition.",
+          "capture": [
+            "active_borg_base",
+            "base+0x544",
+            "base+0x5e0",
+            "base+0x6b4",
+            "base+0x6b6",
+            "base+0x6fe",
+            "target pointer if present",
+            "r0-r31"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "action-handler-table",
+          "type": "read",
+          "address": "0x802d35a4",
+          "dol_offset": "0x002d05a4",
+          "section": "data3",
+          "symbol": "action/handler table lead near base+0x6fe use",
+          "event": "Action index dispatch during shot.",
+          "capture": [
+            "base+0x6fe action index",
+            "table entry read",
+            "resolved handler address",
+            "pc/lr of reader"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "action-helper-cluster",
+          "type": "execute",
+          "address": "0x800660b8",
+          "dol_offset": "0x000630b8",
+          "section": "text1",
+          "range_end": "0x80068004",
+          "range_end_dol_offset": "0x00065004",
+          "symbol": "zz_00660b8_ / action helper cluster",
+          "event": "Shot helper or projectile spawn path.",
+          "capture": [
+            "r3 return value after step",
+            "r0-r31",
+            "f0-f13",
+            "projectile/shot pointer if returned or stored",
+            "owner pointer",
+            "target pointer"
+          ],
+          "confidence": "playbook_lead"
+        }
+      ],
+      "watchpoints": [
+        "active-borg-action-state",
+        "active-borg-action-index",
+        "target-borg-pointer"
+      ]
+    },
+    {
+      "name": "melee",
+      "event_window": "Enemy locked at close range; press close-range attack once.",
+      "breakpoints": [
+        {
+          "id": "action-state-entry",
+          "type": "execute",
+          "address": "0x8005ec04",
+          "dol_offset": "0x0005bc04",
+          "section": "text1",
+          "symbol": "zz_005ec04_ / dense action-state handler lead",
+          "event": "Melee action transition.",
+          "capture": [
+            "active_borg_base",
+            "target_borg_base if present",
+            "base+0x544",
+            "base+0x5e0",
+            "base+0x6fe",
+            "r0-r31",
+            "f0-f13"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "action-handler-table",
+          "type": "read",
+          "address": "0x802d35a4",
+          "dol_offset": "0x002d05a4",
+          "section": "data3",
+          "symbol": "action/handler table lead near base+0x6fe use",
+          "event": "Action index dispatch during melee.",
+          "capture": [
+            "base+0x6fe action index",
+            "table entry read",
+            "resolved handler address",
+            "pc/lr of reader"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "action-helper-cluster",
+          "type": "execute",
+          "address": "0x800660b8",
+          "dol_offset": "0x000630b8",
+          "section": "text1",
+          "range_end": "0x80068004",
+          "range_end_dol_offset": "0x00065004",
+          "symbol": "zz_00660b8_ / action helper cluster",
+          "event": "Melee hit/contact helper path.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "hitbox/contact pointer if present",
+            "attacker borg base",
+            "target borg base",
+            "lr caller"
+          ],
+          "confidence": "playbook_lead"
+        }
+      ],
+      "watchpoints": [
+        "active-borg-action-state",
+        "active-borg-action-index",
+        "target-borg-pointer",
+        "hp-field"
+      ]
+    },
+    {
+      "name": "damage",
+      "event_window": "Take one hit, then one knockdown/wake-up event; keep each as a separate short run.",
+      "breakpoints": [
+        {
+          "id": "wakeup-invulnerability-init",
+          "type": "execute",
+          "address": "0x8005d4b0",
+          "dol_offset": "0x0005a4b0",
+          "section": "text1",
+          "symbol": "wake-up invincibility init",
+          "event": "Knockdown/wake state sets 60-frame invulnerability.",
+          "capture": [
+            "r3 active_borg_base",
+            "r0-r31",
+            "f0-f13",
+            "base+0x720 before and after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "secondary-wakeup-timer-init",
+          "type": "execute",
+          "address": "0x8005c7d8",
+          "dol_offset": "0x000597d8",
+          "section": "text1",
+          "symbol": "secondary timer init",
+          "event": "Secondary wake/invulnerability setter.",
+          "capture": [
+            "r3 candidate borg base",
+            "r0-r31",
+            "base+0x720 if base is valid",
+            "base+0x6b4",
+            "base+0x6b6",
+            "lr caller"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "wakeup-timer-countdown",
+          "type": "execute",
+          "address": "0x80055c00",
+          "dol_offset": "0x00052c00",
+          "section": "text1",
+          "symbol": "timer countdown",
+          "event": "Invulnerability timer decrements during post-hit/wake state.",
+          "capture": [
+            "r31 active_borg_base",
+            "base+0x720 before and after step",
+            "base+0x544",
+            "base+0x5e0",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "static-float-sixty",
+          "type": "read",
+          "address": "0x80437448",
+          "dol_offset": "0x003af668",
+          "section": "data5",
+          "symbol": "static float 60.0",
+          "event": "Timer init reads 60.0.",
+          "capture": [
+            "4 bytes at address",
+            "pc/lr of reader",
+            "destination register/value"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "timer-status-helper",
+          "type": "execute",
+          "address": "0x8005c290",
+          "dol_offset": "0x00059290",
+          "section": "text1",
+          "range_end": "0x8005c4a4",
+          "range_end_dol_offset": "0x000594a4",
+          "symbol": "timer/status helper touching +0x720/+0x6b4/+0x6b6",
+          "event": "Damage-side timer/status update.",
+          "capture": [
+            "active_borg_base",
+            "base+0x720",
+            "base+0x6b4",
+            "base+0x6b6",
+            "r0-r31",
+            "lr caller"
+          ],
+          "confidence": "playbook_lead"
+        }
+      ],
+      "watchpoints": [
+        "active-borg-wakeup-invulnerability-timer",
+        "active-borg-action-state",
+        "hp-field"
+      ]
+    },
+    {
+      "name": "death",
+      "event_window": "Low-HP borg; kill exactly one borg and pause at defeat state start.",
+      "breakpoints": [
+        {
+          "id": "death-swap-lead",
+          "type": "execute",
+          "address": "0x80281c38",
+          "dol_offset": "0x0027ec38",
+          "section": "text1",
+          "range_end": "0x80281e60",
+          "range_end_dol_offset": "0x0027ee60",
+          "symbol": "zz_0281c38_ / death-swap lead",
+          "event": "Defeated borg enters death/swap path.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "player pointer",
+            "active borg pointer",
+            "force/active index if present",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "clear-swap-controller-timer",
+          "type": "execute",
+          "address": "0x802807ac",
+          "dol_offset": "0x0027d7ac",
+          "section": "text1",
+          "symbol": "cPlayer::ClearSwapControllerTimer(void)",
+          "event": "Player swap/death controller timer clears.",
+          "capture": [
+            "r3 cPlayer pointer",
+            "0x80 bytes at r3 before and after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "player-team-lookup-band",
+          "type": "execute",
+          "address": "0x80297538",
+          "dol_offset": "0x00294538",
+          "section": "text1",
+          "symbol": "zz_0297538_ / team-player lookup band lead",
+          "event": "Death path queries team/player state.",
+          "capture": [
+            "r0-r31",
+            "lr caller",
+            "callstack",
+            "candidate team pointer",
+            "candidate player pointer"
+          ],
+          "confidence": "playbook_lead"
+        }
+      ],
+      "watchpoints": [
+        "hp-field",
+        "active-borg-action-state"
+      ]
+    },
+    {
+      "name": "next-borg spawn",
+      "event_window": "Force has at least two borgs; let defeated active borg disappear and next borg spawn.",
+      "breakpoints": [
+        {
+          "id": "team-get-player",
+          "type": "execute",
+          "address": "0x802a3938",
+          "dol_offset": "0x002a0938",
+          "section": "text1",
+          "symbol": "cTeam::GetPlayer(int)",
+          "event": "Resolve player object before/after next active borg spawns.",
+          "capture": [
+            "r3 cTeam pointer",
+            "r4 player index",
+            "r3 return value after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "clear-swap-controller-timer",
+          "type": "execute",
+          "address": "0x802807ac",
+          "dol_offset": "0x0027d7ac",
+          "section": "text1",
+          "symbol": "cPlayer::ClearSwapControllerTimer(void)",
+          "event": "Spawn/swap timer reset for incoming borg.",
+          "capture": [
+            "r3 cPlayer pointer",
+            "0x80 bytes at r3 before and after step",
+            "active index before and after if identifiable",
+            "lr caller"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "death-swap-lead",
+          "type": "execute",
+          "address": "0x80281c38",
+          "dol_offset": "0x0027ec38",
+          "section": "text1",
+          "range_end": "0x80281e60",
+          "range_end_dol_offset": "0x0027ee60",
+          "symbol": "zz_0281c38_ / death-swap lead",
+          "event": "Bridge from defeated borg to next active borg.",
+          "capture": [
+            "old active borg pointer",
+            "new active borg pointer if assigned",
+            "force/slot index if present",
+            "r0-r31",
+            "callstack"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "player-team-lookup-band",
+          "type": "execute",
+          "address": "0x80297538",
+          "dol_offset": "0x00294538",
+          "section": "text1",
+          "symbol": "zz_0297538_ / team-player lookup band lead",
+          "event": "Team/player state lookup during spawn.",
+          "capture": [
+            "r0-r31",
+            "candidate team pointer",
+            "candidate player pointer",
+            "candidate force data pointer",
+            "lr caller"
+          ],
+          "confidence": "playbook_lead"
+        }
+      ],
+      "watchpoints": [
+        "active-borg-action-state",
+        "active-borg-wakeup-invulnerability-timer"
+      ]
+    },
+    {
+      "name": "CPU AI",
+      "event_window": "Player idle with one visible CPU enemy; let CPU approach and attack for a short window.",
+      "breakpoints": [
+        {
+          "id": "team-get-player",
+          "type": "execute",
+          "address": "0x802a3938",
+          "dol_offset": "0x002a0938",
+          "section": "text1",
+          "symbol": "cTeam::GetPlayer(int)",
+          "event": "Identify CPU player object and controlled borg.",
+          "capture": [
+            "r3 cTeam pointer",
+            "r4 player index",
+            "r3 return value after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "player-team-lookup-band",
+          "type": "execute",
+          "address": "0x80297538",
+          "dol_offset": "0x00294538",
+          "section": "text1",
+          "symbol": "zz_0297538_ / team-player lookup band lead",
+          "event": "AI/controller code queries player/team state.",
+          "capture": [
+            "r0-r31",
+            "candidate CPU player pointer",
+            "candidate CPU borg pointer",
+            "candidate target player/borg pointer",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "action-state-entry",
+          "type": "execute",
+          "address": "0x8005ec04",
+          "dol_offset": "0x0005bc04",
+          "section": "text1",
+          "symbol": "zz_005ec04_ / dense action-state handler lead",
+          "event": "CPU-selected movement/attack enters shared action state.",
+          "capture": [
+            "CPU active_borg_base",
+            "CPU base+0x544",
+            "CPU base+0x5e0",
+            "CPU base+0x6fe",
+            "target pointer if present",
+            "r0-r31",
+            "f0-f13",
+            "callstack"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "action-helper-cluster",
+          "type": "execute",
+          "address": "0x800660b8",
+          "dol_offset": "0x000630b8",
+          "section": "text1",
+          "range_end": "0x80068004",
+          "range_end_dol_offset": "0x00065004",
+          "symbol": "zz_00660b8_ / action helper cluster",
+          "event": "CPU action helper after decision.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "CPU active_borg_base",
+            "target pointer",
+            "chosen action index",
+            "lr caller"
+          ],
+          "confidence": "playbook_lead"
+        }
+      ],
+      "watchpoints": [
+        "active-borg-action-state",
+        "active-borg-action-index",
+        "target-borg-pointer"
+      ]
+    }
+  ],
+  "cannot_implement_without_runtime_capture": [
+    "Lock-on target pointer location and target selection rules.",
+    "Projectile spawn table, projectile owner/target fields, homing parameters, and shot cooldowns.",
+    "Melee hitbox/contact representation and close-range attack gating.",
+    "HP field offset, damage formula, defense scaling, hitstun, and knockdown thresholds.",
+    "Death-to-next-borg timing, force active index location, and GF-energy decrement source.",
+    "Jump/fly velocity fields, grounded/airborne flags, boost drain, and per-borg air-jump counts.",
+    "CPU AI decision state, target choice, approach/retreat thresholds, and attack selection."
+  ]
+}

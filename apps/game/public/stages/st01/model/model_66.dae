@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="1.4.1" xmlns="http://www.collada.org/2005/11/COLLADASchema">
+    <asset>
+        <created>2026-06-30T03:43:59.8226738-04:00</created>
+        <modified>2026-06-30T03:43:59.8226782-04:00</modified>
+        <unit name="Meter" />
+        <contributor>
+            <authoring_tool>IONET Exporter</authoring_tool>
+        </contributor>
+    </asset>
+    <library_images>
+        <image id="Texture_0_I4-image" name="Texture_0_I4">
+            <init_from>Texture_0_I4.png</init_from>
+        </image>
+    </library_images>
+    <library_materials>
+        <material id="Material_D3A94659" name="Material_D3A94659">
+            <instance_effect url="#Material_D3A94659-effect" />
+        </material>
+    </library_materials>
+    <library_effects>
+        <effect id="Material_D3A94659-effect" name="Material_D3A94659">
+            <profile_COMMON>
+                <newparam sid="Texture_0_I4-image_surface">
+                    <surface type="2D">
+                        <init_from>Texture_0_I4-image</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="Texture_0_I4-image_sampler">
+                    <sampler2D>
+                        <source>Texture_0_I4-image_surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="standard">
+                    <phong>
+                        <emission>
+                            <color sid="emission">0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color sid="ambient">1 1 1 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="Texture_0_I4-image_sampler" texcoord="CHANNEL0" />
+                        </diffuse>
+                        <specular>
+                            <color sid="specular">1 1 1 1</color>
+                        </specular>
+                        <reflective>
+                            <color sid="reflective">1 1 1 1</color>
+                        </reflective>
+                        <shininess>
+                            <float sid="shininess">50</float>
+                        </shininess>
+                        <reflectivity>
+                            <float sid="reflectivity">1</float>
+                        </reflectivity>
+                        <transparency>
+                            <float sid="transparency">1</float>
+                        </transparency>
+                    </phong>
+                </technique>
+            </profile_COMMON>
+        </effect>
+    </library_effects>
+    <library_geometries>
+        <geometry id="Joint_0_Object_0-geometry" name="Joint_0_Object_0">
+            <mesh>
+                <source id="Joint_0_Object_0-geometry-POSITION">
+                    <float_array id="Joint_0_Object_0-geometry-POSITION-array" count="84">3454.2595 301 -4176.2354 3415.6338 301 -4153.873 3446.1277 301 -4184.367 3423.7654 301 -4145.741 3703.5867 301 -4131.611 3682.9644 301 -4160.9883 3707.9644 301 -4135.9883 3731.791 301 -4071.2861 3576.2349 301 -4054.2583 3580.3008 301 -4050.1924 3549.807 301 -4019.6985 3530.407 301 -3867.94 3545.741 301 -4023.7644 3439.0125 301 -3917.0364 3468.3901 301 -3896.414 3464.0125 301 -3892.0364 3682.9644 301 -4160.9883 3560.9885 301 -4282.9644 3576.2349 301 -4054.2583 3545.741 301 -4023.7644 3580.3008 301 -4050.1924 3549.807 301 -4019.6985 3439.0125 301 -3917.0364 3317.0366 301 -4039.0125 3742.7861 301 -4079.6174 3740.9436 301 -4058.4065 3541.5942 301 -3859.0571 3520.3835 301 -3857.2146</float_array>
+                    <technique_common>
+                        <accessor count="28" offset="0" source="Joint_0_Object_0-geometry-POSITION-array" stride="3">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                            <param name="Z" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="Joint_0_Object_0-geometry-NORMAL">
+                    <float_array id="Joint_0_Object_0-geometry-NORMAL-array" count="3">0 1 0</float_array>
+                    <technique_common>
+                        <accessor count="1" offset="0" source="Joint_0_Object_0-geometry-NORMAL-array" stride="3">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                            <param name="Z" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="Joint_0_Object_0-geometry-TEXCOORD">
+                    <float_array id="Joint_0_Object_0-geometry-TEXCOORD-array" count="8">0.22675002 0.97675 0.2265625 0.9765625 0.1171875 0.9765625 0.0546875 0.9765625</float_array>
+                    <technique_common>
+                        <accessor count="4" offset="0" source="Joint_0_Object_0-geometry-TEXCOORD-array" stride="2">
+                            <param name="S" type="float" />
+                            <param name="T" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="Joint_0_Object_0-geometry-COLOR">
+                    <float_array id="Joint_0_Object_0-geometry-COLOR-array" count="20">0.039215688 0.039215688 0.039215688 1 0.3137255 0.3137255 0.3137255 1 0.39215687 0.2901961 0.16078432 1 0.33333334 0.3137255 0.23529412 1 0.33333334 0.28235295 0.19607843 1</float_array>
+                    <technique_common>
+                        <accessor count="5" offset="0" source="Joint_0_Object_0-geometry-COLOR-array" stride="4">
+                            <param name="R" type="double" />
+                            <param name="G" type="double" />
+                            <param name="B" type="double" />
+                            <param name="A" type="double" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <vertices id="Joint_0_Object_0-vertices">
+                    <input semantic="POSITION" source="#Joint_0_Object_0-geometry-POSITION" />
+                </vertices>
+                <triangles count="30" material="Material_D3A94659">
+                    <input semantic="VERTEX" source="#Joint_0_Object_0-vertices" offset="0" set="0" />
+                    <input semantic="NORMAL" source="#Joint_0_Object_0-geometry-NORMAL" offset="1" set="0" />
+                    <input semantic="TEXCOORD" source="#Joint_0_Object_0-geometry-TEXCOORD" offset="2" set="0" />
+                    <input semantic="COLOR" source="#Joint_0_Object_0-geometry-COLOR" offset="3" set="0" />
+                    <p>0 0 0 0 2 0 0 0 1 0 0 0 3 0 1 0 0 0 0 0 1 0 0 0 4 0 2 1 6 0 3 1 5 0 1 1 7 0 1 2 4 0 2 1 5 0 1 1 7 0 1 2 5 0 1 1 8 0 1 1 7 0 1 2 7 0 1 2 8 0 1 1 7 0 1 2 8 0 1 1 9 0 1 1 7 0 1 2 7 0 1 2 9 0 1 1 7 0 1 2 9 0 1 1 10 0 1 1 11 0 1 2 7 0 1 2 10 0 1 1 11 0 1 2 10 0 1 1 12 0 1 1 11 0 1 2 11 0 1 2 12 0 1 1 11 0 1 2 12 0 1 1 13 0 1 3 14 0 2 4 11 0 1 2 13 0 1 3 14 0 2 4 13 0 1 3 15 0 3 3 16 0 1 0 17 0 1 0 0 0 0 0 18 0 1 0 16 0 1 0 0 0 0 0 18 0 1 0 0 0 0 0 19 0 0 0 20 0 1 0 18 0 1 0 19 0 0 0 20 0 1 0 19 0 0 0 21 0 1 0 3 0 1 0 23 0 1 0 22 0 1 0 0 0 0 0 3 0 1 0 22 0 1 0 0 0 0 0 22 0 1 0 19 0 0 0 24 0 3 2 4 0 2 1 7 0 1 2 25 0 3 2 24 0 3 2 7 0 1 2 25 0 3 2 7 0 1 2 7 0 1 2 26 0 3 2 25 0 3 2 7 0 1 2 26 0 3 2 7 0 1 2 11 0 1 2 27 0 3 2 26 0 3 2 11 0 1 2 27 0 3 2 11 0 1 2 14 0 2 4</p>
+                </triangles>
+            </mesh>
+        </geometry>
+    </library_geometries>
+    <library_visual_scenes>
+        <visual_scene id="Scene" name="Scene">
+            <node id="JOBJ_0" sid="JOBJ_0" name="JOBJ_0" type="JOINT">
+                <matrix sid="transform">1 0 0 3549.536 0 1 0 301 0 0 1 -4050.544 0 0 0 1</matrix>
+            </node>
+            <node id="Joint_0_Object_0" sid="Joint_0_Object_0" name="Joint_0_Object_0">
+                <instance_geometry url="#Joint_0_Object_0-geometry">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material target="#Material_D3A94659" symbol="Material_D3A94659" />
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+            </node>
+        </visual_scene>
+    </library_visual_scenes>
+    <scene>
+        <instance_visual_scene url="#Scene" />
+    </scene>
+</COLLADA>

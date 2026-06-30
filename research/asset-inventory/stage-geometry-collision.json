@@ -1,0 +1,5289 @@
+{
+  "generatedBy": "scripts/inventory-stage-geometry.mjs",
+  "generatedAt": "2026-06-30T07:44:14.435Z",
+  "scope": "Task 07: st00 stage geometry, walls, ceiling, backdrop, collision, bounds, culling/draw-group clues.",
+  "stageId": "st00",
+  "sources": {
+    "afsRoot": {
+      "path": "user-data/GG4E/afs_data/root",
+      "exists": true,
+      "bytes": 0
+    },
+    "discRoot": {
+      "path": "user-data/GG4E/disc",
+      "exists": true,
+      "bytes": 0
+    },
+    "publicStage": {
+      "path": "apps/game/public/stages/st00",
+      "exists": true,
+      "bytes": 0
+    },
+    "publicStageManifest": {
+      "path": "apps/game/public/stages/st00/manifest.json",
+      "exists": true,
+      "bytes": 663
+    },
+    "publicStagesManifest": {
+      "path": "apps/game/public/stages/manifest.json",
+      "exists": true,
+      "bytes": 65
+    },
+    "stageArc": {
+      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
+      "exists": true,
+      "bytes": 485019
+    },
+    "stagePzz": {
+      "path": "user-data/GG4E/afs_data/root/st00.pzz",
+      "exists": true,
+      "bytes": 573440
+    },
+    "publicStageArc": {
+      "path": "apps/game/public/stages/st00/raw/st00_mdl.arc",
+      "exists": true,
+      "bytes": 485019
+    },
+    "publicStagePzz": {
+      "path": "apps/game/public/stages/st00/raw/st00.pzz",
+      "exists": true,
+      "bytes": 573440
+    },
+    "gameMain": {
+      "path": "apps/game/src/main.ts",
+      "exists": true,
+      "bytes": 28578
+    },
+    "stageExportScript": {
+      "path": "scripts/export-stage-hsd.mjs",
+      "exists": true,
+      "bytes": 2848
+    },
+    "stageAssetScript": {
+      "path": "scripts/export-stage-assets.mjs",
+      "exists": true,
+      "bytes": 2491
+    },
+    "arcSpec": {
+      "path": "research/format-specs/arc-hsd-format.md",
+      "exists": true,
+      "bytes": 10830
+    },
+    "symbolMap": {
+      "path": "research/symbols/GG4E-CSM-20220412.map",
+      "exists": true,
+      "bytes": 260909
+    }
+  },
+  "refs": {
+    "defaultStageModelCount": "apps/game/src/main.ts:90",
+    "loadStageUrls": "apps/game/src/main.ts:345",
+    "normalizeStageCulling": "apps/game/src/main.ts:369",
+    "stageExporterLoop": "scripts/export-stage-hsd.mjs:36",
+    "stageExporterOutputName": "scripts/export-stage-hsd.mjs:38",
+    "stageAssetHitBins": "scripts/export-stage-assets.mjs:13",
+    "stageAssetSetArcs": "scripts/export-stage-assets.mjs:14"
+  },
+  "sourceArchive": {
+    "rootFileCount": 2857,
+    "st00Related": {
+      "visualArc": "st00_mdl.arc",
+      "pzz": "st00.pzz",
+      "hitBins": [
+        "hit000.bin",
+        "hit001.bin",
+        "hit002.bin"
+      ],
+      "setArcs": [
+        "set0000.arc",
+        "set0001.arc",
+        "set0002.arc",
+        "set0003.arc"
+      ],
+      "relatedCollisionArchives": [
+        "collision.arc",
+        "comhit.bin",
+        "comhit2.bin",
+        "hit000.bin",
+        "hit001.bin",
+        "hit002.bin",
+        "hit010.bin",
+        "hit011.bin",
+        "hit012.bin",
+        "hit020.bin",
+        "hit021.bin",
+        "hit022.bin",
+        "hit030.bin",
+        "hit031.bin",
+        "hit032.bin",
+        "hit040.bin",
+        "hit041.bin",
+        "hit042.bin",
+        "hit050.bin",
+        "hit051.bin",
+        "hit052.bin",
+        "hit060.bin",
+        "hit061.bin",
+        "hit062.bin",
+        "hit070.bin",
+        "hit071.bin",
+        "hit072.bin",
+        "hit080.bin",
+        "hit081.bin",
+        "hit082.bin",
+        "hit090.bin",
+        "hit091.bin",
+        "hit092.bin",
+        "hit0a0.bin",
+        "hit0a1.bin",
+        "hit0a2.bin",
+        "hit0b0.bin",
+        "hit0b1.bin",
+        "hit0b2.bin",
+        "hit0c0.bin",
+        "hit0c1.bin",
+        "hit0c2.bin",
+        "hit0d0.bin",
+        "hit0d1.bin",
+        "hit0d2.bin",
+        "hit0e0.bin",
+        "hit0e1.bin",
+        "hit0e2.bin",
+        "hit0f0.bin",
+        "hit0f1.bin",
+        "hit0f2.bin",
+        "hit100.bin",
+        "hit101.bin",
+        "hit102.bin",
+        "hitff0.bin",
+        "hitff1.bin",
+        "hitff2.bin"
+      ]
+    },
+    "stageArc": {
+      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
+      "hsd": {
+        "valid": true,
+        "reason": null,
+        "fileSize": 485019,
+        "actualBytes": 485019,
+        "fileSizeMatches": true,
+        "dataBlockSize": 481068,
+        "relocCount": 975,
+        "rootCount": 1,
+        "externalRefCount": 0,
+        "rootTableOffset": 485000,
+        "symbolTableOffset": 485008,
+        "roots": [
+          {
+            "index": 0,
+            "dataOffset": 481052,
+            "absoluteDataOffset": 481084,
+            "stringOffset": 0,
+            "name": "scene_data"
+          }
+        ]
+      },
+      "publicCopy": {
+        "source": {
+          "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
+          "exists": true,
+          "bytes": 485019,
+          "sha1": "60cc67ea7073c9b34ff5812f0a7fb927465b8a0f"
+        },
+        "public": {
+          "path": "apps/game/public/stages/st00/raw/st00_mdl.arc",
+          "exists": true,
+          "bytes": 485019,
+          "sha1": "60cc67ea7073c9b34ff5812f0a7fb927465b8a0f"
+        },
+        "byteMatch": true
+      }
+    },
+    "stagePzz": {
+      "path": "user-data/GG4E/afs_data/root/st00.pzz",
+      "header": {
+        "bytes": 573440,
+        "firstWordAsCountCandidate": 4,
+        "headerWords": [
+          "0x00000004",
+          "0x000000ed",
+          "0x4000000e",
+          "0x40000017",
+          "0x40000005",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000"
+        ],
+        "note": "PZZ member table is not decoded by this inventory; first word is reported only as a candidate count."
+      },
+      "publicCopy": {
+        "source": {
+          "path": "user-data/GG4E/afs_data/root/st00.pzz",
+          "exists": true,
+          "bytes": 573440,
+          "sha1": "a812ae2ca619c66d244a762a7e42e3d287302678"
+        },
+        "public": {
+          "path": "apps/game/public/stages/st00/raw/st00.pzz",
+          "exists": true,
+          "bytes": 573440,
+          "sha1": "a812ae2ca619c66d244a762a7e42e3d287302678"
+        },
+        "byteMatch": true
+      }
+    },
+    "setArcs": [
+      {
+        "path": "user-data/GG4E/afs_data/root/set0000.arc",
+        "bytes": 139264,
+        "headerWords": [
+          "0x00000003",
+          "0x00000001",
+          "0x00000021",
+          "0x00000021",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000"
+        ],
+        "hsd": {
+          "valid": false,
+          "reason": "file-size field does not match actual bytes",
+          "fileSize": 3,
+          "actualBytes": 139264,
+          "fileSizeMatches": false,
+          "dataBlockSize": 1,
+          "relocCount": 33,
+          "rootCount": 33,
+          "externalRefCount": 0,
+          "rootTableOffset": 165,
+          "symbolTableOffset": 429,
+          "roots": []
+        },
+        "publicCopy": {
+          "source": {
+            "path": "user-data/GG4E/afs_data/root/set0000.arc",
+            "exists": true,
+            "bytes": 139264,
+            "sha1": "8675d7d6315b71ef2a725567e62abe8a8c6afbca"
+          },
+          "public": {
+            "path": "apps/game/public/stages/st00/set/set0000.arc",
+            "exists": true,
+            "bytes": 139264,
+            "sha1": "8675d7d6315b71ef2a725567e62abe8a8c6afbca"
+          },
+          "byteMatch": true
+        }
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/set0001.arc",
+        "bytes": 114688,
+        "headerWords": [
+          "0x00000003",
+          "0x00000001",
+          "0x0000001d",
+          "0x00000019",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000"
+        ],
+        "hsd": {
+          "valid": false,
+          "reason": "file-size field does not match actual bytes",
+          "fileSize": 3,
+          "actualBytes": 114688,
+          "fileSizeMatches": false,
+          "dataBlockSize": 1,
+          "relocCount": 29,
+          "rootCount": 25,
+          "externalRefCount": 0,
+          "rootTableOffset": 149,
+          "symbolTableOffset": 349,
+          "roots": []
+        },
+        "publicCopy": {
+          "source": {
+            "path": "user-data/GG4E/afs_data/root/set0001.arc",
+            "exists": true,
+            "bytes": 114688,
+            "sha1": "281ca9d52e98fc5050f55137d59dbb2bb83f181d"
+          },
+          "public": {
+            "path": "apps/game/public/stages/st00/set/set0001.arc",
+            "exists": true,
+            "bytes": 114688,
+            "sha1": "281ca9d52e98fc5050f55137d59dbb2bb83f181d"
+          },
+          "byteMatch": true
+        }
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/set0002.arc",
+        "bytes": 122880,
+        "headerWords": [
+          "0x00000003",
+          "0x00000001",
+          "0x0000001c",
+          "0x0000001e",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000"
+        ],
+        "hsd": {
+          "valid": false,
+          "reason": "file-size field does not match actual bytes",
+          "fileSize": 3,
+          "actualBytes": 122880,
+          "fileSizeMatches": false,
+          "dataBlockSize": 1,
+          "relocCount": 28,
+          "rootCount": 30,
+          "externalRefCount": 0,
+          "rootTableOffset": 145,
+          "symbolTableOffset": 385,
+          "roots": []
+        },
+        "publicCopy": {
+          "source": {
+            "path": "user-data/GG4E/afs_data/root/set0002.arc",
+            "exists": true,
+            "bytes": 122880,
+            "sha1": "5e78c8d4cc4196cc9905abb46b997312f3a74fae"
+          },
+          "public": {
+            "path": "apps/game/public/stages/st00/set/set0002.arc",
+            "exists": true,
+            "bytes": 122880,
+            "sha1": "5e78c8d4cc4196cc9905abb46b997312f3a74fae"
+          },
+          "byteMatch": true
+        }
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/set0003.arc",
+        "bytes": 116736,
+        "headerWords": [
+          "0x00000003",
+          "0x00000001",
+          "0x0000001e",
+          "0x00000019",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000",
+          "0x00000000"
+        ],
+        "hsd": {
+          "valid": false,
+          "reason": "file-size field does not match actual bytes",
+          "fileSize": 3,
+          "actualBytes": 116736,
+          "fileSizeMatches": false,
+          "dataBlockSize": 1,
+          "relocCount": 30,
+          "rootCount": 25,
+          "externalRefCount": 0,
+          "rootTableOffset": 153,
+          "symbolTableOffset": 353,
+          "roots": []
+        },
+        "publicCopy": {
+          "source": {
+            "path": "user-data/GG4E/afs_data/root/set0003.arc",
+            "exists": true,
+            "bytes": 116736,
+            "sha1": "23c77c67ac7a70a3de7b69933a0cf72be52a793e"
+          },
+          "public": {
+            "path": "apps/game/public/stages/st00/set/set0003.arc",
+            "exists": true,
+            "bytes": 116736,
+            "sha1": "23c77c67ac7a70a3de7b69933a0cf72be52a793e"
+          },
+          "byteMatch": true
+        }
+      }
+    ],
+    "globalCollisionCandidates": [
+      "collision.arc",
+      "comhit.bin",
+      "comhit2.bin",
+      "hit000.bin",
+      "hit001.bin",
+      "hit002.bin",
+      "hit010.bin",
+      "hit011.bin",
+      "hit012.bin",
+      "hit020.bin",
+      "hit021.bin",
+      "hit022.bin",
+      "hit030.bin",
+      "hit031.bin",
+      "hit032.bin",
+      "hit040.bin",
+      "hit041.bin",
+      "hit042.bin",
+      "hit050.bin",
+      "hit051.bin",
+      "hit052.bin",
+      "hit060.bin",
+      "hit061.bin",
+      "hit062.bin",
+      "hit070.bin",
+      "hit071.bin",
+      "hit072.bin",
+      "hit080.bin",
+      "hit081.bin",
+      "hit082.bin",
+      "hit090.bin",
+      "hit091.bin",
+      "hit092.bin",
+      "hit0a0.bin",
+      "hit0a1.bin",
+      "hit0a2.bin",
+      "hit0b0.bin",
+      "hit0b1.bin",
+      "hit0b2.bin",
+      "hit0c0.bin",
+      "hit0c1.bin",
+      "hit0c2.bin",
+      "hit0d0.bin",
+      "hit0d1.bin",
+      "hit0d2.bin",
+      "hit0e0.bin",
+      "hit0e1.bin",
+      "hit0e2.bin",
+      "hit0f0.bin",
+      "hit0f1.bin",
+      "hit0f2.bin",
+      "hit100.bin",
+      "hit101.bin",
+      "hit102.bin",
+      "hitff0.bin",
+      "hitff1.bin",
+      "hitff2.bin"
+    ]
+  },
+  "exportedPieces": {
+    "directory": "apps/game/public/stages/st00/model",
+    "count": 40,
+    "requestedByBrowserCount": 40,
+    "withGeometry": 39,
+    "emptySlots": [
+      "model_24"
+    ],
+    "missingExpectedDae": [],
+    "extraDae": [],
+    "aggregateBbox": {
+      "min": {
+        "x": -22083.316,
+        "y": -22000.426,
+        "z": -21842.582
+      },
+      "max": {
+        "x": 22083.316,
+        "y": 22000.426,
+        "z": 21842.582
+      },
+      "extent": {
+        "x": 44166.632,
+        "y": 44000.852,
+        "z": 43685.164
+      },
+      "center": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "textureFiles": [
+      "apps/game/public/stages/st00/model/Texture_0_CMP.png",
+      "apps/game/public/stages/st00/model/Texture_0_I4.png",
+      "apps/game/public/stages/st00/model/Texture_1_CMP.png",
+      "apps/game/public/stages/st00/model/Texture_2_CMP.png",
+      "apps/game/public/stages/st00/model/Texture_2_I4.png"
+    ],
+    "pieces": [
+      {
+        "path": "apps/game/public/stages/st00/model/model_00.dae",
+        "index": 0,
+        "bytes": 11267,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 81,
+        "triangleCount": 135,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -5000,
+            "y": 0,
+            "z": -5000
+          },
+          "max": {
+            "x": 5000,
+            "y": 0,
+            "z": 5000
+          },
+          "extent": {
+            "x": 10000,
+            "y": 0,
+            "z": 10000
+          },
+          "center": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_1102BE77"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 243,
+            "vertexCount": 81,
+            "bbox": {
+              "min": {
+                "x": -5000,
+                "y": 0,
+                "z": -5000
+              },
+              "max": {
+                "x": 5000,
+                "y": 0,
+                "z": 5000
+              },
+              "extent": {
+                "x": 10000,
+                "y": 0,
+                "z": 10000
+              },
+              "center": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            }
+          }
+        ],
+        "id": "model_00",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "floor"
+          ],
+          "primary": "floor",
+          "reasons": [
+            "Very broad, nearly flat X/Z plane at arena Y=0."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_01.dae",
+        "index": 1,
+        "bytes": 22639,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 162,
+        "triangleCount": 371,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -22083.316,
+            "y": -22000.426,
+            "z": -21842.582
+          },
+          "max": {
+            "x": 22083.316,
+            "y": 22000.426,
+            "z": 21842.582
+          },
+          "extent": {
+            "x": 44166.632,
+            "y": 44000.852,
+            "z": 43685.164
+          },
+          "center": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8C1F4CB1"
+        ],
+        "textureNames": [],
+        "textureFiles": [],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 486,
+            "vertexCount": 162,
+            "bbox": {
+              "min": {
+                "x": -22083.316,
+                "y": -22000.426,
+                "z": -21842.582
+              },
+              "max": {
+                "x": 22083.316,
+                "y": 22000.426,
+                "z": 21842.582
+              },
+              "extent": {
+                "x": 44166.632,
+                "y": 44000.852,
+                "z": 43685.164
+              },
+              "center": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              }
+            }
+          }
+        ],
+        "id": "model_01",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "wall-or-vertical-shell-candidate",
+            "backdrop-or-skybox-candidate"
+          ],
+          "primary": "backdrop-or-skybox-candidate",
+          "reasons": [
+            "Large vertical extent with broad horizontal span.",
+            "Large or distant shell-like geometry relative to the arena origin."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_02.dae",
+        "index": 2,
+        "bytes": 10060,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 128,
+        "triangleCount": 64,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -5000,
+            "y": -1600,
+            "z": -5000
+          },
+          "max": {
+            "x": 5000,
+            "y": 0,
+            "z": 5000
+          },
+          "extent": {
+            "x": 10000,
+            "y": 1600,
+            "z": 10000
+          },
+          "center": {
+            "x": 0,
+            "y": -800,
+            "z": 0
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_38FA6CB7"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 384,
+            "vertexCount": 128,
+            "bbox": {
+              "min": {
+                "x": -5000,
+                "y": -1600,
+                "z": -5000
+              },
+              "max": {
+                "x": 5000,
+                "y": 0,
+                "z": 5000
+              },
+              "extent": {
+                "x": 10000,
+                "y": 1600,
+                "z": 10000
+              },
+              "center": {
+                "x": 0,
+                "y": -800,
+                "z": 0
+              }
+            }
+          }
+        ],
+        "id": "model_02",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "wall-or-vertical-shell-candidate",
+            "backdrop-or-skybox-candidate"
+          ],
+          "primary": "backdrop-or-skybox-candidate",
+          "reasons": [
+            "Large vertical extent with broad horizontal span.",
+            "Large or distant shell-like geometry relative to the arena origin."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_03.dae",
+        "index": 3,
+        "bytes": 35514,
+        "geometryCount": 3,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 203,
+        "triangleCount": 226,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 319.98,
+            "y": 0,
+            "z": -5000
+          },
+          "max": {
+            "x": 4219.98,
+            "y": 450.501,
+            "z": -1765
+          },
+          "extent": {
+            "x": 3899.999,
+            "y": 450.501,
+            "z": 3235
+          },
+          "center": {
+            "x": 2269.98,
+            "y": 225.251,
+            "z": -3382.5
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2"
+        ],
+        "materialNames": [
+          "Material_80FF8D9A",
+          "Material_A5847847",
+          "Material_F17BAF75"
+        ],
+        "textureNames": [
+          "Texture_0_I4",
+          "Texture_1_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png",
+          "Texture_1_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 210,
+            "vertexCount": 70,
+            "bbox": {
+              "min": {
+                "x": 369.979,
+                "y": 0,
+                "z": -5000
+              },
+              "max": {
+                "x": 4169.979,
+                "y": 350,
+                "z": -1800
+              },
+              "extent": {
+                "x": 3800,
+                "y": 350,
+                "z": 3200
+              },
+              "center": {
+                "x": 2269.979,
+                "y": 175,
+                "z": -3400
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 12,
+            "vertexCount": 4,
+            "bbox": {
+              "min": {
+                "x": 3206.379,
+                "y": 450.501,
+                "z": -2548.367
+              },
+              "max": {
+                "x": 3757.773,
+                "y": 450.501,
+                "z": -2051.652
+              },
+              "extent": {
+                "x": 551.393,
+                "y": 0,
+                "z": 496.715
+              },
+              "center": {
+                "x": 3482.076,
+                "y": 450.501,
+                "z": -2300.009
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 387,
+            "vertexCount": 129,
+            "bbox": {
+              "min": {
+                "x": 319.98,
+                "y": 350,
+                "z": -2599
+              },
+              "max": {
+                "x": 4219.98,
+                "y": 450,
+                "z": -1765
+              },
+              "extent": {
+                "x": 3899.999,
+                "y": 100,
+                "z": 834
+              },
+              "center": {
+                "x": 2269.98,
+                "y": 400,
+                "z": -2182
+              }
+            }
+          }
+        ],
+        "id": "model_03",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "wall-or-vertical-shell-candidate"
+          ],
+          "primary": "wall-or-vertical-shell-candidate",
+          "reasons": [
+            "Large vertical extent with broad horizontal span."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_04.dae",
+        "index": 4,
+        "bytes": 34530,
+        "geometryCount": 3,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 208,
+        "triangleCount": 219,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 319.984,
+            "y": 350,
+            "z": -4999.999
+          },
+          "max": {
+            "x": 4219.983,
+            "y": 850.485,
+            "z": -2564.999
+          },
+          "extent": {
+            "x": 3899.999,
+            "y": 500.485,
+            "z": 2435
+          },
+          "center": {
+            "x": 2269.984,
+            "y": 600.243,
+            "z": -3782.499
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2"
+        ],
+        "materialNames": [
+          "Material_80FF8D9A",
+          "Material_A5847847",
+          "Material_F17BAF75"
+        ],
+        "textureNames": [
+          "Texture_0_I4",
+          "Texture_1_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png",
+          "Texture_1_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 213,
+            "vertexCount": 71,
+            "bbox": {
+              "min": {
+                "x": 369.983,
+                "y": 350,
+                "z": -4999.999
+              },
+              "max": {
+                "x": 4169.983,
+                "y": 750,
+                "z": -2599.999
+              },
+              "extent": {
+                "x": 3800,
+                "y": 400,
+                "z": 2400
+              },
+              "center": {
+                "x": 2269.983,
+                "y": 550,
+                "z": -3799.999
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 12,
+            "vertexCount": 4,
+            "bbox": {
+              "min": {
+                "x": 425.291,
+                "y": 850.485,
+                "z": -3264.09
+              },
+              "max": {
+                "x": 562.946,
+                "y": 850.485,
+                "z": -3122.498
+              },
+              "extent": {
+                "x": 137.655,
+                "y": 0,
+                "z": 141.592
+              },
+              "center": {
+                "x": 494.118,
+                "y": 850.485,
+                "z": -3193.294
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 399,
+            "vertexCount": 133,
+            "bbox": {
+              "min": {
+                "x": 319.984,
+                "y": 750,
+                "z": -3398.999
+              },
+              "max": {
+                "x": 4219.983,
+                "y": 850,
+                "z": -2564.999
+              },
+              "extent": {
+                "x": 3899.999,
+                "y": 100,
+                "z": 834
+              },
+              "center": {
+                "x": 2269.984,
+                "y": 800,
+                "z": -2981.999
+              }
+            }
+          }
+        ],
+        "id": "model_04",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "wall-or-vertical-shell-candidate"
+          ],
+          "primary": "wall-or-vertical-shell-candidate",
+          "reasons": [
+            "Large vertical extent with broad horizontal span."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_05.dae",
+        "index": 5,
+        "bytes": 29181,
+        "geometryCount": 2,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 186,
+        "triangleCount": 212,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 319.991,
+            "y": 750,
+            "z": -5000
+          },
+          "max": {
+            "x": 4219.99,
+            "y": 1250.001,
+            "z": -3364.999
+          },
+          "extent": {
+            "x": 3899.999,
+            "y": 500,
+            "z": 1635.001
+          },
+          "center": {
+            "x": 2269.991,
+            "y": 1000.001,
+            "z": -4182.5
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1"
+        ],
+        "materialNames": [
+          "Material_80FF8D9A",
+          "Material_F17BAF75"
+        ],
+        "textureNames": [
+          "Texture_0_I4",
+          "Texture_1_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png",
+          "Texture_1_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 180,
+            "vertexCount": 60,
+            "bbox": {
+              "min": {
+                "x": 369.99,
+                "y": 750,
+                "z": -5000
+              },
+              "max": {
+                "x": 4169.99,
+                "y": 1150.001,
+                "z": -3400
+              },
+              "extent": {
+                "x": 3800,
+                "y": 400,
+                "z": 1600
+              },
+              "center": {
+                "x": 2269.99,
+                "y": 950.001,
+                "z": -4200
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 378,
+            "vertexCount": 126,
+            "bbox": {
+              "min": {
+                "x": 319.991,
+                "y": 1150.001,
+                "z": -4199
+              },
+              "max": {
+                "x": 4219.99,
+                "y": 1250.001,
+                "z": -3364.999
+              },
+              "extent": {
+                "x": 3899.999,
+                "y": 100,
+                "z": 834.001
+              },
+              "center": {
+                "x": 2269.991,
+                "y": 1200.001,
+                "z": -3782
+              }
+            }
+          }
+        ],
+        "id": "model_05",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "wall-or-vertical-shell-candidate",
+            "backdrop-or-skybox-candidate"
+          ],
+          "primary": "backdrop-or-skybox-candidate",
+          "reasons": [
+            "Large vertical extent with broad horizontal span.",
+            "Large or distant shell-like geometry relative to the arena origin."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_06.dae",
+        "index": 6,
+        "bytes": 32828,
+        "geometryCount": 3,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 178,
+        "triangleCount": 215,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 319.992,
+            "y": 1150,
+            "z": -5000
+          },
+          "max": {
+            "x": 4219.991,
+            "y": 1650,
+            "z": -4164.999
+          },
+          "extent": {
+            "x": 3899.999,
+            "y": 500,
+            "z": 835.001
+          },
+          "center": {
+            "x": 2269.992,
+            "y": 1400,
+            "z": -4582.5
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2"
+        ],
+        "materialNames": [
+          "Material_80FF8D9A",
+          "Material_A5847847",
+          "Material_F17BAF75"
+        ],
+        "textureNames": [
+          "Texture_0_I4",
+          "Texture_1_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png",
+          "Texture_1_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 168,
+            "vertexCount": 56,
+            "bbox": {
+              "min": {
+                "x": 369.991,
+                "y": 1150,
+                "z": -5000
+              },
+              "max": {
+                "x": 4169.991,
+                "y": 1550,
+                "z": -4200
+              },
+              "extent": {
+                "x": 3800,
+                "y": 400,
+                "z": 800
+              },
+              "center": {
+                "x": 2269.991,
+                "y": 1350,
+                "z": -4600
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 12,
+            "vertexCount": 4,
+            "bbox": {
+              "min": {
+                "x": 3999.434,
+                "y": 1298.989,
+                "z": -4199.005
+              },
+              "max": {
+                "x": 4125.121,
+                "y": 1430.549,
+                "z": -4199.005
+              },
+              "extent": {
+                "x": 125.687,
+                "y": 131.56,
+                "z": 0
+              },
+              "center": {
+                "x": 4062.277,
+                "y": 1364.769,
+                "z": -4199.005
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 354,
+            "vertexCount": 118,
+            "bbox": {
+              "min": {
+                "x": 319.992,
+                "y": 1550,
+                "z": -5000
+              },
+              "max": {
+                "x": 4219.991,
+                "y": 1650,
+                "z": -4164.999
+              },
+              "extent": {
+                "x": 3899.999,
+                "y": 100,
+                "z": 835.001
+              },
+              "center": {
+                "x": 2269.992,
+                "y": 1600,
+                "z": -4582.5
+              }
+            }
+          }
+        ],
+        "id": "model_06",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "wall-or-vertical-shell-candidate",
+            "backdrop-or-skybox-candidate"
+          ],
+          "primary": "backdrop-or-skybox-candidate",
+          "reasons": [
+            "Large vertical extent with broad horizontal span.",
+            "Large or distant shell-like geometry relative to the arena origin."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_07.dae",
+        "index": 7,
+        "bytes": 83738,
+        "geometryCount": 7,
+        "controllerCount": 3,
+        "jointCount": 3,
+        "vertexCount": 440,
+        "triangleCount": 480,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -2315.284,
+            "y": -0.2,
+            "z": 1162.936
+          },
+          "max": {
+            "x": 2085.282,
+            "y": 607.748,
+            "z": 4243.868
+          },
+          "extent": {
+            "x": 4400.566,
+            "y": 607.949,
+            "z": 3080.933
+          },
+          "center": {
+            "x": -115.001,
+            "y": 303.774,
+            "z": 2703.402
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2",
+          "Joint_0_Object_3",
+          "Joint_1_Object_0_SINGLE",
+          "Joint_1_Object_1_SINGLE",
+          "Joint_2_Object_0_SINGLE"
+        ],
+        "materialNames": [
+          "Material_181565F3",
+          "Material_23674F2C",
+          "Material_3DEA373B",
+          "Material_45F15F4D",
+          "Material_89BE3284",
+          "Material_C52481EC",
+          "Material_DEF1064D"
+        ],
+        "textureNames": [
+          "Texture_0_CMP",
+          "Texture_1_CMP",
+          "Texture_2_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png",
+          "Texture_1_CMP.png",
+          "Texture_2_I4.png"
+        ],
+        "transparencyValues": [
+          0.661,
+          0.999,
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": true,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 666,
+            "vertexCount": 222,
+            "bbox": {
+              "min": {
+                "x": -2315.284,
+                "y": -0.2,
+                "z": 1162.936
+              },
+              "max": {
+                "x": 2085.282,
+                "y": 600,
+                "z": 4243.868
+              },
+              "extent": {
+                "x": 4400.566,
+                "y": 600.2,
+                "z": 3080.933
+              },
+              "center": {
+                "x": -115.001,
+                "y": 299.9,
+                "z": 2703.402
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 174,
+            "vertexCount": 58,
+            "bbox": {
+              "min": {
+                "x": -2296.177,
+                "y": 341,
+                "z": 1182.041
+              },
+              "max": {
+                "x": 2066.177,
+                "y": 500,
+                "z": 4224.762
+              },
+              "extent": {
+                "x": 4362.354,
+                "y": 159,
+                "z": 3042.721
+              },
+              "center": {
+                "x": -115,
+                "y": 420.5,
+                "z": 2703.401
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 120,
+            "vertexCount": 40,
+            "bbox": {
+              "min": {
+                "x": -2296.177,
+                "y": 600,
+                "z": 1182.041
+              },
+              "max": {
+                "x": 2066.177,
+                "y": 600,
+                "z": 4224.762
+              },
+              "extent": {
+                "x": 4362.354,
+                "y": 0,
+                "z": 3042.721
+              },
+              "center": {
+                "x": -115,
+                "y": 600,
+                "z": 2703.401
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_3-geometry-POSITION",
+            "declaredFloatCount": 36,
+            "vertexCount": 12,
+            "bbox": {
+              "min": {
+                "x": -1578.12,
+                "y": 600.941,
+                "z": 1513.305
+              },
+              "max": {
+                "x": -1334.601,
+                "y": 600.941,
+                "z": 1921.494
+              },
+              "extent": {
+                "x": 243.519,
+                "y": 0,
+                "z": 408.188
+              },
+              "center": {
+                "x": -1456.361,
+                "y": 600.941,
+                "z": 1717.399
+              }
+            }
+          },
+          {
+            "id": "Joint_1_Object_0_SINGLE-geometry-POSITION",
+            "declaredFloatCount": 216,
+            "vertexCount": 72,
+            "bbox": {
+              "min": {
+                "x": 264.112,
+                "y": 602.398,
+                "z": 2648.398
+              },
+              "max": {
+                "x": 884.112,
+                "y": 607.748,
+                "z": 2707.798
+              },
+              "extent": {
+                "x": 620,
+                "y": 5.35,
+                "z": 59.4
+              },
+              "center": {
+                "x": 574.112,
+                "y": 605.073,
+                "z": 2678.098
+              }
+            }
+          },
+          {
+            "id": "Joint_1_Object_1_SINGLE-geometry-POSITION",
+            "declaredFloatCount": 72,
+            "vertexCount": 24,
+            "bbox": {
+              "min": {
+                "x": 264.106,
+                "y": 601.941,
+                "z": 2648.272
+              },
+              "max": {
+                "x": 884.117,
+                "y": 601.941,
+                "z": 2678.224
+              },
+              "extent": {
+                "x": 620.011,
+                "y": 0,
+                "z": 29.953
+              },
+              "center": {
+                "x": 574.112,
+                "y": 601.941,
+                "z": 2663.248
+              }
+            }
+          },
+          {
+            "id": "Joint_2_Object_0_SINGLE-geometry-POSITION",
+            "declaredFloatCount": 36,
+            "vertexCount": 12,
+            "bbox": {
+              "min": {
+                "x": -155.553,
+                "y": 601,
+                "z": 1892.487
+              },
+              "max": {
+                "x": 602.581,
+                "y": 601,
+                "z": 2844.665
+              },
+              "extent": {
+                "x": 758.134,
+                "y": 0,
+                "z": 952.177
+              },
+              "center": {
+                "x": 223.514,
+                "y": 601,
+                "z": 2368.576
+              }
+            }
+          }
+        ],
+        "id": "model_07",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "wall-or-vertical-shell-candidate",
+            "transparent-or-invisible-candidate"
+          ],
+          "primary": "wall-or-vertical-shell-candidate",
+          "reasons": [
+            "Large vertical extent with broad horizontal span.",
+            "At least one material has COLLADA transparency below 0.999."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_08.dae",
+        "index": 8,
+        "bytes": 64573,
+        "geometryCount": 3,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 559,
+        "triangleCount": 762,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -1813.357,
+            "y": 600.024,
+            "z": 1920.58
+          },
+          "max": {
+            "x": -535.634,
+            "y": 1710.759,
+            "z": 3198.302
+          },
+          "extent": {
+            "x": 1277.723,
+            "y": 1110.735,
+            "z": 1277.723
+          },
+          "center": {
+            "x": -1174.496,
+            "y": 1155.391,
+            "z": 2559.441
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2"
+        ],
+        "materialNames": [
+          "Material_4BACC7C9",
+          "Material_59E31ABC",
+          "Material_CECE64CB"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 975,
+            "vertexCount": 325,
+            "bbox": {
+              "min": {
+                "x": -1743.527,
+                "y": 600.024,
+                "z": 2326.258
+              },
+              "max": {
+                "x": -941.312,
+                "y": 1710.759,
+                "z": 2995.459
+              },
+              "extent": {
+                "x": 802.214,
+                "y": 1110.735,
+                "z": 669.201
+              },
+              "center": {
+                "x": -1342.419,
+                "y": 1155.391,
+                "z": 2660.858
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 546,
+            "vertexCount": 182,
+            "bbox": {
+              "min": {
+                "x": -1813.357,
+                "y": 810.76,
+                "z": 1920.58
+              },
+              "max": {
+                "x": -535.634,
+                "y": 1606.161,
+                "z": 3198.302
+              },
+              "extent": {
+                "x": 1277.723,
+                "y": 795.4,
+                "z": 1277.723
+              },
+              "center": {
+                "x": -1174.496,
+                "y": 1208.46,
+                "z": 2559.441
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 156,
+            "vertexCount": 52,
+            "bbox": {
+              "min": {
+                "x": -1335.119,
+                "y": 1480.243,
+                "z": 2047.995
+              },
+              "max": {
+                "x": -663.05,
+                "y": 1530.694,
+                "z": 2720.066
+              },
+              "extent": {
+                "x": 672.069,
+                "y": 50.451,
+                "z": 672.07
+              },
+              "center": {
+                "x": -999.085,
+                "y": 1505.468,
+                "z": 2384.031
+              }
+            }
+          }
+        ],
+        "id": "model_08",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_09.dae",
+        "index": 9,
+        "bytes": 27506,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 326,
+        "triangleCount": 267,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -483.987,
+            "y": 600,
+            "z": 2956.8
+          },
+          "max": {
+            "x": -304.918,
+            "y": 942.143,
+            "z": 3171.309
+          },
+          "extent": {
+            "x": 179.07,
+            "y": 342.144,
+            "z": 214.509
+          },
+          "center": {
+            "x": -394.453,
+            "y": 771.072,
+            "z": 3064.054
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_875FE00A"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 978,
+            "vertexCount": 326,
+            "bbox": {
+              "min": {
+                "x": -483.987,
+                "y": 600,
+                "z": 2956.8
+              },
+              "max": {
+                "x": -304.918,
+                "y": 942.143,
+                "z": 3171.309
+              },
+              "extent": {
+                "x": 179.07,
+                "y": 342.144,
+                "z": 214.509
+              },
+              "center": {
+                "x": -394.453,
+                "y": 771.072,
+                "z": 3064.054
+              }
+            }
+          }
+        ],
+        "id": "model_09",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_10.dae",
+        "index": 10,
+        "bytes": 43719,
+        "geometryCount": 3,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 405,
+        "triangleCount": 274,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 348.17,
+            "y": 600,
+            "z": 2932.179
+          },
+          "max": {
+            "x": 1674.489,
+            "y": 1120.319,
+            "z": 3443.278
+          },
+          "extent": {
+            "x": 1326.319,
+            "y": 520.319,
+            "z": 511.099
+          },
+          "center": {
+            "x": 1011.33,
+            "y": 860.159,
+            "z": 3187.728
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2"
+        ],
+        "materialNames": [
+          "Material_4CCA96BA",
+          "Material_B9CA28B0",
+          "Material_F1F64CB4"
+        ],
+        "textureNames": [
+          "Texture_0_CMP",
+          "Texture_1_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png",
+          "Texture_1_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 510,
+            "vertexCount": 170,
+            "bbox": {
+              "min": {
+                "x": 524.27,
+                "y": 600,
+                "z": 2932.179
+              },
+              "max": {
+                "x": 1497.67,
+                "y": 1120.319,
+                "z": 3443.278
+              },
+              "extent": {
+                "x": 973.4,
+                "y": 520.319,
+                "z": 511.099
+              },
+              "center": {
+                "x": 1010.97,
+                "y": 860.159,
+                "z": 3187.728
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 249,
+            "vertexCount": 83,
+            "bbox": {
+              "min": {
+                "x": 348.17,
+                "y": 600,
+                "z": 2980.234
+              },
+              "max": {
+                "x": 1674.489,
+                "y": 861.201,
+                "z": 3436.427
+              },
+              "extent": {
+                "x": 1326.319,
+                "y": 261.202,
+                "z": 456.193
+              },
+              "center": {
+                "x": 1011.33,
+                "y": 730.601,
+                "z": 3208.331
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 456,
+            "vertexCount": 152,
+            "bbox": {
+              "min": {
+                "x": 599.007,
+                "y": 600,
+                "z": 3041.553
+              },
+              "max": {
+                "x": 1102.732,
+                "y": 1020,
+                "z": 3430.286
+              },
+              "extent": {
+                "x": 503.724,
+                "y": 420,
+                "z": 388.733
+              },
+              "center": {
+                "x": 850.869,
+                "y": 810,
+                "z": 3235.919
+              }
+            }
+          }
+        ],
+        "id": "model_10",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_11.dae",
+        "index": 11,
+        "bytes": 36189,
+        "geometryCount": 4,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 234,
+        "triangleCount": 188,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -5000.087,
+            "y": 0.093,
+            "z": -3400
+          },
+          "max": {
+            "x": -3579.58,
+            "y": 708.933,
+            "z": 600
+          },
+          "extent": {
+            "x": 1420.507,
+            "y": 708.84,
+            "z": 4000
+          },
+          "center": {
+            "x": -4289.834,
+            "y": 354.513,
+            "z": -1400
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2",
+          "Joint_0_Object_3"
+        ],
+        "materialNames": [
+          "Material_52CAEF87",
+          "Material_73C47EDC",
+          "Material_833A4BD7",
+          "Material_99BE7EE5"
+        ],
+        "textureNames": [
+          "Texture_0_CMP",
+          "Texture_1_CMP",
+          "Texture_2_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png",
+          "Texture_1_CMP.png",
+          "Texture_2_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 462,
+            "vertexCount": 154,
+            "bbox": {
+              "min": {
+                "x": -5000.087,
+                "y": 0.093,
+                "z": -3400
+              },
+              "max": {
+                "x": -3579.58,
+                "y": 708.933,
+                "z": 600
+              },
+              "extent": {
+                "x": 1420.507,
+                "y": 708.84,
+                "z": 4000
+              },
+              "center": {
+                "x": -4289.834,
+                "y": 354.513,
+                "z": -1400
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 156,
+            "vertexCount": 52,
+            "bbox": {
+              "min": {
+                "x": -5000.087,
+                "y": 142,
+                "z": -3400
+              },
+              "max": {
+                "x": -3819.431,
+                "y": 616.583,
+                "z": 600
+              },
+              "extent": {
+                "x": 1180.656,
+                "y": 474.583,
+                "z": 4000
+              },
+              "center": {
+                "x": -4409.759,
+                "y": 379.292,
+                "z": -1400
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 48,
+            "vertexCount": 16,
+            "bbox": {
+              "min": {
+                "x": -4963.759,
+                "y": 142,
+                "z": -3308.534
+              },
+              "max": {
+                "x": -4963.759,
+                "y": 616.583,
+                "z": 508.534
+              },
+              "extent": {
+                "x": 0,
+                "y": 474.583,
+                "z": 3817.067
+              },
+              "center": {
+                "x": -4963.759,
+                "y": 379.292,
+                "z": -1400
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_3-geometry-POSITION",
+            "declaredFloatCount": 36,
+            "vertexCount": 12,
+            "bbox": {
+              "min": {
+                "x": -5000.087,
+                "y": 142,
+                "z": -3400
+              },
+              "max": {
+                "x": -5000.087,
+                "y": 616.583,
+                "z": 600
+              },
+              "extent": {
+                "x": 0,
+                "y": 474.583,
+                "z": 4000
+              },
+              "center": {
+                "x": -5000.087,
+                "y": 379.292,
+                "z": -1400
+              }
+            }
+          }
+        ],
+        "id": "model_11",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "wall-or-vertical-shell-candidate",
+            "backdrop-or-skybox-candidate"
+          ],
+          "primary": "backdrop-or-skybox-candidate",
+          "reasons": [
+            "Large vertical extent with broad horizontal span.",
+            "Large or distant shell-like geometry relative to the arena origin."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_12.dae",
+        "index": 12,
+        "bytes": 16453,
+        "geometryCount": 2,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 48,
+        "triangleCount": 40,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4915.199,
+            "y": 142.993,
+            "z": -417.372
+          },
+          "max": {
+            "x": -3800.975,
+            "y": 610.994,
+            "z": 493.459
+          },
+          "extent": {
+            "x": 1114.224,
+            "y": 468,
+            "z": 910.832
+          },
+          "center": {
+            "x": -4358.087,
+            "y": 376.993,
+            "z": 38.044
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1"
+        ],
+        "materialNames": [
+          "Material_5D024828",
+          "Material_6AFEDB38"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 96,
+            "vertexCount": 32,
+            "bbox": {
+              "min": {
+                "x": -4915.199,
+                "y": 142.993,
+                "z": -417.372
+              },
+              "max": {
+                "x": -3800.975,
+                "y": 610.994,
+                "z": 493.459
+              },
+              "extent": {
+                "x": 1114.224,
+                "y": 468,
+                "z": 910.832
+              },
+              "center": {
+                "x": -4358.087,
+                "y": 376.993,
+                "z": 38.044
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 48,
+            "vertexCount": 16,
+            "bbox": {
+              "min": {
+                "x": -3802.075,
+                "y": 142.993,
+                "z": -417.372
+              },
+              "max": {
+                "x": -3802.075,
+                "y": 610.994,
+                "z": 493.459
+              },
+              "extent": {
+                "x": 0,
+                "y": 468,
+                "z": 910.832
+              },
+              "center": {
+                "x": -3802.075,
+                "y": 376.993,
+                "z": 38.044
+              }
+            }
+          }
+        ],
+        "id": "model_12",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_13.dae",
+        "index": 13,
+        "bytes": 16580,
+        "geometryCount": 2,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 48,
+        "triangleCount": 41,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4889.083,
+            "y": 142.993,
+            "z": -1346.821
+          },
+          "max": {
+            "x": -3774.858,
+            "y": 610.994,
+            "z": -435.99
+          },
+          "extent": {
+            "x": 1114.225,
+            "y": 468,
+            "z": 910.831
+          },
+          "center": {
+            "x": -4331.97,
+            "y": 376.993,
+            "z": -891.405
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1"
+        ],
+        "materialNames": [
+          "Material_5D024828",
+          "Material_6AFEDB38"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 96,
+            "vertexCount": 32,
+            "bbox": {
+              "min": {
+                "x": -4889.083,
+                "y": 142.993,
+                "z": -1346.821
+              },
+              "max": {
+                "x": -3774.858,
+                "y": 610.994,
+                "z": -435.99
+              },
+              "extent": {
+                "x": 1114.225,
+                "y": 468,
+                "z": 910.831
+              },
+              "center": {
+                "x": -4331.97,
+                "y": 376.993,
+                "z": -891.405
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 48,
+            "vertexCount": 16,
+            "bbox": {
+              "min": {
+                "x": -3775.958,
+                "y": 142.993,
+                "z": -1346.821
+              },
+              "max": {
+                "x": -3775.958,
+                "y": 610.994,
+                "z": -435.99
+              },
+              "extent": {
+                "x": 0,
+                "y": 468,
+                "z": 910.831
+              },
+              "center": {
+                "x": -3775.958,
+                "y": 376.993,
+                "z": -891.405
+              }
+            }
+          }
+        ],
+        "id": "model_13",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_14.dae",
+        "index": 14,
+        "bytes": 17971,
+        "geometryCount": 2,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 80,
+        "triangleCount": 36,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4913.222,
+            "y": 142.993,
+            "z": -2378.594
+          },
+          "max": {
+            "x": -3798.997,
+            "y": 610.994,
+            "z": -1467.762
+          },
+          "extent": {
+            "x": 1114.224,
+            "y": 468,
+            "z": 910.832
+          },
+          "center": {
+            "x": -4356.11,
+            "y": 376.993,
+            "z": -1923.178
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1"
+        ],
+        "materialNames": [
+          "Material_5D024828",
+          "Material_6AFEDB38"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 138,
+            "vertexCount": 46,
+            "bbox": {
+              "min": {
+                "x": -4913.222,
+                "y": 142.993,
+                "z": -2378.594
+              },
+              "max": {
+                "x": -3798.997,
+                "y": 610.994,
+                "z": -1467.762
+              },
+              "extent": {
+                "x": 1114.224,
+                "y": 468,
+                "z": 910.832
+              },
+              "center": {
+                "x": -4356.11,
+                "y": 376.993,
+                "z": -1923.178
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 102,
+            "vertexCount": 34,
+            "bbox": {
+              "min": {
+                "x": -3800.098,
+                "y": 142.993,
+                "z": -2378.593
+              },
+              "max": {
+                "x": -3800.098,
+                "y": 610.994,
+                "z": -1467.762
+              },
+              "extent": {
+                "x": 0,
+                "y": 468,
+                "z": 910.831
+              },
+              "center": {
+                "x": -3800.098,
+                "y": 376.993,
+                "z": -1923.178
+              }
+            }
+          }
+        ],
+        "id": "model_14",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_15.dae",
+        "index": 15,
+        "bytes": 16591,
+        "geometryCount": 2,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 49,
+        "triangleCount": 40,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4889.852,
+            "y": 142.993,
+            "z": -3299.597
+          },
+          "max": {
+            "x": -3775.627,
+            "y": 610.994,
+            "z": -2388.765
+          },
+          "extent": {
+            "x": 1114.224,
+            "y": 468,
+            "z": 910.832
+          },
+          "center": {
+            "x": -4332.739,
+            "y": 376.993,
+            "z": -2844.181
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1"
+        ],
+        "materialNames": [
+          "Material_5D024828",
+          "Material_6AFEDB38"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 96,
+            "vertexCount": 32,
+            "bbox": {
+              "min": {
+                "x": -4889.852,
+                "y": 142.993,
+                "z": -3299.597
+              },
+              "max": {
+                "x": -3775.627,
+                "y": 610.994,
+                "z": -2388.765
+              },
+              "extent": {
+                "x": 1114.224,
+                "y": 468,
+                "z": 910.832
+              },
+              "center": {
+                "x": -4332.739,
+                "y": 376.993,
+                "z": -2844.181
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 51,
+            "vertexCount": 17,
+            "bbox": {
+              "min": {
+                "x": -3776.727,
+                "y": 142.993,
+                "z": -3299.597
+              },
+              "max": {
+                "x": -3776.727,
+                "y": 610.994,
+                "z": -2388.765
+              },
+              "extent": {
+                "x": 0,
+                "y": 468,
+                "z": 910.832
+              },
+              "center": {
+                "x": -3776.727,
+                "y": 376.993,
+                "z": -2844.181
+              }
+            }
+          }
+        ],
+        "id": "model_15",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_16.dae",
+        "index": 16,
+        "bytes": 44074,
+        "geometryCount": 3,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 357,
+        "triangleCount": 303,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4691.06,
+            "y": 708.958,
+            "z": -2896.748
+          },
+          "max": {
+            "x": -4007.414,
+            "y": 1338.759,
+            "z": -2203.442
+          },
+          "extent": {
+            "x": 683.646,
+            "y": 629.801,
+            "z": 693.305
+          },
+          "center": {
+            "x": -4349.237,
+            "y": 1023.859,
+            "z": -2550.095
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2"
+        ],
+        "materialNames": [
+          "Material_3FD17959",
+          "Material_50C2EF17",
+          "Material_85DFA231"
+        ],
+        "textureNames": [
+          "Texture_0_CMP",
+          "Texture_2_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png",
+          "Texture_2_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 921,
+            "vertexCount": 307,
+            "bbox": {
+              "min": {
+                "x": -4691.06,
+                "y": 708.958,
+                "z": -2896.748
+              },
+              "max": {
+                "x": -4007.414,
+                "y": 1338.759,
+                "z": -2203.442
+              },
+              "extent": {
+                "x": 683.646,
+                "y": 629.801,
+                "z": 693.305
+              },
+              "center": {
+                "x": -4349.237,
+                "y": 1023.859,
+                "z": -2550.095
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 126,
+            "vertexCount": 42,
+            "bbox": {
+              "min": {
+                "x": -4239.111,
+                "y": 868.155,
+                "z": -2775.881
+              },
+              "max": {
+                "x": -4036.19,
+                "y": 1288.159,
+                "z": -2253.939
+              },
+              "extent": {
+                "x": 202.921,
+                "y": 420.004,
+                "z": 521.942
+              },
+              "center": {
+                "x": -4137.651,
+                "y": 1078.157,
+                "z": -2514.91
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 24,
+            "vertexCount": 8,
+            "bbox": {
+              "min": {
+                "x": -4661.57,
+                "y": 887.217,
+                "z": -2875.233
+              },
+              "max": {
+                "x": -4291.826,
+                "y": 1081.491,
+                "z": -2364.369
+              },
+              "extent": {
+                "x": 369.744,
+                "y": 194.274,
+                "z": 510.864
+              },
+              "center": {
+                "x": -4476.698,
+                "y": 984.354,
+                "z": -2619.801
+              }
+            }
+          }
+        ],
+        "id": "model_16",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_17.dae",
+        "index": 17,
+        "bytes": 63985,
+        "geometryCount": 3,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 623,
+        "triangleCount": 555,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4747.066,
+            "y": 708.929,
+            "z": -2044.996
+          },
+          "max": {
+            "x": -3943.188,
+            "y": 933.93,
+            "z": -1058.542
+          },
+          "extent": {
+            "x": 803.878,
+            "y": 225.001,
+            "z": 986.453
+          },
+          "center": {
+            "x": -4345.127,
+            "y": 821.43,
+            "z": -1551.769
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2"
+        ],
+        "materialNames": [
+          "Material_AB46BAD6",
+          "Material_ADAC774E",
+          "Material_FC8DFB1C"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 1356,
+            "vertexCount": 452,
+            "bbox": {
+              "min": {
+                "x": -4747.066,
+                "y": 708.929,
+                "z": -2044.996
+              },
+              "max": {
+                "x": -3959.416,
+                "y": 933.93,
+                "z": -1062.89
+              },
+              "extent": {
+                "x": 787.65,
+                "y": 225.001,
+                "z": 982.105
+              },
+              "center": {
+                "x": -4353.241,
+                "y": 821.43,
+                "z": -1553.943
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 453,
+            "vertexCount": 151,
+            "bbox": {
+              "min": {
+                "x": -4182.001,
+                "y": 733.929,
+                "z": -1893.587
+              },
+              "max": {
+                "x": -3943.188,
+                "y": 933.93,
+                "z": -1058.542
+              },
+              "extent": {
+                "x": 238.812,
+                "y": 200,
+                "z": 835.044
+              },
+              "center": {
+                "x": -4062.594,
+                "y": 833.93,
+                "z": -1476.064
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 60,
+            "vertexCount": 20,
+            "bbox": {
+              "min": {
+                "x": -4015.118,
+                "y": 811.793,
+                "z": -1846.446
+              },
+              "max": {
+                "x": -3956.131,
+                "y": 893.832,
+                "z": -1679.924
+              },
+              "extent": {
+                "x": 58.987,
+                "y": 82.039,
+                "z": 166.522
+              },
+              "center": {
+                "x": -3985.625,
+                "y": 852.812,
+                "z": -1763.185
+              }
+            }
+          }
+        ],
+        "id": "model_17",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_18.dae",
+        "index": 18,
+        "bytes": 18184,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 154,
+        "triangleCount": 122,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4999.001,
+            "y": 0,
+            "z": 612
+          },
+          "max": {
+            "x": -3998.58,
+            "y": 534.069,
+            "z": 1412
+          },
+          "extent": {
+            "x": 1000.421,
+            "y": 534.069,
+            "z": 800
+          },
+          "center": {
+            "x": -4498.79,
+            "y": 267.035,
+            "z": 1012
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_4892AFFD"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 462,
+            "vertexCount": 154,
+            "bbox": {
+              "min": {
+                "x": -4999.001,
+                "y": 0,
+                "z": 612
+              },
+              "max": {
+                "x": -3998.58,
+                "y": 534.069,
+                "z": 1412
+              },
+              "extent": {
+                "x": 1000.421,
+                "y": 534.069,
+                "z": 800
+              },
+              "center": {
+                "x": -4498.79,
+                "y": 267.035,
+                "z": 1012
+              }
+            }
+          }
+        ],
+        "id": "model_18",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_19.dae",
+        "index": 19,
+        "bytes": 21013,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 244,
+        "triangleCount": 182,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 2371.234,
+            "y": 0,
+            "z": 1979.794
+          },
+          "max": {
+            "x": 2963.696,
+            "y": 300,
+            "z": 2422.579
+          },
+          "extent": {
+            "x": 592.462,
+            "y": 300,
+            "z": 442.785
+          },
+          "center": {
+            "x": 2667.465,
+            "y": 150,
+            "z": 2201.186
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_5DA1EE42"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 732,
+            "vertexCount": 244,
+            "bbox": {
+              "min": {
+                "x": 2371.234,
+                "y": 0,
+                "z": 1979.794
+              },
+              "max": {
+                "x": 2963.696,
+                "y": 300,
+                "z": 2422.579
+              },
+              "extent": {
+                "x": 592.462,
+                "y": 300,
+                "z": 442.785
+              },
+              "center": {
+                "x": 2667.465,
+                "y": 150,
+                "z": 2201.186
+              }
+            }
+          }
+        ],
+        "id": "model_19",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_20.dae",
+        "index": 20,
+        "bytes": 76397,
+        "geometryCount": 2,
+        "controllerCount": 1,
+        "jointCount": 2,
+        "vertexCount": 979,
+        "triangleCount": 610,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 2401.519,
+            "y": 0.016,
+            "z": 2761.257
+          },
+          "max": {
+            "x": 2984.564,
+            "y": 660.016,
+            "z": 3631.814
+          },
+          "extent": {
+            "x": 583.045,
+            "y": 660,
+            "z": 870.557
+          },
+          "center": {
+            "x": 2693.041,
+            "y": 330.016,
+            "z": 3196.536
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_1_Object_0_SINGLE"
+        ],
+        "materialNames": [
+          "Material_8391C28F"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 2481,
+            "vertexCount": 827,
+            "bbox": {
+              "min": {
+                "x": 2401.519,
+                "y": 0.016,
+                "z": 2761.257
+              },
+              "max": {
+                "x": 2984.564,
+                "y": 660.016,
+                "z": 3631.814
+              },
+              "extent": {
+                "x": 583.045,
+                "y": 660,
+                "z": 870.557
+              },
+              "center": {
+                "x": 2693.041,
+                "y": 330.016,
+                "z": 3196.536
+              }
+            }
+          },
+          {
+            "id": "Joint_1_Object_0_SINGLE-geometry-POSITION",
+            "declaredFloatCount": 456,
+            "vertexCount": 152,
+            "bbox": {
+              "min": {
+                "x": 2459.296,
+                "y": 3.016,
+                "z": 2773.928
+              },
+              "max": {
+                "x": 2933.758,
+                "y": 657.016,
+                "z": 3630.036
+              },
+              "extent": {
+                "x": 474.462,
+                "y": 654,
+                "z": 856.107
+              },
+              "center": {
+                "x": 2696.527,
+                "y": 330.016,
+                "z": 3201.982
+              }
+            }
+          }
+        ],
+        "id": "model_20",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_21.dae",
+        "index": 21,
+        "bytes": 16944,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 156,
+        "triangleCount": 108,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 3418.548,
+            "y": 0,
+            "z": 2336.102
+          },
+          "max": {
+            "x": 3691.22,
+            "y": 432,
+            "z": 2719.549
+          },
+          "extent": {
+            "x": 272.671,
+            "y": 432,
+            "z": 383.446
+          },
+          "center": {
+            "x": 3554.884,
+            "y": 216,
+            "z": 2527.825
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_C915DFB1"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 468,
+            "vertexCount": 156,
+            "bbox": {
+              "min": {
+                "x": 3418.548,
+                "y": 0,
+                "z": 2336.102
+              },
+              "max": {
+                "x": 3691.22,
+                "y": 432,
+                "z": 2719.549
+              },
+              "extent": {
+                "x": 272.671,
+                "y": 432,
+                "z": 383.446
+              },
+              "center": {
+                "x": 3554.884,
+                "y": 216,
+                "z": 2527.825
+              }
+            }
+          }
+        ],
+        "id": "model_21",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_22.dae",
+        "index": 22,
+        "bytes": 73411,
+        "geometryCount": 2,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 1138,
+        "triangleCount": 576,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -3540.961,
+            "y": 0.325,
+            "z": 3244.861
+          },
+          "max": {
+            "x": -3343.04,
+            "y": 199.897,
+            "z": 3443.138
+          },
+          "extent": {
+            "x": 197.921,
+            "y": 199.572,
+            "z": 198.277
+          },
+          "center": {
+            "x": -3442.001,
+            "y": 100.111,
+            "z": 3343.999
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1"
+        ],
+        "materialNames": [
+          "Material_DD92768B"
+        ],
+        "textureNames": [
+          "Texture_0_CMP"
+        ],
+        "textureFiles": [
+          "Texture_0_CMP.png"
+        ],
+        "transparencyValues": [
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 2742,
+            "vertexCount": 914,
+            "bbox": {
+              "min": {
+                "x": -3540.961,
+                "y": 0.325,
+                "z": 3244.861
+              },
+              "max": {
+                "x": -3343.04,
+                "y": 199.897,
+                "z": 3443.138
+              },
+              "extent": {
+                "x": 197.921,
+                "y": 199.572,
+                "z": 198.277
+              },
+              "center": {
+                "x": -3442.001,
+                "y": 100.111,
+                "z": 3343.999
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 672,
+            "vertexCount": 224,
+            "bbox": {
+              "min": {
+                "x": -3540.961,
+                "y": 1.481,
+                "z": 3244.861
+              },
+              "max": {
+                "x": -3343.04,
+                "y": 192.887,
+                "z": 3443.138
+              },
+              "extent": {
+                "x": 197.921,
+                "y": 191.406,
+                "z": 198.277
+              },
+              "center": {
+                "x": -3442.001,
+                "y": 97.184,
+                "z": 3343.999
+              }
+            }
+          }
+        ],
+        "id": "model_22",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_23.dae",
+        "index": 23,
+        "bytes": 42593,
+        "geometryCount": 4,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 271,
+        "triangleCount": 342,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -3261.064,
+            "y": 0.425,
+            "z": 2708.626
+          },
+          "max": {
+            "x": -2401.277,
+            "y": 151.176,
+            "z": 4165.799
+          },
+          "extent": {
+            "x": 859.787,
+            "y": 150.75,
+            "z": 1457.173
+          },
+          "center": {
+            "x": -2831.171,
+            "y": 75.801,
+            "z": 3437.213
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0",
+          "Joint_0_Object_1",
+          "Joint_0_Object_2",
+          "Joint_0_Object_3"
+        ],
+        "materialNames": [
+          "Material_4A9A9E79",
+          "Material_5AAABD1E",
+          "Material_72ED76A1",
+          "Material_74AE379E"
+        ],
+        "textureNames": [
+          "Texture_1_CMP",
+          "Texture_2_I4"
+        ],
+        "textureFiles": [
+          "Texture_1_CMP.png",
+          "Texture_2_I4.png"
+        ],
+        "transparencyValues": [
+          0.999,
+          1
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 438,
+            "vertexCount": 146,
+            "bbox": {
+              "min": {
+                "x": -3261.064,
+                "y": 0.8,
+                "z": 2708.626
+              },
+              "max": {
+                "x": -2401.277,
+                "y": 150.801,
+                "z": 4165.799
+              },
+              "extent": {
+                "x": 859.787,
+                "y": 150,
+                "z": 1457.173
+              },
+              "center": {
+                "x": -2831.171,
+                "y": 75.801,
+                "z": 3437.213
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_1-geometry-POSITION",
+            "declaredFloatCount": 72,
+            "vertexCount": 24,
+            "bbox": {
+              "min": {
+                "x": -2661.849,
+                "y": 41.885,
+                "z": 3796.543
+              },
+              "max": {
+                "x": -2447.896,
+                "y": 109.715,
+                "z": 4116.467
+              },
+              "extent": {
+                "x": 213.953,
+                "y": 67.83,
+                "z": 319.924
+              },
+              "center": {
+                "x": -2554.873,
+                "y": 75.8,
+                "z": 3956.505
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_2-geometry-POSITION",
+            "declaredFloatCount": 231,
+            "vertexCount": 77,
+            "bbox": {
+              "min": {
+                "x": -3222.966,
+                "y": 0.425,
+                "z": 2797.272
+              },
+              "max": {
+                "x": -2832.622,
+                "y": 151.176,
+                "z": 3362.407
+              },
+              "extent": {
+                "x": 390.344,
+                "y": 150.75,
+                "z": 565.135
+              },
+              "center": {
+                "x": -3027.794,
+                "y": 75.801,
+                "z": 3079.84
+              }
+            }
+          },
+          {
+            "id": "Joint_0_Object_3-geometry-POSITION",
+            "declaredFloatCount": 72,
+            "vertexCount": 24,
+            "bbox": {
+              "min": {
+                "x": -2669.76,
+                "y": 41.109,
+                "z": 3782.678
+              },
+              "max": {
+                "x": -2602.051,
+                "y": 110.491,
+                "z": 3828.561
+              },
+              "extent": {
+                "x": 67.71,
+                "y": 69.382,
+                "z": 45.882
+              },
+              "center": {
+                "x": -2635.906,
+                "y": 75.8,
+                "z": 3805.619
+              }
+            }
+          }
+        ],
+        "id": "model_23",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_24.dae",
+        "index": 24,
+        "bytes": 903,
+        "geometryCount": 0,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 0,
+        "triangleCount": 0,
+        "polylistFaceCount": 0,
+        "bbox": null,
+        "geometryNames": [],
+        "materialNames": [],
+        "textureNames": [],
+        "textureFiles": [],
+        "transparencyValues": [],
+        "hasGeometry": false,
+        "hasTransparentMaterial": false,
+        "positionSources": [],
+        "id": "model_24",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "empty-export-slot"
+          ],
+          "primary": "empty-export-slot",
+          "reasons": [
+            "DAE has no geometry, positions, triangles, or controllers with mesh data."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_25.dae",
+        "index": 25,
+        "bytes": 14390,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 91,
+        "triangleCount": 133,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -2151.993,
+            "y": 0.8,
+            "z": 1352.154
+          },
+          "max": {
+            "x": 2339.794,
+            "y": 1,
+            "z": 4505.616
+          },
+          "extent": {
+            "x": 4491.787,
+            "y": 0.2,
+            "z": 3153.462
+          },
+          "center": {
+            "x": 93.9,
+            "y": 0.9,
+            "z": 2928.885
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 273,
+            "vertexCount": 91,
+            "bbox": {
+              "min": {
+                "x": -2151.993,
+                "y": 0.8,
+                "z": 1352.154
+              },
+              "max": {
+                "x": 2339.794,
+                "y": 1,
+                "z": 4505.616
+              },
+              "extent": {
+                "x": 4491.787,
+                "y": 0.2,
+                "z": 3153.462
+              },
+              "center": {
+                "x": 93.9,
+                "y": 0.9,
+                "z": 2928.885
+              }
+            }
+          }
+        ],
+        "id": "model_25",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_26.dae",
+        "index": 26,
+        "bytes": 9447,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 35,
+        "triangleCount": 19,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -5000.104,
+            "y": 1,
+            "z": -3400.001
+          },
+          "max": {
+            "x": -3409.098,
+            "y": 1,
+            "z": 1686.123
+          },
+          "extent": {
+            "x": 1591.005,
+            "y": 0,
+            "z": 5086.124
+          },
+          "center": {
+            "x": -4204.601,
+            "y": 1,
+            "z": -856.939
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 105,
+            "vertexCount": 35,
+            "bbox": {
+              "min": {
+                "x": -5000.104,
+                "y": 1,
+                "z": -3400.001
+              },
+              "max": {
+                "x": -3409.098,
+                "y": 1,
+                "z": 1686.123
+              },
+              "extent": {
+                "x": 1591.005,
+                "y": 0,
+                "z": 5086.124
+              },
+              "center": {
+                "x": -4204.601,
+                "y": 1,
+                "z": -856.939
+              }
+            }
+          }
+        ],
+        "id": "model_26",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_27.dae",
+        "index": 27,
+        "bytes": 7951,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 12,
+        "triangleCount": 10,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -3496.538,
+            "y": 1,
+            "z": 3292.407
+          },
+          "max": {
+            "x": -3256.538,
+            "y": 1,
+            "z": 3532.407
+          },
+          "extent": {
+            "x": 240,
+            "y": 0,
+            "z": 240
+          },
+          "center": {
+            "x": -3376.538,
+            "y": 1,
+            "z": 3412.407
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 36,
+            "vertexCount": 12,
+            "bbox": {
+              "min": {
+                "x": -3496.538,
+                "y": 1,
+                "z": 3292.407
+              },
+              "max": {
+                "x": -3256.538,
+                "y": 1,
+                "z": 3532.407
+              },
+              "extent": {
+                "x": 240,
+                "y": 0,
+                "z": 240
+              },
+              "center": {
+                "x": -3376.538,
+                "y": 1,
+                "z": 3412.407
+              }
+            }
+          }
+        ],
+        "id": "model_27",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_28.dae",
+        "index": 28,
+        "bytes": 9364,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 28,
+        "triangleCount": 35,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -3261.064,
+            "y": 1,
+            "z": 2708.627
+          },
+          "max": {
+            "x": -2351.277,
+            "y": 1,
+            "z": 4215.799
+          },
+          "extent": {
+            "x": 909.788,
+            "y": 0,
+            "z": 1507.172
+          },
+          "center": {
+            "x": -2806.17,
+            "y": 1,
+            "z": 3462.213
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 84,
+            "vertexCount": 28,
+            "bbox": {
+              "min": {
+                "x": -3261.064,
+                "y": 1,
+                "z": 2708.627
+              },
+              "max": {
+                "x": -2351.277,
+                "y": 1,
+                "z": 4215.799
+              },
+              "extent": {
+                "x": 909.788,
+                "y": 0,
+                "z": 1507.172
+              },
+              "center": {
+                "x": -2806.17,
+                "y": 1,
+                "z": 3462.213
+              }
+            }
+          }
+        ],
+        "id": "model_28",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_29.dae",
+        "index": 29,
+        "bytes": 7892,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 10,
+        "triangleCount": 7,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 2411,
+            "y": 1,
+            "z": 1996.001
+          },
+          "max": {
+            "x": 3031,
+            "y": 1,
+            "z": 2456.001
+          },
+          "extent": {
+            "x": 620,
+            "y": 0,
+            "z": 460
+          },
+          "center": {
+            "x": 2721,
+            "y": 1,
+            "z": 2226.001
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 30,
+            "vertexCount": 10,
+            "bbox": {
+              "min": {
+                "x": 2411,
+                "y": 1,
+                "z": 1996.001
+              },
+              "max": {
+                "x": 3031,
+                "y": 1,
+                "z": 2456.001
+              },
+              "extent": {
+                "x": 620,
+                "y": 0,
+                "z": 460
+              },
+              "center": {
+                "x": 2721,
+                "y": 1,
+                "z": 2226.001
+              }
+            }
+          }
+        ],
+        "id": "model_29",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_30.dae",
+        "index": 30,
+        "bytes": 7813,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 10,
+        "triangleCount": 7,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 2429.999,
+            "y": 1,
+            "z": 2793.601
+          },
+          "max": {
+            "x": 3149.999,
+            "y": 1,
+            "z": 3790.601
+          },
+          "extent": {
+            "x": 720,
+            "y": 0,
+            "z": 997
+          },
+          "center": {
+            "x": 2789.999,
+            "y": 1,
+            "z": 3292.101
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 30,
+            "vertexCount": 10,
+            "bbox": {
+              "min": {
+                "x": 2429.999,
+                "y": 1,
+                "z": 2793.601
+              },
+              "max": {
+                "x": 3149.999,
+                "y": 1,
+                "z": 3790.601
+              },
+              "extent": {
+                "x": 720,
+                "y": 0,
+                "z": 997
+              },
+              "center": {
+                "x": 2789.999,
+                "y": 1,
+                "z": 3292.101
+              }
+            }
+          }
+        ],
+        "id": "model_30",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_31.dae",
+        "index": 31,
+        "bytes": 7742,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 10,
+        "triangleCount": 7,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 3447.161,
+            "y": 1,
+            "z": 2337.278
+          },
+          "max": {
+            "x": 3866.81,
+            "y": 1,
+            "z": 2893.443
+          },
+          "extent": {
+            "x": 419.649,
+            "y": 0,
+            "z": 556.165
+          },
+          "center": {
+            "x": 3656.986,
+            "y": 1,
+            "z": 2615.36
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 30,
+            "vertexCount": 10,
+            "bbox": {
+              "min": {
+                "x": 3447.161,
+                "y": 1,
+                "z": 2337.278
+              },
+              "max": {
+                "x": 3866.81,
+                "y": 1,
+                "z": 2893.443
+              },
+              "extent": {
+                "x": 419.649,
+                "y": 0,
+                "z": 556.165
+              },
+              "center": {
+                "x": 3656.986,
+                "y": 1,
+                "z": 2615.36
+              }
+            }
+          }
+        ],
+        "id": "model_31",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_32.dae",
+        "index": 32,
+        "bytes": 8803,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 25,
+        "triangleCount": 25,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 369.983,
+            "y": 1,
+            "z": -5000
+          },
+          "max": {
+            "x": 4890.261,
+            "y": 1,
+            "z": -1591.956
+          },
+          "extent": {
+            "x": 4520.278,
+            "y": 0,
+            "z": 3408.044
+          },
+          "center": {
+            "x": 2630.122,
+            "y": 1,
+            "z": -3295.978
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 75,
+            "vertexCount": 25,
+            "bbox": {
+              "min": {
+                "x": 369.983,
+                "y": 1,
+                "z": -5000
+              },
+              "max": {
+                "x": 4890.261,
+                "y": 1,
+                "z": -1591.956
+              },
+              "extent": {
+                "x": 4520.278,
+                "y": 0,
+                "z": 3408.044
+              },
+              "center": {
+                "x": 2630.122,
+                "y": 1,
+                "z": -3295.978
+              }
+            }
+          }
+        ],
+        "id": "model_32",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_33.dae",
+        "index": 33,
+        "bytes": 8506,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 21,
+        "triangleCount": 11,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 369.961,
+            "y": 431.049,
+            "z": -2600.123
+          },
+          "max": {
+            "x": 4221.027,
+            "y": 451.001,
+            "z": -2410.17
+          },
+          "extent": {
+            "x": 3851.066,
+            "y": 19.952,
+            "z": 189.952
+          },
+          "center": {
+            "x": 2295.494,
+            "y": 441.025,
+            "z": -2505.146
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 63,
+            "vertexCount": 21,
+            "bbox": {
+              "min": {
+                "x": 369.961,
+                "y": 431.049,
+                "z": -2600.123
+              },
+              "max": {
+                "x": 4221.027,
+                "y": 451.001,
+                "z": -2410.17
+              },
+              "extent": {
+                "x": 3851.066,
+                "y": 19.952,
+                "z": 189.952
+              },
+              "center": {
+                "x": 2295.494,
+                "y": 441.025,
+                "z": -2505.146
+              }
+            }
+          }
+        ],
+        "id": "model_33",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_34.dae",
+        "index": 34,
+        "bytes": 8483,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 21,
+        "triangleCount": 11,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 369.999,
+            "y": 831.024,
+            "z": -3400.458
+          },
+          "max": {
+            "x": 4221.055,
+            "y": 850.976,
+            "z": -3210.232
+          },
+          "extent": {
+            "x": 3851.055,
+            "y": 19.952,
+            "z": 190.226
+          },
+          "center": {
+            "x": 2295.527,
+            "y": 841,
+            "z": -3305.345
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 63,
+            "vertexCount": 21,
+            "bbox": {
+              "min": {
+                "x": 369.999,
+                "y": 831.024,
+                "z": -3400.458
+              },
+              "max": {
+                "x": 4221.055,
+                "y": 850.976,
+                "z": -3210.232
+              },
+              "extent": {
+                "x": 3851.055,
+                "y": 19.952,
+                "z": 190.226
+              },
+              "center": {
+                "x": 2295.527,
+                "y": 841,
+                "z": -3305.345
+              }
+            }
+          }
+        ],
+        "id": "model_34",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_35.dae",
+        "index": 35,
+        "bytes": 8510,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 21,
+        "triangleCount": 11,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 369.999,
+            "y": 1231.055,
+            "z": -4200.442
+          },
+          "max": {
+            "x": 4221.055,
+            "y": 1251.008,
+            "z": -4010.216
+          },
+          "extent": {
+            "x": 3851.055,
+            "y": 19.952,
+            "z": 190.226
+          },
+          "center": {
+            "x": 2295.527,
+            "y": 1241.032,
+            "z": -4105.329
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 63,
+            "vertexCount": 21,
+            "bbox": {
+              "min": {
+                "x": 369.999,
+                "y": 1231.055,
+                "z": -4200.442
+              },
+              "max": {
+                "x": 4221.055,
+                "y": 1251.008,
+                "z": -4010.216
+              },
+              "extent": {
+                "x": 3851.055,
+                "y": 19.952,
+                "z": 190.226
+              },
+              "center": {
+                "x": 2295.527,
+                "y": 1241.032,
+                "z": -4105.329
+              }
+            }
+          }
+        ],
+        "id": "model_35",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_36.dae",
+        "index": 36,
+        "bytes": 9979,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 29,
+        "triangleCount": 22,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4691.064,
+            "y": 709.958,
+            "z": -2896.749
+          },
+          "max": {
+            "x": -3766.136,
+            "y": 710.757,
+            "z": -1966.853
+          },
+          "extent": {
+            "x": 924.927,
+            "y": 0.799,
+            "z": 929.895
+          },
+          "center": {
+            "x": -4228.6,
+            "y": 710.358,
+            "z": -2431.801
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 87,
+            "vertexCount": 29,
+            "bbox": {
+              "min": {
+                "x": -4691.064,
+                "y": 709.958,
+                "z": -2896.749
+              },
+              "max": {
+                "x": -3766.136,
+                "y": 710.757,
+                "z": -1966.853
+              },
+              "extent": {
+                "x": 924.927,
+                "y": 0.799,
+                "z": 929.895
+              },
+              "center": {
+                "x": -4228.6,
+                "y": 710.358,
+                "z": -2431.801
+              }
+            }
+          }
+        ],
+        "id": "model_36",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "small-marker-or-prop"
+          ],
+          "primary": "small-marker-or-prop",
+          "reasons": [
+            "Low triangle count; likely a small prop, marker, or simple boundary visual."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_37.dae",
+        "index": 37,
+        "bytes": 13749,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 75,
+        "triangleCount": 90,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -4747.069,
+            "y": 709.929,
+            "z": -2044.992
+          },
+          "max": {
+            "x": -3859.419,
+            "y": 710.932,
+            "z": -962.887
+          },
+          "extent": {
+            "x": 887.651,
+            "y": 1.003,
+            "z": 1082.105
+          },
+          "center": {
+            "x": -4303.244,
+            "y": 710.431,
+            "z": -1503.94
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 225,
+            "vertexCount": 75,
+            "bbox": {
+              "min": {
+                "x": -4747.069,
+                "y": 709.929,
+                "z": -2044.992
+              },
+              "max": {
+                "x": -3859.419,
+                "y": 710.932,
+                "z": -962.887
+              },
+              "extent": {
+                "x": 887.651,
+                "y": 1.003,
+                "z": 1082.105
+              },
+              "center": {
+                "x": -4303.244,
+                "y": 710.431,
+                "z": -1503.94
+              }
+            }
+          }
+        ],
+        "id": "model_37",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_38.dae",
+        "index": 38,
+        "bytes": 12273,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 95,
+        "triangleCount": 103,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": 348.158,
+            "y": 601,
+            "z": 2932.16
+          },
+          "max": {
+            "x": 1755.62,
+            "y": 601,
+            "z": 3615.843
+          },
+          "extent": {
+            "x": 1407.461,
+            "y": 0,
+            "z": 683.683
+          },
+          "center": {
+            "x": 1051.889,
+            "y": 601,
+            "z": 3274.002
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 285,
+            "vertexCount": 95,
+            "bbox": {
+              "min": {
+                "x": 348.158,
+                "y": 601,
+                "z": 2932.16
+              },
+              "max": {
+                "x": 1755.62,
+                "y": 601,
+                "z": 3615.843
+              },
+              "extent": {
+                "x": 1407.461,
+                "y": 0,
+                "z": 683.683
+              },
+              "center": {
+                "x": 1051.889,
+                "y": 601,
+                "z": 3274.002
+              }
+            }
+          }
+        ],
+        "id": "model_38",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      },
+      {
+        "path": "apps/game/public/stages/st00/model/model_39.dae",
+        "index": 39,
+        "bytes": 12891,
+        "geometryCount": 1,
+        "controllerCount": 0,
+        "jointCount": 1,
+        "vertexCount": 93,
+        "triangleCount": 115,
+        "polylistFaceCount": 0,
+        "bbox": {
+          "min": {
+            "x": -1743.526,
+            "y": 601,
+            "z": 2284.566
+          },
+          "max": {
+            "x": -202.615,
+            "y": 601,
+            "z": 3314.906
+          },
+          "extent": {
+            "x": 1540.911,
+            "y": 0,
+            "z": 1030.34
+          },
+          "center": {
+            "x": -973.07,
+            "y": 601,
+            "z": 2799.736
+          }
+        },
+        "geometryNames": [
+          "Joint_0_Object_0"
+        ],
+        "materialNames": [
+          "Material_8D3038AB"
+        ],
+        "textureNames": [
+          "Texture_0_I4"
+        ],
+        "textureFiles": [
+          "Texture_0_I4.png"
+        ],
+        "transparencyValues": [
+          0.999
+        ],
+        "hasGeometry": true,
+        "hasTransparentMaterial": false,
+        "positionSources": [
+          {
+            "id": "Joint_0_Object_0-geometry-POSITION",
+            "declaredFloatCount": 279,
+            "vertexCount": 93,
+            "bbox": {
+              "min": {
+                "x": -1743.526,
+                "y": 601,
+                "z": 2284.566
+              },
+              "max": {
+                "x": -202.615,
+                "y": 601,
+                "z": 3314.906
+              },
+              "extent": {
+                "x": 1540.911,
+                "y": 0,
+                "z": 1030.34
+              },
+              "center": {
+                "x": -973.07,
+                "y": 601,
+                "z": 2799.736
+              }
+            }
+          }
+        ],
+        "id": "model_39",
+        "browserLoads": true,
+        "classification": {
+          "tags": [
+            "prop-or-stage-detail"
+          ],
+          "primary": "prop-or-stage-detail",
+          "reasons": [
+            "Geometry is present but does not meet floor, ceiling, wall, or backdrop heuristics."
+          ]
+        }
+      }
+    ]
+  },
+  "collision": {
+    "hitBins": [
+      {
+        "path": "user-data/GG4E/afs_data/root/hit000.bin",
+        "valid": true,
+        "magic": "STIH",
+        "bytes": 65064,
+        "declaredBytes": 65064,
+        "cellSize": {
+          "x": 500,
+          "z": 500
+        },
+        "gridCells": {
+          "x": 42,
+          "z": 42
+        },
+        "bounds2d": {
+          "minX": -11000,
+          "minZ": -11000,
+          "maxX": 10000,
+          "maxZ": 10000
+        },
+        "note": "Header looks like an STIH collision/spatial grid. Body records are not decoded here."
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/hit001.bin",
+        "valid": true,
+        "magic": "STIH",
+        "bytes": 95072,
+        "declaredBytes": 95072,
+        "cellSize": {
+          "x": 500,
+          "z": 500
+        },
+        "gridCells": {
+          "x": 42,
+          "z": 42
+        },
+        "bounds2d": {
+          "minX": -11000,
+          "minZ": -11000,
+          "maxX": 10000,
+          "maxZ": 10000
+        },
+        "note": "Header looks like an STIH collision/spatial grid. Body records are not decoded here."
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/hit002.bin",
+        "valid": true,
+        "magic": "STIH",
+        "bytes": 17824,
+        "declaredBytes": 17824,
+        "cellSize": {
+          "x": 500,
+          "z": 500
+        },
+        "gridCells": {
+          "x": 42,
+          "z": 42
+        },
+        "bounds2d": {
+          "minX": -11000,
+          "minZ": -11000,
+          "maxX": 10000,
+          "maxZ": 10000
+        },
+        "note": "Header looks like an STIH collision/spatial grid. Body records are not decoded here."
+      }
+    ],
+    "inferredArenaBounds": {
+      "minX": -11000,
+      "minZ": -11000,
+      "maxX": 10000,
+      "maxZ": 10000
+    },
+    "nonVisualStageFiles": [
+      "user-data/GG4E/afs_data/root/st00.pzz",
+      "user-data/GG4E/afs_data/root/hit000.bin",
+      "user-data/GG4E/afs_data/root/hit001.bin",
+      "user-data/GG4E/afs_data/root/hit002.bin",
+      "user-data/GG4E/afs_data/root/set0000.arc",
+      "user-data/GG4E/afs_data/root/set0001.arc",
+      "user-data/GG4E/afs_data/root/set0002.arc",
+      "user-data/GG4E/afs_data/root/set0003.arc"
+    ]
+  },
+  "browserLoader": {
+    "defaultStageModelCount": {
+      "value": 40,
+      "ref": "apps/game/src/main.ts:90",
+      "expectedIds": [
+        "model_00",
+        "model_01",
+        "model_02",
+        "model_03",
+        "model_04",
+        "model_05",
+        "model_06",
+        "model_07",
+        "model_08",
+        "model_09",
+        "model_10",
+        "model_11",
+        "model_12",
+        "model_13",
+        "model_14",
+        "model_15",
+        "model_16",
+        "model_17",
+        "model_18",
+        "model_19",
+        "model_20",
+        "model_21",
+        "model_22",
+        "model_23",
+        "model_24",
+        "model_25",
+        "model_26",
+        "model_27",
+        "model_28",
+        "model_29",
+        "model_30",
+        "model_31",
+        "model_32",
+        "model_33",
+        "model_34",
+        "model_35",
+        "model_36",
+        "model_37",
+        "model_38",
+        "model_39"
+      ],
+      "missingExpectedDae": [],
+      "extraDae": []
+    },
+    "culling": {
+      "ref": "apps/game/src/main.ts:369",
+      "finding": "Browser disables Three.js frustum culling on every loaded stage mesh after ColladaLoader import; no source draw-group or culling flags are decoded into runtime metadata."
+    }
+  },
+  "findings": {
+    "floorCandidates": [
+      "model_00"
+    ],
+    "wallCandidates": [
+      "model_01",
+      "model_02",
+      "model_03",
+      "model_04",
+      "model_05",
+      "model_06",
+      "model_07",
+      "model_11"
+    ],
+    "ceilingCandidates": [],
+    "backdropCandidates": [
+      "model_01",
+      "model_02",
+      "model_05",
+      "model_06",
+      "model_11"
+    ],
+    "transparentCandidates": [
+      "model_07"
+    ],
+    "propCandidates": [
+      "model_08",
+      "model_09",
+      "model_10",
+      "model_12",
+      "model_13",
+      "model_14",
+      "model_15",
+      "model_16",
+      "model_17",
+      "model_18",
+      "model_19",
+      "model_20",
+      "model_21",
+      "model_22",
+      "model_23",
+      "model_25",
+      "model_26",
+      "model_27",
+      "model_28",
+      "model_29",
+      "model_30",
+      "model_31",
+      "model_32",
+      "model_33",
+      "model_34",
+      "model_35",
+      "model_36",
+      "model_37",
+      "model_38",
+      "model_39"
+    ],
+    "stageModelCountConclusion": "The browser's `DEFAULT_STAGE_MODEL_COUNT = 40` is complete for the current exported `st00_mdl.arc` DAE slot set: indices `model_00.dae` through `model_39.dae` all exist and are requested. It is not complete for the full stage asset set because `st00.pzz`, `hit000.bin`/`hit001.bin`/`hit002.bin`, and `set0000.arc`..`set0003.arc` are present source assets but are not visual DAE exports or loaded stage geometry."
+  },
+  "missingOrUncertain": [
+    "`model_24.dae` is an exported stage slot but contains only a root joint and no mesh geometry.",
+    "`st00.pzz` is copied and present, but its member table and any embedded stage shell/culling data are not decoded by this scanner.",
+    "`hit000.bin`, `hit001.bin`, and `hit002.bin` have STIH collision/spatial-grid headers and inferred X/Z arena bounds, but their body records are not decoded into polygons.",
+    "`set0000.arc` through `set0003.arc` are copied set archives and not loaded by the current browser stage renderer; spawn/object/bounds semantics remain uncertain.",
+    "No separate high flat ceiling DAE is conclusively identified by the current export heuristics.",
+    "Skybox/backdrop identification is heuristic only; the DAE files do not carry semantic names beyond generic Joint/Object/Material identifiers.",
+    "The scanner reports raw DAE POSITION-array bounds; it does not fully evaluate skin controllers or every COLLADA scene transform."
+  ]
+}

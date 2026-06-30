@@ -1,6 +1,20 @@
 {
   "region": "GG4E",
+  "generatedBy": "scripts/build-stage-manifests.mjs",
   "stages": [
-    "st00"
+    {
+      "id": "st00",
+      "modelCount": 40,
+      "renderStatus": "dae-exported",
+      "collisionCount": 3,
+      "setArcCount": 4
+    },
+    {
+      "id": "st01",
+      "modelCount": 63,
+      "renderStatus": "dae-exported",
+      "collisionCount": 3,
+      "setArcCount": 4
+    }
   ]
 }

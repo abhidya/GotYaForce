@@ -1,0 +1,5411 @@
+{
+  "generatedBy": "scripts/export-all-stages.mjs",
+  "generatedAt": "2026-06-30T07:52:23.669Z",
+  "region": "GG4E",
+  "mode": "dry-run",
+  "scope": "Direct stage ARC/PZZ export coverage only; does not edit browser runtime source or infer arena-name mappings.",
+  "sources": {
+    "assetRoot": "user-data/GG4E/afs_data/root",
+    "publicStages": "apps/game/public/stages",
+    "singleStageExporters": [
+      "scripts\\export-stage-assets.mjs",
+      "scripts\\export-stage-hsd.mjs"
+    ],
+    "adventureFlow": {
+      "path": "research/asset-inventory/adventure-flow-ai.json",
+      "exists": true,
+      "directStageArchives": {
+        "count": 40,
+        "pairsWithModelAndPzz": 40,
+        "codes": [
+          "st00",
+          "st01",
+          "st02",
+          "st03",
+          "st04",
+          "st05",
+          "st06",
+          "st07",
+          "st08",
+          "st09",
+          "st0a",
+          "st0b",
+          "st0c",
+          "st0d",
+          "st0e",
+          "st0f",
+          "st10",
+          "st20",
+          "st21",
+          "st22",
+          "st23",
+          "st24",
+          "st25",
+          "st29",
+          "st2a",
+          "st2b",
+          "st2c",
+          "st2e",
+          "st40",
+          "st41",
+          "st42",
+          "st43",
+          "st44",
+          "st45",
+          "st49",
+          "st4a",
+          "st4b",
+          "st4c",
+          "st4e",
+          "stff"
+        ]
+      },
+      "uniqueArenaCount": 20,
+      "uniqueArenas": [
+        "Construction Town",
+        "Construction Zone",
+        "Greater Tricity Area",
+        "Greater Tricity Area (Blue Death Base)",
+        "Greater Tricity Area (Blue Death Lair)",
+        "Greater Tricity Area (Red Death Lair)",
+        "Greater Tricity Area (Sky Fortress)",
+        "Greater Tricity Area (Stratosphere)",
+        "Kakeru's Home",
+        "Kou's Home",
+        "Little Hill",
+        "Mana's Home",
+        "Neo Elementary",
+        "Safaritown Marketplace",
+        "Serenity Street",
+        "Stone River",
+        "Stone River (Death Base)",
+        "Sunnyside Park",
+        "The Pit",
+        "Your Home"
+      ],
+      "publicStageExport": {
+        "path": "apps/game/public/stages",
+        "stageDirs": [
+          "st00"
+        ],
+        "fileCount": 56,
+        "daeCount": 40,
+        "collisionBinCount": 3,
+        "setArcCount": 4
+      },
+      "stageSelectionFinding": "Runtime hard-codes st00 and 40 DAE pieces; extracted root has many st##_mdl.arc/st##.pzz pairs but no verified arena-name to stage-code table in source."
+    }
+  },
+  "summary": {
+    "sourceStageArchiveCount": 40,
+    "sourcePairsWithModelAndPzz": 40,
+    "publicStageFolderCount": 3,
+    "publicStageWithAnyDaeCount": 3,
+    "verifiedVisualStageCount": 1,
+    "exportedCollisionHitStageCount": 3,
+    "sourceCompleteCollisionTripletCount": 18,
+    "sourceAnyCollisionHitCount": 18,
+    "sourceAnySetArcCount": 16,
+    "missingOrPartialExportCount": 39,
+    "safeMissingExportCount": 37,
+    "proofCandidate": "st03",
+    "executedExports": [],
+    "refreshedManifests": []
+  },
+  "exportPlan": {
+    "defaultIsDryRun": true,
+    "selectedStageIds": [
+      "st03",
+      "st04",
+      "st05",
+      "st06",
+      "st07",
+      "st08",
+      "st09",
+      "st0a",
+      "st0b",
+      "st0c",
+      "st0d",
+      "st0e",
+      "st0f",
+      "st10",
+      "st20",
+      "st21",
+      "st22",
+      "st23",
+      "st24",
+      "st25",
+      "st29",
+      "st2a",
+      "st2b",
+      "st2c",
+      "st2e",
+      "st40",
+      "st41",
+      "st42",
+      "st43",
+      "st44",
+      "st45",
+      "st49",
+      "st4a",
+      "st4b",
+      "st4c",
+      "st4e",
+      "stff"
+    ],
+    "allMissingOrPartialStageIds": [
+      "st01",
+      "st02",
+      "st03",
+      "st04",
+      "st05",
+      "st06",
+      "st07",
+      "st08",
+      "st09",
+      "st0a",
+      "st0b",
+      "st0c",
+      "st0d",
+      "st0e",
+      "st0f",
+      "st10",
+      "st20",
+      "st21",
+      "st22",
+      "st23",
+      "st24",
+      "st25",
+      "st29",
+      "st2a",
+      "st2b",
+      "st2c",
+      "st2e",
+      "st40",
+      "st41",
+      "st42",
+      "st43",
+      "st44",
+      "st45",
+      "st49",
+      "st4a",
+      "st4b",
+      "st4c",
+      "st4e",
+      "stff"
+    ],
+    "safeMissingStageIds": [
+      "st03",
+      "st04",
+      "st05",
+      "st06",
+      "st07",
+      "st08",
+      "st09",
+      "st0a",
+      "st0b",
+      "st0c",
+      "st0d",
+      "st0e",
+      "st0f",
+      "st10",
+      "st20",
+      "st21",
+      "st22",
+      "st23",
+      "st24",
+      "st25",
+      "st29",
+      "st2a",
+      "st2b",
+      "st2c",
+      "st2e",
+      "st40",
+      "st41",
+      "st42",
+      "st43",
+      "st44",
+      "st45",
+      "st49",
+      "st4a",
+      "st4b",
+      "st4c",
+      "st4e",
+      "stff"
+    ],
+    "skippedUnsafeExistingStageIds": [
+      "st01",
+      "st02"
+    ],
+    "proofCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --proof",
+    "selectedCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03,st04,st05,st06,st07,st08,st09,st0a,st0b,st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff",
+    "allSafeMissingCommand": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03,st04,st05,st06,st07,st08,st09,st0a,st0b,st0c,st0d,st0e,st0f,st10,st20,st21,st22,st23,st24,st25,st29,st2a,st2b,st2c,st2e,st40,st41,st42,st43,st44,st45,st49,st4a,st4b,st4c,st4e,stff",
+    "exactPerStageCommands": [
+      {
+        "stage": "st01",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st01",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 01",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 01"
+      },
+      {
+        "stage": "st02",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st02",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 02",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 02"
+      },
+      {
+        "stage": "st03",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 03",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 03"
+      },
+      {
+        "stage": "st04",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st04",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 04",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 04"
+      },
+      {
+        "stage": "st05",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st05",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 05",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 05"
+      },
+      {
+        "stage": "st06",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st06",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 06",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 06"
+      },
+      {
+        "stage": "st07",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 07",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 07"
+      },
+      {
+        "stage": "st08",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st08",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 08",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 08"
+      },
+      {
+        "stage": "st09",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 09",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 09"
+      },
+      {
+        "stage": "st0a",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0a",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0a",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0a"
+      },
+      {
+        "stage": "st0b",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0b",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0b",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0b"
+      },
+      {
+        "stage": "st0c",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0c",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0c"
+      },
+      {
+        "stage": "st0d",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0d",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0d",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0d"
+      },
+      {
+        "stage": "st0e",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0e",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0e",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0e"
+      },
+      {
+        "stage": "st0f",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0f",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0f",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0f"
+      },
+      {
+        "stage": "st10",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st10",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 10",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 10"
+      },
+      {
+        "stage": "st20",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st20",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 20",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 20"
+      },
+      {
+        "stage": "st21",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st21",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 21",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 21"
+      },
+      {
+        "stage": "st22",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st22",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 22",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 22"
+      },
+      {
+        "stage": "st23",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st23",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 23",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 23"
+      },
+      {
+        "stage": "st24",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st24",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 24",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 24"
+      },
+      {
+        "stage": "st25",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st25",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 25",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 25"
+      },
+      {
+        "stage": "st29",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st29",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 29",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 29"
+      },
+      {
+        "stage": "st2a",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2a",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2a",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2a"
+      },
+      {
+        "stage": "st2b",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2b",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2b",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2b"
+      },
+      {
+        "stage": "st2c",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2c",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2c",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2c"
+      },
+      {
+        "stage": "st2e",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2e",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2e",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2e"
+      },
+      {
+        "stage": "st40",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st40",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 40",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 40"
+      },
+      {
+        "stage": "st41",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st41",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 41",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 41"
+      },
+      {
+        "stage": "st42",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st42",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 42",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 42"
+      },
+      {
+        "stage": "st43",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st43",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 43",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 43"
+      },
+      {
+        "stage": "st44",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st44",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 44",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 44"
+      },
+      {
+        "stage": "st45",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st45",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 45",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 45"
+      },
+      {
+        "stage": "st49",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st49",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 49",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 49"
+      },
+      {
+        "stage": "st4a",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4a",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4a",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4a"
+      },
+      {
+        "stage": "st4b",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4b",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4b",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4b"
+      },
+      {
+        "stage": "st4c",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4c",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4c",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4c"
+      },
+      {
+        "stage": "st4e",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4e",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4e",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4e"
+      },
+      {
+        "stage": "stff",
+        "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage stff",
+        "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E ff",
+        "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E ff"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "id": "st00",
+      "code": "00",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st00_mdl.arc",
+          "bytes": 485019
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st00.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st00.pzz",
+          "bytes": 573440
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit000.bin",
+            "hit001.bin",
+            "hit002.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit000.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit000.bin",
+              "bytes": 65064
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit001.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit001.bin",
+              "bytes": 95072
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit002.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit002.bin",
+              "bytes": 17824
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0000.arc",
+            "set0001.arc",
+            "set0002.arc",
+            "set0003.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0000.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0000.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0001.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0001.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0002.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0002.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0003.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0003.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0000.arc",
+            "set0001.arc",
+            "set0002.arc",
+            "set0003.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": true,
+        "directory": "apps/game/public/stages/st00",
+        "manifest": {
+          "path": "apps/game/public/stages/st00/manifest.json",
+          "exists": true,
+          "parses": true,
+          "error": null,
+          "status": "raw-copied"
+        },
+        "raw": {
+          "hasStageArc": true,
+          "hasStagePzz": true,
+          "stageArc": {
+            "path": "apps/game/public/stages/st00/raw/st00_mdl.arc",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st00\\raw\\st00_mdl.arc",
+            "bytes": 485019
+          },
+          "stagePzz": {
+            "path": "apps/game/public/stages/st00/raw/st00.pzz",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st00\\raw\\st00.pzz",
+            "bytes": 573440
+          },
+          "stageArcMatchesSource": true,
+          "stagePzzMatchesSource": true
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st00/model",
+          "hasDaePieces": true,
+          "hasContiguousDaeSequence": true,
+          "daeCount": 40,
+          "nonEmptyDaeCount": 40,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": 39,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [
+            "apps/game/public/stages/st00/model/model_00.dae",
+            "apps/game/public/stages/st00/model/model_01.dae",
+            "apps/game/public/stages/st00/model/model_02.dae",
+            "apps/game/public/stages/st00/model/model_03.dae",
+            "apps/game/public/stages/st00/model/model_04.dae",
+            "apps/game/public/stages/st00/model/model_05.dae",
+            "apps/game/public/stages/st00/model/model_06.dae",
+            "apps/game/public/stages/st00/model/model_07.dae"
+          ],
+          "textureCount": 5,
+          "textureFiles": [
+            "apps/game/public/stages/st00/model/Texture_0_CMP.png",
+            "apps/game/public/stages/st00/model/Texture_0_I4.png",
+            "apps/game/public/stages/st00/model/Texture_1_CMP.png",
+            "apps/game/public/stages/st00/model/Texture_2_CMP.png",
+            "apps/game/public/stages/st00/model/Texture_2_I4.png"
+          ]
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "exportedHitCount": 3,
+          "exportedHitFiles": [
+            "apps/game/public/stages/st00/collision/hit000.bin",
+            "apps/game/public/stages/st00/collision/hit001.bin",
+            "apps/game/public/stages/st00/collision/hit002.bin"
+          ],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 4,
+          "exportedSetFiles": [
+            "apps/game/public/stages/st00/set/set0000.arc",
+            "apps/game/public/stages/st00/set/set0001.arc",
+            "apps/game/public/stages/st00/set/set0002.arc",
+            "apps/game/public/stages/st00/set/set0003.arc"
+          ]
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": false,
+        "needsRaw": false,
+        "needsVisual": false,
+        "needsCollision": false,
+        "safeToRunExistingTools": false,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st00",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st00",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 00",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 00"
+        }
+      }
+    },
+    {
+      "id": "st01",
+      "code": "01",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st01_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st01_mdl.arc",
+          "bytes": 435155
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st01.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st01.pzz",
+          "bytes": 516096
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit010.bin",
+            "hit011.bin",
+            "hit012.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit010.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit010.bin",
+              "bytes": 38260
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit011.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit011.bin",
+              "bytes": 108564
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit012.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit012.bin",
+              "bytes": 28332
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0100.arc",
+            "set0101.arc",
+            "set0102.arc",
+            "set0103.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0100.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0100.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0101.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0101.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0102.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0102.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0103.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0103.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0100.arc",
+            "set0101.arc",
+            "set0102.arc",
+            "set0103.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": true,
+        "directory": "apps/game/public/stages/st01",
+        "manifest": {
+          "path": "apps/game/public/stages/st01/manifest.json",
+          "exists": true,
+          "parses": true,
+          "error": null,
+          "status": "raw-copied"
+        },
+        "raw": {
+          "hasStageArc": true,
+          "hasStagePzz": true,
+          "stageArc": {
+            "path": "apps/game/public/stages/st01/raw/st01_mdl.arc",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st01\\raw\\st01_mdl.arc",
+            "bytes": 435155
+          },
+          "stagePzz": {
+            "path": "apps/game/public/stages/st01/raw/st01.pzz",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st01\\raw\\st01.pzz",
+            "bytes": 516096
+          },
+          "stageArcMatchesSource": true,
+          "stagePzzMatchesSource": true
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st01/model",
+          "hasDaePieces": true,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 63,
+          "nonEmptyDaeCount": 63,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": 77,
+          "missingModelIndices": [
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48
+          ],
+          "sampleDaeFiles": [
+            "apps/game/public/stages/st01/model/model_00.dae",
+            "apps/game/public/stages/st01/model/model_01.dae",
+            "apps/game/public/stages/st01/model/model_02.dae",
+            "apps/game/public/stages/st01/model/model_03.dae",
+            "apps/game/public/stages/st01/model/model_04.dae",
+            "apps/game/public/stages/st01/model/model_05.dae",
+            "apps/game/public/stages/st01/model/model_06.dae",
+            "apps/game/public/stages/st01/model/model_07.dae"
+          ],
+          "textureCount": 7,
+          "textureFiles": [
+            "apps/game/public/stages/st01/model/Texture_0_CMP.png",
+            "apps/game/public/stages/st01/model/Texture_0_I4.png",
+            "apps/game/public/stages/st01/model/Texture_1_CMP.png",
+            "apps/game/public/stages/st01/model/Texture_2_CMP.png",
+            "apps/game/public/stages/st01/model/Texture_2_I4.png",
+            "apps/game/public/stages/st01/model/Texture_3_CMP.png",
+            "apps/game/public/stages/st01/model/Texture_3_I4.png"
+          ]
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "exportedHitCount": 3,
+          "exportedHitFiles": [
+            "apps/game/public/stages/st01/collision/hit010.bin",
+            "apps/game/public/stages/st01/collision/hit011.bin",
+            "apps/game/public/stages/st01/collision/hit012.bin"
+          ],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 4,
+          "exportedSetFiles": [
+            "apps/game/public/stages/st01/set/set0100.arc",
+            "apps/game/public/stages/st01/set/set0101.arc",
+            "apps/game/public/stages/st01/set/set0102.arc",
+            "apps/game/public/stages/st01/set/set0103.arc"
+          ]
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": false,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": false,
+        "unsafeReason": "public stage folder exists; scripts/export-stage-assets.mjs removes the output folder before copying",
+        "commands": {
+          "stage": "st01",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st01",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 01",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 01"
+        }
+      }
+    },
+    {
+      "id": "st02",
+      "code": "02",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st02_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st02_mdl.arc",
+          "bytes": 494683
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st02.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st02.pzz",
+          "bytes": 663552
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit020.bin",
+            "hit021.bin",
+            "hit022.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit020.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit020.bin",
+              "bytes": 215748
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit021.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit021.bin",
+              "bytes": 126948
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit022.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit022.bin",
+              "bytes": 36484
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0200.arc",
+            "set0201.arc",
+            "set0202.arc",
+            "set0203.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0200.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0200.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0201.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0201.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0202.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0202.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0203.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0203.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0200.arc",
+            "set0201.arc",
+            "set0202.arc",
+            "set0203.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": true,
+        "directory": "apps/game/public/stages/st02",
+        "manifest": {
+          "path": "apps/game/public/stages/st02/manifest.json",
+          "exists": true,
+          "parses": true,
+          "error": null,
+          "status": "partial-visual-dae-missing-slots"
+        },
+        "raw": {
+          "hasStageArc": true,
+          "hasStagePzz": true,
+          "stageArc": {
+            "path": "apps/game/public/stages/st02/raw/st02_mdl.arc",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st02\\raw\\st02_mdl.arc",
+            "bytes": 494683
+          },
+          "stagePzz": {
+            "path": "apps/game/public/stages/st02/raw/st02.pzz",
+            "absolutePath": "D:\\GotYaForce\\apps\\game\\public\\stages\\st02\\raw\\st02.pzz",
+            "bytes": 663552
+          },
+          "stageArcMatchesSource": true,
+          "stagePzzMatchesSource": true
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st02/model",
+          "hasDaePieces": true,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 44,
+          "nonEmptyDaeCount": 44,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": 50,
+          "missingModelIndices": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "sampleDaeFiles": [
+            "apps/game/public/stages/st02/model/model_00.dae",
+            "apps/game/public/stages/st02/model/model_01.dae",
+            "apps/game/public/stages/st02/model/model_09.dae",
+            "apps/game/public/stages/st02/model/model_10.dae",
+            "apps/game/public/stages/st02/model/model_11.dae",
+            "apps/game/public/stages/st02/model/model_12.dae",
+            "apps/game/public/stages/st02/model/model_13.dae",
+            "apps/game/public/stages/st02/model/model_14.dae"
+          ],
+          "textureCount": 11,
+          "textureFiles": [
+            "apps/game/public/stages/st02/model/Texture_0_CMP.png",
+            "apps/game/public/stages/st02/model/Texture_0_I4.png",
+            "apps/game/public/stages/st02/model/Texture_0_RGB5A3.png",
+            "apps/game/public/stages/st02/model/Texture_1_CMP.png",
+            "apps/game/public/stages/st02/model/Texture_1_RGB5A3.png",
+            "apps/game/public/stages/st02/model/Texture_2_CMP.png",
+            "apps/game/public/stages/st02/model/Texture_2_RGB5A3.png",
+            "apps/game/public/stages/st02/model/Texture_3_CMP.png",
+            "apps/game/public/stages/st02/model/Texture_4_CMP.png",
+            "apps/game/public/stages/st02/model/Texture_5_CMP.png",
+            "apps/game/public/stages/st02/model/Texture_6_CMP.png"
+          ]
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "exportedHitCount": 3,
+          "exportedHitFiles": [
+            "apps/game/public/stages/st02/collision/hit020.bin",
+            "apps/game/public/stages/st02/collision/hit021.bin",
+            "apps/game/public/stages/st02/collision/hit022.bin"
+          ],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 4,
+          "exportedSetFiles": [
+            "apps/game/public/stages/st02/set/set0200.arc",
+            "apps/game/public/stages/st02/set/set0201.arc",
+            "apps/game/public/stages/st02/set/set0202.arc",
+            "apps/game/public/stages/st02/set/set0203.arc"
+          ]
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": false,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": false,
+        "unsafeReason": "public stage folder exists; scripts/export-stage-assets.mjs removes the output folder before copying",
+        "commands": {
+          "stage": "st02",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st02",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 02",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 02"
+        }
+      }
+    },
+    {
+      "id": "st03",
+      "code": "03",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st03_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st03_mdl.arc",
+          "bytes": 417139
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st03.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st03.pzz",
+          "bytes": 495616
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit030.bin",
+            "hit031.bin",
+            "hit032.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit030.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit030.bin",
+              "bytes": 94812
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit031.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit031.bin",
+              "bytes": 52556
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit032.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit032.bin",
+              "bytes": 14356
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0300.arc",
+            "set0301.arc",
+            "set0302.arc",
+            "set0303.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0300.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0300.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0301.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0301.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0302.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0302.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0303.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0303.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0300.arc",
+            "set0301.arc",
+            "set0302.arc",
+            "set0303.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st03",
+        "manifest": {
+          "path": "apps/game/public/stages/st03/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st03/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit030.bin",
+            "hit031.bin",
+            "hit032.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st03",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st03",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 03",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 03"
+        }
+      }
+    },
+    {
+      "id": "st04",
+      "code": "04",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st04_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st04_mdl.arc",
+          "bytes": 510187
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st04.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st04.pzz",
+          "bytes": 675840
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit040.bin",
+            "hit041.bin",
+            "hit042.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit040.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit040.bin",
+              "bytes": 199564
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit041.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit041.bin",
+              "bytes": 133968
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit042.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit042.bin",
+              "bytes": 30476
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0400.arc",
+            "set0401.arc",
+            "set0402.arc",
+            "set0403.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0400.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0400.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0401.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0401.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0402.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0402.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0403.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0403.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0400.arc",
+            "set0401.arc",
+            "set0402.arc",
+            "set0403.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st04",
+        "manifest": {
+          "path": "apps/game/public/stages/st04/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st04/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit040.bin",
+            "hit041.bin",
+            "hit042.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st04",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st04",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 04",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 04"
+        }
+      }
+    },
+    {
+      "id": "st05",
+      "code": "05",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st05_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st05_mdl.arc",
+          "bytes": 477567
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st05.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st05.pzz",
+          "bytes": 565248
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit050.bin",
+            "hit051.bin",
+            "hit052.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit050.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit050.bin",
+              "bytes": 92440
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit051.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit051.bin",
+              "bytes": 85420
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit052.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit052.bin",
+              "bytes": 16364
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0500.arc",
+            "set0501.arc",
+            "set0502.arc",
+            "set0503.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0500.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0500.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0501.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0501.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0502.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0502.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0503.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0503.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0500.arc",
+            "set0501.arc",
+            "set0502.arc",
+            "set0503.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st05",
+        "manifest": {
+          "path": "apps/game/public/stages/st05/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st05/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit050.bin",
+            "hit051.bin",
+            "hit052.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st05",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st05",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 05",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 05"
+        }
+      }
+    },
+    {
+      "id": "st06",
+      "code": "06",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st06_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st06_mdl.arc",
+          "bytes": 252559
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st06.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st06.pzz",
+          "bytes": 280576
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit060.bin",
+            "hit061.bin",
+            "hit062.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit060.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit060.bin",
+              "bytes": 20824
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit061.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit061.bin",
+              "bytes": 14216
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit062.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit062.bin",
+              "bytes": 14288
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0600.arc",
+            "set0601.arc",
+            "set0602.arc",
+            "set0603.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0600.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0600.arc",
+              "bytes": 71680
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0601.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0601.arc",
+              "bytes": 55296
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0602.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0602.arc",
+              "bytes": 65536
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0603.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0603.arc",
+              "bytes": 55296
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0600.arc",
+            "set0601.arc",
+            "set0602.arc",
+            "set0603.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st06",
+        "manifest": {
+          "path": "apps/game/public/stages/st06/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st06/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit060.bin",
+            "hit061.bin",
+            "hit062.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st06",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st06",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 06",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 06"
+        }
+      }
+    },
+    {
+      "id": "st07",
+      "code": "07",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st07_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st07_mdl.arc",
+          "bytes": 208607
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st07.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st07.pzz",
+          "bytes": 235520
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit070.bin",
+            "hit071.bin",
+            "hit072.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit070.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit070.bin",
+              "bytes": 20824
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit071.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit071.bin",
+              "bytes": 14216
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit072.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit072.bin",
+              "bytes": 14288
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0700.arc",
+            "set0701.arc",
+            "set0702.arc",
+            "set0703.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0700.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0700.arc",
+              "bytes": 71680
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0701.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0701.arc",
+              "bytes": 63488
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0702.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0702.arc",
+              "bytes": 61440
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0703.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0703.arc",
+              "bytes": 65536
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0700.arc",
+            "set0701.arc",
+            "set0702.arc",
+            "set0703.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st07",
+        "manifest": {
+          "path": "apps/game/public/stages/st07/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st07/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit070.bin",
+            "hit071.bin",
+            "hit072.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st07",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st07",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 07",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 07"
+        }
+      }
+    },
+    {
+      "id": "st08",
+      "code": "08",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st08_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st08_mdl.arc",
+          "bytes": 475827
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st08.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st08.pzz",
+          "bytes": 622592
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit080.bin",
+            "hit081.bin",
+            "hit082.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit080.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit080.bin",
+              "bytes": 125188
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit081.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit081.bin",
+              "bytes": 151744
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit082.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit082.bin",
+              "bytes": 22736
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0800.arc",
+            "set0801.arc",
+            "set0802.arc",
+            "set0803.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0800.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0800.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0801.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0801.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0802.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0802.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0803.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0803.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0800.arc",
+            "set0801.arc",
+            "set0802.arc",
+            "set0803.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st08",
+        "manifest": {
+          "path": "apps/game/public/stages/st08/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st08/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit080.bin",
+            "hit081.bin",
+            "hit082.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st08",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st08",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 08",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 08"
+        }
+      }
+    },
+    {
+      "id": "st09",
+      "code": "09",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st09_mdl.arc",
+          "bytes": 365151
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st09.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st09.pzz",
+          "bytes": 395264
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit090.bin",
+            "hit091.bin",
+            "hit092.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit090.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit090.bin",
+              "bytes": 23784
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit091.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit091.bin",
+              "bytes": 14312
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit092.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit092.bin",
+              "bytes": 14312
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0900.arc",
+            "set0901.arc",
+            "set0902.arc",
+            "set0903.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0904.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0904.arc",
+              "bytes": 124928
+            }
+          ],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": [
+            "set0904.arc"
+          ]
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st09",
+        "manifest": {
+          "path": "apps/game/public/stages/st09/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st09/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit090.bin",
+            "hit091.bin",
+            "hit092.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st09",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st09",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 09",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 09"
+        }
+      }
+    },
+    {
+      "id": "st0a",
+      "code": "0a",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st0a_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0a_mdl.arc",
+          "bytes": 449135
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st0a.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0a.pzz",
+          "bytes": 573440
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit0a0.bin",
+            "hit0a1.bin",
+            "hit0a2.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0a0.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0a0.bin",
+              "bytes": 101672
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0a1.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0a1.bin",
+              "bytes": 141224
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0a2.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0a2.bin",
+              "bytes": 18952
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0a00.arc",
+            "set0a01.arc",
+            "set0a02.arc",
+            "set0a03.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0a00.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0a00.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0a01.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0a01.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0a02.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0a02.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0a03.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0a03.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0a00.arc",
+            "set0a01.arc",
+            "set0a02.arc",
+            "set0a03.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st0a",
+        "manifest": {
+          "path": "apps/game/public/stages/st0a/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st0a/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit0a0.bin",
+            "hit0a1.bin",
+            "hit0a2.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st0a",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0a",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0a",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0a"
+        }
+      }
+    },
+    {
+      "id": "st0b",
+      "code": "0b",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st0b_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0b_mdl.arc",
+          "bytes": 507671
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st0b.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0b.pzz",
+          "bytes": 593920
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit0b0.bin",
+            "hit0b1.bin",
+            "hit0b2.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0b0.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0b0.bin",
+              "bytes": 124864
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0b1.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0b1.bin",
+              "bytes": 60596
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0b2.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0b2.bin",
+              "bytes": 14304
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0b00.arc",
+            "set0b01.arc",
+            "set0b02.arc",
+            "set0b03.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0b00.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0b00.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0b01.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0b01.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0b02.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0b02.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0b03.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0b03.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0b00.arc",
+            "set0b01.arc",
+            "set0b02.arc",
+            "set0b03.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st0b",
+        "manifest": {
+          "path": "apps/game/public/stages/st0b/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st0b/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit0b0.bin",
+            "hit0b1.bin",
+            "hit0b2.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st0b",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0b",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0b",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0b"
+        }
+      }
+    },
+    {
+      "id": "st0c",
+      "code": "0c",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st0c_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0c_mdl.arc",
+          "bytes": 458543
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st0c.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0c.pzz",
+          "bytes": 544768
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit0c0.bin",
+            "hit0c1.bin",
+            "hit0c2.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0c0.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0c0.bin",
+              "bytes": 67860
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0c1.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0c1.bin",
+              "bytes": 81616
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0c2.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0c2.bin",
+              "bytes": 22416
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0c00.arc",
+            "set0c01.arc",
+            "set0c02.arc",
+            "set0c03.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0c00.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0c00.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0c01.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0c01.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0c02.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0c02.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0c03.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0c03.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0c00.arc",
+            "set0c01.arc",
+            "set0c02.arc",
+            "set0c03.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st0c",
+        "manifest": {
+          "path": "apps/game/public/stages/st0c/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st0c/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit0c0.bin",
+            "hit0c1.bin",
+            "hit0c2.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st0c",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0c",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0c",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0c"
+        }
+      }
+    },
+    {
+      "id": "st0d",
+      "code": "0d",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st0d_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0d_mdl.arc",
+          "bytes": 349419
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st0d.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0d.pzz",
+          "bytes": 401408
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit0d0.bin",
+            "hit0d1.bin",
+            "hit0d2.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0d0.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0d0.bin",
+              "bytes": 71176
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0d1.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0d1.bin",
+              "bytes": 27208
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0d2.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0d2.bin",
+              "bytes": 14836
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0d00.arc",
+            "set0d01.arc",
+            "set0d02.arc",
+            "set0d03.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0d00.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0d00.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0d01.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0d01.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0d02.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0d02.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0d03.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0d03.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0d00.arc",
+            "set0d01.arc",
+            "set0d02.arc",
+            "set0d03.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st0d",
+        "manifest": {
+          "path": "apps/game/public/stages/st0d/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st0d/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit0d0.bin",
+            "hit0d1.bin",
+            "hit0d2.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st0d",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0d",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0d",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0d"
+        }
+      }
+    },
+    {
+      "id": "st0e",
+      "code": "0e",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st0e_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0e_mdl.arc",
+          "bytes": 502335
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st0e.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0e.pzz",
+          "bytes": 636928
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit0e0.bin",
+            "hit0e1.bin",
+            "hit0e2.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0e0.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0e0.bin",
+              "bytes": 101144
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0e1.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0e1.bin",
+              "bytes": 188052
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0e2.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0e2.bin",
+              "bytes": 18256
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0e00.arc",
+            "set0e01.arc",
+            "set0e02.arc",
+            "set0e03.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0e00.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0e00.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0e01.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0e01.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0e02.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0e02.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0e03.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0e03.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0e00.arc",
+            "set0e01.arc",
+            "set0e02.arc",
+            "set0e03.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st0e",
+        "manifest": {
+          "path": "apps/game/public/stages/st0e/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st0e/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit0e0.bin",
+            "hit0e1.bin",
+            "hit0e2.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st0e",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0e",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0e",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0e"
+        }
+      }
+    },
+    {
+      "id": "st0f",
+      "code": "0f",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st0f_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0f_mdl.arc",
+          "bytes": 336671
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st0f.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st0f.pzz",
+          "bytes": 385024
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit0f0.bin",
+            "hit0f1.bin",
+            "hit0f2.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0f0.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0f0.bin",
+              "bytes": 74768
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0f1.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0f1.bin",
+              "bytes": 23380
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit0f2.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit0f2.bin",
+              "bytes": 15000
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set0f00.arc",
+            "set0f01.arc",
+            "set0f02.arc",
+            "set0f03.arc"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/set0f00.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0f00.arc",
+              "bytes": 139264
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0f01.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0f01.arc",
+              "bytes": 114688
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0f02.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0f02.arc",
+              "bytes": 122880
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/set0f03.arc",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\set0f03.arc",
+              "bytes": 116736
+            }
+          ],
+          "filesCopiedByCurrentTool": [
+            "set0f00.arc",
+            "set0f01.arc",
+            "set0f02.arc",
+            "set0f03.arc"
+          ],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st0f",
+        "manifest": {
+          "path": "apps/game/public/stages/st0f/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st0f/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit0f0.bin",
+            "hit0f1.bin",
+            "hit0f2.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st0f",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st0f",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 0f",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 0f"
+        }
+      }
+    },
+    {
+      "id": "st10",
+      "code": "10",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st10_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st10_mdl.arc",
+          "bytes": 288439
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st10.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st10.pzz",
+          "bytes": 452608
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hit100.bin",
+            "hit101.bin",
+            "hit102.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hit100.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit100.bin",
+              "bytes": 257744
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit101.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit101.bin",
+              "bytes": 14212
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hit102.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hit102.bin",
+              "bytes": 14288
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set1000.arc",
+            "set1001.arc",
+            "set1002.arc",
+            "set1003.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st10",
+        "manifest": {
+          "path": "apps/game/public/stages/st10/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st10/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hit100.bin",
+            "hit101.bin",
+            "hit102.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st10",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st10",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 10",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 10"
+        }
+      }
+    },
+    {
+      "id": "st20",
+      "code": "20",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st20_mdl.arc",
+          "bytes": 484923
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st20.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st20.pzz",
+          "bytes": 573440
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit200.bin",
+            "hit201.bin",
+            "hit202.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit200.bin",
+            "hit201.bin",
+            "hit202.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2000.arc",
+            "set2001.arc",
+            "set2002.arc",
+            "set2003.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st20",
+        "manifest": {
+          "path": "apps/game/public/stages/st20/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st20/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st20",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st20",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 20",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 20"
+        }
+      }
+    },
+    {
+      "id": "st21",
+      "code": "21",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st21_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st21_mdl.arc",
+          "bytes": 435155
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st21.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st21.pzz",
+          "bytes": 516096
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit210.bin",
+            "hit211.bin",
+            "hit212.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit210.bin",
+            "hit211.bin",
+            "hit212.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2100.arc",
+            "set2101.arc",
+            "set2102.arc",
+            "set2103.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st21",
+        "manifest": {
+          "path": "apps/game/public/stages/st21/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st21/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st21",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st21",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 21",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 21"
+        }
+      }
+    },
+    {
+      "id": "st22",
+      "code": "22",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st22_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st22_mdl.arc",
+          "bytes": 494683
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st22.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st22.pzz",
+          "bytes": 663552
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit220.bin",
+            "hit221.bin",
+            "hit222.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit220.bin",
+            "hit221.bin",
+            "hit222.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2200.arc",
+            "set2201.arc",
+            "set2202.arc",
+            "set2203.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st22",
+        "manifest": {
+          "path": "apps/game/public/stages/st22/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st22/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st22",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st22",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 22",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 22"
+        }
+      }
+    },
+    {
+      "id": "st23",
+      "code": "23",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st23_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st23_mdl.arc",
+          "bytes": 417139
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st23.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st23.pzz",
+          "bytes": 495616
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit230.bin",
+            "hit231.bin",
+            "hit232.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit230.bin",
+            "hit231.bin",
+            "hit232.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2300.arc",
+            "set2301.arc",
+            "set2302.arc",
+            "set2303.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st23",
+        "manifest": {
+          "path": "apps/game/public/stages/st23/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st23/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st23",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st23",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 23",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 23"
+        }
+      }
+    },
+    {
+      "id": "st24",
+      "code": "24",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st24_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st24_mdl.arc",
+          "bytes": 510187
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st24.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st24.pzz",
+          "bytes": 675840
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit240.bin",
+            "hit241.bin",
+            "hit242.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit240.bin",
+            "hit241.bin",
+            "hit242.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2400.arc",
+            "set2401.arc",
+            "set2402.arc",
+            "set2403.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st24",
+        "manifest": {
+          "path": "apps/game/public/stages/st24/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st24/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st24",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st24",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 24",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 24"
+        }
+      }
+    },
+    {
+      "id": "st25",
+      "code": "25",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st25_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st25_mdl.arc",
+          "bytes": 477567
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st25.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st25.pzz",
+          "bytes": 565248
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit250.bin",
+            "hit251.bin",
+            "hit252.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit250.bin",
+            "hit251.bin",
+            "hit252.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2500.arc",
+            "set2501.arc",
+            "set2502.arc",
+            "set2503.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st25",
+        "manifest": {
+          "path": "apps/game/public/stages/st25/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st25/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st25",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st25",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 25",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 25"
+        }
+      }
+    },
+    {
+      "id": "st29",
+      "code": "29",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st29_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st29_mdl.arc",
+          "bytes": 365151
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st29.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st29.pzz",
+          "bytes": 395264
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit290.bin",
+            "hit291.bin",
+            "hit292.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit290.bin",
+            "hit291.bin",
+            "hit292.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2900.arc",
+            "set2901.arc",
+            "set2902.arc",
+            "set2903.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st29",
+        "manifest": {
+          "path": "apps/game/public/stages/st29/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st29/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st29",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st29",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 29",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 29"
+        }
+      }
+    },
+    {
+      "id": "st2a",
+      "code": "2a",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st2a_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st2a_mdl.arc",
+          "bytes": 449135
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st2a.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st2a.pzz",
+          "bytes": 573440
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit2a0.bin",
+            "hit2a1.bin",
+            "hit2a2.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit2a0.bin",
+            "hit2a1.bin",
+            "hit2a2.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2a00.arc",
+            "set2a01.arc",
+            "set2a02.arc",
+            "set2a03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st2a",
+        "manifest": {
+          "path": "apps/game/public/stages/st2a/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st2a/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st2a",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2a",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2a",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2a"
+        }
+      }
+    },
+    {
+      "id": "st2b",
+      "code": "2b",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st2b_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st2b_mdl.arc",
+          "bytes": 507671
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st2b.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st2b.pzz",
+          "bytes": 593920
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit2b0.bin",
+            "hit2b1.bin",
+            "hit2b2.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit2b0.bin",
+            "hit2b1.bin",
+            "hit2b2.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2b00.arc",
+            "set2b01.arc",
+            "set2b02.arc",
+            "set2b03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st2b",
+        "manifest": {
+          "path": "apps/game/public/stages/st2b/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st2b/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st2b",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2b",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2b",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2b"
+        }
+      }
+    },
+    {
+      "id": "st2c",
+      "code": "2c",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st2c_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st2c_mdl.arc",
+          "bytes": 458543
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st2c.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st2c.pzz",
+          "bytes": 544768
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit2c0.bin",
+            "hit2c1.bin",
+            "hit2c2.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit2c0.bin",
+            "hit2c1.bin",
+            "hit2c2.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2c00.arc",
+            "set2c01.arc",
+            "set2c02.arc",
+            "set2c03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st2c",
+        "manifest": {
+          "path": "apps/game/public/stages/st2c/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st2c/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st2c",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2c",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2c",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2c"
+        }
+      }
+    },
+    {
+      "id": "st2e",
+      "code": "2e",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st2e_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st2e_mdl.arc",
+          "bytes": 502335
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st2e.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st2e.pzz",
+          "bytes": 636928
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit2e0.bin",
+            "hit2e1.bin",
+            "hit2e2.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit2e0.bin",
+            "hit2e1.bin",
+            "hit2e2.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set2e00.arc",
+            "set2e01.arc",
+            "set2e02.arc",
+            "set2e03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st2e",
+        "manifest": {
+          "path": "apps/game/public/stages/st2e/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st2e/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st2e",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2e",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2e",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2e"
+        }
+      }
+    },
+    {
+      "id": "st40",
+      "code": "40",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st40_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st40_mdl.arc",
+          "bytes": 484923
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st40.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st40.pzz",
+          "bytes": 573440
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit400.bin",
+            "hit401.bin",
+            "hit402.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit400.bin",
+            "hit401.bin",
+            "hit402.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4000.arc",
+            "set4001.arc",
+            "set4002.arc",
+            "set4003.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st40",
+        "manifest": {
+          "path": "apps/game/public/stages/st40/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st40/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st40",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st40",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 40",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 40"
+        }
+      }
+    },
+    {
+      "id": "st41",
+      "code": "41",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st41_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st41_mdl.arc",
+          "bytes": 435155
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st41.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st41.pzz",
+          "bytes": 516096
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit410.bin",
+            "hit411.bin",
+            "hit412.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit410.bin",
+            "hit411.bin",
+            "hit412.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4100.arc",
+            "set4101.arc",
+            "set4102.arc",
+            "set4103.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st41",
+        "manifest": {
+          "path": "apps/game/public/stages/st41/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st41/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st41",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st41",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 41",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 41"
+        }
+      }
+    },
+    {
+      "id": "st42",
+      "code": "42",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st42_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st42_mdl.arc",
+          "bytes": 494683
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st42.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st42.pzz",
+          "bytes": 663552
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit420.bin",
+            "hit421.bin",
+            "hit422.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit420.bin",
+            "hit421.bin",
+            "hit422.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4200.arc",
+            "set4201.arc",
+            "set4202.arc",
+            "set4203.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st42",
+        "manifest": {
+          "path": "apps/game/public/stages/st42/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st42/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st42",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st42",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 42",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 42"
+        }
+      }
+    },
+    {
+      "id": "st43",
+      "code": "43",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st43_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st43_mdl.arc",
+          "bytes": 417139
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st43.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st43.pzz",
+          "bytes": 495616
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit430.bin",
+            "hit431.bin",
+            "hit432.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit430.bin",
+            "hit431.bin",
+            "hit432.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4300.arc",
+            "set4301.arc",
+            "set4302.arc",
+            "set4303.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st43",
+        "manifest": {
+          "path": "apps/game/public/stages/st43/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st43/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st43",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st43",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 43",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 43"
+        }
+      }
+    },
+    {
+      "id": "st44",
+      "code": "44",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st44_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st44_mdl.arc",
+          "bytes": 510187
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st44.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st44.pzz",
+          "bytes": 675840
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit440.bin",
+            "hit441.bin",
+            "hit442.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit440.bin",
+            "hit441.bin",
+            "hit442.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4400.arc",
+            "set4401.arc",
+            "set4402.arc",
+            "set4403.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st44",
+        "manifest": {
+          "path": "apps/game/public/stages/st44/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st44/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st44",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st44",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 44",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 44"
+        }
+      }
+    },
+    {
+      "id": "st45",
+      "code": "45",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st45_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st45_mdl.arc",
+          "bytes": 477567
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st45.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st45.pzz",
+          "bytes": 565248
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit450.bin",
+            "hit451.bin",
+            "hit452.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit450.bin",
+            "hit451.bin",
+            "hit452.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4500.arc",
+            "set4501.arc",
+            "set4502.arc",
+            "set4503.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st45",
+        "manifest": {
+          "path": "apps/game/public/stages/st45/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st45/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st45",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st45",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 45",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 45"
+        }
+      }
+    },
+    {
+      "id": "st49",
+      "code": "49",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st49_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st49_mdl.arc",
+          "bytes": 365151
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st49.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st49.pzz",
+          "bytes": 395264
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit490.bin",
+            "hit491.bin",
+            "hit492.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit490.bin",
+            "hit491.bin",
+            "hit492.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4900.arc",
+            "set4901.arc",
+            "set4902.arc",
+            "set4903.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st49",
+        "manifest": {
+          "path": "apps/game/public/stages/st49/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st49/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st49",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st49",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 49",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 49"
+        }
+      }
+    },
+    {
+      "id": "st4a",
+      "code": "4a",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st4a_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st4a_mdl.arc",
+          "bytes": 449135
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st4a.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st4a.pzz",
+          "bytes": 573440
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit4a0.bin",
+            "hit4a1.bin",
+            "hit4a2.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit4a0.bin",
+            "hit4a1.bin",
+            "hit4a2.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4a00.arc",
+            "set4a01.arc",
+            "set4a02.arc",
+            "set4a03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st4a",
+        "manifest": {
+          "path": "apps/game/public/stages/st4a/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st4a/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st4a",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4a",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4a",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4a"
+        }
+      }
+    },
+    {
+      "id": "st4b",
+      "code": "4b",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st4b_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st4b_mdl.arc",
+          "bytes": 507671
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st4b.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st4b.pzz",
+          "bytes": 593920
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit4b0.bin",
+            "hit4b1.bin",
+            "hit4b2.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit4b0.bin",
+            "hit4b1.bin",
+            "hit4b2.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4b00.arc",
+            "set4b01.arc",
+            "set4b02.arc",
+            "set4b03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st4b",
+        "manifest": {
+          "path": "apps/game/public/stages/st4b/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st4b/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st4b",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4b",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4b",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4b"
+        }
+      }
+    },
+    {
+      "id": "st4c",
+      "code": "4c",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st4c_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st4c_mdl.arc",
+          "bytes": 458543
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st4c.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st4c.pzz",
+          "bytes": 544768
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit4c0.bin",
+            "hit4c1.bin",
+            "hit4c2.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit4c0.bin",
+            "hit4c1.bin",
+            "hit4c2.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4c00.arc",
+            "set4c01.arc",
+            "set4c02.arc",
+            "set4c03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st4c",
+        "manifest": {
+          "path": "apps/game/public/stages/st4c/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st4c/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st4c",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4c",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4c",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4c"
+        }
+      }
+    },
+    {
+      "id": "st4e",
+      "code": "4e",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/st4e_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st4e_mdl.arc",
+          "bytes": 502335
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/st4e.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\st4e.pzz",
+          "bytes": 636928
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "hasCompleteHitTriplet": false,
+          "expectedHitFiles": [
+            "hit4e0.bin",
+            "hit4e1.bin",
+            "hit4e2.bin"
+          ],
+          "files": [],
+          "missingExpectedHitFiles": [
+            "hit4e0.bin",
+            "hit4e1.bin",
+            "hit4e2.bin"
+          ]
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "set4e00.arc",
+            "set4e01.arc",
+            "set4e02.arc",
+            "set4e03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/st4e",
+        "manifest": {
+          "path": "apps/game/public/stages/st4e/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/st4e/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": false,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "st4e",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st4e",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 4e",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 4e"
+        }
+      }
+    },
+    {
+      "id": "stff",
+      "code": "ff",
+      "source": {
+        "hasStageArc": true,
+        "hasStagePzz": true,
+        "hasModelAndPzzPair": true,
+        "stageArc": {
+          "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\stff_mdl.arc",
+          "bytes": 680791
+        },
+        "stagePzz": {
+          "path": "user-data/GG4E/afs_data/root/stff.pzz",
+          "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\stff.pzz",
+          "bytes": 849920
+        },
+        "collision": {
+          "hasHitFiles": true,
+          "hasCompleteHitTriplet": true,
+          "expectedHitFiles": [
+            "hitff0.bin",
+            "hitff1.bin",
+            "hitff2.bin"
+          ],
+          "files": [
+            {
+              "path": "user-data/GG4E/afs_data/root/hitff0.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hitff0.bin",
+              "bytes": 142664
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hitff1.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hitff1.bin",
+              "bytes": 145512
+            },
+            {
+              "path": "user-data/GG4E/afs_data/root/hitff2.bin",
+              "absolutePath": "D:\\GotYaForce\\user-data\\GG4E\\afs_data\\root\\hitff2.bin",
+              "bytes": 36540
+            }
+          ],
+          "missingExpectedHitFiles": []
+        },
+        "sets": {
+          "expectedExporterFiles": [
+            "setff00.arc",
+            "setff01.arc",
+            "setff02.arc",
+            "setff03.arc"
+          ],
+          "files": [],
+          "filesCopiedByCurrentTool": [],
+          "filesNotCopiedByCurrentTool": []
+        }
+      },
+      "public": {
+        "exists": false,
+        "directory": "apps/game/public/stages/stff",
+        "manifest": {
+          "path": "apps/game/public/stages/stff/manifest.json",
+          "exists": false,
+          "parses": false,
+          "error": "missing",
+          "status": null
+        },
+        "raw": {
+          "hasStageArc": false,
+          "hasStagePzz": false,
+          "stageArc": null,
+          "stagePzz": null,
+          "stageArcMatchesSource": false,
+          "stagePzzMatchesSource": false
+        },
+        "visual": {
+          "directory": "apps/game/public/stages/stff/model",
+          "hasDaePieces": false,
+          "hasContiguousDaeSequence": false,
+          "daeCount": 0,
+          "nonEmptyDaeCount": 0,
+          "zeroByteDaeFiles": [],
+          "maxModelIndex": null,
+          "missingModelIndices": [],
+          "sampleDaeFiles": [],
+          "textureCount": 0,
+          "textureFiles": []
+        },
+        "collision": {
+          "hasHitFiles": false,
+          "exportedHitCount": 0,
+          "exportedHitFiles": [],
+          "missingSourceHitFiles": [
+            "hitff0.bin",
+            "hitff1.bin",
+            "hitff2.bin"
+          ],
+          "extraExportedHitFiles": []
+        },
+        "sets": {
+          "exportedSetCount": 0,
+          "exportedSetFiles": []
+        }
+      },
+      "export": {
+        "canExportWithExistingTools": true,
+        "needsExport": true,
+        "needsRaw": true,
+        "needsVisual": true,
+        "needsCollision": true,
+        "safeToRunExistingTools": true,
+        "unsafeReason": null,
+        "commands": {
+          "stage": "stff",
+          "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage stff",
+          "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E ff",
+          "visualExport": "rtk node scripts/export-stage-hsd.mjs GG4E ff"
+        }
+      }
+    }
+  ],
+  "notes": [
+    "The existing raw exporter removes a stage output folder before copying; this orchestrator marks existing public folders unsafe unless --force-existing is used.",
+    "Visual coverage means non-empty model_*.dae files exist in apps/game/public/stages/<stage>/model.",
+    "Complete visual coverage additionally requires a contiguous model_00.dae..model_NN.dae sequence with no zero-byte DAE files.",
+    "Collision coverage means hit*.bin files are present; hit body records are copied but not decoded here.",
+    "Adventure flow currently lists arena names, but the repo does not contain a verified arena-name to st## table."
+  ]
+}
