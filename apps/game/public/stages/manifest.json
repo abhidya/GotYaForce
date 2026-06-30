@@ -235,6 +235,33 @@
       "visualComplete": true,
       "collisionCount": 0,
       "setArcCount": 0
+    },
+    {
+      "id": "st2c",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 20,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
+    },
+    {
+      "id": "st2e",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 43,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
+    },
+    {
+      "id": "st40",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 40,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
     }
   ]
 }

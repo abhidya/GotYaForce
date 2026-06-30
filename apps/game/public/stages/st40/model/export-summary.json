@@ -1,0 +1,467 @@
+{
+  "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+  "expectedSlotCount": 40,
+  "expectedDaeCount": 40,
+  "exportedModelCount": 40,
+  "failedModelCount": 0,
+  "skippedNullRootJointCount": 0,
+  "normalizedInstanceJointCount": 0,
+  "expectedDaeIndices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "failedModelIndices": [],
+  "skippedNullRootJointIndices": [],
+  "complete": true,
+  "models": [
+    {
+      "index": 0,
+      "status": "exported",
+      "daeFile": "model_00.dae",
+      "textureFiles": [
+        "model_00_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 1,
+      "status": "exported",
+      "daeFile": "model_01.dae",
+      "textureFiles": [
+        "model_01_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 2,
+      "status": "exported",
+      "daeFile": "model_02.dae",
+      "textureFiles": [
+        "model_02_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 3,
+      "status": "exported",
+      "daeFile": "model_03.dae",
+      "textureFiles": [
+        "model_03_Texture_0_I4.png",
+        "model_03_Texture_1_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 4,
+      "status": "exported",
+      "daeFile": "model_04.dae",
+      "textureFiles": [
+        "model_04_Texture_0_I4.png",
+        "model_04_Texture_1_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 5,
+      "status": "exported",
+      "daeFile": "model_05.dae",
+      "textureFiles": [
+        "model_05_Texture_0_I4.png",
+        "model_05_Texture_1_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 6,
+      "status": "exported",
+      "daeFile": "model_06.dae",
+      "textureFiles": [
+        "model_06_Texture_0_I4.png",
+        "model_06_Texture_1_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 7,
+      "status": "exported",
+      "daeFile": "model_07.dae",
+      "textureFiles": [
+        "model_07_Texture_0_CMP.png",
+        "model_07_Texture_1_CMP.png",
+        "model_07_Texture_2_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 8,
+      "status": "exported",
+      "daeFile": "model_08.dae",
+      "textureFiles": [
+        "model_08_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 9,
+      "status": "exported",
+      "daeFile": "model_09.dae",
+      "textureFiles": [
+        "model_09_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 10,
+      "status": "exported",
+      "daeFile": "model_10.dae",
+      "textureFiles": [
+        "model_10_Texture_0_CMP.png",
+        "model_10_Texture_1_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 11,
+      "status": "exported",
+      "daeFile": "model_11.dae",
+      "textureFiles": [
+        "model_11_Texture_0_CMP.png",
+        "model_11_Texture_1_CMP.png",
+        "model_11_Texture_2_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 12,
+      "status": "exported",
+      "daeFile": "model_12.dae",
+      "textureFiles": [
+        "model_12_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 13,
+      "status": "exported",
+      "daeFile": "model_13.dae",
+      "textureFiles": [
+        "model_13_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 14,
+      "status": "exported",
+      "daeFile": "model_14.dae",
+      "textureFiles": [
+        "model_14_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 15,
+      "status": "exported",
+      "daeFile": "model_15.dae",
+      "textureFiles": [
+        "model_15_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 16,
+      "status": "exported",
+      "daeFile": "model_16.dae",
+      "textureFiles": [
+        "model_16_Texture_0_CMP.png",
+        "model_16_Texture_1_CMP.png",
+        "model_16_Texture_2_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 17,
+      "status": "exported",
+      "daeFile": "model_17.dae",
+      "textureFiles": [
+        "model_17_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 18,
+      "status": "exported",
+      "daeFile": "model_18.dae",
+      "textureFiles": [
+        "model_18_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 19,
+      "status": "exported",
+      "daeFile": "model_19.dae",
+      "textureFiles": [
+        "model_19_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 20,
+      "status": "exported",
+      "daeFile": "model_20.dae",
+      "textureFiles": [
+        "model_20_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 21,
+      "status": "exported",
+      "daeFile": "model_21.dae",
+      "textureFiles": [
+        "model_21_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 22,
+      "status": "exported",
+      "daeFile": "model_22.dae",
+      "textureFiles": [
+        "model_22_Texture_0_CMP.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 23,
+      "status": "exported",
+      "daeFile": "model_23.dae",
+      "textureFiles": [
+        "model_23_Texture_0_CMP.png",
+        "model_23_Texture_1_CMP.png",
+        "model_23_Texture_2_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 24,
+      "status": "exported",
+      "daeFile": "model_24.dae",
+      "textureFiles": [],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 25,
+      "status": "exported",
+      "daeFile": "model_25.dae",
+      "textureFiles": [
+        "model_25_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 26,
+      "status": "exported",
+      "daeFile": "model_26.dae",
+      "textureFiles": [
+        "model_26_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 27,
+      "status": "exported",
+      "daeFile": "model_27.dae",
+      "textureFiles": [
+        "model_27_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 28,
+      "status": "exported",
+      "daeFile": "model_28.dae",
+      "textureFiles": [
+        "model_28_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 29,
+      "status": "exported",
+      "daeFile": "model_29.dae",
+      "textureFiles": [
+        "model_29_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 30,
+      "status": "exported",
+      "daeFile": "model_30.dae",
+      "textureFiles": [
+        "model_30_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 31,
+      "status": "exported",
+      "daeFile": "model_31.dae",
+      "textureFiles": [
+        "model_31_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 32,
+      "status": "exported",
+      "daeFile": "model_32.dae",
+      "textureFiles": [
+        "model_32_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 33,
+      "status": "exported",
+      "daeFile": "model_33.dae",
+      "textureFiles": [
+        "model_33_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 34,
+      "status": "exported",
+      "daeFile": "model_34.dae",
+      "textureFiles": [
+        "model_34_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 35,
+      "status": "exported",
+      "daeFile": "model_35.dae",
+      "textureFiles": [
+        "model_35_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 36,
+      "status": "exported",
+      "daeFile": "model_36.dae",
+      "textureFiles": [
+        "model_36_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 37,
+      "status": "exported",
+      "daeFile": "model_37.dae",
+      "textureFiles": [
+        "model_37_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 38,
+      "status": "exported",
+      "daeFile": "model_38.dae",
+      "textureFiles": [
+        "model_38_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    },
+    {
+      "index": 39,
+      "status": "exported",
+      "daeFile": "model_39.dae",
+      "textureFiles": [
+        "model_39_Texture_0_I4.png"
+      ],
+      "error": null,
+      "normalizedInstanceJointCount": 0
+    }
+  ]
+}

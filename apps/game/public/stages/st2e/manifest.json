@@ -1,0 +1,533 @@
+{
+  "region": "GG4E",
+  "id": "st2e",
+  "source": "user-data/GG4E/afs_data/root",
+  "status": "visual-exported-no-source-hit-files",
+  "verifiedBy": "scripts/export-all-stages.mjs",
+  "verifiedAt": "2026-06-30T22:12:29.559Z",
+  "copied": {
+    "stageArc": "st2e/raw/st2e_mdl.arc",
+    "stagePzz": "st2e/raw/st2e.pzz",
+    "hitBins": [],
+    "setArcs": []
+  },
+  "visual": {
+    "hasDaePieces": true,
+    "hasContiguousDaeSequence": true,
+    "hasCompleteDaeExport": true,
+    "daeCount": 43,
+    "nonEmptyDaeCount": 43,
+    "maxModelIndex": 42,
+    "missingModelIndices": [],
+    "expectedDaeIndices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42
+    ],
+    "missingExpectedDaeIndices": [],
+    "unexpectedDaeIndices": [],
+    "zeroByteDaeFiles": [],
+    "textureCount": 63,
+    "exportSummary": {
+      "path": "model/export-summary.json",
+      "exists": true,
+      "parses": true,
+      "error": null,
+      "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+      "expectedSlotCount": 43,
+      "expectedDaeCount": 43,
+      "exportedModelCount": 43,
+      "failedModelIndices": [],
+      "skippedNullRootJointIndices": [],
+      "complete": true
+    }
+  },
+  "collision": [],
+  "sets": {
+    "sourceSetFiles": [],
+    "exportedSetCount": 0,
+    "filesNotCopiedByCurrentTool": []
+  },
+  "commands": {
+    "stage": "st2e",
+    "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2e",
+    "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 2e",
+    "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st2e",
+    "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 2e"
+  },
+  "notes": [
+    "Verified by comparing source stage assets against the browser public stage folder.",
+    "Visual DAE pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
+  ],
+  "modelCount": 43,
+  "models": [
+    {
+      "path": "model/model_00.dae",
+      "bytes": 14221
+    },
+    {
+      "path": "model/model_01.dae",
+      "bytes": 22877
+    },
+    {
+      "path": "model/model_02.dae",
+      "bytes": 10108
+    },
+    {
+      "path": "model/model_03.dae",
+      "bytes": 58309
+    },
+    {
+      "path": "model/model_04.dae",
+      "bytes": 22352
+    },
+    {
+      "path": "model/model_05.dae",
+      "bytes": 35029
+    },
+    {
+      "path": "model/model_06.dae",
+      "bytes": 59649
+    },
+    {
+      "path": "model/model_07.dae",
+      "bytes": 53665
+    },
+    {
+      "path": "model/model_08.dae",
+      "bytes": 18332
+    },
+    {
+      "path": "model/model_09.dae",
+      "bytes": 12016
+    },
+    {
+      "path": "model/model_10.dae",
+      "bytes": 70118
+    },
+    {
+      "path": "model/model_11.dae",
+      "bytes": 13985
+    },
+    {
+      "path": "model/model_12.dae",
+      "bytes": 14031
+    },
+    {
+      "path": "model/model_13.dae",
+      "bytes": 13980
+    },
+    {
+      "path": "model/model_14.dae",
+      "bytes": 14026
+    },
+    {
+      "path": "model/model_15.dae",
+      "bytes": 58467
+    },
+    {
+      "path": "model/model_16.dae",
+      "bytes": 28214
+    },
+    {
+      "path": "model/model_17.dae",
+      "bytes": 19331
+    },
+    {
+      "path": "model/model_18.dae",
+      "bytes": 238851
+    },
+    {
+      "path": "model/model_19.dae",
+      "bytes": 11012
+    },
+    {
+      "path": "model/model_20.dae",
+      "bytes": 20373
+    },
+    {
+      "path": "model/model_21.dae",
+      "bytes": 22523
+    },
+    {
+      "path": "model/model_22.dae",
+      "bytes": 23561
+    },
+    {
+      "path": "model/model_23.dae",
+      "bytes": 80471
+    },
+    {
+      "path": "model/model_24.dae",
+      "bytes": 246197
+    },
+    {
+      "path": "model/model_25.dae",
+      "bytes": 95621
+    },
+    {
+      "path": "model/model_26.dae",
+      "bytes": 61738
+    },
+    {
+      "path": "model/model_27.dae",
+      "bytes": 23845
+    },
+    {
+      "path": "model/model_28.dae",
+      "bytes": 11198
+    },
+    {
+      "path": "model/model_29.dae",
+      "bytes": 10181
+    },
+    {
+      "path": "model/model_30.dae",
+      "bytes": 14232
+    },
+    {
+      "path": "model/model_31.dae",
+      "bytes": 10787
+    },
+    {
+      "path": "model/model_32.dae",
+      "bytes": 8939
+    },
+    {
+      "path": "model/model_33.dae",
+      "bytes": 7864
+    },
+    {
+      "path": "model/model_34.dae",
+      "bytes": 9781
+    },
+    {
+      "path": "model/model_35.dae",
+      "bytes": 8387
+    },
+    {
+      "path": "model/model_36.dae",
+      "bytes": 8527
+    },
+    {
+      "path": "model/model_37.dae",
+      "bytes": 9200
+    },
+    {
+      "path": "model/model_38.dae",
+      "bytes": 14421
+    },
+    {
+      "path": "model/model_39.dae",
+      "bytes": 8983
+    },
+    {
+      "path": "model/model_40.dae",
+      "bytes": 13579
+    },
+    {
+      "path": "model/model_41.dae",
+      "bytes": 10557
+    },
+    {
+      "path": "model/model_42.dae",
+      "bytes": 9449
+    }
+  ],
+  "textures": [
+    {
+      "path": "model/model_00_Texture_0_CMP.png",
+      "bytes": 21877
+    },
+    {
+      "path": "model/model_01_Texture_0_CMP.png",
+      "bytes": 54358
+    },
+    {
+      "path": "model/model_02_Texture_0_CMP.png",
+      "bytes": 21877
+    },
+    {
+      "path": "model/model_03_Texture_0_CMP.png",
+      "bytes": 18008
+    },
+    {
+      "path": "model/model_04_Texture_0_CMP.png",
+      "bytes": 33110
+    },
+    {
+      "path": "model/model_05_Texture_0_CMP.png",
+      "bytes": 55823
+    },
+    {
+      "path": "model/model_06_Texture_0_CMP.png",
+      "bytes": 303
+    },
+    {
+      "path": "model/model_07_Texture_0_CMP.png",
+      "bytes": 38538
+    },
+    {
+      "path": "model/model_07_Texture_1_CMP.png",
+      "bytes": 12704
+    },
+    {
+      "path": "model/model_07_Texture_2_CMP.png",
+      "bytes": 15224
+    },
+    {
+      "path": "model/model_07_Texture_3_CMP.png",
+      "bytes": 4241
+    },
+    {
+      "path": "model/model_08_Texture_0_CMP.png",
+      "bytes": 54138
+    },
+    {
+      "path": "model/model_09_Texture_0_CMP.png",
+      "bytes": 38538
+    },
+    {
+      "path": "model/model_10_Texture_0_CMP.png",
+      "bytes": 38538
+    },
+    {
+      "path": "model/model_10_Texture_1_CMP.png",
+      "bytes": 14987
+    },
+    {
+      "path": "model/model_10_Texture_2_CMP.png",
+      "bytes": 12704
+    },
+    {
+      "path": "model/model_10_Texture_3_CMP.png",
+      "bytes": 4758
+    },
+    {
+      "path": "model/model_11_Texture_0_CMP.png",
+      "bytes": 38538
+    },
+    {
+      "path": "model/model_12_Texture_0_CMP.png",
+      "bytes": 38538
+    },
+    {
+      "path": "model/model_13_Texture_0_CMP.png",
+      "bytes": 38538
+    },
+    {
+      "path": "model/model_14_Texture_0_CMP.png",
+      "bytes": 38538
+    },
+    {
+      "path": "model/model_15_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_16_Texture_0_CMP.png",
+      "bytes": 1293
+    },
+    {
+      "path": "model/model_17_Texture_0_CMP.png",
+      "bytes": 28937
+    },
+    {
+      "path": "model/model_18_Texture_0_CMP.png",
+      "bytes": 16903
+    },
+    {
+      "path": "model/model_18_Texture_1_CMP.png",
+      "bytes": 35237
+    },
+    {
+      "path": "model/model_18_Texture_2_CMP.png",
+      "bytes": 11003
+    },
+    {
+      "path": "model/model_19_Texture_0_CMP.png",
+      "bytes": 14987
+    },
+    {
+      "path": "model/model_20_Texture_0_CMP.png",
+      "bytes": 14987
+    },
+    {
+      "path": "model/model_20_Texture_1_CMP.png",
+      "bytes": 38538
+    },
+    {
+      "path": "model/model_21_Texture_0_CMP.png",
+      "bytes": 3192
+    },
+    {
+      "path": "model/model_21_Texture_1_CMP.png",
+      "bytes": 13111
+    },
+    {
+      "path": "model/model_22_Texture_0_CMP.png",
+      "bytes": 27393
+    },
+    {
+      "path": "model/model_22_Texture_1_CMP.png",
+      "bytes": 3192
+    },
+    {
+      "path": "model/model_23_Texture_0_CMP.png",
+      "bytes": 14214
+    },
+    {
+      "path": "model/model_23_Texture_1_CMP.png",
+      "bytes": 4241
+    },
+    {
+      "path": "model/model_23_Texture_2_CMP.png",
+      "bytes": 12704
+    },
+    {
+      "path": "model/model_24_Texture_0_CMP.png",
+      "bytes": 11472
+    },
+    {
+      "path": "model/model_24_Texture_1_CMP.png",
+      "bytes": 9700
+    },
+    {
+      "path": "model/model_24_Texture_2_CMP.png",
+      "bytes": 4241
+    },
+    {
+      "path": "model/model_25_Texture_0_CMP.png",
+      "bytes": 4241
+    },
+    {
+      "path": "model/model_25_Texture_1_CMP.png",
+      "bytes": 19813
+    },
+    {
+      "path": "model/model_25_Texture_2_CMP.png",
+      "bytes": 14214
+    },
+    {
+      "path": "model/model_25_Texture_3_CMP.png",
+      "bytes": 6611
+    },
+    {
+      "path": "model/model_26_Texture_0_CMP.png",
+      "bytes": 14987
+    },
+    {
+      "path": "model/model_26_Texture_1_CMP.png",
+      "bytes": 4241
+    },
+    {
+      "path": "model/model_26_Texture_2_CMP.png",
+      "bytes": 303
+    },
+    {
+      "path": "model/model_27_Texture_0_CMP.png",
+      "bytes": 14987
+    },
+    {
+      "path": "model/model_28_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_29_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_30_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_31_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_32_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_33_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_34_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_35_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_36_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_37_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_38_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_39_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_40_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_41_Texture_0_I4.png",
+      "bytes": 662
+    },
+    {
+      "path": "model/model_42_Texture_0_I4.png",
+      "bytes": 662
+    }
+  ],
+  "setArcs": [],
+  "renderStatus": "dae-complete"
+}
