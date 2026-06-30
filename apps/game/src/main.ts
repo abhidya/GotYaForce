@@ -181,6 +181,19 @@ type BakedClip = {
   bones: Array<{ i: number; pos?: number[]; rot?: number[]; scl?: number[] }>;
 };
 
+type AnimBank = {
+  file: string;
+  group: number;
+  slot: number;
+  label: string;
+  frames: number;
+};
+
+type AnimIndex = {
+  borg: string;
+  banks: AnimBank[];
+};
+
 function buildClip(json: BakedClip): THREE.AnimationClip {
   const fps = json.fps ?? 60;
   const times = Float32Array.from({ length: json.frameCount }, (_, frame) => frame / fps);
@@ -249,22 +262,81 @@ async function loadBorgModel(id: string): Promise<THREE.Object3D | null> {
   return clone(source);
 }
 
-// Animated borgs have baked g-clips; we read idle/move/death. (pl0500 has no death.)
-const ANIM_FILE: Record<AnimSlot, string> = {
-  idle: "anim_g00_s00_idle.json",
-  move: "anim_g00_s01_move.json",
-  death: "anim_g05_s01_death.json",
+const animIndexCache = new Map<string, Promise<AnimIndex | null>>();
+
+const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
+  idle: [/^idle$/],
+  move: [/^move$/, /^move_s\d+$/],
+  dash: [/^dash_fwd$/, /^dash_(right|left|back)$/, /^boost$/],
+  jump: [/^jump_takeoff$/, /^fly_transition$/, /^boost$/],
+  fly: [/^boost$/, /^fly_transition$/, /^move_s\d+$/],
+  attack: [/^attack_s\d+$/, /^attack_lunge_s\d+$/],
+  melee: [/^attack_lunge_s\d+$/, /^attack_s\d+$/],
+  shoot: [/^attack_s\d+$/, /^special_s\d+$/],
+  special: [/^special_s\d+$/],
+  hit: [/^hit_react_s\d+$/, /^guard_s\d+$/],
+  down: [/^hit_react_s\d+$/, /^guard_s\d+$/, /^death$/],
+  death: [/^death$/, /^win_or_death$/],
+  spawn: [/^pose_short$/, /^idle$/],
+  victory: [/^victory$/, /^win_or_death$/],
 };
-const ANIMATED_IDS = new Set(["pl0102", "pl0109", "pl0500", "pl0615", "pl0802"]);
+
+const SLOT_FALLBACKS: Partial<Record<AnimSlot, AnimSlot[]>> = {
+  dash: ["move", "idle"],
+  jump: ["fly", "move", "idle"],
+  fly: ["jump", "move", "idle"],
+  attack: ["melee", "shoot", "move", "idle"],
+  melee: ["attack", "move", "idle"],
+  shoot: ["attack", "special", "move", "idle"],
+  special: ["attack", "idle"],
+  hit: ["down", "idle"],
+  down: ["hit", "death", "idle"],
+  death: ["down", "idle"],
+  spawn: ["idle"],
+  victory: ["idle"],
+};
+
+async function loadAnimIndex(id: string): Promise<AnimIndex | null> {
+  let p = animIndexCache.get(id);
+  if (!p) {
+    p = fetch(`/models/${id}/anim_index.json`)
+      .then((r) => (r.ok ? (r.json() as Promise<AnimIndex>) : null))
+      .catch(() => null);
+    animIndexCache.set(id, p);
+  }
+  return p;
+}
+
+function pickAnimBank(index: AnimIndex, slot: AnimSlot): AnimBank | null {
+  const direct = pickAnimBankDirect(index, slot);
+  if (direct) return direct;
+  for (const fallback of SLOT_FALLBACKS[slot] ?? []) {
+    const bank = pickAnimBankDirect(index, fallback);
+    if (bank) return bank;
+  }
+  return null;
+}
+
+function pickAnimBankDirect(index: AnimIndex, slot: AnimSlot): AnimBank | null {
+  const patterns = SLOT_LABELS[slot];
+  const banks = [...index.banks].sort((a, b) => a.group - b.group || a.slot - b.slot || a.frames - b.frames);
+  for (const pattern of patterns) {
+    const match = banks.find((bank) => pattern.test(bank.label));
+    if (match) return match;
+  }
+  return null;
+}
 
 async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.AnimationClip | null> {
-  if (!ANIMATED_IDS.has(id)) return null;
   const key = `${id}:${slot}`;
   let p = clipCache.get(key);
   if (!p) {
-    const url = `/models/${id}/${ANIM_FILE[slot]}`;
-    p = fetch(url)
-      .then((r) => (r.ok ? (r.json() as Promise<BakedClip>) : null))
+    p = loadAnimIndex(id)
+      .then((index) => {
+        const bank = index ? pickAnimBank(index, slot) : null;
+        return bank ? fetch(`/models/${id}/${bank.file}`) : null;
+      })
+      .then((r) => (r?.ok ? (r.json() as Promise<BakedClip>) : null))
       .then((json) => (json ? buildClip(json) : null))
       .catch(() => null);
     clipCache.set(key, p);

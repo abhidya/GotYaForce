@@ -1,17 +1,9 @@
 /**
  * MainMenu — the mode hub, per reference `title-main-menu.png`.
  *
- * APPROXIMATION (the one documented deviation): the real game renders this as a
- * 3D desk diorama (a kid's room) where each mode is a physical object ringed by a
- * spinning gear cursor. We reproduce the *selection model* faithfully — modes are
- * laid out as gear-mounted labels in a ring, the selected one enlarges front-center
- * with a spinning red-gear cursor, the game's yellow-outlined font/colors and the
- * "GOTCHA FORCE" logo plate are matched — but as a flat re-skin rather than a live
- * 3D scene. An optional `deskImage` lets the integrator drop the real desk render
- * behind it. This is the only screen that is not pixel-faithful by design.
- *
- * Modes match the labels seen on the desk: STORY, VERSUS, CHALLENGE, EDIT FORCE,
- * COLLECTION, TRADE, OPTION.
+ * The real game renders this as a 3D desk diorama where each mode is a physical
+ * object ringed by a spinning gear cursor. This component keeps the Challenge
+ * selection flow in place while the extracted desk/menu assets are wired.
  */
 
 import { el } from "../dom.js";
@@ -28,19 +20,18 @@ export type MainMenuMode =
 interface MenuEntry {
   mode: MainMenuMode;
   label: string;
-  /** decorative glyph standing in for the desk object */
-  glyph: string;
+  tone: "red" | "blue" | "green" | "yellow" | "purple";
 }
 
 /** Ring order roughly matches the desk layout in the reference. */
 const ENTRIES: readonly MenuEntry[] = [
-  { mode: "story", label: "STORY", glyph: "📖" },
-  { mode: "challenge", label: "CHALLENGE", glyph: "⏰" },
-  { mode: "edit-force", label: "EDIT FORCE", glyph: "⚙️" },
-  { mode: "option", label: "OPTION", glyph: "🎮" },
-  { mode: "trade", label: "TRADE", glyph: "🔁" },
-  { mode: "collection", label: "COLLECTION", glyph: "🗂️" },
-  { mode: "versus", label: "VERSUS", glyph: "⚔️" },
+  { mode: "story", label: "STORY", tone: "yellow" },
+  { mode: "challenge", label: "CHALLENGE", tone: "red" },
+  { mode: "edit-force", label: "EDIT FORCE", tone: "green" },
+  { mode: "option", label: "OPTION", tone: "blue" },
+  { mode: "trade", label: "TRADE", tone: "purple" },
+  { mode: "collection", label: "COLLECTION", tone: "yellow" },
+  { mode: "versus", label: "VERSUS", tone: "blue" },
 ];
 
 export interface MainMenuOptions {
@@ -91,7 +82,7 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
         },
       },
       [
-        el("span", { class: "gf-menu-gear", text: entry.glyph }),
+        el("span", { class: `gf-menu-gear gf-menu-gear-${entry.tone}`, attrs: { "aria-hidden": "true" } }),
         el("span", { class: "gf-menu-label", text: entry.label }),
       ],
     );
@@ -101,9 +92,6 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
 
   root.appendChild(ring);
   root.appendChild(el("div", { class: "gf-mainmenu-logo", text: "GOTCHA FORCE" }));
-  root.appendChild(
-    el("div", { class: "gf-mainmenu-approx", text: "flat re-skin of the 3D desk menu" }),
-  );
 
   function setSelected(mode: MainMenuMode): void {
     selected = mode;

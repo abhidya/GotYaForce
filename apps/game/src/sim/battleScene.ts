@@ -3,7 +3,7 @@
 // One three.js Group per live BorgRuntime (keyed by uid). Each frame:
 //   - spawn a model for any new uid, despawn models whose uid is gone,
 //   - copy pos -> position, rotY -> rotation.y,
-//   - pick a baked clip from the borg's state (idle/move/death) and play it,
+//   - pick a baked clip from the borg's state/action and play it,
 //   - advance per-borg AnimationMixers.
 //
 // Models + baked clips are provided by main.ts via the BorgAssets interface so we
@@ -12,17 +12,31 @@
 // so every combatant in the sim is visible.
 
 import * as THREE from "three";
-import type { BorgRuntime, BorgState } from "@gf/combat";
+import type { BorgRuntime } from "@gf/combat";
 
 /** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
 export interface BorgAssets {
   /** Resolve a cloneable source model for a borg id (cached upstream). Null if unavailable. */
   loadModel(borgId: string): Promise<THREE.Object3D | null>;
-  /** Resolve a baked AnimationClip for (borgId, slot). Null if unavailable. slots: "idle"|"move"|"death". */
+  /** Resolve a baked AnimationClip for (borgId, slot). Null if unavailable. */
   loadClip(borgId: string, slot: AnimSlot): Promise<THREE.AnimationClip | null>;
 }
 
-export type AnimSlot = "idle" | "move" | "death";
+export type AnimSlot =
+  | "idle"
+  | "move"
+  | "dash"
+  | "jump"
+  | "fly"
+  | "attack"
+  | "melee"
+  | "shoot"
+  | "special"
+  | "hit"
+  | "down"
+  | "death"
+  | "spawn"
+  | "victory";
 
 interface Actor {
   group: THREE.Group;
@@ -48,11 +62,22 @@ export class BattleScene {
     private readonly assets: BorgAssets,
   ) {}
 
-  /** Map a sim BorgState to one of the baked animation slots we have. */
-  private slotForState(state: BorgState): AnimSlot {
-    if (state === "death" || state === "down") return "death";
-    if (state === "move" || state === "jump" || state === "fly" || state === "attack" || state === "special")
-      return "move";
+  /** Map a sim state/action to one of the exported game animation groups. */
+  private slotForBorg(b: BorgRuntime): AnimSlot {
+    if ((b.cooldowns["dashActive"] ?? 0) > 0) return "dash";
+    if (b.state === "death") return "death";
+    if (b.state === "down") return "down";
+    if (b.state === "hit") return "hit";
+    if (b.state === "spawn") return "spawn";
+    if (b.state === "special") return "special";
+    if (b.state === "attack") {
+      if (b.anim === "shoot") return "shoot";
+      if (b.anim === "melee") return "melee";
+      return "attack";
+    }
+    if (b.state === "fly") return "fly";
+    if (b.state === "jump") return "jump";
+    if (b.state === "move") return "move";
     return "idle";
   }
 
@@ -70,7 +95,7 @@ export class BattleScene {
       actor.group.position.set(b.pos.x, b.pos.y, b.pos.z);
       actor.group.rotation.y = b.rotY;
       // Animation slot from state.
-      const slot = this.slotForState(b.state);
+      const slot = this.slotForBorg(b);
       if (actor.ready) this.playSlot(actor, slot);
       // Dim/hide once dead so the death pose reads (sim culls dead borgs next frame).
       if (!b.alive) actor.group.visible = true;
@@ -187,7 +212,7 @@ export class BattleScene {
   }
 
   private crossfadeTo(actor: Actor, action: THREE.AnimationAction, slot: AnimSlot): void {
-    const looping = slot !== "death";
+    const looping = slot === "idle" || slot === "move" || slot === "fly";
     action
       .reset()
       .setLoop(looping ? THREE.LoopRepeat : THREE.LoopOnce, looping ? Infinity : 1)

@@ -217,14 +217,31 @@
 .gf-menu-gear {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 26px;
-  background: radial-gradient(circle at 35% 30%, #6fb6ff, #2f6db0);
-  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.4);
+  background:
+    conic-gradient(from 11deg, #1d365f 0 8deg, transparent 8deg 22deg),
+    radial-gradient(circle at 35% 30%, #6fb6ff, #2f6db0);
+  box-shadow:
+    inset 0 -4px 0 rgba(0, 0, 0, 0.3),
+    inset 0 0 0 8px rgba(255, 255, 255, 0.2),
+    0 4px 6px rgba(0, 0, 0, 0.4);
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
 }
+.gf-menu-gear::after {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(20, 24, 38, 0.72);
+  box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.35);
+}
+.gf-menu-gear-red { background: conic-gradient(from 11deg, #7e160f 0 8deg, transparent 8deg 22deg), radial-gradient(circle at 35% 30%, #ff8a4a, var(--gf-red)); }
+.gf-menu-gear-blue { background: conic-gradient(from 11deg, #1d365f 0 8deg, transparent 8deg 22deg), radial-gradient(circle at 35% 30%, #6fb6ff, #2f6db0); }
+.gf-menu-gear-green { background: conic-gradient(from 11deg, #165a10 0 8deg, transparent 8deg 22deg), radial-gradient(circle at 35% 30%, #7be85a, var(--gf-green-deep)); }
+.gf-menu-gear-yellow { background: conic-gradient(from 11deg, #8a5a00 0 8deg, transparent 8deg 22deg), radial-gradient(circle at 35% 30%, #ffe27a, var(--gf-yellow-deep)); }
+.gf-menu-gear-purple { background: conic-gradient(from 11deg, #34265f 0 8deg, transparent 8deg 22deg), radial-gradient(circle at 35% 30%, #b68cff, var(--gf-edit-purple)); }
 .gf-menu-label {
   font-size: 18px;
   color: var(--gf-yellow);
@@ -236,7 +253,9 @@
 .gf-menu-item.gf-selected { transform: translate(-50%, -50%) scale(1.5); z-index: 5; }
 .gf-menu-item.gf-selected .gf-menu-label { color: #fff; -webkit-text-stroke: 2px var(--gf-outline); }
 .gf-menu-item.gf-selected .gf-menu-gear {
-  background: radial-gradient(circle at 35% 30%, #ff8a4a, var(--gf-red));
+  background:
+    conic-gradient(from 11deg, #7e160f 0 8deg, transparent 8deg 22deg),
+    radial-gradient(circle at 35% 30%, #ff8a4a, var(--gf-red));
   box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.35), 0 0 0 6px rgba(232, 35, 27, 0.35);
   animation: gf-gear-spin 6s linear infinite;
 }
@@ -254,17 +273,6 @@
   paint-order: stroke fill;
   text-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
 }
-.gf-mainmenu-approx {
-  position: absolute;
-  right: 8px;
-  bottom: 4px;
-  z-index: 6;
-  font-size: 10px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0;
-}
-
 /* ============================ FORCE BUILDER ============================ */
 .gf-force { display: grid; grid-template-columns: 1fr minmax(280px, 42%); gap: 12px; padding: 12px; box-sizing: border-box; height: 100%; }
 .gf-force-edit-tab {
