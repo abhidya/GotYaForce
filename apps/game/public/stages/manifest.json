@@ -262,6 +262,33 @@
       "visualComplete": true,
       "collisionCount": 0,
       "setArcCount": 0
+    },
+    {
+      "id": "st41",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 78,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
+    },
+    {
+      "id": "st42",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 51,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
+    },
+    {
+      "id": "st43",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 43,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
     }
   ]
 }
