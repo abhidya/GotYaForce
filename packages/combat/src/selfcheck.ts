@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 import { createBattle } from "./battle.js";
+import { JUMP } from "./constants.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
 import type { BorgStats } from "./stats.js";
 
@@ -158,12 +159,66 @@ function assertTriangleWallCollision(borgs: BorgStats[]): void {
   console.log(`[selfcheck] STIH triangle wall stopped p1 at x=${active.pos.x}`);
 }
 
+function assertTriangleCeilingCollision(borgs: BorgStats[]): void {
+  const ceilingY = 24;
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
+      ],
+      bounds: { minX: -100, maxX: 100, minZ: -100, maxZ: 100 },
+      collision: {
+        triangles: [
+          {
+            index: 0,
+            layerIndex: null,
+            marker: 0xcccccccc,
+            vertices: [
+              { x: -100, y: ceilingY, z: -100 },
+              { x: 0, y: ceilingY, z: 100 },
+              { x: 100, y: ceilingY, z: -100 },
+            ],
+            normal: { x: 0, y: -1, z: 0 },
+            planeD: ceilingY,
+            bounds2d: { minX: -100, maxX: 100, minZ: -100, maxZ: 100 },
+          },
+        ],
+      },
+    },
+    borgs,
+  );
+  const activeUid = battle.state.activeUidByPlayer["p1"];
+  const active = battle.state.borgs.find((b) => b.uid === activeUid);
+  if (!active) throw new Error("[selfcheck] triangle ceiling test lost active p1 borg");
+
+  for (let f = 0; f < 25; f += 1) {
+    battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
+    assertSane(battle.state.borgs, f);
+  }
+
+  let maxTopY = active.pos.y + JUMP.GROUND_Y;
+  battle.step(1 / 60, { p1: { ...emptyInput(), jump: true }, p2: emptyInput() });
+  for (let f = 0; f < 45; f += 1) {
+    battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
+    assertSane(battle.state.borgs, f);
+    maxTopY = Math.max(maxTopY, active.pos.y + JUMP.GROUND_Y);
+  }
+
+  if (maxTopY > ceilingY + 0.01) {
+    throw new Error(`[selfcheck] triangle ceiling collision failed: topY=${maxTopY}`);
+  }
+  console.log(`[selfcheck] STIH triangle ceiling capped p1 top at y=${maxTopY}`);
+}
+
 export function main(): number {
   const borgs = loadBorgs();
   console.log(`[selfcheck] loaded ${borgs.length} borgs from borgs.json`);
   assertRectBoundsClamp(borgs);
   assertTriangleFloorGrounding(borgs);
   assertTriangleWallCollision(borgs);
+  assertTriangleCeilingCollision(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

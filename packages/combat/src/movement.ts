@@ -27,6 +27,9 @@ import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCo
 const GROUND_SNAP_UP = 35;
 const WALL_NORMAL_MAX_Y = 0.5;
 const WALL_CLEARANCE = 0.25;
+const CEILING_NORMAL_MAX_Y = -0.5;
+const CEILING_BODY_CLEARANCE = JUMP.GROUND_Y;
+const CEILING_CLEARANCE = 0.25;
 
 export interface MoveContext {
   /** Resolved lock-on target position, if locked (face toward it). */
@@ -141,6 +144,7 @@ export function stepMovement(
   b.pos.x = clamp(b.pos.x, ctx.bounds.minX, ctx.bounds.maxX);
   b.pos.z = clamp(b.pos.z, ctx.bounds.minZ, ctx.bounds.maxZ);
   resolveLateralCollision(ctx.collision, prevPos, b.pos, b.vel);
+  resolveCeilingCollision(ctx.collision, prevPos, b.pos, b.vel);
 
   const groundY = groundYAt(ctx.collision, b.pos.x, b.pos.z, b.pos.y);
   if (b.pos.y <= groundY) {
@@ -301,6 +305,29 @@ function resolveLateralCollision(
   }
 }
 
+function resolveCeilingCollision(
+  collision: StageCollision | null,
+  previous: Vec3,
+  current: Vec3,
+  velocity: Vec3,
+): void {
+  if (!collision || collision.triangles.length === 0 || velocity.y <= 0) return;
+  let best: { point: Vec3; t: number } | null = null;
+  const previousTop = { ...previous, y: previous.y + CEILING_BODY_CLEARANCE };
+  const currentTop = { ...current, y: current.y + CEILING_BODY_CLEARANCE };
+
+  for (const tri of candidateTrianglesForSegment(collision, previousTop, currentTop)) {
+    const hit = segmentTriangleCeilingHit(tri, previousTop, currentTop);
+    if (!hit) continue;
+    if (!best || hit.t < best.t) best = hit;
+  }
+  if (!best) return;
+
+  const maxOriginY = best.point.y - CEILING_BODY_CLEARANCE - CEILING_CLEARANCE;
+  if (current.y > maxOriginY) current.y = maxOriginY;
+  if (velocity.y > 0) velocity.y = 0;
+}
+
 function segmentTriangleWallHit(
   tri: StageCollisionTriangle,
   previous: Vec3,
@@ -327,6 +354,33 @@ function segmentTriangleWallHit(
   };
   if (!pointInTriangle3d(point, tri.vertices)) return null;
   return { point, t, side: d0 >= 0 ? 1 : -1 };
+}
+
+function segmentTriangleCeilingHit(
+  tri: StageCollisionTriangle,
+  previousTop: Vec3,
+  currentTop: Vec3,
+): { point: Vec3; t: number } | null {
+  if (tri.marker !== 0xcccccccc) return null;
+  if (!isFiniteVec(tri.normal) || !tri.vertices.every(isFiniteVec)) return null;
+  if (tri.normal.y > CEILING_NORMAL_MAX_Y) return null;
+
+  const a = tri.vertices[0];
+  const d0 = signedDistanceToPlane(previousTop, a, tri.normal);
+  const d1 = signedDistanceToPlane(currentTop, a, tri.normal);
+  if (!Number.isFinite(d0) || !Number.isFinite(d1)) return null;
+  if (Math.abs(d0 - d1) < 1e-5) return null;
+  if (d0 <= 0 || d1 > 0) return null;
+
+  const t = d0 / (d0 - d1);
+  if (t < -1e-4 || t > 1 + 1e-4) return null;
+  const point = {
+    x: previousTop.x + (currentTop.x - previousTop.x) * t,
+    y: previousTop.y + (currentTop.y - previousTop.y) * t,
+    z: previousTop.z + (currentTop.z - previousTop.z) * t,
+  };
+  if (!pointInTriangle3d(point, tri.vertices)) return null;
+  return { point, t };
 }
 
 function bestFloorFromCandidates(

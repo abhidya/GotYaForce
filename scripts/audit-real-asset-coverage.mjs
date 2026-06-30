@@ -295,6 +295,7 @@ function inspectStages() {
         passesBoundsToCombat: main.includes("convertBattleConfig(config, stageId, stageBounds"),
         passesTrianglesToCombat: main.includes("stageResources.collision") && main.includes("convertBattleConfig(config, stageId, stageBounds, stageResources.collision)"),
         movementUsesTriangleWalls: readText("packages/combat/src/movement.ts").includes("resolveLateralCollision"),
+        movementUsesTriangleCeilings: readText("packages/combat/src/movement.ts").includes("resolveCeilingCollision"),
         parserPackage: main.includes("@gf/formats") ? "@gf/formats" : null,
       },
       assessment:
@@ -380,6 +381,7 @@ function buildReport() {
     runtimeStageCollisionBounds: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesBoundsToCombat,
     runtimeStageTriangleCollision: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesTrianglesToCombat,
     runtimeStageWallCollision: stageCoverage.runtimeUse.collisionBounds.movementUsesTriangleWalls,
+    runtimeStageCeilingCollision: stageCoverage.runtimeUse.collisionBounds.movementUsesTriangleCeilings,
   };
   return {
     generatedBy: "scripts/audit-real-asset-coverage.mjs",
@@ -431,6 +433,7 @@ function renderMarkdown(report) {
   add(`- Runtime stage collision bounds from STIH: ${report.summary.runtimeStageCollisionBounds ? "yes" : "no"}`);
   add(`- Runtime stage triangle collision from STIH: ${report.summary.runtimeStageTriangleCollision ? "yes" : "no"}`);
   add(`- Runtime lateral wall collision from STIH: ${report.summary.runtimeStageWallCollision ? "yes" : "no"}`);
+  add(`- Runtime upward ceiling collision from STIH: ${report.summary.runtimeStageCeilingCollision ? "yes" : "no"}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
   add();
   add("## Runtime Screens");
@@ -463,7 +466,7 @@ function renderMarkdown(report) {
   add();
   add(`Runtime loader refs: ${Object.values(report.stageCoverage.runtimeUse.mainRefs).join(", ")}`);
   add();
-  add(`Runtime collision parser: ${report.stageCoverage.runtimeUse.collisionBounds.parserPackage ?? "none"} (bounds ${report.summary.runtimeStageCollisionBounds ? "wired" : "not wired"}, triangles ${report.summary.runtimeStageTriangleCollision ? "wired" : "not wired"}, walls ${report.summary.runtimeStageWallCollision ? "wired" : "not wired"})`);
+  add(`Runtime collision parser: ${report.stageCoverage.runtimeUse.collisionBounds.parserPackage ?? "none"} (bounds ${report.summary.runtimeStageCollisionBounds ? "wired" : "not wired"}, triangles ${report.summary.runtimeStageTriangleCollision ? "wired" : "not wired"}, walls ${report.summary.runtimeStageWallCollision ? "wired" : "not wired"}, ceilings ${report.summary.runtimeStageCeilingCollision ? "wired" : "not wired"})`);
   add();
   add(report.stageCoverage.runtimeUse.assessment);
   add();
