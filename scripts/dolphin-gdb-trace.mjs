@@ -16,6 +16,7 @@ const commandTimeoutMs = Number.parseInt(argsByName.get("command-timeout-ms") ??
 const groupsFilter = csvSet(argsByName.get("groups") ?? process.env.TRACE_GROUPS);
 const skipIds = csvSet(argsByName.get("skip-ids") ?? process.env.TRACE_SKIP_IDS);
 const onlyIds = csvSet(argsByName.get("only-ids") ?? process.env.TRACE_ONLY_IDS);
+const dryRun = argsByName.has("dry-run") || process.env.TRACE_DRY_RUN === "1";
 
 function parseArgs(argv) {
   const parsed = new Map();
@@ -89,6 +90,40 @@ function loadBreakpoints() {
   return [...byAddress.values()].sort((a, b) => a.address - b.address);
 }
 
+function loadStaticWatchpoints() {
+  const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
+  const byKey = new Map();
+  for (const group of plan.groups) {
+    if (groupsFilter.size && !groupsFilter.has(group.name)) continue;
+    for (const wp of group.breakpoints ?? []) {
+      if (wp.type === "execute") continue;
+      if (skipIds.has(wp.id)) continue;
+      if (onlyIds.size && !onlyIds.has(wp.id)) continue;
+      if (typeof wp.address !== "string" || !wp.address.startsWith("0x")) continue;
+      const address = Number.parseInt(wp.address, 16) >>> 0;
+      const size = Number.isInteger(wp.size) ? wp.size : 4;
+      const key = `${wp.type}:${address.toString(16)}:${size}`;
+      const existing = byKey.get(key) ?? {
+        id: wp.id,
+        type: wp.type,
+        address,
+        size,
+        sourceAddress: wp.address,
+        ids: [],
+        groups: [],
+        symbols: [],
+        events: [],
+      };
+      existing.ids.push(wp.id);
+      existing.groups.push(group.name);
+      existing.symbols.push(wp.symbol);
+      existing.events.push(wp.event);
+      byKey.set(key, existing);
+    }
+  }
+  return [...byKey.values()].sort((a, b) => a.address - b.address);
+}
+
 function loadRuntimeWatchpoints() {
   const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
   return (plan.runtime_field_watchpoints ?? [])
@@ -105,6 +140,39 @@ function loadRuntimeWatchpoints() {
     })
     .filter((wp) => Number.isInteger(wp.offset) && Number.isInteger(wp.size))
     .slice(0, 6);
+}
+
+async function installStaticWatchpoints(gdb, trace, staticWatchpoints, installed) {
+  for (const template of staticWatchpoints) {
+    const command = watchpointCommand(template.type, template.address, template.size);
+    const response = await gdb.send(command, commandTimeoutMs);
+    if (response.startsWith("E")) {
+      trace.errors.push({ where: "installStaticWatchpoint", id: template.id, address: hex32(template.address), response });
+      continue;
+    }
+    const initial = await readMem(gdb, template.address, template.size);
+    const record = {
+      ...template,
+      address: hex32(template.address),
+      command,
+      response,
+      initial,
+      last: initial,
+    };
+    installed.set(template.address, record);
+    trace.installedStaticWatchpoints.push({
+      id: record.id,
+      ids: record.ids,
+      groups: record.groups,
+      sourceAddress: record.sourceAddress,
+      address: record.address,
+      size: record.size,
+      type: record.type,
+      command: record.command,
+      response: record.response,
+      initial: record.initial,
+    });
+  }
 }
 
 class GdbRemote {
@@ -216,10 +284,11 @@ async function readMem(gdb, address, bytes) {
   return raw.startsWith("E") ? { error: raw } : { raw };
 }
 
-async function installDerivedWatchpoints(gdb, trace, templates, activeBase, installed) {
-  if (!isMem1(activeBase) || installed.size > 0) return;
+async function installDerivedWatchpoints(gdb, trace, templates, activeBase, installed, installedDerived) {
+  if (!isMem1(activeBase) || installedDerived.size > 0) return;
   for (const template of templates) {
     const address = (activeBase + template.offset) >>> 0;
+    if (installed.has(address)) continue;
     const command = watchpointCommand(template.type, address, template.size);
     const response = await gdb.send(command, commandTimeoutMs);
     if (response.startsWith("E")) {
@@ -237,6 +306,7 @@ async function installDerivedWatchpoints(gdb, trace, templates, activeBase, inst
       last: initial,
     };
     installed.set(address, record);
+    installedDerived.set(address, record);
     trace.derivedWatchpoints.push({
       id: record.id,
       sourceAddress: record.sourceAddress,
@@ -256,7 +326,7 @@ function watchpointCommand(type, address, size) {
   return `${kind},${address.toString(16)},${size.toString(16)}`;
 }
 
-async function removeDerivedWatchpoints(gdb, trace, installed) {
+async function removeWatchpoints(gdb, trace, installed) {
   for (const record of installed.values()) {
     try {
       const response = await gdb.send(watchpointCommand(record.type, Number.parseInt(record.address, 16), record.size).replace(/^Z/, "z"), 1000);
@@ -279,6 +349,28 @@ async function snapshotWatchpoint(gdb, record) {
     size: record.size,
     previous,
     current,
+    ids: record.ids,
+    groups: record.groups,
+    symbols: record.symbols,
+    events: record.events,
+  };
+}
+
+function summarizeHit(hit) {
+  return {
+    pc: hit.pc,
+    lr: hit.lr,
+    group: hit.breakpoint?.groups?.[0] ?? hit.watchpoint?.groups?.[0] ?? null,
+    id: hit.breakpoint?.ids?.[0] ?? hit.watchpoint?.ids?.[0] ?? hit.watchpoint?.id ?? null,
+    symbol: hit.breakpoint?.symbols?.[0] ?? hit.watchpoint?.symbols?.[0] ?? null,
+    watchpoint: hit.watchpoint
+      ? {
+          type: hit.watchpoint.type,
+          address: hit.watchpoint.address,
+          previous: hit.watchpoint.previous,
+          current: hit.watchpoint.current,
+        }
+      : null,
   };
 }
 
@@ -297,12 +389,33 @@ async function main() {
   fs.mkdirSync(outDir, { recursive: true });
 
   const breakpoints = loadBreakpoints();
-  if (!breakpoints.length) throw new Error("No execute breakpoints selected.");
+  const staticWatchpoints = loadStaticWatchpoints();
+  if (!breakpoints.length && !staticWatchpoints.length) {
+    throw new Error("No execute breakpoints or static watchpoints selected.");
+  }
   const runtimeWatchpointTemplates = loadRuntimeWatchpoints();
+  if (dryRun) {
+    console.log(JSON.stringify({
+      planPath,
+      filters: {
+        groups: [...groupsFilter],
+        onlyIds: [...onlyIds],
+        skipIds: [...skipIds],
+      },
+      breakpoints,
+      staticWatchpoints: staticWatchpoints.map((wp) => ({
+        ...wp,
+        address: hex32(wp.address),
+      })),
+      runtimeWatchpointTemplates,
+    }, null, 2));
+    return;
+  }
 
   const byAddress = new Map(breakpoints.map((bp) => [bp.address, bp]));
   const gdb = new GdbRemote();
   const installedWatchpoints = new Map();
+  const installedDerivedWatchpoints = new Map();
   const startedAt = new Date();
   const trace = {
     schema: "gotyaforce.dolphinGdbTrace.v1",
@@ -318,7 +431,9 @@ async function main() {
       timeoutMs,
     },
     breakpoints,
+    staticWatchpoints,
     runtimeWatchpointTemplates,
+    installedStaticWatchpoints: [],
     derivedWatchpoints: [],
     setup: [],
     initialStop: null,
@@ -341,6 +456,7 @@ async function main() {
       const response = await gdb.send(`Z0,${bp.address.toString(16)},4`, commandTimeoutMs);
       trace.setup.push({ address: hex32(bp.address), response });
     }
+    await installStaticWatchpoints(gdb, trace, staticWatchpoints, installedWatchpoints);
 
     const deadline = Date.now() + timeoutMs;
     while (trace.hits.length < maxHits && Date.now() < deadline) {
@@ -386,7 +502,7 @@ async function main() {
       const activeBase = activeBorgBaseFromHit(breakpoint, regs);
       if (isMem1(activeBase)) {
         try {
-          await installDerivedWatchpoints(gdb, trace, runtimeWatchpointTemplates, activeBase, installedWatchpoints);
+          await installDerivedWatchpoints(gdb, trace, runtimeWatchpointTemplates, activeBase, installedWatchpoints, installedDerivedWatchpoints);
         } catch (error) {
           trace.errors.push({ where: "installDerivedWatchpoints", activeBase: hex32(activeBase), message: error.message });
         }
@@ -406,7 +522,7 @@ async function main() {
       });
     }
 
-    await removeDerivedWatchpoints(gdb, trace, installedWatchpoints);
+    await removeWatchpoints(gdb, trace, installedWatchpoints);
 
     for (const bp of breakpoints) {
       try {
@@ -423,13 +539,7 @@ async function main() {
     console.log(JSON.stringify({
       outPath,
       hits: trace.hits.length,
-      firstHits: trace.hits.slice(0, 10).map((hit) => ({
-        pc: hit.pc,
-        lr: hit.lr,
-        group: hit.breakpoint?.groups?.[0] ?? null,
-        id: hit.breakpoint?.ids?.[0] ?? null,
-        symbol: hit.breakpoint?.symbols?.[0] ?? null,
-      })),
+      firstHits: trace.hits.slice(0, 10).map(summarizeHit),
       controlStops: trace.controlStops.length,
       errors: trace.errors,
     }, null, 2));
