@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-06-30T22:57:24.621Z",
+  "generatedAt": "2026-06-30T23:06:10.314Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -746,10 +746,10 @@
         "fallback": "apps/game/src/sim/adapter.ts:33"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:416",
-        "fetchStageManifest": "apps/game/src/main.ts:420",
-        "loadDefaultArena": "apps/game/src/main.ts:457",
-        "loadConvertedStage": "apps/game/src/main.ts:685"
+        "loadStage": "apps/game/src/main.ts:468",
+        "fetchStageManifest": "apps/game/src/main.ts:472",
+        "loadDefaultArena": "apps/game/src/main.ts:509",
+        "loadConvertedStage": "apps/game/src/main.ts:737"
       },
       "assessment": "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
     }

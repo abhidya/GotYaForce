@@ -129,13 +129,23 @@ type StageManifest = {
   };
 };
 
+type StageVector = [number, number, number];
+type StageColorRecord = { rgbHex?: string };
+type ExtractedStageLight = {
+  role?: string;
+  color?: StageColorRecord;
+  intensity?: number;
+  position?: { position?: number[] } | null;
+};
+type LegacyStageLights = {
+  ambient?: { colorRgbHex?: string; intensity?: number };
+  directional?: { colorRgbHex?: string; intensity?: number; position?: number[] };
+};
+
 type StageRenderState = {
   camera?: { fovDegrees?: number; near?: number; far?: number };
-  fog?: { colorRgbHex?: string; start?: number; end?: number };
-  lights?: {
-    ambient?: { colorRgbHex?: string; intensity?: number };
-    directional?: { colorRgbHex?: string; intensity?: number; position?: [number, number, number] };
-  };
+  fog?: { colorRgbHex?: string; color?: StageColorRecord; start?: number; end?: number };
+  lights?: ExtractedStageLight[] | LegacyStageLights;
 };
 
 type ModelManifestEntry = { id: string; name: string; dae: string };
@@ -381,19 +391,61 @@ function parseHexColor(value: string | undefined, fallback: number): number {
   return Number.parseInt(value.slice(1), 16);
 }
 
+function stageVector(value: number[] | undefined): StageVector | undefined {
+  if (!value || value.length < 3) return undefined;
+  const [x, y, z] = value;
+  if (x === undefined || y === undefined || z === undefined) return undefined;
+  return Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z) ? [x, y, z] : undefined;
+}
+
+function extractedLights(rs: StageRenderState | null): ExtractedStageLight[] {
+  return Array.isArray(rs?.lights) ? rs.lights : [];
+}
+
+function legacyLights(rs: StageRenderState | null): LegacyStageLights {
+  return rs?.lights && !Array.isArray(rs.lights) ? rs.lights : {};
+}
+
+function resolveAmbientLight(rs: StageRenderState | null): { color: string | undefined; intensity: number | undefined } {
+  const legacy = legacyLights(rs).ambient;
+  const extracted =
+    extractedLights(rs).find((light) => /ambient|global/i.test(light.role ?? "")) ??
+    extractedLights(rs).find((light) => !stageVector(light.position?.position));
+  return {
+    color: legacy?.colorRgbHex ?? extracted?.color?.rgbHex,
+    intensity: legacy?.intensity ?? extracted?.intensity,
+  };
+}
+
+function resolveDirectionalLight(
+  rs: StageRenderState | null,
+): { color: string | undefined; intensity: number | undefined; position: StageVector | undefined } {
+  const legacy = legacyLights(rs).directional;
+  const extracted =
+    extractedLights(rs).find((light) => stageVector(light.position?.position)) ??
+    extractedLights(rs).find((light) => /positioned|diffuse|specular/i.test(light.role ?? ""));
+  return {
+    color: legacy?.colorRgbHex ?? extracted?.color?.rgbHex,
+    intensity: legacy?.intensity ?? extracted?.intensity,
+    position: stageVector(legacy?.position) ?? stageVector(extracted?.position?.position),
+  };
+}
+
 function applyStageRenderState(rs: StageRenderState | null): void {
-  const fogColor = parseHexColor(rs?.fog?.colorRgbHex, DEFAULT_RENDER_STATE.fogColor);
+  const fogColor = parseHexColor(rs?.fog?.color?.rgbHex ?? rs?.fog?.colorRgbHex, DEFAULT_RENDER_STATE.fogColor);
+  const ambient = resolveAmbientLight(rs);
+  const directional = resolveDirectionalLight(rs);
   scene.background = new THREE.Color(fogColor);
   scene.fog = new THREE.Fog(fogColor, rs?.fog?.start ?? DEFAULT_RENDER_STATE.fogNear, rs?.fog?.end ?? DEFAULT_RENDER_STATE.fogFar);
   camera.fov = rs?.camera?.fovDegrees ?? DEFAULT_RENDER_STATE.fov;
   camera.near = rs?.camera?.near ?? DEFAULT_RENDER_STATE.near;
   camera.far = rs?.camera?.far ?? DEFAULT_RENDER_STATE.far;
   camera.updateProjectionMatrix();
-  stageAmbient.color.setHex(parseHexColor(rs?.lights?.ambient?.colorRgbHex, DEFAULT_RENDER_STATE.ambientColor));
-  stageAmbient.intensity = rs?.lights?.ambient?.intensity ?? 1;
-  stageLight.color.setHex(parseHexColor(rs?.lights?.directional?.colorRgbHex, DEFAULT_RENDER_STATE.lightColor));
-  stageLight.intensity = rs?.lights?.directional?.intensity ?? 1;
-  const lp = rs?.lights?.directional?.position;
+  stageAmbient.color.setHex(parseHexColor(ambient.color, DEFAULT_RENDER_STATE.ambientColor));
+  stageAmbient.intensity = ambient.intensity ?? 1;
+  stageLight.color.setHex(parseHexColor(directional.color, DEFAULT_RENDER_STATE.lightColor));
+  stageLight.intensity = directional.intensity ?? 1;
+  const lp = directional.position;
   if (lp) stageLight.position.set(lp[0], lp[1], lp[2]);
   else stageLight.position.copy(DEFAULT_RENDER_STATE.lightPosition);
 }

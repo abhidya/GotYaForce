@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-06-30T22:57:24.621Z
+Generated: 2026-06-30T23:06:10.314Z
 
 ## Summary
 
@@ -49,7 +49,7 @@ Generated: 2026-06-30T22:57:24.621Z
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports and 18 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:416, apps/game/src/main.ts:420, apps/game/src/main.ts:457, apps/game/src/main.ts:685
+Runtime loader refs: apps/game/src/main.ts:468, apps/game/src/main.ts:472, apps/game/src/main.ts:509, apps/game/src/main.ts:737
 
 Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id.
 

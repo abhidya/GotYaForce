@@ -1,16 +1,15 @@
 import { randomBytes } from "node:crypto";
 import { WebSocketServer } from "ws";
 import borgsData from "../../packages/assets/data/borgs.json" with { type: "json" };
-import stagesData from "../../packages/assets/data/stages.json" with { type: "json" };
 
 const PORT = Number(process.env.PORT ?? 5174);
 const MAX_PLAYERS = 4;
 const FORCE_LIMIT = 30;
 const DEFAULT_BORG_ID = "pl0615";
+const DEFAULT_ARENA_ID = "challenge";
 const DEFAULT_ENERGY_BUDGET = 1000;
 const borgs = new Map(borgsData.borgs.map((borg) => [borg.id, borg]));
 const defaultBorgId = borgs.has(DEFAULT_BORG_ID) ? DEFAULT_BORG_ID : borgsData.borgs[0]?.id;
-const defaultStage = stagesData.stages[0] ?? { stage: "adventure", name: "Adventure" };
 const rooms = new Map();
 
 const wss = new WebSocketServer({ port: PORT });
@@ -48,7 +47,7 @@ function handleMessage(client, raw) {
     rooms.set(roomCode, {
       code: roomCode,
       clients: new Set(),
-      stage: stageSummary(msg.stageId ?? msg.stage ?? defaultStage.stage),
+      stage: stageSummary(msg.stageId ?? msg.stage ?? DEFAULT_ARENA_ID),
     });
     joinRoom(client, roomCode, payload.name, payload.borg);
   } else if (msg.type === "join") {
@@ -189,7 +188,7 @@ function energyForForce(force) {
 }
 
 function stageSummary(stageId) {
-  const id = String(stageId);
-  const stage = stagesData.stages.find((candidate) => String(candidate.stage) === id) ?? defaultStage;
-  return { id: String(stage.stage), name: stage.name };
+  const id = String(stageId ?? DEFAULT_ARENA_ID).trim().toLowerCase();
+  if (/^st\d{2}$/.test(id)) return { id, name: id.toUpperCase() };
+  return { id: DEFAULT_ARENA_ID, name: "Challenge" };
 }
