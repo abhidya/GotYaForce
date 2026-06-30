@@ -18,6 +18,7 @@
     "@gf/assets": "workspace:*",
     "@gf/combat": "workspace:*",
     "@gf/core": "workspace:*",
+    "@gf/formats": "workspace:*",
     "@gf/missions": "workspace:*",
     "@gf/render": "workspace:*"
   },

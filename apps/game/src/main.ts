@@ -31,7 +31,9 @@ import {
   type BorgStats,
   type BorgRuntime,
   type PlayerInput,
+  type RectStageBounds,
 } from "@gf/combat";
+import { hitBin } from "@gf/formats";
 import {
   createChallengeRun,
   computeResults,
@@ -123,10 +125,15 @@ const DEFAULT_RENDER_STATE = {
 type StageManifest = {
   id: string;
   models?: Array<{ path: string; bytes?: number }>;
+  collision?: Array<{ path: string; bytes?: number }>;
   visual?: {
     daeCount?: number;
     expectedDaeIndices?: number[];
   };
+};
+
+type StageResources = {
+  bounds: RectStageBounds | undefined;
 };
 
 type StageVector = [number, number, number];
@@ -381,6 +388,12 @@ const cameraFocus = new THREE.Vector3();
 const cameraGoal = new THREE.Vector3();
 const cameraForward = new THREE.Vector3();
 const cameraInward = new THREE.Vector3();
+const fallbackStageBounds: RectStageBounds = {
+  minX: -DEFAULT_BOUNDS.x,
+  maxX: DEFAULT_BOUNDS.x,
+  minZ: -DEFAULT_BOUNDS.z,
+  maxZ: DEFAULT_BOUNDS.z,
+};
 
 // ------------------------------------------------------------------------------------------
 // Stage loading (preserved)
@@ -451,6 +464,7 @@ function applyStageRenderState(rs: StageRenderState | null): void {
 }
 
 let loadedStageId: string | null = null;
+let loadedStageResources: StageResources = { bounds: undefined };
 function stageModelPaths(manifest: StageManifest): string[] {
   if (Array.isArray(manifest.models) && manifest.models.length > 0) {
     return manifest.models.map((m) => m.path);
@@ -465,8 +479,26 @@ function stageModelPaths(manifest: StageManifest): string[] {
   return Array.from({ length: count }, (_, i) => `model/model_${String(i).padStart(2, "0")}.dae`);
 }
 
-async function loadStage(stageId: string): Promise<void> {
-  if (loadedStageId === stageId) return;
+async function loadStageBounds(stageId: string, manifest: StageManifest): Promise<RectStageBounds | undefined> {
+  // The three layer files share the same STIH header bounds; prefer layer 0
+  // because it is the primary/densest collision candidate in the inventory.
+  const hitPath =
+    manifest.collision?.find((entry) => /hit[0-9a-f]{2}0\.bin$/i.test(entry.path))?.path ??
+    manifest.collision?.[0]?.path;
+  if (!hitPath) return undefined;
+  try {
+    const response = await fetch(`/stages/${stageId}/${hitPath}`);
+    if (!response.ok) return undefined;
+    const grid = hitBin.parseStageHitGrid(await response.arrayBuffer());
+    return hitBin.stageBoundsFromHitGrid(grid);
+  } catch (error) {
+    console.warn(`Failed to parse stage collision bounds for ${stageId}`, error);
+    return undefined;
+  }
+}
+
+async function loadStage(stageId: string): Promise<StageResources> {
+  if (loadedStageId === stageId) return loadedStageResources;
   stageRoot.clear();
   const [manifest, renderState] = await Promise.all([
     fetch(`/stages/${stageId}/manifest.json`).then((r) => r.json() as Promise<StageManifest>),
@@ -475,6 +507,7 @@ async function loadStage(stageId: string): Promise<void> {
       .catch(() => null),
   ]);
   applyStageRenderState(renderState);
+  const bounds = await loadStageBounds(stageId, manifest);
   const loader = new ColladaLoader();
   const urls = stageModelPaths(manifest).map((path) => `/stages/${stageId}/${path}`);
   const results = await Promise.allSettled(urls.map((u) => loader.loadAsync(u)));
@@ -497,6 +530,8 @@ async function loadStage(stageId: string): Promise<void> {
   }
   if (loaded === 0) throw new Error(`No exported stage pieces loaded for ${stageId}`);
   loadedStageId = stageId;
+  loadedStageResources = { bounds };
+  return loadedStageResources;
 }
 
 async function loadInitialAssets(): Promise<void> {
@@ -713,6 +748,7 @@ interface BattleSession {
   config: MissionBattleConfig;
   hud: BattleHudHandle;
   localPlayerId: string;
+  stageBounds: RectStageBounds;
   allyMax: number;
   enemyMax: number;
   // outcome telemetry accumulated across the battle
@@ -734,9 +770,10 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   ui.replaceChildren();
 
   const stageId = stageIdForArena(config.arena);
-  await loadStage(stageId);
+  const stageResources = await loadStage(stageId);
+  const stageBounds = stageResources.bounds ?? fallbackStageBounds;
 
-  const combatCfg = convertBattleConfig(config, stageId);
+  const combatCfg = convertBattleConfig(config, stageId, stageBounds);
   const battle = createBattle(combatCfg);
 
   const localPlayerId = playerIdFor(0);
@@ -757,6 +794,7 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
     config,
     hud,
     localPlayerId,
+    stageBounds,
     allyMax,
     enemyMax,
     startEnemyBorgCount: startEnemy,
@@ -897,11 +935,14 @@ function followCamera(): void {
     // Until the original gameplay camera collision path is traced, keep the
     // browser camera inside the exported arena shell instead of letting the
     // normal trailing point sit behind a wall/ceiling at spawn.
-    const currentRadius = Math.hypot(focus.x, focus.z);
-    const goalRadius = Math.hypot(cameraGoal.x, cameraGoal.z);
-    const shellGuardRadius = Math.min(DEFAULT_BOUNDS.x, DEFAULT_BOUNDS.z) * 0.25;
+    const bounds = session.stageBounds;
+    const centerX = (bounds.minX + bounds.maxX) * 0.5;
+    const centerZ = (bounds.minZ + bounds.maxZ) * 0.5;
+    const currentRadius = Math.hypot(focus.x - centerX, focus.z - centerZ);
+    const goalRadius = Math.hypot(cameraGoal.x - centerX, cameraGoal.z - centerZ);
+    const shellGuardRadius = Math.min(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ) * 0.25;
     if (currentRadius > shellGuardRadius && goalRadius > currentRadius + 80) {
-      cameraInward.set(-focus.x, 0, -focus.z);
+      cameraInward.set(centerX - focus.x, 0, centerZ - focus.z);
       if (cameraInward.lengthSq() < 0.0001) cameraInward.copy(cameraForward).multiplyScalar(-1);
       cameraInward.normalize();
       cameraGoal.set(focus.x + cameraInward.x * 1100, focus.y + 560, focus.z + cameraInward.z * 1100);

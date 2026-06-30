@@ -96,10 +96,36 @@ export interface ForceConfig {
   borgIds: string[];
 }
 
+/** Legacy tuned half-extents from origin. Kept for existing callers/selfchecks. */
+export interface SymmetricStageBounds {
+  x: number;
+  z: number;
+}
+
+/** Real stage-space X/Z rectangle decoded from STIH hit bins. */
+export interface RectStageBounds {
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+}
+
+export type StageBounds = SymmetricStageBounds | RectStageBounds;
+
+export function normalizeStageBounds(bounds: StageBounds): RectStageBounds {
+  if ("minX" in bounds) return bounds;
+  return {
+    minX: -bounds.x,
+    maxX: bounds.x,
+    minZ: -bounds.z,
+    maxZ: bounds.z,
+  };
+}
+
 export interface BattleConfig {
   stageId: string;
   forces: ForceConfig[];
-  bounds?: { x: number; z: number };
+  bounds?: StageBounds;
 }
 
 export type BattleResult = "ongoing" | "win" | "lose" | "draw";

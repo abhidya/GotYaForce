@@ -22,12 +22,12 @@ import {
 } from "@gf/physics";
 import { DASH, JUMP, MOVE } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
-import type { BorgRuntime, PlayerInput } from "./types.js";
+import type { BorgRuntime, PlayerInput, RectStageBounds } from "./types.js";
 
 export interface MoveContext {
   /** Resolved lock-on target position, if locked (face toward it). */
   lockTargetPos: Vec3 | null;
-  bounds: { x: number; z: number };
+  bounds: RectStageBounds;
 }
 
 /** True if the borg's current state allows free movement input. */
@@ -139,9 +139,10 @@ export function stepMovement(
     b.grounded = false;
   }
 
-  // Bounds clamp on XZ.
-  b.pos.x = clamp(b.pos.x, -ctx.bounds.x, ctx.bounds.x);
-  b.pos.z = clamp(b.pos.z, -ctx.bounds.z, ctx.bounds.z);
+  // Bounds clamp on XZ. Real STIH stage bounds are rectangular and slightly
+  // asymmetric around origin (for st00: -11000..10000), so clamp to min/max.
+  b.pos.x = clamp(b.pos.x, ctx.bounds.minX, ctx.bounds.maxX);
+  b.pos.z = clamp(b.pos.z, ctx.bounds.minZ, ctx.bounds.maxZ);
 
   // --- State bookkeeping for the locomotion states ------------------------------------
   if (free) {

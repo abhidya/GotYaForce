@@ -34,6 +34,8 @@ import {
   type BorgRuntime,
   type DeployEntry,
   type PlayerInput,
+  type RectStageBounds,
+  normalizeStageBounds,
 } from "./types.js";
 
 /** Internal per-force runtime: the deploy queue + which team/owner it belongs to. */
@@ -54,7 +56,7 @@ class BattleImpl implements Battle {
   private profiles = new Map<string, BorgProfile>();
   private byUid = new Map<string, BorgRuntime>();
   private forces: ForceRuntime[] = [];
-  private bounds: { x: number; z: number };
+  private bounds: RectStageBounds;
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
@@ -62,7 +64,7 @@ class BattleImpl implements Battle {
     cfg: BattleConfig,
     private readonly statsById: Map<string, BorgStats>,
   ) {
-    this.bounds = cfg.bounds ?? { x: DEFAULT_BOUNDS.x, z: DEFAULT_BOUNDS.z };
+    this.bounds = normalizeStageBounds(cfg.bounds ?? DEFAULT_BOUNDS);
     resetProjectileCounter();
 
     let cpuIdx = 0;
@@ -102,11 +104,15 @@ class BattleImpl implements Battle {
   private spawnPosFor(forceIndex: number): { pos: Vec3; rotY: number } {
     const n = Math.max(1, this.forces.length);
     const angle = (forceIndex / n) * Math.PI * 2;
-    const radius = Math.min(this.bounds.x, this.bounds.z) * 0.5;
-    const x = Math.sin(angle) * radius;
-    const z = Math.cos(angle) * radius;
-    // Face toward the origin (center of the arena).
-    const rotY = Math.atan2(-x, -z);
+    const centerX = (this.bounds.minX + this.bounds.maxX) * 0.5;
+    const centerZ = (this.bounds.minZ + this.bounds.maxZ) * 0.5;
+    const halfX = (this.bounds.maxX - this.bounds.minX) * 0.5;
+    const halfZ = (this.bounds.maxZ - this.bounds.minZ) * 0.5;
+    const radius = Math.min(halfX, halfZ) * 0.5;
+    const x = centerX + Math.sin(angle) * radius;
+    const z = centerZ + Math.cos(angle) * radius;
+    // Face toward the center of the arena.
+    const rotY = Math.atan2(centerX - x, centerZ - z);
     return { pos: { x, y: JUMP.GROUND_Y, z }, rotY };
   }
 

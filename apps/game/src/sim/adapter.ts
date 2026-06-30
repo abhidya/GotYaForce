@@ -15,6 +15,7 @@ import type {
 import type {
   BattleConfig as CombatBattleConfig,
   PlayerInput,
+  StageBounds,
 } from "@gf/combat";
 
 /** Default renderable Challenge arena until trace data proves the original arena rotation. */
@@ -48,9 +49,11 @@ export function playerIdFor(playerIndex: number): string {
 export function convertBattleConfig(
   cfg: MissionBattleConfig,
   stageId: string = stageIdForArena(cfg.arena),
+  bounds?: StageBounds,
 ): CombatBattleConfig {
   return {
     stageId,
+    ...(bounds ? { bounds } : {}),
     forces: cfg.forces.map((force) => ({
       team: force.team === "player" ? 0 : 1,
       ownerPlayer: force.ownerPlayer == null ? null : playerIdFor(force.ownerPlayer),

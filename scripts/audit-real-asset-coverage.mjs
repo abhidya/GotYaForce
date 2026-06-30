@@ -283,10 +283,17 @@ function inspectStages() {
         fallback: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "return DEFAULT_ARENA_STAGE")}`,
       },
       mainRefs: {
-        loadStage: `apps/game/src/main.ts:${lineOf(main, "async function loadStage")}`,
+        loadStage: `apps/game/src/main.ts:${lineOf(main, "async function loadStage(stageId")}`,
         fetchStageManifest: `apps/game/src/main.ts:${lineOf(main, "fetch(`/stages/${stageId}/manifest.json`)")}`,
+        loadStageBounds: `apps/game/src/main.ts:${lineOf(main, "async function loadStageBounds")}`,
+        parseStageHitGrid: `apps/game/src/main.ts:${lineOf(main, "parseStageHitGrid")}`,
         loadDefaultArena: `apps/game/src/main.ts:${lineOf(main, "loadStage(DEFAULT_ARENA_STAGE)")}`,
         loadConvertedStage: `apps/game/src/main.ts:${lineOf(main, "await loadStage(stageId)")}`,
+      },
+      collisionBounds: {
+        usesStageHitParser: main.includes("hitBin.parseStageHitGrid"),
+        passesBoundsToCombat: main.includes("convertBattleConfig(config, stageId, stageBounds)"),
+        parserPackage: main.includes("@gf/formats") ? "@gf/formats" : null,
       },
       assessment:
         publicStages.length > 1
@@ -368,6 +375,7 @@ function buildReport() {
     publicStagesCompleteVisual: stageCoverage.publicManifest.completeVisualCount,
     publicStagesTotal: stageCoverage.publicManifest.stageCount,
     runtimeStageFallback: stageCoverage.runtimeUse.defaultStage,
+    runtimeStageCollisionBounds: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesBoundsToCombat,
   };
   return {
     generatedBy: "scripts/audit-real-asset-coverage.mjs",
@@ -416,6 +424,7 @@ function renderMarkdown(report) {
   add(`- UI texture export: ${report.summary.publicUiTextureExportedImages} images from ${report.uiTextureExports.path}`);
   add(`- Requested UI scene models exported: ${report.summary.requestedUiSceneModelsExported ?? "unknown"} from ${report.uiSceneExports.path}`);
   add(`- Stage exports complete visually: ${report.summary.publicStagesCompleteVisual}/${report.summary.publicStagesTotal}`);
+  add(`- Runtime stage collision bounds from STIH: ${report.summary.runtimeStageCollisionBounds ? "yes" : "no"}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
   add();
   add("## Runtime Screens");
@@ -447,6 +456,8 @@ function renderMarkdown(report) {
   add(`Public stage manifest has ${report.stageCoverage.publicManifest.stageCount} stage folders; ${report.stageCoverage.publicManifest.completeVisualCount} have complete visual DAE exports and ${report.stageCoverage.publicManifest.collisionCoveredCount} have collision bins.`);
   add();
   add(`Runtime loader refs: ${Object.values(report.stageCoverage.runtimeUse.mainRefs).join(", ")}`);
+  add();
+  add(`Runtime collision bounds parser: ${report.stageCoverage.runtimeUse.collisionBounds.parserPackage ?? "none"} (${report.summary.runtimeStageCollisionBounds ? "wired" : "not wired"})`);
   add();
   add(report.stageCoverage.runtimeUse.assessment);
   add();

@@ -12,3 +12,4 @@ export * as mot from "./mot.js";
 export * as mdt from "./mdt.js";
 export * as mdlArc from "./mdl-arc.js";
 export * as hsdAnim from "./hsd-anim.js";
+export * as hitBin from "./hit-bin.js";

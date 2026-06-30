@@ -48,9 +48,37 @@ function assertSane(borgs: BorgRuntime[], frame: number): void {
   }
 }
 
+function assertRectBoundsClamp(borgs: BorgStats[]): void {
+  const bounds = { minX: -30, maxX: 40, minZ: -20, maxZ: 50 };
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
+      ],
+      bounds,
+    },
+    borgs,
+  );
+  const moveRight: PlayerInput = { ...emptyInput(), moveX: 1 };
+  for (let f = 0; f < 90; f += 1) {
+    battle.step(1 / 60, { p1: moveRight, p2: emptyInput() });
+    assertSane(battle.state.borgs, f);
+  }
+  const activeUid = battle.state.activeUidByPlayer["p1"];
+  const active = battle.state.borgs.find((b) => b.uid === activeUid);
+  if (!active) throw new Error("[selfcheck] rectangular bounds test lost active p1 borg");
+  if (active.pos.x > bounds.maxX || active.pos.x < bounds.minX) {
+    throw new Error(`[selfcheck] rectangular bounds clamp failed: x=${active.pos.x}`);
+  }
+  console.log(`[selfcheck] rectangular STIH-style bounds clamp kept p1 at x=${active.pos.x}`);
+}
+
 export function main(): number {
   const borgs = loadBorgs();
   console.log(`[selfcheck] loaded ${borgs.length} borgs from borgs.json`);
+  assertRectBoundsClamp(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

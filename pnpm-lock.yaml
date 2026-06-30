@@ -23,6 +23,9 @@ importers:
       '@gf/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@gf/formats':
+        specifier: workspace:*
+        version: link:../../packages/formats
       '@gf/missions':
         specifier: workspace:*
         version: link:../../packages/missions
