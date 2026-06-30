@@ -1,0 +1,26 @@
+{
+  "region": "GG4E",
+  "id": "st00",
+  "source": "user-data/GG4E/afs_data/root",
+  "status": "raw-copied",
+  "copied": {
+    "stageArc": "st00/raw/st00_mdl.arc",
+    "stagePzz": "st00/raw/st00.pzz",
+    "hitBins": [
+      "st00/collision/hit000.bin",
+      "st00/collision/hit001.bin",
+      "st00/collision/hit002.bin"
+    ],
+    "setArcs": [
+      "st00/set/set0000.arc",
+      "st00/set/set0001.arc",
+      "st00/set/set0002.arc",
+      "st00/set/set0003.arc"
+    ]
+  },
+  "notes": [
+    "Raw stage assets copied from local ISO extraction.",
+    "Rendering still needs HSD stage ARC export to DAE/GLB.",
+    "Collision hit*.bin copied but not decoded."
+  ]
+}

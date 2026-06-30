@@ -1,17 +1,88 @@
 [
   {
-    "id": "pl0615",
-    "name": "G RED",
-    "tribe": "Machine Borg",
-    "energy": 300,
-    "dae": "pl0615.dae",
-    "bones": 26,
-    "meshes": 41,
-    "tris": 3866,
+    "id": "pl0008",
+    "name": "DEATH BORG ALPHA",
+    "tribe": "Death Borg",
+    "energy": 80,
+    "dae": "pl0008.dae",
+    "bones": 20,
+    "meshes": 4,
+    "tris": 1557,
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
-      "Texture_2_CMP.png"
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1635,
+        "sha1": "20eaa763815acdd241139c07a48df25fa23bf278"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1535,
+        "sha1": "2b6b9ab1e733786c40d520844f22df78a3eca33e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1321,
+        "sha1": "a68f2da587a0408bd531ccfb634d44ab959cd3c1"
+      },
+      {
+        "name": "pl0008.dae",
+        "bytes": 141022,
+        "sha1": "3262cbf534bf3eef7dc1162bc77f7eb19effd1dc"
+      }
+    ]
+  },
+  {
+    "id": "pl000c",
+    "name": "DEATH BORG ALPHA II",
+    "tribe": "Death Borg",
+    "energy": 110,
+    "dae": "pl000c.dae",
+    "bones": 20,
+    "meshes": 4,
+    "tris": 1557,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1635,
+        "sha1": "20eaa763815acdd241139c07a48df25fa23bf278"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1535,
+        "sha1": "2b6b9ab1e733786c40d520844f22df78a3eca33e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1321,
+        "sha1": "a68f2da587a0408bd531ccfb634d44ab959cd3c1"
+      },
+      {
+        "name": "pl000c.dae",
+        "bytes": 141022,
+        "sha1": "4768f36ac3e5964fb0ea09ba46f0207b5df177db"
+      }
     ]
   },
   {
@@ -30,105 +101,559 @@
       "Texture_3_CMP.png",
       "Texture_4_CMP.png",
       "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1672,
+        "sha1": "5f7cdef27bd07abe67cf8a484fa5bbcc7b796f83"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 2356,
+        "sha1": "ca61bca5e903d958ab1a96b43f99acd7ea8c2720"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18077,
+        "sha1": "d5ab248fbeba2c80c9d35194f1e0bd807a995d24"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1199,
+        "sha1": "44600db488fa6197613392668b1ca15470e7a923"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 1716,
+        "sha1": "1dcc4ee00371e8bc4d0349ef0d33b18fe0a75a6f"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 4940,
+        "sha1": "010ea957ea302088420ff5bf253782825ff3e019"
+      },
+      {
+        "name": "pl0102.dae",
+        "bytes": 428985,
+        "sha1": "0f52be129dccd0119c87c32fd30d79806e6b5ff3"
+      }
     ]
   },
   {
-    "id": "pl0802",
-    "name": "GOLD HERO",
-    "tribe": "Hero Borg",
-    "energy": 420,
-    "dae": "pl0802.dae",
-    "bones": 25,
-    "meshes": 10,
-    "tris": 2368,
+    "id": "pl0105",
+    "name": "DEATH BORG BETA II",
+    "tribe": "Death Borg",
+    "energy": 100,
+    "dae": "pl0105.dae",
+    "bones": 20,
+    "meshes": 4,
+    "tris": 1454,
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1157,
+        "sha1": "565e7c15313dd527f2f4844ce11e6518e19e255a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3675,
+        "sha1": "a74cd41d27a419aa26a1ddaf7bd4b3e5b63a1a9d"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 240,
+        "sha1": "69c3a1e3eaf4da33605e3368f6197d851fc1293c"
+      },
+      {
+        "name": "pl0105.dae",
+        "bytes": 142129,
+        "sha1": "00e6b41f8c96f581f33acdd1cbe8b1117d4176f7"
+      }
     ]
   },
   {
-    "id": "pl0804",
-    "name": "STAR HERO",
-    "tribe": "Hero Borg",
-    "energy": 520,
-    "dae": "pl0804.dae",
+    "id": "pl0109",
+    "name": "DEATH BORG BETA",
+    "tribe": "Death Borg",
+    "energy": 90,
+    "dae": "pl0109.dae",
     "bones": 20,
-    "meshes": 20,
-    "tris": 2138,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png",
-      "Texture_4_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0808",
-    "name": "CYBER HERO",
-    "tribe": "Hero Borg",
-    "energy": 450,
-    "dae": "pl0808.dae",
-    "bones": 20,
-    "meshes": 56,
-    "tris": 3737,
+    "meshes": 9,
+    "tris": 1410,
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1157,
+        "sha1": "565e7c15313dd527f2f4844ce11e6518e19e255a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3675,
+        "sha1": "a74cd41d27a419aa26a1ddaf7bd4b3e5b63a1a9d"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 240,
+        "sha1": "69c3a1e3eaf4da33605e3368f6197d851fc1293c"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "pl0109.dae",
+        "bytes": 164001,
+        "sha1": "ce3c9e3cf45040ca34bd43fc49f573849e1e28f8"
+      }
     ]
   },
   {
-    "id": "pl080a",
-    "name": "METAL HERO",
-    "tribe": "Hero Borg",
-    "energy": 380,
-    "dae": "pl080a.dae",
-    "bones": 25,
+    "id": "pl010a",
+    "name": "DEATH BORG BETA III",
+    "tribe": "Death Borg",
+    "energy": 120,
+    "dae": "pl010a.dae",
+    "bones": 20,
+    "meshes": 5,
+    "tris": 1221,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1157,
+        "sha1": "565e7c15313dd527f2f4844ce11e6518e19e255a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3675,
+        "sha1": "a74cd41d27a419aa26a1ddaf7bd4b3e5b63a1a9d"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 240,
+        "sha1": "69c3a1e3eaf4da33605e3368f6197d851fc1293c"
+      },
+      {
+        "name": "pl010a.dae",
+        "bytes": 129920,
+        "sha1": "1683ee99985fe4e3a073368442f86ceb6523ba4a"
+      }
+    ]
+  },
+  {
+    "id": "pl0206",
+    "name": "DEATH BORG GAMMA",
+    "tribe": "Death Borg",
+    "energy": 90,
+    "dae": "pl0206.dae",
+    "bones": 20,
     "meshes": 6,
-    "tris": 2069,
+    "tris": 1379,
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1153,
+        "sha1": "a207832c57f8b4bbf38e0a191bc1022e17004071"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1532,
+        "sha1": "edc3db7851f6584fc394d202b4475ed47ebcb012"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1525,
+        "sha1": "f7d2ec61ac02ec4a8d8846c4e0899a4bf8313b08"
+      },
+      {
+        "name": "pl0206.dae",
+        "bytes": 140978,
+        "sha1": "5cacefaa568541c6b1af810574ec1cb85cf0ab94"
+      }
     ]
   },
   {
-    "id": "pl080c",
-    "name": "PLANET HERO",
-    "tribe": "Hero Borg",
-    "energy": 530,
-    "dae": "pl080c.dae",
+    "id": "pl020f",
+    "name": "DEATH BORG GAMMA II",
+    "tribe": "Death Borg",
+    "energy": 110,
+    "dae": "pl020f.dae",
     "bones": 20,
-    "meshes": 20,
-    "tris": 2137,
+    "meshes": 6,
+    "tris": 1310,
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1153,
+        "sha1": "a207832c57f8b4bbf38e0a191bc1022e17004071"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1532,
+        "sha1": "edc3db7851f6584fc394d202b4475ed47ebcb012"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1525,
+        "sha1": "f7d2ec61ac02ec4a8d8846c4e0899a4bf8313b08"
+      },
+      {
+        "name": "pl020f.dae",
+        "bytes": 140042,
+        "sha1": "1e7bb47253b2a5ce9e9e7829c91acdf3cc9247dd"
+      }
     ]
   },
   {
-    "id": "pl0a01",
-    "name": "JET HERO",
-    "tribe": "Hero Borg",
-    "energy": 350,
-    "dae": "pl0a01.dae",
-    "bones": 23,
-    "meshes": 51,
-    "tris": 3896,
+    "id": "pl0303",
+    "name": "DEATH BORG DELTA II",
+    "tribe": "Death Borg",
+    "energy": 100,
+    "dae": "pl0303.dae",
+    "bones": 20,
+    "meshes": 11,
+    "tris": 1537,
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
-      "Texture_3_CMP.png",
-      "Texture_4_CMP.png",
-      "Texture_5_CMP.png"
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1535,
+        "sha1": "371ad8ad60e152997a2128036fd31797919c678b"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5069,
+        "sha1": "e177d3a8e024b86a478fac6b8e31991ea4d84320"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1924,
+        "sha1": "f1a33e9305718f72a4a63c8b49d937e985191cbe"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1142,
+        "sha1": "327667de0ce766259e90f35e7c8a2257d95ece52"
+      },
+      {
+        "name": "pl0303.dae",
+        "bytes": 184677,
+        "sha1": "59f279db51dd00702f8e9075a3d42225056e18c2"
+      }
+    ]
+  },
+  {
+    "id": "pl030c",
+    "name": "DEATH BORG DELTA",
+    "tribe": "Death Borg",
+    "energy": 80,
+    "dae": "pl030c.dae",
+    "bones": 20,
+    "meshes": 13,
+    "tris": 1652,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1535,
+        "sha1": "371ad8ad60e152997a2128036fd31797919c678b"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5069,
+        "sha1": "e177d3a8e024b86a478fac6b8e31991ea4d84320"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1924,
+        "sha1": "f1a33e9305718f72a4a63c8b49d937e985191cbe"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1142,
+        "sha1": "327667de0ce766259e90f35e7c8a2257d95ece52"
+      },
+      {
+        "name": "pl030c.dae",
+        "bytes": 199407,
+        "sha1": "11c6c24371e752e63548d292ec7dd100ce2c9adc"
+      }
+    ]
+  },
+  {
+    "id": "pl030d",
+    "name": "DEATH BORG DELTA III",
+    "tribe": "Death Borg",
+    "energy": 100,
+    "dae": "pl030d.dae",
+    "bones": 20,
+    "meshes": 13,
+    "tris": 1508,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1535,
+        "sha1": "371ad8ad60e152997a2128036fd31797919c678b"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5069,
+        "sha1": "e177d3a8e024b86a478fac6b8e31991ea4d84320"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1924,
+        "sha1": "f1a33e9305718f72a4a63c8b49d937e985191cbe"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1142,
+        "sha1": "327667de0ce766259e90f35e7c8a2257d95ece52"
+      },
+      {
+        "name": "pl030d.dae",
+        "bytes": 193465,
+        "sha1": "50594204600cc06f6bd969e2a7bfc791190164b4"
+      }
+    ]
+  },
+  {
+    "id": "pl0406",
+    "name": "DEATH BORG OMEGA",
+    "tribe": "Death Borg",
+    "energy": 130,
+    "dae": "pl0406.dae",
+    "bones": 20,
+    "meshes": 28,
+    "tris": 1504,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1277,
+        "sha1": "cac0894450de2e88852224c4643652f324039be0"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1307,
+        "sha1": "d750e550adfe434b2a202af9c2703df2fa936306"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1638,
+        "sha1": "d81da15ee479d87b9604b51b8345e7b832cedf58"
+      },
+      {
+        "name": "pl0406.dae",
+        "bytes": 285258,
+        "sha1": "f979e1132f8f19cfed74783d8730247eeb9c87cf"
+      }
+    ]
+  },
+  {
+    "id": "pl040b",
+    "name": "DEATH BORG OMEGA II",
+    "tribe": "Death Borg",
+    "energy": 170,
+    "dae": "pl040b.dae",
+    "bones": 20,
+    "meshes": 26,
+    "tris": 1492,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1277,
+        "sha1": "cac0894450de2e88852224c4643652f324039be0"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1307,
+        "sha1": "d750e550adfe434b2a202af9c2703df2fa936306"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1638,
+        "sha1": "d81da15ee479d87b9604b51b8345e7b832cedf58"
+      },
+      {
+        "name": "pl040b.dae",
+        "bytes": 276730,
+        "sha1": "42e8d0b8b977cf3abd60d8a61bfd3cf848041f35"
+      }
+    ]
+  },
+  {
+    "id": "pl040c",
+    "name": "DEATH BORG OMEGA III",
+    "tribe": "Death Borg",
+    "energy": 150,
+    "dae": "pl040c.dae",
+    "bones": 20,
+    "meshes": 28,
+    "tris": 1603,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1277,
+        "sha1": "cac0894450de2e88852224c4643652f324039be0"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1601,
+        "sha1": "a9c5de6c82d2acdd40e68d44d4700cca1c8480c1"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1638,
+        "sha1": "d81da15ee479d87b9604b51b8345e7b832cedf58"
+      },
+      {
+        "name": "pl040c.dae",
+        "bytes": 301959,
+        "sha1": "da41dbc8f38ef0b607dee3285d4cb46d26f3b5f0"
+      }
+    ]
+  },
+  {
+    "id": "pl040d",
+    "name": "DEATH BORG OMEGA IV",
+    "tribe": "Death Borg",
+    "energy": 160,
+    "dae": "pl040d.dae",
+    "bones": 22,
+    "meshes": 32,
+    "tris": 1720,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1277,
+        "sha1": "cac0894450de2e88852224c4643652f324039be0"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1307,
+        "sha1": "d750e550adfe434b2a202af9c2703df2fa936306"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1638,
+        "sha1": "d81da15ee479d87b9604b51b8345e7b832cedf58"
+      },
+      {
+        "name": "pl040d.dae",
+        "bytes": 331781,
+        "sha1": "30dbf14fce6ddd9a06afc17a36d7b46181b53e41"
+      }
     ]
   },
   {
@@ -145,6 +670,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17944,
+        "sha1": "aeefef5222433136b351fdc2c242ac63cf2f0829"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18757,
+        "sha1": "0538bcc50ad2371d5e93ffa29ec4f99356b3bd6d"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6359,
+        "sha1": "07a3e2cd32cf8a9f2828729ea0e2c7a620b0b374"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6303,
+        "sha1": "7a81eb48834286d2c36b923f79e71988b13bfa20"
+      },
+      {
+        "name": "pl0500.dae",
+        "bytes": 412620,
+        "sha1": "841d319fa940d3c42229ae066acf6950eff3a1e6"
+      }
     ]
   },
   {
@@ -163,6 +715,43 @@
       "Texture_3_CMP.png",
       "Texture_4_CMP.png",
       "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5456,
+        "sha1": "29983ebf2fd576049e659cb735e729da876d0a38"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 9383,
+        "sha1": "adac72f5bd5332de54dc198463215a9084dc97e2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18625,
+        "sha1": "5a76d5f2d298fc5426918d89aa6d2b64a17c46d7"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17087,
+        "sha1": "217701013579a540c8656208986ce5935c3cedd0"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 938,
+        "sha1": "87d59d84cd17f9bfc8832137e3f21527df4231a5"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 6594,
+        "sha1": "b2887e5d4b35d3a07d9bdd2cf71a8f38acf52ed8"
+      },
+      {
+        "name": "pl0502.dae",
+        "bytes": 511823,
+        "sha1": "4ae3565c25f5a4465e72e4811c18b48b7ca2a09c"
+      }
     ]
   },
   {
@@ -179,6 +768,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18815,
+        "sha1": "b4bdbbb0e6b7602d60226acd9c2285fe87acd093"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10319,
+        "sha1": "a65452dd17e8784548a48d2ae2cae8d159779311"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15799,
+        "sha1": "4e6f97905f0644e6248aaaacbba17b80bcd9c2e9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4838,
+        "sha1": "a327bd0f21624d068510d3dceabd904501619365"
+      },
+      {
+        "name": "pl0503.dae",
+        "bytes": 856819,
+        "sha1": "fb5f6a7968ddd9aaf3bb804d0b9e4be65e70fae4"
+      }
     ]
   },
   {
@@ -193,6 +809,189 @@
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18528,
+        "sha1": "1f77b138344712470ba9110f39c73cff443435b0"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 22398,
+        "sha1": "cc7c46bcf96372cbdea378ab818a48f9bfc7d128"
+      },
+      {
+        "name": "pl0504.dae",
+        "bytes": 577024,
+        "sha1": "80b3cd3624d8ea20c3ab3e667777d6910147c7d4"
+      }
+    ]
+  },
+  {
+    "id": "pl0505",
+    "name": "DEATH HEAD",
+    "tribe": "Dragon Borg",
+    "energy": 500,
+    "dae": "pl0505.dae",
+    "bones": 4,
+    "meshes": 13,
+    "tris": 1064,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18815,
+        "sha1": "b4bdbbb0e6b7602d60226acd9c2285fe87acd093"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10319,
+        "sha1": "a65452dd17e8784548a48d2ae2cae8d159779311"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15799,
+        "sha1": "4e6f97905f0644e6248aaaacbba17b80bcd9c2e9"
+      },
+      {
+        "name": "pl0505.dae",
+        "bytes": 158130,
+        "sha1": "d59463f97290e25a8657a6dc90c49beae378c139"
+      }
+    ]
+  },
+  {
+    "id": "pl0506",
+    "name": "CYBER DRAGON",
+    "tribe": "Dragon Borg",
+    "energy": 1500,
+    "dae": "pl0506.dae",
+    "bones": 32,
+    "meshes": 61,
+    "tris": 4474,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18815,
+        "sha1": "b4bdbbb0e6b7602d60226acd9c2285fe87acd093"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10319,
+        "sha1": "a65452dd17e8784548a48d2ae2cae8d159779311"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15799,
+        "sha1": "4e6f97905f0644e6248aaaacbba17b80bcd9c2e9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4838,
+        "sha1": "a327bd0f21624d068510d3dceabd904501619365"
+      },
+      {
+        "name": "pl0506.dae",
+        "bytes": 727000,
+        "sha1": "556440ce4602345f1b5909c5fbc603f4b7119b25"
+      }
+    ]
+  },
+  {
+    "id": "pl0509",
+    "name": "PLASMA DRAGON",
+    "tribe": "Dragon Borg",
+    "energy": 1600,
+    "dae": "pl0509.dae",
+    "bones": 32,
+    "meshes": 19,
+    "tris": 3076,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 15411,
+        "sha1": "d48263306e797671f2c8d88c1732e8397ffedd8c"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16117,
+        "sha1": "05c6f0283273100e018019aa4b5e249f9f25d128"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6359,
+        "sha1": "07a3e2cd32cf8a9f2828729ea0e2c7a620b0b374"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5972,
+        "sha1": "31ebd7732663848867950f551cd3e3732055faf3"
+      },
+      {
+        "name": "pl0509.dae",
+        "bytes": 396112,
+        "sha1": "b4a667bb194117dad9e739a2bd3621205277c4ee"
+      }
+    ]
+  },
+  {
+    "id": "pl050a",
+    "name": "BLIZZARD DRAGON",
+    "tribe": "Dragon Borg",
+    "energy": 1550,
+    "dae": "pl050a.dae",
+    "bones": 32,
+    "meshes": 19,
+    "tris": 3128,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19293,
+        "sha1": "fc2ec2be10b75ff5a683aa5134d5b88c6a5375f7"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17647,
+        "sha1": "b2c3021290d915d609e993450a616ac8cdf0bc6e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6359,
+        "sha1": "07a3e2cd32cf8a9f2828729ea0e2c7a620b0b374"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6442,
+        "sha1": "768de451a6fecb2a48ab7707829289a29d35238d"
+      },
+      {
+        "name": "pl050a.dae",
+        "bytes": 399390,
+        "sha1": "0c9754ffc48ca287bc383c58dff2605982760f20"
+      }
     ]
   },
   {
@@ -209,6 +1008,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17944,
+        "sha1": "aeefef5222433136b351fdc2c242ac63cf2f0829"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18757,
+        "sha1": "0538bcc50ad2371d5e93ffa29ec4f99356b3bd6d"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6359,
+        "sha1": "07a3e2cd32cf8a9f2828729ea0e2c7a620b0b374"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6303,
+        "sha1": "7a81eb48834286d2c36b923f79e71988b13bfa20"
+      },
+      {
+        "name": "pl050c.dae",
+        "bytes": 411862,
+        "sha1": "ef8ccf771349b5c0154fa42923f84357679989e3"
+      }
     ]
   },
   {
@@ -227,69 +1053,43 @@
       "Texture_3_CMP.png",
       "Texture_4_CMP.png",
       "Texture_5_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0505",
-    "name": "DEATH HEAD",
-    "tribe": "Dragon Borg",
-    "energy": 500,
-    "dae": "pl0505.dae",
-    "bones": 4,
-    "meshes": 13,
-    "tris": 1064,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0506",
-    "name": "CYBER DRAGON",
-    "tribe": "Dragon Borg",
-    "energy": 1500,
-    "dae": "pl0506.dae",
-    "bones": 32,
-    "meshes": 61,
-    "tris": 4474,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0509",
-    "name": "PLASMA DRAGON",
-    "tribe": "Dragon Borg",
-    "energy": 1600,
-    "dae": "pl0509.dae",
-    "bones": 32,
-    "meshes": 19,
-    "tris": 3076,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl050a",
-    "name": "BLIZZARD DRAGON",
-    "tribe": "Dragon Borg",
-    "energy": 1550,
-    "dae": "pl050a.dae",
-    "bones": 32,
-    "meshes": 19,
-    "tris": 3128,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5456,
+        "sha1": "29983ebf2fd576049e659cb735e729da876d0a38"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 9383,
+        "sha1": "adac72f5bd5332de54dc198463215a9084dc97e2"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18625,
+        "sha1": "5a76d5f2d298fc5426918d89aa6d2b64a17c46d7"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17087,
+        "sha1": "217701013579a540c8656208986ce5935c3cedd0"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 938,
+        "sha1": "87d59d84cd17f9bfc8832137e3f21527df4231a5"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 6594,
+        "sha1": "b2887e5d4b35d3a07d9bdd2cf71a8f38acf52ed8"
+      },
+      {
+        "name": "pl050e.dae",
+        "bytes": 512186,
+        "sha1": "814ccac15e8fc6fee8122859c44e89d8bc039fee"
+      }
     ]
   },
   {
@@ -306,6 +1106,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18815,
+        "sha1": "b4bdbbb0e6b7602d60226acd9c2285fe87acd093"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10319,
+        "sha1": "a65452dd17e8784548a48d2ae2cae8d159779311"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15799,
+        "sha1": "4e6f97905f0644e6248aaaacbba17b80bcd9c2e9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4838,
+        "sha1": "a327bd0f21624d068510d3dceabd904501619365"
+      },
+      {
+        "name": "pl050f.dae",
+        "bytes": 855873,
+        "sha1": "32891390ae34852237377f71b4721e7fd363a583"
+      }
     ]
   },
   {
@@ -320,6 +1147,23 @@
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18528,
+        "sha1": "1f77b138344712470ba9110f39c73cff443435b0"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 22398,
+        "sha1": "cc7c46bcf96372cbdea378ab818a48f9bfc7d128"
+      },
+      {
+        "name": "pl0510.dae",
+        "bytes": 577065,
+        "sha1": "3e86107c3b2f0743045df4f41324a3f06e79d09b"
+      }
     ]
   },
   {
@@ -335,6 +1179,28 @@
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18815,
+        "sha1": "b4bdbbb0e6b7602d60226acd9c2285fe87acd093"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10319,
+        "sha1": "a65452dd17e8784548a48d2ae2cae8d159779311"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15799,
+        "sha1": "4e6f97905f0644e6248aaaacbba17b80bcd9c2e9"
+      },
+      {
+        "name": "pl0511.dae",
+        "bytes": 158406,
+        "sha1": "54b54dcca380005be8662f49b77e73529ee71978"
+      }
     ]
   },
   {
@@ -351,6 +1217,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18815,
+        "sha1": "b4bdbbb0e6b7602d60226acd9c2285fe87acd093"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10319,
+        "sha1": "a65452dd17e8784548a48d2ae2cae8d159779311"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15799,
+        "sha1": "4e6f97905f0644e6248aaaacbba17b80bcd9c2e9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4838,
+        "sha1": "a327bd0f21624d068510d3dceabd904501619365"
+      },
+      {
+        "name": "pl0512.dae",
+        "bytes": 725905,
+        "sha1": "39c3b287de647edbf57671739515f5105a3866f5"
+      }
     ]
   },
   {
@@ -367,6 +1260,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 15411,
+        "sha1": "d48263306e797671f2c8d88c1732e8397ffedd8c"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 16117,
+        "sha1": "05c6f0283273100e018019aa4b5e249f9f25d128"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6359,
+        "sha1": "07a3e2cd32cf8a9f2828729ea0e2c7a620b0b374"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5972,
+        "sha1": "31ebd7732663848867950f551cd3e3732055faf3"
+      },
+      {
+        "name": "pl0515.dae",
+        "bytes": 395548,
+        "sha1": "846e1a009d89125729f4cbeeb044ebf044a2a4e3"
+      }
     ]
   },
   {
@@ -383,230 +1303,70 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 19293,
+        "sha1": "fc2ec2be10b75ff5a683aa5134d5b88c6a5375f7"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17647,
+        "sha1": "b2c3021290d915d609e993450a616ac8cdf0bc6e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 6359,
+        "sha1": "07a3e2cd32cf8a9f2828729ea0e2c7a620b0b374"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 6442,
+        "sha1": "768de451a6fecb2a48ab7707829289a29d35238d"
+      },
+      {
+        "name": "pl0516.dae",
+        "bytes": 398891,
+        "sha1": "ae875c016a07ebe990046ea94cb2f8c63f70f9fe"
+      }
     ]
   },
   {
-    "id": "pl0008",
-    "name": "DEATH BORG ALPHA",
-    "tribe": "Death Borg",
-    "energy": 80,
-    "dae": "pl0008.dae",
-    "bones": 20,
-    "meshes": 4,
-    "tris": 1557,
+    "id": "pl0615",
+    "name": "G RED",
+    "tribe": "Machine Borg",
+    "energy": 300,
+    "dae": "pl0615.dae",
+    "bones": 26,
+    "meshes": 41,
+    "tris": 3866,
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl000c",
-    "name": "DEATH BORG ALPHA II",
-    "tribe": "Death Borg",
-    "energy": 110,
-    "dae": "pl000c.dae",
-    "bones": 20,
-    "meshes": 4,
-    "tris": 1557,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0105",
-    "name": "DEATH BORG BETA II",
-    "tribe": "Death Borg",
-    "energy": 100,
-    "dae": "pl0105.dae",
-    "bones": 20,
-    "meshes": 4,
-    "tris": 1454,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0109",
-    "name": "DEATH BORG BETA",
-    "tribe": "Death Borg",
-    "energy": 90,
-    "dae": "pl0109.dae",
-    "bones": 20,
-    "meshes": 9,
-    "tris": 1410,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl010a",
-    "name": "DEATH BORG BETA III",
-    "tribe": "Death Borg",
-    "energy": 120,
-    "dae": "pl010a.dae",
-    "bones": 20,
-    "meshes": 5,
-    "tris": 1221,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0206",
-    "name": "DEATH BORG GAMMA",
-    "tribe": "Death Borg",
-    "energy": 90,
-    "dae": "pl0206.dae",
-    "bones": 20,
-    "meshes": 6,
-    "tris": 1379,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl020f",
-    "name": "DEATH BORG GAMMA II",
-    "tribe": "Death Borg",
-    "energy": 110,
-    "dae": "pl020f.dae",
-    "bones": 20,
-    "meshes": 6,
-    "tris": 1310,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0303",
-    "name": "DEATH BORG DELTA II",
-    "tribe": "Death Borg",
-    "energy": 100,
-    "dae": "pl0303.dae",
-    "bones": 20,
-    "meshes": 11,
-    "tris": 1537,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl030c",
-    "name": "DEATH BORG DELTA",
-    "tribe": "Death Borg",
-    "energy": 80,
-    "dae": "pl030c.dae",
-    "bones": 20,
-    "meshes": 13,
-    "tris": 1652,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl030d",
-    "name": "DEATH BORG DELTA III",
-    "tribe": "Death Borg",
-    "energy": 100,
-    "dae": "pl030d.dae",
-    "bones": 20,
-    "meshes": 13,
-    "tris": 1508,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl0406",
-    "name": "DEATH BORG OMEGA",
-    "tribe": "Death Borg",
-    "energy": 130,
-    "dae": "pl0406.dae",
-    "bones": 20,
-    "meshes": 28,
-    "tris": 1504,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl040b",
-    "name": "DEATH BORG OMEGA II",
-    "tribe": "Death Borg",
-    "energy": 170,
-    "dae": "pl040b.dae",
-    "bones": 20,
-    "meshes": 26,
-    "tris": 1492,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl040c",
-    "name": "DEATH BORG OMEGA III",
-    "tribe": "Death Borg",
-    "energy": 150,
-    "dae": "pl040c.dae",
-    "bones": 20,
-    "meshes": 28,
-    "tris": 1603,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
-    ]
-  },
-  {
-    "id": "pl040d",
-    "name": "DEATH BORG OMEGA IV",
-    "tribe": "Death Borg",
-    "energy": 160,
-    "dae": "pl040d.dae",
-    "bones": 22,
-    "meshes": 32,
-    "tris": 1720,
-    "textures": [
-      "Texture_0_CMP.png",
-      "Texture_1_CMP.png",
-      "Texture_2_CMP.png",
-      "Texture_3_CMP.png"
+      "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18994,
+        "sha1": "3096786e6f77ac660fbd4d582f2e71b6d7443222"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 7428,
+        "sha1": "71dc8ddea5821454ab245d4840e8df4a61f61599"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 22187,
+        "sha1": "ab5ff18cb177d8bc7db7303a27d8016c492d9711"
+      },
+      {
+        "name": "pl0615.dae",
+        "bytes": 557283,
+        "sha1": "788adb669caace58d6b8e0350ee5fa2de3d7d0e2"
+      }
     ]
   },
   {
@@ -623,6 +1383,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1533,
+        "sha1": "59c76ad2940c219b09adaf68b7130328a20a0b34"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1128,
+        "sha1": "5ab18b97cad807cde105ae40434917548ba37b24"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1880,
+        "sha1": "5ff680ba4c13ca8c5f1000a5b549acb0ddbddaed"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5065,
+        "sha1": "54b9b757a105f565943f201009e9c9be3585e4ec"
+      },
+      {
+        "name": "pl0705.dae",
+        "bytes": 177145,
+        "sha1": "c349ea0eb13abeb12fcaa91d55ca1ca0242c95a3"
+      }
     ]
   },
   {
@@ -639,6 +1426,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1533,
+        "sha1": "59c76ad2940c219b09adaf68b7130328a20a0b34"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1153,
+        "sha1": "7ab7c42017a5d81b17c897540005b459e847976a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1880,
+        "sha1": "5ff680ba4c13ca8c5f1000a5b549acb0ddbddaed"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5065,
+        "sha1": "54b9b757a105f565943f201009e9c9be3585e4ec"
+      },
+      {
+        "name": "pl070b.dae",
+        "bytes": 177144,
+        "sha1": "01fb30c21250526d30e749ea4d21a3da26f8b67e"
+      }
     ]
   },
   {
@@ -655,6 +1469,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1533,
+        "sha1": "59c76ad2940c219b09adaf68b7130328a20a0b34"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1153,
+        "sha1": "7ab7c42017a5d81b17c897540005b459e847976a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1880,
+        "sha1": "5ff680ba4c13ca8c5f1000a5b549acb0ddbddaed"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5065,
+        "sha1": "54b9b757a105f565943f201009e9c9be3585e4ec"
+      },
+      {
+        "name": "pl070c.dae",
+        "bytes": 187594,
+        "sha1": "0413e9647feda028121bbc82827ee794ebcde67f"
+      }
     ]
   },
   {
@@ -672,6 +1513,130 @@
       "Texture_2_CMP.png",
       "Texture_3_CMP.png",
       "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1533,
+        "sha1": "59c76ad2940c219b09adaf68b7130328a20a0b34"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1153,
+        "sha1": "7ab7c42017a5d81b17c897540005b459e847976a"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1880,
+        "sha1": "5ff680ba4c13ca8c5f1000a5b549acb0ddbddaed"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 5065,
+        "sha1": "54b9b757a105f565943f201009e9c9be3585e4ec"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 59785,
+        "sha1": "63ecea12606166bd0cf93dac7d9cc05407b2273d"
+      },
+      {
+        "name": "pl070d.dae",
+        "bytes": 196487,
+        "sha1": "7ac1cd39007ad08d4b5fb13e163fd6f5520e94c5"
+      }
+    ]
+  },
+  {
+    "id": "pl0802",
+    "name": "GOLD HERO",
+    "tribe": "Hero Borg",
+    "energy": 420,
+    "dae": "pl0802.dae",
+    "bones": 25,
+    "meshes": 10,
+    "tris": 2368,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 11836,
+        "sha1": "55819ebb426da3e10b866a28f8d7b74f29982c65"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18293,
+        "sha1": "be19e36049e197ce6fee05c4054b42b43fa92f54"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15666,
+        "sha1": "92171b80f11d000f51f39e7d695bd5d58ed8fa0e"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4216,
+        "sha1": "6f03e96a79387eb0ba058c3bdf6b403a07c00a6e"
+      },
+      {
+        "name": "pl0802.dae",
+        "bytes": 245217,
+        "sha1": "865698dba1b210a8b358e13eea531a32506b871a"
+      }
+    ]
+  },
+  {
+    "id": "pl0804",
+    "name": "STAR HERO",
+    "tribe": "Hero Borg",
+    "energy": 520,
+    "dae": "pl0804.dae",
+    "bones": 20,
+    "meshes": 20,
+    "tris": 2138,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 6695,
+        "sha1": "11996dcb39e1410e8238b7599168f5c07271418d"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19366,
+        "sha1": "fa146a7f967f685a8c1af4ad34fb0ec326a22ce7"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3624,
+        "sha1": "4e152a3fb3a347808d31848fd2a516d3e121e982"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 16542,
+        "sha1": "35031cdd38e68fcf68cd2d1fca1961059420f8ff"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 15245,
+        "sha1": "fb270cf45e818357076462f884e4eb5d080c71a2"
+      },
+      {
+        "name": "pl0804.dae",
+        "bytes": 351769,
+        "sha1": "b52f35423131354630ba6fff87948202b77dc88f"
+      }
     ]
   },
   {
@@ -688,6 +1653,162 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1545,
+        "sha1": "722ebafe9d7c49b109646bf0a8b0e0f7d30b7840"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 1147,
+        "sha1": "072d1dc471a04b644e66333ae9aa65e5d7aa565e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 5047,
+        "sha1": "cc08cb82d83df71cf6bd210b63cadaad9097b30d"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1555,
+        "sha1": "f2108f7ffd7c9534987042e3e3063c285f25a669"
+      },
+      {
+        "name": "pl0807.dae",
+        "bytes": 190686,
+        "sha1": "2fe313b7a9af74ee5b9def740d9b09c1fd0bdac9"
+      }
+    ]
+  },
+  {
+    "id": "pl0808",
+    "name": "CYBER HERO",
+    "tribe": "Hero Borg",
+    "energy": 450,
+    "dae": "pl0808.dae",
+    "bones": 20,
+    "meshes": 56,
+    "tris": 3737,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5046,
+        "sha1": "6699b484d349f8d8eef3b31311b95ce363de1bb5"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 17976,
+        "sha1": "2443f5b3c97871056f573f48ef875a0113d9da92"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4258,
+        "sha1": "b33650dcae99363638a411605a62014f13ab3bfb"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 17838,
+        "sha1": "d075d4cfa958cdde1a6968a60270ed5e4a776b7f"
+      },
+      {
+        "name": "pl0808.dae",
+        "bytes": 686200,
+        "sha1": "460b8296dc1408044f79853a496b56e9eb6a517c"
+      }
+    ]
+  },
+  {
+    "id": "pl080a",
+    "name": "METAL HERO",
+    "tribe": "Hero Borg",
+    "energy": 380,
+    "dae": "pl080a.dae",
+    "bones": 25,
+    "meshes": 6,
+    "tris": 2069,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 12089,
+        "sha1": "fadcd3a7b2d4a459018cdacbafcc2da5c7a27592"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18296,
+        "sha1": "b2277a60a3fb6358ab3b43835e4306c926024224"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 13018,
+        "sha1": "c1c7dd2850b6ebcf788f2d3674cf75def78aa4a2"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4270,
+        "sha1": "21df8f2c482bf636d979965da2f4338089bd5783"
+      },
+      {
+        "name": "pl080a.dae",
+        "bytes": 207599,
+        "sha1": "187dcf8eaa672cbd5226caddfccd9a7d3778a8de"
+      }
+    ]
+  },
+  {
+    "id": "pl080c",
+    "name": "PLANET HERO",
+    "tribe": "Hero Borg",
+    "energy": 530,
+    "dae": "pl080c.dae",
+    "bones": 20,
+    "meshes": 20,
+    "tris": 2137,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 6790,
+        "sha1": "b8d88bd1ccb58a80ca1f033e5cae679c44df3c2e"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 19573,
+        "sha1": "4fe14742cdf87d1be932d0003c1c8d2bc36a1dc8"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 3732,
+        "sha1": "6e984a2003c5177126c4cd0348f408d0919b1d61"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 16209,
+        "sha1": "fc1d2452ab197e4e9f17000c4c40102e87b785f6"
+      },
+      {
+        "name": "pl080c.dae",
+        "bytes": 349862,
+        "sha1": "5c8496785780a5a30df06dc50f747584e8646890"
+      }
     ]
   },
   {
@@ -704,6 +1825,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 17838,
+        "sha1": "d075d4cfa958cdde1a6968a60270ed5e4a776b7f"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4443,
+        "sha1": "e6184b0ea49ff6c6b635a036c1f3d7850d7c310e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18415,
+        "sha1": "78131d9f05bfe9ba1531381bf61fb64bb9936e23"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 2565,
+        "sha1": "7e1bc8d7e79204e311f5c3702d3687fe548e8322"
+      },
+      {
+        "name": "pl080f.dae",
+        "bytes": 263065,
+        "sha1": "2e879acc23f15beb1a7516502ae5dff41f7239f6"
+      }
     ]
   },
   {
@@ -720,6 +1868,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1533,
+        "sha1": "59c76ad2940c219b09adaf68b7130328a20a0b34"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1917,
+        "sha1": "3eb106cc0971571d51d7d2a68024fcb1efdb131b"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1128,
+        "sha1": "5ab18b97cad807cde105ae40434917548ba37b24"
+      },
+      {
+        "name": "pl0906.dae",
+        "bytes": 187788,
+        "sha1": "8b181f0c5edcfcb4476f24499bdb3988c396d8e0"
+      }
     ]
   },
   {
@@ -739,6 +1914,103 @@
       "Texture_4_CMP.png",
       "Texture_5_CMP.png",
       "Texture_6_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1526,
+        "sha1": "35a896238854234fcf9df028764fc14ea54be61a"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 5047,
+        "sha1": "cc08cb82d83df71cf6bd210b63cadaad9097b30d"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1914,
+        "sha1": "4139281e56944a7b15112c90ca2dcc7dd586c569"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1153,
+        "sha1": "a207832c57f8b4bbf38e0a191bc1022e17004071"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 1533,
+        "sha1": "59c76ad2940c219b09adaf68b7130328a20a0b34"
+      },
+      {
+        "name": "Texture_6_CMP.png",
+        "bytes": 1917,
+        "sha1": "3eb106cc0971571d51d7d2a68024fcb1efdb131b"
+      },
+      {
+        "name": "pl090b.dae",
+        "bytes": 228317,
+        "sha1": "d8d417877dedced081c67dc6962910129df3a580"
+      }
+    ]
+  },
+  {
+    "id": "pl0a01",
+    "name": "JET HERO",
+    "tribe": "Hero Borg",
+    "energy": 350,
+    "dae": "pl0a01.dae",
+    "bones": 23,
+    "meshes": 51,
+    "tris": 3896,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png",
+      "Texture_4_CMP.png",
+      "Texture_5_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 2520,
+        "sha1": "2bbe4950a8b02d3029b5ef11efd092f6efd696cb"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 18126,
+        "sha1": "ab9c54c49dd7709465a3960d2e88163bc04d913c"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4643,
+        "sha1": "986a97962db7e98a32a38137bde603ccb0082e58"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 19298,
+        "sha1": "354b99f07052e05bbfa67bb34b7ac5b908536445"
+      },
+      {
+        "name": "Texture_4_CMP.png",
+        "bytes": 3676,
+        "sha1": "e617a256108ef29764cb7d0e6c89ed3d87aa75d9"
+      },
+      {
+        "name": "Texture_5_CMP.png",
+        "bytes": 3635,
+        "sha1": "28f260f0ca3278a2261370e1c477e4804d42b26b"
+      },
+      {
+        "name": "pl0a01.dae",
+        "bytes": 656413,
+        "sha1": "9871f7bf6afd19316af770ce75d06ac539ff6168"
+      }
     ]
   },
   {
@@ -754,6 +2026,28 @@
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5452,
+        "sha1": "d483c42604dffd9c0e5c17c94a5213289430f611"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3077,
+        "sha1": "011222f09f5a7910aef58b2ecac41aeda852486e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1283,
+        "sha1": "97be3364f48fb600eebc5703999a6eae38f007ab"
+      },
+      {
+        "name": "pl0a05.dae",
+        "bytes": 275805,
+        "sha1": "dcd917f2cd689ceda33ead1565d8a892f8114617"
+      }
     ]
   },
   {
@@ -769,6 +2063,28 @@
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5452,
+        "sha1": "d483c42604dffd9c0e5c17c94a5213289430f611"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3077,
+        "sha1": "011222f09f5a7910aef58b2ecac41aeda852486e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1298,
+        "sha1": "de9a3d276803a3a0ae2abc46285732656c9f4908"
+      },
+      {
+        "name": "pl0a0a.dae",
+        "bytes": 267886,
+        "sha1": "0492496afe7501c988fa1de0df0980149f9019f1"
+      }
     ]
   },
   {
@@ -784,6 +2100,28 @@
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5452,
+        "sha1": "d483c42604dffd9c0e5c17c94a5213289430f611"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3077,
+        "sha1": "011222f09f5a7910aef58b2ecac41aeda852486e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1298,
+        "sha1": "de9a3d276803a3a0ae2abc46285732656c9f4908"
+      },
+      {
+        "name": "pl0b05.dae",
+        "bytes": 265909,
+        "sha1": "a03e64d25c23680a3b755cf9bfd9c83c111f8ad1"
+      }
     ]
   },
   {
@@ -799,6 +2137,28 @@
       "Texture_0_CMP.png",
       "Texture_1_CMP.png",
       "Texture_2_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5452,
+        "sha1": "d483c42604dffd9c0e5c17c94a5213289430f611"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3077,
+        "sha1": "011222f09f5a7910aef58b2ecac41aeda852486e"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 1298,
+        "sha1": "de9a3d276803a3a0ae2abc46285732656c9f4908"
+      },
+      {
+        "name": "pl0b07.dae",
+        "bytes": 265908,
+        "sha1": "a50f12213050c134d9719d04ae62ee1c0c3668ca"
+      }
     ]
   },
   {
@@ -815,6 +2175,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 7454,
+        "sha1": "505483890a09218facc107f66ccd3e6eae0092b3"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 28480,
+        "sha1": "92a6f05732f06df17045086b110cd970e83061ca"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18062,
+        "sha1": "fe7ffe4ad34eefd7691107251ff07345cc2b84b3"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3133,
+        "sha1": "b6580d9a7af54d69c356f0a17e1c07fc6fcc90ee"
+      },
+      {
+        "name": "pl0d06.dae",
+        "bytes": 173263,
+        "sha1": "3a703a97bb15ddd29f908db759a35f2183f697fe"
+      }
     ]
   },
   {
@@ -831,6 +2218,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18565,
+        "sha1": "33920e8b36a04938af648b2d56dcd156464c689d"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 8086,
+        "sha1": "e74c929b3266e4303905f87af59be3f3df629960"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 18648,
+        "sha1": "05d6eac21f549f0f26e80afdab6708fde915ade3"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 3133,
+        "sha1": "b6580d9a7af54d69c356f0a17e1c07fc6fcc90ee"
+      },
+      {
+        "name": "pl0d07.dae",
+        "bytes": 147376,
+        "sha1": "3764991ab04bb431e4032ec90d05385b532175ab"
+      }
     ]
   },
   {
@@ -847,6 +2261,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 1291,
+        "sha1": "9c01927136e5f176403841108d33d39e09e8e975"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 356,
+        "sha1": "b4f9ee1359f964c47c868e6a99fbd25e1a49be3b"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1614,
+        "sha1": "299982b90b3598915b7aef0c220a29889c97e7fd"
+      },
+      {
+        "name": "pl0f00.dae",
+        "bytes": 121240,
+        "sha1": "be7249b511cf57d1688330085808b5cffd1abb96"
+      }
     ]
   },
   {
@@ -863,6 +2304,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 275,
+        "sha1": "3837ea2cb1ca4e9cb67d6e70be91be126962cea8"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3945,
+        "sha1": "be7bf4bf410ef4be7e446522ca269a1484a260da"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1614,
+        "sha1": "299982b90b3598915b7aef0c220a29889c97e7fd"
+      },
+      {
+        "name": "pl0f01.dae",
+        "bytes": 127698,
+        "sha1": "b24fce87731b30ad4b97bfeb30c10050ed050a9a"
+      }
     ]
   },
   {
@@ -879,6 +2347,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 275,
+        "sha1": "3837ea2cb1ca4e9cb67d6e70be91be126962cea8"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3945,
+        "sha1": "be7bf4bf410ef4be7e446522ca269a1484a260da"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1614,
+        "sha1": "299982b90b3598915b7aef0c220a29889c97e7fd"
+      },
+      {
+        "name": "pl0f02.dae",
+        "bytes": 139328,
+        "sha1": "83e642f28ed33303c8c8afbce453774d5165034a"
+      }
     ]
   },
   {
@@ -895,6 +2390,33 @@
       "Texture_1_CMP.png",
       "Texture_2_CMP.png",
       "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 275,
+        "sha1": "3837ea2cb1ca4e9cb67d6e70be91be126962cea8"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 3945,
+        "sha1": "be7bf4bf410ef4be7e446522ca269a1484a260da"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 4901,
+        "sha1": "87177050b324079f1022b2640658c6e0ca3c255f"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 1614,
+        "sha1": "299982b90b3598915b7aef0c220a29889c97e7fd"
+      },
+      {
+        "name": "pl0f03.dae",
+        "bytes": 170971,
+        "sha1": "e23cc3b1f41b34e08a899d09c64f4b6055bb446b"
+      }
     ]
   },
   {
@@ -909,6 +2431,23 @@
     "textures": [
       "Texture_0_CMP.png",
       "Texture_1_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 5595,
+        "sha1": "ac5cc619167fe29a6d68a5b7600b3a71c92071d9"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 4558,
+        "sha1": "a1878eb24f811f6980731e1cc30a96beb80f7de5"
+      },
+      {
+        "name": "pl0f04.dae",
+        "bytes": 84887,
+        "sha1": "549f08abe95b78e894d57fa2b71b4a7d078558ee"
+      }
     ]
   },
   {
@@ -920,6 +2459,13 @@
     "bones": 2,
     "meshes": 5,
     "tris": 643,
-    "textures": []
+    "textures": [],
+    "files": [
+      {
+        "name": "pl0f06.dae",
+        "bytes": 73115,
+        "sha1": "6bfee60a9207211cf3c423d0f982d328e7266d7d"
+      }
+    ]
   }
 ]

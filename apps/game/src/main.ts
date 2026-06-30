@@ -75,8 +75,10 @@ type BakedClip = {
 
 const GF_RED = "pl0615";
 const DEFAULT_ENERGY = 1000;
-const MAX_PLAYERS = 4;
 const BROWSER_UNITS_PER_SPEED_POINT = 66; // Unit conversion placeholder; relative speed comes from extracted borg stats.
+const DEFAULT_STAGE_ID = "st00";
+const DEFAULT_STAGE_MODEL_COUNT = 40;
+const ANIMATED_BORGS = new Set([GF_RED]);
 
 const catalog = (borgs as { borgs: BorgEntry[] }).borgs.filter((borg) => borg.id && borg.name);
 const byId = new Map(catalog.map((borg) => [borg.id, borg]));
@@ -86,7 +88,7 @@ const canvas = document.getElementById("app") as HTMLCanvasElement;
 if (!uiElement) throw new Error("Missing #ui");
 const ui = uiElement;
 
-let screen: Screen = "title";
+let screen: Screen = "arena";
 let netStatus: NetStatus = "offline";
 let playerName = `Player ${Math.floor(100 + Math.random() * 900)}`;
 let roomCode = "";
@@ -110,8 +112,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x07101a);
 scene.fog = new THREE.Fog(0x07101a, 900, 3600);
 
-const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 1, 6000);
-camera.position.set(220, 170, 360);
+const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 1, 80000);
+camera.position.set(950, 520, 1320);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -121,7 +123,9 @@ scene.add(new THREE.HemisphereLight(0xb8d9ff, 0x14202c, 1.35));
 const key = new THREE.DirectionalLight(0xffffff, 1.6);
 key.position.set(260, 520, 360);
 scene.add(key);
-scene.add(new THREE.GridHelper(3600, 72, 0x37a8d8, 0x1a435b));
+
+const stageRoot = new THREE.Group();
+scene.add(stageRoot);
 
 const localRig = new THREE.Group();
 scene.add(localRig);
@@ -134,6 +138,8 @@ const sourceModels = new Map<string, THREE.Object3D>();
 let currentAction: THREE.AnimationAction | null = null;
 let currentBorgId = GF_RED;
 const remotes = new Map<string, { rig: THREE.Group; mixer: THREE.AnimationMixer; action: THREE.AnimationAction | null; borg: string }>();
+let loadedStagePieceCount = 0;
+let assetStatus = "Loading extracted stage assets";
 
 const keys = new Set<string>();
 window.addEventListener("keydown", (event) => keys.add(event.code));
@@ -181,7 +187,9 @@ function currentBorgStats(): BorgEntry | undefined {
 
 function availableForceBorgs(): BorgEntry[] {
   const exportedIds = new Set(modelManifest.map((entry) => entry.id));
-  return catalog.filter((borg) => exportedIds.has(borg.id)).sort((a, b) => a.energy - b.energy || a.name.localeCompare(b.name));
+  return catalog
+    .filter((borg) => exportedIds.has(borg.id) && ANIMATED_BORGS.has(borg.id))
+    .sort((a, b) => a.energy - b.energy || a.name.localeCompare(b.name));
 }
 
 function send(message: ClientMessage): void {
@@ -263,8 +271,58 @@ async function loadInitialAssets(): Promise<void> {
   modelManifest = manifest;
   clips.set("idle", buildClip(idle));
   clips.set("move", buildClip(clip1));
+  await loadStage(DEFAULT_STAGE_ID);
   await mountLocalModel(selectedForce[0] ?? GF_RED);
   renderUi();
+}
+
+async function loadStage(stageId: string): Promise<void> {
+  stageRoot.clear();
+  loadedStagePieceCount = 0;
+  assetStatus = `Loading ${stageId}_mdl.arc export`;
+
+  const loader = new ColladaLoader();
+  const urls = Array.from(
+    { length: DEFAULT_STAGE_MODEL_COUNT },
+    (_, index) => `/stages/${stageId}/model/model_${String(index).padStart(2, "0")}.dae`,
+  );
+  const results = await Promise.allSettled(urls.map((url) => loader.loadAsync(url)));
+
+  for (const result of results) {
+    if (result.status !== "fulfilled") continue;
+    const model = result.value.scene;
+    normalizeStagePiece(model);
+    stageRoot.add(model);
+    loadedStagePieceCount += 1;
+  }
+
+  if (loadedStagePieceCount === 0) {
+    throw new Error(`No exported stage pieces loaded for ${stageId}`);
+  }
+
+  frameStageAndPlayer();
+  assetStatus = `${stageId}_mdl.arc loaded from exported DAE pieces`;
+}
+
+function normalizeStagePiece(model: THREE.Object3D): void {
+  model.traverse((object) => {
+    if (object instanceof THREE.Mesh || object instanceof THREE.SkinnedMesh) {
+      object.frustumCulled = false;
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      for (const material of materials) {
+        material.side = THREE.DoubleSide;
+        if ("metalness" in material) material.metalness = 0;
+      }
+    }
+  });
+}
+
+function frameStageAndPlayer(): void {
+  localRig.position.set(0, 0, 0);
+  controls.target.set(0, 90, 0);
+  camera.position.set(950, 520, 1320);
+  camera.lookAt(controls.target);
+  camera.updateProjectionMatrix();
 }
 
 async function loadBorgSource(id: string): Promise<THREE.Object3D> {
@@ -299,6 +357,9 @@ function normalizeModel(model: THREE.Object3D): void {
 }
 
 async function mountLocalModel(id: string): Promise<void> {
+  if (!ANIMATED_BORGS.has(id)) {
+    throw new Error(`${id} blocked: model has no verified MOT animation mapping yet`);
+  }
   sourceModel = await loadBorgSource(id);
   if (localModel) localRig.remove(localModel);
   localModel = clone(sourceModel);
@@ -411,8 +472,8 @@ function renderUi(): void {
       .error { color:#ff8f86; margin-top:10px; min-height:18px; }
       .badge { color:#ffd95b; font-weight:800; }
     </style>
-    ${screen === "arena" ? `<div class="panel hud"><b>${escapeHtml(roomLabel)}</b><div>Adventure ${escapeHtml(displayStage.id)} - ${escapeHtml(displayStage.name)}</div><div>${roster.length}/${MAX_PLAYERS} players online</div><div>${escapeHtml(currentBorgStats()?.name ?? currentBorgId)} · Speed ${currentBorgStats()?.speed ?? "?"}</div><div>${controllerName ? `Controller: ${escapeHtml(controllerName)}` : "Keyboard active"}</div><div class="fine">Pose sync live. Movement uses extracted borg Speed; exact unit scale pending active-borg struct map.</div></div>` : ""}
-    ${screen !== "arena" ? `<section class="panel title"><div class="brand">Gotcha Force</div><div class="subtitle">Online Adventure prototype</div><div class="modes">${modeRows}</div><p class="fine">Only Adventure is enabled in this build.</p></section>` : ""}
+    ${screen === "arena" ? `<div class="panel hud"><b>Adventure ${escapeHtml(displayStage.id)}</b><div>${escapeHtml(displayStage.name)}</div><div>World: ${escapeHtml(assetStatus)} (${loadedStagePieceCount}/${DEFAULT_STAGE_MODEL_COUNT})</div><div>Actor: ${escapeHtml(currentBorgStats()?.name ?? currentBorgId)} · MOT-backed idle/move</div><div>${controllerName ? `Controller: ${escapeHtml(controllerName)}` : "Keyboard active"}</div><div class="fine">No CPU actors spawned until their model, MOT action set, and AI path are verified.</div></div>` : ""}
+    ${screen !== "arena" ? `<section class="panel title"><div class="brand">Gotcha Force</div><div class="subtitle">Adventure</div><div class="modes">${modeRows}</div><p class="fine">Only Adventure is enabled in this build.</p></section>` : ""}
     ${screen === "lobby" || screen === "force" ? `
       <section class="panel lobby">
         <h2>${escapeHtml(roomLabel)}</h2>
