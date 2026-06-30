@@ -15,10 +15,10 @@ Started: 2026-06-30
 | 09 MOT exporter generalization | Socrates `019f177a-d4a0-7b21-803c-2cc73c542b81` | `scripts/export-borg-animation-hsd.mjs`, `research/asset-inventory/mot-exporter-generalization.md` | complete: explicit non-0x240 clip export works |
 | 10 Hit/collision decode | Archimedes `019f177d-d5cd-7990-b5d9-b5f26cddf198` | `scripts/inspect-hit-bins.mjs`, `research/format-specs/hit-bin-format.md`, `research/asset-inventory/hit-bin-inventory.json` | complete: STIH grids and 0xF4 actor hit records |
 | 11 Particle/effect decode | Erdos `019f177e-1186-7430-80e9-78045d43f647` | `scripts/inspect-particle-effects.mjs`, `research/format-specs/particle-effect-format.md`, `research/asset-inventory/particle-effect-inventory.json` | complete: fire/beam/gun/sword/effect inventory |
-| 12 PZZ/ARZ archive inspection | Ramanujan `019f1788-4299-7d31-96aa-78bce8ad2928` | `scripts/inspect-pzz-arz.mjs`, `research/format-specs/pzz-arz-format.md`, `research/asset-inventory/pzz-arz-inventory.json` | running |
+| 12 PZZ/ARZ archive inspection | Ramanujan `019f1788-4299-7d31-96aa-78bce8ad2928` | `scripts/inspect-pzz-arz.mjs`, `research/format-specs/pzz-arz-format.md`, `research/asset-inventory/pzz-arz-inventory.json` | complete: 354 archives, 3,100 PZZ members, 103 ARZ HSD payloads |
 | 13 UI/HUD asset inventory | Pasteur `019f1788-94c7-7190-9fb2-3fb59f2badea` | `scripts/inventory-ui-hud-assets.mjs`, `research/asset-inventory/ui-hud-assets.*` | complete: 558 candidates, 441 TPLs, 102 HSD archives |
-| 14 Weapon attachment map | Leibniz `019f1788-d87c-73c3-8006-d073fcb59e7d` | `scripts/map-weapon-attachments.mjs`, `research/asset-inventory/weapon-attachment-map.*` | running |
-| 15 Stage render-state export | Beauvoir `019f1789-1ca6-79a3-b570-95c2b35c4314` | `scripts/export-stage-render-state.mjs`, `apps/game/public/stages/st00/render-state.json` | running |
+| 14 Weapon attachment map | Leibniz `019f1788-d87c-73c3-8006-d073fcb59e7d` | `scripts/map-weapon-attachments.mjs`, `research/asset-inventory/weapon-attachment-map.*` | complete: 210 borg-linked candidates, 1,022 attack clips to trace |
+| 15 Stage render-state export | Beauvoir `019f1789-1ca6-79a3-b570-95c2b35c4314` | `scripts/export-stage-render-state.mjs`, `apps/game/public/stages/st00/render-state.json` | complete: exact st00 camera/fog/light export |
 
 Main-thread notes:
 - Current browser playable slice is not enough: sword, fire, gun, beam, targeting, and CPU AI are still unported.
