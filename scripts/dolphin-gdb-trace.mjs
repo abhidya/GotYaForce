@@ -57,6 +57,11 @@ function parseStopPc(payload) {
   return match ? parseHex32(match[1]) : null;
 }
 
+function parseWatchAddress(payload) {
+  const match = payload.match(/(?:^|;)(?:watch|rwatch|awatch):([0-9a-fA-F]+);/);
+  return match ? Number.parseInt(match[1], 16) >>> 0 : null;
+}
+
 function loadBreakpoints() {
   const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
   const byAddress = new Map();
@@ -82,6 +87,24 @@ function loadBreakpoints() {
     }
   }
   return [...byAddress.values()].sort((a, b) => a.address - b.address);
+}
+
+function loadRuntimeWatchpoints() {
+  const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
+  return (plan.runtime_field_watchpoints ?? [])
+    .filter((wp) => typeof wp.address === "string" && wp.address.startsWith("runtime:active_borg_base+"))
+    .map((wp) => {
+      const offset = Number.parseInt(wp.address.slice("runtime:active_borg_base+".length), 16);
+      return {
+        id: wp.id,
+        type: wp.type,
+        offset,
+        size: wp.size,
+        sourceAddress: wp.address,
+      };
+    })
+    .filter((wp) => Number.isInteger(wp.offset) && Number.isInteger(wp.size))
+    .slice(0, 6);
 }
 
 class GdbRemote {
@@ -193,14 +216,93 @@ async function readMem(gdb, address, bytes) {
   return raw.startsWith("E") ? { error: raw } : { raw };
 }
 
+async function installDerivedWatchpoints(gdb, trace, templates, activeBase, installed) {
+  if (!isMem1(activeBase) || installed.size > 0) return;
+  for (const template of templates) {
+    const address = (activeBase + template.offset) >>> 0;
+    const command = watchpointCommand(template.type, address, template.size);
+    const response = await gdb.send(command, commandTimeoutMs);
+    if (response.startsWith("E")) {
+      trace.errors.push({ where: "installWatchpoint", id: template.id, address: hex32(address), response });
+      continue;
+    }
+    const initial = await readMem(gdb, address, template.size);
+    const record = {
+      ...template,
+      activeBase: hex32(activeBase),
+      address: hex32(address),
+      command,
+      response,
+      initial,
+      last: initial,
+    };
+    installed.set(address, record);
+    trace.derivedWatchpoints.push({
+      id: record.id,
+      sourceAddress: record.sourceAddress,
+      activeBase: record.activeBase,
+      address: record.address,
+      size: record.size,
+      type: record.type,
+      command: record.command,
+      response: record.response,
+      initial: record.initial,
+    });
+  }
+}
+
+function watchpointCommand(type, address, size) {
+  const kind = type === "write" ? "Z2" : type === "read" ? "Z3" : "Z4";
+  return `${kind},${address.toString(16)},${size.toString(16)}`;
+}
+
+async function removeDerivedWatchpoints(gdb, trace, installed) {
+  for (const record of installed.values()) {
+    try {
+      const response = await gdb.send(watchpointCommand(record.type, Number.parseInt(record.address, 16), record.size).replace(/^Z/, "z"), 1000);
+      trace.setup.push({ address: record.address, watchpoint: record.id, removeResponse: response });
+    } catch (error) {
+      trace.errors.push({ where: "removeWatchpoint", id: record.id, address: record.address, message: error.message });
+    }
+  }
+}
+
+async function snapshotWatchpoint(gdb, record) {
+  const current = await readMem(gdb, Number.parseInt(record.address, 16), record.size);
+  const previous = record.last;
+  record.last = current;
+  return {
+    id: record.id,
+    type: record.type,
+    address: record.address,
+    sourceAddress: record.sourceAddress,
+    size: record.size,
+    previous,
+    current,
+  };
+}
+
+function activeBorgBaseFromHit(breakpoint, regs) {
+  const ids = new Set(breakpoint?.ids ?? []);
+  if (ids.has("wakeup-invulnerability-init") || ids.has("secondary-wakeup-timer-init")) {
+    return regs.r3?.value ?? null;
+  }
+  if (ids.has("wakeup-timer-countdown")) {
+    return regs.r31?.value ?? null;
+  }
+  return null;
+}
+
 async function main() {
   fs.mkdirSync(outDir, { recursive: true });
 
   const breakpoints = loadBreakpoints();
   if (!breakpoints.length) throw new Error("No execute breakpoints selected.");
+  const runtimeWatchpointTemplates = loadRuntimeWatchpoints();
 
   const byAddress = new Map(breakpoints.map((bp) => [bp.address, bp]));
   const gdb = new GdbRemote();
+  const installedWatchpoints = new Map();
   const startedAt = new Date();
   const trace = {
     schema: "gotyaforce.dolphinGdbTrace.v1",
@@ -216,6 +318,8 @@ async function main() {
       timeoutMs,
     },
     breakpoints,
+    runtimeWatchpointTemplates,
+    derivedWatchpoints: [],
     setup: [],
     initialStop: null,
     hits: [],
@@ -244,12 +348,21 @@ async function main() {
         stop = await gdb.send("c", Math.max(1000, deadline - Date.now()));
       } catch (error) {
         trace.errors.push({ where: "continue", message: error.message });
+        try {
+          gdb.interrupt();
+          trace.errors.push({ where: "continueInterrupt", stop: await gdb.waitPacket(commandTimeoutMs) });
+        } catch (interruptError) {
+          trace.errors.push({ where: "continueInterrupt", message: interruptError.message });
+        }
         break;
       }
 
       const regs = await readRegs(gdb);
       const pc = regs.pc.value ?? parseStopPc(stop);
       const breakpoint = byAddress.get(pc) ?? byAddress.get((pc - 4) >>> 0) ?? null;
+      const watchAddress = parseWatchAddress(stop);
+      const watched = watchAddress == null ? null : installedWatchpoints.get(watchAddress) ?? null;
+      const watchpoint = watched ? await snapshotWatchpoint(gdb, watched) : null;
       const pointers = {};
       for (const name of ["r1", "r3", "r4", "r5", "r6", "r31"]) {
         const value = regs[name]?.value;
@@ -260,6 +373,15 @@ async function main() {
         };
       }
 
+      const activeBase = activeBorgBaseFromHit(breakpoint, regs);
+      if (isMem1(activeBase)) {
+        try {
+          await installDerivedWatchpoints(gdb, trace, runtimeWatchpointTemplates, activeBase, installedWatchpoints);
+        } catch (error) {
+          trace.errors.push({ where: "installDerivedWatchpoints", activeBase: hex32(activeBase), message: error.message });
+        }
+      }
+
       trace.hits.push({
         index: trace.hits.length,
         at: new Date().toISOString(),
@@ -268,10 +390,13 @@ async function main() {
         lr: regs.lr.value == null ? null : hex32(regs.lr.value),
         ctr: regs.ctr.value == null ? null : hex32(regs.ctr.value),
         breakpoint,
+        watchpoint,
         regs,
         pointers,
       });
     }
+
+    await removeDerivedWatchpoints(gdb, trace, installedWatchpoints);
 
     for (const bp of breakpoints) {
       try {
