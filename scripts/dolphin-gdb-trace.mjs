@@ -322,6 +322,7 @@ async function main() {
     derivedWatchpoints: [],
     setup: [],
     initialStop: null,
+    controlStops: [],
     hits: [],
     errors: [],
   };
@@ -363,6 +364,15 @@ async function main() {
       const watchAddress = parseWatchAddress(stop);
       const watched = watchAddress == null ? null : installedWatchpoints.get(watchAddress) ?? null;
       const watchpoint = watched ? await snapshotWatchpoint(gdb, watched) : null;
+      if (!breakpoint && !watchpoint) {
+        trace.controlStops.push({
+          at: new Date().toISOString(),
+          stop,
+          pc: pc == null ? null : hex32(pc),
+          lr: regs.lr.value == null ? null : hex32(regs.lr.value),
+        });
+        continue;
+      }
       const pointers = {};
       for (const name of ["r1", "r3", "r4", "r5", "r6", "r31"]) {
         const value = regs[name]?.value;
@@ -420,6 +430,7 @@ async function main() {
         id: hit.breakpoint?.ids?.[0] ?? null,
         symbol: hit.breakpoint?.symbols?.[0] ?? null,
       })),
+      controlStops: trace.controlStops.length,
       errors: trace.errors,
     }, null, 2));
     gdb.close();

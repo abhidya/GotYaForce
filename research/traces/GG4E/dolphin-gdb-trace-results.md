@@ -26,13 +26,33 @@ Generated: 2026-06-30
   - Narrow action/death/AI pass from `dolphin/soon we fight mirror b.sav`.
   - Only one unmapped boot/core hit, then timeout.
   - Evidence says this save-state launch did not enter the active gameplay/action path under the current headless batch launch.
+- `user-data/dolphin-trace/traces/damage-next/gdb-trace-2026-06-30T21-25-14-937Z.json`
+  - First pass after `scripts/dolphin-gdb-trace.mjs` gained derived active-borg watchpoints.
+  - Damage breakpoints installed and six runtime watchpoint templates parsed, but no wake/damage breakpoint fired.
+  - Result: no `active_borg_base` was derived and no mechanics field writes were captured.
+- `user-data/dolphin-trace/traces/camera-next/gdb-trace-2026-06-30T21-28-19-435Z.json`
+  - Focused camera pass from `dolphin/soon we fight mirror b.sav`.
+  - 120 hits, no errors.
+  - Caller distribution: startup/control `0x80005424` x1, `0x80005a44` x1, early camera `0x8000bd08` x13, later camera callers `0x8008c93c` x35 and `0x8008ca90` x70.
+  - Decoded `C_MTXLookAt` vectors were stable setup values in this capture:
+    - `0x8008c93c`: eye `[0, 0, 100]`, up `[0, 1, 0]`, interest `[0, 0, -100]`.
+    - `0x8008ca90`: eye `[0, 0, 0]`, up `[0, 1, 0]`, interest `[0, 0, -10]`.
+  - Result: proves camera callsite/capture path, but not enough to replace the browser gameplay follow camera formula yet.
 
 ## Commands
 
 ```bash
 rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --save-state "D:\GotYaForce\dolphin\soon we fight mirror b.sav"
 rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids action-state-entry,action-helper-cluster,movement-helper-cluster,wakeup-invulnerability-init,secondary-wakeup-timer-init,wakeup-timer-countdown,timer-status-helper,death-swap-lead,clear-swap-controller-timer,player-team-lookup-band,team-get-player --max-hits 80 --timeout-ms 90000
+
+rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\soon we fight mirror b.sav"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups damage --max-hits 60 --timeout-ms 90000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\damage-next"
+
+rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\soon we fight mirror b.sav"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups camera --max-hits 120 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\camera-next"
 ```
+
+Note: do not probe `127.0.0.1:5555` with `Test-NetConnection` before tracing; Dolphin's GDB stub behaves as a single-client endpoint and the probe can consume the connection.
 
 ## Implementation Gate
 
@@ -43,6 +63,7 @@ Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, de
 - Target pointer writer.
 - HP writer.
 - Action helper/projectile pointer from `0x800660b8`.
+- Gameplay camera follow formula. The latest camera trace proves callsites and static vectors, but not target-relative distance/height/lag.
 
 ## Next Trace
 
