@@ -1,0 +1,2298 @@
+{
+  "generatedBy": "scripts/export-ui-scenes.mjs",
+  "generatedAt": "2026-06-30T22:23:25.657Z",
+  "region": "GG4E",
+  "mode": "export",
+  "sourceRoot": "user-data/GG4E/afs_data/root",
+  "existingExportRoot": "user-data/GG4E/gltf-export",
+  "publicScenesRoot": "apps/game/public/ui/scenes",
+  "counts": {
+    "candidates": 85,
+    "requestedCandidates": 12,
+    "faceCandidates": 73,
+    "copyReady": 1,
+    "exported": 1,
+    "modelFiles": 1,
+    "textureFiles": 4
+  },
+  "caveats": [
+    "Asset plumbing only: no runtime UI replacement, menu layout reconstruction, camera setup, or UI behavior is generated here.",
+    "Archives without existing validated DAE/glTF output are listed for follow-up instead of guessed or hand-built."
+  ],
+  "assets": [
+    {
+      "id": "box00",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "exported",
+      "sourceArchive": {
+        "sourceName": "box00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/box00_mdl.arc",
+        "sourceBytes": 105415
+      },
+      "existingExport": {
+        "sourceDir": "user-data/GG4E/gltf-export/box00",
+        "modelCount": 1,
+        "textureCount": 4,
+        "models": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/box00/model_00.dae",
+            "sourceBytes": 407405,
+            "sha1": "aea32913948b27f041ea18402e5b1446cb919914"
+          }
+        ],
+        "textures": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/box00/Texture_0_CMP.png",
+            "sourceBytes": 5234,
+            "sha1": "f79bb43c5b2877da55e5b8e86835ec55000accb3"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/box00/Texture_1_CMP.png",
+            "sourceBytes": 2824,
+            "sha1": "2e7ef295947c5922cdf249e8c2c11f799472f3ce"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/box00/Texture_2_CMP.png",
+            "sourceBytes": 3672,
+            "sha1": "b98f4d8f360e25a43243a38f7ae1d7d556b375d3"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/box00/Texture_3_CMP.png",
+            "sourceBytes": 24003,
+            "sha1": "b7d8f5c31d2b5d75ebefd13475008352b6d71095"
+          }
+        ]
+      },
+      "outputDir": "apps/game/public/ui/scenes/box00",
+      "modelFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/box00/model_00.dae",
+          "publicPath": "/ui/scenes/box00/model_00.dae",
+          "bytes": 407405,
+          "sha1": "aea32913948b27f041ea18402e5b1446cb919914",
+          "sourcePath": "user-data/GG4E/gltf-export/box00/model_00.dae"
+        }
+      ],
+      "textureFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/box00/Texture_0_CMP.png",
+          "publicPath": "/ui/scenes/box00/Texture_0_CMP.png",
+          "bytes": 5234,
+          "sha1": "f79bb43c5b2877da55e5b8e86835ec55000accb3",
+          "sourcePath": "user-data/GG4E/gltf-export/box00/Texture_0_CMP.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/box00/Texture_1_CMP.png",
+          "publicPath": "/ui/scenes/box00/Texture_1_CMP.png",
+          "bytes": 2824,
+          "sha1": "2e7ef295947c5922cdf249e8c2c11f799472f3ce",
+          "sourcePath": "user-data/GG4E/gltf-export/box00/Texture_1_CMP.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/box00/Texture_2_CMP.png",
+          "publicPath": "/ui/scenes/box00/Texture_2_CMP.png",
+          "bytes": 3672,
+          "sha1": "b98f4d8f360e25a43243a38f7ae1d7d556b375d3",
+          "sourcePath": "user-data/GG4E/gltf-export/box00/Texture_2_CMP.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/box00/Texture_3_CMP.png",
+          "publicPath": "/ui/scenes/box00/Texture_3_CMP.png",
+          "bytes": 24003,
+          "sha1": "b7d8f5c31d2b5d75ebefd13475008352b6d71095",
+          "sourcePath": "user-data/GG4E/gltf-export/box00/Texture_3_CMP.png"
+        }
+      ],
+      "textureCount": 4,
+      "caveats": [
+        "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
+        "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."
+      ]
+    },
+    {
+      "id": "brif00",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "brif00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/brif00_mdl.arc",
+        "sourceBytes": 77059
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/brif00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "entry00",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "entry00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/entry00_mdl.arc",
+        "sourceBytes": 142947
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/entry00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "optn00",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "optn00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/optn00_mdl.arc",
+        "sourceBytes": 376123
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/optn00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "rpot20",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "rpot20_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/rpot20_mdl.arc",
+        "sourceBytes": 1358767
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/rpot20",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "rpot21",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "rpot21_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/rpot21_mdl.arc",
+        "sourceBytes": 1358767
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/rpot21",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "rpot22",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "rpot22_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/rpot22_mdl.arc",
+        "sourceBytes": 1358767
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/rpot22",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "rpot23",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "rpot23_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/rpot23_mdl.arc",
+        "sourceBytes": 1358727
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/rpot23",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "staff00",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "staff00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/staff00_mdl.arc",
+        "sourceBytes": 168323
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/staff00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "tl00",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "tl00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/tl00_mdl.arc",
+        "sourceBytes": 277619
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/tl00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "vsel00",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "vsel00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/vsel00_mdl.arc",
+        "sourceBytes": 994019
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/vsel00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "vsel01",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "vsel01_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/vsel01_mdl.arc",
+        "sourceBytes": 616187
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/vsel01",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0000",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0000_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0000_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0000",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0002",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0002_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0002_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0002",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0003",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0003_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0003_mdl.arc",
+        "sourceBytes": 88783
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0003",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0004",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0004_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0004_mdl.arc",
+        "sourceBytes": 88723
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0004",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0005",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0005_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0005_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0005",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0006",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0006_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0006_mdl.arc",
+        "sourceBytes": 18639
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0006",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0100",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0100_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0100_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0100",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0102",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0102_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0102_mdl.arc",
+        "sourceBytes": 20291
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0102",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0103",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0103_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0103_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0103",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0104",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0104_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0104_mdl.arc",
+        "sourceBytes": 150095
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0104",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0105",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0105_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0105_mdl.arc",
+        "sourceBytes": 60947
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0105",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0106",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0106_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0106_mdl.arc",
+        "sourceBytes": 18799
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0106",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0200",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0200_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0200_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0200",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0202",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0202_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0202_mdl.arc",
+        "sourceBytes": 20291
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0202",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0203",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0203_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0203_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0203",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0204",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0204_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0204_mdl.arc",
+        "sourceBytes": 149335
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0204",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0205",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0205_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0205_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0205",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0300",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0300_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0300_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0300",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0302",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0302_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0302_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0302",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0303",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0303_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0303_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0303",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0304",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0304_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0304_mdl.arc",
+        "sourceBytes": 149583
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0304",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0305",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0305_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0305_mdl.arc",
+        "sourceBytes": 60499
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0305",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0400",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0400_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0400_mdl.arc",
+        "sourceBytes": 60647
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0400",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0402",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0402_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0402_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0402",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0403",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0403_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0403_mdl.arc",
+        "sourceBytes": 149623
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0403",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0404",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0404_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0404_mdl.arc",
+        "sourceBytes": 149871
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0404",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0405",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0405_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0405_mdl.arc",
+        "sourceBytes": 60787
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0405",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0500",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0500_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0500_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0500",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0502",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0502_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0502_mdl.arc",
+        "sourceBytes": 20291
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0502",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0503",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0503_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0503_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0503",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0504",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0504_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0504_mdl.arc",
+        "sourceBytes": 149583
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0504",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0505",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0505_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0505_mdl.arc",
+        "sourceBytes": 60499
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0505",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0600",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0600_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0600_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0600",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0602",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0602_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0602_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0602",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0603",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0603_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0603_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0603",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0604",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0604_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0604_mdl.arc",
+        "sourceBytes": 149335
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0604",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0605",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0605_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0605_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0605",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0700",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0700_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0700_mdl.arc",
+        "sourceBytes": 60787
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0700",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0702",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0702_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0702_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0702",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0703",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0703_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0703_mdl.arc",
+        "sourceBytes": 149839
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0703",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0704",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0704_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0704_mdl.arc",
+        "sourceBytes": 149807
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0704",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0705",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0705_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0705_mdl.arc",
+        "sourceBytes": 60723
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0705",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0800",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0800_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0800_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0800",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0802",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0802_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0802_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0802",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0803",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0803_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0803_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0803",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0804",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0804_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0804_mdl.arc",
+        "sourceBytes": 149847
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0804",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0805",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0805_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0805_mdl.arc",
+        "sourceBytes": 60807
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0805",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0900",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0900_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0900_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0900",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0902",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0902_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0902_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0902",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0903",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0903_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0903_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0903",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0904",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0904_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0904_mdl.arc",
+        "sourceBytes": 149335
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0904",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0905",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0905_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0905_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0905",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0a00",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0a00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0a00_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0a00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0a02",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0a02_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0a02_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0a02",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0a03",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0a03_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0a03_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0a03",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0a04",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0a04_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0a04_mdl.arc",
+        "sourceBytes": 149335
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0a04",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0a05",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0a05_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0a05_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0a05",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0b00",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0b00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0b00_mdl.arc",
+        "sourceBytes": 60915
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0b00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0b02",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0b02_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0b02_mdl.arc",
+        "sourceBytes": 20291
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0b02",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0b03",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0b03_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0b03_mdl.arc",
+        "sourceBytes": 150031
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0b03",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0b04",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0b04_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0b04_mdl.arc",
+        "sourceBytes": 149399
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0b04",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0b05",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0b05_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0b05_mdl.arc",
+        "sourceBytes": 60391
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0b05",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0c00",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0c00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0c00_mdl.arc",
+        "sourceBytes": 60563
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0c00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0c02",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0c02_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0c02_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0c02",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0c03",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0c03_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0c03_mdl.arc",
+        "sourceBytes": 149583
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0c03",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0c04",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0c04_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0c04_mdl.arc",
+        "sourceBytes": 149871
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0c04",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0c05",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0c05_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0c05_mdl.arc",
+        "sourceBytes": 60755
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0c05",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0d00",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0d00_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0d00_mdl.arc",
+        "sourceBytes": 60359
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0d00",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0d02",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0d02_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0d02_mdl.arc",
+        "sourceBytes": 20003
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0d02",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0d03",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0d03_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0d03_mdl.arc",
+        "sourceBytes": 149303
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0d03",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0d04",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0d04_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0d04_mdl.arc",
+        "sourceBytes": 149495
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0d04",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0d05",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0d05_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0d05_mdl.arc",
+        "sourceBytes": 60519
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0d05",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    },
+    {
+      "id": "face0e02",
+      "kind": "face-model",
+      "requested": false,
+      "status": "not-exported",
+      "sourceArchive": {
+        "sourceName": "face0e02_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/face0e02_mdl.arc",
+        "sourceBytes": 18639
+      },
+      "existingExport": {
+        "sourceDir": null,
+        "modelCount": 0,
+        "textureCount": 0,
+        "models": [],
+        "textures": []
+      },
+      "outputDir": "apps/game/public/ui/scenes/face0e02",
+      "modelFiles": [],
+      "textureFiles": [],
+      "textureCount": 0,
+      "caveats": [
+        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
+        "No validated model export output to copy."
+      ]
+    }
+  ]
+}
