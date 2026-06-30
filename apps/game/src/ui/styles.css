@@ -57,6 +57,7 @@
 .gf-grid-bg.gf-bg-blue { --gf-screen-bg: #2f7fd0; }
 .gf-grid-bg.gf-bg-green { --gf-screen-bg: #4caa2f; }
 .gf-grid-bg.gf-bg-purple { --gf-screen-bg: #8b4fb5; }
+.gf-grid-bg.gf-bg-gold { --gf-screen-bg: #f3a312; }
 
 /* Chunky outlined arcade title (SELECT DIFFICULTY, SELECT A FORCE, ...). */
 .gf-title {
@@ -273,6 +274,365 @@
   paint-order: stroke fill;
   text-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
 }
+
+/* ============================ LOAD BOX DATA ============================ */
+.gf-load-box { background: #f3a312; }
+.gf-load-title {
+  position: absolute;
+  top: 17%;
+  left: 0;
+  right: 0;
+  font-size: clamp(34px, 6.8vw, 72px);
+}
+.gf-load-rule {
+  position: absolute;
+  left: 17%;
+  right: 17%;
+  top: 34%;
+  height: 6px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+.gf-load-copy {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 40%;
+  z-index: 2;
+  color: #ffffff;
+  text-align: center;
+  font-size: clamp(18px, 2.9vw, 34px);
+  line-height: 1.45;
+  -webkit-text-stroke: 1.5px #89420e;
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
+}
+.gf-inline-a {
+  display: inline-grid;
+  place-items: center;
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 50%;
+  margin: 0 0.12em;
+  color: #ffffff;
+  background: #18a949;
+  -webkit-text-stroke: 0;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25), 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.gf-box-model {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: min(34vw, 280px);
+  aspect-ratio: 1.2;
+  transform: translateX(-50%) perspective(560px) rotateX(58deg) rotateZ(-4deg);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, transparent 0 20%, #f1f3e3 20% 80%, transparent 80%),
+    linear-gradient(#f8f8e9, #c8cbb8);
+  border: 8px solid #615d45;
+  box-shadow:
+    inset 0 -20px 0 rgba(0, 0, 0, 0.2),
+    0 18px 0 #7f2f22,
+    0 34px 24px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+.gf-box-model img,
+.gf-box-model span {
+  position: absolute;
+  display: block;
+}
+.gf-box-button {
+  left: 39%;
+  top: 24%;
+  width: 23%;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
+}
+.gf-box-lens {
+  left: 14%;
+  top: 28%;
+  width: 25%;
+  image-rendering: pixelated;
+}
+.gf-box-cross {
+  right: 14%;
+  top: 24%;
+  width: 22%;
+  image-rendering: pixelated;
+}
+.gf-box-screw {
+  width: 10%;
+  image-rendering: pixelated;
+  opacity: 0.8;
+}
+.gf-box-screw-a { left: 11%; bottom: 16%; }
+.gf-box-screw-b { right: 11%; bottom: 16%; }
+.gf-box-red {
+  background: linear-gradient(#f04b35, #a71612);
+  border: 3px solid #64120d;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.25);
+}
+.gf-box-red-top {
+  left: 30%;
+  top: -18%;
+  width: 40%;
+  height: 20%;
+  border-radius: 10px 10px 2px 2px;
+}
+.gf-box-red-side {
+  left: 16%;
+  right: 16%;
+  bottom: -22%;
+  height: 24%;
+  transform: skewX(-12deg);
+}
+.gf-box-slot {
+  bottom: 14%;
+  width: 22%;
+  height: 8%;
+  border-radius: 999px;
+  background: #3c3b35;
+  box-shadow: inset 0 3px 0 #11110f;
+}
+.gf-box-slot-a { left: 20%; }
+.gf-box-slot-b { right: 20%; }
+
+/* ============================ SELECT A FORCE ============================ */
+.gf-select-force { background: #8b4fb5; }
+.gf-select-entry-sheet {
+  position: absolute;
+  left: 2%;
+  top: 2%;
+  width: min(16vw, 118px);
+  max-height: 18vh;
+  object-fit: contain;
+  image-rendering: pixelated;
+  opacity: 0.92;
+  z-index: 2;
+}
+.gf-select-platform {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  width: min(45vw, 420px);
+  height: min(17vw, 150px);
+  transform: translate(-50%, -50%) perspective(720px) rotateX(62deg);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.1) 30%, transparent 31%),
+    radial-gradient(ellipse at center, #80d85d 0 46%, #378a34 47% 67%, #145e2f 68% 100%);
+  box-shadow: 0 18px 0 #85471d, 0 28px 24px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+.gf-select-face,
+.gf-select-mini {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  max-width: 42%;
+  max-height: 160%;
+  object-fit: contain;
+  transform: translate(-50%, -74%) rotateX(-62deg) scale(2.1);
+  image-rendering: pixelated;
+  filter: drop-shadow(0 10px 0 rgba(0, 0, 0, 0.32));
+}
+.gf-select-cost {
+  position: absolute;
+  left: 10%;
+  bottom: 24%;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 12px;
+  color: #ffffff;
+  -webkit-text-stroke: 1.5px #2a1f46;
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.38);
+}
+.gf-select-cost-label {
+  font-size: clamp(20px, 3vw, 36px);
+  color: var(--gf-yellow);
+}
+.gf-select-cost-value {
+  font-size: clamp(44px, 8vw, 90px);
+}
+.gf-select-name {
+  position: absolute;
+  right: 7%;
+  bottom: 21%;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: auto minmax(160px, 448px);
+  grid-template-areas:
+    "no banner"
+    "force force"
+    "limit limit";
+  gap: 6px 14px;
+  align-items: center;
+  min-width: min(48vw, 520px);
+  color: #ffffff;
+}
+.gf-select-no {
+  grid-area: no;
+  font-size: clamp(18px, 2.4vw, 28px);
+  -webkit-text-stroke: 1.25px #2a1f46;
+  paint-order: stroke fill;
+}
+.gf-select-banner {
+  grid-area: banner;
+  width: 100%;
+  max-width: 448px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
+}
+.gf-select-force-name {
+  grid-area: force;
+  font-size: clamp(22px, 3.6vw, 44px);
+  color: var(--gf-yellow);
+  -webkit-text-stroke: 1.8px #2a1f46;
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+.gf-select-limit {
+  grid-area: limit;
+  justify-self: end;
+  font-size: clamp(14px, 2vw, 22px);
+  color: #dff6ff;
+  -webkit-text-stroke: 1px #2a1f46;
+  paint-order: stroke fill;
+}
+
+/* ============================ BATTLE INTRO ============================ */
+.gf-battle-intro {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), transparent 52%),
+    linear-gradient(90deg, rgba(20, 78, 156, 0.82), rgba(137, 56, 155, 0.72));
+  pointer-events: auto;
+}
+.gf-brief-vs-sheet,
+.gf-brief-label-sheet {
+  position: absolute;
+  image-rendering: pixelated;
+  pointer-events: none;
+  opacity: 0.22;
+  z-index: 1;
+}
+.gf-brief-vs-sheet {
+  left: 50%;
+  top: 50%;
+  width: min(36vw, 300px);
+  transform: translate(-50%, -50%) scale(1.6);
+}
+.gf-brief-label-sheet {
+  right: 2%;
+  top: 2%;
+  width: min(24vw, 190px);
+}
+.gf-brief-title {
+  position: absolute;
+  left: 50%;
+  top: 5%;
+  transform: translateX(-50%);
+  margin: 0;
+  z-index: 3;
+  width: min(86%, 860px);
+  color: var(--gf-yellow);
+  text-align: center;
+  font-size: clamp(24px, 4.2vw, 50px);
+  -webkit-text-stroke: 2px var(--gf-outline);
+  paint-order: stroke fill;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
+}
+.gf-brief-side {
+  position: absolute;
+  top: 25%;
+  z-index: 3;
+  width: min(32vw, 300px);
+  min-height: 42%;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
+}
+.gf-brief-player { left: 6%; }
+.gf-brief-enemy { right: 6%; }
+.gf-brief-icon,
+.gf-brief-emblem {
+  width: min(24vw, 220px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.35));
+}
+.gf-brief-emblem {
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gf-yellow), var(--gf-red));
+}
+.gf-brief-energy,
+.gf-brief-name {
+  padding: 4px 16px;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: clamp(15px, 2.2vw, 24px);
+  -webkit-text-stroke: 1px var(--gf-outline);
+  paint-order: stroke fill;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.22), 0 3px 0 rgba(0, 0, 0, 0.24);
+}
+.gf-brief-energy-player { background: linear-gradient(#3ea6ff, #1262c8); }
+.gf-brief-energy-enemy { background: linear-gradient(#ff5d4c, #b81d1a); }
+.gf-brief-name {
+  max-width: 100%;
+  background: linear-gradient(#fff2a8, #dc9f18);
+  color: #ffffff;
+  text-align: center;
+  white-space: normal;
+}
+.gf-brief-vs {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  z-index: 4;
+  color: #ffffff;
+  font-size: clamp(46px, 9vw, 106px);
+  -webkit-text-stroke: 3px var(--gf-red);
+  paint-order: stroke fill;
+  text-shadow: 0 7px 0 rgba(0, 0, 0, 0.35);
+}
+.gf-brief-preview {
+  position: absolute;
+  left: 50%;
+  bottom: 16%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: min(44vw, 470px);
+  height: min(18vw, 170px);
+  border: 5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.28), 0 8px 0 rgba(0, 0, 0, 0.35);
+}
+.gf-brief-objective {
+  position: absolute;
+  left: 50%;
+  bottom: -22px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 92vw;
+  padding: 7px 24px;
+  border-radius: 999px;
+  background: linear-gradient(#ffd969, #e9a51a);
+  color: #ffffff;
+  font-size: clamp(14px, 2vw, 24px);
+  -webkit-text-stroke: 1px #754216;
+  paint-order: stroke fill;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+
 /* ============================ FORCE BUILDER ============================ */
 .gf-force { display: grid; grid-template-columns: 1fr minmax(280px, 42%); gap: 12px; padding: 12px; box-sizing: border-box; height: 100%; }
 .gf-force-edit-tab {

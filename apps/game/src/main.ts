@@ -6,8 +6,9 @@
 //   C) apps/game/src/ui — the framework-free screen + HUD components.
 //
 // Screen flow:
-//   MainMenu -> (challenge) -> SelectDifficulty -> SelectPlayers -> ForceBuilder
-//     -> BATTLE (a run of battles) -> Results -> next battle / back to menu
+//   MainMenu -> (challenge) -> SelectDifficulty -> SelectPlayers -> LoadBoxData
+//     -> SelectForce -> ForceBuilder/edit -> BattleIntro -> BATTLE
+//     -> Results -> next battle / back to menu
 //   PauseMenu overlays the battle on Start/Esc.
 //
 // The existing three.js scene, stage rendering, lighting, camera, the Collada
@@ -43,7 +44,10 @@ import {
   createMainMenu,
   createSelectDifficulty,
   createSelectPlayers,
+  createLoadBoxData,
+  createSelectForce,
   createForceBuilder,
+  createBattleIntro,
   createResults,
   createPauseMenu,
   createBattleHud,
@@ -88,6 +92,12 @@ const FORCE_CATALOG: ForceBorg[] = [...allBorgs]
   .map((b) => ({ id: b.id, name: b.name, energy: b.energy }));
 
 const DEFAULT_LEAD = "pl0615"; // G Red — fully animated, used as a sensible default.
+const FORCE_BY_ID = new Map(FORCE_CATALOG.map((entry) => [entry.id, entry] as const));
+
+function selectedForce(): string[] {
+  const valid = flow.playerForce.filter((id) => FORCE_BY_ID.has(id));
+  return valid.length > 0 ? valid : [DEFAULT_LEAD];
+}
 
 // Borgs that have a verified Collada model in the library (or the pl0615 special path).
 const LIBRARY_IDS = new Set<string>();
@@ -461,7 +471,10 @@ type Screen =
   | "menu"
   | "difficulty"
   | "players"
+  | "load-box"
+  | "select-force"
   | "force"
+  | "briefing"
   | "battle"
   | "results"
   | "loading";
@@ -520,12 +533,44 @@ function showPlayers(): void {
   flow.screen = "players";
   mountScreen((root) =>
     createSelectPlayers(root, {
-      maxPlayers: 4,
+      maxPlayers: 2,
       onSelect: (count) => {
         flow.playerCount = count;
-        showForceBuilder();
+        showLoadBoxData();
       },
       onBack: showDifficulty,
+    }),
+  );
+}
+
+function showLoadBoxData(): void {
+  flow.screen = "load-box";
+  mountScreen((root) =>
+    createLoadBoxData(root, {
+      onConfirm: showSelectForce,
+      onSkip: showSelectForce,
+      onBack: showPlayers,
+    }),
+  );
+}
+
+function showSelectForce(): void {
+  flow.screen = "select-force";
+  const force = selectedForce();
+  mountScreen((root) =>
+    createSelectForce(root, {
+      catalog: FORCE_CATALOG,
+      force,
+      limit: flow.budget,
+      onConfirm: (nextForce) => {
+        flow.playerForce = nextForce.length > 0 ? nextForce : force;
+        startRun();
+      },
+      onEdit: (nextForce) => {
+        flow.playerForce = nextForce.length > 0 ? nextForce : force;
+        showForceBuilder();
+      },
+      onBack: showLoadBoxData,
     }),
   );
 }
@@ -536,21 +581,23 @@ function showForceBuilder(): void {
     createForceBuilder(root, {
       catalog: FORCE_CATALOG,
       limit: flow.budget,
-      initialForce: flow.playerForce.length ? flow.playerForce : [DEFAULT_LEAD],
+      initialForce: selectedForce(),
       onConfirm: (force) => {
-        flow.playerForce = force;
-        startRun();
+        flow.playerForce = force.length > 0 ? force : [DEFAULT_LEAD];
+        showSelectForce();
       },
-      onQuit: showPlayers,
+      onQuit: showSelectForce,
     }),
   );
 }
 
 function startRun(): void {
+  const force = selectedForce();
+  flow.playerForce = force;
   flow.run = createChallengeRun({
     budget: flow.budget,
     playerCount: flow.playerCount,
-    playerForces: [{ player: 0, borgIds: flow.playerForce }],
+    playerForces: [{ player: 0, borgIds: force }],
     borgs: borgs as unknown as Parameters<typeof createChallengeRun>[0]["borgs"],
   });
   const battle = flow.run.getCurrentBattle();
@@ -558,7 +605,21 @@ function startRun(): void {
     showMenu();
     return;
   }
-  void enterBattle(battle);
+  showBattleIntro(battle);
+}
+
+function showBattleIntro(config: MissionBattleConfig): void {
+  flow.screen = "briefing";
+  mountScreen((root) =>
+    createBattleIntro(root, {
+      config,
+      catalog: FORCE_CATALOG,
+      onConfirm: () => {
+        void enterBattle(config);
+      },
+      onBack: showSelectForce,
+    }),
+  );
 }
 
 // ------------------------------------------------------------------------------------------
@@ -822,7 +883,7 @@ function advanceRun(won: boolean): void {
   }
   const progress = run.next(lastResult);
   if (progress.action === "advance" && progress.nextBattle) {
-    void enterBattle(progress.nextBattle);
+    showBattleIntro(progress.nextBattle);
   } else {
     // "complete" (won the whole run) or "title" (lost) -> back to menu.
     showMenu();

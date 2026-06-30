@@ -32,10 +32,19 @@ export function borgFacePath(id: string): string {
 export const ASSETS = {
   /** Main-menu option screen texture (384x224). */
   mainMenuOption: "/ui/hsd/optn00_mdl/texture_000_CI4.png",
-  /** Gotcha box texture (force setup). */
-  gotchaBox: "/ui/hsd/box00_mdl/texture_000_CMP.png",
+  /** Gotcha box source textures (force setup / Load Box Data). */
+  gotchaBoxLens: "/ui/hsd/box00_mdl/texture_000_CMP.png",
+  gotchaBoxCross: "/ui/hsd/box00_mdl/texture_001_CMP.png",
+  gotchaBoxScrew: "/ui/hsd/box00_mdl/texture_002_CMP.png",
+  gotchaBoxButton: "/ui/hsd/box00_mdl/texture_003_CMP.png",
   /** GET strip (force setup, 448x64). */
   getStrip: "/ui/hsd/gets00_mdl/texture_000_CI4.png",
+  /** Force-entry/control texture sheets. */
+  entryControls: "/ui/hsd/entry00_mdl/texture_002_CI8.png",
+  /** Battle briefing / VS source texture sheets. */
+  briefingVs: "/ui/hsd/brif00_mdl/texture_000_IA4.png",
+  briefingNames: "/ui/hsd/brif00_mdl/texture_001_CI4.png",
+  vsSelectLabels: "/ui/hsd/vsel00_mdl/texture_004_CI8.png",
   /** Bitmap font sheet. */
   font: "/ui/tpl/font_00/image_00_CI4.png",
 } as const;
