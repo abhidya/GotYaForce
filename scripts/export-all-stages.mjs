@@ -618,7 +618,7 @@ class StageBatchExporter {
     var data = File.ReadAllBytes(arc);
     var hsd = new HSDRawFile(data);
     var records = new List<ModelRecord>();
-    int model = 0, ok = 0, fail = 0, skippedNull = 0;
+    int model = 0, ok = 0, fail = 0, skippedNull = 0, normalizedInstances = 0;
 
     foreach (var root in hsd.Roots) {
       if (root?.Data == null) continue;
@@ -632,7 +632,8 @@ class StageBatchExporter {
             Status = "skipped-null-root-joint",
             DaeFile = null,
             TextureFiles = Array.Empty<string>(),
-            Error = null
+            Error = null,
+            NormalizedInstanceJointCount = 0
           });
           skippedNull++;
           continue;
@@ -641,7 +642,10 @@ class StageBatchExporter {
         var isolatedModelDir = Path.Combine(isolatedRoot, $"model_{index:D2}");
         Directory.CreateDirectory(isolatedModelDir);
         var isolatedDae = Path.Combine(isolatedModelDir, $"model_{index:D2}.dae");
+        var normalizedInstanceJointCount = 0;
         try {
+          normalizedInstanceJointCount = NormalizeInstanceJoints(jd.RootJoint);
+          normalizedInstances += normalizedInstanceJointCount;
           var settings = new ModelExportSettings {
             ExportMesh = true,
             ExportTextures = true,
@@ -655,9 +659,11 @@ class StageBatchExporter {
             Status = "exported",
             DaeFile = $"model_{index:D2}.dae",
             TextureFiles = textureFiles,
-            Error = null
+            Error = null,
+            NormalizedInstanceJointCount = normalizedInstanceJointCount
           });
-          Console.WriteLine($"OK model_{index:D2}.dae textures={textureFiles.Length}");
+          var instanceNote = normalizedInstanceJointCount > 0 ? $" instances={normalizedInstanceJointCount}" : "";
+          Console.WriteLine($"OK model_{index:D2}.dae textures={textureFiles.Length}{instanceNote}");
           ok++;
         } catch (Exception e) {
           records.Add(new ModelRecord {
@@ -665,7 +671,8 @@ class StageBatchExporter {
             Status = "failed",
             DaeFile = null,
             TextureFiles = Array.Empty<string>(),
-            Error = e.GetType().Name + ": " + e.Message
+            Error = e.GetType().Name + ": " + e.Message,
+            NormalizedInstanceJointCount = normalizedInstanceJointCount
           });
           Console.WriteLine($"ERR model_{index:D2}: {e.GetType().Name} {e.Message}");
           fail++;
@@ -684,6 +691,7 @@ class StageBatchExporter {
       ExportedModelCount = exportedModelCount,
       FailedModelCount = fail,
       SkippedNullRootJointCount = skippedNull,
+      NormalizedInstanceJointCount = normalizedInstances,
       ExpectedDaeIndices = expectedDaeIndices,
       FailedModelIndices = failedModelIndices,
       SkippedNullRootJointIndices = skippedNullRootJointIndices,
@@ -698,6 +706,31 @@ class StageBatchExporter {
     File.WriteAllText(summaryPath, json + Environment.NewLine, new UTF8Encoding(false));
     Console.WriteLine($"stage-batch-export expected={expectedDaeIndices.Length} ok={ok} fail={fail} skipped-null={skippedNull}");
     return ok == 0 ? 2 : 0;
+  }
+
+  static int NormalizeInstanceJoints(HSD_JOBJ root) {
+    return NormalizeInstanceJoints(root, new HashSet<HSD_JOBJ>());
+  }
+
+  static int NormalizeInstanceJoints(HSD_JOBJ node, HashSet<HSD_JOBJ> seen) {
+    if (node == null || !seen.Add(node)) return 0;
+
+    var count = 0;
+    if (node.Flags.HasFlag(JOBJ_FLAG.INSTANCE)) {
+      var sourceDobj = node.Child?.Dobj;
+      if (node.Dobj == null && sourceDobj != null) {
+        node.Dobj = sourceDobj;
+      }
+      if (node.Child != null) {
+        node.Child = null;
+        count++;
+      }
+    } else {
+      count += NormalizeInstanceJoints(node.Child, seen);
+    }
+
+    count += NormalizeInstanceJoints(node.Next, seen);
+    return count;
   }
 
   static string[] PublishModel(int modelIndex, string isolatedModelDir, string isolatedDae, string outDir) {
@@ -737,6 +770,7 @@ public class ExportSummary {
   public int ExportedModelCount { get; set; }
   public int FailedModelCount { get; set; }
   public int SkippedNullRootJointCount { get; set; }
+  public int NormalizedInstanceJointCount { get; set; }
   public int[] ExpectedDaeIndices { get; set; }
   public int[] FailedModelIndices { get; set; }
   public int[] SkippedNullRootJointIndices { get; set; }
@@ -750,6 +784,7 @@ public class ModelRecord {
   public string DaeFile { get; set; }
   public string[] TextureFiles { get; set; }
   public string Error { get; set; }
+  public int NormalizedInstanceJointCount { get; set; }
 }
 `;
 }
