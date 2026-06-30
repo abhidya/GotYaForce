@@ -17,8 +17,22 @@ import type {
   PlayerInput,
 } from "@gf/combat";
 
-/** Map a mission arena id to a real renderable stage id. We only have st00 verified. */
+/** Default renderable Challenge arena until trace data proves the original arena rotation. */
 export const DEFAULT_ARENA_STAGE = "st00";
+
+/**
+ * Map a mission arena id to a browser-exported stage id.
+ *
+ * The extractor exports real disc stages as `st##`. Adventure arena names like
+ * "Little Hill" are not yet verified against those ids, so they deliberately
+ * fall back instead of guessing. When a traced table exists, add it here.
+ */
+export function stageIdForArena(arena: string | undefined): string {
+  const normalized = arena?.trim().toLowerCase() ?? "";
+  if (/^st\d{2}$/.test(normalized)) return normalized;
+  if (normalized === "challenge") return DEFAULT_ARENA_STAGE;
+  return DEFAULT_ARENA_STAGE;
+}
 
 /** Stable playerId for a 0-based human player index, matching the brief: 0 -> "p0". */
 export function playerIdFor(playerIndex: number): string {
@@ -33,7 +47,7 @@ export function playerIdFor(playerIndex: number): string {
  */
 export function convertBattleConfig(
   cfg: MissionBattleConfig,
-  stageId: string = DEFAULT_ARENA_STAGE,
+  stageId: string = stageIdForArena(cfg.arena),
 ): CombatBattleConfig {
   return {
     stageId,

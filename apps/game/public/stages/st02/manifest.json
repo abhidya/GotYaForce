@@ -4,7 +4,7 @@
   "source": "user-data/GG4E/afs_data/root",
   "status": "verified-visual-and-collision",
   "verifiedBy": "scripts/export-all-stages.mjs",
-  "verifiedAt": "2026-06-30T08:25:15.938Z",
+  "verifiedAt": "2026-06-30T21:08:40.972Z",
   "copied": {
     "stageArc": "st02/raw/st02_mdl.arc",
     "stagePzz": "st02/raw/st02.pzz",

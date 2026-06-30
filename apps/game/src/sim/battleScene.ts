@@ -26,6 +26,10 @@ export type AnimSlot =
   | "idle"
   | "move"
   | "dash"
+  | "dash_fwd"
+  | "dash_back"
+  | "dash_left"
+  | "dash_right"
   | "jump"
   | "fly"
   | "attack"
@@ -64,7 +68,7 @@ export class BattleScene {
 
   /** Map a sim state/action to one of the exported game animation groups. */
   private slotForBorg(b: BorgRuntime): AnimSlot {
-    if ((b.cooldowns["dashActive"] ?? 0) > 0) return "dash";
+    if ((b.cooldowns["dashActive"] ?? 0) > 0) return dashSlotForBorg(b);
     if (b.state === "death") return "death";
     if (b.state === "down") return "down";
     if (b.state === "hit") return "hit";
@@ -223,6 +227,23 @@ export class BattleScene {
       if (s !== slot && a.isRunning()) a.crossFadeTo(action, 0.18, false);
     }
   }
+}
+
+function dashSlotForBorg(b: BorgRuntime): AnimSlot {
+  const vx = b.vel.x;
+  const vz = b.vel.z;
+  const speedSq = vx * vx + vz * vz;
+  if (speedSq < 0.0001) return "dash_fwd";
+
+  const sin = Math.sin(b.rotY);
+  const cos = Math.cos(b.rotY);
+  const forwardDot = vx * sin + vz * cos;
+  const rightDot = vx * cos - vz * sin;
+
+  if (Math.abs(forwardDot) >= Math.abs(rightDot)) {
+    return forwardDot >= 0 ? "dash_fwd" : "dash_back";
+  }
+  return rightDot >= 0 ? "dash_right" : "dash_left";
 }
 
 function disposeMesh(obj: THREE.Object3D): void {

@@ -55,7 +55,7 @@ import {
   type BattleHudHandle,
 } from "./ui/index.js";
 
-import { convertBattleConfig, inputFromKeys, playerIdFor, DEFAULT_ARENA_STAGE } from "./sim/adapter.js";
+import { convertBattleConfig, inputFromKeys, playerIdFor, DEFAULT_ARENA_STAGE, stageIdForArena } from "./sim/adapter.js";
 import { BattleScene, type AnimSlot } from "./sim/battleScene.js";
 
 // ------------------------------------------------------------------------------------------
@@ -121,8 +121,11 @@ const DEFAULT_RENDER_STATE = {
 
 type StageManifest = {
   id: string;
-  modelCount: number;
-  models: Array<{ path: string; bytes: number }>;
+  models?: Array<{ path: string; bytes?: number }>;
+  visual?: {
+    daeCount?: number;
+    expectedDaeIndices?: number[];
+  };
 };
 
 type StageRenderState = {
@@ -278,6 +281,10 @@ const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
   idle: [/^idle$/],
   move: [/^move$/, /^move_s\d+$/],
   dash: [/^dash_fwd$/, /^dash_(right|left|back)$/, /^boost$/],
+  dash_fwd: [/^dash_fwd$/],
+  dash_back: [/^dash_back$/],
+  dash_left: [/^dash_left$/],
+  dash_right: [/^dash_right$/],
   jump: [/^jump_takeoff$/, /^fly_transition$/, /^boost$/],
   fly: [/^boost$/, /^fly_transition$/, /^move_s\d+$/],
   attack: [/^attack_s\d+$/, /^attack_lunge_s\d+$/],
@@ -292,6 +299,10 @@ const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
 };
 
 const SLOT_FALLBACKS: Partial<Record<AnimSlot, AnimSlot[]>> = {
+  dash_fwd: ["dash", "move", "idle"],
+  dash_back: ["dash", "move", "idle"],
+  dash_left: ["dash", "move", "idle"],
+  dash_right: ["dash", "move", "idle"],
   dash: ["move", "idle"],
   jump: ["fly", "move", "idle"],
   fly: ["jump", "move", "idle"],
@@ -382,9 +393,23 @@ function applyStageRenderState(rs: StageRenderState | null): void {
   else stageLight.position.copy(DEFAULT_RENDER_STATE.lightPosition);
 }
 
-let stageLoaded = false;
+let loadedStageId: string | null = null;
+function stageModelPaths(manifest: StageManifest): string[] {
+  if (Array.isArray(manifest.models) && manifest.models.length > 0) {
+    return manifest.models.map((m) => m.path);
+  }
+
+  const indices = manifest.visual?.expectedDaeIndices;
+  if (indices && indices.length > 0) {
+    return indices.map((i) => `model/model_${String(i).padStart(2, "0")}.dae`);
+  }
+
+  const count = manifest.visual?.daeCount ?? 0;
+  return Array.from({ length: count }, (_, i) => `model/model_${String(i).padStart(2, "0")}.dae`);
+}
+
 async function loadStage(stageId: string): Promise<void> {
-  if (stageLoaded) return; // st00 is the only renderable arena; load once.
+  if (loadedStageId === stageId) return;
   stageRoot.clear();
   const [manifest, renderState] = await Promise.all([
     fetch(`/stages/${stageId}/manifest.json`).then((r) => r.json() as Promise<StageManifest>),
@@ -394,7 +419,7 @@ async function loadStage(stageId: string): Promise<void> {
   ]);
   applyStageRenderState(renderState);
   const loader = new ColladaLoader();
-  const urls = manifest.models.map((m) => `/stages/${stageId}/${m.path}`);
+  const urls = stageModelPaths(manifest).map((path) => `/stages/${stageId}/${path}`);
   const results = await Promise.allSettled(urls.map((u) => loader.loadAsync(u)));
   let loaded = 0;
   for (const result of results) {
@@ -414,7 +439,7 @@ async function loadStage(stageId: string): Promise<void> {
     loaded += 1;
   }
   if (loaded === 0) throw new Error(`No exported stage pieces loaded for ${stageId}`);
-  stageLoaded = true;
+  loadedStageId = stageId;
 }
 
 async function loadInitialAssets(): Promise<void> {
@@ -651,9 +676,10 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   activeHandle = null;
   ui.replaceChildren();
 
-  await loadStage(DEFAULT_ARENA_STAGE);
+  const stageId = stageIdForArena(config.arena);
+  await loadStage(stageId);
 
-  const combatCfg = convertBattleConfig(config, DEFAULT_ARENA_STAGE);
+  const combatCfg = convertBattleConfig(config, stageId);
   const battle = createBattle(combatCfg);
 
   const localPlayerId = playerIdFor(0);
