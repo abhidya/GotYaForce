@@ -22,12 +22,15 @@ import {
 } from "@gf/physics";
 import { DASH, JUMP, MOVE } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
-import type { BorgRuntime, PlayerInput, RectStageBounds } from "./types.js";
+import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
+
+const GROUND_SNAP_UP = 35;
 
 export interface MoveContext {
   /** Resolved lock-on target position, if locked (face toward it). */
   lockTargetPos: Vec3 | null;
   bounds: RectStageBounds;
+  collision: StageCollision | null;
 }
 
 /** True if the borg's current state allows free movement input. */
@@ -129,20 +132,21 @@ export function stepMovement(
   // --- Integrate ----------------------------------------------------------------------
   b.pos = add(b.pos, b.vel as Vec3);
 
-  // Ground clamp.
-  if (b.pos.y <= JUMP.GROUND_Y) {
-    b.pos.y = JUMP.GROUND_Y;
+  // Bounds clamp on XZ. Real STIH stage bounds are rectangular and slightly
+  // asymmetric around origin (for st00: -11000..10000), so clamp to min/max
+  // before querying the floor triangle under the borg.
+  b.pos.x = clamp(b.pos.x, ctx.bounds.minX, ctx.bounds.maxX);
+  b.pos.z = clamp(b.pos.z, ctx.bounds.minZ, ctx.bounds.maxZ);
+
+  const groundY = groundYAt(ctx.collision, b.pos.x, b.pos.z, b.pos.y);
+  if (b.pos.y <= groundY) {
+    b.pos.y = groundY;
     if (b.vel.y < 0) b.vel.y = 0;
     if (!b.grounded) onLand(b, p);
     b.grounded = true;
   } else {
     b.grounded = false;
   }
-
-  // Bounds clamp on XZ. Real STIH stage bounds are rectangular and slightly
-  // asymmetric around origin (for st00: -11000..10000), so clamp to min/max.
-  b.pos.x = clamp(b.pos.x, ctx.bounds.minX, ctx.bounds.maxX);
-  b.pos.z = clamp(b.pos.z, ctx.bounds.minZ, ctx.bounds.maxZ);
 
   // --- State bookkeeping for the locomotion states ------------------------------------
   if (free) {
@@ -194,6 +198,78 @@ function approachScalar(current: number, target: number, maxDelta: number): numb
   if (current < target) return Math.min(current + maxDelta, target);
   if (current > target) return Math.max(current - maxDelta, target);
   return target;
+}
+
+function groundYAt(collision: StageCollision | null, x: number, z: number, currentY: number): number {
+  // Use STIH triangles as floor candidates, but do not teleport up to distant
+  // platforms/ceilings; exact step-up limits still need a DOL mechanics trace.
+  const surfaceY = floorSurfaceYAt(collision, x, z, currentY - JUMP.GROUND_Y + GROUND_SNAP_UP);
+  return surfaceY == null ? JUMP.GROUND_Y : surfaceY + JUMP.GROUND_Y;
+}
+
+function floorSurfaceYAt(
+  collision: StageCollision | null,
+  x: number,
+  z: number,
+  maxSurfaceY: number,
+): number | null {
+  if (!collision || collision.triangles.length === 0) return null;
+  let best: number | null = null;
+  const primary = candidateTriangles(collision, x, z);
+  best = bestFloorFromCandidates(primary, x, z, maxSurfaceY);
+  if (best != null || primary.length === collision.triangles.length) return best;
+  return bestFloorFromCandidates(collision.triangles, x, z, maxSurfaceY);
+}
+
+function candidateTriangles(collision: StageCollision, x: number, z: number): StageCollisionTriangle[] {
+  const grid = collision.grid;
+  if (!grid) return collision.triangles;
+  const cx = Math.floor((x - grid.origin.x) / grid.cellSize.x);
+  const cz = Math.floor((z - grid.origin.z) / grid.cellSize.z);
+  if (cx < 0 || cz < 0 || cx >= grid.gridCells.x || cz >= grid.gridCells.z) return [];
+  const cell = grid.cells[cz * grid.gridCells.x + cx];
+  if (!cell || cell.triangleIndices.length === 0) return [];
+  const out: StageCollisionTriangle[] = [];
+  for (const index of cell.triangleIndices) {
+    const tri = collision.triangles[index];
+    if (tri) out.push(tri);
+  }
+  return out;
+}
+
+function bestFloorFromCandidates(
+  triangles: readonly StageCollisionTriangle[],
+  x: number,
+  z: number,
+  maxSurfaceY: number,
+): number | null {
+  let best: number | null = null;
+  for (const tri of triangles) {
+    if (tri.marker !== 0xcccccccc) continue;
+    if (!isFiniteVec(tri.normal)) continue;
+    if (tri.normal.y < 0.5) continue;
+    if (!tri.vertices.every(isFiniteVec)) continue;
+    if (x < tri.bounds2d.minX || x > tri.bounds2d.maxX || z < tri.bounds2d.minZ || z > tri.bounds2d.maxZ) continue;
+    const y = yAtTriangleXZ(tri, x, z);
+    if (y == null || y > maxSurfaceY) continue;
+    if (best == null || y > best) best = y;
+  }
+  return best;
+}
+
+function yAtTriangleXZ(tri: StageCollisionTriangle, x: number, z: number): number | null {
+  const [a, b, c] = tri.vertices;
+  const denom = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+  if (Math.abs(denom) < 1e-5) return null;
+  const wa = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denom;
+  const wb = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denom;
+  const wc = 1 - wa - wb;
+  if (wa < -1e-4 || wb < -1e-4 || wc < -1e-4) return null;
+  return wa * a.y + wb * b.y + wc * c.y;
+}
+
+function isFiniteVec(v: Vec3): boolean {
+  return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
 }
 
 // re-export for combat.ts convenience

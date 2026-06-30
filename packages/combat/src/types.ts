@@ -122,10 +122,36 @@ export function normalizeStageBounds(bounds: StageBounds): RectStageBounds {
   };
 }
 
+export interface StageCollisionCell {
+  index: number;
+  triangleIndices: number[];
+}
+
+export interface StageCollisionTriangle {
+  index: number;
+  layerIndex: number | null;
+  marker: number;
+  vertices: [Vec3, Vec3, Vec3];
+  normal: Vec3;
+  planeD: number;
+  bounds2d: RectStageBounds;
+}
+
+export interface StageCollision {
+  triangles: StageCollisionTriangle[];
+  grid?: {
+    origin: { x: number; z: number };
+    cellSize: { x: number; z: number };
+    gridCells: { x: number; z: number; total: number };
+    cells: StageCollisionCell[];
+  };
+}
+
 export interface BattleConfig {
   stageId: string;
   forces: ForceConfig[];
   bounds?: StageBounds;
+  collision?: StageCollision;
 }
 
 export type BattleResult = "ongoing" | "win" | "lose" | "draw";

@@ -32,6 +32,8 @@ import {
   type BorgRuntime,
   type PlayerInput,
   type RectStageBounds,
+  type StageCollision,
+  type StageCollisionTriangle,
 } from "@gf/combat";
 import { hitBin } from "@gf/formats";
 import {
@@ -134,6 +136,7 @@ type StageManifest = {
 
 type StageResources = {
   bounds: RectStageBounds | undefined;
+  collision: StageCollision | undefined;
 };
 
 type StageVector = [number, number, number];
@@ -464,7 +467,7 @@ function applyStageRenderState(rs: StageRenderState | null): void {
 }
 
 let loadedStageId: string | null = null;
-let loadedStageResources: StageResources = { bounds: undefined };
+let loadedStageResources: StageResources = { bounds: undefined, collision: undefined };
 function stageModelPaths(manifest: StageManifest): string[] {
   if (Array.isArray(manifest.models) && manifest.models.length > 0) {
     return manifest.models.map((m) => m.path);
@@ -479,22 +482,92 @@ function stageModelPaths(manifest: StageManifest): string[] {
   return Array.from({ length: count }, (_, i) => `model/model_${String(i).padStart(2, "0")}.dae`);
 }
 
-async function loadStageBounds(stageId: string, manifest: StageManifest): Promise<RectStageBounds | undefined> {
-  // The three layer files share the same STIH header bounds; prefer layer 0
-  // because it is the primary/densest collision candidate in the inventory.
-  const hitPath =
-    manifest.collision?.find((entry) => /hit[0-9a-f]{2}0\.bin$/i.test(entry.path))?.path ??
-    manifest.collision?.[0]?.path;
-  if (!hitPath) return undefined;
+async function loadStageCollision(stageId: string, manifest: StageManifest): Promise<StageResources> {
+  const collisionFiles = [...(manifest.collision ?? [])].sort((a, b) => a.path.localeCompare(b.path));
+  if (collisionFiles.length === 0) return { bounds: undefined, collision: undefined };
+
   try {
-    const response = await fetch(`/stages/${stageId}/${hitPath}`);
-    if (!response.ok) return undefined;
-    const grid = hitBin.parseStageHitGrid(await response.arrayBuffer());
-    return hitBin.stageBoundsFromHitGrid(grid);
+    const parsed = [];
+    for (const file of collisionFiles) {
+      const response = await fetch(`/stages/${stageId}/${file.path}`);
+      if (!response.ok) continue;
+      parsed.push({
+        path: file.path,
+        layerIndex: layerIndexFromCollisionPath(file.path),
+        grid: hitBin.parseStageHitGrid(await response.arrayBuffer()),
+      });
+    }
+    const first = parsed[0]?.grid;
+    if (!first) return { bounds: undefined, collision: undefined };
+
+    const triangles: StageCollisionTriangle[] = [];
+    const mergedCells = Array.from({ length: first.header.gridCells.total }, (_, index) => ({
+      index,
+      triangleIndices: [] as number[],
+    }));
+    let canMergeCells = true;
+
+    for (const entry of parsed) {
+      const base = triangles.length;
+      for (const tri of entry.grid.triangles) {
+        triangles.push({
+          index: triangles.length,
+          layerIndex: entry.layerIndex,
+          marker: tri.marker,
+          vertices: tri.vertices,
+          normal: tri.normal,
+          planeD: tri.planeD,
+          bounds2d: tri.bounds2d,
+        });
+      }
+
+      if (!sameHitGridHeader(first, entry.grid)) {
+        canMergeCells = false;
+        continue;
+      }
+      for (const cell of entry.grid.cells) {
+        const target = mergedCells[cell.index];
+        if (!target) continue;
+        target.triangleIndices.push(...cell.recordIndices.map((recordIndex) => base + recordIndex));
+      }
+    }
+
+    return {
+      bounds: hitBin.stageBoundsFromHitGrid(first),
+      collision: {
+        triangles,
+        ...(canMergeCells
+          ? {
+              grid: {
+                origin: first.header.origin,
+                cellSize: first.header.cellSize,
+                gridCells: first.header.gridCells,
+                cells: mergedCells,
+              },
+            }
+          : {}),
+      },
+    };
   } catch (error) {
-    console.warn(`Failed to parse stage collision bounds for ${stageId}`, error);
-    return undefined;
+    console.warn(`Failed to parse stage collision for ${stageId}`, error);
+    return { bounds: undefined, collision: undefined };
   }
+}
+
+function layerIndexFromCollisionPath(path: string): number | null {
+  const match = /hit[0-9a-f]{2}([0-2])\.bin$/i.exec(path);
+  return match ? Number(match[1]) : null;
+}
+
+function sameHitGridHeader(a: ReturnType<typeof hitBin.parseStageHitGrid>, b: ReturnType<typeof hitBin.parseStageHitGrid>): boolean {
+  return (
+    a.header.cellSize.x === b.header.cellSize.x &&
+    a.header.cellSize.z === b.header.cellSize.z &&
+    a.header.gridCells.x === b.header.gridCells.x &&
+    a.header.gridCells.z === b.header.gridCells.z &&
+    a.header.origin.x === b.header.origin.x &&
+    a.header.origin.z === b.header.origin.z
+  );
 }
 
 async function loadStage(stageId: string): Promise<StageResources> {
@@ -507,7 +580,7 @@ async function loadStage(stageId: string): Promise<StageResources> {
       .catch(() => null),
   ]);
   applyStageRenderState(renderState);
-  const bounds = await loadStageBounds(stageId, manifest);
+  const resources = await loadStageCollision(stageId, manifest);
   const loader = new ColladaLoader();
   const urls = stageModelPaths(manifest).map((path) => `/stages/${stageId}/${path}`);
   const results = await Promise.allSettled(urls.map((u) => loader.loadAsync(u)));
@@ -530,7 +603,7 @@ async function loadStage(stageId: string): Promise<StageResources> {
   }
   if (loaded === 0) throw new Error(`No exported stage pieces loaded for ${stageId}`);
   loadedStageId = stageId;
-  loadedStageResources = { bounds };
+  loadedStageResources = resources;
   return loadedStageResources;
 }
 
@@ -773,7 +846,7 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   const stageResources = await loadStage(stageId);
   const stageBounds = stageResources.bounds ?? fallbackStageBounds;
 
-  const combatCfg = convertBattleConfig(config, stageId, stageBounds);
+  const combatCfg = convertBattleConfig(config, stageId, stageBounds, stageResources.collision);
   const battle = createBattle(combatCfg);
 
   const localPlayerId = playerIdFor(0);

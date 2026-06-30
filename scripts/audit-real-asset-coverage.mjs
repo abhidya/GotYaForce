@@ -285,14 +285,15 @@ function inspectStages() {
       mainRefs: {
         loadStage: `apps/game/src/main.ts:${lineOf(main, "async function loadStage(stageId")}`,
         fetchStageManifest: `apps/game/src/main.ts:${lineOf(main, "fetch(`/stages/${stageId}/manifest.json`)")}`,
-        loadStageBounds: `apps/game/src/main.ts:${lineOf(main, "async function loadStageBounds")}`,
+        loadStageCollision: `apps/game/src/main.ts:${lineOf(main, "async function loadStageCollision")}`,
         parseStageHitGrid: `apps/game/src/main.ts:${lineOf(main, "parseStageHitGrid")}`,
         loadDefaultArena: `apps/game/src/main.ts:${lineOf(main, "loadStage(DEFAULT_ARENA_STAGE)")}`,
         loadConvertedStage: `apps/game/src/main.ts:${lineOf(main, "await loadStage(stageId)")}`,
       },
       collisionBounds: {
         usesStageHitParser: main.includes("hitBin.parseStageHitGrid"),
-        passesBoundsToCombat: main.includes("convertBattleConfig(config, stageId, stageBounds)"),
+        passesBoundsToCombat: main.includes("convertBattleConfig(config, stageId, stageBounds"),
+        passesTrianglesToCombat: main.includes("stageResources.collision") && main.includes("convertBattleConfig(config, stageId, stageBounds, stageResources.collision)"),
         parserPackage: main.includes("@gf/formats") ? "@gf/formats" : null,
       },
       assessment:
@@ -376,6 +377,7 @@ function buildReport() {
     publicStagesTotal: stageCoverage.publicManifest.stageCount,
     runtimeStageFallback: stageCoverage.runtimeUse.defaultStage,
     runtimeStageCollisionBounds: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesBoundsToCombat,
+    runtimeStageTriangleCollision: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesTrianglesToCombat,
   };
   return {
     generatedBy: "scripts/audit-real-asset-coverage.mjs",
@@ -425,6 +427,7 @@ function renderMarkdown(report) {
   add(`- Requested UI scene models exported: ${report.summary.requestedUiSceneModelsExported ?? "unknown"} from ${report.uiSceneExports.path}`);
   add(`- Stage exports complete visually: ${report.summary.publicStagesCompleteVisual}/${report.summary.publicStagesTotal}`);
   add(`- Runtime stage collision bounds from STIH: ${report.summary.runtimeStageCollisionBounds ? "yes" : "no"}`);
+  add(`- Runtime stage triangle collision from STIH: ${report.summary.runtimeStageTriangleCollision ? "yes" : "no"}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
   add();
   add("## Runtime Screens");
@@ -457,7 +460,7 @@ function renderMarkdown(report) {
   add();
   add(`Runtime loader refs: ${Object.values(report.stageCoverage.runtimeUse.mainRefs).join(", ")}`);
   add();
-  add(`Runtime collision bounds parser: ${report.stageCoverage.runtimeUse.collisionBounds.parserPackage ?? "none"} (${report.summary.runtimeStageCollisionBounds ? "wired" : "not wired"})`);
+  add(`Runtime collision parser: ${report.stageCoverage.runtimeUse.collisionBounds.parserPackage ?? "none"} (bounds ${report.summary.runtimeStageCollisionBounds ? "wired" : "not wired"}, triangles ${report.summary.runtimeStageTriangleCollision ? "wired" : "not wired"})`);
   add();
   add(report.stageCoverage.runtimeUse.assessment);
   add();

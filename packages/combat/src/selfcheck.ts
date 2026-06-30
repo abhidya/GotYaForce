@@ -75,10 +75,50 @@ function assertRectBoundsClamp(borgs: BorgStats[]): void {
   console.log(`[selfcheck] rectangular STIH-style bounds clamp kept p1 at x=${active.pos.x}`);
 }
 
+function assertTriangleFloorGrounding(borgs: BorgStats[]): void {
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
+      ],
+      bounds: { minX: -100, maxX: 100, minZ: -100, maxZ: 100 },
+      collision: {
+        triangles: [
+          {
+            index: 0,
+            layerIndex: null,
+            marker: 0xcccccccc,
+            vertices: [
+              { x: -100, y: 20, z: -100 },
+              { x: 100, y: 20, z: -100 },
+              { x: 0, y: 20, z: 100 },
+            ],
+            normal: { x: 0, y: 1, z: 0 },
+            planeD: -20,
+            bounds2d: { minX: -100, maxX: 100, minZ: -100, maxZ: 100 },
+          },
+        ],
+      },
+    },
+    borgs,
+  );
+  battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
+  const activeUid = battle.state.activeUidByPlayer["p1"];
+  const active = battle.state.borgs.find((b) => b.uid === activeUid);
+  if (!active) throw new Error("[selfcheck] triangle floor test lost active p1 borg");
+  if (Math.abs(active.pos.y - 30) > 0.001) {
+    throw new Error(`[selfcheck] triangle floor grounding failed: y=${active.pos.y}`);
+  }
+  console.log(`[selfcheck] STIH triangle floor grounded p1 at y=${active.pos.y}`);
+}
+
 export function main(): number {
   const borgs = loadBorgs();
   console.log(`[selfcheck] loaded ${borgs.length} borgs from borgs.json`);
   assertRectBoundsClamp(borgs);
+  assertTriangleFloorGrounding(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

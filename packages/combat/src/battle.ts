@@ -35,6 +35,7 @@ import {
   type DeployEntry,
   type PlayerInput,
   type RectStageBounds,
+  type StageCollision,
   normalizeStageBounds,
 } from "./types.js";
 
@@ -57,6 +58,7 @@ class BattleImpl implements Battle {
   private byUid = new Map<string, BorgRuntime>();
   private forces: ForceRuntime[] = [];
   private bounds: RectStageBounds;
+  private collision: StageCollision | null;
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
@@ -65,6 +67,7 @@ class BattleImpl implements Battle {
     private readonly statsById: Map<string, BorgStats>,
   ) {
     this.bounds = normalizeStageBounds(cfg.bounds ?? DEFAULT_BOUNDS);
+    this.collision = cfg.collision ?? null;
     resetProjectileCounter();
 
     let cpuIdx = 0;
@@ -222,7 +225,7 @@ class BattleImpl implements Battle {
       if (b.lockTarget && !this.lockStillValid(b)) b.lockTarget = null;
 
       const lockPos = b.lockTarget ? this.byUid.get(b.lockTarget)?.pos ?? null : null;
-      const ctx: MoveContext = { lockTargetPos: lockPos, bounds: this.bounds };
+      const ctx: MoveContext = { lockTargetPos: lockPos, bounds: this.bounds, collision: this.collision };
 
       // Movement (skips horizontal control while busy, but still applies gravity).
       stepMovement(b, prof, input, ctx);

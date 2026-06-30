@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-06-30T23:18:29.753Z
+Generated: 2026-06-30T23:29:55.575Z
 
 ## Summary
 
@@ -12,6 +12,7 @@ Generated: 2026-06-30T23:18:29.753Z
 - Requested UI scene models exported: 6 from apps/game/public/ui/scenes/manifest.json
 - Stage exports complete visually: 40/40
 - Runtime stage collision bounds from STIH: yes
+- Runtime stage triangle collision from STIH: yes
 - Runtime stage fallback: st00
 
 ## Runtime Screens
@@ -50,9 +51,9 @@ Generated: 2026-06-30T23:18:29.753Z
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports and 18 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:500, apps/game/src/main.ts:504, apps/game/src/main.ts:482, apps/game/src/main.ts:492, apps/game/src/main.ts:544, apps/game/src/main.ts:773
+Runtime loader refs: apps/game/src/main.ts:573, apps/game/src/main.ts:577, apps/game/src/main.ts:485, apps/game/src/main.ts:497, apps/game/src/main.ts:617, apps/game/src/main.ts:846
 
-Runtime collision bounds parser: @gf/formats (wired)
+Runtime collision parser: @gf/formats (bounds wired, triangles wired)
 
 Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id.
 

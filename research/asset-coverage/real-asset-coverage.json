@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-06-30T23:18:29.753Z",
+  "generatedAt": "2026-06-30T23:29:55.575Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -13,7 +13,8 @@
     "publicStagesCompleteVisual": 40,
     "publicStagesTotal": 40,
     "runtimeStageFallback": "st00",
-    "runtimeStageCollisionBounds": true
+    "runtimeStageCollisionBounds": true,
+    "runtimeStageTriangleCollision": true
   },
   "screens": [
     {
@@ -743,20 +744,21 @@
         "stab"
       ],
       "adapterRefs": {
-        "defaultArenaStage": "apps/game/src/sim/adapter.ts:22",
-        "fallback": "apps/game/src/sim/adapter.ts:34"
+        "defaultArenaStage": "apps/game/src/sim/adapter.ts:23",
+        "fallback": "apps/game/src/sim/adapter.ts:35"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:500",
-        "fetchStageManifest": "apps/game/src/main.ts:504",
-        "loadStageBounds": "apps/game/src/main.ts:482",
-        "parseStageHitGrid": "apps/game/src/main.ts:492",
-        "loadDefaultArena": "apps/game/src/main.ts:544",
-        "loadConvertedStage": "apps/game/src/main.ts:773"
+        "loadStage": "apps/game/src/main.ts:573",
+        "fetchStageManifest": "apps/game/src/main.ts:577",
+        "loadStageCollision": "apps/game/src/main.ts:485",
+        "parseStageHitGrid": "apps/game/src/main.ts:497",
+        "loadDefaultArena": "apps/game/src/main.ts:617",
+        "loadConvertedStage": "apps/game/src/main.ts:846"
       },
       "collisionBounds": {
         "usesStageHitParser": true,
         "passesBoundsToCombat": true,
+        "passesTrianglesToCombat": true,
         "parserPackage": "@gf/formats"
       },
       "assessment": "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."

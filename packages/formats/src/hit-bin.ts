@@ -12,6 +12,12 @@ export interface StageHitBounds2d {
   maxZ: number;
 }
 
+export interface StageHitVec3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
 export interface StageHitHeader {
   declaredBytes: number;
   cellSize: { x: number; z: number };
@@ -30,10 +36,34 @@ export interface StageHitRecordSummary {
   wholeRecords: boolean;
 }
 
+export interface StageHitCell {
+  index: number;
+  x: number;
+  z: number;
+  offset: number;
+  nextOffset: number;
+  recordIndices: number[];
+  anomalous: boolean;
+}
+
+export interface StageHitTriangle {
+  index: number;
+  recordOffset: number;
+  marker: number;
+  vertices: [StageHitVec3, StageHitVec3, StageHitVec3];
+  normal: StageHitVec3;
+  planeD: number;
+  bounds2d: StageHitBounds2d;
+  minY: number;
+  maxY: number;
+}
+
 export interface StageHitGrid {
   magic: "STIH";
   header: StageHitHeader;
   records: StageHitRecordSummary;
+  cells: StageHitCell[];
+  triangles: StageHitTriangle[];
 }
 
 const STIH_HEADER_BYTES = 0x28;
@@ -73,6 +103,9 @@ export function parseStageHitGrid(input: Uint8Array | ArrayBuffer): StageHitGrid
 
   const recordOffset = recordSentinelOffset + 8;
   const recordBytes = bytes.byteLength - recordOffset;
+  const recordCount = Math.floor(recordBytes / STAGE_RECORD_SIZE);
+  const cells = parseCells(view, cellCount, gridX, offsetTableEnd, recordSentinelOffset, recordBytes);
+  const triangles = parseTriangles(view, recordOffset, recordCount);
   return {
     magic: "STIH",
     header: {
@@ -93,9 +126,11 @@ export function parseStageHitGrid(input: Uint8Array | ArrayBuffer): StageHitGrid
       offset: recordOffset,
       bytes: recordBytes,
       recordSize: STAGE_RECORD_SIZE,
-      recordCount: Math.floor(recordBytes / STAGE_RECORD_SIZE),
+      recordCount,
       wholeRecords: recordBytes % STAGE_RECORD_SIZE === 0,
     },
+    cells,
+    triangles,
   };
 }
 
@@ -105,4 +140,85 @@ export function stageBoundsFromHitGrid(grid: StageHitGrid): StageHitBounds2d {
 
 function asBytes(input: Uint8Array | ArrayBuffer): Uint8Array {
   return input instanceof Uint8Array ? input : new Uint8Array(input);
+}
+
+function parseCells(
+  view: DataView,
+  cellCount: number,
+  gridX: number,
+  offsetTableEnd: number,
+  recordSentinelOffset: number,
+  recordBytes: number,
+): StageHitCell[] {
+  const offsets = Array.from({ length: cellCount }, (_, i) => view.getUint32(STIH_HEADER_BYTES + i * 4, false));
+  return offsets.map((offset, index) => {
+    const nextOffset = offsets[index + 1] ?? recordSentinelOffset;
+    const anomalous =
+      offset < offsetTableEnd ||
+      offset > recordSentinelOffset ||
+      nextOffset < offset ||
+      nextOffset > recordSentinelOffset ||
+      offset % 4 !== 0 ||
+      nextOffset % 4 !== 0;
+    const recordIndices: number[] = [];
+    if (!anomalous) {
+      for (let cursor = offset; cursor + 4 <= nextOffset; cursor += 4) {
+        const value = view.getUint32(cursor, false);
+        if (value === 0xffffffff) continue;
+        if (value % STAGE_RECORD_SIZE === 0 && value >= 0 && value < recordBytes) {
+          recordIndices.push(value / STAGE_RECORD_SIZE);
+        }
+      }
+    }
+    return {
+      index,
+      x: index % gridX,
+      z: Math.floor(index / gridX),
+      offset,
+      nextOffset,
+      recordIndices,
+      anomalous,
+    };
+  });
+}
+
+function parseTriangles(view: DataView, recordOffset: number, recordCount: number): StageHitTriangle[] {
+  return Array.from({ length: recordCount }, (_, index) => {
+    const offset = recordOffset + index * STAGE_RECORD_SIZE;
+    const vertices = [
+      readVec3(view, offset + 0x04),
+      readVec3(view, offset + 0x10),
+      readVec3(view, offset + 0x1c),
+    ] as [StageHitVec3, StageHitVec3, StageHitVec3];
+    return {
+      index,
+      recordOffset: offset,
+      marker: view.getUint32(offset, false),
+      vertices,
+      normal: readVec3(view, offset + 0x28),
+      planeD: view.getFloat32(offset + 0x34, false),
+      bounds2d: triangleBounds2d(vertices),
+      minY: Math.min(...vertices.map((v) => v.y)),
+      maxY: Math.max(...vertices.map((v) => v.y)),
+    };
+  });
+}
+
+function readVec3(view: DataView, offset: number): StageHitVec3 {
+  return {
+    x: view.getFloat32(offset, false),
+    y: view.getFloat32(offset + 4, false),
+    z: view.getFloat32(offset + 8, false),
+  };
+}
+
+function triangleBounds2d(vertices: [StageHitVec3, StageHitVec3, StageHitVec3]): StageHitBounds2d {
+  const xs = vertices.map((v) => v.x);
+  const zs = vertices.map((v) => v.z);
+  return {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minZ: Math.min(...zs),
+    maxZ: Math.max(...zs),
+  };
 }
