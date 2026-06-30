@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="1.4.1" xmlns="http://www.collada.org/2005/11/COLLADASchema">
+    <asset>
+        <created>1970-01-01T00:00:00Z</created>
+        <modified>1970-01-01T00:00:00Z</modified>
+        <unit name="Meter" />
+        <contributor>
+            <authoring_tool>IONET Exporter</authoring_tool>
+        </contributor>
+    </asset>
+    <library_images>
+        <image id="model_28_Texture_0_I4-image" name="model_28_Texture_0_I4">
+            <init_from>model_28_Texture_0_I4.png</init_from>
+        </image>
+    </library_images>
+    <library_materials>
+        <material id="Material_90015D17" name="Material_90015D17">
+            <instance_effect url="#Material_90015D17-effect" />
+        </material>
+    </library_materials>
+    <library_effects>
+        <effect id="Material_90015D17-effect" name="Material_90015D17">
+            <profile_COMMON>
+                <newparam sid="model_28_Texture_0_I4-image_surface">
+                    <surface type="2D">
+                        <init_from>model_28_Texture_0_I4-image</init_from>
+                    </surface>
+                </newparam>
+                <newparam sid="model_28_Texture_0_I4-image_sampler">
+                    <sampler2D>
+                        <source>model_28_Texture_0_I4-image_surface</source>
+                    </sampler2D>
+                </newparam>
+                <technique sid="standard">
+                    <phong>
+                        <emission>
+                            <color sid="emission">0 0 0 1</color>
+                        </emission>
+                        <ambient>
+                            <color sid="ambient">0.5019608 0.5019608 0.5019608 1</color>
+                        </ambient>
+                        <diffuse>
+                            <texture texture="model_28_Texture_0_I4-image_sampler" texcoord="CHANNEL0" />
+                        </diffuse>
+                        <specular>
+                            <color sid="specular">1 1 1 1</color>
+                        </specular>
+                        <reflective>
+                            <color sid="reflective">1 1 1 1</color>
+                        </reflective>
+                        <shininess>
+                            <float sid="shininess">50</float>
+                        </shininess>
+                        <reflectivity>
+                            <float sid="reflectivity">1</float>
+                        </reflectivity>
+                        <transparency>
+                            <float sid="transparency">1</float>
+                        </transparency>
+                    </phong>
+                </technique>
+            </profile_COMMON>
+        </effect>
+    </library_effects>
+    <library_geometries>
+        <geometry id="Joint_0_Object_0-geometry" name="Joint_0_Object_0">
+            <mesh>
+                <source id="Joint_0_Object_0-geometry-POSITION">
+                    <float_array id="Joint_0_Object_0-geometry-POSITION-array" count="174">-1000.0006 1 4999.9995 -979.7324 1 4985.3643 -973.0371 1 5000 -1128.5853 1 4880.4395 -1115.4607 1 4859.1616 -1462.8446 1 4729.851 -1475.9692 1 4751.129 -1618.8414 1 4618.283 -1598.5732 1 4603.648 -1700.0001 1 4440.8755 -1675.6738 1 4435.1104 -1707.0901 1 4245.914 -1682.4093 1 4249.897 -1679.8173 1 4077.5144 -1655.5778 1 4083.633 -1601.7053 1 3768.0542 -1577.0577 1 3772.5986 -1569.3435 1 3742.0205 -1594.029 1 3737.668 -796.775 1 2781.5857 -1703.225 1 3718.4143 -1515.6846 1 2654.822 -984.3154 1 3845.1777 -826.0782 1 2947.772 -1444.8668 1 3763.97 -1601.7053 1 3768.0542 -1703.225 1 3718.4143 -1594.029 1 3737.668 -1704.8094 1 3749.874 -1713.1428 1 3728.1924 -1522.1294 1 2644.904 -1515.6846 1 2654.822 -783.5237 1 2775.1406 -796.775 1 2781.5857 -775.1903 1 2783.4739 -805.14996 1 2953.39 -826.0782 1 2947.772 -718.2974 1 3040.2424 -891.9459 1 4025.05 -984.3154 1 3845.1777 -1285.869 1 3955.5906 -1444.8668 1 3763.97 -1448.2991 1 3795.1045 -1557.4421 1 3776.0273 -1569.3435 1 3742.0205 -1577.0577 1 3772.5986 -1635.2582 1 4088.3357 -1655.5778 1 4083.633 -1661.9478 1 4254.2324 -1682.4093 1 4249.897 -1653.2408 1 4430.825 -1675.6738 1 4435.1104 -1598.5732 1 4603.648 -1128.5853 1 4880.4395 -1142.2933 1 4901.381 -1475.9692 1 4751.129 -1000.0006 1 4999.9995 -1036.9885 1 5000</float_array>
+                    <technique_common>
+                        <accessor count="58" offset="0" source="Joint_0_Object_0-geometry-POSITION-array" stride="3">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                            <param name="Z" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="Joint_0_Object_0-geometry-NORMAL">
+                    <float_array id="Joint_0_Object_0-geometry-NORMAL-array" count="3">0 1 0</float_array>
+                    <technique_common>
+                        <accessor count="1" offset="0" source="Joint_0_Object_0-geometry-NORMAL-array" stride="3">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                            <param name="Z" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="Joint_0_Object_0-geometry-TEXCOORD">
+                    <float_array id="Joint_0_Object_0-geometry-TEXCOORD-array" count="4">0.4375 0.9375 0.03125 0.9375</float_array>
+                    <technique_common>
+                        <accessor count="2" offset="0" source="Joint_0_Object_0-geometry-TEXCOORD-array" stride="2">
+                            <param name="S" type="float" />
+                            <param name="T" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="Joint_0_Object_0-geometry-COLOR">
+                    <float_array id="Joint_0_Object_0-geometry-COLOR-array" count="12">0.039215688 0.039215688 0.039215688 1 0.27450982 0.27450982 0.27450982 1 0.3019608 0.28235295 0.24313726 1</float_array>
+                    <technique_common>
+                        <accessor count="3" offset="0" source="Joint_0_Object_0-geometry-COLOR-array" stride="4">
+                            <param name="R" type="double" />
+                            <param name="G" type="double" />
+                            <param name="B" type="double" />
+                            <param name="A" type="double" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <vertices id="Joint_0_Object_0-vertices">
+                    <input semantic="POSITION" source="#Joint_0_Object_0-geometry-POSITION" />
+                </vertices>
+                <triangles count="61" material="Material_90015D17">
+                    <input semantic="VERTEX" source="#Joint_0_Object_0-vertices" offset="0" set="0" />
+                    <input semantic="NORMAL" source="#Joint_0_Object_0-geometry-NORMAL" offset="1" set="0" />
+                    <input semantic="TEXCOORD" source="#Joint_0_Object_0-geometry-TEXCOORD" offset="2" set="0" />
+                    <input semantic="COLOR" source="#Joint_0_Object_0-geometry-COLOR" offset="3" set="0" />
+                    <p>0 0 0 0 2 0 0 0 1 0 0 0 3 0 0 0 0 0 0 0 1 0 0 0 3 0 0 0 1 0 0 0 4 0 0 0 3 0 0 0 3 0 0 0 4 0 0 0 3 0 0 0 4 0 0 0 5 0 0 0 6 0 0 0 3 0 0 0 5 0 0 0 6 0 0 0 5 0 0 0 5 0 0 0 7 0 0 0 6 0 0 0 5 0 0 0 7 0 0 0 5 0 0 0 8 0 0 0 9 0 0 0 7 0 0 0 8 0 0 0 9 0 0 0 8 0 0 0 10 0 0 0 11 0 0 0 9 0 0 0 10 0 0 0 11 0 0 0 10 0 0 0 12 0 0 0 13 0 0 0 11 0 0 0 12 0 0 0 13 0 0 0 12 0 0 0 14 0 0 0 15 0 0 0 13 0 0 0 14 0 0 0 15 0 0 0 14 0 0 0 16 0 0 0 15 0 0 0 15 0 0 0 16 0 0 0 15 0 0 0 16 0 0 0 17 0 0 0 18 0 0 0 15 0 0 0 17 0 0 0 18 0 0 0 17 0 0 0 19 0 0 0 20 0 0 0 18 0 0 0 19 0 0 0 20 0 0 0 19 0 0 0 21 0 0 0 22 0 0 0 23 0 0 0 19 0 0 0 24 0 0 0 22 0 0 0 19 0 0 0 24 0 0 0 19 0 0 0 17 0 0 0 25 0 1 1 27 0 0 1 26 0 0 1 28 0 1 1 25 0 1 1 26 0 0 1 28 0 1 1 26 0 0 1 26 0 0 1 29 0 1 1 28 0 1 1 26 0 0 1 29 0 1 1 26 0 0 1 26 0 0 1 30 0 1 1 29 0 1 1 26 0 0 1 30 0 1 1 26 0 0 1 31 0 0 1 32 0 1 1 30 0 1 1 31 0 0 1 32 0 1 1 31 0 0 1 33 0 0 1 34 0 1 1 32 0 1 1 33 0 0 1 34 0 1 1 33 0 0 1 33 0 0 1 35 0 1 1 34 0 1 1 33 0 0 1 35 0 1 1 33 0 0 1 36 0 0 1 37 0 1 1 35 0 1 1 36 0 0 1 37 0 1 1 36 0 0 1 36 0 0 1 38 0 1 2 37 0 1 1 36 0 0 1 38 0 1 2 36 0 0 1 39 0 0 1 40 0 1 2 38 0 1 2 39 0 0 1 40 0 1 2 39 0 0 1 41 0 0 1 42 0 1 1 40 0 1 2 41 0 0 1 42 0 1 1 41 0 0 1 41 0 0 1 43 0 1 1 42 0 1 1 41 0 0 1 43 0 1 1 41 0 0 1 44 0 0 1 43 0 1 1 43 0 1 1 44 0 0 1 43 0 1 1 44 0 0 1 45 0 0 1 46 0 1 1 43 0 1 1 45 0 0 1 46 0 1 1 45 0 0 1 47 0 0 1 48 0 1 1 46 0 1 1 47 0 0 1 48 0 1 1 47 0 0 1 49 0 0 1 50 0 1 1 48 0 1 1 49 0 0 1 50 0 1 1 49 0 0 1 51 0 0 1 52 0 1 1 50 0 1 1 51 0 0 1 53 0 0 1 55 0 1 1 54 0 1 1 56 0 0 1 53 0 0 1 54 0 1 1 56 0 0 1 54 0 1 1 57 0 1 1</p>
+                </triangles>
+            </mesh>
+        </geometry>
+    </library_geometries>
+    <library_visual_scenes>
+        <visual_scene id="Scene" name="Scene">
+            <node id="JOBJ_0" sid="JOBJ_0" name="JOBJ_0" type="JOINT">
+                <matrix sid="transform">1 0 0 -1250 0 1 0 1 0 0 1 3250 0 0 0 1</matrix>
+            </node>
+            <node id="Joint_0_Object_0" sid="Joint_0_Object_0" name="Joint_0_Object_0">
+                <instance_geometry url="#Joint_0_Object_0-geometry">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material target="#Material_90015D17" symbol="Material_90015D17" />
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+            </node>
+        </visual_scene>
+    </library_visual_scenes>
+    <scene>
+        <instance_visual_scene url="#Scene" />
+    </scene>
+</COLLADA>

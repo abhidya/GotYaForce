@@ -1,0 +1,163 @@
+{
+  "region": "GG4E",
+  "id": "st29",
+  "source": "user-data/GG4E/afs_data/root",
+  "status": "visual-exported-no-source-hit-files",
+  "verifiedBy": "scripts/export-all-stages.mjs",
+  "verifiedAt": "2026-06-30T22:09:57.544Z",
+  "copied": {
+    "stageArc": "st29/raw/st29_mdl.arc",
+    "stagePzz": "st29/raw/st29.pzz",
+    "hitBins": [],
+    "setArcs": []
+  },
+  "visual": {
+    "hasDaePieces": true,
+    "hasContiguousDaeSequence": true,
+    "hasCompleteDaeExport": true,
+    "daeCount": 9,
+    "nonEmptyDaeCount": 9,
+    "maxModelIndex": 8,
+    "missingModelIndices": [],
+    "expectedDaeIndices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "missingExpectedDaeIndices": [],
+    "unexpectedDaeIndices": [],
+    "zeroByteDaeFiles": [],
+    "textureCount": 13,
+    "exportSummary": {
+      "path": "model/export-summary.json",
+      "exists": true,
+      "parses": true,
+      "error": null,
+      "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
+      "expectedSlotCount": 9,
+      "expectedDaeCount": 9,
+      "exportedModelCount": 9,
+      "failedModelIndices": [],
+      "skippedNullRootJointIndices": [],
+      "complete": true
+    }
+  },
+  "collision": [],
+  "sets": {
+    "sourceSetFiles": [],
+    "exportedSetCount": 0,
+    "filesNotCopiedByCurrentTool": []
+  },
+  "commands": {
+    "stage": "st29",
+    "orchestrated": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st29",
+    "singleStageRawCopy": "rtk node scripts/export-stage-assets.mjs GG4E 29",
+    "visualExport": "rtk node scripts/export-all-stages.mjs GG4E --export --stage st29",
+    "legacyVisualExport": "rtk node scripts/export-stage-hsd.mjs GG4E 29"
+  },
+  "notes": [
+    "Verified by comparing source stage assets against the browser public stage folder.",
+    "Visual DAE pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
+  ],
+  "modelCount": 9,
+  "models": [
+    {
+      "path": "model/model_00.dae",
+      "bytes": 190497
+    },
+    {
+      "path": "model/model_01.dae",
+      "bytes": 22632
+    },
+    {
+      "path": "model/model_02.dae",
+      "bytes": 22188
+    },
+    {
+      "path": "model/model_03.dae",
+      "bytes": 291835
+    },
+    {
+      "path": "model/model_04.dae",
+      "bytes": 11418
+    },
+    {
+      "path": "model/model_05.dae",
+      "bytes": 59454
+    },
+    {
+      "path": "model/model_06.dae",
+      "bytes": 108960
+    },
+    {
+      "path": "model/model_07.dae",
+      "bytes": 320578
+    },
+    {
+      "path": "model/model_08.dae",
+      "bytes": 13035
+    }
+  ],
+  "textures": [
+    {
+      "path": "model/model_00_Texture_0_CMP.png",
+      "bytes": 36702
+    },
+    {
+      "path": "model/model_00_Texture_1_CMP.png",
+      "bytes": 30056
+    },
+    {
+      "path": "model/model_00_Texture_2_CMP.png",
+      "bytes": 72962
+    },
+    {
+      "path": "model/model_01_Texture_0_CMP.png",
+      "bytes": 50109
+    },
+    {
+      "path": "model/model_02_Texture_0_CMP.png",
+      "bytes": 28163
+    },
+    {
+      "path": "model/model_03_Texture_0_CMP.png",
+      "bytes": 20142
+    },
+    {
+      "path": "model/model_03_Texture_1_CMP.png",
+      "bytes": 35215
+    },
+    {
+      "path": "model/model_04_Texture_0_CMP.png",
+      "bytes": 33836
+    },
+    {
+      "path": "model/model_04_Texture_1_I4.png",
+      "bytes": 33285
+    },
+    {
+      "path": "model/model_05_Texture_0_CMP.png",
+      "bytes": 20142
+    },
+    {
+      "path": "model/model_06_Texture_0_CMP.png",
+      "bytes": 20142
+    },
+    {
+      "path": "model/model_07_Texture_0_CMP.png",
+      "bytes": 20142
+    },
+    {
+      "path": "model/model_08_Texture_0_I4.png",
+      "bytes": 187
+    }
+  ],
+  "setArcs": [],
+  "renderStatus": "dae-complete"
+}
