@@ -316,6 +316,51 @@
       "visualComplete": true,
       "collisionCount": 0,
       "setArcCount": 0
+    },
+    {
+      "id": "st4a",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 43,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
+    },
+    {
+      "id": "st4b",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 28,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
+    },
+    {
+      "id": "st4c",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 20,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
+    },
+    {
+      "id": "st4e",
+      "status": "visual-exported-no-source-hit-files",
+      "modelCount": 43,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 0,
+      "setArcCount": 0
+    },
+    {
+      "id": "stff",
+      "status": "verified-visual-and-collision",
+      "modelCount": 83,
+      "renderStatus": "dae-complete",
+      "visualComplete": true,
+      "collisionCount": 3,
+      "setArcCount": 0
     }
   ]
 }
