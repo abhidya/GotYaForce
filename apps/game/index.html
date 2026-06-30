@@ -1,0 +1,20 @@
+<!doctype html>
+<!-- Gotcha Force (GG4E) browser recreation — app entry HTML. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gotcha Force (web)</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #05070c; overflow: hidden; }
+      #app { width: 100vw; height: 100vh; display: block; }
+      #ui { position: fixed; inset: 0; pointer-events: none; color: #e9f2ff; font-family: "Trebuchet MS", system-ui, sans-serif; }
+      button, input, select { font: inherit; }
+    </style>
+  </head>
+  <body>
+    <canvas id="app"></canvas>
+    <div id="ui"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

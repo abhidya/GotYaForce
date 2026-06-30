@@ -1,0 +1,4 @@
+# pnpm workspace definition for the gotcha-force-web monorepo.
+packages:
+  - "apps/*"
+  - "packages/*"

@@ -1,0 +1,23 @@
+{
+  "name": "gotcha-force-web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Browser recreation of the GameCube game Gotcha Force (region GG4E / NTSC-U).",
+  "type": "module",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm --filter game dev",
+    "typecheck": "tsc -b",
+    "clean": "pnpm -r exec rimraf dist tsconfig.tsbuildinfo",
+    "extract": "node scripts/extract-user-disc.mjs",
+    "convert": "node scripts/asset-convert.mjs",
+    "manifest": "node scripts/build-manifest.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

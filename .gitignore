@@ -1,0 +1,38 @@
+# --- Dependencies & build output ---
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.vite/
+coverage/
+*.log
+
+# --- Editor / OS noise ---
+.DS_Store
+Thumbs.db
+.idea/
+.claude/
+.vscode/*
+!.vscode/extensions.json
+
+# --- User-local binary data ---
+# IMPORTANT: The disc ISO and any extracted disc bytes are USER-SUPPLIED and stay
+# strictly local. They are NEVER committed — both for repo hygiene/size and to keep
+# the repository free of game-data dumps. Only synthetic samples are tracked.
+*.iso
+*.gcm
+*.rvz
+*.ciso
+*.wbfs
+dotnet-sdk-*.exe
+user-data/
+
+# Per-region disc extracts: hashes/FST/magic maps are user-generated, kept local.
+research/disc/*/
+# ...but preserve the folder itself in the tree.
+!research/disc/.gitkeep
+
+# --- Externally cloned tooling (NOT vendored into this repo) ---
+# tools/ is populated by another agent cloning NeoGF etc.; dolphin/ is a local install.
+tools/
+dolphin/

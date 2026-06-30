@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gotcha Force — local slice</title>
+<style>
+  html,body{margin:0;height:100%;background:#0e1014;overflow:hidden;font-family:system-ui,sans-serif;color:#cdd3dc}
+  #hud{position:fixed;top:10px;left:12px;font-size:13px;line-height:1.5;text-shadow:0 1px 2px #000;pointer-events:none}
+  #hud b{color:#7fd1ff}
+  #err{position:fixed;bottom:10px;left:12px;color:#ff8a8a;font-size:12px;white-space:pre;max-width:90vw}
+</style>
+</head>
+<body>
+<div id="hud">
+  <div><b>Gotcha Force</b> — local slice (borg <b>pl0615</b> · G RED)</div>
+  <div><b>WASD</b> move · <b>Q/E</b> turn · <b>mouse drag</b> orbit · <b>wheel</b> zoom · <b>1/2</b> switch anim</div>
+  <div id="stat"></div>
+  <div id="animstat"></div>
+</div>
+<div id="err"></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { ColladaLoader } from 'three/addons/loaders/ColladaLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const err = (m)=>{ document.getElementById('err').textContent += m + "\n"; console.error(m); };
+window.addEventListener('error', e=>err('JS error: '+e.message));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0e1014);
+scene.fog = new THREE.Fog(0x0e1014, 600, 2000);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 1, 6000);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+// lights
+scene.add(new THREE.HemisphereLight(0xbcd6ff, 0x202830, 1.1));
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+sun.position.set(300, 600, 400);
+scene.add(sun);
+
+// ground
+const grid = new THREE.GridHelper(4000, 80, 0x335577, 0x223344);
+scene.add(grid);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// player rig: a group we move; the model is parented to it
+const player = new THREE.Group();
+scene.add(player);
+
+let modelReady = false;
+const stat = document.getElementById('stat');
+const animstat = document.getElementById('animstat');
+
+// ---- animation state ----
+let mixer = null;
+let modelRoot = null;
+const clips = {};          // name -> THREE.AnimationClip
+let currentAction = null;
+
+// Build a THREE.AnimationClip from a baked GF mot.bin clip JSON.
+// JSON: { frameCount, fps, rotFormat:"quat_xyzw", bones:[{i, pos:[x,y,z,...], rot:[x,y,z,w,...], scl:[...]}] }
+// bone index i maps to the Collada JOINT node named "JOBJ_i" (depth-first JOBJ TreeList order).
+function buildClip(json){
+  const fps = json.fps || 60;
+  const F = json.frameCount;
+  const times = new Float32Array(F);
+  for (let f=0; f<F; f++) times[f] = f / fps;
+  const tracks = [];
+  for (const b of json.bones){
+    const node = `JOBJ_${b.i}`;
+    if (b.pos && b.pos.length === F*3)
+      tracks.push(new THREE.VectorKeyframeTrack(`${node}.position`, times, Float32Array.from(b.pos)));
+    if (b.rot && b.rot.length === F*4)
+      tracks.push(new THREE.QuaternionKeyframeTrack(`${node}.quaternion`, times, Float32Array.from(b.rot)));
+    if (b.scl && b.scl.length === F*3)
+      tracks.push(new THREE.VectorKeyframeTrack(`${node}.scale`, times, Float32Array.from(b.scl)));
+  }
+  const dur = F / fps;
+  return new THREE.AnimationClip(json.name || 'clip', dur, tracks);
+}
+
+function playClip(name){
+  if (!mixer || !clips[name]) return;
+  const next = mixer.clipAction(clips[name]);
+  next.reset();
+  next.setLoop(THREE.LoopRepeat, Infinity);
+  next.enabled = true;
+  if (currentAction && currentAction !== next){
+    next.play();
+    currentAction.crossFadeTo(next, 0.25, false);
+  } else {
+    next.play();
+  }
+  currentAction = next;
+  animstat.innerHTML = `anim: <b>${name}</b> · ${clips[name].duration.toFixed(2)}s`;
+}
+
+const MODEL_URL = 'models/pl0615/model_00.dae';
+const ANIMS = { idle: 'models/pl0615/anim_b00_idle.json', clip1: 'models/pl0615/anim_b00_clip1.json' };
+
+new ColladaLoader().load(
+  MODEL_URL,
+  (collada) => {
+    const model = collada.scene;
+    modelRoot = model;
+    // normalize: recenter on origin, feet at y=0
+    model.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3(); box.getSize(size);
+    const center = new THREE.Vector3(); box.getCenter(center);
+    model.position.x -= center.x;
+    model.position.z -= center.z;
+    model.position.y -= box.min.y;          // stand on the grid
+    player.add(model);
+
+    // brighten any unlit materials, ensure double-sided so we see all faces
+    model.traverse(o=>{
+      if(o.isMesh){ o.frustumCulled=false; const ms=Array.isArray(o.material)?o.material:[o.material]; ms.forEach(m=>{ if(m){ m.side=THREE.DoubleSide; if('metalness' in m) m.metalness=0; } }); }
+      if(o.isSkinnedMesh){ o.frustumCulled=false; }
+    });
+
+    // mixer drives the skeleton bones by name (JOBJ_i)
+    mixer = new THREE.AnimationMixer(model);
+
+    // debug hook for verification
+    window.__dbg = {
+      sampleBone(name){
+        let found=null; model.traverse(o=>{ if(o.name===name) found=o; });
+        if(!found) return null;
+        return { name, q:[found.quaternion.x,found.quaternion.y,found.quaternion.z,found.quaternion.w], p:[found.position.x,found.position.y,found.position.z] };
+      },
+      boneNames(){ const n=[]; model.traverse(o=>{ if(o.isBone) n.push(o.name); }); return n; },
+      mixerTime(){ return mixer ? mixer.time : -1; }
+    };
+
+    // frame camera to model height
+    const h = Math.max(size.y, 50);
+    camera.position.set(h*1.2, h*0.9, h*1.8);
+    controls.target.set(0, h*0.5, 0);
+    controls.update();
+    modelReady = true;
+    const tris = countTris(model);
+    stat.innerHTML = `loaded pl0615: ${size.x.toFixed(0)}×${size.y.toFixed(0)}×${size.z.toFixed(0)} units · ~${tris.toLocaleString()} tris`;
+
+    // load animation clips, then start idle loop
+    Promise.all(Object.entries(ANIMS).map(([name,url])=>
+      fetch(url).then(r=>r.json()).then(j=>{ clips[name] = buildClip(j); })
+        .catch(e=>err('anim '+name+' load failed: '+(e?.message||e)))
+    )).then(()=>{
+      if (clips.idle) playClip('idle');
+      else if (Object.keys(clips).length) playClip(Object.keys(clips)[0]);
+    });
+  },
+  (p)=>{ stat.textContent = 'loading model… ' + (p.total? Math.round(p.loaded/p.total*100)+'%' : (p.loaded+' bytes')); },
+  (e)=>err('ColladaLoader failed: '+(e?.message||e))
+);
+
+function countTris(root){ let n=0; root.traverse(o=>{ if(o.isMesh&&o.geometry){ const g=o.geometry; n += (g.index? g.index.count : g.attributes.position.count)/3; }}); return Math.round(n); }
+
+// input
+const keys = {};
+addEventListener('keydown', e=>{
+  keys[e.code]=true;
+  if (e.code==='Digit1') playClip('idle');
+  if (e.code==='Digit2') playClip('clip1');
+});
+addEventListener('keyup',   e=>keys[e.code]=false);
+
+const SPEED = 320;   // units/sec
+const TURN  = 2.6;   // rad/sec
+const clock = new THREE.Clock();
+
+function tick(){
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (mixer) mixer.update(dt);
+  if (modelReady){
+    if (keys['KeyQ']) player.rotation.y += TURN*dt;
+    if (keys['KeyE']) player.rotation.y -= TURN*dt;
+    const fwd = new THREE.Vector3(Math.sin(player.rotation.y),0,Math.cos(player.rotation.y));
+    const right = new THREE.Vector3(fwd.z,0,-fwd.x);
+    const v = new THREE.Vector3();
+    if (keys['KeyW']) v.add(fwd);
+    if (keys['KeyS']) v.sub(fwd);
+    if (keys['KeyD']) v.add(right);
+    if (keys['KeyA']) v.sub(right);
+    if (v.lengthSq()>0){ v.normalize().multiplyScalar(SPEED*dt); player.position.add(v); }
+    // camera follows player position (keep orbit offset)
+    controls.target.lerp(new THREE.Vector3(player.position.x, player.position.y+ (controls.target.y), player.position.z), 0.1);
+  }
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+tick();
+
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
