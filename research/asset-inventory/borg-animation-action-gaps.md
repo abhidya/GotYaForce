@@ -1,6 +1,6 @@
 # Borg Animation Action Gaps
 
-Generated: 2026-07-01T03:54:46.144Z
+Generated: 2026-07-01T03:59:03.694Z
 
 Scope: `apps/game/public/models/pl*/anim_index.json`
 Canonical app slots: `idle`, `move`, `dash_fwd`, `dash_back`, `dash_left`, `dash_right`, `jump`, `fly`, `shoot`, `melee`, `special`, `hit`, `death`
@@ -10,11 +10,11 @@ Runtime resolver: mirrors `PREFERRED_LABELS`, `SLOT_LABELS`, `SLOT_FALLBACKS`, `
 
 | Metric | Count |
 |---|---:|
-| Animation indexes found | 105 |
-| Animation indexes parsed | 105 |
-| Total exported banks in parsed indexes | 4709 |
-| Canonical slot checks | 1365 |
-| Direct runtime matches | 1287 |
+| Animation indexes found | 108 |
+| Animation indexes parsed | 108 |
+| Total exported banks in parsed indexes | 4894 |
+| Canonical slot checks | 1404 |
+| Direct runtime matches | 1326 |
 | Runtime fallbacks | 78 |
 | Missing runtime matches | 0 |
 | Borgs with any fallback | 28 |
@@ -26,19 +26,19 @@ Runtime resolver: mirrors `PREFERRED_LABELS`, `SLOT_LABELS`, `SLOT_FALLBACKS`, `
 
 | Slot | Direct | Fallback | Missing | Gap notes |
 |---|---:|---:|---:|---|
-| `idle` | 105 | 0 | 0 | none |
-| `move` | 102 | 3 | 0 | idle -> idle x3 |
-| `dash_fwd` | 101 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
-| `dash_back` | 101 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
-| `dash_left` | 97 | 8 | 0 | idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1 |
-| `dash_right` | 91 | 14 | 0 | dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1 |
-| `jump` | 102 | 3 | 0 | idle -> idle x3 |
-| `fly` | 102 | 3 | 0 | idle -> idle x3 |
-| `shoot` | 103 | 2 | 0 | idle -> idle x2 |
-| `melee` | 97 | 8 | 0 | idle -> idle x8 |
-| `special` | 99 | 6 | 0 | idle -> idle x2; attack -> attack_s0 x4 |
-| `hit` | 93 | 12 | 0 | idle -> idle x12 |
-| `death` | 94 | 11 | 0 | idle -> idle x11 |
+| `idle` | 108 | 0 | 0 | none |
+| `move` | 105 | 3 | 0 | idle -> idle x3 |
+| `dash_fwd` | 104 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
+| `dash_back` | 104 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
+| `dash_left` | 100 | 8 | 0 | idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1 |
+| `dash_right` | 94 | 14 | 0 | dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1 |
+| `jump` | 105 | 3 | 0 | idle -> idle x3 |
+| `fly` | 105 | 3 | 0 | idle -> idle x3 |
+| `shoot` | 106 | 2 | 0 | idle -> idle x2 |
+| `melee` | 100 | 8 | 0 | idle -> idle x8 |
+| `special` | 102 | 6 | 0 | idle -> idle x2; attack -> attack_s0 x4 |
+| `hit` | 96 | 12 | 0 | idle -> idle x12 |
+| `death` | 97 | 11 | 0 | idle -> idle x11 |
 
 ## Missing Runtime Matches
 

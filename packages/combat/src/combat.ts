@@ -95,7 +95,12 @@ export function cycleLock(self: BorgRuntime, all: BorgRuntime[]): string | null 
 }
 
 // ---------------------------------------------------------------------------------------
-// Damage application — DERIVED FROM STATS (no ROM formula was recoverable; flagged).
+// Damage application.
+// mitigate(): DEF_PER_STAT/MIN_MULT are TUNED FROM STATS (no ROM formula recoverable yet).
+// The subtract-then-clamp-at-0 shape below (victim.hp -= dmg; ...; victim.hp = 0) is DERIVED
+// from the live trace at object+0x1C6 (behavior-notes.md s4h).
+// Ghidra export re-read (behavior-notes.md s4m) shows object+0x88 is a match slot/team byte,
+// not borgs.json's display type, so display type is intentionally not part of mitigation here.
 // ---------------------------------------------------------------------------------------
 function mitigate(raw: number, defenderDef: number): number {
   const mult = Math.max(DAMAGE.MIN_MULT, 1 - defenderDef * DAMAGE.DEF_PER_STAT);

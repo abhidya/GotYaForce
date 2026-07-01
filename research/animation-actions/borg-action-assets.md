@@ -1,6 +1,6 @@
 # Borg Action Animation Asset Inventory
 
-Generated: 2026-07-01T03:54:47.986Z
+Generated: 2026-07-01T03:59:05.891Z
 Script: `scripts/inventory-borg-action-assets.mjs`
 
 This is an inventory pipeline, not gameplay behavior. Action rows are candidates backed by exported/source assets.
@@ -13,8 +13,8 @@ This is an inventory pipeline, not gameplay behavior. Action rows are candidates
 | Source models | 207 |
 | Source MOT files | 104 |
 | Exported models | 1 |
-| Exported anim indexes | 105 |
-| Exported indexed clips | 4709 |
+| Exported anim indexes | 108 |
+| Exported indexed clips | 4894 |
 | Source MOT structural clips | 4433 |
 | PZZ member records joined | 2926 |
 | Borgs with PZZ member records | 209 |
@@ -27,17 +27,17 @@ This is an inventory pipeline, not gameplay behavior. Action rows are candidates
 
 | Action | Borgs with exported candidate |
 |---|---:|
-| `idle` | 105 |
-| `walk/run` | 102 |
-| `jump` | 102 |
-| `fly/air` | 102 |
-| `dash` | 102 |
-| `shoot/gun` | 96 |
+| `idle` | 108 |
+| `walk/run` | 105 |
+| `jump` | 105 |
+| `fly/air` | 105 |
+| `dash` | 105 |
+| `shoot/gun` | 99 |
 | `beam` | 5 |
-| `melee/sword` | 97 |
-| `hit` | 93 |
-| `death` | 94 |
-| `spawn` | 105 |
+| `melee/sword` | 100 |
+| `hit` | 96 |
+| `death` | 97 |
+| `spawn` | 108 |
 
 ## Priority Borgs
 
@@ -107,8 +107,8 @@ Notes: no exported candidate for: shoot/gun, beam; 2 exported anim JSON files ar
 | `pl0007` | CYBER NINJA | yes | yes | yes | 61 | beam |
 | `pl0008` | DEATH BORG ALPHA | yes | yes | yes | 56 | beam |
 | `pl0009` | SWITCHING NINJA | yes | yes | yes | 32 | beam |
-| `pl000a` | SASUKE | no | yes | no | 0 | idle, walk/run, jump, fly/air, dash, shoot/gun, beam, melee/sword, hit, death, spawn |
-| `pl000b` | SHIJIMA | no | yes | no | 0 | idle, walk/run, jump, fly/air, dash, shoot/gun, beam, melee/sword, hit, death, spawn |
+| `pl000a` | SASUKE | no | yes | yes | 56 | beam |
+| `pl000b` | SHIJIMA | no | yes | yes | 56 | beam |
 | `pl000c` | DEATH BORG ALPHA II | yes | yes | yes | 56 | beam |
 | `pl0100` | REVOLVER GUNMAN | yes | yes | yes | 64 | beam |
 | `pl0101` | POWERED GUNMAN | yes | yes | yes | 64 | beam |
@@ -116,7 +116,7 @@ Notes: no exported candidate for: shoot/gun, beam; 2 exported anim JSON files ar
 | `pl0103` | WIRE GUNNER | yes | yes | yes | 73 | beam |
 | `pl0104` | BEAM GUNNER | yes | yes | yes | 71 | none |
 | `pl0105` | DEATH BORG BETA II | yes | yes | yes | 64 | beam |
-| `pl0106` | TIME BOMBER | no | yes | no | 0 | idle, walk/run, jump, fly/air, dash, shoot/gun, beam, melee/sword, hit, death, spawn |
+| `pl0106` | TIME BOMBER | no | yes | yes | 73 | beam |
 | `pl0107` | REMOTE BOMBER | yes | yes | yes | 68 | beam |
 | `pl0108` | BILLY | no | yes | no | 0 | idle, walk/run, jump, fly/air, dash, shoot/gun, beam, melee/sword, hit, death, spawn |
 | `pl010a` | DEATH BORG BETA III | no | yes | no | 0 | idle, walk/run, jump, fly/air, dash, shoot/gun, beam, melee/sword, hit, death, spawn |

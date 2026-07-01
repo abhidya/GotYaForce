@@ -11,9 +11,11 @@
 //   type    -> "Long range type" etc. (informs AI preferred engage range)
 //   tribe   -> cosmetic / grouping, unused by the sim
 //
-// Confidence note: the decomp could NOT confirm the HP offset or the exact damage formula
-// (behavior-notes.md s4f, ram-trace-analysis.md s3.3). So HP and damage here are DERIVED
-// FROM THE STAT TABLE with a tuned formula, NOT ported from the ROM. Clearly flagged.
+// Confidence note: the HP field (object+0x1C6) and subtract-and-clamp application are now
+// DERIVED from a live disassembly trace (behavior-notes.md s4h); the exact attack/defense ->
+// raw-damage coefficients are still TUNED FROM THE STAT TABLE, not ported from the ROM
+// (`zz_003cd5c_` is known to be a table-driven formula, but not yet fully ported).
+// Clearly flagged in packages/combat/src/constants.ts.
 
 /**
  * Raw borg stats as they appear in borgs.json. Kept structurally compatible with the
