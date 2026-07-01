@@ -38,18 +38,26 @@ if (selected.length === 0) {
   process.exit(0);
 }
 
-await mkdir(outRoot, { recursive: true });
+if (!options.manifestOnly) await mkdir(outRoot, { recursive: true });
 await mkdir(path.dirname(manifestPath), { recursive: true });
 const manifestRecords = [];
 for (const { borg, member } of selected) {
   const outPath = path.join(outRoot, member.inferredName);
+  if (options.manifestOnly) {
+    manifestRecords.push(buildManifestRecord(borg, member, outPath, true));
+    console.log(
+      `manifest ${borg}#${member.memberId} ${member.inferredName} ` +
+        `${member.flags.compressed ? "pzzp" : "raw"} ${member.payload.length} bytes`,
+    );
+    continue;
+  }
   if (member.payload.length === 0) {
     console.log(`skip empty ${borg}#${member.memberId} ${member.inferredName}`);
-    manifestRecords.push(buildManifestRecord(borg, member, null));
+    manifestRecords.push(buildManifestRecord(borg, member, null, true));
     continue;
   }
   await writeFile(outPath, member.payload);
-  manifestRecords.push(buildManifestRecord(borg, member, outPath));
+  manifestRecords.push(buildManifestRecord(borg, member, outPath, false));
   console.log(
     `extract ${borg}#${member.memberId} ${member.inferredName} ` +
       `${member.flags.compressed ? "pzzp" : "raw"} ${member.payload.length} bytes -> ${rel(outPath)}`,
@@ -65,6 +73,7 @@ const manifest = {
   selection: {
     borgs: options.borgs,
     members: [...options.members],
+    manifestOnly: options.manifestOnly,
   },
   recordCount: manifestRecords.length,
   records: manifestRecords,
@@ -79,6 +88,7 @@ function parseArgs(args) {
     manifest: path.join("research", "asset-inventory", "pzz-member-extraction-manifest.json"),
     borgs: [],
     members: new Set(["mot"]),
+    manifestOnly: false,
     help: false,
   };
 
@@ -100,6 +110,8 @@ function parseArgs(args) {
       parsed.manifest = requiredValue(args, ++i, arg);
     } else if (arg.startsWith("--manifest=")) {
       parsed.manifest = arg.slice("--manifest=".length);
+    } else if (arg === "--manifest-only") {
+      parsed.manifestOnly = true;
     } else if (arg === "--borg") {
       addBorgs(parsed.borgs, requiredValue(args, ++i, arg));
     } else if (arg.startsWith("--borg=")) {
@@ -131,6 +143,7 @@ Options:
   --member <kind[,kind]>   mot, data, hit, model, texture, all (default mot)
   --out-root <path>        destination root (default user-data/<region>/afs_data/root)
   --manifest <path>        JSON manifest path (default research/asset-inventory/pzz-member-extraction-manifest.json)
+  --manifest-only          write only the JSON manifest; do not extract payload files
 `);
   process.exit(code);
 }
@@ -205,7 +218,7 @@ async function readBorgMap() {
   }
 }
 
-function buildManifestRecord(borg, member, outPath) {
+function buildManifestRecord(borg, member, outPath, skipped) {
   const borgMeta = borgMap.get(borg);
   return {
     sourceArchive: `user-data/${options.region}/afs_data/root/${borg}.pzz`,
@@ -216,7 +229,7 @@ function buildManifestRecord(borg, member, outPath) {
     inferredName: member.inferredName,
     inferredKind: inferKind(member.inferredName),
     outputPath: outPath ? rel(outPath) : null,
-    skipped: outPath === null,
+    skipped,
     compressed: member.flags.compressed,
     tableWord: hex(member.tableWord),
     blockCount: member.blockCount,

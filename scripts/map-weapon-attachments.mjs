@@ -11,6 +11,7 @@ const paths = {
   borgAnimationPlan: "research/asset-inventory/borg-animation-export-plan.json",
   weaponsEffectsProjectiles: "research/asset-inventory/weapons-effects-projectiles.json",
   particleEffectInventory: "research/asset-inventory/particle-effect-inventory.json",
+  pzzMemberExtractionManifest: "research/asset-inventory/pzz-member-extraction-manifest.json",
   borgAssets: "research/asset-inventory/borg-assets.json",
   hitBinInventory: "research/asset-inventory/hit-bin-inventory.json",
   borgData: "packages/assets/data/borgs.json",
@@ -191,6 +192,54 @@ function borgIdFromFileName(name) {
 
 function itemAttachmentNameForBorg(borgId) {
   return `it${borgId.slice(2)}_mdl.arz`;
+}
+
+function borgIdFromExtractionRecord(record) {
+  const id = String(record?.borgId ?? "").toLowerCase();
+  return /^pl[0-9a-f]{4}$/.test(id) ? id : null;
+}
+
+function summarizeExtractionRecords(records) {
+  const kinds = {};
+  const actionHints = new Set();
+  const familyHints = new Set();
+  for (const record of records) {
+    const kind = record.inferredKind ?? "unknown";
+    kinds[kind] = (kinds[kind] ?? 0) + 1;
+    for (const hint of record.actionHints ?? []) actionHints.add(hint);
+    for (const hint of record.familyHints ?? []) familyHints.add(hint);
+  }
+  return {
+    recordCount: records.length,
+    kinds: Object.fromEntries(Object.entries(kinds).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))),
+    actionHints: [...actionHints].sort(),
+    familyHints: [...familyHints].sort(),
+    keyRecords: selectKeyExtractionRecords(records)
+      .map((record) => ({
+        memberId: record.memberId,
+        inferredName: record.inferredName,
+        inferredKind: record.inferredKind,
+        outputPath: record.outputPath,
+        skipped: record.skipped,
+        compressed: record.compressed,
+        payloadBytes: record.payloadBytes,
+        actionHints: record.actionHints ?? [],
+        familyHints: record.familyHints ?? [],
+      }))
+      .sort((a, b) => a.memberId.localeCompare(b.memberId)),
+  };
+}
+
+function selectKeyExtractionRecords(records) {
+  const wantedKinds = new Set(["borg-data", "hit-collision-data", "motion-bank", "hsd-model", "texture"]);
+  const selected = [];
+  const seenKinds = new Set();
+  for (const record of records.sort((a, b) => String(a.memberId).localeCompare(String(b.memberId)))) {
+    if (!wantedKinds.has(record.inferredKind) || seenKinds.has(record.inferredKind)) continue;
+    selected.push(record);
+    seenKinds.add(record.inferredKind);
+  }
+  return selected;
 }
 
 async function walkFiles(rootRel, predicate = () => true) {
@@ -623,6 +672,7 @@ function buildBorgRecord({
   hitFile,
   dataInspections,
   evidence,
+  extractionRecords,
 }) {
   const sourceFiles = sourceFilesForRecord(assetRecord);
   const familySummary = {};
@@ -690,6 +740,7 @@ function buildBorgRecord({
       blocker: item.blocker,
     })),
     sourceFiles,
+    pzzMemberExtraction: summarizeExtractionRecords(extractionRecords ?? []),
     dataBinInspection: dataInspections,
     hitBinInspection: hitInspection,
     modelExport: {
@@ -870,6 +921,8 @@ function makeMarkdown(report) {
   lines.push(`- Shared/global asset candidates: ${report.summary.sharedAssetCount}`);
   lines.push(`- Borgs with DAE attachment-node candidates: ${report.summary.borgsWithDaeAttachmentCandidates}`);
   lines.push(`- MOT attack/action clip candidates needing runtime trace: ${report.summary.runtimeTraceAttackClipCount}`);
+  lines.push(`- PZZ member extraction manifest records joined: ${report.summary.pzzMemberExtractionRecordCount}`);
+  lines.push(`- Full PZZ member manifest: \`${paths.pzzMemberExtractionManifest}\``);
   lines.push("");
   lines.push("Family coverage:");
   lines.push("");
@@ -952,7 +1005,8 @@ function makeMarkdown(report) {
   lines.push("");
   lines.push("- `pl####data.bin` files were inspected as raw 432-byte big-endian word tables; field names are still unknown.");
   lines.push("- `pl####hit.bin` files use a 0x20-byte remap header plus 32 actor records of 0xF4 bytes, but record fields are not mapped to actions or bones.");
-  lines.push("- `it####_mdl.arz` item-model archives are strong attachment leads when linked to weapon-like borgs, but ARZ decompression is still a blocker for model export.");
+  lines.push("- `pl####.pzz` member manifests now provide a joinable source archive/member view for action, hit, data, model, and texture assets.");
+  lines.push("- `it####_mdl.arz` item-model archives are strong attachment leads when linked to weapon-like borgs; decompression is now proven, but model export and action/socket binding still need semantic work.");
   lines.push("- `efct.*`, `ptcl00.*`, `hit*.bin`, and `comhit*.bin` remain shared/global effect and impact leads rather than borg-specific sockets.");
   lines.push("");
 
@@ -964,6 +1018,7 @@ async function main() {
     animationPlan,
     weapons,
     particles,
+    pzzMemberManifest,
     borgAssets,
     hitInventory,
     borgData,
@@ -972,6 +1027,7 @@ async function main() {
     readJson(paths.borgAnimationPlan),
     readJson(paths.weaponsEffectsProjectiles),
     readJson(paths.particleEffectInventory),
+    readJsonIfExists(paths.pzzMemberExtractionManifest, { records: [] }),
     readJson(paths.borgAssets),
     readJson(paths.hitBinInventory),
     readJson(paths.borgData),
@@ -983,6 +1039,14 @@ async function main() {
   const animationBorgs = new Map((animationPlan.borgs ?? []).map((borg) => [String(borg.id).toLowerCase(), borg]));
   const hitByBorg = new Map((hitInventory.files?.player ?? []).map((file) => [String(file.linkedBorgId).toLowerCase(), file]));
   const daeByBorg = await discoverDaeInspections(modelManifest);
+  const extractionRecordsByBorg = new Map();
+  for (const record of pzzMemberManifest.records ?? []) {
+    const id = borgIdFromExtractionRecord(record);
+    if (!id) continue;
+    const list = extractionRecordsByBorg.get(id) ?? [];
+    list.push(record);
+    extractionRecordsByBorg.set(id, list);
+  }
 
   const evidence = collectAssetEvidence(weapons, particles);
   const evidenceByBorg = new Map();
@@ -1049,6 +1113,7 @@ async function main() {
 
   const mappedIds = unique([
     ...evidenceByBorg.keys(),
+    ...extractionRecordsByBorg.keys(),
     ...[...daeByBorg.keys()].filter((id) => evidenceByBorg.has(id)),
   ]).sort();
 
@@ -1071,6 +1136,7 @@ async function main() {
         hitFile: hitByBorg.get(id),
         dataInspections: await dataInspectionsFor(assetRecord, id),
         evidence: itemEvidence,
+        extractionRecords: extractionRecordsByBorg.get(id) ?? [],
       }),
     );
   }
@@ -1097,6 +1163,8 @@ async function main() {
       borgsWithDaeAttachmentCandidates: borgs.filter((borg) => borg.attachmentBoneCandidates.length > 0).length,
       runtimeTraceAttackClipCount: runtimeTraceQueue.length,
       sourceEvidenceCount: evidence.length,
+      pzzMemberExtractionRecordCount: [...extractionRecordsByBorg.values()].reduce((sum, records) => sum + records.length, 0),
+      pzzMemberExtractionBorgCount: extractionRecordsByBorg.size,
       dataBinInspectedCount: borgs.reduce((sum, borg) => sum + borg.dataBinInspection.length, 0),
       hitBinInspectedCount: borgs.filter((borg) => borg.hitBinInspection).length,
     },
