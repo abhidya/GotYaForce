@@ -510,6 +510,7 @@ function inspectCommonBattleDataEvidence() {
       firstFloatWords: record.firstFloatWords?.slice(0, 8) ?? [],
     })),
     exactActorDataMatches: inventory.value?.exactActorDataMatches ?? [],
+    runtimeBinding: inventory.value?.runtimeBinding ?? null,
     assessment: inventory.value?.assessment ?? null,
   };
 }
@@ -643,6 +644,7 @@ function buildReport() {
     runtimeBattleHudUsesAsIcon: hudAssetEvidence.battleHudUsesAsIcon,
     commonBattleArchiveInventoried: Boolean(commonBattleArchiveEvidence.cmnDataPzz),
     commonBattleDataExactMatches: commonBattleDataEvidence.exactActorDataMatches.length,
+    runtimeActorDataBoundToCombat: Boolean(commonBattleDataEvidence.runtimeBinding) && !commonBattleDataEvidence.runtimeBinding.formatsPzzStillTodo && !commonBattleDataEvidence.runtimeBinding.combatConstantsDeclareTunedFormulas,
     runtimeBorgAnimationDirectMatches: borgAnimationCoverage.directRuntimeMatches,
     runtimeBorgAnimationFallbacks: borgAnimationCoverage.runtimeFallbacks,
     runtimeBorgAnimationMissing: borgAnimationCoverage.missingRuntimeMatches,
@@ -720,6 +722,7 @@ function renderMarkdown(report) {
   add(`- Runtime battle HUD uses as_icon: ${report.summary.runtimeBattleHudUsesAsIcon ? "yes" : "no"} (manifest marks as_icon low-confidence for battle HUD)`);
   add(`- Common battle archive inventoried: ${report.summary.commonBattleArchiveInventoried ? "yes" : "no"}`);
   add(`- Common battle data exact actor matches: ${report.summary.commonBattleDataExactMatches}`);
+  add(`- Runtime actor-data bytes bound to combat formulas: ${report.summary.runtimeActorDataBoundToCombat ? "yes" : "no"}`);
   add(`- Runtime borg animation direct matches: ${report.summary.runtimeBorgAnimationDirectMatches}/${report.borgAnimationCoverage.canonicalSlotChecks}`);
   add(`- Runtime borg animation fallbacks/missing: ${report.summary.runtimeBorgAnimationFallbacks}/${report.summary.runtimeBorgAnimationMissing}`);
   add(`- Runtime fly uses exported boost clip: ${report.summary.runtimeBoostFlyUsesExportedBoostClip ? "yes" : "no"}`);
@@ -867,6 +870,15 @@ function renderMarkdown(report) {
   );
   add();
   add(report.commonBattleDataEvidence.assessment);
+  if (report.commonBattleDataEvidence.runtimeBinding) {
+    add();
+    add("Runtime binding gap:");
+    add(`- App imports borgs.json: ${report.commonBattleDataEvidence.runtimeBinding.appImportsBorgsJson ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.appBorgImport ?? "n/a"})`);
+    add(`- Combat buildProfile consumes stats: ${report.commonBattleDataEvidence.runtimeBinding.buildProfileConsumesBorgsJsonFields ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.buildProfile ?? "n/a"})`);
+    add(`- Combat formulas still marked tuned: ${report.commonBattleDataEvidence.runtimeBinding.combatConstantsDeclareTunedFormulas ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.tunedFormulaNote ?? "n/a"})`);
+    add(`- Generic PZZ package parser still TODO: ${report.commonBattleDataEvidence.runtimeBinding.formatsPzzStillTodo ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.pzzTodo ?? "n/a"})`);
+    add(report.commonBattleDataEvidence.runtimeBinding.assessment);
+  }
   add();
   add("## Borg Animation Coverage");
   add();

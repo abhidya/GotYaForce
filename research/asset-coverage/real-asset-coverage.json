@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:20:58.416Z",
+  "generatedAt": "2026-07-01T03:23:39.836Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -24,6 +24,7 @@
     "runtimeBattleHudUsesAsIcon": false,
     "commonBattleArchiveInventoried": true,
     "commonBattleDataExactMatches": 2,
+    "runtimeActorDataBoundToCombat": false,
     "runtimeBorgAnimationDirectMatches": 1274,
     "runtimeBorgAnimationFallbacks": 75,
     "runtimeBorgAnimationMissing": 3,
@@ -1879,6 +1880,19 @@
         }
       }
     ],
+    "runtimeBinding": {
+      "appImportsBorgsJson": true,
+      "buildProfileConsumesBorgsJsonFields": true,
+      "combatConstantsDeclareTunedFormulas": true,
+      "formatsPzzStillTodo": true,
+      "refs": {
+        "appBorgImport": "apps/game/src/main.ts:23",
+        "buildProfile": "packages/combat/src/stats.ts:104",
+        "tunedFormulaNote": "packages/combat/src/constants.ts:10",
+        "pzzTodo": "packages/formats/src/pzz.ts:4"
+      },
+      "assessment": "Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet."
+    },
     "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation."
   },
   "borgAnimationCoverage": {

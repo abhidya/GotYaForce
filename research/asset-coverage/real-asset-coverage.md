@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:20:58.416Z
+Generated: 2026-07-01T03:23:39.836Z
 
 ## Summary
 
@@ -21,6 +21,7 @@ Generated: 2026-07-01T03:20:58.416Z
 - Runtime battle HUD uses as_icon: no (manifest marks as_icon low-confidence for battle HUD)
 - Common battle archive inventoried: yes
 - Common battle data exact actor matches: 2
+- Runtime actor-data bytes bound to combat formulas: no
 - Runtime borg animation direct matches: 1274/1352
 - Runtime borg animation fallbacks/missing: 75/3
 - Runtime fly uses exported boost clip: yes
@@ -157,6 +158,13 @@ Actor data reference files: 198 (432 bytes each).
 | 1 | user-data/GG4E/afs_data/root/pl0f06data.bin | pl0f06 DEATH EYE | GF 10, HP 30/48, shot 1, attack 0, speed 2 |
 
 cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation.
+
+Runtime binding gap:
+- App imports borgs.json: yes (apps/game/src/main.ts:23)
+- Combat buildProfile consumes stats: yes (packages/combat/src/stats.ts:104)
+- Combat formulas still marked tuned: yes (packages/combat/src/constants.ts:10)
+- Generic PZZ package parser still TODO: yes (packages/formats/src/pzz.ts:4)
+Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet.
 
 ## Borg Animation Coverage
 

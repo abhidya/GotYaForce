@@ -11,6 +11,12 @@ const outDir = path.join(repoRoot, "research", "asset-inventory");
 const outJson = path.join(outDir, "common-battle-data.json");
 const outMd = path.join(outDir, "common-battle-data.md");
 const borgMetadataPath = path.join(repoRoot, "packages", "assets", "data", "borgs.json");
+const runtimePaths = {
+  appMain: path.join(repoRoot, "apps", "game", "src", "main.ts"),
+  combatStats: path.join(repoRoot, "packages", "combat", "src", "stats.ts"),
+  combatConstants: path.join(repoRoot, "packages", "combat", "src", "constants.ts"),
+  formatsPzz: path.join(repoRoot, "packages", "formats", "src", "pzz.ts"),
+};
 
 const pzzBlockSize = 0x800;
 const pzzCompressedFlag = 0x40000000;
@@ -207,6 +213,43 @@ function readBorgMetadata() {
   }
 }
 
+function readTextIfExists(absPath) {
+  try {
+    return fs.readFileSync(absPath, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function lineOf(text, needle) {
+  const index = text.indexOf(needle);
+  if (index < 0) return null;
+  return text.slice(0, index).split(/\r?\n/).length;
+}
+
+function inspectRuntimeBinding() {
+  const appMain = readTextIfExists(runtimePaths.appMain);
+  const stats = readTextIfExists(runtimePaths.combatStats);
+  const constants = readTextIfExists(runtimePaths.combatConstants);
+  const pzz = readTextIfExists(runtimePaths.formatsPzz);
+  return {
+    appImportsBorgsJson: appMain.includes("packages/assets/data/borgs.json"),
+    buildProfileConsumesBorgsJsonFields:
+      stats.includes("export function buildProfile") &&
+      ["energy", "hp", "defense", "shot", "attack", "speed", "jump"].every((field) => stats.includes(`${field}:`)),
+    combatConstantsDeclareTunedFormulas: constants.includes("Everything else (speeds, gravity, damage scale, ranges, cooldowns): TUNED"),
+    formatsPzzStillTodo: pzz.includes("TODO: implement unpack"),
+    refs: {
+      appBorgImport: `${rel(runtimePaths.appMain)}:${lineOf(appMain, "packages/assets/data/borgs.json")}`,
+      buildProfile: `${rel(runtimePaths.combatStats)}:${lineOf(stats, "export function buildProfile")}`,
+      tunedFormulaNote: `${rel(runtimePaths.combatConstants)}:${lineOf(constants, "Everything else (speeds, gravity, damage scale")}`,
+      pzzTodo: `${rel(runtimePaths.formatsPzz)}:${lineOf(pzz, "TODO: implement unpack")}`,
+    },
+    assessment:
+      "Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet.",
+  };
+}
+
 function summarizeRecord(buffer, index) {
   let nonZeroBytes = 0;
   for (const byte of buffer) if (byte !== 0) nonZeroBytes += 1;
@@ -304,6 +347,7 @@ function renderMarkdown(report) {
   lines.push(`- Actor data files compared: ${report.actorDataReference.count}`);
   lines.push(`- Member 003 splits into ${report.commonRecords.length} x ${actorDataRecordSize}-byte candidate records.`);
   lines.push(`- Exact actor-data matches: ${report.exactActorDataMatches.map((match) => `${match.id} ${match.metadata?.name ?? ""}`.trim()).join(", ") || "none"}.`);
+  lines.push(`- Runtime currently consumes borgs.json stats: ${report.runtimeBinding.appImportsBorgsJson ? "yes" : "no"}.`);
   lines.push("");
   lines.push("## Candidate Records");
   lines.push("");
@@ -337,6 +381,15 @@ function renderMarkdown(report) {
   lines.push("## Assessment");
   lines.push("");
   lines.push(report.assessment);
+  lines.push("");
+  lines.push("## Runtime Binding Gap");
+  lines.push("");
+  lines.push(`- App imports borgs.json: ${report.runtimeBinding.appImportsBorgsJson ? "yes" : "no"} (${report.runtimeBinding.refs.appBorgImport})`);
+  lines.push(`- Combat buildProfile consumes stat fields: ${report.runtimeBinding.buildProfileConsumesBorgsJsonFields ? "yes" : "no"} (${report.runtimeBinding.refs.buildProfile})`);
+  lines.push(`- Combat constants still declare tuned formulas: ${report.runtimeBinding.combatConstantsDeclareTunedFormulas ? "yes" : "no"} (${report.runtimeBinding.refs.tunedFormulaNote})`);
+  lines.push(`- Generic PZZ parser package still TODO: ${report.runtimeBinding.formatsPzzStillTodo ? "yes" : "no"} (${report.runtimeBinding.refs.pzzTodo})`);
+  lines.push("");
+  lines.push(report.runtimeBinding.assessment);
   lines.push("");
   lines.push("## Verification");
   lines.push("");
@@ -395,6 +448,7 @@ const report = {
         metadata: match.metadata,
       })),
   ),
+  runtimeBinding: inspectRuntimeBinding(),
   assessment:
     member.payload.length % actorDataRecordSize === 0
       ? "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation."

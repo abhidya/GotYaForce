@@ -1,6 +1,6 @@
 # Common Battle Data Inventory
 
-Generated: 2026-07-01T03:20:53.136Z
+Generated: 2026-07-01T03:23:34.208Z
 Scanner: `scripts/inventory-common-battle-data.mjs`
 
 ## Scope
@@ -14,6 +14,7 @@ Byte-level inventory only. This compares cmn_data.pzz member 003 against the sol
 - Actor data files compared: 198
 - Member 003 splits into 2 x 432-byte candidate records.
 - Exact actor-data matches: pl0f05 ROACH, pl0f06 DEATH EYE.
+- Runtime currently consumes borgs.json stats: yes.
 
 ## Candidate Records
 
@@ -57,6 +58,15 @@ Same-offset u16 values observed in actor data: 216
 ## Assessment
 
 cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation.
+
+## Runtime Binding Gap
+
+- App imports borgs.json: yes (apps/game/src/main.ts:23)
+- Combat buildProfile consumes stat fields: yes (packages/combat/src/stats.ts:104)
+- Combat constants still declare tuned formulas: yes (packages/combat/src/constants.ts:10)
+- Generic PZZ parser package still TODO: yes (packages/formats/src/pzz.ts:4)
+
+Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet.
 
 ## Verification
 
