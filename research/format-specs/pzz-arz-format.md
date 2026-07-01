@@ -1,6 +1,6 @@
 # PZZ/ARZ archive format notes
 
-Generated: 2026-06-30T08:08:08.018Z
+Generated: 2026-07-01T03:08:32.868Z
 Scanner: `scripts/inspect-pzz-arz.mjs`
 
 ## Inputs
@@ -10,6 +10,7 @@ Scanner: `scripts/inspect-pzz-arz.mjs`
 - `research/asset-inventory/weapons-effects-projectiles.json`
 - `efct.pzz`
 - `gets.pzz`
+- `cmn_data.pzz`
 - `st*.pzz`
 - `pl*.pzz`
 - `it####_mdl.arz`
@@ -17,12 +18,12 @@ Scanner: `scripts/inspect-pzz-arz.mjs`
 
 ## Summary
 
-- Files scanned: 354
-- PZZ archives: 251
+- Files scanned: 355
+- PZZ archives: 252
 - Direct ARZ files: 103
-- PZZ members listed: 3100
-- Compressed PZZ members: 2829
-- Payload kinds: hsd-dat 1407, tpl-texture 833, empty 231, borg-data-bin 209, borg-hit-bin 209, mot-bank-container 185, unknown-binary 129
+- PZZ members listed: 3104
+- Compressed PZZ members: 2833
+- Payload kinds: hsd-dat 1407, tpl-texture 833, empty 231, borg-data-bin 209, borg-hit-bin 209, mot-bank-container 186, unknown-binary 132
 
 ## PZZ layout
 
@@ -40,6 +41,7 @@ ARZ files and compressed PZZ members use the same 16-bit big-endian LZ stream. T
 
 | Archive | Role | Members | Compressed/raw/zero | Valid block sum | Recognized member kinds |
 |---|---|---:|---|---|---|
+| `user-data/GG4E/afs_data/root/cmn_data.pzz` | shared common battle-data PZZ archive | 4 | 4/0/0 | true | unknown-binary:3, mot-bank-container:1 |
 | `user-data/GG4E/afs_data/root/efct.pzz` | shared effect PZZ archive | 3 | 3/0/0 | true | hsd-dat:2, tpl-texture:1 |
 | `user-data/GG4E/afs_data/root/gets.pzz` | GET/item shared PZZ archive | 11 | 11/0/0 | true | hsd-dat:8, unknown-binary:3 |
 | `user-data/GG4E/afs_data/root/pl0100.pzz` | Borg/player PZZ archive | 14 | 13/0/1 | true | hsd-dat:6, tpl-texture:4, borg-data-bin:1, borg-hit-bin:1, empty:1, mot-bank-container:1 |
@@ -48,6 +50,15 @@ ARZ files and compressed PZZ members use the same 16-bit big-endian LZ stream. T
 | `user-data/GG4E/afs_data/root/st01.pzz` | stage PZZ archive | 4 | 3/1/0 | true | unknown-binary:3, hsd-dat:1 |
 
 ## Representative member listing
+
+### cmn_data.pzz
+
+| Id | Table word | Offset | Blocks | Compression | Name / kind | Exact bytes |
+|---:|---|---:|---:|---|---|---:|
+| 000 | `0x40000003` | `0x000800` | 3 | pzzp | cmn_data.member000.unknown-binary / unknown-binary |  |
+| 001 | `0x40000001` | `0x002000` | 1 | pzzp | cmn_data.member001.unknown-binary / unknown-binary |  |
+| 002 | `0x400000aa` | `0x002800` | 170 | pzzp | cmn_data.member002.mot-bank-container / mot-bank-container |  |
+| 003 | `0x40000001` | `0x057800` | 1 | pzzp | cmn_data.member003.unknown-binary / unknown-binary |  |
 
 ### efct.pzz
 
@@ -92,25 +103,6 @@ ARZ files and compressed PZZ members use the same 16-bit big-endian LZ stream. T
 | 012 | `0x40000003` | `0x113800` | 3 | pzzp | pl0100.slot012.tpl-texture / tpl-texture | 14464 |
 | 013 | `0x40000002` | `0x115000` | 2 | pzzp | pl0100.slot013.tpl-texture / tpl-texture | 3712 |
 
-### pl0200.pzz
-
-| Id | Table word | Offset | Blocks | Compression | Name / kind | Exact bytes |
-|---:|---|---:|---:|---|---|---:|
-| 000 | `0x40000001` | `0x000800` | 1 | pzzp | pl0200data.bin / borg-data-bin | 432 |
-| 001 | `0x00000000` | `0x001000` | 0 | zero | pl0200.slot001.empty / empty |  |
-| 002 | `0x40000001` | `0x001000` | 1 | pzzp | pl0200hit.bin / borg-hit-bin | 7840 |
-| 003 | `0x4000006d` | `0x001800` | 109 | pzzp | pl0200mot.bin / mot-bank-container | 276992 |
-| 004 | `0x40000040` | `0x038000` | 64 | pzzp | pl0200_mdl.arc / hsd-dat | 191267 |
-| 005 | `0x40000040` | `0x058000` | 64 | pzzp | pl0200b_mdl.arc / hsd-dat | 191267 |
-| 006 | `0x4000003a` | `0x078000` | 58 | pzzp | pl0200g_mdl.arc / hsd-dat | 140383 |
-| 007 | `0x4000003a` | `0x095000` | 58 | pzzp | pl0200s_mdl.arc / hsd-dat | 140383 |
-| 008 | `0x40000031` | `0x0b2000` | 49 | pzzp | pl0200c_mdl.arc / hsd-dat | 115807 |
-| 009 | `0x40000016` | `0x0ca800` | 22 | pzzp | pl0200k_mdl.arc / hsd-dat | 58695 |
-| 010 | `0x40000002` | `0x0d5800` | 2 | pzzp | pl0200.slot010.tpl-texture / tpl-texture | 14464 |
-| 011 | `0x40000001` | `0x0d6800` | 1 | pzzp | pl0200.slot011.tpl-texture / tpl-texture | 3712 |
-| 012 | `0x40000002` | `0x0d7000` | 2 | pzzp | pl0200.slot012.tpl-texture / tpl-texture | 14464 |
-| 013 | `0x40000002` | `0x0d8000` | 2 | pzzp | pl0200.slot013.tpl-texture / tpl-texture | 3712 |
-
 ## Direct ARZ groups
 
 | First words | Count | Size range | Payload kinds | Examples |
@@ -142,10 +134,10 @@ ARZ files and compressed PZZ members use the same 16-bit big-endian LZ stream. T
 
 ## Blockers
 
-- PZZ member semantics are only partly named: open; 129 item(s). The table and compression are decoded, but several payloads need runtime correlation or sibling file matches before naming their fields.
-- Exact payload length can be padded: open; 1590 item(s). HSD and sibling-file matches recover exact byte counts for many payloads, but unknown binary members still expose the decompressed stream length only.
+- PZZ member semantics are only partly named: open; 132 item(s). The table and compression are decoded, but several payloads need runtime correlation or sibling file matches before naming their fields.
+- Exact payload length can be padded: open; 1592 item(s). HSD and sibling-file matches recover exact byte counts for many payloads, but unknown binary members still expose the decompressed stream length only.
 - Direct ARZ payloads not recognized by magic: clear; 0 item(s). Direct item/stc ARZ files should normally decompress to HSD DAT; non-HSD cases need separate format work.
-- Runtime effect/item/stage meaning still needs correlation: open; 354 item(s). This scanner lists and classifies bytes. It does not claim which game event, particle emitter, or stage state consumes each payload.
+- Runtime effect/item/stage meaning still needs correlation: open; 355 item(s). This scanner lists and classifies bytes. It does not claim which game event, particle emitter, or stage state consumes each payload.
 
 ## Notes for effect/item/stage work
 
@@ -153,3 +145,4 @@ ARZ files and compressed PZZ members use the same 16-bit big-endian LZ stream. T
 - `gets.pzz` is listable as eleven compressed members. Several members identify as HSD DAT payloads, but the per-member item meaning remains unnamed.
 - `st##.pzz` archives are listable. Their first member is raw/uncompressed in the sampled stage pattern; later compressed members decode to smaller binary payloads that need stage-runtime correlation.
 - `it####_mdl.arz` and `stc##_mdl.arz` are direct compressed streams, not multi-entry archives. They now decompress in memory for header/root sniffing.
+

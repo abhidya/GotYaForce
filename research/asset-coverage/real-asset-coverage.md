@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:03:43.719Z
+Generated: 2026-07-01T03:08:45.372Z
 
 ## Summary
 
@@ -19,6 +19,7 @@ Generated: 2026-07-01T03:03:43.719Z
 - Runtime projectile FX from exported textures: yes
 - Runtime battle HUD uses exported font/roundel: yes
 - Runtime battle HUD uses as_icon: no (manifest marks as_icon low-confidence for battle HUD)
+- Common battle archive inventoried: yes
 - Runtime borg animation direct matches: 1274/1352
 - Runtime borg animation fallbacks/missing: 75/3
 - Runtime fly uses exported boost clip: yes
@@ -119,6 +120,22 @@ Original HUD elements not available as discrete sprites:
 | labelCpu | GAME-DRAWN / font. 'CPU' is text from the font atlas. |
 | alert | GAME-DRAWN / font. The '!' alert is a font glyph, not a dedicated sprite. |
 | comboDigits | Use font_ascii_atlas.png (or font_jp_atlas.png) digit cells; no pre-baked combo-number sprite sheet exists. |
+
+## Common Battle Archive Evidence
+
+Inventory: research/asset-inventory/pzz-arz-inventory.json
+cmn_data.bin exists unpacked: no
+cmn_data.pzz: user-data/GG4E/afs_data/root/cmn_data.pzz; 4 members (4 compressed, 0 raw, 0 zero), valid block sum true.
+Recognized member kinds: unknown-binary:3, mot-bank-container:1.
+
+| Member | Name | Table | Blocks | Compression | Payload | Kind |
+| --- | --- | --- | --- | --- | --- | --- |
+| 000 | cmn_data.member000.unknown-binary | 0x40000003 | 3 | pzzp | 21504 | unknown-binary |
+| 001 | cmn_data.member001.unknown-binary | 0x40000001 | 1 | pzzp | 15680 | unknown-binary |
+| 002 | cmn_data.member002.mot-bank-container | 0x400000aa | 170 | pzzp | 437888 | mot-bank-container |
+| 003 | cmn_data.member003.unknown-binary | 0x40000001 | 1 | pzzp | 864 | unknown-binary |
+
+cmn_data is present as a PZZ archive and now inventoried at member-table level. Treat its contents as common battle/HUD candidate data until DOL/runtime traces map consumers and field semantics.
 
 ## Borg Animation Coverage
 

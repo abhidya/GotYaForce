@@ -249,7 +249,7 @@ async function listRootFiles() {
     const name = entry.name;
     const lower = name.toLowerCase();
     const wanted =
-      /^(efct|gets|st[0-9a-f]{2}|pl[0-9a-f]{4})\.pzz$/i.test(name) ||
+      /^(efct|gets|cmn_data|st[0-9a-f]{2}|pl[0-9a-f]{4})\.pzz$/i.test(name) ||
       /^(it[0-9a-f]{4}_mdl|stc[0-9a-f]{2}_mdl)\.arz$/i.test(name);
     if (!wanted) continue;
 
@@ -271,6 +271,7 @@ async function listRootFiles() {
 function classifyTopLevelFile(file) {
   if (/^efct\.pzz$/i.test(file.name)) return { bucket: "effect", role: "shared effect PZZ archive" };
   if (/^gets\.pzz$/i.test(file.name)) return { bucket: "item", role: "GET/item shared PZZ archive" };
+  if (/^cmn_data\.pzz$/i.test(file.name)) return { bucket: "battle-common", role: "shared common battle-data PZZ archive" };
   if (/^st[0-9a-f]{2}\.pzz$/i.test(file.name)) return { bucket: "stage", role: "stage PZZ archive" };
   if (/^pl[0-9a-f]{4}\.pzz$/i.test(file.name)) return { bucket: "borg", role: "Borg/player PZZ archive" };
   if (/^it[0-9a-f]{4}_mdl\.arz$/i.test(file.name)) return { bucket: "item", role: "item/attachment model ARZ" };
@@ -731,6 +732,9 @@ function inferPzzMemberLabel(file, index, sniff) {
   if (/^gets$/i.test(stem)) {
     return `gets${String(index).padStart(2, "0")}.${sniff.kind}`;
   }
+  if (/^cmn_data$/i.test(stem)) {
+    return `cmn_data.member${String(index).padStart(3, "0")}.${sniff.kind}`;
+  }
   if (/^st[0-9a-f]{2}$/i.test(stem)) {
     return `${stem}.member${String(index).padStart(3, "0")}.${sniff.kind}`;
   }
@@ -941,7 +945,7 @@ function collectBlockers(records, summary) {
 }
 
 function selectExamples(records) {
-  const wanted = new Set(["efct.pzz", "gets.pzz", "st00.pzz", "st01.pzz", "pl0100.pzz", "pl0200.pzz"]);
+  const wanted = new Set(["efct.pzz", "gets.pzz", "cmn_data.pzz", "st00.pzz", "st01.pzz", "pl0100.pzz", "pl0200.pzz"]);
   const pzzExamples = records.filter((record) => wanted.has(record.name));
   const arzExamples = records
     .filter((record) => record.archive.kind === "arz")
@@ -1087,6 +1091,7 @@ async function main() {
       sourceInventoryPaths.weaponsEffectsProjectiles,
       "efct.pzz",
       "gets.pzz",
+      "cmn_data.pzz",
       "st*.pzz",
       "pl*.pzz",
       "it####_mdl.arz",

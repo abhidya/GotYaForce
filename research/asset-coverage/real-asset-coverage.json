@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:03:43.719Z",
+  "generatedAt": "2026-07-01T03:08:45.372Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -22,6 +22,7 @@
     "runtimeProjectileFxFromExportedTextures": true,
     "runtimeBattleHudUsesAvailableFontAndRoundel": true,
     "runtimeBattleHudUsesAsIcon": false,
+    "commonBattleArchiveInventoried": true,
     "runtimeBorgAnimationDirectMatches": 1274,
     "runtimeBorgAnimationFallbacks": 75,
     "runtimeBorgAnimationMissing": 3,
@@ -1573,6 +1574,68 @@
     "battleHudUsesFontAscii": true,
     "battleHudUsesFaceRoundel": true,
     "battleHudUsesAsIcon": false
+  },
+  "commonBattleArchiveEvidence": {
+    "path": "research/asset-inventory/pzz-arz-inventory.json",
+    "parses": true,
+    "cmnDataBinExists": false,
+    "cmnDataPzz": {
+      "path": "user-data/GG4E/afs_data/root/cmn_data.pzz",
+      "role": "shared common battle-data PZZ archive",
+      "sizeBytes": 360448,
+      "memberCount": 4,
+      "compressedMemberCount": 4,
+      "rawMemberCount": 0,
+      "zeroLengthMemberCount": 0,
+      "validatesAgainstFileSize": true,
+      "recognizedMemberKinds": {
+        "unknown-binary": 3,
+        "mot-bank-container": 1
+      },
+      "sampleMembers": [
+        {
+          "id": "000",
+          "name": "cmn_data.member000.unknown-binary",
+          "tableWord": "0x40000003",
+          "blocks": 3,
+          "compression": "pzzp",
+          "payloadBytes": 21504,
+          "kind": "unknown-binary",
+          "headHex": "00 8c ff ff 01 ff ff ff 02 03 ff ff 04 ff ff ff 05 ff ff ff 06 ff ff ff 07 ff ff ff 08 ff ff ff"
+        },
+        {
+          "id": "001",
+          "name": "cmn_data.member001.unknown-binary",
+          "tableWord": "0x40000001",
+          "blocks": 1,
+          "compression": "pzzp",
+          "payloadBytes": 15680,
+          "kind": "unknown-binary",
+          "headHex": "00 01 02 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff"
+        },
+        {
+          "id": "002",
+          "name": "cmn_data.member002.mot-bank-container",
+          "tableWord": "0x400000aa",
+          "blocks": 170,
+          "compression": "pzzp",
+          "payloadBytes": 437888,
+          "kind": "mot-bank-container",
+          "headHex": "00 00 00 40 00 00 00 78 00 00 00 c0 00 00 01 04 00 00 01 0c 00 00 01 44 00 00 01 88 00 00 01 cc"
+        },
+        {
+          "id": "003",
+          "name": "cmn_data.member003.unknown-binary",
+          "tableWord": "0x40000001",
+          "blocks": 1,
+          "compression": "pzzp",
+          "payloadBytes": 864,
+          "kind": "unknown-binary",
+          "headHex": "01 f4 00 64 27 10 00 00 07 d0 00 00 00 00 00 00 00 00 00 00 01 00 00 00 40 c0 00 00 40 b0 00 00"
+        }
+      ]
+    },
+    "assessment": "cmn_data is present as a PZZ archive and now inventoried at member-table level. Treat its contents as common battle/HUD candidate data until DOL/runtime traces map consumers and field semantics."
   },
   "borgAnimationCoverage": {
     "path": "research/asset-inventory/borg-animation-action-gaps.md",

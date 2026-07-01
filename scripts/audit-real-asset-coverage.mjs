@@ -450,6 +450,42 @@ function inspectHudAssetEvidence() {
   };
 }
 
+function inspectCommonBattleArchiveEvidence() {
+  const inventory = readJson("research/asset-inventory/pzz-arz-inventory.json");
+  const record = (inventory.value?.records ?? []).find((entry) => entry.name === "cmn_data.pzz") ?? null;
+  return {
+    path: "research/asset-inventory/pzz-arz-inventory.json",
+    parses: inventory.ok,
+    cmnDataBinExists: fs.existsSync(abs(`user-data/${region}/afs_data/root/cmn_data.bin`)),
+    cmnDataPzz: record
+      ? {
+          path: record.path,
+          role: record.role,
+          sizeBytes: record.sizeBytes,
+          memberCount: record.archive?.memberCount ?? null,
+          compressedMemberCount: record.archive?.compressedMemberCount ?? null,
+          rawMemberCount: record.archive?.rawMemberCount ?? null,
+          zeroLengthMemberCount: record.archive?.zeroLengthMemberCount ?? null,
+          validatesAgainstFileSize: record.archive?.validatesAgainstFileSize ?? null,
+          recognizedMemberKinds: record.archive?.recognizedMemberKinds ?? {},
+          sampleMembers: (record.members ?? []).slice(0, 6).map((member) => ({
+            id: member.memberId,
+            name: member.inferredName,
+            tableWord: member.tableWord,
+            blocks: member.blockCount,
+            compression: member.zeroLength ? "zero" : member.flags?.compressed ? "pzzp" : "raw",
+            payloadBytes: member.payload?.availableBytes ?? null,
+            kind: member.payload?.sniff?.kind ?? null,
+            headHex: member.payload?.sniff?.headHex ?? null,
+          })),
+        }
+      : null,
+    assessment: record
+      ? "cmn_data is present as a PZZ archive and now inventoried at member-table level. Treat its contents as common battle/HUD candidate data until DOL/runtime traces map consumers and field semantics."
+      : "cmn_data.pzz is present in source UI/HUD inventories, but pzz-arz inventory has not listed it yet.",
+  };
+}
+
 function inspectBorgAnimationCoverage() {
   const reportPath = "research/asset-inventory/borg-animation-action-gaps.md";
   const report = readText(reportPath);
@@ -549,6 +585,7 @@ function buildReport() {
   const modeNamingRisks = inspectModeNamingRisks();
   const combatFx = inspectCombatFx();
   const hudAssetEvidence = inspectHudAssetEvidence();
+  const commonBattleArchiveEvidence = inspectCommonBattleArchiveEvidence();
   const borgAnimationCoverage = inspectBorgAnimationCoverage();
   const powerupRuntimeGap = inspectPowerupRuntimeGap();
   const audioRuntime = inspectAudioRuntime();
@@ -575,6 +612,7 @@ function buildReport() {
     runtimeBattleHudUsesAvailableFontAndRoundel:
       hudAssetEvidence.battleHudUsesFontAscii && hudAssetEvidence.battleHudUsesFaceRoundel,
     runtimeBattleHudUsesAsIcon: hudAssetEvidence.battleHudUsesAsIcon,
+    commonBattleArchiveInventoried: Boolean(commonBattleArchiveEvidence.cmnDataPzz),
     runtimeBorgAnimationDirectMatches: borgAnimationCoverage.directRuntimeMatches,
     runtimeBorgAnimationFallbacks: borgAnimationCoverage.runtimeFallbacks,
     runtimeBorgAnimationMissing: borgAnimationCoverage.missingRuntimeMatches,
@@ -599,6 +637,7 @@ function buildReport() {
     uiTextureExports,
     combatFx,
     hudAssetEvidence,
+    commonBattleArchiveEvidence,
     borgAnimationCoverage,
     powerupRuntimeGap,
     audioRuntime,
@@ -648,6 +687,7 @@ function renderMarkdown(report) {
   add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses exported font/roundel: ${report.summary.runtimeBattleHudUsesAvailableFontAndRoundel ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses as_icon: ${report.summary.runtimeBattleHudUsesAsIcon ? "yes" : "no"} (manifest marks as_icon low-confidence for battle HUD)`);
+  add(`- Common battle archive inventoried: ${report.summary.commonBattleArchiveInventoried ? "yes" : "no"}`);
   add(`- Runtime borg animation direct matches: ${report.summary.runtimeBorgAnimationDirectMatches}/${report.borgAnimationCoverage.canonicalSlotChecks}`);
   add(`- Runtime borg animation fallbacks/missing: ${report.summary.runtimeBorgAnimationFallbacks}/${report.summary.runtimeBorgAnimationMissing}`);
   add(`- Runtime fly uses exported boost clip: ${report.summary.runtimeBoostFlyUsesExportedBoostClip ? "yes" : "no"}`);
@@ -734,6 +774,30 @@ function renderMarkdown(report) {
       { title: "Evidence", value: (row) => row.note },
     ]),
   );
+  add();
+  add("## Common Battle Archive Evidence");
+  add();
+  add(`Inventory: ${report.commonBattleArchiveEvidence.path}`);
+  add(`cmn_data.bin exists unpacked: ${report.commonBattleArchiveEvidence.cmnDataBinExists ? "yes" : "no"}`);
+  if (report.commonBattleArchiveEvidence.cmnDataPzz) {
+    const cmn = report.commonBattleArchiveEvidence.cmnDataPzz;
+    add(`cmn_data.pzz: ${cmn.path}; ${cmn.memberCount} members (${cmn.compressedMemberCount} compressed, ${cmn.rawMemberCount} raw, ${cmn.zeroLengthMemberCount} zero), valid block sum ${cmn.validatesAgainstFileSize}.`);
+    add(`Recognized member kinds: ${Object.entries(cmn.recognizedMemberKinds).map(([kind, count]) => `${kind}:${count}`).join(", ") || "none"}.`);
+    add();
+    add(
+      mdTable(cmn.sampleMembers, [
+        { title: "Member", value: (row) => row.id },
+        { title: "Name", value: (row) => row.name },
+        { title: "Table", value: (row) => row.tableWord },
+        { title: "Blocks", value: (row) => row.blocks },
+        { title: "Compression", value: (row) => row.compression },
+        { title: "Payload", value: (row) => row.payloadBytes },
+        { title: "Kind", value: (row) => row.kind },
+      ]),
+    );
+    add();
+  }
+  add(report.commonBattleArchiveEvidence.assessment);
   add();
   add("## Borg Animation Coverage");
   add();
