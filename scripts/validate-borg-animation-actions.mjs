@@ -72,6 +72,44 @@ const SLOT_FALLBACKS = {
   victory: ["idle"],
 };
 
+// Mirrored from apps/game/src/main.ts PREFERRED_LABELS.
+const PREFERRED_LABELS = {
+  pl0615: {
+    shoot: ["attack_s4"],
+    melee: ["attack_lunge_s1"],
+    hit: ["hit_react_s0"],
+    special: ["special_s0"],
+    death: ["death"],
+    victory: ["victory"],
+  },
+  pl0008: {
+    melee: ["attack_lunge_s1"],
+    hit: ["hit_react_s0"],
+    special: ["special_s0"],
+    death: ["death", "win_or_death"],
+    victory: ["victory"],
+  },
+  pl000c: {
+    melee: ["attack_lunge_s1"],
+    hit: ["hit_react_s0"],
+    special: ["special_s0"],
+    death: ["death", "win_or_death"],
+    victory: ["victory"],
+  },
+  pl0105: {
+    melee: ["attack_lunge_s1"],
+    hit: ["hit_react_s0"],
+    special: ["special_s0"],
+    death: ["death", "win_or_death"],
+  },
+  pl0109: {
+    melee: ["attack_lunge_s1"],
+    hit: ["guard_s11"],
+    special: ["special_s0"],
+    death: ["death", "win_or_death"],
+  },
+};
+
 const args = new Set(process.argv.slice(2));
 const strict = args.has("--strict");
 
@@ -146,9 +184,13 @@ function sortedBanks(index) {
 }
 
 function pickAnimBankDirect(index, slot) {
+  const banks = sortedBanks(index);
+  for (const label of PREFERRED_LABELS[index.borg]?.[slot] ?? []) {
+    const match = banks.find((bank) => bank.label === label);
+    if (match) return match;
+  }
   const patterns = SLOT_LABELS[slot];
   if (!patterns) return null;
-  const banks = sortedBanks(index);
   for (const pattern of patterns) {
     const match = banks.find((bank) => typeof bank.label === "string" && pattern.test(bank.label));
     if (match) return match;
@@ -282,7 +324,7 @@ function renderReport(records, parseErrors) {
   lines.push(`Scope: ${code("apps/game/public/models/pl*/anim_index.json")}`);
   lines.push(`Canonical app slots: ${codeList(CANONICAL_SLOTS)}`);
   lines.push(
-    "Runtime resolver: mirrors `SLOT_LABELS`, `SLOT_FALLBACKS`, `pickAnimBank`, and `pickAnimBankDirect` from `apps/game/src/main.ts` (runtime label tables and bank sort/pick order). `BattleScene` may still ask for `idle` after `loadClip` returns null, so `missing` below means the main runtime resolver found no canonical clip before that last idle request.",
+    "Runtime resolver: mirrors `PREFERRED_LABELS`, `SLOT_LABELS`, `SLOT_FALLBACKS`, `pickAnimBank`, and `pickAnimBankDirect` from `apps/game/src/main.ts` (runtime label tables and bank sort/pick order). `BattleScene` may still ask for `idle` after `loadClip` returns null, so `missing` below means the main runtime resolver found no canonical clip before that last idle request.",
   );
   lines.push("");
   lines.push("## Summary");

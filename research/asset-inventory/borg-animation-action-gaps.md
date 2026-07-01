@@ -1,20 +1,20 @@
 # Borg Animation Action Gaps
 
-Generated: 2026-06-30T21:52:41.833Z
+Generated: 2026-07-01T01:33:21.003Z
 
 Scope: `apps/game/public/models/pl*/anim_index.json`
 Canonical app slots: `idle`, `move`, `dash_fwd`, `dash_back`, `dash_left`, `dash_right`, `jump`, `fly`, `shoot`, `melee`, `special`, `hit`, `death`
-Runtime resolver: mirrors `SLOT_LABELS`, `SLOT_FALLBACKS`, `pickAnimBank`, and `pickAnimBankDirect` from `apps/game/src/main.ts` (runtime label tables and bank sort/pick order). `BattleScene` may still ask for `idle` after `loadClip` returns null, so `missing` below means the main runtime resolver found no canonical clip before that last idle request.
+Runtime resolver: mirrors `PREFERRED_LABELS`, `SLOT_LABELS`, `SLOT_FALLBACKS`, `pickAnimBank`, and `pickAnimBankDirect` from `apps/game/src/main.ts` (runtime label tables and bank sort/pick order). `BattleScene` may still ask for `idle` after `loadClip` returns null, so `missing` below means the main runtime resolver found no canonical clip before that last idle request.
 
 ## Summary
 
 | Metric | Count |
 |---|---:|
-| Animation indexes found | 102 |
-| Animation indexes parsed | 102 |
-| Total exported banks in parsed indexes | 4541 |
-| Canonical slot checks | 1326 |
-| Direct runtime matches | 1248 |
+| Animation indexes found | 104 |
+| Animation indexes parsed | 104 |
+| Total exported banks in parsed indexes | 4653 |
+| Canonical slot checks | 1352 |
+| Direct runtime matches | 1274 |
 | Runtime fallbacks | 75 |
 | Missing runtime matches | 3 |
 | Borgs with any fallback | 28 |
@@ -26,19 +26,19 @@ Runtime resolver: mirrors `SLOT_LABELS`, `SLOT_FALLBACKS`, `pickAnimBank`, and `
 
 | Slot | Direct | Fallback | Missing | Gap notes |
 |---|---:|---:|---:|---|
-| `idle` | 102 | 0 | 0 | none |
-| `move` | 99 | 0 | 3 | missing x3 |
-| `dash_fwd` | 98 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
-| `dash_back` | 98 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
-| `dash_left` | 94 | 8 | 0 | idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1 |
-| `dash_right` | 88 | 14 | 0 | dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1 |
-| `jump` | 99 | 3 | 0 | idle -> idle x3 |
-| `fly` | 99 | 3 | 0 | idle -> idle x3 |
-| `shoot` | 100 | 2 | 0 | idle -> idle x2 |
-| `melee` | 94 | 8 | 0 | idle -> idle x3; move -> move x5 |
-| `special` | 96 | 6 | 0 | idle -> idle x2; attack -> attack_s0 x4 |
-| `hit` | 90 | 12 | 0 | down -> death x3; idle -> idle x9 |
-| `death` | 91 | 11 | 0 | down -> guard_s0 x3; idle -> idle x8 |
+| `idle` | 104 | 0 | 0 | none |
+| `move` | 101 | 0 | 3 | missing x3 |
+| `dash_fwd` | 100 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
+| `dash_back` | 100 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
+| `dash_left` | 96 | 8 | 0 | idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1 |
+| `dash_right` | 90 | 14 | 0 | dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1 |
+| `jump` | 101 | 3 | 0 | idle -> idle x3 |
+| `fly` | 101 | 3 | 0 | idle -> idle x3 |
+| `shoot` | 102 | 2 | 0 | idle -> idle x2 |
+| `melee` | 96 | 8 | 0 | idle -> idle x3; move -> move x5 |
+| `special` | 98 | 6 | 0 | idle -> idle x2; attack -> attack_s0 x4 |
+| `hit` | 92 | 12 | 0 | down -> death x3; idle -> idle x9 |
+| `death` | 93 | 11 | 0 | down -> guard_s0 x3; idle -> idle x8 |
 
 ## Missing Runtime Matches
 

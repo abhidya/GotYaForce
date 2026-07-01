@@ -338,6 +338,43 @@ const SLOT_FALLBACKS: Partial<Record<AnimSlot, AnimSlot[]>> = {
   victory: ["idle"],
 };
 
+const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]>>>> = {
+  pl0615: {
+    shoot: ["attack_s4"],
+    melee: ["attack_lunge_s1"],
+    hit: ["hit_react_s0"],
+    special: ["special_s0"],
+    death: ["death"],
+    victory: ["victory"],
+  },
+  pl0008: {
+    melee: ["attack_lunge_s1"],
+    hit: ["hit_react_s0"],
+    special: ["special_s0"],
+    death: ["death", "win_or_death"],
+    victory: ["victory"],
+  },
+  pl000c: {
+    melee: ["attack_lunge_s1"],
+    hit: ["hit_react_s0"],
+    special: ["special_s0"],
+    death: ["death", "win_or_death"],
+    victory: ["victory"],
+  },
+  pl0105: {
+    melee: ["attack_lunge_s1"],
+    hit: ["hit_react_s0"],
+    special: ["special_s0"],
+    death: ["death", "win_or_death"],
+  },
+  pl0109: {
+    melee: ["attack_lunge_s1"],
+    hit: ["guard_s11"],
+    special: ["special_s0"],
+    death: ["death", "win_or_death"],
+  },
+};
+
 async function loadAnimIndex(id: string): Promise<AnimIndex | null> {
   let p = animIndexCache.get(id);
   if (!p) {
@@ -360,8 +397,12 @@ function pickAnimBank(index: AnimIndex, slot: AnimSlot): AnimBank | null {
 }
 
 function pickAnimBankDirect(index: AnimIndex, slot: AnimSlot): AnimBank | null {
-  const patterns = SLOT_LABELS[slot];
   const banks = [...index.banks].sort((a, b) => a.group - b.group || a.slot - b.slot || a.frames - b.frames);
+  for (const label of PREFERRED_LABELS[index.borg]?.[slot] ?? []) {
+    const match = banks.find((bank) => bank.label === label);
+    if (match) return match;
+  }
+  const patterns = SLOT_LABELS[slot];
   for (const pattern of patterns) {
     const match = banks.find((bank) => pattern.test(bank.label));
     if (match) return match;

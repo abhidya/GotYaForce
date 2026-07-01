@@ -4,7 +4,7 @@
 > idle/move) — death, victory, damage-react, knockdown, attacks — and bake them so
 > the web recreation has the full move set.
 >
-> **Status (2026-06-30):** DONE for the priority set. 251 clips baked across 5 borgs.
+> **Status (2026-07-01):** DONE for the priority set. 363 clips baked across 7 borgs.
 > Bank counts are **measured** (exact). Index→action labels are **inferred by
 > heuristic** (group/slot convention shared across borgs, anchored by a handful of
 > human-verified pl0615 clips). The decomp does **not** give a concrete bank table —
@@ -44,9 +44,13 @@ the proven HSDRaw `FOBJ_Player.GetValue` path (hermite-correct, see
 | pl0802 | Gold Hero | 308,864 | **54** | g0(18) g1(13) g2(0) g3(15) g4(5) g5(3) |
 | pl0500 | Flame Dragon | 247,392 | **33** | g0(12) g1(5) g3(3) g4(6) g5(1) g6(2) g7(1) g8(3) |
 | pl0109 | DEATH BORG BETA | 330,080 | **41** | g0(15) g1(19) g3(3) g4(2) g5(2) |
+| pl0008 | DEATH BORG ALPHA | 368,160 | **56** | g0(14) g1(10) g2(3) g3(18) g4(5) g5(6) |
+| pl000c | DEATH BORG ALPHA II | 368,160 | **56** | g0(14) g1(10) g2(3) g3(18) g4(5) g5(6) |
 
-(pl0008 DEATH BORG ALPHA has a model but **no** `pl0008mot.bin` — it shares/uses a
-base mot. pl0109 used as the Death-Borg representative.)
+(pl0008 DEATH BORG ALPHA and pl000c DEATH BORG ALPHA II do not have standalone
+`pl0008mot.bin` / `pl000cmot.bin` siblings in the AFS root, but their MOT members
+are present as member 003 inside `pl0008.pzz` / `pl000c.pzz`. Use
+`scripts/extract-pzz-members.mjs --borg pl0008,pl000c --member mot` before baking.)
 
 Group 2 is always present in the master table but always empty (0 non-zero slots)
 for humanoid borgs — a reserved category.
@@ -146,7 +150,9 @@ group/slot/label/frames/animJoints/root-spans.
 | pl0802 | 54 |
 | pl0500 | 33 |
 | pl0109 | 41 |
-| **total** | **251** |
+| pl0008 | 56 |
+| pl000c | 56 |
+| **total** | **363** |
 
 Re-bake any borg: `node scripts/bake-all-borg-anims.mjs <plId> GG4E`.
 Inspect any mot without baking: `dotnet user-data/GG4E/borg-anim-allbanks/...
