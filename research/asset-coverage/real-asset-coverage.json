@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:39:17.830Z",
+  "generatedAt": "2026-07-01T02:42:18.190Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -1411,6 +1411,10 @@
         },
         {
           "publicPath": "/fx/efct00_atlas.png",
+          "exists": true
+        },
+        {
+          "publicPath": "/fx/hit_spark.png",
           "exists": true
         }
       ]

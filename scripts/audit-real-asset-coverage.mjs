@@ -383,7 +383,13 @@ function inspectCombatFx() {
   const types = readText("packages/combat/src/types.ts");
   const battleScene = readText("apps/game/src/sim/battleScene.ts");
   const fxManifest = readJson("apps/game/public/fx/manifest.json");
-  const texturePaths = ["/fx/energy_dot.png", "/fx/flame_core.png", "/fx/muzzle_flash.png", "/fx/efct00_atlas.png"];
+  const texturePaths = [
+    "/fx/energy_dot.png",
+    "/fx/flame_core.png",
+    "/fx/muzzle_flash.png",
+    "/fx/efct00_atlas.png",
+    "/fx/hit_spark.png",
+  ];
   return {
     projectileVisualKindInState: types.includes("ProjectileVisualKind") && types.includes("visualKind"),
     projectileVisualKindDerivedFromProfile: combat.includes("projectileVisualKindForProfile"),

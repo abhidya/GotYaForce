@@ -49,6 +49,7 @@ interface Actor {
   /** Cached actions per slot for this actor. */
   actions: Partial<Record<AnimSlot, THREE.AnimationAction>>;
   current: AnimSlot | null;
+  lastSeenSlot: AnimSlot | null;
   /** True once the (async) model has been attached. */
   ready: boolean;
   isPlaceholder: boolean;
@@ -64,6 +65,8 @@ interface ImpactActor {
   material: THREE.SpriteMaterial;
   age: number;
   ttl: number;
+  startScale: THREE.Vector2;
+  endScale: THREE.Vector2;
 }
 
 /** Team-tinted placeholder material colors. */
@@ -74,6 +77,7 @@ const PROJECTILE_TEXTURE_URLS: Record<ProjectileVisualKind, string> = {
   muzzle: "/fx/muzzle_flash.png", // ptcl00.txg#6, exported muzzle flare.
 };
 const IMPACT_ATLAS_URL = "/fx/efct00_atlas.png"; // efct00.tpl#0, exported alpha puff/ring atlas.
+const HIT_SPARK_URL = "/fx/hit_spark.png"; // ptcl00.txg#2, exported hit spark / ember particle.
 const PROJECTILE_COLORS: Record<ProjectileVisualKind, { ally: number; enemy: number }> = {
   energy: { ally: 0x91eaff, enemy: 0xff7a4d },
   flame: { ally: 0xffd36a, enemy: 0xff5a2e },
@@ -87,6 +91,7 @@ export class BattleScene {
   private pending = new Set<string>();
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
   private impactTexture: THREE.Texture;
+  private hitSparkTexture: THREE.Texture;
 
   constructor(
     private readonly root: THREE.Group,
@@ -98,6 +103,8 @@ export class BattleScene {
       this.projectileTextures.set(kind, texture);
     }
     this.impactTexture = makeAtlasTexture(IMPACT_ATLAS_URL, 0, 0, 64, 32);
+    this.hitSparkTexture = new THREE.TextureLoader().load(HIT_SPARK_URL);
+    this.hitSparkTexture.colorSpace = THREE.SRGBColorSpace;
   }
 
   /** Map a sim state/action to one of the exported game animation groups. */
@@ -134,6 +141,8 @@ export class BattleScene {
       actor.group.rotation.y = b.rotY;
       // Animation slot from state.
       const slot = this.slotForBorg(b);
+      if (slot === "hit" && actor.lastSeenSlot !== "hit") this.spawnHitSpark(actor.group.position);
+      actor.lastSeenSlot = slot;
       if (actor.ready) this.playSlot(actor, slot);
       // Dim/hide once dead so the death pose reads (sim culls dead borgs next frame).
       if (!b.alive) actor.group.visible = true;
@@ -185,6 +194,7 @@ export class BattleScene {
       mixer: null,
       actions: {},
       current: null,
+      lastSeenSlot: null,
       ready: false,
       isPlaceholder: true,
     };
@@ -325,7 +335,37 @@ export class BattleScene {
     sprite.position.copy(position);
     sprite.scale.set(72, 36, 1);
     this.root.add(sprite);
-    this.impactActors.push({ sprite, material, age: 0, ttl: 0.22 });
+    this.impactActors.push({
+      sprite,
+      material,
+      age: 0,
+      ttl: 0.22,
+      startScale: new THREE.Vector2(72, 36),
+      endScale: new THREE.Vector2(130, 65),
+    });
+  }
+
+  private spawnHitSpark(position: THREE.Vector3): void {
+    const material = new THREE.SpriteMaterial({
+      map: this.hitSparkTexture,
+      color: 0xffffff,
+      transparent: true,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.position.set(position.x, position.y + 82, position.z);
+    sprite.scale.set(34, 34, 1);
+    this.root.add(sprite);
+    this.impactActors.push({
+      sprite,
+      material,
+      age: 0,
+      ttl: 0.16,
+      startScale: new THREE.Vector2(34, 34),
+      endScale: new THREE.Vector2(58, 58),
+    });
   }
 
   private updateImpacts(dt: number): void {
@@ -335,7 +375,11 @@ export class BattleScene {
       actor.age += dt;
       const t = Math.min(1, actor.age / actor.ttl);
       actor.material.opacity = 0.9 * (1 - t);
-      actor.sprite.scale.set(72 + 58 * t, 36 + 29 * t, 1);
+      actor.sprite.scale.set(
+        THREE.MathUtils.lerp(actor.startScale.x, actor.endScale.x, t),
+        THREE.MathUtils.lerp(actor.startScale.y, actor.endScale.y, t),
+        1,
+      );
       if (t >= 1) {
         this.disposeImpactActor(actor);
         this.impactActors.splice(i, 1);
