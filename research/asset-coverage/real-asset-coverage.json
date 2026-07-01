@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:11:11.561Z",
+  "generatedAt": "2026-07-01T03:16:31.934Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -1604,6 +1604,32 @@
           "matchedSibling": "user-data/GG4E/afs_data/root/comhit.bin",
           "matchedSiblingRelation": "explicit-common-battle-sibling",
           "kind": "unknown-binary",
+          "bankSummary": null,
+          "uniqueClipOffsetCount": null,
+          "headerHalfwords": [
+            "0x008c",
+            "0xffff",
+            "0x01ff",
+            "0xffff",
+            "0x0203",
+            "0xffff",
+            "0x04ff",
+            "0xffff",
+            "0x05ff",
+            "0xffff",
+            "0x06ff",
+            "0xffff"
+          ],
+          "headerFloatWords": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
           "headHex": "00 8c ff ff 01 ff ff ff 02 03 ff ff 04 ff ff ff 05 ff ff ff 06 ff ff ff 07 ff ff ff 08 ff ff ff"
         },
         {
@@ -1617,6 +1643,32 @@
           "matchedSibling": "user-data/GG4E/afs_data/root/comhit2.bin",
           "matchedSiblingRelation": "explicit-common-battle-sibling",
           "kind": "unknown-binary",
+          "bankSummary": null,
+          "uniqueClipOffsetCount": null,
+          "headerHalfwords": [
+            "0x0001",
+            "0x02ff",
+            "0xffff",
+            "0xffff",
+            "0xffff",
+            "0xffff",
+            "0xffff",
+            "0xffff",
+            "0xffff",
+            "0xffff",
+            "0xffff",
+            "0xffff"
+          ],
+          "headerFloatWords": [
+            0,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
           "headHex": "00 01 02 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff"
         },
         {
@@ -1630,6 +1682,32 @@
           "matchedSibling": null,
           "matchedSiblingRelation": null,
           "kind": "mot-bank-container",
+          "bankSummary": "b0:13, b1:15, b2:14, b3:1, b4:0, b5:2",
+          "uniqueClipOffsetCount": 45,
+          "headerHalfwords": [
+            "0x0000",
+            "0x0040",
+            "0x0000",
+            "0x0078",
+            "0x0000",
+            "0x00c0",
+            "0x0000",
+            "0x0104",
+            "0x0000",
+            "0x010c",
+            "0x0000",
+            "0x0144"
+          ],
+          "headerFloatWords": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
           "headHex": "00 00 00 40 00 00 00 78 00 00 00 c0 00 00 01 04 00 00 01 0c 00 00 01 44 00 00 01 88 00 00 01 cc"
         },
         {
@@ -1643,6 +1721,32 @@
           "matchedSibling": null,
           "matchedSiblingRelation": null,
           "kind": "unknown-binary",
+          "bankSummary": null,
+          "uniqueClipOffsetCount": null,
+          "headerHalfwords": [
+            "0x01f4",
+            "0x0064",
+            "0x2710",
+            "0x0000",
+            "0x07d0",
+            "0x0000",
+            "0x0000",
+            "0x0000",
+            "0x0000",
+            "0x0000",
+            "0x0100",
+            "0x0000"
+          ],
+          "headerFloatWords": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            6,
+            5.5
+          ],
           "headHex": "01 f4 00 64 27 10 00 00 07 d0 00 00 00 00 00 00 00 00 00 00 01 00 00 00 40 c0 00 00 40 b0 00 00"
         }
       ]

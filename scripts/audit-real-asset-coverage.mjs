@@ -479,6 +479,10 @@ function inspectCommonBattleArchiveEvidence() {
             matchedSibling: member.payload?.matchedSibling?.path ?? null,
             matchedSiblingRelation: member.payload?.matchedSibling?.relation ?? null,
             kind: member.payload?.sniff?.kind ?? null,
+            bankSummary: member.payload?.sniff?.banks?.map((bank) => `b${bank.bankIndex}:${bank.clipCount}`).join(", ") ?? null,
+            uniqueClipOffsetCount: member.payload?.sniff?.uniqueClipOffsetCount ?? null,
+            headerHalfwords: member.payload?.sniff?.headerHalfwords ?? null,
+            headerFloatWords: member.payload?.sniff?.headerFloatWords ?? null,
             headHex: member.payload?.sniff?.headHex ?? null,
           })),
         }
@@ -796,9 +800,15 @@ function renderMarkdown(report) {
         { title: "Compression", value: (row) => row.compression },
         { title: "Payload", value: (row) => row.payloadBytes },
         { title: "Kind", value: (row) => row.kind },
+        { title: "MOT banks", value: (row) => row.bankSummary ? `${row.bankSummary} (${row.uniqueClipOffsetCount} unique clips)` : "" },
         { title: "Matched source", value: (row) => row.matchedSibling ?? "none" },
       ]),
     );
+    const compactCommonMember = cmn.sampleMembers.find((member) => member.id === "003");
+    if (compactCommonMember) {
+      add();
+      add(`Member 003 numeric probes: halfwords ${compactCommonMember.headerHalfwords?.slice(0, 8).join(", ") ?? "n/a"}; f32 words ${compactCommonMember.headerFloatWords?.slice(0, 6).join(", ") ?? "n/a"}. These are byte-level probes only, not named fields.`);
+    }
     add();
   }
   add(report.commonBattleArchiveEvidence.assessment);

@@ -76,6 +76,15 @@ function headerHalfwords(buffer, count = 12) {
   return words;
 }
 
+function headerFloatWords(buffer, count = 12) {
+  const words = [];
+  for (let offset = 0; offset + 4 <= buffer.length && words.length < count; offset += 4) {
+    const value = buffer.readFloatBE(offset);
+    words.push(Number.isFinite(value) ? Number(value.toFixed(6)) : null);
+  }
+  return words;
+}
+
 function readCString(buffer, offset, max = 512) {
   if (offset < 0 || offset >= buffer.length) return null;
   let end = offset;
@@ -530,7 +539,7 @@ function parseHsdDat(buffer) {
   return null;
 }
 
-function parseMotLike(buffer) {
+function parseMotLike(buffer, options = {}) {
   if (buffer.length < 0x18) return null;
   const bankOffsets = [];
   for (let i = 0; i < 6; i += 1) bankOffsets.push(buffer.readUInt32BE(i * 4));
@@ -541,6 +550,7 @@ function parseMotLike(buffer) {
   const banks = bankOffsets.map((offset, bankIndex) => {
     if (offset === 0 || offset >= buffer.length) return { bankIndex, tableOffset: offset, parseStatus: "missing", clipCount: 0 };
     const clipOffsets = [];
+    let emptySlotCount = 0;
     let cursor = offset;
     for (let slot = 0; slot < 512 && cursor + 4 <= buffer.length; slot += 1, cursor += 4) {
       const value = buffer.readUInt32BE(cursor);
@@ -549,27 +559,55 @@ function parseMotLike(buffer) {
           bankIndex,
           tableOffset: offset,
           parseStatus: "terminated",
+          slotCount: slot,
+          emptySlotCount,
           clipCount: clipOffsets.length,
           firstClipOffset: clipOffsets[0] ?? null,
+          ...(options.includeClipOffsets ? { clipOffsets: clipOffsets.slice(0, 32) } : {}),
+          internalClipOffsets: clipOffsets,
         };
       }
-      if (value !== 0) clipOffsets.push(value);
+      if (value === 0) emptySlotCount += 1;
+      else clipOffsets.push(value);
     }
     return {
       bankIndex,
       tableOffset: offset,
       parseStatus: "unterminated",
+      slotCount: null,
+      emptySlotCount,
       clipCount: clipOffsets.length,
       firstClipOffset: clipOffsets[0] ?? null,
+      ...(options.includeClipOffsets ? { clipOffsets: clipOffsets.slice(0, 32) } : {}),
+      internalClipOffsets: clipOffsets,
     };
   });
 
   if (!banks.some((bank) => bank.parseStatus === "terminated")) return null;
+  const uniqueClipOffsets = [...new Set(banks.flatMap((bank) => bank.internalClipOffsets ?? []))]
+    .filter((offset) => offset > 0 && offset < buffer.length)
+    .sort((a, b) => a - b);
+  const blobRanges = options.includeBlobRanges
+    ? uniqueClipOffsets.slice(0, 32).map((offset, index) => {
+        const nextOffset = uniqueClipOffsets[index + 1] ?? buffer.length;
+        return {
+          index,
+          offset,
+          offsetHex: hex(offset),
+          lengthBytes: Math.max(0, nextOffset - offset),
+          headHex: headHex(buffer.subarray(offset, Math.min(offset + 16, buffer.length)), 16),
+        };
+      })
+    : null;
   return {
     kind: "mot-bank-container",
     bankOffsets,
-    banks,
+    banks: banks.map(({ internalClipOffsets, ...bank }) => bank),
     totalClipCount: banks.reduce((sum, bank) => sum + bank.clipCount, 0),
+    uniqueClipOffsetCount: uniqueClipOffsets.length,
+    firstClipOffset: uniqueClipOffsets[0] ?? null,
+    firstClipOffsetHex: uniqueClipOffsets[0] == null ? null : hex(uniqueClipOffsets[0]),
+    ...(blobRanges ? { blobRanges } : {}),
   };
 }
 
@@ -586,10 +624,12 @@ function inferKindFromContext(file, memberIndex, buffer) {
 }
 
 function sniffBuffer(buffer, context = {}) {
+  const isCmnData = /^cmn_data\.pzz$/i.test(context.file?.name ?? "");
   const common = {
     availableBytes: buffer.length,
     headHex: headHex(buffer),
     headerWords: headerWords(buffer, 8),
+    ...(isCmnData ? { headerHalfwords: headerHalfwords(buffer, 12), headerFloatWords: headerFloatWords(buffer, 8) } : {}),
     asciiPrefix: printableAsciiPrefix(buffer),
   };
 
@@ -610,7 +650,7 @@ function sniffBuffer(buffer, context = {}) {
     };
   }
 
-  const mot = parseMotLike(buffer);
+  const mot = parseMotLike(buffer, { includeBlobRanges: isCmnData, includeClipOffsets: isCmnData });
   if (mot) return { ...common, ...mot };
 
   const contextual = inferKindFromContext(context.file, context.memberIndex, buffer);

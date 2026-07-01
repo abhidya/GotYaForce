@@ -1,6 +1,6 @@
 # PZZ/ARZ archive format notes
 
-Generated: 2026-07-01T03:10:58.081Z
+Generated: 2026-07-01T03:16:28.490Z
 Scanner: `scripts/inspect-pzz-arz.mjs`
 
 ## Inputs
