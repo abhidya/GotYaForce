@@ -104,9 +104,7 @@ for (const [address, bodyInfo] of bodies) {
 const callableNames = new Map();
 for (const entry of functionEntries.values()) {
   for (const name of [entry.currentName, entry.symbolName]) {
-    if (typeof name === "string" && /^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
-      callableNames.set(name, entry.address);
-    }
+    addCallableAlias(callableNames, name, entry.address);
   }
 }
 
@@ -256,6 +254,14 @@ function collectCallees(body, ownAddress, names) {
     calls.set(address, { address: `0x${address}`, name });
   }
   return [...calls.values()];
+}
+
+function addCallableAlias(names, name, address) {
+  if (typeof name !== "string" || !name) return;
+  const aliases = [name, name.replace(/[^A-Za-z0-9_]+/g, "_").replace(/^_+|_+$/g, "")];
+  for (const alias of unique(aliases)) {
+    if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(alias) && !names.has(alias)) names.set(alias, address);
+  }
 }
 
 function collectGlobals(body) {
