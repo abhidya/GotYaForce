@@ -1,6 +1,6 @@
 # PZZ/ARZ archive format notes
 
-Generated: 2026-07-01T03:08:32.868Z
+Generated: 2026-07-01T03:10:58.081Z
 Scanner: `scripts/inspect-pzz-arz.mjs`
 
 ## Inputs
@@ -55,8 +55,8 @@ ARZ files and compressed PZZ members use the same 16-bit big-endian LZ stream. T
 
 | Id | Table word | Offset | Blocks | Compression | Name / kind | Exact bytes |
 |---:|---|---:|---:|---|---|---:|
-| 000 | `0x40000003` | `0x000800` | 3 | pzzp | cmn_data.member000.unknown-binary / unknown-binary |  |
-| 001 | `0x40000001` | `0x002000` | 1 | pzzp | cmn_data.member001.unknown-binary / unknown-binary |  |
+| 000 | `0x40000003` | `0x000800` | 3 | pzzp | comhit.bin / unknown-binary | 21504 |
+| 001 | `0x40000001` | `0x002000` | 1 | pzzp | comhit2.bin / unknown-binary | 15680 |
 | 002 | `0x400000aa` | `0x002800` | 170 | pzzp | cmn_data.member002.mot-bank-container / mot-bank-container |  |
 | 003 | `0x40000001` | `0x057800` | 1 | pzzp | cmn_data.member003.unknown-binary / unknown-binary |  |
 
@@ -135,7 +135,7 @@ ARZ files and compressed PZZ members use the same 16-bit big-endian LZ stream. T
 ## Blockers
 
 - PZZ member semantics are only partly named: open; 132 item(s). The table and compression are decoded, but several payloads need runtime correlation or sibling file matches before naming their fields.
-- Exact payload length can be padded: open; 1592 item(s). HSD and sibling-file matches recover exact byte counts for many payloads, but unknown binary members still expose the decompressed stream length only.
+- Exact payload length can be padded: open; 1590 item(s). HSD and sibling-file matches recover exact byte counts for many payloads, but unknown binary members still expose the decompressed stream length only.
 - Direct ARZ payloads not recognized by magic: clear; 0 item(s). Direct item/stc ARZ files should normally decompress to HSD DAT; non-HSD cases need separate format work.
 - Runtime effect/item/stage meaning still needs correlation: open; 355 item(s). This scanner lists and classifies bytes. It does not claim which game event, particle emitter, or stage state consumes each payload.
 

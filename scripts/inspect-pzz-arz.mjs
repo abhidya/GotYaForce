@@ -17,6 +17,10 @@ const sourceInventoryPaths = {
   weaponsEffectsProjectiles: "research/asset-inventory/weapons-effects-projectiles.json",
 };
 
+const extraSiblingCandidatesByStem = {
+  cmn_data: ["comhit.bin", "comhit2.bin"],
+};
+
 const pzzMemberBlockSize = 0x800;
 const pzzCompressedFlag = 0x40000000;
 const pzzBlockCountMask = 0x3fffffff;
@@ -345,7 +349,27 @@ async function listSiblingCandidates(stem) {
     });
   }
 
-  return candidates.sort((a, b) => a.name.localeCompare(b.name)).slice(0, maxRootFilesForSiblingMatch);
+  for (const candidateName of extraSiblingCandidatesByStem[prefix] ?? []) {
+    const abs = path.join(assetRoot, candidateName);
+    try {
+      const stat = await fs.stat(abs);
+      if (!stat.isFile()) continue;
+      candidates.push({
+        name: candidateName,
+        path: toRepoPath(abs),
+        abs,
+        sizeBytes: stat.size,
+        relation: "explicit-common-battle-sibling",
+      });
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+
+  return candidates
+    .filter((candidate, index, all) => all.findIndex((other) => other.path === candidate.path) === index)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .slice(0, maxRootFilesForSiblingMatch);
 }
 
 const siblingContentCache = new Map();
@@ -366,6 +390,7 @@ async function matchSibling(buffer, candidates) {
     return {
       path: candidate.path,
       name: candidate.name,
+      relation: candidate.relation ?? "same-prefix-sibling",
       exactBytes: candidate.sizeBytes,
       paddingBytes: buffer.length - candidate.sizeBytes,
       paddingIsZero,
@@ -662,6 +687,7 @@ async function inspectPzzArchive(file, sourceIndexes) {
         compression: decompression,
         payload: {
           availableBytes: payload.length,
+          sha1: payload.length > 0 ? sha1(payload) : null,
           exactBytes,
           paddingBytes: exactBytes === null ? null : payload.length - exactBytes,
           matchedSibling: siblingMatch,
@@ -733,6 +759,8 @@ function inferPzzMemberLabel(file, index, sniff) {
     return `gets${String(index).padStart(2, "0")}.${sniff.kind}`;
   }
   if (/^cmn_data$/i.test(stem)) {
+    if (index === 0 && sniff.kind === "unknown-binary") return "comhit.bin";
+    if (index === 1 && sniff.kind === "unknown-binary") return "comhit2.bin";
     return `cmn_data.member${String(index).padStart(3, "0")}.${sniff.kind}`;
   }
   if (/^st[0-9a-f]{2}$/i.test(stem)) {

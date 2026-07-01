@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:08:45.372Z
+Generated: 2026-07-01T03:11:11.561Z
 
 ## Summary
 
@@ -128,12 +128,12 @@ cmn_data.bin exists unpacked: no
 cmn_data.pzz: user-data/GG4E/afs_data/root/cmn_data.pzz; 4 members (4 compressed, 0 raw, 0 zero), valid block sum true.
 Recognized member kinds: unknown-binary:3, mot-bank-container:1.
 
-| Member | Name | Table | Blocks | Compression | Payload | Kind |
-| --- | --- | --- | --- | --- | --- | --- |
-| 000 | cmn_data.member000.unknown-binary | 0x40000003 | 3 | pzzp | 21504 | unknown-binary |
-| 001 | cmn_data.member001.unknown-binary | 0x40000001 | 1 | pzzp | 15680 | unknown-binary |
-| 002 | cmn_data.member002.mot-bank-container | 0x400000aa | 170 | pzzp | 437888 | mot-bank-container |
-| 003 | cmn_data.member003.unknown-binary | 0x40000001 | 1 | pzzp | 864 | unknown-binary |
+| Member | Name | Table | Blocks | Compression | Payload | Kind | Matched source |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 000 | comhit.bin | 0x40000003 | 3 | pzzp | 21504 | unknown-binary | user-data/GG4E/afs_data/root/comhit.bin |
+| 001 | comhit2.bin | 0x40000001 | 1 | pzzp | 15680 | unknown-binary | user-data/GG4E/afs_data/root/comhit2.bin |
+| 002 | cmn_data.member002.mot-bank-container | 0x400000aa | 170 | pzzp | 437888 | mot-bank-container | none |
+| 003 | cmn_data.member003.unknown-binary | 0x40000001 | 1 | pzzp | 864 | unknown-binary | none |
 
 cmn_data is present as a PZZ archive and now inventoried at member-table level. Treat its contents as common battle/HUD candidate data until DOL/runtime traces map consumers and field semantics.
 

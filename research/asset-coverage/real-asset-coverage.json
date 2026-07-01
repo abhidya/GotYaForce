@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:08:45.372Z",
+  "generatedAt": "2026-07-01T03:11:11.561Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -1595,21 +1595,27 @@
       "sampleMembers": [
         {
           "id": "000",
-          "name": "cmn_data.member000.unknown-binary",
+          "name": "comhit.bin",
           "tableWord": "0x40000003",
           "blocks": 3,
           "compression": "pzzp",
           "payloadBytes": 21504,
+          "payloadSha1": "0f178c736dfefcb78596f91f47a5c1cf82a4e9f6",
+          "matchedSibling": "user-data/GG4E/afs_data/root/comhit.bin",
+          "matchedSiblingRelation": "explicit-common-battle-sibling",
           "kind": "unknown-binary",
           "headHex": "00 8c ff ff 01 ff ff ff 02 03 ff ff 04 ff ff ff 05 ff ff ff 06 ff ff ff 07 ff ff ff 08 ff ff ff"
         },
         {
           "id": "001",
-          "name": "cmn_data.member001.unknown-binary",
+          "name": "comhit2.bin",
           "tableWord": "0x40000001",
           "blocks": 1,
           "compression": "pzzp",
           "payloadBytes": 15680,
+          "payloadSha1": "a7afe013b5c9a3ff752db62728207b67296803bf",
+          "matchedSibling": "user-data/GG4E/afs_data/root/comhit2.bin",
+          "matchedSiblingRelation": "explicit-common-battle-sibling",
           "kind": "unknown-binary",
           "headHex": "00 01 02 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff"
         },
@@ -1620,6 +1626,9 @@
           "blocks": 170,
           "compression": "pzzp",
           "payloadBytes": 437888,
+          "payloadSha1": "27b41b0b212f43b178683f2714529e1088975d35",
+          "matchedSibling": null,
+          "matchedSiblingRelation": null,
           "kind": "mot-bank-container",
           "headHex": "00 00 00 40 00 00 00 78 00 00 00 c0 00 00 01 04 00 00 01 0c 00 00 01 44 00 00 01 88 00 00 01 cc"
         },
@@ -1630,6 +1639,9 @@
           "blocks": 1,
           "compression": "pzzp",
           "payloadBytes": 864,
+          "payloadSha1": "b6ca17cd14d4065f748bac8d285772716fa91a36",
+          "matchedSibling": null,
+          "matchedSiblingRelation": null,
           "kind": "unknown-binary",
           "headHex": "01 f4 00 64 27 10 00 00 07 d0 00 00 00 00 00 00 00 00 00 00 01 00 00 00 40 c0 00 00 40 b0 00 00"
         }

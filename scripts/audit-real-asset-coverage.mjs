@@ -475,6 +475,9 @@ function inspectCommonBattleArchiveEvidence() {
             blocks: member.blockCount,
             compression: member.zeroLength ? "zero" : member.flags?.compressed ? "pzzp" : "raw",
             payloadBytes: member.payload?.availableBytes ?? null,
+            payloadSha1: member.payload?.sha1 ?? null,
+            matchedSibling: member.payload?.matchedSibling?.path ?? null,
+            matchedSiblingRelation: member.payload?.matchedSibling?.relation ?? null,
             kind: member.payload?.sniff?.kind ?? null,
             headHex: member.payload?.sniff?.headHex ?? null,
           })),
@@ -793,6 +796,7 @@ function renderMarkdown(report) {
         { title: "Compression", value: (row) => row.compression },
         { title: "Payload", value: (row) => row.payloadBytes },
         { title: "Kind", value: (row) => row.kind },
+        { title: "Matched source", value: (row) => row.matchedSibling ?? "none" },
       ]),
     );
     add();
