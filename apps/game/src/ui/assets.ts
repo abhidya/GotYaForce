@@ -50,6 +50,8 @@ export const ASSETS = {
   /** Results/podium exported scene texture sheets. */
   resultsWin: "/ui/hsd/rpot20_mdl/texture_000_RGBA8.png",
   resultsLose: "/ui/hsd/rpot23_mdl/texture_000_RGBA8.png",
+  /** In-battle face marker/roundel texture from `fmg00_mdl.arc`. */
+  faceMarkerRoundel: "/ui/hsd/fmg00_mdl/texture_001_CI8.png",
   /** Bitmap font sheet. */
   font: "/ui/tpl/font_00/image_00_CI4.png",
 } as const;

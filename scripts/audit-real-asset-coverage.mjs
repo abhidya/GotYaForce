@@ -117,6 +117,7 @@ const assetConstants = {
     vsSelectLabels: "/ui/hsd/vsel00_mdl/texture_004_CI8.png",
     resultsWin: "/ui/hsd/rpot20_mdl/texture_000_RGBA8.png",
     resultsLose: "/ui/hsd/rpot23_mdl/texture_000_RGBA8.png",
+    faceMarkerRoundel: "/ui/hsd/fmg00_mdl/texture_001_CI8.png",
     font: "/ui/tpl/font_00/image_00_CI4.png",
   },
   helpers: {

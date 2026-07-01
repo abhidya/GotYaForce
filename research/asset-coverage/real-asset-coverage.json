@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:23:48.285Z",
+  "generatedAt": "2026-07-01T02:27:58.974Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -561,6 +561,12 @@
       "fileRef": "apps/game/src/ui/hud/BattleHud.ts:101",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.faceMarkerRoundel",
+          "publicPath": "/ui/hsd/fmg00_mdl/texture_001_CI8.png",
+          "exists": true
+        },
         {
           "kind": "borg-ui-helper",
           "symbol": "borgBannerPath",

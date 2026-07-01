@@ -17,7 +17,7 @@
  */
 
 import { el, clamp01 } from "../dom.js";
-import { borgBannerPath } from "../assets.js";
+import { ASSETS, borgBannerPath } from "../assets.js";
 
 export interface HudState {
   /** Remaining ally GF-energy (sum of alive ally borg energy). */
@@ -150,7 +150,11 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   // ----- HP gauge (bottom-left) -----
   const hpGauge = ringGauge(60, "#46c828", "rgba(0,0,0,0.4)");
   const hpNum = el("span", { class: "gf-hp-num", text: "0" });
-  const hpWrap = el("div", { class: "gf-hud-hp" }, [el("div", { class: "gf-hp-ring" }, [hpGauge.node]), hpNum]);
+  const hpWrap = el("div", { class: "gf-hud-hp" }, [
+    el("img", { class: "gf-hp-face-marker", attrs: { src: ASSETS.faceMarkerRoundel, alt: "", "aria-hidden": "true" } }),
+    el("div", { class: "gf-hp-ring" }, [hpGauge.node]),
+    hpNum,
+  ]);
   root.appendChild(hpWrap);
 
   // ----- weapon prompts (bottom-right) -----
