@@ -8,6 +8,7 @@
  */
 
 import { el, legendItem } from "../dom.js";
+import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export type Difficulty = "normal" | "tuff" | "insane";
@@ -44,6 +45,8 @@ export function createSelectDifficulty(
   opts: SelectDifficultyOptions,
 ): SelectDifficultyHandle {
   let selected: Difficulty = opts.initial ?? "normal";
+  let motion: ChallengeMenuMotionHandle | null = null;
+  let choosing = false;
 
   const root = el("div", { class: "gf-screen gf-vsel-screen gf-select-difficulty" });
   const frame = el("div", { class: "gf-vsel-frame" });
@@ -55,15 +58,17 @@ export function createSelectDifficulty(
 
   const row = el("div", { class: "gf-row gf-vsel-options" });
   const tiles = new Map<Difficulty, HTMLButtonElement>();
+  const motionItems: Array<{ element: HTMLElement; delayFrames: number; fromX: number; fromY: number }> = [];
 
-  for (const e of ENTRIES) {
+  for (const [index, e] of ENTRIES.entries()) {
     const tile = el(
       "button",
       {
         class: `gf-option gf-diff-option gf-diff-${e.key}`,
         attrs: { type: "button", "data-diff": e.key, "aria-label": `${e.name} ${e.energy}` },
         onClick: () => {
-          if (selected === e.key) opts.onSelect(e.energy, e.key);
+          if (!canInteract()) return;
+          if (selected === e.key) void chooseSelected();
           else select(e.key);
         },
       },
@@ -77,6 +82,12 @@ export function createSelectDifficulty(
       ],
     );
     tiles.set(e.key, tile);
+    motionItems.push({
+      element: tile,
+      delayFrames: index * 2,
+      fromX: e.key === "normal" ? -56 : e.key === "insane" ? 56 : 0,
+      fromY: 74,
+    });
     row.appendChild(tile);
   }
   frame.appendChild(row);
@@ -89,10 +100,39 @@ export function createSelectDifficulty(
 
   function select(key: Difficulty): void {
     selected = key;
-    for (const [k, node] of tiles) node.classList.toggle("gf-selected", k === key);
+    let selectedNode: HTMLElement | null = null;
+    for (const [k, node] of tiles) {
+      const isSelected = k === key;
+      node.classList.toggle("gf-selected", isSelected);
+      if (isSelected) selectedNode = node;
+    }
+    motion?.pulseSelected(selectedNode);
+  }
+
+  function canInteract(): boolean {
+    return Boolean(motion?.isReady()) && !choosing;
+  }
+
+  async function chooseSelected(): Promise<void> {
+    if (!canInteract()) return;
+    choosing = true;
+    const e = ENTRIES.find((x) => x.key === selected)!;
+    await motion?.finish();
+    opts.onSelect(e.energy, e.key);
+  }
+
+  async function goBack(): Promise<void> {
+    if (!opts.onBack || !canInteract()) return;
+    choosing = true;
+    await motion?.finish();
+    opts.onBack();
   }
 
   function onKey(ev: KeyboardEvent): void {
+    if (!canInteract()) {
+      ev.preventDefault();
+      return;
+    }
     const order = ENTRIES.map((e) => e.key);
     const idx = order.indexOf(selected);
     if (ev.key === "ArrowRight") {
@@ -102,15 +142,15 @@ export function createSelectDifficulty(
       select(order[Math.max(idx - 1, 0)]!);
       ev.preventDefault();
     } else if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
-      const e = ENTRIES.find((x) => x.key === selected)!;
-      opts.onSelect(e.energy, e.key);
+      void chooseSelected();
       ev.preventDefault();
     } else if (ev.key === "Escape" || ev.key.toLowerCase() === "b") {
-      opts.onBack?.();
+      void goBack();
       ev.preventDefault();
     }
   }
 
+  motion = mountChallengeMenuMotion(root, motionItems);
   select(selected);
   container.appendChild(root);
   const stopScene = mountUiSceneModels(selectScene, {
@@ -124,6 +164,7 @@ export function createSelectDifficulty(
   return {
     getSelected: () => selected,
     destroy: () => {
+      motion?.destroy();
       stopScene();
       window.removeEventListener("keydown", onKey);
       root.remove();
