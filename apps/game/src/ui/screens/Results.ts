@@ -11,6 +11,7 @@
  * bottom-right advances (next battle on win, title on lose — the caller decides).
  */
 
+import { ASSETS } from "../assets.js";
 import { el, faceButton } from "../dom.js";
 
 export interface ResultStats {
@@ -53,7 +54,11 @@ function pct(n: number): string {
 
 export function createResults(container: HTMLElement, opts: ResultsOptions = {}): ResultsHandle {
   const root = el("div", { class: "gf-screen gf-results" });
-  root.appendChild(el("div", { class: "gf-results-sky" }));
+  const backdrop = el("img", {
+    class: "gf-results-backdrop",
+    attrs: { src: ASSETS.resultsWin, alt: "", "aria-hidden": "true" },
+  }) as HTMLImageElement;
+  root.appendChild(backdrop);
 
   const rows = el("div", { class: "gf-results-rows" });
   root.appendChild(rows);
@@ -72,6 +77,8 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
   }
 
   function render(result: "win" | "lose", s: ResultStats): void {
+    backdrop.src = result === "win" ? ASSETS.resultsWin : ASSETS.resultsLose;
+
     const defs: RowDef[] = [
       { label: "ATTACK", value: String(s.attack) },
       { label: "HIT RATIO", value: pct(s.hitRatio) },

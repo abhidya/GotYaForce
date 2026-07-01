@@ -1,11 +1,11 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:20:02.341Z",
+  "generatedAt": "2026-07-01T02:23:48.285Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
-    "screensUsingAnyRealExportedAsset": 8,
+    "screensUsingAnyRealExportedAsset": 9,
     "screensWithHandcodedSurfaceSignals": 10,
     "screensWithRealSceneModel": 6,
     "publicUiTextureExportedImages": 831,
@@ -613,27 +613,35 @@
       ],
       "nextReplacement": "Export and mount the real result/podium scenes instead of CSS rows and sky backdrop.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/Results.ts:54",
-      "coverageLevel": "handcoded-or-unverified",
-      "realExportedAssetsUsed": [],
-      "handcodedSurfaceSignals": [
+      "fileRef": "apps/game/src/ui/screens/Results.ts:55",
+      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "realExportedAssetsUsed": [
         {
-          "kind": "css-results-backdrop",
-          "pattern": "gf-results-sky",
-          "line": 56
+          "kind": "named-texture",
+          "symbol": "ASSETS.resultsWin",
+          "publicPath": "/ui/hsd/rpot20_mdl/texture_000_RGBA8.png",
+          "exists": true
         },
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.resultsLose",
+          "publicPath": "/ui/hsd/rpot23_mdl/texture_000_RGBA8.png",
+          "exists": true
+        }
+      ],
+      "handcodedSurfaceSignals": [
         {
           "kind": "css-results-row",
           "pattern": "gf-result-pill",
-          "line": 90
+          "line": 97
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 64
+          "line": 69
         }
       ],
-      "replacementStatus": "No direct exported UI asset usage observed in this component."
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
       "id": "pause-menu",
