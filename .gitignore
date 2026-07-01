@@ -50,6 +50,10 @@ research/decomp/*.lock
 research/decomp/*.lock~
 research/decomp/*.rep/
 
+# Derived per-function reorganization of the ghidra-export corpus.
+# Regenerate any time with: node scripts/reorg-decomp.mjs
+research/decomp/organized/
+
 # Live Dolphin capture scratch output.
 hp_log.csv
 

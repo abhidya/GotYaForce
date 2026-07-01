@@ -122,10 +122,12 @@ grep-the-corpus-then-cross-reference approach applies to any other system:
   using the section-table parser already in `research/decomp/dol.py` (`addr_to_off`, `read_u32`,
   `read_f32` — extend with `read_s16`/pointer-following as needed, see
   `research/decomp/data/*.json` generation for the pattern).
-- Full matching decompilation (byte-identical recompilation) is explicitly out of scope — it
-  needs Nintendo's proprietary Metrowerks CodeWarrior compiler, which won't be sourced for
-  copyright reasons. The bulk-decompile-and-grep approach above is the practical substitute and
-  is sufficient for fixing the port.
+- Full matching decompilation (byte-identical recompilation) is intentionally not pursued.
+  It is NOT a blocker — it's the wrong tool for this project. Matching decomp only pays off
+  when the goal is recompiling the original binary (preservation projects, native ports); this
+  port targets TypeScript and never recompiles PowerPC, so even a complete matching toolchain
+  would add nothing over the bulk-decompile-and-grep corpus, which already answers every
+  "what does the ROM do here" question the port needs.
 - After any code change in `packages/combat` (or elsewhere), verify with a scratch TypeScript
   compile — the repo's own `pnpm`-managed `node_modules/typescript` symlink is broken in at least
   one prior sandbox environment; if `tsc -b` fails with an I/O error on the symlink, copy the

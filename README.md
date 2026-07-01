@@ -10,10 +10,19 @@ Phase-0 technical research and design plan: format table, tool matrix, asset-rec
 plan, gameplay-systems RE plan, repository structure (section 15), and the
 browser-recreation architecture (section 10) this scaffold implements.
 
-Key finding from the research: **~70% of the asset pipeline is plumbing over existing
-tools; the one unsolved blocker is the 3D model/skeleton/animation format** (the
-`_mdl.arc` "HSD Files" container and the `chd/dpk/tsb/txg` family). That parser is the
-project's critical path — see `packages/formats/src/mdl-arc.ts`.
+Key finding from the research: ~70% of the asset pipeline is plumbing over existing
+tools. The formerly-unsolved blocker — the 3D model/skeleton/animation format — was
+**solved 2026-06-30**: `.arc` files are HSD DAT archives (HAL Sysdolphin; borg
+`pl****_mdl.arc` files carry a 0x100-byte wrapper before the DAT). See
+[`research/format-specs/arc-hsd-format.md`](research/format-specs/arc-hsd-format.md).
+Models are converted **offline** via Ploaj/HSDLib `HSDRaw` (C#, build-time only, never
+shipped) to Collada DAE with skeleton, skinning, materials, and decoded CMPR textures
+(exporter at `user-data/GG4E/gltf-export/`); the browser loads the converted output —
+there is intentionally **no TypeScript `.arc` parser**
+(`packages/formats/src/mdl-arc.ts` is a stub documenting this). Remaining model work:
+animation-track export wiring, batch-convert coverage of all 1369 `.arc` files, and one
+POBJ "out of struct range" edge case. (`chd/dpk/tsb` turned out to be audio and `txg`
+particle images, not model data.)
 
 ## Layout
 
