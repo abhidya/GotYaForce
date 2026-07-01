@@ -364,10 +364,10 @@ function parsePzzHeader(buffer) {
     headerWords.push(hex(buffer.readUInt32BE(i * 4)));
   }
   return {
-    parseStatus: "header sniff only; local PZZ member parser is not implemented",
+    parseStatus: "header sniff only; shared @gf/formats PZZ parser is implemented but this scanner has not consumed members yet",
     firstWordAsMemberCountCandidate: firstWord,
     headerWords,
-    blocker: "PZZ unpack/list support is documented as upstream-solved by NeoGF pzztool, but packages/formats/src/pzz.ts is still a local TODO.",
+    blocker: "Remaining work: consume @gf/formats pzz.unpack output here, then inspect decompressed effect members and HSD payload semantics.",
   };
 }
 
@@ -376,10 +376,10 @@ function parseArzHeader(buffer) {
   const words = [];
   for (let i = 0; i < Math.min(12, Math.floor(buffer.length / 4)); i += 1) words.push(hex(buffer.readUInt32BE(i * 4)));
   return {
-    parseStatus: "compressed header sniff only; local ARZ decompressor is not implemented",
+    parseStatus: "compressed header sniff only; shared @gf/formats ARZ decompressor is implemented but this scanner has not consumed payloads yet",
     headerWords: words,
     firstWord: words[0],
-    blocker: "ARZ decompression is documented as upstream-solved by NeoGF pzztool -d, but packages/formats/src/arz.ts is still a local TODO.",
+    blocker: "Remaining work: consume @gf/formats arz.decompress output here, then inspect HSD item/attachment model payload semantics.",
   };
 }
 
@@ -648,9 +648,13 @@ function summarizeArchives(assets) {
       firstWordAsMemberCountCandidate: asset.parse?.pzz?.firstWordAsMemberCountCandidate ?? null,
     })),
     arzHeaderGroups,
-    blockers: [
-      "Local PZZ unpack/list support is not implemented in packages/formats/src/pzz.ts; upstream NeoGF pzztool is the known source to port or wrap.",
-      "Local ARZ decompression is not implemented in packages/formats/src/arz.ts; it blocks direct inspection of it####_mdl.arz attachment/projectile meshes.",
+    parserStatus: [
+      "Shared PZZ unpack/list support is implemented in packages/formats/src/pzz.ts.",
+      "Shared ARZ/PZZP decompression is implemented in packages/formats/src/arz.ts.",
+    ],
+    remainingBlockers: [
+      "This scanner still needs to consume @gf/formats PZZ/ARZ outputs instead of header-sniffing direct archive candidates.",
+      "Decoded PZZ/ARZ payloads still need HSD/model and effect semantic mapping before they can drive sword/gun/projectile/powerup visuals.",
       "PZZ members may contain ARZ-compressed payloads, so effect archive inspection has two layers: PZZ member table first, then ARZ decompression per compressed member.",
     ],
   };
@@ -797,9 +801,12 @@ function buildMarkdown(report) {
   }
 
   lines.push("");
-  lines.push("## Archive and decompression blockers");
+  lines.push("## Archive parser status and remaining blockers");
   lines.push("");
-  for (const blocker of report.archiveAndDecompressionBlockers.blockers) {
+  for (const blocker of report.archiveAndDecompressionBlockers.parserStatus) {
+    lines.push(`- ${blocker}`);
+  }
+  for (const blocker of report.archiveAndDecompressionBlockers.remainingBlockers) {
     lines.push(`- ${blocker}`);
   }
   lines.push(`- Direct scan found ${report.archiveAndDecompressionBlockers.pzzCount} PZZ effect archive(s) and ${report.archiveAndDecompressionBlockers.arzCount} ARZ item model archive(s).`);
@@ -821,7 +828,7 @@ function buildMarkdown(report) {
   lines.push("");
   lines.push("## Next decoding steps");
   lines.push("");
-  lines.push("- Port or wrap NeoGF `pzztool` for PZZ member listing and ARZ decompression, then re-run this scanner on decompressed `efct.pzz` members and `it####_mdl.arz` payloads.");
+  lines.push("- Use @gf/formats `pzz.unpack` and `arz.decompress` in this scanner, then re-run on decompressed `efct.pzz` members and `it####_mdl.arz` payloads.");
   lines.push("- Add a TXG image decoder for I4, I8, and RGB565; `ptcl00.txg` already provides dimensions, formats, and byte-exact payload spans.");
   lines.push("- Reverse PTL record fields by correlating PTL records, REF indexes, TXG texture indexes, and Dolphin captures of fire/beam/muzzle/impact/trail effects.");
   lines.push("- For sword/gun attachment visuals, inspect decompressed `it####_mdl.arz` as HSD models and map them to MOT/hit timing rather than creating placeholder effects.");

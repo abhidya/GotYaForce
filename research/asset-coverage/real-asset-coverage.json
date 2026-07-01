@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:32:34.433Z",
+  "generatedAt": "2026-07-01T03:36:12.293Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {

@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:32:34.433Z
+Generated: 2026-07-01T03:36:12.293Z
 
 ## Summary
 
