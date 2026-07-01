@@ -53,6 +53,7 @@ const flowSteps = [
     anchors: selectByTopic("stage-load-collision", 10),
     topicFallbacks: selectByTopic("assets-animation", 6, (fn) => fn.assets.some((asset) => /^st[0-9a-f]{2}$/i.test(asset))),
     supportingArtifacts: artifactRefs([
+      "research/decomp/index/archive-load-xrefs.md",
       "research/asset-inventory/stage-code-evidence.md",
       "research/asset-inventory/stage-geometry-collision.md",
       "research/asset-inventory/stage-lighting-render-state.md",
@@ -72,7 +73,10 @@ const flowSteps = [
     label: "stage/load flow -> battle initialization",
     anchors: selectByAddresses(["0x800541ac", "0x80057b78", "0x8002e2a8"]),
     topicFallbacks: selectByTopic("battle-initialization", 8, (fn) => fn.globalReferences.includes("PTR_DAT_80433934")),
-    supportingArtifacts: artifactRefs(["research/decomp/data/type-category-remap-802f2e28.json"]),
+    supportingArtifacts: artifactRefs([
+      "research/decomp/index/archive-load-xrefs.md",
+      "research/decomp/data/type-category-remap-802f2e28.json",
+    ]),
     requiredBeforePorting: [
       "Map active borg object fields copied from slot table into combat runtime shape.",
       "Preserve object+0x88 as slot/team state and object+1000 as the separate type-category source.",

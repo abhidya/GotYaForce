@@ -1,6 +1,6 @@
 # Challenge Flow Evidence Map
 
-Generated: 2026-07-01T09:41:43.642Z
+Generated: 2026-07-01T10:00:41.757Z
 
 ## Principle
 
@@ -23,9 +23,9 @@ Do not replace player-facing Challenge flow with fake menus/stages/mechanics. Ea
 ### Topic Fallback Candidates
 
 - 0x801969a0 `FUN_801969a0` at `research/decomp/ghidra-export/chunk_0048.c:451`; globals DAT_80436378, PTR_DAT_80433930, PTR_DAT_80433934.
-- 0x80196030 `FUN_80196030` at `research/decomp/ghidra-export/chunk_0048.c:145`; globals DAT_80436378, PTR_DAT_80433944, DAT_804356d0, PTR_DAT_80433934, DAT_8036f554.
-- 0x80195f2c `FUN_80195f2c` at `research/decomp/ghidra-export/chunk_0048.c:109`; globals DAT_80436378, DAT_803d4960, PTR_DAT_80433930, PTR_FUN_8036f560.
 - 0x80196188 `FUN_80196188` at `research/decomp/ghidra-export/chunk_0048.c:191`; globals DAT_80436378, PTR_DAT_80435a30, PTR_DAT_80433944, DAT_803bfe20.
+- 0x80195f2c `FUN_80195f2c` at `research/decomp/ghidra-export/chunk_0048.c:109`; globals DAT_80436378, DAT_803d4960, PTR_DAT_80433930, PTR_FUN_8036f560.
+- 0x80196030 `FUN_80196030` at `research/decomp/ghidra-export/chunk_0048.c:145`; globals DAT_80436378, PTR_DAT_80433944, DAT_804356d0, PTR_DAT_80433934, DAT_8036f554.
 - 0x80196a9c `FUN_80196a9c` at `research/decomp/ghidra-export/chunk_0048.c:495`; globals DAT_80436378, PTR_DAT_80433930.
 - 0x80196cec `FUN_80196cec` at `research/decomp/ghidra-export/chunk_0048.c:603`; globals DAT_80436378, PTR_DAT_80433930.
 
@@ -64,6 +64,7 @@ Do not replace player-facing Challenge flow with fake menus/stages/mechanics. Ea
 - 0x800a98a4 `FUN_800a98a4` at `research/decomp/ghidra-export/chunk_0016.c:4168`; globals PTR_DAT_80433934, FLOAT_80438150, FLOAT_80438154, FLOAT_80438158, FLOAT_8043815c.
 - 0x8009cc48 `FUN_8009cc48` at `research/decomp/ghidra-export/chunk_0015.c:3230`; globals PTR_DAT_80433934, DAT_803c4e84, FLOAT_80437ec8, FLOAT_80437ecc, FLOAT_80437ed0.
 - 0x801c795c `FUN_801c795c` at `research/decomp/ghidra-export/chunk_0055.c:2227`; globals PTR_DAT_80433934, DAT_8038a4ec, DAT_80436238, DAT_803c71dc, DAT_803c71e0.
+- 0x80080a74 `FUN_80080a74` at `research/decomp/ghidra-export/chunk_0012.c:866`; globals PTR_DAT_80433934, PTR_DAT_80433930, DAT_803c7695, DAT_803c771c, DAT_803c772c.
 - 0x800107a0 `zz_00107a0_` at `research/decomp/ghidra-export/chunk_0001.c:3244`; globals PTR_DAT_80433934.
 
 ### Current Web Evidence
@@ -85,6 +86,7 @@ No original C function anchor is confirmed by the current index for this step.
 
 ### Supporting Artifacts
 
+- `research/decomp/index/archive-load-xrefs.md`
 - `research/asset-inventory/stage-code-evidence.md`
 - `research/asset-inventory/stage-geometry-collision.md`
 - `research/asset-inventory/stage-lighting-render-state.md`
@@ -112,6 +114,7 @@ No original C function anchor is confirmed by the current index for this step.
 
 ### Supporting Artifacts
 
+- `research/decomp/index/archive-load-xrefs.md`
 - `research/decomp/data/type-category-remap-802f2e28.json`
 
 ### Topic Fallback Candidates
@@ -160,9 +163,9 @@ No original C function anchor is confirmed by the current index for this step.
 - 0x8002e2a8 `zz_002e2a8_` at `research/decomp/ghidra-export/chunk_0003.c:7457`; globals FLOAT_80436fa0, DOUBLE_80436fb0, FLOAT_80436f7c, FLOAT_80436f78, DOUBLE_80436f88.
 - 0x801d35a0 `FUN_801d35a0` at `research/decomp/ghidra-export/chunk_0056.c:4963`; globals FLOAT_8043be3c, FLOAT_8043be38, DAT_8038b240, DAT_8038b234, DAT_8038b230.
 - 0x800e075c `FUN_800e075c` at `research/decomp/ghidra-export/chunk_0024.c:818`; globals DAT_80316f00, DAT_80316efc, DAT_80316f04, DAT_80316f08, DAT_80316f0c.
-- 0x800141d8 `zz_00141d8_` at `research/decomp/ghidra-export/chunk_0001.c:5964`; globals DOUBLE_80436bd0, FLOAT_80436c60, FLOAT_80436c64, DAT_804361fc, FLOAT_80436c68.
+- 0x801d31d4 `FUN_801d31d4` at `research/decomp/ghidra-export/chunk_0056.c:4808`; globals DAT_8038b1e2, DAT_802b0cbc, DAT_802b0cb8, DAT_802b0cb4, DAT_8038b238.
+- 0x801d7eec `FUN_801d7eec` at `research/decomp/ghidra-export/chunk_0057.c:2254`; globals DAT_8038e05a, DAT_8038e07c, DAT_8038e07d, FLOAT_8043bf20, FLOAT_8043bf24.
 - 0x800fe818 `FUN_800fe818` at `research/decomp/ghidra-export/chunk_0028.c:1290`; globals DAT_8031ef80, DAT_8031ef38, DAT_802b0cb8, DAT_802b0cb4, DAT_802b0cbc.
-- 0x80128fec `FUN_80128fec` at `research/decomp/ghidra-export/chunk_0034.c:442`; globals DAT_80330b08, DAT_803309fe, DAT_803309f8, DAT_803309fc, DAT_803309ea.
 
 ### Current Web Evidence
 

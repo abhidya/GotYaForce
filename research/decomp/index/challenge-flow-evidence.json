@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T09:41:43.642Z",
+  "generatedAt": "2026-07-01T10:00:41.757Z",
   "generatedBy": "scripts/inventory-challenge-flow-evidence.mjs",
   "sourceIndex": "research/decomp/index/function-evidence-index.json",
   "principle": "Do not replace player-facing Challenge flow with fake menus/stages/mechanics. Each step below must be driven by original functions, data tables, asset opens, traces, or behavior.",
@@ -15,6 +15,10 @@
           "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:127",
           "callers": [],
           "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
             {
               "address": "0x80006b74",
               "name": "zz_0006b74_"
@@ -310,6 +314,127 @@
           ]
         },
         {
+          "address": "0x80196188",
+          "currentFunctionName": "FUN_80196188",
+          "inferredName": "challenge-menu-flow_candidate_80196188",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:191",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
+              "address": "0x800054f4",
+              "name": "gnt4_memcpy"
+            },
+            {
+              "address": "0x801ba750",
+              "name": "zz_01ba750_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "PTR_DAT_80435a30",
+            "PTR_DAT_80433944",
+            "DAT_803bfe20"
+          ],
+          "globalAccesses": [
+            "DAT_80436378[2]",
+            "PTR_DAT_80435a30",
+            "PTR_DAT_80435a30[0x46]",
+            "PTR_DAT_80433944[0x14]",
+            "PTR_DAT_80435a30[0x47]",
+            "PTR_DAT_80435a30[0x149]",
+            "PTR_DAT_80435a30[0x40]",
+            "DAT_80436378 + 0x15",
+            "PTR_DAT_80435a30 + 0x24",
+            "PTR_DAT_80433944",
+            "PTR_DAT_80435a30 + 0x28",
+            "PTR_DAT_80435a30 + 0x2c",
+            "DAT_803bfe20",
+            "DAT_80436378"
+          ],
+          "constants": [
+            "80196188",
+            "2",
+            "0",
+            "1",
+            "0x200",
+            "0x46",
+            "0x14",
+            "0x47",
+            "0x149",
+            "3",
+            "0x40",
+            "0x15",
+            "0x24",
+            "0x80",
+            "0x140",
+            "0x28",
+            "0x144",
+            "0x2c",
+            "0x148",
+            "600"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts"
+          ]
+        },
+        {
+          "address": "0x80195f2c",
+          "currentFunctionName": "FUN_80195f2c",
+          "inferredName": "challenge-menu-flow_candidate_80195f2c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:109",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
+              "address": "0x8002a5f4",
+              "name": "zz_002a5f4_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "DAT_803d4960",
+            "PTR_DAT_80433930",
+            "PTR_FUN_8036f560"
+          ],
+          "globalAccesses": [
+            "DAT_80436378",
+            "DAT_803d4960",
+            "PTR_DAT_80433930[1]",
+            "PTR_DAT_80433930[0x40]",
+            "PTR_FUN_8036f560"
+          ],
+          "constants": [
+            "1",
+            "0",
+            "0x40",
+            "0x16"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts"
+          ]
+        },
+        {
           "address": "0x80196030",
           "currentFunctionName": "FUN_80196030",
           "inferredName": "challenge-menu-flow_candidate_80196030",
@@ -380,115 +505,6 @@
             "packages/missions/src/challenge.ts",
             "packages/combat/src/battle.ts",
             "apps/game/src/sim/adapter.ts"
-          ]
-        },
-        {
-          "address": "0x80195f2c",
-          "currentFunctionName": "FUN_80195f2c",
-          "inferredName": "challenge-menu-flow_candidate_80195f2c",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:109",
-          "callers": [],
-          "callees": [
-            {
-              "address": "0x8002a5f4",
-              "name": "zz_002a5f4_"
-            }
-          ],
-          "globalReferences": [
-            "DAT_80436378",
-            "DAT_803d4960",
-            "PTR_DAT_80433930",
-            "PTR_FUN_8036f560"
-          ],
-          "globalAccesses": [
-            "DAT_80436378",
-            "DAT_803d4960",
-            "PTR_DAT_80433930[1]",
-            "PTR_DAT_80433930[0x40]",
-            "PTR_FUN_8036f560"
-          ],
-          "constants": [
-            "1",
-            "0",
-            "0x40",
-            "0x16"
-          ],
-          "strings": [],
-          "assets": [],
-          "topics": [
-            "challenge-menu-flow"
-          ],
-          "relatedWebModules": [
-            "apps/game/src/main.ts",
-            "apps/game/src/ui/screens",
-            "packages/missions/src/challenge.ts"
-          ]
-        },
-        {
-          "address": "0x80196188",
-          "currentFunctionName": "FUN_80196188",
-          "inferredName": "challenge-menu-flow_candidate_80196188",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:191",
-          "callers": [],
-          "callees": [
-            {
-              "address": "0x801ba750",
-              "name": "zz_01ba750_"
-            }
-          ],
-          "globalReferences": [
-            "DAT_80436378",
-            "PTR_DAT_80435a30",
-            "PTR_DAT_80433944",
-            "DAT_803bfe20"
-          ],
-          "globalAccesses": [
-            "DAT_80436378[2]",
-            "PTR_DAT_80435a30",
-            "PTR_DAT_80435a30[0x46]",
-            "PTR_DAT_80433944[0x14]",
-            "PTR_DAT_80435a30[0x47]",
-            "PTR_DAT_80435a30[0x149]",
-            "PTR_DAT_80435a30[0x40]",
-            "DAT_80436378 + 0x15",
-            "PTR_DAT_80435a30 + 0x24",
-            "PTR_DAT_80433944",
-            "PTR_DAT_80435a30 + 0x28",
-            "PTR_DAT_80435a30 + 0x2c",
-            "DAT_803bfe20",
-            "DAT_80436378"
-          ],
-          "constants": [
-            "80196188",
-            "2",
-            "0",
-            "1",
-            "0x200",
-            "0x46",
-            "0x14",
-            "0x47",
-            "0x149",
-            "3",
-            "0x40",
-            "0x15",
-            "0x24",
-            "0x80",
-            "0x140",
-            "0x28",
-            "0x144",
-            "0x2c",
-            "0x148",
-            "600"
-          ],
-          "strings": [],
-          "assets": [],
-          "topics": [
-            "challenge-menu-flow"
-          ],
-          "relatedWebModules": [
-            "apps/game/src/main.ts",
-            "apps/game/src/ui/screens",
-            "packages/missions/src/challenge.ts"
           ]
         },
         {
@@ -734,6 +750,10 @@
           "callers": [],
           "callees": [
             {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
               "address": "0x8001c80c",
               "name": "zz_001c80c_"
             },
@@ -776,10 +796,6 @@
             {
               "address": "0x80055f90",
               "name": "zz_0055f90_"
-            },
-            {
-              "address": "0x8005614c",
-              "name": "zz_005614c_"
             }
           ],
           "globalReferences": [
@@ -1738,6 +1754,10 @@
           "callers": [],
           "callees": [
             {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
               "address": "0x800059b8",
               "name": "zz_00059b8_"
             },
@@ -1780,10 +1800,6 @@
             {
               "address": "0x800429ec",
               "name": "zz_00429ec_"
-            },
-            {
-              "address": "0x80042a58",
-              "name": "zz_0042a58_"
             }
           ],
           "globalReferences": [
@@ -1850,6 +1866,160 @@
             "apps/game/src/ui/screens/SelectForce.ts",
             "apps/game/src/sim/adapter.ts",
             "packages/audio/src/index.ts"
+          ]
+        },
+        {
+          "address": "0x80080a74",
+          "currentFunctionName": "FUN_80080a74",
+          "inferredName": "challenge-menu-flow_candidate_80080a74",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0012.c:866",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x800057f0",
+              "name": "zz_00057f0_"
+            },
+            {
+              "address": "0x800076d0",
+              "name": "zz_00076d0_"
+            },
+            {
+              "address": "0x80007834",
+              "name": "zz_0007834_"
+            },
+            {
+              "address": "0x80009958",
+              "name": "zz_0009958_"
+            },
+            {
+              "address": "0x80010514",
+              "name": "zz_0010514_"
+            },
+            {
+              "address": "0x8008b290",
+              "name": "zz_008b290_"
+            },
+            {
+              "address": "0x8020aefc",
+              "name": "gnt4_PSMTXIdentity_bl"
+            },
+            {
+              "address": "0x8020af5c",
+              "name": "gnt4_PSMTXConcat_bl"
+            },
+            {
+              "address": "0x8020b238",
+              "name": "gnt4_PSMTXRotRad_bl"
+            },
+            {
+              "address": "0x8020b4f8",
+              "name": "gnt4_PSMTXScale_bl"
+            },
+            {
+              "address": "0x8020b520",
+              "name": "zz_020b520_"
+            },
+            {
+              "address": "0x8020ba78",
+              "name": "gnt4_PSVECSubtract_bl"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433930",
+            "DAT_803c7695",
+            "DAT_803c771c",
+            "DAT_803c772c",
+            "DAT_803c773c",
+            "DAT_803c7720",
+            "DAT_803c7730",
+            "DAT_803c7740",
+            "FLOAT_80437a50",
+            "FLOAT_80437a5c",
+            "FLOAT_80437a54",
+            "DOUBLE_80437a80",
+            "FLOAT_80437a58",
+            "FLOAT_80437a60",
+            "FLOAT_80437a64",
+            "FLOAT_80437a70",
+            "FLOAT_80437a74",
+            "FLOAT_80437a68",
+            "FLOAT_80437a6c"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0x45]",
+            "PTR_DAT_80433930[0x28]",
+            "DAT_803c7695",
+            "DAT_803c771c",
+            "DAT_803c772c",
+            "DAT_803c773c",
+            "DAT_803c7720",
+            "DAT_803c7730",
+            "DAT_803c7740",
+            "FLOAT_80437a50",
+            "FLOAT_80437a5c",
+            "FLOAT_80437a54",
+            "DOUBLE_80437a80",
+            "FLOAT_80437a58",
+            "PTR_DAT_80433934[0x1833]",
+            "PTR_DAT_80433930[0x29]",
+            "FLOAT_80437a60",
+            "FLOAT_80437a64",
+            "FLOAT_80437a70",
+            "FLOAT_80437a74"
+          ],
+          "constants": [
+            "12",
+            "3",
+            "0x45",
+            "0x90",
+            "0x28",
+            "0x3e4",
+            "4",
+            "0x1ff0ec5f",
+            "0x88",
+            "0x508",
+            "0",
+            "0x18",
+            "0x504",
+            "0x20",
+            "0x146",
+            "10",
+            "0xf9",
+            "0x144",
+            "0xe0",
+            "2",
+            "5",
+            "0x43300000",
+            "0x74",
+            "0x80000000",
+            "0x7a",
+            "0xffff",
+            "0xe4",
+            "0x150",
+            "0x1833",
+            "0x29"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
           ]
         },
         {
@@ -1986,6 +2156,10 @@
       "topicFallbacks": [],
       "supportingArtifacts": [
         {
+          "path": "research/decomp/index/archive-load-xrefs.md",
+          "exists": true
+        },
+        {
           "path": "research/asset-inventory/stage-code-evidence.md",
           "exists": true
         },
@@ -2032,6 +2206,10 @@
           "callers": [],
           "callees": [
             {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
               "address": "0x8001c80c",
               "name": "zz_001c80c_"
             },
@@ -2074,10 +2252,6 @@
             {
               "address": "0x80055f90",
               "name": "zz_0055f90_"
-            },
-            {
-              "address": "0x8005614c",
-              "name": "zz_005614c_"
             }
           ],
           "globalReferences": [
@@ -2496,6 +2670,26 @@
             {
               "address": "0x8008b480",
               "name": "zz_008b480_"
+            },
+            {
+              "address": "0x8020ba54",
+              "name": "gnt4_PSVECAdd_bl"
+            },
+            {
+              "address": "0x8020ba78",
+              "name": "gnt4_PSVECSubtract_bl"
+            },
+            {
+              "address": "0x8020ba9c",
+              "name": "gnt4_PSQUATScale_bl"
+            },
+            {
+              "address": "0x8020bab8",
+              "name": "gnt4_PSVECNormalize_bl"
+            },
+            {
+              "address": "0x8020bb14",
+              "name": "gnt4_PSVECMag_bl"
             }
           ],
           "globalReferences": [
@@ -2612,6 +2806,14 @@
             {
               "address": "0x800086b8",
               "name": "zz_00086b8_"
+            },
+            {
+              "address": "0x8024f834",
+              "name": "gnt4_HSD_JObjLoadJoint"
+            },
+            {
+              "address": "0x8024fd74",
+              "name": "gnt4_HSD_JObjUnref"
             }
           ],
           "globalReferences": [
@@ -3349,6 +3551,10 @@
       ],
       "supportingArtifacts": [
         {
+          "path": "research/decomp/index/archive-load-xrefs.md",
+          "exists": true
+        },
+        {
           "path": "research/decomp/data/type-category-remap-802f2e28.json",
           "exists": true
         }
@@ -3604,6 +3810,14 @@
             {
               "address": "0x800452a0",
               "name": "FUN_800452a0"
+            },
+            {
+              "address": "0x8020ba78",
+              "name": "gnt4_PSVECSubtract_bl"
+            },
+            {
+              "address": "0x8020bb14",
+              "name": "gnt4_PSVECMag_bl"
             }
           ],
           "globalReferences": [
@@ -4293,6 +4507,14 @@
             {
               "address": "0x8008aff0",
               "name": "zz_008aff0_"
+            },
+            {
+              "address": "0x8020af28",
+              "name": "gnt4_PSMTXCopy_bl"
+            },
+            {
+              "address": "0x8020af5c",
+              "name": "gnt4_PSMTXConcat_bl"
             }
           ],
           "globalReferences": [
@@ -4392,132 +4614,138 @@
           ]
         },
         {
-          "address": "0x800141d8",
-          "currentFunctionName": "zz_00141d8_",
-          "inferredName": "force-setup_candidate_800141d8",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0001.c:5964",
-          "callers": [
+          "address": "0x801d31d4",
+          "currentFunctionName": "FUN_801d31d4",
+          "inferredName": "force-setup_candidate_801d31d4",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0056.c:4808",
+          "callers": [],
+          "callees": [
             {
-              "address": "0x80011f30",
-              "name": "zz_0011f30_"
+              "address": "0x80006dc8",
+              "name": "zz_0006dc8_"
             },
             {
-              "address": "0x800147e0",
-              "name": "zz_00147e0_"
-            }
-          ],
-          "callees": [
+              "address": "0x80006f98",
+              "name": "zz_0006f98_"
+            },
             {
               "address": "0x80006fb4",
               "name": "zz_0006fb4_"
             },
             {
-              "address": "0x80007c30",
-              "name": "zz_0007c30_"
+              "address": "0x80007030",
+              "name": "zz_0007030_"
+            },
+            {
+              "address": "0x80007c54",
+              "name": "zz_0007c54_"
             },
             {
               "address": "0x80007cac",
               "name": "zz_0007cac_"
             },
             {
-              "address": "0x80007cd0",
-              "name": "zz_0007cd0_"
+              "address": "0x8006de10",
+              "name": "zz_006de10_"
             },
             {
-              "address": "0x80007cf4",
-              "name": "zz_0007cf4_"
+              "address": "0x80089100",
+              "name": "zz_0089100_"
             },
             {
-              "address": "0x800086b8",
-              "name": "zz_00086b8_"
+              "address": "0x8008ac80",
+              "name": "zz_008ac80_"
             },
             {
-              "address": "0x80013f3c",
-              "name": "zz_0013f3c_"
+              "address": "0x8008aff0",
+              "name": "zz_008aff0_"
+            },
+            {
+              "address": "0x800a2bf8",
+              "name": "zz_00a2bf8_"
+            },
+            {
+              "address": "0x8020b7a8",
+              "name": "gnt4_PSMTXMultVec_bl"
             }
           ],
           "globalReferences": [
-            "DOUBLE_80436bd0",
-            "FLOAT_80436c60",
-            "FLOAT_80436c64",
-            "DAT_804361fc",
-            "FLOAT_80436c68",
-            "FLOAT_80436c78",
-            "FLOAT_80436c6c",
-            "FLOAT_80436bcc",
-            "FLOAT_80436c74",
-            "FLOAT_80436c70",
-            "FLOAT_80436c84",
-            "FLOAT_80436c80",
-            "FLOAT_80436c7c",
-            "FLOAT_80436c88",
-            "DAT_802c3c84",
-            "FLOAT_80436c8c",
-            "FLOAT_80436bc4",
-            "FLOAT_80436c14",
-            "FLOAT_80436c10",
-            "DOUBLE_80436c00"
+            "DAT_8038b1e2",
+            "DAT_802b0cbc",
+            "DAT_802b0cb8",
+            "DAT_802b0cb4",
+            "DAT_8038b238",
+            "DOUBLE_8043be30",
+            "FLOAT_8043be28",
+            "DAT_8038b22c",
+            "DAT_8038b22e",
+            "DAT_8038b1fc",
+            "DAT_8038b200",
+            "DAT_8038b22a",
+            "DAT_8038b23c",
+            "DAT_8038b1e0",
+            "DAT_8038b1e1",
+            "FLOAT_8043be2c",
+            "DAT_8038b228"
           ],
           "globalAccesses": [
-            "DOUBLE_80436bd0",
-            "FLOAT_80436c60",
-            "FLOAT_80436c64",
-            "DAT_804361fc",
-            "FLOAT_80436c68",
-            "FLOAT_80436c78",
-            "FLOAT_80436c6c",
-            "FLOAT_80436bcc",
-            "FLOAT_80436c74",
-            "FLOAT_80436c70",
-            "FLOAT_80436c84",
-            "FLOAT_80436c80",
-            "FLOAT_80436c7c",
-            "FLOAT_80436c88",
-            "DAT_802c3c84",
-            "FLOAT_80436c8c",
-            "FLOAT_80436bc4",
-            "FLOAT_80436c14",
-            "FLOAT_80436c10",
-            "DOUBLE_80436c00"
+            "DAT_8038b1e2",
+            "DAT_802b0cbc",
+            "DAT_802b0cb8",
+            "DAT_802b0cb4",
+            "DAT_8038b238",
+            "DOUBLE_8043be30",
+            "FLOAT_8043be28",
+            "DAT_8038b22c",
+            "DAT_8038b22e",
+            "DAT_8038b1fc",
+            "DAT_8038b200",
+            "DAT_8038b22a",
+            "DAT_8038b23c",
+            "DAT_8038b1e0",
+            "DAT_8038b1e1",
+            "FLOAT_8043be2c",
+            "DAT_8038b228"
           ],
           "constants": [
-            "0x800147c4",
-            "0x800141e8",
-            "0x172",
+            "0x18",
+            "0x19",
             "0",
-            "0x1a6",
-            "1",
-            "0x1a5",
-            "0x94",
+            "0x1a",
+            "0x1b",
+            "10",
             "0x90",
-            "1000",
-            "0x96",
-            "0x3e4",
-            "0x1a4",
-            "0x194",
-            "0x1c6",
-            "0x43300000",
-            "0x80000000",
-            "0x1c4",
-            "0x198",
-            "0x7c",
-            "0x10000",
-            "8",
-            "0xe0",
-            "0xe4",
-            "0x13",
-            "0x50",
+            "0x11",
+            "0x1c",
+            "0x84",
             "0x10",
-            "0xe8",
-            "0x19c",
-            "0x1a0"
+            "0x13",
+            "0x24",
+            "0x98",
+            "5",
+            "1",
+            "0x100",
+            "0x9c",
+            "0x30",
+            "0x8dc",
+            "0xa0",
+            "0x8ec",
+            "0xa4",
+            "0x8fc",
+            "0x8d4",
+            "0x7fc74e1c",
+            "0x20",
+            "0x38",
+            "0x3c",
+            "0x8e4"
           ],
           "strings": [],
           "assets": [],
           "topics": [
             "force-setup",
             "damage",
-            "knockback-targeting"
+            "knockback-targeting",
+            "movement-physics"
           ],
           "relatedWebModules": [
             "packages/missions/src/challenge.ts",
@@ -4527,7 +4755,156 @@
             "packages/combat/src/constants.ts",
             "packages/combat/src/stats.ts",
             "packages/physics/src/index.ts",
-            "apps/game/src/sim/battleScene.ts"
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x801d7eec",
+          "currentFunctionName": "FUN_801d7eec",
+          "inferredName": "force-setup_candidate_801d7eec",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0057.c:2254",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80006f78",
+              "name": "zz_0006f78_"
+            },
+            {
+              "address": "0x8000726c",
+              "name": "zz_000726c_"
+            },
+            {
+              "address": "0x80048288",
+              "name": "zz_0048288_"
+            },
+            {
+              "address": "0x8006c334",
+              "name": "FUN_8006c334"
+            },
+            {
+              "address": "0x80089100",
+              "name": "zz_0089100_"
+            },
+            {
+              "address": "0x8008ac80",
+              "name": "zz_008ac80_"
+            },
+            {
+              "address": "0x800aedc0",
+              "name": "zz_00aedc0_"
+            },
+            {
+              "address": "0x800f061c",
+              "name": "zz_00f061c_"
+            },
+            {
+              "address": "0x801d8660",
+              "name": "FUN_801d8660"
+            },
+            {
+              "address": "0x8020b7a8",
+              "name": "gnt4_PSMTXMultVec_bl"
+            },
+            {
+              "address": "0x8020ba54",
+              "name": "gnt4_PSVECAdd_bl"
+            },
+            {
+              "address": "0x8020ba9c",
+              "name": "gnt4_PSQUATScale_bl"
+            }
+          ],
+          "globalReferences": [
+            "DAT_8038e05a",
+            "DAT_8038e07c",
+            "DAT_8038e07d",
+            "FLOAT_8043bf20",
+            "FLOAT_8043bf24",
+            "DAT_8038e078",
+            "DAT_8038e083",
+            "DAT_8038e07f",
+            "FLOAT_8043bf28",
+            "DAT_8038e05c",
+            "DAT_8038e060",
+            "DAT_8038e07e",
+            "DAT_8038e084",
+            "DAT_8038e05b",
+            "DAT_8038e058",
+            "DAT_803bb374",
+            "FLOAT_8043bf2c",
+            "DAT_8038e080"
+          ],
+          "globalAccesses": [
+            "DAT_8038e05a",
+            "DAT_8038e07c",
+            "DAT_8038e07d",
+            "FLOAT_8043bf20",
+            "FLOAT_8043bf24",
+            "DAT_8038e078",
+            "DAT_8038e083",
+            "DAT_8038e07f",
+            "FLOAT_8043bf28",
+            "DAT_8038e05c",
+            "DAT_8038e060",
+            "DAT_8038e07e",
+            "DAT_8038e084",
+            "DAT_8038e05b",
+            "DAT_8038e058",
+            "DAT_803bb374",
+            "FLOAT_8043bf2c",
+            "DAT_8038e080"
+          ],
+          "constants": [
+            "200",
+            "0x90",
+            "0x14",
+            "0xff",
+            "0x30",
+            "0x18",
+            "1",
+            "0x0",
+            "0",
+            "0x20",
+            "0xcc",
+            "0x100",
+            "0x84",
+            "0x10",
+            "0x98",
+            "5",
+            "0x8d4",
+            "0x148",
+            "0x38",
+            "4",
+            "0x3c",
+            "0x8e4",
+            "0x40",
+            "0x8f4",
+            "0x160",
+            "0x24",
+            "0x154",
+            "0x68",
+            "100",
+            "0x158"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
           ]
         },
         {
@@ -4576,6 +4953,14 @@
             {
               "address": "0x800f036c",
               "name": "zz_00f036c_"
+            },
+            {
+              "address": "0x8020b7a8",
+              "name": "gnt4_PSMTXMultVec_bl"
+            },
+            {
+              "address": "0x8020ba54",
+              "name": "gnt4_PSVECAdd_bl"
             }
           ],
           "globalReferences": [
@@ -4651,146 +5036,6 @@
             "0x1c6",
             "0x1c8",
             "0x144"
-          ],
-          "strings": [],
-          "assets": [],
-          "topics": [
-            "force-setup",
-            "damage",
-            "knockback-targeting",
-            "movement-physics"
-          ],
-          "relatedWebModules": [
-            "packages/missions/src/challenge.ts",
-            "packages/combat/src/battle.ts",
-            "apps/game/src/ui/screens/SelectForce.ts",
-            "packages/combat/src/combat.ts",
-            "packages/combat/src/constants.ts",
-            "packages/combat/src/stats.ts",
-            "packages/physics/src/index.ts",
-            "apps/game/src/sim/battleScene.ts",
-            "packages/combat/src/movement.ts"
-          ]
-        },
-        {
-          "address": "0x80128fec",
-          "currentFunctionName": "FUN_80128fec",
-          "inferredName": "force-setup_candidate_80128fec",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0034.c:442",
-          "callers": [],
-          "callees": [
-            {
-              "address": "0x80006f98",
-              "name": "zz_0006f98_"
-            },
-            {
-              "address": "0x80006fb4",
-              "name": "zz_0006fb4_"
-            },
-            {
-              "address": "0x8000726c",
-              "name": "zz_000726c_"
-            },
-            {
-              "address": "0x80083d60",
-              "name": "zz_0083d60_"
-            },
-            {
-              "address": "0x80089100",
-              "name": "zz_0089100_"
-            },
-            {
-              "address": "0x8008ac80",
-              "name": "zz_008ac80_"
-            },
-            {
-              "address": "0x8008aff0",
-              "name": "zz_008aff0_"
-            },
-            {
-              "address": "0x800c74ec",
-              "name": "zz_00c74ec_"
-            },
-            {
-              "address": "0x800f036c",
-              "name": "zz_00f036c_"
-            }
-          ],
-          "globalReferences": [
-            "DAT_80330b08",
-            "DAT_803309fe",
-            "DAT_803309f8",
-            "DAT_803309fc",
-            "DAT_803309ea",
-            "DAT_803309ff",
-            "FLOAT_80439ce8",
-            "DAT_80330b18",
-            "FLOAT_80439cec",
-            "FLOAT_80439cf0",
-            "DAT_80330b0a",
-            "DAT_80330b0c",
-            "DAT_80330b0e",
-            "DAT_80330b1c",
-            "DAT_80330a04",
-            "DAT_80330a00",
-            "DAT_80330a08",
-            "DAT_803309e8",
-            "DAT_803bb374",
-            "DAT_80330b24"
-          ],
-          "globalAccesses": [
-            "DAT_80330b08",
-            "DAT_803309fe",
-            "DAT_803309f8",
-            "DAT_803309fc",
-            "DAT_803309ea",
-            "DAT_803309ff",
-            "FLOAT_80439ce8",
-            "DAT_80330b18",
-            "FLOAT_80439cec",
-            "FLOAT_80439cf0",
-            "DAT_80330b0a",
-            "DAT_80330b0c",
-            "DAT_80330b0e",
-            "DAT_80330b1c",
-            "DAT_80330a04",
-            "DAT_80330a00",
-            "DAT_80330a08",
-            "DAT_803309e8",
-            "DAT_803bb374",
-            "DAT_80330b24"
-          ],
-          "constants": [
-            "0x18",
-            "0x11",
-            "0x90",
-            "0x13",
-            "0x24",
-            "0x84",
-            "0x10",
-            "0x98",
-            "0x100",
-            "0",
-            "1",
-            "0x70",
-            "0x74",
-            "0x9c",
-            "0x30",
-            "0x8d8",
-            "0xa0",
-            "0x8e8",
-            "0xa4",
-            "0x8f8",
-            "0x8d4",
-            "0x7fccf614",
-            "0x20",
-            "0x38",
-            "0x3c",
-            "0x8e4",
-            "0x40",
-            "0x8f4",
-            "0x44",
-            "0x1c"
           ],
           "strings": [],
           "assets": [],
@@ -4933,6 +5178,83 @@
           ]
         },
         {
+          "address": "0x8020ba9c",
+          "currentFunctionName": "gnt4-PSQUATScale-bl",
+          "inferredName": "gnt4-PSQUATScale-bl",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0064.c:1299",
+          "callers": [
+            {
+              "address": "0x8000c314",
+              "name": "FUN_8000c314"
+            },
+            {
+              "address": "0x8000c988",
+              "name": "FUN_8000c988"
+            },
+            {
+              "address": "0x8000cdc0",
+              "name": "FUN_8000cdc0"
+            },
+            {
+              "address": "0x8000cf28",
+              "name": "FUN_8000cf28"
+            },
+            {
+              "address": "0x8000d11c",
+              "name": "FUN_8000d11c"
+            },
+            {
+              "address": "0x8000df28",
+              "name": "zz_000df28_"
+            },
+            {
+              "address": "0x8000e2c4",
+              "name": "FUN_8000e2c4"
+            },
+            {
+              "address": "0x8000e5f8",
+              "name": "zz_000e5f8_"
+            },
+            {
+              "address": "0x8000e950",
+              "name": "FUN_8000e950"
+            },
+            {
+              "address": "0x8000f02c",
+              "name": "FUN_8000f02c"
+            },
+            {
+              "address": "0x8000fffc",
+              "name": "FUN_8000fffc"
+            },
+            {
+              "address": "0x800101c8",
+              "name": "FUN_800101c8"
+            }
+          ],
+          "callees": [],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0x8020bab0",
+            "0x8020baa8",
+            "0x8020baa0",
+            "0x8020ba9c",
+            "1",
+            "2"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "knockback-targeting"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
           "address": "0x800677b0",
           "currentFunctionName": "zz_00677b0_",
           "inferredName": "knockback-targeting_candidate_800677b0",
@@ -4999,6 +5321,26 @@
             {
               "address": "0x800452a0",
               "name": "FUN_800452a0"
+            },
+            {
+              "address": "0x8020ba54",
+              "name": "gnt4_PSVECAdd_bl"
+            },
+            {
+              "address": "0x8020ba78",
+              "name": "gnt4_PSVECSubtract_bl"
+            },
+            {
+              "address": "0x8020ba9c",
+              "name": "gnt4_PSQUATScale_bl"
+            },
+            {
+              "address": "0x8020bab8",
+              "name": "gnt4_PSVECNormalize_bl"
+            },
+            {
+              "address": "0x8020bb58",
+              "name": "gnt4_PSQUATDotProduct_bl"
             }
           ],
           "globalReferences": [
@@ -5138,116 +5480,6 @@
             "packages/combat/src/combat.ts",
             "packages/physics/src/index.ts",
             "apps/game/src/sim/battleScene.ts"
-          ]
-        },
-        {
-          "address": "0x80067310",
-          "currentFunctionName": "FUN_80067310",
-          "inferredName": "knockback-targeting_candidate_80067310",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:3780",
-          "callers": [
-            {
-              "address": "0x8005cc00",
-              "name": "zz_005cc00_"
-            },
-            {
-              "address": "0x8005ce14",
-              "name": "FUN_8005ce14"
-            },
-            {
-              "address": "0x8005d0a8",
-              "name": "FUN_8005d0a8"
-            },
-            {
-              "address": "0x8005d9d8",
-              "name": "FUN_8005d9d8"
-            },
-            {
-              "address": "0x8005dc24",
-              "name": "FUN_8005dc24"
-            },
-            {
-              "address": "0x8005dd10",
-              "name": "FUN_8005dd10"
-            },
-            {
-              "address": "0x8005df2c",
-              "name": "FUN_8005df2c"
-            },
-            {
-              "address": "0x8005dffc",
-              "name": "FUN_8005dffc"
-            },
-            {
-              "address": "0x8005fecc",
-              "name": "FUN_8005fecc"
-            },
-            {
-              "address": "0x80061338",
-              "name": "FUN_80061338"
-            },
-            {
-              "address": "0x80061560",
-              "name": "FUN_80061560"
-            },
-            {
-              "address": "0x80061f50",
-              "name": "FUN_80061f50"
-            }
-          ],
-          "callees": [
-            {
-              "address": "0x80045204",
-              "name": "zz_0045204_"
-            },
-            {
-              "address": "0x80045238",
-              "name": "zz_0045238_"
-            },
-            {
-              "address": "0x80068030",
-              "name": "zz_0068030_"
-            }
-          ],
-          "globalReferences": [
-            "FLOAT_804375d0",
-            "FLOAT_804375f0"
-          ],
-          "globalAccesses": [
-            "FLOAT_804375d0",
-            "FLOAT_804375f0"
-          ],
-          "constants": [
-            "80067310",
-            "0x80067438",
-            "0x80067430",
-            "0x80067328",
-            "0x80067320",
-            "0x5f4",
-            "0x5f8",
-            "0x20",
-            "0x44",
-            "0x24",
-            "0x48",
-            "0x28",
-            "0x4c",
-            "0x50",
-            "0x741",
-            "0",
-            "0x6cb",
-            "0x680"
-          ],
-          "strings": [],
-          "assets": [],
-          "topics": [
-            "knockback-targeting",
-            "movement-physics"
-          ],
-          "relatedWebModules": [
-            "packages/combat/src/combat.ts",
-            "packages/physics/src/index.ts",
-            "apps/game/src/sim/battleScene.ts",
-            "packages/combat/src/movement.ts"
           ]
         }
       ],
