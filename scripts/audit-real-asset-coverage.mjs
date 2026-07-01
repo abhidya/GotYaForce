@@ -418,6 +418,38 @@ function inspectCombatFx() {
   };
 }
 
+function inspectHudAssetEvidence() {
+  const manifest = readJson("apps/game/public/ui/hud/manifest.json");
+  const battleHud = readText("apps/game/src/ui/hud/BattleHud.ts");
+  const available = manifest.value?.available ?? {};
+  const notAvailableAsSprites = manifest.value?.notAvailableAsSprites ?? {};
+  const availableRows = Object.entries(available).map(([key, value]) => ({
+    key,
+    file: value.file ?? null,
+    source: value.source ?? null,
+    size: value.w && value.h ? `${value.w}x${value.h}` : "unknown",
+    format: value.format ?? null,
+    confidence: value.confidence ?? null,
+    role: value.role ?? null,
+    usedInBattleHud:
+      (key === "fontAscii" && battleHud.includes("ASSETS.fontAscii")) ||
+      (key === "faceIconRoundel" && battleHud.includes("ASSETS.faceMarkerRoundel")) ||
+      (key === "asIcon" && battleHud.includes("as_icon")),
+  }));
+  return {
+    path: "apps/game/public/ui/hud/manifest.json",
+    parses: manifest.ok,
+    summary: manifest.value?.summary ?? null,
+    availableRows,
+    gameDrawnRows: Object.entries(notAvailableAsSprites).map(([key, note]) => ({ key, note })),
+    asIconPublicPath: "/ui/tpl/as_icon/image_00_CI8.png",
+    asIconExists: publicPathExists("/ui/tpl/as_icon/image_00_CI8.png"),
+    battleHudUsesFontAscii: battleHud.includes("ASSETS.fontAscii"),
+    battleHudUsesFaceRoundel: battleHud.includes("ASSETS.faceMarkerRoundel"),
+    battleHudUsesAsIcon: battleHud.includes("as_icon"),
+  };
+}
+
 function inspectBorgAnimationCoverage() {
   const reportPath = "research/asset-inventory/borg-animation-action-gaps.md";
   const report = readText(reportPath);
@@ -516,6 +548,7 @@ function buildReport() {
   const uiTextureExports = inspectUiTextureExports();
   const modeNamingRisks = inspectModeNamingRisks();
   const combatFx = inspectCombatFx();
+  const hudAssetEvidence = inspectHudAssetEvidence();
   const borgAnimationCoverage = inspectBorgAnimationCoverage();
   const powerupRuntimeGap = inspectPowerupRuntimeGap();
   const audioRuntime = inspectAudioRuntime();
@@ -539,6 +572,9 @@ function buildReport() {
       combatFx.projectileVisualKindInState &&
       combatFx.projectileVisualKindDerivedFromProfile &&
       combatFx.rendererUsesExportedProjectileTextures,
+    runtimeBattleHudUsesAvailableFontAndRoundel:
+      hudAssetEvidence.battleHudUsesFontAscii && hudAssetEvidence.battleHudUsesFaceRoundel,
+    runtimeBattleHudUsesAsIcon: hudAssetEvidence.battleHudUsesAsIcon,
     runtimeBorgAnimationDirectMatches: borgAnimationCoverage.directRuntimeMatches,
     runtimeBorgAnimationFallbacks: borgAnimationCoverage.runtimeFallbacks,
     runtimeBorgAnimationMissing: borgAnimationCoverage.missingRuntimeMatches,
@@ -562,6 +598,7 @@ function buildReport() {
     uiSceneExports,
     uiTextureExports,
     combatFx,
+    hudAssetEvidence,
     borgAnimationCoverage,
     powerupRuntimeGap,
     audioRuntime,
@@ -609,6 +646,8 @@ function renderMarkdown(report) {
   add(`- Runtime lateral wall collision from STIH: ${report.summary.runtimeStageWallCollision ? "yes" : "no"}`);
   add(`- Runtime upward ceiling collision from STIH: ${report.summary.runtimeStageCeilingCollision ? "yes" : "no"}`);
   add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
+  add(`- Runtime battle HUD uses exported font/roundel: ${report.summary.runtimeBattleHudUsesAvailableFontAndRoundel ? "yes" : "no"}`);
+  add(`- Runtime battle HUD uses as_icon: ${report.summary.runtimeBattleHudUsesAsIcon ? "yes" : "no"} (manifest marks as_icon low-confidence for battle HUD)`);
   add(`- Runtime borg animation direct matches: ${report.summary.runtimeBorgAnimationDirectMatches}/${report.borgAnimationCoverage.canonicalSlotChecks}`);
   add(`- Runtime borg animation fallbacks/missing: ${report.summary.runtimeBorgAnimationFallbacks}/${report.summary.runtimeBorgAnimationMissing}`);
   add(`- Runtime fly uses exported boost clip: ${report.summary.runtimeBoostFlyUsesExportedBoostClip ? "yes" : "no"}`);
@@ -667,6 +706,32 @@ function renderMarkdown(report) {
     mdTable(report.combatFx.fxManifest.projectileTextures, [
       { title: "Projectile texture", value: (row) => row.publicPath },
       { title: "Exists", value: (row) => row.exists ? "yes" : "no" },
+    ]),
+  );
+  add();
+  add("## Battle HUD Asset Evidence");
+  add();
+  add(`Manifest: ${report.hudAssetEvidence.path}`);
+  add(report.hudAssetEvidence.summary);
+  add();
+  add(
+    mdTable(report.hudAssetEvidence.availableRows, [
+      { title: "Asset", value: (row) => row.key },
+      { title: "Source", value: (row) => row.source },
+      { title: "Size", value: (row) => row.size },
+      { title: "Confidence", value: (row) => row.confidence },
+      { title: "Used in BattleHud", value: (row) => row.usedInBattleHud ? "yes" : "no" },
+      { title: "Role", value: (row) => row.role },
+    ]),
+  );
+  add();
+  add(`as_icon public export: ${report.hudAssetEvidence.asIconPublicPath} (${report.hudAssetEvidence.asIconExists ? "exists" : "missing"}). It remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.`);
+  add();
+  add("Original HUD elements not available as discrete sprites:");
+  add(
+    mdTable(report.hudAssetEvidence.gameDrawnRows, [
+      { title: "Element", value: (row) => row.key },
+      { title: "Evidence", value: (row) => row.note },
     ]),
   );
   add();

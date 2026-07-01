@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:00:07.609Z
+Generated: 2026-07-01T03:03:43.719Z
 
 ## Summary
 
@@ -17,6 +17,8 @@ Generated: 2026-07-01T03:00:07.609Z
 - Runtime lateral wall collision from STIH: yes
 - Runtime upward ceiling collision from STIH: yes
 - Runtime projectile FX from exported textures: yes
+- Runtime battle HUD uses exported font/roundel: yes
+- Runtime battle HUD uses as_icon: no (manifest marks as_icon low-confidence for battle HUD)
 - Runtime borg animation direct matches: 1274/1352
 - Runtime borg animation fallbacks/missing: 75/3
 - Runtime fly uses exported boost clip: yes
@@ -84,6 +86,39 @@ Projectile renderer uses exported FX textures: yes
 | /fx/muzzle_flash.png | yes |
 | /fx/efct00_atlas.png | yes |
 | /fx/hit_spark.png | yes |
+
+## Battle HUD Asset Evidence
+
+Manifest: apps/game/public/ui/hud/manifest.json
+Gotcha Force does NOT ship its in-battle HUD overlay (the green/red energy meter, the circular HP gauge, A/B/X/Y button icons, the lock-on reticle, ALLY/ENEMY/CPU labels, the '!' alert) as discrete pre-rendered sprite textures. After decoding every 'battle HUD' category source (301 source assets, 327 images) plus the dedicated icon/font files (as_icon, ascii, font_00, mini_t, dc000/dc001, fmg00_mdl, arrow_mdl), none of those gauge/meter/button/reticle elements exist as a standalone texture. They are drawn at runtime by the game's HSD/GX pipeline (billboard geometry + vertex colors), and HUD text/numbers are rendered glyph-by-glyph from the font atlases below. The real, reusable in-battle HUD art that IS available as image assets is the font/glyph atlases and a couple of icon textures.
+
+| Asset | Source | Size | Confidence | Used in BattleHud | Role |
+| --- | --- | --- | --- | --- | --- |
+| fontAscii | user-data/GG4E/afs_data/root/ascii.tpl | 128x128 | high | yes | Monospaced ASCII glyph atlas (0-9, A-Z, a-z, punctuation). This is the source for HUD numerals -> hit/combo digits, timers, counts. Composite digits by blitting cells from this atlas. |
+| fontJp | user-data/GG4E/afs_data/root/font_00.tpl | 256x320 | high | no | Main game font atlas (Japanese kana + Latin + digits + symbols). Source glyphs for any on-screen HUD/menu text labels. |
+| asIcon | user-data/GG4E/afs_data/root/as_icon.tpl | 64x64 | low | no | Small circular icon/badge (adventure-select / status icon). Possible HUD status badge; role not definitively a battle-HUD element. |
+| faceIconRoundel | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_001) | unknown | medium | yes | Circular Borg face icon/roundel used as an in-battle character marker, plus a small icon strip (see faceIconStrip). |
+| faceIconStrip | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_000) | unknown | low | no | Small icon strip from the face-marker model atlas. |
+
+as_icon public export: /ui/tpl/as_icon/image_00_CI8.png (exists). It remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.
+
+Original HUD elements not available as discrete sprites:
+| Element | Evidence |
+| --- | --- |
+| energyBarFill | GAME-DRAWN. No texture. The green/red energy meter is runtime geometry filled with vertex color; render as a colored quad. |
+| energyBarFrame | GAME-DRAWN. No texture. Meter frame is geometry, not a sprite. |
+| hpGaugeRing | GAME-DRAWN. No texture. The circular HP gauge ring is runtime geometry (arc/torus), not a sprite. |
+| hpGaugeFill | GAME-DRAWN. No texture. The HP arc fill is vertex-colored geometry. |
+| btnA | GAME-DRAWN / font. No discrete A button icon texture; button prompts are letters drawn from the font atlas, not glyph-shaped sprites. |
+| btnB | GAME-DRAWN / font. See btnA. |
+| btnX | GAME-DRAWN / font. See btnA. |
+| btnY | GAME-DRAWN / font. See btnA. |
+| reticle | GAME-DRAWN. arrow_mdl.arc (the lock-on arrow/target indicator) is HSD geometry with NO embedded texture; it is drawn as vertex-colored geometry. No reticle sprite exists. |
+| labelAlly | GAME-DRAWN / font. 'ALLY' is text rendered from the font atlas, not a baked label sprite. |
+| labelEnemy | GAME-DRAWN / font. 'ENEMY' is text from the font atlas. |
+| labelCpu | GAME-DRAWN / font. 'CPU' is text from the font atlas. |
+| alert | GAME-DRAWN / font. The '!' alert is a font glyph, not a dedicated sprite. |
+| comboDigits | Use font_ascii_atlas.png (or font_jp_atlas.png) digit cells; no pre-baked combo-number sprite sheet exists. |
 
 ## Borg Animation Coverage
 
