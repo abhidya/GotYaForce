@@ -452,7 +452,8 @@ dumps the C to disk. Result: `research/decomp/ghidra-export/` — 11,972 functio
 `chunk_NNNN.c` files plus `_index.tsv` (address/name/chunk-file lookup). See that folder's
 `README.md` for how to grep it. This replaces "click through Ghidra by hand" with "grep the
 corpus" for any future function of interest — the practical version of a "1:1 source-of-truth
-mapping" for a proprietary binary we can't byte-match without Nintendo's CodeWarrior compiler.
+mapping". (Byte-matched recompilation is deliberately skipped, not blocked: it only serves
+projects that rebuild the original binary, which a TypeScript port never does.)
 
 Following up on §j's two open call sites using the corpus:
 

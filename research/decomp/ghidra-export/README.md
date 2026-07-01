@@ -3,9 +3,11 @@
 Generated 2026-07-01 via a Ghidra script (`DumpAllDecompiledJ.java`, run from inside the
 `GotchaForce` Ghidra project against `user-data/GG4E/disc/sys/boot.dol`, using the community
 `GG4E-CSM-20220412.map` symbol map). This is a full-coverage decompiled-C snapshot of **every**
-function Ghidra found in the binary — not byte-matched against a compiler (that would need the
-proprietary Metrowerks CodeWarrior toolchain, out of scope — see `research/tools/re-tooling-guide.md`),
-but a real decompiler pass over the whole program, persisted to disk so future questions about
+function Ghidra found in the binary — not byte-matched against a compiler (byte-matching only
+matters for projects that recompile the original binary; this TypeScript port never does, so
+matching decomp is skipped as unnecessary, not treated as a blocker — see
+`research/tools/re-tooling-guide.md`), but a real decompiler pass over the whole program,
+persisted to disk so future questions about
 "what does the ROM actually do here" are a grep, not a new live-debugging or manual-Ghidra-click
 session.
 
