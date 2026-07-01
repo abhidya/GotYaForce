@@ -43,6 +43,8 @@ export interface BattleConfig {
   arena: string;
   /** All forces in the battle (player force(s), optional CPU ally, enemy force). */
   forces: BattleForce[];
+  /** Original battle timer in frames; omitted means no timer. */
+  timeLimitFrames?: number;
   /** Optional human-readable label (e.g. "BATTLE 2 VS" or the stage name). */
   label?: string;
   /** Optional metadata for UI/debugging; never read by the simulation. */
@@ -59,6 +61,30 @@ export interface BattleMeta {
   enemyTargetEnergy?: number;
   /** Actual summed enemy force energy. */
   enemyForceEnergy?: number;
+  /** Original DOL Challenge mode: 0=NORMAL, 1=TUFF, 2=INSANE. */
+  challengeMode?: 0 | 1 | 2;
+  /** Original DOL budget charge uses floor(cost * 2 / 3), not raw force energy. */
+  enemyBudgetCharge?: number;
+  /** Original slot setup creates two enemy CPU slots. */
+  enemySlotCount?: number;
+  enemySlotForceEnergy?: number[];
+  enemySlotBudgetCharge?: number[];
+  enemyMaxMembers?: number;
+  enemyGroupChoices?: number[];
+  enemyPickedGroupCodes?: number[];
+  /** CPU ally values are present for FIGHT ALONE when generated from DOL tables. */
+  allyTargetEnergy?: number;
+  allyForceEnergy?: number;
+  allyBudgetCharge?: number;
+  allyMaxMembers?: number;
+  allyGroupChoices?: number[];
+  allyPickedGroupCodes?: number[];
+  /** Raw Challenge stage selector bytes from PTR_DAT_80433934[0x1c..0x1e]. */
+  stageByte?: number;
+  stageSubtable?: number;
+  stageVariant?: number;
+  /** Raw Challenge setup writes 18000 frames (5 minutes at 60 Hz). */
+  timeLimitFrames?: number;
   /** Boss label, if this is a boss stage (adventure). */
   boss?: string | null;
   /** Source-data confidence (adventure stages). */

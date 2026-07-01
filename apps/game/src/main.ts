@@ -127,12 +127,23 @@ const AUDIO_CUES = {
 } as const;
 
 function selectedForce(): string[] {
-  const valid = selectedForceSlot().borgIds.filter((id) => FORCE_BY_ID.has(id));
+  return forceFromSlot(selectedForceSlot());
+}
+
+function forceFromSlot(slot: ForceSlot): string[] {
+  const valid = slot.borgIds.filter((id) => FORCE_BY_ID.has(id));
   return valid.length > 0 ? valid : [DEFAULT_LEAD];
 }
 
 function selectedForceSlot(): ForceSlot {
   return flow.forceSlots[flow.selectedForceSlot] ?? flow.forceSlots[0] ?? DEFAULT_FORCE_SLOTS[0]!;
+}
+
+function forceSlotForPlayer(playerIndex: number): ForceSlot {
+  if (playerIndex <= 0) return selectedForceSlot();
+  const slotCount = flow.forceSlots.length;
+  if (slotCount === 0) return selectedForceSlot();
+  return flow.forceSlots[(flow.selectedForceSlot + playerIndex) % slotCount] ?? selectedForceSlot();
 }
 
 function updateSelectedForceSlot(borgIds: readonly string[]): void {
@@ -965,10 +976,15 @@ function showForceBuilder(): void {
 function startRun(): void {
   const force = selectedForce();
   updateSelectedForceSlot(force);
+  const humanPlayerCount = Math.max(1, Math.min(flow.playerCount, 2));
+  const playerForces = Array.from({ length: humanPlayerCount }, (_, player) => ({
+    player,
+    borgIds: player === 0 ? force : forceFromSlot(forceSlotForPlayer(player)),
+  }));
   flow.run = createChallengeRun({
     budget: flow.budget,
     playerCount: flow.playerCount,
-    playerForces: [{ player: 0, borgIds: force }],
+    playerForces,
     borgs: borgs as unknown as Parameters<typeof createChallengeRun>[0]["borgs"],
   });
   const battle = flow.run.getCurrentBattle();
@@ -1095,6 +1111,7 @@ function updateHud(): void {
     cooldown01: active ? (active.cooldowns?.["special"] ? clamp01(1 - active.cooldowns["special"] / 90) : 1) : 1,
     borgId: active?.borgId ?? DEFAULT_LEAD,
     lockOn: Boolean(active?.lockTarget),
+    timeRemainingFrames: st.timeRemainingFrames,
     alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= session.allyMax * 0.25,
   });
 }

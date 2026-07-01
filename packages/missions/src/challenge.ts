@@ -2,7 +2,7 @@
 //
 // CHALLENGE mode: the run/progression layer.
 //
-// Real flow (reference/captures/BRANCHES.md):
+// Player-facing flow (reference/captures/BRANCHES.md):
 //   pick difficulty (= energy budget 1500 / 2000 / 2500)
 //   → pick players (1P FIGHT ALONE / 2P TEAM UP)
 //   → build force(s) (≤30 borgs, summed energy ≤ budget)
@@ -10,11 +10,25 @@
 //   "FIGHT ALONE" still spawns a CPU ally on the player side.
 //   WIN/LOSE results carry a GRAND TOTAL; the run tracks a cumulative score.
 //
-// This module produces an ordered list of `BattleConfig`s (the escalating run)
-// and a `next(result)` progression that advances on win and ends on lose.
+// The CPU ally/enemy rosters and Challenge stage ids below are not heuristic:
+// they are built from the deobfuscated 0x801962c4 / 0x80196dac DOL tables.
 
 import type { BattleConfig, BattleForce } from "./battle-config.js";
-import { type BorgData, enemyForceForBudget, deathBorgPool, type Borg } from "./borg-data.js";
+import { type BorgData, readBorgs } from "./borg-data.js";
+import {
+  CHALLENGE_GROUP_ROSTERS,
+  CHALLENGE_TIME_LIMIT_FRAMES,
+  challengeBattleCount,
+  challengeBudgetFor,
+  challengeGroupChoicesFor,
+  challengeMaxMembersFor,
+  challengeModeForPlayerBudget,
+  selectChallengeStage,
+  type ChallengeGroupCode,
+  type ChallengeMode,
+  type ChallengeSide,
+  type ChallengeStageSelection,
+} from "./challenge-reference.js";
 import {
   type BattleResults,
   accumulateScore,
@@ -46,29 +60,32 @@ export interface ChallengeRunOptions {
   playerForces: PlayerForce[];
   /** Roster data (borgs.json) for assembling enemy waves. */
   borgs: BorgData;
-  /** How many battles in the run. Default 10. */
+  /** Optional cap. Defaults to the original mode table count: 5 / 10 / 15. */
   battleCount?: number;
   /**
-   * Borg id used as the CPU ally roster when fighting alone. Defaults to the
-   * single player's own force (the CPU mirrors your force, as in GG4E where
-   * the assist clears the wave). Provide an explicit ally if desired.
+   * Borg ids used as an explicit CPU ally roster when fighting alone.
+   * Omit this to use the original DOL ally group/budget tables.
    */
   fightAloneAllyBorgIds?: string[];
-  /** Arena id for the run's battles. Default "challenge". */
+  /**
+   * Arena/stage override for every battle. Omit this to use the original
+   * Challenge stage-byte selector (`st00`, `st01`, ..., `st0e` subset).
+   */
   arena?: string;
+  /** Deterministic seed for DOL-style random table picks. */
+  seed?: number;
+  /** Optional RNG override. Must return a value in [0, 1). */
+  rng?: () => number;
 }
 
 /**
- * Enemy-energy escalation across the run. Capture evidence in
- * apps/game/reference/captures/BRANCHES.md pins NORMAL battle 1 near the
- * 1500 GF-energy budget and NORMAL battle 2 at ENEMY 1860.
- *
- *   enemyTarget(i) = round(budget * (startFactor + i * stepFactor))
+ * Legacy shape retained for older callers. Challenge CPU budgets now come from
+ * the original DOL tables rather than this curve.
  */
 export interface EscalationCurve {
-  /** Fraction of budget the first enemy force targets. Default 1.0. */
+  /** @deprecated DOL-backed Challenge no longer uses this curve. */
   startFactor: number;
-  /** Added fraction of budget per battle index. Default 0.24. */
+  /** @deprecated DOL-backed Challenge no longer uses this curve. */
   stepFactor: number;
 }
 
@@ -80,14 +97,17 @@ export const DEFAULT_ESCALATION: EscalationCurve = {
 export function enemyTargetForBattle(
   budget: number,
   index: number,
-  curve: EscalationCurve = DEFAULT_ESCALATION,
+  _curve: EscalationCurve = DEFAULT_ESCALATION,
 ): number {
-  return Math.round(budget * (curve.startFactor + index * curve.stepFactor));
+  const mode = challengeModeForPlayerBudget(budget);
+  return challengeBudgetFor("enemy", mode, index);
 }
 
 /** A built challenge run: the ordered battles + the run's live progression state. */
 export interface ChallengeRun {
   budget: number;
+  /** Original DOL Challenge table set: 0=NORMAL, 1=TUFF, 2=INSANE. */
+  mode: ChallengeMode;
   playerCount: number;
   /** Ordered escalating battles. */
   battles: BattleConfig[];
@@ -132,21 +152,32 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
     playerCount,
     playerForces,
     borgs,
-    battleCount = 10,
-    arena = "challenge",
+    battleCount,
+    arena,
   } = options;
 
-  const pool = deathBorgPool(borgs);
-  // Augment the Death Borg fodder with a few escalating-cost roster borgs so
-  // later battles can field meaningful threats, not just 30 cheap fodder.
-  const escalatingPool = buildEscalatingEnemyPool(borgs, pool);
+  const mode = challengeModeForPlayerBudget(budget);
+  const referenceBattleCount = challengeBattleCount(mode);
+  const totalBattles = Math.min(battleCount ?? referenceBattleCount, referenceBattleCount);
+  const rng = options.rng ?? createChallengeRng(options.seed ?? seedFromRunOptions(mode, budget, playerCount));
+  const energyById = energyMap(borgs);
 
   const battles: BattleConfig[] = [];
-  for (let i = 0; i < battleCount; i++) {
-    const enemyTarget = enemyTargetForBattle(budget, i);
-    const enemy = enemyForceForBudget(enemyTarget, borgs, {
-      pool: i < 2 ? pool : escalatingPool,
-    });
+  let previousStageByte: number | null = null;
+
+  for (let i = 0; i < totalBattles; i++) {
+    const stage: ChallengeStageSelection | null = arena ? null : selectChallengeStage(rng, previousStageByte);
+    if (stage) previousStageByte = stage.stageByte;
+
+    const enemyRosters = [0, 1].map(() =>
+      buildCpuRoster({
+        side: "enemy",
+        mode,
+        battleIndex: i,
+        energyById,
+        rng,
+      }),
+    );
 
     const playerForceConfigs: BattleForce[] = playerForces.map((pf) => ({
       team: "player" as const,
@@ -154,10 +185,23 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
       borgIds: pf.borgIds,
     }));
 
-    // FIGHT ALONE → add a CPU ally on the player side.
+    let allyGenerated: GeneratedCpuRoster | null = null;
+    let allyBorgIds: readonly string[] | null = null;
+
+    // FIGHT ALONE -> add the original CPU ally side, not a mirror of the player force.
     if (playerCount <= 1) {
-      const allyBorgIds =
-        options.fightAloneAllyBorgIds ?? playerForces[0]?.borgIds ?? [];
+      if (options.fightAloneAllyBorgIds) {
+        allyBorgIds = options.fightAloneAllyBorgIds;
+      } else {
+        allyGenerated = buildCpuRoster({
+          side: "ally",
+          mode,
+          battleIndex: i,
+          energyById,
+          rng,
+        });
+        allyBorgIds = allyGenerated.borgIds;
+      }
       playerForceConfigs.push({
         team: "player",
         ownerPlayer: null,
@@ -166,27 +210,51 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
       });
     }
 
-    const enemyForce: BattleForce = {
+    const enemyForces: BattleForce[] = enemyRosters.map((enemy) => ({
       team: "enemy",
       ownerPlayer: null,
       borgIds: enemy.borgIds,
-    };
+    }));
+    const enemyForceEnergy = sum(enemyRosters.map((enemy) => enemy.energy));
+    const enemyBudgetCharge = sum(enemyRosters.map((enemy) => enemy.chargedEnergy));
 
     battles.push({
-      arena,
+      arena: arena ?? stage?.stageId ?? "st00",
+      timeLimitFrames: CHALLENGE_TIME_LIMIT_FRAMES,
       label: `BATTLE ${i + 1} VS`,
-      forces: [...playerForceConfigs, enemyForce],
+      forces: [...playerForceConfigs, ...enemyForces],
       meta: {
         mode: "challenge",
         index: i,
-        enemyTargetEnergy: enemyTarget,
-        enemyForceEnergy: enemy.energy,
+        challengeMode: mode,
+        enemyTargetEnergy: enemyRosters[0]?.targetEnergy ?? 0,
+        enemyForceEnergy,
+        enemyBudgetCharge,
+        enemySlotCount: enemyRosters.length,
+        enemySlotForceEnergy: enemyRosters.map((enemy) => enemy.energy),
+        enemySlotBudgetCharge: enemyRosters.map((enemy) => enemy.chargedEnergy),
+        enemyMaxMembers: enemyRosters[0]?.maxMembers ?? 0,
+        enemyGroupChoices: [...(enemyRosters[0]?.groupChoices ?? [])],
+        enemyPickedGroupCodes: enemyRosters.flatMap((enemy) => enemy.pickedGroupCodes),
+        timeLimitFrames: CHALLENGE_TIME_LIMIT_FRAMES,
+        ...(allyGenerated
+          ? {
+              allyTargetEnergy: allyGenerated.targetEnergy,
+              allyForceEnergy: allyGenerated.energy,
+              allyBudgetCharge: allyGenerated.chargedEnergy,
+              allyMaxMembers: allyGenerated.maxMembers,
+              allyGroupChoices: [...allyGenerated.groupChoices],
+              allyPickedGroupCodes: [...allyGenerated.pickedGroupCodes],
+            }
+          : {}),
+        ...(stage ? stageMeta(stage) : {}),
       },
     });
   }
 
   const run: ChallengeRun = {
     budget,
+    mode,
     playerCount,
     battles,
     total: battles.length,
@@ -249,15 +317,97 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
   return run;
 }
 
-/**
- * A pool for later-battle enemy waves: Death Borg fodder plus a spread of
- * mid/high-cost non-Dragon, non-final roster borgs so escalating battles have
- * teeth. We exclude the ultra-cost (≥1500) units to keep waves composable.
- */
-function buildEscalatingEnemyPool(data: BorgData, deathBorgs: readonly Borg[]): Borg[] {
-  const all = "borgs" in data ? data.borgs : data;
-  const threats = all.filter(
-    (b) => b.energy >= 250 && b.energy <= 1000 && b.tribe !== "Death Borg",
-  );
-  return [...deathBorgs, ...threats];
+export function createChallengeRng(seed = 0x47463445): () => number {
+  let state = seed >>> 0;
+  if (state === 0) state = 0x47463445;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+interface GeneratedCpuRoster {
+  borgIds: string[];
+  energy: number;
+  chargedEnergy: number;
+  targetEnergy: number;
+  maxMembers: number;
+  groupChoices: readonly ChallengeGroupCode[];
+  pickedGroupCodes: ChallengeGroupCode[];
+}
+
+interface BuildCpuRosterOptions {
+  side: ChallengeSide;
+  mode: ChallengeMode;
+  battleIndex: number;
+  energyById: ReadonlyMap<string, number>;
+  rng: () => number;
+}
+
+function buildCpuRoster(options: BuildCpuRosterOptions): GeneratedCpuRoster {
+  const { side, mode, battleIndex, energyById, rng } = options;
+  const targetEnergy = challengeBudgetFor(side, mode, battleIndex);
+  const maxMembers = challengeMaxMembersFor(side, mode, battleIndex);
+  const groupChoices = challengeGroupChoicesFor(side, mode, battleIndex);
+  const borgIds: string[] = [];
+  const pickedGroupCodes: ChallengeGroupCode[] = [];
+  let chargedEnergy = 0;
+  let energy = 0;
+
+  for (let i = 0; i < maxMembers; i += 1) {
+    const groupCode = groupChoices[randomInt(rng, groupChoices.length)] ?? groupChoices[0];
+    if (groupCode === undefined) break;
+    const pool = CHALLENGE_GROUP_ROSTERS[groupCode];
+    const candidate = pool.length > 0 ? pool[randomInt(rng, pool.length)] ?? "pl0008" : "pl0008";
+    const cost = energyById.get(candidate) ?? 0;
+    const chargedCost = Math.floor((cost * 2) / 3);
+    if (chargedEnergy + chargedCost > targetEnergy) break;
+
+    borgIds.push(candidate);
+    pickedGroupCodes.push(groupCode);
+    chargedEnergy += chargedCost;
+    energy += cost;
+  }
+
+  return {
+    borgIds,
+    energy,
+    chargedEnergy,
+    targetEnergy,
+    maxMembers,
+    groupChoices,
+    pickedGroupCodes,
+  };
+}
+
+function energyMap(data: BorgData): ReadonlyMap<string, number> {
+  return new Map(readBorgs(data).map((borg) => [borg.id, borg.energy] as const));
+}
+
+function seedFromRunOptions(mode: ChallengeMode, budget: number, playerCount: number): number {
+  return (0x47463445 ^ Math.imul(mode + 1, 0x9e3779b1) ^ budget ^ (playerCount << 16)) >>> 0;
+}
+
+function stageMeta(stage: ChallengeStageSelection): {
+  stageByte: number;
+  stageSubtable: number;
+  stageVariant: number;
+} {
+  return {
+    stageByte: stage.stageByte,
+    stageSubtable: stage.stageSubtable,
+    stageVariant: stage.stageVariant,
+  };
+}
+
+function randomInt(rng: () => number, maxExclusive: number): number {
+  if (maxExclusive <= 0) throw new RangeError("maxExclusive must be positive");
+  return Math.min(maxExclusive - 1, Math.floor(Math.max(0, Math.min(0.999999999, rng())) * maxExclusive));
+}
+
+function sum(values: readonly number[]): number {
+  return values.reduce((total, value) => total + value, 0);
 }

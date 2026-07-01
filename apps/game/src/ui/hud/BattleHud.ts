@@ -42,6 +42,8 @@ export interface HudState {
   borgId: string;
   /** Whether the lock-on reticle is visible. */
   lockOn: boolean;
+  /** Remaining battle timer frames, or null when untimed. */
+  timeRemainingFrames?: number | null;
   /** Optional: show the yellow "!" alert. Defaults to false. */
   alert?: boolean;
 }
@@ -187,6 +189,10 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   const alert = el("div", { class: "gf-hud-alert gf-hidden", text: "!" });
   root.appendChild(alert);
 
+  const timerText = bitmapText("gf-hud-timer-text");
+  const timer = el("div", { class: "gf-hud-timer gf-hidden" }, [timerText]);
+  root.appendChild(timer);
+
   // ----- optional name banner -----
   let bannerImg: HTMLImageElement | null = null;
   if (opts.showBanner) {
@@ -255,6 +261,9 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
     setMeter(enemyFill, enemyTab, s.enemyEnergy, s.enemyMax);
 
     alert.classList.toggle("gf-hidden", !s.alert);
+    const hasTimer = s.timeRemainingFrames !== undefined && s.timeRemainingFrames !== null;
+    timer.classList.toggle("gf-hidden", !hasTimer);
+    if (hasTimer) setBitmapText(timerText, formatFramesAsClock(s.timeRemainingFrames ?? 0));
 
     reticle.classList.toggle("gf-hidden", !s.lockOn);
 
@@ -279,4 +288,11 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
     update,
     destroy: () => root.remove(),
   };
+}
+
+function formatFramesAsClock(frames: number): string {
+  const seconds = Math.max(0, Math.ceil(frames / 60));
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${minutes}:${String(rest).padStart(2, "0")}`;
 }

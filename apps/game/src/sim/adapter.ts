@@ -63,6 +63,7 @@ export function convertBattleConfig(
     stageId,
     ...(bounds ? { bounds } : {}),
     ...(collision ? { collision } : {}),
+    ...(cfg.timeLimitFrames !== undefined ? { timeLimitFrames: cfg.timeLimitFrames } : {}),
     forces: cfg.forces.map((force) => ({
       team: force.team === "player" ? 0 : 1,
       ownerPlayer: force.ownerPlayer == null ? null : playerIdFor(force.ownerPlayer),

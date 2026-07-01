@@ -59,6 +59,7 @@ class BattleImpl implements Battle {
   private forces: ForceRuntime[] = [];
   private bounds: RectStageBounds;
   private collision: StageCollision | null;
+  private readonly timeLimitFrames: number | null;
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
@@ -68,6 +69,7 @@ class BattleImpl implements Battle {
   ) {
     this.bounds = normalizeStageBounds(cfg.bounds ?? DEFAULT_BOUNDS);
     this.collision = cfg.collision ?? null;
+    this.timeLimitFrames = cfg.timeLimitFrames !== undefined ? Math.max(0, Math.floor(cfg.timeLimitFrames)) : null;
     resetProjectileCounter();
 
     let cpuIdx = 0;
@@ -93,6 +95,7 @@ class BattleImpl implements Battle {
       energy: {},
       activeUidByPlayer: {},
       frame: 0,
+      timeRemainingFrames: this.timeLimitFrames,
       result: "ongoing",
     };
 
@@ -278,6 +281,7 @@ class BattleImpl implements Battle {
     // 5) Energy + win/lose.
     this.recomputeEnergy();
     this.evaluateResult();
+    this.tickBattleTimer();
 
     // 6) Cull fully-dead borgs from the active list to keep arrays small (keep maps for energy already counted via queue=0).
     this.state.borgs = this.state.borgs.filter((b) => {
@@ -289,6 +293,13 @@ class BattleImpl implements Battle {
     });
 
     this.state.frame += 1;
+  }
+
+  private tickBattleTimer(): void {
+    if (this.state.result !== "ongoing" || this.timeLimitFrames === null) return;
+    const remaining = Math.max(0, this.timeLimitFrames - this.state.frame - 1);
+    this.state.timeRemainingFrames = remaining;
+    if (remaining <= 0) this.state.result = "draw";
   }
 
   private lockStillValid(b: BorgRuntime): boolean {
