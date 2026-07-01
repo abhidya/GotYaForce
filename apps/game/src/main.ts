@@ -35,6 +35,7 @@ import {
   type StageCollision,
   type StageCollisionTriangle,
 } from "@gf/combat";
+import { createAudioManager, type GotchaAudioManager } from "@gf/audio";
 import { hitBin } from "@gf/formats";
 import {
   createChallengeRun,
@@ -104,6 +105,17 @@ const DEFAULT_FORCE_SLOTS: ForceSlot[] = [
   { no: 2, name: "DEATH BORG FORCE", borgIds: ["pl0008", "pl000c"] },
   { no: 3, name: "GUN BORG FORCE", borgIds: ["pl0102", "pl0104"] },
 ];
+
+// Exported ADX->OGG cues from poq_adx_usa.afs. Exact Challenge cue semantics
+// still need DOL trace confirmation, so these are conservative asset-backed
+// defaults rather than claimed final music IDs.
+const AUDIO_CUES = {
+  menuBgm: "bgm00",
+  battleBgm: "bgm01",
+  confirm: "se00_00",
+  back: "se00_01",
+  edit: "se00_02",
+} as const;
 
 function selectedForce(): string[] {
   const valid = selectedForceSlot().borgIds.filter((id) => FORCE_BY_ID.has(id));
@@ -689,17 +701,79 @@ function closeSocket(): void {
 void closeSocket; // referenced so the dormant hook isn't tree-shaken/flagged.
 
 // ------------------------------------------------------------------------------------------
+// Audio
+// ------------------------------------------------------------------------------------------
+
+let audioManagerPromise: Promise<GotchaAudioManager | null> | null = null;
+let activeBgmKey: string | null = null;
+let pendingBgmKey: string | null = null;
+
+function initAudio(): Promise<GotchaAudioManager | null> {
+  if (!audioManagerPromise) {
+    audioManagerPromise = createAudioManager().catch(() => null);
+  }
+  return audioManagerPromise;
+}
+
+function queueBgm(key: string): void {
+  pendingBgmKey = key;
+  void playPendingBgm();
+}
+
+async function playPendingBgm(): Promise<void> {
+  const key = pendingBgmKey;
+  if (!key) return;
+  if (key === activeBgmKey) {
+    pendingBgmKey = null;
+    return;
+  }
+  const audio = await initAudio();
+  if (!audio) return;
+  try {
+    await audio.playBgm(key);
+    activeBgmKey = key;
+    if (pendingBgmKey === key) pendingBgmKey = null;
+  } catch {
+    // Browsers reject autoplay before the first user gesture. Keep pending and
+    // retry from the next key/click/touch event.
+  }
+}
+
+function playSfx(key: string): void {
+  void initAudio().then((audio) => {
+    if (!audio) return;
+    void audio.playSfx(key).catch(() => undefined);
+  });
+}
+
+function playConfirmSfx(): void {
+  playSfx(AUDIO_CUES.confirm);
+}
+
+function playBackSfx(): void {
+  playSfx(AUDIO_CUES.back);
+}
+
+function playEditSfx(): void {
+  playSfx(AUDIO_CUES.edit);
+}
+
+// ------------------------------------------------------------------------------------------
 // Input
 // ------------------------------------------------------------------------------------------
 
 const keys = new Set<string>();
 window.addEventListener("keydown", (e) => {
   if (isTextInputTarget(e.target)) return;
+  void playPendingBgm();
   // Tab would move focus; capture it for switch-lock during battle.
   if (e.code === "Tab" && flow.screen === "battle") e.preventDefault();
   keys.add(e.code);
 });
 window.addEventListener("keyup", (e) => keys.delete(e.code));
+window.addEventListener("pointerdown", () => {
+  void playPendingBgm();
+});
 
 function isTextInputTarget(target: EventTarget | null): boolean {
   return (
@@ -758,11 +832,15 @@ function mountScreen(build: (root: HTMLElement) => { destroy(): void }): void {
 
 function showMenu(): void {
   flow.screen = "menu";
+  queueBgm(AUDIO_CUES.menuBgm);
   mountScreen((root) =>
     createMainMenu(root, {
       initial: "challenge",
       onSelect: (mode) => {
-        if (mode === "challenge") showDifficulty();
+        if (mode === "challenge") {
+          playConfirmSfx();
+          showDifficulty();
+        }
       },
     }),
   );
@@ -773,10 +851,14 @@ function showDifficulty(): void {
   mountScreen((root) =>
     createSelectDifficulty(root, {
       onSelect: (budget) => {
+        playConfirmSfx();
         flow.budget = budget;
         showPlayers();
       },
-      onBack: showMenu,
+      onBack: () => {
+        playBackSfx();
+        showMenu();
+      },
     }),
   );
 }
@@ -787,10 +869,14 @@ function showPlayers(): void {
     createSelectPlayers(root, {
       maxPlayers: 2,
       onSelect: (count) => {
+        playConfirmSfx();
         flow.playerCount = count;
         showLoadBoxData();
       },
-      onBack: showDifficulty,
+      onBack: () => {
+        playBackSfx();
+        showDifficulty();
+      },
     }),
   );
 }
@@ -799,9 +885,18 @@ function showLoadBoxData(): void {
   flow.screen = "load-box";
   mountScreen((root) =>
     createLoadBoxData(root, {
-      onConfirm: showSelectForce,
-      onSkip: showSelectForce,
-      onBack: showPlayers,
+      onConfirm: () => {
+        playConfirmSfx();
+        showSelectForce();
+      },
+      onSkip: () => {
+        playConfirmSfx();
+        showSelectForce();
+      },
+      onBack: () => {
+        playBackSfx();
+        showPlayers();
+      },
     }),
   );
 }
@@ -815,17 +910,23 @@ function showSelectForce(): void {
       selectedSlot: flow.selectedForceSlot,
       limit: flow.budget,
       onSelectSlot: (slotIndex) => {
+        playSfx(AUDIO_CUES.confirm);
         flow.selectedForceSlot = slotIndex;
       },
       onConfirm: (slot) => {
+        playConfirmSfx();
         flow.selectedForceSlot = Math.max(0, flow.forceSlots.findIndex((candidate) => candidate.no === slot.no));
         startRun();
       },
       onEdit: (slot) => {
+        playEditSfx();
         flow.selectedForceSlot = Math.max(0, flow.forceSlots.findIndex((candidate) => candidate.no === slot.no));
         showForceBuilder();
       },
-      onBack: showLoadBoxData,
+      onBack: () => {
+        playBackSfx();
+        showLoadBoxData();
+      },
     }),
   );
 }
@@ -838,10 +939,14 @@ function showForceBuilder(): void {
       limit: flow.budget,
       initialForce: selectedForce(),
       onConfirm: (force) => {
+        playConfirmSfx();
         updateSelectedForceSlot(force);
         showSelectForce();
       },
-      onQuit: showSelectForce,
+      onQuit: () => {
+        playBackSfx();
+        showSelectForce();
+      },
     }),
   );
 }
@@ -865,14 +970,19 @@ function startRun(): void {
 
 function showBattleIntro(config: MissionBattleConfig): void {
   flow.screen = "briefing";
+  queueBgm(AUDIO_CUES.menuBgm);
   mountScreen((root) =>
     createBattleIntro(root, {
       config,
       catalog: FORCE_CATALOG,
       onConfirm: () => {
+        playConfirmSfx();
         void enterBattle(config);
       },
-      onBack: showSelectForce,
+      onBack: () => {
+        playBackSfx();
+        showSelectForce();
+      },
     }),
   );
 }
@@ -903,6 +1013,7 @@ const SIM_DT = 1 / 60;
 
 async function enterBattle(config: MissionBattleConfig): Promise<void> {
   flow.screen = "loading";
+  queueBgm(AUDIO_CUES.battleBgm);
   activeHandle?.destroy();
   activeHandle = null;
   ui.replaceChildren();

@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T01:46:28.136Z",
+  "generatedAt": "2026-07-01T01:57:16.809Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -17,7 +17,8 @@
     "runtimeStageTriangleCollision": true,
     "runtimeStageWallCollision": true,
     "runtimeStageCeilingCollision": true,
-    "runtimeProjectileFxFromExportedTextures": true
+    "runtimeProjectileFxFromExportedTextures": true,
+    "runtimeAudioFromExportedCues": true
   },
   "screens": [
     {
@@ -286,7 +287,7 @@
       ],
       "nextReplacement": "Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:27",
+      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:35",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
         {
@@ -318,17 +319,17 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 39
+          "line": 44
         },
         {
           "kind": "css-force-platform",
           "pattern": "gf-select-platform",
-          "line": 45
+          "line": 50
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 40
+          "line": 45
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -762,12 +763,12 @@
         "fallback": "apps/game/src/sim/adapter.ts:35"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:614",
-        "fetchStageManifest": "apps/game/src/main.ts:618",
-        "loadStageCollision": "apps/game/src/main.ts:526",
-        "parseStageHitGrid": "apps/game/src/main.ts:538",
-        "loadDefaultArena": "apps/game/src/main.ts:658",
-        "loadConvertedStage": "apps/game/src/main.ts:887"
+        "loadStage": "apps/game/src/main.ts:645",
+        "fetchStageManifest": "apps/game/src/main.ts:649",
+        "loadStageCollision": "apps/game/src/main.ts:557",
+        "parseStageHitGrid": "apps/game/src/main.ts:569",
+        "loadDefaultArena": "apps/game/src/main.ts:689",
+        "loadConvertedStage": "apps/game/src/main.ts:1022"
       },
       "collisionBounds": {
         "usesStageHitParser": true,
@@ -1364,6 +1365,44 @@
           "exists": true
         }
       ]
+    }
+  },
+  "audioRuntime": {
+    "audioPackageDependency": true,
+    "runtimeImportsAudioManager": true,
+    "runtimeQueuesBgm": true,
+    "runtimePlaysSfx": true,
+    "manifest": {
+      "path": "apps/game/public/audio/manifest.json",
+      "parses": true,
+      "counts": {
+        "bgm": 33,
+        "sfx": 5,
+        "voice": 46
+      },
+      "cueKeys": [
+        {
+          "key": "bgm00",
+          "exists": true
+        },
+        {
+          "key": "bgm01",
+          "exists": true
+        },
+        {
+          "key": "se00_00",
+          "exists": true
+        },
+        {
+          "key": "se00_01",
+          "exists": true
+        },
+        {
+          "key": "se00_02",
+          "exists": true
+        }
+      ],
+      "notes": "Voices are a representative sample (first 2 clips per character pl00-pl12) out of ~2075 total. bgm tracks <5s are jingles/stingers (loop=false)."
     }
   },
   "modeNamingRisks": {

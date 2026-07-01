@@ -391,6 +391,30 @@ function inspectCombatFx() {
   };
 }
 
+function inspectAudioRuntime() {
+  const main = readText("apps/game/src/main.ts");
+  const gamePackage = readJson("apps/game/package.json");
+  const manifest = readJson("apps/game/public/audio/manifest.json");
+  const files = manifest.value?.files ?? [];
+  const cueKeys = ["bgm00", "bgm01", "se00_00", "se00_01", "se00_02"];
+  return {
+    audioPackageDependency: Boolean(gamePackage.value?.dependencies?.["@gf/audio"]),
+    runtimeImportsAudioManager: main.includes("createAudioManager") && main.includes("@gf/audio"),
+    runtimeQueuesBgm: main.includes("queueBgm(AUDIO_CUES.menuBgm)") && main.includes("queueBgm(AUDIO_CUES.battleBgm)"),
+    runtimePlaysSfx: main.includes("playConfirmSfx") && main.includes("playBackSfx") && main.includes("playEditSfx"),
+    manifest: {
+      path: "apps/game/public/audio/manifest.json",
+      parses: manifest.ok,
+      counts: manifest.value?.counts ?? null,
+      cueKeys: cueKeys.map((key) => ({
+        key,
+        exists: files.some((entry) => entry.key === key),
+      })),
+      notes: manifest.value?.notes ?? null,
+    },
+  };
+}
+
 function buildReport() {
   const screens = inspectScreens();
   const stageCoverage = inspectStages();
@@ -398,6 +422,7 @@ function buildReport() {
   const uiTextureExports = inspectUiTextureExports();
   const modeNamingRisks = inspectModeNamingRisks();
   const combatFx = inspectCombatFx();
+  const audioRuntime = inspectAudioRuntime();
   const summary = {
     screens: screens.length,
     screensUsingAnyRealExportedAsset: screens.filter((screen) => screen.realExportedAssetsUsed.length > 0).length,
@@ -416,6 +441,12 @@ function buildReport() {
       combatFx.projectileVisualKindInState &&
       combatFx.projectileVisualKindDerivedFromProfile &&
       combatFx.rendererUsesExportedProjectileTextures,
+    runtimeAudioFromExportedCues:
+      audioRuntime.audioPackageDependency &&
+      audioRuntime.runtimeImportsAudioManager &&
+      audioRuntime.runtimeQueuesBgm &&
+      audioRuntime.runtimePlaysSfx &&
+      audioRuntime.manifest.cueKeys.every((cue) => cue.exists),
   };
   return {
     generatedBy: "scripts/audit-real-asset-coverage.mjs",
@@ -428,6 +459,7 @@ function buildReport() {
     uiSceneExports,
     uiTextureExports,
     combatFx,
+    audioRuntime,
     modeNamingRisks,
     nextMostUsefulReplacements: [
       "Wire stageIdForArena to a traced arena-name -> st## table; public exports now cover 40 visual stages, but runtime fallback still collapses non-st## arenas to st00.",
@@ -470,6 +502,7 @@ function renderMarkdown(report) {
   add(`- Runtime lateral wall collision from STIH: ${report.summary.runtimeStageWallCollision ? "yes" : "no"}`);
   add(`- Runtime upward ceiling collision from STIH: ${report.summary.runtimeStageCeilingCollision ? "yes" : "no"}`);
   add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
+  add(`- Runtime audio from exported cues: ${report.summary.runtimeAudioFromExportedCues ? "yes" : "no"}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
   add();
   add("## Runtime Screens");
@@ -518,6 +551,22 @@ function renderMarkdown(report) {
       { title: "Exists", value: (row) => row.exists ? "yes" : "no" },
     ]),
   );
+  add();
+  add("## Audio");
+  add();
+  add(`Audio package dependency: ${report.audioRuntime.audioPackageDependency ? "yes" : "no"}`);
+  add(`Runtime imports audio manager: ${report.audioRuntime.runtimeImportsAudioManager ? "yes" : "no"}`);
+  add(`Runtime queues menu/battle BGM: ${report.audioRuntime.runtimeQueuesBgm ? "yes" : "no"}`);
+  add(`Runtime plays confirm/back/edit SFX: ${report.audioRuntime.runtimePlaysSfx ? "yes" : "no"}`);
+  add();
+  add(
+    mdTable(report.audioRuntime.manifest.cueKeys, [
+      { title: "Cue", value: (row) => row.key },
+      { title: "Exists", value: (row) => row.exists ? "yes" : "no" },
+    ]),
+  );
+  add();
+  add(`Manifest counts: ${JSON.stringify(report.audioRuntime.manifest.counts)}`);
   add();
   add("## Challenge / Adventure / Story Risk");
   add();

@@ -17,6 +17,9 @@ importers:
       '@gf/assets':
         specifier: workspace:*
         version: link:../../packages/assets
+      '@gf/audio':
+        specifier: workspace:*
+        version: link:../../packages/audio
       '@gf/combat':
         specifier: workspace:*
         version: link:../../packages/combat

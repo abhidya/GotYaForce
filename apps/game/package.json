@@ -16,6 +16,7 @@
     "three": "^0.169.0",
     "ws": "^8.21.0",
     "@gf/assets": "workspace:*",
+    "@gf/audio": "workspace:*",
     "@gf/combat": "workspace:*",
     "@gf/core": "workspace:*",
     "@gf/formats": "workspace:*",
