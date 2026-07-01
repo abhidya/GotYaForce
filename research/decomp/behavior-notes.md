@@ -1399,6 +1399,33 @@ piece.
 
 ---
 
+### (x) Challenge select-screen menu-object motion (2026-07-01)
+
+`chunk_0048.c` anchors the Challenge menu object set:
+
+- `0x801999c8 spawn_challenge_menu_object_set` spawns banner/object rows and clears
+  `challenge_work[0x1653]`, the active object counter.
+- `0x80199dc0` / `0x80199ea8` give object-0's 10-frame phase timings and two-frame flicker
+  during the selected/banner settle.
+- `0x8019a3f0` / `0x8019a8f0` initialize and update slot/card objects with a 15-frame entrance
+  timer at `object+0x1c`.
+- `0x80199da0 is_global_menu_mode_5` hides these objects while the global menu mode is 5.
+
+**Port status:** browser Challenge difficulty/player screens now share `challengeMenuMotion.ts`,
+which drives DOM menu objects with a 60 Hz frame counter, 10-frame title/selection pulse, 15-frame
+option fly-in, 10/15-frame reverse hide on confirm/back, and input gating until all intro/exit
+objects finish. This is not the exact world-space float-table placement yet; it ports the proved
+state/timing behavior while capture CSS still owns pixel placement.
+
+**Asset note:** `vsel00_mdl.arc` / `vsel01_mdl.arc` are exported and present under
+`apps/game/public/ui/scenes/vsel00` and `vsel01` (165 DAE models each). A broad "foreground bbox"
+filter was tested and rejected because it exposed shared menu-text/controller quads (for example
+the `CPU` texture from `Texture_0_CI4_RGB5A3.png`) over the difficulty screen. Next asset pass
+should map exact model indices from the object spawn tables instead of fitting a large filtered
+subset.
+
+---
+
 ### (g) Audio / music triggers (Confirmed library entry points)
 Engine uses GC **AI/DSP streaming** + sequence audio: `AIInit`/`AIStartDMA`/`AISetStreamPlayState`
 /`AISetStreamVolLeft` (0x802146xx–0x80214xxx), `sndSeqContinue` @ 0x801c7b68,

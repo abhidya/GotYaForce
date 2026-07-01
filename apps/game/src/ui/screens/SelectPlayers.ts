@@ -8,6 +8,7 @@
  */
 
 import { el, legendItem } from "../dom.js";
+import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export interface SelectPlayersOptions {
@@ -38,6 +39,8 @@ export function createSelectPlayers(
 ): SelectPlayersHandle {
   const max = Math.max(1, Math.min(opts.maxPlayers ?? 2, 2));
   let selected = Math.min(Math.max(opts.initial ?? 1, 1), max);
+  let motion: ChallengeMenuMotionHandle | null = null;
+  let choosing = false;
 
   const root = el("div", { class: "gf-screen gf-vsel-screen gf-select-players" });
   const frame = el("div", { class: "gf-vsel-frame" });
@@ -49,6 +52,7 @@ export function createSelectPlayers(
 
   const row = el("div", { class: "gf-row gf-vsel-options" });
   const tiles = new Map<number, HTMLButtonElement>();
+  const motionItems: Array<{ element: HTMLElement; delayFrames: number; fromX: number; fromY: number }> = [];
 
   for (let count = 1; count <= max; count++) {
     const people = el("div", { class: `gf-people gf-people-${count}` });
@@ -61,7 +65,8 @@ export function createSelectPlayers(
         class: `gf-option gf-player-option gf-player-${count}`,
         attrs: { type: "button", "data-count": String(count), "aria-label": `${count} player ${label}` },
         onClick: () => {
-          if (selected === count) opts.onSelect(count);
+          if (!canInteract()) return;
+          if (selected === count) void chooseSelected();
           else select(count);
         },
       },
@@ -71,9 +76,19 @@ export function createSelectPlayers(
       ],
     );
     tiles.set(count, tile);
+    motionItems.push({
+      element: tile,
+      delayFrames: (count - 1) * 3,
+      fromX: count === 1 ? -52 : 52,
+      fromY: 82,
+    });
     row.appendChild(tile);
   }
   frame.appendChild(row);
+
+  const centerArrow = el("div", { class: "gf-player-arrow gf-motion-object", attrs: { "aria-hidden": "true" } });
+  motionItems.push({ element: centerArrow, delayFrames: 2, fromX: 0, fromY: 60 });
+  frame.appendChild(centerArrow);
 
   frame.appendChild(
     el("div", { class: "gf-legend" }, [legendItem("b", "BACK"), legendItem("a", "CONFIRM")]),
@@ -81,10 +96,39 @@ export function createSelectPlayers(
 
   function select(count: number): void {
     selected = count;
-    for (const [c, node] of tiles) node.classList.toggle("gf-selected", c === count);
+    let selectedNode: HTMLElement | null = null;
+    for (const [c, node] of tiles) {
+      const isSelected = c === count;
+      node.classList.toggle("gf-selected", isSelected);
+      if (isSelected) selectedNode = node;
+    }
+    motion?.pulseSelected(selectedNode);
+  }
+
+  function canInteract(): boolean {
+    return Boolean(motion?.isReady()) && !choosing;
+  }
+
+  async function chooseSelected(): Promise<void> {
+    if (!canInteract()) return;
+    choosing = true;
+    const count = selected;
+    await motion?.finish();
+    opts.onSelect(count);
+  }
+
+  async function goBack(): Promise<void> {
+    if (!opts.onBack || !canInteract()) return;
+    choosing = true;
+    await motion?.finish();
+    opts.onBack();
   }
 
   function onKey(ev: KeyboardEvent): void {
+    if (!canInteract()) {
+      ev.preventDefault();
+      return;
+    }
     if (ev.key === "ArrowRight") {
       select(Math.min(selected + 1, max));
       ev.preventDefault();
@@ -92,14 +136,15 @@ export function createSelectPlayers(
       select(Math.max(selected - 1, 1));
       ev.preventDefault();
     } else if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
-      opts.onSelect(selected);
+      void chooseSelected();
       ev.preventDefault();
     } else if (ev.key === "Escape" || ev.key.toLowerCase() === "b") {
-      opts.onBack?.();
+      void goBack();
       ev.preventDefault();
     }
   }
 
+  motion = mountChallengeMenuMotion(root, motionItems);
   select(selected);
   container.appendChild(root);
   const stopScene = mountUiSceneModels(selectScene, {
@@ -113,6 +158,7 @@ export function createSelectPlayers(
   return {
     getSelected: () => selected,
     destroy: () => {
+      motion?.destroy();
       stopScene();
       window.removeEventListener("keydown", onKey);
       root.remove();
