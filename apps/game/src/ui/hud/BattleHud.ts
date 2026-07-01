@@ -59,6 +59,45 @@ export interface BattleHudHandle {
 }
 
 const NS = "http://www.w3.org/2000/svg";
+const ASCII_CELL = 8;
+const ASCII_GLYPHS: Record<string, [number, number]> = {
+  "0": [0, 0],
+  "1": [1, 0],
+  "2": [2, 0],
+  "3": [3, 0],
+  "4": [4, 0],
+  "5": [5, 0],
+  "6": [6, 0],
+  "7": [7, 0],
+  "8": [8, 0],
+  "9": [9, 0],
+  A: [0, 2],
+  B: [1, 2],
+  C: [2, 2],
+  D: [3, 2],
+  E: [4, 2],
+  F: [5, 2],
+  G: [6, 2],
+  H: [7, 2],
+  I: [8, 2],
+  J: [9, 2],
+  K: [10, 2],
+  L: [11, 2],
+  M: [12, 2],
+  N: [13, 2],
+  O: [14, 2],
+  P: [0, 3],
+  Q: [1, 3],
+  R: [2, 3],
+  S: [3, 3],
+  T: [4, 3],
+  U: [5, 3],
+  V: [6, 3],
+  W: [7, 3],
+  X: [8, 3],
+  Y: [9, 3],
+  Z: [10, 3],
+};
 
 function svgEl<K extends keyof SVGElementTagNameMap>(
   tag: K,
@@ -67,6 +106,31 @@ function svgEl<K extends keyof SVGElementTagNameMap>(
   const node = document.createElementNS(NS, tag);
   for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
   return node;
+}
+
+function bitmapText(className: string): HTMLSpanElement {
+  const node = el("span", { class: `gf-bitmap-text ${className}` });
+  node.setAttribute("aria-hidden", "true");
+  return node;
+}
+
+function setBitmapText(node: HTMLElement, value: string): void {
+  node.replaceChildren(
+    ...[...value.toUpperCase()].map((char) => {
+      if (char === " ") return el("span", { class: "gf-bitmap-space" });
+      const glyph = ASCII_GLYPHS[char];
+      if (!glyph) return el("span", { class: "gf-bitmap-fallback", text: char });
+      const [col, row] = glyph;
+      return el("span", {
+        class: "gf-bitmap-glyph",
+        style: {
+          backgroundImage: `url(${ASSETS.fontAscii})`,
+          backgroundPosition: `-${col * ASCII_CELL}px -${row * ASCII_CELL}px`,
+        },
+      });
+    }),
+  );
+  node.setAttribute("aria-label", value);
 }
 
 /** A C-shaped ring gauge (used for HP and X cooldown). Returns the arc + a setter. */
@@ -104,17 +168,17 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
 
   // ----- energy meters -----
   const allyFill = el("div", { class: "gf-meter-fill" });
-  const allyTab = el("span", { class: "gf-meter-tab", text: "0" });
+  const allyTab = el("span", { class: "gf-meter-tab" }, [bitmapText("gf-meter-tab-text")]);
   const allyMeter = el("div", { class: "gf-meter gf-meter-ally" }, [
     allyTab,
-    el("div", { class: "gf-meter-track" }, [allyFill, el("span", { class: "gf-meter-name", text: "ALLY" })]),
+    el("div", { class: "gf-meter-track" }, [allyFill, el("span", { class: "gf-meter-name" }, [bitmapText("gf-meter-label-text")])]),
   ]);
 
   const enemyFill = el("div", { class: "gf-meter-fill" });
-  const enemyTab = el("span", { class: "gf-meter-tab", text: "0" });
+  const enemyTab = el("span", { class: "gf-meter-tab" }, [bitmapText("gf-meter-tab-text")]);
   const enemyMeter = el("div", { class: "gf-meter gf-meter-enemy" }, [
     enemyTab,
-    el("div", { class: "gf-meter-track" }, [enemyFill, el("span", { class: "gf-meter-name", text: "ENEMY" })]),
+    el("div", { class: "gf-meter-track" }, [enemyFill, el("span", { class: "gf-meter-name" }, [bitmapText("gf-meter-label-text")])]),
   ]);
 
   const meters = el("div", { class: "gf-hud-meters" }, [allyMeter, enemyMeter]);
@@ -149,7 +213,7 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
 
   // ----- HP gauge (bottom-left) -----
   const hpGauge = ringGauge(60, "#46c828", "rgba(0,0,0,0.4)");
-  const hpNum = el("span", { class: "gf-hp-num", text: "0" });
+  const hpNum = bitmapText("gf-hp-num");
   const hpWrap = el("div", { class: "gf-hud-hp" }, [
     el("img", { class: "gf-hp-face-marker", attrs: { src: ASSETS.faceMarkerRoundel, alt: "", "aria-hidden": "true" } }),
     el("div", { class: "gf-hp-ring" }, [hpGauge.node]),
@@ -161,24 +225,29 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   const cooldown = ringGauge(56, "#cfd3da", "rgba(0,0,0,0.35)");
   const weaponX = el("div", { class: "gf-weapon-x" }, [
     el("div", { class: "gf-cooldown-ring" }, [cooldown.node]),
-    el("div", { class: "gf-x-glyph", text: "X" }),
+    el("div", { class: "gf-x-glyph" }, [bitmapText("gf-button-letter")]),
   ]);
 
   const bReload = el("div", { class: "gf-b-reload", style: { width: "0%" } });
-  const bAmmo = el("span", { class: "gf-b-ammo", text: "0" });
+  const bAmmo = bitmapText("gf-b-ammo");
   const weaponB = el("div", { class: "gf-weapon-b" }, [
     el("div", { class: "gf-b-track" }, [bReload, bAmmo]),
-    el("div", { class: "gf-b-glyph", text: "B" }),
+    el("div", { class: "gf-b-glyph" }, [bitmapText("gf-button-letter")]),
   ]);
 
   root.appendChild(el("div", { class: "gf-hud-weapon" }, [weaponX, weaponB]));
 
   container.appendChild(root);
+  setBitmapText(allyMeter.querySelector(".gf-meter-label-text") as HTMLElement, "ALLY");
+  setBitmapText(enemyMeter.querySelector(".gf-meter-label-text") as HTMLElement, "ENEMY");
+  setBitmapText(weaponX.querySelector(".gf-button-letter") as HTMLElement, "X");
+  setBitmapText(weaponB.querySelector(".gf-button-letter") as HTMLElement, "B");
 
   function setMeter(fill: HTMLElement, tab: HTMLElement, value: number, max: number): void {
     const frac = max > 0 ? clamp01(value / max) : 0;
     fill.style.transform = `scaleX(${frac})`;
-    tab.textContent = String(Math.max(0, Math.round(value)));
+    const text = tab.querySelector(".gf-bitmap-text") as HTMLElement | null;
+    if (text) setBitmapText(text, String(Math.max(0, Math.round(value))));
   }
 
   function update(s: HudState): void {
@@ -191,14 +260,14 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
 
     const hpFrac = s.maxHp > 0 ? clamp01(s.hp / s.maxHp) : 0;
     hpGauge.set(hpFrac);
-    hpNum.textContent = String(Math.max(0, Math.round(s.hp)));
+    setBitmapText(hpNum, String(Math.max(0, Math.round(s.hp))));
     const critical = hpFrac <= critFrac;
     hpWrap.classList.toggle("gf-critical", critical);
     hpGauge.node.querySelector("circle:nth-child(2)")?.setAttribute("stroke", critical ? "#e8231b" : "#46c828");
 
     cooldown.set(s.cooldown01);
     bReload.style.width = `${clamp01(s.reload01) * 100}%`;
-    bAmmo.textContent = String(Math.max(0, Math.round(s.ammo)));
+    setBitmapText(bAmmo, String(Math.max(0, Math.round(s.ammo))));
 
     if (bannerImg && s.borgId) {
       bannerImg.style.visibility = "visible";

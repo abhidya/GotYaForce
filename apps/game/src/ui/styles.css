@@ -142,6 +142,30 @@
 .gf-btn-y { background: radial-gradient(circle at 35% 30%, #6fc3ff, #2f6db0); }
 .gf-btn-start { background: radial-gradient(circle at 35% 30%, #cfd3da, #7d828c); color: #2a2150; font-size: 0.62em; }
 
+.gf-bitmap-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  image-rendering: pixelated;
+  font-size: 0;
+}
+.gf-bitmap-glyph,
+.gf-bitmap-space {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+}
+.gf-bitmap-glyph {
+  background-repeat: no-repeat;
+  background-size: 128px 128px;
+}
+.gf-bitmap-fallback {
+  display: inline-block;
+  font-size: 8px;
+  line-height: 8px;
+}
+
 /* Generic option tile used by difficulty + players screens. */
 .gf-option {
   display: flex;
@@ -793,6 +817,11 @@
   -webkit-text-stroke: 0.5px #000;
   paint-order: stroke fill;
 }
+.gf-meter-tab .gf-bitmap-text {
+  transform: scale(1.35);
+  transform-origin: center;
+  filter: drop-shadow(1px 1px 0 #000);
+}
 .gf-meter-ally .gf-meter-tab { background: var(--gf-green-deep); border-radius: 4px 0 0 4px; }
 .gf-meter-enemy .gf-meter-tab { background: var(--gf-red-deep); border-radius: 4px 0 0 4px; }
 .gf-meter-track {
@@ -817,6 +846,11 @@
   letter-spacing: 0.1em;
   -webkit-text-stroke: 0.5px #000;
   paint-order: stroke fill;
+}
+.gf-meter-name .gf-bitmap-text {
+  transform: scale(1.25);
+  transform-origin: right center;
+  filter: drop-shadow(1px 1px 0 #000);
 }
 .gf-hud-alert {
   position: absolute;
@@ -888,6 +922,11 @@
   -webkit-text-stroke: 1.4px var(--gf-outline);
   paint-order: stroke fill;
 }
+.gf-hp-num.gf-bitmap-text {
+  transform: scale(2.6);
+  transform-origin: center;
+  filter: drop-shadow(1px 1px 0 var(--gf-outline));
+}
 .gf-hud-hp.gf-critical .gf-hp-num { color: #fff; }
 
 /* bottom-right weapon prompts */
@@ -906,6 +945,11 @@
   font-size: 14px;
   font-weight: 900;
 }
+.gf-button-letter {
+  transform: scale(1.6);
+  transform-origin: center;
+  filter: drop-shadow(1px 1px 0 rgba(255, 255, 255, 0.45));
+}
 .gf-cooldown-ring { position: absolute; inset: 0; }
 .gf-weapon-b { display: flex; align-items: center; gap: 6px; }
 .gf-b-track {
@@ -921,6 +965,11 @@
 }
 .gf-b-reload { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gf-cyan); transition: width 0.2s ease; }
 .gf-b-ammo { position: relative; z-index: 2; color: var(--gf-yellow); font-size: 15px; -webkit-text-stroke: 1px var(--gf-outline); paint-order: stroke fill; }
+.gf-b-ammo.gf-bitmap-text {
+  transform: scale(1.5);
+  transform-origin: left center;
+  filter: drop-shadow(1px 1px 0 var(--gf-outline));
+}
 .gf-b-glyph {
   width: 26px;
   height: 26px;

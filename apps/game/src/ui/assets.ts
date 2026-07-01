@@ -52,6 +52,8 @@ export const ASSETS = {
   resultsLose: "/ui/hsd/rpot23_mdl/texture_000_RGBA8.png",
   /** In-battle face marker/roundel texture from `fmg00_mdl.arc`. */
   faceMarkerRoundel: "/ui/hsd/fmg00_mdl/texture_001_CI8.png",
+  /** Monospaced ASCII HUD/font atlas from `ascii.tpl`. */
+  fontAscii: "/ui/tpl/ascii/image_00_IA4.png",
   /** Bitmap font sheet. */
   font: "/ui/tpl/font_00/image_00_CI4.png",
 } as const;

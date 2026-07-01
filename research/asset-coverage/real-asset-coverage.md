@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T02:27:58.974Z
+Generated: 2026-07-01T02:33:49.771Z
 
 ## Summary
 
@@ -31,7 +31,7 @@ Generated: 2026-07-01T02:27:58.974Z
 | select-force | real-scene-partial-layout | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>borgFacePath<br>/models/pl0615/model_00.dae | css-grid-backdrop:46<br>css-force-platform:52<br>runtime-text-layout:47 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
 | force-builder | mixed-real-assets-handcoded-surface | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath | handcoded-force-grid:79<br>handcoded-force-ring:91<br>handcoded-force-slot:160<br>runtime-text-layout:74 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
 | battle-intro | real-scene-partial-layout | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:52 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
-| battle-hud | mixed-real-assets-handcoded-surface | ASSETS.faceMarkerRoundel<br>borgBannerPath | svg-hud-gauge:73<br>css-lockon-reticle:139<br>runtime-text-layout:107 | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
+| battle-hud | mixed-real-assets-handcoded-surface | ASSETS.faceMarkerRoundel<br>ASSETS.fontAscii<br>borgBannerPath | svg-hud-gauge:137<br>css-lockon-reticle:203<br>runtime-text-layout:122 | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
 | results | mixed-real-assets-handcoded-surface | ASSETS.resultsWin<br>ASSETS.resultsLose | css-results-row:97<br>runtime-text-layout:69 | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |
 | pause-menu | handcoded-or-unverified | none | css-pause-box:32<br>runtime-text-layout:33 | Find the original pause menu data/assets; current overlay is entirely recreated CSS/text. |
 

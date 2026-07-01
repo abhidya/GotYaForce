@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:27:58.974Z",
+  "generatedAt": "2026-07-01T02:33:49.771Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -558,13 +558,19 @@
       ],
       "nextReplacement": "Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:101",
+      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:165",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
         {
           "kind": "named-texture",
           "symbol": "ASSETS.faceMarkerRoundel",
           "publicPath": "/ui/hsd/fmg00_mdl/texture_001_CI8.png",
+          "exists": true
+        },
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
           "exists": true
         },
         {
@@ -578,17 +584,17 @@
         {
           "kind": "svg-hud-gauge",
           "pattern": "ringGauge",
-          "line": 73
+          "line": 137
         },
         {
           "kind": "css-lockon-reticle",
           "pattern": "gf-reticle",
-          "line": 139
+          "line": 203
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 107
+          "line": 122
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."

@@ -118,6 +118,7 @@ const assetConstants = {
     resultsWin: "/ui/hsd/rpot20_mdl/texture_000_RGBA8.png",
     resultsLose: "/ui/hsd/rpot23_mdl/texture_000_RGBA8.png",
     faceMarkerRoundel: "/ui/hsd/fmg00_mdl/texture_001_CI8.png",
+    fontAscii: "/ui/tpl/ascii/image_00_IA4.png",
     font: "/ui/tpl/font_00/image_00_CI4.png",
   },
   helpers: {
@@ -202,7 +203,7 @@ function sourceArchiveRecord(name) {
 function assetSourcesUsed(text) {
   const used = [];
   for (const [name, publicPath] of Object.entries(assetConstants.ASSETS)) {
-    if (text.includes(`ASSETS.${name}`)) {
+    if (new RegExp(`\\bASSETS\\.${name}\\b`).test(text)) {
       used.push({ kind: "named-texture", symbol: `ASSETS.${name}`, publicPath, exists: publicPathExists(publicPath) });
     }
   }
