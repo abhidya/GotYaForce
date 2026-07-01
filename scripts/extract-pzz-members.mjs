@@ -1,48 +1,18 @@
 #!/usr/bin/env node
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import path from "node:path";
+import { unpack as unpackPzz } from "../packages/formats/src/pzz.ts";
 
-const BLOCK_SIZE = 0x800;
-const COMPRESSED_FLAG = 0x40000000;
-const BLOCK_COUNT_MASK = 0x3fffffff;
 const DEFAULT_REGION = "GG4E";
+const borgDataPath = path.join("packages", "assets", "data", "borgs.json");
 
-class GrowBuffer {
-  constructor(initialSize) {
-    this.buffer = Buffer.allocUnsafe(Math.max(0x1000, initialSize));
-    this.length = 0;
-  }
-
-  ensure(extraBytes) {
-    const needed = this.length + extraBytes;
-    if (needed <= this.buffer.length) return;
-    let nextLength = this.buffer.length;
-    while (nextLength < needed) nextLength *= 2;
-    const next = Buffer.allocUnsafe(nextLength);
-    this.buffer.copy(next, 0, 0, this.length);
-    this.buffer = next;
-  }
-
-  pushByte(value) {
-    this.ensure(1);
-    this.buffer[this.length] = value;
-    this.length += 1;
-  }
-
-  copyFromSelf(distance, count) {
-    const start = this.length - distance;
-    if (start < 0) fail(`invalid PZZP back-reference distance ${distance}`);
-    this.ensure(count);
-    for (let i = 0; i < count; i += 1) {
-      this.buffer[this.length] = this.buffer[start + i];
-      this.length += 1;
-    }
-  }
-
-  toBuffer() {
-    return this.buffer.subarray(0, this.length);
-  }
-}
+const familyTerms = {
+  fire: ["fire", "flame", "burn", "blaze", "phoenix"],
+  beam: ["beam", "laser", "plasma"],
+  gun: ["gun", "bullet", "gatling", "revolver", "cannon", "tank", "arrow", "shuriken", "missile", "icbm", "bomb", "projectile", "shot"],
+  sword: ["sword", "blade", "slash", "samurai", "knight", "axe", "hatchet", "chainsaw", "claw", "spike", "drill", "hammer"],
+  trail: ["trail", "aura", "boost", "wing", "jet", "ghost", "shadow", "cyber"],
+};
 
 const options = parseArgs(process.argv.slice(2));
 if (options.help) usage(0);
@@ -50,6 +20,8 @@ if (options.help) usage(0);
 const repoRoot = path.resolve(".");
 const assetRoot = path.join(repoRoot, "user-data", options.region, "afs_data", "root");
 const outRoot = path.resolve(repoRoot, options.outRoot);
+const manifestPath = path.resolve(repoRoot, options.manifest);
+const borgMap = await readBorgMap();
 
 const selected = [];
 for (const borg of options.borgs) {
@@ -67,23 +39,44 @@ if (selected.length === 0) {
 }
 
 await mkdir(outRoot, { recursive: true });
+await mkdir(path.dirname(manifestPath), { recursive: true });
+const manifestRecords = [];
 for (const { borg, member } of selected) {
   const outPath = path.join(outRoot, member.inferredName);
   if (member.payload.length === 0) {
     console.log(`skip empty ${borg}#${member.memberId} ${member.inferredName}`);
+    manifestRecords.push(buildManifestRecord(borg, member, null));
     continue;
   }
   await writeFile(outPath, member.payload);
+  manifestRecords.push(buildManifestRecord(borg, member, outPath));
   console.log(
     `extract ${borg}#${member.memberId} ${member.inferredName} ` +
       `${member.flags.compressed ? "pzzp" : "raw"} ${member.payload.length} bytes -> ${rel(outPath)}`,
   );
 }
 
+const manifest = {
+  generatedAt: new Date().toISOString(),
+  script: "scripts/extract-pzz-members.mjs",
+  region: options.region,
+  assetRoot: rel(assetRoot),
+  outRoot: rel(outRoot),
+  selection: {
+    borgs: options.borgs,
+    members: [...options.members],
+  },
+  recordCount: manifestRecords.length,
+  records: manifestRecords,
+};
+await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+console.log(`wrote manifest ${rel(manifestPath)} (${manifestRecords.length} record(s))`);
+
 function parseArgs(args) {
   const parsed = {
     region: DEFAULT_REGION,
     outRoot: path.join("user-data", DEFAULT_REGION, "afs_data", "root"),
+    manifest: path.join("research", "asset-inventory", "pzz-member-extraction-manifest.json"),
     borgs: [],
     members: new Set(["mot"]),
     help: false,
@@ -103,6 +96,10 @@ function parseArgs(args) {
       parsed.outRoot = requiredValue(args, ++i, arg);
     } else if (arg.startsWith("--out-root=")) {
       parsed.outRoot = arg.slice("--out-root=".length);
+    } else if (arg === "--manifest") {
+      parsed.manifest = requiredValue(args, ++i, arg);
+    } else if (arg.startsWith("--manifest=")) {
+      parsed.manifest = arg.slice("--manifest=".length);
     } else if (arg === "--borg") {
       addBorgs(parsed.borgs, requiredValue(args, ++i, arg));
     } else if (arg.startsWith("--borg=")) {
@@ -133,6 +130,7 @@ Options:
   --borg <id[,id...]>      one or more borg PZZ archives to extract
   --member <kind[,kind]>   mot, data, hit, model, texture, all (default mot)
   --out-root <path>        destination root (default user-data/<region>/afs_data/root)
+  --manifest <path>        JSON manifest path (default research/asset-inventory/pzz-member-extraction-manifest.json)
 `);
   process.exit(code);
 }
@@ -169,40 +167,115 @@ function fail(message) {
 
 async function readPzzArchive(archivePath, stem) {
   const buffer = await readFile(archivePath);
-  if (buffer.length < BLOCK_SIZE) fail(`archive too small: ${rel(archivePath)}`);
-  const count = buffer.readUInt32BE(0);
-  if (!Number.isInteger(count) || count <= 0 || count > 512 || 4 + count * 4 > BLOCK_SIZE) {
-    fail(`invalid PZZ member table in ${rel(archivePath)}`);
+  let archive;
+  try {
+    archive = unpackPzz(buffer);
+  } catch (error) {
+    fail(`invalid PZZ archive ${rel(archivePath)}: ${error.message}`);
   }
 
-  const members = [];
-  let cursor = BLOCK_SIZE;
-  let sumBlocks = 0;
-  for (let index = 0; index < count; index += 1) {
-    const tableWord = buffer.readUInt32BE(4 + index * 4);
-    const compressed = (tableWord & COMPRESSED_FLAG) !== 0;
-    const blockCount = tableWord & BLOCK_COUNT_MASK;
-    const paddedBytes = blockCount * BLOCK_SIZE;
-    const raw = blockCount === 0 ? Buffer.alloc(0) : buffer.subarray(cursor, cursor + paddedBytes);
-    const payload = compressed && raw.length > 0 ? decompressPzzpStream(raw) : raw;
-    const inferredName = inferBorgMemberName(stem, index, payload);
-    members.push({
-      index,
-      memberId: String(index).padStart(3, "0"),
+  const members = archive.members.map((member) => {
+    const payload = Buffer.from(member.payload);
+    const inferredName = inferBorgMemberName(stem, member.index, payload);
+    return {
+      index: member.index,
+      memberId: member.memberId,
       inferredName,
-      tableWord,
-      blockCount,
-      dataOffset: cursor,
-      flags: { compressed },
+      tableWord: member.tableWord,
+      blockCount: member.blockCount,
+      dataOffset: member.dataOffset,
+      flags: { compressed: member.compressed },
+      compression: member.compression,
+      rawBytes: member.rawPayload.byteLength,
       payload,
-    });
-    cursor += paddedBytes;
-    sumBlocks += blockCount;
-  }
+    };
+  });
 
-  const expectedSize = (sumBlocks + 1) * BLOCK_SIZE;
-  if (expectedSize !== buffer.length) fail(`PZZ block sum mismatch for ${rel(archivePath)}`);
+  if (!archive.validatesAgainstFileSize) fail(`PZZ block sum mismatch for ${rel(archivePath)}`);
   return { path: archivePath, members };
+}
+
+async function readBorgMap() {
+  try {
+    const raw = await readFile(path.join(repoRoot, borgDataPath), "utf8");
+    const data = JSON.parse(raw);
+    return new Map((data.borgs || []).map((borg) => [String(borg.id).toLowerCase(), borg]));
+  } catch {
+    return new Map();
+  }
+}
+
+function buildManifestRecord(borg, member, outPath) {
+  const borgMeta = borgMap.get(borg);
+  return {
+    sourceArchive: `user-data/${options.region}/afs_data/root/${borg}.pzz`,
+    borgId: borg,
+    borgName: borgMeta?.name ?? null,
+    memberId: member.memberId,
+    memberIndex: member.index,
+    inferredName: member.inferredName,
+    inferredKind: inferKind(member.inferredName),
+    outputPath: outPath ? rel(outPath) : null,
+    skipped: outPath === null,
+    compressed: member.flags.compressed,
+    tableWord: hex(member.tableWord),
+    blockCount: member.blockCount,
+    dataOffset: member.dataOffset,
+    rawBytes: member.rawBytes,
+    payloadBytes: member.payload.length,
+    compression: summarizeCompression(member.compression),
+    familyHints: inferFamilyHints(borgMeta, member.inferredName),
+    actionHints: inferActionHints(member.inferredName),
+  };
+}
+
+function inferKind(name) {
+  const lower = name.toLowerCase();
+  if (lower.endsWith("data.bin")) return "borg-data";
+  if (lower.endsWith("hit.bin")) return "hit-collision-data";
+  if (lower.endsWith("mot.bin")) return "motion-bank";
+  if (lower.endsWith("_mdl.arc")) return "hsd-model";
+  if (lower.endsWith(".tpl")) return "texture";
+  if (lower.includes(".empty")) return "empty-slot";
+  return path.extname(lower).slice(1) || "binary";
+}
+
+function inferFamilyHints(borgMeta, inferredName) {
+  const haystack = `${inferredName} ${borgMeta?.name ?? ""} ${borgMeta?.tribe ?? ""} ${borgMeta?.type ?? ""}`.toLowerCase();
+  return Object.entries(familyTerms)
+    .filter(([, terms]) => terms.some((term) => haystack.includes(term)))
+    .map(([family]) => family);
+}
+
+function inferActionHints(name) {
+  const kind = inferKind(name);
+  if (kind === "motion-bank") return ["animation clips", "attack timing candidates"];
+  if (kind === "hit-collision-data") return ["hitboxes", "damage/action metadata candidates"];
+  if (kind === "hsd-model") return ["attachment/model visuals"];
+  if (kind === "texture") return ["texture visuals"];
+  if (kind === "borg-data") return ["actor stats/raw data"];
+  return [];
+}
+
+function summarizeCompression(meta) {
+  if (!meta) return null;
+  return {
+    sourceBytes: meta.sourceBytes,
+    producedBytes: meta.producedBytes,
+    consumedBytes: meta.consumedBytes,
+    trailingBytes: meta.trailingBytes,
+    terminated: meta.terminated,
+    terminatorOffset: meta.terminatorOffset,
+    tokenCount: meta.tokenCount,
+    literalPairs: meta.literalPairs,
+    backRefs: meta.backRefs,
+    longBackRefs: meta.longBackRefs,
+    firstControlWord: meta.firstControlWord,
+  };
+}
+
+function hex(value) {
+  return `0x${Number(value).toString(16).padStart(8, "0")}`;
 }
 
 function inferBorgMemberName(stem, index, payload) {
@@ -232,47 +305,6 @@ function memberMatches(member, selectedKinds) {
     (selectedKinds.has("model") && name.endsWith("_mdl.arc")) ||
     (selectedKinds.has("texture") && name.endsWith(".tpl"))
   );
-}
-
-function decompressPzzpStream(buffer) {
-  const out = new GrowBuffer(Math.max(buffer.length * 3, 0x1000));
-  const evenLength = buffer.length & ~1;
-  let cursor = 0;
-  let control = 0;
-  let bit = -1;
-
-  while (cursor + 2 <= evenLength) {
-    if (bit < 0) {
-      control = buffer.readUInt16BE(cursor);
-      cursor += 2;
-      bit = 15;
-      continue;
-    }
-
-    const compressedToken = (control & (1 << bit)) !== 0;
-    bit -= 1;
-    if (!compressedToken) {
-      out.pushByte(buffer[cursor]);
-      out.pushByte(buffer[cursor + 1]);
-      cursor += 2;
-      continue;
-    }
-
-    const token = buffer.readUInt16BE(cursor);
-    const distance = (token & 0x7ff) * 2;
-    cursor += 2;
-    if (distance === 0) return out.toBuffer();
-
-    let byteCount = (token >> 11) * 2;
-    if (byteCount === 0) {
-      if (cursor + 2 > evenLength) fail("PZZP long back-reference is missing its extension word");
-      byteCount = buffer.readUInt16BE(cursor) * 2;
-      cursor += 2;
-    }
-    out.copyFromSelf(distance, byteCount);
-  }
-
-  fail("PZZP stream ended before terminator");
 }
 
 function rel(absPath) {
