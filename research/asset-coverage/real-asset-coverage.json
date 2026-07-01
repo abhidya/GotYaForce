@@ -1,13 +1,13 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:13:17.393Z",
+  "generatedAt": "2026-07-01T02:20:02.341Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
     "screensUsingAnyRealExportedAsset": 8,
     "screensWithHandcodedSurfaceSignals": 10,
-    "screensWithRealSceneModel": 5,
+    "screensWithRealSceneModel": 6,
     "publicUiTextureExportedImages": 831,
     "requestedUiSceneModelsExported": 6,
     "publicStagesCompleteVisual": 40,
@@ -300,8 +300,8 @@
       ],
       "nextReplacement": "Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:35",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:36",
+      "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
           "kind": "named-texture",
@@ -326,23 +326,28 @@
           "symbol": "borgFacePath",
           "publicPathPattern": "/ui/hsd/face<borgUiCode>_mdl/texture_000_CI8.png",
           "exists": "per-borg"
+        },
+        {
+          "kind": "literal-public-path",
+          "publicPath": "/models/pl0615/model_00.dae",
+          "exists": true
         }
       ],
       "handcodedSurfaceSignals": [
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 44
+          "line": 46
         },
         {
           "kind": "css-force-platform",
           "pattern": "gf-select-platform",
-          "line": 50
+          "line": 52
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 45
+          "line": 47
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -783,12 +788,12 @@
         "fallback": "apps/game/src/sim/adapter.ts:35"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:645",
-        "fetchStageManifest": "apps/game/src/main.ts:649",
-        "loadStageCollision": "apps/game/src/main.ts:557",
-        "parseStageHitGrid": "apps/game/src/main.ts:569",
-        "loadDefaultArena": "apps/game/src/main.ts:689",
-        "loadConvertedStage": "apps/game/src/main.ts:1022"
+        "loadStage": "apps/game/src/main.ts:646",
+        "fetchStageManifest": "apps/game/src/main.ts:650",
+        "loadStageCollision": "apps/game/src/main.ts:558",
+        "parseStageHitGrid": "apps/game/src/main.ts:570",
+        "loadDefaultArena": "apps/game/src/main.ts:690",
+        "loadConvertedStage": "apps/game/src/main.ts:1023"
       },
       "collisionBounds": {
         "usesStageHitParser": true,

@@ -208,7 +208,7 @@ function assetSourcesUsed(text) {
       used.push({ kind: "borg-ui-helper", symbol: name, publicPathPattern, exists: "per-borg" });
     }
   }
-  const literalPublicPaths = [...text.matchAll(/["'](\/(?:ui|stages)\/[^"']+)["']/g)].map((match) => match[1]);
+  const literalPublicPaths = [...text.matchAll(/["'](\/(?:ui|stages|models)\/[^"']+)["']/g)].map((match) => match[1]);
   for (const publicPath of literalPublicPaths) {
     if (!used.some((asset) => asset.publicPath === publicPath)) {
       used.push({ kind: "literal-public-path", publicPath, exists: publicPathExists(publicPath) });

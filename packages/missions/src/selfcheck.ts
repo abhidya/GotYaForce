@@ -19,6 +19,20 @@ import { computeResults, type BattleOutcome } from "./scoring.js";
 import type { BorgData } from "./borg-data.js";
 import type { StagesData } from "./adventure.js";
 
+function assert(condition: unknown, message: string): asserts condition {
+  if (!condition) throw new Error(`selfcheck failed: ${message}`);
+}
+
+function assertChallengeReferenceInvariants(): void {
+  assert(CHALLENGE_DIFFICULTIES.NORMAL === 1500, "Challenge NORMAL must be GF ENERGY 1500");
+  assert(CHALLENGE_DIFFICULTIES.TUFF === 2000, "Challenge TUFF must be GF ENERGY 2000");
+  assert(CHALLENGE_DIFFICULTIES.INSANE === 2500, "Challenge INSANE must be GF ENERGY 2500");
+  assert(
+    Object.keys(CHALLENGE_DIFFICULTIES).join(",") === "NORMAL,TUFF,INSANE",
+    "Challenge difficulty labels must match captured UI order",
+  );
+}
+
 /** Find packages/assets/data by walking up from a start directory. */
 function findDataDir(): string {
   let dir = dirname(fileURLToPath(import.meta.url));
@@ -45,6 +59,7 @@ function loadData(): { borgs: BorgData; stages: StagesData } {
 
 export function main(): void {
   const { borgs, stages } = loadData();
+  assertChallengeReferenceInvariants();
 
   console.log("=".repeat(70));
   console.log("CHALLENGE — NORMAL run (budget", CHALLENGE_DIFFICULTIES.NORMAL, ")");
@@ -59,6 +74,13 @@ export function main(): void {
     playerForces,
     borgs,
   });
+  assert(run.battles.length === 10, "Challenge run should default to 10 battles");
+  assert(run.battles[0]?.label === "BATTLE 1 VS", "Challenge battle label should match captured VS flow");
+  assert(run.battles[1]?.label === "BATTLE 2 VS", "WIN branch should advance to BATTLE 2 VS");
+  assert(
+    run.battles[0]?.forces.filter((f) => f.team === "player" && f.ownerPlayer == null && f.cpuAlly).length === 1,
+    "FIGHT ALONE should add one CPU ally on the player side",
+  );
 
   console.log(`battles in run: ${run.total}`);
   for (const battle of run.battles) {
@@ -104,6 +126,25 @@ export function main(): void {
         `action=${prog.action} runScore=${prog.score} current=${prog.current}`,
     );
   }
+
+  const branchRun = createChallengeRun({
+    budget: CHALLENGE_DIFFICULTIES.NORMAL,
+    playerCount: 1,
+    playerForces,
+    borgs,
+  });
+  const firstWin = branchRun.next(computeResults(wins));
+  assert(firstWin.action === "advance", "WIN should advance Challenge to the next battle");
+  assert(firstWin.nextBattle?.label === "BATTLE 2 VS", "WIN should load BATTLE 2 VS next");
+  const losingRun = createChallengeRun({
+    budget: CHALLENGE_DIFFICULTIES.NORMAL,
+    playerCount: 1,
+    playerForces,
+    borgs,
+  });
+  const firstLoss = losingRun.next(computeResults(loss));
+  assert(firstLoss.action === "title", "LOSE should return Challenge to title/menu");
+  assert(firstLoss.nextBattle == null, "LOSE should not enqueue an auto-retry battle");
 
   console.log("\n" + "=".repeat(70));
   console.log("ADVENTURE — campaign load");

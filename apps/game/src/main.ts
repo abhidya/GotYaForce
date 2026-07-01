@@ -43,6 +43,7 @@ import {
   type ChallengeRun,
   type BattleConfig as MissionBattleConfig,
   type BattleOutcome,
+  type BattleResults,
 } from "@gf/missions";
 
 import {
@@ -1241,10 +1242,14 @@ function resolveBattle(): void {
     playerTotalCost: Math.round(costLost),
     allyBorgsDefeated: results.allyBorgsDefeated,
     grandTotal: results.grandTotal,
-  });
+  }, results);
 }
 
-function showResults(result: "win" | "lose", stats: Parameters<ReturnType<typeof createResults>["render"]>[1]): void {
+function showResults(
+  result: "win" | "lose",
+  stats: Parameters<ReturnType<typeof createResults>["render"]>[1],
+  battleResults: BattleResults,
+): void {
   // Tear down HUD but keep the battle scene visible behind the results.
   session?.hud.destroy();
   session?.pauseHandle?.destroy();
@@ -1253,16 +1258,15 @@ function showResults(result: "win" | "lose", stats: Parameters<ReturnType<typeof
   const handle = createResults(ui, {
     onAdvance: () => {
       handle.destroy();
-      advanceRun(result === "win");
+      advanceRun(battleResults);
     },
   });
   handle.render(result, stats);
   activeHandle = handle;
 }
 
-function advanceRun(won: boolean): void {
+function advanceRun(lastResult: BattleResults): void {
   const run = flow.run;
-  const lastResult = lastBattleResults(won);
   battleScene.clear();
   session = null;
 
@@ -1277,26 +1281,6 @@ function advanceRun(won: boolean): void {
     // "complete" (won the whole run) or "title" (lost) -> back to menu.
     showMenu();
   }
-}
-
-// Recompute a BattleResults for run.next() from the just-finished battle.
-function lastBattleResults(won: boolean) {
-  // We computed the same numbers in resolveBattle; rebuild a minimal results
-  // object good enough for cumulative scoring + advance/title decisions.
-  const outcome: BattleOutcome = {
-    win: won,
-    attack: 0,
-    hits: 0,
-    attempts: 1,
-    dodges: 0,
-    incoming: 1,
-    enemyBorgsDefeated: 0,
-    playerBorgsDefeated: won ? 0 : 1,
-    allyBorgsDefeated: 0,
-    costWon: 0,
-    costLost: 0,
-  };
-  return computeResults(outcome);
 }
 
 // ------------------------------------------------------------------------------------------

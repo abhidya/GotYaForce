@@ -9,6 +9,7 @@
 
 import { ASSETS, borgBannerPath, borgFacePath, borgMiniPath } from "../assets.js";
 import { clear, el, legendItem } from "../dom.js";
+import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
 export interface ForceSlot {
@@ -39,6 +40,7 @@ export function createSelectForce(
   const byId = new Map(opts.catalog.map((b) => [b.id, b] as const));
   const slots = opts.slots.length > 0 ? opts.slots : [{ no: 1, name: "GOTCHA FORCE", borgIds: [] }];
   let selectedSlot = clampSlot(opts.selectedSlot, slots.length);
+  let stopLeadModel: (() => void) | null = null;
 
   const root = el("div", { class: "gf-screen gf-select-force" });
   root.appendChild(el("div", { class: "gf-grid-bg gf-bg-purple" }));
@@ -100,15 +102,28 @@ export function createSelectForce(
     const leadBorg = byId.get(lead);
     const cost = force.reduce((sum, id) => sum + (byId.get(id)?.energy ?? 0), 0);
 
+    stopLeadModel?.();
+    stopLeadModel = null;
     clear(platform);
-    const face = el("img", { class: "gf-select-face", attrs: { src: borgFacePath(lead), alt: leadBorg?.name ?? "" } }) as HTMLImageElement;
-    const mini = el("img", { class: "gf-select-mini", attrs: { src: borgMiniPath(lead), alt: leadBorg?.name ?? "" } }) as HTMLImageElement;
-    face.addEventListener("error", () => {
-      face.style.display = "none";
-      mini.style.display = "block";
-    });
-    mini.style.display = "none";
-    platform.append(face, mini);
+    if (lead === "pl0615") {
+      const modelHost = createUiSceneHost("gf-select-borg-scene");
+      platform.appendChild(modelHost);
+      stopLeadModel = mountUiSceneModels(modelHost, {
+        modelPaths: ["/models/pl0615/model_00.dae"],
+        fitSize: 270,
+        camera: { fov: 29, position: [0, 80, 520], lookAt: [0, 62, 0] },
+        rotation: [-0.1, 0.32, 0],
+      });
+    } else {
+      const face = el("img", { class: "gf-select-face", attrs: { src: borgFacePath(lead), alt: leadBorg?.name ?? "" } }) as HTMLImageElement;
+      const mini = el("img", { class: "gf-select-mini", attrs: { src: borgMiniPath(lead), alt: leadBorg?.name ?? "" } }) as HTMLImageElement;
+      face.addEventListener("error", () => {
+        face.style.display = "none";
+        mini.style.display = "block";
+      });
+      mini.style.display = "none";
+      platform.append(face, mini);
+    }
 
     clear(costRoot);
     costRoot.append(
@@ -131,6 +146,7 @@ export function createSelectForce(
 
   return {
     destroy: () => {
+      stopLeadModel?.();
       window.removeEventListener("keydown", onKey);
       root.remove();
     },

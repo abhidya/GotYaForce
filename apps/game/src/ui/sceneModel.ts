@@ -9,7 +9,8 @@ type UiSceneManifest = {
 };
 
 export interface UiSceneModelOptions {
-  sceneId: string;
+  sceneId?: string;
+  modelPaths?: string[];
   fitSize?: number;
   camera?: { fov?: number; position?: [number, number, number]; lookAt?: [number, number, number] };
   rotation?: [number, number, number];
@@ -69,7 +70,7 @@ export function mountUiSceneModels(host: HTMLElement, opts: UiSceneModelOptions)
   observer.observe(host);
   resize();
 
-  void loadSceneModelPaths(opts.sceneId, opts.maxModels)
+  void loadSceneModelPaths(opts)
     .then((paths) => Promise.allSettled(paths.map((path) => new ColladaLoader().loadAsync(path))))
     .then((results) => {
       if (disposed) return;
@@ -102,7 +103,10 @@ export function mountUiSceneModels(host: HTMLElement, opts: UiSceneModelOptions)
   };
 }
 
-async function loadSceneModelPaths(sceneId: string, maxModels: number | undefined): Promise<string[]> {
+async function loadSceneModelPaths(opts: UiSceneModelOptions): Promise<string[]> {
+  if (opts.modelPaths?.length) return opts.modelPaths;
+  const sceneId = opts.sceneId;
+  if (!sceneId) return [];
   const manifest = await fetch("/ui/scenes/manifest.json")
     .then((r) => (r.ok ? (r.json() as Promise<UiSceneManifest>) : null))
     .catch(() => null);
@@ -111,7 +115,7 @@ async function loadSceneModelPaths(sceneId: string, maxModels: number | undefine
       ?.find((asset) => asset.id === sceneId)
       ?.modelFiles?.map((file) => file.publicPath)
       .filter((path): path is string => Boolean(path)) ?? [];
-  const limited = maxModels === undefined ? paths : paths.slice(0, maxModels);
+  const limited = opts.maxModels === undefined ? paths : paths.slice(0, opts.maxModels);
   return limited.length > 0 ? limited : [`/ui/scenes/${sceneId}/model_00.dae`];
 }
 

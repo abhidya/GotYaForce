@@ -397,6 +397,16 @@
   image-rendering: pixelated;
   filter: drop-shadow(0 10px 0 rgba(0, 0, 0, 0.32));
 }
+.gf-select-borg-scene {
+  position: absolute;
+  left: 50%;
+  bottom: 34%;
+  width: min(30vw, 280px);
+  height: min(38vw, 340px);
+  transform: translate(-50%, 0) rotateX(-62deg);
+  pointer-events: none;
+  filter: drop-shadow(0 14px 0 rgba(0, 0, 0, 0.32));
+}
 .gf-select-cost {
   position: absolute;
   left: 10%;
