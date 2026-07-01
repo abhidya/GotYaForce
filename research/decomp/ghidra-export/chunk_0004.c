@@ -8554,7 +8554,7 @@ void zz_003fbac_(void)
   zz_008c098_();
   if ((char)PTR_DAT_80433930[1] < '\x01') {
     gnt4_memset(PTR_DAT_80433938,0,0x20);
-    zz_008c3a0_(0);
+    set_global_menu_mode(0);
     if ((char)PTR_DAT_80433930[1] < '\0') {
       PTR_DAT_80433938[0x14] = 1;
     }

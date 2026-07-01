@@ -1980,7 +1980,7 @@ void FUN_801f5bd4(undefined8 param_1,undefined8 param_2,undefined8 param_3,undef
   if ((iVar3 == 0) && (iVar3 = zz_01f60d0_(DAT_804363b0,0), iVar3 != 0)) {
     DAT_804363b0[1] = DAT_804363b0[1] + '\x01';
     zz_0027aac_(0,0x20,0);
-    zz_008c3a0_(10);
+    set_global_menu_mode(10);
     if (DAT_804363b0[0xc] < '\x02') {
       PTR_DAT_80433930[0x29] = 0;
     }
@@ -2172,7 +2172,7 @@ void zz_01f6024_(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefi
   zz_00e9ac0_(uVar1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,2,extraout_r4_01,
               param_11,param_12,param_13,param_14,param_15,param_16);
   zz_00f07c4_();
-  zz_008c3a0_(0);
+  set_global_menu_mode(0);
   return;
 }
 
@@ -3715,7 +3715,7 @@ void FUN_801f7f70(undefined8 param_1,double param_2,double param_3,double param_
     puVar4 = PTR_DAT_80433944;
     *(undefined2 *)(PTR_DAT_80433944 + 2) = 0;
     zz_002a5f4_(0,0,0,0);
-    uVar7 = zz_008c3a0_(0);
+    uVar7 = set_global_menu_mode(0);
     uVar7 = zz_004370c_(extraout_f1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
                         (int)((ulonglong)uVar7 >> 0x20),(int)uVar7,puVar2,uVar3,puVar4,puVar6,in_r9,
                         in_r10);

@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const region = process.argv.find((arg) => !arg.startsWith("--")) ?? "GG4E";
+const region = process.argv.slice(2).find((arg) => !arg.startsWith("--")) ?? "GG4E";
 const outDir = path.join(repoRoot, "research", "asset-coverage");
 const outJson = path.join(outDir, "real-asset-coverage.json");
 const outMd = path.join(outDir, "real-asset-coverage.md");
@@ -266,6 +266,7 @@ function inspectStages() {
   const plan = readJson("research/asset-inventory/stage-export-plan.json");
   const stageCodeEvidence = readJson("research/asset-inventory/stage-code-evidence.json");
   const adapter = readText("apps/game/src/sim/adapter.ts");
+  const stageCatalog = readText("apps/game/src/stages/catalog.generated.ts");
   const main = readText("apps/game/src/main.ts");
   const publicStages = rootManifest.value?.stages ?? [];
   const completeVisual = publicStages.filter((stage) => stage.visualComplete === true);
@@ -275,6 +276,12 @@ function inspectStages() {
   );
   const sourceStageCodes = plan.value?.sources?.adventureFlow?.directStageArchives?.codes ?? plan.value?.stages?.map((stage) => stage.id) ?? [];
   const runtimeLiteralStages = [...new Set([...adapter.matchAll(/st[0-9a-f]{2}|stff/gi)].map((match) => match[0].toLowerCase()))];
+  const runtimeCatalogStageIds = [
+    ...new Set([...stageCatalog.matchAll(/"id":\s*"(st[0-9a-f]{2})"/gi)].map((match) => match[1]?.toLowerCase()).filter(Boolean)),
+  ];
+  const runtimeDefaultStage =
+    /DEFAULT_ARENA_STAGE[^=]*=\s*"(st[0-9a-f]{2})"/i.exec(stageCatalog)?.[1]?.toLowerCase() ??
+    (runtimeLiteralStages.includes("st00") ? "st00" : null);
   return {
     publicManifest: {
       path: "apps/game/public/stages/manifest.json",
@@ -295,11 +302,20 @@ function inspectStages() {
       sourceStageCodes,
     },
     runtimeUse: {
-      defaultStage: runtimeLiteralStages.includes("st00") ? "st00" : null,
+      defaultStage: runtimeDefaultStage,
       literalStageIdsInAdapter: runtimeLiteralStages,
+      generatedStageCatalog: {
+        path: "apps/game/src/stages/catalog.generated.ts",
+        parses: stageCatalog.includes("EXPORTED_STAGE_CATALOG"),
+        stageCount: runtimeCatalogStageIds.length,
+        stageIds: runtimeCatalogStageIds,
+        ref: `apps/game/src/stages/catalog.generated.ts:${lineOf(stageCatalog, "EXPORTED_STAGE_CATALOG")}`,
+      },
       acceptsHexStageIds: adapter.includes("^st[0-9a-f]{2}$"),
+      acceptsExportedStageCatalog: adapter.includes("isExportedStageId"),
       adapterRefs: {
         defaultArenaStage: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "DEFAULT_ARENA_STAGE")}`,
+        catalogGate: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "isExportedStageId")}`,
         fallback: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "return DEFAULT_ARENA_STAGE")}`,
       },
       mainRefs: {
@@ -319,8 +335,10 @@ function inspectStages() {
         parserPackage: main.includes("@gf/formats") ? "@gf/formats" : null,
       },
       assessment:
-        publicStages.length > 1
-          ? "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
+        publicStages.length > 1 && adapter.includes("isExportedStageId")
+          ? "Runtime authorizes literal exported st## ids through the generated stage catalog; arena-name to st## routing still falls back to st00 until traced."
+          : publicStages.length > 1
+            ? "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
           : "Runtime and public export are both effectively st00-only.",
     },
     stageCodeEvidence: {
@@ -662,6 +680,7 @@ function buildReport() {
     publicStagesRenderState: stageCoverage.publicManifest.renderStateCoveredCount,
     runtimeStageFallback: stageCoverage.runtimeUse.defaultStage,
     runtimeAcceptsHexStageIds: stageCoverage.runtimeUse.acceptsHexStageIds,
+    runtimeAcceptsExportedStageCatalog: stageCoverage.runtimeUse.acceptsExportedStageCatalog,
     runtimeStageCollisionBounds: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesBoundsToCombat,
     runtimeStageTriangleCollision: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesTrianglesToCombat,
     runtimeStageWallCollision: stageCoverage.runtimeUse.collisionBounds.movementUsesTriangleWalls,
@@ -710,7 +729,7 @@ function buildReport() {
     formatParserCoverage,
     modeNamingRisks,
     nextMostUsefulReplacements: [
-      "Wire stageIdForArena to a traced arena-name -> st## table; public exports now cover 40 visual stages, but runtime fallback still collapses non-st## arenas to st00.",
+      "Trace and wire the original arena-name/Challenge rotation -> st## table; runtime now authorizes exported literal st## ids through a generated catalog, but untraced names still fall back to st00.",
       "Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.",
       "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
       "Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges.",
@@ -764,7 +783,7 @@ function renderMarkdown(report) {
   add(`- Runtime audio from exported cues: ${report.summary.runtimeAudioFromExportedCues ? "yes" : "no"}`);
   add(`- Shared PZZ/ARZ parsers implemented: ${report.summary.formatParsersImplemented}/${report.summary.formatParsersTotal}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
-  add(`- Runtime accepts exported hex stage ids: ${report.summary.runtimeAcceptsHexStageIds ? "yes" : "no"}`);
+  add(`- Runtime accepts exported stage catalog ids: ${report.summary.runtimeAcceptsExportedStageCatalog ? "yes" : "no"}`);
   add();
   add("## Format Parser Coverage");
   add();
@@ -995,6 +1014,6 @@ fs.writeFileSync(outJson, `${JSON.stringify(report, null, 2)}\n`);
 fs.writeFileSync(outMd, renderMarkdown(report));
 
 console.log(`asset coverage audit: screens ${report.summary.screens}, real-ui ${report.summary.screensUsingAnyRealExportedAsset}, handcoded ${report.summary.screensWithHandcodedSurfaceSignals}`);
-console.log(`stage exports: ${report.summary.publicStagesCompleteVisual}/${report.summary.publicStagesTotal} complete visual; runtime fallback ${report.summary.runtimeStageFallback ?? "unknown"}`);
+console.log(`stage exports: ${report.summary.publicStagesCompleteVisual}/${report.summary.publicStagesTotal} complete visual; runtime fallback ${report.summary.runtimeStageFallback ?? "unknown"}; catalog ids ${report.summary.runtimeAcceptsExportedStageCatalog ? "yes" : "no"}`);
 console.log(`wrote ${rel(outJson)}`);
 console.log(`wrote ${rel(outMd)}`);

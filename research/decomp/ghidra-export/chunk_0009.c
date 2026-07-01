@@ -1053,27 +1053,33 @@ void FUN_8006aab0(int param_1)
 
 
 
-// ==== 8006ab04  zz_006ab04_ ====
+// ==== 8006ab04  start_forced_move_to_point ====
 
-void zz_006ab04_(int param_1,undefined4 *param_2,undefined1 param_3)
+/* GF_ALIAS: start_forced_move_to_point
+ * Evidence: stores a world-space vector at actor+0x7bc/0x7c0/0x7c4, sets actor+0x5e0
+ * flag 0x1000, clears actor+0x71b and timers, then selects action/animation index 0x23.
+ * Called when battle_frame_target_action_dispatch has a stored per-slot vector.
+ */
+
+void start_forced_move_to_point(int actor,undefined4 *target_vec3,undefined1 move_kind)
 
 {
-  undefined4 uVar1;
+  undefined4 target_y;
   
-  if (*(char *)(param_1 + 0x7c9) == '\0') {
-    *(undefined1 *)(param_1 + 0x7c9) = param_3;
-    *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) | 0x1000;
-    uVar1 = param_2[1];
-    *(undefined4 *)(param_1 + 0x7bc) = *param_2;
-    *(undefined4 *)(param_1 + 0x7c0) = uVar1;
-    *(undefined4 *)(param_1 + 0x7c4) = param_2[2];
-    *(undefined1 *)(param_1 + 0x71b) = 0;
-    *(undefined2 *)(param_1 + 0x272) = 0xffff;
-    *(undefined1 *)(param_1 + 0x7ca) = 0;
-    *(undefined1 *)(param_1 + 0x7cb) = 0;
-    zz_006a7b4_(param_1,0x23);
-    zz_006a7f4_(param_1,0x23);
-    zz_00f036c_(param_1,0xf2);
+  if (*(char *)(actor + 0x7c9) == '\0') {
+    *(undefined1 *)(actor + 0x7c9) = move_kind;
+    *(uint *)(actor + 0x5e0) = *(uint *)(actor + 0x5e0) | 0x1000;
+    target_y = target_vec3[1];
+    *(undefined4 *)(actor + 0x7bc) = *target_vec3;
+    *(undefined4 *)(actor + 0x7c0) = target_y;
+    *(undefined4 *)(actor + 0x7c4) = target_vec3[2];
+    *(undefined1 *)(actor + 0x71b) = 0;
+    *(undefined2 *)(actor + 0x272) = 0xffff;
+    *(undefined1 *)(actor + 0x7ca) = 0;
+    *(undefined1 *)(actor + 0x7cb) = 0;
+    zz_006a7b4_(actor,0x23);
+    zz_006a7f4_(actor,0x23);
+    zz_00f036c_(actor,0xf2);
   }
   return;
 }
@@ -1106,37 +1112,45 @@ uint FUN_8006abb8(int param_1)
 
 
 
-// ==== 8006abd4  zz_006abd4_ ====
+// ==== 8006abd4  react_to_slot_target_object ====
 
-void zz_006abd4_(int param_1,int param_2)
+/* GF_ALIAS: react_to_slot_target_object
+ * Evidence: called only when DAT_803b06a8[actor+0x3e4] contains a target actor pointer.
+ * Uses target object+1000/type fields to enter status/action state, sets timers
+ * at actor+0x49a/0x49c, flags actor+0x5e0|0x80000000, and plays side-aware cue
+ * through zz_0176ec0_(actor, actor+0x88, 1).
+ */
+
+void react_to_slot_target_object(int actor,int target_actor)
 
 {
-  if (*(char *)(param_1 + 0x18) < '\x02') {
-    if (*(char *)(param_2 + 0x4a0) == '\0') {
-      if (*(char *)(param_1 + 0x48a) == '\0') {
-        if (*(char *)(param_2 + 0x48a) == '\0') {
-          zz_006a868_(param_1,*(undefined2 *)(param_2 + 1000),*(undefined1 *)(param_2 + 0x3ec));
-          *(undefined2 *)(param_1 + 0x49a) = 900;
-          *(undefined1 *)(param_1 + 0x489) = 1;
+  if (*(char *)(actor + 0x18) < '\x02') {
+    if (*(char *)(target_actor + 0x4a0) == '\0') {
+      if (*(char *)(actor + 0x48a) == '\0') {
+        if (*(char *)(target_actor + 0x48a) == '\0') {
+          zz_006a868_(actor,*(undefined2 *)(target_actor + 1000),
+                      *(undefined1 *)(target_actor + 0x3ec));
+          *(undefined2 *)(actor + 0x49a) = 900;
+          *(undefined1 *)(actor + 0x489) = 1;
         }
         else {
-          *(undefined2 *)(param_1 + 0x49e) = *(undefined2 *)(param_1 + 1000);
-          if (*(char *)(param_2 + 0x48b) == '\x01') {
-            zz_006a868_(param_1,0xf06,*(undefined1 *)(param_1 + 0x3ec));
+          *(undefined2 *)(actor + 0x49e) = *(undefined2 *)(actor + 1000);
+          if (*(char *)(target_actor + 0x48b) == '\x01') {
+            zz_006a868_(actor,0xf06,*(undefined1 *)(actor + 0x3ec));
           }
           else {
-            zz_006a868_(param_1,0xf05,*(undefined1 *)(param_1 + 0x3ec));
+            zz_006a868_(actor,0xf05,*(undefined1 *)(actor + 0x3ec));
           }
-          *(undefined2 *)(param_1 + 0x49c) = 900;
-          *(undefined1 *)(param_1 + 0x48a) = 1;
-          *(undefined1 *)(param_1 + 0x48b) = *(undefined1 *)(param_2 + 0x48b);
-          *(undefined2 *)(param_1 + 0x49e) = *(undefined2 *)(param_1 + 1000);
-          *(undefined1 *)(param_1 + 0x6fb) = 0;
+          *(undefined2 *)(actor + 0x49c) = 900;
+          *(undefined1 *)(actor + 0x48a) = 1;
+          *(undefined1 *)(actor + 0x48b) = *(undefined1 *)(target_actor + 0x48b);
+          *(undefined2 *)(actor + 0x49e) = *(undefined2 *)(actor + 1000);
+          *(undefined1 *)(actor + 0x6fb) = 0;
         }
-        *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) | 0x80000000;
-        *(ushort *)(param_1 + 0x272) = *(ushort *)(param_1 + 0x272) | 0x443;
-        *(undefined4 *)(param_1 + 0x8c4) = 0;
-        zz_0176ec0_(param_1,*(undefined1 *)(param_1 + 0x88),1);
+        *(uint *)(actor + 0x5e0) = *(uint *)(actor + 0x5e0) | 0x80000000;
+        *(ushort *)(actor + 0x272) = *(ushort *)(actor + 0x272) | 0x443;
+        *(undefined4 *)(actor + 0x8c4) = 0;
+        zz_0176ec0_(actor,*(undefined1 *)(actor + 0x88),1);
       }
     }
   }
@@ -1145,52 +1159,58 @@ void zz_006abd4_(int param_1,int param_2)
 
 
 
-// ==== 8006ace8  zz_006ace8_ ====
+// ==== 8006ace8  start_status_reaction_by_side ====
 
-void zz_006ace8_(int param_1,int param_2)
+/* GF_ALIAS: start_status_reaction_by_side
+ * Evidence: side variant of the same action/status entry path as react_to_slot_target_object.
+ * Selects 0xf05/0xf06 based on side_variant, sets actor+0x48a/0x48b/0x49c, and marks
+ * actor+0x5e0|0x80000000.
+ */
+
+void start_status_reaction_by_side(int actor,int side_variant)
 
 {
-  if (*(char *)(param_1 + 0x18) < '\x02') {
-    if (*(char *)(param_1 + 0x4a1) == '\0') {
-      if ((*(char *)(param_1 + 0x6fc) == '\0') && (*(char *)(param_1 + 0x4a0) == '\0')) {
-        if (*(char *)(param_1 + 0x48a) != '\x01') {
-          if (*(char *)(param_1 + 0x48a) == '\0') {
-            *(undefined2 *)(param_1 + 0x49e) = *(undefined2 *)(param_1 + 1000);
-            if (param_2 == 1) {
-              zz_006a868_(param_1,0xf06,*(undefined1 *)(param_1 + 0x3ec));
+  if (*(char *)(actor + 0x18) < '\x02') {
+    if (*(char *)(actor + 0x4a1) == '\0') {
+      if ((*(char *)(actor + 0x6fc) == '\0') && (*(char *)(actor + 0x4a0) == '\0')) {
+        if (*(char *)(actor + 0x48a) != '\x01') {
+          if (*(char *)(actor + 0x48a) == '\0') {
+            *(undefined2 *)(actor + 0x49e) = *(undefined2 *)(actor + 1000);
+            if (side_variant == 1) {
+              zz_006a868_(actor,0xf06,*(undefined1 *)(actor + 0x3ec));
             }
             else {
-              zz_006a868_(param_1,0xf05,*(undefined1 *)(param_1 + 0x3ec));
+              zz_006a868_(actor,0xf05,*(undefined1 *)(actor + 0x3ec));
             }
-            *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) | 0x80000000;
-            *(ushort *)(param_1 + 0x272) = *(ushort *)(param_1 + 0x272) | 0x443;
-            *(undefined4 *)(param_1 + 0x8c4) = 0;
-            *(undefined1 *)(param_1 + 0x48a) = 1;
-            *(undefined2 *)(param_1 + 0x49c) = 900;
-            *(undefined1 *)(param_1 + 0x6fb) = 0;
+            *(uint *)(actor + 0x5e0) = *(uint *)(actor + 0x5e0) | 0x80000000;
+            *(ushort *)(actor + 0x272) = *(ushort *)(actor + 0x272) | 0x443;
+            *(undefined4 *)(actor + 0x8c4) = 0;
+            *(undefined1 *)(actor + 0x48a) = 1;
+            *(undefined2 *)(actor + 0x49c) = 900;
+            *(undefined1 *)(actor + 0x6fb) = 0;
           }
-          else if (*(char *)(param_1 + 0x48b) == param_2) {
-            *(undefined1 *)(param_1 + 0x48a) = 2;
-            if (*(short *)(param_1 + 0x49c) < 0x78) {
-              *(undefined2 *)(param_1 + 0x49c) = 0x78;
+          else if (*(char *)(actor + 0x48b) == side_variant) {
+            *(undefined1 *)(actor + 0x48a) = 2;
+            if (*(short *)(actor + 0x49c) < 0x78) {
+              *(undefined2 *)(actor + 0x49c) = 0x78;
             }
           }
           else {
-            if (param_2 == 1) {
-              zz_006a868_(param_1,0xf06,*(undefined1 *)(param_1 + 0x3ec));
+            if (side_variant == 1) {
+              zz_006a868_(actor,0xf06,*(undefined1 *)(actor + 0x3ec));
             }
             else {
-              zz_006a868_(param_1,0xf05,*(undefined1 *)(param_1 + 0x3ec));
+              zz_006a868_(actor,0xf05,*(undefined1 *)(actor + 0x3ec));
             }
-            *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) | 0x80000000;
-            *(ushort *)(param_1 + 0x272) = *(ushort *)(param_1 + 0x272) | 0x443;
-            *(undefined4 *)(param_1 + 0x8c4) = 0;
-            *(undefined1 *)(param_1 + 0x48a) = 1;
-            *(undefined2 *)(param_1 + 0x49c) = 900;
-            *(undefined1 *)(param_1 + 0x6fb) = 0;
+            *(uint *)(actor + 0x5e0) = *(uint *)(actor + 0x5e0) | 0x80000000;
+            *(ushort *)(actor + 0x272) = *(ushort *)(actor + 0x272) | 0x443;
+            *(undefined4 *)(actor + 0x8c4) = 0;
+            *(undefined1 *)(actor + 0x48a) = 1;
+            *(undefined2 *)(actor + 0x49c) = 900;
+            *(undefined1 *)(actor + 0x6fb) = 0;
           }
-          *(char *)(param_1 + 0x48b) = (char)param_2;
-          zz_00ea2c8_(param_1,4);
+          *(char *)(actor + 0x48b) = (char)side_variant;
+          zz_00ea2c8_(actor,4);
         }
       }
     }
@@ -5569,6 +5589,5 @@ void zz_0071c50_(int param_1)
   }
   return;
 }
-
 
 

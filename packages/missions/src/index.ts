@@ -44,6 +44,7 @@ export type {
 // --- Challenge mode ---
 export {
   createChallengeRun,
+  createChallengeRng,
   enemyTargetForBattle,
   CHALLENGE_DIFFICULTIES,
   DEFAULT_ESCALATION,
@@ -56,6 +57,31 @@ export type {
   PlayerForce,
   EscalationCurve,
 } from "./challenge.js";
+export {
+  CHALLENGE_BATTLE_COUNTS,
+  CHALLENGE_TIME_LIMIT_FRAMES,
+  CHALLENGE_STAGE_BYTES,
+  CHALLENGE_ALLY_BUDGETS,
+  CHALLENGE_ENEMY_BUDGETS,
+  CHALLENGE_ALLY_MAX_MEMBERS,
+  CHALLENGE_ENEMY_MAX_MEMBERS,
+  CHALLENGE_ALLY_GROUP_CODES,
+  CHALLENGE_ENEMY_GROUP_CODES,
+  CHALLENGE_GROUP_ROSTERS,
+  challengeModeForPlayerBudget,
+  challengeBattleCount,
+  challengeBudgetFor,
+  challengeMaxMembersFor,
+  challengeGroupChoicesFor,
+  challengeStageId,
+  selectChallengeStage,
+} from "./challenge-reference.js";
+export type {
+  ChallengeMode,
+  ChallengeSide,
+  ChallengeGroupCode,
+  ChallengeStageSelection,
+} from "./challenge-reference.js";
 
 // --- Adventure mode ---
 export {

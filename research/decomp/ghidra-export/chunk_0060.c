@@ -389,7 +389,7 @@ LAB_801eca08:
         uVar6 = zz_0044848_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,0x12);
         zz_007fd6c_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,zz_01ecfe4_,0,
                     uVar5,in_r6,in_r7,in_r8,in_r9,in_r10);
-        uVar6 = zz_008c3a0_(6);
+        uVar6 = set_global_menu_mode(6);
         uVar6 = zz_0041954_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,1,0);
         zz_004453c_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,0,extraout_r4,
                     uVar5,in_r6,in_r7,in_r8,in_r9,in_r10);
@@ -3737,7 +3737,7 @@ void FUN_801f13a0(undefined8 param_1,undefined8 param_2,undefined8 param_3,undef
     puVar4 = PTR_DAT_80435a30;
     *(undefined2 *)(PTR_DAT_80435a30 + 4) = 0;
     zz_002a5f4_(0,0,0,0);
-    uVar6 = zz_008c3a0_(6);
+    uVar6 = set_global_menu_mode(6);
     zz_007fd6c_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,zz_01ba78c_,0,uVar2,
                 uVar3,puVar4,puVar5,in_r9,in_r10);
     zz_01f16bc_();

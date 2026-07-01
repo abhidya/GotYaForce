@@ -13,7 +13,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-import { createChallengeRun, CHALLENGE_DIFFICULTIES } from "./challenge.js";
+import { createChallengeRun, CHALLENGE_DIFFICULTIES, enemyTargetForBattle } from "./challenge.js";
 import { createAdventureCampaign } from "./adventure.js";
 import { computeResults, type BattleOutcome } from "./scoring.js";
 import type { BorgData } from "./borg-data.js";
@@ -30,6 +30,14 @@ function assertChallengeReferenceInvariants(): void {
   assert(
     Object.keys(CHALLENGE_DIFFICULTIES).join(",") === "NORMAL,TUFF,INSANE",
     "Challenge difficulty labels must match captured UI order",
+  );
+  assert(
+    enemyTargetForBattle(CHALLENGE_DIFFICULTIES.NORMAL, 0) === 1000,
+    "NORMAL BATTLE 1 target should match recovered DOL table",
+  );
+  assert(
+    enemyTargetForBattle(CHALLENGE_DIFFICULTIES.NORMAL, 1) === 1000,
+    "NORMAL BATTLE 2 target should match recovered DOL table",
   );
 }
 
@@ -74,12 +82,24 @@ export function main(): void {
     playerForces,
     borgs,
   });
-  assert(run.battles.length === 10, "Challenge run should default to 10 battles");
+  assert(run.battles.length === 5, "NORMAL Challenge run should default to DOL table count");
   assert(run.battles[0]?.label === "BATTLE 1 VS", "Challenge battle label should match captured VS flow");
   assert(run.battles[1]?.label === "BATTLE 2 VS", "WIN branch should advance to BATTLE 2 VS");
   assert(
     run.battles[0]?.forces.filter((f) => f.team === "player" && f.ownerPlayer == null && f.cpuAlly).length === 1,
     "FIGHT ALONE should add one CPU ally on the player side",
+  );
+  const clampedTeamRun = createChallengeRun({
+    budget: CHALLENGE_DIFFICULTIES.NORMAL,
+    playerCount: 4,
+    playerForces,
+    borgs,
+    battleCount: 1,
+  });
+  assert(clampedTeamRun.playerCount === 2, "Challenge player count should clamp to original 1P/2P branches");
+  assert(
+    clampedTeamRun.battles[0]?.forces.every((f) => !f.cpuAlly),
+    "TEAM UP branch should not add the FIGHT ALONE CPU ally",
   );
 
   console.log(`battles in run: ${run.total}`);

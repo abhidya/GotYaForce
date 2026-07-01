@@ -1,20 +1,21 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:36:12.293Z",
-  "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
+  "generatedAt": "2026-07-01T10:33:28.337Z",
+  "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
-    "screensUsingAnyRealExportedAsset": 9,
-    "screensWithHandcodedSurfaceSignals": 10,
-    "screensWithRealSceneModel": 6,
+    "screensUsingAnyRealExportedAsset": 8,
+    "screensWithHandcodedSurfaceSignals": 9,
+    "screensWithRealSceneModel": 5,
     "publicUiTextureExportedImages": 831,
     "requestedUiSceneModelsExported": 6,
     "publicStagesCompleteVisual": 40,
     "publicStagesTotal": 40,
     "publicStagesRenderState": 40,
     "runtimeStageFallback": "st00",
-    "runtimeAcceptsHexStageIds": true,
+    "runtimeAcceptsHexStageIds": false,
+    "runtimeAcceptsExportedStageCatalog": true,
     "runtimeStageCollisionBounds": true,
     "runtimeStageTriangleCollision": true,
     "runtimeStageWallCollision": true,
@@ -25,9 +26,9 @@
     "commonBattleArchiveInventoried": true,
     "commonBattleDataExactMatches": 2,
     "runtimeActorDataBoundToCombat": false,
-    "runtimeBorgAnimationDirectMatches": 1274,
-    "runtimeBorgAnimationFallbacks": 75,
-    "runtimeBorgAnimationMissing": 3,
+    "runtimeBorgAnimationDirectMatches": 1326,
+    "runtimeBorgAnimationFallbacks": 78,
+    "runtimeBorgAnimationMissing": 0,
     "runtimeBoostFlyUsesExportedBoostClip": true,
     "runtimeItemsOrPowerupsModeled": false,
     "runtimeAudioFromExportedCues": true,
@@ -43,54 +44,37 @@
       "originalMode": "Challenge mode hub",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/tl00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/tl00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/optn00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/optn00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/staff00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/staff00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/titles.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/titles.tpl",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/as_icon.tpl",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/font_00.tpl",
+          "exists": true
         }
       ],
       "nextReplacement": "Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:54",
-      "coverageLevel": "real-scene-partial-layout",
-      "realExportedAssetsUsed": [
-        {
-          "kind": "mounted-ui-scene",
-          "publicPath": "/ui/scenes/tl00/model_00.dae",
-          "exists": true
-        }
-      ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "css-menu-gear",
-          "pattern": "gf-menu-gear",
-          "line": 88
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 89
-        }
-      ],
-      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
+      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:66",
+      "coverageLevel": "handcoded-or-unverified",
+      "realExportedAssetsUsed": [],
+      "handcodedSurfaceSignals": [],
+      "replacementStatus": "No direct exported UI asset usage observed in this component."
     },
     {
       "id": "select-difficulty",
@@ -100,20 +84,20 @@
       "originalMode": "Challenge",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/vsel00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel01_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/vsel01_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/as_icon.tpl",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/font_00.tpl",
+          "exists": true
         }
       ],
       "nextReplacement": "Use the original Challenge select scene textures/models for the three GF-energy pads and cursor.",
@@ -164,20 +148,20 @@
       "originalMode": "Challenge",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/vsel00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel01_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/vsel01_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/as_icon.tpl",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/font_00.tpl",
+          "exists": true
         }
       ],
       "nextReplacement": "Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene.",
@@ -228,16 +212,16 @@
       "originalMode": "Challenge",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/box00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/box00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/firstld.pzz",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/firstld.pzz",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/font_00.tpl",
+          "exists": true
         }
       ],
       "nextReplacement": "Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets.",
@@ -273,42 +257,69 @@
       "originalMode": "Challenge",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/entry00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/entry00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/box00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/box00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/unitall_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/unitall_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/plcmndata.bin",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/plcmndata.bin",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/allbox.bin",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/allbox.bin",
+          "exists": true
         },
         {
           "pattern": "bn####.tpl",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 8,
+          "samples": [
+            "user-data/GG4E/afs_data/root/bn0000.tpl",
+            "user-data/GG4E/afs_data/root/bn0001.tpl",
+            "user-data/GG4E/afs_data/root/bn0002.tpl",
+            "user-data/GG4E/afs_data/root/bn0003.tpl",
+            "user-data/GG4E/afs_data/root/bn0004.tpl",
+            "user-data/GG4E/afs_data/root/bn0005.tpl",
+            "user-data/GG4E/afs_data/root/bn0006.tpl",
+            "user-data/GG4E/afs_data/root/bn0007.tpl"
+          ]
         },
         {
           "pattern": "mn####.tpl",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 8,
+          "samples": [
+            "user-data/GG4E/afs_data/root/mn0000.tpl",
+            "user-data/GG4E/afs_data/root/mn0001.tpl",
+            "user-data/GG4E/afs_data/root/mn0002.tpl",
+            "user-data/GG4E/afs_data/root/mn0003.tpl",
+            "user-data/GG4E/afs_data/root/mn0004.tpl",
+            "user-data/GG4E/afs_data/root/mn0005.tpl",
+            "user-data/GG4E/afs_data/root/mn0006.tpl",
+            "user-data/GG4E/afs_data/root/mn0007.tpl"
+          ]
         },
         {
           "pattern": "face####_mdl.arc",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 8,
+          "samples": [
+            "user-data/GG4E/afs_data/root/face0000_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0002_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0003_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0004_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0005_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0006_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0100_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0102_mdl.arc"
+          ]
         }
       ],
       "nextReplacement": "Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data.",
@@ -378,38 +389,64 @@
       "originalMode": "Challenge edit force",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/unitall_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/unitall_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/plcmndata.bin",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/plcmndata.bin",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/allbox.bin",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/allbox.bin",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/gets.pzz",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/gets.pzz",
+          "exists": true
         },
         {
           "pattern": "gets##_mdl.arc",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 7,
+          "samples": [
+            "user-data/GG4E/afs_data/root/gets00_mdl.arc",
+            "user-data/GG4E/afs_data/root/gets01_mdl.arc",
+            "user-data/GG4E/afs_data/root/gets02_mdl.arc",
+            "user-data/GG4E/afs_data/root/gets03_mdl.arc",
+            "user-data/GG4E/afs_data/root/gets04_mdl.arc",
+            "user-data/GG4E/afs_data/root/gets05_mdl.arc",
+            "user-data/GG4E/afs_data/root/gets06_mdl.arc"
+          ]
         },
         {
           "pattern": "bn####.tpl",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 8,
+          "samples": [
+            "user-data/GG4E/afs_data/root/bn0000.tpl",
+            "user-data/GG4E/afs_data/root/bn0001.tpl",
+            "user-data/GG4E/afs_data/root/bn0002.tpl",
+            "user-data/GG4E/afs_data/root/bn0003.tpl",
+            "user-data/GG4E/afs_data/root/bn0004.tpl",
+            "user-data/GG4E/afs_data/root/bn0005.tpl",
+            "user-data/GG4E/afs_data/root/bn0006.tpl",
+            "user-data/GG4E/afs_data/root/bn0007.tpl"
+          ]
         },
         {
           "pattern": "mn####.tpl",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 8,
+          "samples": [
+            "user-data/GG4E/afs_data/root/mn0000.tpl",
+            "user-data/GG4E/afs_data/root/mn0001.tpl",
+            "user-data/GG4E/afs_data/root/mn0002.tpl",
+            "user-data/GG4E/afs_data/root/mn0003.tpl",
+            "user-data/GG4E/afs_data/root/mn0004.tpl",
+            "user-data/GG4E/afs_data/root/mn0005.tpl",
+            "user-data/GG4E/afs_data/root/mn0006.tpl",
+            "user-data/GG4E/afs_data/root/mn0007.tpl"
+          ]
         }
       ],
       "nextReplacement": "Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets.",
@@ -468,28 +505,40 @@
       "originalMode": "Challenge briefing/VS",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/brif00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/brif00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/entry00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/entry00_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/vsel00_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/vsel00_mdl.arc",
+          "exists": true
         },
         {
           "pattern": "msg*.mdt",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 2,
+          "samples": [
+            "user-data/GG4E/afs_data/root/msg00.mdt",
+            "user-data/GG4E/afs_data/root/msg01.mdt"
+          ]
         },
         {
           "pattern": "face####_mdl.arc",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 8,
+          "samples": [
+            "user-data/GG4E/afs_data/root/face0000_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0002_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0003_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0004_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0005_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0006_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0100_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0102_mdl.arc"
+          ]
         }
       ],
       "nextReplacement": "Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates.",
@@ -539,38 +588,56 @@
       "expectedSourceArchives": [
         {
           "pattern": "bn####.tpl",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 8,
+          "samples": [
+            "user-data/GG4E/afs_data/root/bn0000.tpl",
+            "user-data/GG4E/afs_data/root/bn0001.tpl",
+            "user-data/GG4E/afs_data/root/bn0002.tpl",
+            "user-data/GG4E/afs_data/root/bn0003.tpl",
+            "user-data/GG4E/afs_data/root/bn0004.tpl",
+            "user-data/GG4E/afs_data/root/bn0005.tpl",
+            "user-data/GG4E/afs_data/root/bn0006.tpl",
+            "user-data/GG4E/afs_data/root/bn0007.tpl"
+          ]
         },
         {
           "pattern": "face####_mdl.arc",
-          "exists": false,
-          "sampleCount": 0,
-          "samples": []
+          "exists": true,
+          "sampleCount": 8,
+          "samples": [
+            "user-data/GG4E/afs_data/root/face0000_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0002_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0003_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0004_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0005_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0006_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0100_mdl.arc",
+            "user-data/GG4E/afs_data/root/face0102_mdl.arc"
+          ]
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/font_00.tpl",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/as_icon.tpl",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/arrow_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/arrow_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/comhit.bin",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/comhit.bin",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/comhit2.bin",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/comhit2.bin",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/cmn_data.bin",
+          "path": "user-data/GG4E/afs_data/root/cmn_data.bin",
           "exists": false
         }
       ],
@@ -625,20 +692,20 @@
       "originalMode": "Challenge results",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/rpot20_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/rpot20_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/rpot21_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/rpot21_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/rpot22_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/rpot22_mdl.arc",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/rpot23_mdl.arc",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/rpot23_mdl.arc",
+          "exists": true
         }
       ],
       "nextReplacement": "Export and mount the real result/podium scenes instead of CSS rows and sky backdrop.",
@@ -693,15 +760,15 @@
       "originalMode": "In-battle",
       "expectedSourceArchives": [
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/font_00.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/font_00.tpl",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/as_icon.tpl",
-          "exists": false
+          "path": "user-data/GG4E/afs_data/root/as_icon.tpl",
+          "exists": true
         },
         {
-          "path": "user-data/D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe/afs_data/root/cmn_data.bin",
+          "path": "user-data/GG4E/afs_data/root/cmn_data.bin",
           "exists": false
         }
       ],
@@ -829,22 +896,71 @@
     "runtimeUse": {
       "defaultStage": "st00",
       "literalStageIdsInAdapter": [
-        "st00",
         "stea",
         "stab"
       ],
-      "acceptsHexStageIds": true,
+      "generatedStageCatalog": {
+        "path": "apps/game/src/stages/catalog.generated.ts",
+        "parses": true,
+        "stageCount": 40,
+        "stageIds": [
+          "st00",
+          "st01",
+          "st02",
+          "st03",
+          "st04",
+          "st05",
+          "st06",
+          "st07",
+          "st08",
+          "st09",
+          "st0a",
+          "st0b",
+          "st0c",
+          "st0d",
+          "st0e",
+          "st0f",
+          "st10",
+          "st20",
+          "st21",
+          "st22",
+          "st23",
+          "st24",
+          "st25",
+          "st29",
+          "st2a",
+          "st2b",
+          "st2c",
+          "st2e",
+          "st40",
+          "st41",
+          "st42",
+          "st43",
+          "st44",
+          "st45",
+          "st49",
+          "st4a",
+          "st4b",
+          "st4c",
+          "st4e",
+          "stff"
+        ],
+        "ref": "apps/game/src/stages/catalog.generated.ts:14"
+      },
+      "acceptsHexStageIds": false,
+      "acceptsExportedStageCatalog": true,
       "adapterRefs": {
-        "defaultArenaStage": "apps/game/src/sim/adapter.ts:23",
-        "fallback": "apps/game/src/sim/adapter.ts:35"
+        "defaultArenaStage": "apps/game/src/sim/adapter.ts:22",
+        "catalogGate": "apps/game/src/sim/adapter.ts:25",
+        "fallback": "apps/game/src/sim/adapter.ts:41"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:646",
-        "fetchStageManifest": "apps/game/src/main.ts:650",
-        "loadStageCollision": "apps/game/src/main.ts:558",
-        "parseStageHitGrid": "apps/game/src/main.ts:570",
-        "loadDefaultArena": "apps/game/src/main.ts:690",
-        "loadConvertedStage": "apps/game/src/main.ts:1023"
+        "loadStage": "apps/game/src/main.ts:655",
+        "fetchStageManifest": "apps/game/src/main.ts:660",
+        "loadStageCollision": "apps/game/src/main.ts:567",
+        "parseStageHitGrid": "apps/game/src/main.ts:579",
+        "loadDefaultArena": "apps/game/src/main.ts:700",
+        "loadConvertedStage": "apps/game/src/main.ts:1033"
       },
       "collisionBounds": {
         "usesStageHitParser": true,
@@ -854,7 +970,7 @@
         "movementUsesTriangleCeilings": true,
         "parserPackage": "@gf/formats"
       },
-      "assessment": "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
+      "assessment": "Runtime authorizes literal exported st## ids through the generated stage catalog; arena-name to st## routing still falls back to st00 until traced."
     },
     "stageCodeEvidence": {
       "path": "research/asset-inventory/stage-code-evidence.json",
@@ -1900,111 +2016,111 @@
   "borgAnimationCoverage": {
     "path": "research/asset-inventory/borg-animation-action-gaps.md",
     "exists": true,
-    "indexesFound": 104,
-    "indexesParsed": 104,
-    "exportedBanks": 4653,
-    "canonicalSlotChecks": 1352,
-    "directRuntimeMatches": 1274,
-    "runtimeFallbacks": 75,
-    "missingRuntimeMatches": 3,
+    "indexesFound": 108,
+    "indexesParsed": 108,
+    "exportedBanks": 4894,
+    "canonicalSlotChecks": 1404,
+    "directRuntimeMatches": 1326,
+    "runtimeFallbacks": 78,
+    "missingRuntimeMatches": 0,
     "parseErrors": 0,
     "slotRows": [
       {
         "slot": "idle",
-        "direct": 104,
+        "direct": 108,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "move",
-        "direct": 101,
-        "fallback": 0,
-        "missing": 3,
-        "notes": "missing x3"
+        "direct": 105,
+        "fallback": 3,
+        "missing": 0,
+        "notes": "idle -> idle x3"
       },
       {
         "slot": "dash_fwd",
-        "direct": 100,
+        "direct": 104,
         "fallback": 4,
         "missing": 0,
         "notes": "idle -> idle x3; dash -> boost x1"
       },
       {
         "slot": "dash_back",
-        "direct": 100,
+        "direct": 104,
         "fallback": 4,
         "missing": 0,
         "notes": "idle -> idle x3; dash -> boost x1"
       },
       {
         "slot": "dash_left",
-        "direct": 96,
+        "direct": 100,
         "fallback": 8,
         "missing": 0,
         "notes": "idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1"
       },
       {
         "slot": "dash_right",
-        "direct": 90,
+        "direct": 94,
         "fallback": 14,
         "missing": 0,
         "notes": "dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1"
       },
       {
         "slot": "jump",
-        "direct": 101,
+        "direct": 105,
         "fallback": 3,
         "missing": 0,
         "notes": "idle -> idle x3"
       },
       {
         "slot": "fly",
-        "direct": 101,
+        "direct": 105,
         "fallback": 3,
         "missing": 0,
         "notes": "idle -> idle x3"
       },
       {
         "slot": "shoot",
-        "direct": 102,
+        "direct": 106,
         "fallback": 2,
         "missing": 0,
         "notes": "idle -> idle x2"
       },
       {
         "slot": "melee",
-        "direct": 96,
+        "direct": 100,
         "fallback": 8,
         "missing": 0,
-        "notes": "idle -> idle x3; move -> move x5"
+        "notes": "idle -> idle x8"
       },
       {
         "slot": "special",
-        "direct": 98,
+        "direct": 102,
         "fallback": 6,
         "missing": 0,
         "notes": "idle -> idle x2; attack -> attack_s0 x4"
       },
       {
         "slot": "hit",
-        "direct": 92,
+        "direct": 96,
         "fallback": 12,
         "missing": 0,
-        "notes": "down -> death x3; idle -> idle x9"
+        "notes": "idle -> idle x12"
       },
       {
         "slot": "death",
-        "direct": 93,
+        "direct": 97,
         "fallback": 11,
         "missing": 0,
-        "notes": "down -> guard_s0 x3; idle -> idle x8"
+        "notes": "idle -> idle x11"
       }
     ],
     "runtimeResolverRefs": {
-      "slotLabels": "apps/game/src/main.ts:333",
-      "slotFallbacks": "apps/game/src/main.ts:354",
-      "pickAnimBank": "apps/game/src/main.ts:421",
+      "slotLabels": "apps/game/src/main.ts:341",
+      "slotFallbacks": "apps/game/src/main.ts:362",
+      "pickAnimBank": "apps/game/src/main.ts:430",
       "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:111"
     },
     "boostFlyMapped": true
@@ -2100,7 +2216,7 @@
     ]
   },
   "nextMostUsefulReplacements": [
-    "Wire stageIdForArena to a traced arena-name -> st## table; public exports now cover 40 visual stages, but runtime fallback still collapses non-st## arenas to st00.",
+    "Trace and wire the original arena-name/Challenge rotation -> st## table; runtime now authorizes exported literal st## ids through a generated catalog, but untraced names still fall back to st00.",
     "Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.",
     "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
     "Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges.",

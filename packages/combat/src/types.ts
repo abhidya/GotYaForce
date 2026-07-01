@@ -152,6 +152,8 @@ export interface BattleConfig {
   forces: ForceConfig[];
   bounds?: StageBounds;
   collision?: StageCollision;
+  /** Original battle timer in frames; omitted means no timer. */
+  timeLimitFrames?: number;
 }
 
 export type BattleResult = "ongoing" | "win" | "lose" | "draw";
@@ -182,6 +184,8 @@ export interface BattleState {
   /** The currently-active (controllable) borg uid per player id. */
   activeUidByPlayer: Record<string, string>;
   frame: number;
+  /** Frames remaining on the battle timer, or null when untimed. */
+  timeRemainingFrames: number | null;
   result: BattleResult;
 }
 

@@ -186,7 +186,7 @@ void FUN_80017918(undefined8 param_1,double param_2,double param_3,double param_
       zz_01c78b0_(uVar1,param_2,param_3,param_4,param_5,param_6,param_7,param_8);
     }
     PTR_DAT_80433930[1] = 1;
-    zz_008c3a0_(0);
+    set_global_menu_mode(0);
   }
   PTR_DAT_8043393c[0x14] = 0;
   uVar1 = (*(code *)(&PTR_FUN_802c4a00)[(char)*PTR_DAT_8043393c])();

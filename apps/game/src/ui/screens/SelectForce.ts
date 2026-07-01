@@ -117,14 +117,37 @@ export function createSelectForce(
         rotation: [-0.1, 0.32, 0],
       });
     } else {
-      const face = el("img", { class: "gf-select-face", attrs: { src: borgFacePath(lead), alt: leadBorg?.name ?? "" } }) as HTMLImageElement;
-      const mini = el("img", { class: "gf-select-mini", attrs: { src: borgMiniPath(lead), alt: leadBorg?.name ?? "" } }) as HTMLImageElement;
+      const fallbackText = leadBorg?.name ?? lead;
+      const face = el("img", {
+        class: "gf-select-face",
+        attrs: { src: borgFacePath(lead), alt: fallbackText },
+      }) as HTMLImageElement;
+      const mini = el("img", {
+        class: "gf-select-mini",
+        attrs: { src: borgMiniPath(lead), alt: fallbackText },
+      }) as HTMLImageElement;
+      const fallback = el("span", {
+        class: "gf-select-mini",
+        style: {
+          display: "none",
+          color: "#ffd21e",
+          fontSize: "14px",
+          maxWidth: "160px",
+          textAlign: "center",
+          textShadow: "0 2px 0 #2a2150",
+        },
+        text: fallbackText,
+      });
       face.addEventListener("error", () => {
         face.style.display = "none";
         mini.style.display = "block";
       });
+      mini.addEventListener("error", () => {
+        mini.style.display = "none";
+        fallback.style.display = "block";
+      });
       mini.style.display = "none";
-      platform.append(face, mini);
+      platform.append(face, mini, fallback);
     }
 
     clear(costRoot);
@@ -136,7 +159,7 @@ export function createSelectForce(
     clear(nameRoot);
     nameRoot.append(
       el("span", { class: "gf-select-no", text: `No. ${slot.no}` }),
-      el("img", { class: "gf-select-banner", attrs: { src: borgBannerPath(lead), alt: "" } }),
+      forceBanner(lead, leadBorg?.name ?? slot.name),
       el("span", { class: "gf-select-force-name", text: slot.name }),
       el("span", { class: "gf-select-limit", text: `${Math.max(0, opts.limit - cost)} REMAIN` }),
     );
@@ -161,6 +184,27 @@ export function createSelectForce(
       root.remove();
     },
   };
+}
+
+function forceBanner(borgId: string, fallbackText: string): HTMLElement {
+  const image = el("img", { class: "gf-select-banner", attrs: { src: borgBannerPath(borgId), alt: "" } }) as HTMLImageElement;
+  image.addEventListener("error", () => {
+    image.replaceWith(
+      el("span", {
+        class: "gf-select-banner",
+        style: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "34px",
+          color: "#ffd21e",
+          textShadow: "0 2px 0 #2a2150",
+        },
+        text: fallbackText,
+      }),
+    );
+  });
+  return image;
 }
 
 function clampSlot(index: number, count: number): number {

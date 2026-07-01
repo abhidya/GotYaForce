@@ -49,18 +49,18 @@ Asset counts by category (from `public/ui/manifest.json`): portraits/banners/fon
 These are the ACTUAL layouts of the original game. Implement to match these, not invented designs.
 
 ## ⭐ CHALLENGE MODE — the canonical flow for our online recreation (REAL CAPTURES)
-Our 1–4 player energy-budget game is modeled on **Challenge mode** (NOT Story). Real native-res screenshots are in `apps/game/reference/captures/` — build each screen to match its image:
+Our energy-budget game is modeled on **Challenge mode** (NOT Story). Real native-res screenshots are in `apps/game/reference/captures/` — build each screen to match its image:
 
 | # | Screen | Reference image | What it establishes |
 |---|---|---|---|
 | 1 | Main menu | `captures/challenge-1-main-menu.png` | 3D desk diorama; CHALLENGE selected (red-gear cursor) |
 | 2 | **Select Difficulty = energy budget** | `captures/challenge-2-select-difficulty.png` | three gears: **NORMAL = GF ENERGY 1500**, **TUFF = 2000**, **INSANE = 2500**. This IS "choose your energy". |
-| 3 | **Select # players** | `captures/challenge-3-select-players.png` | **FIGHT ALONE (1P)** vs **TEAM UP (2P co-op)**. Original 1–2; our build extends to **1–4 online**. |
+| 3 | **Select # players** | `captures/challenge-3-select-players.png` | **FIGHT ALONE (1P)** vs **TEAM UP (2P co-op)**. Original Challenge branch is 1P/2P; keep 3P/4P out of scope for now. |
 | 4 | Load Box Data | `captures/challenge-4-load-box-data.png` | load collected borgs from memory card; START=SKIP |
 | 5 | **Select a Force** | `captures/challenge-5-select-a-force.png` | pick a saved force; borg model + `COST 300` vs budget; `X = EDIT FORCE` |
 | 6 | **Edit Force = the builder** | `captures/challenge-6-edit-force.png` | left = borg grid to add; right = **30-slot force ring**; panel = **`TOTAL COST 300 / LIMIT 1500 / REMAIN 1200`**. Total must stay ≤ LIMIT (the chosen budget). |
 
-**Canonical force-build rule (confirmed):** pick a difficulty → that sets the **LIMIT** (energy budget) → build a force in up to **30 slots** → **TOTAL COST** must stay ≤ LIMIT, **REMAIN = LIMIT − TOTAL COST**. This is exactly what the web force-builder must reproduce (the in-repo builder already enforces budget; match this screen's TOTAL/LIMIT/REMAIN panel + 30-slot model). Our online flow: lobby picks the shared energy LIMIT (like Select Difficulty) → each of 1–4 players builds a force under it (Edit Force) → co-op battle.
+**Canonical force-build rule (confirmed):** pick a difficulty → that sets the **LIMIT** (energy budget) → build a force in up to **30 slots** → **TOTAL COST** must stay ≤ LIMIT, **REMAIN = LIMIT − TOTAL COST**. This is exactly what the web force-builder must reproduce (the in-repo builder already enforces budget; match this screen's TOTAL/LIMIT/REMAIN panel + 30-slot model). Current Challenge port: FIGHT ALONE (1P + CPU ally) or TEAM UP (2P), both under the selected energy LIMIT.
 
 
 

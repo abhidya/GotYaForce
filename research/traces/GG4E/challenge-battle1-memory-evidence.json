@@ -1,0 +1,695 @@
+{
+  "generatedAt": "2026-07-01T10:12:27.504950+00:00",
+  "generatedBy": "scripts/inventory-challenge-memory-evidence.py",
+  "principle": "Challenge battle memory evidence can prove retained runtime data, but absence of strings does not prove absence of a load. Stage selection still needs DVDOpen/archive-open tracing if no selected st## string remains.",
+  "inputs": [
+    {
+      "id": "mem1_t1",
+      "path": "user-data/GG4E/traces/mem1_t1.bin",
+      "kind": "mem1",
+      "exists": true,
+      "bytesScanned": 25165824,
+      "mem1StateOffset": 0,
+      "mem1RamBase": "0x80000000",
+      "mem1BytesAvailable": 25165824,
+      "patternCounts": {
+        "stageArchives": 0,
+        "stageSetArchives": 0,
+        "stageHitBins": 0,
+        "borgAnimJoints": 5509
+      }
+    },
+    {
+      "id": "mem1_t2",
+      "path": "user-data/GG4E/traces/mem1_t2.bin",
+      "kind": "mem1",
+      "exists": true,
+      "bytesScanned": 25165824,
+      "mem1StateOffset": 0,
+      "mem1RamBase": "0x80000000",
+      "mem1BytesAvailable": 25165824,
+      "patternCounts": {
+        "stageArchives": 0,
+        "stageSetArchives": 0,
+        "stageHitBins": 0,
+        "borgAnimJoints": 5282
+      }
+    },
+    {
+      "id": "battle1_challenge",
+      "path": "user-data/GG4E/traces/battle1_challenge.sav",
+      "kind": "dolphin-sav",
+      "exists": true,
+      "bytesScanned": 187026760,
+      "dolphinVersion": "Dolphin 2506a",
+      "stateHeaderVersion": 1,
+      "compressionType": 1,
+      "uncompressedBytes": 187026760,
+      "chunks": [
+        {
+          "compressedBytes": 29592829,
+          "decompressedBytes": 187026760
+        }
+      ],
+      "mem1StateOffset": 102785918,
+      "mem1RamBase": "0x80000000",
+      "mem1BytesAvailable": 25165824,
+      "patternCounts": {
+        "stageArchives": 0,
+        "stageSetArchives": 0,
+        "stageHitBins": 0,
+        "borgAnimJoints": 5509
+      }
+    },
+    {
+      "id": "battle1_challenge_t2",
+      "path": "user-data/GG4E/traces/battle1_challenge_t2.sav",
+      "kind": "dolphin-sav",
+      "exists": true,
+      "bytesScanned": 187026760,
+      "dolphinVersion": "Dolphin 2506a",
+      "stateHeaderVersion": 1,
+      "compressionType": 1,
+      "uncompressedBytes": 187026760,
+      "chunks": [
+        {
+          "compressedBytes": 34270573,
+          "decompressedBytes": 187026760
+        }
+      ],
+      "mem1StateOffset": 102785918,
+      "mem1RamBase": "0x80000000",
+      "mem1BytesAvailable": 25165824,
+      "patternCounts": {
+        "stageArchives": 0,
+        "stageSetArchives": 0,
+        "stageHitBins": 0,
+        "borgAnimJoints": 5282
+      }
+    },
+    {
+      "id": "battle1_start_checkpoint",
+      "path": "user-data/GG4E/traces/battle1_start_checkpoint.sav",
+      "kind": "dolphin-sav",
+      "exists": true,
+      "bytesScanned": 187026760,
+      "dolphinVersion": "Dolphin 2506a",
+      "stateHeaderVersion": 1,
+      "compressionType": 1,
+      "uncompressedBytes": 187026760,
+      "chunks": [
+        {
+          "compressedBytes": 54078830,
+          "decompressedBytes": 187026760
+        }
+      ],
+      "mem1StateOffset": 102785918,
+      "mem1RamBase": "0x80000000",
+      "mem1BytesAvailable": 25165824,
+      "patternCounts": {
+        "stageArchives": 0,
+        "stageSetArchives": 0,
+        "stageHitBins": 0,
+        "borgAnimJoints": 5023
+      }
+    }
+  ],
+  "summary": {
+    "stageArchiveStringMatches": 0,
+    "stageSetArchiveStringMatches": 0,
+    "stageHitBinStringMatches": 0,
+    "borgAnimJointStringMatches": 26605,
+    "uniqueBorgAnimPrefixes": 8,
+    "stageSelectionStatus": "unproven: no st##_mdl.arc, st##.pzz, set####.arc, hit###.bin, or comhit.bin strings were found in the scanned Challenge battle save-state payloads or MEM1 dumps"
+  },
+  "stageStringEvidence": [],
+  "borgAnimPrefixEvidence": [
+    {
+      "borgId": "pl0b00",
+      "name": "QUICK VALKRIE",
+      "tribe": "Angel Borg",
+      "energy": 230,
+      "hasModel": true,
+      "hasAnim": true,
+      "totalMatches": 10056,
+      "sources": {
+        "battle1_challenge": 3233,
+        "battle1_challenge_t2": 1795,
+        "mem1_t1": 3233,
+        "mem1_t2": 1795
+      },
+      "boneNamesSeen": [
+        "b00",
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15",
+        "b16",
+        "b17",
+        "b18",
+        "b19",
+        "b20",
+        "b21",
+        "b22",
+        "b23",
+        "b24",
+        "b25",
+        "b26",
+        "b27"
+      ],
+      "examples": [
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x4eb672",
+          "ramAddress": "0x804eb672",
+          "text": "pl0b00_b00_animjoint",
+          "context": ".........................|.\".v.7pl0b00_b00_animjoint...pl0b00_b01_animjoint. .02P.3_"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x4eb689",
+          "ramAddress": "0x804eb689",
+          "text": "pl0b00_b01_animjoint",
+          "context": "..|.\".v.7pl0b00_b00_animjoint...pl0b00_b01_animjoint. .02P.3_H.UU04P*5_H*06P?7_H?08P"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x4ee261",
+          "ramAddress": "0x804ee261",
+          "text": "pl0b00_b01_animjoint",
+          "context": "..|.\".v.7pl0b00_b00_animj..oint.pl0b00_b01_animjoint. .02P.UU3_H.04P*5_H*06P?7_H?08P"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x4efaf6",
+          "ramAddress": "0x804efaf6",
+          "text": "pl0b00_b00_animjoint",
+          "context": ".......................|@..\".v.7pl0b00_b00_animjoint.pl0b0..0_b01_animjoint. .02P.3_"
+        }
+      ],
+      "evidenceNote": "Resident animation joint strings prove this model/animation prefix was in memory, not that it was an active force slot."
+    },
+    {
+      "borgId": "pl0000",
+      "name": "NORMAL NINJA",
+      "tribe": "Ninja Borg",
+      "energy": 150,
+      "hasModel": true,
+      "hasAnim": true,
+      "totalMatches": 6137,
+      "sources": {
+        "battle1_challenge": 1120,
+        "battle1_challenge_t2": 1676,
+        "battle1_start_checkpoint": 545,
+        "mem1_t1": 1120,
+        "mem1_t2": 1676
+      },
+      "boneNamesSeen": [
+        "b00",
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15",
+        "b16",
+        "b17",
+        "b18",
+        "b19"
+      ],
+      "examples": [
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x9c77f0",
+          "ramAddress": "0x809c77f0",
+          "text": "pl0000_b00_animjoint",
+          "context": ".. t...P.. ....e.. ....z.. .....pl0000_b00_animjoint.pl0000_b01_animjoint.pl0000_b02"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x9c7805",
+          "ramAddress": "0x809c7805",
+          "text": "pl0000_b01_animjoint",
+          "context": "..z.. .....pl0000_b00_animjoint.pl0000_b01_animjoint.pl0000_b02_animjoint.pl0000_b03"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x9c781a",
+          "ramAddress": "0x809c781a",
+          "text": "pl0000_b02_animjoint",
+          "context": "_animjoint.pl0000_b01_animjoint.pl0000_b02_animjoint.pl0000_b03_animjoint.pl0000_b04"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x9c782f",
+          "ramAddress": "0x809c782f",
+          "text": "pl0000_b03_animjoint",
+          "context": "_animjoint.pl0000_b02_animjoint.pl0000_b03_animjoint.pl0000_b04_animjoint.pl0000_b05"
+        }
+      ],
+      "evidenceNote": "Resident animation joint strings prove this model/animation prefix was in memory, not that it was an active force slot."
+    },
+    {
+      "borgId": "pl0615",
+      "name": "G RED",
+      "tribe": "Machine Borg",
+      "energy": 300,
+      "hasModel": true,
+      "hasAnim": true,
+      "totalMatches": 5300,
+      "sources": {
+        "battle1_challenge": 1060,
+        "battle1_challenge_t2": 1060,
+        "battle1_start_checkpoint": 1060,
+        "mem1_t1": 1060,
+        "mem1_t2": 1060
+      },
+      "boneNamesSeen": [
+        "b00",
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15",
+        "b16",
+        "b17",
+        "b18",
+        "b19"
+      ],
+      "examples": [
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x95aa4c",
+          "ramAddress": "0x8095aa4c",
+          "text": "pl0615_b00_animjoint",
+          "context": ".......P.......e...(...z...<....pl0615_b00_animjoint.pl0615_b01_animjoint.pl0615_b02"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x95aa61",
+          "ramAddress": "0x8095aa61",
+          "text": "pl0615_b01_animjoint",
+          "context": "..z...<....pl0615_b00_animjoint.pl0615_b01_animjoint.pl0615_b02_animjoint.pl0615_b03"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x95aa76",
+          "ramAddress": "0x8095aa76",
+          "text": "pl0615_b02_animjoint",
+          "context": "_animjoint.pl0615_b01_animjoint.pl0615_b02_animjoint.pl0615_b03_animjoint.pl0615_b04"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x95aa8b",
+          "ramAddress": "0x8095aa8b",
+          "text": "pl0615_b03_animjoint",
+          "context": "_animjoint.pl0615_b02_animjoint.pl0615_b03_animjoint.pl0615_b04_animjoint.pl0615_b05"
+        }
+      ],
+      "evidenceNote": "Matches G RED, the active player borg named in research/decomp/ram-trace-analysis.md."
+    },
+    {
+      "borgId": "pl0a00",
+      "name": "WING SOLDIER",
+      "tribe": "Wing Borg",
+      "energy": 200,
+      "hasModel": true,
+      "hasAnim": true,
+      "totalMatches": 2246,
+      "sources": {
+        "battle1_challenge": 56,
+        "battle1_challenge_t2": 56,
+        "battle1_start_checkpoint": 2022,
+        "mem1_t1": 56,
+        "mem1_t2": 56
+      },
+      "boneNamesSeen": [
+        "b00",
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15",
+        "b16",
+        "b17",
+        "b18",
+        "b19",
+        "b20",
+        "b21",
+        "b22",
+        "b23",
+        "b24",
+        "b25",
+        "b26",
+        "b27"
+      ],
+      "examples": [
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0xa97d9c",
+          "ramAddress": "0x80a97d9c",
+          "text": "pl0a00_b00_animjoint",
+          "context": "...t...................\".......7pl0a00_b00_animjoint.pl0a00_b01_animjoint.pl0a00_b02"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0xa97db1",
+          "ramAddress": "0x80a97db1",
+          "text": "pl0a00_b01_animjoint",
+          "context": "..\".......7pl0a00_b00_animjoint.pl0a00_b01_animjoint.pl0a00_b02_animjoint.pl0a00_b03"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0xa97dc6",
+          "ramAddress": "0x80a97dc6",
+          "text": "pl0a00_b02_animjoint",
+          "context": "_animjoint.pl0a00_b01_animjoint.pl0a00_b02_animjoint.pl0a00_b03_animjoint.pl0a00_b04"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0xa97ddb",
+          "ramAddress": "0x80a97ddb",
+          "text": "pl0a00_b03_animjoint",
+          "context": "_animjoint.pl0a00_b02_animjoint.pl0a00_b03_animjoint.pl0a00_b04_animjoint.pl0a00_b05"
+        }
+      ],
+      "evidenceNote": "Resident animation joint strings prove this model/animation prefix was in memory, not that it was an active force slot."
+    },
+    {
+      "borgId": "pl0700",
+      "name": "NORMAL SAMURAI",
+      "tribe": "Musha Borg",
+      "energy": 300,
+      "hasModel": true,
+      "hasAnim": true,
+      "totalMatches": 1966,
+      "sources": {
+        "battle1_challenge_t2": 655,
+        "battle1_start_checkpoint": 656,
+        "mem1_t2": 655
+      },
+      "boneNamesSeen": [
+        "b00",
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15",
+        "b16",
+        "b17",
+        "b18",
+        "b19"
+      ],
+      "examples": [
+        {
+          "source": "mem1_t2",
+          "stateOffset": "0x4f0f01",
+          "ramAddress": "0x804f0f01",
+          "text": "pl0700_b01_animjoint",
+          "context": "e...z....pl0700_b00_animj..oint.pl0700_b01_animjoint. .02P.UU3_H.04P*5_H*06P?7_H?08P"
+        },
+        {
+          "source": "mem1_t2",
+          "stateOffset": "0x4f2ca5",
+          "ramAddress": "0x804f2ca5",
+          "text": "pl0700_b01_animjoint",
+          "context": "e...z....pl0700_b00.._animjoint.pl0700_b01_animjoint... .02P.3_H.04P*5_H*06P?7_H?08P"
+        },
+        {
+          "source": "mem1_t2",
+          "stateOffset": "0x4f4ee9",
+          "ramAddress": "0x804f4ee9",
+          "text": "pl0700_b01_animjoint",
+          "context": "e...z....pl0700_b00.._animjoint.pl0700_b01_animjoint... .02P.3_H.04P*5_H*06P?7_H?08P"
+        },
+        {
+          "source": "mem1_t2",
+          "stateOffset": "0x4f8359",
+          "ramAddress": "0x804f8359",
+          "text": "pl0700_b01_animjoint",
+          "context": "e.h.z.b..pl0700_b00_animj..oint.pl0700_b01_animjoint. .02P.UU3_H.04P*5_H*06P?7_H?08P"
+        }
+      ],
+      "evidenceNote": "Resident animation joint strings prove this model/animation prefix was in memory, not that it was an active force slot."
+    },
+    {
+      "borgId": "pl0200",
+      "name": "SWORD KNIGHT",
+      "tribe": "Knight Borg",
+      "energy": 280,
+      "hasModel": true,
+      "hasAnim": true,
+      "totalMatches": 500,
+      "sources": {
+        "battle1_start_checkpoint": 500
+      },
+      "boneNamesSeen": [
+        "b00",
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15",
+        "b16",
+        "b17",
+        "b18",
+        "b19"
+      ],
+      "examples": [
+        {
+          "source": "battle1_start_checkpoint",
+          "stateOffset": "0x6bcd6c6",
+          "ramAddress": "0x809c7348",
+          "text": "pl0200_b00_animjoint",
+          "context": ".......P.......e.......z........pl0200_b00_animjoint.pl0200_b01_animjoint.pl0200_b02"
+        },
+        {
+          "source": "battle1_start_checkpoint",
+          "stateOffset": "0x6bcd6db",
+          "ramAddress": "0x809c735d",
+          "text": "pl0200_b01_animjoint",
+          "context": "..z........pl0200_b00_animjoint.pl0200_b01_animjoint.pl0200_b02_animjoint.pl0200_b03"
+        },
+        {
+          "source": "battle1_start_checkpoint",
+          "stateOffset": "0x6bcd6f0",
+          "ramAddress": "0x809c7372",
+          "text": "pl0200_b02_animjoint",
+          "context": "_animjoint.pl0200_b01_animjoint.pl0200_b02_animjoint.pl0200_b03_animjoint.pl0200_b04"
+        },
+        {
+          "source": "battle1_start_checkpoint",
+          "stateOffset": "0x6bcd705",
+          "ramAddress": "0x809c7387",
+          "text": "pl0200_b03_animjoint",
+          "context": "_animjoint.pl0200_b02_animjoint.pl0200_b03_animjoint.pl0200_b04_animjoint.pl0200_b05"
+        }
+      ],
+      "evidenceNote": "Resident animation joint strings prove this model/animation prefix was in memory, not that it was an active force slot."
+    },
+    {
+      "borgId": "pl0002",
+      "name": "ARROW NINJA",
+      "tribe": "Ninja Borg",
+      "energy": 300,
+      "hasModel": true,
+      "hasAnim": true,
+      "totalMatches": 200,
+      "sources": {
+        "battle1_start_checkpoint": 200
+      },
+      "boneNamesSeen": [
+        "b00",
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15",
+        "b16",
+        "b17",
+        "b18",
+        "b19"
+      ],
+      "examples": [
+        {
+          "source": "battle1_start_checkpoint",
+          "stateOffset": "0x6bd8d22",
+          "ramAddress": "0x809d29a4",
+          "text": "pl0002_b00_animjoint",
+          "context": "...8...P...L...e...`...z...t....pl0002_b00_animjoint.pl0002_b01_animjoint.pl0002_b02"
+        },
+        {
+          "source": "battle1_start_checkpoint",
+          "stateOffset": "0x6bd8d37",
+          "ramAddress": "0x809d29b9",
+          "text": "pl0002_b01_animjoint",
+          "context": "..z...t....pl0002_b00_animjoint.pl0002_b01_animjoint.pl0002_b02_animjoint.pl0002_b03"
+        },
+        {
+          "source": "battle1_start_checkpoint",
+          "stateOffset": "0x6bd8d4c",
+          "ramAddress": "0x809d29ce",
+          "text": "pl0002_b02_animjoint",
+          "context": "_animjoint.pl0002_b01_animjoint.pl0002_b02_animjoint.pl0002_b03_animjoint.pl0002_b04"
+        },
+        {
+          "source": "battle1_start_checkpoint",
+          "stateOffset": "0x6bd8d61",
+          "ramAddress": "0x809d29e3",
+          "text": "pl0002_b03_animjoint",
+          "context": "_animjoint.pl0002_b02_animjoint.pl0002_b03_animjoint.pl0002_b04_animjoint.pl0002_b05"
+        }
+      ],
+      "evidenceNote": "Resident animation joint strings prove this model/animation prefix was in memory, not that it was an active force slot."
+    },
+    {
+      "borgId": "pl062a",
+      "name": "G BLACK",
+      "tribe": "Machine Borg",
+      "energy": 600,
+      "hasModel": true,
+      "hasAnim": true,
+      "totalMatches": 200,
+      "sources": {
+        "battle1_challenge": 40,
+        "battle1_challenge_t2": 40,
+        "battle1_start_checkpoint": 40,
+        "mem1_t1": 40,
+        "mem1_t2": 40
+      },
+      "boneNamesSeen": [
+        "b00",
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12",
+        "b13",
+        "b14",
+        "b15",
+        "b16",
+        "b17",
+        "b18",
+        "b19"
+      ],
+      "examples": [
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x9a8288",
+          "ramAddress": "0x809a8288",
+          "text": "pl062a_b00_animjoint",
+          "context": ".......P.......e.......z........pl062a_b00_animjoint.pl062a_b01_animjoint.pl062a_b02"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x9a829d",
+          "ramAddress": "0x809a829d",
+          "text": "pl062a_b01_animjoint",
+          "context": "..z........pl062a_b00_animjoint.pl062a_b01_animjoint.pl062a_b02_animjoint.pl062a_b03"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x9a82b2",
+          "ramAddress": "0x809a82b2",
+          "text": "pl062a_b02_animjoint",
+          "context": "_animjoint.pl062a_b01_animjoint.pl062a_b02_animjoint.pl062a_b03_animjoint.pl062a_b04"
+        },
+        {
+          "source": "mem1_t1",
+          "stateOffset": "0x9a82c7",
+          "ramAddress": "0x809a82c7",
+          "text": "pl062a_b03_animjoint",
+          "context": "_animjoint.pl062a_b02_animjoint.pl062a_b03_animjoint.pl062a_b04_animjoint.pl062a_b05"
+        }
+      ],
+      "evidenceNote": "Resident animation joint strings prove this model/animation prefix was in memory, not that it was an active force slot."
+    }
+  ],
+  "supportingEvidence": [
+    "research/decomp/ram-trace-analysis.md",
+    "research/decomp/index/archive-load-xrefs.md",
+    "research/asset-inventory/stage-code-evidence.md"
+  ],
+  "requiredNextTraceTasks": [
+    "Use DVDOpen/gcCiOpen breakpoints from archive-load-xrefs to capture selected st## filenames during Challenge battle entry.",
+    "Use active object spawn/init breakpoints to connect retained pl#### animation prefixes to live active borg object pointers.",
+    "Do not treat resident pl####_b##_animjoint strings as a complete force roster until the object table is traced."
+  ]
+}

@@ -1979,7 +1979,7 @@ void zz_00ff698_(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefi
             bVar2 = (byte)(1 << iVar5 + -4);
             if (*unaff_r29 == 0) {
               PTR_DAT_8043394c[0x30] = PTR_DAT_8043394c[0x30] | bVar2;
-              zz_010d880_(*(char *)(param_9 + 0x15) + -4,5);
+              set_slot_action_handler(*(char *)(param_9 + 0x15) + -4,5);
             }
             else {
               PTR_DAT_8043394c[0x30] = PTR_DAT_8043394c[0x30] & ~bVar2;

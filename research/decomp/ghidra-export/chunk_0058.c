@@ -1372,7 +1372,7 @@ void FUN_801dca30(undefined8 param_1,double param_2,double param_3,double param_
       DAT_80436398[0x6b] = '\x01';
       zz_0008ca8_(param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,DAT_803bb354,
                   pcVar3,pcVar2,in_r6,in_r7,in_r8,in_r9,in_r10);
-      zz_008c3a0_(9);
+      set_global_menu_mode(9);
       zz_01dd60c_();
       zz_01dd63c_();
       zz_01dd7d4_();
@@ -1500,7 +1500,7 @@ void FUN_801dce4c(void)
   else if ((cVar1 < '\x03') &&
           (sVar3 = *(short *)(DAT_80436398 + 4) + -1, *(short *)(DAT_80436398 + 4) = sVar3,
           sVar3 < 1)) {
-    zz_008c3a0_(6);
+    set_global_menu_mode(6);
     zz_0027c1c_();
     if (*(char *)(DAT_80436398 + 0x67) == '\0') {
       zz_0041b58_(0);

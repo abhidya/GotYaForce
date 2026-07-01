@@ -1,17 +1,27 @@
 // Simple CPU AI: produce a PlayerInput for a borg whose ownerPlayer === null (CPU), or for
-// a CPU-ally / single-player opponent. Behaviour: seek the nearest enemy, keep the borg's
-// preferred engage range, lock on, and attack when in range. Deterministic (no RNG).
+// a CPU-ally / single-player opponent. Behaviour: keep a valid target, otherwise seek the
+// nearest enemy, hold preferred engage range, lock on, and attack when in range. Deterministic.
 
 import { distXZ } from "@gf/physics";
 import { AI } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
 
+function isEnemy(self: BorgRuntime, other: BorgRuntime): boolean {
+  return other.alive && other.team !== self.team && other.uid !== self.uid;
+}
+
+function currentLockedEnemy(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null {
+  if (!self.lockTarget) return null;
+  const target = all.find((o) => o.uid === self.lockTarget);
+  return target && isEnemy(self, target) ? target : null;
+}
+
 function nearestEnemy(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null {
   let best: BorgRuntime | null = null;
   let bestD = Infinity;
   for (const o of all) {
-    if (!o.alive || o.team === self.team || o.uid === self.uid) continue;
+    if (!isEnemy(self, o)) continue;
     const d = distXZ(self.pos, o.pos);
     if (d < bestD) {
       bestD = d;
@@ -27,7 +37,7 @@ function nearestEnemy(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null
  */
 export function stepAI(self: BorgRuntime, p: BorgProfile, all: BorgRuntime[]): PlayerInput {
   const input = emptyInput();
-  const target = nearestEnemy(self, all);
+  const target = currentLockedEnemy(self, all) ?? nearestEnemy(self, all);
   if (!target) return input;
 
   // Always try to keep a lock so projectiles home and facing tracks.

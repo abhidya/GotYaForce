@@ -9,9 +9,9 @@ import {
   add,
   distXZ,
   forwardFromYaw,
+  knockbackDirectionFromPositions,
   normalize,
   scale,
-  sub,
   yawFromXZ,
   type Vec3,
 } from "@gf/physics";
@@ -25,7 +25,9 @@ import {
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
+import { typeDamageMultiplier } from "./typeDamage.js";
 import type { BorgRuntime, Projectile, ProjectileVisualKind } from "./types.js";
+import projectileVisualFamilies from "./data/projectileVisualFamilies.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------------------
 // Invincibility timer — DIRECT PORT of the decompiled countdown (behavior-notes.md s4a).
@@ -55,9 +57,35 @@ export function stepCooldowns(b: BorgRuntime): void {
 
 // ---------------------------------------------------------------------------------------
 // Lock-on (R) and switch-lock (Z).
+//
+// TUNED, and CHECKED CLOSED (2026-07-01, behavior-notes.md s4q): this is not a partially-derived
+// stand-in awaiting a future decode — a thorough corpus search (borg state-machine dispatch,
+// every writer of the 6-actor-table "last enemy" globals DAT_803b06a8/object+2000/+0x7d1,
+// every loop over DAT_803c4e84, every PSVEC distance-check call site, PAD/SI input symbols) found
+// no button-triggered scan-and-select enemy-lock mechanic anywhere in the ROM. Every "target"
+// field the decomp has is hit-REACTIVE bookkeeping (remembers who last hit whom, for a one-shot
+// reaction animation via react_to_slot_target_object/start_status_reaction_by_side), never a
+// scan-selective player lock system. So there is no real algorithm to port here — this heuristic
+// (nearest enemy in a forward view-cone, scored by distance*angle) is an honest design choice,
+// not a guess standing in for a known-but-undecoded formula. Do not re-derive without new leads.
 // ---------------------------------------------------------------------------------------
 function isEnemyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
   return o.alive && o.team !== self.team && o.uid !== self.uid;
+}
+
+function canReceiveHit(self: BorgRuntime, o: BorgRuntime): boolean {
+  return o.alive && o.uid !== self.uid;
+}
+
+function rawDamageForTarget(
+  rawDamage: number,
+  attackerTeam: number,
+  targetTeam: number,
+  attackerBorgId: string | undefined,
+  defenderBorgId: string | undefined,
+): number {
+  const typeAdjusted = rawDamage * typeDamageMultiplier(attackerBorgId, defenderBorgId);
+  return attackerTeam === targetTeam ? typeAdjusted / DAMAGE.SAME_TEAM_HIT_DIVISOR : typeAdjusted;
 }
 
 /** Acquire the nearest enemy that is in front (within the lock cone) and in range. */
@@ -125,10 +153,18 @@ export function applyHit(
   const dmg = mitigate(rawDamage, victimProfile.defense);
   victim.hp -= dmg;
 
-  // Knockback impulse (XZ), plus a little pop-up so hits read in the air.
+  // Knockback DIRECTION — ROM-accurate port of zz_00300bc_ (0x800300bc), mode 1 ("attacker to
+  // target" relative-position vector -> atan2 -> BAM16 yaw), the only one of the ROM's 5 vector-
+  // source modes this port has enough data to compute (see packages/physics/src/knockback.ts
+  // header and behavior-notes.md section (p) for the other 4 modes and why they're not wired).
+  // `knockDir` lets a caller override with a more specific vector (e.g. a projectile's travel
+  // direction) when the "attacker position" isn't the right source (fromPos is still passed as
+  // the attacker-position input to the mode-1 calc either way).
+  // Knockback MAGNITUDE remains a flat TUNED scalar (`knockback` param) — the ROM function only
+  // ever computes/stores direction, never a speed/force value; see constants.ts MELEE/SHOT/SPECIAL.
   const dir =
     knockDir.x === 0 && knockDir.z === 0
-      ? normalize(sub(victim.pos, fromPos))
+      ? knockbackDirectionFromPositions(fromPos, victim.pos)
       : normalize(knockDir);
   victim.vel.x = dir.x * knockback;
   victim.vel.z = dir.z * knockback;
@@ -238,7 +274,28 @@ export function resetProjectileCounter(): void {
   projCounter = 0;
 }
 
+// Per-borg family table generated from research/asset-inventory/weapon-attachment-map.json
+// (scripts/gen-projectile-visual-families.mjs) — see that JSON's own "note" field and
+// behavior-notes.md s4t for the full citation. TUNED, but backed by real per-borg PZZ/model/
+// mot asset-family evidence (fire/beam/gun/bulletProjectile/muzzle signals, weighted by
+// confidence) instead of an English name-string match. No ROM-side per-move effect/particle-ID
+// field has been decoded (hit-bin-format.md's 0xF4 records and the puVar17 per-move fields
+// documented in behavior-notes.md s4j/s4o/s4p are all damage/knockback fields, not visual-asset
+// IDs), so this remains explicitly TUNED, not DERIVED.
+const VISUAL_FAMILY_BY_BORG_ID: Readonly<Record<string, ProjectileVisualKind>> =
+  projectileVisualFamilies.kinds as Record<string, ProjectileVisualKind>;
+
+/**
+ * Resolve a projectile's visual kind for a borg. Prefers the asset-family table above (real,
+ * per-borg asset-inventory evidence); falls back to the original name-string heuristic only for
+ * the ~half of the roster with no confident family signal in that table. Both paths are TUNED —
+ * see the comment above and constants.ts's DERIVED/TUNED header for why neither can be labeled
+ * DERIVED yet.
+ */
 export function projectileVisualKindForProfile(p: BorgProfile): ProjectileVisualKind {
+  const fromAssets = VISUAL_FAMILY_BY_BORG_ID[p.id];
+  if (fromAssets) return fromAssets;
+  // LAST-RESORT fallback: no real per-borg asset-family signal found for this id.
   const text = `${p.id} ${p.name}`.toLowerCase();
   if (/(flame|fire|phoenix|dragon)/.test(text)) return "flame";
   if (/(beam|laser|plasma|satellite|bit)/.test(text)) return "energy";
@@ -280,11 +337,21 @@ export function stepAttacks(
       (p.hasMelee ? MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT : SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT) *
       SPECIAL.DMG_MULT;
     for (const o of all) {
-      if (!isEnemyAlive(b, o)) continue;
+      if (!canReceiveHit(b, o)) continue;
       if (distXZ(b.pos, o.pos) <= SPECIAL.RADIUS) {
         const op = profiles.get(o.uid);
         if (op) {
-          applyHit(o, op, baseDmg, SPECIAL.KNOCKBACK, sub(o.pos, b.pos), b.pos, true);
+          // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target,
+          // via the ported zz_00300bc_ atan2/BAM16 calc) instead of this raw un-ported subtract.
+          applyHit(
+            o,
+            op,
+            rawDamageForTarget(baseDmg, b.team, o.team, p.id, op.id),
+            SPECIAL.KNOCKBACK,
+            { x: 0, y: 0, z: 0 },
+            b.pos,
+            true,
+          );
         }
       }
     }
@@ -312,11 +379,14 @@ export function stepAttacks(
 
   // --- Resolve an active melee swing against enemies in reach ------------------------
   const meleeActive = b.cooldowns["meleeActive"] ?? 0;
+  if (b.state === "attack" && p.hasMelee && meleeActive > 0 && STATE.MELEE_IFRAME_REFRESH_PER_FRAME) {
+    b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
+  }
   if (b.state === "attack" && p.hasMelee && meleeActive > 0 && meleeActive <= MELEE.ACTIVE) {
     // Only the active window (after startup) deals damage; one hit per swing per target.
     const fwd = forwardFromYaw(b.rotY);
     for (const o of all) {
-      if (!isEnemyAlive(b, o)) continue;
+      if (!canReceiveHit(b, o)) continue;
       const d = distXZ(b.pos, o.pos);
       if (d > MELEE.RANGE) continue;
       if (Math.abs(o.pos.y - b.pos.y) > MELEE.Y_TOLERANCE) continue;
@@ -325,7 +395,9 @@ export function stepAttacks(
       const op = profiles.get(o.uid);
       if (!op) continue;
       const raw = MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT;
-      applyHit(o, op, raw, MELEE.KNOCKBACK, fwd, b.pos);
+      // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
+      // instead of the attacker's facing vector (`fwd`) used here previously.
+      applyHit(o, op, rawDamageForTarget(raw, b.team, o.team, p.id, op.id), MELEE.KNOCKBACK, { x: 0, y: 0, z: 0 }, b.pos);
     }
   }
 
@@ -394,15 +466,29 @@ export function stepProjectiles(
 
     pr.pos = add(pr.pos, pr.vel as Vec3);
 
-    // Hit test against enemies.
+    // Hit test against any non-owner borg. Same-team hits use the derived 0.25x reducer.
     let consumed = false;
     for (const o of all) {
-      if (!o.alive || o.team === pr.team || o.uid === pr.ownerUid) continue;
+      if (!o.alive || o.uid === pr.ownerUid) continue;
       if (isInvincible(o)) continue;
       if (distXZ(pr.pos, o.pos) <= pr.hitRadius && Math.abs(pr.pos.y - o.pos.y) <= 60) {
         const op = profiles.get(o.uid);
         if (op) {
-          applyHit(o, op, pr.damage, pr.knockback, pr.vel as Vec3, pr.pos);
+          // Intentionally NOT the zero-vector convention: a projectile's own travel vector
+          // (which may have curved via homing) is a more accurate knockback direction than
+          // recomputing the ROM's mode-1 attacker->target vector from a possibly-stale shooter
+          // origin. Neither is a ROM-confirmed mode for the projectile case specifically (the
+          // ROM caller always passes the same hit-context wrapper regardless of melee/shot), so
+          // this remains a TUNED choice between two reasonable direction sources.
+          const attackerProfile = profiles.get(pr.ownerUid);
+          applyHit(
+            o,
+            op,
+            rawDamageForTarget(pr.damage, pr.team, o.team, attackerProfile?.id, op.id),
+            pr.knockback,
+            pr.vel as Vec3,
+            pr.pos,
+          );
         }
         consumed = true;
         break;

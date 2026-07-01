@@ -2292,7 +2292,7 @@ void FUN_801c795c(undefined8 param_1,double param_2,double param_3,double param_
   zz_00429ec_();
   uVar12 = zz_0042874_();
   zz_0042878_(uVar12,param_2,param_3,param_4,param_5,param_6,param_7,param_8);
-  uVar12 = zz_008c3a0_(1);
+  uVar12 = set_global_menu_mode(1);
   puVar1 = PTR_DAT_80433934;
   PTR_DAT_80433934[0x45] = 4;
   zz_00424cc_(uVar12,param_2,param_3,param_4,param_5,param_6,param_7,param_8,puVar1,extraout_r4,

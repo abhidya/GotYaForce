@@ -3711,7 +3711,7 @@ void FUN_8002844c(undefined8 param_1,double param_2,double param_3,double param_
   zz_0040940_();
   uVar7 = zz_003d4a0_();
   zz_004104c_(uVar7,param_2,param_3,param_4,param_5,param_6,param_7,param_8);
-  uVar7 = zz_01999c8_(3);
+  uVar7 = spawn_challenge_menu_object_set(3);
   uVar7 = zz_0041288_(uVar7,param_2,param_3,param_4,param_5,param_6,param_7,param_8);
   zz_0042520_(extraout_f1_00,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
               (int)((ulonglong)uVar7 >> 0x20),(int)uVar7,puVar4,uVar5,puVar6,param_14,param_15,
@@ -3735,7 +3735,7 @@ void FUN_8002844c(undefined8 param_1,double param_2,double param_3,double param_
     zz_00444b4_(uVar7,param_2,param_3,param_4,param_5,param_6,param_7,param_8,uVar2,uVar3,puVar4,
                 uVar5,puVar6,param_14,param_15,param_16);
   }
-  uVar7 = zz_008c3a0_(5);
+  uVar7 = set_global_menu_mode(5);
   zz_00e99c8_(uVar7,param_2,param_3,param_4,param_5,param_6,param_7,param_8,2,0,DAT_8031a088,uVar5,
               puVar6,param_14,param_15,param_16);
   return;
@@ -3837,7 +3837,7 @@ void FUN_800286d8(undefined8 param_1,double param_2,double param_3,double param_
       zz_00e9d38_(uVar5,param_2,param_3,param_4,param_5,param_6,param_7,param_8);
     }
     zz_00178b4_();
-    zz_008c3a0_(1);
+    set_global_menu_mode(1);
   }
   return;
 }
@@ -4068,7 +4068,7 @@ LAB_80028d84:
       piVar11 = piVar11 + 1;
     } while (iVar5 < 4);
     zz_00d285c_();
-    param_1 = zz_008c3a0_(3);
+    param_1 = set_global_menu_mode(3);
     break;
   case 7:
     if (0 < *(short *)(PTR_DAT_80433934 + 8)) {
@@ -4334,7 +4334,7 @@ void zz_0029434_(undefined8 param_1,double param_2,double param_3)
   if (PTR_DAT_80433934[0x66] == '\0') {
     zz_008a28c_();
     uVar1 = zz_0089aec_();
-    FUN_8002bb14(uVar1,param_2,param_3);
+    battle_frame_target_action_dispatch(uVar1,param_2,param_3);
   }
   FUN_80036e24();
   zz_008972c_();
@@ -4455,7 +4455,7 @@ void zz_0029708_(undefined8 param_1,double param_2,double param_3)
   *(int *)(PTR_DAT_80433934 + 0xb0) = *(int *)(PTR_DAT_80433934 + 0xb0) + 1;
   zz_008a28c_();
   uVar1 = zz_0089aec_();
-  FUN_8002bb14(uVar1,param_2,param_3);
+  battle_frame_target_action_dispatch(uVar1,param_2,param_3);
   FUN_80036e24();
   zz_008972c_();
   zz_0089658_();
@@ -5841,7 +5841,17 @@ void zz_002bae8_(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefi
 
 
 
-// ==== 8002bb14  FUN_8002bb14 ====
+// ==== 8002bb14  battle_frame_target_action_dispatch ====
+
+/* GF_ALIAS: battle_frame_target_action_dispatch
+ * Evidence: per-frame active-borg loop over DAT_803c4e84 stride 0x1e00. Resets per-slot
+ * target/effect globals (DAT_803b06a8, DAT_8043612c, DAT_80436134/3c/44/4c),
+ * runs hit/contact passes, applies the signed param-tier delta through apply_actor_param_tier_delta_63,
+ * consumes slot target pointers via react_to_slot_target_object, then dispatches slot action update
+ * through dispatch_slot_action_update.
+ * Field aliases: actor+0x3e4 active_slot_index; actor+0x88 match_side_from_slot_table;
+ * actor+2000 last_enemy_slot; actor+0x7d1 last_enemy_slot_timer.
+ */
 
 /* WARNING: Removing unreachable block (ram,0x8002c978) */
 /* WARNING: Removing unreachable block (ram,0x8002c970) */
@@ -5850,7 +5860,7 @@ void zz_002bae8_(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefi
 /* WARNING: Removing unreachable block (ram,0x8002bb2c) */
 /* WARNING: Removing unreachable block (ram,0x8002bb24) */
 
-void FUN_8002bb14(undefined8 param_1,double param_2,double param_3)
+void battle_frame_target_action_dispatch(undefined8 param_1,double param_2,double param_3)
 
 {
   bool bVar1;
@@ -5973,7 +5983,7 @@ void FUN_8002bb14(undefined8 param_1,double param_2,double param_3)
   zz_002d58c_();
   zz_002d198_();
   zz_002e1c8_();
-  zz_002cb20_();
+  mutual_actor_contact_mask_update();
   pfVar14 = local_70;
   piVar16 = &DAT_803b0674;
   pfVar15 = (float *)&DAT_803b065c;
@@ -6200,9 +6210,9 @@ void FUN_8002bb14(undefined8 param_1,double param_2,double param_3)
     pfVar17 = pfVar17 + 1;
   } while (iVar13 < 6);
   zz_002ce44_();
-  zz_002d7c4_();
-  zz_002df08_();
-  dVar25 = (double)zz_002db58_();
+  collision_hit_pair_pass_active_vs_borgs();
+  collision_hit_pair_pass_object_lists();
+  dVar25 = (double)collision_hit_pair_pass_active_vs_secondary();
   iVar13 = 0;
   pcVar10 = DAT_803c4e84;
   do {
@@ -6235,7 +6245,7 @@ void FUN_8002bb14(undefined8 param_1,double param_2,double param_3)
           bVar4 = pcVar10[0x1da];
           if ((bVar4 & 2) == 0) {
             if (((bVar4 & 0x20) != 0) || ((bVar4 & 0x40) != 0)) {
-              zz_00681e4_((int)pcVar10,(int)(char)(&DAT_8043612c)[pcVar10[0x3e4]]);
+              apply_actor_param_tier_delta_63((int)pcVar10,(int)(char)(&DAT_8043612c)[pcVar10[0x3e4]]);
             }
             iVar9 = (int)pcVar10[0x3e4];
             if ((&DAT_8043613c)[iVar9] == '\0') {
@@ -6249,7 +6259,7 @@ void FUN_8002bb14(undefined8 param_1,double param_2,double param_3)
                       dVar25 = (double)zz_005c290_((int)pcVar10);
                     }
                     else {
-                      dVar25 = (double)zz_00680d4_((int)pcVar10,0);
+                      dVar25 = (double)dispatch_slot_action_update((int)pcVar10,0);
                     }
                   }
                   else {
@@ -6257,18 +6267,18 @@ void FUN_8002bb14(undefined8 param_1,double param_2,double param_3)
                   }
                 }
                 else {
-                  zz_006ab04_((int)pcVar10,(undefined4 *)(&DAT_803b06c0 + iVar9 * 0xc),2);
-                  dVar25 = (double)zz_00680d4_((int)pcVar10,0);
+                  start_forced_move_to_point((int)pcVar10,(undefined4 *)(&DAT_803b06c0 + iVar9 * 0xc),2);
+                  dVar25 = (double)dispatch_slot_action_update((int)pcVar10,0);
                 }
               }
               else {
-                zz_006ace8_((int)pcVar10,1);
-                dVar25 = (double)zz_00680d4_((int)pcVar10,0);
+                start_status_reaction_by_side((int)pcVar10,1);
+                dVar25 = (double)dispatch_slot_action_update((int)pcVar10,0);
               }
             }
             else {
-              zz_006ace8_((int)pcVar10,0);
-              dVar25 = (double)zz_00680d4_((int)pcVar10,0);
+              start_status_reaction_by_side((int)pcVar10,0);
+              dVar25 = (double)dispatch_slot_action_update((int)pcVar10,0);
             }
           }
           else if (*(short *)(pcVar10 + 0x7dc) < 1) {
@@ -6283,13 +6293,13 @@ void FUN_8002bb14(undefined8 param_1,double param_2,double param_3)
       if (0 < *(short *)(pcVar10 + 0x1c6)) {
         if (*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4) == 0) {
           if ((pcVar10[0x1d9] & 4U) != 0) {
-            dVar25 = (double)zz_006ab04_((int)pcVar10,
+            dVar25 = (double)start_forced_move_to_point((int)pcVar10,
                                          (undefined4 *)(&DAT_803b06c0 + pcVar10[0x3e4] * 0xc),2);
             bVar1 = true;
           }
         }
         else {
-          dVar25 = (double)zz_006abd4_((int)pcVar10,*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4));
+          dVar25 = (double)react_to_slot_target_object((int)pcVar10,*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4));
           bVar1 = true;
         }
         if (((pcVar10[0x274] & 1U) != 0) && ('\x02' < (char)(&DAT_80436144)[pcVar10[0x3e4]])) {
@@ -6441,9 +6451,15 @@ void zz_002caa8_(double param_1,int param_2)
 
 
 
-// ==== 8002cb20  zz_002cb20_ ====
+// ==== 8002cb20  mutual_actor_contact_mask_update ====
 
-void zz_002cb20_(void)
+/* GF_ALIAS: mutual_actor_contact_mask_update
+ * Evidence: pairwise active-borg scan gated by mutual actor+0x71e and actor+0x71f
+ * slot bitmasks before calling zz_0035ca4_ with the other actor motion vector.
+ * This is a target/contact eligibility pass, not a CPU-only decision function.
+ */
+
+void mutual_actor_contact_mask_update(void)
 
 {
   int iVar1;
@@ -7007,12 +7023,12 @@ LAB_8002d788:
 
 
 
-// ==== 8002d7c4  zz_002d7c4_ ====
+// ==== 8002d7c4  collision_hit_pair_pass_active_vs_borgs ====
 
 /* WARNING: Removing unreachable block (ram,0x8002db3c) */
 /* WARNING: Removing unreachable block (ram,0x8002d7d4) */
 
-void zz_002d7c4_(void)
+void collision_hit_pair_pass_active_vs_borgs(void)
 
 {
   undefined4 *puVar1;
@@ -7105,7 +7121,7 @@ void zz_002d7c4_(void)
                                 *(int *)(iVar17 + 0x58) << 3 | *(uint *)(iVar16 + 0x58));
             if (iVar8 != 0) {
               if (bVar3) {
-                zz_002e2a8_(iVar17,iVar16);
+                resolve_hitbox_target_effects_and_damage(iVar17,iVar16);
               }
               else {
                 dVar18 = gnt4_PSVECSquareDistance_bl((float *)&DAT_803b0374,(float *)&DAT_803b0504);
@@ -7139,7 +7155,7 @@ void zz_002d7c4_(void)
             (**(code **)(iVar13 + 0x100))(iVar13);
           }
         }
-        zz_002e2a8_(iVar17,unaff_r31);
+        resolve_hitbox_target_effects_and_damage(iVar17,unaff_r31);
       }
     }
     piVar5 = piVar5 + 1;
@@ -7149,12 +7165,12 @@ void zz_002d7c4_(void)
 
 
 
-// ==== 8002db58  zz_002db58_ ====
+// ==== 8002db58  collision_hit_pair_pass_active_vs_secondary ====
 
 /* WARNING: Removing unreachable block (ram,0x8002deec) */
 /* WARNING: Removing unreachable block (ram,0x8002db68) */
 
-void zz_002db58_(void)
+void collision_hit_pair_pass_active_vs_secondary(void)
 
 {
   undefined4 *puVar1;
@@ -7245,7 +7261,7 @@ void zz_002db58_(void)
                               *(int *)(iVar16 + 0x58) << 3 | *(uint *)(iVar15 + 0x58));
           if (iVar8 != 0) {
             if (bVar4) {
-              zz_002e2a8_(iVar16,iVar15);
+              resolve_hitbox_target_effects_and_damage(iVar16,iVar15);
             }
             else {
               dVar18 = gnt4_PSVECSquareDistance_bl((float *)&DAT_803b0374,(float *)&DAT_803b0504);
@@ -7282,7 +7298,7 @@ void zz_002db58_(void)
           }
         }
       }
-      zz_002e2a8_(iVar16,unaff_r31);
+      resolve_hitbox_target_effects_and_damage(iVar16,unaff_r31);
     }
     piVar6 = piVar6 + 1;
   }
@@ -7291,12 +7307,12 @@ void zz_002db58_(void)
 
 
 
-// ==== 8002df08  zz_002df08_ ====
+// ==== 8002df08  collision_hit_pair_pass_object_lists ====
 
 /* WARNING: Removing unreachable block (ram,0x8002e1ac) */
 /* WARNING: Removing unreachable block (ram,0x8002df18) */
 
-void zz_002df08_(void)
+void collision_hit_pair_pass_object_lists(void)
 
 {
   undefined4 *puVar1;
@@ -7369,7 +7385,7 @@ void zz_002df08_(void)
                             *(int *)(iVar12 + 0x58) << 3 | *(uint *)(iVar11 + 0x58));
         if (iVar6 != 0) {
           if (bVar2) {
-            zz_002e2a8_(iVar12,iVar11);
+            resolve_hitbox_target_effects_and_damage(iVar12,iVar11);
           }
           else {
             dVar14 = gnt4_PSVECSquareDistance_bl((float *)&DAT_803b0374,(float *)&DAT_803b0504);
@@ -7402,7 +7418,7 @@ void zz_002df08_(void)
           (**(code **)(iVar9 + 0x100))(iVar9);
         }
       }
-      zz_002e2a8_(iVar12,unaff_r31);
+      resolve_hitbox_target_effects_and_damage(iVar12,unaff_r31);
     }
     piVar4 = piVar4 + 1;
   }
@@ -7454,9 +7470,18 @@ void zz_002e1c8_(void)
 
 
 
-// ==== 8002e2a8  zz_002e2a8_ ====
+// ==== 8002e2a8  resolve_hitbox_target_effects_and_damage ====
 
-void zz_002e2a8_(int param_1,int param_2)
+/* GF_ALIAS: resolve_hitbox_target_effects_and_damage
+ * Evidence: called by three hit-pair passes. param_1 owns the hit record table
+ * (param_1+0x2c + action_index*0x18); param_2 resolves to the target actor.
+ * Writes lock/target reaction fields (actor+0x290, DAT_803b06a8), last-enemy slot
+ * marker (target+2000, target+0x7d1=15), effect deltas (DAT_8043612c), damage
+ * accounting (actor+0x418/0x42c, target+0x41c), then calls zz_00300bc_,
+ * zz_003cd5c_, and zz_003d344_.
+ */
+
+void resolve_hitbox_target_effects_and_damage(int param_1,int param_2)
 
 {
   short sVar1;

@@ -1873,7 +1873,7 @@ void FUN_8006478c(int param_1)
                           &local_18,&local_18);
       gnt4_PSVECAdd_bl((float *)(param_1 + 0x20),&local_18,&local_18);
       *(float *)(param_1 + 0x568) = FLOAT_804374ec;
-      zz_006ab04_(param_1,&local_18,1);
+      start_forced_move_to_point(param_1,&local_18,1);
     }
   }
   else {
@@ -3435,7 +3435,7 @@ undefined4 zz_0066ac0_(int param_1,int param_2)
   undefined4 uVar3;
   
   if (param_2 == 0) {
-    iVar1 = zz_008b7b0_(*(uint *)(param_1 + 0x5b4) >> 0x10 & 0xf);
+    iVar1 = map_main_menu_direction_to_mode(*(uint *)(param_1 + 0x5b4) >> 0x10 & 0xf);
     if (iVar1 < 1) {
       uVar3 = 0;
       *(short *)(param_1 + 0x734) =
@@ -3460,7 +3460,7 @@ undefined4 zz_0066ac0_(int param_1,int param_2)
     }
   }
   else {
-    iVar1 = zz_008b7b0_(*(byte *)(param_1 + 0x58f) & 0xf);
+    iVar1 = map_main_menu_direction_to_mode(*(byte *)(param_1 + 0x58f) & 0xf);
     if (iVar1 + -1 < 0) {
       uVar3 = 0;
       *(short *)(param_1 + 0x734) =
@@ -4363,17 +4363,22 @@ undefined4 zz_0068030_(int param_1)
 
 
 
-// ==== 800680d4  zz_00680d4_ ====
+// ==== 800680d4  dispatch_slot_action_update ====
 
-void zz_00680d4_(int param_1,int param_2)
+/* GF_ALIAS: dispatch_slot_action_update
+ * Evidence: gates on match globals, then calls set_slot_action_handler(actor+0x3e4, mode)
+ * unless actor+0x3e6 suppresses slot dispatch. Called from battle_frame_target_action_dispatch.
+ */
+
+void dispatch_slot_action_update(int actor,int action_update_mode)
 
 {
   if (PTR_DAT_80433930[0x40] == '\0') {
     if ((*PTR_DAT_80433930 == '\x03') && ('\x04' < (char)PTR_DAT_80433934[0x45])) {
       return;
     }
-    if (*(char *)(param_1 + 0x3e6) == '\0') {
-      zz_010d880_((int)*(char *)(param_1 + 0x3e4),param_2);
+    if (*(char *)(actor + 0x3e6) == '\0') {
+      set_slot_action_handler((int)*(char *)(actor + 0x3e4),action_update_mode);
     }
   }
   return;
@@ -4381,77 +4386,95 @@ void zz_00680d4_(int param_1,int param_2)
 
 
 
-// ==== 80068138  FUN_80068138 ====
+// ==== 80068138  reset_actor_param_tier ====
 
-void FUN_80068138(int param_1)
+/* GF_ALIAS: reset_actor_param_tier
+ * Evidence: initializes actor+0x74a=0x10, actor+0x74e=0, actor+0x750=0,
+ * then refreshes the param tier table through refresh_actor_param_tier_table.
+ */
+
+void reset_actor_param_tier(int actor)
 
 {
   if (PTR_DAT_80433934[0x1f] == '\0') {
-    *(undefined1 *)(param_1 + 0x74a) = 0x10;
-    *(undefined1 *)(param_1 + 0x74e) = 0;
-    *(undefined2 *)(param_1 + 0x750) = 0;
-    zz_006826c_(param_1);
+    *(undefined1 *)(actor + 0x74a) = 0x10;
+    *(undefined1 *)(actor + 0x74e) = 0;
+    *(undefined2 *)(actor + 0x750) = 0;
+    refresh_actor_param_tier_table(actor);
   }
   return;
 }
 
 
 
-// ==== 8006817c  zz_006817c_ ====
+// ==== 8006817c  apply_actor_param_tier_delta_127 ====
 
-void zz_006817c_(int param_1,int param_2)
+/* GF_ALIAS: apply_actor_param_tier_delta_127
+ * Evidence: adds a signed delta to actor+0x74a, clamps to [-0x7f, 0x7f],
+ * then refreshes table-backed actor params through refresh_actor_param_tier_table.
+ */
+
+void apply_actor_param_tier_delta_127(int actor,int signed_delta)
 
 {
-  int iVar1;
+  int unclamped_tier;
   
   if (PTR_DAT_80433934[0x1f] == '\0') {
-    iVar1 = *(char *)(param_1 + 0x74a) + param_2;
-    if (iVar1 < 0x80) {
-      if (iVar1 < -0x7f) {
-        *(undefined1 *)(param_1 + 0x74a) = 0x81;
+    unclamped_tier = *(char *)(actor + 0x74a) + signed_delta;
+    if (unclamped_tier < 0x80) {
+      if (unclamped_tier < -0x7f) {
+        *(undefined1 *)(actor + 0x74a) = 0x81;
       }
       else {
-        *(char *)(param_1 + 0x74a) = (char)iVar1;
+        *(char *)(actor + 0x74a) = (char)unclamped_tier;
       }
     }
     else {
-      *(undefined1 *)(param_1 + 0x74a) = 0x7f;
+      *(undefined1 *)(actor + 0x74a) = 0x7f;
     }
-    zz_006826c_(param_1);
+    refresh_actor_param_tier_table(actor);
   }
   return;
 }
 
 
 
-// ==== 800681e4  zz_00681e4_ ====
+// ==== 800681e4  apply_actor_param_tier_delta_63 ====
 
-void zz_00681e4_(int param_1,int param_2)
+/* GF_ALIAS: apply_actor_param_tier_delta_63
+ * Evidence: called from battle_frame_target_action_dispatch with DAT_8043612c[slot].
+ * It clamps the applied delta so actor+0x74a stays in [-0x3f, 0x3f], accumulates
+ * actor+0x74e, sets actor+0x750=900 when nonzero, then delegates to
+ * apply_actor_param_tier_delta_127.
+ */
+
+void apply_actor_param_tier_delta_63(int actor,int signed_delta)
 
 {
-  int iVar1;
-  int iVar2;
+  int current_tier;
+  int desired_tier;
+  int applied_delta;
   
   if (PTR_DAT_80433934[0x1f] == '\0') {
-    iVar1 = (int)*(char *)(param_1 + 0x74a);
-    iVar2 = iVar1 + param_2;
-    if (iVar2 < 0x40) {
-      if (iVar2 < -0x3f) {
-        iVar1 = -0x3f - iVar1;
+    current_tier = (int)*(char *)(actor + 0x74a);
+    desired_tier = current_tier + signed_delta;
+    if (desired_tier < 0x40) {
+      if (desired_tier < -0x3f) {
+        applied_delta = -0x3f - current_tier;
       }
       else {
-        iVar1 = iVar2 - iVar1;
+        applied_delta = desired_tier - current_tier;
       }
     }
     else {
-      iVar1 = 0x3f - iVar1;
+      applied_delta = 0x3f - current_tier;
     }
-    if (iVar1 != 0) {
-      *(char *)(param_1 + 0x74e) = *(char *)(param_1 + 0x74e) + (char)iVar1;
-      if (*(char *)(param_1 + 0x74e) != '\0') {
-        *(undefined2 *)(param_1 + 0x750) = 900;
+    if (applied_delta != 0) {
+      *(char *)(actor + 0x74e) = *(char *)(actor + 0x74e) + (char)applied_delta;
+      if (*(char *)(actor + 0x74e) != '\0') {
+        *(undefined2 *)(actor + 0x750) = 900;
       }
-      zz_006817c_(param_1,iVar1);
+      apply_actor_param_tier_delta_127(actor,applied_delta);
     }
   }
   return;
@@ -4459,33 +4482,39 @@ void zz_00681e4_(int param_1,int param_2)
 
 
 
-// ==== 8006826c  zz_006826c_ ====
+// ==== 8006826c  refresh_actor_param_tier_table ====
 
-void zz_006826c_(int param_1)
+/* GF_ALIAS: refresh_actor_param_tier_table
+ * Evidence: clamps actor+0x74a between actor+0x74c and actor+0x74d into actor+0x74b,
+ * then indexes PTR_DAT_804339e0[model_variant][tier] and writes actor+0xb8,
+ * actor+0x1dd0, and actor+0x5f8.
+ */
+
+void refresh_actor_param_tier_table(int actor)
 
 {
-  char cVar1;
-  undefined4 *puVar2;
+  char clamped_tier;
+  undefined4 *tier_params;
   
-  if (*(int *)(param_1 + 0x4ac) == 0) {
+  if (*(int *)(actor + 0x4ac) == 0) {
     return;
   }
-  cVar1 = *(char *)(param_1 + 0x74a);
-  if (*(char *)(param_1 + 0x74d) < cVar1) {
-    *(char *)(param_1 + 0x74b) = *(char *)(param_1 + 0x74d);
+  clamped_tier = *(char *)(actor + 0x74a);
+  if (*(char *)(actor + 0x74d) < clamped_tier) {
+    *(char *)(actor + 0x74b) = *(char *)(actor + 0x74d);
   }
-  else if (cVar1 < *(char *)(param_1 + 0x74c)) {
-    *(char *)(param_1 + 0x74b) = *(char *)(param_1 + 0x74c);
+  else if (clamped_tier < *(char *)(actor + 0x74c)) {
+    *(char *)(actor + 0x74b) = *(char *)(actor + 0x74c);
   }
   else {
-    *(char *)(param_1 + 0x74b) = cVar1;
+    *(char *)(actor + 0x74b) = clamped_tier;
   }
-  puVar2 = (undefined4 *)
-           ((&PTR_DAT_804339e0)[*(byte *)(*(int *)(param_1 + 0x4ac) + 0xa3)] +
-           *(char *)(param_1 + 0x74b) * 0xc);
-  *(undefined4 *)(param_1 + 0xb8) = *puVar2;
-  *(undefined4 *)(param_1 + 0x1dd0) = puVar2[1];
-  *(undefined4 *)(param_1 + 0x5f8) = puVar2[2];
+  tier_params = (undefined4 *)
+                ((&PTR_DAT_804339e0)[*(byte *)(*(int *)(actor + 0x4ac) + 0xa3)] +
+                *(char *)(actor + 0x74b) * 0xc);
+  *(undefined4 *)(actor + 0xb8) = *tier_params;
+  *(undefined4 *)(actor + 0x1dd0) = tier_params[1];
+  *(undefined4 *)(actor + 0x5f8) = tier_params[2];
   return;
 }
 

@@ -501,7 +501,7 @@
       "file": "anim_g04_s00_special_s0.json",
       "group": 4,
       "slot": 0,
-      "label": "special_s0",
+      "label": "down_s0",
       "frames": 46,
       "animJoints": 20,
       "rootSpanX": 0,

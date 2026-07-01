@@ -42,6 +42,8 @@ export interface HudState {
   borgId: string;
   /** Whether the lock-on reticle is visible. */
   lockOn: boolean;
+  /** Remaining battle timer frames, or null when untimed. */
+  timeRemainingFrames?: number | null;
   /** Optional: show the yellow "!" alert. Defaults to false. */
   alert?: boolean;
 }
@@ -60,44 +62,6 @@ export interface BattleHudHandle {
 
 const NS = "http://www.w3.org/2000/svg";
 const ASCII_CELL = 8;
-const ASCII_GLYPHS: Record<string, [number, number]> = {
-  "0": [0, 0],
-  "1": [1, 0],
-  "2": [2, 0],
-  "3": [3, 0],
-  "4": [4, 0],
-  "5": [5, 0],
-  "6": [6, 0],
-  "7": [7, 0],
-  "8": [8, 0],
-  "9": [9, 0],
-  A: [0, 2],
-  B: [1, 2],
-  C: [2, 2],
-  D: [3, 2],
-  E: [4, 2],
-  F: [5, 2],
-  G: [6, 2],
-  H: [7, 2],
-  I: [8, 2],
-  J: [9, 2],
-  K: [10, 2],
-  L: [11, 2],
-  M: [12, 2],
-  N: [13, 2],
-  O: [14, 2],
-  P: [0, 3],
-  Q: [1, 3],
-  R: [2, 3],
-  S: [3, 3],
-  T: [4, 3],
-  U: [5, 3],
-  V: [6, 3],
-  W: [7, 3],
-  X: [8, 3],
-  Y: [9, 3],
-  Z: [10, 3],
-};
 
 function svgEl<K extends keyof SVGElementTagNameMap>(
   tag: K,
@@ -118,9 +82,13 @@ function setBitmapText(node: HTMLElement, value: string): void {
   node.replaceChildren(
     ...[...value.toUpperCase()].map((char) => {
       if (char === " ") return el("span", { class: "gf-bitmap-space" });
-      const glyph = ASCII_GLYPHS[char];
-      if (!glyph) return el("span", { class: "gf-bitmap-fallback", text: char });
-      const [col, row] = glyph;
+      // ascii.tpl atlas is ASCII-ordered from 0x20 (space), 16 glyphs per row, 8px cells:
+      // row0 punctuation, row1 digits, rows2-3 uppercase, rows4-5 lowercase.
+      const code = char.charCodeAt(0);
+      if (code < 0x20 || code > 0x7e) return el("span", { class: "gf-bitmap-fallback", text: char });
+      const idx = code - 0x20;
+      const col = idx % 16;
+      const row = Math.floor(idx / 16);
       return el("span", {
         class: "gf-bitmap-glyph",
         style: {
@@ -186,6 +154,10 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
 
   const alert = el("div", { class: "gf-hud-alert gf-hidden", text: "!" });
   root.appendChild(alert);
+
+  const timerText = bitmapText("gf-hud-timer-text");
+  const timer = el("div", { class: "gf-hud-timer gf-hidden" }, [timerText]);
+  root.appendChild(timer);
 
   // ----- optional name banner -----
   let bannerImg: HTMLImageElement | null = null;
@@ -255,6 +227,9 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
     setMeter(enemyFill, enemyTab, s.enemyEnergy, s.enemyMax);
 
     alert.classList.toggle("gf-hidden", !s.alert);
+    const hasTimer = s.timeRemainingFrames !== undefined && s.timeRemainingFrames !== null;
+    timer.classList.toggle("gf-hidden", !hasTimer);
+    if (hasTimer) setBitmapText(timerText, formatFramesAsClock(s.timeRemainingFrames ?? 0));
 
     reticle.classList.toggle("gf-hidden", !s.lockOn);
 
@@ -279,4 +254,11 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
     update,
     destroy: () => root.remove(),
   };
+}
+
+function formatFramesAsClock(frames: number): string {
+  const seconds = Math.max(0, Math.ceil(frames / 60));
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${minutes}:${String(rest).padStart(2, "0")}`;
 }

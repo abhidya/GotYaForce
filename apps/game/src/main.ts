@@ -63,8 +63,17 @@ import {
   type BattleHudHandle,
 } from "./ui/index.js";
 
-import { convertBattleConfig, inputFromKeys, playerIdFor, DEFAULT_ARENA_STAGE, stageIdForArena } from "./sim/adapter.js";
+import {
+  convertBattleConfig,
+  inputFromKeys,
+  playerIdFor,
+  DEFAULT_ARENA_STAGE,
+  EXPORTED_STAGE_CATALOG,
+  isExportedStageId,
+  stageIdForArena,
+} from "./sim/adapter.js";
 import { BattleScene, type AnimSlot } from "./sim/battleScene.js";
+import { BattleCamera } from "./sim/camera.js";
 
 // ------------------------------------------------------------------------------------------
 // Data
@@ -118,13 +127,48 @@ const AUDIO_CUES = {
   edit: "se00_02",
 } as const;
 
+// Combat SFX-per-animation-slot mapping. TUNED, NOT DERIVED: behavior-notes.md (t) confirms
+// there is no recovered ROM per-action audio-event table to port (AnimAudioEventLookup @
+// 0x801a7640 is a generic nlQSort<T> instantiation name, not a decoded frame/sound-id table;
+// hit.bin/comhit.bin's 0xF4-byte records have no identified sound-id field either). Only 5
+// generic exported SFX samples exist (audio/manifest.json), and only two (se00_01 @ ~3.0s,
+// se00_04 @ ~3.0s) are short enough to work as one-shot hit/impact stingers — the other three
+// (se00_00/02/03, all exactly 12.0s) are clearly loops/jingles, not hit-length one-shots, so
+// they're deliberately NOT reused here for combat hits. Until real per-move SFX IDs are
+// recovered from the ROM, every borg's melee/shot/special/hit/down/death events share these
+// same two generic stingers rather than inventing fake per-borg specificity.
+const COMBAT_SFX: Partial<Record<AnimSlot, string>> = {
+  melee: "se00_04",
+  shoot: "se00_04",
+  special: "se00_01",
+  hit: "se00_01",
+  down: "se00_01",
+  death: "se00_01",
+};
+
+function playCombatSfx(slot: AnimSlot): void {
+  const key = COMBAT_SFX[slot];
+  if (key) playSfx(key);
+}
+
 function selectedForce(): string[] {
-  const valid = selectedForceSlot().borgIds.filter((id) => FORCE_BY_ID.has(id));
+  return forceFromSlot(selectedForceSlot());
+}
+
+function forceFromSlot(slot: ForceSlot): string[] {
+  const valid = slot.borgIds.filter((id) => FORCE_BY_ID.has(id));
   return valid.length > 0 ? valid : [DEFAULT_LEAD];
 }
 
 function selectedForceSlot(): ForceSlot {
   return flow.forceSlots[flow.selectedForceSlot] ?? flow.forceSlots[0] ?? DEFAULT_FORCE_SLOTS[0]!;
+}
+
+function forceSlotForPlayer(playerIndex: number): ForceSlot {
+  if (playerIndex <= 0) return selectedForceSlot();
+  const slotCount = flow.forceSlots.length;
+  if (slotCount === 0) return selectedForceSlot();
+  return flow.forceSlots[(flow.selectedForceSlot + playerIndex) % slotCount] ?? selectedForceSlot();
 }
 
 function updateSelectedForceSlot(borgIds: readonly string[]): void {
@@ -144,6 +188,12 @@ const LIBRARY_IDS = new Set<string>();
 // three.js scene (preserved from the original app)
 // ------------------------------------------------------------------------------------------
 
+// DERIVED: fov/near/far/fog/ambient/light values below are read directly from st00_mdl.arc's
+// scene CObj/LObj/Fog tables (research/asset-inventory/stage-lighting-render-state.md — Camera
+// section: eye/interest/near=10/far=80000/fov=43.191872; Fog section: start=900/end=40000).
+// Per-stage overrides (StageRenderState.camera) may replace fov/near/far at runtime; this object
+// is only the fallback default. Camera *position* (as opposed to fov/near/far) is NOT derived
+// from this table — that's the separate follow-camera logic in sim/camera.ts.
 const DEFAULT_RENDER_STATE = {
   fogColor: 0xfff6e5,
   fogNear: 900,
@@ -345,7 +395,14 @@ const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
   shoot: [/^attack_s\d+$/, /^special_s\d+$/],
   special: [/^special_s\d+$/],
   hit: [/^hit_react_s\d+$/, /^guard_s\d+$/],
-  down: [/^hit_react_s\d+$/, /^guard_s\d+$/, /^death$/],
+  // g4s0 ("down_s0") is the real knockdown/getting-up pose, DERIVED from the decomp
+  // cross-reference in research/format-specs/borg-animation-banks.md (high-confidence
+  // knockdown=g4s0, matching the prior human-labeled `down_candidate` anchor) and
+  // behavior-notes.md s4r. Previously this slot had no real match at all (the bake
+  // script mislabeled g4s0 as a generic `special_s0`, so "down" silently fell back to
+  // a hit/guard/death clip). hit_react/guard/death stay as TUNED fallbacks for borgs
+  // whose g4s0 bank is missing or not yet re-baked with the corrected label.
+  down: [/^down_s0$/, /^hit_react_s\d+$/, /^guard_s\d+$/, /^death$/],
   death: [/^death$/, /^win_or_death$/],
   spawn: [/^pose_short$/, /^idle$/],
   victory: [/^victory$/, /^win_or_death$/],
@@ -373,37 +430,57 @@ const SLOT_FALLBACKS: Partial<Record<AnimSlot, AnimSlot[]>> = {
 
 const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]>>>> = {
   pl0615: {
+    // G RED (borgs.json name "G RED", id pl0615 — the game's box-art mascot borg,
+    // NOT pl0000 "NORMAL NINJA"). This is the DEFAULT_LEAD / most fully-animated borg.
     shoot: ["attack_s4"],
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
-    special: ["special_s0"],
+    // g4s0 ("special_s0" in the old mislabeled bake, now "down_s0") is actually the
+    // knockdown/down pose, not a special move — see the `down` slot override below and
+    // research/format-specs/borg-animation-banks.md's decomp cross-reference
+    // (behavior-notes.md s4r). g4s1 (26f) is the real short special-move candidate;
+    // g4s0 (81f) was previously wrongly used for "special" here, meaning G Red's special
+    // attack was silently playing its own knockdown pose. DERIVED that g4s0 != special;
+    // g4s1 as "the" special move is a reasonable TUNED pick among g4s1-4 (not individually
+    // decomp-confirmed which of s1-s4 maps to the Y-button special specifically).
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death"],
     victory: ["victory"],
   },
+  // pl0008/pl000c/pl0105/pl0109 all had the same g4s0-as-"special" bug as pl0615
+  // (their old special_s0 override pointed at the knockdown pose, now down_s0 — see
+  // research/format-specs/borg-animation-banks.md + behavior-notes.md s4r). Each has
+  // a distinct special_s1+ bank confirmed present in its anim_index.json, used here
+  // instead. TUNED which of s1-s4 is "the" Y-button special where multiple exist.
   pl0008: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death", "win_or_death"],
     victory: ["victory"],
   },
   pl000c: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death", "win_or_death"],
     victory: ["victory"],
   },
   pl0105: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death", "win_or_death"],
   },
   pl0109: {
     melee: ["attack_lunge_s1"],
     hit: ["guard_s11"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death", "win_or_death"],
   },
 };
@@ -460,11 +537,12 @@ async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.Animation
   return p;
 }
 
-const battleScene = new BattleScene(battleRoot, { loadModel: loadBorgModel, loadClip: loadBorgClip });
-const cameraFocus = new THREE.Vector3();
-const cameraGoal = new THREE.Vector3();
-const cameraForward = new THREE.Vector3();
-const cameraInward = new THREE.Vector3();
+const battleScene = new BattleScene(battleRoot, {
+  loadModel: loadBorgModel,
+  loadClip: loadBorgClip,
+  onSlotEnter: (_borgId, slot) => playCombatSfx(slot),
+});
+const battleCamera = new BattleCamera({ camera, controlsTarget: controls.target });
 const fallbackStageBounds: RectStageBounds = {
   minX: -DEFAULT_BOUNDS.x,
   maxX: DEFAULT_BOUNDS.x,
@@ -645,6 +723,7 @@ function sameHitGridHeader(a: ReturnType<typeof hitBin.parseStageHitGrid>, b: Re
 }
 
 async function loadStage(stageId: string): Promise<StageResources> {
+  if (!isExportedStageId(stageId)) throw new Error(`Stage is not exported: ${stageId}`);
   if (loadedStageId === stageId) return loadedStageResources;
   stageRoot.clear();
   const [manifest, renderState] = await Promise.all([
@@ -956,10 +1035,15 @@ function showForceBuilder(): void {
 function startRun(): void {
   const force = selectedForce();
   updateSelectedForceSlot(force);
+  const humanPlayerCount = Math.max(1, Math.min(flow.playerCount, 2));
+  const playerForces = Array.from({ length: humanPlayerCount }, (_, player) => ({
+    player,
+    borgIds: player === 0 ? force : forceFromSlot(forceSlotForPlayer(player)),
+  }));
   flow.run = createChallengeRun({
     budget: flow.budget,
-    playerCount: flow.playerCount,
-    playerForces: [{ player: 0, borgIds: force }],
+    playerCount: humanPlayerCount,
+    playerForces,
     borgs: borgs as unknown as Parameters<typeof createChallengeRun>[0]["borgs"],
   });
   const battle = flow.run.getCurrentBattle();
@@ -1086,6 +1170,7 @@ function updateHud(): void {
     cooldown01: active ? (active.cooldowns?.["special"] ? clamp01(1 - active.cooldowns["special"] / 90) : 1) : 1,
     borgId: active?.borgId ?? DEFAULT_LEAD,
     lockOn: Boolean(active?.lockTarget),
+    timeRemainingFrames: st.timeRemainingFrames,
     alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= session.allyMax * 0.25,
   });
 }
@@ -1167,40 +1252,19 @@ function stepBattle(dt: number): void {
   if (battle.state.result !== "ongoing") resolveBattle();
 }
 
+// Battle-camera framing: see apps/game/src/sim/camera.ts header for the full DERIVED-vs-TUNED
+// breakdown (ram-trace-analysis.md §3.1 height-offset/distance/smoothing evidence, plus a TUNED
+// multi-actor widen-to-fit heuristic since no ROM multi-actor framing algorithm was found).
 function followCamera(): void {
   if (!session) return;
   const active = localActiveBorg();
   const target = active ? battleScene.positionOf(active.uid) : null;
-  const focus = target ?? new THREE.Vector3(0, 80, 0);
-  cameraFocus.set(focus.x, focus.y + 90, focus.z);
-  controls.target.lerp(cameraFocus, 0.08);
-  // Trail the camera behind the active borg.
-  if (active) {
-    cameraForward.set(Math.sin(active.rotY), 0, Math.cos(active.rotY));
-    cameraGoal.set(
-      focus.x - cameraForward.x * 700,
-      focus.y + 420,
-      focus.z - cameraForward.z * 700,
-    );
-
-    // Until the original gameplay camera collision path is traced, keep the
-    // browser camera inside the exported arena shell instead of letting the
-    // normal trailing point sit behind a wall/ceiling at spawn.
-    const bounds = session.stageBounds;
-    const centerX = (bounds.minX + bounds.maxX) * 0.5;
-    const centerZ = (bounds.minZ + bounds.maxZ) * 0.5;
-    const currentRadius = Math.hypot(focus.x - centerX, focus.z - centerZ);
-    const goalRadius = Math.hypot(cameraGoal.x - centerX, cameraGoal.z - centerZ);
-    const shellGuardRadius = Math.min(bounds.maxX - bounds.minX, bounds.maxZ - bounds.minZ) * 0.25;
-    if (currentRadius > shellGuardRadius && goalRadius > currentRadius + 80) {
-      cameraInward.set(centerX - focus.x, 0, centerZ - focus.z);
-      if (cameraInward.lengthSq() < 0.0001) cameraInward.copy(cameraForward).multiplyScalar(-1);
-      cameraInward.normalize();
-      cameraGoal.set(focus.x + cameraInward.x * 1100, focus.y + 560, focus.z + cameraInward.z * 1100);
-    }
-
-    camera.position.lerp(cameraGoal, 0.08);
-  }
+  const primary = active && target ? { pos: target, rotY: active.rotY } : null;
+  const liveActorPositions = session.battle.state.borgs
+    .filter((b) => b.alive)
+    .map((b) => battleScene.positionOf(b.uid))
+    .filter((p): p is THREE.Vector3 => p !== null);
+  battleCamera.update(primary, liveActorPositions, session.stageBounds);
 }
 
 function resolveBattle(): void {
@@ -1359,6 +1423,14 @@ function showLoadingMessage(text: string): void {
   },
   get session() {
     return session;
+  },
+  stages: EXPORTED_STAGE_CATALOG,
+  loadStage: async (stageId: string) => {
+    const normalized = stageId.trim().toLowerCase();
+    if (!isExportedStageId(normalized)) throw new Error(`Stage is not exported: ${stageId}`);
+    await loadStage(normalized);
+    renderer.render(scene, camera);
+    return normalized;
   },
   startChallenge: () => showDifficulty(),
   renderNow: () => {

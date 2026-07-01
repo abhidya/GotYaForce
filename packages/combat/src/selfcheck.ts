@@ -11,10 +11,12 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 import { createBattle } from "./battle.js";
-import { projectileVisualKindForProfile } from "./combat.js";
-import { JUMP } from "./constants.js";
+import { stepAI } from "./ai.js";
+import { projectileVisualKindForProfile, stepAttacks } from "./combat.js";
+import { JUMP, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
 import { buildProfile, type BorgStats } from "./stats.js";
+import { typeCategoryForBorgId, typeDamageMultiplier } from "./typeDamage.js";
 
 function loadBorgs(): BorgStats[] {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -257,6 +259,123 @@ function assertProjectileVisualKinds(borgs: BorgStats[]): void {
   console.log(`[selfcheck] projectile visuals mapped gun/beam/flame assets; spawned ${projectile.visualKind}`);
 }
 
+function assertSameTeamDamageDivisor(borgs: BorgStats[]): void {
+  const attacker = fakeRuntime("attacker", 0, 0);
+  const ally = fakeRuntime("ally", 0, 20);
+  const enemy = fakeRuntime("enemy", 1, 20);
+  const profile = buildProfile(borgById(borgs, "pl0615"));
+  const profiles = new Map([
+    [attacker.uid, profile],
+    [ally.uid, profile],
+    [enemy.uid, profile],
+  ]);
+
+  stepAttacks(attacker, profile, false, true, [attacker, ally, enemy], profiles);
+
+  const allyDamage = ally.maxHp - ally.hp;
+  const enemyDamage = enemy.maxHp - enemy.hp;
+  if (!(allyDamage > 0 && allyDamage < enemyDamage)) {
+    throw new Error(`[selfcheck] same-team routed damage failed: ally=${allyDamage}, enemy=${enemyDamage}`);
+  }
+  console.log(`[selfcheck] same-team hit divisor reduced raw damage: ally=${allyDamage}, enemy=${enemyDamage}`);
+}
+
+function assertTypeDamageMatrixWired(borgs: BorgStats[]): void {
+  const missing = borgs.filter((borg) => typeCategoryForBorgId(borg.id) === null).map((borg) => borg.id);
+  if (missing.length > 0) {
+    throw new Error(`[selfcheck] borg ids missing type category: ${missing.slice(0, 8).join(", ")}`);
+  }
+  if (typeCategoryForBorgId("pl0b00") !== 15 || typeCategoryForBorgId("pl0701") !== 12) {
+    throw new Error("[selfcheck] type category remap changed for pl0b00/pl0701");
+  }
+  if (typeDamageMultiplier("pl0b00", "pl0701") !== 1.25) {
+    throw new Error("[selfcheck] type damage matrix expected pl0b00 -> pl0701 multiplier 1.25");
+  }
+
+  const attacker = fakeRuntime("attacker", 0, 0);
+  const boosted = fakeRuntime("boosted", 1, 20);
+  const neutral = fakeRuntime("neutral", 1, 25);
+  attacker.borgId = "pl0b00";
+  boosted.borgId = "pl0701";
+  neutral.borgId = "pl0b00";
+
+  const base = buildProfile(borgById(borgs, "pl0b00"));
+  const attackerProfile = { ...base, id: "pl0b00", attack: 10, hasMelee: true, hasShot: false };
+  const boostedProfile = { ...base, id: "pl0701", defense: 0, maxHp: 1000 };
+  const neutralProfile = { ...base, id: "pl0b00", defense: 0, maxHp: 1000 };
+  boosted.hp = boosted.maxHp = boostedProfile.maxHp;
+  neutral.hp = neutral.maxHp = neutralProfile.maxHp;
+
+  const profiles = new Map([
+    [attacker.uid, attackerProfile],
+    [boosted.uid, boostedProfile],
+    [neutral.uid, neutralProfile],
+  ]);
+
+  stepAttacks(attacker, attackerProfile, false, true, [attacker, boosted, neutral], profiles);
+
+  const boostedDamage = boosted.maxHp - boosted.hp;
+  const neutralDamage = neutral.maxHp - neutral.hp;
+  if (!(boostedDamage > neutralDamage)) {
+    throw new Error(`[selfcheck] type damage was not applied: boosted=${boostedDamage}, neutral=${neutralDamage}`);
+  }
+  console.log(`[selfcheck] type matrix maps ${borgs.length} borgs and boosts pl0b00 -> pl0701 damage: ${boostedDamage} > ${neutralDamage}`);
+}
+
+function assertMeleeRefreshesInvincibility(borgs: BorgStats[]): void {
+  const attacker = fakeRuntime("attacker", 0, 0);
+  const enemy = fakeRuntime("enemy", 1, 20);
+  const profile = buildProfile(borgById(borgs, "pl0615"));
+  const profiles = new Map([
+    [attacker.uid, profile],
+    [enemy.uid, profile],
+  ]);
+
+  stepAttacks(attacker, profile, true, false, [attacker, enemy], profiles);
+
+  if (attacker.invincTimer !== WAKE_UP_INVINCIBILITY_FRAMES) {
+    throw new Error(`[selfcheck] melee i-frame refresh failed: invincTimer=${attacker.invincTimer}`);
+  }
+  console.log(`[selfcheck] melee active handler refreshed i-frames to ${attacker.invincTimer}`);
+}
+
+function assertAiKeepsLockedTarget(borgs: BorgStats[]): void {
+  const self = fakeRuntime("self", 0, 0);
+  const closerEnemy = fakeRuntime("closer", 1, -800);
+  const lockedEnemy = fakeRuntime("locked", 1, 900);
+  self.lockTarget = lockedEnemy.uid;
+
+  const input = stepAI(self, buildProfile(borgById(borgs, "pl0615")), [self, closerEnemy, lockedEnemy]);
+  if (input.moveX <= 0) {
+    throw new Error("[selfcheck] AI target memory failed: ignored valid lockTarget for nearer enemy");
+  }
+  console.log("[selfcheck] AI kept valid lockTarget before nearest-enemy fallback");
+}
+
+function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
+  return {
+    uid,
+    borgId: "pl0615",
+    team,
+    ownerPlayer: team === 0 ? "p1" : null,
+    hp: 100,
+    maxHp: 100,
+    pos: { x, y: 0, z: 0 },
+    rotY: 0,
+    vel: { x: 0, y: 0, z: 0 },
+    grounded: true,
+    airJumps: 0,
+    state: "idle",
+    stateTime: 0,
+    anim: "idle",
+    ammo: 0,
+    cooldowns: {},
+    invincTimer: 0,
+    lockTarget: null,
+    alive: true,
+  };
+}
+
 export function main(): number {
   const borgs = loadBorgs();
   console.log(`[selfcheck] loaded ${borgs.length} borgs from borgs.json`);
@@ -265,6 +384,10 @@ export function main(): number {
   assertTriangleWallCollision(borgs);
   assertTriangleCeilingCollision(borgs);
   assertProjectileVisualKinds(borgs);
+  assertSameTeamDamageDivisor(borgs);
+  assertTypeDamageMatrixWired(borgs);
+  assertMeleeRefreshesInvincibility(borgs);
+  assertAiKeepsLockedTarget(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

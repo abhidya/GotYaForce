@@ -45,20 +45,22 @@ export function createSelectDifficulty(
 ): SelectDifficultyHandle {
   let selected: Difficulty = opts.initial ?? "normal";
 
-  const root = el("div", { class: "gf-screen" });
-  root.appendChild(el("div", { class: "gf-grid-bg gf-bg-blue" }));
+  const root = el("div", { class: "gf-screen gf-vsel-screen gf-select-difficulty" });
+  const frame = el("div", { class: "gf-vsel-frame" });
+  root.appendChild(frame);
+  frame.appendChild(el("div", { class: "gf-grid-bg gf-bg-blue" }));
   const selectScene = createUiSceneHost("gf-ui-scene gf-vsel-real-scene gf-vsel-difficulty-scene");
-  root.appendChild(selectScene);
-  root.appendChild(el("h1", { class: "gf-title", text: "SELECT DIFFICULTY" }));
+  frame.appendChild(selectScene);
+  frame.appendChild(el("h1", { class: "gf-title gf-vsel-title", text: "SELECT DIFFICULTY" }));
 
-  const row = el("div", { class: "gf-row", style: { marginTop: "6%" } });
+  const row = el("div", { class: "gf-row gf-vsel-options" });
   const tiles = new Map<Difficulty, HTMLButtonElement>();
 
   for (const e of ENTRIES) {
     const tile = el(
       "button",
       {
-        class: "gf-option",
+        class: `gf-option gf-diff-option gf-diff-${e.key}`,
         attrs: { type: "button", "data-diff": e.key, "aria-label": `${e.name} ${e.energy}` },
         onClick: () => {
           if (selected === e.key) opts.onSelect(e.energy, e.key);
@@ -67,7 +69,7 @@ export function createSelectDifficulty(
       },
       [
         el("div", { class: "gf-pad", style: { background: e.pad } }, [
-          el("div", { class: "gf-menu-gear", style: { background: e.gear, fontSize: "20px" }, text: "⚙" }),
+          el("div", { class: "gf-menu-gear", style: { background: e.gear } }),
           el("div", { class: "gf-energy-label", text: "GF ENERGY" }),
           el("div", { class: "gf-energy-num", text: String(e.energy) }),
         ]),
@@ -77,13 +79,13 @@ export function createSelectDifficulty(
     tiles.set(e.key, tile);
     row.appendChild(tile);
   }
-  root.appendChild(row);
+  frame.appendChild(row);
 
   const legend = el("div", { class: "gf-legend" }, [
     legendItem("b", "BACK"),
     legendItem("a", "CONFIRM"),
   ]);
-  root.appendChild(legend);
+  frame.appendChild(legend);
 
   function select(key: Difficulty): void {
     selected = key;

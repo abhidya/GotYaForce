@@ -1,0 +1,2508 @@
+{
+  "generatedAt": "2026-07-01T09:59:46.570Z",
+  "generatedBy": "scripts/inventory-archive-load-xrefs.mjs",
+  "sourceIndex": "research/decomp/index/function-evidence-index.json",
+  "principle": "Archive/stage/load behavior must be ported from original file-open, archive-parse, table, and trace evidence. This report does not authorize fake Challenge stage mappings.",
+  "findings": [
+    "DVDOpen has 2 static callers in the current index: 0x802754ec FUN_802754ec, 0x802756fc FUN_802756fc.",
+    "HSD_ArchiveParse has 2 static callers in the current index: 0x80006c88 zz_0006c88_, 0x8004d548 zz_004d548_.",
+    "0x800419ec reads DAT_803bb4a0, FLOAT_80437068 and constants 0x3e4, 4, 0x0, 0x600, 0x604, 0x14, 0xc28, 0xff before calling 0x80006c88 zz_0006c88_.",
+    "0x80006c88 calls 0x8025b00c gnt4_HSD_ArchiveParse_bl, 0x8025b178 zz_025b178_, 0x8025b1b0 gnt4_HSD_ArchiveGetPublicAddress_bl; this is the proven parse/public-address wrapper for active object archive data.",
+    "boot.dol static stage-code scan still has 0 st## hits, so Challenge arena selection still requires runtime archive-open tracing."
+  ],
+  "roots": [
+    {
+      "id": "dvd-open",
+      "address": "0x8020d1ec",
+      "label": "DVDOpen SDK import",
+      "relevance": "Lowest-level static file-open primitive currently visible in the decomp index.",
+      "function": {
+        "address": "0x8020d1ec",
+        "currentFunctionName": "gnt4-DVDOpen-bl",
+        "inferredName": "gnt4-DVDOpen-bl",
+        "sourceRef": "research/decomp/ghidra-export/chunk_0064.c:2391",
+        "callers": [
+          {
+            "address": "0x802754ec",
+            "name": "FUN_802754ec"
+          },
+          {
+            "address": "0x802756fc",
+            "name": "FUN_802756fc"
+          }
+        ],
+        "callees": [
+          {
+            "address": "0x802013f4",
+            "name": "gnt4_OSReport_bl"
+          },
+          {
+            "address": "0x8020cef8",
+            "name": "gnt4_DVDConvertPathToEntrynum_bl"
+          },
+          {
+            "address": "0x8020d438",
+            "name": "gnt4_DVDGetCurrentDir_bl"
+          }
+        ],
+        "globalReferences": [
+          "DAT_80436524"
+        ],
+        "globalAccesses": [
+          "DAT_80436524"
+        ],
+        "constants": [
+          "128",
+          "0",
+          "0x80",
+          "0xc",
+          "0xff000000",
+          "1",
+          "0x30",
+          "4",
+          "0x34",
+          "8",
+          "0x38"
+        ],
+        "strings": [
+          "s_Warning__DVDOpen____file___s__wa_803a4f48"
+        ],
+        "assets": [],
+        "topics": [],
+        "relatedWebModules": []
+      }
+    },
+    {
+      "id": "gcci-open",
+      "address": "0x802754ec",
+      "label": "gcCiOpen-style DVDOpen wrapper",
+      "relevance": "Validates filenames and reports DVDOpen failures before reading archives/files.",
+      "function": {
+        "address": "0x802754ec",
+        "currentFunctionName": "FUN_802754ec",
+        "inferredName": null,
+        "sourceRef": "research/decomp/ghidra-export/chunk_0074.c:6214",
+        "callers": [],
+        "callees": [
+          {
+            "address": "0x8000540c",
+            "name": "gnt4_memset"
+          },
+          {
+            "address": "0x8020d1ec",
+            "name": "gnt4_DVDOpen_bl"
+          },
+          {
+            "address": "0x80238c90",
+            "name": "zz_0238c90_"
+          },
+          {
+            "address": "0x80238d00",
+            "name": "strcpy"
+          },
+          {
+            "address": "0x80238db8",
+            "name": "strlen"
+          }
+        ],
+        "globalReferences": [
+          "DAT_8040b1d0",
+          "DAT_8040b1cc",
+          "DAT_8040b1d4",
+          "DAT_8040c178"
+        ],
+        "globalAccesses": [
+          "DAT_8040b1d0",
+          "DAT_8040b1cc",
+          "DAT_8040b1d4",
+          "DAT_8040c178"
+        ],
+        "constants": [
+          "264",
+          "0",
+          "0x0",
+          "0x28",
+          "100",
+          "1",
+          "0x10",
+          "0x800",
+          "0x5c",
+          "0x80000000",
+          "0x7fffffff",
+          "0x14",
+          "0x18",
+          "0x1c",
+          "8",
+          "0x24",
+          "0x20",
+          "2"
+        ],
+        "strings": [
+          "s_E0092908_fname_is_null__gcCiOpen_802b7750",
+          "s_E0092910_not_enough_handle_resou_802b7798",
+          "s_E0092911_DVDOpen_fail__gcCiOpen__802b77c8",
+          "s_E0092909_rw_is_illigal__gcCiOpen_802b7774"
+        ],
+        "assets": [],
+        "topics": [],
+        "relatedWebModules": []
+      }
+    },
+    {
+      "id": "gcci-get-file",
+      "address": "0x802756fc",
+      "label": "gcCiGetF-style open/close wrapper",
+      "relevance": "Opens a file path, checks file length, and closes the DVD handle.",
+      "function": {
+        "address": "0x802756fc",
+        "currentFunctionName": "FUN_802756fc",
+        "inferredName": null,
+        "sourceRef": "research/decomp/ghidra-export/chunk_0075.c:1",
+        "callers": [],
+        "callees": [
+          {
+            "address": "0x8020d1ec",
+            "name": "gnt4_DVDOpen_bl"
+          },
+          {
+            "address": "0x8020d2b4",
+            "name": "gnt4_DVDClose_bl"
+          },
+          {
+            "address": "0x80238c90",
+            "name": "zz_0238c90_"
+          },
+          {
+            "address": "0x80238d00",
+            "name": "strcpy"
+          },
+          {
+            "address": "0x80238db8",
+            "name": "strlen"
+          }
+        ],
+        "globalReferences": [
+          "DAT_8040b1d0",
+          "DAT_8040b1cc",
+          "DAT_8040c178"
+        ],
+        "globalAccesses": [
+          "DAT_8040b1d0",
+          "DAT_8040b1cc",
+          "DAT_8040c178"
+        ],
+        "constants": [
+          "13",
+          "260",
+          "0",
+          "0x0",
+          "1",
+          "0x80000000",
+          "0x7fffffff"
+        ],
+        "strings": [
+          "s_E0092901_fname_is_null__gcCiGetF_802b77ec",
+          "s_E0040201_can_t_open_a_file__gcCi_802b7818",
+          "s_E0040202_can_t_close_a_file__gcC_802b7848"
+        ],
+        "assets": [],
+        "topics": [],
+        "relatedWebModules": []
+      }
+    },
+    {
+      "id": "hsd-archive-parse",
+      "address": "0x8025b00c",
+      "label": "HSD_ArchiveParse SDK import",
+      "relevance": "Original HSD archive parser used by model/animation/public-symbol data paths.",
+      "function": {
+        "address": "0x8025b00c",
+        "currentFunctionName": "gnt4-HSD_ArchiveParse-bl",
+        "inferredName": "gnt4-HSD_ArchiveParse-bl",
+        "sourceRef": "research/decomp/ghidra-export/chunk_0072.c:3616",
+        "callers": [
+          {
+            "address": "0x80006c88",
+            "name": "zz_0006c88_"
+          },
+          {
+            "address": "0x8004d548",
+            "name": "zz_004d548_"
+          }
+        ],
+        "callees": [
+          {
+            "address": "0x8000540c",
+            "name": "gnt4_memset"
+          },
+          {
+            "address": "0x800054f4",
+            "name": "gnt4_memcpy"
+          },
+          {
+            "address": "0x802013f4",
+            "name": "gnt4_OSReport_bl"
+          }
+        ],
+        "globalReferences": [],
+        "globalAccesses": [],
+        "constants": [
+          "0x0",
+          "0xffffffff",
+          "0",
+          "0x44",
+          "0x20",
+          "0xf",
+          "1",
+          "8",
+          "2",
+          "9",
+          "4",
+          "3",
+          "10",
+          "0xb",
+          "0xc",
+          "0x10"
+        ],
+        "strings": [
+          "s_HSD_ArchiveParse__byte_order_mis_803ad5c8"
+        ],
+        "assets": [],
+        "topics": [
+          "movement-physics",
+          "assets-animation"
+        ],
+        "relatedWebModules": [
+          "packages/combat/src/movement.ts",
+          "packages/physics/src/index.ts",
+          "apps/game/src/sim/battleScene.ts",
+          "packages/formats/src/hsd-anim.ts",
+          "apps/game/public/models"
+        ]
+      }
+    },
+    {
+      "id": "hsd-public-address",
+      "address": "0x8025b1b0",
+      "label": "HSD_ArchiveGetPublicAddress SDK import",
+      "relevance": "Original public-symbol lookup after archive parse.",
+      "function": {
+        "address": "0x8025b1b0",
+        "currentFunctionName": "gnt4-HSD_ArchiveGetPublicAddress-bl",
+        "inferredName": "gnt4-HSD_ArchiveGetPublicAddress-bl",
+        "sourceRef": "research/decomp/ghidra-export/chunk_0072.c:3698",
+        "callers": [
+          {
+            "address": "0x80006c88",
+            "name": "zz_0006c88_"
+          },
+          {
+            "address": "0x8004adc8",
+            "name": "zz_004adc8_"
+          }
+        ],
+        "callees": [
+          {
+            "address": "0x80238b1c",
+            "name": "gnt4_strcmp"
+          }
+        ],
+        "globalReferences": [],
+        "globalAccesses": [],
+        "constants": [
+          "0",
+          "0xc",
+          "0x30",
+          "0x28",
+          "4",
+          "8",
+          "1",
+          "0x20"
+        ],
+        "strings": [],
+        "assets": [],
+        "topics": [
+          "assets-animation"
+        ],
+        "relatedWebModules": [
+          "packages/formats/src/hsd-anim.ts",
+          "apps/game/src/sim/battleScene.ts",
+          "apps/game/public/models"
+        ]
+      }
+    },
+    {
+      "id": "archive-public-wrapper",
+      "address": "0x80006c88",
+      "label": "HSD archive parse/public-address wrapper",
+      "relevance": "Parses an HSD archive and iterates public entries for runtime object data.",
+      "function": {
+        "address": "0x80006c88",
+        "currentFunctionName": "zz_0006c88_",
+        "inferredName": "assets-animation_candidate_80006c88",
+        "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:1312",
+        "callers": [
+          {
+            "address": "0x80040eb4",
+            "name": "zz_0040eb4_"
+          },
+          {
+            "address": "0x80041678",
+            "name": "FUN_80041678"
+          },
+          {
+            "address": "0x800419ec",
+            "name": "zz_00419ec_"
+          }
+        ],
+        "callees": [
+          {
+            "address": "0x8025b00c",
+            "name": "gnt4_HSD_ArchiveParse_bl"
+          },
+          {
+            "address": "0x8025b178",
+            "name": "zz_025b178_"
+          },
+          {
+            "address": "0x8025b1b0",
+            "name": "gnt4_HSD_ArchiveGetPublicAddress_bl"
+          }
+        ],
+        "globalReferences": [],
+        "globalAccesses": [],
+        "constants": [
+          "0xc",
+          "0",
+          "0x10",
+          "4",
+          "1",
+          "0x1a",
+          "2",
+          "0x18",
+          "3",
+          "0x19",
+          "10"
+        ],
+        "strings": [],
+        "assets": [],
+        "topics": [
+          "assets-animation"
+        ],
+        "relatedWebModules": [
+          "packages/formats/src/hsd-anim.ts",
+          "apps/game/src/sim/battleScene.ts",
+          "apps/game/public/models"
+        ]
+      }
+    },
+    {
+      "id": "secondary-archive-wrapper",
+      "address": "0x8004d548",
+      "label": "secondary HSD archive parse wrapper",
+      "relevance": "Allocates/initializes a parsed archive path reached from object setup helpers.",
+      "function": {
+        "address": "0x8004d548",
+        "currentFunctionName": "zz_004d548_",
+        "inferredName": "assets-animation_candidate_8004d548",
+        "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:2366",
+        "callers": [
+          {
+            "address": "0x8004a754",
+            "name": "zz_004a754_"
+          }
+        ],
+        "callees": [
+          {
+            "address": "0x80197a0c",
+            "name": "zz_0197a0c_"
+          },
+          {
+            "address": "0x8025b00c",
+            "name": "gnt4_HSD_ArchiveParse_bl"
+          }
+        ],
+        "globalReferences": [],
+        "globalAccesses": [],
+        "constants": [
+          "0x0",
+          "0xffffffff",
+          "0",
+          "0x2a",
+          "0x7f",
+          "1",
+          "0x2b",
+          "4",
+          "0xfffffffe",
+          "2",
+          "3"
+        ],
+        "strings": [],
+        "assets": [],
+        "topics": [
+          "assets-animation"
+        ],
+        "relatedWebModules": [
+          "packages/formats/src/hsd-anim.ts",
+          "apps/game/src/sim/battleScene.ts",
+          "apps/game/public/models"
+        ]
+      }
+    },
+    {
+      "id": "active-archive-attach",
+      "address": "0x800419ec",
+      "label": "active object archive attach path",
+      "relevance": "Reads DAT_803bb4a0 by object slot/type state and calls the HSD archive wrapper used by spawn/init.",
+      "function": {
+        "address": "0x800419ec",
+        "currentFunctionName": "zz_00419ec_",
+        "inferredName": "force-setup_candidate_800419ec",
+        "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:9936",
+        "callers": [
+          {
+            "address": "0x800541ac",
+            "name": "FUN_800541ac"
+          },
+          {
+            "address": "0x80057b78",
+            "name": "FUN_80057b78"
+          }
+        ],
+        "callees": [
+          {
+            "address": "0x80006c88",
+            "name": "zz_0006c88_"
+          },
+          {
+            "address": "0x80006f98",
+            "name": "zz_0006f98_"
+          },
+          {
+            "address": "0x80007030",
+            "name": "zz_0007030_"
+          },
+          {
+            "address": "0x80007c54",
+            "name": "zz_0007c54_"
+          },
+          {
+            "address": "0x80007cac",
+            "name": "zz_0007cac_"
+          },
+          {
+            "address": "0x80197a0c",
+            "name": "zz_0197a0c_"
+          }
+        ],
+        "globalReferences": [
+          "DAT_803bb4a0",
+          "FLOAT_80437068"
+        ],
+        "globalAccesses": [
+          "DAT_803bb4a0",
+          "FLOAT_80437068"
+        ],
+        "constants": [
+          "0x3e4",
+          "4",
+          "0x0",
+          "0x600",
+          "0x604",
+          "0x14",
+          "0xc28",
+          "0xff",
+          "0xc2c",
+          "0",
+          "0x1a",
+          "1",
+          "0x708",
+          "0x788"
+        ],
+        "strings": [],
+        "assets": [],
+        "topics": [
+          "force-setup"
+        ],
+        "relatedWebModules": [
+          "packages/missions/src/challenge.ts",
+          "packages/combat/src/battle.ts",
+          "apps/game/src/ui/screens/SelectForce.ts"
+        ]
+      }
+    },
+    {
+      "id": "active-borg-spawn",
+      "address": "0x800541ac",
+      "label": "active borg spawn init",
+      "relevance": "Challenge/battle spawn path that calls the active archive attach function.",
+      "function": {
+        "address": "0x800541ac",
+        "currentFunctionName": "FUN_800541ac",
+        "inferredName": "active_borg_spawn_init_from_slot_tables",
+        "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:6999",
+        "callers": [],
+        "callees": [
+          {
+            "address": "0x8000540c",
+            "name": "gnt4_memset"
+          },
+          {
+            "address": "0x8001c80c",
+            "name": "zz_001c80c_"
+          },
+          {
+            "address": "0x80027a44",
+            "name": "FUN_80027a44"
+          },
+          {
+            "address": "0x8003cc24",
+            "name": "zz_003cc24_"
+          },
+          {
+            "address": "0x800419ec",
+            "name": "zz_00419ec_"
+          },
+          {
+            "address": "0x80041b20",
+            "name": "zz_0041b20_"
+          },
+          {
+            "address": "0x800422d8",
+            "name": "zz_00422d8_"
+          },
+          {
+            "address": "0x8004bb14",
+            "name": "FUN_8004bb14"
+          },
+          {
+            "address": "0x8004beb8",
+            "name": "zz_004beb8_"
+          },
+          {
+            "address": "0x8005380c",
+            "name": "zz_005380c_"
+          },
+          {
+            "address": "0x80055dcc",
+            "name": "zz_0055dcc_"
+          },
+          {
+            "address": "0x80055f90",
+            "name": "zz_0055f90_"
+          },
+          {
+            "address": "0x8005614c",
+            "name": "zz_005614c_"
+          },
+          {
+            "address": "0x80056ce0",
+            "name": "zz_0056ce0_"
+          },
+          {
+            "address": "0x80056d28",
+            "name": "FUN_80056d28"
+          },
+          {
+            "address": "0x80068004",
+            "name": "zz_0068004_"
+          },
+          {
+            "address": "0x80068344",
+            "name": "FUN_80068344"
+          },
+          {
+            "address": "0x8006a6fc",
+            "name": "zz_006a6fc_"
+          },
+          {
+            "address": "0x8006a750",
+            "name": "zz_006a750_"
+          },
+          {
+            "address": "0x800807e4",
+            "name": "FUN_800807e4"
+          },
+          {
+            "address": "0x800813a8",
+            "name": "FUN_800813a8"
+          },
+          {
+            "address": "0x8008ab30",
+            "name": "zz_008ab30_"
+          }
+        ],
+        "globalReferences": [
+          "FLOAT_80437250",
+          "PTR_DAT_80433934",
+          "PTR_DAT_80433930",
+          "FLOAT_8043725c"
+        ],
+        "globalAccesses": [
+          "FLOAT_80437250",
+          "PTR_DAT_80433934",
+          "PTR_DAT_80433934[param_9[999]",
+          "PTR_DAT_80433934[param_9[0x3e4]",
+          "PTR_DAT_80433930[2]",
+          "PTR_DAT_80433930[0x32]",
+          "PTR_DAT_80433934 + 0x9c",
+          "FLOAT_8043725c",
+          "PTR_DAT_80433934[iVar4 + 0x103]"
+        ],
+        "constants": [
+          "0x3e4",
+          "0",
+          "0x18",
+          "0x19",
+          "0x1a",
+          "0x1b",
+          "0x493",
+          "0x24",
+          "0x6d0",
+          "0x144",
+          "0x80",
+          "0x394",
+          "0x540",
+          "0x50",
+          "0x48",
+          "0x4c",
+          "0x44",
+          "0x81",
+          "0x7e",
+          "0x7f",
+          "0x7c",
+          "0x7d",
+          "0x501",
+          "0x530",
+          "0x531",
+          "0x532",
+          "0x533",
+          "0x534",
+          "0x535",
+          "0x536",
+          "0x537",
+          "0x538"
+        ],
+        "strings": [],
+        "assets": [],
+        "topics": [
+          "challenge-menu-flow",
+          "force-setup",
+          "battle-initialization",
+          "movement-physics"
+        ],
+        "relatedWebModules": [
+          "apps/game/src/main.ts",
+          "apps/game/src/ui/screens",
+          "packages/missions/src/challenge.ts",
+          "packages/combat/src/battle.ts",
+          "apps/game/src/ui/screens/SelectForce.ts",
+          "apps/game/src/sim/adapter.ts",
+          "packages/combat/src/movement.ts",
+          "packages/physics/src/index.ts",
+          "apps/game/src/sim/battleScene.ts"
+        ]
+      }
+    },
+    {
+      "id": "active-object-init",
+      "address": "0x80057b78",
+      "label": "active object init",
+      "relevance": "Related active object path that also calls the active archive attach function.",
+      "function": {
+        "address": "0x80057b78",
+        "currentFunctionName": "FUN_80057b78",
+        "inferredName": "active_object_init_from_slot_tables",
+        "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:896",
+        "callers": [],
+        "callees": [
+          {
+            "address": "0x8003cc24",
+            "name": "zz_003cc24_"
+          },
+          {
+            "address": "0x800419ec",
+            "name": "zz_00419ec_"
+          },
+          {
+            "address": "0x80041b20",
+            "name": "zz_0041b20_"
+          },
+          {
+            "address": "0x800422d8",
+            "name": "zz_00422d8_"
+          },
+          {
+            "address": "0x8004bb14",
+            "name": "FUN_8004bb14"
+          },
+          {
+            "address": "0x8005380c",
+            "name": "zz_005380c_"
+          },
+          {
+            "address": "0x80055dcc",
+            "name": "zz_0055dcc_"
+          },
+          {
+            "address": "0x80055f90",
+            "name": "zz_0055f90_"
+          },
+          {
+            "address": "0x8005614c",
+            "name": "zz_005614c_"
+          },
+          {
+            "address": "0x80056ce0",
+            "name": "zz_0056ce0_"
+          },
+          {
+            "address": "0x80057cf4",
+            "name": "zz_0057cf4_"
+          },
+          {
+            "address": "0x80068004",
+            "name": "zz_0068004_"
+          },
+          {
+            "address": "0x8008ab30",
+            "name": "zz_008ab30_"
+          }
+        ],
+        "globalReferences": [
+          "PTR_DAT_80433934"
+        ],
+        "globalAccesses": [
+          "PTR_DAT_80433934",
+          "PTR_DAT_80433934[*(char *)(param_9 + 999) + 0xa0]",
+          "PTR_DAT_80433934[*(char *)(param_9 + 0x3e4) + 0xcb]"
+        ],
+        "constants": [
+          "0x3e4",
+          "0",
+          "0x18",
+          "1",
+          "0x19",
+          "0x1a",
+          "0x1b",
+          "0x493",
+          "999",
+          "1000",
+          "2",
+          "0x10",
+          "0x3ec",
+          "0xa0",
+          "0x88",
+          "0xcb",
+          "0x3ee",
+          "0x8c",
+          "0x90",
+          "0x94",
+          "0x96",
+          "0x97",
+          "0x3e6",
+          "0x488",
+          "0x10c",
+          "0x76c",
+          "0xffffffff",
+          "0x26f",
+          "0x4b8",
+          "0x741",
+          "0x743",
+          "0x272"
+        ],
+        "strings": [],
+        "assets": [],
+        "topics": [
+          "challenge-menu-flow",
+          "force-setup",
+          "battle-initialization",
+          "movement-physics"
+        ],
+        "relatedWebModules": [
+          "apps/game/src/main.ts",
+          "apps/game/src/ui/screens",
+          "packages/missions/src/challenge.ts",
+          "packages/combat/src/battle.ts",
+          "apps/game/src/ui/screens/SelectForce.ts",
+          "apps/game/src/sim/adapter.ts",
+          "packages/combat/src/movement.ts",
+          "packages/physics/src/index.ts",
+          "apps/game/src/sim/battleScene.ts"
+        ]
+      }
+    }
+  ],
+  "provenChains": [
+    {
+      "id": "active-borg-spawn-to-hsd-parse",
+      "addresses": [
+        "0x800541ac",
+        "0x800419ec",
+        "0x80006c88",
+        "0x8025b00c"
+      ],
+      "proves": "battle spawn init reaches original HSD_ArchiveParse through the active archive attach wrapper",
+      "path": [
+        {
+          "address": "0x800541ac",
+          "currentFunctionName": "FUN_800541ac",
+          "inferredName": "active_borg_spawn_init_from_slot_tables",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:6999",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
+              "address": "0x8001c80c",
+              "name": "zz_001c80c_"
+            },
+            {
+              "address": "0x80027a44",
+              "name": "FUN_80027a44"
+            },
+            {
+              "address": "0x8003cc24",
+              "name": "zz_003cc24_"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            },
+            {
+              "address": "0x80041b20",
+              "name": "zz_0041b20_"
+            },
+            {
+              "address": "0x800422d8",
+              "name": "zz_00422d8_"
+            },
+            {
+              "address": "0x8004bb14",
+              "name": "FUN_8004bb14"
+            },
+            {
+              "address": "0x8004beb8",
+              "name": "zz_004beb8_"
+            },
+            {
+              "address": "0x8005380c",
+              "name": "zz_005380c_"
+            },
+            {
+              "address": "0x80055dcc",
+              "name": "zz_0055dcc_"
+            },
+            {
+              "address": "0x80055f90",
+              "name": "zz_0055f90_"
+            },
+            {
+              "address": "0x8005614c",
+              "name": "zz_005614c_"
+            },
+            {
+              "address": "0x80056ce0",
+              "name": "zz_0056ce0_"
+            },
+            {
+              "address": "0x80056d28",
+              "name": "FUN_80056d28"
+            },
+            {
+              "address": "0x80068004",
+              "name": "zz_0068004_"
+            },
+            {
+              "address": "0x80068344",
+              "name": "FUN_80068344"
+            },
+            {
+              "address": "0x8006a6fc",
+              "name": "zz_006a6fc_"
+            },
+            {
+              "address": "0x8006a750",
+              "name": "zz_006a750_"
+            },
+            {
+              "address": "0x800807e4",
+              "name": "FUN_800807e4"
+            },
+            {
+              "address": "0x800813a8",
+              "name": "FUN_800813a8"
+            },
+            {
+              "address": "0x8008ab30",
+              "name": "zz_008ab30_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80437250",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433930",
+            "FLOAT_8043725c"
+          ],
+          "globalAccesses": [
+            "FLOAT_80437250",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[param_9[999]",
+            "PTR_DAT_80433934[param_9[0x3e4]",
+            "PTR_DAT_80433930[2]",
+            "PTR_DAT_80433930[0x32]",
+            "PTR_DAT_80433934 + 0x9c",
+            "FLOAT_8043725c",
+            "PTR_DAT_80433934[iVar4 + 0x103]"
+          ],
+          "constants": [
+            "0x3e4",
+            "0",
+            "0x18",
+            "0x19",
+            "0x1a",
+            "0x1b",
+            "0x493",
+            "0x24",
+            "0x6d0",
+            "0x144",
+            "0x80",
+            "0x394",
+            "0x540",
+            "0x50",
+            "0x48",
+            "0x4c",
+            "0x44",
+            "0x81",
+            "0x7e",
+            "0x7f",
+            "0x7c",
+            "0x7d",
+            "0x501",
+            "0x530",
+            "0x531",
+            "0x532",
+            "0x533",
+            "0x534",
+            "0x535",
+            "0x536",
+            "0x537",
+            "0x538"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x800419ec",
+          "currentFunctionName": "zz_00419ec_",
+          "inferredName": "force-setup_candidate_800419ec",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:9936",
+          "callers": [
+            {
+              "address": "0x800541ac",
+              "name": "FUN_800541ac"
+            },
+            {
+              "address": "0x80057b78",
+              "name": "FUN_80057b78"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80006c88",
+              "name": "zz_0006c88_"
+            },
+            {
+              "address": "0x80006f98",
+              "name": "zz_0006f98_"
+            },
+            {
+              "address": "0x80007030",
+              "name": "zz_0007030_"
+            },
+            {
+              "address": "0x80007c54",
+              "name": "zz_0007c54_"
+            },
+            {
+              "address": "0x80007cac",
+              "name": "zz_0007cac_"
+            },
+            {
+              "address": "0x80197a0c",
+              "name": "zz_0197a0c_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803bb4a0",
+            "FLOAT_80437068"
+          ],
+          "globalAccesses": [
+            "DAT_803bb4a0",
+            "FLOAT_80437068"
+          ],
+          "constants": [
+            "0x3e4",
+            "4",
+            "0x0",
+            "0x600",
+            "0x604",
+            "0x14",
+            "0xc28",
+            "0xff",
+            "0xc2c",
+            "0",
+            "0x1a",
+            "1",
+            "0x708",
+            "0x788"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts"
+          ]
+        },
+        {
+          "address": "0x80006c88",
+          "currentFunctionName": "zz_0006c88_",
+          "inferredName": "assets-animation_candidate_80006c88",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:1312",
+          "callers": [
+            {
+              "address": "0x80040eb4",
+              "name": "zz_0040eb4_"
+            },
+            {
+              "address": "0x80041678",
+              "name": "FUN_80041678"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8025b00c",
+              "name": "gnt4_HSD_ArchiveParse_bl"
+            },
+            {
+              "address": "0x8025b178",
+              "name": "zz_025b178_"
+            },
+            {
+              "address": "0x8025b1b0",
+              "name": "gnt4_HSD_ArchiveGetPublicAddress_bl"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0xc",
+            "0",
+            "0x10",
+            "4",
+            "1",
+            "0x1a",
+            "2",
+            "0x18",
+            "3",
+            "0x19",
+            "10"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "apps/game/public/models"
+          ]
+        },
+        {
+          "address": "0x8025b00c",
+          "currentFunctionName": "gnt4-HSD_ArchiveParse-bl",
+          "inferredName": "gnt4-HSD_ArchiveParse-bl",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0072.c:3616",
+          "callers": [
+            {
+              "address": "0x80006c88",
+              "name": "zz_0006c88_"
+            },
+            {
+              "address": "0x8004d548",
+              "name": "zz_004d548_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
+              "address": "0x800054f4",
+              "name": "gnt4_memcpy"
+            },
+            {
+              "address": "0x802013f4",
+              "name": "gnt4_OSReport_bl"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0x0",
+            "0xffffffff",
+            "0",
+            "0x44",
+            "0x20",
+            "0xf",
+            "1",
+            "8",
+            "2",
+            "9",
+            "4",
+            "3",
+            "10",
+            "0xb",
+            "0xc",
+            "0x10"
+          ],
+          "strings": [
+            "s_HSD_ArchiveParse__byte_order_mis_803ad5c8"
+          ],
+          "assets": [],
+          "topics": [
+            "movement-physics",
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/public/models"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "0x800541ac",
+          "to": "0x800419ec",
+          "relation": "direct callee"
+        },
+        {
+          "from": "0x800419ec",
+          "to": "0x80006c88",
+          "relation": "direct callee"
+        },
+        {
+          "from": "0x80006c88",
+          "to": "0x8025b00c",
+          "relation": "direct callee"
+        }
+      ]
+    },
+    {
+      "id": "active-object-init-to-hsd-parse",
+      "addresses": [
+        "0x80057b78",
+        "0x800419ec",
+        "0x80006c88",
+        "0x8025b00c"
+      ],
+      "proves": "active object init reaches original HSD_ArchiveParse through the same attach wrapper",
+      "path": [
+        {
+          "address": "0x80057b78",
+          "currentFunctionName": "FUN_80057b78",
+          "inferredName": "active_object_init_from_slot_tables",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:896",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8003cc24",
+              "name": "zz_003cc24_"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            },
+            {
+              "address": "0x80041b20",
+              "name": "zz_0041b20_"
+            },
+            {
+              "address": "0x800422d8",
+              "name": "zz_00422d8_"
+            },
+            {
+              "address": "0x8004bb14",
+              "name": "FUN_8004bb14"
+            },
+            {
+              "address": "0x8005380c",
+              "name": "zz_005380c_"
+            },
+            {
+              "address": "0x80055dcc",
+              "name": "zz_0055dcc_"
+            },
+            {
+              "address": "0x80055f90",
+              "name": "zz_0055f90_"
+            },
+            {
+              "address": "0x8005614c",
+              "name": "zz_005614c_"
+            },
+            {
+              "address": "0x80056ce0",
+              "name": "zz_0056ce0_"
+            },
+            {
+              "address": "0x80057cf4",
+              "name": "zz_0057cf4_"
+            },
+            {
+              "address": "0x80068004",
+              "name": "zz_0068004_"
+            },
+            {
+              "address": "0x8008ab30",
+              "name": "zz_008ab30_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[*(char *)(param_9 + 999) + 0xa0]",
+            "PTR_DAT_80433934[*(char *)(param_9 + 0x3e4) + 0xcb]"
+          ],
+          "constants": [
+            "0x3e4",
+            "0",
+            "0x18",
+            "1",
+            "0x19",
+            "0x1a",
+            "0x1b",
+            "0x493",
+            "999",
+            "1000",
+            "2",
+            "0x10",
+            "0x3ec",
+            "0xa0",
+            "0x88",
+            "0xcb",
+            "0x3ee",
+            "0x8c",
+            "0x90",
+            "0x94",
+            "0x96",
+            "0x97",
+            "0x3e6",
+            "0x488",
+            "0x10c",
+            "0x76c",
+            "0xffffffff",
+            "0x26f",
+            "0x4b8",
+            "0x741",
+            "0x743",
+            "0x272"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x800419ec",
+          "currentFunctionName": "zz_00419ec_",
+          "inferredName": "force-setup_candidate_800419ec",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:9936",
+          "callers": [
+            {
+              "address": "0x800541ac",
+              "name": "FUN_800541ac"
+            },
+            {
+              "address": "0x80057b78",
+              "name": "FUN_80057b78"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80006c88",
+              "name": "zz_0006c88_"
+            },
+            {
+              "address": "0x80006f98",
+              "name": "zz_0006f98_"
+            },
+            {
+              "address": "0x80007030",
+              "name": "zz_0007030_"
+            },
+            {
+              "address": "0x80007c54",
+              "name": "zz_0007c54_"
+            },
+            {
+              "address": "0x80007cac",
+              "name": "zz_0007cac_"
+            },
+            {
+              "address": "0x80197a0c",
+              "name": "zz_0197a0c_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803bb4a0",
+            "FLOAT_80437068"
+          ],
+          "globalAccesses": [
+            "DAT_803bb4a0",
+            "FLOAT_80437068"
+          ],
+          "constants": [
+            "0x3e4",
+            "4",
+            "0x0",
+            "0x600",
+            "0x604",
+            "0x14",
+            "0xc28",
+            "0xff",
+            "0xc2c",
+            "0",
+            "0x1a",
+            "1",
+            "0x708",
+            "0x788"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts"
+          ]
+        },
+        {
+          "address": "0x80006c88",
+          "currentFunctionName": "zz_0006c88_",
+          "inferredName": "assets-animation_candidate_80006c88",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:1312",
+          "callers": [
+            {
+              "address": "0x80040eb4",
+              "name": "zz_0040eb4_"
+            },
+            {
+              "address": "0x80041678",
+              "name": "FUN_80041678"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8025b00c",
+              "name": "gnt4_HSD_ArchiveParse_bl"
+            },
+            {
+              "address": "0x8025b178",
+              "name": "zz_025b178_"
+            },
+            {
+              "address": "0x8025b1b0",
+              "name": "gnt4_HSD_ArchiveGetPublicAddress_bl"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0xc",
+            "0",
+            "0x10",
+            "4",
+            "1",
+            "0x1a",
+            "2",
+            "0x18",
+            "3",
+            "0x19",
+            "10"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "apps/game/public/models"
+          ]
+        },
+        {
+          "address": "0x8025b00c",
+          "currentFunctionName": "gnt4-HSD_ArchiveParse-bl",
+          "inferredName": "gnt4-HSD_ArchiveParse-bl",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0072.c:3616",
+          "callers": [
+            {
+              "address": "0x80006c88",
+              "name": "zz_0006c88_"
+            },
+            {
+              "address": "0x8004d548",
+              "name": "zz_004d548_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
+              "address": "0x800054f4",
+              "name": "gnt4_memcpy"
+            },
+            {
+              "address": "0x802013f4",
+              "name": "gnt4_OSReport_bl"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0x0",
+            "0xffffffff",
+            "0",
+            "0x44",
+            "0x20",
+            "0xf",
+            "1",
+            "8",
+            "2",
+            "9",
+            "4",
+            "3",
+            "10",
+            "0xb",
+            "0xc",
+            "0x10"
+          ],
+          "strings": [
+            "s_HSD_ArchiveParse__byte_order_mis_803ad5c8"
+          ],
+          "assets": [],
+          "topics": [
+            "movement-physics",
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/public/models"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "0x80057b78",
+          "to": "0x800419ec",
+          "relation": "direct callee"
+        },
+        {
+          "from": "0x800419ec",
+          "to": "0x80006c88",
+          "relation": "direct callee"
+        },
+        {
+          "from": "0x80006c88",
+          "to": "0x8025b00c",
+          "relation": "direct callee"
+        }
+      ]
+    },
+    {
+      "id": "active-borg-spawn-to-public-address",
+      "addresses": [
+        "0x800541ac",
+        "0x800419ec",
+        "0x80006c88",
+        "0x8025b1b0"
+      ],
+      "proves": "spawn init reaches HSD public-symbol lookup after archive parse",
+      "path": [
+        {
+          "address": "0x800541ac",
+          "currentFunctionName": "FUN_800541ac",
+          "inferredName": "active_borg_spawn_init_from_slot_tables",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:6999",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
+              "address": "0x8001c80c",
+              "name": "zz_001c80c_"
+            },
+            {
+              "address": "0x80027a44",
+              "name": "FUN_80027a44"
+            },
+            {
+              "address": "0x8003cc24",
+              "name": "zz_003cc24_"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            },
+            {
+              "address": "0x80041b20",
+              "name": "zz_0041b20_"
+            },
+            {
+              "address": "0x800422d8",
+              "name": "zz_00422d8_"
+            },
+            {
+              "address": "0x8004bb14",
+              "name": "FUN_8004bb14"
+            },
+            {
+              "address": "0x8004beb8",
+              "name": "zz_004beb8_"
+            },
+            {
+              "address": "0x8005380c",
+              "name": "zz_005380c_"
+            },
+            {
+              "address": "0x80055dcc",
+              "name": "zz_0055dcc_"
+            },
+            {
+              "address": "0x80055f90",
+              "name": "zz_0055f90_"
+            },
+            {
+              "address": "0x8005614c",
+              "name": "zz_005614c_"
+            },
+            {
+              "address": "0x80056ce0",
+              "name": "zz_0056ce0_"
+            },
+            {
+              "address": "0x80056d28",
+              "name": "FUN_80056d28"
+            },
+            {
+              "address": "0x80068004",
+              "name": "zz_0068004_"
+            },
+            {
+              "address": "0x80068344",
+              "name": "FUN_80068344"
+            },
+            {
+              "address": "0x8006a6fc",
+              "name": "zz_006a6fc_"
+            },
+            {
+              "address": "0x8006a750",
+              "name": "zz_006a750_"
+            },
+            {
+              "address": "0x800807e4",
+              "name": "FUN_800807e4"
+            },
+            {
+              "address": "0x800813a8",
+              "name": "FUN_800813a8"
+            },
+            {
+              "address": "0x8008ab30",
+              "name": "zz_008ab30_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80437250",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433930",
+            "FLOAT_8043725c"
+          ],
+          "globalAccesses": [
+            "FLOAT_80437250",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[param_9[999]",
+            "PTR_DAT_80433934[param_9[0x3e4]",
+            "PTR_DAT_80433930[2]",
+            "PTR_DAT_80433930[0x32]",
+            "PTR_DAT_80433934 + 0x9c",
+            "FLOAT_8043725c",
+            "PTR_DAT_80433934[iVar4 + 0x103]"
+          ],
+          "constants": [
+            "0x3e4",
+            "0",
+            "0x18",
+            "0x19",
+            "0x1a",
+            "0x1b",
+            "0x493",
+            "0x24",
+            "0x6d0",
+            "0x144",
+            "0x80",
+            "0x394",
+            "0x540",
+            "0x50",
+            "0x48",
+            "0x4c",
+            "0x44",
+            "0x81",
+            "0x7e",
+            "0x7f",
+            "0x7c",
+            "0x7d",
+            "0x501",
+            "0x530",
+            "0x531",
+            "0x532",
+            "0x533",
+            "0x534",
+            "0x535",
+            "0x536",
+            "0x537",
+            "0x538"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x800419ec",
+          "currentFunctionName": "zz_00419ec_",
+          "inferredName": "force-setup_candidate_800419ec",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:9936",
+          "callers": [
+            {
+              "address": "0x800541ac",
+              "name": "FUN_800541ac"
+            },
+            {
+              "address": "0x80057b78",
+              "name": "FUN_80057b78"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80006c88",
+              "name": "zz_0006c88_"
+            },
+            {
+              "address": "0x80006f98",
+              "name": "zz_0006f98_"
+            },
+            {
+              "address": "0x80007030",
+              "name": "zz_0007030_"
+            },
+            {
+              "address": "0x80007c54",
+              "name": "zz_0007c54_"
+            },
+            {
+              "address": "0x80007cac",
+              "name": "zz_0007cac_"
+            },
+            {
+              "address": "0x80197a0c",
+              "name": "zz_0197a0c_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803bb4a0",
+            "FLOAT_80437068"
+          ],
+          "globalAccesses": [
+            "DAT_803bb4a0",
+            "FLOAT_80437068"
+          ],
+          "constants": [
+            "0x3e4",
+            "4",
+            "0x0",
+            "0x600",
+            "0x604",
+            "0x14",
+            "0xc28",
+            "0xff",
+            "0xc2c",
+            "0",
+            "0x1a",
+            "1",
+            "0x708",
+            "0x788"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts"
+          ]
+        },
+        {
+          "address": "0x80006c88",
+          "currentFunctionName": "zz_0006c88_",
+          "inferredName": "assets-animation_candidate_80006c88",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:1312",
+          "callers": [
+            {
+              "address": "0x80040eb4",
+              "name": "zz_0040eb4_"
+            },
+            {
+              "address": "0x80041678",
+              "name": "FUN_80041678"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8025b00c",
+              "name": "gnt4_HSD_ArchiveParse_bl"
+            },
+            {
+              "address": "0x8025b178",
+              "name": "zz_025b178_"
+            },
+            {
+              "address": "0x8025b1b0",
+              "name": "gnt4_HSD_ArchiveGetPublicAddress_bl"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0xc",
+            "0",
+            "0x10",
+            "4",
+            "1",
+            "0x1a",
+            "2",
+            "0x18",
+            "3",
+            "0x19",
+            "10"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "apps/game/public/models"
+          ]
+        },
+        {
+          "address": "0x8025b1b0",
+          "currentFunctionName": "gnt4-HSD_ArchiveGetPublicAddress-bl",
+          "inferredName": "gnt4-HSD_ArchiveGetPublicAddress-bl",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0072.c:3698",
+          "callers": [
+            {
+              "address": "0x80006c88",
+              "name": "zz_0006c88_"
+            },
+            {
+              "address": "0x8004adc8",
+              "name": "zz_004adc8_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80238b1c",
+              "name": "gnt4_strcmp"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0",
+            "0xc",
+            "0x30",
+            "0x28",
+            "4",
+            "8",
+            "1",
+            "0x20"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "apps/game/public/models"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "0x800541ac",
+          "to": "0x800419ec",
+          "relation": "direct callee"
+        },
+        {
+          "from": "0x800419ec",
+          "to": "0x80006c88",
+          "relation": "direct callee"
+        },
+        {
+          "from": "0x80006c88",
+          "to": "0x8025b1b0",
+          "relation": "direct callee"
+        }
+      ]
+    },
+    {
+      "id": "gcci-open-to-dvdopen",
+      "addresses": [
+        "0x802754ec",
+        "0x8020d1ec"
+      ],
+      "proves": "gcCiOpen-style wrapper directly calls DVDOpen",
+      "path": [
+        {
+          "address": "0x802754ec",
+          "currentFunctionName": "FUN_802754ec",
+          "inferredName": null,
+          "sourceRef": "research/decomp/ghidra-export/chunk_0074.c:6214",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
+              "address": "0x8020d1ec",
+              "name": "gnt4_DVDOpen_bl"
+            },
+            {
+              "address": "0x80238c90",
+              "name": "zz_0238c90_"
+            },
+            {
+              "address": "0x80238d00",
+              "name": "strcpy"
+            },
+            {
+              "address": "0x80238db8",
+              "name": "strlen"
+            }
+          ],
+          "globalReferences": [
+            "DAT_8040b1d0",
+            "DAT_8040b1cc",
+            "DAT_8040b1d4",
+            "DAT_8040c178"
+          ],
+          "globalAccesses": [
+            "DAT_8040b1d0",
+            "DAT_8040b1cc",
+            "DAT_8040b1d4",
+            "DAT_8040c178"
+          ],
+          "constants": [
+            "264",
+            "0",
+            "0x0",
+            "0x28",
+            "100",
+            "1",
+            "0x10",
+            "0x800",
+            "0x5c",
+            "0x80000000",
+            "0x7fffffff",
+            "0x14",
+            "0x18",
+            "0x1c",
+            "8",
+            "0x24",
+            "0x20",
+            "2"
+          ],
+          "strings": [
+            "s_E0092908_fname_is_null__gcCiOpen_802b7750",
+            "s_E0092910_not_enough_handle_resou_802b7798",
+            "s_E0092911_DVDOpen_fail__gcCiOpen__802b77c8",
+            "s_E0092909_rw_is_illigal__gcCiOpen_802b7774"
+          ],
+          "assets": [],
+          "topics": [],
+          "relatedWebModules": []
+        },
+        {
+          "address": "0x8020d1ec",
+          "currentFunctionName": "gnt4-DVDOpen-bl",
+          "inferredName": "gnt4-DVDOpen-bl",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0064.c:2391",
+          "callers": [
+            {
+              "address": "0x802754ec",
+              "name": "FUN_802754ec"
+            },
+            {
+              "address": "0x802756fc",
+              "name": "FUN_802756fc"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x802013f4",
+              "name": "gnt4_OSReport_bl"
+            },
+            {
+              "address": "0x8020cef8",
+              "name": "gnt4_DVDConvertPathToEntrynum_bl"
+            },
+            {
+              "address": "0x8020d438",
+              "name": "gnt4_DVDGetCurrentDir_bl"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436524"
+          ],
+          "globalAccesses": [
+            "DAT_80436524"
+          ],
+          "constants": [
+            "128",
+            "0",
+            "0x80",
+            "0xc",
+            "0xff000000",
+            "1",
+            "0x30",
+            "4",
+            "0x34",
+            "8",
+            "0x38"
+          ],
+          "strings": [
+            "s_Warning__DVDOpen____file___s__wa_803a4f48"
+          ],
+          "assets": [],
+          "topics": [],
+          "relatedWebModules": []
+        }
+      ],
+      "edges": [
+        {
+          "from": "0x802754ec",
+          "to": "0x8020d1ec",
+          "relation": "direct callee"
+        }
+      ]
+    },
+    {
+      "id": "gcci-get-file-to-dvdopen",
+      "addresses": [
+        "0x802756fc",
+        "0x8020d1ec"
+      ],
+      "proves": "gcCiGetF-style wrapper directly calls DVDOpen",
+      "path": [
+        {
+          "address": "0x802756fc",
+          "currentFunctionName": "FUN_802756fc",
+          "inferredName": null,
+          "sourceRef": "research/decomp/ghidra-export/chunk_0075.c:1",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8020d1ec",
+              "name": "gnt4_DVDOpen_bl"
+            },
+            {
+              "address": "0x8020d2b4",
+              "name": "gnt4_DVDClose_bl"
+            },
+            {
+              "address": "0x80238c90",
+              "name": "zz_0238c90_"
+            },
+            {
+              "address": "0x80238d00",
+              "name": "strcpy"
+            },
+            {
+              "address": "0x80238db8",
+              "name": "strlen"
+            }
+          ],
+          "globalReferences": [
+            "DAT_8040b1d0",
+            "DAT_8040b1cc",
+            "DAT_8040c178"
+          ],
+          "globalAccesses": [
+            "DAT_8040b1d0",
+            "DAT_8040b1cc",
+            "DAT_8040c178"
+          ],
+          "constants": [
+            "13",
+            "260",
+            "0",
+            "0x0",
+            "1",
+            "0x80000000",
+            "0x7fffffff"
+          ],
+          "strings": [
+            "s_E0092901_fname_is_null__gcCiGetF_802b77ec",
+            "s_E0040201_can_t_open_a_file__gcCi_802b7818",
+            "s_E0040202_can_t_close_a_file__gcC_802b7848"
+          ],
+          "assets": [],
+          "topics": [],
+          "relatedWebModules": []
+        },
+        {
+          "address": "0x8020d1ec",
+          "currentFunctionName": "gnt4-DVDOpen-bl",
+          "inferredName": "gnt4-DVDOpen-bl",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0064.c:2391",
+          "callers": [
+            {
+              "address": "0x802754ec",
+              "name": "FUN_802754ec"
+            },
+            {
+              "address": "0x802756fc",
+              "name": "FUN_802756fc"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x802013f4",
+              "name": "gnt4_OSReport_bl"
+            },
+            {
+              "address": "0x8020cef8",
+              "name": "gnt4_DVDConvertPathToEntrynum_bl"
+            },
+            {
+              "address": "0x8020d438",
+              "name": "gnt4_DVDGetCurrentDir_bl"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436524"
+          ],
+          "globalAccesses": [
+            "DAT_80436524"
+          ],
+          "constants": [
+            "128",
+            "0",
+            "0x80",
+            "0xc",
+            "0xff000000",
+            "1",
+            "0x30",
+            "4",
+            "0x34",
+            "8",
+            "0x38"
+          ],
+          "strings": [
+            "s_Warning__DVDOpen____file___s__wa_803a4f48"
+          ],
+          "assets": [],
+          "topics": [],
+          "relatedWebModules": []
+        }
+      ],
+      "edges": [
+        {
+          "from": "0x802756fc",
+          "to": "0x8020d1ec",
+          "relation": "direct callee"
+        }
+      ]
+    },
+    {
+      "id": "secondary-object-path-to-hsd-parse",
+      "addresses": [
+        "0x8004a754",
+        "0x8004d548",
+        "0x8025b00c"
+      ],
+      "proves": "secondary object setup path reaches original HSD_ArchiveParse",
+      "path": [
+        {
+          "address": "0x8004a754",
+          "currentFunctionName": "zz_004a754_",
+          "inferredName": null,
+          "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:347",
+          "callers": [
+            {
+              "address": "0x8004871c",
+              "name": "FUN_8004871c"
+            },
+            {
+              "address": "0x800487ec",
+              "name": "FUN_800487ec"
+            },
+            {
+              "address": "0x8004892c",
+              "name": "FUN_8004892c"
+            },
+            {
+              "address": "0x80048a6c",
+              "name": "FUN_80048a6c"
+            },
+            {
+              "address": "0x80048be0",
+              "name": "FUN_80048be0"
+            },
+            {
+              "address": "0x80048d54",
+              "name": "zz_0048d54_"
+            },
+            {
+              "address": "0x80049210",
+              "name": "FUN_80049210"
+            },
+            {
+              "address": "0x800496d8",
+              "name": "zz_00496d8_"
+            },
+            {
+              "address": "0x80049b98",
+              "name": "zz_0049b98_"
+            },
+            {
+              "address": "0x80049cc4",
+              "name": "FUN_80049cc4"
+            },
+            {
+              "address": "0x8004a41c",
+              "name": "zz_004a41c_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8004aae0",
+              "name": "zz_004aae0_"
+            },
+            {
+              "address": "0x8004b8f4",
+              "name": "zz_004b8f4_"
+            },
+            {
+              "address": "0x8004d548",
+              "name": "zz_004d548_"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0x100",
+            "0x40",
+            "0x1ad4",
+            "0x35",
+            "0x31",
+            "0",
+            "0x1d78",
+            "0x1d7c",
+            "0x2e",
+            "0xe",
+            "1",
+            "0x4b0",
+            "0x8c"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [],
+          "relatedWebModules": []
+        },
+        {
+          "address": "0x8004d548",
+          "currentFunctionName": "zz_004d548_",
+          "inferredName": "assets-animation_candidate_8004d548",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:2366",
+          "callers": [
+            {
+              "address": "0x8004a754",
+              "name": "zz_004a754_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80197a0c",
+              "name": "zz_0197a0c_"
+            },
+            {
+              "address": "0x8025b00c",
+              "name": "gnt4_HSD_ArchiveParse_bl"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0x0",
+            "0xffffffff",
+            "0",
+            "0x2a",
+            "0x7f",
+            "1",
+            "0x2b",
+            "4",
+            "0xfffffffe",
+            "2",
+            "3"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "apps/game/public/models"
+          ]
+        },
+        {
+          "address": "0x8025b00c",
+          "currentFunctionName": "gnt4-HSD_ArchiveParse-bl",
+          "inferredName": "gnt4-HSD_ArchiveParse-bl",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0072.c:3616",
+          "callers": [
+            {
+              "address": "0x80006c88",
+              "name": "zz_0006c88_"
+            },
+            {
+              "address": "0x8004d548",
+              "name": "zz_004d548_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8000540c",
+              "name": "gnt4_memset"
+            },
+            {
+              "address": "0x800054f4",
+              "name": "gnt4_memcpy"
+            },
+            {
+              "address": "0x802013f4",
+              "name": "gnt4_OSReport_bl"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0x0",
+            "0xffffffff",
+            "0",
+            "0x44",
+            "0x20",
+            "0xf",
+            "1",
+            "8",
+            "2",
+            "9",
+            "4",
+            "3",
+            "10",
+            "0xb",
+            "0xc",
+            "0x10"
+          ],
+          "strings": [
+            "s_HSD_ArchiveParse__byte_order_mis_803ad5c8"
+          ],
+          "assets": [],
+          "topics": [
+            "movement-physics",
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/public/models"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "0x8004a754",
+          "to": "0x8004d548",
+          "relation": "direct callee"
+        },
+        {
+          "from": "0x8004d548",
+          "to": "0x8025b00c",
+          "relation": "direct callee"
+        }
+      ]
+    }
+  ],
+  "supportingArtifacts": [
+    {
+      "path": "research/decomp/index/challenge-flow-evidence.md",
+      "exists": true
+    },
+    {
+      "path": "research/asset-inventory/stage-code-evidence.md",
+      "exists": true
+    },
+    {
+      "path": "research/asset-inventory/stage-geometry-collision.md",
+      "exists": true
+    },
+    {
+      "path": "research/asset-inventory/stage-lighting-render-state.md",
+      "exists": true
+    }
+  ],
+  "currentWebEvidence": [
+    {
+      "file": "apps/game/src/sim/battleScene.ts",
+      "needle": "load",
+      "found": true,
+      "sourceRef": "apps/game/src/sim/battleScene.ts:10"
+    },
+    {
+      "file": "apps/game/src/sim/adapter.ts",
+      "needle": "DEFAULT_ARENA_STAGE",
+      "found": true,
+      "sourceRef": "apps/game/src/sim/adapter.ts:23"
+    },
+    {
+      "file": "apps/game/src/main.ts",
+      "needle": "async function loadStage",
+      "found": true,
+      "sourceRef": "apps/game/src/main.ts:559"
+    },
+    {
+      "file": "packages/formats/src/hsd-anim.ts",
+      "needle": "HSD",
+      "found": true,
+      "sourceRef": "packages/formats/src/hsd-anim.ts:1"
+    },
+    {
+      "file": "packages/render/src/index.ts",
+      "needle": "Stage",
+      "found": false,
+      "sourceRef": null
+    }
+  ],
+  "requiredNextTraceTasks": [
+    "Break on 0x802754ec, 0x802756fc, and 0x8020d1ec while entering Challenge battle 1 and record filename strings.",
+    "Break on 0x8025b00c and 0x80006c88 during the same run to connect loaded archive bytes to parsed HSD public names.",
+    "Watch DAT_803bb4a0 and object+0x3e4 in 0x800419ec to confirm which slot/type selects each object archive pointer.",
+    "Do not map human arena names or Challenge stage rotation to st## until the trace records the selected st## archive IDs."
+  ]
+}

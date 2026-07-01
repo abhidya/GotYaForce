@@ -5820,7 +5820,7 @@ void zz_00527d8_(undefined8 param_1,double param_2,double param_3,double param_4
     zz_00efda8_(uVar3,param_2,param_3,param_4,param_5,param_6,param_7,param_8,iVar1,uVar2,param_11,
                 param_12,param_13,param_14,param_15,param_16);
     zz_002a4b0_();
-    zz_008c3ac_();
+    dispatch_global_menu_mode();
     zz_00528b4_();
     zz_00802a8_();
     zz_008c2dc_();
@@ -8266,7 +8266,7 @@ void zz_0056180_(int param_1)
   *(undefined1 *)(param_1 + 0x74a) = 0x10;
   *(undefined1 *)(param_1 + 0x74d) = *(undefined1 *)(*(int *)(param_1 + 0x4ac) + 0xa1);
   *(undefined1 *)(param_1 + 0x74c) = *(undefined1 *)(*(int *)(param_1 + 0x4ac) + 0xa2);
-  zz_006826c_(param_1);
+  refresh_actor_param_tier_table(param_1);
   if (*(char *)(param_1 + 0x489) == '\0') {
     if ((*(char *)(param_1 + 0x48a) == '\0') && (*(char *)(param_1 + 0x500) == '\0')) {
       *(undefined4 *)(param_1 + 0xb4) = *(undefined4 *)(param_1 + 0xb8);

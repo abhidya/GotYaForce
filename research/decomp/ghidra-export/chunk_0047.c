@@ -1434,7 +1434,7 @@ void FUN_8018f6c4(undefined8 param_1,double param_2,double param_3,double param_
     puVar4 = PTR_DAT_80433944;
     *(undefined2 *)(PTR_DAT_80433944 + 2) = 0;
     zz_002a5f4_(0,0,0,0);
-    uVar6 = zz_008c3a0_(0);
+    uVar6 = set_global_menu_mode(0);
     uVar6 = zz_004370c_(extraout_f1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
                         (int)((ulonglong)uVar6 >> 0x20),(int)uVar6,puVar2,puVar3,puVar4,puVar5,in_r9
                         ,in_r10);
