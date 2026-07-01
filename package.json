@@ -19,6 +19,7 @@
     "index:decomp": "node scripts/build-decomp-evidence-index.mjs",
     "inventory:challenge-flow": "node scripts/inventory-challenge-flow-evidence.mjs",
     "inventory:archive-load": "node scripts/inventory-archive-load-xrefs.mjs",
+    "inventory:challenge-memory": "python scripts/inventory-challenge-memory-evidence.py",
     "manifest:stages": "node scripts/build-stage-manifests.mjs",
     "convert": "node scripts/asset-convert.mjs",
     "manifest": "node scripts/build-manifest.mjs"

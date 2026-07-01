@@ -1,6 +1,6 @@
 # Challenge Flow Evidence Map
 
-Generated: 2026-07-01T10:00:41.757Z
+Generated: 2026-07-01T10:12:36.156Z
 
 ## Principle
 
@@ -87,6 +87,7 @@ No original C function anchor is confirmed by the current index for this step.
 ### Supporting Artifacts
 
 - `research/decomp/index/archive-load-xrefs.md`
+- `research/traces/GG4E/challenge-battle1-memory-evidence.md`
 - `research/asset-inventory/stage-code-evidence.md`
 - `research/asset-inventory/stage-geometry-collision.md`
 - `research/asset-inventory/stage-lighting-render-state.md`
@@ -115,6 +116,7 @@ No original C function anchor is confirmed by the current index for this step.
 ### Supporting Artifacts
 
 - `research/decomp/index/archive-load-xrefs.md`
+- `research/traces/GG4E/challenge-battle1-memory-evidence.md`
 - `research/decomp/data/type-category-remap-802f2e28.json`
 
 ### Topic Fallback Candidates

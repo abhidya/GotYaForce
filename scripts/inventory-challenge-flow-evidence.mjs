@@ -54,6 +54,7 @@ const flowSteps = [
     topicFallbacks: selectByTopic("assets-animation", 6, (fn) => fn.assets.some((asset) => /^st[0-9a-f]{2}$/i.test(asset))),
     supportingArtifacts: artifactRefs([
       "research/decomp/index/archive-load-xrefs.md",
+      "research/traces/GG4E/challenge-battle1-memory-evidence.md",
       "research/asset-inventory/stage-code-evidence.md",
       "research/asset-inventory/stage-geometry-collision.md",
       "research/asset-inventory/stage-lighting-render-state.md",
@@ -75,6 +76,7 @@ const flowSteps = [
     topicFallbacks: selectByTopic("battle-initialization", 8, (fn) => fn.globalReferences.includes("PTR_DAT_80433934")),
     supportingArtifacts: artifactRefs([
       "research/decomp/index/archive-load-xrefs.md",
+      "research/traces/GG4E/challenge-battle1-memory-evidence.md",
       "research/decomp/data/type-category-remap-802f2e28.json",
     ]),
     requiredBeforePorting: [

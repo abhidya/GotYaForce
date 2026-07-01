@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T10:00:41.757Z",
+  "generatedAt": "2026-07-01T10:12:36.156Z",
   "generatedBy": "scripts/inventory-challenge-flow-evidence.mjs",
   "sourceIndex": "research/decomp/index/function-evidence-index.json",
   "principle": "Do not replace player-facing Challenge flow with fake menus/stages/mechanics. Each step below must be driven by original functions, data tables, asset opens, traces, or behavior.",
@@ -2160,6 +2160,10 @@
           "exists": true
         },
         {
+          "path": "research/traces/GG4E/challenge-battle1-memory-evidence.md",
+          "exists": true
+        },
+        {
           "path": "research/asset-inventory/stage-code-evidence.md",
           "exists": true
         },
@@ -3552,6 +3556,10 @@
       "supportingArtifacts": [
         {
           "path": "research/decomp/index/archive-load-xrefs.md",
+          "exists": true
+        },
+        {
+          "path": "research/traces/GG4E/challenge-battle1-memory-evidence.md",
           "exists": true
         },
         {
