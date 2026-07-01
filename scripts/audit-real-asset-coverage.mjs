@@ -606,6 +606,36 @@ function inspectAudioRuntime() {
   };
 }
 
+function inspectFormatParserCoverage() {
+  const pzzSource = readText("packages/formats/src/pzz.ts");
+  const arzSource = readText("packages/formats/src/arz.ts");
+  const pzzInventory = readJson("research/asset-inventory/pzz-arz-inventory.json");
+  const directArzCount = pzzInventory.value?.summary?.directArzFileCount ?? null;
+  return {
+    parsers: [
+      {
+        format: "PZZ",
+        source: "packages/formats/src/pzz.ts",
+        implemented: pzzSource.includes("export function unpack") && pzzSource.includes("decompressPzzpStream"),
+        evidence: "Exports archive member-table unpacking and compressed member decompression.",
+      },
+      {
+        format: "ARZ",
+        source: "packages/formats/src/arz.ts",
+        implemented: arzSource.includes("export function decompress") && arzSource.includes("decompressPzzpStream"),
+        evidence: `Direct ARZ/PZZP wrapper; pzz-arz inventory currently lists ${directArzCount ?? "unknown"} direct ARZ files.`,
+      },
+    ],
+    inventory: {
+      path: "research/asset-inventory/pzz-arz-inventory.json",
+      parses: pzzInventory.ok,
+      directArzFileCount: directArzCount,
+      pzzArchiveCount: pzzInventory.value?.summary?.pzzArchiveCount ?? null,
+      pzzMemberCount: pzzInventory.value?.summary?.pzzMemberCount ?? null,
+    },
+  };
+}
+
 function buildReport() {
   const screens = inspectScreens();
   const stageCoverage = inspectStages();
@@ -619,6 +649,7 @@ function buildReport() {
   const borgAnimationCoverage = inspectBorgAnimationCoverage();
   const powerupRuntimeGap = inspectPowerupRuntimeGap();
   const audioRuntime = inspectAudioRuntime();
+  const formatParserCoverage = inspectFormatParserCoverage();
   const summary = {
     screens: screens.length,
     screensUsingAnyRealExportedAsset: screens.filter((screen) => screen.realExportedAssetsUsed.length > 0).length,
@@ -656,6 +687,8 @@ function buildReport() {
       audioRuntime.runtimeQueuesBgm &&
       audioRuntime.runtimePlaysSfx &&
       audioRuntime.manifest.cueKeys.every((cue) => cue.exists),
+    formatParsersImplemented: formatParserCoverage.parsers.filter((parser) => parser.implemented).length,
+    formatParsersTotal: formatParserCoverage.parsers.length,
   };
   return {
     generatedBy: "scripts/audit-real-asset-coverage.mjs",
@@ -674,6 +707,7 @@ function buildReport() {
     borgAnimationCoverage,
     powerupRuntimeGap,
     audioRuntime,
+    formatParserCoverage,
     modeNamingRisks,
     nextMostUsefulReplacements: [
       "Wire stageIdForArena to a traced arena-name -> st## table; public exports now cover 40 visual stages, but runtime fallback still collapses non-st## arenas to st00.",
@@ -728,8 +762,22 @@ function renderMarkdown(report) {
   add(`- Runtime fly uses exported boost clip: ${report.summary.runtimeBoostFlyUsesExportedBoostClip ? "yes" : "no"}`);
   add(`- Runtime items/powerups modeled: ${report.summary.runtimeItemsOrPowerupsModeled ? "yes" : "no"}`);
   add(`- Runtime audio from exported cues: ${report.summary.runtimeAudioFromExportedCues ? "yes" : "no"}`);
+  add(`- Shared PZZ/ARZ parsers implemented: ${report.summary.formatParsersImplemented}/${report.summary.formatParsersTotal}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
   add(`- Runtime accepts exported hex stage ids: ${report.summary.runtimeAcceptsHexStageIds ? "yes" : "no"}`);
+  add();
+  add("## Format Parser Coverage");
+  add();
+  add(`Inventory: ${report.formatParserCoverage.inventory.path} (${report.formatParserCoverage.inventory.pzzArchiveCount ?? "unknown"} PZZ archives, ${report.formatParserCoverage.inventory.pzzMemberCount ?? "unknown"} PZZ members, ${report.formatParserCoverage.inventory.directArzFileCount ?? "unknown"} direct ARZ files).`);
+  add();
+  add(
+    mdTable(report.formatParserCoverage.parsers, [
+      { title: "Format", value: (row) => row.format },
+      { title: "Implemented", value: (row) => row.implemented ? "yes" : "no" },
+      { title: "Source", value: (row) => row.source },
+      { title: "Evidence", value: (row) => row.evidence },
+    ]),
+  );
   add();
   add("## Runtime Screens");
   add();

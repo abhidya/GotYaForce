@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:29:29.979Z",
+  "generatedAt": "2026-07-01T03:32:34.433Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -30,7 +30,9 @@
     "runtimeBorgAnimationMissing": 3,
     "runtimeBoostFlyUsesExportedBoostClip": true,
     "runtimeItemsOrPowerupsModeled": false,
-    "runtimeAudioFromExportedCues": true
+    "runtimeAudioFromExportedCues": true,
+    "formatParsersImplemented": 2,
+    "formatParsersTotal": 2
   },
   "screens": [
     {
@@ -2060,6 +2062,29 @@
         }
       ],
       "notes": "Voices are a representative sample (first 2 clips per character pl00-pl12) out of ~2075 total. bgm tracks <5s are jingles/stingers (loop=false)."
+    }
+  },
+  "formatParserCoverage": {
+    "parsers": [
+      {
+        "format": "PZZ",
+        "source": "packages/formats/src/pzz.ts",
+        "implemented": true,
+        "evidence": "Exports archive member-table unpacking and compressed member decompression."
+      },
+      {
+        "format": "ARZ",
+        "source": "packages/formats/src/arz.ts",
+        "implemented": true,
+        "evidence": "Direct ARZ/PZZP wrapper; pzz-arz inventory currently lists 103 direct ARZ files."
+      }
+    ],
+    "inventory": {
+      "path": "research/asset-inventory/pzz-arz-inventory.json",
+      "parses": true,
+      "directArzFileCount": 103,
+      "pzzArchiveCount": 252,
+      "pzzMemberCount": 3104
     }
   },
   "modeNamingRisks": {

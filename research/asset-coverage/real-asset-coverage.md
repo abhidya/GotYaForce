@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:29:29.979Z
+Generated: 2026-07-01T03:32:34.433Z
 
 ## Summary
 
@@ -27,8 +27,18 @@ Generated: 2026-07-01T03:29:29.979Z
 - Runtime fly uses exported boost clip: yes
 - Runtime items/powerups modeled: no
 - Runtime audio from exported cues: yes
+- Shared PZZ/ARZ parsers implemented: 2/2
 - Runtime stage fallback: st00
 - Runtime accepts exported hex stage ids: yes
+
+## Format Parser Coverage
+
+Inventory: research/asset-inventory/pzz-arz-inventory.json (252 PZZ archives, 3104 PZZ members, 103 direct ARZ files).
+
+| Format | Implemented | Source | Evidence |
+| --- | --- | --- | --- |
+| PZZ | yes | packages/formats/src/pzz.ts | Exports archive member-table unpacking and compressed member decompression. |
+| ARZ | yes | packages/formats/src/arz.ts | Direct ARZ/PZZP wrapper; pzz-arz inventory currently lists 103 direct ARZ files. |
 
 ## Runtime Screens
 
