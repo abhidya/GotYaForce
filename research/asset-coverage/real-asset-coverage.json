@@ -1,13 +1,13 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T01:39:19.645Z",
+  "generatedAt": "2026-07-01T01:46:28.136Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
-    "screensUsingAnyRealExportedAsset": 5,
+    "screensUsingAnyRealExportedAsset": 6,
     "screensWithHandcodedSurfaceSignals": 10,
-    "screensWithRealSceneModel": 1,
+    "screensWithRealSceneModel": 3,
     "publicUiTextureExportedImages": 831,
     "requestedUiSceneModelsExported": 6,
     "publicStagesCompleteVisual": 40,
@@ -54,22 +54,28 @@
       ],
       "nextReplacement": "Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:53",
-      "coverageLevel": "handcoded-or-unverified",
-      "realExportedAssetsUsed": [],
+      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:54",
+      "coverageLevel": "real-scene-partial-layout",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "mounted-ui-scene",
+          "publicPath": "/ui/scenes/tl00/model_00.dae",
+          "exists": true
+        }
+      ],
       "handcodedSurfaceSignals": [
         {
           "kind": "css-menu-gear",
           "pattern": "gf-menu-gear",
-          "line": 85
+          "line": 88
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 86
+          "line": 89
         }
       ],
-      "replacementStatus": "No direct exported UI asset usage observed in this component."
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
       "id": "select-difficulty",
@@ -209,11 +215,11 @@
       ],
       "nextReplacement": "Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/LoadBoxData.ts:24",
+      "fileRef": "apps/game/src/ui/screens/LoadBoxData.ts:22",
       "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
-          "kind": "literal-public-path",
+          "kind": "mounted-ui-scene",
           "publicPath": "/ui/scenes/box00/model_00.dae",
           "exists": true
         }
@@ -222,12 +228,12 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 29
+          "line": 27
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 30
+          "line": 28
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -445,8 +451,8 @@
       ],
       "nextReplacement": "Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/BattleIntro.ts:25",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/BattleIntro.ts:26",
+      "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
           "kind": "named-texture",
@@ -465,13 +471,18 @@
           "symbol": "borgMiniPath",
           "publicPathPattern": "/ui/tpl/mn<borgUiCode>/image_00_CI4.png",
           "exists": "per-borg"
+        },
+        {
+          "kind": "mounted-ui-scene",
+          "publicPath": "/ui/scenes/brif00/model_00.dae",
+          "exists": true
         }
       ],
       "handcodedSurfaceSignals": [
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 49
+          "line": 52
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."

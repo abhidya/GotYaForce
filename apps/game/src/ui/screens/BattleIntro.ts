@@ -9,6 +9,7 @@
 import type { BattleConfig } from "@gf/missions";
 import { ASSETS, borgMiniPath } from "../assets.js";
 import { el, legendItem } from "../dom.js";
+import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
 export interface BattleIntroOptions {
@@ -39,6 +40,8 @@ export function createBattleIntro(
   const enemyLead = enemyIds[0] ?? "";
 
   const root = el("div", { class: "gf-screen gf-battle-intro" });
+  const briefingScene = createUiSceneHost("gf-ui-scene gf-brief-real-scene");
+  root.appendChild(briefingScene);
   root.appendChild(
     el("img", { class: "gf-brief-vs-sheet", attrs: { src: ASSETS.briefingVs, alt: "", "aria-hidden": "true" } }),
   );
@@ -79,11 +82,19 @@ export function createBattleIntro(
   }
 
   container.appendChild(root);
+  const stopBriefingScene = mountUiSceneModels(briefingScene, {
+    sceneId: "brif00",
+    fitSize: 720,
+    camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 20, 0] },
+    rotation: [-0.12, 0, 0],
+    maxModels: 27,
+  });
   window.addEventListener("keydown", onKey);
 
   return {
     destroy: () => {
       window.removeEventListener("keydown", onKey);
+      stopBriefingScene();
       root.remove();
     },
   };

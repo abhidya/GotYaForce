@@ -1,13 +1,13 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T01:39:19.645Z
+Generated: 2026-07-01T01:46:28.136Z
 
 ## Summary
 
 - Runtime screens audited: 10
-- Screens using at least one real exported UI asset: 5
+- Screens using at least one real exported UI asset: 6
 - Screens with handcoded/CSS/SVG surface signals: 10
-- Screens mounting a real exported UI scene model: 1
+- Screens mounting a real exported UI scene model: 3
 - UI texture export: 831 images from apps/game/public/ui/manifest.json
 - Requested UI scene models exported: 6 from apps/game/public/ui/scenes/manifest.json
 - Stage exports complete visually: 40/40
@@ -22,13 +22,13 @@ Generated: 2026-07-01T01:39:19.645Z
 
 | Screen | Coverage | Real exported assets used | Handcoded signals | Next replacement |
 | --- | --- | --- | --- | --- |
-| main-menu | handcoded-or-unverified | none | css-menu-gear:85<br>runtime-text-layout:86 | Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels. |
+| main-menu | real-scene-partial-layout | /ui/scenes/tl00/model_00.dae | css-menu-gear:88<br>runtime-text-layout:89 | Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels. |
 | select-difficulty | handcoded-or-unverified | none | css-grid-backdrop:48<br>css-gradient-surface:23<br>css-menu-gear:67<br>css-option-pad:66<br>runtime-text-layout:49 | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
 | select-players | handcoded-or-unverified | none | css-grid-backdrop:55<br>css-option-pad:77<br>css-label-pill:78<br>handcoded-player-silhouette:27<br>runtime-text-layout:42 | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
-| load-box-data | real-scene-partial-layout | /ui/scenes/box00/model_00.dae | css-grid-backdrop:29<br>runtime-text-layout:30 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
+| load-box-data | real-scene-partial-layout | /ui/scenes/box00/model_00.dae | css-grid-backdrop:27<br>runtime-text-layout:28 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
 | select-force | mixed-real-assets-handcoded-surface | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>borgFacePath | css-grid-backdrop:39<br>css-force-platform:45<br>runtime-text-layout:40 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
 | force-builder | mixed-real-assets-handcoded-surface | borgBannerPath<br>borgMiniPath | handcoded-force-grid:73<br>handcoded-force-ring:85<br>handcoded-force-slot:154<br>runtime-text-layout:68 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
-| battle-intro | mixed-real-assets-handcoded-surface | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath | runtime-text-layout:49 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
+| battle-intro | real-scene-partial-layout | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:52 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
 | battle-hud | mixed-real-assets-handcoded-surface | borgBannerPath | svg-hud-gauge:73<br>css-lockon-reticle:139<br>runtime-text-layout:107 | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
 | results | handcoded-or-unverified | none | css-results-backdrop:56<br>css-results-row:90<br>runtime-text-layout:64 | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |
 | pause-menu | handcoded-or-unverified | none | css-pause-box:32<br>runtime-text-layout:33 | Find the original pause menu data/assets; current overlay is entirely recreated CSS/text. |

@@ -213,6 +213,13 @@ function assetSourcesUsed(text) {
       used.push({ kind: "literal-public-path", publicPath, exists: publicPathExists(publicPath) });
     }
   }
+  const mountedSceneIds = [...text.matchAll(/sceneId:\s*["']([^"']+)["']/g)].map((match) => match[1]);
+  for (const sceneId of mountedSceneIds) {
+    const publicPath = `/ui/scenes/${sceneId}/model_00.dae`;
+    if (!used.some((asset) => asset.publicPath === publicPath)) {
+      used.push({ kind: "mounted-ui-scene", publicPath, exists: publicPathExists(publicPath) });
+    }
+  }
   return used;
 }
 

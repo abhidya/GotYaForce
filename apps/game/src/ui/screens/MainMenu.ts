@@ -7,6 +7,7 @@
  */
 
 import { el } from "../dom.js";
+import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export type MainMenuMode =
   | "story"
@@ -54,6 +55,8 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
   let selected: MainMenuMode = opts.initial ?? "story";
 
   const root = el("div", { class: "gf-screen gf-mainmenu" });
+  const titleScene = createUiSceneHost("gf-ui-scene gf-mainmenu-real-scene");
+  root.appendChild(titleScene);
   if (opts.deskImage) {
     root.appendChild(
       el("div", { class: "gf-mainmenu-desk", style: { backgroundImage: `url(${opts.deskImage})` } }),
@@ -115,6 +118,13 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
 
   setSelected(selected);
   container.appendChild(root);
+  const stopTitleScene = mountUiSceneModels(titleScene, {
+    sceneId: "tl00",
+    fitSize: 780,
+    camera: { fov: 28, position: [0, 110, 900], lookAt: [0, 20, 0] },
+    rotation: [-0.1, 0, 0],
+    maxModels: 37,
+  });
   window.addEventListener("keydown", onKey);
 
   return {
@@ -122,6 +132,7 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
     getSelected: () => selected,
     destroy: () => {
       window.removeEventListener("keydown", onKey);
+      stopTitleScene();
       root.remove();
     },
   };
