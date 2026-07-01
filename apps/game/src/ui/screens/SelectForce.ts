@@ -44,6 +44,8 @@ export function createSelectForce(
 
   const root = el("div", { class: "gf-screen gf-select-force" });
   root.appendChild(el("div", { class: "gf-grid-bg gf-bg-purple" }));
+  const entryScene = createUiSceneHost("gf-ui-scene gf-select-entry-scene");
+  root.appendChild(entryScene);
   root.appendChild(el("h1", { class: "gf-title", text: "SELECT A FORCE" }));
   root.appendChild(
     el("img", { class: "gf-select-entry-sheet", attrs: { src: ASSETS.entryControls, alt: "", "aria-hidden": "true" } }),
@@ -142,11 +144,19 @@ export function createSelectForce(
 
   renderSlot();
   container.appendChild(root);
+  const stopEntryScene = mountUiSceneModels(entryScene, {
+    sceneId: "entry00",
+    fitSize: 780,
+    camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 20, 0] },
+    rotation: [-0.12, 0, 0],
+    maxModels: 29,
+  });
   window.addEventListener("keydown", onKey);
 
   return {
     destroy: () => {
       stopLeadModel?.();
+      stopEntryScene();
       window.removeEventListener("keydown", onKey);
       root.remove();
     },

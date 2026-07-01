@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T02:46:49.406Z
+Generated: 2026-07-01T02:50:40.661Z
 
 ## Summary
 
@@ -29,7 +29,7 @@ Generated: 2026-07-01T02:46:49.406Z
 | select-difficulty | real-scene-partial-layout | /ui/scenes/vsel00/model_00.dae | css-grid-backdrop:49<br>css-gradient-surface:24<br>css-menu-gear:70<br>css-option-pad:69<br>runtime-text-layout:52 | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
 | select-players | real-scene-partial-layout | /ui/scenes/vsel01/model_00.dae | css-grid-backdrop:56<br>css-option-pad:80<br>css-label-pill:81<br>handcoded-player-silhouette:28<br>runtime-text-layout:43 | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
 | load-box-data | real-scene-partial-layout | /ui/scenes/box00/model_00.dae | css-grid-backdrop:27<br>runtime-text-layout:28 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
-| select-force | real-scene-partial-layout | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>borgFacePath<br>/models/pl0615/model_00.dae | css-grid-backdrop:46<br>css-force-platform:52<br>runtime-text-layout:47 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
+| select-force | real-scene-partial-layout | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>borgFacePath<br>/models/pl0615/model_00.dae<br>/ui/scenes/entry00/model_00.dae | css-grid-backdrop:46<br>css-force-platform:54<br>runtime-text-layout:49 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
 | force-builder | mixed-real-assets-handcoded-surface | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath | handcoded-force-grid:79<br>handcoded-force-ring:91<br>handcoded-force-slot:160<br>runtime-text-layout:74 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
 | battle-intro | real-scene-partial-layout | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:52 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
 | battle-hud | mixed-real-assets-handcoded-surface | ASSETS.faceMarkerRoundel<br>ASSETS.fontAscii<br>borgBannerPath | svg-hud-gauge:137<br>css-lockon-reticle:203<br>runtime-text-layout:122 | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
@@ -62,6 +62,10 @@ Runtime loader refs: apps/game/src/main.ts:646, apps/game/src/main.ts:650, apps/
 Runtime collision parser: @gf/formats (bounds wired, triangles wired, walls wired, ceilings wired)
 
 Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id.
+
+Stage-code evidence: research/asset-inventory/stage-code-evidence.json (0 boot.dol hits, 0 unique stage codes, 0 verified arena-name mappings).
+
+This scan proves the exported st## codes are present in disc/runtime artifacts, but it does not prove any human arena-name or Challenge rotation mapping. Keep runtime name mapping on st## literals until Dolphin/DOL control-flow tracing identifies the table that chooses stages.
 
 ## Combat FX
 

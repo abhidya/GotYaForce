@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:46:49.406Z",
+  "generatedAt": "2026-07-01T02:50:40.661Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -332,6 +332,11 @@
           "kind": "literal-public-path",
           "publicPath": "/models/pl0615/model_00.dae",
           "exists": true
+        },
+        {
+          "kind": "mounted-ui-scene",
+          "publicPath": "/ui/scenes/entry00/model_00.dae",
+          "exists": true
         }
       ],
       "handcodedSurfaceSignals": [
@@ -343,12 +348,12 @@
         {
           "kind": "css-force-platform",
           "pattern": "gf-select-platform",
-          "line": 52
+          "line": 54
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 47
+          "line": 49
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -829,11 +834,11 @@
     },
     "stageCodeEvidence": {
       "path": "research/asset-inventory/stage-code-evidence.json",
-      "parses": false,
-      "bootDolStageCodeHitCount": null,
-      "bootDolUniqueStageCodeCount": null,
-      "verifiedArenaNameMappingCount": null,
-      "conclusion": null
+      "parses": true,
+      "bootDolStageCodeHitCount": 0,
+      "bootDolUniqueStageCodeCount": 0,
+      "verifiedArenaNameMappingCount": 0,
+      "conclusion": "This scan proves the exported st## codes are present in disc/runtime artifacts, but it does not prove any human arena-name or Challenge rotation mapping. Keep runtime name mapping on st## literals until Dolphin/DOL control-flow tracing identifies the table that chooses stages."
     }
   },
   "uiSceneExports": {

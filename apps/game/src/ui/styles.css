@@ -384,6 +384,14 @@
 
 /* ============================ SELECT A FORCE ============================ */
 .gf-select-force { background: #8b4fb5; }
+.gf-select-entry-scene {
+  opacity: 0.46;
+  transform: scale(1.04);
+  z-index: 1;
+}
+.gf-select-entry-scene .gf-ui-scene-canvas {
+  filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.32));
+}
 .gf-select-entry-sheet {
   position: absolute;
   left: 2%;
