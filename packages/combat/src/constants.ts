@@ -9,8 +9,28 @@
 //     holding FORWARD produced +Z movement). GROUND_Y default 10 to match the trace.
 //   - Everything else (speeds, gravity, damage scale, ranges, cooldowns): TUNED to feel like
 //     a fast 3D arena fighter. RELATIVE values come from stats (speed/attack/shot/defense);
-//     the ABSOLUTE scale is a tuning choice. HP/damage offsets were NOT recoverable from the
-//     ROM (behavior-notes.md s4f), so the damage formula is ours, not a port.
+//     the ABSOLUTE scale is a tuning choice.
+//
+//   - HP field: DERIVED (2026-07-01). Confirmed live — a 16-bit uint mirrored at 5 fixed
+//     addresses (0x803b069c, 0x805dbf86, 0x805f3850/58/5c) tracks the on-screen HP gauge;
+//     found independently by a 6-save-state MEM1 diff AND by Dolphin's live Cheat Search,
+//     converging on the same address set (behavior-notes.md s4f).
+//   - Damage application mechanism: DERIVED (2026-07-01). Live disassembly at the HP write site
+//     (object+0x1C6) showed a plain `HP -= raw_damage`, clamped at 0, with a secondary bound
+//     check against a neighboring field at +0x1C4 (behavior-notes.md s4h). applyHit()/mitigate()
+//     in combat.ts already implement subtract-then-clamp-at-zero, matching this shape exactly.
+//   - object+0x88 mismatch divisor: DERIVED mechanism, but NOT wired to borgs.json display type.
+//     Ghidra export re-read (behavior-notes.md s4m) shows +0x88 is copied from match slot/team
+//     state (`PTR_DAT_80433934[slot+0xcb]`) in the active spawn paths. The five-value
+//     borgs.json `type` string is not a safe proxy, so combat.ts intentionally does not apply
+//     TYPE_MISMATCH_DIVISOR yet.
+//   - The exact attack/defense-to-raw-damage coefficients (DEF_PER_STAT/MIN_MULT/DMG_BASE/
+//     DMG_PER_STAT below) remain TUNED. Ghidra located the real formula function (`zz_003cd5c_`,
+//     behavior-notes.md s4j) — it's a multi-stage multiplicative formula keyed off a per-move
+//     data pointer (`power * (1 + k*(atkStat - baseline))`, plus further sub-object-gated
+//     multipliers), not the linear BASE+stat*PER_STAT shape used here. Full decode of that
+//     function (naming its float constants and the small multiplier table it indexes) is the
+//     next step before these constants could be replaced with a derived formula.
 //
 // Units: world units per frame (or per second where noted). Stage bounds from the RAM trace
 // were in the low thousands (X~3000, Z~-680..-960), so absolute speeds are scaled to that world.
@@ -139,12 +159,25 @@ export const DAMAGE = {
   /**
    * Defense mitigation: incoming damage is multiplied by (1 - defense*DEF_PER_STAT),
    * floored at MIN_MULT so high-defense borgs still take chip damage. defense 0..10.
-   * TUNED (no ROM formula was recoverable).
+   * TUNED, and now confirmed to be a deliberately-simplified stand-in rather than a missing
+   * lookup: behavior-notes.md s4k traced the real base-damage formula (`zz_003cd5c_`) to its end
+   * and found the ROM has no single "defense percentage" at all — mitigation is spread across
+   * several attacker/defender rank+category table lookups (indexed by fields at object+0x43a,
+   * +0x6ca, +0x88, and a HP-ratio-derived index) plus a per-attacker "rank" table. There is no
+   * flat percentage to extract from that; a percentage-based model is a reasonable simplification
+   * of a system whose real shape is table-driven, not a not-yet-found formula.
    */
   DEF_PER_STAT: 0.06,
   MIN_MULT: 0.25,
   /** A hit that brings HP to <= KNOCKDOWN_FRACTION of a big blow forces knockdown. */
   KNOCKDOWN_DMG: 40,
+  /**
+   * DERIVED constant for the special +0x88 mismatch branch in `zz_002e2a8_`: when that branch
+   * uses the object+0x88 byte, mismatch quarters the value via rounded /4 before HP subtract.
+   * Not currently applied in combat.ts because +0x88 is a match slot/team byte in spawn paths,
+   * not borgs.json's five-value display type (behavior-notes.md s4m).
+   */
+  TYPE_MISMATCH_DIVISOR: 4,
 } as const;
 
 export const STATE = {

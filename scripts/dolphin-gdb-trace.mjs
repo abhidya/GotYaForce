@@ -508,6 +508,18 @@ async function main() {
         }
       }
 
+      // Wide struct dump for HP-hunting: known accesses on the active-borg struct span at
+      // least 0x000-0x8c4 (borg-struct-offsets.txt) with a second cluster out to ~0x1dd4, so
+      // the 0x40-byte per-register snapshots above are too narrow to ever contain the HP
+      // field. When this hit resolves an active_borg_base, also grab a single large
+      // contiguous dump of the whole struct so two hits (e.g. pre-hit vs. post-hit, or two
+      // successive knockdowns) can be diffed offset-by-offset to spot which field dropped by
+      // a plausible damage amount.
+      let activeBaseStruct = null;
+      if (isMem1(activeBase)) {
+        activeBaseStruct = { base: hex32(activeBase), size: 0x1e00, bytes: await readMem(gdb, activeBase, 0x1e00) };
+      }
+
       trace.hits.push({
         index: trace.hits.length,
         at: new Date().toISOString(),
@@ -519,6 +531,7 @@ async function main() {
         watchpoint,
         regs,
         pointers,
+        activeBaseStruct,
       });
     }
 

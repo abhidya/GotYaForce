@@ -38,6 +38,20 @@ research/disc/*/
 # tools/ is populated by another agent cloning NeoGF etc.; dolphin/ is a local install.
 tools/
 dolphin/
+.tools/
+GameCubeLoader/
+ghidra_*_PUBLIC/
+ghidra_*_PUBLIC_*.zip
+
+# Local Ghidra project state. The exported decompile corpus under
+# research/decomp/ghidra-export/ is the tracked artifact, not the GUI database.
+research/decomp/*.gpr
+research/decomp/*.lock
+research/decomp/*.lock~
+research/decomp/*.rep/
+
+# Live Dolphin capture scratch output.
+hp_log.csv
 
 # User save files (local)
 *.sav
