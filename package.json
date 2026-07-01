@@ -11,7 +11,7 @@
   "scripts": {
     "build": "pnpm -r run build",
     "dev": "pnpm --filter game dev",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc -b tsconfig.json apps/game/tsconfig.json",
     "clean": "pnpm -r exec rimraf dist tsconfig.tsbuildinfo",
     "extract": "node scripts/extract-user-disc.mjs",
     "sync:assets": "node scripts/sync-exported-assets.mjs",
