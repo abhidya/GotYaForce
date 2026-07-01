@@ -1,0 +1,765 @@
+{
+  "generatedAt": "2026-07-01T02:46:49.653Z",
+  "scanner": "scripts/inventory-stage-code-evidence.mjs",
+  "region": "GG4E",
+  "purpose": "Find direct stage-code evidence from the extracted disc/runtime without inferring arena-name or Challenge-mode mappings.",
+  "inputs": {
+    "bootDol": {
+      "path": "user-data/GG4E/disc/sys/boot.dol",
+      "bytes": 3888928
+    },
+    "afsRoot": "user-data/GG4E/afs_data/root",
+    "publicStagesManifest": "apps/game/public/stages/manifest.json",
+    "runtimeAdapter": "apps/game/src/sim/adapter.ts",
+    "tracePlan": "research/traces/GG4E/breakpoints-watchpoints.json"
+  },
+  "exportedStageIds": [
+    "st00",
+    "st01",
+    "st02",
+    "st03",
+    "st04",
+    "st05",
+    "st06",
+    "st07",
+    "st08",
+    "st09",
+    "st0a",
+    "st0b",
+    "st0c",
+    "st0d",
+    "st0e",
+    "st0f",
+    "st10",
+    "st20",
+    "st21",
+    "st22",
+    "st23",
+    "st24",
+    "st25",
+    "st29",
+    "st2a",
+    "st2b",
+    "st2c",
+    "st2e",
+    "st40",
+    "st41",
+    "st42",
+    "st43",
+    "st44",
+    "st45",
+    "st49",
+    "st4a",
+    "st4b",
+    "st4c",
+    "st4e",
+    "stff"
+  ],
+  "sourceStageIds": [
+    "st00",
+    "st01",
+    "st02",
+    "st03",
+    "st04",
+    "st05",
+    "st06",
+    "st07",
+    "st08",
+    "st09",
+    "st0a",
+    "st0b",
+    "st0c",
+    "st0d",
+    "st0e",
+    "st0f",
+    "st10",
+    "st20",
+    "st21",
+    "st22",
+    "st23",
+    "st24",
+    "st25",
+    "st29",
+    "st2a",
+    "st2b",
+    "st2c",
+    "st2e",
+    "st40",
+    "st41",
+    "st42",
+    "st43",
+    "st44",
+    "st45",
+    "st49",
+    "st4a",
+    "st4b",
+    "st4c",
+    "st4e",
+    "stff"
+  ],
+  "summary": {
+    "exportedStageCount": 40,
+    "sourceStageArchiveCount": 40,
+    "bootDolStageCodeHitCount": 0,
+    "bootDolUniqueStageCodeCount": 0,
+    "rootStageReferenceFileCount": 80,
+    "runtimeFallbacksChallengeToDefault": true,
+    "verifiedArenaNameMappingCount": 0
+  },
+  "bootDolStageCodeEvidence": {
+    "path": "user-data/GG4E/disc/sys/boot.dol",
+    "hits": [],
+    "uniqueStageIds": []
+  },
+  "rootStageReferenceEvidence": {
+    "afsRoot": "user-data/GG4E/afs_data/root",
+    "filesWithStageRefs": [
+      {
+        "path": "user-data/GG4E/afs_data/root/st00.pzz",
+        "name": "st00.pzz",
+        "bytes": 573440,
+        "stageIds": [
+          "st00"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
+        "name": "st00_mdl.arc",
+        "bytes": 485019,
+        "stageIds": [
+          "st00"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st01.pzz",
+        "name": "st01.pzz",
+        "bytes": 516096,
+        "stageIds": [
+          "st01"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st01_mdl.arc",
+        "name": "st01_mdl.arc",
+        "bytes": 435155,
+        "stageIds": [
+          "st01"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st02.pzz",
+        "name": "st02.pzz",
+        "bytes": 663552,
+        "stageIds": [
+          "st02"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st02_mdl.arc",
+        "name": "st02_mdl.arc",
+        "bytes": 494683,
+        "stageIds": [
+          "st02"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st03.pzz",
+        "name": "st03.pzz",
+        "bytes": 495616,
+        "stageIds": [
+          "st03"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st03_mdl.arc",
+        "name": "st03_mdl.arc",
+        "bytes": 417139,
+        "stageIds": [
+          "st03"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st04.pzz",
+        "name": "st04.pzz",
+        "bytes": 675840,
+        "stageIds": [
+          "st04"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st04_mdl.arc",
+        "name": "st04_mdl.arc",
+        "bytes": 510187,
+        "stageIds": [
+          "st04"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st05.pzz",
+        "name": "st05.pzz",
+        "bytes": 565248,
+        "stageIds": [
+          "st05"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st05_mdl.arc",
+        "name": "st05_mdl.arc",
+        "bytes": 477567,
+        "stageIds": [
+          "st05"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st06.pzz",
+        "name": "st06.pzz",
+        "bytes": 280576,
+        "stageIds": [
+          "st06"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st06_mdl.arc",
+        "name": "st06_mdl.arc",
+        "bytes": 252559,
+        "stageIds": [
+          "st06"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st07.pzz",
+        "name": "st07.pzz",
+        "bytes": 235520,
+        "stageIds": [
+          "st07"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st07_mdl.arc",
+        "name": "st07_mdl.arc",
+        "bytes": 208607,
+        "stageIds": [
+          "st07"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st08.pzz",
+        "name": "st08.pzz",
+        "bytes": 622592,
+        "stageIds": [
+          "st08"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st08_mdl.arc",
+        "name": "st08_mdl.arc",
+        "bytes": 475827,
+        "stageIds": [
+          "st08"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st09.pzz",
+        "name": "st09.pzz",
+        "bytes": 395264,
+        "stageIds": [
+          "st09"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+        "name": "st09_mdl.arc",
+        "bytes": 365151,
+        "stageIds": [
+          "st09"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0a.pzz",
+        "name": "st0a.pzz",
+        "bytes": 573440,
+        "stageIds": [
+          "st0a"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0a_mdl.arc",
+        "name": "st0a_mdl.arc",
+        "bytes": 449135,
+        "stageIds": [
+          "st0a"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0b.pzz",
+        "name": "st0b.pzz",
+        "bytes": 593920,
+        "stageIds": [
+          "st0b"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0b_mdl.arc",
+        "name": "st0b_mdl.arc",
+        "bytes": 507671,
+        "stageIds": [
+          "st0b"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0c.pzz",
+        "name": "st0c.pzz",
+        "bytes": 544768,
+        "stageIds": [
+          "st0c"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0c_mdl.arc",
+        "name": "st0c_mdl.arc",
+        "bytes": 458543,
+        "stageIds": [
+          "st0c"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0d.pzz",
+        "name": "st0d.pzz",
+        "bytes": 401408,
+        "stageIds": [
+          "st0d"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0d_mdl.arc",
+        "name": "st0d_mdl.arc",
+        "bytes": 349419,
+        "stageIds": [
+          "st0d"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0e.pzz",
+        "name": "st0e.pzz",
+        "bytes": 636928,
+        "stageIds": [
+          "st0e"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0e_mdl.arc",
+        "name": "st0e_mdl.arc",
+        "bytes": 502335,
+        "stageIds": [
+          "st0e"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0f.pzz",
+        "name": "st0f.pzz",
+        "bytes": 385024,
+        "stageIds": [
+          "st0f"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st0f_mdl.arc",
+        "name": "st0f_mdl.arc",
+        "bytes": 336671,
+        "stageIds": [
+          "st0f"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st10.pzz",
+        "name": "st10.pzz",
+        "bytes": 452608,
+        "stageIds": [
+          "st10"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st10_mdl.arc",
+        "name": "st10_mdl.arc",
+        "bytes": 288439,
+        "stageIds": [
+          "st10"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st20.pzz",
+        "name": "st20.pzz",
+        "bytes": 573440,
+        "stageIds": [
+          "st20"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+        "name": "st20_mdl.arc",
+        "bytes": 484923,
+        "stageIds": [
+          "st20"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st21.pzz",
+        "name": "st21.pzz",
+        "bytes": 516096,
+        "stageIds": [
+          "st21"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st21_mdl.arc",
+        "name": "st21_mdl.arc",
+        "bytes": 435155,
+        "stageIds": [
+          "st21"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st22.pzz",
+        "name": "st22.pzz",
+        "bytes": 663552,
+        "stageIds": [
+          "st22"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st22_mdl.arc",
+        "name": "st22_mdl.arc",
+        "bytes": 494683,
+        "stageIds": [
+          "st22"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st23.pzz",
+        "name": "st23.pzz",
+        "bytes": 495616,
+        "stageIds": [
+          "st23"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st23_mdl.arc",
+        "name": "st23_mdl.arc",
+        "bytes": 417139,
+        "stageIds": [
+          "st23"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st24.pzz",
+        "name": "st24.pzz",
+        "bytes": 675840,
+        "stageIds": [
+          "st24"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st24_mdl.arc",
+        "name": "st24_mdl.arc",
+        "bytes": 510187,
+        "stageIds": [
+          "st24"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st25.pzz",
+        "name": "st25.pzz",
+        "bytes": 565248,
+        "stageIds": [
+          "st25"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st25_mdl.arc",
+        "name": "st25_mdl.arc",
+        "bytes": 477567,
+        "stageIds": [
+          "st25"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st29.pzz",
+        "name": "st29.pzz",
+        "bytes": 395264,
+        "stageIds": [
+          "st29"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st29_mdl.arc",
+        "name": "st29_mdl.arc",
+        "bytes": 365151,
+        "stageIds": [
+          "st29"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st2a.pzz",
+        "name": "st2a.pzz",
+        "bytes": 573440,
+        "stageIds": [
+          "st2a"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st2a_mdl.arc",
+        "name": "st2a_mdl.arc",
+        "bytes": 449135,
+        "stageIds": [
+          "st2a"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st2b.pzz",
+        "name": "st2b.pzz",
+        "bytes": 593920,
+        "stageIds": [
+          "st2b"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st2b_mdl.arc",
+        "name": "st2b_mdl.arc",
+        "bytes": 507671,
+        "stageIds": [
+          "st2b"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st2c.pzz",
+        "name": "st2c.pzz",
+        "bytes": 544768,
+        "stageIds": [
+          "st2c"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st2c_mdl.arc",
+        "name": "st2c_mdl.arc",
+        "bytes": 458543,
+        "stageIds": [
+          "st2c"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st2e.pzz",
+        "name": "st2e.pzz",
+        "bytes": 636928,
+        "stageIds": [
+          "st2e"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st2e_mdl.arc",
+        "name": "st2e_mdl.arc",
+        "bytes": 502335,
+        "stageIds": [
+          "st2e"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st40.pzz",
+        "name": "st40.pzz",
+        "bytes": 573440,
+        "stageIds": [
+          "st40"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st40_mdl.arc",
+        "name": "st40_mdl.arc",
+        "bytes": 484923,
+        "stageIds": [
+          "st40"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st41.pzz",
+        "name": "st41.pzz",
+        "bytes": 516096,
+        "stageIds": [
+          "st41"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st41_mdl.arc",
+        "name": "st41_mdl.arc",
+        "bytes": 435155,
+        "stageIds": [
+          "st41"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st42.pzz",
+        "name": "st42.pzz",
+        "bytes": 663552,
+        "stageIds": [
+          "st42"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st42_mdl.arc",
+        "name": "st42_mdl.arc",
+        "bytes": 494683,
+        "stageIds": [
+          "st42"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st43.pzz",
+        "name": "st43.pzz",
+        "bytes": 495616,
+        "stageIds": [
+          "st43"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st43_mdl.arc",
+        "name": "st43_mdl.arc",
+        "bytes": 417139,
+        "stageIds": [
+          "st43"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st44.pzz",
+        "name": "st44.pzz",
+        "bytes": 675840,
+        "stageIds": [
+          "st44"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st44_mdl.arc",
+        "name": "st44_mdl.arc",
+        "bytes": 510187,
+        "stageIds": [
+          "st44"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st45.pzz",
+        "name": "st45.pzz",
+        "bytes": 565248,
+        "stageIds": [
+          "st45"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st45_mdl.arc",
+        "name": "st45_mdl.arc",
+        "bytes": 477567,
+        "stageIds": [
+          "st45"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st49.pzz",
+        "name": "st49.pzz",
+        "bytes": 395264,
+        "stageIds": [
+          "st49"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st49_mdl.arc",
+        "name": "st49_mdl.arc",
+        "bytes": 365151,
+        "stageIds": [
+          "st49"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st4a.pzz",
+        "name": "st4a.pzz",
+        "bytes": 573440,
+        "stageIds": [
+          "st4a"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st4a_mdl.arc",
+        "name": "st4a_mdl.arc",
+        "bytes": 449135,
+        "stageIds": [
+          "st4a"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st4b.pzz",
+        "name": "st4b.pzz",
+        "bytes": 593920,
+        "stageIds": [
+          "st4b"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st4b_mdl.arc",
+        "name": "st4b_mdl.arc",
+        "bytes": 507671,
+        "stageIds": [
+          "st4b"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st4c.pzz",
+        "name": "st4c.pzz",
+        "bytes": 544768,
+        "stageIds": [
+          "st4c"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st4c_mdl.arc",
+        "name": "st4c_mdl.arc",
+        "bytes": 458543,
+        "stageIds": [
+          "st4c"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st4e.pzz",
+        "name": "st4e.pzz",
+        "bytes": 636928,
+        "stageIds": [
+          "st4e"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/st4e_mdl.arc",
+        "name": "st4e_mdl.arc",
+        "bytes": 502335,
+        "stageIds": [
+          "st4e"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/stff.pzz",
+        "name": "stff.pzz",
+        "bytes": 849920,
+        "stageIds": [
+          "stff"
+        ]
+      },
+      {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "name": "stff_mdl.arc",
+        "bytes": 680791,
+        "stageIds": [
+          "stff"
+        ]
+      }
+    ]
+  },
+  "conclusion": "This scan proves the exported st## codes are present in disc/runtime artifacts, but it does not prove any human arena-name or Challenge rotation mapping. Keep runtime name mapping on st## literals until Dolphin/DOL control-flow tracing identifies the table that chooses stages.",
+  "nextTraceTasks": [
+    "Trace writes/reads around BattleConfig arena selection and stage archive loads while entering Challenge battle 1.",
+    "Break on file/archive open routines with watch strings for st##_mdl.arc and st##.pzz to capture the code path and selected stage id.",
+    "Once a Challenge battle loads, record the selected st## literal and add only that proven id to runtime mapping/tests."
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:42:18.190Z",
+  "generatedAt": "2026-07-01T02:46:49.406Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -14,6 +14,7 @@
     "publicStagesTotal": 40,
     "publicStagesRenderState": 40,
     "runtimeStageFallback": "st00",
+    "runtimeAcceptsHexStageIds": true,
     "runtimeStageCollisionBounds": true,
     "runtimeStageTriangleCollision": true,
     "runtimeStageWallCollision": true,
@@ -803,6 +804,7 @@
         "stea",
         "stab"
       ],
+      "acceptsHexStageIds": true,
       "adapterRefs": {
         "defaultArenaStage": "apps/game/src/sim/adapter.ts:23",
         "fallback": "apps/game/src/sim/adapter.ts:35"
@@ -824,6 +826,14 @@
         "parserPackage": "@gf/formats"
       },
       "assessment": "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
+    },
+    "stageCodeEvidence": {
+      "path": "research/asset-inventory/stage-code-evidence.json",
+      "parses": false,
+      "bootDolStageCodeHitCount": null,
+      "bootDolUniqueStageCodeCount": null,
+      "verifiedArenaNameMappingCount": null,
+      "conclusion": null
     }
   },
   "uiSceneExports": {

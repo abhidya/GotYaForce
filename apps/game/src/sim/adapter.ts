@@ -25,13 +25,13 @@ export const DEFAULT_ARENA_STAGE = "st00";
 /**
  * Map a mission arena id to a browser-exported stage id.
  *
- * The extractor exports real disc stages as `st##`. Adventure arena names like
+ * The extractor exports real disc stages as hex `st##` ids. Adventure arena names like
  * "Little Hill" are not yet verified against those ids, so they deliberately
  * fall back instead of guessing. When a traced table exists, add it here.
  */
 export function stageIdForArena(arena: string | undefined): string {
   const normalized = arena?.trim().toLowerCase() ?? "";
-  if (/^st\d{2}$/.test(normalized)) return normalized;
+  if (/^st[0-9a-f]{2}$/.test(normalized)) return normalized;
   if (normalized === "challenge") return DEFAULT_ARENA_STAGE;
   return DEFAULT_ARENA_STAGE;
 }

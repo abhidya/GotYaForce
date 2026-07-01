@@ -262,6 +262,7 @@ function inspectScreens() {
 function inspectStages() {
   const rootManifest = readJson("apps/game/public/stages/manifest.json");
   const plan = readJson("research/asset-inventory/stage-export-plan.json");
+  const stageCodeEvidence = readJson("research/asset-inventory/stage-code-evidence.json");
   const adapter = readText("apps/game/src/sim/adapter.ts");
   const main = readText("apps/game/src/main.ts");
   const publicStages = rootManifest.value?.stages ?? [];
@@ -294,6 +295,7 @@ function inspectStages() {
     runtimeUse: {
       defaultStage: runtimeLiteralStages.includes("st00") ? "st00" : null,
       literalStageIdsInAdapter: runtimeLiteralStages,
+      acceptsHexStageIds: adapter.includes("^st[0-9a-f]{2}$"),
       adapterRefs: {
         defaultArenaStage: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "DEFAULT_ARENA_STAGE")}`,
         fallback: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "return DEFAULT_ARENA_STAGE")}`,
@@ -318,6 +320,14 @@ function inspectStages() {
         publicStages.length > 1
           ? "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
           : "Runtime and public export are both effectively st00-only.",
+    },
+    stageCodeEvidence: {
+      path: "research/asset-inventory/stage-code-evidence.json",
+      parses: stageCodeEvidence.ok,
+      bootDolStageCodeHitCount: stageCodeEvidence.value?.summary?.bootDolStageCodeHitCount ?? null,
+      bootDolUniqueStageCodeCount: stageCodeEvidence.value?.summary?.bootDolUniqueStageCodeCount ?? null,
+      verifiedArenaNameMappingCount: stageCodeEvidence.value?.summary?.verifiedArenaNameMappingCount ?? null,
+      conclusion: stageCodeEvidence.value?.conclusion ?? null,
     },
   };
 }
@@ -449,6 +459,7 @@ function buildReport() {
     publicStagesTotal: stageCoverage.publicManifest.stageCount,
     publicStagesRenderState: stageCoverage.publicManifest.renderStateCoveredCount,
     runtimeStageFallback: stageCoverage.runtimeUse.defaultStage,
+    runtimeAcceptsHexStageIds: stageCoverage.runtimeUse.acceptsHexStageIds,
     runtimeStageCollisionBounds: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesBoundsToCombat,
     runtimeStageTriangleCollision: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesTrianglesToCombat,
     runtimeStageWallCollision: stageCoverage.runtimeUse.collisionBounds.movementUsesTriangleWalls,
@@ -521,6 +532,7 @@ function renderMarkdown(report) {
   add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
   add(`- Runtime audio from exported cues: ${report.summary.runtimeAudioFromExportedCues ? "yes" : "no"}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
+  add(`- Runtime accepts exported hex stage ids: ${report.summary.runtimeAcceptsHexStageIds ? "yes" : "no"}`);
   add();
   add("## Runtime Screens");
   add();
@@ -555,6 +567,12 @@ function renderMarkdown(report) {
   add(`Runtime collision parser: ${report.stageCoverage.runtimeUse.collisionBounds.parserPackage ?? "none"} (bounds ${report.summary.runtimeStageCollisionBounds ? "wired" : "not wired"}, triangles ${report.summary.runtimeStageTriangleCollision ? "wired" : "not wired"}, walls ${report.summary.runtimeStageWallCollision ? "wired" : "not wired"}, ceilings ${report.summary.runtimeStageCeilingCollision ? "wired" : "not wired"})`);
   add();
   add(report.stageCoverage.runtimeUse.assessment);
+  if (report.stageCoverage.stageCodeEvidence.parses) {
+    add();
+    add(`Stage-code evidence: ${report.stageCoverage.stageCodeEvidence.path} (${report.stageCoverage.stageCodeEvidence.bootDolStageCodeHitCount} boot.dol hits, ${report.stageCoverage.stageCodeEvidence.bootDolUniqueStageCodeCount} unique stage codes, ${report.stageCoverage.stageCodeEvidence.verifiedArenaNameMappingCount} verified arena-name mappings).`);
+    add();
+    add(report.stageCoverage.stageCodeEvidence.conclusion);
+  }
   add();
   add("## Combat FX");
   add();

@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T02:42:18.190Z
+Generated: 2026-07-01T02:46:49.406Z
 
 ## Summary
 
@@ -19,6 +19,7 @@ Generated: 2026-07-01T02:42:18.190Z
 - Runtime projectile FX from exported textures: yes
 - Runtime audio from exported cues: yes
 - Runtime stage fallback: st00
+- Runtime accepts exported hex stage ids: yes
 
 ## Runtime Screens
 
