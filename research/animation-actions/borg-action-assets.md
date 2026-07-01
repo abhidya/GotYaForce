@@ -1,6 +1,6 @@
 # Borg Action Animation Asset Inventory
 
-Generated: 2026-07-01T03:52:06.426Z
+Generated: 2026-07-01T03:54:47.986Z
 Script: `scripts/inventory-borg-action-assets.mjs`
 
 This is an inventory pipeline, not gameplay behavior. Action rows are candidates backed by exported/source assets.
@@ -13,8 +13,8 @@ This is an inventory pipeline, not gameplay behavior. Action rows are candidates
 | Source models | 207 |
 | Source MOT files | 104 |
 | Exported models | 1 |
-| Exported anim indexes | 104 |
-| Exported indexed clips | 4653 |
+| Exported anim indexes | 105 |
+| Exported indexed clips | 4709 |
 | Source MOT structural clips | 4433 |
 | PZZ member records joined | 2926 |
 | Borgs with PZZ member records | 209 |
@@ -27,17 +27,17 @@ This is an inventory pipeline, not gameplay behavior. Action rows are candidates
 
 | Action | Borgs with exported candidate |
 |---|---:|
-| `idle` | 104 |
-| `walk/run` | 101 |
-| `jump` | 101 |
-| `fly/air` | 101 |
-| `dash` | 101 |
-| `shoot/gun` | 95 |
+| `idle` | 105 |
+| `walk/run` | 102 |
+| `jump` | 102 |
+| `fly/air` | 102 |
+| `dash` | 102 |
+| `shoot/gun` | 96 |
 | `beam` | 5 |
-| `melee/sword` | 96 |
-| `hit` | 92 |
-| `death` | 93 |
-| `spawn` | 104 |
+| `melee/sword` | 97 |
+| `hit` | 93 |
+| `death` | 94 |
+| `spawn` | 105 |
 
 ## Priority Borgs
 
@@ -100,7 +100,7 @@ Notes: no exported candidate for: shoot/gun, beam; 2 exported anim JSON files ar
 | `pl0000` | NORMAL NINJA | yes | yes | yes | 56 | beam |
 | `pl0001` | SHURIKEN NINJA | yes | yes | yes | 50 | beam |
 | `pl0002` | ARROW NINJA | yes | yes | yes | 56 | beam |
-| `pl0003` | DOUBLE NINJA | no | yes | no | 0 | idle, walk/run, jump, fly/air, dash, shoot/gun, beam, melee/sword, hit, death, spawn |
+| `pl0003` | DOUBLE NINJA | no | yes | yes | 56 | beam |
 | `pl0004` | ACCELERATION NINJA | yes | yes | yes | 51 | beam |
 | `pl0005` | TELEPORT NINJA | yes | yes | yes | 53 | beam |
 | `pl0006` | FLAME NINJA | yes | yes | yes | 51 | beam |
