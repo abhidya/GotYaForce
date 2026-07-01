@@ -1,6 +1,6 @@
 # Ghidra Function Evidence Index
 
-Generated: 2026-07-01T09:36:51.788Z
+Generated: 2026-07-01T09:41:15.606Z
 
 ## Warning
 
@@ -25,7 +25,6 @@ inferredName values are local hints only. Verify with callers/callees, constants
 | force-setup | 1565 | `packages/missions/src/challenge.ts`<br>`packages/combat/src/battle.ts`<br>`apps/game/src/ui/screens/SelectForce.ts` |
 | knockback-targeting | 2045 | `packages/combat/src/combat.ts`<br>`packages/physics/src/index.ts`<br>`apps/game/src/sim/battleScene.ts` |
 | movement-physics | 2765 | `packages/combat/src/movement.ts`<br>`packages/physics/src/index.ts`<br>`apps/game/src/sim/battleScene.ts` |
-| stage-load-collision | 28 | `apps/game/src/sim/adapter.ts`<br>`apps/game/src/main.ts`<br>`packages/formats/src/hit-bin.ts` |
 
 ## Known Porting Anchors
 

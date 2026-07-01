@@ -1,0 +1,5416 @@
+{
+  "generatedAt": "2026-07-01T09:41:43.642Z",
+  "generatedBy": "scripts/inventory-challenge-flow-evidence.mjs",
+  "sourceIndex": "research/decomp/index/function-evidence-index.json",
+  "principle": "Do not replace player-facing Challenge flow with fake menus/stages/mechanics. Each step below must be driven by original functions, data tables, asset opens, traces, or behavior.",
+  "flowSteps": [
+    {
+      "id": "main-menu-challenge-selection",
+      "label": "main menu -> Challenge Mode selection",
+      "anchors": [
+        {
+          "address": "0x80195fbc",
+          "currentFunctionName": "FUN_80195fbc",
+          "inferredName": "challenge-menu-flow_candidate_80195fbc",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:127",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80006b74",
+              "name": "zz_0006b74_"
+            },
+            {
+              "address": "0x80196f3c",
+              "name": "zz_0196f3c_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433944"
+          ],
+          "globalAccesses": [
+            "DAT_80436378",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433944",
+            "PTR_DAT_80433934[0x1c]",
+            "PTR_DAT_80433934 + 0x15c",
+            "PTR_DAT_80433934 + 0x120"
+          ],
+          "constants": [
+            "1",
+            "0",
+            "0x18b8",
+            "0x4a0",
+            "0x1c",
+            "0xff",
+            "0x15c",
+            "999999",
+            "0x120"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts"
+          ]
+        },
+        {
+          "address": "0x801962c4",
+          "currentFunctionName": "FUN_801962c4",
+          "inferredName": "challenge-menu-flow_candidate_801962c4",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:226",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x800055fc",
+              "name": "zz_00055fc_"
+            },
+            {
+              "address": "0x800064d4",
+              "name": "zz_00064d4_"
+            },
+            {
+              "address": "0x8000685c",
+              "name": "zz_000685c_"
+            },
+            {
+              "address": "0x80027c1c",
+              "name": "zz_0027c1c_"
+            },
+            {
+              "address": "0x80029fd4",
+              "name": "zz_0029fd4_"
+            },
+            {
+              "address": "0x80066168",
+              "name": "zz_0066168_"
+            },
+            {
+              "address": "0x80196eb8",
+              "name": "zz_0196eb8_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433930",
+            "PTR_DAT_8036f40c",
+            "PTR_DAT_8036f4b8",
+            "PTR_DAT_8036f434",
+            "PTR_DAT_8036f53c",
+            "PTR_DAT_8036f360",
+            "PTR_DAT_8036f3e4",
+            "DAT_804356ec",
+            "PTR_DAT_80433950",
+            "DAT_804356e4"
+          ],
+          "globalAccesses": [
+            "DAT_80436378",
+            "PTR_DAT_80433934[0x15d9]",
+            "PTR_DAT_80433934[0x15da]",
+            "PTR_DAT_80433930[2]",
+            "PTR_DAT_80433934[iVar4 + 0xcb]",
+            "PTR_DAT_80433934[iVar4 + 0xcc]",
+            "DAT_80436378 + 0x13",
+            "DAT_80436378[8]",
+            "PTR_DAT_8036f40c",
+            "PTR_DAT_8036f4b8",
+            "PTR_DAT_8036f434",
+            "PTR_DAT_8036f53c",
+            "PTR_DAT_80433934[iVar4 + 0x5a]",
+            "PTR_DAT_80433934[iVar9 + 0x1654]",
+            "PTR_DAT_8036f360",
+            "PTR_DAT_8036f3e4",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[iVar8 + (char)PTR_DAT_80433934[iVar4 + 0x5a]",
+            "PTR_DAT_80433934[iVar4 + 0x20]",
+            "PTR_DAT_80433934[iVar4 + 0x3e]"
+          ],
+          "constants": [
+            "2",
+            "4",
+            "0",
+            "0x15d9",
+            "0x15da",
+            "3",
+            "1",
+            "0xcb",
+            "0xff",
+            "0xcc",
+            "0x13",
+            "8",
+            "0x5a",
+            "0x1654",
+            "0x1f",
+            "0x7fffffff",
+            "0x1e",
+            "0x1c",
+            "0x1e8",
+            "0x1ea",
+            "0x1eb",
+            "0x10",
+            "0x20",
+            "0xe",
+            "0x3e",
+            "0x29",
+            "0x348",
+            "0x32",
+            "0x54",
+            "0xa0"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x80199da0",
+          "currentFunctionName": "zz_0199da0_",
+          "inferredName": "challenge-menu-flow_candidate_80199da0",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:2797",
+          "callers": [
+            {
+              "address": "0x8019a064",
+              "name": "FUN_8019a064"
+            },
+            {
+              "address": "0x8019a330",
+              "name": "FUN_8019a330"
+            },
+            {
+              "address": "0x8019ac1c",
+              "name": "FUN_8019ac1c"
+            },
+            {
+              "address": "0x8019afa8",
+              "name": "FUN_8019afa8"
+            },
+            {
+              "address": "0x8019b718",
+              "name": "FUN_8019b718"
+            },
+            {
+              "address": "0x8019bae8",
+              "name": "FUN_8019bae8"
+            },
+            {
+              "address": "0x8019be30",
+              "name": "FUN_8019be30"
+            }
+          ],
+          "callees": [],
+          "globalReferences": [
+            "PTR_DAT_80433930"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433930[0x3e]"
+          ],
+          "constants": [
+            "0x3e",
+            "0x1f"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts"
+          ]
+        }
+      ],
+      "topicFallbacks": [
+        {
+          "address": "0x801969a0",
+          "currentFunctionName": "FUN_801969a0",
+          "inferredName": "challenge-menu-flow_candidate_801969a0",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:451",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80042454",
+              "name": "zz_0042454_"
+            },
+            {
+              "address": "0x80042690",
+              "name": "zz_0042690_"
+            },
+            {
+              "address": "0x800437b0",
+              "name": "zz_00437b0_"
+            },
+            {
+              "address": "0x80196dac",
+              "name": "zz_0196dac_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "PTR_DAT_80433930",
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "DAT_80436378",
+            "PTR_DAT_80433930[2]",
+            "PTR_DAT_80433934[0x1f]",
+            "PTR_DAT_80433934[iVar4 + 0xcb]",
+            "DAT_80436378[8]",
+            "DAT_80436378[2]"
+          ],
+          "constants": [
+            "1",
+            "0",
+            "4",
+            "2",
+            "0x1f",
+            "0xcb",
+            "6",
+            "8",
+            "9",
+            "3",
+            "5"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts"
+          ]
+        },
+        {
+          "address": "0x80196030",
+          "currentFunctionName": "FUN_80196030",
+          "inferredName": "challenge-menu-flow_candidate_80196030",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:145",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8018f56c",
+              "name": "zz_018f56c_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "PTR_DAT_80433944",
+            "DAT_804356d0",
+            "PTR_DAT_80433934",
+            "DAT_8036f554"
+          ],
+          "globalAccesses": [
+            "DAT_80436378[2]",
+            "PTR_DAT_80433944 + 6",
+            "PTR_DAT_80433944 + 4",
+            "PTR_DAT_80433944 + 2",
+            "PTR_DAT_80433944",
+            "PTR_DAT_80433944[0x17]",
+            "PTR_DAT_80433944[(char)PTR_DAT_80433944[0x14]",
+            "DAT_80436378 + 0x15",
+            "DAT_80436378",
+            "DAT_80436378 + 10",
+            "PTR_DAT_80433944[0x16]",
+            "DAT_80436378 + 0x13",
+            "PTR_DAT_80433944[0x15]",
+            "DAT_80436378 + 9",
+            "DAT_804356d0",
+            "PTR_DAT_80433934 + 0x120",
+            "DAT_8036f554"
+          ],
+          "constants": [
+            "80196030",
+            "2",
+            "0",
+            "1",
+            "6",
+            "4",
+            "0x17",
+            "0x14",
+            "0x80",
+            "0x161",
+            "0x15",
+            "7",
+            "0x8000",
+            "3",
+            "10",
+            "0x16",
+            "0x13",
+            "9",
+            "0x120"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts"
+          ]
+        },
+        {
+          "address": "0x80195f2c",
+          "currentFunctionName": "FUN_80195f2c",
+          "inferredName": "challenge-menu-flow_candidate_80195f2c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:109",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8002a5f4",
+              "name": "zz_002a5f4_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "DAT_803d4960",
+            "PTR_DAT_80433930",
+            "PTR_FUN_8036f560"
+          ],
+          "globalAccesses": [
+            "DAT_80436378",
+            "DAT_803d4960",
+            "PTR_DAT_80433930[1]",
+            "PTR_DAT_80433930[0x40]",
+            "PTR_FUN_8036f560"
+          ],
+          "constants": [
+            "1",
+            "0",
+            "0x40",
+            "0x16"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts"
+          ]
+        },
+        {
+          "address": "0x80196188",
+          "currentFunctionName": "FUN_80196188",
+          "inferredName": "challenge-menu-flow_candidate_80196188",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:191",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x801ba750",
+              "name": "zz_01ba750_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "PTR_DAT_80435a30",
+            "PTR_DAT_80433944",
+            "DAT_803bfe20"
+          ],
+          "globalAccesses": [
+            "DAT_80436378[2]",
+            "PTR_DAT_80435a30",
+            "PTR_DAT_80435a30[0x46]",
+            "PTR_DAT_80433944[0x14]",
+            "PTR_DAT_80435a30[0x47]",
+            "PTR_DAT_80435a30[0x149]",
+            "PTR_DAT_80435a30[0x40]",
+            "DAT_80436378 + 0x15",
+            "PTR_DAT_80435a30 + 0x24",
+            "PTR_DAT_80433944",
+            "PTR_DAT_80435a30 + 0x28",
+            "PTR_DAT_80435a30 + 0x2c",
+            "DAT_803bfe20",
+            "DAT_80436378"
+          ],
+          "constants": [
+            "80196188",
+            "2",
+            "0",
+            "1",
+            "0x200",
+            "0x46",
+            "0x14",
+            "0x47",
+            "0x149",
+            "3",
+            "0x40",
+            "0x15",
+            "0x24",
+            "0x80",
+            "0x140",
+            "0x28",
+            "0x144",
+            "0x2c",
+            "0x148",
+            "600"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts"
+          ]
+        },
+        {
+          "address": "0x80196a9c",
+          "currentFunctionName": "FUN_80196a9c",
+          "inferredName": "challenge-menu-flow_candidate_80196a9c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:495",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x801f5ae0",
+              "name": "zz_01f5ae0_"
+            },
+            {
+              "address": "0x801f5b68",
+              "name": "zz_01f5b68_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "PTR_DAT_80433930"
+          ],
+          "globalAccesses": [
+            "DAT_80436378[2]",
+            "PTR_DAT_80433930 + 4",
+            "PTR_DAT_80433930 + 6",
+            "DAT_80436378 + 0x13",
+            "DAT_80436378"
+          ],
+          "constants": [
+            "2",
+            "0",
+            "1",
+            "4",
+            "6",
+            "0x13",
+            "7"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts"
+          ]
+        },
+        {
+          "address": "0x80196cec",
+          "currentFunctionName": "FUN_80196cec",
+          "inferredName": "challenge-menu-flow_candidate_80196cec",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:603",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x801f5ae0",
+              "name": "zz_01f5ae0_"
+            },
+            {
+              "address": "0x801f5b68",
+              "name": "zz_01f5b68_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80436378",
+            "PTR_DAT_80433930"
+          ],
+          "globalAccesses": [
+            "DAT_80436378[2]",
+            "PTR_DAT_80433930 + 4",
+            "PTR_DAT_80433930 + 6",
+            "DAT_80436378"
+          ],
+          "constants": [
+            "2",
+            "0",
+            "1",
+            "4",
+            "6",
+            "3",
+            "7"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts"
+          ]
+        }
+      ],
+      "supportingArtifacts": [
+        {
+          "path": "research/asset-inventory/ui-hud-assets.md",
+          "exists": true
+        }
+      ],
+      "requiredBeforePorting": [
+        "Identify the selected menu mode state variable and transition value that enters Challenge.",
+        "Confirm asset opens for title/menu objects/textures before replacing player-facing MainMenu."
+      ],
+      "currentWebEvidence": [
+        {
+          "file": "apps/game/src/main.ts",
+          "needle": "MainMenu -> (challenge)",
+          "sourceRef": "apps/game/src/main.ts:9"
+        },
+        {
+          "file": "apps/game/src/ui/screens/MainMenu.ts",
+          "needle": "The real game renders this as a 3D desk diorama",
+          "sourceRef": "apps/game/src/ui/screens/MainMenu.ts:4"
+        }
+      ]
+    },
+    {
+      "id": "force-setup",
+      "label": "Challenge selection -> force/player setup",
+      "anchors": [
+        {
+          "address": "0x802a3938",
+          "currentFunctionName": "cTeam::GetPlayer(int)",
+          "inferredName": "team_get_player",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0078.c:2079",
+          "callers": [],
+          "callees": [],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "4",
+            "0x9a0"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts"
+          ]
+        },
+        {
+          "address": "0x802807ac",
+          "currentFunctionName": "cPlayer::ClearSwapControllerTimer(void)",
+          "inferredName": "player_clear_swap_controller_timer",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0076.c:3819",
+          "callers": [],
+          "callees": [],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0x10",
+            "0",
+            "0x14",
+            "0x18",
+            "0x1c"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts"
+          ]
+        },
+        {
+          "address": "0x80281c38",
+          "currentFunctionName": "zz_0281c38_",
+          "inferredName": "death_swap_flow_candidate",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0076.c:4844",
+          "callers": [
+            {
+              "address": "0x80281ecc",
+              "name": "zz_0281ecc_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x802779cc",
+              "name": "zz_02779cc_"
+            },
+            {
+              "address": "0x80280798",
+              "name": "zz_0280798_"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "4",
+            "0x18",
+            "1",
+            "0x7fffffff",
+            "0x12a8",
+            "0xfffffffc",
+            "8",
+            "2",
+            "0x1f",
+            "0x20",
+            "3",
+            "0",
+            "0x2dc",
+            "0xff",
+            "0x1b0",
+            "0x1b",
+            "5",
+            "0x290",
+            "0x294",
+            "0x2b8",
+            "0x12b0",
+            "7",
+            "0x1c",
+            "0x268",
+            "9",
+            "0x17",
+            "0x12ac"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts"
+          ]
+        },
+        {
+          "address": "0x800541ac",
+          "currentFunctionName": "FUN_800541ac",
+          "inferredName": "active_borg_spawn_init_from_slot_tables",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:6999",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8001c80c",
+              "name": "zz_001c80c_"
+            },
+            {
+              "address": "0x80027a44",
+              "name": "FUN_80027a44"
+            },
+            {
+              "address": "0x8003cc24",
+              "name": "zz_003cc24_"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            },
+            {
+              "address": "0x80041b20",
+              "name": "zz_0041b20_"
+            },
+            {
+              "address": "0x800422d8",
+              "name": "zz_00422d8_"
+            },
+            {
+              "address": "0x8004bb14",
+              "name": "FUN_8004bb14"
+            },
+            {
+              "address": "0x8004beb8",
+              "name": "zz_004beb8_"
+            },
+            {
+              "address": "0x8005380c",
+              "name": "zz_005380c_"
+            },
+            {
+              "address": "0x80055dcc",
+              "name": "zz_0055dcc_"
+            },
+            {
+              "address": "0x80055f90",
+              "name": "zz_0055f90_"
+            },
+            {
+              "address": "0x8005614c",
+              "name": "zz_005614c_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80437250",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433930",
+            "FLOAT_8043725c"
+          ],
+          "globalAccesses": [
+            "FLOAT_80437250",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[param_9[999]",
+            "PTR_DAT_80433934[param_9[0x3e4]",
+            "PTR_DAT_80433930[2]",
+            "PTR_DAT_80433930[0x32]",
+            "PTR_DAT_80433934 + 0x9c",
+            "FLOAT_8043725c",
+            "PTR_DAT_80433934[iVar4 + 0x103]"
+          ],
+          "constants": [
+            "0x3e4",
+            "0",
+            "0x18",
+            "0x19",
+            "0x1a",
+            "0x1b",
+            "0x493",
+            "0x24",
+            "0x6d0",
+            "0x144",
+            "0x80",
+            "0x394",
+            "0x540",
+            "0x50",
+            "0x48",
+            "0x4c",
+            "0x44",
+            "0x81",
+            "0x7e",
+            "0x7f",
+            "0x7c",
+            "0x7d",
+            "0x501",
+            "0x530",
+            "0x531",
+            "0x532",
+            "0x533",
+            "0x534",
+            "0x535",
+            "0x536"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x80057b78",
+          "currentFunctionName": "FUN_80057b78",
+          "inferredName": "active_object_init_from_slot_tables",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:896",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8003cc24",
+              "name": "zz_003cc24_"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            },
+            {
+              "address": "0x80041b20",
+              "name": "zz_0041b20_"
+            },
+            {
+              "address": "0x800422d8",
+              "name": "zz_00422d8_"
+            },
+            {
+              "address": "0x8004bb14",
+              "name": "FUN_8004bb14"
+            },
+            {
+              "address": "0x8005380c",
+              "name": "zz_005380c_"
+            },
+            {
+              "address": "0x80055dcc",
+              "name": "zz_0055dcc_"
+            },
+            {
+              "address": "0x80055f90",
+              "name": "zz_0055f90_"
+            },
+            {
+              "address": "0x8005614c",
+              "name": "zz_005614c_"
+            },
+            {
+              "address": "0x80056ce0",
+              "name": "zz_0056ce0_"
+            },
+            {
+              "address": "0x80057cf4",
+              "name": "zz_0057cf4_"
+            },
+            {
+              "address": "0x80068004",
+              "name": "zz_0068004_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[*(char *)(param_9 + 999) + 0xa0]",
+            "PTR_DAT_80433934[*(char *)(param_9 + 0x3e4) + 0xcb]"
+          ],
+          "constants": [
+            "0x3e4",
+            "0",
+            "0x18",
+            "1",
+            "0x19",
+            "0x1a",
+            "0x1b",
+            "0x493",
+            "999",
+            "1000",
+            "2",
+            "0x10",
+            "0x3ec",
+            "0xa0",
+            "0x88",
+            "0xcb",
+            "0x3ee",
+            "0x8c",
+            "0x90",
+            "0x94",
+            "0x96",
+            "0x97",
+            "0x3e6",
+            "0x488",
+            "0x10c",
+            "0x76c",
+            "0xffffffff",
+            "0x26f",
+            "0x4b8",
+            "0x741"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        }
+      ],
+      "topicFallbacks": [
+        {
+          "address": "0x8002bb14",
+          "currentFunctionName": "FUN_8002bb14",
+          "inferredName": "challenge-menu-flow_candidate_8002bb14",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
+          "callers": [
+            {
+              "address": "0x80029434",
+              "name": "zz_0029434_"
+            },
+            {
+              "address": "0x80029708",
+              "name": "zz_0029708_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8002c994",
+              "name": "zz_002c994_"
+            },
+            {
+              "address": "0x8002caa8",
+              "name": "zz_002caa8_"
+            },
+            {
+              "address": "0x8002cb20",
+              "name": "zz_002cb20_"
+            },
+            {
+              "address": "0x8002cc78",
+              "name": "zz_002cc78_"
+            },
+            {
+              "address": "0x8002cda4",
+              "name": "zz_002cda4_"
+            },
+            {
+              "address": "0x8002ce44",
+              "name": "zz_002ce44_"
+            },
+            {
+              "address": "0x8002cf80",
+              "name": "zz_002cf80_"
+            },
+            {
+              "address": "0x8002d198",
+              "name": "zz_002d198_"
+            },
+            {
+              "address": "0x8002d35c",
+              "name": "zz_002d35c_"
+            },
+            {
+              "address": "0x8002d58c",
+              "name": "zz_002d58c_"
+            },
+            {
+              "address": "0x8002d7c4",
+              "name": "zz_002d7c4_"
+            },
+            {
+              "address": "0x8002db58",
+              "name": "zz_002db58_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803b068c",
+            "PTR_DAT_80433934",
+            "DAT_80436154",
+            "DAT_803b069c",
+            "DAT_803b0690",
+            "DAT_803b0694",
+            "DAT_803b0698",
+            "DAT_80436128",
+            "DAT_803c4e84",
+            "DAT_8043614c",
+            "FLOAT_80436f68",
+            "FLOAT_80436f6c",
+            "DAT_80436144",
+            "DAT_803b06a8",
+            "DAT_8043613c",
+            "DAT_80436134",
+            "DAT_803b0644",
+            "DAT_8043612c",
+            "DAT_803b0638",
+            "DAT_803b0708"
+          ],
+          "globalAccesses": [
+            "DAT_803b068c",
+            "PTR_DAT_80433934 + 0x118",
+            "DAT_80436154",
+            "DAT_803b069c",
+            "DAT_803b0690",
+            "PTR_DAT_80433934 + 0x154",
+            "DAT_803b0694",
+            "PTR_DAT_80433934 + 400",
+            "DAT_803b0698",
+            "PTR_DAT_80433934 + 0x1cc",
+            "DAT_80436128",
+            "DAT_803c4e84",
+            "DAT_8043614c",
+            "FLOAT_80436f68",
+            "FLOAT_80436f6c",
+            "DAT_80436144",
+            "DAT_803b06a8",
+            "DAT_8043613c",
+            "DAT_80436134",
+            "DAT_803b0644"
+          ],
+          "constants": [
+            "0x8002c978",
+            "0x8002c970",
+            "0x8002c968",
+            "0x8002bb34",
+            "0x8002bb2c",
+            "0x8002bb24",
+            "7",
+            "0x118",
+            "0",
+            "0x154",
+            "400",
+            "0x1cc",
+            "0x7d1",
+            "2000",
+            "1",
+            "0x3e4",
+            "0x1c6",
+            "0x436",
+            "0x4fc",
+            "0x4f4",
+            "0x4f8",
+            "0x4f5",
+            "0x4fe",
+            "0x4f6",
+            "0x4fa",
+            "0x4f7",
+            "0x6fd",
+            "0x70c",
+            "0x70d",
+            "0x7d4"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x800289fc",
+          "currentFunctionName": "FUN_800289fc",
+          "inferredName": "challenge-menu-flow_candidate_800289fc",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:3897",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x800064d4",
+              "name": "zz_00064d4_"
+            },
+            {
+              "address": "0x8000685c",
+              "name": "zz_000685c_"
+            },
+            {
+              "address": "0x80006abc",
+              "name": "zz_0006abc_"
+            },
+            {
+              "address": "0x80009e08",
+              "name": "zz_0009e08_"
+            },
+            {
+              "address": "0x8000a3c4",
+              "name": "zz_000a3c4_"
+            },
+            {
+              "address": "0x80010760",
+              "name": "zz_0010760_"
+            },
+            {
+              "address": "0x80011bcc",
+              "name": "zz_0011bcc_"
+            },
+            {
+              "address": "0x80011c1c",
+              "name": "zz_0011c1c_"
+            },
+            {
+              "address": "0x80027aac",
+              "name": "zz_0027aac_"
+            },
+            {
+              "address": "0x80027adc",
+              "name": "zz_0027adc_"
+            },
+            {
+              "address": "0x80027c1c",
+              "name": "zz_0027c1c_"
+            },
+            {
+              "address": "0x800282e4",
+              "name": "zz_00282e4_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934",
+            "FLOAT_80436ef8",
+            "DAT_803c4e84",
+            "PTR_DAT_80433930",
+            "DAT_8031a074",
+            "DAT_803c71fc",
+            "DAT_803c721c",
+            "DAT_803c723c",
+            "DAT_803c725c",
+            "DAT_802cfdb4"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0x45]",
+            "PTR_DAT_80433934[1]",
+            "PTR_DAT_80433934 + 8",
+            "PTR_DAT_80433934[0x52]",
+            "FLOAT_80436ef8",
+            "PTR_DAT_80433934[0x1f]",
+            "DAT_803c4e84",
+            "PTR_DAT_80433930[0x33]",
+            "PTR_DAT_80433934[0x51]",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[iVar5 * 0x3c + 0xf6]",
+            "DAT_8031a074",
+            "PTR_DAT_80433934[0x15dd]",
+            "PTR_DAT_80433934[0x67]",
+            "PTR_DAT_80433930[2]",
+            "DAT_803c71fc",
+            "DAT_803c721c",
+            "DAT_803c723c",
+            "DAT_803c725c",
+            "PTR_DAT_80433934[0xf0]"
+          ],
+          "constants": [
+            "0x45",
+            "5",
+            "1",
+            "0",
+            "8",
+            "0x5a",
+            "0x52",
+            "2",
+            "0x20",
+            "0x1e",
+            "0x1f",
+            "0x3c",
+            "0x33",
+            "4",
+            "0x51",
+            "0x11",
+            "0x102",
+            "0xf6",
+            "0x10",
+            "3",
+            "0x15dd",
+            "0x67",
+            "0x78",
+            "6",
+            "0x708",
+            "7",
+            "0xf0",
+            "0x29",
+            "9",
+            "0x1c"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics",
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/public/models"
+          ]
+        },
+        {
+          "address": "0x8002e2a8",
+          "currentFunctionName": "zz_002e2a8_",
+          "inferredName": "per_borg_update_damage_dispatch",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7457",
+          "callers": [
+            {
+              "address": "0x8002d7c4",
+              "name": "zz_002d7c4_"
+            },
+            {
+              "address": "0x8002db58",
+              "name": "zz_002db58_"
+            },
+            {
+              "address": "0x8002df08",
+              "name": "zz_002df08_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x800061a8",
+              "name": "FUN_800061a8"
+            },
+            {
+              "address": "0x80006c24",
+              "name": "zz_0006c24_"
+            },
+            {
+              "address": "0x80019550",
+              "name": "zz_0019550_"
+            },
+            {
+              "address": "0x8002f8d0",
+              "name": "zz_002f8d0_"
+            },
+            {
+              "address": "0x8002f8dc",
+              "name": "zz_002f8dc_"
+            },
+            {
+              "address": "0x8002fc18",
+              "name": "zz_002fc18_"
+            },
+            {
+              "address": "0x8002fcbc",
+              "name": "zz_002fcbc_"
+            },
+            {
+              "address": "0x800300bc",
+              "name": "zz_00300bc_"
+            },
+            {
+              "address": "0x8003cd5c",
+              "name": "zz_003cd5c_"
+            },
+            {
+              "address": "0x8003d344",
+              "name": "zz_003d344_"
+            },
+            {
+              "address": "0x800db250",
+              "name": "zz_00db250_"
+            },
+            {
+              "address": "0x8010e158",
+              "name": "zz_010e158_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80436fa0",
+            "DOUBLE_80436fb0",
+            "FLOAT_80436f7c",
+            "FLOAT_80436f78",
+            "DOUBLE_80436f88",
+            "FLOAT_80436f9c",
+            "FLOAT_80436fa4",
+            "FLOAT_80436fa8",
+            "DAT_803b0724",
+            "DAT_803b0720",
+            "DAT_803b0728",
+            "DAT_803b06c0",
+            "DAT_803b06c4",
+            "DAT_803b06c8",
+            "DAT_803b06a8",
+            "DAT_80436134",
+            "DAT_8043613c",
+            "DAT_8043612c",
+            "DAT_80436128",
+            "DAT_802c7ca0"
+          ],
+          "globalAccesses": [
+            "FLOAT_80436fa0",
+            "DOUBLE_80436fb0",
+            "FLOAT_80436f7c",
+            "FLOAT_80436f78",
+            "DOUBLE_80436f88",
+            "FLOAT_80436f9c",
+            "FLOAT_80436fa4",
+            "FLOAT_80436fa8",
+            "DAT_803b0724",
+            "DAT_803b0720",
+            "DAT_803b0728",
+            "DAT_803b06c0",
+            "DAT_803b06c4",
+            "DAT_803b06c8",
+            "DAT_803b06a8",
+            "DAT_80436134",
+            "DAT_8043613c",
+            "DAT_8043612c",
+            "DAT_80436128",
+            "DAT_802c7ca0"
+          ],
+          "constants": [
+            "2",
+            "0x20",
+            "0x24",
+            "0x2c",
+            "0x11",
+            "0x18",
+            "0x28",
+            "0",
+            "0x83",
+            "8",
+            "0x800",
+            "0x59c",
+            "0x599",
+            "1",
+            "0x1da",
+            "0x6fd",
+            "0xb",
+            "1000",
+            "0x302",
+            "9",
+            "0x10",
+            "0x88",
+            "0x43300000",
+            "0xc4",
+            "0x6fc",
+            "0x80000000",
+            "0x12",
+            "0x40",
+            "0xb1",
+            "0xbc"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x800a98a4",
+          "currentFunctionName": "FUN_800a98a4",
+          "inferredName": "challenge-menu-flow_candidate_800a98a4",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0016.c:4168",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80006fb4",
+              "name": "zz_0006fb4_"
+            },
+            {
+              "address": "0x80007834",
+              "name": "zz_0007834_"
+            },
+            {
+              "address": "0x80007c30",
+              "name": "zz_0007c30_"
+            },
+            {
+              "address": "0x800086b8",
+              "name": "zz_00086b8_"
+            },
+            {
+              "address": "0x80012308",
+              "name": "zz_0012308_"
+            },
+            {
+              "address": "0x80089100",
+              "name": "zz_0089100_"
+            },
+            {
+              "address": "0x800abb58",
+              "name": "zz_00abb58_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934",
+            "FLOAT_80438150",
+            "FLOAT_80438154",
+            "FLOAT_80438158",
+            "FLOAT_8043815c",
+            "FLOAT_80438160",
+            "DAT_804361fc",
+            "FLOAT_80438164",
+            "FLOAT_80438168",
+            "FLOAT_8043816c",
+            "FLOAT_80438170",
+            "FLOAT_80438174",
+            "DAT_803c4e84",
+            "FLOAT_80438178",
+            "DAT_802f9550",
+            "DAT_802f9554",
+            "DAT_802f9558",
+            "FLOAT_8043817c",
+            "DAT_802f97cc",
+            "FLOAT_80438180"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[0x45]",
+            "PTR_DAT_80433934[*(char *)(param_9 + 0x173) + 0xc0]",
+            "PTR_DAT_80433934[0x50]",
+            "FLOAT_80438150",
+            "FLOAT_80438154",
+            "FLOAT_80438158",
+            "FLOAT_8043815c",
+            "FLOAT_80438160",
+            "DAT_804361fc",
+            "PTR_DAT_80433934 + 0x4c",
+            "FLOAT_80438164",
+            "FLOAT_80438168",
+            "FLOAT_8043816c",
+            "FLOAT_80438170",
+            "FLOAT_80438174",
+            "DAT_803c4e84",
+            "FLOAT_80438178",
+            "DAT_802f9550",
+            "DAT_802f9554"
+          ],
+          "constants": [
+            "0x45",
+            "0x11",
+            "0x18",
+            "1",
+            "0x82",
+            "0x171",
+            "0",
+            "0x173",
+            "0xc0",
+            "4",
+            "0x1ff0ec5f",
+            "0x90",
+            "0x96",
+            "0x3e4",
+            "0x94",
+            "1000",
+            "0x174",
+            "0x491",
+            "0x172",
+            "0xff",
+            "2",
+            "0x50",
+            "0x100",
+            "0x21",
+            "0x84",
+            "100",
+            "0x6c",
+            "0x68",
+            "0x164",
+            "0x16c"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x8009cc48",
+          "currentFunctionName": "FUN_8009cc48",
+          "inferredName": "challenge-menu-flow_candidate_8009cc48",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0015.c:3230",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80006fb4",
+              "name": "zz_0006fb4_"
+            },
+            {
+              "address": "0x80007834",
+              "name": "zz_0007834_"
+            },
+            {
+              "address": "0x80007908",
+              "name": "zz_0007908_"
+            },
+            {
+              "address": "0x80007c30",
+              "name": "zz_0007c30_"
+            },
+            {
+              "address": "0x80007cac",
+              "name": "zz_0007cac_"
+            },
+            {
+              "address": "0x80007cd0",
+              "name": "zz_0007cd0_"
+            },
+            {
+              "address": "0x80007cf4",
+              "name": "zz_0007cf4_"
+            },
+            {
+              "address": "0x800086b8",
+              "name": "zz_00086b8_"
+            },
+            {
+              "address": "0x80089100",
+              "name": "zz_0089100_"
+            },
+            {
+              "address": "0x8009f0c0",
+              "name": "zz_009f0c0_"
+            },
+            {
+              "address": "0x8009f3e0",
+              "name": "zz_009f3e0_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934",
+            "DAT_803c4e84",
+            "FLOAT_80437ec8",
+            "FLOAT_80437ecc",
+            "FLOAT_80437ed0",
+            "DAT_804361fc",
+            "FLOAT_80437ed4",
+            "FLOAT_80437ed8",
+            "FLOAT_80437edc",
+            "DAT_802f5ef0",
+            "DAT_802f5ef4",
+            "DAT_802f5ef8",
+            "DAT_802f65d0",
+            "FLOAT_80437ee0",
+            "FLOAT_80437ee4",
+            "DAT_802f5f94",
+            "DAT_802f6b90",
+            "DAT_802f6b9c",
+            "DAT_802f6ba0",
+            "DAT_802f6ba4"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[0x45]",
+            "PTR_DAT_80433934[*(char *)(param_9 + 0x173) + 0xc0]",
+            "DAT_803c4e84",
+            "FLOAT_80437ec8",
+            "FLOAT_80437ecc",
+            "FLOAT_80437ed0",
+            "DAT_804361fc",
+            "FLOAT_80437ed4",
+            "FLOAT_80437ed8",
+            "PTR_DAT_80433934 + 0x4c",
+            "PTR_DAT_80433934[0x50]",
+            "FLOAT_80437edc",
+            "DAT_802f5ef0",
+            "DAT_802f5ef4",
+            "DAT_802f5ef8",
+            "DAT_802f65d0",
+            "FLOAT_80437ee0",
+            "FLOAT_80437ee4",
+            "DAT_802f5f94"
+          ],
+          "constants": [
+            "0x45",
+            "0x11",
+            "0x18",
+            "1",
+            "0x96",
+            "0xff",
+            "0x94",
+            "0xffff",
+            "0x173",
+            "0xc0",
+            "0",
+            "2",
+            "0x171",
+            "0x88",
+            "0x0",
+            "0x90",
+            "0x3e4",
+            "1000",
+            "0x174",
+            "0x491",
+            "0x82",
+            "0x172",
+            "0x100",
+            "0x20",
+            "0x84",
+            "0x13",
+            "0x60",
+            "0x144",
+            "0x5c",
+            "0x58"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x801c795c",
+          "currentFunctionName": "FUN_801c795c",
+          "inferredName": "challenge-menu-flow_candidate_801c795c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0055.c:2227",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x800059b8",
+              "name": "zz_00059b8_"
+            },
+            {
+              "address": "0x8000bb70",
+              "name": "zz_000bb70_"
+            },
+            {
+              "address": "0x80027c1c",
+              "name": "zz_0027c1c_"
+            },
+            {
+              "address": "0x8002a5f4",
+              "name": "zz_002a5f4_"
+            },
+            {
+              "address": "0x8003d4a0",
+              "name": "zz_003d4a0_"
+            },
+            {
+              "address": "0x80040940",
+              "name": "zz_0040940_"
+            },
+            {
+              "address": "0x800414ec",
+              "name": "zz_00414ec_"
+            },
+            {
+              "address": "0x800424cc",
+              "name": "zz_00424cc_"
+            },
+            {
+              "address": "0x80042874",
+              "name": "zz_0042874_"
+            },
+            {
+              "address": "0x80042878",
+              "name": "zz_0042878_"
+            },
+            {
+              "address": "0x800429ec",
+              "name": "zz_00429ec_"
+            },
+            {
+              "address": "0x80042a58",
+              "name": "zz_0042a58_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934",
+            "DAT_8038a4ec",
+            "DAT_80436238",
+            "DAT_803c71dc",
+            "DAT_803c71e0",
+            "DAT_8038a3ec"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934",
+            "DAT_8038a4ec",
+            "PTR_DAT_80433934[iVar10 + 0xa0]",
+            "PTR_DAT_80433934[iVar10 + 0xcb]",
+            "PTR_DAT_80433934[iVar10 + 0xa1]",
+            "PTR_DAT_80433934[iVar2]",
+            "DAT_80436238 + 0xfe800",
+            "DAT_803c71dc",
+            "PTR_DAT_80433934[0x1c]",
+            "DAT_803c71e0",
+            "PTR_DAT_80433934[0x1d]",
+            "PTR_DAT_80433934[0x45]",
+            "DAT_8038a3ec"
+          ],
+          "constants": [
+            "1",
+            "0",
+            "0x18b8",
+            "3",
+            "0x10",
+            "0xff",
+            "0xa0",
+            "0x7ffffffe",
+            "2",
+            "0xcb",
+            "0x12",
+            "0xa1",
+            "0xcc",
+            "4",
+            "0x0",
+            "0xfe800",
+            "0xe0000",
+            "0x1c",
+            "0x11",
+            "0x1d",
+            "0x45",
+            "0x20",
+            "0x2d"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "audio"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/audio/src/index.ts"
+          ]
+        },
+        {
+          "address": "0x800107a0",
+          "currentFunctionName": "zz_00107a0_",
+          "inferredName": "challenge-menu-flow_candidate_800107a0",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0001.c:3244",
+          "callers": [
+            {
+              "address": "0x8005dffc",
+              "name": "FUN_8005dffc"
+            },
+            {
+              "address": "0x80062c7c",
+              "name": "FUN_80062c7c"
+            },
+            {
+              "address": "0x80063230",
+              "name": "FUN_80063230"
+            },
+            {
+              "address": "0x800655cc",
+              "name": "FUN_800655cc"
+            },
+            {
+              "address": "0x80065b14",
+              "name": "FUN_80065b14"
+            },
+            {
+              "address": "0x800ce1d4",
+              "name": "FUN_800ce1d4"
+            },
+            {
+              "address": "0x800f73a8",
+              "name": "zz_00f73a8_"
+            },
+            {
+              "address": "0x801037f8",
+              "name": "FUN_801037f8"
+            },
+            {
+              "address": "0x8011230c",
+              "name": "zz_011230c_"
+            },
+            {
+              "address": "0x8012b458",
+              "name": "FUN_8012b458"
+            },
+            {
+              "address": "0x80134c38",
+              "name": "FUN_80134c38"
+            },
+            {
+              "address": "0x801360f8",
+              "name": "FUN_801360f8"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80010514",
+              "name": "zz_0010514_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0x1f]"
+          ],
+          "constants": [
+            "0x3e4",
+            "0x20",
+            "0",
+            "0x1f",
+            "0x43d",
+            "0x81",
+            "0x6f8",
+            "0x6f9",
+            "0xff"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts"
+          ]
+        }
+      ],
+      "supportingArtifacts": [
+        {
+          "path": "research/asset-inventory/borg-assets.md",
+          "exists": true
+        },
+        {
+          "path": "research/animation-actions/borg-action-assets.md",
+          "exists": true
+        }
+      ],
+      "requiredBeforePorting": [
+        "Trace slot/team table writes for PTR_DAT_80433934 offsets 0x10, 0x20, 0x32, 0x3e, 0x5a, 0xa0, and 0xcb.",
+        "Confirm the original ordered-force spawn/death swap path before changing Challenge roster behavior."
+      ],
+      "currentWebEvidence": [
+        {
+          "file": "packages/missions/src/challenge.ts",
+          "needle": "FIGHT ALONE",
+          "sourceRef": "packages/missions/src/challenge.ts:7"
+        },
+        {
+          "file": "apps/game/src/ui/screens/SelectForce.ts",
+          "needle": "SELECT A FORCE",
+          "sourceRef": "apps/game/src/ui/screens/SelectForce.ts:49"
+        },
+        {
+          "file": "apps/game/src/ui/screens/ForceBuilder.ts",
+          "needle": "ForceBuilder",
+          "sourceRef": "apps/game/src/ui/screens/ForceBuilder.ts:2"
+        }
+      ]
+    },
+    {
+      "id": "stage-load-flow",
+      "label": "force setup -> stage/load flow",
+      "anchors": [],
+      "topicFallbacks": [],
+      "supportingArtifacts": [
+        {
+          "path": "research/asset-inventory/stage-code-evidence.md",
+          "exists": true
+        },
+        {
+          "path": "research/asset-inventory/stage-geometry-collision.md",
+          "exists": true
+        },
+        {
+          "path": "research/asset-inventory/stage-lighting-render-state.md",
+          "exists": true
+        }
+      ],
+      "requiredBeforePorting": [
+        "Break/trace archive open path for Challenge battle 1 and record the selected st## ids.",
+        "Only map arena names to st## after a DOL/load trace or direct data table proves the mapping."
+      ],
+      "currentWebEvidence": [
+        {
+          "file": "apps/game/src/sim/adapter.ts",
+          "needle": "DEFAULT_ARENA_STAGE",
+          "sourceRef": "apps/game/src/sim/adapter.ts:23"
+        },
+        {
+          "file": "apps/game/src/sim/adapter.ts",
+          "needle": "normalized === \"challenge\"",
+          "sourceRef": "apps/game/src/sim/adapter.ts:35"
+        },
+        {
+          "file": "apps/game/src/main.ts",
+          "needle": "async function loadStage",
+          "sourceRef": "apps/game/src/main.ts:559"
+        }
+      ]
+    },
+    {
+      "id": "battle-initialization",
+      "label": "stage/load flow -> battle initialization",
+      "anchors": [
+        {
+          "address": "0x800541ac",
+          "currentFunctionName": "FUN_800541ac",
+          "inferredName": "active_borg_spawn_init_from_slot_tables",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:6999",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8001c80c",
+              "name": "zz_001c80c_"
+            },
+            {
+              "address": "0x80027a44",
+              "name": "FUN_80027a44"
+            },
+            {
+              "address": "0x8003cc24",
+              "name": "zz_003cc24_"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            },
+            {
+              "address": "0x80041b20",
+              "name": "zz_0041b20_"
+            },
+            {
+              "address": "0x800422d8",
+              "name": "zz_00422d8_"
+            },
+            {
+              "address": "0x8004bb14",
+              "name": "FUN_8004bb14"
+            },
+            {
+              "address": "0x8004beb8",
+              "name": "zz_004beb8_"
+            },
+            {
+              "address": "0x8005380c",
+              "name": "zz_005380c_"
+            },
+            {
+              "address": "0x80055dcc",
+              "name": "zz_0055dcc_"
+            },
+            {
+              "address": "0x80055f90",
+              "name": "zz_0055f90_"
+            },
+            {
+              "address": "0x8005614c",
+              "name": "zz_005614c_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80437250",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433930",
+            "FLOAT_8043725c"
+          ],
+          "globalAccesses": [
+            "FLOAT_80437250",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[param_9[999]",
+            "PTR_DAT_80433934[param_9[0x3e4]",
+            "PTR_DAT_80433930[2]",
+            "PTR_DAT_80433930[0x32]",
+            "PTR_DAT_80433934 + 0x9c",
+            "FLOAT_8043725c",
+            "PTR_DAT_80433934[iVar4 + 0x103]"
+          ],
+          "constants": [
+            "0x3e4",
+            "0",
+            "0x18",
+            "0x19",
+            "0x1a",
+            "0x1b",
+            "0x493",
+            "0x24",
+            "0x6d0",
+            "0x144",
+            "0x80",
+            "0x394",
+            "0x540",
+            "0x50",
+            "0x48",
+            "0x4c",
+            "0x44",
+            "0x81",
+            "0x7e",
+            "0x7f",
+            "0x7c",
+            "0x7d",
+            "0x501",
+            "0x530",
+            "0x531",
+            "0x532",
+            "0x533",
+            "0x534",
+            "0x535",
+            "0x536"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x80057b78",
+          "currentFunctionName": "FUN_80057b78",
+          "inferredName": "active_object_init_from_slot_tables",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:896",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8003cc24",
+              "name": "zz_003cc24_"
+            },
+            {
+              "address": "0x800419ec",
+              "name": "zz_00419ec_"
+            },
+            {
+              "address": "0x80041b20",
+              "name": "zz_0041b20_"
+            },
+            {
+              "address": "0x800422d8",
+              "name": "zz_00422d8_"
+            },
+            {
+              "address": "0x8004bb14",
+              "name": "FUN_8004bb14"
+            },
+            {
+              "address": "0x8005380c",
+              "name": "zz_005380c_"
+            },
+            {
+              "address": "0x80055dcc",
+              "name": "zz_0055dcc_"
+            },
+            {
+              "address": "0x80055f90",
+              "name": "zz_0055f90_"
+            },
+            {
+              "address": "0x8005614c",
+              "name": "zz_005614c_"
+            },
+            {
+              "address": "0x80056ce0",
+              "name": "zz_0056ce0_"
+            },
+            {
+              "address": "0x80057cf4",
+              "name": "zz_0057cf4_"
+            },
+            {
+              "address": "0x80068004",
+              "name": "zz_0068004_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[*(char *)(param_9 + 999) + 0xa0]",
+            "PTR_DAT_80433934[*(char *)(param_9 + 0x3e4) + 0xcb]"
+          ],
+          "constants": [
+            "0x3e4",
+            "0",
+            "0x18",
+            "1",
+            "0x19",
+            "0x1a",
+            "0x1b",
+            "0x493",
+            "999",
+            "1000",
+            "2",
+            "0x10",
+            "0x3ec",
+            "0xa0",
+            "0x88",
+            "0xcb",
+            "0x3ee",
+            "0x8c",
+            "0x90",
+            "0x94",
+            "0x96",
+            "0x97",
+            "0x3e6",
+            "0x488",
+            "0x10c",
+            "0x76c",
+            "0xffffffff",
+            "0x26f",
+            "0x4b8",
+            "0x741"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x8002e2a8",
+          "currentFunctionName": "zz_002e2a8_",
+          "inferredName": "per_borg_update_damage_dispatch",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7457",
+          "callers": [
+            {
+              "address": "0x8002d7c4",
+              "name": "zz_002d7c4_"
+            },
+            {
+              "address": "0x8002db58",
+              "name": "zz_002db58_"
+            },
+            {
+              "address": "0x8002df08",
+              "name": "zz_002df08_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x800061a8",
+              "name": "FUN_800061a8"
+            },
+            {
+              "address": "0x80006c24",
+              "name": "zz_0006c24_"
+            },
+            {
+              "address": "0x80019550",
+              "name": "zz_0019550_"
+            },
+            {
+              "address": "0x8002f8d0",
+              "name": "zz_002f8d0_"
+            },
+            {
+              "address": "0x8002f8dc",
+              "name": "zz_002f8dc_"
+            },
+            {
+              "address": "0x8002fc18",
+              "name": "zz_002fc18_"
+            },
+            {
+              "address": "0x8002fcbc",
+              "name": "zz_002fcbc_"
+            },
+            {
+              "address": "0x800300bc",
+              "name": "zz_00300bc_"
+            },
+            {
+              "address": "0x8003cd5c",
+              "name": "zz_003cd5c_"
+            },
+            {
+              "address": "0x8003d344",
+              "name": "zz_003d344_"
+            },
+            {
+              "address": "0x800db250",
+              "name": "zz_00db250_"
+            },
+            {
+              "address": "0x8010e158",
+              "name": "zz_010e158_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80436fa0",
+            "DOUBLE_80436fb0",
+            "FLOAT_80436f7c",
+            "FLOAT_80436f78",
+            "DOUBLE_80436f88",
+            "FLOAT_80436f9c",
+            "FLOAT_80436fa4",
+            "FLOAT_80436fa8",
+            "DAT_803b0724",
+            "DAT_803b0720",
+            "DAT_803b0728",
+            "DAT_803b06c0",
+            "DAT_803b06c4",
+            "DAT_803b06c8",
+            "DAT_803b06a8",
+            "DAT_80436134",
+            "DAT_8043613c",
+            "DAT_8043612c",
+            "DAT_80436128",
+            "DAT_802c7ca0"
+          ],
+          "globalAccesses": [
+            "FLOAT_80436fa0",
+            "DOUBLE_80436fb0",
+            "FLOAT_80436f7c",
+            "FLOAT_80436f78",
+            "DOUBLE_80436f88",
+            "FLOAT_80436f9c",
+            "FLOAT_80436fa4",
+            "FLOAT_80436fa8",
+            "DAT_803b0724",
+            "DAT_803b0720",
+            "DAT_803b0728",
+            "DAT_803b06c0",
+            "DAT_803b06c4",
+            "DAT_803b06c8",
+            "DAT_803b06a8",
+            "DAT_80436134",
+            "DAT_8043613c",
+            "DAT_8043612c",
+            "DAT_80436128",
+            "DAT_802c7ca0"
+          ],
+          "constants": [
+            "2",
+            "0x20",
+            "0x24",
+            "0x2c",
+            "0x11",
+            "0x18",
+            "0x28",
+            "0",
+            "0x83",
+            "8",
+            "0x800",
+            "0x59c",
+            "0x599",
+            "1",
+            "0x1da",
+            "0x6fd",
+            "0xb",
+            "1000",
+            "0x302",
+            "9",
+            "0x10",
+            "0x88",
+            "0x43300000",
+            "0xc4",
+            "0x6fc",
+            "0x80000000",
+            "0x12",
+            "0x40",
+            "0xb1",
+            "0xbc"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        }
+      ],
+      "topicFallbacks": [
+        {
+          "address": "0x80083714",
+          "currentFunctionName": "zz_0083714_",
+          "inferredName": "challenge-menu-flow_candidate_80083714",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0012.c:2829",
+          "callers": [
+            {
+              "address": "0x8006f268",
+              "name": "zz_006f268_"
+            },
+            {
+              "address": "0x8007e200",
+              "name": "zz_007e200_"
+            },
+            {
+              "address": "0x8007eac0",
+              "name": "zz_007eac0_"
+            },
+            {
+              "address": "0x8007f698",
+              "name": "FUN_8007f698"
+            },
+            {
+              "address": "0x80082fc4",
+              "name": "FUN_80082fc4"
+            },
+            {
+              "address": "0x80084cec",
+              "name": "FUN_80084cec"
+            },
+            {
+              "address": "0x8009a2ac",
+              "name": "FUN_8009a2ac"
+            },
+            {
+              "address": "0x8009b0f4",
+              "name": "FUN_8009b0f4"
+            },
+            {
+              "address": "0x800a11b0",
+              "name": "FUN_800a11b0"
+            },
+            {
+              "address": "0x800a193c",
+              "name": "FUN_800a193c"
+            },
+            {
+              "address": "0x800a2980",
+              "name": "FUN_800a2980"
+            },
+            {
+              "address": "0x800b5c5c",
+              "name": "FUN_800b5c5c"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8008b480",
+              "name": "zz_008b480_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80437ae4",
+            "PTR_DAT_80433934",
+            "FLOAT_80437b10",
+            "FLOAT_80437b08",
+            "FLOAT_80437b0c"
+          ],
+          "globalAccesses": [
+            "FLOAT_80437ae4",
+            "PTR_DAT_80433934[iVar5 + 0x60]",
+            "PTR_DAT_80433934",
+            "FLOAT_80437b10",
+            "FLOAT_80437b08",
+            "FLOAT_80437b0c"
+          ],
+          "constants": [
+            "80083714",
+            "3",
+            "0",
+            "0x60",
+            "1",
+            "0x68",
+            "0x20",
+            "0x29c",
+            "4",
+            "6"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x8000726c",
+          "currentFunctionName": "zz_000726c_",
+          "inferredName": "challenge-menu-flow_candidate_8000726c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:1713",
+          "callers": [
+            {
+              "address": "0x8001a950",
+              "name": "zz_001a950_"
+            },
+            {
+              "address": "0x8006f11c",
+              "name": "FUN_8006f11c"
+            },
+            {
+              "address": "0x80082b08",
+              "name": "FUN_80082b08"
+            },
+            {
+              "address": "0x80084790",
+              "name": "FUN_80084790"
+            },
+            {
+              "address": "0x8009a12c",
+              "name": "FUN_8009a12c"
+            },
+            {
+              "address": "0x8009a2ac",
+              "name": "FUN_8009a2ac"
+            },
+            {
+              "address": "0x800a2850",
+              "name": "FUN_800a2850"
+            },
+            {
+              "address": "0x800a2fa4",
+              "name": "FUN_800a2fa4"
+            },
+            {
+              "address": "0x800af054",
+              "name": "FUN_800af054"
+            },
+            {
+              "address": "0x800b618c",
+              "name": "FUN_800b618c"
+            },
+            {
+              "address": "0x800b68b4",
+              "name": "zz_00b68b4_"
+            },
+            {
+              "address": "0x800b764c",
+              "name": "FUN_800b764c"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80007c30",
+              "name": "zz_0007c30_"
+            },
+            {
+              "address": "0x80007d40",
+              "name": "zz_0007d40_"
+            },
+            {
+              "address": "0x800086b8",
+              "name": "zz_00086b8_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934",
+            "DOUBLE_80436a48"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0x51]",
+            "DOUBLE_80436a48"
+          ],
+          "constants": [
+            "0x10",
+            "4",
+            "0xc",
+            "0x0",
+            "0",
+            "0x14",
+            "0xb",
+            "1",
+            "0x51",
+            "0x43300000",
+            "0x80000000"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization",
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "apps/game/public/models"
+          ]
+        },
+        {
+          "address": "0x8002bb14",
+          "currentFunctionName": "FUN_8002bb14",
+          "inferredName": "challenge-menu-flow_candidate_8002bb14",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
+          "callers": [
+            {
+              "address": "0x80029434",
+              "name": "zz_0029434_"
+            },
+            {
+              "address": "0x80029708",
+              "name": "zz_0029708_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8002c994",
+              "name": "zz_002c994_"
+            },
+            {
+              "address": "0x8002caa8",
+              "name": "zz_002caa8_"
+            },
+            {
+              "address": "0x8002cb20",
+              "name": "zz_002cb20_"
+            },
+            {
+              "address": "0x8002cc78",
+              "name": "zz_002cc78_"
+            },
+            {
+              "address": "0x8002cda4",
+              "name": "zz_002cda4_"
+            },
+            {
+              "address": "0x8002ce44",
+              "name": "zz_002ce44_"
+            },
+            {
+              "address": "0x8002cf80",
+              "name": "zz_002cf80_"
+            },
+            {
+              "address": "0x8002d198",
+              "name": "zz_002d198_"
+            },
+            {
+              "address": "0x8002d35c",
+              "name": "zz_002d35c_"
+            },
+            {
+              "address": "0x8002d58c",
+              "name": "zz_002d58c_"
+            },
+            {
+              "address": "0x8002d7c4",
+              "name": "zz_002d7c4_"
+            },
+            {
+              "address": "0x8002db58",
+              "name": "zz_002db58_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803b068c",
+            "PTR_DAT_80433934",
+            "DAT_80436154",
+            "DAT_803b069c",
+            "DAT_803b0690",
+            "DAT_803b0694",
+            "DAT_803b0698",
+            "DAT_80436128",
+            "DAT_803c4e84",
+            "DAT_8043614c",
+            "FLOAT_80436f68",
+            "FLOAT_80436f6c",
+            "DAT_80436144",
+            "DAT_803b06a8",
+            "DAT_8043613c",
+            "DAT_80436134",
+            "DAT_803b0644",
+            "DAT_8043612c",
+            "DAT_803b0638",
+            "DAT_803b0708"
+          ],
+          "globalAccesses": [
+            "DAT_803b068c",
+            "PTR_DAT_80433934 + 0x118",
+            "DAT_80436154",
+            "DAT_803b069c",
+            "DAT_803b0690",
+            "PTR_DAT_80433934 + 0x154",
+            "DAT_803b0694",
+            "PTR_DAT_80433934 + 400",
+            "DAT_803b0698",
+            "PTR_DAT_80433934 + 0x1cc",
+            "DAT_80436128",
+            "DAT_803c4e84",
+            "DAT_8043614c",
+            "FLOAT_80436f68",
+            "FLOAT_80436f6c",
+            "DAT_80436144",
+            "DAT_803b06a8",
+            "DAT_8043613c",
+            "DAT_80436134",
+            "DAT_803b0644"
+          ],
+          "constants": [
+            "0x8002c978",
+            "0x8002c970",
+            "0x8002c968",
+            "0x8002bb34",
+            "0x8002bb2c",
+            "0x8002bb24",
+            "7",
+            "0x118",
+            "0",
+            "0x154",
+            "400",
+            "0x1cc",
+            "0x7d1",
+            "2000",
+            "1",
+            "0x3e4",
+            "0x1c6",
+            "0x436",
+            "0x4fc",
+            "0x4f4",
+            "0x4f8",
+            "0x4f5",
+            "0x4fe",
+            "0x4f6",
+            "0x4fa",
+            "0x4f7",
+            "0x6fd",
+            "0x70c",
+            "0x70d",
+            "0x7d4"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x8002844c",
+          "currentFunctionName": "FUN_8002844c",
+          "inferredName": "challenge-menu-flow_candidate_8002844c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:3628",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8000a3c4",
+              "name": "zz_000a3c4_"
+            },
+            {
+              "address": "0x8000bb70",
+              "name": "zz_000bb70_"
+            },
+            {
+              "address": "0x80029ca4",
+              "name": "zz_0029ca4_"
+            },
+            {
+              "address": "0x8002a1c0",
+              "name": "zz_002a1c0_"
+            },
+            {
+              "address": "0x8002a26c",
+              "name": "zz_002a26c_"
+            },
+            {
+              "address": "0x8002a5f4",
+              "name": "zz_002a5f4_"
+            },
+            {
+              "address": "0x8003d4a0",
+              "name": "zz_003d4a0_"
+            },
+            {
+              "address": "0x80040940",
+              "name": "zz_0040940_"
+            },
+            {
+              "address": "0x80040f74",
+              "name": "zz_0040f74_"
+            },
+            {
+              "address": "0x8004104c",
+              "name": "zz_004104c_"
+            },
+            {
+              "address": "0x80041288",
+              "name": "zz_0041288_"
+            },
+            {
+              "address": "0x80042394",
+              "name": "zz_0042394_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433930",
+            "DAT_80436238",
+            "DAT_803c71dc",
+            "DAT_803c71e0",
+            "DAT_803c7380",
+            "DAT_802cfdf0",
+            "DAT_802cfdfc",
+            "DAT_802cfe08",
+            "DAT_8031a088"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0x45]",
+            "PTR_DAT_80433930[0x40]",
+            "PTR_DAT_80433930[0x32]",
+            "PTR_DAT_80433934[1]",
+            "PTR_DAT_80433930",
+            "PTR_DAT_80433934",
+            "DAT_80436238 + 0xfe800",
+            "DAT_803c71dc",
+            "DAT_803c71e0",
+            "PTR_DAT_80433930[0xf]",
+            "PTR_DAT_80433930[0xe]",
+            "PTR_DAT_80433930[0xd]",
+            "PTR_DAT_80433930[0xc]",
+            "PTR_DAT_80433930 + 0x20",
+            "DAT_803c7380",
+            "PTR_DAT_80433930 + 0x1c",
+            "PTR_DAT_80433930 + 0x18",
+            "PTR_DAT_80433930 + 0x14",
+            "DAT_802cfdf0",
+            "DAT_802cfdfc"
+          ],
+          "constants": [
+            "0x45",
+            "1",
+            "0x40",
+            "0",
+            "0x32",
+            "0xfe800",
+            "0xe0000",
+            "0xf",
+            "0xff",
+            "0xe",
+            "0xd",
+            "0xc",
+            "0x20",
+            "0x1c",
+            "0x18",
+            "0x14",
+            "0x1828",
+            "0xc4",
+            "0xc5",
+            "0xc6",
+            "199",
+            "200",
+            "0xc9",
+            "3",
+            "0x15dd",
+            "4",
+            "5",
+            "2"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization",
+            "camera"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/render/src/index.ts"
+          ]
+        },
+        {
+          "address": "0x800289fc",
+          "currentFunctionName": "FUN_800289fc",
+          "inferredName": "challenge-menu-flow_candidate_800289fc",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:3897",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x800064d4",
+              "name": "zz_00064d4_"
+            },
+            {
+              "address": "0x8000685c",
+              "name": "zz_000685c_"
+            },
+            {
+              "address": "0x80006abc",
+              "name": "zz_0006abc_"
+            },
+            {
+              "address": "0x80009e08",
+              "name": "zz_0009e08_"
+            },
+            {
+              "address": "0x8000a3c4",
+              "name": "zz_000a3c4_"
+            },
+            {
+              "address": "0x80010760",
+              "name": "zz_0010760_"
+            },
+            {
+              "address": "0x80011bcc",
+              "name": "zz_0011bcc_"
+            },
+            {
+              "address": "0x80011c1c",
+              "name": "zz_0011c1c_"
+            },
+            {
+              "address": "0x80027aac",
+              "name": "zz_0027aac_"
+            },
+            {
+              "address": "0x80027adc",
+              "name": "zz_0027adc_"
+            },
+            {
+              "address": "0x80027c1c",
+              "name": "zz_0027c1c_"
+            },
+            {
+              "address": "0x800282e4",
+              "name": "zz_00282e4_"
+            }
+          ],
+          "globalReferences": [
+            "PTR_DAT_80433934",
+            "FLOAT_80436ef8",
+            "DAT_803c4e84",
+            "PTR_DAT_80433930",
+            "DAT_8031a074",
+            "DAT_803c71fc",
+            "DAT_803c721c",
+            "DAT_803c723c",
+            "DAT_803c725c",
+            "DAT_802cfdb4"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0x45]",
+            "PTR_DAT_80433934[1]",
+            "PTR_DAT_80433934 + 8",
+            "PTR_DAT_80433934[0x52]",
+            "FLOAT_80436ef8",
+            "PTR_DAT_80433934[0x1f]",
+            "DAT_803c4e84",
+            "PTR_DAT_80433930[0x33]",
+            "PTR_DAT_80433934[0x51]",
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433934[iVar5 * 0x3c + 0xf6]",
+            "DAT_8031a074",
+            "PTR_DAT_80433934[0x15dd]",
+            "PTR_DAT_80433934[0x67]",
+            "PTR_DAT_80433930[2]",
+            "DAT_803c71fc",
+            "DAT_803c721c",
+            "DAT_803c723c",
+            "DAT_803c725c",
+            "PTR_DAT_80433934[0xf0]"
+          ],
+          "constants": [
+            "0x45",
+            "5",
+            "1",
+            "0",
+            "8",
+            "0x5a",
+            "0x52",
+            "2",
+            "0x20",
+            "0x1e",
+            "0x1f",
+            "0x3c",
+            "0x33",
+            "4",
+            "0x51",
+            "0x11",
+            "0x102",
+            "0xf6",
+            "0x10",
+            "3",
+            "0x15dd",
+            "0x67",
+            "0x78",
+            "6",
+            "0x708",
+            "7",
+            "0xf0",
+            "0x29",
+            "9",
+            "0x1c"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "movement-physics",
+            "assets-animation"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/movement.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/formats/src/hsd-anim.ts",
+            "apps/game/public/models"
+          ]
+        },
+        {
+          "address": "0x80069814",
+          "currentFunctionName": "FUN_80069814",
+          "inferredName": "challenge-menu-flow_candidate_80069814",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:102",
+          "callers": [
+            {
+              "address": "0x8005913c",
+              "name": "FUN_8005913c"
+            },
+            {
+              "address": "0x800591f0",
+              "name": "FUN_800591f0"
+            },
+            {
+              "address": "0x80059280",
+              "name": "FUN_80059280"
+            },
+            {
+              "address": "0x80059310",
+              "name": "FUN_80059310"
+            },
+            {
+              "address": "0x800593ac",
+              "name": "FUN_800593ac"
+            },
+            {
+              "address": "0x8005940c",
+              "name": "FUN_8005940c"
+            },
+            {
+              "address": "0x800594a8",
+              "name": "FUN_800594a8"
+            },
+            {
+              "address": "0x80059574",
+              "name": "FUN_80059574"
+            },
+            {
+              "address": "0x800595e4",
+              "name": "FUN_800595e4"
+            },
+            {
+              "address": "0x80059690",
+              "name": "FUN_80059690"
+            },
+            {
+              "address": "0x8005970c",
+              "name": "FUN_8005970c"
+            },
+            {
+              "address": "0x8005974c",
+              "name": "FUN_8005974c"
+            }
+          ],
+          "callees": [],
+          "globalReferences": [
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[*(char *)(param_1 + 0x88) * 0x3c + 0x103]"
+          ],
+          "constants": [
+            "80069814",
+            "0x88",
+            "0x3c",
+            "0x103",
+            "0",
+            "0x5d4",
+            "0x200",
+            "0x6fb",
+            "6"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts"
+          ]
+        },
+        {
+          "address": "0x8008b290",
+          "currentFunctionName": "zz_008b290_",
+          "inferredName": "challenge-menu-flow_candidate_8008b290",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0013.c:1674",
+          "callers": [
+            {
+              "address": "0x8001080c",
+              "name": "zz_001080c_"
+            },
+            {
+              "address": "0x800108c8",
+              "name": "FUN_800108c8"
+            },
+            {
+              "address": "0x80010924",
+              "name": "FUN_80010924"
+            },
+            {
+              "address": "0x8001212c",
+              "name": "FUN_8001212c"
+            },
+            {
+              "address": "0x8001c70c",
+              "name": "FUN_8001c70c"
+            },
+            {
+              "address": "0x80029164",
+              "name": "zz_0029164_"
+            },
+            {
+              "address": "0x80029b58",
+              "name": "zz_0029b58_"
+            },
+            {
+              "address": "0x80029d48",
+              "name": "zz_0029d48_"
+            },
+            {
+              "address": "0x8005c080",
+              "name": "zz_005c080_"
+            },
+            {
+              "address": "0x80068030",
+              "name": "zz_0068030_"
+            },
+            {
+              "address": "0x80080a74",
+              "name": "FUN_80080a74"
+            },
+            {
+              "address": "0x800820c8",
+              "name": "FUN_800820c8"
+            }
+          ],
+          "callees": [],
+          "globalReferences": [
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0xd9]"
+          ],
+          "constants": [
+            "0xd9"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts"
+          ]
+        },
+        {
+          "address": "0x8008b480",
+          "currentFunctionName": "zz_008b480_",
+          "inferredName": "challenge-menu-flow_candidate_8008b480",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0013.c:1769",
+          "callers": [
+            {
+              "address": "0x8001080c",
+              "name": "zz_001080c_"
+            },
+            {
+              "address": "0x800108c8",
+              "name": "FUN_800108c8"
+            },
+            {
+              "address": "0x80010924",
+              "name": "FUN_80010924"
+            },
+            {
+              "address": "0x8002281c",
+              "name": "zz_002281c_"
+            },
+            {
+              "address": "0x8002288c",
+              "name": "zz_002288c_"
+            },
+            {
+              "address": "0x8002330c",
+              "name": "zz_002330c_"
+            },
+            {
+              "address": "0x8002337c",
+              "name": "zz_002337c_"
+            },
+            {
+              "address": "0x80029164",
+              "name": "zz_0029164_"
+            },
+            {
+              "address": "0x80029b58",
+              "name": "zz_0029b58_"
+            },
+            {
+              "address": "0x80029d48",
+              "name": "zz_0029d48_"
+            },
+            {
+              "address": "0x800358f4",
+              "name": "FUN_800358f4"
+            },
+            {
+              "address": "0x80054070",
+              "name": "FUN_80054070"
+            }
+          ],
+          "callees": [],
+          "globalReferences": [
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0xeb]"
+          ],
+          "constants": [
+            "0xeb"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts"
+          ]
+        }
+      ],
+      "supportingArtifacts": [
+        {
+          "path": "research/decomp/data/type-category-remap-802f2e28.json",
+          "exists": true
+        }
+      ],
+      "requiredBeforePorting": [
+        "Map active borg object fields copied from slot table into combat runtime shape.",
+        "Preserve object+0x88 as slot/team state and object+1000 as the separate type-category source."
+      ],
+      "currentWebEvidence": [
+        {
+          "file": "packages/combat/src/battle.ts",
+          "needle": "export function createBattle",
+          "sourceRef": "packages/combat/src/battle.ts:326"
+        },
+        {
+          "file": "apps/game/src/sim/adapter.ts",
+          "needle": "convertBattleConfig",
+          "sourceRef": "apps/game/src/sim/adapter.ts:10"
+        },
+        {
+          "file": "apps/game/src/main.ts",
+          "needle": "const battle = createBattle",
+          "sourceRef": "apps/game/src/main.ts:1028"
+        }
+      ]
+    },
+    {
+      "id": "hud-gameplay",
+      "label": "battle initialization -> HUD/gameplay",
+      "anchors": [
+        {
+          "address": "0x8003d344",
+          "currentFunctionName": "zz_003d344_",
+          "inferredName": "apply_hp_damage_subtract_clamp",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+          "callers": [
+            {
+              "address": "0x8002e2a8",
+              "name": "zz_002e2a8_"
+            }
+          ],
+          "callees": [],
+          "globalReferences": [
+            "PTR_DAT_80433934"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934[0x1f]"
+          ],
+          "constants": [
+            "0x1c6",
+            "0",
+            "0x1f",
+            "0x83",
+            "0x1c8",
+            "0x1c4",
+            "0x4a0",
+            "0x4a4",
+            "5"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "battle-initialization",
+            "damage"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts"
+          ]
+        },
+        {
+          "address": "0x8003cd5c",
+          "currentFunctionName": "zz_003cd5c_",
+          "inferredName": "compute_base_damage_formula",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6667",
+          "callers": [
+            {
+              "address": "0x8002e2a8",
+              "name": "zz_002e2a8_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80066298",
+              "name": "zz_0066298_"
+            }
+          ],
+          "globalReferences": [
+            "DOUBLE_80436fb0",
+            "FLOAT_80436f68",
+            "FLOAT_80436f7c",
+            "FLOAT_80436f78",
+            "FLOAT_80436f9c",
+            "PTR_DAT_804335e0",
+            "PTR_DAT_80433950",
+            "PTR_DAT_80433930",
+            "DAT_803b069c",
+            "DAT_803b068c",
+            "PTR_DAT_80433934",
+            "PTR_DAT_804335f8",
+            "PTR_DAT_80433618",
+            "DAT_802c7ca0",
+            "FLOAT_80437024",
+            "FLOAT_80437028"
+          ],
+          "globalAccesses": [
+            "DOUBLE_80436fb0",
+            "FLOAT_80436f68",
+            "FLOAT_80436f7c",
+            "FLOAT_80436f78",
+            "FLOAT_80436f9c",
+            "PTR_DAT_804335e0",
+            "PTR_DAT_80433950[iVar4]",
+            "PTR_DAT_80433930[0x32]",
+            "DAT_803b069c",
+            "DAT_803b068c",
+            "PTR_DAT_80433934",
+            "PTR_DAT_804335f8",
+            "PTR_DAT_80433950[iVar6]",
+            "PTR_DAT_80433618",
+            "DAT_802c7ca0",
+            "FLOAT_80437024",
+            "FLOAT_80437028"
+          ],
+          "constants": [
+            "0x8003d31c",
+            "0x8003cd6c",
+            "2",
+            "0x43300000",
+            "0x83",
+            "0",
+            "0x5a0",
+            "1",
+            "0x71a",
+            "0x90",
+            "0xc4",
+            "0x18",
+            "0x6fc",
+            "0x3e6",
+            "0x88",
+            "0x1d",
+            "4",
+            "0x32",
+            "0x3e4",
+            "0xc9",
+            "0x1c4",
+            "200",
+            "5",
+            "0x1b",
+            "0x1f",
+            "0x20",
+            "3",
+            "0x3c",
+            "0x114",
+            "7"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "damage",
+            "knockback-targeting"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x80066298",
+          "currentFunctionName": "zz_0066298_",
+          "inferredName": "lookup_type_category_table",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:2976",
+          "callers": [
+            {
+              "address": "0x8003cd5c",
+              "name": "zz_003cd5c_"
+            },
+            {
+              "address": "0x801cd060",
+              "name": "zz_01cd060_"
+            },
+            {
+              "address": "0x801dd298",
+              "name": "zz_01dd298_"
+            },
+            {
+              "address": "0x801e5244",
+              "name": "zz_01e5244_"
+            },
+            {
+              "address": "0x801ed0e4",
+              "name": "zz_01ed0e4_"
+            },
+            {
+              "address": "0x801edc7c",
+              "name": "FUN_801edc7c"
+            }
+          ],
+          "callees": [],
+          "globalReferences": [
+            "PTR_DAT_802f2e28"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_802f2e28"
+          ],
+          "constants": [
+            "80066298",
+            "1",
+            "2"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "damage"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts"
+          ]
+        },
+        {
+          "address": "0x800300bc",
+          "currentFunctionName": "zz_00300bc_",
+          "inferredName": "compute_knockback_launch_direction",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:8515",
+          "callers": [
+            {
+              "address": "0x8002e2a8",
+              "name": "zz_002e2a8_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x800452a0",
+              "name": "FUN_800452a0"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80436f68",
+            "FLOAT_80436fc0",
+            "FLOAT_80436f74"
+          ],
+          "globalAccesses": [
+            "FLOAT_80436f68",
+            "FLOAT_80436fc0",
+            "FLOAT_80436f74"
+          ],
+          "constants": [
+            "0x80030320",
+            "0x800300cc",
+            "0x20",
+            "2",
+            "0x30",
+            "0x3c",
+            "0x38",
+            "0x40",
+            "0",
+            "0x2c",
+            "1",
+            "4",
+            "0x83",
+            "0x8dc",
+            "0x8ec",
+            "0x8fc",
+            "0x24",
+            "0x11c",
+            "300",
+            "0x13c",
+            "100",
+            "0x284",
+            "0x282",
+            "0x11",
+            "0x18",
+            "0x14",
+            "0x100",
+            "0x15",
+            "0x1da"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        }
+      ],
+      "topicFallbacks": [
+        {
+          "address": "0x8002bb14",
+          "currentFunctionName": "FUN_8002bb14",
+          "inferredName": "challenge-menu-flow_candidate_8002bb14",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
+          "callers": [
+            {
+              "address": "0x80029434",
+              "name": "zz_0029434_"
+            },
+            {
+              "address": "0x80029708",
+              "name": "zz_0029708_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8002c994",
+              "name": "zz_002c994_"
+            },
+            {
+              "address": "0x8002caa8",
+              "name": "zz_002caa8_"
+            },
+            {
+              "address": "0x8002cb20",
+              "name": "zz_002cb20_"
+            },
+            {
+              "address": "0x8002cc78",
+              "name": "zz_002cc78_"
+            },
+            {
+              "address": "0x8002cda4",
+              "name": "zz_002cda4_"
+            },
+            {
+              "address": "0x8002ce44",
+              "name": "zz_002ce44_"
+            },
+            {
+              "address": "0x8002cf80",
+              "name": "zz_002cf80_"
+            },
+            {
+              "address": "0x8002d198",
+              "name": "zz_002d198_"
+            },
+            {
+              "address": "0x8002d35c",
+              "name": "zz_002d35c_"
+            },
+            {
+              "address": "0x8002d58c",
+              "name": "zz_002d58c_"
+            },
+            {
+              "address": "0x8002d7c4",
+              "name": "zz_002d7c4_"
+            },
+            {
+              "address": "0x8002db58",
+              "name": "zz_002db58_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803b068c",
+            "PTR_DAT_80433934",
+            "DAT_80436154",
+            "DAT_803b069c",
+            "DAT_803b0690",
+            "DAT_803b0694",
+            "DAT_803b0698",
+            "DAT_80436128",
+            "DAT_803c4e84",
+            "DAT_8043614c",
+            "FLOAT_80436f68",
+            "FLOAT_80436f6c",
+            "DAT_80436144",
+            "DAT_803b06a8",
+            "DAT_8043613c",
+            "DAT_80436134",
+            "DAT_803b0644",
+            "DAT_8043612c",
+            "DAT_803b0638",
+            "DAT_803b0708"
+          ],
+          "globalAccesses": [
+            "DAT_803b068c",
+            "PTR_DAT_80433934 + 0x118",
+            "DAT_80436154",
+            "DAT_803b069c",
+            "DAT_803b0690",
+            "PTR_DAT_80433934 + 0x154",
+            "DAT_803b0694",
+            "PTR_DAT_80433934 + 400",
+            "DAT_803b0698",
+            "PTR_DAT_80433934 + 0x1cc",
+            "DAT_80436128",
+            "DAT_803c4e84",
+            "DAT_8043614c",
+            "FLOAT_80436f68",
+            "FLOAT_80436f6c",
+            "DAT_80436144",
+            "DAT_803b06a8",
+            "DAT_8043613c",
+            "DAT_80436134",
+            "DAT_803b0644"
+          ],
+          "constants": [
+            "0x8002c978",
+            "0x8002c970",
+            "0x8002c968",
+            "0x8002bb34",
+            "0x8002bb2c",
+            "0x8002bb24",
+            "7",
+            "0x118",
+            "0",
+            "0x154",
+            "400",
+            "0x1cc",
+            "0x7d1",
+            "2000",
+            "1",
+            "0x3e4",
+            "0x1c6",
+            "0x436",
+            "0x4fc",
+            "0x4f4",
+            "0x4f8",
+            "0x4f5",
+            "0x4fe",
+            "0x4f6",
+            "0x4fa",
+            "0x4f7",
+            "0x6fd",
+            "0x70c",
+            "0x70d",
+            "0x7d4"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x80218a1c",
+          "currentFunctionName": "zz_0218a1c_",
+          "inferredName": "force-setup_candidate_80218a1c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0065.c:4213",
+          "callers": [
+            {
+              "address": "0x80219168",
+              "name": "zz_0219168_"
+            }
+          ],
+          "callees": [],
+          "globalReferences": [
+            "DAT_80436770",
+            "DAT_803dfbec",
+            "DAT_803dfc44",
+            "DAT_803dfc5a",
+            "DAT_803dfc5c",
+            "DAT_803dfbe0",
+            "DAT_803dfbe4",
+            "DAT_803dfbe8",
+            "DAT_803dfbf0",
+            "DAT_803dfbf4",
+            "DAT_803dfbf8",
+            "DAT_803dfbfc",
+            "DAT_803dfc00",
+            "DAT_803dfc04",
+            "DAT_803dfc08",
+            "DAT_803dfc0c",
+            "DAT_803dfc10",
+            "DAT_803dfc14",
+            "DAT_803dfc18",
+            "DAT_803dfc1c"
+          ],
+          "globalAccesses": [
+            "DAT_80436770",
+            "DAT_80436770 + 1",
+            "DAT_803dfbec",
+            "DAT_803dfc44",
+            "DAT_803dfc5a",
+            "DAT_803dfc5c",
+            "DAT_803dfbe0",
+            "DAT_803dfbe4",
+            "DAT_803dfbe8",
+            "DAT_803dfbf0",
+            "DAT_803dfbf4",
+            "DAT_803dfbf8",
+            "DAT_803dfbfc",
+            "DAT_803dfc00",
+            "DAT_803dfc04",
+            "DAT_803dfc08",
+            "DAT_803dfc0c",
+            "DAT_803dfc10",
+            "DAT_803dfc14",
+            "DAT_803dfc18"
+          ],
+          "constants": [
+            "0x80218c38",
+            "1",
+            "0x18",
+            "0x1c",
+            "0xf4",
+            "0",
+            "0x146",
+            "2",
+            "0x19c",
+            "0x1b2",
+            "0x1b4",
+            "0x80000000",
+            "0x7a",
+            "0x138",
+            "0x13c",
+            "0x3d",
+            "0x140",
+            "0x144",
+            "0x148",
+            "0x14c",
+            "0x150",
+            "0x154",
+            "0x158",
+            "0x15c",
+            "0x160",
+            "0x164",
+            "0x168",
+            "0x16c",
+            "0x170",
+            "0x174"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup",
+            "damage",
+            "knockback-targeting"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x8002e2a8",
+          "currentFunctionName": "zz_002e2a8_",
+          "inferredName": "per_borg_update_damage_dispatch",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7457",
+          "callers": [
+            {
+              "address": "0x8002d7c4",
+              "name": "zz_002d7c4_"
+            },
+            {
+              "address": "0x8002db58",
+              "name": "zz_002db58_"
+            },
+            {
+              "address": "0x8002df08",
+              "name": "zz_002df08_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x800061a8",
+              "name": "FUN_800061a8"
+            },
+            {
+              "address": "0x80006c24",
+              "name": "zz_0006c24_"
+            },
+            {
+              "address": "0x80019550",
+              "name": "zz_0019550_"
+            },
+            {
+              "address": "0x8002f8d0",
+              "name": "zz_002f8d0_"
+            },
+            {
+              "address": "0x8002f8dc",
+              "name": "zz_002f8dc_"
+            },
+            {
+              "address": "0x8002fc18",
+              "name": "zz_002fc18_"
+            },
+            {
+              "address": "0x8002fcbc",
+              "name": "zz_002fcbc_"
+            },
+            {
+              "address": "0x800300bc",
+              "name": "zz_00300bc_"
+            },
+            {
+              "address": "0x8003cd5c",
+              "name": "zz_003cd5c_"
+            },
+            {
+              "address": "0x8003d344",
+              "name": "zz_003d344_"
+            },
+            {
+              "address": "0x800db250",
+              "name": "zz_00db250_"
+            },
+            {
+              "address": "0x8010e158",
+              "name": "zz_010e158_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_80436fa0",
+            "DOUBLE_80436fb0",
+            "FLOAT_80436f7c",
+            "FLOAT_80436f78",
+            "DOUBLE_80436f88",
+            "FLOAT_80436f9c",
+            "FLOAT_80436fa4",
+            "FLOAT_80436fa8",
+            "DAT_803b0724",
+            "DAT_803b0720",
+            "DAT_803b0728",
+            "DAT_803b06c0",
+            "DAT_803b06c4",
+            "DAT_803b06c8",
+            "DAT_803b06a8",
+            "DAT_80436134",
+            "DAT_8043613c",
+            "DAT_8043612c",
+            "DAT_80436128",
+            "DAT_802c7ca0"
+          ],
+          "globalAccesses": [
+            "FLOAT_80436fa0",
+            "DOUBLE_80436fb0",
+            "FLOAT_80436f7c",
+            "FLOAT_80436f78",
+            "DOUBLE_80436f88",
+            "FLOAT_80436f9c",
+            "FLOAT_80436fa4",
+            "FLOAT_80436fa8",
+            "DAT_803b0724",
+            "DAT_803b0720",
+            "DAT_803b0728",
+            "DAT_803b06c0",
+            "DAT_803b06c4",
+            "DAT_803b06c8",
+            "DAT_803b06a8",
+            "DAT_80436134",
+            "DAT_8043613c",
+            "DAT_8043612c",
+            "DAT_80436128",
+            "DAT_802c7ca0"
+          ],
+          "constants": [
+            "2",
+            "0x20",
+            "0x24",
+            "0x2c",
+            "0x11",
+            "0x18",
+            "0x28",
+            "0",
+            "0x83",
+            "8",
+            "0x800",
+            "0x59c",
+            "0x599",
+            "1",
+            "0x1da",
+            "0x6fd",
+            "0xb",
+            "1000",
+            "0x302",
+            "9",
+            "0x10",
+            "0x88",
+            "0x43300000",
+            "0xc4",
+            "0x6fc",
+            "0x80000000",
+            "0x12",
+            "0x40",
+            "0xb1",
+            "0xbc"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x801d35a0",
+          "currentFunctionName": "FUN_801d35a0",
+          "inferredName": "force-setup_candidate_801d35a0",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0056.c:4963",
+          "callers": [
+            {
+              "address": "0x801d3534",
+              "name": "FUN_801d3534"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80019550",
+              "name": "zz_0019550_"
+            },
+            {
+              "address": "0x8001b9ac",
+              "name": "FUN_8001b9ac"
+            },
+            {
+              "address": "0x8003ecb8",
+              "name": "zz_003ecb8_"
+            },
+            {
+              "address": "0x80046588",
+              "name": "zz_0046588_"
+            },
+            {
+              "address": "0x8006ebb4",
+              "name": "zz_006ebb4_"
+            },
+            {
+              "address": "0x8006ec1c",
+              "name": "zz_006ec1c_"
+            },
+            {
+              "address": "0x80083244",
+              "name": "zz_0083244_"
+            },
+            {
+              "address": "0x800833ec",
+              "name": "zz_00833ec_"
+            },
+            {
+              "address": "0x80083610",
+              "name": "zz_0083610_"
+            },
+            {
+              "address": "0x80083714",
+              "name": "zz_0083714_"
+            },
+            {
+              "address": "0x80083874",
+              "name": "FUN_80083874"
+            },
+            {
+              "address": "0x80083ad4",
+              "name": "FUN_80083ad4"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_8043be3c",
+            "FLOAT_8043be38",
+            "DAT_8038b240",
+            "DAT_8038b234",
+            "DAT_8038b230",
+            "DAT_8038b22c",
+            "DAT_802b0cb8",
+            "DAT_802b0cb4",
+            "DAT_802b0cbc",
+            "DAT_8038b1e2",
+            "FLOAT_8043be40",
+            "FLOAT_8043be44",
+            "FLOAT_8043be28"
+          ],
+          "globalAccesses": [
+            "FLOAT_8043be3c",
+            "FLOAT_8043be38",
+            "DAT_8038b240",
+            "DAT_8038b234",
+            "DAT_8038b230",
+            "DAT_8038b22c",
+            "DAT_802b0cb8",
+            "DAT_802b0cb4",
+            "DAT_802b0cbc",
+            "DAT_8038b1e2",
+            "FLOAT_8043be40",
+            "FLOAT_8043be44",
+            "FLOAT_8043be28"
+          ],
+          "constants": [
+            "0x801d3ce4",
+            "0x801d35b0",
+            "3",
+            "0xd4",
+            "0x90",
+            "0x13",
+            "0x24",
+            "0x11",
+            "0x1c",
+            "0x1d9",
+            "0",
+            "4",
+            "0x1b",
+            "1",
+            "0x20",
+            "0x5e0",
+            "0x1c6",
+            "0x9c",
+            "0x118",
+            "0xa0",
+            "0x128",
+            "0xa4",
+            "0x138",
+            "0x11c",
+            "300",
+            "0x13c",
+            "0x1a",
+            "0x44",
+            "0x16c",
+            "0x38"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x800e075c",
+          "currentFunctionName": "FUN_800e075c",
+          "inferredName": "force-setup_candidate_800e075c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0024.c:818",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x800055fc",
+              "name": "zz_00055fc_"
+            },
+            {
+              "address": "0x80006f98",
+              "name": "zz_0006f98_"
+            },
+            {
+              "address": "0x80006fb4",
+              "name": "zz_0006fb4_"
+            },
+            {
+              "address": "0x80007c30",
+              "name": "zz_0007c30_"
+            },
+            {
+              "address": "0x800086b8",
+              "name": "zz_00086b8_"
+            },
+            {
+              "address": "0x80047aa4",
+              "name": "FUN_80047aa4"
+            },
+            {
+              "address": "0x8006ebb4",
+              "name": "zz_006ebb4_"
+            },
+            {
+              "address": "0x80089100",
+              "name": "zz_0089100_"
+            },
+            {
+              "address": "0x8008ac80",
+              "name": "zz_008ac80_"
+            },
+            {
+              "address": "0x8008aff0",
+              "name": "zz_008aff0_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80316f00",
+            "DAT_80316efc",
+            "DAT_80316f04",
+            "DAT_80316f08",
+            "DAT_80316f0c",
+            "DAT_80316ef9",
+            "DAT_80316efa",
+            "DAT_8031706a",
+            "FLOAT_80438d80",
+            "DAT_80316f12",
+            "DAT_80316f10",
+            "DAT_80316f0e",
+            "DAT_8031706b",
+            "FLOAT_80438d84",
+            "DAT_8031706c",
+            "DAT_80317066",
+            "DAT_80317068",
+            "DAT_80317065",
+            "DAT_80316ef8",
+            "DAT_80316efb"
+          ],
+          "globalAccesses": [
+            "DAT_80316f00",
+            "DAT_80316efc",
+            "DAT_80316f04",
+            "DAT_80316f08",
+            "DAT_80316f0c",
+            "DAT_80316ef9",
+            "DAT_80316efa",
+            "DAT_8031706a",
+            "FLOAT_80438d80",
+            "DAT_80316f12",
+            "DAT_80316f10",
+            "DAT_80316f0e",
+            "DAT_8031706b",
+            "FLOAT_80438d84",
+            "DAT_8031706c",
+            "DAT_80317066",
+            "DAT_80317068",
+            "DAT_80317065",
+            "DAT_80316ef8",
+            "DAT_80316efb"
+          ],
+          "constants": [
+            "0x800e08b4",
+            "0x800e0888",
+            "0x800e085c",
+            "12",
+            "4",
+            "6",
+            "0x18",
+            "0x11",
+            "0x90",
+            "0x13",
+            "0x1c",
+            "0x84",
+            "0x5f",
+            "0x14",
+            "100",
+            "0x68",
+            "0x6c",
+            "0x70",
+            "0x74",
+            "0x89",
+            "0x9c",
+            "0x118",
+            "0xa0",
+            "0x128",
+            "0xa4",
+            "0x138",
+            "0x1e",
+            "0x98",
+            "0x100",
+            "0"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x800141d8",
+          "currentFunctionName": "zz_00141d8_",
+          "inferredName": "force-setup_candidate_800141d8",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0001.c:5964",
+          "callers": [
+            {
+              "address": "0x80011f30",
+              "name": "zz_0011f30_"
+            },
+            {
+              "address": "0x800147e0",
+              "name": "zz_00147e0_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80006fb4",
+              "name": "zz_0006fb4_"
+            },
+            {
+              "address": "0x80007c30",
+              "name": "zz_0007c30_"
+            },
+            {
+              "address": "0x80007cac",
+              "name": "zz_0007cac_"
+            },
+            {
+              "address": "0x80007cd0",
+              "name": "zz_0007cd0_"
+            },
+            {
+              "address": "0x80007cf4",
+              "name": "zz_0007cf4_"
+            },
+            {
+              "address": "0x800086b8",
+              "name": "zz_00086b8_"
+            },
+            {
+              "address": "0x80013f3c",
+              "name": "zz_0013f3c_"
+            }
+          ],
+          "globalReferences": [
+            "DOUBLE_80436bd0",
+            "FLOAT_80436c60",
+            "FLOAT_80436c64",
+            "DAT_804361fc",
+            "FLOAT_80436c68",
+            "FLOAT_80436c78",
+            "FLOAT_80436c6c",
+            "FLOAT_80436bcc",
+            "FLOAT_80436c74",
+            "FLOAT_80436c70",
+            "FLOAT_80436c84",
+            "FLOAT_80436c80",
+            "FLOAT_80436c7c",
+            "FLOAT_80436c88",
+            "DAT_802c3c84",
+            "FLOAT_80436c8c",
+            "FLOAT_80436bc4",
+            "FLOAT_80436c14",
+            "FLOAT_80436c10",
+            "DOUBLE_80436c00"
+          ],
+          "globalAccesses": [
+            "DOUBLE_80436bd0",
+            "FLOAT_80436c60",
+            "FLOAT_80436c64",
+            "DAT_804361fc",
+            "FLOAT_80436c68",
+            "FLOAT_80436c78",
+            "FLOAT_80436c6c",
+            "FLOAT_80436bcc",
+            "FLOAT_80436c74",
+            "FLOAT_80436c70",
+            "FLOAT_80436c84",
+            "FLOAT_80436c80",
+            "FLOAT_80436c7c",
+            "FLOAT_80436c88",
+            "DAT_802c3c84",
+            "FLOAT_80436c8c",
+            "FLOAT_80436bc4",
+            "FLOAT_80436c14",
+            "FLOAT_80436c10",
+            "DOUBLE_80436c00"
+          ],
+          "constants": [
+            "0x800147c4",
+            "0x800141e8",
+            "0x172",
+            "0",
+            "0x1a6",
+            "1",
+            "0x1a5",
+            "0x94",
+            "0x90",
+            "1000",
+            "0x96",
+            "0x3e4",
+            "0x1a4",
+            "0x194",
+            "0x1c6",
+            "0x43300000",
+            "0x80000000",
+            "0x1c4",
+            "0x198",
+            "0x7c",
+            "0x10000",
+            "8",
+            "0xe0",
+            "0xe4",
+            "0x13",
+            "0x50",
+            "0x10",
+            "0xe8",
+            "0x19c",
+            "0x1a0"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup",
+            "damage",
+            "knockback-targeting"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x800fe818",
+          "currentFunctionName": "FUN_800fe818",
+          "inferredName": "force-setup_candidate_800fe818",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0028.c:1290",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80006f98",
+              "name": "zz_0006f98_"
+            },
+            {
+              "address": "0x80006fb4",
+              "name": "zz_0006fb4_"
+            },
+            {
+              "address": "0x80048288",
+              "name": "zz_0048288_"
+            },
+            {
+              "address": "0x80083d60",
+              "name": "zz_0083d60_"
+            },
+            {
+              "address": "0x80089100",
+              "name": "zz_0089100_"
+            },
+            {
+              "address": "0x8008ac80",
+              "name": "zz_008ac80_"
+            },
+            {
+              "address": "0x8008aff0",
+              "name": "zz_008aff0_"
+            },
+            {
+              "address": "0x800aedc0",
+              "name": "zz_00aedc0_"
+            },
+            {
+              "address": "0x800c74ec",
+              "name": "zz_00c74ec_"
+            },
+            {
+              "address": "0x800f036c",
+              "name": "zz_00f036c_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_8031ef80",
+            "DAT_8031ef38",
+            "DAT_802b0cb8",
+            "DAT_802b0cb4",
+            "DAT_802b0cbc",
+            "DAT_8031ef39",
+            "DAT_8031ef3a",
+            "DAT_8031ef3b",
+            "FLOAT_804392a8",
+            "DAT_8031ef90",
+            "DAT_8031ef9f",
+            "FLOAT_804392ac",
+            "DAT_8031ef82",
+            "DAT_8031ef84",
+            "DAT_8031ef86",
+            "DAT_8031ef94",
+            "DAT_8031ef9e",
+            "DAT_8031ef9c",
+            "DAT_8031ef87"
+          ],
+          "globalAccesses": [
+            "DAT_8031ef80",
+            "DAT_8031ef38",
+            "DAT_802b0cb8",
+            "DAT_802b0cb4",
+            "DAT_802b0cbc",
+            "DAT_8031ef39",
+            "DAT_8031ef3a",
+            "DAT_8031ef3b",
+            "FLOAT_804392a8",
+            "DAT_8031ef90",
+            "DAT_8031ef9f",
+            "FLOAT_804392ac",
+            "DAT_8031ef82",
+            "DAT_8031ef84",
+            "DAT_8031ef86",
+            "DAT_8031ef94",
+            "DAT_8031ef9e",
+            "DAT_8031ef9c",
+            "DAT_8031ef87"
+          ],
+          "constants": [
+            "0x18",
+            "0x90",
+            "0x84",
+            "0x1e",
+            "0x13",
+            "0x11",
+            "0x20",
+            "0x98",
+            "5",
+            "0x100",
+            "0",
+            "1",
+            "0x9c",
+            "0xa0",
+            "0xa4",
+            "0x30",
+            "0x8d4",
+            "0x7fce10c4",
+            "0x38",
+            "0x3c",
+            "0x8e4",
+            "0x40",
+            "0x8f4",
+            "0x44",
+            "0x1c",
+            "0x1cb",
+            "0x1c4",
+            "0x1c6",
+            "0x1c8",
+            "0x144"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x80128fec",
+          "currentFunctionName": "FUN_80128fec",
+          "inferredName": "force-setup_candidate_80128fec",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0034.c:442",
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80006f98",
+              "name": "zz_0006f98_"
+            },
+            {
+              "address": "0x80006fb4",
+              "name": "zz_0006fb4_"
+            },
+            {
+              "address": "0x8000726c",
+              "name": "zz_000726c_"
+            },
+            {
+              "address": "0x80083d60",
+              "name": "zz_0083d60_"
+            },
+            {
+              "address": "0x80089100",
+              "name": "zz_0089100_"
+            },
+            {
+              "address": "0x8008ac80",
+              "name": "zz_008ac80_"
+            },
+            {
+              "address": "0x8008aff0",
+              "name": "zz_008aff0_"
+            },
+            {
+              "address": "0x800c74ec",
+              "name": "zz_00c74ec_"
+            },
+            {
+              "address": "0x800f036c",
+              "name": "zz_00f036c_"
+            }
+          ],
+          "globalReferences": [
+            "DAT_80330b08",
+            "DAT_803309fe",
+            "DAT_803309f8",
+            "DAT_803309fc",
+            "DAT_803309ea",
+            "DAT_803309ff",
+            "FLOAT_80439ce8",
+            "DAT_80330b18",
+            "FLOAT_80439cec",
+            "FLOAT_80439cf0",
+            "DAT_80330b0a",
+            "DAT_80330b0c",
+            "DAT_80330b0e",
+            "DAT_80330b1c",
+            "DAT_80330a04",
+            "DAT_80330a00",
+            "DAT_80330a08",
+            "DAT_803309e8",
+            "DAT_803bb374",
+            "DAT_80330b24"
+          ],
+          "globalAccesses": [
+            "DAT_80330b08",
+            "DAT_803309fe",
+            "DAT_803309f8",
+            "DAT_803309fc",
+            "DAT_803309ea",
+            "DAT_803309ff",
+            "FLOAT_80439ce8",
+            "DAT_80330b18",
+            "FLOAT_80439cec",
+            "FLOAT_80439cf0",
+            "DAT_80330b0a",
+            "DAT_80330b0c",
+            "DAT_80330b0e",
+            "DAT_80330b1c",
+            "DAT_80330a04",
+            "DAT_80330a00",
+            "DAT_80330a08",
+            "DAT_803309e8",
+            "DAT_803bb374",
+            "DAT_80330b24"
+          ],
+          "constants": [
+            "0x18",
+            "0x11",
+            "0x90",
+            "0x13",
+            "0x24",
+            "0x84",
+            "0x10",
+            "0x98",
+            "0x100",
+            "0",
+            "1",
+            "0x70",
+            "0x74",
+            "0x9c",
+            "0x30",
+            "0x8d8",
+            "0xa0",
+            "0x8e8",
+            "0xa4",
+            "0x8f8",
+            "0x8d4",
+            "0x7fccf614",
+            "0x20",
+            "0x38",
+            "0x3c",
+            "0x8e4",
+            "0x40",
+            "0x8f4",
+            "0x44",
+            "0x1c"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup",
+            "damage",
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x8004cd24",
+          "currentFunctionName": "zz_004cd24_",
+          "inferredName": "knockback-targeting_candidate_8004cd24",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:1991",
+          "callers": [
+            {
+              "address": "0x80057d9c",
+              "name": "FUN_80057d9c"
+            },
+            {
+              "address": "0x80058ec8",
+              "name": "FUN_80058ec8"
+            },
+            {
+              "address": "0x8005c810",
+              "name": "FUN_8005c810"
+            },
+            {
+              "address": "0x8005c95c",
+              "name": "FUN_8005c95c"
+            },
+            {
+              "address": "0x8005ca80",
+              "name": "FUN_8005ca80"
+            },
+            {
+              "address": "0x8005cc00",
+              "name": "zz_005cc00_"
+            },
+            {
+              "address": "0x8005ce14",
+              "name": "FUN_8005ce14"
+            },
+            {
+              "address": "0x8005d0a8",
+              "name": "FUN_8005d0a8"
+            },
+            {
+              "address": "0x8005d258",
+              "name": "FUN_8005d258"
+            },
+            {
+              "address": "0x8005d494",
+              "name": "FUN_8005d494"
+            },
+            {
+              "address": "0x8005d9d8",
+              "name": "FUN_8005d9d8"
+            },
+            {
+              "address": "0x8005db44",
+              "name": "FUN_8005db44"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80049e58",
+              "name": "zz_0049e58_"
+            },
+            {
+              "address": "0x8004c050",
+              "name": "zz_004c050_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_804370f4",
+            "FLOAT_80437148",
+            "DOUBLE_804370f8",
+            "FLOAT_80437128"
+          ],
+          "globalAccesses": [
+            "FLOAT_804370f4",
+            "FLOAT_80437148",
+            "DOUBLE_804370f8",
+            "FLOAT_80437128"
+          ],
+          "constants": [
+            "0x8004ce34",
+            "0x8004ce68",
+            "0",
+            "0x1cd4",
+            "0x1ad4",
+            "0x579",
+            "1",
+            "0x1cee",
+            "0x1d0e",
+            "0x1d2e",
+            "0x1d4e",
+            "0x1e",
+            "0x1d9a",
+            "0x1a",
+            "8",
+            "2",
+            "4",
+            "5",
+            "0x2e",
+            "0x1f",
+            "0x2d",
+            "0xc",
+            "0x24",
+            "0x3ff0000000000000",
+            "0x1dc8",
+            "3",
+            "0x1b01",
+            "0x43300000",
+            "0x1af8",
+            "0x80000000"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "knockback-targeting"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x800677b0",
+          "currentFunctionName": "zz_00677b0_",
+          "inferredName": "knockback-targeting_candidate_800677b0",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:3978",
+          "callers": [
+            {
+              "address": "0x8005a580",
+              "name": "FUN_8005a580"
+            },
+            {
+              "address": "0x8005cc00",
+              "name": "zz_005cc00_"
+            },
+            {
+              "address": "0x8005ce14",
+              "name": "FUN_8005ce14"
+            },
+            {
+              "address": "0x8005d0a8",
+              "name": "FUN_8005d0a8"
+            },
+            {
+              "address": "0x8005d9d8",
+              "name": "FUN_8005d9d8"
+            },
+            {
+              "address": "0x8005dc24",
+              "name": "FUN_8005dc24"
+            },
+            {
+              "address": "0x8005dd10",
+              "name": "FUN_8005dd10"
+            },
+            {
+              "address": "0x8005df2c",
+              "name": "FUN_8005df2c"
+            },
+            {
+              "address": "0x8005dffc",
+              "name": "FUN_8005dffc"
+            },
+            {
+              "address": "0x8005e31c",
+              "name": "FUN_8005e31c"
+            },
+            {
+              "address": "0x8005e5a8",
+              "name": "FUN_8005e5a8"
+            },
+            {
+              "address": "0x8005fecc",
+              "name": "FUN_8005fecc"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8003e0a8",
+              "name": "FUN_8003e0a8"
+            },
+            {
+              "address": "0x80045238",
+              "name": "zz_0045238_"
+            },
+            {
+              "address": "0x800452a0",
+              "name": "FUN_800452a0"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_804375f8",
+            "FLOAT_804375d0",
+            "DOUBLE_80437600",
+            "DOUBLE_80437608",
+            "FLOAT_804375d4"
+          ],
+          "globalAccesses": [
+            "FLOAT_804375f8",
+            "FLOAT_804375d0",
+            "DOUBLE_80437600",
+            "DOUBLE_80437608",
+            "FLOAT_804375d4"
+          ],
+          "constants": [
+            "0x800679b0",
+            "0x800677c0",
+            "0x7c9",
+            "0",
+            "0x668",
+            "0x20",
+            "0x24",
+            "0x6d0",
+            "0x1db",
+            "0x2c",
+            "0x698",
+            "0x4b0",
+            "0xac",
+            "0xae",
+            "1.0",
+            "0x4c",
+            "0x44",
+            "0x48",
+            "0x754",
+            "0x0",
+            "1"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        },
+        {
+          "address": "0x8006d144",
+          "currentFunctionName": "zz_006d144_",
+          "inferredName": "force-setup_candidate_8006d144",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:2475",
+          "callers": [
+            {
+              "address": "0x800707b8",
+              "name": "zz_00707b8_"
+            },
+            {
+              "address": "0x800709b8",
+              "name": "zz_00709b8_"
+            },
+            {
+              "address": "0x80070a48",
+              "name": "zz_0070a48_"
+            },
+            {
+              "address": "0x80070aec",
+              "name": "zz_0070aec_"
+            },
+            {
+              "address": "0x80070ccc",
+              "name": "zz_0070ccc_"
+            },
+            {
+              "address": "0x80070de4",
+              "name": "zz_0070de4_"
+            },
+            {
+              "address": "0x80070f18",
+              "name": "zz_0070f18_"
+            },
+            {
+              "address": "0x80071288",
+              "name": "zz_0071288_"
+            },
+            {
+              "address": "0x800713e0",
+              "name": "zz_00713e0_"
+            },
+            {
+              "address": "0x80071b10",
+              "name": "zz_0071b10_"
+            },
+            {
+              "address": "0x80071c50",
+              "name": "zz_0071c50_"
+            },
+            {
+              "address": "0x80071d78",
+              "name": "zz_0071d78_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8006660c",
+              "name": "zz_006660c_"
+            },
+            {
+              "address": "0x800669d0",
+              "name": "FUN_800669d0"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0xcc",
+            "0",
+            "0x5aa",
+            "0x5ac",
+            "0x72"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup",
+            "knockback-targeting"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "packages/combat/src/combat.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts"
+          ]
+        },
+        {
+          "address": "0x80067310",
+          "currentFunctionName": "FUN_80067310",
+          "inferredName": "knockback-targeting_candidate_80067310",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:3780",
+          "callers": [
+            {
+              "address": "0x8005cc00",
+              "name": "zz_005cc00_"
+            },
+            {
+              "address": "0x8005ce14",
+              "name": "FUN_8005ce14"
+            },
+            {
+              "address": "0x8005d0a8",
+              "name": "FUN_8005d0a8"
+            },
+            {
+              "address": "0x8005d9d8",
+              "name": "FUN_8005d9d8"
+            },
+            {
+              "address": "0x8005dc24",
+              "name": "FUN_8005dc24"
+            },
+            {
+              "address": "0x8005dd10",
+              "name": "FUN_8005dd10"
+            },
+            {
+              "address": "0x8005df2c",
+              "name": "FUN_8005df2c"
+            },
+            {
+              "address": "0x8005dffc",
+              "name": "FUN_8005dffc"
+            },
+            {
+              "address": "0x8005fecc",
+              "name": "FUN_8005fecc"
+            },
+            {
+              "address": "0x80061338",
+              "name": "FUN_80061338"
+            },
+            {
+              "address": "0x80061560",
+              "name": "FUN_80061560"
+            },
+            {
+              "address": "0x80061f50",
+              "name": "FUN_80061f50"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x80045204",
+              "name": "zz_0045204_"
+            },
+            {
+              "address": "0x80045238",
+              "name": "zz_0045238_"
+            },
+            {
+              "address": "0x80068030",
+              "name": "zz_0068030_"
+            }
+          ],
+          "globalReferences": [
+            "FLOAT_804375d0",
+            "FLOAT_804375f0"
+          ],
+          "globalAccesses": [
+            "FLOAT_804375d0",
+            "FLOAT_804375f0"
+          ],
+          "constants": [
+            "80067310",
+            "0x80067438",
+            "0x80067430",
+            "0x80067328",
+            "0x80067320",
+            "0x5f4",
+            "0x5f8",
+            "0x20",
+            "0x44",
+            "0x24",
+            "0x48",
+            "0x28",
+            "0x4c",
+            "0x50",
+            "0x741",
+            "0",
+            "0x6cb",
+            "0x680"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "knockback-targeting",
+            "movement-physics"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts"
+          ]
+        }
+      ],
+      "supportingArtifacts": [
+        {
+          "path": "research/decomp/data/type-multiplier-matrix-802c5d60.json",
+          "exists": true
+        },
+        {
+          "path": "research/asset-inventory/common-battle-data.md",
+          "exists": true
+        },
+        {
+          "path": "research/asset-inventory/weapons-effects-projectiles.md",
+          "exists": true
+        }
+      ],
+      "requiredBeforePorting": [
+        "Port damage from zz_003cd5c_ only after table inputs and object+1000 category source are confirmed.",
+        "Port knockback as computed direction from zz_00300bc_, not as flat tuned scalar.",
+        "Keep HUD mirrors separate from authoritative HP fields."
+      ],
+      "currentWebEvidence": [
+        {
+          "file": "packages/combat/src/combat.ts",
+          "needle": "function applyHit",
+          "sourceRef": "packages/combat/src/combat.ts:114"
+        },
+        {
+          "file": "packages/combat/src/constants.ts",
+          "needle": "TUNED",
+          "sourceRef": "packages/combat/src/constants.ts:3"
+        },
+        {
+          "file": "apps/game/src/ui/hud/BattleHud.ts",
+          "needle": "BattleHud",
+          "sourceRef": "apps/game/src/ui/hud/BattleHud.ts:2"
+        }
+      ]
+    },
+    {
+      "id": "victory-defeat-progression",
+      "label": "HUD/gameplay -> victory/defeat/progression",
+      "anchors": [
+        {
+          "address": "0x802807ac",
+          "currentFunctionName": "cPlayer::ClearSwapControllerTimer(void)",
+          "inferredName": "player_clear_swap_controller_timer",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0076.c:3819",
+          "callers": [],
+          "callees": [],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "0x10",
+            "0",
+            "0x14",
+            "0x18",
+            "0x1c"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts"
+          ]
+        },
+        {
+          "address": "0x80281c38",
+          "currentFunctionName": "zz_0281c38_",
+          "inferredName": "death_swap_flow_candidate",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0076.c:4844",
+          "callers": [
+            {
+              "address": "0x80281ecc",
+              "name": "zz_0281ecc_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x802779cc",
+              "name": "zz_02779cc_"
+            },
+            {
+              "address": "0x80280798",
+              "name": "zz_0280798_"
+            }
+          ],
+          "globalReferences": [],
+          "globalAccesses": [],
+          "constants": [
+            "4",
+            "0x18",
+            "1",
+            "0x7fffffff",
+            "0x12a8",
+            "0xfffffffc",
+            "8",
+            "2",
+            "0x1f",
+            "0x20",
+            "3",
+            "0",
+            "0x2dc",
+            "0xff",
+            "0x1b0",
+            "0x1b",
+            "5",
+            "0x290",
+            "0x294",
+            "0x2b8",
+            "0x12b0",
+            "7",
+            "0x1c",
+            "0x268",
+            "9",
+            "0x17",
+            "0x12ac"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "force-setup"
+          ],
+          "relatedWebModules": [
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts"
+          ]
+        }
+      ],
+      "topicFallbacks": [],
+      "supportingArtifacts": [
+        {
+          "path": "packages/missions/src/challenge.ts",
+          "exists": true
+        }
+      ],
+      "requiredBeforePorting": [
+        "Trace player swap/death transition around cPlayer::ClearSwapControllerTimer and adjacent functions.",
+        "Confirm original Challenge win/loss branch and next-battle counter before replacing Results progression."
+      ],
+      "currentWebEvidence": [
+        {
+          "file": "packages/missions/src/challenge.ts",
+          "needle": "next(result: BattleResults)",
+          "sourceRef": "packages/missions/src/challenge.ts:111"
+        },
+        {
+          "file": "apps/game/src/main.ts",
+          "needle": "function advanceRun",
+          "sourceRef": "apps/game/src/main.ts:1269"
+        },
+        {
+          "file": "apps/game/src/ui/screens/Results.ts",
+          "needle": "Results",
+          "sourceRef": "apps/game/src/ui/screens/Results.ts:2"
+        }
+      ]
+    }
+  ]
+}

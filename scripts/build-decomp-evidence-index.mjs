@@ -63,7 +63,7 @@ const topicRules = [
   {
     topic: "stage-load-collision",
     modules: ["apps/game/src/sim/adapter.ts", "apps/game/src/main.ts", "packages/formats/src/hit-bin.ts"],
-    patterns: [/\bst[0-9a-f]{2}\b/i, /stage/i, /collision/i, /hit[0-9a-f]{3}\.bin/i, /set[0-9a-f]{4}\.arc/i],
+    patterns: [/\bst[0-9a-f]{2}\b/i, /collision/i, /hit[0-9a-f]{3}\.bin/i, /set[0-9a-f]{4}\.arc/i],
   },
   {
     topic: "assets-animation",

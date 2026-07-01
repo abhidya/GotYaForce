@@ -17,6 +17,7 @@
     "sync:assets": "node scripts/sync-exported-assets.mjs",
     "export:borg-anim": "node scripts/export-borg-animation-hsd.mjs",
     "index:decomp": "node scripts/build-decomp-evidence-index.mjs",
+    "inventory:challenge-flow": "node scripts/inventory-challenge-flow-evidence.mjs",
     "manifest:stages": "node scripts/build-stage-manifests.mjs",
     "convert": "node scripts/asset-convert.mjs",
     "manifest": "node scripts/build-manifest.mjs"
