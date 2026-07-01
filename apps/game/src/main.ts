@@ -1042,7 +1042,7 @@ function startRun(): void {
   }));
   flow.run = createChallengeRun({
     budget: flow.budget,
-    playerCount: flow.playerCount,
+    playerCount: humanPlayerCount,
     playerForces,
     borgs: borgs as unknown as Parameters<typeof createChallengeRun>[0]["borgs"],
   });

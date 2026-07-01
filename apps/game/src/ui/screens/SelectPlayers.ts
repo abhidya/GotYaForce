@@ -3,19 +3,18 @@
  *
  * Real game: FIGHT ALONE (1P) vs TEAM UP (2P co-op), person silhouettes in a
  * selection ring with blue label pills + GameCube controllers underneath, on a
- * green gridded backdrop, B BACK / A CONFIRM legend. Our online build extends the
- * count to 1..4 (`maxPlayers`): 1 => FIGHT ALONE, 2+ => TEAM UP with that many
- * silhouettes. Each selectable count is its own option so 3P/4P are reachable.
+ * green gridded backdrop, B BACK / A CONFIRM legend. Challenge mode is kept to
+ * the original two choices for now: 1 => FIGHT ALONE, 2 => TEAM UP.
  */
 
 import { el, legendItem } from "../dom.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export interface SelectPlayersOptions {
-  /** Fired on confirm with the chosen player count (1..maxPlayers). */
+  /** Fired on confirm with the chosen player count (1..2 for Challenge). */
   onSelect: (playerCount: number) => void;
   onBack?: () => void;
-  /** Highest selectable count. Original game = 2; our online build = 4. */
+  /** Highest selectable count. Original Challenge = 2; 3P/4P are out of scope. */
   maxPlayers?: number;
   initial?: number;
 }
@@ -27,21 +26,9 @@ export interface SelectPlayersHandle {
 
 function personSilhouette(label: string): HTMLElement {
   return el("div", { class: "gf-person" }, [
-    el("div", {
-      style: {
-        width: "46px",
-        height: "62px",
-        margin: "0 auto",
-        borderRadius: "22px 22px 8px 8px",
-        background: "rgba(255,255,255,0.92)",
-        display: "grid",
-        placeItems: "center",
-        color: "#2a2150",
-        fontSize: "26px",
-        position: "relative",
-      },
-      text: label,
-    }),
+    el("span", { class: "gf-person-head" }),
+    el("span", { class: "gf-person-body" }),
+    el("span", { class: "gf-person-num", text: label }),
   ]);
 }
 
@@ -49,27 +36,29 @@ export function createSelectPlayers(
   container: HTMLElement,
   opts: SelectPlayersOptions,
 ): SelectPlayersHandle {
-  const max = Math.max(1, Math.min(opts.maxPlayers ?? 2, 4));
+  const max = Math.max(1, Math.min(opts.maxPlayers ?? 2, 2));
   let selected = Math.min(Math.max(opts.initial ?? 1, 1), max);
 
-  const root = el("div", { class: "gf-screen" });
-  root.appendChild(el("div", { class: "gf-grid-bg gf-bg-green" }));
+  const root = el("div", { class: "gf-screen gf-vsel-screen gf-select-players" });
+  const frame = el("div", { class: "gf-vsel-frame" });
+  root.appendChild(frame);
+  frame.appendChild(el("div", { class: "gf-grid-bg gf-bg-green" }));
   const selectScene = createUiSceneHost("gf-ui-scene gf-vsel-real-scene gf-vsel-players-scene");
-  root.appendChild(selectScene);
-  root.appendChild(el("h1", { class: "gf-title", text: "SELECT NUMBER OF PLAYERS" }));
+  frame.appendChild(selectScene);
+  frame.appendChild(el("h1", { class: "gf-title gf-vsel-title", text: "SELECT NUMBER OF PLAYERS" }));
 
-  const row = el("div", { class: "gf-row", style: { marginTop: "5%" } });
+  const row = el("div", { class: "gf-row gf-vsel-options" });
   const tiles = new Map<number, HTMLButtonElement>();
 
   for (let count = 1; count <= max; count++) {
-    const people = el("div", { style: { display: "flex", gap: "6px", justifyContent: "center" } });
+    const people = el("div", { class: `gf-people gf-people-${count}` });
     for (let p = 1; p <= count; p++) people.appendChild(personSilhouette(String(p)));
 
-    const label = count === 1 ? "FIGHT ALONE" : count === 2 ? "TEAM UP" : `TEAM UP ${count}P`;
+    const label = count === 1 ? "FIGHT ALONE" : "TEAM UP";
     const tile = el(
       "button",
       {
-        class: "gf-option",
+        class: `gf-option gf-player-option gf-player-${count}`,
         attrs: { type: "button", "data-count": String(count), "aria-label": `${count} player ${label}` },
         onClick: () => {
           if (selected === count) opts.onSelect(count);
@@ -77,16 +66,16 @@ export function createSelectPlayers(
         },
       },
       [
-        el("div", { class: "gf-pad", style: { width: "auto", height: "auto", padding: "14px 22px" } }, [people]),
+        el("div", { class: "gf-pad gf-player-pad" }, [people, el("div", { class: `gf-controller-row gf-controller-row-${count}` })]),
         el("div", { class: "gf-pill", text: label }),
       ],
     );
     tiles.set(count, tile);
     row.appendChild(tile);
   }
-  root.appendChild(row);
+  frame.appendChild(row);
 
-  root.appendChild(
+  frame.appendChild(
     el("div", { class: "gf-legend" }, [legendItem("b", "BACK"), legendItem("a", "CONFIRM")]),
   );
 

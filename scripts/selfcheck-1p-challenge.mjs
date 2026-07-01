@@ -5,7 +5,11 @@ import { fileURLToPath } from "node:url";
 
 import { createBattle, emptyInput } from "../packages/combat/dist/index.js";
 import { hitBin } from "../packages/formats/dist/index.js";
-import { CHALLENGE_DIFFICULTIES, createChallengeRun } from "../packages/missions/dist/index.js";
+import {
+  CHALLENGE_DIFFICULTIES,
+  CHALLENGE_ENEMY_BUDGETS,
+  createChallengeRun,
+} from "../packages/missions/dist/index.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const STAGE_ID = "st00";
@@ -44,8 +48,10 @@ if (firstEnergyChangeFrame < 0) {
 if (resolvedFrame < 0) {
   throw new Error(`1P Challenge smoke failed: battle did not resolve within ${maxFrames} frames`);
 }
-if ((battle.state.energy[0] ?? -1) !== 0 && (battle.state.energy[1] ?? -1) !== 0) {
-  throw new Error("1P Challenge smoke failed: resolved battle without a depleted team energy meter");
+const resolvedByDepletion = (battle.state.energy[0] ?? -1) === 0 || (battle.state.energy[1] ?? -1) === 0;
+const resolvedByTimer = battle.state.result === "draw" && battle.state.timeRemainingFrames === 0;
+if (!resolvedByDepletion && !resolvedByTimer) {
+  throw new Error("1P Challenge smoke failed: resolved battle without KO or timer expiry");
 }
 
 console.log(
@@ -71,7 +77,8 @@ function buildChallengeBattle() {
   });
   const battleConfig = run.getCurrentBattle();
   if (!battleConfig) throw new Error("Challenge run did not create BATTLE 1");
-  if (battleConfig.meta?.enemyTargetEnergy !== 1500) {
+  const expectedEnemyTarget = CHALLENGE_ENEMY_BUDGETS[0][0];
+  if (battleConfig.meta?.enemyTargetEnergy !== expectedEnemyTarget) {
     throw new Error(`Challenge BATTLE 1 target changed: ${battleConfig.meta?.enemyTargetEnergy}`);
   }
   const cpuAlly = battleConfig.forces.find((force) => force.team === "player" && force.ownerPlayer == null);
@@ -143,6 +150,7 @@ function convertBattleConfig(config, stageId, bounds, collision) {
     stageId,
     bounds,
     collision,
+    timeLimitFrames: config.timeLimitFrames,
     forces: config.forces.map((force) => ({
       team: force.team === "player" ? 0 : 1,
       ownerPlayer: force.ownerPlayer == null ? null : `p${force.ownerPlayer}`,

@@ -25,8 +25,9 @@ import {
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
+import { typeDamageMultiplier } from "./typeDamage.js";
 import type { BorgRuntime, Projectile, ProjectileVisualKind } from "./types.js";
-import projectileVisualFamilies from "./data/projectileVisualFamilies.json";
+import projectileVisualFamilies from "./data/projectileVisualFamilies.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------------------
 // Invincibility timer — DIRECT PORT of the decompiled countdown (behavior-notes.md s4a).
@@ -70,6 +71,21 @@ export function stepCooldowns(b: BorgRuntime): void {
 // ---------------------------------------------------------------------------------------
 function isEnemyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
   return o.alive && o.team !== self.team && o.uid !== self.uid;
+}
+
+function canReceiveHit(self: BorgRuntime, o: BorgRuntime): boolean {
+  return o.alive && o.uid !== self.uid;
+}
+
+function rawDamageForTarget(
+  rawDamage: number,
+  attackerTeam: number,
+  targetTeam: number,
+  attackerBorgId: string | undefined,
+  defenderBorgId: string | undefined,
+): number {
+  const typeAdjusted = rawDamage * typeDamageMultiplier(attackerBorgId, defenderBorgId);
+  return attackerTeam === targetTeam ? typeAdjusted / DAMAGE.SAME_TEAM_HIT_DIVISOR : typeAdjusted;
 }
 
 /** Acquire the nearest enemy that is in front (within the lock cone) and in range. */
@@ -321,13 +337,21 @@ export function stepAttacks(
       (p.hasMelee ? MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT : SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT) *
       SPECIAL.DMG_MULT;
     for (const o of all) {
-      if (!isEnemyAlive(b, o)) continue;
+      if (!canReceiveHit(b, o)) continue;
       if (distXZ(b.pos, o.pos) <= SPECIAL.RADIUS) {
         const op = profiles.get(o.uid);
         if (op) {
           // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target,
           // via the ported zz_00300bc_ atan2/BAM16 calc) instead of this raw un-ported subtract.
-          applyHit(o, op, baseDmg, SPECIAL.KNOCKBACK, { x: 0, y: 0, z: 0 }, b.pos, true);
+          applyHit(
+            o,
+            op,
+            rawDamageForTarget(baseDmg, b.team, o.team, p.id, op.id),
+            SPECIAL.KNOCKBACK,
+            { x: 0, y: 0, z: 0 },
+            b.pos,
+            true,
+          );
         }
       }
     }
@@ -355,11 +379,14 @@ export function stepAttacks(
 
   // --- Resolve an active melee swing against enemies in reach ------------------------
   const meleeActive = b.cooldowns["meleeActive"] ?? 0;
+  if (b.state === "attack" && p.hasMelee && meleeActive > 0 && STATE.MELEE_IFRAME_REFRESH_PER_FRAME) {
+    b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
+  }
   if (b.state === "attack" && p.hasMelee && meleeActive > 0 && meleeActive <= MELEE.ACTIVE) {
     // Only the active window (after startup) deals damage; one hit per swing per target.
     const fwd = forwardFromYaw(b.rotY);
     for (const o of all) {
-      if (!isEnemyAlive(b, o)) continue;
+      if (!canReceiveHit(b, o)) continue;
       const d = distXZ(b.pos, o.pos);
       if (d > MELEE.RANGE) continue;
       if (Math.abs(o.pos.y - b.pos.y) > MELEE.Y_TOLERANCE) continue;
@@ -370,7 +397,7 @@ export function stepAttacks(
       const raw = MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT;
       // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
       // instead of the attacker's facing vector (`fwd`) used here previously.
-      applyHit(o, op, raw, MELEE.KNOCKBACK, { x: 0, y: 0, z: 0 }, b.pos);
+      applyHit(o, op, rawDamageForTarget(raw, b.team, o.team, p.id, op.id), MELEE.KNOCKBACK, { x: 0, y: 0, z: 0 }, b.pos);
     }
   }
 
@@ -439,10 +466,10 @@ export function stepProjectiles(
 
     pr.pos = add(pr.pos, pr.vel as Vec3);
 
-    // Hit test against enemies.
+    // Hit test against any non-owner borg. Same-team hits use the derived 0.25x reducer.
     let consumed = false;
     for (const o of all) {
-      if (!o.alive || o.team === pr.team || o.uid === pr.ownerUid) continue;
+      if (!o.alive || o.uid === pr.ownerUid) continue;
       if (isInvincible(o)) continue;
       if (distXZ(pr.pos, o.pos) <= pr.hitRadius && Math.abs(pr.pos.y - o.pos.y) <= 60) {
         const op = profiles.get(o.uid);
@@ -453,7 +480,15 @@ export function stepProjectiles(
           // origin. Neither is a ROM-confirmed mode for the projectile case specifically (the
           // ROM caller always passes the same hit-context wrapper regardless of melee/shot), so
           // this remains a TUNED choice between two reasonable direction sources.
-          applyHit(o, op, pr.damage, pr.knockback, pr.vel as Vec3, pr.pos);
+          const attackerProfile = profiles.get(pr.ownerUid);
+          applyHit(
+            o,
+            op,
+            rawDamageForTarget(pr.damage, pr.team, o.team, attackerProfile?.id, op.id),
+            pr.knockback,
+            pr.vel as Vec3,
+            pr.pos,
+          );
         }
         consumed = true;
         break;

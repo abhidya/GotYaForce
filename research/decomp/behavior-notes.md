@@ -1369,6 +1369,36 @@ entirely in the missing wiring between them in the app layer.
 
 ---
 
+### (w) `object+1000` borg category mapping is complete enough for the type matrix (2026-07-01)
+
+Follow-up to sections (l), (n), and (o). The missing practical bridge for wiring the real
+`type-multiplier-matrix-802c5d60.json` was whether browser borg ids can be treated as the same
+two-byte spawn id copied into `object+1000`.
+
+Validation pass over the current roster confirms that they can:
+
+- Parse every `packages/assets/data/borgs.json` id as `pl{family}{variant}` in hex.
+- Use `family` as the row into `research/decomp/data/type-category-remap-802f2e28.json`.
+- Use `variant` as the column in that row.
+- All 208 borg ids resolve to a canonical category; missing count is 0.
+- Category distribution across the full roster:
+  `0:11, 1:8, 2:15, 3:11, 4:35, 5:18, 6:6, 7:7, 8:7, 9:3, 10:1, 11:6, 12:4, 13:6, 14:6, 15:6, 16:10, 17:8, 18:6, 19:34`.
+
+This matches the mechanism established in (n): the spawn id format is `(family << 8 | variant)`,
+`zz_0066298_` reads the two bytes from `object+1000`, and the remap table returns a canonical
+0-19 category. Since `borgs.json` ids encode the same family/variant bytes (`pl0615` -> family
+0x06, variant 0x15, etc.), the browser port now has a derived, per-borg source for the ROM type
+category. No display-type string and no `object+0x88` slot/team byte are involved.
+
+**Port status:** safe to wire the real type multiplier as a separate multiplicative factor:
+`matrix[defenderCategory][attackerCategory]`, exactly as corrected in (o). This does NOT make the
+whole `zz_003cd5c_` base-damage formula derived yet; the base attack/shot coefficients, defense
+percentage stand-in, HP-ratio scaling, rank/handicap table, and block/reflect gate still remain
+the open parts called out in (o). The type matrix is just the now-confirmed category multiplier
+piece.
+
+---
+
 ### (g) Audio / music triggers (Confirmed library entry points)
 Engine uses GC **AI/DSP streaming** + sequence audio: `AIInit`/`AIStartDMA`/`AISetStreamPlayState`
 /`AISetStreamVolLeft` (0x802146xx–0x80214xxx), `sndSeqContinue` @ 0x801c7b68,

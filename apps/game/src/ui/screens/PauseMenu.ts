@@ -4,7 +4,7 @@
  * A purple-bordered grey rounded box centered over the (still-visible) battle:
  * "1P PAUSE" title bar, then RESUME / QUIT. The highlighted item shows the green
  * A-button bullet and a filled blue pill. The "1P" reflects which player paused
- * (our online build can label it 2P/3P/4P via `playerLabel`).
+ * (Challenge focus is 1P/2P; `playerLabel` remains for the TEAM UP branch).
  */
 
 import { el, faceButton } from "../dom.js";

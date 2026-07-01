@@ -22,17 +22,16 @@
 //   - object+0x88 same-team divisor (DAMAGE.SAME_TEAM_HIT_DIVISOR): DERIVED mechanism (a 0.25x
 //     friendly-fire reducer, not a "type mismatch" — see s4o, which corrected the s4m-era name).
 //     Ghidra export re-read (behavior-notes.md s4m) shows +0x88 is copied from match slot/team
-//     state (`PTR_DAT_80433934[slot+0xcb]`) in the active spawn paths. NOT wired: combat.ts never
-//     resolves a hit against a same-team target in the first place (see s4o).
+//     state (`PTR_DAT_80433934[slot+0xcb]`) in the active spawn paths. Wired in combat.ts for
+//     melee, special, and projectile hits.
 //   - The exact attack/defense-to-raw-damage coefficients (DEF_PER_STAT/MIN_MULT/DMG_BASE/
 //     DMG_PER_STAT below) remain TUNED. Ghidra located and substantially decoded the real formula
 //     function (`zz_003cd5c_`, behavior-notes.md s4j/s4o) — it's a multi-stage multiplicative
 //     formula keyed off a per-move data pointer (`power * (1 + k*(atkStat - baseline))`, plus
 //     HP-ratio "comeback" scaling, a defender/attacker-category type matrix, and a rank/handicap
-//     table that appears to be keyed by team-slot, NOT by borgs.json's 0-10 attack/shot stat —
-//     s4o flags this as an open question that blocks porting the full formula. Full decode of that
-//     function (naming its float constants and the small multiplier table it indexes) is the
-//     next step before these constants could be replaced with a derived formula.
+//     table that appears to be keyed by team-slot, NOT by borgs.json's 0-10 attack/shot stat.
+//     The category matrix piece is now DERIVED and wired in typeDamage.ts (s4w). The rest of the
+//     formula still blocks replacing these tuned linear coefficients with a derived formula.
 //   - Knockback DIRECTION: DERIVED (2026-07-01, behavior-notes.md s4p). `zz_00300bc_` (0x800300bc)
 //     computes launch direction (yaw/pitch as BAM16 shorts) from one of 5 vector-source modes
 //     selected by a per-move byte, plus a per-move angular trim. Mode 1 (attacker->target
@@ -243,12 +242,11 @@ export const DAMAGE = {
    * Defense mitigation: incoming damage is multiplied by (1 - defense*DEF_PER_STAT),
    * floored at MIN_MULT so high-defense borgs still take chip damage. defense 0..10.
    * TUNED, and now confirmed to be a deliberately-simplified stand-in rather than a missing
-   * lookup: behavior-notes.md s4k traced the real base-damage formula (`zz_003cd5c_`) to its end
-   * and found the ROM has no single "defense percentage" at all — mitigation is spread across
-   * several attacker/defender rank+category table lookups (indexed by fields at object+0x43a,
-   * +0x6ca, +0x88, and a HP-ratio-derived index) plus a per-attacker "rank" table. There is no
-   * flat percentage to extract from that; a percentage-based model is a reasonable simplification
-   * of a system whose real shape is table-driven, not a not-yet-found formula.
+   * lookup: behavior-notes.md s4k/s4o traced the real base-damage formula (`zz_003cd5c_`) and
+   * found the ROM has no single "defense percentage" at all. One table-driven piece, the
+   * attacker/defender type-category multiplier, is now ported separately in typeDamage.ts (s4w).
+   * The remaining rank/handicap/HP-ratio pieces are still not a flat percentage, so this
+   * percentage-based defense model stays an explicit simplification.
    */
   DEF_PER_STAT: 0.06,
   MIN_MULT: 0.25,
@@ -261,10 +259,8 @@ export const DAMAGE = {
    * raw float read), and +0x88 is the match slot/team byte (s4m), not a type category. Formerly
    * named TYPE_MISMATCH_DIVISOR — that name was wrong on both counts (it's a match, not a
    * mismatch; and it's team, not type). Kept as a divisor (4 = 1/0.25) for call-site continuity.
-   * NOT applied in combat.ts: the current sim never resolves a hit against a same-team target
-   * (`isEnemyAlive`/`o.team === pr.team` filter every hit-resolution loop), so the port doesn't
-   * model friendly fire at all yet. Wiring this requires deciding whether Force-battle friendly
-   * fire is in scope for the port — a design question, not just a missing constant.
+   * Wired in combat.ts for melee, special, and projectile hits: same-team targets can be hit,
+   * with raw damage divided by this value before normal defense mitigation.
    */
   SAME_TEAM_HIT_DIVISOR: 4,
   /**

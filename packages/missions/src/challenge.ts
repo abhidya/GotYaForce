@@ -54,7 +54,7 @@ export interface PlayerForce {
 export interface ChallengeRunOptions {
   /** Energy budget (use CHALLENGE_DIFFICULTIES or a raw number). */
   budget: number;
-  /** Number of human players (1 = FIGHT ALONE, 2+ = TEAM UP). */
+  /** Number of human players (1 = FIGHT ALONE, 2 = TEAM UP). */
   playerCount: number;
   /** Each human player's force. */
   playerForces: PlayerForce[];
@@ -108,6 +108,7 @@ export interface ChallengeRun {
   budget: number;
   /** Original DOL Challenge table set: 0=NORMAL, 1=TUFF, 2=INSANE. */
   mode: ChallengeMode;
+  /** Original Challenge player branch, clamped to 1P/2P. */
   playerCount: number;
   /** Ordered escalating battles. */
   battles: BattleConfig[];
@@ -149,13 +150,13 @@ export interface ChallengeProgress {
 export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
   const {
     budget,
-    playerCount,
     playerForces,
     borgs,
     battleCount,
     arena,
   } = options;
 
+  const playerCount = normalizeChallengePlayerCount(options.playerCount);
   const mode = challengeModeForPlayerBudget(budget);
   const referenceBattleCount = challengeBattleCount(mode);
   const totalBattles = Math.min(battleCount ?? referenceBattleCount, referenceBattleCount);
@@ -189,7 +190,7 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
     let allyBorgIds: readonly string[] | null = null;
 
     // FIGHT ALONE -> add the original CPU ally side, not a mirror of the player force.
-    if (playerCount <= 1) {
+    if (playerCount === 1) {
       if (options.fightAloneAllyBorgIds) {
         allyBorgIds = options.fightAloneAllyBorgIds;
       } else {
@@ -389,6 +390,10 @@ function energyMap(data: BorgData): ReadonlyMap<string, number> {
 
 function seedFromRunOptions(mode: ChallengeMode, budget: number, playerCount: number): number {
   return (0x47463445 ^ Math.imul(mode + 1, 0x9e3779b1) ^ budget ^ (playerCount << 16)) >>> 0;
+}
+
+function normalizeChallengePlayerCount(playerCount: number): 1 | 2 {
+  return Number.isFinite(playerCount) && playerCount >= 2 ? 2 : 1;
 }
 
 function stageMeta(stage: ChallengeStageSelection): {

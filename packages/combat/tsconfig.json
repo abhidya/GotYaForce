@@ -9,5 +9,5 @@
     }
   },
   "references": [{ "path": "../physics" }],
-  "include": ["src"]
+  "include": ["src", "src/**/*.json"]
 }
