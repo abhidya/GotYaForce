@@ -59,6 +59,13 @@ interface ProjectileActor {
   material: THREE.SpriteMaterial;
 }
 
+interface ImpactActor {
+  sprite: THREE.Sprite;
+  material: THREE.SpriteMaterial;
+  age: number;
+  ttl: number;
+}
+
 /** Team-tinted placeholder material colors. */
 const TEAM_COLORS: Record<number, number> = { 0: 0x4cc7ff, 1: 0xff5a4d };
 const PROJECTILE_TEXTURE_URLS: Record<ProjectileVisualKind, string> = {
@@ -66,6 +73,7 @@ const PROJECTILE_TEXTURE_URLS: Record<ProjectileVisualKind, string> = {
   flame: "/fx/flame_core.png", // ptcl00.txg#1, exported flame/explosion core.
   muzzle: "/fx/muzzle_flash.png", // ptcl00.txg#6, exported muzzle flare.
 };
+const IMPACT_ATLAS_URL = "/fx/efct00_atlas.png"; // efct00.tpl#0, exported alpha puff/ring atlas.
 const PROJECTILE_COLORS: Record<ProjectileVisualKind, { ally: number; enemy: number }> = {
   energy: { ally: 0x91eaff, enemy: 0xff7a4d },
   flame: { ally: 0xffd36a, enemy: 0xff5a2e },
@@ -75,8 +83,10 @@ const PROJECTILE_COLORS: Record<ProjectileVisualKind, { ally: number; enemy: num
 export class BattleScene {
   private actors = new Map<string, Actor>();
   private projectileActors = new Map<string, ProjectileActor>();
+  private impactActors: ImpactActor[] = [];
   private pending = new Set<string>();
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
+  private impactTexture: THREE.Texture;
 
   constructor(
     private readonly root: THREE.Group,
@@ -87,6 +97,7 @@ export class BattleScene {
       texture.colorSpace = THREE.SRGBColorSpace;
       this.projectileTextures.set(kind, texture);
     }
+    this.impactTexture = makeAtlasTexture(IMPACT_ATLAS_URL, 0, 0, 64, 32);
   }
 
   /** Map a sim state/action to one of the exported game animation groups. */
@@ -140,14 +151,17 @@ export class BattleScene {
   /** Advance all per-actor animation mixers. */
   update(dt: number): void {
     for (const actor of this.actors.values()) actor.mixer?.update(dt);
+    this.updateImpacts(dt);
   }
 
   /** Remove every actor (call when leaving a battle). */
   clear(): void {
     for (const actor of this.actors.values()) this.root.remove(actor.group);
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
+    for (const actor of this.impactActors) this.disposeImpactActor(actor);
     this.actors.clear();
     this.projectileActors.clear();
+    this.impactActors = [];
     this.pending.clear();
   }
 
@@ -269,6 +283,7 @@ export class BattleScene {
 
     for (const [uid, actor] of this.projectileActors) {
       if (!live.has(uid)) {
+        this.spawnImpact(actor.sprite.position);
         this.disposeProjectileActor(actor);
         this.projectileActors.delete(uid);
       }
@@ -294,6 +309,41 @@ export class BattleScene {
   }
 
   private disposeProjectileActor(actor: ProjectileActor): void {
+    this.root.remove(actor.sprite);
+    actor.material.dispose();
+  }
+
+  private spawnImpact(position: THREE.Vector3): void {
+    const material = new THREE.SpriteMaterial({
+      map: this.impactTexture,
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.9,
+      depthWrite: false,
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.position.copy(position);
+    sprite.scale.set(72, 36, 1);
+    this.root.add(sprite);
+    this.impactActors.push({ sprite, material, age: 0, ttl: 0.22 });
+  }
+
+  private updateImpacts(dt: number): void {
+    for (let i = this.impactActors.length - 1; i >= 0; i--) {
+      const actor = this.impactActors[i];
+      if (!actor) continue;
+      actor.age += dt;
+      const t = Math.min(1, actor.age / actor.ttl);
+      actor.material.opacity = 0.9 * (1 - t);
+      actor.sprite.scale.set(72 + 58 * t, 36 + 29 * t, 1);
+      if (t >= 1) {
+        this.disposeImpactActor(actor);
+        this.impactActors.splice(i, 1);
+      }
+    }
+  }
+
+  private disposeImpactActor(actor: ImpactActor): void {
     this.root.remove(actor.sprite);
     actor.material.dispose();
   }
@@ -324,4 +374,12 @@ function disposeMesh(obj: THREE.Object3D): void {
       for (const m of mats) m.dispose();
     }
   });
+}
+
+function makeAtlasTexture(url: string, x: number, y: number, w: number, h: number): THREE.Texture {
+  const texture = new THREE.TextureLoader().load(url);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.repeat.set(w / 256, h / 64);
+  texture.offset.set(x / 256, 1 - (y + h) / 64);
+  return texture;
 }

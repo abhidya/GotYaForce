@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T02:33:49.771Z
+Generated: 2026-07-01T02:39:17.830Z
 
 ## Summary
 
@@ -73,6 +73,7 @@ Projectile renderer uses exported FX textures: yes
 | /fx/energy_dot.png | yes |
 | /fx/flame_core.png | yes |
 | /fx/muzzle_flash.png | yes |
+| /fx/efct00_atlas.png | yes |
 
 ## Audio
 
