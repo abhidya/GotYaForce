@@ -71,6 +71,12 @@
 .gf-grid-bg.gf-bg-purple { --gf-screen-bg: #8b4fb5; }
 .gf-grid-bg.gf-bg-gold { --gf-screen-bg: #f3a312; }
 
+.gf-vsel-real-scene {
+  opacity: 0.24;
+  transform: scale(1.06);
+  filter: drop-shadow(0 20px 18px rgba(0, 0, 0, 0.32));
+}
+
 /* Chunky outlined arcade title (SELECT DIFFICULTY, SELECT A FORCE, ...). */
 .gf-title {
   position: relative;

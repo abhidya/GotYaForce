@@ -1,13 +1,13 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:01:13.984Z",
+  "generatedAt": "2026-07-01T02:05:41.793Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
-    "screensUsingAnyRealExportedAsset": 6,
+    "screensUsingAnyRealExportedAsset": 8,
     "screensWithHandcodedSurfaceSignals": 10,
-    "screensWithRealSceneModel": 3,
+    "screensWithRealSceneModel": 5,
     "publicUiTextureExportedImages": 831,
     "requestedUiSceneModelsExported": 6,
     "publicStagesCompleteVisual": 40,
@@ -105,37 +105,43 @@
       ],
       "nextReplacement": "Use the original Challenge select scene textures/models for the three GF-energy pads and cursor.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:41",
-      "coverageLevel": "handcoded-or-unverified",
-      "realExportedAssetsUsed": [],
+      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:42",
+      "coverageLevel": "real-scene-partial-layout",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "mounted-ui-scene",
+          "publicPath": "/ui/scenes/vsel00/model_00.dae",
+          "exists": true
+        }
+      ],
       "handcodedSurfaceSignals": [
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 48
+          "line": 49
         },
         {
           "kind": "css-gradient-surface",
           "pattern": "linear-gradient",
-          "line": 23
+          "line": 24
         },
         {
           "kind": "css-menu-gear",
           "pattern": "gf-menu-gear",
-          "line": 67
+          "line": 70
         },
         {
           "kind": "css-option-pad",
           "pattern": "gf-pad",
-          "line": 66
+          "line": 69
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 49
+          "line": 52
         }
       ],
-      "replacementStatus": "No direct exported UI asset usage observed in this component."
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
       "id": "select-players",
@@ -163,37 +169,43 @@
       ],
       "nextReplacement": "Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectPlayers.ts:47",
-      "coverageLevel": "handcoded-or-unverified",
-      "realExportedAssetsUsed": [],
+      "fileRef": "apps/game/src/ui/screens/SelectPlayers.ts:48",
+      "coverageLevel": "real-scene-partial-layout",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "mounted-ui-scene",
+          "publicPath": "/ui/scenes/vsel01/model_00.dae",
+          "exists": true
+        }
+      ],
       "handcodedSurfaceSignals": [
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 55
+          "line": 56
         },
         {
           "kind": "css-option-pad",
           "pattern": "gf-pad",
-          "line": 77
+          "line": 80
         },
         {
           "kind": "css-label-pill",
           "pattern": "gf-pill",
-          "line": 78
+          "line": 81
         },
         {
           "kind": "handcoded-player-silhouette",
           "pattern": "personSilhouette",
-          "line": 27
+          "line": 28
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 42
+          "line": 43
         }
       ],
-      "replacementStatus": "No direct exported UI asset usage observed in this component."
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
       "id": "load-box-data",

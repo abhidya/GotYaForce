@@ -8,6 +8,7 @@
  */
 
 import { el, legendItem } from "../dom.js";
+import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export type Difficulty = "normal" | "tuff" | "insane";
 
@@ -46,6 +47,8 @@ export function createSelectDifficulty(
 
   const root = el("div", { class: "gf-screen" });
   root.appendChild(el("div", { class: "gf-grid-bg gf-bg-blue" }));
+  const selectScene = createUiSceneHost("gf-ui-scene gf-vsel-real-scene gf-vsel-difficulty-scene");
+  root.appendChild(selectScene);
   root.appendChild(el("h1", { class: "gf-title", text: "SELECT DIFFICULTY" }));
 
   const row = el("div", { class: "gf-row", style: { marginTop: "6%" } });
@@ -108,11 +111,18 @@ export function createSelectDifficulty(
 
   select(selected);
   container.appendChild(root);
+  const stopScene = mountUiSceneModels(selectScene, {
+    sceneId: "vsel00",
+    fitSize: 760,
+    camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 22, 0] },
+    rotation: [-0.12, 0, 0],
+  });
   window.addEventListener("keydown", onKey);
 
   return {
     getSelected: () => selected,
     destroy: () => {
+      stopScene();
       window.removeEventListener("keydown", onKey);
       root.remove();
     },

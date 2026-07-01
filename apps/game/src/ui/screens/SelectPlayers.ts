@@ -9,6 +9,7 @@
  */
 
 import { el, legendItem } from "../dom.js";
+import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export interface SelectPlayersOptions {
   /** Fired on confirm with the chosen player count (1..maxPlayers). */
@@ -53,6 +54,8 @@ export function createSelectPlayers(
 
   const root = el("div", { class: "gf-screen" });
   root.appendChild(el("div", { class: "gf-grid-bg gf-bg-green" }));
+  const selectScene = createUiSceneHost("gf-ui-scene gf-vsel-real-scene gf-vsel-players-scene");
+  root.appendChild(selectScene);
   root.appendChild(el("h1", { class: "gf-title", text: "SELECT NUMBER OF PLAYERS" }));
 
   const row = el("div", { class: "gf-row", style: { marginTop: "5%" } });
@@ -110,11 +113,18 @@ export function createSelectPlayers(
 
   select(selected);
   container.appendChild(root);
+  const stopScene = mountUiSceneModels(selectScene, {
+    sceneId: "vsel01",
+    fitSize: 760,
+    camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 22, 0] },
+    rotation: [-0.12, 0, 0],
+  });
   window.addEventListener("keydown", onKey);
 
   return {
     getSelected: () => selected,
     destroy: () => {
+      stopScene();
       window.removeEventListener("keydown", onKey);
       root.remove();
     },
