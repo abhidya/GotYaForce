@@ -11,9 +11,10 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 import { createBattle } from "./battle.js";
+import { projectileVisualKindForProfile } from "./combat.js";
 import { JUMP } from "./constants.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
-import type { BorgStats } from "./stats.js";
+import { buildProfile, type BorgStats } from "./stats.js";
 
 function loadBorgs(): BorgStats[] {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -212,6 +213,50 @@ function assertTriangleCeilingCollision(borgs: BorgStats[]): void {
   console.log(`[selfcheck] STIH triangle ceiling capped p1 top at y=${maxTopY}`);
 }
 
+function borgById(borgs: BorgStats[], id: string): BorgStats {
+  const borg = borgs.find((entry) => entry.id === id);
+  if (!borg) throw new Error(`[selfcheck] missing borg stats for ${id}`);
+  return borg;
+}
+
+function assertProjectileVisualKinds(borgs: BorgStats[]): void {
+  const gatling = buildProfile(borgById(borgs, "pl0102"));
+  const beam = buildProfile(borgById(borgs, "pl0104"));
+  const flame = buildProfile(borgById(borgs, "pl0500"));
+  if (projectileVisualKindForProfile(gatling) !== "muzzle") {
+    throw new Error("[selfcheck] Gatling Gunner projectile visual should use exported muzzle flash");
+  }
+  if (projectileVisualKindForProfile(beam) !== "energy") {
+    throw new Error("[selfcheck] Beam Gunner projectile visual should use exported energy dot");
+  }
+  if (projectileVisualKindForProfile(flame) !== "flame") {
+    throw new Error("[selfcheck] Flame Dragon projectile visual should use exported flame core");
+  }
+
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0102"] },
+        { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
+      ],
+      bounds: { minX: -300, maxX: 300, minZ: -300, maxZ: 300 },
+    },
+    borgs,
+  );
+  for (let f = 0; f < 25; f += 1) {
+    battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
+    assertSane(battle.state.borgs, f);
+  }
+  battle.step(1 / 60, { p1: { ...emptyInput(), attack: true }, p2: emptyInput() });
+  const projectile = battle.state.projectiles[0];
+  if (!projectile) throw new Error("[selfcheck] Gatling Gunner did not spawn a projectile");
+  if (projectile.visualKind !== "muzzle") {
+    throw new Error(`[selfcheck] spawned Gatling Gunner projectile visualKind=${projectile.visualKind}`);
+  }
+  console.log(`[selfcheck] projectile visuals mapped gun/beam/flame assets; spawned ${projectile.visualKind}`);
+}
+
 export function main(): number {
   const borgs = loadBorgs();
   console.log(`[selfcheck] loaded ${borgs.length} borgs from borgs.json`);
@@ -219,6 +264,7 @@ export function main(): number {
   assertTriangleFloorGrounding(borgs);
   assertTriangleWallCollision(borgs);
   assertTriangleCeilingCollision(borgs);
+  assertProjectileVisualKinds(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

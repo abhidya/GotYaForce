@@ -25,7 +25,7 @@ import {
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
-import type { BorgRuntime, Projectile } from "./types.js";
+import type { BorgRuntime, Projectile, ProjectileVisualKind } from "./types.js";
 
 // ---------------------------------------------------------------------------------------
 // Invincibility timer — DIRECT PORT of the decompiled countdown (behavior-notes.md s4a).
@@ -233,6 +233,14 @@ export function resetProjectileCounter(): void {
   projCounter = 0;
 }
 
+export function projectileVisualKindForProfile(p: BorgProfile): ProjectileVisualKind {
+  const text = `${p.id} ${p.name}`.toLowerCase();
+  if (/(flame|fire|phoenix|dragon)/.test(text)) return "flame";
+  if (/(beam|laser|plasma|satellite|bit)/.test(text)) return "energy";
+  if (/(gun|gatling|revolver|rifle|cannon|tank|machine|bullet|missile|launcher)/.test(text)) return "muzzle";
+  return "energy";
+}
+
 /**
  * Process B (attack) and Y (special) for one borg. Mutates `b` (state, cooldowns, ammo) and
  * resolves melee hits immediately against `all`. Ranged borgs spawn projectiles.
@@ -346,6 +354,7 @@ function spawnProjectile(b: BorgRuntime, p: BorgProfile): Projectile {
     homingTarget: b.lockTarget,
     life: SHOT.LIFETIME,
     hitRadius: SHOT.HIT_RADIUS,
+    visualKind: projectileVisualKindForProfile(p),
   };
 }
 

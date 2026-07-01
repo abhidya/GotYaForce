@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-06-30T23:46:21.488Z",
+  "generatedAt": "2026-07-01T01:39:19.645Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -16,7 +16,8 @@
     "runtimeStageCollisionBounds": true,
     "runtimeStageTriangleCollision": true,
     "runtimeStageWallCollision": true,
-    "runtimeStageCeilingCollision": true
+    "runtimeStageCeilingCollision": true,
+    "runtimeProjectileFxFromExportedTextures": true
   },
   "screens": [
     {
@@ -750,12 +751,12 @@
         "fallback": "apps/game/src/sim/adapter.ts:35"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:573",
-        "fetchStageManifest": "apps/game/src/main.ts:577",
-        "loadStageCollision": "apps/game/src/main.ts:485",
-        "parseStageHitGrid": "apps/game/src/main.ts:497",
-        "loadDefaultArena": "apps/game/src/main.ts:617",
-        "loadConvertedStage": "apps/game/src/main.ts:846"
+        "loadStage": "apps/game/src/main.ts:614",
+        "fetchStageManifest": "apps/game/src/main.ts:618",
+        "loadStageCollision": "apps/game/src/main.ts:526",
+        "parseStageHitGrid": "apps/game/src/main.ts:538",
+        "loadDefaultArena": "apps/game/src/main.ts:658",
+        "loadConvertedStage": "apps/game/src/main.ts:887"
       },
       "collisionBounds": {
         "usesStageHitParser": true,
@@ -1329,6 +1330,30 @@
         ]
       }
     ]
+  },
+  "combatFx": {
+    "projectileVisualKindInState": true,
+    "projectileVisualKindDerivedFromProfile": true,
+    "rendererUsesExportedProjectileTextures": true,
+    "fxManifest": {
+      "path": "apps/game/public/fx/manifest.json",
+      "parses": true,
+      "imageCount": 9,
+      "projectileTextures": [
+        {
+          "publicPath": "/fx/energy_dot.png",
+          "exists": true
+        },
+        {
+          "publicPath": "/fx/flame_core.png",
+          "exists": true
+        },
+        {
+          "publicPath": "/fx/muzzle_flash.png",
+          "exists": true
+        }
+      ]
+    }
   },
   "modeNamingRisks": {
     "stageDataMode": "Story Mode",

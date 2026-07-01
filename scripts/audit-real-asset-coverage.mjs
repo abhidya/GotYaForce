@@ -362,12 +362,35 @@ function inspectModeNamingRisks() {
   };
 }
 
+function inspectCombatFx() {
+  const combat = readText("packages/combat/src/combat.ts");
+  const types = readText("packages/combat/src/types.ts");
+  const battleScene = readText("apps/game/src/sim/battleScene.ts");
+  const fxManifest = readJson("apps/game/public/fx/manifest.json");
+  const texturePaths = ["/fx/energy_dot.png", "/fx/flame_core.png", "/fx/muzzle_flash.png"];
+  return {
+    projectileVisualKindInState: types.includes("ProjectileVisualKind") && types.includes("visualKind"),
+    projectileVisualKindDerivedFromProfile: combat.includes("projectileVisualKindForProfile"),
+    rendererUsesExportedProjectileTextures: texturePaths.every((texturePath) => battleScene.includes(texturePath) && publicPathExists(texturePath)),
+    fxManifest: {
+      path: "apps/game/public/fx/manifest.json",
+      parses: fxManifest.ok,
+      imageCount: fxManifest.value?.images?.length ?? null,
+      projectileTextures: texturePaths.map((texturePath) => ({
+        publicPath: texturePath,
+        exists: publicPathExists(texturePath),
+      })),
+    },
+  };
+}
+
 function buildReport() {
   const screens = inspectScreens();
   const stageCoverage = inspectStages();
   const uiSceneExports = inspectUiSceneExports();
   const uiTextureExports = inspectUiTextureExports();
   const modeNamingRisks = inspectModeNamingRisks();
+  const combatFx = inspectCombatFx();
   const summary = {
     screens: screens.length,
     screensUsingAnyRealExportedAsset: screens.filter((screen) => screen.realExportedAssetsUsed.length > 0).length,
@@ -382,6 +405,10 @@ function buildReport() {
     runtimeStageTriangleCollision: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesTrianglesToCombat,
     runtimeStageWallCollision: stageCoverage.runtimeUse.collisionBounds.movementUsesTriangleWalls,
     runtimeStageCeilingCollision: stageCoverage.runtimeUse.collisionBounds.movementUsesTriangleCeilings,
+    runtimeProjectileFxFromExportedTextures:
+      combatFx.projectileVisualKindInState &&
+      combatFx.projectileVisualKindDerivedFromProfile &&
+      combatFx.rendererUsesExportedProjectileTextures,
   };
   return {
     generatedBy: "scripts/audit-real-asset-coverage.mjs",
@@ -393,6 +420,7 @@ function buildReport() {
     stageCoverage,
     uiSceneExports,
     uiTextureExports,
+    combatFx,
     modeNamingRisks,
     nextMostUsefulReplacements: [
       "Wire stageIdForArena to a traced arena-name -> st## table; public exports now cover 40 visual stages, but runtime fallback still collapses non-st## arenas to st00.",
@@ -434,6 +462,7 @@ function renderMarkdown(report) {
   add(`- Runtime stage triangle collision from STIH: ${report.summary.runtimeStageTriangleCollision ? "yes" : "no"}`);
   add(`- Runtime lateral wall collision from STIH: ${report.summary.runtimeStageWallCollision ? "yes" : "no"}`);
   add(`- Runtime upward ceiling collision from STIH: ${report.summary.runtimeStageCeilingCollision ? "yes" : "no"}`);
+  add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
   add();
   add("## Runtime Screens");
@@ -469,6 +498,19 @@ function renderMarkdown(report) {
   add(`Runtime collision parser: ${report.stageCoverage.runtimeUse.collisionBounds.parserPackage ?? "none"} (bounds ${report.summary.runtimeStageCollisionBounds ? "wired" : "not wired"}, triangles ${report.summary.runtimeStageTriangleCollision ? "wired" : "not wired"}, walls ${report.summary.runtimeStageWallCollision ? "wired" : "not wired"}, ceilings ${report.summary.runtimeStageCeilingCollision ? "wired" : "not wired"})`);
   add();
   add(report.stageCoverage.runtimeUse.assessment);
+  add();
+  add("## Combat FX");
+  add();
+  add(`Projectile visual kind in sim state: ${report.combatFx.projectileVisualKindInState ? "yes" : "no"}`);
+  add(`Projectile visual kind derived from borg profile: ${report.combatFx.projectileVisualKindDerivedFromProfile ? "yes" : "no"}`);
+  add(`Projectile renderer uses exported FX textures: ${report.combatFx.rendererUsesExportedProjectileTextures ? "yes" : "no"}`);
+  add();
+  add(
+    mdTable(report.combatFx.fxManifest.projectileTextures, [
+      { title: "Projectile texture", value: (row) => row.publicPath },
+      { title: "Exists", value: (row) => row.exists ? "yes" : "no" },
+    ]),
+  );
   add();
   add("## Challenge / Adventure / Story Risk");
   add();

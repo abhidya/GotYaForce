@@ -156,6 +156,8 @@ export interface BattleConfig {
 
 export type BattleResult = "ongoing" | "win" | "lose" | "draw";
 
+export type ProjectileVisualKind = "energy" | "flame" | "muzzle";
+
 /** A homing/straight projectile in flight. */
 export interface Projectile {
   uid: string;
@@ -169,6 +171,7 @@ export interface Projectile {
   homingTarget: string | null;
   life: number;
   hitRadius: number;
+  visualKind: ProjectileVisualKind;
 }
 
 export interface BattleState {

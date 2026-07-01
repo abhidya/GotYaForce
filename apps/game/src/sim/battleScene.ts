@@ -12,7 +12,7 @@
 // so every combatant in the sim is visible.
 
 import * as THREE from "three";
-import type { BorgRuntime, Projectile } from "@gf/combat";
+import type { BorgRuntime, Projectile, ProjectileVisualKind } from "@gf/combat";
 
 /** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
 export interface BorgAssets {
@@ -61,19 +61,32 @@ interface ProjectileActor {
 
 /** Team-tinted placeholder material colors. */
 const TEAM_COLORS: Record<number, number> = { 0: 0x4cc7ff, 1: 0xff5a4d };
-const PROJECTILE_TEXTURE_URL = "/fx/energy_dot.png"; // ptcl00.txg#5, exported original particle.
+const PROJECTILE_TEXTURE_URLS: Record<ProjectileVisualKind, string> = {
+  energy: "/fx/energy_dot.png", // ptcl00.txg#5, exported original particle.
+  flame: "/fx/flame_core.png", // ptcl00.txg#1, exported flame/explosion core.
+  muzzle: "/fx/muzzle_flash.png", // ptcl00.txg#6, exported muzzle flare.
+};
+const PROJECTILE_COLORS: Record<ProjectileVisualKind, { ally: number; enemy: number }> = {
+  energy: { ally: 0x91eaff, enemy: 0xff7a4d },
+  flame: { ally: 0xffd36a, enemy: 0xff5a2e },
+  muzzle: { ally: 0xfff1a8, enemy: 0xffb14a },
+};
 
 export class BattleScene {
   private actors = new Map<string, Actor>();
   private projectileActors = new Map<string, ProjectileActor>();
   private pending = new Set<string>();
-  private projectileTexture = new THREE.TextureLoader().load(PROJECTILE_TEXTURE_URL);
+  private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
 
   constructor(
     private readonly root: THREE.Group,
     private readonly assets: BorgAssets,
   ) {
-    this.projectileTexture.colorSpace = THREE.SRGBColorSpace;
+    for (const kind of Object.keys(PROJECTILE_TEXTURE_URLS) as ProjectileVisualKind[]) {
+      const texture = new THREE.TextureLoader().load(PROJECTILE_TEXTURE_URLS[kind]);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      this.projectileTextures.set(kind, texture);
+    }
   }
 
   /** Map a sim state/action to one of the exported game animation groups. */
@@ -263,9 +276,11 @@ export class BattleScene {
   }
 
   private spawnProjectile(projectile: Projectile): ProjectileActor {
+    const kind = projectile.visualKind;
+    const colors = PROJECTILE_COLORS[kind];
     const material = new THREE.SpriteMaterial({
-      map: this.projectileTexture,
-      color: projectile.team === 0 ? 0x91eaff : 0xff7a4d,
+      map: this.projectileTextures.get(kind),
+      color: projectile.team === 0 ? colors.ally : colors.enemy,
       transparent: true,
       opacity: 1,
       blending: THREE.AdditiveBlending,

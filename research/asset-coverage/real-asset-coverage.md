@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-06-30T23:46:21.488Z
+Generated: 2026-07-01T01:39:19.645Z
 
 ## Summary
 
@@ -15,6 +15,7 @@ Generated: 2026-06-30T23:46:21.488Z
 - Runtime stage triangle collision from STIH: yes
 - Runtime lateral wall collision from STIH: yes
 - Runtime upward ceiling collision from STIH: yes
+- Runtime projectile FX from exported textures: yes
 - Runtime stage fallback: st00
 
 ## Runtime Screens
@@ -53,11 +54,23 @@ Generated: 2026-06-30T23:46:21.488Z
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports and 18 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:573, apps/game/src/main.ts:577, apps/game/src/main.ts:485, apps/game/src/main.ts:497, apps/game/src/main.ts:617, apps/game/src/main.ts:846
+Runtime loader refs: apps/game/src/main.ts:614, apps/game/src/main.ts:618, apps/game/src/main.ts:526, apps/game/src/main.ts:538, apps/game/src/main.ts:658, apps/game/src/main.ts:887
 
 Runtime collision parser: @gf/formats (bounds wired, triangles wired, walls wired, ceilings wired)
 
 Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id.
+
+## Combat FX
+
+Projectile visual kind in sim state: yes
+Projectile visual kind derived from borg profile: yes
+Projectile renderer uses exported FX textures: yes
+
+| Projectile texture | Exists |
+| --- | --- |
+| /fx/energy_dot.png | yes |
+| /fx/flame_core.png | yes |
+| /fx/muzzle_flash.png | yes |
 
 ## Challenge / Adventure / Story Risk
 
