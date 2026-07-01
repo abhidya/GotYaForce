@@ -1058,16 +1058,28 @@
   letter-spacing: 0.04em;
 }
 .gf-verdict-win { color: var(--gf-yellow); -webkit-text-stroke: 4px var(--gf-red); paint-order: stroke fill; text-shadow: 0 6px 0 rgba(0, 0, 0, 0.4); }
-.gf-verdict-lose { color: #cfd3da; -webkit-text-stroke: 4px var(--gf-outline); paint-order: stroke fill; text-shadow: 0 6px 0 rgba(0, 0, 0, 0.4); }
+.gf-verdict-lose {
+  left: 50%;
+  top: 36%;
+  width: min(68vw, 448px);
+  transform: translate(-50%, -50%) rotate(-3deg);
+}
+.gf-results-gameover {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 7px 0 rgba(0, 0, 0, 0.35));
+}
 .gf-results-start {
   position: absolute;
   right: 18px;
   bottom: 18px;
   z-index: 4;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  width: 72px;
+  height: 40px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
 }
 
 /* ============================ PAUSE MENU ============================ */

@@ -12,7 +12,7 @@
  */
 
 import { ASSETS } from "../assets.js";
-import { el, faceButton } from "../dom.js";
+import { el } from "../dom.js";
 
 export interface ResultStats {
   attack: number;
@@ -66,7 +66,10 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
   const verdict = el("div", { class: "gf-results-verdict" });
   root.appendChild(verdict);
 
-  const start = el("div", { class: "gf-results-start" }, [faceButton("start"), el("span", { text: "" })]);
+  const start = el("img", {
+    class: "gf-results-start",
+    attrs: { src: ASSETS.resultsStartPrompt, alt: "START" },
+  });
   root.appendChild(start);
 
   function onKey(ev: KeyboardEvent): void {
@@ -101,7 +104,13 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
     );
 
     verdict.className = `gf-results-verdict gf-verdict-${result}`;
-    verdict.textContent = result === "win" ? "WIN" : "LOSE";
+    if (result === "lose") {
+      verdict.replaceChildren(
+        el("img", { class: "gf-results-gameover", attrs: { src: ASSETS.resultsGameOver, alt: "GAME OVER" } }),
+      );
+    } else {
+      verdict.textContent = "WIN";
+    }
   }
 
   container.appendChild(root);

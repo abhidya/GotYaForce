@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:50:40.661Z",
+  "generatedAt": "2026-07-01T02:55:10.420Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -645,18 +645,30 @@
           "symbol": "ASSETS.resultsLose",
           "publicPath": "/ui/hsd/rpot23_mdl/texture_000_RGBA8.png",
           "exists": true
+        },
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.resultsStartPrompt",
+          "publicPath": "/ui/hsd/rpot20_mdl/texture_003_CI8.png",
+          "exists": true
+        },
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.resultsGameOver",
+          "publicPath": "/ui/hsd/rpot23_mdl/texture_004_CI8.png",
+          "exists": true
         }
       ],
       "handcodedSurfaceSignals": [
         {
           "kind": "css-results-row",
           "pattern": "gf-result-pill",
-          "line": 97
+          "line": 100
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 69
+          "line": 100
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
