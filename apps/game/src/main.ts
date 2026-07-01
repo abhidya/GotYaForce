@@ -57,6 +57,7 @@ import {
   createPauseMenu,
   createBattleHud,
   type ForceBorg,
+  type ForceSlot,
   type BattleHudHandle,
 } from "./ui/index.js";
 
@@ -98,10 +99,28 @@ const FORCE_CATALOG: ForceBorg[] = [...allBorgs]
 
 const DEFAULT_LEAD = "pl0615"; // G Red — fully animated, used as a sensible default.
 const FORCE_BY_ID = new Map(FORCE_CATALOG.map((entry) => [entry.id, entry] as const));
+const DEFAULT_FORCE_SLOTS: ForceSlot[] = [
+  { no: 1, name: "G RED FORCE", borgIds: [DEFAULT_LEAD] },
+  { no: 2, name: "DEATH BORG FORCE", borgIds: ["pl0008", "pl000c"] },
+  { no: 3, name: "GUN BORG FORCE", borgIds: ["pl0102", "pl0104"] },
+];
 
 function selectedForce(): string[] {
-  const valid = flow.playerForce.filter((id) => FORCE_BY_ID.has(id));
+  const valid = selectedForceSlot().borgIds.filter((id) => FORCE_BY_ID.has(id));
   return valid.length > 0 ? valid : [DEFAULT_LEAD];
+}
+
+function selectedForceSlot(): ForceSlot {
+  return flow.forceSlots[flow.selectedForceSlot] ?? flow.forceSlots[0] ?? DEFAULT_FORCE_SLOTS[0]!;
+}
+
+function updateSelectedForceSlot(borgIds: readonly string[]): void {
+  const slot = selectedForceSlot();
+  const valid = borgIds.filter((id) => FORCE_BY_ID.has(id));
+  flow.forceSlots[flow.selectedForceSlot] = {
+    ...slot,
+    borgIds: valid.length > 0 ? [...valid] : [DEFAULT_LEAD],
+  };
 }
 
 // Borgs that have a verified Collada model in the library (or the pl0615 special path).
@@ -714,7 +733,8 @@ interface Flow {
   screen: Screen;
   budget: number;
   playerCount: number;
-  playerForce: string[];
+  selectedForceSlot: number;
+  forceSlots: ForceSlot[];
   run: ChallengeRun | null;
 }
 
@@ -722,7 +742,8 @@ const flow: Flow = {
   screen: "loading",
   budget: 2000,
   playerCount: 1,
-  playerForce: [],
+  selectedForceSlot: 0,
+  forceSlots: DEFAULT_FORCE_SLOTS.map((slot) => ({ ...slot, borgIds: [...slot.borgIds] })),
   run: null,
 };
 
@@ -787,18 +808,21 @@ function showLoadBoxData(): void {
 
 function showSelectForce(): void {
   flow.screen = "select-force";
-  const force = selectedForce();
   mountScreen((root) =>
     createSelectForce(root, {
       catalog: FORCE_CATALOG,
-      force,
+      slots: flow.forceSlots,
+      selectedSlot: flow.selectedForceSlot,
       limit: flow.budget,
-      onConfirm: (nextForce) => {
-        flow.playerForce = nextForce.length > 0 ? nextForce : force;
+      onSelectSlot: (slotIndex) => {
+        flow.selectedForceSlot = slotIndex;
+      },
+      onConfirm: (slot) => {
+        flow.selectedForceSlot = Math.max(0, flow.forceSlots.findIndex((candidate) => candidate.no === slot.no));
         startRun();
       },
-      onEdit: (nextForce) => {
-        flow.playerForce = nextForce.length > 0 ? nextForce : force;
+      onEdit: (slot) => {
+        flow.selectedForceSlot = Math.max(0, flow.forceSlots.findIndex((candidate) => candidate.no === slot.no));
         showForceBuilder();
       },
       onBack: showLoadBoxData,
@@ -814,7 +838,7 @@ function showForceBuilder(): void {
       limit: flow.budget,
       initialForce: selectedForce(),
       onConfirm: (force) => {
-        flow.playerForce = force.length > 0 ? force : [DEFAULT_LEAD];
+        updateSelectedForceSlot(force);
         showSelectForce();
       },
       onQuit: showSelectForce,
@@ -824,7 +848,7 @@ function showForceBuilder(): void {
 
 function startRun(): void {
   const force = selectedForce();
-  flow.playerForce = force;
+  updateSelectedForceSlot(force);
   flow.run = createChallengeRun({
     budget: flow.budget,
     playerCount: flow.playerCount,
@@ -1248,7 +1272,7 @@ function showLoadingMessage(text: string): void {
   forceBattle: (force: string[] = [DEFAULT_LEAD]) => {
     flow.budget = 2000;
     flow.playerCount = 1;
-    flow.playerForce = force;
+    updateSelectedForceSlot(force);
     startRun();
   },
 };

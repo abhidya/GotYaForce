@@ -48,7 +48,7 @@ export { createLoadBoxData } from "./screens/LoadBoxData.js";
 export type { LoadBoxDataOptions, LoadBoxDataHandle } from "./screens/LoadBoxData.js";
 
 export { createSelectForce } from "./screens/SelectForce.js";
-export type { SelectForceOptions, SelectForceHandle } from "./screens/SelectForce.js";
+export type { ForceSlot, SelectForceOptions, SelectForceHandle } from "./screens/SelectForce.js";
 
 export { createForceBuilder } from "./screens/ForceBuilder.js";
 export type { ForceBorg, ForceBuilderOptions, ForceBuilderHandle } from "./screens/ForceBuilder.js";
