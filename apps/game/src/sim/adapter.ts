@@ -18,20 +18,26 @@ import type {
   StageBounds,
   StageCollision,
 } from "@gf/combat";
+import {
+  DEFAULT_ARENA_STAGE,
+  EXPORTED_STAGE_CATALOG,
+  EXPORTED_STAGE_IDS,
+  isExportedStageId,
+} from "../stages/catalog.generated.js";
 
-/** Default renderable Challenge arena until trace data proves the original arena rotation. */
-export const DEFAULT_ARENA_STAGE = "st00";
+export { DEFAULT_ARENA_STAGE, EXPORTED_STAGE_CATALOG, EXPORTED_STAGE_IDS, isExportedStageId };
 
 /**
  * Map a mission arena id to a browser-exported stage id.
  *
- * The extractor exports real disc stages as hex `st##` ids. Adventure arena names like
- * "Little Hill" are not yet verified against those ids, so they deliberately
- * fall back instead of guessing. When a traced table exists, add it here.
+ * The extractor exports real disc stages as `st##` ids in the generated catalog.
+ * Adventure arena names like "Little Hill" are not yet verified against those ids,
+ * so they deliberately fall back instead of guessing. When a traced table exists,
+ * add it here.
  */
 export function stageIdForArena(arena: string | undefined): string {
   const normalized = arena?.trim().toLowerCase() ?? "";
-  if (/^st[0-9a-f]{2}$/.test(normalized)) return normalized;
+  if (isExportedStageId(normalized)) return normalized;
   if (normalized === "challenge") return DEFAULT_ARENA_STAGE;
   return DEFAULT_ARENA_STAGE;
 }

@@ -63,7 +63,15 @@ import {
   type BattleHudHandle,
 } from "./ui/index.js";
 
-import { convertBattleConfig, inputFromKeys, playerIdFor, DEFAULT_ARENA_STAGE, stageIdForArena } from "./sim/adapter.js";
+import {
+  convertBattleConfig,
+  inputFromKeys,
+  playerIdFor,
+  DEFAULT_ARENA_STAGE,
+  EXPORTED_STAGE_CATALOG,
+  isExportedStageId,
+  stageIdForArena,
+} from "./sim/adapter.js";
 import { BattleScene, type AnimSlot } from "./sim/battleScene.js";
 
 // ------------------------------------------------------------------------------------------
@@ -645,6 +653,7 @@ function sameHitGridHeader(a: ReturnType<typeof hitBin.parseStageHitGrid>, b: Re
 }
 
 async function loadStage(stageId: string): Promise<StageResources> {
+  if (!isExportedStageId(stageId)) throw new Error(`Stage is not exported: ${stageId}`);
   if (loadedStageId === stageId) return loadedStageResources;
   stageRoot.clear();
   const [manifest, renderState] = await Promise.all([
@@ -1359,6 +1368,14 @@ function showLoadingMessage(text: string): void {
   },
   get session() {
     return session;
+  },
+  stages: EXPORTED_STAGE_CATALOG,
+  loadStage: async (stageId: string) => {
+    const normalized = stageId.trim().toLowerCase();
+    if (!isExportedStageId(normalized)) throw new Error(`Stage is not exported: ${stageId}`);
+    await loadStage(normalized);
+    renderer.render(scene, camera);
+    return normalized;
   },
   startChallenge: () => showDifficulty(),
   renderNow: () => {
