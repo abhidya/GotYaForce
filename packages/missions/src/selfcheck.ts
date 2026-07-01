@@ -13,7 +13,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-import { createChallengeRun, CHALLENGE_DIFFICULTIES } from "./challenge.js";
+import { createChallengeRun, CHALLENGE_DIFFICULTIES, enemyTargetForBattle } from "./challenge.js";
 import { createAdventureCampaign } from "./adventure.js";
 import { computeResults, type BattleOutcome } from "./scoring.js";
 import type { BorgData } from "./borg-data.js";
@@ -30,6 +30,14 @@ function assertChallengeReferenceInvariants(): void {
   assert(
     Object.keys(CHALLENGE_DIFFICULTIES).join(",") === "NORMAL,TUFF,INSANE",
     "Challenge difficulty labels must match captured UI order",
+  );
+  assert(
+    enemyTargetForBattle(CHALLENGE_DIFFICULTIES.NORMAL, 0) === 1500,
+    "NORMAL BATTLE 1 target should match captured 1500 GF-energy scale",
+  );
+  assert(
+    enemyTargetForBattle(CHALLENGE_DIFFICULTIES.NORMAL, 1) === 1860,
+    "NORMAL BATTLE 2 target should match captured ENEMY 1860",
   );
 }
 

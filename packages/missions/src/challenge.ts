@@ -59,23 +59,22 @@ export interface ChallengeRunOptions {
 }
 
 /**
- * Enemy-energy escalation across the run. Battle 1 starts near the player's
- * budget and each subsequent battle is tougher. BRANCHES.md shows battle 1
- * ENEMY ~1500-budget and battle 2 jumping to ENEMY 1860 — i.e. a step up of
- * a few hundred. We model a linear ramp scaled to the budget.
+ * Enemy-energy escalation across the run. Capture evidence in
+ * apps/game/reference/captures/BRANCHES.md pins NORMAL battle 1 near the
+ * 1500 GF-energy budget and NORMAL battle 2 at ENEMY 1860.
  *
  *   enemyTarget(i) = round(budget * (startFactor + i * stepFactor))
  */
 export interface EscalationCurve {
-  /** Fraction of budget the first enemy force targets. Default 0.9. */
+  /** Fraction of budget the first enemy force targets. Default 1.0. */
   startFactor: number;
-  /** Added fraction of budget per battle index. Default 0.25. */
+  /** Added fraction of budget per battle index. Default 0.24. */
   stepFactor: number;
 }
 
 export const DEFAULT_ESCALATION: EscalationCurve = {
-  startFactor: 0.9,
-  stepFactor: 0.25,
+  startFactor: 1.0,
+  stepFactor: 0.24,
 };
 
 export function enemyTargetForBattle(
