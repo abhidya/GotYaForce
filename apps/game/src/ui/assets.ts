@@ -41,6 +41,8 @@ export const ASSETS = {
   getStrip: "/ui/hsd/gets00_mdl/texture_000_CI4.png",
   /** Force-entry/control texture sheets. */
   entryControls: "/ui/hsd/entry00_mdl/texture_002_CI8.png",
+  /** Edit-force/unit collection atlas from `unitall_mdl.arc`. */
+  unitAllAtlas: "/ui/hsd/unitall_mdl/texture_008_CI8.png",
   /** Battle briefing / VS source texture sheets. */
   briefingVs: "/ui/hsd/brif00_mdl/texture_000_IA4.png",
   briefingNames: "/ui/hsd/brif00_mdl/texture_001_CI4.png",

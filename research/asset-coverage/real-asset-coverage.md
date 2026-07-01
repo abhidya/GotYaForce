@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T02:05:41.793Z
+Generated: 2026-07-01T02:13:17.393Z
 
 ## Summary
 
@@ -29,7 +29,7 @@ Generated: 2026-07-01T02:05:41.793Z
 | select-players | real-scene-partial-layout | /ui/scenes/vsel01/model_00.dae | css-grid-backdrop:56<br>css-option-pad:80<br>css-label-pill:81<br>handcoded-player-silhouette:28<br>runtime-text-layout:43 | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
 | load-box-data | real-scene-partial-layout | /ui/scenes/box00/model_00.dae | css-grid-backdrop:27<br>runtime-text-layout:28 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
 | select-force | mixed-real-assets-handcoded-surface | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>borgFacePath | css-grid-backdrop:44<br>css-force-platform:50<br>runtime-text-layout:45 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
-| force-builder | mixed-real-assets-handcoded-surface | borgBannerPath<br>borgMiniPath | handcoded-force-grid:73<br>handcoded-force-ring:85<br>handcoded-force-slot:154<br>runtime-text-layout:68 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
+| force-builder | mixed-real-assets-handcoded-surface | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath | handcoded-force-grid:79<br>handcoded-force-ring:91<br>handcoded-force-slot:160<br>runtime-text-layout:74 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
 | battle-intro | real-scene-partial-layout | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:52 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
 | battle-hud | mixed-real-assets-handcoded-surface | borgBannerPath | svg-hud-gauge:73<br>css-lockon-reticle:139<br>runtime-text-layout:107 | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
 | results | handcoded-or-unverified | none | css-results-backdrop:56<br>css-results-row:90<br>runtime-text-layout:64 | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |

@@ -16,7 +16,7 @@
  */
 
 import { el, legendItem, clear } from "../dom.js";
-import { borgBannerPath, borgMiniPath } from "../assets.js";
+import { ASSETS, borgBannerPath, borgMiniPath } from "../assets.js";
 
 /** Minimal borg shape the builder needs (subset of borgs.json). */
 export interface ForceBorg {
@@ -63,6 +63,12 @@ export function createForceBuilder(
 
   // ---- left column: EDIT tab + grid ----
   const left = el("div", { class: "gf-force-left" });
+  left.appendChild(
+    el("img", {
+      class: "gf-force-unitall-atlas",
+      attrs: { src: ASSETS.unitAllAtlas, alt: "", "aria-hidden": "true" },
+    }),
+  );
   left.appendChild(
     el("div", { class: "gf-force-edit-tab" }, [
       el("span", { text: "◄" }),

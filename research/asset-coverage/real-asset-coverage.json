@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:05:41.793Z",
+  "generatedAt": "2026-07-01T02:13:17.393Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -395,6 +395,12 @@
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
         {
+          "kind": "named-texture",
+          "symbol": "ASSETS.unitAllAtlas",
+          "publicPath": "/ui/hsd/unitall_mdl/texture_008_CI8.png",
+          "exists": true
+        },
+        {
           "kind": "borg-ui-helper",
           "symbol": "borgBannerPath",
           "publicPathPattern": "/ui/tpl/bn<borgUiCode>/image_00_CI4.png",
@@ -411,22 +417,22 @@
         {
           "kind": "handcoded-force-grid",
           "pattern": "gf-force-grid",
-          "line": 73
+          "line": 79
         },
         {
           "kind": "handcoded-force-ring",
           "pattern": "gf-force-ring",
-          "line": 85
+          "line": 91
         },
         {
           "kind": "handcoded-force-slot",
           "pattern": "gf-slot",
-          "line": 154
+          "line": 160
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 68
+          "line": 74
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."

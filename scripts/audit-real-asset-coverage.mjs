@@ -111,6 +111,7 @@ const assetConstants = {
     gotchaBoxButton: "/ui/hsd/box00_mdl/texture_003_CMP.png",
     getStrip: "/ui/hsd/gets00_mdl/texture_000_CI4.png",
     entryControls: "/ui/hsd/entry00_mdl/texture_002_CI8.png",
+    unitAllAtlas: "/ui/hsd/unitall_mdl/texture_008_CI8.png",
     briefingVs: "/ui/hsd/brif00_mdl/texture_000_IA4.png",
     briefingNames: "/ui/hsd/brif00_mdl/texture_001_CI4.png",
     vsSelectLabels: "/ui/hsd/vsel00_mdl/texture_004_CI8.png",

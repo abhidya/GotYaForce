@@ -599,6 +599,18 @@
 
 /* ============================ FORCE BUILDER ============================ */
 .gf-force { display: grid; grid-template-columns: 1fr minmax(280px, 42%); gap: 12px; padding: 12px; box-sizing: border-box; height: 100%; }
+.gf-force-unitall-atlas {
+  position: absolute;
+  left: 14px;
+  top: 54px;
+  width: min(46vw, 420px);
+  max-height: calc(100% - 118px);
+  object-fit: cover;
+  object-position: top left;
+  opacity: 0.18;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
 .gf-force-edit-tab {
   display: inline-flex;
   align-items: center;
@@ -612,7 +624,8 @@
   font-size: 18px;
   letter-spacing: 0.08em;
 }
-.gf-force-left { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.gf-force-left { position: relative; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.gf-force-left > :not(.gf-force-unitall-atlas) { position: relative; z-index: 1; }
 .gf-force-grid {
   flex: 1;
   min-height: 0;

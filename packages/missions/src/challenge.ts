@@ -22,9 +22,9 @@ import {
 
 /** The three selectable difficulties map directly to an energy budget. */
 export const CHALLENGE_DIFFICULTIES = {
-  EASY: 1500,
-  NORMAL: 2000,
-  HARD: 2500,
+  NORMAL: 1500,
+  TUFF: 2000,
+  INSANE: 2500,
 } as const;
 
 export type ChallengeDifficulty = keyof typeof CHALLENGE_DIFFICULTIES;
