@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const region = process.argv.find((arg) => !arg.startsWith("--")) ?? "GG4E";
+const region = process.argv.slice(2).find((arg) => !arg.startsWith("--")) ?? "GG4E";
 const outDir = path.join(repoRoot, "research", "asset-coverage");
 const outJson = path.join(outDir, "real-asset-coverage.json");
 const outMd = path.join(outDir, "real-asset-coverage.md");

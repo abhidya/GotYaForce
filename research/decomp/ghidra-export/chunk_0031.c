@@ -587,7 +587,7 @@ void zz_011230c_(int param_1)
     *(undefined1 *)(param_1 + 0x1cef) = 0;
     if (0 < *(short *)(param_1 + 0x144)) goto LAB_801123c4;
     *(undefined2 *)(param_1 + 0x144) = 0x4b0;
-    zz_006817c_(param_1,4);
+    apply_actor_param_tier_delta_127(param_1,4);
     zz_00f036c_(param_1,0xa5);
     *(undefined1 *)(param_1 + 0x146) = 0x1e;
     zz_00107a0_(param_1,0xf);

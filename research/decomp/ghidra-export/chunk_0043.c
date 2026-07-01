@@ -5494,7 +5494,7 @@ void FUN_8016e980(undefined8 param_1,double param_2,double param_3,double param_
     uVar3 = 0;
     *(undefined2 *)(PTR_DAT_80433944 + 2) = 0;
     zz_002a5f4_(0x40,0x80,0xc0,0);
-    uVar5 = zz_008c3a0_(2);
+    uVar5 = set_global_menu_mode(2);
     uVar5 = zz_004370c_(extraout_f1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
                         (int)((ulonglong)uVar5 >> 0x20),(int)uVar5,puVar2,uVar3,puVar4,in_r8,in_r9,
                         in_r10);

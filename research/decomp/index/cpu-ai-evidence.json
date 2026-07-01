@@ -1,0 +1,944 @@
+{
+  "generatedAt": "2026-07-01T10:44:50.582Z",
+  "generatedBy": "scripts/inventory-cpu-ai-evidence.mjs",
+  "sourceIndex": "research/decomp/index/function-evidence-index.json",
+  "principle": "CPU AI porting must use original target/action/effect code and confirmed slot/team data. These names are evidence labels; unconfirmed decision-brain code remains unrenamed.",
+  "classAliases": [
+    {
+      "inferredName": "ActiveBorgObject",
+      "originalClassName": null,
+      "confidence": "struct alias only",
+      "evidence": "Repeated DAT_803c4e84 active loop with 0x1e00 stride and active fields. No original C++ class name confirmed yet."
+    },
+    {
+      "inferredName": "MatchState",
+      "originalClassName": null,
+      "confidence": "struct alias only",
+      "evidence": "PTR_DAT_80433934 carries match/force/slot state, active slot masks, rosters, and per-side values."
+    },
+    {
+      "inferredName": "cTeam",
+      "originalClassName": "cTeam",
+      "confidence": "symbol-map confirmed",
+      "evidence": "0x802a3938 cTeam::GetPlayer(int)"
+    },
+    {
+      "inferredName": "cPlayer",
+      "originalClassName": "cPlayer",
+      "confidence": "symbol-map confirmed",
+      "evidence": "0x802807ac cPlayer::ClearSwapControllerTimer(void)"
+    }
+  ],
+  "functionAnchors": [
+    {
+      "address": "0x801962c4",
+      "inferredName": "challenge_force_slot_team_setup",
+      "system": "Challenge CPU/player slot setup",
+      "summary": "Builds Challenge slot/team state and force roster entries before active actors spawn.",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:281",
+          "needle": "PTR_DAT_80433934[iVar4 + 0xcb] = 0xff"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:327",
+          "needle": "PTR_DAT_80433934[iVar4 + 0xcb] = 1"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:360",
+          "needle": "PTR_DAT_80433934[iVar4 + 0x5a] = PTR_DAT_80433934[iVar4 + 0x5a] +"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:3146",
+          "needle": "*(undefined *)(param_9 + 0x88) = PTR_DAT_80433934[*(char *)(param_9 + 0x96) + 0xcb]"
+        }
+      ],
+      "relatedWebModules": [
+        "packages/missions/src/challenge.ts",
+        "packages/combat/src/battle.ts"
+      ],
+      "currentFunctionName": "build_challenge_battle_setup",
+      "symbolMapName": "FUN_801962c4",
+      "indexedInferredName": "challenge_force_slot_team_setup",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:234",
+      "callers": [],
+      "callees": [
+        {
+          "address": "0x800055fc",
+          "name": "zz_00055fc_"
+        },
+        {
+          "address": "0x800064d4",
+          "name": "zz_00064d4_"
+        },
+        {
+          "address": "0x8000685c",
+          "name": "zz_000685c_"
+        },
+        {
+          "address": "0x80027c1c",
+          "name": "zz_0027c1c_"
+        },
+        {
+          "address": "0x80029fd4",
+          "name": "zz_0029fd4_"
+        },
+        {
+          "address": "0x80066168",
+          "name": "zz_0066168_"
+        },
+        {
+          "address": "0x80196eb8",
+          "name": "zz_0196eb8_"
+        }
+      ],
+      "globalReferences": [
+        "PTR_DAT_80433934",
+        "PTR_DAT_80433930",
+        "DAT_80436378",
+        "PTR_DAT_8036f40c",
+        "PTR_DAT_8036f4b8",
+        "PTR_DAT_8036f434",
+        "PTR_DAT_8036f53c",
+        "PTR_DAT_8036f360",
+        "PTR_DAT_8036f3e4",
+        "DAT_804356ec",
+        "PTR_DAT_80433950",
+        "DAT_804356e4"
+      ],
+      "constants": [
+        "0xcb",
+        "0xcc",
+        "2",
+        "0x1e8",
+        "0x15d9",
+        "0x15da",
+        "0x88",
+        "4",
+        "0",
+        "3",
+        "1",
+        "0xff",
+        "0x13",
+        "8",
+        "0x5a",
+        "0x1654",
+        "0x1f",
+        "0x7fffffff",
+        "0x1e",
+        "0x1c",
+        "0x1ea",
+        "0x1eb",
+        "0x10",
+        "0x20",
+        "0xe",
+        "0x3e",
+        "0x29",
+        "0x348",
+        "0x32",
+        "0x54",
+        "0xa0",
+        "5"
+      ]
+    },
+    {
+      "address": "0x8002bb14",
+      "inferredName": "battle_frame_target_action_dispatch",
+      "system": "Per-frame CPU/player shared target and action dispatch",
+      "summary": "Main active actor loop resets slot target/effect state, runs target/contact passes, applies target reactions, and dispatches per-slot action updates.",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5956",
+          "needle": "*(undefined4 *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4) = 0"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5960",
+          "needle": "(&DAT_8043612c)[pcVar10[0x3e4]] = 0"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6248",
+          "needle": "zz_00681e4_((int)pcVar10,(int)(char)(&DAT_8043612c)[pcVar10[0x3e4]])"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6302",
+          "needle": "zz_006abd4_((int)pcVar10,*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4))"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6262",
+          "needle": "dVar25 = (double)zz_00680d4_((int)pcVar10,0)"
+        }
+      ],
+      "relatedWebModules": [
+        "packages/combat/src/ai.ts",
+        "packages/combat/src/battle.ts",
+        "packages/combat/src/combat.ts"
+      ],
+      "currentFunctionName": "FUN_8002bb14",
+      "symbolMapName": "FUN_8002bb14",
+      "indexedInferredName": "battle_frame_target_action_dispatch",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
+      "callers": [
+        {
+          "address": "0x80029434",
+          "name": "zz_0029434_"
+        },
+        {
+          "address": "0x80029708",
+          "name": "zz_0029708_"
+        }
+      ],
+      "callees": [
+        {
+          "address": "0x8002c994",
+          "name": "zz_002c994_"
+        },
+        {
+          "address": "0x8002caa8",
+          "name": "zz_002caa8_"
+        },
+        {
+          "address": "0x8002cb20",
+          "name": "zz_002cb20_"
+        },
+        {
+          "address": "0x8002cc78",
+          "name": "zz_002cc78_"
+        },
+        {
+          "address": "0x8002cda4",
+          "name": "zz_002cda4_"
+        },
+        {
+          "address": "0x8002ce44",
+          "name": "zz_002ce44_"
+        },
+        {
+          "address": "0x8002cf80",
+          "name": "zz_002cf80_"
+        },
+        {
+          "address": "0x8002d198",
+          "name": "zz_002d198_"
+        },
+        {
+          "address": "0x8002d35c",
+          "name": "zz_002d35c_"
+        },
+        {
+          "address": "0x8002d58c",
+          "name": "zz_002d58c_"
+        },
+        {
+          "address": "0x8002d7c4",
+          "name": "zz_002d7c4_"
+        },
+        {
+          "address": "0x8002db58",
+          "name": "zz_002db58_"
+        },
+        {
+          "address": "0x8002df08",
+          "name": "zz_002df08_"
+        },
+        {
+          "address": "0x8002e1c8",
+          "name": "zz_002e1c8_"
+        },
+        {
+          "address": "0x8002f8dc",
+          "name": "zz_002f8dc_"
+        },
+        {
+          "address": "0x8003d3e8",
+          "name": "zz_003d3e8_"
+        }
+      ],
+      "globalReferences": [
+        "DAT_803c4e84",
+        "DAT_803b06a8",
+        "DAT_8043612c",
+        "DAT_80436134",
+        "DAT_803b068c",
+        "PTR_DAT_80433934",
+        "DAT_80436154",
+        "DAT_803b069c",
+        "DAT_803b0690",
+        "DAT_803b0694",
+        "DAT_803b0698",
+        "DAT_80436128",
+        "DAT_8043614c",
+        "FLOAT_80436f68",
+        "FLOAT_80436f6c",
+        "DAT_80436144",
+        "DAT_8043613c",
+        "DAT_803b0644",
+        "DAT_803b0638",
+        "DAT_803b0708",
+        "DAT_803c73b0",
+        "DAT_803b0674",
+        "DAT_803b065c",
+        "FLOAT_80436f70"
+      ],
+      "constants": [
+        "0x1e00",
+        "44",
+        "0x3e4",
+        "0x88",
+        "2000",
+        "0x7d1",
+        "0x8002c978",
+        "0x8002c970",
+        "0x8002c968",
+        "0x8002bb34",
+        "0x8002bb2c",
+        "0x8002bb24",
+        "7",
+        "0x118",
+        "0",
+        "0x154",
+        "400",
+        "0x1cc",
+        "1",
+        "0x1c6",
+        "0x436",
+        "0x4fc",
+        "0x4f4",
+        "0x4f8",
+        "0x4f5",
+        "0x4fe",
+        "0x4f6",
+        "0x4fa",
+        "0x4f7",
+        "0x6fd",
+        "0x70c",
+        "0x70d"
+      ]
+    },
+    {
+      "address": "0x8002cb20",
+      "inferredName": "mutual_actor_contact_mask_update",
+      "system": "Actor eligibility / contact mask update",
+      "summary": "Pairwise active actor pass gated by mutual 0x71e/0x71f slot masks before contact-vector update.",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6479",
+          "needle": "((int)pcVar4[0x71e] & 1 << (int)pcVar3[0x3e4])"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6482",
+          "needle": "((int)pcVar3[0x71f] & 1 << (int)pcVar4[0x3e4])"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6489",
+          "needle": "zz_0035ca4_((int)pcVar4,(float *)(pcVar3 + 0x1cc))"
+        }
+      ],
+      "relatedWebModules": [
+        "packages/combat/src/ai.ts",
+        "packages/combat/src/combat.ts"
+      ],
+      "currentFunctionName": "zz_002cb20_",
+      "symbolMapName": "zz_002cb20_",
+      "indexedInferredName": "mutual_actor_contact_mask_update",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6454",
+      "callers": [
+        {
+          "address": "0x8002bb14",
+          "name": "FUN_8002bb14"
+        }
+      ],
+      "callees": [
+        {
+          "address": "0x80035ca4",
+          "name": "zz_0035ca4_"
+        }
+      ],
+      "globalReferences": [
+        "DAT_803c4e84",
+        "FLOAT_80436f90"
+      ],
+      "constants": [
+        "0x71e",
+        "0x71f",
+        "0",
+        "1",
+        "0x3e4",
+        "0x1dd",
+        "0x204",
+        "0x1cc",
+        "0x1e00",
+        "6",
+        "5"
+      ]
+    },
+    {
+      "address": "0x8002e2a8",
+      "inferredName": "resolve_hitbox_target_effects_and_damage",
+      "system": "Hitbox target effects, target memory, and damage dispatch",
+      "summary": "Shared hit/effect resolver. It writes target pointers, last-enemy markers, effect deltas, damage accounting, knockback direction, base damage, and HP subtraction.",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7718",
+          "needle": "*(char **)(&DAT_803b06a8 + pcVar16[0x3e4] * 4) = pcVar18"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7910",
+          "needle": "pcVar18[2000] = pcVar16[0x3e4]"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7911",
+          "needle": "pcVar18[0x7d1] = '\\x0f'"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7763",
+          "needle": "(&DAT_8043612c)[pcVar18[0x3e4]]"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7945",
+          "needle": "zz_00300bc_(param_1,param_2,(int)*(char *)(puVar17 + 7))"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7948",
+          "needle": "uVar10 = zz_003cd5c_(puVar17,iVar19,pcVar18)"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7989",
+          "needle": "uVar10 = zz_003d344_((int)pcVar18,(short)uVar10)"
+        }
+      ],
+      "relatedWebModules": [
+        "packages/combat/src/combat.ts",
+        "packages/combat/src/ai.ts"
+      ],
+      "currentFunctionName": "zz_002e2a8_",
+      "symbolMapName": "zz_002e2a8_",
+      "indexedInferredName": "resolve_hitbox_target_effects_and_damage",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7473",
+      "callers": [
+        {
+          "address": "0x8002d7c4",
+          "name": "zz_002d7c4_"
+        },
+        {
+          "address": "0x8002db58",
+          "name": "zz_002db58_"
+        },
+        {
+          "address": "0x8002df08",
+          "name": "zz_002df08_"
+        }
+      ],
+      "callees": [
+        {
+          "address": "0x800061a8",
+          "name": "FUN_800061a8"
+        },
+        {
+          "address": "0x80006c24",
+          "name": "zz_0006c24_"
+        },
+        {
+          "address": "0x80019550",
+          "name": "zz_0019550_"
+        },
+        {
+          "address": "0x8002f8d0",
+          "name": "zz_002f8d0_"
+        },
+        {
+          "address": "0x8002f8dc",
+          "name": "zz_002f8dc_"
+        },
+        {
+          "address": "0x8002fc18",
+          "name": "zz_002fc18_"
+        },
+        {
+          "address": "0x8002fcbc",
+          "name": "zz_002fcbc_"
+        },
+        {
+          "address": "0x800300bc",
+          "name": "zz_00300bc_"
+        },
+        {
+          "address": "0x8003cd5c",
+          "name": "zz_003cd5c_"
+        },
+        {
+          "address": "0x8003d344",
+          "name": "zz_003d344_"
+        },
+        {
+          "address": "0x800db250",
+          "name": "zz_00db250_"
+        },
+        {
+          "address": "0x8010e158",
+          "name": "zz_010e158_"
+        },
+        {
+          "address": "0x8013f300",
+          "name": "zz_013f300_"
+        },
+        {
+          "address": "0x80176ec0",
+          "name": "zz_0176ec0_"
+        },
+        {
+          "address": "0x8018214c",
+          "name": "zz_018214c_"
+        },
+        {
+          "address": "0x801dff24",
+          "name": "zz_01dff24_"
+        }
+      ],
+      "globalReferences": [
+        "DAT_803b06a8",
+        "DAT_8043612c",
+        "FLOAT_80436fa0",
+        "DOUBLE_80436fb0",
+        "FLOAT_80436f7c",
+        "FLOAT_80436f78",
+        "DOUBLE_80436f88",
+        "FLOAT_80436f9c",
+        "FLOAT_80436fa4",
+        "FLOAT_80436fa8",
+        "DAT_803b0724",
+        "DAT_803b0720",
+        "DAT_803b0728",
+        "DAT_803b06c0",
+        "DAT_803b06c4",
+        "DAT_803b06c8",
+        "DAT_80436134",
+        "DAT_8043613c",
+        "DAT_80436128",
+        "DAT_802c7ca0",
+        "DAT_80436154",
+        "PTR_DAT_80433934",
+        "DAT_803b0638",
+        "FLOAT_80436fac"
+      ],
+      "constants": [
+        "0x2c",
+        "0x18",
+        "0x290",
+        "2000",
+        "0x7d1",
+        "15",
+        "0x418",
+        "0x42c",
+        "0x41c",
+        "2",
+        "0x20",
+        "0x24",
+        "0x11",
+        "0x28",
+        "0",
+        "0x83",
+        "8",
+        "0x800",
+        "0x59c",
+        "0x599",
+        "1",
+        "0x1da",
+        "0x6fd",
+        "0xb",
+        "1000",
+        "0x302",
+        "9",
+        "0x10",
+        "0x88",
+        "0x43300000",
+        "0xc4",
+        "0x6fc"
+      ]
+    },
+    {
+      "address": "0x800681e4",
+      "inferredName": "apply_actor_param_tier_delta_63",
+      "system": "Actor param-tier modifier applied from per-slot effect delta",
+      "summary": "Applies the signed DAT_8043612c slot delta to actor+0x74a with a narrower [-63, 63] clamp, then refreshes table-backed actor params.",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4458",
+          "needle": "iVar1 = (int)*(char *)(param_1 + 0x74a)"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4460",
+          "needle": "if (iVar2 < 0x40)"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4474",
+          "needle": "*(undefined2 *)(param_1 + 0x750) = 900"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4476",
+          "needle": "zz_006817c_(param_1,iVar1)"
+        }
+      ],
+      "relatedWebModules": [
+        "packages/combat/src/stats.ts",
+        "packages/combat/src/combat.ts"
+      ],
+      "currentFunctionName": "zz_00681e4_",
+      "symbolMapName": "zz_00681e4_",
+      "indexedInferredName": "apply_actor_param_tier_delta_63",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4442",
+      "callers": [
+        {
+          "address": "0x8002bb14",
+          "name": "FUN_8002bb14"
+        }
+      ],
+      "callees": [
+        {
+          "address": "0x8006817c",
+          "name": "zz_006817c_"
+        }
+      ],
+      "globalReferences": [
+        "DAT_8043612c",
+        "PTR_DAT_80433934"
+      ],
+      "constants": [
+        "0x74a",
+        "0x3f",
+        "0x74e",
+        "0x750",
+        "900",
+        "0x1f",
+        "0",
+        "0x40"
+      ]
+    },
+    {
+      "address": "0x8006ab04",
+      "inferredName": "start_forced_move_to_point",
+      "system": "Forced move / point reaction",
+      "summary": "Stores a per-slot world target vector and enters a movement/action state. This is evidence for target-vector mechanics, not enough by itself to rename CPU decision code.",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1073",
+          "needle": "*(undefined4 *)(param_1 + 0x7bc) = *param_2"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1071",
+          "needle": "*(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) | 0x1000"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1080",
+          "needle": "zz_006a7b4_(param_1,0x23)"
+        }
+      ],
+      "relatedWebModules": [
+        "packages/combat/src/movement.ts",
+        "packages/combat/src/ai.ts"
+      ],
+      "currentFunctionName": "zz_006ab04_",
+      "symbolMapName": "zz_006ab04_",
+      "indexedInferredName": "start_forced_move_to_point",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1056",
+      "callers": [
+        {
+          "address": "0x8002bb14",
+          "name": "FUN_8002bb14"
+        },
+        {
+          "address": "0x8006478c",
+          "name": "FUN_8006478c"
+        }
+      ],
+      "callees": [
+        {
+          "address": "0x8006a7b4",
+          "name": "zz_006a7b4_"
+        },
+        {
+          "address": "0x8006a7f4",
+          "name": "zz_006a7f4_"
+        },
+        {
+          "address": "0x800f036c",
+          "name": "zz_00f036c_"
+        }
+      ],
+      "globalReferences": [],
+      "constants": [
+        "0x7bc",
+        "0x7c0",
+        "0x7c4",
+        "0x5e0",
+        "0x1000",
+        "0x71b",
+        "0x23",
+        "0x7c9",
+        "0",
+        "1",
+        "2",
+        "0x272",
+        "0xffff",
+        "0x7ca",
+        "0x7cb",
+        "0xf2"
+      ]
+    },
+    {
+      "address": "0x8006abd4",
+      "inferredName": "react_to_slot_target_object",
+      "system": "Stored target reaction",
+      "summary": "Consumes DAT_803b06a8 target pointer, reads target object type/category, enters status/action state, and plays a side-aware cue.",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1128",
+          "needle": "if (*(char *)(param_2 + 0x4a0) == '\\0')"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1131",
+          "needle": "zz_006a868_(param_1,*(undefined2 *)(param_2 + 1000),*(undefined1 *)(param_2 + 0x3ec))"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1132",
+          "needle": "*(undefined2 *)(param_1 + 0x49a) = 900"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1152",
+          "needle": "zz_0176ec0_(param_1,*(undefined1 *)(param_1 + 0x88),1)"
+        }
+      ],
+      "relatedWebModules": [
+        "packages/combat/src/ai.ts",
+        "packages/combat/src/combat.ts"
+      ],
+      "currentFunctionName": "zz_006abd4_",
+      "symbolMapName": "zz_006abd4_",
+      "indexedInferredName": "react_to_slot_target_object",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1115",
+      "callers": [
+        {
+          "address": "0x8002bb14",
+          "name": "FUN_8002bb14"
+        }
+      ],
+      "callees": [
+        {
+          "address": "0x8006a868",
+          "name": "zz_006a868_"
+        },
+        {
+          "address": "0x80176ec0",
+          "name": "zz_0176ec0_"
+        }
+      ],
+      "globalReferences": [
+        "DAT_803b06a8"
+      ],
+      "constants": [
+        "0x3e4",
+        "1000",
+        "0x49a",
+        "0x49c",
+        "0x5e0",
+        "0x80000000",
+        "0x88",
+        "1",
+        "0x18",
+        "0x4a0",
+        "0",
+        "0x48a",
+        "0x3ec",
+        "900",
+        "0x489",
+        "0x49e",
+        "0x48b",
+        "0xf06",
+        "0xf05",
+        "0x6fb",
+        "0x272",
+        "0x443",
+        "0x8c4"
+      ]
+    }
+  ],
+  "fieldAliases": [
+    {
+      "owner": "ActiveBorgObject",
+      "offset": "0x83",
+      "inferredName": "action_state",
+      "confidence": "evidence-backed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7519",
+          "needle": "if (pcVar18[0x83] == '\\0')"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7591",
+          "needle": "case '\\x10':"
+        }
+      ]
+    },
+    {
+      "owner": "ActiveBorgObject",
+      "offset": "0x88",
+      "inferredName": "match_side_from_slot_table",
+      "confidence": "confirmed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:3146",
+          "needle": "*(undefined *)(param_9 + 0x88) = PTR_DAT_80433934[*(char *)(param_9 + 0x96) + 0xcb]"
+        }
+      ]
+    },
+    {
+      "owner": "ActiveBorgObject",
+      "offset": "0x3e4",
+      "inferredName": "active_slot_index",
+      "confidence": "confirmed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5956",
+          "needle": "pcVar10[0x3e4] * 4"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6479",
+          "needle": "1 << (int)pcVar3[0x3e4]"
+        }
+      ]
+    },
+    {
+      "owner": "ActiveBorgObject",
+      "offset": "0x71e/0x71f",
+      "inferredName": "mutual_actor_slot_masks",
+      "confidence": "evidence-backed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6479",
+          "needle": "pcVar4[0x71e] & 1 << (int)pcVar3[0x3e4]"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6482",
+          "needle": "pcVar3[0x71f] & 1 << (int)pcVar4[0x3e4]"
+        }
+      ]
+    },
+    {
+      "owner": "ActiveBorgObject",
+      "offset": "2000 / 0x7d1",
+      "inferredName": "last_enemy_slot_and_timer",
+      "confidence": "evidence-backed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7910",
+          "needle": "pcVar18[2000] = pcVar16[0x3e4]"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7911",
+          "needle": "pcVar18[0x7d1] = '\\x0f'"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5917",
+          "needle": "pcVar10[2000] = -1"
+        }
+      ]
+    },
+    {
+      "owner": "ActiveBorgObject",
+      "offset": "0x74a/0x74b/0x74c/0x74d/0x74e/0x750",
+      "inferredName": "param_tier_state",
+      "confidence": "evidence-backed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4423",
+          "needle": "*(char *)(param_1 + 0x74a)"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4503",
+          "needle": "*(char *)(param_1 + 0x74b)"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4474",
+          "needle": "*(undefined2 *)(param_1 + 0x750) = 900"
+        }
+      ]
+    },
+    {
+      "owner": "Global",
+      "offset": "DAT_803b06a8",
+      "inferredName": "slot_target_object_ptrs",
+      "confidence": "confirmed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5956",
+          "needle": "*(undefined4 *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4) = 0"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7718",
+          "needle": "*(char **)(&DAT_803b06a8 + pcVar16[0x3e4] * 4) = pcVar18"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6302",
+          "needle": "zz_006abd4_((int)pcVar10,*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4))"
+        }
+      ]
+    },
+    {
+      "owner": "Global",
+      "offset": "DAT_8043612c",
+      "inferredName": "slot_param_tier_delta",
+      "confidence": "evidence-backed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5960",
+          "needle": "(&DAT_8043612c)[pcVar10[0x3e4]] = 0"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7763",
+          "needle": "(&DAT_8043612c)[pcVar18[0x3e4]] ="
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6248",
+          "needle": "zz_00681e4_((int)pcVar10,(int)(char)(&DAT_8043612c)[pcVar10[0x3e4]])"
+        }
+      ]
+    },
+    {
+      "owner": "Global",
+      "offset": "DAT_803b06c0/DAT_803b06c4/DAT_803b06c8",
+      "inferredName": "slot_world_target_vec3",
+      "confidence": "evidence-backed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7694",
+          "needle": "(&DAT_803b06c0 + iVar11)"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6270",
+          "needle": "zz_006ab04_((int)pcVar10"
+        }
+      ]
+    },
+    {
+      "owner": "PTR_DAT_80433934",
+      "offset": "slot+0xcb / slot+0xcc",
+      "inferredName": "slot_match_side",
+      "confidence": "confirmed",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:281",
+          "needle": "PTR_DAT_80433934[iVar4 + 0xcb] = 0"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:291",
+          "needle": "PTR_DAT_80433934[iVar4 + 0xcc] = 0"
+        }
+      ]
+    }
+  ],
+  "portingNotes": [
+    "Do not implement CPU AI as nearest-enemy-only long term. Original code keeps per-slot target object pointers and short-lived last-enemy slot memory.",
+    "Keep object+0x88 as match side/team from PTR_DAT_80433934[slot+0xcb]. It is not a borg display type.",
+    "DAT_8043612c is an effect-driven signed param-tier delta, not proven CPU desire/input.",
+    "The CPU decision-brain function is not fully isolated by this pass; current evidence covers shared target/effect/action dispatch used by CPU and player-controlled actors."
+  ]
+}

@@ -36,6 +36,11 @@ Function names follow the community `GG4E-CSM-20220412.map` where it had a real 
 other HAL/AM2-lineage titles, hence the borrowed GNT4 map covering them at all); everything else
 is Ghidra's auto-generated `zz_<addr>_`/`FUN_<addr>` fallback name.
 
+Some researched functions also carry `GF_ALIAS:` comments. These are source-controlled
+inferred names backed by nearby call graph, fields, globals, constants, and traces. Keep the
+original address/header visible, and update `scripts/build-decomp-evidence-index.mjs` plus the
+topic inventory scripts when an alias becomes strong enough to drive porting.
+
 ## What's been cross-referenced against the TS port so far (2026-07-01)
 
 All addresses below are cited in `research/decomp/behavior-notes.md` sections (h)/(i)/(j)/(k)

@@ -1,17 +1,19 @@
 /**
- * MainMenu — the mode hub, per reference `title-main-menu.png`.
+ * MainMenu - the mode hub, per reference `challenge-1-main-menu.png`.
  *
  * The real game renders this as a 3D desk diorama where each mode is a physical
- * object ringed by a spinning gear cursor. This component keeps the Challenge
- * selection flow in place while the extracted desk/menu assets are wired.
+ * object on the desk. The extracted `optn00_mdl.arc` model is identified as the
+ * source menu scene, but the DAE export is still blocked, so this component uses
+ * the live reference captures as the desk layer and exposes click/keyboard
+ * hotspots over the real objects.
  */
 
 import { el } from "../dom.js";
-import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export type MainMenuMode =
   | "story"
   | "versus"
+  | "action"
   | "challenge"
   | "edit-force"
   | "collection"
@@ -21,18 +23,28 @@ export type MainMenuMode =
 interface MenuEntry {
   mode: MainMenuMode;
   label: string;
-  tone: "red" | "blue" | "green" | "yellow" | "purple";
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
-/** Ring order roughly matches the desk layout in the reference. */
+const CHALLENGE_MENU_CAPTURE = new URL(
+  "../../../reference/captures/challenge-1-main-menu.png",
+  import.meta.url,
+).href;
+const STORY_MENU_CAPTURE = new URL("../../../reference/captures/title-main-menu.png", import.meta.url).href;
+
+/** Navigation order follows the physical object ring around the captured desk. */
 const ENTRIES: readonly MenuEntry[] = [
-  { mode: "story", label: "STORY", tone: "yellow" },
-  { mode: "challenge", label: "CHALLENGE", tone: "red" },
-  { mode: "edit-force", label: "EDIT FORCE", tone: "green" },
-  { mode: "option", label: "OPTION", tone: "blue" },
-  { mode: "trade", label: "TRADE", tone: "purple" },
-  { mode: "collection", label: "COLLECTION", tone: "yellow" },
-  { mode: "versus", label: "VERSUS", tone: "blue" },
+  { mode: "story", label: "STORY", x: 64, y: 61, w: 18, h: 24 },
+  { mode: "versus", label: "VERSUS", x: 34, y: 56, w: 18, h: 18 },
+  { mode: "action", label: "ACTION", x: 15, y: 33, w: 17, h: 18 },
+  { mode: "collection", label: "COLLECTION", x: 27, y: 34, w: 18, h: 15 },
+  { mode: "trade", label: "TRADE", x: 42, y: 28, w: 18, h: 16 },
+  { mode: "challenge", label: "CHALLENGE", x: 58, y: 35, w: 25, h: 26 },
+  { mode: "edit-force", label: "EDIT FORCE", x: 80, y: 43, w: 21, h: 20 },
+  { mode: "option", label: "OPTION", x: 81, y: 13, w: 18, h: 14 },
 ];
 
 export interface MainMenuOptions {
@@ -55,50 +67,56 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
   let selected: MainMenuMode = opts.initial ?? "story";
 
   const root = el("div", { class: "gf-screen gf-mainmenu" });
-  const titleScene = createUiSceneHost("gf-ui-scene gf-mainmenu-real-scene");
-  root.appendChild(titleScene);
-  if (opts.deskImage) {
-    root.appendChild(
-      el("div", { class: "gf-mainmenu-desk", style: { backgroundImage: `url(${opts.deskImage})` } }),
-    );
-  }
+  const frame = el("div", { class: "gf-mainmenu-frame" });
+  const desk = el("div", {
+    class: "gf-mainmenu-desk",
+    style: { backgroundImage: `url(${captureFor(selected, opts.deskImage)})` },
+  });
+  frame.appendChild(desk);
 
   const ring = el("div", { class: "gf-mainmenu-ring" });
+  const cursor = el("div", { class: "gf-menu-cursor", attrs: { "aria-hidden": "true" } });
   const itemNodes = new Map<MainMenuMode, HTMLButtonElement>();
 
-  // Lay items out on an ellipse; the selected item additionally pops to center
-  // via CSS scale. Positions approximate the desk arrangement.
-  const n = ENTRIES.length;
-  ENTRIES.forEach((entry, i) => {
-    const angle = (-90 + (360 / n) * i) * (Math.PI / 180);
-    const cx = 50 + Math.cos(angle) * 30;
-    const cy = 46 + Math.sin(angle) * 30;
+  ENTRIES.forEach((entry) => {
     const node = el(
       "button",
       {
         class: "gf-menu-item",
-        style: { left: `${cx}%`, top: `${cy}%` },
+        style: {
+          left: `${entry.x}%`,
+          top: `${entry.y}%`,
+          width: `${entry.w}%`,
+          height: `${entry.h}%`,
+        },
         attrs: { type: "button", "data-mode": entry.mode, "aria-label": entry.label },
         onClick: () => {
           if (selected === entry.mode) opts.onSelect(entry.mode);
           else setSelected(entry.mode);
         },
       },
-      [
-        el("span", { class: `gf-menu-gear gf-menu-gear-${entry.tone}`, attrs: { "aria-hidden": "true" } }),
-        el("span", { class: "gf-menu-label", text: entry.label }),
-      ],
     );
     itemNodes.set(entry.mode, node);
     ring.appendChild(node);
   });
 
-  root.appendChild(ring);
-  root.appendChild(el("div", { class: "gf-mainmenu-logo", text: "GOTCHA FORCE" }));
+  ring.appendChild(cursor);
+  frame.appendChild(ring);
+  root.appendChild(frame);
 
   function setSelected(mode: MainMenuMode): void {
     selected = mode;
-    for (const [m, node] of itemNodes) node.classList.toggle("gf-selected", m === mode);
+    desk.style.backgroundImage = `url(${captureFor(mode, opts.deskImage)})`;
+    const entry = ENTRIES.find((candidate) => candidate.mode === mode) ?? ENTRIES[0]!;
+    cursor.style.left = `${entry.x}%`;
+    cursor.style.top = `${entry.y}%`;
+    cursor.style.width = `${entry.w}%`;
+    cursor.style.height = `${entry.h}%`;
+    cursor.setAttribute("data-mode", mode);
+    for (const [m, node] of itemNodes) {
+      node.classList.toggle("gf-selected", m === mode);
+      node.setAttribute("aria-pressed", String(m === mode));
+    }
   }
 
   function onKey(ev: KeyboardEvent): void {
@@ -118,13 +136,6 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
 
   setSelected(selected);
   container.appendChild(root);
-  const stopTitleScene = mountUiSceneModels(titleScene, {
-    sceneId: "tl00",
-    fitSize: 780,
-    camera: { fov: 28, position: [0, 110, 900], lookAt: [0, 20, 0] },
-    rotation: [-0.1, 0, 0],
-    maxModels: 37,
-  });
   window.addEventListener("keydown", onKey);
 
   return {
@@ -132,8 +143,12 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
     getSelected: () => selected,
     destroy: () => {
       window.removeEventListener("keydown", onKey);
-      stopTitleScene();
       root.remove();
     },
   };
+}
+
+function captureFor(mode: MainMenuMode, override: string | undefined): string {
+  if (override) return override;
+  return mode === "story" ? STORY_MENU_CAPTURE : CHALLENGE_MENU_CAPTURE;
 }

@@ -3086,7 +3086,7 @@ void FUN_800936c0(undefined8 param_1,double param_2,double param_3,double param_
       uVar8 = zz_0044848_(uVar8,param_2,param_3,param_4,param_5,param_6,param_7,param_8,1);
       zz_007fd6c_(uVar8,param_2,param_3,param_4,param_5,param_6,param_7,param_8,zz_0094f5c_,0,uVar4,
                   param_12,param_13,param_14,param_15,param_16);
-      uVar8 = zz_008c3a0_(8);
+      uVar8 = set_global_menu_mode(8);
       param_1 = zz_0044bec_(uVar8,param_2,param_3,param_4,param_5,param_6,param_7,param_8,0,0,uVar4,
                             param_12,param_13,param_14,param_15,param_16);
     }
@@ -4754,7 +4754,7 @@ zz_0095f6c_(undefined8 param_1,double param_2,double param_3,double param_4,doub
       return 0;
     }
     PTR_DAT_80433934[1] = cVar1 + '\x01';
-    zz_008c3a0_(0);
+    set_global_menu_mode(0);
     param_1 = zz_0027aac_(0,4,0);
   }
   param_12 = 1;
@@ -4774,7 +4774,7 @@ LAB_8009601c:
     zz_01cebe0_();
     iVar2 = zz_0095e5c_(param_9);
     if (iVar2 == 0) {
-      uVar3 = zz_008c3a0_(8);
+      uVar3 = set_global_menu_mode(8);
       zz_0008a94_(uVar3,param_2,param_3,param_4,param_5,param_6,param_7,param_8,DAT_803bb384,
                   extraout_r4,param_11,param_12,param_13,param_14,param_15,param_16);
       zz_0094ec0_();

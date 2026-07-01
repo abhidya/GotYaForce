@@ -1,13 +1,13 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:36:12.293Z
+Generated: 2026-07-01T10:33:28.337Z
 
 ## Summary
 
 - Runtime screens audited: 10
-- Screens using at least one real exported UI asset: 9
-- Screens with handcoded/CSS/SVG surface signals: 10
-- Screens mounting a real exported UI scene model: 6
+- Screens using at least one real exported UI asset: 8
+- Screens with handcoded/CSS/SVG surface signals: 9
+- Screens mounting a real exported UI scene model: 5
 - UI texture export: 831 images from apps/game/public/ui/manifest.json
 - Requested UI scene models exported: 6 from apps/game/public/ui/scenes/manifest.json
 - Stage exports complete visually: 40/40
@@ -22,14 +22,14 @@ Generated: 2026-07-01T03:36:12.293Z
 - Common battle archive inventoried: yes
 - Common battle data exact actor matches: 2
 - Runtime actor-data bytes bound to combat formulas: no
-- Runtime borg animation direct matches: 1274/1352
-- Runtime borg animation fallbacks/missing: 75/3
+- Runtime borg animation direct matches: 1326/1404
+- Runtime borg animation fallbacks/missing: 78/0
 - Runtime fly uses exported boost clip: yes
 - Runtime items/powerups modeled: no
 - Runtime audio from exported cues: yes
 - Shared PZZ/ARZ parsers implemented: 2/2
 - Runtime stage fallback: st00
-- Runtime accepts exported hex stage ids: yes
+- Runtime accepts exported stage catalog ids: yes
 
 ## Format Parser Coverage
 
@@ -44,7 +44,7 @@ Inventory: research/asset-inventory/pzz-arz-inventory.json (252 PZZ archives, 31
 
 | Screen | Coverage | Real exported assets used | Handcoded signals | Next replacement |
 | --- | --- | --- | --- | --- |
-| main-menu | real-scene-partial-layout | /ui/scenes/tl00/model_00.dae | css-menu-gear:88<br>runtime-text-layout:89 | Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels. |
+| main-menu | handcoded-or-unverified | none | none | Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels. |
 | select-difficulty | real-scene-partial-layout | /ui/scenes/vsel00/model_00.dae | css-grid-backdrop:49<br>css-gradient-surface:24<br>css-menu-gear:70<br>css-option-pad:69<br>runtime-text-layout:52 | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
 | select-players | real-scene-partial-layout | /ui/scenes/vsel01/model_00.dae | css-grid-backdrop:56<br>css-option-pad:80<br>css-label-pill:81<br>handcoded-player-silhouette:28<br>runtime-text-layout:43 | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
 | load-box-data | real-scene-partial-layout | /ui/scenes/box00/model_00.dae | css-grid-backdrop:27<br>runtime-text-layout:28 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
@@ -76,11 +76,11 @@ Inventory: research/asset-inventory/pzz-arz-inventory.json (252 PZZ archives, 31
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 18 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:646, apps/game/src/main.ts:650, apps/game/src/main.ts:558, apps/game/src/main.ts:570, apps/game/src/main.ts:690, apps/game/src/main.ts:1023
+Runtime loader refs: apps/game/src/main.ts:655, apps/game/src/main.ts:660, apps/game/src/main.ts:567, apps/game/src/main.ts:579, apps/game/src/main.ts:700, apps/game/src/main.ts:1033
 
 Runtime collision parser: @gf/formats (bounds wired, triangles wired, walls wired, ceilings wired)
 
-Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id.
+Runtime authorizes literal exported st## ids through the generated stage catalog; arena-name to st## routing still falls back to st00 until traced.
 
 Stage-code evidence: research/asset-inventory/stage-code-evidence.json (0 boot.dol hits, 0 unique stage codes, 0 verified arena-name mappings).
 
@@ -179,26 +179,26 @@ Runtime combat profiles are currently derived from packages/assets/data/borgs.js
 ## Borg Animation Coverage
 
 Validator report: research/asset-inventory/borg-animation-action-gaps.md
-Runtime resolver refs: apps/game/src/main.ts:333, apps/game/src/main.ts:354, apps/game/src/main.ts:421, apps/game/src/sim/battleScene.ts:111
-Animation indexes parsed: 104/104; exported banks: 4653; canonical slot checks: 1352.
-Direct matches: 1274; fallbacks: 75; missing: 3; parse errors: 0.
+Runtime resolver refs: apps/game/src/main.ts:341, apps/game/src/main.ts:362, apps/game/src/main.ts:430, apps/game/src/sim/battleScene.ts:111
+Animation indexes parsed: 108/108; exported banks: 4894; canonical slot checks: 1404.
+Direct matches: 1326; fallbacks: 78; missing: 0; parse errors: 0.
 Fly/boost mapping: fly state resolves through exported boost labels.
 
 | Slot | Direct | Fallback | Missing | Notes |
 | --- | --- | --- | --- | --- |
-| idle | 104 | 0 | 0 | none |
-| move | 101 | 0 | 3 | missing x3 |
-| dash_fwd | 100 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
-| dash_back | 100 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
-| dash_left | 96 | 8 | 0 | idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1 |
-| dash_right | 90 | 14 | 0 | dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1 |
-| jump | 101 | 3 | 0 | idle -> idle x3 |
-| fly | 101 | 3 | 0 | idle -> idle x3 |
-| shoot | 102 | 2 | 0 | idle -> idle x2 |
-| melee | 96 | 8 | 0 | idle -> idle x3; move -> move x5 |
-| special | 98 | 6 | 0 | idle -> idle x2; attack -> attack_s0 x4 |
-| hit | 92 | 12 | 0 | down -> death x3; idle -> idle x9 |
-| death | 93 | 11 | 0 | down -> guard_s0 x3; idle -> idle x8 |
+| idle | 108 | 0 | 0 | none |
+| move | 105 | 3 | 0 | idle -> idle x3 |
+| dash_fwd | 104 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
+| dash_back | 104 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
+| dash_left | 100 | 8 | 0 | idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1 |
+| dash_right | 94 | 14 | 0 | dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1 |
+| jump | 105 | 3 | 0 | idle -> idle x3 |
+| fly | 105 | 3 | 0 | idle -> idle x3 |
+| shoot | 106 | 2 | 0 | idle -> idle x2 |
+| melee | 100 | 8 | 0 | idle -> idle x8 |
+| special | 102 | 6 | 0 | idle -> idle x2; attack -> attack_s0 x4 |
+| hit | 96 | 12 | 0 | idle -> idle x12 |
+| death | 97 | 11 | 0 | idle -> idle x11 |
 
 ## Powerup / Item Runtime Gap
 
@@ -235,7 +235,7 @@ Runtime screen comments and flow are Challenge-oriented, while packages/assets/d
 
 ## Next Replacements
 
-- Wire stageIdForArena to a traced arena-name -> st## table; public exports now cover 40 visual stages, but runtime fallback still collapses non-st## arenas to st00.
+- Trace and wire the original arena-name/Challenge rotation -> st## table; runtime now authorizes exported literal st## ids through a generated catalog, but untraced names still fall back to st00.
 - Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.
 - Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.
 - Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges.

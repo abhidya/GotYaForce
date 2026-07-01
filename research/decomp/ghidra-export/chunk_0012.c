@@ -99,7 +99,7 @@ void zz_007fa48_(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefi
                 param_11,param_12,param_13,param_14,param_15,param_16);
     zz_008c098_();
     PTR_DAT_80433930[0x29] = 0;
-    zz_008c3a0_(0);
+    set_global_menu_mode(0);
     zz_002a5f4_(0,0,0,0xff);
     zz_007fe60_();
     bVar1 = PTR_DAT_80433930[0x2b];

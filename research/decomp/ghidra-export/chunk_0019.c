@@ -3569,7 +3569,7 @@ void FUN_800bf8d4(undefined8 param_1,undefined8 param_2,undefined8 param_3,undef
     gnt4_memset(PTR_DAT_80433934,0,0x18b8);
     zz_01ae8a8_();
     *(float *)(PTR_DAT_80433940 + 0x14) = FLOAT_804385f8;
-    zz_008c3a0_(7);
+    set_global_menu_mode(7);
   }
   (*(code *)(&PTR_FUN_80301cc8)[*(short *)PTR_DAT_80433940])();
   zz_0027ae8_();

@@ -4019,7 +4019,7 @@ void FUN_801ba86c(undefined8 param_1,double param_2,double param_3,double param_
     puVar4 = PTR_DAT_80435a30;
     *(undefined2 *)(PTR_DAT_80435a30 + 0x12) = 0;
     zz_002a5f4_(0,0,0,0);
-    uVar6 = zz_008c3a0_(6);
+    uVar6 = set_global_menu_mode(6);
     uVar6 = zz_0044318_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,0,extraout_r4,
                         puVar2,uVar3,puVar4,puVar5,in_r9,in_r10);
     uVar6 = zz_0008a94_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,DAT_803bb32c,

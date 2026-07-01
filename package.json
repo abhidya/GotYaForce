@@ -12,6 +12,7 @@
     "build": "pnpm -r run build",
     "dev": "pnpm --filter game dev",
     "typecheck": "tsc -b tsconfig.json apps/game/tsconfig.json",
+    "selfcheck:1p": "node scripts/selfcheck-1p-challenge.mjs",
     "clean": "pnpm -r exec rimraf dist tsconfig.tsbuildinfo",
     "extract": "node scripts/extract-user-disc.mjs",
     "sync:assets": "node scripts/sync-exported-assets.mjs",

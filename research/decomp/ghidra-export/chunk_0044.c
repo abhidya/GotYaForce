@@ -5350,7 +5350,7 @@ void FUN_8017ba20(undefined8 param_1,undefined8 param_2,undefined8 param_3,undef
   else if ((char)bVar1 < '\x01') {
     if (-1 < (char)bVar1) {
       *(byte *)(DAT_80436354 + 2) = bVar1 + 1;
-      uVar6 = zz_008c3a0_(0);
+      uVar6 = set_global_menu_mode(0);
       *(undefined2 *)(DAT_80436354 + 8) = 0x1518;
       uVar6 = zz_01b7304_(uVar6,param_2,param_3,param_4,param_5,param_6,param_7,param_8,0,0,
                           DAT_80436238 + 0x208c00);
@@ -5367,7 +5367,7 @@ void FUN_8017ba20(undefined8 param_1,undefined8 param_2,undefined8 param_3,undef
     *(undefined1 *)(DAT_80436354 + 1) = 2;
     *(undefined1 *)(DAT_80436354 + 2) = 0;
     zz_01b74a8_(0);
-    zz_008c3a0_(4);
+    set_global_menu_mode(4);
     return;
   }
 LAB_8017bb5c:

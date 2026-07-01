@@ -2598,17 +2598,23 @@ void zz_010d450_(void)
 
 
 
-// ==== 8010d880  zz_010d880_ ====
+// ==== 8010d880  set_slot_action_handler ====
 
-void zz_010d880_(int param_1,int param_2)
+/* GF_ALIAS: set_slot_action_handler
+ * Evidence: gates by active slot mask PTR_DAT_8043394c+0x30, then writes
+ * DAT_803c735c[slot] from PTR_DAT_80325af4[mode % 6] and clears adjacent
+ * per-slot state arrays.
+ */
+
+void set_slot_action_handler(int slot_index,int action_mode)
 
 {
-  if (((int)(char)PTR_DAT_8043394c[0x30] & 1 << param_1) == 0) {
+  if (((int)(char)PTR_DAT_8043394c[0x30] & 1 << slot_index) == 0) {
     return;
   }
-  (&DAT_803c735c)[param_1] = (&PTR_DAT_80325af4)[param_2 % 6];
-  (&DAT_803c736c)[param_1] = 0;
-  (&DAT_803c737c)[param_1] = 0;
+  (&DAT_803c735c)[slot_index] = (&PTR_DAT_80325af4)[action_mode % 6];
+  (&DAT_803c736c)[slot_index] = 0;
+  (&DAT_803c737c)[slot_index] = 0;
   return;
 }
 
@@ -4009,7 +4015,7 @@ void FUN_8010f790(int param_1)
        (*(short *)(param_1 + 0x144) = *(short *)(param_1 + 0x144) + -1,
        *(short *)(param_1 + 0x144) < 1)) {
       *(undefined2 *)(param_1 + 0x144) = 0;
-      zz_006817c_(param_1,-4);
+      apply_actor_param_tier_delta_127(param_1,-4);
     }
   }
   else {
@@ -5059,6 +5065,5 @@ void FUN_80111294(int param_1)
   zz_00b22f4_(param_1);
   return;
 }
-
 
 

@@ -1936,12 +1936,12 @@ undefined1 FUN_8008b73c(char param_1,char param_2,int param_3)
 
 
 
-// ==== 8008b7b0  zz_008b7b0_ ====
+// ==== 8008b7b0  map_main_menu_direction_to_mode ====
 
-int zz_008b7b0_(uint param_1)
+int map_main_menu_direction_to_mode(uint direction_mask)
 
 {
-  return (int)(char)(&DAT_802da770)[param_1 & 0xf];
+  return (int)(char)(&DAT_802da770)[direction_mask & 0xf];
 }
 
 
@@ -2603,23 +2603,26 @@ void zz_008c344_(void)
 
 
 
-// ==== 8008c3a0  zz_008c3a0_ ====
+// ==== 8008c3a0  set_global_menu_mode ====
 
-void zz_008c3a0_(undefined1 param_1)
+void set_global_menu_mode(undefined1 menu_mode)
 
 {
-  PTR_DAT_80433930[0x3e] = param_1;
+  PTR_DAT_80433930[0x3e] = menu_mode;
   return;
 }
 
 
 
-// ==== 8008c3ac  zz_008c3ac_ ====
+// ==== 8008c3ac  dispatch_global_menu_mode ====
 
-void zz_008c3ac_(void)
+void dispatch_global_menu_mode(void)
 
 {
-  (*(code *)(&PTR_FUN_802da780)[(char)PTR_DAT_80433930[0x3e]])();
+  char menu_mode;
+
+  menu_mode = (char)PTR_DAT_80433930[0x3e];
+  (*(code *)(&PTR_FUN_802da780)[menu_mode])();
   zz_009752c_();
   return;
 }
@@ -4548,6 +4551,5 @@ uint zz_008e704_(int param_1,int param_2,int param_3,int param_4)
   }
   return uVar4;
 }
-
 
 
