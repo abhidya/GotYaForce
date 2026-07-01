@@ -9,6 +9,7 @@ const paths = {
   sourceRoot: path.join(repoRoot, "user-data", region, "afs_data", "root"),
   modelsRoot: path.join(repoRoot, "apps", "game", "public", "models"),
   borgData: path.join(repoRoot, "packages", "assets", "data", "borgs.json"),
+  pzzMemberManifest: path.join(repoRoot, "research", "asset-inventory", "pzz-member-extraction-manifest.json"),
   outputDir: path.join(repoRoot, "research", "animation-actions"),
 };
 
@@ -32,6 +33,8 @@ const actionNames = [
 for (const input of [paths.sourceRoot, paths.modelsRoot, paths.borgData]) mustExist(input);
 
 const metadata = readMetadata();
+const pzzMemberManifest = readJsonIfExists(paths.pzzMemberManifest, { records: [] });
+const pzzMembersByBorg = groupPzzMembersByBorg(pzzMemberManifest.records ?? []);
 const records = discoverBorgIds(metadata).map((id) => buildRecord(id, metadata.get(id))).sort(compareRecords);
 const inventory = {
   schema: "gotyaforce.borgActionAssetInventory.v1",
@@ -58,7 +61,9 @@ const inventory = {
       "scripts/export-all-borg-animations.mjs",
       "scripts/bake-all-borg-anims.mjs",
       "scripts/validate-borg-animation-actions.mjs",
+      "scripts/extract-pzz-members.mjs",
     ],
+    pzzMemberManifest: fs.existsSync(paths.pzzMemberManifest) ? rel(paths.pzzMemberManifest) : null,
   },
   summary: summarize(records),
   priority: records.filter((record) => priorityBorgs.includes(record.id)),
@@ -76,6 +81,7 @@ console.log(`with source MOT: ${inventory.summary.withSourceMot}`);
 console.log(`with anim_index: ${inventory.summary.withAnimIndex}`);
 console.log(`exported clips from indexes: ${inventory.summary.indexedClipCount}`);
 console.log(`source MOT structural clips: ${inventory.summary.sourceMotClipCount}`);
+console.log(`PZZ member records joined: ${inventory.summary.pzzMemberRecordCount}`);
 console.log(`priority: ${priorityBorgs.join(", ")}`);
 console.log(`wrote ${rel(outputJson)}`);
 console.log(`wrote ${rel(outputMarkdown)}`);
@@ -126,6 +132,7 @@ function discoverBorgIds(metadata) {
 
 function buildRecord(id, meta = null) {
   const sourceFiles = findSourceFiles(id);
+  const pzzMembers = pzzMembersByBorg.get(id) ?? [];
   const modelDir = path.join(paths.modelsRoot, id);
   const exported = scanExportedAnimations(id, modelDir);
   const mot = sourceFiles.mot ? parseMot(sourceFiles.mot.pathAbs) : null;
@@ -162,6 +169,7 @@ function buildRecord(id, meta = null) {
       dataBins: sourceFiles.dataBins,
       variants: sourceFiles.variants,
     },
+    pzzSourceMembers: summarizePzzMembers(pzzMembers),
     sourceMot: mot,
     exportedAssets: {
       directory: fs.existsSync(modelDir) ? rel(modelDir) : null,
@@ -372,7 +380,7 @@ function scoreClip(action, clip, meta) {
 
 function buildNotes(meta, sourceFiles, exported, clips, actionCandidates) {
   const notes = [];
-  if (!sourceFiles.mot && meta?.hasAnim) notes.push("metadata expects an anim file, but no source MOT was found");
+  if (!sourceFiles.mot && meta?.hasAnim) notes.push("metadata expects an anim file, but no loose source MOT was found");
   if (sourceFiles.mot && !exported.index) notes.push("source MOT exists, but no exported anim_index.json was found");
   if (exported.index && exported.index.bankCount !== clips.length) notes.push("anim_index bankCount differs from parsed bank rows");
   const missingActions = actionNames.filter((action) => actionCandidates[action].length === 0);
@@ -394,6 +402,12 @@ function summarize(records) {
     withAnimIndex: records.filter((record) => record.exportedAssets.animIndex).length,
     indexedClipCount: records.reduce((sum, record) => sum + record.clips.length, 0),
     sourceMotClipCount: records.reduce((sum, record) => sum + (record.sourceMot?.clipCount ?? 0), 0),
+    pzzMemberRecordCount: records.reduce((sum, record) => sum + record.pzzSourceMembers.recordCount, 0),
+    withPzzArchiveMembers: records.filter((record) => record.pzzSourceMembers.recordCount > 0).length,
+    withPzzMotionBank: records.filter((record) => record.pzzSourceMembers.hasMotionBank).length,
+    withPzzHitData: records.filter((record) => record.pzzSourceMembers.hasHitData).length,
+    withPzzModel: records.filter((record) => record.pzzSourceMembers.hasModel).length,
+    withPzzTexture: records.filter((record) => record.pzzSourceMembers.hasTexture).length,
     actionCoverage,
   };
 }
@@ -418,6 +432,12 @@ function renderMarkdown(inventory) {
   lines.push(`| Exported anim indexes | ${inventory.summary.withAnimIndex} |`);
   lines.push(`| Exported indexed clips | ${inventory.summary.indexedClipCount} |`);
   lines.push(`| Source MOT structural clips | ${inventory.summary.sourceMotClipCount} |`);
+  lines.push(`| PZZ member records joined | ${inventory.summary.pzzMemberRecordCount} |`);
+  lines.push(`| Borgs with PZZ member records | ${inventory.summary.withPzzArchiveMembers} |`);
+  lines.push(`| Borgs with PZZ motion-bank members | ${inventory.summary.withPzzMotionBank} |`);
+  lines.push(`| Borgs with PZZ hit-data members | ${inventory.summary.withPzzHitData} |`);
+  lines.push(`| Borgs with PZZ model members | ${inventory.summary.withPzzModel} |`);
+  lines.push(`| Borgs with PZZ texture members | ${inventory.summary.withPzzTexture} |`);
   lines.push("");
   lines.push("## Action Coverage");
   lines.push("");
@@ -432,12 +452,12 @@ function renderMarkdown(inventory) {
   for (const record of inventory.priority) renderBorg(lines, record, true);
   lines.push("## All Borgs");
   lines.push("");
-  lines.push("| Borg | Name | Source MOT | Anim index | Clips | Missing exported action candidates |");
-  lines.push("|---|---|---:|---:|---:|---|");
+  lines.push("| Borg | Name | Source MOT | PZZ MOT | Anim index | Clips | Missing exported action candidates |");
+  lines.push("|---|---|---:|---:|---:|---:|---|");
   for (const record of inventory.records) {
     const missing = actionNames.filter((action) => record.actionCandidates[action].length === 0);
     lines.push(
-      `| ${code(record.id)} | ${md(record.metadata.name ?? "")} | ${yes(record.sourceFiles.mot)} | ${yes(record.exportedAssets.animIndex)} | ${record.clips.length} | ${md(missing.join(", ") || "none")} |`,
+      `| ${code(record.id)} | ${md(record.metadata.name ?? "")} | ${yes(record.sourceFiles.mot)} | ${yes(record.pzzSourceMembers.hasMotionBank)} | ${yes(record.exportedAssets.animIndex)} | ${record.clips.length} | ${md(missing.join(", ") || "none")} |`,
     );
   }
   lines.push("");
@@ -455,6 +475,7 @@ function renderBorg(lines, record, expanded) {
   lines.push("");
   lines.push(`- Source model: ${record.sourceFiles.modelArc ? code(record.sourceFiles.modelArc.path) : "none"}`);
   lines.push(`- Source MOT: ${record.sourceFiles.mot ? code(record.sourceFiles.mot.path) : "none"}`);
+  lines.push(`- PZZ source members: ${record.pzzSourceMembers.recordCount} (${Object.entries(record.pzzSourceMembers.kinds).map(([kind, count]) => `${kind} ${count}`).join(", ") || "none"})`);
   lines.push(`- Exported anim index: ${record.exportedAssets.animIndex ? code(record.exportedAssets.animIndex.path) : "none"}`);
   lines.push(`- Exported indexed clips: ${record.clips.length}`);
   lines.push(`- Source MOT structural clips: ${record.sourceMot?.clipCount ?? 0}`);
@@ -516,6 +537,70 @@ function numberOrNull(value) {
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
+}
+
+function readJsonIfExists(file, fallback) {
+  if (!fs.existsSync(file)) return fallback;
+  return readJson(file);
+}
+
+function groupPzzMembersByBorg(records) {
+  const grouped = new Map();
+  for (const record of records) {
+    const id = normalizeBorgId(record.borgId);
+    if (!id) continue;
+    const list = grouped.get(id) ?? [];
+    list.push(record);
+    grouped.set(id, list);
+  }
+  for (const list of grouped.values()) {
+    list.sort((a, b) => String(a.memberId).localeCompare(String(b.memberId)));
+  }
+  return grouped;
+}
+
+function summarizePzzMembers(records) {
+  const kinds = {};
+  const actionHints = new Set();
+  const familyHints = new Set();
+  for (const record of records) {
+    const kind = record.inferredKind ?? "unknown";
+    kinds[kind] = (kinds[kind] ?? 0) + 1;
+    for (const hint of record.actionHints ?? []) actionHints.add(hint);
+    for (const hint of record.familyHints ?? []) familyHints.add(hint);
+  }
+  const keyMembers = selectKeyPzzMembers(records);
+  return {
+    manifest: fs.existsSync(paths.pzzMemberManifest) ? rel(paths.pzzMemberManifest) : null,
+    recordCount: records.length,
+    kinds: Object.fromEntries(Object.entries(kinds).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))),
+    hasMotionBank: records.some((record) => record.inferredKind === "motion-bank" && record.payloadBytes > 0),
+    hasHitData: records.some((record) => record.inferredKind === "hit-collision-data" && record.payloadBytes > 0),
+    hasModel: records.some((record) => record.inferredKind === "hsd-model" && record.payloadBytes > 0),
+    hasTexture: records.some((record) => record.inferredKind === "texture" && record.payloadBytes > 0),
+    actionHints: [...actionHints].sort(),
+    familyHints: [...familyHints].sort(),
+    keyMembers: keyMembers.map((record) => ({
+      memberId: record.memberId,
+      inferredName: record.inferredName,
+      inferredKind: record.inferredKind,
+      payloadBytes: record.payloadBytes,
+      compressed: record.compressed,
+      actionHints: record.actionHints ?? [],
+    })),
+  };
+}
+
+function selectKeyPzzMembers(records) {
+  const selected = [];
+  const wanted = new Set(["borg-data", "hit-collision-data", "motion-bank", "hsd-model", "texture"]);
+  const seen = new Set();
+  for (const record of records) {
+    if (!wanted.has(record.inferredKind) || seen.has(record.inferredKind)) continue;
+    selected.push(record);
+    seen.add(record.inferredKind);
+  }
+  return selected;
 }
 
 function writeJson(file, value) {
