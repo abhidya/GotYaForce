@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T01:57:16.809Z
+Generated: 2026-07-01T02:01:13.984Z
 
 ## Summary
 
@@ -11,6 +11,7 @@ Generated: 2026-07-01T01:57:16.809Z
 - UI texture export: 831 images from apps/game/public/ui/manifest.json
 - Requested UI scene models exported: 6 from apps/game/public/ui/scenes/manifest.json
 - Stage exports complete visually: 40/40
+- Stage render-state exports: 40/40
 - Runtime stage collision bounds from STIH: yes
 - Runtime stage triangle collision from STIH: yes
 - Runtime lateral wall collision from STIH: yes
@@ -53,7 +54,7 @@ Generated: 2026-07-01T01:57:16.809Z
 
 ## Stage Coverage
 
-Public stage manifest has 40 stage folders; 40 have complete visual DAE exports and 18 have collision bins.
+Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 18 have collision bins.
 
 Runtime loader refs: apps/game/src/main.ts:645, apps/game/src/main.ts:649, apps/game/src/main.ts:557, apps/game/src/main.ts:569, apps/game/src/main.ts:689, apps/game/src/main.ts:1022
 

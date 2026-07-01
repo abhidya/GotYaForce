@@ -1,0 +1,459 @@
+{
+  "stageId": "stff",
+  "generatedBy": "scripts/export-stage-render-state.mjs",
+  "source": {
+    "renderStateInventory": "research/asset-inventory/stage-lighting-render-state.json",
+    "inventoryGeneratedAt": "2026-06-30T07:47:27.124Z",
+    "inventoryScanner": "scripts/inventory-stage-lighting.mjs",
+    "stageManifest": "apps/game/public/stages/stff/manifest.json",
+    "stageManifestId": "stff",
+    "stageRenderStatus": "dae-complete",
+    "archiveName": "stff_mdl.arc",
+    "sourcePath": "user-data/GG4E/afs_data/root/stff_mdl.arc"
+  },
+  "camera": {
+    "index": 0,
+    "objectName": "scene_data.cameras[0].HSD_CObjDesc",
+    "confidence": "high",
+    "source": {
+      "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+      "archiveName": "stff_mdl.arc",
+      "dataOffset": "0xa2bdc",
+      "fileOffset": "0xa2bfc"
+    },
+    "entry": {
+      "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+      "archiveName": "stff_mdl.arc",
+      "dataOffset": "0xa4018",
+      "fileOffset": "0xa4038"
+    },
+    "evidence": [
+      "scene_data field[1] points to a CObj table entry",
+      "descriptor carries 640x480 viewport/scissor, eye/interest WObj pointers, near/far/fov/aspect floats",
+      "symbol map contains HSD_CObjLoad/SetCurrent/SetEyePosition/SetInterest/SetFov/SetNear/SetFar"
+    ],
+    "projection": "perspective",
+    "eye": {
+      "source": {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "archiveName": "stff_mdl.arc",
+        "dataOffset": "0xa2bb4",
+        "fileOffset": "0xa2bd4"
+      },
+      "flags": "0x0",
+      "position": [
+        83.785248,
+        940.888428,
+        2788.060059
+      ]
+    },
+    "interest": {
+      "source": {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "archiveName": "stff_mdl.arc",
+        "dataOffset": "0xa2bc8",
+        "fileOffset": "0xa2be8"
+      },
+      "flags": "0x0",
+      "position": [
+        83.785248,
+        -11.72845,
+        -409.605103
+      ]
+    },
+    "near": 0.1,
+    "far": 32768,
+    "fovDegrees": 41.538998,
+    "aspect": 1.333333,
+    "raw": {
+      "flagsOrClass": "0x0",
+      "projectionType": 1,
+      "viewportWidth": 640,
+      "viewportHeight": 480,
+      "scissorWidth": 640,
+      "scissorHeight": 480,
+      "rollOrUnknown0": 0,
+      "unknown1": 0,
+      "near": 0.10000000149011612,
+      "far": 32768,
+      "fovDegrees": 41.538997650146484,
+      "aspect": 1.3333333730697632
+    }
+  },
+  "lights": [
+    {
+      "index": 0,
+      "objectName": "scene_data.lights[0].HSD_LObjDesc",
+      "confidence": "high",
+      "source": {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "archiveName": "stff_mdl.arc",
+        "dataOffset": "0xa2b98",
+        "fileOffset": "0xa2bb8"
+      },
+      "entry": {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "archiveName": "stff_mdl.arc",
+        "dataOffset": "0xa4048",
+        "fileOffset": "0xa4068"
+      },
+      "evidence": [
+        "scene_data field[2] is a null-terminated table of light entries",
+        "entries point to descriptors with LObj-like flags, GXColor bytes, and optional WObj pointer",
+        "symbol map contains HSD_LObjLoadDesc/HSD_LObjSetup/HSD_LObjSetColor/HSD_LObjGetPosition"
+      ],
+      "role": "ambient/global color candidate",
+      "flags": "0x40000",
+      "color": {
+        "rawHex": "0x988cb200",
+        "rgbHex": "#988cb2",
+        "rgba": [
+          152,
+          140,
+          178,
+          0
+        ],
+        "normalized": [
+          0.596078,
+          0.54902,
+          0.698039,
+          0
+        ]
+      },
+      "position": null,
+      "interestOrParam": null,
+      "raw": {
+        "classNamePointer": {
+          "fieldDataOffset": "0xa2b98",
+          "fieldFileOffset": "0xa2bb8",
+          "relocationMarked": false,
+          "targetDataOffset": null,
+          "targetDataOffsetRaw": null,
+          "targetFileOffset": null
+        },
+        "nextOrFlags0": "0x0",
+        "flags": "0x40000",
+        "color": {
+          "rawHex": "0x988cb200",
+          "rgba": [
+            152,
+            140,
+            178,
+            0
+          ],
+          "rgbHex": "#988cb2",
+          "normalized": [
+            0.596078,
+            0.54902,
+            0.698039,
+            0
+          ]
+        },
+        "positionPointer": {
+          "fieldDataOffset": "0xa2ba8",
+          "fieldFileOffset": "0xa2bc8",
+          "relocationMarked": false,
+          "targetDataOffset": null,
+          "targetDataOffsetRaw": null,
+          "targetFileOffset": null
+        },
+        "interestOrParamPointer": {
+          "fieldDataOffset": "0xa2bb0",
+          "fieldFileOffset": "0xa2bd0",
+          "relocationMarked": false,
+          "targetDataOffset": null,
+          "targetDataOffsetRaw": null,
+          "targetFileOffset": null
+        }
+      }
+    },
+    {
+      "index": 1,
+      "objectName": "scene_data.lights[1].HSD_LObjDesc",
+      "confidence": "high",
+      "source": {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "archiveName": "stff_mdl.arc",
+        "dataOffset": "0xa2b7c",
+        "fileOffset": "0xa2b9c"
+      },
+      "entry": {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "archiveName": "stff_mdl.arc",
+        "dataOffset": "0xa4038",
+        "fileOffset": "0xa4058"
+      },
+      "evidence": [
+        "scene_data field[2] is a null-terminated table of light entries",
+        "entries point to descriptors with LObj-like flags, GXColor bytes, and optional WObj pointer",
+        "symbol map contains HSD_LObjLoadDesc/HSD_LObjSetup/HSD_LObjSetColor/HSD_LObjGetPosition"
+      ],
+      "role": "positioned diffuse/specular light candidate",
+      "flags": "0xd0000",
+      "color": {
+        "rawHex": "0x80808000",
+        "rgbHex": "#808080",
+        "rgba": [
+          128,
+          128,
+          128,
+          0
+        ],
+        "normalized": [
+          0.501961,
+          0.501961,
+          0.501961,
+          0
+        ]
+      },
+      "position": {
+        "source": {
+          "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+          "archiveName": "stff_mdl.arc",
+          "dataOffset": "0xa2b64",
+          "fileOffset": "0xa2b84"
+        },
+        "flags": "0x0",
+        "position": [
+          -2.781278,
+          1.966554,
+          1.140989
+        ]
+      },
+      "interestOrParam": {
+        "source": {
+          "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+          "archiveName": "stff_mdl.arc",
+          "dataOffset": "0xa2b78",
+          "fileOffset": "0xa2b98"
+        },
+        "flags": "0x41800000",
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      "raw": {
+        "classNamePointer": {
+          "fieldDataOffset": "0xa2b7c",
+          "fieldFileOffset": "0xa2b9c",
+          "relocationMarked": false,
+          "targetDataOffset": null,
+          "targetDataOffsetRaw": null,
+          "targetFileOffset": null
+        },
+        "nextOrFlags0": "0x0",
+        "flags": "0xd0000",
+        "color": {
+          "rawHex": "0x80808000",
+          "rgba": [
+            128,
+            128,
+            128,
+            0
+          ],
+          "rgbHex": "#808080",
+          "normalized": [
+            0.501961,
+            0.501961,
+            0.501961,
+            0
+          ]
+        },
+        "positionPointer": {
+          "fieldDataOffset": "0xa2b8c",
+          "fieldFileOffset": "0xa2bac",
+          "relocationMarked": true,
+          "targetDataOffset": "0xa2b64",
+          "targetDataOffsetRaw": 666468,
+          "targetFileOffset": "0xa2b84"
+        },
+        "interestOrParamPointer": {
+          "fieldDataOffset": "0xa2b94",
+          "fieldFileOffset": "0xa2bb4",
+          "relocationMarked": true,
+          "targetDataOffset": "0xa2b78",
+          "targetDataOffsetRaw": 666488,
+          "targetFileOffset": "0xa2b98"
+        }
+      }
+    },
+    {
+      "index": 2,
+      "objectName": "scene_data.lights[2].HSD_LObjDesc",
+      "confidence": "high",
+      "source": {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "archiveName": "stff_mdl.arc",
+        "dataOffset": "0xa2b48",
+        "fileOffset": "0xa2b68"
+      },
+      "entry": {
+        "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+        "archiveName": "stff_mdl.arc",
+        "dataOffset": "0xa4028",
+        "fileOffset": "0xa4048"
+      },
+      "evidence": [
+        "scene_data field[2] is a null-terminated table of light entries",
+        "entries point to descriptors with LObj-like flags, GXColor bytes, and optional WObj pointer",
+        "symbol map contains HSD_LObjLoadDesc/HSD_LObjSetup/HSD_LObjSetColor/HSD_LObjGetPosition"
+      ],
+      "role": "positioned diffuse/specular light candidate",
+      "flags": "0xd0000",
+      "color": {
+        "rawHex": "0x80808000",
+        "rgbHex": "#808080",
+        "rgba": [
+          128,
+          128,
+          128,
+          0
+        ],
+        "normalized": [
+          0.501961,
+          0.501961,
+          0.501961,
+          0
+        ]
+      },
+      "position": {
+        "source": {
+          "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+          "archiveName": "stff_mdl.arc",
+          "dataOffset": "0xa2b30",
+          "fileOffset": "0xa2b50"
+        },
+        "flags": "0x0",
+        "position": [
+          0.962472,
+          2.037143,
+          -0.698656
+        ]
+      },
+      "interestOrParam": {
+        "source": {
+          "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+          "archiveName": "stff_mdl.arc",
+          "dataOffset": "0xa2b44",
+          "fileOffset": "0xa2b64"
+        },
+        "flags": "0x41800000",
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      "raw": {
+        "classNamePointer": {
+          "fieldDataOffset": "0xa2b48",
+          "fieldFileOffset": "0xa2b68",
+          "relocationMarked": false,
+          "targetDataOffset": null,
+          "targetDataOffsetRaw": null,
+          "targetFileOffset": null
+        },
+        "nextOrFlags0": "0x0",
+        "flags": "0xd0000",
+        "color": {
+          "rawHex": "0x80808000",
+          "rgba": [
+            128,
+            128,
+            128,
+            0
+          ],
+          "rgbHex": "#808080",
+          "normalized": [
+            0.501961,
+            0.501961,
+            0.501961,
+            0
+          ]
+        },
+        "positionPointer": {
+          "fieldDataOffset": "0xa2b58",
+          "fieldFileOffset": "0xa2b78",
+          "relocationMarked": true,
+          "targetDataOffset": "0xa2b30",
+          "targetDataOffsetRaw": 666416,
+          "targetFileOffset": "0xa2b50"
+        },
+        "interestOrParamPointer": {
+          "fieldDataOffset": "0xa2b60",
+          "fieldFileOffset": "0xa2b80",
+          "relocationMarked": true,
+          "targetDataOffset": "0xa2b44",
+          "targetDataOffsetRaw": 666436,
+          "targetFileOffset": "0xa2b64"
+        }
+      }
+    }
+  ],
+  "fog": {
+    "index": 0,
+    "objectName": "scene_data.fogs[0].HSD_FogDesc",
+    "confidence": "high",
+    "source": {
+      "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+      "archiveName": "stff_mdl.arc",
+      "dataOffset": "0xa2c14",
+      "fileOffset": "0xa2c34"
+    },
+    "entry": {
+      "path": "user-data/GG4E/afs_data/root/stff_mdl.arc",
+      "archiveName": "stff_mdl.arc",
+      "dataOffset": "0xa4068",
+      "fileOffset": "0xa4088"
+    },
+    "evidence": [
+      "scene_data field[3] points to a fog entry",
+      "descriptor has fog type/enable-like words, start/end floats, and GXColor bytes",
+      "symbol map contains HSD_FogLoadDesc/HSD_FogSet/GXSetFog"
+    ],
+    "type": 2,
+    "flagsOrEnabled": 0,
+    "start": 1000000,
+    "end": 2000000,
+    "color": {
+      "rawHex": "0x2ac4bcff",
+      "rgbHex": "#2ac4bc",
+      "rgba": [
+        42,
+        196,
+        188,
+        255
+      ],
+      "normalized": [
+        0.164706,
+        0.768627,
+        0.737255,
+        1
+      ]
+    },
+    "raw": {
+      "type": 2,
+      "flagsOrEnabled": 0,
+      "start": 1000000,
+      "end": 2000000,
+      "color": {
+        "rawHex": "0x2ac4bcff",
+        "rgba": [
+          42,
+          196,
+          188,
+          255
+        ],
+        "rgbHex": "#2ac4bc",
+        "normalized": [
+          0.164706,
+          0.768627,
+          0.737255,
+          1
+        ]
+      }
+    }
+  }
+}

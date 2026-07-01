@@ -14,30 +14,39 @@ if (options.help) usage(0);
 
 const inputPath = path.resolve(repoRoot, options.input);
 const publicStagesRoot = path.resolve(repoRoot, options.publicStages);
-const outputPath = path.resolve(publicStagesRoot, options.stageId, "render-state.json");
-const manifestPath = path.resolve(publicStagesRoot, options.stageId, "manifest.json");
 
 const inventory = readJson(inputPath);
-const stage = inventory[options.stageId];
-if (!stage) fail(`stage ${options.stageId} is not present in ${rel(inputPath)}`);
+const stageIds = options.all ? publicStageIds(publicStagesRoot) : [options.stageId];
+const written = [];
 
-const manifest = readJsonIfExists(manifestPath);
-if (!manifest.ok) fail(`stage manifest did not parse: ${rel(manifestPath)} (${manifest.error})`);
+for (const stageId of stageIds) {
+  const stage = findStage(inventory, stageId);
+  if (!stage) fail(`stage ${stageId} is not present in ${rel(inputPath)}`);
 
-const renderState = buildRenderState({ inventory, stage, manifest: manifest.value, inputPath, manifestPath });
-verifyExactCopies(renderState, stage);
-writeJson(outputPath, renderState);
+  const outputPath = path.resolve(publicStagesRoot, stageId, "render-state.json");
+  const manifestPath = path.resolve(publicStagesRoot, stageId, "manifest.json");
+  const manifest = readJsonIfExists(manifestPath);
+  if (!manifest.ok) fail(`stage manifest did not parse: ${rel(manifestPath)} (${manifest.error})`);
 
-console.log(`export-stage-render-state: wrote ${rel(outputPath)}`);
-console.log(`camera ${renderState.camera.objectName}`);
-console.log(`lights ${renderState.lights.length}`);
-console.log(`fog ${renderState.fog.objectName}`);
+  const renderState = buildRenderState({ inventory, stage, stageId, manifest: manifest.value, inputPath, manifestPath });
+  verifyExactCopies(renderState, stage);
+  writeJson(outputPath, renderState);
+  written.push({ stageId, outputPath, renderState });
+}
+
+for (const entry of written) {
+  console.log(
+    `export-stage-render-state: wrote ${rel(entry.outputPath)} camera ${entry.renderState.camera.objectName} lights ${entry.renderState.lights.length} fog ${entry.renderState.fog.objectName}`,
+  );
+}
+console.log(`export-stage-render-state: wrote ${written.length} stage render-state file${written.length === 1 ? "" : "s"}`);
 
 function parseArgs(args) {
   const parsed = {
     stageId: DEFAULT_STAGE_ID,
     input: DEFAULT_INPUT,
     publicStages: DEFAULT_PUBLIC_STAGES,
+    all: false,
     help: false,
   };
 
@@ -57,6 +66,8 @@ function parseArgs(args) {
       parsed.publicStages = requiredValue(args, ++i, arg);
     } else if (arg.startsWith("--public-stages=")) {
       parsed.publicStages = arg.slice("--public-stages=".length);
+    } else if (arg === "--all") {
+      parsed.all = true;
     } else if (arg.startsWith("--")) {
       fail(`unknown option "${arg}"`);
     } else {
@@ -76,15 +87,16 @@ research/asset-inventory/stage-lighting-render-state.json.
 
 Options:
   --stage <st##>          stage id to export (default: st00)
+  --all                   export every stage listed in public stages manifest
   --input <path>          research render-state inventory JSON
   --public-stages <path>  browser public stages root
 `);
   process.exit(code);
 }
 
-function buildRenderState({ inventory, stage, manifest, inputPath, manifestPath }) {
+function buildRenderState({ inventory, stage, stageId, manifest, inputPath, manifestPath }) {
   const scene = stage.scene;
-  if (!scene) fail(`stage ${stage.stageId ?? options.stageId} has no scene record`);
+  if (!scene) fail(`stage ${stage.stageId ?? stageId} has no scene record`);
   if (!Array.isArray(scene.cameras) || scene.cameras.length === 0) fail("no camera evidence found");
   if (!Array.isArray(scene.lights) || scene.lights.length === 0) fail("no light evidence found");
   if (!Array.isArray(scene.fogs) || scene.fogs.length === 0) fail("no fog evidence found");
@@ -93,7 +105,7 @@ function buildRenderState({ inventory, stage, manifest, inputPath, manifestPath 
   const fog = scene.fogs[0];
 
   return {
-    stageId: stage.stageId ?? options.stageId,
+    stageId: stage.stageId ?? stageId,
     generatedBy: "scripts/export-stage-render-state.mjs",
     source: {
       renderStateInventory: rel(inputPath),
@@ -109,6 +121,19 @@ function buildRenderState({ inventory, stage, manifest, inputPath, manifestPath 
     lights: scene.lights.map(exportLight),
     fog: exportFog(fog),
   };
+}
+
+function findStage(inventory, stageId) {
+  return inventory[stageId] ?? inventory.stages?.find((stage) => stage.stageId === stageId) ?? null;
+}
+
+function publicStageIds(publicStagesRoot) {
+  const manifestPath = path.join(publicStagesRoot, "manifest.json");
+  const manifest = readJsonIfExists(manifestPath);
+  if (!manifest.ok) fail(`public stage manifest did not parse: ${rel(manifestPath)} (${manifest.error})`);
+  const ids = manifest.value?.stages?.map((stage) => stage.id).filter(Boolean) ?? [];
+  if (ids.length === 0) fail(`public stage manifest contains no stages: ${rel(manifestPath)}`);
+  return ids.map(normalizeStageId);
 }
 
 function exportCamera(camera) {

@@ -262,6 +262,9 @@ function inspectStages() {
   const publicStages = rootManifest.value?.stages ?? [];
   const completeVisual = publicStages.filter((stage) => stage.visualComplete === true);
   const collisionCovered = publicStages.filter((stage) => stage.collisionCount > 0);
+  const renderStateCovered = publicStages.filter((stage) =>
+    fs.existsSync(abs(`apps/game/public/stages/${stage.id}/render-state.json`)),
+  );
   const sourceStageCodes = plan.value?.sources?.adventureFlow?.directStageArchives?.codes ?? plan.value?.stages?.map((stage) => stage.id) ?? [];
   const runtimeLiteralStages = [...new Set([...adapter.matchAll(/st[0-9a-f]{2}|stff/gi)].map((match) => match[0].toLowerCase()))];
   return {
@@ -271,6 +274,7 @@ function inspectStages() {
       stageCount: publicStages.length,
       completeVisualCount: completeVisual.length,
       collisionCoveredCount: collisionCovered.length,
+      renderStateCoveredCount: renderStateCovered.length,
       stageIds: publicStages.map((stage) => stage.id),
     },
     exportPlan: {
@@ -432,6 +436,7 @@ function buildReport() {
     requestedUiSceneModelsExported: uiSceneExports.counts?.exported ?? null,
     publicStagesCompleteVisual: stageCoverage.publicManifest.completeVisualCount,
     publicStagesTotal: stageCoverage.publicManifest.stageCount,
+    publicStagesRenderState: stageCoverage.publicManifest.renderStateCoveredCount,
     runtimeStageFallback: stageCoverage.runtimeUse.defaultStage,
     runtimeStageCollisionBounds: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesBoundsToCombat,
     runtimeStageTriangleCollision: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesTrianglesToCombat,
@@ -497,6 +502,7 @@ function renderMarkdown(report) {
   add(`- UI texture export: ${report.summary.publicUiTextureExportedImages} images from ${report.uiTextureExports.path}`);
   add(`- Requested UI scene models exported: ${report.summary.requestedUiSceneModelsExported ?? "unknown"} from ${report.uiSceneExports.path}`);
   add(`- Stage exports complete visually: ${report.summary.publicStagesCompleteVisual}/${report.summary.publicStagesTotal}`);
+  add(`- Stage render-state exports: ${report.summary.publicStagesRenderState}/${report.summary.publicStagesTotal}`);
   add(`- Runtime stage collision bounds from STIH: ${report.summary.runtimeStageCollisionBounds ? "yes" : "no"}`);
   add(`- Runtime stage triangle collision from STIH: ${report.summary.runtimeStageTriangleCollision ? "yes" : "no"}`);
   add(`- Runtime lateral wall collision from STIH: ${report.summary.runtimeStageWallCollision ? "yes" : "no"}`);
@@ -531,7 +537,7 @@ function renderMarkdown(report) {
   add();
   add("## Stage Coverage");
   add();
-  add(`Public stage manifest has ${report.stageCoverage.publicManifest.stageCount} stage folders; ${report.stageCoverage.publicManifest.completeVisualCount} have complete visual DAE exports and ${report.stageCoverage.publicManifest.collisionCoveredCount} have collision bins.`);
+  add(`Public stage manifest has ${report.stageCoverage.publicManifest.stageCount} stage folders; ${report.stageCoverage.publicManifest.completeVisualCount} have complete visual DAE exports, ${report.stageCoverage.publicManifest.renderStateCoveredCount} have render-state JSON, and ${report.stageCoverage.publicManifest.collisionCoveredCount} have collision bins.`);
   add();
   add(`Runtime loader refs: ${Object.values(report.stageCoverage.runtimeUse.mainRefs).join(", ")}`);
   add();

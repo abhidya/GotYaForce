@@ -1,31 +1,31 @@
 {
-  "stageId": "st00",
+  "stageId": "st20",
   "generatedBy": "scripts/export-stage-render-state.mjs",
   "source": {
     "renderStateInventory": "research/asset-inventory/stage-lighting-render-state.json",
     "inventoryGeneratedAt": "2026-06-30T07:47:27.124Z",
     "inventoryScanner": "scripts/inventory-stage-lighting.mjs",
-    "stageManifest": "apps/game/public/stages/st00/manifest.json",
-    "stageManifestId": "st00",
+    "stageManifest": "apps/game/public/stages/st20/manifest.json",
+    "stageManifestId": "st20",
     "stageRenderStatus": "dae-complete",
-    "archiveName": "st00_mdl.arc",
-    "sourcePath": "user-data/GG4E/afs_data/root/st00_mdl.arc"
+    "archiveName": "st20_mdl.arc",
+    "sourcePath": "user-data/GG4E/afs_data/root/st20_mdl.arc"
   },
   "camera": {
     "index": 0,
     "objectName": "scene_data.cameras[0].HSD_CObjDesc",
     "confidence": "high",
     "source": {
-      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-      "archiveName": "st00_mdl.arc",
-      "dataOffset": "0x75278",
-      "fileOffset": "0x75298"
+      "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+      "archiveName": "st20_mdl.arc",
+      "dataOffset": "0x75218",
+      "fileOffset": "0x75238"
     },
     "entry": {
-      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-      "archiveName": "st00_mdl.arc",
-      "dataOffset": "0x756c8",
-      "fileOffset": "0x756e8"
+      "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+      "archiveName": "st20_mdl.arc",
+      "dataOffset": "0x75668",
+      "fileOffset": "0x75688"
     },
     "evidence": [
       "scene_data field[1] points to a CObj table entry",
@@ -35,10 +35,10 @@
     "projection": "perspective",
     "eye": {
       "source": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x75250",
-        "fileOffset": "0x75270"
+        "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+        "archiveName": "st20_mdl.arc",
+        "dataOffset": "0x751f0",
+        "fileOffset": "0x75210"
       },
       "flags": "0x0",
       "position": [
@@ -49,10 +49,10 @@
     },
     "interest": {
       "source": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x75264",
-        "fileOffset": "0x75284"
+        "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+        "archiveName": "st20_mdl.arc",
+        "dataOffset": "0x75204",
+        "fileOffset": "0x75224"
       },
       "flags": "0x0",
       "position": [
@@ -86,16 +86,16 @@
       "objectName": "scene_data.lights[0].HSD_LObjDesc",
       "confidence": "high",
       "source": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x75234",
-        "fileOffset": "0x75254"
+        "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+        "archiveName": "st20_mdl.arc",
+        "dataOffset": "0x751d4",
+        "fileOffset": "0x751f4"
       },
       "entry": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x756e8",
-        "fileOffset": "0x75708"
+        "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+        "archiveName": "st20_mdl.arc",
+        "dataOffset": "0x75688",
+        "fileOffset": "0x756a8"
       },
       "evidence": [
         "scene_data field[2] is a null-terminated table of light entries",
@@ -124,8 +124,8 @@
       "interestOrParam": null,
       "raw": {
         "classNamePointer": {
-          "fieldDataOffset": "0x75234",
-          "fieldFileOffset": "0x75254",
+          "fieldDataOffset": "0x751d4",
+          "fieldFileOffset": "0x751f4",
           "relocationMarked": false,
           "targetDataOffset": null,
           "targetDataOffsetRaw": null,
@@ -150,16 +150,16 @@
           ]
         },
         "positionPointer": {
-          "fieldDataOffset": "0x75244",
-          "fieldFileOffset": "0x75264",
+          "fieldDataOffset": "0x751e4",
+          "fieldFileOffset": "0x75204",
           "relocationMarked": false,
           "targetDataOffset": null,
           "targetDataOffsetRaw": null,
           "targetFileOffset": null
         },
         "interestOrParamPointer": {
-          "fieldDataOffset": "0x7524c",
-          "fieldFileOffset": "0x7526c",
+          "fieldDataOffset": "0x751ec",
+          "fieldFileOffset": "0x7520c",
           "relocationMarked": false,
           "targetDataOffset": null,
           "targetDataOffsetRaw": null,
@@ -172,16 +172,16 @@
       "objectName": "scene_data.lights[1].HSD_LObjDesc",
       "confidence": "high",
       "source": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x75218",
-        "fileOffset": "0x75238"
+        "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+        "archiveName": "st20_mdl.arc",
+        "dataOffset": "0x751b8",
+        "fileOffset": "0x751d8"
       },
       "entry": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x756d8",
-        "fileOffset": "0x756f8"
+        "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+        "archiveName": "st20_mdl.arc",
+        "dataOffset": "0x75678",
+        "fileOffset": "0x75698"
       },
       "evidence": [
         "scene_data field[2] is a null-terminated table of light entries",
@@ -208,10 +208,10 @@
       },
       "position": {
         "source": {
-          "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-          "archiveName": "st00_mdl.arc",
-          "dataOffset": "0x75200",
-          "fileOffset": "0x75220"
+          "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+          "archiveName": "st20_mdl.arc",
+          "dataOffset": "0x751a0",
+          "fileOffset": "0x751c0"
         },
         "flags": "0x0",
         "position": [
@@ -222,10 +222,10 @@
       },
       "interestOrParam": {
         "source": {
-          "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-          "archiveName": "st00_mdl.arc",
-          "dataOffset": "0x75214",
-          "fileOffset": "0x75234"
+          "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+          "archiveName": "st20_mdl.arc",
+          "dataOffset": "0x751b4",
+          "fileOffset": "0x751d4"
         },
         "flags": "0x41800000",
         "position": [
@@ -236,8 +236,8 @@
       },
       "raw": {
         "classNamePointer": {
-          "fieldDataOffset": "0x75218",
-          "fieldFileOffset": "0x75238",
+          "fieldDataOffset": "0x751b8",
+          "fieldFileOffset": "0x751d8",
           "relocationMarked": false,
           "targetDataOffset": null,
           "targetDataOffsetRaw": null,
@@ -262,20 +262,20 @@
           ]
         },
         "positionPointer": {
-          "fieldDataOffset": "0x75228",
-          "fieldFileOffset": "0x75248",
+          "fieldDataOffset": "0x751c8",
+          "fieldFileOffset": "0x751e8",
           "relocationMarked": true,
-          "targetDataOffset": "0x75200",
-          "targetDataOffsetRaw": 479744,
-          "targetFileOffset": "0x75220"
+          "targetDataOffset": "0x751a0",
+          "targetDataOffsetRaw": 479648,
+          "targetFileOffset": "0x751c0"
         },
         "interestOrParamPointer": {
-          "fieldDataOffset": "0x75230",
-          "fieldFileOffset": "0x75250",
+          "fieldDataOffset": "0x751d0",
+          "fieldFileOffset": "0x751f0",
           "relocationMarked": true,
-          "targetDataOffset": "0x75214",
-          "targetDataOffsetRaw": 479764,
-          "targetFileOffset": "0x75234"
+          "targetDataOffset": "0x751b4",
+          "targetDataOffsetRaw": 479668,
+          "targetFileOffset": "0x751d4"
         }
       }
     }
@@ -285,16 +285,16 @@
     "objectName": "scene_data.fogs[0].HSD_FogDesc",
     "confidence": "high",
     "source": {
-      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-      "archiveName": "st00_mdl.arc",
-      "dataOffset": "0x752b0",
-      "fileOffset": "0x752d0"
+      "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+      "archiveName": "st20_mdl.arc",
+      "dataOffset": "0x75250",
+      "fileOffset": "0x75270"
     },
     "entry": {
-      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-      "archiveName": "st00_mdl.arc",
-      "dataOffset": "0x75704",
-      "fileOffset": "0x75724"
+      "path": "user-data/GG4E/afs_data/root/st20_mdl.arc",
+      "archiveName": "st20_mdl.arc",
+      "dataOffset": "0x756a4",
+      "fileOffset": "0x756c4"
     },
     "evidence": [
       "scene_data field[3] points to a fog entry",

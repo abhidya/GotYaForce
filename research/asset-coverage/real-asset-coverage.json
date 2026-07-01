@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T01:57:16.809Z",
+  "generatedAt": "2026-07-01T02:01:13.984Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -12,6 +12,7 @@
     "requestedUiSceneModelsExported": 6,
     "publicStagesCompleteVisual": 40,
     "publicStagesTotal": 40,
+    "publicStagesRenderState": 40,
     "runtimeStageFallback": "st00",
     "runtimeStageCollisionBounds": true,
     "runtimeStageTriangleCollision": true,
@@ -658,6 +659,7 @@
       "stageCount": 40,
       "completeVisualCount": 40,
       "collisionCoveredCount": 18,
+      "renderStateCoveredCount": 40,
       "stageIds": [
         "st00",
         "st01",

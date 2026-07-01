@@ -1,31 +1,31 @@
 {
-  "stageId": "st00",
+  "stageId": "st09",
   "generatedBy": "scripts/export-stage-render-state.mjs",
   "source": {
     "renderStateInventory": "research/asset-inventory/stage-lighting-render-state.json",
     "inventoryGeneratedAt": "2026-06-30T07:47:27.124Z",
     "inventoryScanner": "scripts/inventory-stage-lighting.mjs",
-    "stageManifest": "apps/game/public/stages/st00/manifest.json",
-    "stageManifestId": "st00",
+    "stageManifest": "apps/game/public/stages/st09/manifest.json",
+    "stageManifestId": "st09",
     "stageRenderStatus": "dae-complete",
-    "archiveName": "st00_mdl.arc",
-    "sourcePath": "user-data/GG4E/afs_data/root/st00_mdl.arc"
+    "archiveName": "st09_mdl.arc",
+    "sourcePath": "user-data/GG4E/afs_data/root/st09_mdl.arc"
   },
   "camera": {
     "index": 0,
     "objectName": "scene_data.cameras[0].HSD_CObjDesc",
     "confidence": "high",
     "source": {
-      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-      "archiveName": "st00_mdl.arc",
-      "dataOffset": "0x75278",
-      "fileOffset": "0x75298"
+      "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+      "archiveName": "st09_mdl.arc",
+      "dataOffset": "0x58a58",
+      "fileOffset": "0x58a78"
     },
     "entry": {
-      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-      "archiveName": "st00_mdl.arc",
-      "dataOffset": "0x756c8",
-      "fileOffset": "0x756e8"
+      "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+      "archiveName": "st09_mdl.arc",
+      "dataOffset": "0x58c3c",
+      "fileOffset": "0x58c5c"
     },
     "evidence": [
       "scene_data field[1] points to a CObj table entry",
@@ -35,35 +35,35 @@
     "projection": "perspective",
     "eye": {
       "source": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x75250",
-        "fileOffset": "0x75270"
+        "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+        "archiveName": "st09_mdl.arc",
+        "dataOffset": "0x58a30",
+        "fileOffset": "0x58a50"
       },
       "flags": "0x0",
       "position": [
-        10087.730469,
-        9489.730469,
-        9746.232422
+        -11012.5,
+        9027.921875,
+        10382.879883
       ]
     },
     "interest": {
       "source": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x75264",
-        "fileOffset": "0x75284"
+        "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+        "archiveName": "st09_mdl.arc",
+        "dataOffset": "0x58a44",
+        "fileOffset": "0x58a64"
       },
       "flags": "0x0",
       "position": [
-        578.34082,
-        -1718.759033,
-        452.259888
+        0.002,
+        -799.500977,
+        0.001
       ]
     },
     "near": 10,
-    "far": 80000,
-    "fovDegrees": 43.191872,
+    "far": 40000,
+    "fovDegrees": 45,
     "aspect": 1.333333,
     "raw": {
       "flagsOrClass": "0x0",
@@ -75,8 +75,8 @@
       "rollOrUnknown0": 0,
       "unknown1": 0,
       "near": 10,
-      "far": 80000,
-      "fovDegrees": 43.191871643066406,
+      "far": 40000,
+      "fovDegrees": 45,
       "aspect": 1.3333333730697632
     }
   },
@@ -86,16 +86,16 @@
       "objectName": "scene_data.lights[0].HSD_LObjDesc",
       "confidence": "high",
       "source": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x75234",
-        "fileOffset": "0x75254"
+        "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+        "archiveName": "st09_mdl.arc",
+        "dataOffset": "0x58a14",
+        "fileOffset": "0x58a34"
       },
       "entry": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x756e8",
-        "fileOffset": "0x75708"
+        "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+        "archiveName": "st09_mdl.arc",
+        "dataOffset": "0x58c5c",
+        "fileOffset": "0x58c7c"
       },
       "evidence": [
         "scene_data field[2] is a null-terminated table of light entries",
@@ -105,18 +105,18 @@
       "role": "ambient/global color candidate",
       "flags": "0x40000",
       "color": {
-        "rawHex": "0xd8d0c200",
-        "rgbHex": "#d8d0c2",
+        "rawHex": "0xcccccc00",
+        "rgbHex": "#cccccc",
         "rgba": [
-          216,
-          208,
-          194,
+          204,
+          204,
+          204,
           0
         ],
         "normalized": [
-          0.847059,
-          0.815686,
-          0.760784,
+          0.8,
+          0.8,
+          0.8,
           0
         ]
       },
@@ -124,8 +124,8 @@
       "interestOrParam": null,
       "raw": {
         "classNamePointer": {
-          "fieldDataOffset": "0x75234",
-          "fieldFileOffset": "0x75254",
+          "fieldDataOffset": "0x58a14",
+          "fieldFileOffset": "0x58a34",
           "relocationMarked": false,
           "targetDataOffset": null,
           "targetDataOffsetRaw": null,
@@ -134,32 +134,32 @@
         "nextOrFlags0": "0x0",
         "flags": "0x40000",
         "color": {
-          "rawHex": "0xd8d0c200",
+          "rawHex": "0xcccccc00",
           "rgba": [
-            216,
-            208,
-            194,
+            204,
+            204,
+            204,
             0
           ],
-          "rgbHex": "#d8d0c2",
+          "rgbHex": "#cccccc",
           "normalized": [
-            0.847059,
-            0.815686,
-            0.760784,
+            0.8,
+            0.8,
+            0.8,
             0
           ]
         },
         "positionPointer": {
-          "fieldDataOffset": "0x75244",
-          "fieldFileOffset": "0x75264",
+          "fieldDataOffset": "0x58a24",
+          "fieldFileOffset": "0x58a44",
           "relocationMarked": false,
           "targetDataOffset": null,
           "targetDataOffsetRaw": null,
           "targetFileOffset": null
         },
         "interestOrParamPointer": {
-          "fieldDataOffset": "0x7524c",
-          "fieldFileOffset": "0x7526c",
+          "fieldDataOffset": "0x58a2c",
+          "fieldFileOffset": "0x58a4c",
           "relocationMarked": false,
           "targetDataOffset": null,
           "targetDataOffsetRaw": null,
@@ -172,16 +172,16 @@
       "objectName": "scene_data.lights[1].HSD_LObjDesc",
       "confidence": "high",
       "source": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x75218",
-        "fileOffset": "0x75238"
+        "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+        "archiveName": "st09_mdl.arc",
+        "dataOffset": "0x589f8",
+        "fileOffset": "0x58a18"
       },
       "entry": {
-        "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-        "archiveName": "st00_mdl.arc",
-        "dataOffset": "0x756d8",
-        "fileOffset": "0x756f8"
+        "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+        "archiveName": "st09_mdl.arc",
+        "dataOffset": "0x58c4c",
+        "fileOffset": "0x58c6c"
       },
       "evidence": [
         "scene_data field[2] is a null-terminated table of light entries",
@@ -191,41 +191,41 @@
       "role": "positioned diffuse/specular light candidate",
       "flags": "0xd0000",
       "color": {
-        "rawHex": "0xfff0e600",
-        "rgbHex": "#fff0e6",
+        "rawHex": "0xfff9ec00",
+        "rgbHex": "#fff9ec",
         "rgba": [
           255,
-          240,
-          230,
+          249,
+          236,
           0
         ],
         "normalized": [
           1,
-          0.941176,
-          0.901961,
+          0.976471,
+          0.92549,
           0
         ]
       },
       "position": {
         "source": {
-          "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-          "archiveName": "st00_mdl.arc",
-          "dataOffset": "0x75200",
-          "fileOffset": "0x75220"
+          "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+          "archiveName": "st09_mdl.arc",
+          "dataOffset": "0x589e0",
+          "fileOffset": "0x58a00"
         },
         "flags": "0x0",
         "position": [
-          -385.512512,
-          956.0448,
-          -377.986603
+          -10000,
+          15000,
+          -10000
         ]
       },
       "interestOrParam": {
         "source": {
-          "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-          "archiveName": "st00_mdl.arc",
-          "dataOffset": "0x75214",
-          "fileOffset": "0x75234"
+          "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+          "archiveName": "st09_mdl.arc",
+          "dataOffset": "0x589f4",
+          "fileOffset": "0x58a14"
         },
         "flags": "0x41800000",
         "position": [
@@ -236,8 +236,8 @@
       },
       "raw": {
         "classNamePointer": {
-          "fieldDataOffset": "0x75218",
-          "fieldFileOffset": "0x75238",
+          "fieldDataOffset": "0x589f8",
+          "fieldFileOffset": "0x58a18",
           "relocationMarked": false,
           "targetDataOffset": null,
           "targetDataOffsetRaw": null,
@@ -246,36 +246,36 @@
         "nextOrFlags0": "0x0",
         "flags": "0xd0000",
         "color": {
-          "rawHex": "0xfff0e600",
+          "rawHex": "0xfff9ec00",
           "rgba": [
             255,
-            240,
-            230,
+            249,
+            236,
             0
           ],
-          "rgbHex": "#fff0e6",
+          "rgbHex": "#fff9ec",
           "normalized": [
             1,
-            0.941176,
-            0.901961,
+            0.976471,
+            0.92549,
             0
           ]
         },
         "positionPointer": {
-          "fieldDataOffset": "0x75228",
-          "fieldFileOffset": "0x75248",
+          "fieldDataOffset": "0x58a08",
+          "fieldFileOffset": "0x58a28",
           "relocationMarked": true,
-          "targetDataOffset": "0x75200",
-          "targetDataOffsetRaw": 479744,
-          "targetFileOffset": "0x75220"
+          "targetDataOffset": "0x589e0",
+          "targetDataOffsetRaw": 362976,
+          "targetFileOffset": "0x58a00"
         },
         "interestOrParamPointer": {
-          "fieldDataOffset": "0x75230",
-          "fieldFileOffset": "0x75250",
+          "fieldDataOffset": "0x58a10",
+          "fieldFileOffset": "0x58a30",
           "relocationMarked": true,
-          "targetDataOffset": "0x75214",
-          "targetDataOffsetRaw": 479764,
-          "targetFileOffset": "0x75234"
+          "targetDataOffset": "0x589f4",
+          "targetDataOffsetRaw": 362996,
+          "targetFileOffset": "0x58a14"
         }
       }
     }
@@ -285,16 +285,16 @@
     "objectName": "scene_data.fogs[0].HSD_FogDesc",
     "confidence": "high",
     "source": {
-      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-      "archiveName": "st00_mdl.arc",
-      "dataOffset": "0x752b0",
-      "fileOffset": "0x752d0"
+      "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+      "archiveName": "st09_mdl.arc",
+      "dataOffset": "0x58a90",
+      "fileOffset": "0x58ab0"
     },
     "entry": {
-      "path": "user-data/GG4E/afs_data/root/st00_mdl.arc",
-      "archiveName": "st00_mdl.arc",
-      "dataOffset": "0x75704",
-      "fileOffset": "0x75724"
+      "path": "user-data/GG4E/afs_data/root/st09_mdl.arc",
+      "archiveName": "st09_mdl.arc",
+      "dataOffset": "0x58c78",
+      "fileOffset": "0x58c98"
     },
     "evidence": [
       "scene_data field[3] points to a fog entry",
@@ -303,42 +303,42 @@
     ],
     "type": 2,
     "flagsOrEnabled": 0,
-    "start": 900,
-    "end": 40000,
+    "start": 1000,
+    "end": 25000,
     "color": {
-      "rawHex": "0xfff6e5ff",
-      "rgbHex": "#fff6e5",
+      "rawHex": "0xb3d3d9ff",
+      "rgbHex": "#b3d3d9",
       "rgba": [
-        255,
-        246,
-        229,
+        179,
+        211,
+        217,
         255
       ],
       "normalized": [
-        1,
-        0.964706,
-        0.898039,
+        0.701961,
+        0.827451,
+        0.85098,
         1
       ]
     },
     "raw": {
       "type": 2,
       "flagsOrEnabled": 0,
-      "start": 900,
-      "end": 40000,
+      "start": 1000,
+      "end": 25000,
       "color": {
-        "rawHex": "0xfff6e5ff",
+        "rawHex": "0xb3d3d9ff",
         "rgba": [
-          255,
-          246,
-          229,
+          179,
+          211,
+          217,
           255
         ],
-        "rgbHex": "#fff6e5",
+        "rgbHex": "#b3d3d9",
         "normalized": [
-          1,
-          0.964706,
-          0.898039,
+          0.701961,
+          0.827451,
+          0.85098,
           1
         ]
       }
