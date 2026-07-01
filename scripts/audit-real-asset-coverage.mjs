@@ -493,6 +493,27 @@ function inspectCommonBattleArchiveEvidence() {
   };
 }
 
+function inspectCommonBattleDataEvidence() {
+  const inventory = readJson("research/asset-inventory/common-battle-data.json");
+  return {
+    path: "research/asset-inventory/common-battle-data.json",
+    parses: inventory.ok,
+    source: inventory.value?.source ?? null,
+    actorDataReference: inventory.value?.actorDataReference ?? null,
+    commonRecords: (inventory.value?.commonRecords ?? []).map((record) => ({
+      index: record.index,
+      offset: record.offset,
+      bytes: record.bytes,
+      sha1: record.sha1,
+      nonZeroBytes: record.nonZeroBytes,
+      firstHalfwords: record.firstHalfwords?.slice(0, 8) ?? [],
+      firstFloatWords: record.firstFloatWords?.slice(0, 8) ?? [],
+    })),
+    exactActorDataMatches: inventory.value?.exactActorDataMatches ?? [],
+    assessment: inventory.value?.assessment ?? null,
+  };
+}
+
 function inspectBorgAnimationCoverage() {
   const reportPath = "research/asset-inventory/borg-animation-action-gaps.md";
   const report = readText(reportPath);
@@ -593,6 +614,7 @@ function buildReport() {
   const combatFx = inspectCombatFx();
   const hudAssetEvidence = inspectHudAssetEvidence();
   const commonBattleArchiveEvidence = inspectCommonBattleArchiveEvidence();
+  const commonBattleDataEvidence = inspectCommonBattleDataEvidence();
   const borgAnimationCoverage = inspectBorgAnimationCoverage();
   const powerupRuntimeGap = inspectPowerupRuntimeGap();
   const audioRuntime = inspectAudioRuntime();
@@ -620,6 +642,7 @@ function buildReport() {
       hudAssetEvidence.battleHudUsesFontAscii && hudAssetEvidence.battleHudUsesFaceRoundel,
     runtimeBattleHudUsesAsIcon: hudAssetEvidence.battleHudUsesAsIcon,
     commonBattleArchiveInventoried: Boolean(commonBattleArchiveEvidence.cmnDataPzz),
+    commonBattleDataExactMatches: commonBattleDataEvidence.exactActorDataMatches.length,
     runtimeBorgAnimationDirectMatches: borgAnimationCoverage.directRuntimeMatches,
     runtimeBorgAnimationFallbacks: borgAnimationCoverage.runtimeFallbacks,
     runtimeBorgAnimationMissing: borgAnimationCoverage.missingRuntimeMatches,
@@ -645,6 +668,7 @@ function buildReport() {
     combatFx,
     hudAssetEvidence,
     commonBattleArchiveEvidence,
+    commonBattleDataEvidence,
     borgAnimationCoverage,
     powerupRuntimeGap,
     audioRuntime,
@@ -695,6 +719,7 @@ function renderMarkdown(report) {
   add(`- Runtime battle HUD uses exported font/roundel: ${report.summary.runtimeBattleHudUsesAvailableFontAndRoundel ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses as_icon: ${report.summary.runtimeBattleHudUsesAsIcon ? "yes" : "no"} (manifest marks as_icon low-confidence for battle HUD)`);
   add(`- Common battle archive inventoried: ${report.summary.commonBattleArchiveInventoried ? "yes" : "no"}`);
+  add(`- Common battle data exact actor matches: ${report.summary.commonBattleDataExactMatches}`);
   add(`- Runtime borg animation direct matches: ${report.summary.runtimeBorgAnimationDirectMatches}/${report.borgAnimationCoverage.canonicalSlotChecks}`);
   add(`- Runtime borg animation fallbacks/missing: ${report.summary.runtimeBorgAnimationFallbacks}/${report.summary.runtimeBorgAnimationMissing}`);
   add(`- Runtime fly uses exported boost clip: ${report.summary.runtimeBoostFlyUsesExportedBoostClip ? "yes" : "no"}`);
@@ -812,6 +837,36 @@ function renderMarkdown(report) {
     add();
   }
   add(report.commonBattleArchiveEvidence.assessment);
+  add();
+  add("## Common Battle Data Evidence");
+  add();
+  add(`Inventory: ${report.commonBattleDataEvidence.path}`);
+  if (report.commonBattleDataEvidence.source) {
+    add(`Source: member ${report.commonBattleDataEvidence.source.memberId} from ${report.commonBattleDataEvidence.source.archive}; ${report.commonBattleDataEvidence.source.payloadBytes} bytes.`);
+  }
+  add(`Actor data reference files: ${report.commonBattleDataEvidence.actorDataReference?.count ?? "unknown"} (${report.commonBattleDataEvidence.actorDataReference?.recordSize ?? "unknown"} bytes each).`);
+  add();
+  add(
+    mdTable(report.commonBattleDataEvidence.commonRecords, [
+      { title: "Record", value: (row) => row.index },
+      { title: "Offset", value: (row) => row.offset },
+      { title: "SHA1", value: (row) => row.sha1 },
+      { title: "Non-zero", value: (row) => row.nonZeroBytes },
+      { title: "First halfwords", value: (row) => row.firstHalfwords.join(" ") },
+      { title: "First f32 probes", value: (row) => row.firstFloatWords.join(" ") },
+    ]),
+  );
+  add();
+  add(
+    mdTable(report.commonBattleDataEvidence.exactActorDataMatches, [
+      { title: "Record", value: (row) => row.recordIndex },
+      { title: "Actor data", value: (row) => row.path },
+      { title: "Borg", value: (row) => `${row.id ?? ""} ${row.metadata?.name ?? ""}`.trim() },
+      { title: "Stats", value: (row) => `GF ${row.metadata?.energy ?? "?"}, HP ${row.metadata?.hp ?? "?"}, shot ${row.metadata?.shot ?? "?"}, attack ${row.metadata?.attack ?? "?"}, speed ${row.metadata?.speed ?? "?"}` },
+    ]),
+  );
+  add();
+  add(report.commonBattleDataEvidence.assessment);
   add();
   add("## Borg Animation Coverage");
   add();

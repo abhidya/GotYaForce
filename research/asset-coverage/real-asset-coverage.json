@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:16:31.934Z",
+  "generatedAt": "2026-07-01T03:20:58.416Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -23,6 +23,7 @@
     "runtimeBattleHudUsesAvailableFontAndRoundel": true,
     "runtimeBattleHudUsesAsIcon": false,
     "commonBattleArchiveInventoried": true,
+    "commonBattleDataExactMatches": 2,
     "runtimeBorgAnimationDirectMatches": 1274,
     "runtimeBorgAnimationFallbacks": 75,
     "runtimeBorgAnimationMissing": 3,
@@ -1752,6 +1753,133 @@
       ]
     },
     "assessment": "cmn_data is present as a PZZ archive and now inventoried at member-table level. Treat its contents as common battle/HUD candidate data until DOL/runtime traces map consumers and field semantics."
+  },
+  "commonBattleDataEvidence": {
+    "path": "research/asset-inventory/common-battle-data.json",
+    "parses": true,
+    "source": {
+      "archive": "user-data/GG4E/afs_data/root/cmn_data.pzz",
+      "memberId": "003",
+      "tableWord": "0x40000001",
+      "blockCount": 1,
+      "compressed": true,
+      "payloadBytes": 864,
+      "payloadSha1": "b6ca17cd14d4065f748bac8d285772716fa91a36"
+    },
+    "actorDataReference": {
+      "pattern": "pl####data.bin",
+      "recordSize": 432,
+      "count": 198,
+      "examples": [
+        "user-data/GG4E/afs_data/root/pl0000data.bin",
+        "user-data/GG4E/afs_data/root/pl0001data.bin",
+        "user-data/GG4E/afs_data/root/pl0002data.bin",
+        "user-data/GG4E/afs_data/root/pl0003data.bin",
+        "user-data/GG4E/afs_data/root/pl0004data.bin",
+        "user-data/GG4E/afs_data/root/pl0005data.bin",
+        "user-data/GG4E/afs_data/root/pl0006data.bin",
+        "user-data/GG4E/afs_data/root/pl0007data.bin",
+        "user-data/GG4E/afs_data/root/pl0008data.bin",
+        "user-data/GG4E/afs_data/root/pl0009data.bin",
+        "user-data/GG4E/afs_data/root/pl000adata.bin",
+        "user-data/GG4E/afs_data/root/pl000bdata.bin"
+      ]
+    },
+    "commonRecords": [
+      {
+        "index": 0,
+        "offset": "0x0000",
+        "bytes": 432,
+        "sha1": "a397fd9ce9a186e3caf0daa3ee9dc22895e23794",
+        "nonZeroBytes": 245,
+        "firstHalfwords": [
+          "0x01f4",
+          "0x0064",
+          "0x2710",
+          "0x0000",
+          "0x07d0",
+          "0x0000",
+          "0x0000",
+          "0x0000"
+        ],
+        "firstFloatWords": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          5.5
+        ]
+      },
+      {
+        "index": 1,
+        "offset": "0x01b0",
+        "bytes": 432,
+        "sha1": "e15dedd41ca34460a54b07928e0ee40388235739",
+        "nonZeroBytes": 222,
+        "firstHalfwords": [
+          "0x01f4",
+          "0x0064",
+          "0x2710",
+          "0x0000",
+          "0x07d0",
+          "0x0000",
+          "0x0000",
+          "0x0000"
+        ],
+        "firstFloatWords": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          2.5
+        ]
+      }
+    ],
+    "exactActorDataMatches": [
+      {
+        "recordIndex": 0,
+        "id": "pl0f05",
+        "path": "user-data/GG4E/afs_data/root/pl0f05data.bin",
+        "metadata": {
+          "name": "ROACH",
+          "number": 189,
+          "energy": 30,
+          "tribe": "Bug Borg",
+          "type": "Short range type",
+          "hp": "60/78",
+          "defense": 1,
+          "shot": 1,
+          "attack": 0,
+          "speed": 2,
+          "jump": "Air jump level 1"
+        }
+      },
+      {
+        "recordIndex": 1,
+        "id": "pl0f06",
+        "path": "user-data/GG4E/afs_data/root/pl0f06data.bin",
+        "metadata": {
+          "name": "DEATH EYE",
+          "number": 107,
+          "energy": 10,
+          "tribe": "Death Borg",
+          "type": "Long range type",
+          "hp": "30/48",
+          "defense": 1,
+          "shot": 1,
+          "attack": 0,
+          "speed": 2,
+          "jump": "Air jump level 3"
+        }
+      }
+    ],
+    "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation."
   },
   "borgAnimationCoverage": {
     "path": "research/asset-inventory/borg-animation-action-gaps.md",

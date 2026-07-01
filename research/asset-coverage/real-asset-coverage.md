@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:16:31.934Z
+Generated: 2026-07-01T03:20:58.416Z
 
 ## Summary
 
@@ -20,6 +20,7 @@ Generated: 2026-07-01T03:16:31.934Z
 - Runtime battle HUD uses exported font/roundel: yes
 - Runtime battle HUD uses as_icon: no (manifest marks as_icon low-confidence for battle HUD)
 - Common battle archive inventoried: yes
+- Common battle data exact actor matches: 2
 - Runtime borg animation direct matches: 1274/1352
 - Runtime borg animation fallbacks/missing: 75/3
 - Runtime fly uses exported boost clip: yes
@@ -138,6 +139,24 @@ Recognized member kinds: unknown-binary:3, mot-bank-container:1.
 Member 003 numeric probes: halfwords 0x01f4, 0x0064, 0x2710, 0x0000, 0x07d0, 0x0000, 0x0000, 0x0000; f32 words 0, 0, 0, 0, 0, 0. These are byte-level probes only, not named fields.
 
 cmn_data is present as a PZZ archive and now inventoried at member-table level. Treat its contents as common battle/HUD candidate data until DOL/runtime traces map consumers and field semantics.
+
+## Common Battle Data Evidence
+
+Inventory: research/asset-inventory/common-battle-data.json
+Source: member 003 from user-data/GG4E/afs_data/root/cmn_data.pzz; 864 bytes.
+Actor data reference files: 198 (432 bytes each).
+
+| Record | Offset | SHA1 | Non-zero | First halfwords | First f32 probes |
+| --- | --- | --- | --- | --- | --- |
+| 0 | 0x0000 | a397fd9ce9a186e3caf0daa3ee9dc22895e23794 | 245 | 0x01f4 0x0064 0x2710 0x0000 0x07d0 0x0000 0x0000 0x0000 | 0 0 0 0 0 0 6 5.5 |
+| 1 | 0x01b0 | e15dedd41ca34460a54b07928e0ee40388235739 | 222 | 0x01f4 0x0064 0x2710 0x0000 0x07d0 0x0000 0x0000 0x0000 | 0 0 0 0 0 0 5 2.5 |
+
+| Record | Actor data | Borg | Stats |
+| --- | --- | --- | --- |
+| 0 | user-data/GG4E/afs_data/root/pl0f05data.bin | pl0f05 ROACH | GF 30, HP 60/78, shot 1, attack 0, speed 2 |
+| 1 | user-data/GG4E/afs_data/root/pl0f06data.bin | pl0f06 DEATH EYE | GF 10, HP 30/48, shot 1, attack 0, speed 2 |
+
+cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation.
 
 ## Borg Animation Coverage
 

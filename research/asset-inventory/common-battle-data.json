@@ -1,0 +1,1519 @@
+{
+  "schema": "gotyaforce.commonBattleDataInventory.v1",
+  "generatedAt": "2026-07-01T03:20:53.136Z",
+  "generatedBy": "scripts/inventory-common-battle-data.mjs",
+  "scope": "Byte-level inventory only. This compares cmn_data.pzz member 003 against the solved 432-byte pl####data.bin actor-data record size without naming fields or binding runtime mechanics.",
+  "source": {
+    "archive": "user-data/GG4E/afs_data/root/cmn_data.pzz",
+    "memberId": "003",
+    "tableWord": "0x40000001",
+    "blockCount": 1,
+    "compressed": true,
+    "payloadBytes": 864,
+    "payloadSha1": "b6ca17cd14d4065f748bac8d285772716fa91a36"
+  },
+  "actorDataReference": {
+    "pattern": "pl####data.bin",
+    "recordSize": 432,
+    "count": 198,
+    "examples": [
+      "user-data/GG4E/afs_data/root/pl0000data.bin",
+      "user-data/GG4E/afs_data/root/pl0001data.bin",
+      "user-data/GG4E/afs_data/root/pl0002data.bin",
+      "user-data/GG4E/afs_data/root/pl0003data.bin",
+      "user-data/GG4E/afs_data/root/pl0004data.bin",
+      "user-data/GG4E/afs_data/root/pl0005data.bin",
+      "user-data/GG4E/afs_data/root/pl0006data.bin",
+      "user-data/GG4E/afs_data/root/pl0007data.bin",
+      "user-data/GG4E/afs_data/root/pl0008data.bin",
+      "user-data/GG4E/afs_data/root/pl0009data.bin",
+      "user-data/GG4E/afs_data/root/pl000adata.bin",
+      "user-data/GG4E/afs_data/root/pl000bdata.bin"
+    ]
+  },
+  "commonRecords": [
+    {
+      "index": 0,
+      "offset": "0x0000",
+      "bytes": 432,
+      "sha1": "a397fd9ce9a186e3caf0daa3ee9dc22895e23794",
+      "nonZeroBytes": 245,
+      "firstNonZeroByte": 0,
+      "lastNonZeroByte": 429,
+      "headHex": "01 f4 00 64 27 10 00 00 07 d0 00 00 00 00 00 00 00 00 00 00 01 00 00 00 40 c0 00 00 40 b0 00 00",
+      "firstHalfwords": [
+        "0x01f4",
+        "0x0064",
+        "0x2710",
+        "0x0000",
+        "0x07d0",
+        "0x0000",
+        "0x0000",
+        "0x0000",
+        "0x0000",
+        "0x0000",
+        "0x0100",
+        "0x0000",
+        "0x40c0",
+        "0x0000",
+        "0x40b0",
+        "0x0000"
+      ],
+      "firstWords": [
+        "0x01f40064",
+        "0x27100000",
+        "0x07d00000",
+        "0x00000000",
+        "0x00000000",
+        "0x01000000",
+        "0x40c00000",
+        "0x40b00000",
+        "0x40a00000",
+        "0x40900000",
+        "0x40800000",
+        "0x41200000"
+      ],
+      "firstFloatWords": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        6,
+        5.5,
+        5,
+        4.5,
+        4,
+        10
+      ]
+    },
+    {
+      "index": 1,
+      "offset": "0x01b0",
+      "bytes": 432,
+      "sha1": "e15dedd41ca34460a54b07928e0ee40388235739",
+      "nonZeroBytes": 222,
+      "firstNonZeroByte": 0,
+      "lastNonZeroByte": 429,
+      "headHex": "01 f4 00 64 27 10 00 00 07 d0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 a0 00 00 40 20 00 00",
+      "firstHalfwords": [
+        "0x01f4",
+        "0x0064",
+        "0x2710",
+        "0x0000",
+        "0x07d0",
+        "0x0000",
+        "0x0000",
+        "0x0000",
+        "0x0000",
+        "0x0000",
+        "0x0000",
+        "0x0000",
+        "0x40a0",
+        "0x0000",
+        "0x4020",
+        "0x0000"
+      ],
+      "firstWords": [
+        "0x01f40064",
+        "0x27100000",
+        "0x07d00000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x40a00000",
+        "0x40200000",
+        "0x00000000",
+        "0x40200000",
+        "0x40a00000",
+        "0x41000000"
+      ],
+      "firstFloatWords": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5,
+        2.5,
+        0,
+        2.5,
+        5,
+        8
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "recordIndex": 0,
+      "topByteMatches": [
+        {
+          "id": "pl0f05",
+          "path": "user-data/GG4E/afs_data/root/pl0f05data.bin",
+          "metadata": {
+            "name": "ROACH",
+            "number": 189,
+            "energy": 30,
+            "tribe": "Bug Borg",
+            "type": "Short range type",
+            "hp": "60/78",
+            "defense": 1,
+            "shot": 1,
+            "attack": 0,
+            "speed": 2,
+            "jump": "Air jump level 1"
+          },
+          "sameBytes": 432,
+          "sameNonZeroBytes": 245,
+          "sameU16Offsets": 216,
+          "sameU32Offsets": 108,
+          "byteMatchRatio": 1
+        },
+        {
+          "id": "pl0905",
+          "path": "user-data/GG4E/afs_data/root/pl0905data.bin",
+          "metadata": null,
+          "sameBytes": 423,
+          "sameNonZeroBytes": 236,
+          "sameU16Offsets": 208,
+          "sameU32Offsets": 102,
+          "byteMatchRatio": 0.9792
+        },
+        {
+          "id": "pl0805",
+          "path": "user-data/GG4E/afs_data/root/pl0805data.bin",
+          "metadata": {
+            "name": "JELLY DIVER",
+            "number": 43,
+            "energy": 280,
+            "tribe": "Knuckle Borg",
+            "type": "Short range type",
+            "hp": "180/225",
+            "defense": 2,
+            "shot": 2,
+            "attack": 4,
+            "speed": 5,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 370,
+          "sameNonZeroBytes": 184,
+          "sameU16Offsets": 175,
+          "sameU32Offsets": 78,
+          "byteMatchRatio": 0.8565
+        },
+        {
+          "id": "pl080d",
+          "path": "user-data/GG4E/afs_data/root/pl080ddata.bin",
+          "metadata": {
+            "name": "TAR DIVER",
+            "number": 125,
+            "energy": 340,
+            "tribe": "Knuckle Borg",
+            "type": "Short range type",
+            "hp": "180/225",
+            "defense": 3,
+            "shot": 2,
+            "attack": 4,
+            "speed": 5,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 370,
+          "sameNonZeroBytes": 184,
+          "sameU16Offsets": 175,
+          "sameU32Offsets": 78,
+          "byteMatchRatio": 0.8565
+        },
+        {
+          "id": "pl080e",
+          "path": "user-data/GG4E/afs_data/root/pl080edata.bin",
+          "metadata": {
+            "name": "JACK",
+            "number": 11,
+            "energy": 280,
+            "tribe": "Knuckle Borg",
+            "type": "Short range type",
+            "hp": "200/245",
+            "defense": 3,
+            "shot": 2,
+            "attack": 4,
+            "speed": 5,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 370,
+          "sameNonZeroBytes": 184,
+          "sameU16Offsets": 175,
+          "sameU32Offsets": 78,
+          "byteMatchRatio": 0.8565
+        },
+        {
+          "id": "pl0808",
+          "path": "user-data/GG4E/afs_data/root/pl0808data.bin",
+          "metadata": {
+            "name": "CYBER HERO",
+            "number": 123,
+            "energy": 450,
+            "tribe": "Hero Borg",
+            "type": "Almighty type",
+            "hp": "200/245",
+            "defense": 3,
+            "shot": 5,
+            "attack": 5,
+            "speed": 4,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 366,
+          "sameNonZeroBytes": 183,
+          "sameU16Offsets": 173,
+          "sameU32Offsets": 77,
+          "byteMatchRatio": 0.8472
+        },
+        {
+          "id": "pl090a",
+          "path": "user-data/GG4E/afs_data/root/pl090adata.bin",
+          "metadata": {
+            "name": "SHIELD WITCH",
+            "number": 51,
+            "energy": 330,
+            "tribe": "Wizard Borg",
+            "type": "Support type",
+            "hp": "180/225",
+            "defense": 6,
+            "shot": 1,
+            "attack": 1,
+            "speed": 3,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 364,
+          "sameNonZeroBytes": 183,
+          "sameU16Offsets": 167,
+          "sameU32Offsets": 70,
+          "byteMatchRatio": 0.8426
+        },
+        {
+          "id": "pl0903",
+          "path": "user-data/GG4E/afs_data/root/pl0903data.bin",
+          "metadata": {
+            "name": "GUARD WITCH",
+            "number": 49,
+            "energy": 250,
+            "tribe": "Wizard Borg",
+            "type": "Support Type",
+            "hp": "150/195",
+            "defense": 5,
+            "shot": 1,
+            "attack": 1,
+            "speed": 3,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 363,
+          "sameNonZeroBytes": 183,
+          "sameU16Offsets": 166,
+          "sameU32Offsets": 69,
+          "byteMatchRatio": 0.8403
+        },
+        {
+          "id": "pl0902",
+          "path": "user-data/GG4E/afs_data/root/pl0902data.bin",
+          "metadata": {
+            "name": "PATRA WITCH",
+            "number": 48,
+            "energy": 150,
+            "tribe": "Wizard Borg",
+            "type": "Support type",
+            "hp": "150/195",
+            "defense": 2,
+            "shot": 1,
+            "attack": 1,
+            "speed": 3,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 358,
+          "sameNonZeroBytes": 182,
+          "sameU16Offsets": 162,
+          "sameU32Offsets": 69,
+          "byteMatchRatio": 0.8287
+        },
+        {
+          "id": "pl0909",
+          "path": "user-data/GG4E/afs_data/root/pl0909data.bin",
+          "metadata": {
+            "name": "ISIS WITCH",
+            "number": 129,
+            "energy": 190,
+            "tribe": "Wizard Borg",
+            "type": "Support type",
+            "hp": "180/225",
+            "defense": 2,
+            "shot": 1,
+            "attack": 1,
+            "speed": 3,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 358,
+          "sameNonZeroBytes": 182,
+          "sameU16Offsets": 162,
+          "sameU32Offsets": 69,
+          "byteMatchRatio": 0.8287
+        },
+        {
+          "id": "pl0804",
+          "path": "user-data/GG4E/afs_data/root/pl0804data.bin",
+          "metadata": {
+            "name": "STAR HERO",
+            "number": 160,
+            "energy": 520,
+            "tribe": "Hero Borg",
+            "type": "Short range type",
+            "hp": "250/340",
+            "defense": 3,
+            "shot": 3,
+            "attack": 5,
+            "speed": 5,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 363,
+          "sameNonZeroBytes": 181,
+          "sameU16Offsets": 170,
+          "sameU32Offsets": 75,
+          "byteMatchRatio": 0.8403
+        },
+        {
+          "id": "pl080c",
+          "path": "user-data/GG4E/afs_data/root/pl080cdata.bin",
+          "metadata": {
+            "name": "PLANET HERO",
+            "number": 161,
+            "energy": 530,
+            "tribe": "Hero Borg",
+            "type": "Short range type",
+            "hp": "250/340",
+            "defense": 3,
+            "shot": 3,
+            "attack": 5,
+            "speed": 5,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 363,
+          "sameNonZeroBytes": 181,
+          "sameU16Offsets": 170,
+          "sameU32Offsets": 75,
+          "byteMatchRatio": 0.8403
+        }
+      ],
+      "observedSameOffsetValueCount": 216,
+      "observedSameOffsetValues": [
+        {
+          "offset": "0x0000",
+          "u16": "0x01f4",
+          "matchingActorDataCount": 188,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0002",
+          "u16": "0x0064",
+          "matchingActorDataCount": 142,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0004",
+          "u16": "0x2710",
+          "matchingActorDataCount": 198,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0006",
+          "u16": "0x0000",
+          "matchingActorDataCount": 191,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0008",
+          "u16": "0x07d0",
+          "matchingActorDataCount": 191,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x000a",
+          "u16": "0x0000",
+          "matchingActorDataCount": 70,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x000c",
+          "u16": "0x0000",
+          "matchingActorDataCount": 94,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x000e",
+          "u16": "0x0000",
+          "matchingActorDataCount": 67,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0010",
+          "u16": "0x0000",
+          "matchingActorDataCount": 53,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0012",
+          "u16": "0x0000",
+          "matchingActorDataCount": 70,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0014",
+          "u16": "0x0100",
+          "matchingActorDataCount": 197,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0016",
+          "u16": "0x0000",
+          "matchingActorDataCount": 198,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0018",
+          "u16": "0x40c0",
+          "matchingActorDataCount": 115,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0100data.bin",
+            "user-data/GG4E/afs_data/root/pl0101data.bin",
+            "user-data/GG4E/afs_data/root/pl0102data.bin",
+            "user-data/GG4E/afs_data/root/pl0103data.bin",
+            "user-data/GG4E/afs_data/root/pl0105data.bin",
+            "user-data/GG4E/afs_data/root/pl0106data.bin"
+          ]
+        },
+        {
+          "offset": "0x001a",
+          "u16": "0x0000",
+          "matchingActorDataCount": 194,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x001c",
+          "u16": "0x40b0",
+          "matchingActorDataCount": 106,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0100data.bin",
+            "user-data/GG4E/afs_data/root/pl0101data.bin",
+            "user-data/GG4E/afs_data/root/pl0102data.bin",
+            "user-data/GG4E/afs_data/root/pl0103data.bin",
+            "user-data/GG4E/afs_data/root/pl0105data.bin",
+            "user-data/GG4E/afs_data/root/pl0106data.bin"
+          ]
+        },
+        {
+          "offset": "0x001e",
+          "u16": "0x0000",
+          "matchingActorDataCount": 188,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0020",
+          "u16": "0x40a0",
+          "matchingActorDataCount": 107,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0100data.bin",
+            "user-data/GG4E/afs_data/root/pl0101data.bin",
+            "user-data/GG4E/afs_data/root/pl0102data.bin",
+            "user-data/GG4E/afs_data/root/pl0103data.bin",
+            "user-data/GG4E/afs_data/root/pl0105data.bin",
+            "user-data/GG4E/afs_data/root/pl0106data.bin"
+          ]
+        },
+        {
+          "offset": "0x0022",
+          "u16": "0x0000",
+          "matchingActorDataCount": 194,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0024",
+          "u16": "0x4090",
+          "matchingActorDataCount": 106,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0100data.bin",
+            "user-data/GG4E/afs_data/root/pl0101data.bin",
+            "user-data/GG4E/afs_data/root/pl0102data.bin",
+            "user-data/GG4E/afs_data/root/pl0103data.bin",
+            "user-data/GG4E/afs_data/root/pl0105data.bin",
+            "user-data/GG4E/afs_data/root/pl0106data.bin"
+          ]
+        },
+        {
+          "offset": "0x0026",
+          "u16": "0x0000",
+          "matchingActorDataCount": 188,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0028",
+          "u16": "0x4080",
+          "matchingActorDataCount": 106,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0100data.bin",
+            "user-data/GG4E/afs_data/root/pl0101data.bin",
+            "user-data/GG4E/afs_data/root/pl0102data.bin",
+            "user-data/GG4E/afs_data/root/pl0103data.bin",
+            "user-data/GG4E/afs_data/root/pl0105data.bin",
+            "user-data/GG4E/afs_data/root/pl0106data.bin"
+          ]
+        },
+        {
+          "offset": "0x002a",
+          "u16": "0x0000",
+          "matchingActorDataCount": 198,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x002c",
+          "u16": "0x4120",
+          "matchingActorDataCount": 12,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0100data.bin",
+            "user-data/GG4E/afs_data/root/pl0101data.bin",
+            "user-data/GG4E/afs_data/root/pl0102data.bin",
+            "user-data/GG4E/afs_data/root/pl0105data.bin",
+            "user-data/GG4E/afs_data/root/pl0108data.bin",
+            "user-data/GG4E/afs_data/root/pl0109data.bin"
+          ]
+        },
+        {
+          "offset": "0x002e",
+          "u16": "0x0000",
+          "matchingActorDataCount": 149,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin",
+            "user-data/GG4E/afs_data/root/pl0006data.bin"
+          ]
+        },
+        {
+          "offset": "0x0030",
+          "u16": "0x3dcc",
+          "matchingActorDataCount": 2,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0905data.bin",
+            "user-data/GG4E/afs_data/root/pl0f05data.bin"
+          ]
+        },
+        {
+          "offset": "0x0032",
+          "u16": "0xcccd",
+          "matchingActorDataCount": 4,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0502data.bin",
+            "user-data/GG4E/afs_data/root/pl050edata.bin",
+            "user-data/GG4E/afs_data/root/pl0905data.bin",
+            "user-data/GG4E/afs_data/root/pl0f05data.bin"
+          ]
+        },
+        {
+          "offset": "0x0034",
+          "u16": "0x3dcc",
+          "matchingActorDataCount": 2,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0905data.bin",
+            "user-data/GG4E/afs_data/root/pl0f05data.bin"
+          ]
+        },
+        {
+          "offset": "0x0036",
+          "u16": "0xcccd",
+          "matchingActorDataCount": 150,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0038",
+          "u16": "0x3dcc",
+          "matchingActorDataCount": 2,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0905data.bin",
+            "user-data/GG4E/afs_data/root/pl0f05data.bin"
+          ]
+        },
+        {
+          "offset": "0x003a",
+          "u16": "0xcccd",
+          "matchingActorDataCount": 3,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl050edata.bin",
+            "user-data/GG4E/afs_data/root/pl0905data.bin",
+            "user-data/GG4E/afs_data/root/pl0f05data.bin"
+          ]
+        },
+        {
+          "offset": "0x003c",
+          "u16": "0x010c",
+          "matchingActorDataCount": 14,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0800data.bin",
+            "user-data/GG4E/afs_data/root/pl0801data.bin",
+            "user-data/GG4E/afs_data/root/pl0804data.bin",
+            "user-data/GG4E/afs_data/root/pl0805data.bin",
+            "user-data/GG4E/afs_data/root/pl0806data.bin",
+            "user-data/GG4E/afs_data/root/pl0807data.bin"
+          ]
+        },
+        {
+          "offset": "0x003e",
+          "u16": "0x0c0c",
+          "matchingActorDataCount": 14,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0800data.bin",
+            "user-data/GG4E/afs_data/root/pl0801data.bin",
+            "user-data/GG4E/afs_data/root/pl0804data.bin",
+            "user-data/GG4E/afs_data/root/pl0805data.bin",
+            "user-data/GG4E/afs_data/root/pl0806data.bin",
+            "user-data/GG4E/afs_data/root/pl0807data.bin"
+          ]
+        }
+      ]
+    },
+    {
+      "recordIndex": 1,
+      "topByteMatches": [
+        {
+          "id": "pl0f06",
+          "path": "user-data/GG4E/afs_data/root/pl0f06data.bin",
+          "metadata": {
+            "name": "DEATH EYE",
+            "number": 107,
+            "energy": 10,
+            "tribe": "Death Borg",
+            "type": "Long range type",
+            "hp": "30/48",
+            "defense": 1,
+            "shot": 1,
+            "attack": 0,
+            "speed": 2,
+            "jump": "Air jump level 3"
+          },
+          "sameBytes": 432,
+          "sameNonZeroBytes": 222,
+          "sameU16Offsets": 216,
+          "sameU32Offsets": 108,
+          "byteMatchRatio": 1
+        },
+        {
+          "id": "pl0f04",
+          "path": "user-data/GG4E/afs_data/root/pl0f04data.bin",
+          "metadata": {
+            "name": "DEATH BORG CHI",
+            "number": 102,
+            "energy": 80,
+            "tribe": "Death Borg",
+            "type": "Long range type",
+            "hp": "40/58",
+            "defense": 1,
+            "shot": 1,
+            "attack": 0,
+            "speed": 2,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 370,
+          "sameNonZeroBytes": 177,
+          "sameU16Offsets": 171,
+          "sameU32Offsets": 75,
+          "byteMatchRatio": 0.8565
+        },
+        {
+          "id": "pl0f01",
+          "path": "user-data/GG4E/afs_data/root/pl0f01data.bin",
+          "metadata": {
+            "name": "DEATH BORG NU",
+            "number": 95,
+            "energy": 40,
+            "tribe": "Death Borg",
+            "type": "Long range type",
+            "hp": "30/48",
+            "defense": 1,
+            "shot": 1,
+            "attack": 0,
+            "speed": 2,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 368,
+          "sameNonZeroBytes": 175,
+          "sameU16Offsets": 171,
+          "sameU32Offsets": 75,
+          "byteMatchRatio": 0.8519
+        },
+        {
+          "id": "pl0c00",
+          "path": "user-data/GG4E/afs_data/root/pl0c00data.bin",
+          "metadata": {
+            "name": "NORMAL TANK",
+            "number": 64,
+            "energy": 450,
+            "tribe": "Tank Borg",
+            "type": "Long range type",
+            "hp": "300/390",
+            "defense": 4,
+            "shot": 5,
+            "attack": 0,
+            "speed": 3,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 363,
+          "sameNonZeroBytes": 175,
+          "sameU16Offsets": 166,
+          "sameU32Offsets": 71,
+          "byteMatchRatio": 0.8403
+        },
+        {
+          "id": "pl0f02",
+          "path": "user-data/GG4E/afs_data/root/pl0f02data.bin",
+          "metadata": {
+            "name": "DEATH BORG NU II",
+            "number": 96,
+            "energy": 50,
+            "tribe": "Death Borg",
+            "type": "Long range type",
+            "hp": "40/58",
+            "defense": 1,
+            "shot": 1,
+            "attack": 0,
+            "speed": 2,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 367,
+          "sameNonZeroBytes": 174,
+          "sameU16Offsets": 170,
+          "sameU32Offsets": 74,
+          "byteMatchRatio": 0.8495
+        },
+        {
+          "id": "pl0f03",
+          "path": "user-data/GG4E/afs_data/root/pl0f03data.bin",
+          "metadata": {
+            "name": "DEATH BORG NU III",
+            "number": 97,
+            "energy": 70,
+            "tribe": "Death Borg",
+            "type": "Long range type",
+            "hp": "50/68",
+            "defense": 1,
+            "shot": 2,
+            "attack": 0,
+            "speed": 2,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 366,
+          "sameNonZeroBytes": 173,
+          "sameU16Offsets": 169,
+          "sameU32Offsets": 73,
+          "byteMatchRatio": 0.8472
+        },
+        {
+          "id": "pl0c06",
+          "path": "user-data/GG4E/afs_data/root/pl0c06data.bin",
+          "metadata": {
+            "name": "LEOPARD",
+            "number": 7,
+            "energy": 450,
+            "tribe": "Tank Borg",
+            "type": "Long range type",
+            "hp": "330/420",
+            "defense": 4,
+            "shot": 5,
+            "attack": 0,
+            "speed": 3,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 361,
+          "sameNonZeroBytes": 173,
+          "sameU16Offsets": 164,
+          "sameU32Offsets": 69,
+          "byteMatchRatio": 0.8356
+        },
+        {
+          "id": "pl0c01",
+          "path": "user-data/GG4E/afs_data/root/pl0c01data.bin",
+          "metadata": {
+            "name": "GATLING TANK",
+            "number": 65,
+            "energy": 690,
+            "tribe": "Tank Borg",
+            "type": "Long range type",
+            "hp": "320/410",
+            "defense": 4,
+            "shot": 6,
+            "attack": 0,
+            "speed": 3,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 362,
+          "sameNonZeroBytes": 171,
+          "sameU16Offsets": 164,
+          "sameU32Offsets": 67,
+          "byteMatchRatio": 0.838
+        },
+        {
+          "id": "pl0c05",
+          "path": "user-data/GG4E/afs_data/root/pl0c05data.bin",
+          "metadata": {
+            "name": "ICBM TANK",
+            "number": 68,
+            "energy": 1000,
+            "tribe": "Tank Borg",
+            "type": "Long range type",
+            "hp": "200/245",
+            "defense": 3,
+            "shot": 10,
+            "attack": 0,
+            "speed": 2,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 351,
+          "sameNonZeroBytes": 165,
+          "sameU16Offsets": 157,
+          "sameU32Offsets": 63,
+          "byteMatchRatio": 0.8125
+        },
+        {
+          "id": "pl0c03",
+          "path": "user-data/GG4E/afs_data/root/pl0c03data.bin",
+          "metadata": null,
+          "sameBytes": 333,
+          "sameNonZeroBytes": 165,
+          "sameU16Offsets": 148,
+          "sameU32Offsets": 55,
+          "byteMatchRatio": 0.7708
+        },
+        {
+          "id": "pl0c04",
+          "path": "user-data/GG4E/afs_data/root/pl0c04data.bin",
+          "metadata": {
+            "name": "ULTIMATE CANNON",
+            "number": 145,
+            "energy": 1500,
+            "tribe": "Tank Borg",
+            "type": "Long range type",
+            "hp": "500/590",
+            "defense": 6,
+            "shot": 10,
+            "attack": 0,
+            "speed": 1,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 326,
+          "sameNonZeroBytes": 143,
+          "sameU16Offsets": 143,
+          "sameU32Offsets": 55,
+          "byteMatchRatio": 0.7546
+        },
+        {
+          "id": "pl0c02",
+          "path": "user-data/GG4E/afs_data/root/pl0c02data.bin",
+          "metadata": {
+            "name": "BEAM TANK",
+            "number": 172,
+            "energy": 780,
+            "tribe": "Tank Borg",
+            "type": "Almighty type",
+            "hp": "400/490",
+            "defense": 5,
+            "shot": 5,
+            "attack": 4,
+            "speed": 4,
+            "jump": "Boost jump"
+          },
+          "sameBytes": 305,
+          "sameNonZeroBytes": 139,
+          "sameU16Offsets": 127,
+          "sameU32Offsets": 38,
+          "byteMatchRatio": 0.706
+        }
+      ],
+      "observedSameOffsetValueCount": 216,
+      "observedSameOffsetValues": [
+        {
+          "offset": "0x0000",
+          "u16": "0x01f4",
+          "matchingActorDataCount": 188,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0002",
+          "u16": "0x0064",
+          "matchingActorDataCount": 142,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0004",
+          "u16": "0x2710",
+          "matchingActorDataCount": 198,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0006",
+          "u16": "0x0000",
+          "matchingActorDataCount": 191,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0008",
+          "u16": "0x07d0",
+          "matchingActorDataCount": 191,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x000a",
+          "u16": "0x0000",
+          "matchingActorDataCount": 70,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x000c",
+          "u16": "0x0000",
+          "matchingActorDataCount": 94,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x000e",
+          "u16": "0x0000",
+          "matchingActorDataCount": 67,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0010",
+          "u16": "0x0000",
+          "matchingActorDataCount": 53,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0012",
+          "u16": "0x0000",
+          "matchingActorDataCount": 70,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0014",
+          "u16": "0x0000",
+          "matchingActorDataCount": 1,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0f06data.bin"
+          ]
+        },
+        {
+          "offset": "0x0016",
+          "u16": "0x0000",
+          "matchingActorDataCount": 198,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0018",
+          "u16": "0x40a0",
+          "matchingActorDataCount": 11,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0c00data.bin",
+            "user-data/GG4E/afs_data/root/pl0c01data.bin",
+            "user-data/GG4E/afs_data/root/pl0c03data.bin",
+            "user-data/GG4E/afs_data/root/pl0c04data.bin",
+            "user-data/GG4E/afs_data/root/pl0c05data.bin",
+            "user-data/GG4E/afs_data/root/pl0c06data.bin"
+          ]
+        },
+        {
+          "offset": "0x001a",
+          "u16": "0x0000",
+          "matchingActorDataCount": 194,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x001c",
+          "u16": "0x4020",
+          "matchingActorDataCount": 12,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0510data.bin",
+            "user-data/GG4E/afs_data/root/pl0c00data.bin",
+            "user-data/GG4E/afs_data/root/pl0c01data.bin",
+            "user-data/GG4E/afs_data/root/pl0c03data.bin",
+            "user-data/GG4E/afs_data/root/pl0c04data.bin",
+            "user-data/GG4E/afs_data/root/pl0c05data.bin"
+          ]
+        },
+        {
+          "offset": "0x001e",
+          "u16": "0x0000",
+          "matchingActorDataCount": 188,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0020",
+          "u16": "0x0000",
+          "matchingActorDataCount": 17,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0c00data.bin",
+            "user-data/GG4E/afs_data/root/pl0c01data.bin",
+            "user-data/GG4E/afs_data/root/pl0c03data.bin",
+            "user-data/GG4E/afs_data/root/pl0c04data.bin",
+            "user-data/GG4E/afs_data/root/pl0c05data.bin",
+            "user-data/GG4E/afs_data/root/pl0c06data.bin"
+          ]
+        },
+        {
+          "offset": "0x0022",
+          "u16": "0x0000",
+          "matchingActorDataCount": 194,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0024",
+          "u16": "0x4020",
+          "matchingActorDataCount": 15,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0503data.bin",
+            "user-data/GG4E/afs_data/root/pl0506data.bin",
+            "user-data/GG4E/afs_data/root/pl0507data.bin",
+            "user-data/GG4E/afs_data/root/pl0508data.bin",
+            "user-data/GG4E/afs_data/root/pl0c00data.bin",
+            "user-data/GG4E/afs_data/root/pl0c01data.bin"
+          ]
+        },
+        {
+          "offset": "0x0026",
+          "u16": "0x0000",
+          "matchingActorDataCount": 188,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0028",
+          "u16": "0x40a0",
+          "matchingActorDataCount": 14,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0615data.bin",
+            "user-data/GG4E/afs_data/root/pl0629data.bin",
+            "user-data/GG4E/afs_data/root/pl062adata.bin",
+            "user-data/GG4E/afs_data/root/pl0c00data.bin",
+            "user-data/GG4E/afs_data/root/pl0c01data.bin",
+            "user-data/GG4E/afs_data/root/pl0c03data.bin"
+          ]
+        },
+        {
+          "offset": "0x002a",
+          "u16": "0x0000",
+          "matchingActorDataCount": 198,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x002c",
+          "u16": "0x4100",
+          "matchingActorDataCount": 19,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0203data.bin",
+            "user-data/GG4E/afs_data/root/pl020cdata.bin",
+            "user-data/GG4E/afs_data/root/pl0307data.bin",
+            "user-data/GG4E/afs_data/root/pl030ddata.bin",
+            "user-data/GG4E/afs_data/root/pl0a02data.bin",
+            "user-data/GG4E/afs_data/root/pl0a04data.bin"
+          ]
+        },
+        {
+          "offset": "0x002e",
+          "u16": "0x0000",
+          "matchingActorDataCount": 149,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin",
+            "user-data/GG4E/afs_data/root/pl0006data.bin"
+          ]
+        },
+        {
+          "offset": "0x0030",
+          "u16": "0x3ca3",
+          "matchingActorDataCount": 16,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0602data.bin",
+            "user-data/GG4E/afs_data/root/pl060adata.bin",
+            "user-data/GG4E/afs_data/root/pl060cdata.bin",
+            "user-data/GG4E/afs_data/root/pl060edata.bin",
+            "user-data/GG4E/afs_data/root/pl0c00data.bin",
+            "user-data/GG4E/afs_data/root/pl0c01data.bin"
+          ]
+        },
+        {
+          "offset": "0x0032",
+          "u16": "0xd70a",
+          "matchingActorDataCount": 78,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x0034",
+          "u16": "0x3c23",
+          "matchingActorDataCount": 13,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0c00data.bin",
+            "user-data/GG4E/afs_data/root/pl0c01data.bin",
+            "user-data/GG4E/afs_data/root/pl0c02data.bin",
+            "user-data/GG4E/afs_data/root/pl0c03data.bin",
+            "user-data/GG4E/afs_data/root/pl0c04data.bin",
+            "user-data/GG4E/afs_data/root/pl0c05data.bin"
+          ]
+        },
+        {
+          "offset": "0x0036",
+          "u16": "0xd70a",
+          "matchingActorDataCount": 44,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0a00data.bin",
+            "user-data/GG4E/afs_data/root/pl0a01data.bin",
+            "user-data/GG4E/afs_data/root/pl0a02data.bin",
+            "user-data/GG4E/afs_data/root/pl0a03data.bin",
+            "user-data/GG4E/afs_data/root/pl0a04data.bin",
+            "user-data/GG4E/afs_data/root/pl0a05data.bin"
+          ]
+        },
+        {
+          "offset": "0x0038",
+          "u16": "0x3c23",
+          "matchingActorDataCount": 16,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0505data.bin",
+            "user-data/GG4E/afs_data/root/pl0511data.bin",
+            "user-data/GG4E/afs_data/root/pl0c00data.bin",
+            "user-data/GG4E/afs_data/root/pl0c01data.bin",
+            "user-data/GG4E/afs_data/root/pl0c02data.bin",
+            "user-data/GG4E/afs_data/root/pl0c03data.bin"
+          ]
+        },
+        {
+          "offset": "0x003a",
+          "u16": "0xd70a",
+          "matchingActorDataCount": 189,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0004data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin"
+          ]
+        },
+        {
+          "offset": "0x003c",
+          "u16": "0x010b",
+          "matchingActorDataCount": 164,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin",
+            "user-data/GG4E/afs_data/root/pl0006data.bin"
+          ]
+        },
+        {
+          "offset": "0x003e",
+          "u16": "0x0b0b",
+          "matchingActorDataCount": 66,
+          "examples": [
+            "user-data/GG4E/afs_data/root/pl0000data.bin",
+            "user-data/GG4E/afs_data/root/pl0001data.bin",
+            "user-data/GG4E/afs_data/root/pl0002data.bin",
+            "user-data/GG4E/afs_data/root/pl0003data.bin",
+            "user-data/GG4E/afs_data/root/pl0005data.bin",
+            "user-data/GG4E/afs_data/root/pl0006data.bin"
+          ]
+        }
+      ]
+    }
+  ],
+  "exactActorDataMatches": [
+    {
+      "recordIndex": 0,
+      "id": "pl0f05",
+      "path": "user-data/GG4E/afs_data/root/pl0f05data.bin",
+      "metadata": {
+        "name": "ROACH",
+        "number": 189,
+        "energy": 30,
+        "tribe": "Bug Borg",
+        "type": "Short range type",
+        "hp": "60/78",
+        "defense": 1,
+        "shot": 1,
+        "attack": 0,
+        "speed": 2,
+        "jump": "Air jump level 1"
+      }
+    },
+    {
+      "recordIndex": 1,
+      "id": "pl0f06",
+      "path": "user-data/GG4E/afs_data/root/pl0f06data.bin",
+      "metadata": {
+        "name": "DEATH EYE",
+        "number": 107,
+        "energy": 10,
+        "tribe": "Death Borg",
+        "type": "Long range type",
+        "hp": "30/48",
+        "defense": 1,
+        "shot": 1,
+        "attack": 0,
+        "speed": 2,
+        "jump": "Air jump level 3"
+      }
+    }
+  ],
+  "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation."
+}
