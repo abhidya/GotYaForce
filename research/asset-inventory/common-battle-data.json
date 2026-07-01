@@ -1,6 +1,6 @@
 {
   "schema": "gotyaforce.commonBattleDataInventory.v1",
-  "generatedAt": "2026-07-01T03:23:34.208Z",
+  "generatedAt": "2026-07-01T03:29:26.489Z",
   "generatedBy": "scripts/inventory-common-battle-data.mjs",
   "scope": "Byte-level inventory only. This compares cmn_data.pzz member 003 against the solved 432-byte pl####data.bin actor-data record size without naming fields or binding runtime mechanics.",
   "source": {
@@ -1519,12 +1519,12 @@
     "appImportsBorgsJson": true,
     "buildProfileConsumesBorgsJsonFields": true,
     "combatConstantsDeclareTunedFormulas": true,
-    "formatsPzzStillTodo": true,
+    "formatsPzzStillTodo": false,
     "refs": {
       "appBorgImport": "apps/game/src/main.ts:23",
       "buildProfile": "packages/combat/src/stats.ts:104",
       "tunedFormulaNote": "packages/combat/src/constants.ts:10",
-      "pzzTodo": "packages/formats/src/pzz.ts:4"
+      "pzzParser": "packages/formats/src/pzz.ts:103"
     },
     "assessment": "Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet."
   },

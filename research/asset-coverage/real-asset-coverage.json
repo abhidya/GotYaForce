@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T03:23:39.836Z",
+  "generatedAt": "2026-07-01T03:29:29.979Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -1884,12 +1884,12 @@
       "appImportsBorgsJson": true,
       "buildProfileConsumesBorgsJsonFields": true,
       "combatConstantsDeclareTunedFormulas": true,
-      "formatsPzzStillTodo": true,
+      "formatsPzzStillTodo": false,
       "refs": {
         "appBorgImport": "apps/game/src/main.ts:23",
         "buildProfile": "packages/combat/src/stats.ts:104",
         "tunedFormulaNote": "packages/combat/src/constants.ts:10",
-        "pzzTodo": "packages/formats/src/pzz.ts:4"
+        "pzzParser": "packages/formats/src/pzz.ts:103"
       },
       "assessment": "Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet."
     },

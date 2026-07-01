@@ -1,6 +1,6 @@
 # Common Battle Data Inventory
 
-Generated: 2026-07-01T03:23:34.208Z
+Generated: 2026-07-01T03:29:26.489Z
 Scanner: `scripts/inventory-common-battle-data.mjs`
 
 ## Scope
@@ -64,7 +64,7 @@ cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as
 - App imports borgs.json: yes (apps/game/src/main.ts:23)
 - Combat buildProfile consumes stat fields: yes (packages/combat/src/stats.ts:104)
 - Combat constants still declare tuned formulas: yes (packages/combat/src/constants.ts:10)
-- Generic PZZ parser package still TODO: yes (packages/formats/src/pzz.ts:4)
+- Generic PZZ parser package implemented: yes (packages/formats/src/pzz.ts:103)
 
 Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet.
 

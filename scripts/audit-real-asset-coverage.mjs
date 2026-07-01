@@ -876,7 +876,7 @@ function renderMarkdown(report) {
     add(`- App imports borgs.json: ${report.commonBattleDataEvidence.runtimeBinding.appImportsBorgsJson ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.appBorgImport ?? "n/a"})`);
     add(`- Combat buildProfile consumes stats: ${report.commonBattleDataEvidence.runtimeBinding.buildProfileConsumesBorgsJsonFields ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.buildProfile ?? "n/a"})`);
     add(`- Combat formulas still marked tuned: ${report.commonBattleDataEvidence.runtimeBinding.combatConstantsDeclareTunedFormulas ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.tunedFormulaNote ?? "n/a"})`);
-    add(`- Generic PZZ package parser still TODO: ${report.commonBattleDataEvidence.runtimeBinding.formatsPzzStillTodo ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.pzzTodo ?? "n/a"})`);
+    add(`- Generic PZZ package parser implemented: ${report.commonBattleDataEvidence.runtimeBinding.formatsPzzStillTodo ? "no" : "yes"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.pzzParser ?? "n/a"})`);
     add(report.commonBattleDataEvidence.runtimeBinding.assessment);
   }
   add();

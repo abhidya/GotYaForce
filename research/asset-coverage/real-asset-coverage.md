@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T03:23:39.836Z
+Generated: 2026-07-01T03:29:29.979Z
 
 ## Summary
 
@@ -163,7 +163,7 @@ Runtime binding gap:
 - App imports borgs.json: yes (apps/game/src/main.ts:23)
 - Combat buildProfile consumes stats: yes (packages/combat/src/stats.ts:104)
 - Combat formulas still marked tuned: yes (packages/combat/src/constants.ts:10)
-- Generic PZZ package parser still TODO: yes (packages/formats/src/pzz.ts:4)
+- Generic PZZ package parser implemented: yes (packages/formats/src/pzz.ts:103)
 Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet.
 
 ## Borg Animation Coverage

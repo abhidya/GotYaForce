@@ -243,7 +243,7 @@ function inspectRuntimeBinding() {
       appBorgImport: `${rel(runtimePaths.appMain)}:${lineOf(appMain, "packages/assets/data/borgs.json")}`,
       buildProfile: `${rel(runtimePaths.combatStats)}:${lineOf(stats, "export function buildProfile")}`,
       tunedFormulaNote: `${rel(runtimePaths.combatConstants)}:${lineOf(constants, "Everything else (speeds, gravity, damage scale")}`,
-      pzzTodo: `${rel(runtimePaths.formatsPzz)}:${lineOf(pzz, "TODO: implement unpack")}`,
+      pzzParser: `${rel(runtimePaths.formatsPzz)}:${lineOf(pzz, "export function unpack")}`,
     },
     assessment:
       "Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet.",
@@ -387,7 +387,7 @@ function renderMarkdown(report) {
   lines.push(`- App imports borgs.json: ${report.runtimeBinding.appImportsBorgsJson ? "yes" : "no"} (${report.runtimeBinding.refs.appBorgImport})`);
   lines.push(`- Combat buildProfile consumes stat fields: ${report.runtimeBinding.buildProfileConsumesBorgsJsonFields ? "yes" : "no"} (${report.runtimeBinding.refs.buildProfile})`);
   lines.push(`- Combat constants still declare tuned formulas: ${report.runtimeBinding.combatConstantsDeclareTunedFormulas ? "yes" : "no"} (${report.runtimeBinding.refs.tunedFormulaNote})`);
-  lines.push(`- Generic PZZ parser package still TODO: ${report.runtimeBinding.formatsPzzStillTodo ? "yes" : "no"} (${report.runtimeBinding.refs.pzzTodo})`);
+  lines.push(`- Generic PZZ parser package implemented: ${report.runtimeBinding.formatsPzzStillTodo ? "no" : "yes"} (${report.runtimeBinding.refs.pzzParser})`);
   lines.push("");
   lines.push(report.runtimeBinding.assessment);
   lines.push("");
