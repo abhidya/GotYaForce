@@ -3,6 +3,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { decompressPzzpStream, unpack as unpackPzz } from "../packages/formats/src/pzz.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const rootDir = path.join(repoRoot, "user-data/GG4E/afs_data/root");
@@ -313,8 +314,9 @@ function parseHsdArc(buffer) {
   if (buffer.length < 0x20) return { parseStatus: "too small" };
 
   const first = buffer.readUInt32BE(0);
-  const wrapped = buffer.length >= 0x120 && first === 0x100 && buffer.readUInt32BE(0x100) === buffer.length - 0x100;
-  const bare = first === buffer.length;
+  const wrappedFileSize = buffer.length >= 0x120 && first === 0x100 ? buffer.readUInt32BE(0x100) : null;
+  const wrapped = wrappedFileSize !== null && wrappedFileSize > 0 && 0x100 + wrappedFileSize <= buffer.length;
+  const bare = first > 0 && first <= buffer.length;
   if (!bare && !wrapped) {
     return { parseStatus: "not recognized as bare/wrapped HSD DAT", firstWord: hex(first), sizeBytes: buffer.length };
   }
@@ -325,8 +327,14 @@ function parseHsdArc(buffer) {
   const relocCount = buffer.readUInt32BE(base + 8);
   const rootCount = buffer.readUInt32BE(base + 12);
   const externalRefCount = buffer.readUInt32BE(base + 16);
+  if (fileSize <= 0 || base + fileSize > buffer.length || rootCount > 256 || externalRefCount > 256 || relocCount > 200000) {
+    return { parseStatus: "not recognized as plausible HSD DAT", firstWord: hex(first), sizeBytes: buffer.length };
+  }
   const rootsOffset = base + 0x20 + dataBlockSize + relocCount * 4;
   const symbolTableOffset = rootsOffset + rootCount * 8 + externalRefCount * 8;
+  if (rootsOffset < base || rootsOffset > base + fileSize || symbolTableOffset > base + fileSize) {
+    return { parseStatus: "not recognized as plausible HSD DAT", firstWord: hex(first), sizeBytes: buffer.length };
+  }
   const roots = [];
 
   for (let i = 0; i < rootCount && i < 32; i += 1) {
@@ -347,12 +355,62 @@ function parseHsdArc(buffer) {
     container: wrapped ? "wrapped HSD DAT" : "bare HSD DAT",
     hsdOffset: base,
     fileSize,
+    paddedPayloadBytes: buffer.length,
+    paddingBytes: buffer.length - (base + fileSize),
     dataBlockSize,
     relocCount,
     rootCount,
     externalRefCount,
     symbolTableOffset,
     roots,
+  };
+}
+
+function summarizeCompression(meta) {
+  if (!meta) return null;
+  return {
+    algorithm: meta.algorithm,
+    sourceBytes: meta.sourceBytes,
+    producedBytes: meta.producedBytes,
+    consumedBytes: meta.consumedBytes,
+    trailingBytes: meta.trailingBytes,
+    terminated: meta.terminated,
+    terminatorOffset: meta.terminatorOffset,
+    tokenCount: meta.tokenCount,
+    literalPairs: meta.literalPairs,
+    backRefs: meta.backRefs,
+    longBackRefs: meta.longBackRefs,
+    firstControlWord: meta.firstControlWord === null ? null : hex(meta.firstControlWord, 4),
+  };
+}
+
+function sniffPayload(buffer) {
+  if (buffer.length === 0) return { kind: "empty", parseStatus: "empty payload" };
+
+  const tpl = parseTpl(buffer);
+  if (tpl.parseStatus === "ok" || tpl.parseStatus === "partial") {
+    return { kind: "tpl-texture", tpl };
+  }
+
+  const hsd = parseHsdArc(buffer);
+  if (hsd.parseStatus === "HSD DAT header recognized") {
+    return { kind: "hsd-dat", hsd };
+  }
+
+  const ptl = parsePtl(buffer);
+  if (ptl.parseStatus !== "too small") {
+    return { kind: "ptl-table-candidate", ptl };
+  }
+
+  const txg = parseTxg(buffer);
+  if (txg.parseStatus !== "too small") {
+    return { kind: "txg-candidate", txg };
+  }
+
+  return {
+    kind: "unknown-binary",
+    parseStatus: "payload decoded but format semantics not identified",
+    headWords: Array.from({ length: Math.min(8, Math.floor(buffer.length / 4)) }, (_, index) => hex(buffer.readUInt32BE(index * 4))),
   };
 }
 
@@ -363,24 +421,76 @@ function parsePzzHeader(buffer) {
   for (let i = 0; i < Math.min(16, Math.floor(buffer.length / 4)); i += 1) {
     headerWords.push(hex(buffer.readUInt32BE(i * 4)));
   }
-  return {
-    parseStatus: "header sniff only; shared @gf/formats PZZ parser is implemented but this scanner has not consumed members yet",
-    firstWordAsMemberCountCandidate: firstWord,
-    headerWords,
-    blocker: "Remaining work: consume @gf/formats pzz.unpack output here, then inspect decompressed effect members and HSD payload semantics.",
-  };
+  try {
+    const archive = unpackPzz(buffer);
+    const members = archive.members.map((member) => {
+      const payload = Buffer.from(member.payload);
+      return {
+        memberId: member.memberId,
+        index: member.index,
+        tableWord: hex(member.tableWord),
+        compressed: member.compressed,
+        blockCount: member.blockCount,
+        paddedBytes: member.paddedBytes,
+        dataOffset: member.dataOffset,
+        rawBytes: member.rawPayload.byteLength,
+        payloadBytes: member.payload.byteLength,
+        compression: summarizeCompression(member.compression),
+        sniff: sniffPayload(payload),
+      };
+    });
+    return {
+      parseStatus: "PZZ archive unpacked with shared @gf/formats parser; payload semantics are sniffed, not runtime-bound",
+      firstWordAsMemberCountCandidate: firstWord,
+      headerWords,
+      memberCount: archive.memberCount,
+      tableBytes: archive.tableBytes,
+      dataStartOffset: archive.dataStartOffset,
+      expectedSizeFromTable: archive.expectedSizeFromTable,
+      validatesAgainstFileSize: archive.validatesAgainstFileSize,
+      compressedMemberCount: members.filter((member) => member.compressed).length,
+      rawMemberCount: members.filter((member) => !member.compressed && member.payloadBytes > 0).length,
+      zeroLengthMemberCount: members.filter((member) => member.payloadBytes === 0).length,
+      payloadKinds: countKinds(members.map((member) => member.sniff.kind)),
+      members,
+      blocker: "Remaining work: map decompressed effect members to runtime HSD/effect semantics before driving sword/gun/projectile/powerup visuals.",
+    };
+  } catch (error) {
+    return {
+      parseStatus: "PZZ shared parser failed; header sniff retained for debugging",
+      firstWordAsMemberCountCandidate: firstWord,
+      headerWords,
+      error: error.message,
+      blocker: "Remaining work: fix PZZ parser coverage for this archive before effect semantics can be mapped.",
+    };
+  }
 }
 
 function parseArzHeader(buffer) {
   if (buffer.length < 16) return { parseStatus: "too small" };
   const words = [];
   for (let i = 0; i < Math.min(12, Math.floor(buffer.length / 4)); i += 1) words.push(hex(buffer.readUInt32BE(i * 4)));
-  return {
-    parseStatus: "compressed header sniff only; shared @gf/formats ARZ decompressor is implemented but this scanner has not consumed payloads yet",
-    headerWords: words,
-    firstWord: words[0],
-    blocker: "Remaining work: consume @gf/formats arz.decompress output here, then inspect HSD item/attachment model payload semantics.",
-  };
+  try {
+    const decompressed = decompressPzzpStream(buffer);
+    const payload = Buffer.from(decompressed.payload);
+    return {
+      parseStatus: "ARZ/PZZP stream decompressed with shared @gf/formats parser; payload semantics are sniffed, not runtime-bound",
+      headerWords: words,
+      firstWord: words[0],
+      compression: summarizeCompression(decompressed.meta),
+      payloadBytes: payload.length,
+      sniff: sniffPayload(payload),
+      blocker: "Remaining work: map decompressed HSD item/attachment models to borg action timing and weapon semantics.",
+    };
+  } catch (error) {
+    return {
+      parseStatus: "ARZ shared parser failed; compressed header sniff retained for debugging",
+      headerWords: words,
+      firstWord: words[0],
+      error: error.message,
+      blocker: "Remaining work: fix ARZ parser coverage for this file before item/attachment model semantics can be mapped.",
+    };
+  }
 }
 
 function parsePtl(buffer) {
@@ -560,6 +670,12 @@ function confidenceRank(value) {
   return { High: 3, Medium: 2, Low: 1 }[value] ?? 0;
 }
 
+function countKinds(values) {
+  const counts = {};
+  for (const value of values) counts[value ?? "unknown"] = (counts[value ?? "unknown"] || 0) + 1;
+  return Object.fromEntries(Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
+}
+
 function makeAssetRecord(file, parsed, sourceInventory, sourceCandidateMap, borgMap) {
   const sourceCandidate = sourceCandidateMap.get(file.path);
   const families = classifyByTerms(file, sourceInventory, borgMap);
@@ -643,6 +759,9 @@ function summarizeArchives(assets) {
   return {
     pzzCount: pzz.length,
     arzCount: arz.length,
+    pzzMemberCount: pzz.reduce((sum, asset) => sum + (asset.parse?.pzz?.memberCount ?? 0), 0),
+    pzzPayloadKinds: countKinds(pzz.flatMap((asset) => asset.parse?.pzz?.members?.map((member) => member.sniff.kind) ?? [])),
+    directArzPayloadKinds: countKinds(arz.map((asset) => asset.parse?.arz?.sniff?.kind ?? "unparsed")),
     pzzMemberCountCandidates: pzz.map((asset) => ({
       path: asset.path,
       firstWordAsMemberCountCandidate: asset.parse?.pzz?.firstWordAsMemberCountCandidate ?? null,
@@ -651,9 +770,9 @@ function summarizeArchives(assets) {
     parserStatus: [
       "Shared PZZ unpack/list support is implemented in packages/formats/src/pzz.ts.",
       "Shared ARZ/PZZP decompression is implemented in packages/formats/src/arz.ts.",
+      "This scanner now consumes the shared parser for direct effect PZZ and item-model ARZ candidates.",
     ],
     remainingBlockers: [
-      "This scanner still needs to consume @gf/formats PZZ/ARZ outputs instead of header-sniffing direct archive candidates.",
       "Decoded PZZ/ARZ payloads still need HSD/model and effect semantic mapping before they can drive sword/gun/projectile/powerup visuals.",
       "PZZ members may contain ARZ-compressed payloads, so effect archive inspection has two layers: PZZ member table first, then ARZ decompression per compressed member.",
     ],
@@ -715,8 +834,13 @@ function parseStatusLine(asset) {
     return image ? `${asset.parse.tpl.imageCount} TPL image, ${image.width}x${image.height} ${image.format}` : asset.parse.tpl.parseStatus;
   }
   if (asset.parse?.hsd) return `${asset.parse.hsd.container}, root(s): ${asset.parse.hsd.roots?.map((root) => root.name).join(", ") || "unread"}`;
-  if (asset.parse?.pzz) return `PZZ header sniff, member-count candidate ${asset.parse.pzz.firstWordAsMemberCountCandidate}`;
-  if (asset.parse?.arz) return `ARZ compressed header sniff, first word ${asset.parse.arz.firstWord}`;
+  if (asset.parse?.pzz) {
+    const kinds = Object.entries(asset.parse.pzz.payloadKinds ?? {})
+      .map(([kind, count]) => `${kind}:${count}`)
+      .join(", ");
+    return `PZZ unpacked, ${asset.parse.pzz.memberCount ?? "?"} member(s), payload kinds ${kinds || "unknown"}`;
+  }
+  if (asset.parse?.arz) return `ARZ decompressed to ${formatBytes(asset.parse.arz.payloadBytes ?? 0)}, payload kind ${asset.parse.arz.sniff?.kind ?? "unknown"}`;
   return "unparsed";
 }
 
@@ -810,6 +934,8 @@ function buildMarkdown(report) {
     lines.push(`- ${blocker}`);
   }
   lines.push(`- Direct scan found ${report.archiveAndDecompressionBlockers.pzzCount} PZZ effect archive(s) and ${report.archiveAndDecompressionBlockers.arzCount} ARZ item model archive(s).`);
+  lines.push(`- PZZ member payload kinds: ${Object.entries(report.archiveAndDecompressionBlockers.pzzPayloadKinds).map(([kind, count]) => `${kind} ${count}`).join(", ") || "none"}.`);
+  lines.push(`- Direct ARZ payload kinds: ${Object.entries(report.archiveAndDecompressionBlockers.directArzPayloadKinds).map(([kind, count]) => `${kind} ${count}`).join(", ") || "none"}.`);
   lines.push("");
   lines.push("ARZ header groups:");
   lines.push("");
@@ -828,7 +954,7 @@ function buildMarkdown(report) {
   lines.push("");
   lines.push("## Next decoding steps");
   lines.push("");
-  lines.push("- Use @gf/formats `pzz.unpack` and `arz.decompress` in this scanner, then re-run on decompressed `efct.pzz` members and `it####_mdl.arz` payloads.");
+  lines.push("- Map decompressed `efct.pzz` members and `it####_mdl.arz` HSD roots to concrete game events, borg actions, bones, and hit timing.");
   lines.push("- Add a TXG image decoder for I4, I8, and RGB565; `ptcl00.txg` already provides dimensions, formats, and byte-exact payload spans.");
   lines.push("- Reverse PTL record fields by correlating PTL records, REF indexes, TXG texture indexes, and Dolphin captures of fire/beam/muzzle/impact/trail effects.");
   lines.push("- For sword/gun attachment visuals, inspect decompressed `it####_mdl.arz` as HSD models and map them to MOT/hit timing rather than creating placeholder effects.");

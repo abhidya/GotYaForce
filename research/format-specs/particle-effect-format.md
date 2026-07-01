@@ -1,6 +1,6 @@
 # Gotcha Force particle/effect format notes
 
-Generated: 2026-07-01T03:35:49.710Z
+Generated: 2026-07-01T03:42:49.855Z
 Scanner: `scripts/inspect-particle-effects.mjs`
 
 ## Inputs
@@ -23,7 +23,7 @@ Scanner: `scripts/inspect-particle-effects.mjs`
 
 ## Confirmed byte-level observations
 
-- `user-data/GG4E/afs_data/root/efct.pzz` (572.0 KiB): PZZ header sniff, member-count candidate 3.
+- `user-data/GG4E/afs_data/root/efct.pzz` (572.0 KiB): PZZ unpacked, 3 member(s), payload kinds hsd-dat:2, tpl-texture:1.
 - `user-data/GG4E/afs_data/root/efct00_mdl.arc` (408.2 KiB): bare HSD DAT, root(s): scene_data.
 - `user-data/GG4E/afs_data/root/efct00.tpl` (32.1 KiB): 1 TPL image, 256x64 RGB5A3.
 - `user-data/GG4E/afs_data/root/efct01_mdl.arc` (398.7 KiB): bare HSD DAT, root(s): scene_data.
@@ -62,7 +62,7 @@ The scanner sees 22 offsets before `0xffffffff`, 21 records of 16+ bytes, and 2 
 | `user-data/GG4E/afs_data/root/pl050c.pzz` | compressed archive | 928.0 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl050c (FIRE DRAGON) metadata contains fire / PZZ unpack/list integration before browser conversion |
 | `user-data/GG4E/afs_data/root/pl0006.pzz` | compressed archive | 926.0 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0006 (FLAME NINJA) metadata contains flame / PZZ unpack/list integration before browser conversion |
 | `user-data/GG4E/afs_data/root/pl0502.pzz` | compressed archive | 826.0 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0502 (PHOENIX DRAGON) metadata contains phoenix / PZZ unpack/list integration before browser conversion |
-| `user-data/GG4E/afs_data/root/efct.pzz` | shared effect PZZ archive | 572.0 KiB | Medium | efct prefix is the shared battle-effect asset group / Remaining work: consume @gf/formats pzz.unpack output here, then inspect decompressed effect members and HSD payload semantics. |
+| `user-data/GG4E/afs_data/root/efct.pzz` | shared effect PZZ archive | 572.0 KiB | Medium | efct prefix is the shared battle-effect asset group / Remaining work: map decompressed effect members to runtime HSD/effect semantics before driving sword/gun/projectile/powerup visuals. |
 | `user-data/GG4E/afs_data/root/efct00_mdl.arc` | HSD effect model | 408.2 KiB | Medium | efct prefix is the shared battle-effect asset group |
 | `user-data/GG4E/afs_data/root/efct01_mdl.arc` | HSD effect model | 398.7 KiB | Medium | efct prefix is the shared battle-effect asset group |
 | `user-data/GG4E/afs_data/root/pl0006mot.bin` | animation/motion bank | 273.1 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0006 (FLAME NINJA) metadata contains flame / MOT bank semantic labels for attack/projectile timing |
@@ -82,7 +82,7 @@ The scanner sees 22 offsets before `0xffffffff`, 21 records of 16+ bytes, and 2 
 | `user-data/GG4E/afs_data/root/pl0104.pzz` | compressed archive | 1.05 MiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0104 (BEAM GUNNER) metadata contains beam / PZZ unpack/list integration before browser conversion |
 | `user-data/GG4E/afs_data/root/pl0509.pzz` | compressed archive | 856.0 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0509 (PLASMA DRAGON) metadata contains plasma / PZZ unpack/list integration before browser conversion |
 | `user-data/GG4E/afs_data/root/pl0706.pzz` | compressed archive | 776.0 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0706 (BEAM SAMURAI) metadata contains beam / PZZ unpack/list integration before browser conversion |
-| `user-data/GG4E/afs_data/root/efct.pzz` | shared effect PZZ archive | 572.0 KiB | Medium | efct prefix is the shared battle-effect asset group / Remaining work: consume @gf/formats pzz.unpack output here, then inspect decompressed effect members and HSD payload semantics. |
+| `user-data/GG4E/afs_data/root/efct.pzz` | shared effect PZZ archive | 572.0 KiB | Medium | efct prefix is the shared battle-effect asset group / Remaining work: map decompressed effect members to runtime HSD/effect semantics before driving sword/gun/projectile/powerup visuals. |
 | `user-data/GG4E/afs_data/root/pl0e01.pzz` | compressed archive | 498.0 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0e01 (BEAM SATELLITE) metadata contains beam / PZZ unpack/list integration before browser conversion |
 | `user-data/GG4E/afs_data/root/pl0c02.pzz` | compressed archive | 452.0 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0c02 (BEAM TANK) metadata contains beam / PZZ unpack/list integration before browser conversion |
 | `user-data/GG4E/afs_data/root/pl0a03mot.bin` | animation/motion bank | 412.4 KiB | Medium | source weapons/effects/projectiles inventory: linked Borg pl0a03 (BEAM WING BLUE) metadata contains beam / MOT bank semantic labels for attack/projectile timing |
@@ -209,10 +209,12 @@ The scanner sees 22 offsets before `0xffffffff`, 21 records of 16+ bytes, and 2 
 
 - Shared PZZ unpack/list support is implemented in packages/formats/src/pzz.ts.
 - Shared ARZ/PZZP decompression is implemented in packages/formats/src/arz.ts.
-- This scanner still needs to consume @gf/formats PZZ/ARZ outputs instead of header-sniffing direct archive candidates.
+- This scanner now consumes the shared parser for direct effect PZZ and item-model ARZ candidates.
 - Decoded PZZ/ARZ payloads still need HSD/model and effect semantic mapping before they can drive sword/gun/projectile/powerup visuals.
 - PZZ members may contain ARZ-compressed payloads, so effect archive inspection has two layers: PZZ member table first, then ARZ decompression per compressed member.
 - Direct scan found 1 PZZ effect archive(s) and 90 ARZ item model archive(s).
+- PZZ member payload kinds: hsd-dat 2, tpl-texture 1.
+- Direct ARZ payload kinds: hsd-dat 90.
 
 ARZ header groups:
 
@@ -232,7 +234,7 @@ ARZ header groups:
 
 ## Next decoding steps
 
-- Use @gf/formats `pzz.unpack` and `arz.decompress` in this scanner, then re-run on decompressed `efct.pzz` members and `it####_mdl.arz` payloads.
+- Map decompressed `efct.pzz` members and `it####_mdl.arz` HSD roots to concrete game events, borg actions, bones, and hit timing.
 - Add a TXG image decoder for I4, I8, and RGB565; `ptcl00.txg` already provides dimensions, formats, and byte-exact payload spans.
 - Reverse PTL record fields by correlating PTL records, REF indexes, TXG texture indexes, and Dolphin captures of fire/beam/muzzle/impact/trail effects.
 - For sword/gun attachment visuals, inspect decompressed `it####_mdl.arz` as HSD models and map them to MOT/hit timing rather than creating placeholder effects.
