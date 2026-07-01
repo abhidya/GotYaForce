@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T02:55:10.420Z",
+  "generatedAt": "2026-07-01T03:00:07.609Z",
   "region": "D:\\manny\\Documents\\CustomCard\\.codex\\runtime\\node\\node-v24.18.0-win-x64\\node.exe",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -20,6 +20,11 @@
     "runtimeStageWallCollision": true,
     "runtimeStageCeilingCollision": true,
     "runtimeProjectileFxFromExportedTextures": true,
+    "runtimeBorgAnimationDirectMatches": 1274,
+    "runtimeBorgAnimationFallbacks": 75,
+    "runtimeBorgAnimationMissing": 3,
+    "runtimeBoostFlyUsesExportedBoostClip": true,
+    "runtimeItemsOrPowerupsModeled": false,
     "runtimeAudioFromExportedCues": true
   },
   "screens": [
@@ -1447,6 +1452,135 @@
       ]
     }
   },
+  "borgAnimationCoverage": {
+    "path": "research/asset-inventory/borg-animation-action-gaps.md",
+    "exists": true,
+    "indexesFound": 104,
+    "indexesParsed": 104,
+    "exportedBanks": 4653,
+    "canonicalSlotChecks": 1352,
+    "directRuntimeMatches": 1274,
+    "runtimeFallbacks": 75,
+    "missingRuntimeMatches": 3,
+    "parseErrors": 0,
+    "slotRows": [
+      {
+        "slot": "idle",
+        "direct": 104,
+        "fallback": 0,
+        "missing": 0,
+        "notes": "none"
+      },
+      {
+        "slot": "move",
+        "direct": 101,
+        "fallback": 0,
+        "missing": 3,
+        "notes": "missing x3"
+      },
+      {
+        "slot": "dash_fwd",
+        "direct": 100,
+        "fallback": 4,
+        "missing": 0,
+        "notes": "idle -> idle x3; dash -> boost x1"
+      },
+      {
+        "slot": "dash_back",
+        "direct": 100,
+        "fallback": 4,
+        "missing": 0,
+        "notes": "idle -> idle x3; dash -> boost x1"
+      },
+      {
+        "slot": "dash_left",
+        "direct": 96,
+        "fallback": 8,
+        "missing": 0,
+        "notes": "idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1"
+      },
+      {
+        "slot": "dash_right",
+        "direct": 90,
+        "fallback": 14,
+        "missing": 0,
+        "notes": "dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1"
+      },
+      {
+        "slot": "jump",
+        "direct": 101,
+        "fallback": 3,
+        "missing": 0,
+        "notes": "idle -> idle x3"
+      },
+      {
+        "slot": "fly",
+        "direct": 101,
+        "fallback": 3,
+        "missing": 0,
+        "notes": "idle -> idle x3"
+      },
+      {
+        "slot": "shoot",
+        "direct": 102,
+        "fallback": 2,
+        "missing": 0,
+        "notes": "idle -> idle x2"
+      },
+      {
+        "slot": "melee",
+        "direct": 96,
+        "fallback": 8,
+        "missing": 0,
+        "notes": "idle -> idle x3; move -> move x5"
+      },
+      {
+        "slot": "special",
+        "direct": 98,
+        "fallback": 6,
+        "missing": 0,
+        "notes": "idle -> idle x2; attack -> attack_s0 x4"
+      },
+      {
+        "slot": "hit",
+        "direct": 92,
+        "fallback": 12,
+        "missing": 0,
+        "notes": "down -> death x3; idle -> idle x9"
+      },
+      {
+        "slot": "death",
+        "direct": 93,
+        "fallback": 11,
+        "missing": 0,
+        "notes": "down -> guard_s0 x3; idle -> idle x8"
+      }
+    ],
+    "runtimeResolverRefs": {
+      "slotLabels": "apps/game/src/main.ts:333",
+      "slotFallbacks": "apps/game/src/main.ts:354",
+      "pickAnimBank": "apps/game/src/main.ts:421",
+      "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:111"
+    },
+    "boostFlyMapped": true
+  },
+  "powerupRuntimeGap": {
+    "battleStateHasItems": false,
+    "battleRuntimeSpawnsDrops": false,
+    "evidenceRefs": {
+      "battleState": "packages/combat/src/types.ts:177",
+      "deployNextBorg": "packages/combat/src/battle.ts:122",
+      "deathProcessing": "packages/combat/src/battle.ts:249",
+      "particleInventory": "research/asset-inventory/particle-effect-inventory.json",
+      "hudInventory": "research/asset-inventory/ui-hud-assets.md"
+    },
+    "assetLeads": {
+      "itemModelArzCount": 90,
+      "asIconDocumented": true,
+      "comhitDocumented": true
+    },
+    "assessment": "Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory."
+  },
   "audioRuntime": {
     "audioPackageDependency": true,
     "runtimeImportsAudioManager": true,
@@ -1501,6 +1635,7 @@
     "Wire stageIdForArena to a traced arena-name -> st## table; public exports now cover 40 visual stages, but runtime fallback still collapses non-st## arenas to st00.",
     "Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.",
     "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
-    "Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges."
+    "Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges.",
+    "Resolve remaining borg animation fallbacks/misses from research/asset-inventory/borg-animation-action-gaps.md, especially missing move clips and fallback hit/death labels."
   ]
 }

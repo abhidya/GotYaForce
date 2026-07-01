@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-01T02:55:10.420Z
+Generated: 2026-07-01T03:00:07.609Z
 
 ## Summary
 
@@ -17,6 +17,10 @@ Generated: 2026-07-01T02:55:10.420Z
 - Runtime lateral wall collision from STIH: yes
 - Runtime upward ceiling collision from STIH: yes
 - Runtime projectile FX from exported textures: yes
+- Runtime borg animation direct matches: 1274/1352
+- Runtime borg animation fallbacks/missing: 75/3
+- Runtime fly uses exported boost clip: yes
+- Runtime items/powerups modeled: no
 - Runtime audio from exported cues: yes
 - Runtime stage fallback: st00
 - Runtime accepts exported hex stage ids: yes
@@ -81,6 +85,38 @@ Projectile renderer uses exported FX textures: yes
 | /fx/efct00_atlas.png | yes |
 | /fx/hit_spark.png | yes |
 
+## Borg Animation Coverage
+
+Validator report: research/asset-inventory/borg-animation-action-gaps.md
+Runtime resolver refs: apps/game/src/main.ts:333, apps/game/src/main.ts:354, apps/game/src/main.ts:421, apps/game/src/sim/battleScene.ts:111
+Animation indexes parsed: 104/104; exported banks: 4653; canonical slot checks: 1352.
+Direct matches: 1274; fallbacks: 75; missing: 3; parse errors: 0.
+Fly/boost mapping: fly state resolves through exported boost labels.
+
+| Slot | Direct | Fallback | Missing | Notes |
+| --- | --- | --- | --- | --- |
+| idle | 104 | 0 | 0 | none |
+| move | 101 | 0 | 3 | missing x3 |
+| dash_fwd | 100 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
+| dash_back | 100 | 4 | 0 | idle -> idle x3; dash -> boost x1 |
+| dash_left | 96 | 8 | 0 | idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1 |
+| dash_right | 90 | 14 | 0 | dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1 |
+| jump | 101 | 3 | 0 | idle -> idle x3 |
+| fly | 101 | 3 | 0 | idle -> idle x3 |
+| shoot | 102 | 2 | 0 | idle -> idle x2 |
+| melee | 96 | 8 | 0 | idle -> idle x3; move -> move x5 |
+| special | 98 | 6 | 0 | idle -> idle x2; attack -> attack_s0 x4 |
+| hit | 92 | 12 | 0 | down -> death x3; idle -> idle x9 |
+| death | 93 | 11 | 0 | down -> guard_s0 x3; idle -> idle x8 |
+
+## Powerup / Item Runtime Gap
+
+Items/powerups in BattleState: no
+Runtime spawns item/drop/pickup entities: no
+Evidence refs: packages/combat/src/types.ts:177, packages/combat/src/battle.ts:122, packages/combat/src/battle.ts:249, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
+Asset leads: item model ARZ count 90, as_icon documented yes, comhit documented yes.
+Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory.
+
 ## Audio
 
 Audio package dependency: yes
@@ -112,6 +148,7 @@ Runtime screen comments and flow are Challenge-oriented, while packages/assets/d
 - Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.
 - Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.
 - Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges.
+- Resolve remaining borg animation fallbacks/misses from research/asset-inventory/borg-animation-action-gaps.md, especially missing move clips and fallback hit/death labels.
 
 ## Verification
 

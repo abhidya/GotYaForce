@@ -418,6 +418,73 @@ function inspectCombatFx() {
   };
 }
 
+function inspectBorgAnimationCoverage() {
+  const reportPath = "research/asset-inventory/borg-animation-action-gaps.md";
+  const report = readText(reportPath);
+  const metric = (name) => {
+    const match = new RegExp(`\\| ${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\|\\s*(\\d+) \\|`).exec(report);
+    return match ? Number.parseInt(match[1], 10) : null;
+  };
+  const slotRows = [...report.matchAll(/\| `([^`]+)` \|\s*(\d+) \|\s*(\d+) \|\s*(\d+) \| ([^|]+) \|/g)].map((match) => ({
+    slot: match[1],
+    direct: Number.parseInt(match[2], 10),
+    fallback: Number.parseInt(match[3], 10),
+    missing: Number.parseInt(match[4], 10),
+    notes: match[5].trim(),
+  }));
+  const main = readText("apps/game/src/main.ts");
+  const battleScene = readText("apps/game/src/sim/battleScene.ts");
+  return {
+    path: reportPath,
+    exists: fs.existsSync(abs(reportPath)),
+    indexesFound: metric("Animation indexes found"),
+    indexesParsed: metric("Animation indexes parsed"),
+    exportedBanks: metric("Total exported banks in parsed indexes"),
+    canonicalSlotChecks: metric("Canonical slot checks"),
+    directRuntimeMatches: metric("Direct runtime matches"),
+    runtimeFallbacks: metric("Runtime fallbacks"),
+    missingRuntimeMatches: metric("Missing runtime matches"),
+    parseErrors: metric("Parse errors"),
+    slotRows,
+    runtimeResolverRefs: {
+      slotLabels: `apps/game/src/main.ts:${lineOf(main, "const SLOT_LABELS")}`,
+      slotFallbacks: `apps/game/src/main.ts:${lineOf(main, "const SLOT_FALLBACKS")}`,
+      pickAnimBank: `apps/game/src/main.ts:${lineOf(main, "function pickAnimBank")}`,
+      battleSceneSlotMapping: `apps/game/src/sim/battleScene.ts:${lineOf(battleScene, "private slotForBorg")}`,
+    },
+    boostFlyMapped:
+      main.includes("fly: [/^boost$/") &&
+      battleScene.includes('if (b.state === "fly") return "fly"'),
+  };
+}
+
+function inspectPowerupRuntimeGap() {
+  const types = readText("packages/combat/src/types.ts");
+  const battle = readText("packages/combat/src/battle.ts");
+  const particleInventory = readJson("research/asset-inventory/particle-effect-inventory.json");
+  const hudInventory = readText("research/asset-inventory/ui-hud-assets.md");
+  return {
+    battleStateHasItems:
+      /(?:items|pickups|powerups|drops)\s*:/.test(types),
+    battleRuntimeSpawnsDrops:
+      /\b(?:spawnItem|spawnPickup|spawnPowerup|createItem|createPickup|createPowerup)\b/.test(battle),
+    evidenceRefs: {
+      battleState: `packages/combat/src/types.ts:${lineOf(types, "export interface BattleState")}`,
+      deployNextBorg: `packages/combat/src/battle.ts:${lineOf(battle, "private deployNext")}`,
+      deathProcessing: `packages/combat/src/battle.ts:${lineOf(battle, "Process any deaths")}`,
+      particleInventory: "research/asset-inventory/particle-effect-inventory.json",
+      hudInventory: "research/asset-inventory/ui-hud-assets.md",
+    },
+    assetLeads: {
+      itemModelArzCount: particleInventory.value?.summary?.itemModelArzCount ?? particleInventory.value?.itemModelArzCount ?? null,
+      asIconDocumented: hudInventory.includes("as_icon.tpl"),
+      comhitDocumented: hudInventory.includes("comhit.bin"),
+    },
+    assessment:
+      "Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory.",
+  };
+}
+
 function inspectAudioRuntime() {
   const main = readText("apps/game/src/main.ts");
   const gamePackage = readJson("apps/game/package.json");
@@ -449,6 +516,8 @@ function buildReport() {
   const uiTextureExports = inspectUiTextureExports();
   const modeNamingRisks = inspectModeNamingRisks();
   const combatFx = inspectCombatFx();
+  const borgAnimationCoverage = inspectBorgAnimationCoverage();
+  const powerupRuntimeGap = inspectPowerupRuntimeGap();
   const audioRuntime = inspectAudioRuntime();
   const summary = {
     screens: screens.length,
@@ -470,6 +539,11 @@ function buildReport() {
       combatFx.projectileVisualKindInState &&
       combatFx.projectileVisualKindDerivedFromProfile &&
       combatFx.rendererUsesExportedProjectileTextures,
+    runtimeBorgAnimationDirectMatches: borgAnimationCoverage.directRuntimeMatches,
+    runtimeBorgAnimationFallbacks: borgAnimationCoverage.runtimeFallbacks,
+    runtimeBorgAnimationMissing: borgAnimationCoverage.missingRuntimeMatches,
+    runtimeBoostFlyUsesExportedBoostClip: borgAnimationCoverage.boostFlyMapped,
+    runtimeItemsOrPowerupsModeled: powerupRuntimeGap.battleStateHasItems || powerupRuntimeGap.battleRuntimeSpawnsDrops,
     runtimeAudioFromExportedCues:
       audioRuntime.audioPackageDependency &&
       audioRuntime.runtimeImportsAudioManager &&
@@ -488,6 +562,8 @@ function buildReport() {
     uiSceneExports,
     uiTextureExports,
     combatFx,
+    borgAnimationCoverage,
+    powerupRuntimeGap,
     audioRuntime,
     modeNamingRisks,
     nextMostUsefulReplacements: [
@@ -495,6 +571,7 @@ function buildReport() {
       "Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.",
       "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
       "Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges.",
+      "Resolve remaining borg animation fallbacks/misses from research/asset-inventory/borg-animation-action-gaps.md, especially missing move clips and fallback hit/death labels.",
     ],
   };
 }
@@ -532,6 +609,10 @@ function renderMarkdown(report) {
   add(`- Runtime lateral wall collision from STIH: ${report.summary.runtimeStageWallCollision ? "yes" : "no"}`);
   add(`- Runtime upward ceiling collision from STIH: ${report.summary.runtimeStageCeilingCollision ? "yes" : "no"}`);
   add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
+  add(`- Runtime borg animation direct matches: ${report.summary.runtimeBorgAnimationDirectMatches}/${report.borgAnimationCoverage.canonicalSlotChecks}`);
+  add(`- Runtime borg animation fallbacks/missing: ${report.summary.runtimeBorgAnimationFallbacks}/${report.summary.runtimeBorgAnimationMissing}`);
+  add(`- Runtime fly uses exported boost clip: ${report.summary.runtimeBoostFlyUsesExportedBoostClip ? "yes" : "no"}`);
+  add(`- Runtime items/powerups modeled: ${report.summary.runtimeItemsOrPowerupsModeled ? "yes" : "no"}`);
   add(`- Runtime audio from exported cues: ${report.summary.runtimeAudioFromExportedCues ? "yes" : "no"}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
   add(`- Runtime accepts exported hex stage ids: ${report.summary.runtimeAcceptsHexStageIds ? "yes" : "no"}`);
@@ -588,6 +669,32 @@ function renderMarkdown(report) {
       { title: "Exists", value: (row) => row.exists ? "yes" : "no" },
     ]),
   );
+  add();
+  add("## Borg Animation Coverage");
+  add();
+  add(`Validator report: ${report.borgAnimationCoverage.path}`);
+  add(`Runtime resolver refs: ${Object.values(report.borgAnimationCoverage.runtimeResolverRefs).join(", ")}`);
+  add(`Animation indexes parsed: ${report.borgAnimationCoverage.indexesParsed}/${report.borgAnimationCoverage.indexesFound}; exported banks: ${report.borgAnimationCoverage.exportedBanks}; canonical slot checks: ${report.borgAnimationCoverage.canonicalSlotChecks}.`);
+  add(`Direct matches: ${report.borgAnimationCoverage.directRuntimeMatches}; fallbacks: ${report.borgAnimationCoverage.runtimeFallbacks}; missing: ${report.borgAnimationCoverage.missingRuntimeMatches}; parse errors: ${report.borgAnimationCoverage.parseErrors}.`);
+  add(`Fly/boost mapping: ${report.borgAnimationCoverage.boostFlyMapped ? "fly state resolves through exported boost labels" : "fly state is not proven to resolve through exported boost labels"}.`);
+  add();
+  add(
+    mdTable(report.borgAnimationCoverage.slotRows, [
+      { title: "Slot", value: (row) => row.slot },
+      { title: "Direct", value: (row) => row.direct },
+      { title: "Fallback", value: (row) => row.fallback },
+      { title: "Missing", value: (row) => row.missing },
+      { title: "Notes", value: (row) => row.notes },
+    ]),
+  );
+  add();
+  add("## Powerup / Item Runtime Gap");
+  add();
+  add(`Items/powerups in BattleState: ${report.powerupRuntimeGap.battleStateHasItems ? "yes" : "no"}`);
+  add(`Runtime spawns item/drop/pickup entities: ${report.powerupRuntimeGap.battleRuntimeSpawnsDrops ? "yes" : "no"}`);
+  add(`Evidence refs: ${Object.values(report.powerupRuntimeGap.evidenceRefs).join(", ")}`);
+  add(`Asset leads: item model ARZ count ${report.powerupRuntimeGap.assetLeads.itemModelArzCount ?? "unknown"}, as_icon documented ${report.powerupRuntimeGap.assetLeads.asIconDocumented ? "yes" : "no"}, comhit documented ${report.powerupRuntimeGap.assetLeads.comhitDocumented ? "yes" : "no"}.`);
+  add(report.powerupRuntimeGap.assessment);
   add();
   add("## Audio");
   add();
