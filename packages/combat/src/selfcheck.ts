@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 import { createBattle } from "./battle.js";
+import { stepAI } from "./ai.js";
 import { projectileVisualKindForProfile } from "./combat.js";
 import { JUMP } from "./constants.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
@@ -257,6 +258,43 @@ function assertProjectileVisualKinds(borgs: BorgStats[]): void {
   console.log(`[selfcheck] projectile visuals mapped gun/beam/flame assets; spawned ${projectile.visualKind}`);
 }
 
+function assertAiKeepsLockedTarget(borgs: BorgStats[]): void {
+  const self = fakeRuntime("self", 0, 0);
+  const closerEnemy = fakeRuntime("closer", 1, -800);
+  const lockedEnemy = fakeRuntime("locked", 1, 900);
+  self.lockTarget = lockedEnemy.uid;
+
+  const input = stepAI(self, buildProfile(borgById(borgs, "pl0615")), [self, closerEnemy, lockedEnemy]);
+  if (input.moveX <= 0) {
+    throw new Error("[selfcheck] AI target memory failed: ignored valid lockTarget for nearer enemy");
+  }
+  console.log("[selfcheck] AI kept valid lockTarget before nearest-enemy fallback");
+}
+
+function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
+  return {
+    uid,
+    borgId: "pl0615",
+    team,
+    ownerPlayer: team === 0 ? "p1" : null,
+    hp: 100,
+    maxHp: 100,
+    pos: { x, y: 0, z: 0 },
+    rotY: 0,
+    vel: { x: 0, y: 0, z: 0 },
+    grounded: true,
+    airJumps: 0,
+    state: "idle",
+    stateTime: 0,
+    anim: "idle",
+    ammo: 0,
+    cooldowns: {},
+    invincTimer: 0,
+    lockTarget: null,
+    alive: true,
+  };
+}
+
 export function main(): number {
   const borgs = loadBorgs();
   console.log(`[selfcheck] loaded ${borgs.length} borgs from borgs.json`);
@@ -265,6 +303,7 @@ export function main(): number {
   assertTriangleWallCollision(borgs);
   assertTriangleCeilingCollision(borgs);
   assertProjectileVisualKinds(borgs);
+  assertAiKeepsLockedTarget(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

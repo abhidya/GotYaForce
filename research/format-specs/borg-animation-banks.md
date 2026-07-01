@@ -112,6 +112,20 @@ and other big special actions. These are the banks the game should trigger on
 
 ## Decomp cross-reference — honest status
 
+**Update (2026-07-01, behavior-notes.md §4r):** `0x80066ec0`/`0x80066f1c` (+
+`0x800670dc`) have now been fully decompiled and are **not** animation-request
+helpers at all — they're a heading/turn-rate interpolator (divide a remaining
+turn angle by a step count, then apply one step per call). The "Likely an
+animation/action request" guess below was wrong; there is no mode→(group,slot)
+dispatch table to find in these three functions. This doesn't change any of the
+bank-label confidences below, but it does mean nobody should keep chasing these
+three addresses looking for the death/victory mode constants — see §4r for the
+full correction and what it fixed instead (a real bake-script mislabeling bug:
+group-4 slot-0 was tagged as a generic `special_s0` instead of the knockdown
+pose, which was already identified as high-confidence `down_candidate` right
+below — see "Baked output" section for the fix applied to already-baked
+`anim_index.json` files and `apps/game/src/main.ts`'s slot-matching).
+
 The decomp (`research/decomp/behavior-notes.md`) located anim-request helpers
 `0x80066ec0` (`(borg, int mode)`, "Likely an animation/action request", observed
 mode constants 2/0xf/0x10) and `0x80066f1c` ("apply/advance current action"), and
@@ -157,3 +171,18 @@ group/slot/label/frames/animJoints/root-spans.
 Re-bake any borg: `node scripts/bake-all-borg-anims.mjs <plId> GG4E`.
 Inspect any mot without baking: `dotnet user-data/GG4E/borg-anim-allbanks/...
 manifest <mot.bin> <model.arc> 0x100`.
+
+**Group-4-slot-0 mislabel fixed (2026-07-01, behavior-notes.md §4r):** the bake
+script's `label()` tagged every group-4 bank `special_s<slot>`, including slot 0 —
+even though this file's own cross-reference table above already lists `g4s0` as
+high-confidence **knockdown** (`down_candidate` anchor), not a special move. That
+meant `apps/game/src/main.ts`'s `PREFERRED_LABELS` overrides for pl0615/pl0008/
+pl000c/pl0105/pl0109 pointed their "special" animation slot at the knockdown pose,
+and the `down` combat state had no real match and fell back to a hit/death clip.
+Fixed: `scripts/bake-all-borg-anims.mjs`'s `label()` now emits `down_s0` for group
+4 slot 0 specifically (all other group-4 slots still `special_s<N>`); all 101
+already-baked `apps/game/public/models/*/anim_index.json` files that had a
+`special_s0` group-4-slot-0 entry were patched in place to `down_s0` (bone/keyframe
+JSON files unchanged — only the semantic label string, so no re-bake was needed);
+`main.ts`'s `SLOT_LABELS.down`/`PREFERRED_LABELS` were updated to match. The 5
+affected borgs' "special" overrides now point at `special_s1` instead.

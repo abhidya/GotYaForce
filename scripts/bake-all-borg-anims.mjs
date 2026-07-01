@@ -59,7 +59,14 @@ function label(group, slot, frames, loopErr, spanZ, spanX) {
     if (frames <= 16) return `hit_react_s${s}`;
     return `guard_s${s}`;
   }
-  if (g === 4) return `special_s${s}`;
+  if (g === 4) {
+    // g4s0 is the knockdown/"down" pose, not a generic special — see
+    // research/format-specs/borg-animation-banks.md's decomp cross-reference
+    // (cross-referenced high confidence: knockdown=g4s0, matches the prior
+    // human-labeled `down_candidate` anchor) and behavior-notes.md s5 item 3.
+    if (s === 0) return "down_s0";
+    return `special_s${s}`;
+  }
   if (g === 5) {
     // longest non-looping clips: death / victory
     if (s === 1) return "death";

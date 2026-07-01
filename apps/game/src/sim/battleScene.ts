@@ -20,6 +20,16 @@ export interface BorgAssets {
   loadModel(borgId: string): Promise<THREE.Object3D | null>;
   /** Resolve a baked AnimationClip for (borgId, slot). Null if unavailable. */
   loadClip(borgId: string, slot: AnimSlot): Promise<THREE.AnimationClip | null>;
+  /**
+   * Optional: called exactly once per animation-slot transition (edge-triggered, same
+   * pattern as the existing hit-spark VFX trigger below — NOT fired every frame and NOT
+   * fired on state re-entry while already in that slot). main.ts uses this to trigger
+   * combat SFX. See behavior-notes.md (v): no ROM per-action audio-event table was
+   * recoverable (AnimAudioEventLookup @ 0x801a7640 is a red-herring symbol name — generic
+   * nlQSort<T> plumbing, not a decoded frame/sound-id table), so slot->sound mapping here
+   * is an honest TUNED placeholder, not a ROM-derived cue.
+   */
+  onSlotEnter?(borgId: string, slot: AnimSlot, uid: string): void;
 }
 
 export type AnimSlot =
@@ -141,7 +151,9 @@ export class BattleScene {
       actor.group.rotation.y = b.rotY;
       // Animation slot from state.
       const slot = this.slotForBorg(b);
-      if (slot === "hit" && actor.lastSeenSlot !== "hit") this.spawnHitSpark(actor.group.position);
+      const slotChanged = actor.lastSeenSlot !== slot;
+      if (slot === "hit" && slotChanged) this.spawnHitSpark(actor.group.position);
+      if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid);
       actor.lastSeenSlot = slot;
       if (actor.ready) this.playSlot(actor, slot);
       // Dim/hide once dead so the death pose reads (sim culls dead borgs next frame).

@@ -575,6 +575,800 @@ remains the separate `object+1000 -> zz_0066298_ -> type-multiplier-matrix-802c5
 §l. Next implementation work should focus on resolving `object+1000`/slot roster data and the
 full `zz_003cd5c_` formula, not on live-confirming `+0x88` against display type.
 
+### (n) `object+1000` write-path and spawn-ID byte packing resolved (2026-07-01)
+
+Directly answers the Priority-1 open question from `HANDOFF-PROMPT.md` ("resolving what
+populates that slot table is the next target"). Full chain, all statically confirmed from the
+export + a direct raw-ROM table read (`dol.py`-style, no live capture needed):
+
+- `build_challenge_battle_setup` (`0x801962c4`, `ghidra-export/chunk_0048.c:243`) is the roster
+  builder for challenge/force battles. Per slot, it calls `zz_0196eb8_(group)` (`0x80196eb8`,
+  `chunk_0048.c:685`) to pick a uniformly-random 16-bit value from a `-1`-terminated array
+  reached via `(&PTR_DAT_80380804)[group]`, and stores the result at
+  `PTR_DAT_80433934[slotByteOffset*0x348 + 0x1e8]` (the slot's roster-entry table).
+- Later in the same function (`chunk_0048.c:377`), that roster-entry value is copied into the
+  slot-indexed table read by live gameplay: `*(short *)(PTR_DAT_80433934 + slot*2 + 0x10) =
+  *(short *)(PTR_DAT_80433934 + slotRosterOffset + 0x1e8)`. This is the exact write to
+  `PTR_DAT_80433934[slot*2+0x10]` that active-object init (`chunk_0006.c` etc.) later copies into
+  `object+1000` — closing the loop from "random pool pick" to "the field `zz_0066298_` reads for
+  type-category lookup."
+- **The 80-entry pool table itself is real roster data, not code**: read directly from
+  `boot.dol` at `0x80380804` (80 pointers, one per challenge/mission "group") -> each points to a
+  `-1`(`0xffff`)-terminated `short[]` of spawn IDs. Dumped in full to
+  `research/decomp/data/spawn-pools-80380804.json`.
+- **Spawn-ID byte packing confirmed**: every ID in every one of the 80 pools decomposes cleanly
+  as `family = id >> 8` (high byte), `variant = id & 0xff` (low byte) — e.g. group 1 = `[0,1,2,3,4,5]`
+  (family 0, variants 0-5), group 5 = `[1024,1026,1028,1029,1031,1033]` (family 4, variants
+  `0,2,4,5,7,9`). The union of `family` across all 80 pools is exactly `{0..15}` (16 values) —
+  and this is exactly the `(param_1[0], param_1[1])` pair `zz_0066298_` reads from `object+1000`.
+  So: `object+1000`'s high byte is the borg's spawn-time *family* (the `b0` row selector into the
+  remap table), and the low byte is the *variant-within-family* index (the `b1` column selector).
+- **The `0x802f2e28` remap table actually has 16 rows, not 14**: a direct pointer-table read
+  (`0x802f2e28`..`0x802f2e64`, 16 valid consecutive pointers, index 16 onward is garbage/invalid)
+  confirms two more rows exist past the previously-extracted 14 (`family 14 -> [18]*6`,
+  `family 15 -> [19,19,19,19,19,11,19,19]`) that the earlier extraction pass missed, matching the
+  16-value family union above exactly. Row length is `(nextRowPtr - thisRowPtr) / 2`, cross-checked
+  against `boot.dol` directly. `research/decomp/data/type-category-remap-802f2e28.json` has been
+  corrected/extended to 16 rows.
+- **Still open** (do not wire without this): which of `borgs.json`'s 208 entries (keyed by
+  `plNNNN`/`number`) corresponds to which `family*256+variant` spawn ID. The `number` field is
+  almost certainly a separate "GET Data No." collection/gallery index (`pl0000` -> `number: 15`
+  doesn't decompose validly against the 16-row/6-44-length family table), not the internal spawn
+  ID. The 80 mission pools only sample *subsets* of each family's roster (gaps in variant indices
+  are expected, not evidence of a smaller family), so they can't be inverted into a full
+  `plNNNN -> family/variant` table by themselves. `borgs.json`'s 20 `tribe` values (Machine Borg
+  35, Death Borg 34, Dragon Borg 18, ... down to Idol Borg 1) also outnumber the 16 confirmed
+  family bytes, so `tribe` is not a 1:1 stand-in for `family` either — some tribes likely share a
+  family byte for type-effectiveness purposes, or a few tribes (very small counts: Idol/Nurse/
+  Demon/Bug) are non-selectable/story-only and excluded from the spawn-ID family space entirely.
+  **Next step to close Priority 1 fully**: find the per-`plNNNN` static definition table (stats +
+  tribe + spawn family/variant, probably near wherever `borgs.json` stat fields like defense/
+  attack/speed were originally sourced) — that table, not the mission pools, is what assigns each
+  playable borg its `family*256+variant` ID. Do not guess this from tribe order; find the table.
+
+### (o) `zz_003cd5c_` base-damage formula — constants pinned, structure mapped (2026-07-01)
+
+Full read of `0x8003cd5c` (`ghidra-export/chunk_0004.c:6672-6828`), `int
+zz_003cd5c_(ushort *param_1, int param_2, char *param_3)` — `param_1` = per-move data pointer
+(the `puVar17` from earlier sessions), `param_2` = attacker object, `param_3` = defender object.
+All numeric constants below are raw values read directly out of `boot.dol` (not guessed):
+
+- **Base power**: `*param_1` (a raw `ushort`, the move's power stat) is converted to float via the
+  classic `(double)CONCAT44(0x43300000, rawInt) - 2^52` bit-trick (confirmed:
+  `DOUBLE_80436fb0 == 4503599627370496.0` exactly `== 2^52`). So the formula starts from the
+  move's power value, unmodified — no hidden base offset.
+- **Zero-power guard**: `FLOAT_80436f68 == 0.0` — if power isn't `> 0`, the function returns 0
+  immediately (no damage for 0-power moves/hitless effects).
+- **Attacker "stat" scaling**: `dVar14 = power + power*0.5*(attackerFloatStat@+0xc4 - 1.0)`
+  (`FLOAT_80436f7c == 0.5`, `FLOAT_80436f78 == 1.0` exactly) — i.e. `power * (1 + 0.5*(stat-1))`
+  where `stat` is a float read from attacker's linked-object `+0xc4`, baseline `1.0` = neutral.
+  This is a genuine multiplicative stat scale, but the "stat" here is a float field on a *linked
+  sub-object*, not directly `borgs.json.attack` (0-10 int) — the int-stat -> this float's mapping
+  is still unresolved.
+- **"Boost" flag**: object `+0x6fc` byte, when set on the attacker, doubles damage
+  (`FLOAT_80436f9c == 2.0`); the same byte on the defender halves incoming damage
+  (`FLOAT_80436f7c == 0.5`, reused). Symmetric buff/debuff flag, not yet named.
+- **"Rank"/handicap lookup, NOT a raw attack-stat table**: `PTR_DAT_804335e0` is an array of 2
+  table pointers, selected by the sign of a per-object signed byte `+0x3e6`
+  (`(-cVar2|cVar2)>>0x1d & 4`, i.e. selector is `0` or `4`). The selected table is then indexed
+  by `PTR_DAT_80433950[object+0x88]` (the **team/slot byte translated through another small
+  table**, not the raw team byte and *not* an attack-stat index). Dumped both tables directly
+  from ROM: selector 0 -> `[1.02,1.02,1.01,1.01,1.01,1.01,1.0,1.0,1.0,1.0,0.99,0.99,...]`,
+  selector 4 -> `[0.92,0.92,0.91,0.91,0.91,0.91,0.90,0.90,0.90,0.90,0.89,0.89,...]` (both at
+  `0x802c4ba0`/`0x802c4c20`). Value range (0.88-1.02) and team-byte indexing strongly suggest a
+  **difficulty/handicap damage-output multiplier per player slot**, not a per-borg attack-stat
+  curve. This means `borgs.json`'s 0-10 `attack`/`shot` int stats are **not consumed by this
+  formula the way `constants.ts`'s `TUNED` `MELEE.DMG_PER_STAT` assumes** — if those stats affect
+  damage at all in the real game, it must be through the move-power value itself (`*param_1`)
+  varying per borg/move, not a runtime multiplier keyed off a stat number. Not yet confirmed
+  either way; flagging so nobody "finishes" this formula by plugging `attack` into the wrong slot.
+- **HP-ratio scaling** (confirms the `+0x1c4` claim in `constants.ts`'s header comment, now with
+  exact indexing): `hpMirror = (&DAT_803b069c)[defenderLinked+0x3e4]` (yes — `0x803b069c`, the
+  already-confirmed live HP-mirror address family from `s4f`, here read through a small
+  per-object slot-select byte at `+0x3e4`). If `hpMirror < 201`: `ratio = (hpMirror<<5) /
+  maxHp@+0x1c4` (fixed-point /32), clamped to `[1,31]`, then inverted (`32 - ratio`) so **lower
+  current HP -> larger index**. That index (0-31) plus a per-move byte (`param_1+3` for the
+  attacker branch, `param_1+7`/`(int)param_1+7` for the defender branch) indexes a 2D float table
+  (`PTR_PTR_804335e8`/`...f0` families) — i.e. a genuine "comeback"/low-HP damage-scaling table,
+  keyed by *both* current HP ratio and a per-move byte, not a flat percentage. Table contents not
+  yet dumped (would need the per-move byte's valid range first — see Priority 2 follow-up below).
+- **Type-category multiplier** (only applied when both attacker and defender pass validity
+  checks): `local_34 = *(short*)(attackerLinked+1000); iVar4 = zz_0066298_(&local_34);` and same
+  for defender (`iVar5`), then `dVar14 *= matrix[iVar5*20 + iVar4]` i.e.
+  **`matrix[defenderCategory*20 + attackerCategory]`** — the matrix is indexed
+  defender-major/attacker-minor, the reverse of the earlier (unverified) guess in
+  `type-multiplier-matrix-802c5d60.json`'s original description. Corrected in that file.
+- **Same-team (friendly-fire) divisor — this is NOT a "type mismatch"**: `if (attackerLinked+0x88
+  == defenderRootLinked+0x88) dVar14 *= 0.25` (`FLOAT_80437024 == 0.25` exactly). Given `+0x88` is
+  confirmed (s4m) to be the match slot/team byte, this branch fires when **attacker and defender
+  are on the same team** — i.e. it's a friendly-fire damage reducer (25% damage to teammates in
+  Force battles), not type-effectiveness. `constants.ts`'s `DAMAGE.TYPE_MISMATCH_DIVISOR` is
+  mislabeled — same numeric value (4x divisor = 0.25 multiplier), wrong mechanic name. Renamed to
+  `DAMAGE.SAME_TEAM_HIT_DIVISOR` with a corrected comment; **not wired into `combat.ts`** because
+  the current sim never calls `applyHit` against a same-team target at all (`isEnemyAlive`/
+  `o.team === pr.team` filters exclude teammates from every hit-resolution loop) — the port
+  doesn't model friendly fire yet, which is itself a real behavior gap worth a separate decision,
+  not something to silently bolt on.
+- **A second, harsher block/reflect divisor found**: `if (defender+0x83==0 && move flags &
+  0x1000 && (defender+0x59c & 0x1000)) dVar14 /= 40.0` (`FLOAT_80437028 == 40.0` exactly) — a
+  ~2.5%-damage-through state, likely a guard/shield/reflect mechanic gated by matching move-flag
+  and target-state bits. Not named or ported; needs the `+0x59c`/move-flag-0x1000 meaning traced
+  before it's portable.
+- **What's still missing before this formula can replace the TUNED linear model**: (1) the
+  attacker-float-stat-at-`+0xc4` <-> `borgs.json.attack`/`.shot` correspondence (or proof they're
+  unrelated), (2) the per-move-byte domains at `param_1+3`/`param_1+7`/`pcVar13[0x43a]` (needed to
+  size/dump the remaining lookup tables), (3) Priority 1b (the `plNNNN -> family/variant`
+  roster table). Do not port a partial version of this — see the `constants.ts` header rule.
+
+### (p) `zz_00300bc_` knockback DIRECTION — fully decoded, all 5 modes + angle-offset "table" (2026-07-01)
+
+Priority 3 from `HANDOFF-PROMPT.md`. Full body read from `ghidra-export/chunk_0003.c:8540-8627`
+(`void zz_00300bc_(int param_1,int param_2,int param_3)`). Raw dump persisted at
+`research/decomp/data/knockback-direction-800300bc.json`.
+
+**Call site found** (the corpus has no direct-name caller because Ghidra didn't attribute a
+literal `bl` target label in the decompiled text near it, so it had to be found by reading the
+one function known to call it): `resolve_hitbox_target_effects_and_damage` (`0x8002e2a8`,
+`chunk_0003.c:7945`):
+```c
+zz_00300bc_(param_1, param_2, (int)*(char *)(puVar17 + 7));
+```
+This pins down every previously-open question:
+- `param_1`/`param_2` in `zz_00300bc_` are the **same hit-context/target wrapper objects**
+  `resolve_hitbox_target_effects_and_damage` itself received — not new objects. `param_1+0x20` =
+  attacker object, `param_1+0x24` = attacker's linked/partner object, `param_2+0x20` = defender
+  object, `param_2+0x24` = defender's linked/partner object (matches `iVar19`/`pcVar16`/`iVar15`/
+  wiring already confirmed for the caller in §j/§o).
+- **The mode selector (`param_3`) is `puVar17[7]` as a signed byte** — a field on the *same*
+  per-move hit-record (`puVar17`, stride `0x18`, indexed by `param_1[0x11]`) already used by
+  `zz_003cd5c_` for base power/flags. This is a different field from `puVar17[0]` (power) and
+  `puVar17[8]` (flag bits) documented in §o/§j. So the "5 modes" are an authored per-move choice,
+  not runtime-computed.
+
+**The 5 modes** (branch structure: `param_3==2`, `param_3==0`, `param_3==1` (the `-1<param_3` arm
+inside the `<2` branch), `param_3==4`, `param_3==3` (the final `<4` catch-all) — confirmed
+exhaustive, negative `param_3` is an unreached decompiler artifact per the two
+`/* WARNING: Removing unreachable block */` markers, not a real 6th mode):
+
+| mode | source vectors | fallback |
+|---|---|---|
+| 0 | `attackerObj[0x20..0x2c] - attackerObj[0x2c..0x38]` (float vec3 sub) | if `|v| <= 0.0`: `attackerObj+0x38/0x3c/0x40` |
+| 1 | `defenderObj[0x20] - attackerObj[0x20]` (straight attacker→target vector) | none |
+| 2 | `param_1[0x30] - param_1[0x3c]` (context-object fields, not resolved sub-objects) | if `|v| <= 0.0`: `attackerObj+0x38/0x3c/0x40` (same fallback as mode 0) |
+| 3 | `param_2[100] - param_1[100]` (offset `0x64`, on the raw context wrappers) — the "linked object" mode from the README table | none |
+| 4 | cascading 3-way: `attackerObj+0x83==0` -> `attackerObj+0x8dc/0x8ec/0x8fc`; else attacker's linked obj (`param_1+0x24`) `+0x83==0` -> that object's `+0x8dc/0x8ec/0x8fc`; else -> `attackerObj+0x11c/0x12c/0x13c` | n/a (the cascade itself is the fallback chain) |
+
+**Degenerate-vector guard** (applies after any of the 5 modes): if
+`|x*x+y*y+z*z| < FLOAT_80436fc0` (confirmed **0.01** by direct ROM read, i.e. `|v| < ~0.1`), the
+vector is replaced with the fixed `(0.0, 0.0, -1.0)` (`FLOAT_80436f68`=0.0, `FLOAT_80436f74`=-1.0,
+both confirmed by direct ROM read of `boot.dol`).
+
+**Yaw/pitch conversion**: `FUN_800452a0(a,b) = (short)(int)(atan2(a,b) * FLOAT_8043707c)`, and
+`FLOAT_8043707c` reads as **10430.3779296875**, confirmed exactly equal to `65536/(2*pi)` to float
+precision — the standard radians-to-BAM16 angle conversion (`0x10000` = 360°, same convention
+already established for borg heading at struct `+0x72` in §3). Yaw = `atan2(x, z)` stored at
+`defenderObj+0x284`; pitch = `atan2(y, |x*x+z*z|)` **negated** and stored at `defenderObj+0x282`
+(note: the horizontal term is squared, not square-rooted — reproduced exactly from the decompiled
+C rather than "corrected" to a textbook `atan2(y, sqrt(x²+z²))`, since it's unknown whether this
+asymmetry is load-bearing for pitch feel; see caveats in the JSON dump).
+
+**The "angle-offset table" from `HANDOFF-PROMPT.md` is now fully decoded — it is not a separate
+fixed ROM table at all.** It's two more bytes on the *same* per-move hit-record used for the mode
+selector: after computing base yaw/pitch, the function re-reads `record[0x14]` and `record[0x15]`
+(signed bytes) and adds each, scaled by `*-0x100` (i.e. placed in the high byte of the 16-bit
+angle field — 1 LSB = 256 BAM units = 1.40625°), to yaw and pitch respectively. Because this lives
+in the per-move authored data (part of the still-undecoded `plxxxxhit.bin`/`comhit.bin` record
+format, `research/format-specs/hit-bin-format.md`), there is no fixed DOL address to dump its
+*contents* from — the mechanism (two signed-byte trims, `*256` scale, added post-conversion) is
+fully DERIVED; the actual per-move trim *values* are runtime/per-move data, same status as the
+move's base-power field already documented as unresolved in §o.
+
+**Linked-object mirror**: if `defenderObj+0x1da & 2`, and the *attacker's* linked object
+(`param_2+0x24`, confirmed a different pointer than `param_1+0x24`) has `+0x83==0`, the same
+just-computed yaw/pitch are copied onto that linked object too (a paired/partner borg inherits
+the primary target's launch direction under a specific effect-flag condition).
+
+**Action item**: this confirms, DERIVED, that knockback in the real game is a full 3D direction
+computed per-hit from one of 5 authored vector-source modes plus a per-move angular trim — not a
+flat scalar. The actual knockback **magnitude/velocity** (how far/hard the object is launched
+once this direction is known) is a **separate, still-unconfirmed** mechanism — this function only
+ever writes angle fields (`+0x284`/`+0x282`), never a speed/force value. `MELEE.KNOCKBACK`/
+`HITSTUN` in `constants.ts` should be split: the **direction** portion can be upgraded away from
+flat-vector TUNED behavior using this decode; the **magnitude** stays TUNED until a separate trace
+finds what consumes `+0x284`/`+0x282` to produce an actual velocity impulse.
+
+### (q) Manual "lock-on" / enemy-targeting — searched thoroughly, CONCLUSION: no such system exists (2026-07-01)
+
+Goal (per `HANDOFF-PROMPT.md`): find the real algorithm behind `packages/combat/src/combat.ts`'s
+`acquireLock()`/`cycleLock()` (currently TUNED — nearest enemy in a forward view-cone, scored by
+`distance*(1+angle)`) and either port the real thing or, if genuinely absent, say so and leave the
+heuristic as-is. Conclusion after an exhaustive pass: **there is no button-triggered scan-and-select
+enemy-lock mechanic anywhere in the decompiled corpus.** Every "target" field in the ROM is
+hit-*reactive* (records who last hit whom, for reaction animations/cues), never scan-*selective*.
+This confirms and closes out the three concrete leads `HANDOFF-PROMPT.md` listed.
+
+**Lead 1 — the borg state-machine dispatch (`0x8005cc00`/`0x8005d494`).** Read in full
+(`zz_005cc00_`, `chunk_0007.c` around the `zz_005cc00_` header). Its only "target-shaped" data use is
+`param_1+0x284` compared against `param_1+0x72` (facing yaw, §3) to compute a turn delta — but
+`+0x284` here is *not* an enemy position/direction; tracing every writer of `object+0x284` in the
+whole corpus (`grep "0x284) = "` across all chunks) finds exactly one non-knockback writer
+(`chunk_0006.c:8070`, `*(short*)(param_1+0x284) = *(short*)(param_1+0x5ae) + 0x2000`, copying the
+borg's *own* already-computed muzzle/facing angle `+0x5ae`) plus the knockback-angle writes already
+documented in §p (`zz_00300bc_` writes `defenderObj+0x284/+0x282`, a different object than the one
+`zz_005cc00_` reads). So `zz_005cc00_`'s use of `+0x284` is "turn toward my last knockback-angle /
+copied-facing value," not "turn toward a locked enemy." No target-selection call appears anywhere
+in this function.
+
+**Lead 2 — 6-actor table (`DAT_803c4e84`, stride 0x1e00) scanned with distance/angle math gated by
+input.** The only two loops over this table in the entire corpus are both inside
+`battle_frame_target_action_dispatch` (`0x8002bb14`, `chunk_0003.c:5844-6211`, already indexed in
+`research/decomp/index/cpu-ai-evidence.md`): the first (lines 5912-5967) resets per-slot
+target/effect globals every frame; the second (lines 5987-6211) computes pairwise
+distance-based *push-apart weighting* between overlapping actors (feeds `zz_002caa8_`, a
+separation/knockback-blend helper, not a target-lock). Neither loop reads a controller-button
+field, and a full-corpus grep for the other ~195 occurrences of `DAT_803c4e84` found every one of
+them is a single-slot indexed lookup `(&DAT_803c4e84)[slot]`, never a second independent scanning
+loop elsewhere. There is no "press R, scan the 6-slot table for nearest enemy in a cone" function.
+
+**Lead 3 — `object+2000`/`object+0x7d1` (`last_enemy_slot`/`last_enemy_slot_timer`) writers.**
+Grepped every write to the backing global `DAT_803b06a8` (the slot-indexed "target object pointer"
+array these fields alias) across the whole corpus — exactly two writers exist, both already
+identified: (1) `battle_frame_target_action_dispatch` zeroes it every frame
+(`chunk_0003.c:5956`), and (2) `resolve_hitbox_target_effects_and_damage` (`0x8002e2a8`) sets it to
+the attacker's pointer (`chunk_0003.c:7718`) — already confirmed by the user's own prior check to
+be gated behind a per-move flag bit, i.e. a move-specific mark/grapple effect, not general
+targeting. `react_to_slot_target_object` (0x8006abd4) and `start_status_reaction_by_side`
+(0x8006ace8, chunk_0009.c:1162 — same family, side-variant of the same reaction) are the only
+*readers*, and both are alert/notice-animation entry points (confirmed by re-reading
+`react_to_slot_target_object` in full: it just enters a status/action state and plays a cue, no
+scan). `start_forced_move_to_point` (0x8006ab04) was also checked as a related target-vector
+consumer: it receives an already-computed world vector and walks toward it — no scanning of its
+own. The companion globals `DAT_803b06c0/c4/c8` ("slot_world_target_vec3") have all their writes
+inside the same `resolve_hitbox_target_effects_and_damage` hit-resolution path (copying whichever
+object was just involved in a hit), same hit-reactive family.
+
+**Broader sweep (beyond the 3 named leads):** no `PAD`/`SI`-prefixed symbol in `_index.tsv` reads
+button state in a targeting-adjacent way (`PADClampCircle` at `0x80212a14`, the one PAD-family hit
+near gameplay code, is analog-stick deadzone clamping for rumble-motor processing in
+`chunk_0030.c:2442`, unrelated). All ~400 `gnt4_PSVECSquareMag_bl`/`gnt4_PSVECMag_bl` distance-check
+call sites across the highest-traffic chunks were sampled; the ones that do keep a running
+"nearest" are capsule/segment collision geometry (two pre-supplied line segments, no team filter,
+no 6-slot loop) and box-face collision classification, never an actor-vs-actor enemy scan.
+`set_slot_action_handler` (`0x8010d880`) and `dispatch_slot_action_update` (`0x800680d4`) — the
+final dispatch stage after target/effect resolution — were read in full and are trivial
+handler-table wiring with no target logic. `research/decomp/index/cpu-ai-evidence.md`'s own
+"Porting Notes" (written by an earlier pass on this same question) independently reached the same
+conclusion: *"Do not implement CPU AI as nearest-enemy-only long term... current evidence covers
+shared target/effect/action dispatch used by CPU and player-controlled actors"* — i.e. no dedicated
+selection brain has ever been isolated in this corpus, by any pass.
+
+**Conclusion, and what this means for the port:** Gotcha Force's "targeting" is entirely
+*hit-reactive* bookkeeping (a slot remembers "what/who last hit me" for exactly one reaction
+animation), not a player-driven view-cone scan-and-lock-and-cycle system. There is no ROM algorithm
+to port in place of `acquireLock()`/`cycleLock()`. **Action item:** `packages/combat/src/combat.ts`'s
+lock-on remains explicitly TUNED — not because it wasn't investigated, but because the confirmed
+answer is "the real game doesn't have this as a discrete system to derive a formula from." Updated
+the header comments in `combat.ts` and `constants.ts`'s `LOCK` block to record this as a checked,
+closed question (cite this section) rather than an open TODO, so nobody re-derives it later
+believing it's still unknown. If projectile *homing* target selection (as opposed to manual
+lock-on) is investigated in a future session, that is a separate question — this section only
+covers manual player lock-on/cycle, per the original ask.
+
+### (r) Animation-selection helpers `0x80066ec0`/`0x80066f1c`/`0x800670dc` are heading/turn
+interpolation, NOT animation request/apply — correcting §5 item 3 (2026-07-01)
+
+§5's prioritized port list (and §4c) guessed `0x80066ec0` ("Likely an animation/action request")
+and `0x80066f1c` ("Likely apply/advance current action") from mode constants (2, 0xf, 0x10) passed
+at their call sites, without reading the function bodies. Pulling both out of the Ghidra export
+corpus (`ghidra-export/chunk_0008.c`, confirmed via `grep _index.tsv`) shows this guess was wrong:
+
+```c
+// 0x80066ec0 (zz_0066ec0_) — full body:
+void zz_0066ec0_(int param_1,int param_2) {
+  if (param_2 == 0) return;
+  *(short *)(param_1 + 0x7e) = (short)((int)*(short *)(param_1 + 0x5aa) / param_2);
+}
+
+// 0x80066f1c (zz_0066f1c_) — full body (abbreviated):
+undefined4 zz_0066f1c_(int param_1) {
+  if (*(short *)(param_1 + 0x7e) == 0) { *(undefined2*)(param_1+0x5aa) = 0; return 1; }
+  // else: apply the per-tick delta (param_1+0x7e) to heading (param_1+0x72),
+  // decrement the remaining turn amount (param_1+0x5aa), detect overshoot/completion,
+  // snap-clamp to the target heading and zero out +0x7e/+0x5aa when done, return 1.
+  ...
+}
+```
+
+`+0x7e` is a per-tick turn-rate delta, `+0x5aa` is the remaining heading delta to a target angle
+(already inferred as "computed facing/muzzle angle" in §3's struct table), and `+0x72` is the
+already-confirmed heading/facing yaw field (§3). So `zz_0066ec0_(borg, steps)` divides the
+remaining turn by a step count to get a per-frame increment, and `zz_0066f1c_(borg)` applies one
+increment per call and reports completion — a classic "turn N degrees over M frames" interpolator,
+not an animation-bank selector. `0x800670dc` (`zz_00670dc_`) is a related but more complex heading
+function operating on the same `+0x72`/`+0x5e0`/etc. fields with `PSVEC`/`PSQUAT` calls, confirming
+the same "facing/turn" role guessed in §4c, not animation. Grepping every caller of all three
+(`chunk_0007.c`/`chunk_0008.c`) shows them exclusively intermixed with heading/turn-state code
+(fields `0x72`, `0x5aa`, `0x5ac`, `0x5ae`, `0x1cf0`, `0x1d10`) in the per-state dispatch around
+`0x8005d494`/`0x8005d9d8` — never near an animation-id or anim-frame field. **DERIVED** (full
+function bodies read, not guessed from call-site constants).
+
+**Practical effect on this port**: `packages/combat/src/combat.ts`'s existing `b.anim = "idle"` /
+`"melee"` / `"shoot"` / `"special"` / `"hit"` / `"down"` / `"death"` / `"wake"` string-tag approach
+(state transition directly names the animation slot) was never actually blocked by these three
+functions being "unported" — they govern smooth heading rotation, a separate concern from which
+clip plays. This closes the §5 item 3 action item without a behavioral port: there is no
+mode-to-(group,slot) dispatch table hiding in these functions to port. The real "which clip for
+which state" logic lives in the animation-bank (group,slot) addressing scheme documented in
+`research/format-specs/borg-animation-banks.md`, not in these helpers.
+
+**What this session actually fixed for animation playback** (the live G Red / `pl0615` bug —
+"G Red" here means `pl0615`, borgs.json name literally "G RED", the game's box-art mascot and
+`apps/game/src/main.ts`'s `DEFAULT_LEAD`; NOT `pl0000` "NORMAL NINJA", which despite being the
+roster's first entry is a different, unrelated borg):
+`scripts/bake-all-borg-anims.mjs`'s heuristic `label()` function classified every group-4 bank as
+generic `special_s<N>`, including **group 4 slot 0**, which `borg-animation-banks.md`'s own
+decomp cross-reference table already identified as **high-confidence knockdown** (matching the
+prior human-labeled `down_candidate` anchor — see that file's "Decomp cross-reference" section).
+Because slot 0 sorts first, `apps/game/src/main.ts`'s `PREFERRED_LABELS` override for `pl0615`
+(and pl0008/pl000c/pl0105/pl0109) pointed their `special` slot at `special_s0` — i.e. **G Red's
+Y-button special attack was silently playing his own knockdown/down animation**, while the `down`
+combat state (`combat.ts`'s `enterDown()`/`b.anim = "down"`) had no real match at all in
+`SLOT_LABELS.down` and fell back to a hit-reaction or death clip instead. Fixed by: (1) relabeling
+group-4 slot-0 banks from `special_s0` to `down_s0` in the baker script (for future re-bakes) and
+directly in all 101 already-baked `apps/game/public/models/*/anim_index.json` files that had it
+(bone/keyframe data unchanged, only the semantic `label` string), (2) adding a `down_s0` pattern to
+`SLOT_LABELS.down` in `main.ts` so the `down` state now resolves to the real knockdown clip instead
+of a hit/death fallback, and (3) repointing the 5 borgs' `PREFERRED_LABELS.special` overrides
+(`pl0615`, `pl0008`, `pl000c`, `pl0105`, `pl0109`) at each borg's `special_s1` bank (confirmed
+present in each one's `anim_index.json`) instead of the mislabeled `special_s0`, plus explicit
+`down: ["down_s0"]` overrides for the same 5 borgs. Which of `special_s1..s4` is "the" Y-button
+special (vs. some other special-move variant) is **not** individually decomp-confirmed — that
+choice among the remaining `special_sN` banks stays TUNED, same status `borg-animation-banks.md`
+already documents for group-4 slots 1+ in general.
+
+### (s) TUNED-constants audit — `packages/combat`/`physics`/`ai` — most stay TUNED, one real lead found (2026-07-01)
+
+Systematic pass over every `TUNED` field in `packages/combat/src/constants.ts`'s `MOVE`/`JUMP`/
+`DASH`/`MELEE`/`SHOT`/`SPECIAL`/`STATE`/`LOCK`/`AI` blocks, checking each against the bulk-decompile
+corpus the same way `WAKE_UP_INVINCIBILITY_FRAMES` (struct+0x720) was originally derived. Also
+checked `packages/physics/src` and `packages/ai/src`: **neither has any TUNED gameplay constants to
+audit** — `physics/src/index.ts` is pure allocation-light Vec3/scalar math (no gravity, speed, or
+timing constants live there; those all live in `combat/src/constants.ts`'s `JUMP`/`MOVE`/`DASH`
+blocks, already covered below), and `packages/ai/src/index.ts` is an empty stub (`export {}`) — no
+AI package code exists yet to audit; `constants.ts`'s `AI` block (`MELEE_RANGE`/`RANGED_RANGE`/
+`RANGE_SLACK`/`RETARGET_FRAMES`) is consumed directly by whatever calls into `combat.ts`, not a
+separate `packages/ai` implementation.
+
+**One real, address-cited finding — a genuine 60-frame "hit reaction" timer family, NOT safe to
+port as MELEE.HITSTUN/SHOT.HITSTUN without more work:** `resolve_hitbox_target_effects_and_damage`
+(`0x8002e2a8`, `chunk_0003.c:7995/8009-8010`) sets THREE fields to the exact same confirmed-by-ROM-
+read constant `60.0` (`FLOAT_80436fac`, verified via a corrected-path `dol.py` read = 60.0 exactly)
+on every non-lethal hit against a living target (gated only on `pcVar18[0x1c6] != 0`, i.e. the
+confirmed HP field being nonzero post-hit):
+```c
+*(float *)(pcVar18 + 0x688) = FLOAT_80436fac;   // chunk_0003.c:7995
+...
+*(float *)(pcVar18 + 0x684) = FLOAT_80436fac;   // chunk_0003.c:8009
+*(float *)(pcVar18 + 0x68c) = fVar6;            // chunk_0003.c:8010 (fVar6 == FLOAT_80436fac here)
+```
+All three (`+0x684`, `+0x688`, `+0x68c`) are decremented every frame by the SAME confirmed
+`+0x1dcc` per-frame step already used by the invincibility timer at `+0x720` (`chunk_0006.c:
+7984-8008`, `zz_005568c_` @ `0x8005568c`), clamped at 0 — i.e. structurally identical to the
+already-ported `(timer, decrement, clamp)` pattern. This is genuine, address-cited ROM evidence of
+*a* 60-frame timer set on hit.
+
+**Why this is NOT promoted to DERIVED for `MELEE.HITSTUN`/`SHOT.HITSTUN` (yet):** two things block
+calling this "hitstun" with confidence: (1) `+0x68c` is read back in a completely different function
+(`zz_005f00c_`, `0x8005f00c`, `chunk_0007.c:5770`) as one of several inputs to a byte of *input/attack
+flags* (`bVar3`), gated behind unrelated bits (`+0x6fd`, `+0x6ff`, `+0x591`) — it is consumed
+alongside flag logic that looks like attack-command gating, not a simple "can this borg act"
+lockout check. (2) The SAME hit path also increments a genuinely separate 0-99 combo counter
+(`+0x6c8`/`+0x6c9`) that rolls into a capped rank byte (`+0x6ca`, capped at `0x3e`=62) driven by two
+different per-move-record bytes (`puVar17+2`, `puVar17+4/5`) — i.e. there is a real stagger/combo-
+rank system layered on top of the 60.0 timer, and nothing in this trace shows the borg's main state
+enum (`+0x544`) being written anywhere in this block. Without confirming which of `+0x544`
+(state), `+0x684/688/68c` (timer trio), or the combo/rank byte actually gates "victim can't act for
+N frames," porting `60` as `MELEE.HITSTUN`/`SHOT.HITSTUN` would be exactly the "wrong-but-confident"
+outcome this repo's convention forbids — a flinch/reaction-timer value dressed up as a confirmed
+hitstun duration. **Left TUNED**, with this section cited as the concrete next-step lead (start
+from `zz_005f00c_`'s callers and find what reads `bVar3`'s output, or trace every reader of
+`+0x544` inside the `0x8005cc00`/`0x8005d494` dispatch to see if a hit forces a specific state
+number).
+
+**Everything else audited — confirmed NOT findable in the corpus this pass, left TUNED with
+reasons (so future sessions don't re-grep the same dead ends):**
+
+- **`DASH.IFRAMES`/`DASH.COOLDOWN`/`DASH.SPEED`/`DASH.DURATION`**: grepped every write to `+0x720`
+  (the confirmed invincibility field) across all 80 chunks — besides the known 60.0 write, only two
+  other constants are ever written there: `120.0` (`chunk_0007.c:5495`, `FUN_8005e868`) and a
+  conditional `30.0`/`60.0` (`chunk_0007.c:6788/6791`, `FUN_80060b60`). Both functions were read in
+  full: `FUN_8005e868` is a scripted spawn/drop-in landing-arc handler (parametric trajectory via
+  `zz_0045204_`, gated on state values 0-5, all velocity writes scaled by the same `+0xb4` factor —
+  an intro cutscene-style arc, not a player-triggered dash), and `FUN_80060b60` is a respawn/reset
+  helper that also zeroes `+0x272`. Cross-checked every function writing both `+0x544` (state) and
+  `+0x60` (candidate Y/velocity field) together for a short-burst "dash" shape — only the spawn-arc
+  function matched. **No dash/step/dodge state was identified anywhere in the corpus.** Not
+  findable this pass; stays TUNED.
+- **`JUMP.VELOCITY`/`JUMP.GRAVITY`/`JUMP.MAX_FALL`/`JUMP.BOOST_*`**: searched for a per-frame
+  constant-subtraction pattern against a Y-velocity field (gravity accumulation) and for a one-time
+  positive-Y-velocity write gated on a "jump" state. The only `+0x60`-field decrement pattern found
+  (`chunk_0055.c:2735`, `chunk_0056.c:2797`) is on an object whose neighboring offsets (`+0x146`,
+  `+0x1a`, `+0x18`, `+0x70`) don't match the borg struct at all — almost certainly a different
+  object type (particle/effect) colliding on the same small offset by coincidence, not a gravity
+  accumulator on the borg. `JUMP.GROUND_Y=10` remains the only DERIVED field here (already cited,
+  from `ram-trace-analysis.md` §3.1, live-trace Y=10.0 exactly). No gravity/jump-velocity constant
+  found; stays TUNED.
+- **`MELEE.COOLDOWN`/`SHOT.FIRE_COOLDOWN`/`SPECIAL.COOLDOWN`/`MELEE.DURATION`/`SPECIAL.DURATION`**:
+  the `0x8005cc00`/`0x8005d494` dispatch's individual state-number semantics (which numeric case is
+  "melee attack" vs. "special" vs. "walk") are still not mapped — §3/§4b already flag this as
+  Speculative, and this pass didn't change that. Without knowing which `+0x544` case is which
+  attack type, there's no way to isolate an attack-specific cooldown constant from the general
+  per-state counters. Stays TUNED; mapping `+0x544`'s case numbers to gameplay meanings is the
+  actual blocker (see §5 item 2, already prioritized above this audit).
+- **`STATE.DOWN_DURATION`/`DEATH_DURATION`/`SPAWN_DURATION`**: same blocker — these are specific
+  `+0x544` state durations, and state-number semantics remain unmapped. Stays TUNED.
+- **`LOCK.RANGE`/`LOCK.CONE`**: already fully closed out by §(q) — exhaustively searched and
+  confirmed **there is no manual lock-on/targeting system in the ROM to derive a range or cone
+  from at all** (every target-shaped field is hit-reactive bookkeeping, not scan-and-select). Not
+  re-investigated here; §(q)'s conclusion stands. Stays TUNED, correctly documented as a closed
+  question rather than an open one.
+- **`AI.MELEE_RANGE`/`RANGED_RANGE`/`RANGE_SLACK`/`RETARGET_FRAMES`**: no `packages/ai` code exists
+  (see above) and no CPU-controlled "decide when to retarget" cadence was found; consistent with
+  `research/decomp/index/cpu-ai-evidence.md`'s own prior conclusion (quoted in §q) that CPU and
+  player-controlled actors share the same low-level dispatch with no isolated "AI brain" function.
+  Stays TUNED.
+- **`DAMAGE.KNOCKDOWN_DMG`**: traced `zz_003d344_` (the confirmed HP-subtract function) fully — its
+  return value is a death flag (HP hit exactly 0), not a damage-magnitude comparison; its caller
+  (`resolve_hitbox_target_effects_and_damage`) branches on that death flag to decide whether to
+  apply the `+0x684/688/68c` hit-timer trio above, not to pick "knockdown vs. hitstun." No fixed
+  damage-threshold comparison (e.g. "if raw damage >= 40, force knockdown") exists anywhere in
+  either function. Not findable this pass; stays TUNED.
+
+**Net effect on `constants.ts`**: no fields promoted from TUNED to DERIVED this pass (the one real
+lead, the `+0x684/688/68c` timer trio, is documented above and in `constants.ts`'s `MELEE`/`SHOT`
+comments as a lead, not applied as a value, per the "never port a half-confirmed formula" rule).
+This is itself the honest outcome of the audit: `WAKE_UP_INVINCIBILITY_FRAMES`, HP handling, and
+`DAMAGE.SAME_TEAM_HIT_DIVISOR`/`BLOCK_OR_REFLECT_DIVISOR` (already DERIVED) were re-checked against
+this pass's findings and nothing regressed — the `+0x1dcc`/`+0x720` pattern they rely on is
+reconfirmed by seeing it reused identically for the `+0x684/688/68c` trio.
+
+---
+
+### (t) Weapon/projectile visual FX audit — real ROM textures already wired; no per-move effect-ID
+field exists to replace `projectileVisualKindForProfile`'s heuristic; upgraded it to a broader
+real-asset-evidence table instead (2026-07-01)
+
+Audited `packages/combat/src/combat.ts`'s `spawnProjectile()`/`projectileVisualKindForProfile()`
+and the render-side FX in `apps/game/src/sim/battleScene.ts` (there is no `packages/render`; battle
+rendering lives directly in `apps/game/src/sim`) against everything already sitting in
+`research/combat-assets/` and `research/asset-inventory/*` (built by `scripts/inventory-combat-
+assets.mjs`, `scripts/map-weapon-attachments.mjs`, `scripts/inspect-hit-bins.mjs`, and friends —
+all already-run, outputs already on disk, no new scans needed this pass).
+
+**What was already real and wired (not a gap — confirmed by reading `battleScene.ts`):**
+- Projectile sprites, muzzle/hit sparks, and the death/hit impact-puff atlas all use genuine
+  ROM-extracted textures, not placeholder colors: `apps/game/public/fx/{energy_dot,flame_core,
+  muzzle_flash,hit_spark,efct00_atlas}.png`, sourced 1:1 from `ptcl00.txg#5/#1/#6/#2` and
+  `efct00.tpl#0` per `research/combat-assets/combat-asset-inventory.md`'s "Browser-ready original
+  texture exports" lists. `battleScene.ts`'s `PROJECTILE_TEXTURE_URLS`/`IMPACT_ATLAS_URL`/
+  `HIT_SPARK_URL` already point at these real files (not synthesized canvases), and
+  `spawnHitSpark()`/`spawnImpact()` already fire on hit-state transitions and projectile
+  despawn respectively. This part of the ask was already done; nothing to port here.
+
+**What is a genuine, confirmed-absent gap (not fixed this pass, needs asset-pipeline work, not
+gameplay-code work):** real weapon/projectile **3D meshes** (guns, swords, bomb/missile bodies)
+are not loaded anywhere in `apps/game/public` — only each borg's own body model
+(`apps/game/public/models/<id>/model_00.dae`) exists. The actual weapon geometry lives in
+`it####_mdl.arz` item-model archives in `user-data/GG4E/afs_data/root` (confirmed present on
+disk, e.g. `it0100_mdl.arz` for pl0100 REVOLVER GUNMAN's revolver), but `weapon-attachment-
+map.md`'s own "Needs extraction/conversion scripts" section lists ARZ decompression + HSD-model
+export as still-unstarted (76 candidate files). So projectiles/weapons currently render as 2D
+billboarded sprites using real particle textures, not the real 3D weapon/projectile meshes —
+correctly scoped as future asset-pipeline work, not silently faked.
+
+**`projectileVisualKindForProfile()`'s name-regex heuristic — confirmed there is no real per-move
+effect/particle-ID field to replace it with, so it was upgraded in kind, not in confidence tier:**
+Checked `research/format-specs/hit-bin-format.md` directly for the effect-ID field the task brief
+hypothesized might live on the same per-move data pointer as the already-decoded damage/knockback
+fields (`puVar17[0]`=power, `puVar17[2]`/`[4]`/`[5]`=combo/rank bytes, `puVar17[3]`/`[7]`=HP-ratio
+table index (attacker/defender variants, §o), `puVar17[7]`=knockback-mode selector (§p),
+`puVar17[8]`=flag bits (§j/§o), `puVar17[0x11]`=per-move record stride index (§p),
+`puVar17[0x14]`/`[0x15]`=knockback angle trim (§p)). None of these are a visual-asset/effect ID —
+they're all damage or knockback-direction fields, cross-checked against `hit-bin-format.md`'s own
+"Still Unknown" list, which explicitly states the actor/common `0xF4`-byte hit-bin records'
+"effect IDs" field is unmapped ("Actor/common 0xF4 field meanings: flags, action IDs, damage,
+hitbox shape, bone/attachment IDs, **effect IDs**, and timing" — still listed as unknown). So there
+is no ROM-confirmed field this port could cite to replace the heuristic with a DERIVED lookup.
+
+Instead of leaving the bare `${id} ${name}`-regex as the only source, wired in
+`research/asset-inventory/weapon-attachment-map.json` (the systematic per-borg PZZ/model/mot
+asset-family scan already run by `scripts/map-weapon-attachments.mjs`, covering all 211 borgs with
+confidence-weighted `fire`/`beam`/`gun`/`bulletProjectile`/`muzzle` family tags) as a **first-choice
+TUNED lookup**, generated into a compact `packages/combat/src/data/projectileVisualFamilies.json`
+via the new `scripts/gen-projectile-visual-families.mjs` (104/211 borgs get a confident family
+signal this way — e.g. `pl0615` G RED -> muzzle, `pl0502` PHOENIX DRAGON -> flame, `pl0104` BEAM
+GUNNER -> energy, matching their real weapon type far better than name-string guessing alone).
+The original name-regex remains as an explicit LAST-RESORT fallback in
+`projectileVisualKindForProfile()` for the ~107 borgs with no confident family signal in that
+table — per the task brief, it is not removed, just demoted to fallback and clearly commented as
+such. **Both paths stay TUNED** — the asset-family table is real per-borg evidence (actual asset
+filenames/sizes/associations, not just an English string), which is a meaningfully better-grounded
+guess than the regex, but it is still not a decoded ROM effect-ID field, so it must not be
+mislabeled DERIVED.
+
+**Files touched:** `packages/combat/src/combat.ts` (`projectileVisualKindForProfile`),
+`packages/combat/src/data/projectileVisualFamilies.json` (new, generated),
+`scripts/gen-projectile-visual-families.mjs` (new, generator).
+
+---
+
+### (u) Borg state-machine dispatch CRACKED — real structure is a 35-entry function-pointer table on `object+0x6fe`/`+0x591`/`+0x540`, NOT a switch on `+0x544` (2026-07-01)
+
+**This closes §5 item 2 and the "+0x544 state-number semantics" blocker every parallel session has
+hit.** Full read of `zz_005cc00_` (`0x8005cc00`, `chunk_0007.c:4373`) and `FUN_8005d494`
+(`0x8005d494`, `chunk_0007.c:4678`), plus everything around them in `chunk_0007.c` lines
+~3670-5540, per `HANDOFF-PROMPT.md`'s Priority list. **The premise in the handoff doc and in §3/§4b
+was wrong in one specific, important way**: `object+0x544` is NOT the top-level state selector
+dispatched by a switch at these two addresses. Both functions are individual *leaf handlers* — small
+3-phase sub-state machines local to whichever high-level state is currently active — and `+0x544`
+(plus `+0x545`/`+0x546`/`+0x547`, a 4-byte cluster) is a **per-state local phase/sub-counter that
+every leaf handler resets to 0 on entry and reuses for its own internal sequencing**, not a
+global game-wide enum. The real global state selector is a **different field**, confirmed below.
+
+**The real dispatch site** (found by grepping every use of `(*(code *)(&PTR_FUN_...)` in
+`chunk_0007.c` — there are exactly three, all cited below): `zz_005c694_` (`0x8005c694`,
+`chunk_0007.c:4161`) runs once per frame per active borg and contains the literal dispatch:
+```c
+(*(code *)(&PTR_FUN_802d35a4)[*(char *)(param_1 + 0x6fe)])(param_1);
+```
+i.e. **`object+0x6fe` (signed byte) is the real per-frame state selector**, indexing a genuine
+function-pointer jump table in `.data`, not a switch statement in the decompiled C (which is why
+grepping for `switch` or a big `if/else` chain on `+0x544` never found the "spine" — it isn't
+shaped like one in the source; Ghidra recovers it as a computed call through a table, exactly the
+PPC idiom for `foo[state](obj)`). A second, closely related dispatch exists at
+`chunk_0007.c:4000` inside `zz_005c290_` (`0x8005c290`):
+`(*(code *)(&PTR_FUN_802d3580)[*(char *)(param_1 + 0x591)])(param_1)`, and a third at
+`chunk_0007.c:3781` inside `zz_005bccc_` (`0x8005bccc`):
+`(*(code *)(&PTR_FUN_802d3570)[*(char *)(param_1 + 0x540)])(param_1)`.
+
+**All three tables are literally the same 35-entry array, just read through three different base
+addresses (`0x802d3570` `<` `0x802d3580` `<` `0x802d35a4`) with three different index fields
+(`+0x540`, `+0x591`, `+0x6fe` respectively).** Confirmed by directly reading the raw pointer array
+out of `boot.dol` (`dol.py`-style section-table parser, this session's scratch script): the array
+is 35 consecutive code pointers running from `0x802d3570` to `0x802d35f8` inclusive (functions
+`0x8005be08` through `0x8005e868`), followed immediately at `0x802d35fc` by non-code data
+(`DAT_802d35fc`=`0xc000`, `DAT_802d3600`=`0x4000`, `DAT_802d3604`=0, `DAT_802d3608`=20.0f, ... —
+these are the small lookup tables already referenced by name/offset in §o/`FUN_8005d494`/
+`FUN_8005dd10`, confirming the table boundary). Because the three index fields address the same
+array at different offsets (`0x802d3580 - 0x802d3570 = 0x10` = 4 slots; `0x802d35a4 - 0x802d3570 =
+0x34` = 13 slots), the relationship is: **`table_slot = +0x540_value = +0x591_value + 4 =
++0x6fe_value + 9`**. So a borg whose `+0x6fe == 0` is at the same handler as `+0x591 == 4` or
+`+0x540 == 9` — they are three views of one underlying "which handler runs this frame" cursor, each
+valid only over the sub-range its call site actually uses (`+0x540` spans the full slots 0-34,
+`+0x591` spans slots 4-34 i.e. its own index 0-30, `+0x6fe` spans slots 9-34 i.e. its own index
+0-25). `zz_005ec04_` (`0x8005ec04`, `chunk_0007.c:5531`, already noted in §3/§4b as "state cleared
+to 0" but not previously connected to the table) is the **state-transition primitive**:
+`zz_005ec04_(borg, N)` sets `object+0x6fe = N` (selecting the new handler, in `+0x6fe`-relative
+terms) and zeroes `object+0x544..0x547` (resetting the new handler's local phase counter to a
+clean start) — this is the literal "enter state N" operation used throughout the corpus (e.g.
+`zz_005cc00_` calls `zz_005ec04_(param_1, 10)` when its local phase falls through, i.e. "done with
+this handler, transition to `+0x6fe`-space slot 10 = absolute table-slot 19 = `FUN_8005ce14`").
+
+**Full 35-slot table, addresses, and per-slot role from reading every handler body in full** (roles
+marked Confirmed where the exact mechanism was read directly from decompiled C; Likely where a
+gameplay label is inferred from field reuse/call shape, not a live-traced confirmation — see the
+honesty breakdown after the table):
+
+| slot | `+0x540` | `+0x591` | `+0x6fe` | address | role (confidence) |
+|---|---|---|---|---|---|
+| 0 | 0 | n/a | n/a | `0x8005be08` | spawn drop-in phase 0: counts down `+0x558` timer, sets `+0x541` flag near the end (Confirmed shape; Likely = "falling/materializing" sub-phase) |
+| 1 | 1 | n/a | n/a | `0x8005bec8` | spawn drop-in phase 1: bumps `+0x540`, resets `+0x558`, calls `dispatch_slot_action_update(borg,2)` (Confirmed shape) |
+| 2 | 2 | n/a | n/a | `0x8005bf6c` | spawn drop-in phase 2: counts `+0x558` down again, on completion clears `+0x71b/0x490/0x489/0x48a`, calls `zz_008aff0_` — "landing impact / become controllable" (Likely) |
+| 3 | 3 | n/a | n/a | `0x8005bfec` | not independently read this session (present in the raw pointer table but not cross-checked against `_index.tsv` under a distinct name) — **not yet confirmed** |
+| 4 | 4 | 0 | n/a | `0x8005c4a4` | one-line wrapper: calls `zz_005f00c_(borg)` — **Likely idle/neutral-stance handler** (lowest `+0x591` index; `+0x591` is the already-Confirmed §3 attack/command-type selector, so index 0 there plausibly means "no command") |
+| 5 | 5 | 1 | n/a | `0x8005c4c8` | idle variant: same `zz_005f00c_` call, plus a guard-flag check promoting to slot 28 (`+0x6fe=0x11`) on a bit-0x40 test (Likely: idle-with-guard-available) |
+| 6 | 6 | 2 | n/a | `0x8005c530` | idle variant: same shape, promotes to slot 24 or 25 (`+0x6fe=0xf`/`0x10`) via a parity check — plausibly a **left/right guard-entry pair** (Speculative on which side, Confirmed on the promotion mechanism) |
+| 7 | 7 | 3 | n/a | `0x8005c5ac` | idle variant, `zz_005f00c_` only, no promotion (Likely: a third idle/neutral flavor) |
+| 8 | 8 | 4 | n/a | `0x8005c5d0` | returns bool; on success clears invincibility-adjacent flags and enters "action 4" via `zz_00ea2c8_(borg,4)` — **Likely block/guard-start handler** (gated on `+0x1da` bit 0x10 and `+0x599`==0) |
+| 9 | 9 | 5 | 0 | `0x8005c7f0` | one-liner: `zz_006a474_(borg)` — **Likely "return to idle" trampoline** (this exact call recurs as the common "go back to neutral" tail in many other slots below) |
+| 10 | 10 | 6 | 1 | `0x8005c810` | 3-phase local FSM (`+0x544` -1→0→1) computing a turn-in-place direction bucket via `zz_0046510_(delta,2)`, waits on completion flag `+0x1d0e`, exits via `zz_006a474_` — **Likely one of a walk/turn-direction handler family (slots 9-13/17)** |
+| 11 | 11 | 7 | 2 | `0x8005c95c` | same shape as slot 10, different `zz_005f188_` action-request sub-id (`+5` not `+9`) — sibling direction handler |
+| 12 | 12 | 8 | 3 | `0x8005ca80` | same shape again, additionally uses `zz_004516c_` (local vector-distance check) to bias the direction bucket — third sibling in the same family |
+| 13 | 13 | 9 | 4 | `0x8005c7f0` | **duplicate pointer** — same one-line idle/return trampoline as slot 9 (confirmed by two independent raw-ROM reads, not a transcription error); `+0x6fe` values 0 and 4 behave identically |
+| 14 | 14 | 10 | 5 | `0x8005c810` | duplicate pointer to slot 10's handler |
+| 15 | 15 | 11 | 6 | `0x8005c95c` | duplicate pointer to slot 11's handler |
+| 16 | 16 | 12 | 7 | `0x8005ca80` | duplicate pointer to slot 12's handler |
+| 17 | 17 | 13 | 8 | `0x8005ca80` | second duplicate of slot 12's handler (slots 12/16/17 all point at the same code — three distinct index values intentionally sharing one handler body) |
+| 18 | 18 | 14 | 9 | `0x8005cc00` | **`zz_005cc00_`**, the function named in `HANDOFF-PROMPT.md`. 3-phase local FSM; on entry (phase -1→0) sets a status-flag bit (`+0x5e0 |= 0x2000000`), computes a facing-turn target via `zz_0046510_`, and calls `zz_005f188_(borg,-0x7f,cVar+5)` — an action/animation-request call (the same helper, with varying small integers, recurs across this whole cluster; very likely the "play this specific sub-animation index" call that `research/format-specs/borg-animation-banks.md`'s group/slot addressing is downstream of). Falls through via `zz_005ec04_(borg,10)` to slot **19** when its local phase is outside -1..1. **Likely an attack-startup or directional-turn-then-commit handler** — not confirmed as specifically "melee attack" without a live input correlation. |
+| 19 | 19 | 15 | 10 | `0x8005ce14` | similarly-shaped 3-phase FSM but computes the turn via `FUN_800452a0` (atan2-style angle math on `+0x44`/`+0x48` velocity) instead of the simpler `zz_0046510_` bucket — reached from slot 18's fallthrough; **Likely a follow-up phase of the same attack/turn sequence**, e.g. "commit to attack direction" |
+| 20 | 20 | 16 | 11 | `0x8005d0a8` | same 3-phase shape as the slot-10/11/12 family (turn bucket via `zz_0046510_`, waits on `+0x1d0e`) but falls through via `zz_005ec04_(borg,10)` — i.e. its only exit target is "go to `+0x6fe`-space slot 10" = absolute slot 19. **Likely a short one-off action that always returns to the slot-19 turn/attack-commit handler.** |
+| 21 | 21 | 17 | 12 | `0x8005d224` | one-liner: conditionally resets invincibility timer to the confirmed 60.0 constant, then **tail-calls `zz_005cc00_` directly** (slot 18) — a thin wrapper variant of slot 18, plausibly selected when the same FSM should run but with a fresh invincibility grant (Likely: a hit-reaction-adjacent entry into the same attack FSM) |
+| 22 | 22 | 18 | 13 | `0x8005d258` | 4-phase FSM (`+0x544` 0/1/2/3+), heavy `zz_004beb8_` animation-request calls in the `0x82`xx sub-id family, ends via `zz_005ec04_(borg,0xb)` — i.e. transitions to `+0x6fe`-space slot 11 = absolute slot 20. **Likely a longer attack/special windup that hands off to the short slot-20 handler.** |
+| 23 | 23 | 19 | 14 | `0x8005d494` | **`FUN_8005d494`**, the other function named in `HANDOFF-PROMPT.md`. Richest handler read this session: writes the confirmed invincibility field `object+0x720` to the confirmed `60.0` constant (`FLOAT_80437448`, same address as the §a wake-up-invincibility seed anchor) as the **very first statement of every call**, not just on entry — meaning invincibility is re-armed every single frame this handler runs, not granted once. A 4-way branch on local phase (`==2`, `>1`, `==0`, `<0`, else) follows; the `==0` branch reads `object+0x591` (the confirmed §3 attack/command-type selector) and branches into small direction tables `DAT_80433820`/`DAT_80433828` (indexed by a computed 0-3ish value) when `+0x591` is 4/5/6, or a different fixed-offset facing calc when `+0x591` is 1/2. This is the shape of "resolve which attack sub-move based on command type, commit a direction, and grant invincibility." **Likely the core melee-attack-active/execution handler**, and the per-frame invincibility re-arm is itself a real, address-cited, portable mechanism (see Action Item below) independent of whether "melee attack" is the exactly correct label. |
+| 24 | 24 | 20 | 15 | `0x8005d9d8` | 3-phase FSM, scales velocity by a damping constant (`FLOAT_80437474`) on entry to phase 1, falls through via `zz_005ec04_(borg,10)` — **Likely attack-recovery/end-lag handler** (velocity-damping shape matches "attack over, decelerate") |
+| 25 | 25 | 21 | 16 | `0x8005db44` | short 2-phase FSM: sets a status bit (`+0x5e0 |= 0x10000000`), snaps facing to face away from the last knockback-angle target (`+0x72 = +0x284 - 0x8000`, using the §p/§q-confirmed `+0x284` field), animation sub-id `0xd` — **Likely a knockback/hit-reaction entry handler** |
+| 26 | 26 | 22 | 17 | `0x8005dc24` | near-identical to slot 25 but sub-id `0xe` and additionally restores `+0x50` from a per-borg-type data table (`+0x4ac`-indirect `+0x6c`) — sibling hit-reaction variant |
+| 27 | 27 | 23 | 18 | `0x8005dd10` | 3-phase FSM with a `+0x568` countdown timer (same field family as the §3-noted `+0x568/0x56c/0x570` drop/recovery-arc cluster), animation sub-id `0x13` or `0x17` selected by whether raw `+0x6fe == 0xf` (absolute slot 24) — **Likely hit-reaction recovery / knockdown-adjacent** |
+| 28 | 28 | 24 | 19 | `0x8005dd10` | duplicate pointer to slot 27's handler |
+| 29 | 29 | 25 | 20 | `0x8005df2c` | short 2-phase FSM, same `+0x568`-timer family, animation sub-id `0xd` — sibling of slots 25/26 |
+| 30 | 30 | 26 | 21 | `0x8005dffc` | long 4-phase handler, heavy use of all three `+0x568/0x56c/0x570` "drop/recovery arc" fields plus turn-rate fields `+0x7e/0x7c` — **Likely a full knockdown/getting-up sequence** (consistent with §r's finding that a group-4-slot-0 animation bank is a confirmed knockdown pose) |
+| 31 | 31 | 27 | 22 | `0x8005e31c` | 4-phase FSM explicitly reading a per-borg-type parameter block (`param+0x4ac`-indirect `+0x3f/0x40/0x41/0x4c/0x50/0x68/0x6c`), sets `+0x590 = 2` near the end of phase 3 — **Likely a scripted/authored per-borg landing or special-move-body sequence** |
+| 32 | 32 | 28 | 23 | `0x8005e5a8` | rich handler, sets `+0x7de = 1` unconditionally every call, phases gated by a `+0x550` countdown, calls `FUN_8005ef08`/`zz_00677b0_`; on final countdown **explicitly calls `zz_005ec04_(borg, 5)`**, confirmed to transition to `+0x6fe`-space slot 5 = absolute slot 14 = `0x8005c810` (a walk/turn-direction-family handler, slot 10's twin) — a **Confirmed exact transition target**: this handler's terminal state change goes to the walk/direction family, not to idle, consistent with "recovering from a big action back into normal movement" |
+| 33 | 33 | 29 | 24 | `0x8005e868` | long multi-phase handler (`+0x544` 0/1/2/4-ish, with an explicit fallthrough gap at 3) doing paired-single matrix math (`gnt4_PSMTXMultVec_bl`) against a per-borg-type transform (`+0x4ac`-indirect `+0x8d4`), plus arc-shaped Y-velocity assignment via `zz_0045204_`/`zz_0045238_` (the same sin/cos-style helpers used in the §p-confirmed knockback-direction code) — **Likely a scripted spawn/entrance or big-special-move body**, ends by clearing invincibility-adjacent flags and calling `zz_006a5a4_`/`zz_006a474_` (the same "return to idle/neutral" trampolines seen elsewhere) |
+
+Table columns note: `+0x591`/`+0x6fe` "n/a" markers above mean that particular index field's call
+site (`zz_005c290_`/`zz_005c694_`) is not the one that reaches that slot in the traced call graph
+this session — the underlying array slot still exists and is still reachable via `+0x540` (or via
+direct `zz_005cc00_`-style tail calls, as slot 21 reaches slot 18). This does not mean the slot is
+unreachable in the game, only that this session did not trace a `+0x591`/`+0x6fe` path into it.
+
+**What is Confirmed vs Likely vs Speculative, stated plainly:**
+- **Confirmed** (read directly from decompiled C plus a raw ROM pointer-table read, both cited
+  above): the three-tables-are-one-35-entry-array structure; the exact base-address/index-field
+  relationship (`+0x540 = +0x591+4 = +0x6fe+9`); `zz_005ec04_`'s exact effect (`+0x6fe=N`,
+  `+0x544..547=0`); the table's exact length (35 entries, `0x802d3570`-`0x802d35f8`, confirmed by
+  the immediately following slot being non-code data already named elsewhere in the corpus); every
+  individual handler's internal control-flow shape (phase counts, which struct fields each one
+  touches); slot 23's (`0x8005d494`) invincibility-timer write being unconditional per-call, not
+  gated to entry; slot 32's exact transition target (`zz_005ec04_(borg,5)` -> slot 14).
+- **Likely** (inferred from field reuse and call shape, not a live-traced confirmation): the
+  human-readable *gameplay label* attached to each slot (idle/walk/attack/hitstun/knockdown/etc in
+  the table above). These labels are informed guesses from which already-Confirmed fields (`+0x720`
+  invincibility, `+0x284` knockback-angle-target from §p/§q, `+0x568/56c/570` drop/recovery-arc
+  cluster from §3, `+0x591` attack/command-type selector from §3) each handler reads or writes,
+  cross-referenced against the handler's shape (does it wait on a completion flag then transition,
+  does it drive a countdown timer, etc). **Do not treat the state names in the table as DERIVED** —
+  only the addresses, indices, and code-level mechanisms are DERIVED; the labels are explicitly
+  Likely/Speculative and should be re-checked against a live Dolphin trace (watch `+0x6fe` while
+  performing a specific action — walk, melee, get hit — the same technique already used
+  successfully for HP in §h) before any future session treats them as ground truth.
+- **Not found this session, and the concrete next step**: which absolute `+0x6fe` value the game
+  enters on taking a hit or dying. `resolve_hitbox_target_effects_and_damage` (`0x8002e2a8`, the
+  confirmed damage-application function from §h/§i/§o) was grepped in full for any write to
+  `+0x6fe`, `+0x540`, or `+0x544` in `chunk_0003.c` and **has none** — it only sets HP and the
+  `+0x684/688/68c` timer trio (§s). This means the connection from "took damage" to "which table
+  slot handles the hit reaction" is not direct; it must run through whatever reads the
+  `+0x684/688/68c` timers (§s already names `zz_005f00c_`, `0x8005f00c`, as the next lead), and
+  that function — not the damage resolver — is the one that would actually call `zz_005ec04_` to
+  switch `+0x6fe` into the hit-reaction family (Likely slots 25-30 above). Tracing `zz_005f00c_`'s
+  full body and its own callers is the concrete next step to fully close the hitstun/knockdown
+  state-number question.
+
+**Per-state timer/duration fields analogous to the confirmed 60-frame invincibility pattern**: one
+clean instance found, and it reuses the already-known field. Slot 23 (`0x8005d494`,
+Likely-melee-attack-active handler) writes the confirmed `object+0x720` invincibility timer to the
+confirmed `60.0` constant (`FLOAT_80437448`, same constant/address as the §a wake-up-invincibility
+seed anchor) **every single frame the handler is active**, not once on entry. Because `+0x720`
+decrements by `~1.0`/frame and clamps at 0 (§a's already-ported algorithm), and this handler
+re-writes it to 60 every frame, the practical effect is **"invincible for the entire duration this
+handler is active, plus ~60 more frames after it exits"** — a real, portable mechanism distinct
+from the wake-up-invincibility use of the same timer/constant. No other slot was found writing a
+fixed countdown constant to a *new* timer field the way slot 23 does to `+0x720`; the `+0x550`/
+`+0x552` fields used as countdowns in several slots (25/32/33) are initialized from *computed*
+values (a per-borg-type table lookup, or `+0x3f`/`+0x40`-family fields) rather than a single fixed
+ROM constant, so they are not "confirm one number and port it" the way
+`WAKE_UP_INVINCIBILITY_FRAMES` was — they are per-move/per-borg data, same open status as the
+`plxxxxhit.bin` record fields from §o.
+
+**Action item / what got ported to `constants.ts`**: the "attack-active handler re-arms the
+60-frame invincibility timer every active frame" mechanism from slot 23 is real, address-cited, and
+DERIVED as a boolean mechanism (not a numeric guess) — added to `packages/combat/src/constants.ts`'s
+`STATE` block as `MELEE_IFRAME_REFRESH_PER_FRAME = true` with a citation to this section. The
+specific `STATE.MELEE_COOLDOWN`/`SPECIAL.COOLDOWN`/`STATE.DOWN_DURATION`/`DEATH_DURATION`/
+`SPAWN_DURATION` placeholders **stay TUNED** — this session found *which handler* is Likely
+melee-attack-active (slot 23) and *that* it grants continuous i-frames, but did not find a fixed
+authored duration constant for how long slot 23 (or the knockdown-family slots 27-30) stays active
+before falling through; those durations are gated by animation-completion flags (`+0x1d0e`,
+`+0x1d0f`) and per-borg-type data-table fields (`+0x4ac`-indirect), not a single named ROM constant
+the way `60.0` was for invincibility. Porting a guessed frame-count for those would be exactly the
+"wrong-but-confident" outcome this repo's convention forbids, so they stay TUNED with this section
+cited as the concrete next step (trace `+0x1d0e`/`+0x1d0f`'s writers — almost certainly an
+animation-frame-complete flag set by the HSD animation pipeline from §4d — to recover the real
+per-animation duration, which is the actual portable value, not one constant per state).
+
+**Practical guidance for future AI/animation/cooldown work (the point of this whole section):**
+watch `object+0x6fe` (not `+0x544`) to know "what is this borg doing right now" — `+0x544` only
+tells you *how far into* the current `+0x6fe` state's local sequence you are, and resets to 0 on
+every transition, so it is useless as a cross-state identifier on its own. This is almost certainly
+why every prior parallel pass got stuck: `+0x544` looked like "the" state field because it's read
+first in both functions named in the handoff doc, but it is scoped per-handler, not global. To
+identify a specific gameplay state live (e.g. "which slot is melee attack for borg X"), watch
+`+0x6fe` in Dolphin's debugger while performing that action — the table above gives a Likely
+starting guess for where to look (slot 23/`+0x6fe==14` for melee-active, slots 27-30/
+`+0x6fe==18..21` for knockdown/hit-reaction family, slot 9 or 13/`+0x6fe==0` or `4` for idle) but
+should be confirmed live before code depends on the exact number for a specific borg or move.
+
+---
+
+### (v) Combat had ZERO audio wiring — the "wrong asset / wrong timing" bug report's real cause
+(2026-07-01)
+
+Investigated the user bug report "the port has the wrong audio assets" / "playing at the wrong
+times." Full survey of `packages/audio/src/index.ts` (the `GotchaAudioManager` — a thin
+`HTMLAudioElement` wrapper over a manifest of `bgm`/`sfx`/`voice` keys, no Howler/WebAudio, no
+built-in timing logic — playback timing is entirely the caller's responsibility) and every call
+site in `apps/game/src` (the only file that imports `@gf/audio` is `apps/game/src/main.ts`).
+
+**Finding: `packages/combat/src/combat.ts` has zero audio calls and zero import of `@gf/audio`.**
+Every state transition (`enterHit`, `enterDown`, `enterDeath`, `stepAttacks`'s melee/shot/special
+branches) only mutates `b.state`/`b.anim`/`b.cooldowns` — no sound hook exists at the sim layer.
+`apps/game/src/main.ts`'s only audio call sites (grep-confirmed, ~20 of them) are exclusively
+menu-navigation SFX (`playConfirmSfx`/`playBackSfx`/`playEditSfx`, keyed to `AUDIO_CUES.confirm/
+back/edit` = `se00_00/01/02`) and 2 BGM tracks (`menuBgm`/`battleBgm`), all fired from menu/screen-
+transition code, never from combat. So the user-visible symptom ("wrong asset, wrong timing") is
+the natural way a player would describe "the game makes no attack/hit/death sounds during a
+fight, only menu blips and background music" — not a subtler mistiming of an existing hook.
+
+**Checked whether `AnimAudioEventLookup` (§4g, `nlQSort<AnimAudioEventLookup>` @ 0x801a7640) is a
+usable per-anim-frame (frame, sound-id) table, per the hypothesis in HANDOFF-PROMPT.md — it is
+NOT.** Read the full decompiled body in `research/decomp/ghidra-export/chunk_0050.c:4282-4290`:
+it is a one-line forwarding call, `nlQSort<AnimAudioEventLookup>(...) { zz_01a7560_(param_1,
+param_2,1,param_3); }`. `AnimAudioEventLookup` is a demangled C++ **template type name** attached
+by the toolchain to a generic sort-template instantiation, not evidence of a decoded audio-event
+table — `zz_01a7560_` (`chunk_0050.c:4240-4264`) is itself a generic object-allocation helper
+(`zz_008893c_(2, 0x39, ...)`, allocates object type `0x39`, copies 5 words into fixed struct
+offsets `+0x144/+0x148/+0x14c/+0x150/+0x154`) called from at least 3 other unrelated sites with
+different literal params — shared plumbing, not audio-specific logic. No `(frame, sound-id)` pair
+array or per-clip walk exists in this function. **Confirmed dead end, not a lead**: there is no
+recoverable ROM per-animation audio-event table behind this symbol name.
+
+Also checked `research/format-specs/hit-bin-format.md`'s "Still Unknown" list (per-move `0xF4`-byte
+records) and `scripts/inspect-hit-bins.mjs` — no sound/SFX-ID field has been identified in the
+hit.bin/comhit.bin record format either (only "effect IDs" is listed as unknown, and nothing ties
+it to an audio asset specifically). And checked the animation-bank pipeline (`anim_index.json`,
+`scripts/bake-all-borg-anims.mjs`, `research/format-specs/borg-animation-banks.md`, all touched by
+the G-Red animation fix in §4r) — it is purely bone/keyframe visual data; zero audio-event fields
+exist anywhere in that pipeline. **Net: there is no ROM-derived per-action audio table to port.**
+Combined with `apps/game/public/audio/manifest.json`'s own notes (only 5 generic `se00_00..04`
+SFX samples exist, decoded from `poq_adx_usa.afs` block 0, no combat-specific SFX subfolder was
+ever extracted) and `research/combat-assets/combat-asset-inventory.md`'s explicit statement
+("Audio cue semantics are not mapped; listed audio is exported source material only" — repeated
+per-borg), this is a **"never extracted," not "extracted wrong"** situation: no naming mismatch
+existed because no combat-specific audio asset extraction was ever attempted.
+
+**Fix applied (TUNED, explicitly not DERIVED — no ROM per-action sound-ID data exists to derive
+from):** added an edge-triggered animation-slot-transition hook so combat states actually trigger
+*something* audible, using the same architectural pattern already proven for VFX in
+`apps/game/src/sim/battleScene.ts`'s `spawnHitSpark()` (which already detects `slot === "hit" &&
+lastSeenSlot !== "hit"` to fire hit-spark VFX exactly once per hit-state-entry, not every frame).
+- `BattleScene`'s `BorgAssets` interface (`battleScene.ts`) gained an optional
+  `onSlotEnter?(borgId, slot, uid): void` hook, called in `sync()` exactly once per animation-slot
+  transition (`slotChanged = actor.lastSeenSlot !== slot`) — covers melee/shoot/special/hit/down/
+  death/spawn/jump/dash uniformly, fired on state-enter, not on every frame and not repeatedly
+  while a state persists (the correct trigger semantics per the bug report — "wrong times" would
+  include "playing every frame" or "never playing," and edge-triggering fixes both failure modes).
+- `apps/game/src/main.ts` supplies this hook (`onSlotEnter: (_borgId, slot) => playCombatSfx(slot)`
+  at the `new BattleScene(...)` call site) and a new `COMBAT_SFX: Partial<Record<AnimSlot,
+  string>>` map + `playCombatSfx()` wrapper around the existing (reused, not duplicated) `playSfx`
+  module function. Mapping: `melee`/`shoot` -> `se00_04` (~3.0s, the shortest available sample
+  suitable as a one-shot stinger), `special`/`hit`/`down`/`death` -> `se00_01` (~3.0s, the other
+  short sample). **Deliberately excluded** `se00_00`/`se00_02`/`se00_03` from combat use — all
+  three are exactly 12.0s (manifest.json-confirmed durations), clearly loop/jingle-length assets,
+  not one-shot hit-length stingers; reusing them for melee/hit would just trade "no sound" for "a
+  wrong-length sound," the same class of bug being fixed.
+- This is an honest **TUNED placeholder wiring**, not a claim of ROM accuracy: every borg's
+  melee/shot/special/hit/down/death now shares the same 2 generic stingers (no per-borg or
+  per-move specificity), because no ROM-confirmed per-action sound-ID table was recoverable in
+  this session (see the `AnimAudioEventLookup` dead-end above). Do not "discover" per-move SFX IDs
+  by guessing further from `hit.bin`/`comhit.bin` fields already ruled out above without new
+  binary evidence.
+
+**Still a known gap, not fixed this pass:** footstep-on-move and jump/land SFX were not wired —
+`slotForBorg()`'s `move`/`jump`/`fly`/`dash*` slots fire `onSlotEnter` the same as any other slot
+(so the hook exists), but `COMBAT_SFX` intentionally has no entries for them: footsteps are a
+per-frame-cadence loop concern (needs a stride/frame-cadence signal this sim doesn't track, not a
+single state-enter edge), and no generic "footstep"/"land" sample exists in the current 5-file
+`se00_*` set to wire in dishonestly. Left as a clearly-scoped follow-up rather than reusing an
+unrelated sample.
+
+**Files touched:** `apps/game/src/sim/battleScene.ts` (`BorgAssets.onSlotEnter`, `sync()`),
+`apps/game/src/main.ts` (`COMBAT_SFX`, `playCombatSfx`, `BattleScene` construction). No changes to
+`packages/combat/src/combat.ts` or `packages/audio/src/index.ts` — both were already correctly
+scoped (sim has no side effects; audio manager is generic name-based playback), the gap was
+entirely in the missing wiring between them in the app layer.
+
+---
+
 ### (g) Audio / music triggers (Confirmed library entry points)
 Engine uses GC **AI/DSP streaming** + sequence audio: `AIInit`/`AIStartDMA`/`AISetStreamPlayState`
 /`AISetStreamVolLeft` (0x802146xx–0x80214xxx), `sndSeqContinue` @ 0x801c7b68,
@@ -590,11 +1384,21 @@ trigger sites are unnamed and not yet traced.
 
 1. **Invincibility timer (0x720) + countdown @ 0x80055c00** — fully decompiled, exact, trivial to
    port. Confirms the `(timer, decrement, flag-clear, clamp)` pattern reused by other timers.
-2. **Borg state machine dispatch on 0x544** (`0x8005cc00`, `0x8005d494`) — the spine of all borg
-   behavior; everything else hangs off it. Port the `switch` skeleton + the field meanings in §3.
-3. **Animation request/apply helpers** `0x80066ec0` + `0x80066f1c` (+ `0x800670dc` heading) —
-   small, called everywhere, define how a state picks/advances an animation and facing. Decompile
-   these next.
+2. ~~**Borg state machine dispatch on 0x544** (`0x8005cc00`, `0x8005d494`)~~ — **DONE, and the
+   premise was wrong**: there is no switch on `+0x544`. The real dispatch is a 35-entry
+   function-pointer table (`0x802d3570`-`0x802d35f8`) indexed by `object+0x6fe` (primary,
+   per-frame selector, dispatched from `zz_005c694_`/`0x8005c694`) with two aliasing views
+   (`+0x591` from `zz_005c290_`, `+0x540` from `zz_005bccc_`); `+0x544..0x547` is a per-handler
+   local phase counter reset by the transition primitive `zz_005ec04_`, not a global state enum.
+   Full table, per-slot addresses, and Likely gameplay labels in §u — see that section before
+   re-deriving any of this.
+3. ~~**Animation request/apply helpers** `0x80066ec0` + `0x80066f1c` (+ `0x800670dc` heading)~~ —
+   **DONE, and the original guess was wrong**: these three are a heading/turn-rate interpolator
+   ("turn N degrees over M frames"), not animation selection — see §4r. No mode-to-(group,slot)
+   dispatch table exists to port here; the real per-state clip choice lives in the animation-bank
+   (group,slot) scheme in `research/format-specs/borg-animation-banks.md`, where §4r also fixed a
+   real bug (group-4 slot-0 mislabeled as `special_s0` instead of the knockdown pose `down_s0`,
+   which made G Red's/several borgs' special attack silently play their own knockdown animation).
 4. **HSD AObj→FObj→JObj animation evaluation** (`HSD_AObjInterpretAnim`, `HSD_FObjInterpretAnim`,
    `HSD_JObjMakeMatrix`) — don't re-derive; map the borg's anim ids onto an HSD reference impl.
    This is the bridge to the unsolved model-format problem.

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T10:44:50.582Z",
+  "generatedAt": "2026-07-01T11:00:00.390Z",
   "generatedBy": "scripts/inventory-cpu-ai-evidence.mjs",
   "sourceIndex": "research/decomp/index/function-evidence-index.json",
   "principle": "CPU AI porting must use original target/action/effect code and confirmed slot/team data. These names are evidence labels; unconfirmed decision-brain code remains unrenamed.",
@@ -157,15 +157,15 @@
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6248",
-          "needle": "zz_00681e4_((int)pcVar10,(int)(char)(&DAT_8043612c)[pcVar10[0x3e4]])"
+          "needle": "apply_actor_param_tier_delta_63((int)pcVar10,(int)(char)(&DAT_8043612c)[pcVar10[0x3e4]])"
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6302",
-          "needle": "zz_006abd4_((int)pcVar10,*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4))"
+          "needle": "react_to_slot_target_object((int)pcVar10,*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4))"
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6262",
-          "needle": "dVar25 = (double)zz_00680d4_((int)pcVar10,0)"
+          "needle": "dVar25 = (double)dispatch_slot_action_update((int)pcVar10,0)"
         }
       ],
       "relatedWebModules": [
@@ -173,8 +173,8 @@
         "packages/combat/src/battle.ts",
         "packages/combat/src/combat.ts"
       ],
-      "currentFunctionName": "FUN_8002bb14",
-      "symbolMapName": "FUN_8002bb14",
+      "currentFunctionName": "battle_frame_target_action_dispatch",
+      "symbolMapName": "battle_frame_target_action_dispatch",
       "indexedInferredName": "battle_frame_target_action_dispatch",
       "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
       "callers": [
@@ -198,7 +198,7 @@
         },
         {
           "address": "0x8002cb20",
-          "name": "zz_002cb20_"
+          "name": "mutual_actor_contact_mask_update"
         },
         {
           "address": "0x8002cc78",
@@ -230,15 +230,15 @@
         },
         {
           "address": "0x8002d7c4",
-          "name": "zz_002d7c4_"
+          "name": "collision_hit_pair_pass_active_vs_borgs"
         },
         {
           "address": "0x8002db58",
-          "name": "zz_002db58_"
+          "name": "collision_hit_pair_pass_active_vs_secondary"
         },
         {
           "address": "0x8002df08",
-          "name": "zz_002df08_"
+          "name": "collision_hit_pair_pass_object_lists"
         },
         {
           "address": "0x8002e1c8",
@@ -337,14 +337,14 @@
         "packages/combat/src/ai.ts",
         "packages/combat/src/combat.ts"
       ],
-      "currentFunctionName": "zz_002cb20_",
-      "symbolMapName": "zz_002cb20_",
+      "currentFunctionName": "mutual_actor_contact_mask_update",
+      "symbolMapName": "mutual_actor_contact_mask_update",
       "indexedInferredName": "mutual_actor_contact_mask_update",
       "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6454",
       "callers": [
         {
           "address": "0x8002bb14",
-          "name": "FUN_8002bb14"
+          "name": "battle_frame_target_action_dispatch"
         }
       ],
       "callees": [
@@ -410,22 +410,22 @@
         "packages/combat/src/combat.ts",
         "packages/combat/src/ai.ts"
       ],
-      "currentFunctionName": "zz_002e2a8_",
-      "symbolMapName": "zz_002e2a8_",
+      "currentFunctionName": "resolve_hitbox_target_effects_and_damage",
+      "symbolMapName": "resolve_hitbox_target_effects_and_damage",
       "indexedInferredName": "resolve_hitbox_target_effects_and_damage",
       "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7473",
       "callers": [
         {
           "address": "0x8002d7c4",
-          "name": "zz_002d7c4_"
+          "name": "collision_hit_pair_pass_active_vs_borgs"
         },
         {
           "address": "0x8002db58",
-          "name": "zz_002db58_"
+          "name": "collision_hit_pair_pass_active_vs_secondary"
         },
         {
           "address": "0x8002df08",
-          "name": "zz_002df08_"
+          "name": "collision_hit_pair_pass_object_lists"
         }
       ],
       "callees": [
@@ -562,40 +562,40 @@
       "summary": "Applies the signed DAT_8043612c slot delta to actor+0x74a with a narrower [-63, 63] clamp, then refreshes table-backed actor params.",
       "evidence": [
         {
-          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4458",
-          "needle": "iVar1 = (int)*(char *)(param_1 + 0x74a)"
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4459",
+          "needle": "current_tier = (int)*(char *)(actor + 0x74a)"
         },
         {
-          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4460",
-          "needle": "if (iVar2 < 0x40)"
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4461",
+          "needle": "if (desired_tier < 0x40)"
         },
         {
-          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4474",
-          "needle": "*(undefined2 *)(param_1 + 0x750) = 900"
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4475",
+          "needle": "*(undefined2 *)(actor + 0x750) = 900"
         },
         {
-          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4476",
-          "needle": "zz_006817c_(param_1,iVar1)"
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4477",
+          "needle": "apply_actor_param_tier_delta_127(actor,applied_delta)"
         }
       ],
       "relatedWebModules": [
         "packages/combat/src/stats.ts",
         "packages/combat/src/combat.ts"
       ],
-      "currentFunctionName": "zz_00681e4_",
-      "symbolMapName": "zz_00681e4_",
+      "currentFunctionName": "apply_actor_param_tier_delta_63",
+      "symbolMapName": "apply_actor_param_tier_delta_63",
       "indexedInferredName": "apply_actor_param_tier_delta_63",
       "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4442",
       "callers": [
         {
           "address": "0x8002bb14",
-          "name": "FUN_8002bb14"
+          "name": "battle_frame_target_action_dispatch"
         }
       ],
       "callees": [
         {
           "address": "0x8006817c",
-          "name": "zz_006817c_"
+          "name": "apply_actor_param_tier_delta_127"
         }
       ],
       "globalReferences": [
@@ -621,29 +621,29 @@
       "evidence": [
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1073",
-          "needle": "*(undefined4 *)(param_1 + 0x7bc) = *param_2"
+          "needle": "*(undefined4 *)(actor + 0x7bc) = *target_vec3"
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1071",
-          "needle": "*(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) | 0x1000"
+          "needle": "*(uint *)(actor + 0x5e0) = *(uint *)(actor + 0x5e0) | 0x1000"
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1080",
-          "needle": "zz_006a7b4_(param_1,0x23)"
+          "needle": "zz_006a7b4_(actor,0x23)"
         }
       ],
       "relatedWebModules": [
         "packages/combat/src/movement.ts",
         "packages/combat/src/ai.ts"
       ],
-      "currentFunctionName": "zz_006ab04_",
-      "symbolMapName": "zz_006ab04_",
+      "currentFunctionName": "start_forced_move_to_point",
+      "symbolMapName": "start_forced_move_to_point",
       "indexedInferredName": "start_forced_move_to_point",
       "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1056",
       "callers": [
         {
           "address": "0x8002bb14",
-          "name": "FUN_8002bb14"
+          "name": "battle_frame_target_action_dispatch"
         },
         {
           "address": "0x8006478c",
@@ -692,33 +692,33 @@
       "evidence": [
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1128",
-          "needle": "if (*(char *)(param_2 + 0x4a0) == '\\0')"
+          "needle": "if (*(char *)(target_actor + 0x4a0) == '\\0')"
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1131",
-          "needle": "zz_006a868_(param_1,*(undefined2 *)(param_2 + 1000),*(undefined1 *)(param_2 + 0x3ec))"
+          "needle": "zz_006a868_(actor,*(undefined2 *)(target_actor + 1000)"
         },
         {
-          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1132",
-          "needle": "*(undefined2 *)(param_1 + 0x49a) = 900"
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1133",
+          "needle": "*(undefined2 *)(actor + 0x49a) = 900"
         },
         {
-          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1152",
-          "needle": "zz_0176ec0_(param_1,*(undefined1 *)(param_1 + 0x88),1)"
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1153",
+          "needle": "zz_0176ec0_(actor,*(undefined1 *)(actor + 0x88),1)"
         }
       ],
       "relatedWebModules": [
         "packages/combat/src/ai.ts",
         "packages/combat/src/combat.ts"
       ],
-      "currentFunctionName": "zz_006abd4_",
-      "symbolMapName": "zz_006abd4_",
+      "currentFunctionName": "react_to_slot_target_object",
+      "symbolMapName": "react_to_slot_target_object",
       "indexedInferredName": "react_to_slot_target_object",
       "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:1115",
       "callers": [
         {
           "address": "0x8002bb14",
-          "name": "FUN_8002bb14"
+          "name": "battle_frame_target_action_dispatch"
         }
       ],
       "callees": [
@@ -758,6 +758,58 @@
         "0x272",
         "0x443",
         "0x8c4"
+      ]
+    },
+    {
+      "address": "0x8010d880",
+      "inferredName": "set_slot_action_handler",
+      "system": "Per-slot action handler dispatch",
+      "summary": "Writes a slot's action handler from a 6-entry mode table when the slot is active. This is the final shared dispatch path reached after target/effect resolution.",
+      "evidence": [
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0030.c:2612",
+          "needle": "PTR_DAT_8043394c[0x30] & 1 << slot_index"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0030.c:2615",
+          "needle": "(&DAT_803c735c)[slot_index] = (&PTR_DAT_80325af4)[action_mode % 6]"
+        },
+        {
+          "sourceRef": "research/decomp/ghidra-export/chunk_0030.c:2616",
+          "needle": "(&DAT_803c736c)[slot_index] = 0"
+        }
+      ],
+      "relatedWebModules": [
+        "packages/combat/src/battle.ts",
+        "packages/combat/src/ai.ts"
+      ],
+      "currentFunctionName": "set_slot_action_handler",
+      "symbolMapName": "set_slot_action_handler",
+      "indexedInferredName": "set_slot_action_handler",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0030.c:2601",
+      "callers": [
+        {
+          "address": "0x800680d4",
+          "name": "dispatch_slot_action_update"
+        },
+        {
+          "address": "0x800ff698",
+          "name": "zz_00ff698_"
+        }
+      ],
+      "callees": [],
+      "globalReferences": [
+        "PTR_DAT_8043394c",
+        "DAT_803c735c",
+        "PTR_DAT_80325af4",
+        "DAT_803c736c",
+        "DAT_803c737c"
+      ],
+      "constants": [
+        "0x30",
+        "6",
+        "1",
+        "0"
       ]
     }
   ],
@@ -850,15 +902,15 @@
       "evidence": [
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4423",
-          "needle": "*(char *)(param_1 + 0x74a)"
+          "needle": "*(char *)(actor + 0x74a)"
         },
         {
-          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4503",
-          "needle": "*(char *)(param_1 + 0x74b)"
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4504",
+          "needle": "*(char *)(actor + 0x74b)"
         },
         {
-          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4474",
-          "needle": "*(undefined2 *)(param_1 + 0x750) = 900"
+          "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:4475",
+          "needle": "*(undefined2 *)(actor + 0x750) = 900"
         }
       ]
     },
@@ -878,7 +930,7 @@
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6302",
-          "needle": "zz_006abd4_((int)pcVar10,*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4))"
+          "needle": "react_to_slot_target_object((int)pcVar10,*(int *)(&DAT_803b06a8 + pcVar10[0x3e4] * 4))"
         }
       ]
     },
@@ -898,7 +950,7 @@
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6248",
-          "needle": "zz_00681e4_((int)pcVar10,(int)(char)(&DAT_8043612c)[pcVar10[0x3e4]])"
+          "needle": "apply_actor_param_tier_delta_63((int)pcVar10,(int)(char)(&DAT_8043612c)[pcVar10[0x3e4]])"
         }
       ]
     },
@@ -914,7 +966,7 @@
         },
         {
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:6270",
-          "needle": "zz_006ab04_((int)pcVar10"
+          "needle": "start_forced_move_to_point((int)pcVar10"
         }
       ]
     },

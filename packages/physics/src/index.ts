@@ -124,3 +124,16 @@ export function approach(current: number, target: number, maxDelta: number): num
   if (current > target) return Math.max(current - maxDelta, target);
   return target;
 }
+
+// Knockback DIRECTION calc — ported from the decompiled ROM function `zz_00300bc_` @
+// 0x800300bc. See knockback.ts for the full derivation notes and behavior-notes.md section (p).
+export {
+  BAM16_PER_RADIAN,
+  angleTrimByteToBam16,
+  bam16YawToXZ,
+  computeAttackerToTargetDirection,
+  computeLinkedObjectDirection,
+  knockbackDirectionFromPositions,
+  vectorToKnockbackAngle,
+  type KnockbackAngle,
+} from "./knockback.js";

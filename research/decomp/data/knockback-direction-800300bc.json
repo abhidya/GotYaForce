@@ -1,0 +1,55 @@
+{
+  "address": "0x800300bc",
+  "name": "zz_00300bc_",
+  "signature": "void zz_00300bc_(int param_1, int param_2, int param_3)",
+  "description": "Computes launch/knockback DIRECTION (yaw + pitch, as two BAM16 shorts) from one of 5 vector-source modes selected by param_3, then applies a per-move angular trim read from the same per-move hit-record table already used by the damage formula. Confirmed via full read of ghidra-export/chunk_0003.c:8540-8627, cross-referenced against its sole confirmed call site in resolve_hitbox_target_effects_and_damage (0x8002e2a8, ghidra-export/chunk_0003.c:7945): `zz_00300bc_(param_1, param_2, (int)*(char *)(puVar17 + 7))` -- i.e. param_1/param_2 are the SAME hit-context/target wrapper objects the caller received, and the mode selector is the signed byte at the per-move record's offset +7 (puVar17 is `ushort*`, so `puVar17+7` as `char*` = byte offset +14 from the move record base -- this is a DIFFERENT field from puVar17[0] 'base power' and puVar17[8] 'flag bits' used by zz_003cd5c_, but the same 0x18-byte-stride move-record array indexed by param_1[0x11] (current action/move index) off the base pointer at param_1+0x2c).",
+  "params": {
+    "param_1": "hit-resolution context object. +0x20 = attacker object pointer (iVar2), +0x24 = attacker's linked/partner object pointer, +0x2c = base pointer to the per-move hit-record table, +0x11 = current move/action index byte (table index, stride 0x18 bytes per record)",
+    "param_2": "target wrapper object, same one the caller received. +0x20 = defender/victim object pointer (iVar3), +0x24 = defender's linked/partner object pointer",
+    "param_3": "mode selector, int (signed). Passed by the sole known caller as the signed byte at the move record's +7 (ushort-index) = +0xe (byte offset). Values seen in the branch structure: 0, 1, 2, 3, 4 (and an unhandled negative fallthrough that leaves the local vector uninitialized -- not a real mode, just how the decompiled if/else chain bottoms out)."
+  },
+  "modes": [
+    {
+      "value": 0,
+      "description": "Relative-position mode. vec = normalize_input(attackerLinked.pos[0x20..0x2c] - attackerLinked.pos itself is wrong wording -- precisely: gnt4_PSVECSubtract_bl((float*)(iVar2+0x20), (float*)(iVar2+0x2c), &local) where iVar2 = *(param_1+0x20) (attacker object). Both +0x20 and +0x2c are float vec3 fields on the ATTACKER object (not the borg base-struct +0x44 position from behavior-notes section 3 -- this is a narrower per-hitbox/attack sub-object). If the resulting vector's magnitude <= 0.0 (FLOAT_80436f68), falls back to the attacker's own +0x38/+0x3c/+0x40 vec3 instead.",
+      "fallback_condition": "PSVECMag(vec) <= FLOAT_80436f68 (0.0)",
+      "fallback_source": "iVar2 (attacker object) at +0x38/+0x3c/+0x40 (vec3)"
+    },
+    {
+      "value": 1,
+      "description": "Attacker-to-target mode (the 'normal' melee/shot knockback direction): vec = gnt4_PSVECSubtract_bl((float*)(iVar3+0x20), (float*)(iVar2+0x20)) i.e. defenderObject.pos20 - attackerObject.pos20 -- a straight relative-position vector from attacker to target. No fallback branch (the `-1 < param_3` arm has no magnitude guard, unlike modes 0/2)."
+    },
+    {
+      "value": 2,
+      "description": "Similar relative-position subtract but sourced from the CONTEXT object's own fields rather than the resolved attacker/defender objects: vec = gnt4_PSVECSubtract_bl((float*)(param_1+0x30), (float*)(param_1+0x3c)). Falls back the same way as mode 0 (magnitude <= 0.0) to iVar2 (attacker object) +0x38/+0x3c/+0x40 vec3 -- same fallback source as mode 0, suggesting +0x30/+0x3c on param_1 and +0x20/+0x2c on the attacker object may be aliased views of related hitbox/muzzle-point data, and +0x38/+0x3c/+0x40 is a generic 'last known good direction' fallback vec3 on the attacker."
+    },
+    {
+      "value": 3,
+      "description": "'Linked object' / grab-adjacent mode: vec = gnt4_PSVECSubtract_bl((float*)(param_2+100), (float*)(param_1+100)) -- i.e. param_2.pos100 - param_1.pos100 (offset 100 decimal = 0x64), computed directly on the context wrapper objects (param_1/param_2) rather than their resolved attacker/defender sub-objects. No magnitude fallback guard on this branch."
+    },
+    {
+      "value": 4,
+      "description": "Camera-relative / stored-aim mode with a 3-way cascading fallback: if attacker object (iVar2) +0x83 == 0 (an already-known 'special state' byte seen throughout combat code, 0 = normal), use its own +0x8dc/+0x8ec/+0x8fc vec3 (a distinct, high-offset field cluster -- likely a stored camera-facing or last-input aim direction, not yet otherwise catalogued). Else check the attacker's linked object (param_1+0x24) +0x83; if that's 0, use ITS +0x8dc/+0x8ec/+0x8fc instead. Else (both have nonzero +0x83), fall all the way back to the attacker object's own +0x11c/+0x12c/+0x13c vec3 (a third, still-different field cluster)."
+    }
+  ],
+  "post_processing": {
+    "degenerate_guard": "if ABS(x*x + y*y + z*z) < FLOAT_80436fc0 (0.01, i.e. magnitude < ~0.1) the whole vector is replaced with the fixed fallback (x=0.0, y=0.0, z=-1.0) -- FLOAT_80436f68=0.0, FLOAT_80436f74=-1.0, both confirmed by direct ROM read.",
+    "yaw": "iVar2_angle = FUN_800452a0(x, z) truncated to short, stored at targetObject(iVar3)+0x284. FUN_800452a0(a,b) = (short)(int)(atan2(a,b) * FLOAT_8043707c), and FLOAT_8043707c == 10430.3779296875 == 65536/(2*pi) exactly (confirmed by direct ROM read) -- i.e. atan2 result in radians converted to a 16-bit BAM angle (0x10000 = 360 degrees), same fixed-point angle convention already established for borg heading at struct+0x72 in behavior-notes.md section 3.",
+    "pitch": "computed as FUN_800452a0(y, horizMagSq) where horizMagSq = ABS(x*x + z*z) (a squared, not linear, horizontal magnitude -- an apparent minor asymmetry vs. a textbook atan2(y, sqrt(x^2+z^2)), see caveat below), then NEGATED and stored at targetObject(iVar3)+0x282.",
+    "angle_trim": "After computing the base yaw/pitch, re-reads the SAME per-move record used by the caller (base = *(param_1+0x2c), index = param_1[0x11], stride 0x18) and adds a per-move signed-byte trim: yaw += (signed char)record[0x14] * -0x100; pitch += (signed char)record[0x15] * -0x100. The *-0x100 scaling places the signed byte in the high byte of the 16-bit angle field (i.e. 1 LSB of the trim byte = 256 BAM units = 360/256 = 1.40625 degrees of coarse angular offset) -- this is the 'angle-offset table' referenced in HANDOFF-PROMPT.md, now fully decoded: it is not a separate fixed ROM table, it's two extra bytes (offsets 0x14/0x15) in the SAME runtime per-move hit-record array already used for base power/flags/knockback-mode (puVar17 in zz_003cd5c_'s caller). Its contents are per-move authored data (part of the undecoded plxxxxhit.bin/comhit.bin record format, see research/format-specs/hit-bin-format.md), not a static table dumpable from a fixed DOL address.",
+    "linked_object_mirror": "if (targetObject(iVar3)+0x1da & 2) != 0 AND the ATTACKER's linked object (at param_2+0x24, call it iVar1) has +0x83 == 0, the just-computed yaw/pitch (+0x284/+0x282) are copied verbatim onto that linked object too -- i.e. a paired/partner borg inherits the same launch direction as the primary target when a specific effect flag is set."
+  },
+  "caveats": [
+    "Ghidra's decompiler emitted `/* WARNING: Removing unreachable block */` for two blocks (0x80030320, 0x800300cc) -- these were dead code the compiler/decompiler determined unreachable, not evidence of a 6th mode; the 5 branches documented above are exhaustive for all param_3 values the if/else chain can dispatch (0,1,2,3,4; negative param_3 falls through with locals uninitialized and is not a real mode used by the confirmed caller, which only ever passes a per-move signed byte -- still technically capable of being negative if a move record author sets it so, but no such record's actual value has been inspected).",
+    "The pitch computation's use of a SQUARED horizontal magnitude (`dVar6 = ABS(x*x + z*z)`, not sqrt) as the second atan2 argument, together with FUN_800452a0's fixed BAM16-conversion constant, does not reduce algebraically to a textbook atan2(vertical, horizontal-distance) call -- it is reproduced byte-for-byte from the decompiled C as an intentional-looking (if unusual) engine idiom rather than corrected to 'what a physically clean formula would do'. Port this exactly, do not silently fix it, in case it's load-bearing for how pitch feels in the original game.",
+    "object+0x284 was previously catalogued in behavior-notes.md section 3 as 'a base index / id used in heading math (Speculative)' on the BORG base struct (offset conventions from section 3 assume a different base than the objects reached here) -- this finding does not necessarily contradict that entry, since zz_00300bc_ operates on resolved sub-objects (iVar2/iVar3) reached through several pointer indirections from param_1/param_2, whose relationship to the top-level borg base struct from section 3 has not been re-derived here. Do not assume iVar3 == the borg base struct without further checking; treat +0x284/+0x282 here as fields on whatever object resolve_hitbox_target_effects_and_damage calls 'pcVar18'/'iVar19' (the defender), matching the existing GF_ALIAS evidence comment on that function."
+  ],
+  "confirmed_rom_constants": {
+    "FLOAT_80436f68": { "address": "0x80436f68", "value": 0.0, "role": "zero/epsilon guard, reused across several branches" },
+    "FLOAT_80436fc0": { "address": "0x80436fc0", "value": 0.009999999776482582, "role": "degenerate-vector magnitude-squared threshold (~0.01, i.e. |v| < ~0.1 triggers fallback)" },
+    "FLOAT_80436f74": { "address": "0x80436f74", "value": -1.0, "role": "fallback vector Z component (fallback vector = (0,0,-1))" },
+    "FLOAT_8043707c": { "address": "0x8043707c", "value": 10430.3779296875, "role": "radians-to-BAM16 conversion constant, confirmed == 65536/(2*pi) (10430.378350470453) to float precision" }
+  },
+  "read_method": "dol.py-style: DOL section table parsed directly from user-data/GG4E/disc/sys/boot.dol, addr_to_off()+struct.unpack('>f', ...) for each FLOAT_804... constant above. No fixed-address table dump was possible for the angle-offset data itself because it lives in a runtime per-move hit-record array (base pointer stored at a dynamic context-object field, param_1+0x2c), not at a static ROM address -- see 'angle_trim' above.",
+  "date": "2026-07-01"
+}
