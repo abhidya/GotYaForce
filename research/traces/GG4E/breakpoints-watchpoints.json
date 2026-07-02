@@ -1056,6 +1056,23 @@
           "confidence": "confirmed decompiled input bridge"
         },
         {
+          "id": "input-command-mask-helper",
+          "type": "execute",
+          "address": "0x8008bbc0",
+          "dol_offset": "0x00088bc0",
+          "section": "text1",
+          "symbol": "zz_008bbc0_ / normalized PAD command mask helper",
+          "event": "Masks DAT_803c727c slot input before FUN_80056900 stores actor+0x5b4; mask 0x00ff1f7f preserves B 0x200, X 0x400, and Z 0x10.",
+          "capture": [
+            "r3 port",
+            "r4 normalized slot word",
+            "return command mask",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled input helper"
+        },
+        {
           "id": "state-transition-primitive",
           "type": "execute",
           "address": "0x8005ec04",
@@ -1125,6 +1142,80 @@
             "DAT_8043612c slot inputs if in registers"
           ],
           "confidence": "confirmed function, side-effect labels still traced live"
+        },
+        {
+          "id": "z-command-state-candidate",
+          "type": "execute",
+          "address": "0x8005a298",
+          "dol_offset": "0x00057298",
+          "section": "text1",
+          "symbol": "FUN_8005a298 / exact Z current-bit consumer candidate",
+          "event": "Checks actor+0x5b4 bit 0x10 and writes actor+0x73c; not enough alone to label ally charge or power-up.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 current command word",
+            "actor+0x5d4 state flags",
+            "actor+0x73c before/after",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled bit check, gameplay label unproven"
+        },
+        {
+          "id": "x-pressed-action-transition-candidate",
+          "type": "execute",
+          "address": "0x800e622c",
+          "dol_offset": "0x000e322c",
+          "section": "text1",
+          "symbol": "FUN_800e622c / X pressed-edge transition candidate",
+          "event": "Contains actor+0x5bc bit 0x400 branch leading to action helper call; needs live borg/action correlation.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5bc press-edge word",
+            "actor+0x540",
+            "actor+0x55c",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled bit check, gameplay label unproven"
+        },
+        {
+          "id": "bx-pressed-borg-action-candidate",
+          "type": "execute",
+          "address": "0x801304b8",
+          "dol_offset": "0x0012d4b8",
+          "section": "text1",
+          "symbol": "FUN_801304b8 / B/X pressed-edge borg-specific action candidate",
+          "event": "Contains B 0x200 and X 0x400 press-edge branches gated by borg ids/cooldowns; needs live action correlation.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5bc press-edge word",
+            "actor+0x3e8 borg id",
+            "actor+0x540",
+            "actor+0x694 cooldown",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled bit checks, gameplay label unproven"
+        },
+        {
+          "id": "bx-borg-conditional-action-061e",
+          "type": "execute",
+          "address": "0x8015b0b4",
+          "dol_offset": "0x001580b4",
+          "section": "text1",
+          "symbol": "FUN_8015b0b4 / borg 0x061e X-vs-B command branch",
+          "event": "Uses X current bit for borg 0x061e and B current bit for other borgs before advancing actor+0x54c/action fields; proves B/X consumers are borg/action-specific.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 current command word",
+            "actor+0x3e8 borg id",
+            "actor+0x54c",
+            "actor+0x540",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled bit checks, gameplay label unproven"
         }
       ],
       "watchpoints": [

@@ -46,6 +46,42 @@ Generated: 2026-06-30
     `action-handler-table`, `borg-state-dispatch`, `state-transition-primitive`,
     param-tier, or audio hits. Therefore B/X action mapping, Z ally-lock/charge or
     power-up side effects, and cue IDs remain unproven.
+- Static decomp pass on 2026-07-02 proves the next input bridge step after
+  normalization:
+  - `FUN_80056900` at `0x80056900` copies the previous actor command
+    `actor+0x5b4` to `actor+0x5b8`, calls `zz_008bbc0_` with
+    `DAT_803c727c[port]`, stores the result in `actor+0x5b4`, derives pressed edge
+    `actor+0x5bc = current & ~previous`, and derives release edge
+    `actor+0x5c0 = previous & ~current`
+    (`research/decomp/ghidra-export/chunk_0007.c:228-270`).
+  - `zz_008bbc0_` at `0x8008bbc0` returns `param_2 & 0x00ff1f7f`; this mask
+    preserves B `0x00000200`, X `0x00000400`, and Z `0x00000010`
+    (`research/decomp/ghidra-export/chunk_0013.c:2197-2202`).
+  - This proves injected normalized B/X/Z bits can reach actor command fields if
+    the player-input bridge runs. It still does not identify original attack,
+    special, ally charge, power-up, or audio cue semantics.
+- Static B/X consumer inventory shows command handling is borg/action-specific, not
+  one universal table:
+  - `FUN_8015b0b4` uses X current bit `0x400` for borg id `0x061e`, but B
+    current bit `0x200` for other borgs before advancing `actor+0x54c` and related
+    action fields (`research/decomp/ghidra-export/chunk_0040.c:4265-4317`).
+  - `FUN_800e622c` contains an X pressed-edge `actor+0x5bc & 0x400` path that can
+    call the action helper cluster
+    (`research/decomp/ghidra-export/chunk_0024.c:4523-4612`).
+  - `FUN_801304b8` contains B pressed-edge `0x200` and X pressed-edge `0x400`
+    branches gated by borg ids and cooldown fields
+    (`research/decomp/ghidra-export/chunk_0034.c:4873-4947`).
+- Static Z inventory found one exact Z current-bit consumer in the focused pass:
+  `FUN_8005a298` tests `actor+0x5b4 & 0x10` and writes `actor+0x73c`
+  (`research/decomp/ghidra-export/chunk_0007.c:2772-2805`). This is not enough to
+  label ally-lock target selection, charge, or power-up.
+- Fresh failed action/audio traces from `dolphin/right before hit.sav`:
+  - `user-data/dolphin-trace/traces/input-bridge-action-only/gdb-trace-2026-07-02T21-06-13-352Z.json`
+    captured 80 `audio-seq-continue` hits and no input/action hits. Result: the
+    always-hot sequence breakpoint can starve action proof.
+  - `user-data/dolphin-trace/traces/input-bridge-action-noaudio/gdb-trace-2026-07-02T21-08-12-391Z.json`
+    captured zero hits before timeout. Result: this save-state/launch path did not
+    enter the current input/action bridge under the selected breakpoint set.
 
 ## Trace Files
 
@@ -98,6 +134,15 @@ Generated: 2026-06-30
     `current=0x00000010`, `pressed=0x00000010`.
   - Result: proves injected GC-Z survives through `zz_010d450_` normalization; zero
     param-tier/action/audio hits, so no ally-lock charge or power-up behavior is proven.
+- `user-data/dolphin-trace/traces/input-bridge-action-only/gdb-trace-2026-07-02T21-06-13-352Z.json`
+  - Narrow action/audio pass from `dolphin/right before hit.sav`.
+  - 80 hits, all `audio-seq-continue`.
+  - Result: confirms this audio breakpoint is too hot to mix with low-frequency input
+    bridge/action proof at small hit budgets.
+- `user-data/dolphin-trace/traces/input-bridge-action-noaudio/gdb-trace-2026-07-02T21-08-12-391Z.json`
+  - Same save and action-focused IDs with the hot audio breakpoint removed.
+  - 0 hits before timeout.
+  - Result: this boot path still does not prove B/X/Z action consumers.
 
 ## Commands
 
@@ -121,6 +166,8 @@ Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, de
 - Active borg base from `0x8005d4b0` or `0x80055c00`.
 - Player input bridge from `0x80056900` (`FUN_80056900`) copying normalized
   `DAT_803c727c` into actor `+0x5b4` current command and `+0x5bc` pressed edge.
+- Command-mask helper at `0x8008bbc0` (`zz_008bbc0_`) preserving B `0x200`,
+  X `0x400`, and Z `0x10` before `actor+0x5b4`.
 - Writes to `active_borg_base+0x544`, `+0x5e0`, `+0x6b4`, `+0x6b6`, `+0x6fe`, and `+0x720`.
 - Target pointer writer.
 - HP writer.
@@ -136,9 +183,9 @@ before promoting any rule:
 
 ```bash
 rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\right before hit.sav"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --inject-pad-buttons=B --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --inject-pad-buttons=X --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,param-tier-reset,param-tier-delta-127,param-tier-delta-63,param-tier-refresh,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --inject-pad-buttons=Z --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,input-command-mask-helper,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-borg-conditional-action-061e --inject-pad-buttons=B --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,input-command-mask-helper,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-borg-conditional-action-061e --inject-pad-buttons=X --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,input-command-mask-helper,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-borg-conditional-action-061e,param-tier-reset,param-tier-delta-127,param-tier-delta-63,param-tier-refresh --inject-pad-buttons=Z --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
 rtk .\tools\node\node.exe scripts\summarize-dolphin-gdb-trace.mjs user-data\dolphin-trace\traces\bx-close-b user-data\dolphin-trace\traces\x-special user-data\dolphin-trace\traces\z-ally-lock
 ```
 
@@ -147,3 +194,6 @@ Proof gate: a B/X mapping needs PAD bytes and either `state-transition-primitive
 charge/power-up needs a Z-labeled PAD sample and a `param-tier-*` hit. Audio cue IDs need
 an action-labeled trace with audio hits plus argument/handle inspection; counts alone do not
 identify a cue.
+
+Run audio as a separate pass after an action trace has proven the command path. Do not mix
+`audio-seq-continue` into small B/X/Z proof budgets; it can consume every hit.
