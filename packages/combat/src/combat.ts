@@ -371,7 +371,7 @@ export function projectileVisualKindForProfile(p: BorgProfile): ProjectileVisual
 }
 
 /**
- * Process B (attack) and Y (special) for one borg. Mutates `b` (state, cooldowns, ammo) and
+ * Process B (attack) and X (special) for one borg. Mutates `b` (state, cooldowns, ammo) and
  * resolves melee hits immediately against `all`. Ranged borgs spawn projectiles.
  *
  * `attackHeld` is the button's HELD state each frame (adapter/AI pass held booleans);

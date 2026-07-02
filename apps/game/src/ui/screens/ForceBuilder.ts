@@ -257,7 +257,7 @@ export function createForceBuilder(
     if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
       if (remain() >= 0 && force.length > 0) opts.onConfirm([...force]);
       ev.preventDefault();
-    } else if (ev.key === "Escape" || ev.key === "Backspace") {
+    } else if (ev.key === "Escape" || ev.key === "Backspace" || ev.key.toLowerCase() === "b") {
       opts.onQuit?.();
       ev.preventDefault();
     }

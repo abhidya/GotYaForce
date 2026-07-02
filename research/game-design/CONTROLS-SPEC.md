@@ -64,6 +64,12 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
     `research/decomp/index/function-evidence-index.md:56-57`,
     `research/decomp/ghidra-export/chunk_0076.c:3819-3821`,
     `research/decomp/ghidra-export/chunk_0076.c:4844-4897`.
+- Existing ignored Dolphin traces under `user-data/dolphin-trace/traces/` prove the GDB,
+  PAD, and camera capture path only. Parsed saved traces contain `pad-read`,
+  `pad-clamp-circle`, `game-pad-normalization-cluster`, and `camera-lookat-final` hits, but
+  no `action-state-entry`, `action-handler-table`, or `action-helper-cluster` hits for B/X/Z.
+  Therefore exact B/X action-index mapping, Z charge/power-up side effects, and per-action
+  audio cue IDs remain unproven.
 
 ## GC Battle Control Checklist
 
@@ -247,7 +253,9 @@ Known mismatches:
 3. Dash/step trace: full-stick left/right under lock. Capture position deltas and state index;
    treat left/right as dash events per `research/traces/GG4E/golden-trace-runbook.md:41-57`.
 4. B/X trace: one close-range B, one ranged B, one X. Correlate PAD bits to `object+0x6fe`,
-   `FUN_8005d494`, projectile spawn, cooldown/ammo fields, and animation request helper calls.
+   `FUN_8005d494`, projectile spawn, cooldown/ammo fields, animation request helper calls, and
+   audio trigger wrappers. Do not promote any B/X state mapping or sound cue until this trace
+   shows the original action transition and cue path.
 5. Manual borg switch trace: press candidate buttons and separately let a borg die while
    watching `0x802807ac` / `0x80281c38` plus active borg slot/player state. Until then,
    manual switch stays inactive in the browser battle core.

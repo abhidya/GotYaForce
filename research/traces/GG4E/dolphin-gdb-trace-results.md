@@ -11,6 +11,12 @@ Generated: 2026-06-30
   - `game-pad-normalization-cluster` at `0x8010d450`: 18 hits.
   - `pad-read` at `0x8021379c`: 18 hits.
   - `pad-clamp-circle` at `0x80212a14`: 18 hits.
+- No saved trace currently captures `action-state-entry`, `action-handler-table`, or
+  `action-helper-cluster`, so the local trace set does not prove B/X action mapping, Z
+  ally-charge/power-up behavior, or per-action audio cue IDs.
+- Fresh local parse on 2026-07-02 checked every JSON under
+  `user-data/dolphin-trace/traces/` (including `camera-next/`, `damage-next/`, and
+  `summary.json`): all returned zero hits for those three action IDs.
 
 ## Trace Files
 
@@ -56,7 +62,7 @@ Note: do not probe `127.0.0.1:5555` with `Test-NetConnection` before tracing; Do
 
 ## Implementation Gate
 
-Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, death-to-next-borg, or CPU AI from guesses. The current browser mechanics remain candidate wiring until one action-specific trace captures the original DOL state transitions:
+Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, death-to-next-borg, B/X action mapping, Z ally-charge/power-up behavior, per-action audio cue IDs, or CPU AI from guesses. The current browser mechanics remain candidate wiring until one action-specific trace captures the original DOL state transitions:
 
 - Active borg base from `0x8005d4b0` or `0x80055c00`.
 - Writes to `active_borg_base+0x544`, `+0x5e0`, `+0x6b4`, `+0x6b6`, `+0x6fe`, and `+0x720`.
