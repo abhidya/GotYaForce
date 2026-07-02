@@ -117,8 +117,11 @@ export class BattleScene {
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
   private impactTexture: THREE.Texture;
   private hitSparkTexture: THREE.Texture;
-  private lockMarker: THREE.Group;
-  private lockMarkerAge = 0;
+  /** Enemy lock-on reticle (spinning ring), shown ONLY over the local player's enemy lockTarget. */
+  private enemyReticle: THREE.Group;
+  private enemyReticleRing: THREE.SpriteMaterial;
+  /** Ally lock-on marker (green arrow) — deliberately a different shape+color than the enemy reticle. */
+  private allyMarker: THREE.Group;
 
   constructor(
     private readonly root: THREE.Group,
@@ -132,8 +135,12 @@ export class BattleScene {
     this.impactTexture = makeAtlasTexture(IMPACT_ATLAS_URL, 0, 0, 64, 32);
     this.hitSparkTexture = new THREE.TextureLoader().load(HIT_SPARK_URL);
     this.hitSparkTexture.colorSpace = THREE.SRGBColorSpace;
-    this.lockMarker = makeLockMarker();
-    this.root.add(this.lockMarker);
+    const reticle = makeEnemyReticle();
+    this.enemyReticle = reticle.group;
+    this.enemyReticleRing = reticle.ringMaterial;
+    this.root.add(this.enemyReticle);
+    this.allyMarker = makeAllyMarker();
+    this.root.add(this.allyMarker);
   }
 
   /** Map a sim state/action to one of the exported game animation groups. */
@@ -201,17 +208,20 @@ export class BattleScene {
         this.actors.delete(uid);
       }
     }
-    this.syncLockMarker(borgs, localActiveUid);
+    this.syncLockMarkers(borgs, localActiveUid);
     this.syncProjectiles(projectiles);
   }
 
   /** Advance all per-actor animation mixers. */
   update(dt: number): void {
     for (const actor of this.actors.values()) actor.mixer?.update(dt);
-    if (this.lockMarker.visible) {
-      this.lockMarkerAge += dt;
-      this.lockMarker.rotation.z += dt * 5.4;
-      this.lockMarker.rotation.y = Math.sin(this.lockMarkerAge * 4.2) * 0.18;
+    if (this.enemyReticle.visible) {
+      // Continuous screen-plane spin, matching the original's rotating lock ring
+      // (reference/captures/challenge-8-in-battle-hud.png). Sprite rotation = view-plane roll.
+      this.enemyReticleRing.rotation -= dt * ENEMY_RETICLE_SPIN_RAD_PER_S;
+    }
+    if (this.allyMarker.visible) {
+      this.allyMarker.rotation.y += dt * ALLY_MARKER_SPIN_RAD_PER_S;
     }
     this.updateImpacts(dt);
   }
@@ -225,7 +235,8 @@ export class BattleScene {
     this.projectileActors.clear();
     this.impactActors = [];
     this.pending.clear();
-    this.lockMarker.visible = false;
+    this.enemyReticle.visible = false;
+    this.allyMarker.visible = false;
   }
 
   /** World position of an actor (for the camera to follow). */
@@ -257,18 +268,41 @@ export class BattleScene {
     return actor;
   }
 
-  private syncLockMarker(borgs: readonly BorgRuntime[], localActiveUid: string | null): void {
-    const locked = localActiveUid
-      ? borgs.find((b) => b.uid === localActiveUid && b.alive && b.lockTarget)
-      : borgs.find((b) => b.alive && b.ownerPlayer !== null && b.lockTarget);
-    const target = locked?.lockTarget ? borgs.find((b) => b.uid === locked.lockTarget && b.alive) : null;
-    if (!locked || !target || target.uid === locked.uid || target.team === locked.team) {
-      this.lockMarker.visible = false;
-      return;
+  /**
+   * Enemy reticle + ally marker for the LOCAL HUMAN player only.
+   *
+   * Bug history (self-marking): main.ts passes the presentation FOCUS uid, which falls back to
+   * a CPU ally while the player waits to respawn, and the old single lock marker trusted that
+   * uid (and, with no uid, "any human-owned borg with a lock") with no ownership/team guard on
+   * either end — so the one orange marker could render some other combatant's lock and read as
+   * marking the player's own team. Now both markers derive strictly from a HUMAN-owned borg
+   * (`ownerPlayer !== null`), the enemy reticle additionally requires `target.team !== self.team`
+   * and `target.uid !== self.uid`, and the ally marker is a different shape+color, so an enemy
+   * reticle can never appear over the player's own borg or an ally.
+   */
+  private syncLockMarkers(borgs: readonly BorgRuntime[], localActiveUid: string | null): void {
+    const byUid = localActiveUid ? borgs.find((b) => b.uid === localActiveUid) : undefined;
+    const fallback = localActiveUid ? undefined : borgs.find((b) => b.alive && b.ownerPlayer !== null);
+    const candidate = byUid ?? fallback ?? null;
+    // Only a live, human-owned borg may drive the markers. A CPU-ally focus fallback (player
+    // dead, waiting on auto-deploy) hides them; they re-appear on the next deployed borg
+    // because activeUidByPlayer/focus switches to its uid.
+    const self = candidate && candidate.alive && candidate.ownerPlayer !== null ? candidate : null;
+
+    const enemy = self?.lockTarget ? borgs.find((b) => b.uid === self.lockTarget) : undefined;
+    const showEnemy = !!(self && enemy && enemy.alive && enemy.uid !== self.uid && enemy.team !== self.team);
+    this.enemyReticle.visible = showEnemy;
+    if (showEnemy && enemy) {
+      // Centered on the target's torso like the original ring, not floating above the head.
+      this.enemyReticle.position.set(enemy.pos.x, enemy.pos.y + 80, enemy.pos.z);
     }
 
-    this.lockMarker.visible = true;
-    this.lockMarker.position.set(target.pos.x, target.pos.y + 145, target.pos.z);
+    const ally = self?.allyLockTarget ? borgs.find((b) => b.uid === self.allyLockTarget) : undefined;
+    const showAlly = !!(self && ally && ally.alive && ally.uid !== self.uid && ally.team === self.team);
+    this.allyMarker.visible = showAlly;
+    if (showAlly && ally) {
+      this.allyMarker.position.set(ally.pos.x, ally.pos.y + 145, ally.pos.z);
+    }
   }
 
   private makePlaceholder(team: number): THREE.Mesh {
@@ -489,7 +523,130 @@ function disposeMesh(obj: THREE.Object3D): void {
   });
 }
 
-function makeLockMarker(): THREE.Group {
+/** Spin speed of the enemy lock ring (view-plane, rad/s). TUNED to read like the original's
+ *  steadily rotating ring in reference/captures/challenge-8-in-battle-hud.png. */
+const ENEMY_RETICLE_SPIN_RAD_PER_S = 2.6;
+/** Slow yaw spin of the green ally arrow (rad/s). TUNED, presentation only. */
+const ALLY_MARKER_SPIN_RAD_PER_S = 2.2;
+/** World size of the enemy reticle sprites (borgs are ~120-150 units tall). */
+const ENEMY_RETICLE_WORLD_SIZE = 210;
+
+/**
+ * Enemy lock-on reticle: a camera-facing red-orange ring with four lugs (drawn on the spinning
+ * sprite) plus four static inward-pointing blue triangles, reproducing the original battle
+ * reticle in reference/captures/challenge-8-in-battle-hud.png. No extracted texture/model for
+ * the original reticle exists in the exported assets yet (ui/manifest.json has no lock/reticle
+ * entry), so the two canvas textures are a TUNED visual stand-in transcribed from that capture.
+ * ENEMY-ONLY by contract: syncLockMarkers never positions this over a same-team borg.
+ */
+function makeEnemyReticle(): { group: THREE.Group; ringMaterial: THREE.SpriteMaterial } {
+  const group = new THREE.Group();
+  group.visible = false;
+
+  const ringMaterial = new THREE.SpriteMaterial({
+    map: drawReticleRingTexture(),
+    transparent: true,
+    depthTest: false, // the original ring reads as a HUD overlay: never hidden by stage geometry
+    depthWrite: false,
+  });
+  const ring = new THREE.Sprite(ringMaterial);
+  ring.scale.setScalar(ENEMY_RETICLE_WORLD_SIZE);
+  ring.renderOrder = 30;
+  group.add(ring);
+
+  const trianglesMaterial = new THREE.SpriteMaterial({
+    map: drawReticleTrianglesTexture(),
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
+  const triangles = new THREE.Sprite(trianglesMaterial);
+  triangles.scale.setScalar(ENEMY_RETICLE_WORLD_SIZE);
+  triangles.renderOrder = 31;
+  group.add(triangles);
+
+  return { group, ringMaterial };
+}
+
+/** Red-orange ring + 4 lugs with a white outline (the spinning layer of the reticle). */
+function drawReticleRingTexture(): THREE.CanvasTexture {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const c = size / 2;
+    const radius = 88;
+    // White underlay ring, then the red ring on top -> white outline on both edges.
+    ctx.beginPath();
+    ctx.arc(c, c, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 30;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(c, c, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = "#ff3c14";
+    ctx.lineWidth = 18;
+    ctx.stroke();
+    // Four lugs riding the ring (their off-axis placement makes the spin visible).
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + Math.PI / 12;
+      const x = c + Math.cos(a) * radius;
+      const y = c + Math.sin(a) * radius;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(a);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-17, -17, 34, 34);
+      ctx.fillStyle = "#ff3c14";
+      ctx.fillRect(-12, -12, 24, 24);
+      ctx.restore();
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+/** Four static blue triangles pointing inward at the locked enemy. */
+function drawReticleTrianglesTexture(): THREE.CanvasTexture {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const c = size / 2;
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+      ctx.save();
+      ctx.translate(c + Math.cos(a) * 56, c + Math.sin(a) * 56);
+      ctx.rotate(a + Math.PI / 2); // tip toward the center
+      ctx.beginPath();
+      ctx.moveTo(0, -18);
+      ctx.lineTo(14, 12);
+      ctx.lineTo(-14, 12);
+      ctx.closePath();
+      ctx.fillStyle = "#2f6bff";
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 4;
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+/**
+ * Ally lock-on (Z) marker: the extracted arrow_mdl geometry tinted GREEN, floating overhead.
+ * Deliberately a different shape (3D arrow vs billboard ring) AND color (green vs red) than
+ * the enemy reticle so the two lock indicators can never be mistaken for each other.
+ */
+function makeAllyMarker(): THREE.Group {
   const group = new THREE.Group();
   group.visible = false;
   group.userData = {
@@ -507,7 +664,7 @@ function makeLockMarker(): THREE.Group {
   // arrow_mdl.arc has geometry but no decoded texture; colors are a tuned stand-in
   // for the original runtime vertex colors until the GX material block is decoded.
   const fill = new THREE.MeshBasicMaterial({
-    color: 0xff8a18,
+    color: 0x35d977,
     transparent: true,
     opacity: 0.74,
     side: THREE.DoubleSide,
@@ -520,7 +677,7 @@ function makeLockMarker(): THREE.Group {
 
   const edgeGeometry = new THREE.EdgesGeometry(geometry, 24);
   const edgeMaterial = new THREE.LineBasicMaterial({
-    color: 0x2c8cff,
+    color: 0xeafff2,
     transparent: true,
     opacity: 0.9,
     depthWrite: false,

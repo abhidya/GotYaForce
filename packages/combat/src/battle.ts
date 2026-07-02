@@ -15,6 +15,7 @@ import { stepAI } from "./ai.js";
 import {
   acquireAllyLock,
   acquireLock,
+  cycleAllyLock,
   cycleLock,
   isBusy,
   resetProjectileCounter,
@@ -239,7 +240,15 @@ class BattleImpl implements Battle {
       stepInvincibility(b);
 
       // Lock-on is the default player movement frame; `lockOn` also lets AI/future callers opt in.
-      if (input.switchLock) {
+      // R (switch-lock) and Z (ally-lock) are EDGE-TRIGGERED via 0/1 press latches stored in
+      // cooldowns (same pattern as movement's jumpHeld; stepCooldowns skips them): holding the
+      // button must cycle exactly once per press, not re-cycle at 60 Hz.
+      const switchLockPressed = input.switchLock && (b.cooldowns["switchLockHeld"] ?? 0) === 0;
+      b.cooldowns["switchLockHeld"] = input.switchLock ? 1 : 0;
+      const allyLockPressed = input.allyLock && (b.cooldowns["allyLockHeld"] ?? 0) === 0;
+      b.cooldowns["allyLockHeld"] = input.allyLock ? 1 : 0;
+
+      if (switchLockPressed) {
         b.lockTarget = cycleLock(b, all);
       } else if (input.lockOn || b.ownerPlayer !== null) {
         if (b.lockTarget === null || !this.lockStillValid(b)) {
@@ -248,10 +257,12 @@ class BattleImpl implements Battle {
       } else {
         b.lockTarget = null;
       }
-      // Drop dead/invalid locks.
+      // Drop dead/invalid locks (cycleLock/acquireLock are enemy-only, so lockTarget can
+      // never be self or a same-team ally; this also drops targets that died this frame).
       if (b.lockTarget && !this.lockStillValid(b)) b.lockTarget = null;
-      if (input.allyLock && (b.allyLockTarget === null || !this.allyLockStillValid(b))) {
-        b.allyLockTarget = acquireAllyLock(b, all);
+      // Z ally-lock: acquire the nearest ally on first press, cycle allies on later presses.
+      if (allyLockPressed) {
+        b.allyLockTarget = this.allyLockStillValid(b) ? cycleAllyLock(b, all) : acquireAllyLock(b, all);
       }
       if (b.allyLockTarget && !this.allyLockStillValid(b)) b.allyLockTarget = null;
 

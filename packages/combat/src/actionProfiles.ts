@@ -5,6 +5,18 @@ import actionProfileData from "./data/actionProfiles.json" with { type: "json" }
 
 export type PrimaryAttackKind = "melee" | "shot";
 
+/** Sword-beam finisher projectile (TUNED design: emitted by the LAST hit of a melee combo
+ *  chain; damage scales off the borg's MELEE damage, not its shot stat). */
+export interface SwordBeamDef {
+  speed: number;
+  lifetime: number;
+  hitRadius: number;
+  /** Multiplier applied to the melee swing's raw damage. */
+  damageMultiplier: number;
+  homingTurn: number;
+  visualKind: ProjectileVisualKind;
+}
+
 export interface MeleeActionDef {
   startup: number;
   active: number;
@@ -14,6 +26,12 @@ export interface MeleeActionDef {
   yTolerance: number;
   damageMultiplier: number;
   knockbackMultiplier: number;
+  /** Chain length (1 = no combo). Derived in the generator from distinct exported swing banks. */
+  comboHits: number;
+  /** Frames after a swing's recovery during which the next chain press still connects. TUNED. */
+  comboWindowFrames: number;
+  /** Combo-finisher projectile, or null for borgs without a sword beam. */
+  swordBeam: SwordBeamDef | null;
 }
 
 export interface ShotActionDef {
@@ -33,6 +51,15 @@ export interface ShotActionDef {
   hitstunMultiplier: number;
   knockbackMultiplier: number;
   visualKind: ProjectileVisualKind;
+  /** Hold-B charge shot: hold accumulates charge frames, release fires a scaled projectile. */
+  chargeable: boolean;
+  /** Held frames needed for charge tier 1 / tier 2 (tier 2 is also the accumulation cap). */
+  chargeTier1Frames: number;
+  chargeTier2Frames: number;
+  chargeTier1DamageMult: number;
+  chargeTier2DamageMult: number;
+  /** Ballistic drop applied to the projectile's Y velocity each frame (0 = none). TUNED. */
+  bulletDrop: number;
 }
 
 export interface SpecialActionDef {
@@ -70,6 +97,9 @@ const DEFAULT_MELEE: MeleeActionDef = {
   yTolerance: MELEE.Y_TOLERANCE,
   damageMultiplier: 1,
   knockbackMultiplier: 1,
+  comboHits: 1,
+  comboWindowFrames: 22,
+  swordBeam: null,
 };
 
 const DEFAULT_SHOT: ShotActionDef = {
@@ -89,6 +119,12 @@ const DEFAULT_SHOT: ShotActionDef = {
   hitstunMultiplier: 1,
   knockbackMultiplier: 1,
   visualKind: "energy",
+  chargeable: false,
+  chargeTier1Frames: 30,
+  chargeTier2Frames: 90,
+  chargeTier1DamageMult: 1.6,
+  chargeTier2DamageMult: 2.4,
+  bulletDrop: 0,
 };
 
 const DEFAULT_SPECIAL: SpecialActionDef = {
@@ -107,7 +143,17 @@ const DEFAULT_SPECIAL: SpecialActionDef = {
  * inventories. It is intentionally not labeled DERIVED: hit-bin per-move semantics remain
  * undecoded, so missing data falls back to the old generic constants.
  */
+const RESOLVED_CACHE = new WeakMap<BorgProfile, BorgActionProfile>();
+
 export function actionProfileForProfile(profile: BorgProfile): BorgActionProfile {
+  const cached = RESOLVED_CACHE.get(profile);
+  if (cached) return cached;
+  const resolved = resolveActionProfile(profile);
+  RESOLVED_CACHE.set(profile, resolved);
+  return resolved;
+}
+
+function resolveActionProfile(profile: BorgProfile): BorgActionProfile {
   const raw = RAW_PROFILES[profile.id];
   const melee = profile.hasMelee ? { ...DEFAULT_MELEE, ...(raw?.melee ?? {}) } : null;
   const shot = profile.hasShot ? { ...DEFAULT_SHOT, ...(raw?.shot ?? {}) } : null;

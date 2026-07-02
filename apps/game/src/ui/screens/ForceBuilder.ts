@@ -158,10 +158,13 @@ export function createForceBuilder(
         },
       );
       if (borg.isNew) cell.appendChild(el("span", { class: "gf-new-badge", text: "NEW" }));
+      // The real `mn<code>` art is the borg's name plate (224x32). Borgs without an
+      // exported plate (e.g. pl0507/pl0513) fall back to a plain text name so every
+      // borgs.json entry stays a visible, selectable option.
       const img = el("img", { attrs: { src: borgMiniPath(borg.id), alt: borg.name } }) as HTMLImageElement;
       img.addEventListener("error", () => {
-        img.style.display = "none";
-        cell.appendChild(el("span", { style: { fontSize: "9px", color: "#2a2150", padding: "2px" }, text: borg.name.slice(0, 6) }));
+        img.remove();
+        cell.insertBefore(el("span", { class: "gf-borg-cell-name", text: borg.name }), cell.querySelector(".gf-cost-tag"));
       });
       cell.appendChild(img);
       cell.appendChild(el("span", { class: "gf-cost-tag", text: String(borg.energy) }));
@@ -188,6 +191,7 @@ export function createForceBuilder(
         {
           class: `gf-slot ${filled ? "gf-slot-filled" : "gf-slot-empty"}${i === 0 && filled ? " gf-slot-active" : ""}`,
           style: { left: `${x}%`, top: `${y}%` },
+          title: filled ? (byId.get(id)?.name ?? id) : `slot ${i + 1}`,
           attrs: { type: "button", "data-slot": String(i + 1), "aria-label": `slot ${i + 1}` },
           onClick: () => {
             if (id !== undefined) toggle(id);

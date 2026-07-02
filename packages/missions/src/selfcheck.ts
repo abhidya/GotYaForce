@@ -15,13 +15,23 @@ import { dirname, resolve } from "node:path";
 
 import { createChallengeRun, CHALLENGE_DIFFICULTIES, enemyTargetForBattle } from "./challenge.js";
 import {
+  CHALLENGE_ALLY_BUDGETS,
+  CHALLENGE_ALLY_GROUP_CODES,
+  CHALLENGE_ALLY_MAX_MEMBERS,
+  CHALLENGE_BATTLE_COUNTS,
+  CHALLENGE_ENEMY_BUDGETS,
+  CHALLENGE_ENEMY_GROUP_CODES,
+  CHALLENGE_ENEMY_MAX_MEMBERS,
+  CHALLENGE_GROUP_ROSTERS,
   CHALLENGE_STAGE_BYTES,
   challengeStageId,
   challengeStageVariantCount,
+  type ChallengeGroupCode,
+  type ChallengeMode,
 } from "./challenge-reference.js";
 import { createAdventureCampaign } from "./adventure.js";
 import { computeResults, type BattleOutcome } from "./scoring.js";
-import type { BorgData } from "./borg-data.js";
+import { readBorgs, type BorgData } from "./borg-data.js";
 import type { StagesData } from "./adventure.js";
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -56,6 +66,150 @@ function assertChallengeReferenceInvariants(): void {
     challengeStageVariantCount(0x09) === 5,
     "DOL stage-variant count table should preserve the non-Challenge st09 five-variant entry",
   );
+
+  // Per-mode table rows must exactly cover the DOL battle counts (5/10/15).
+  for (const mode of [0, 1, 2] as const) {
+    const count = CHALLENGE_BATTLE_COUNTS[mode];
+    assert(CHALLENGE_ALLY_BUDGETS[mode].length === count, `ally budget rows must cover mode ${mode}'s ${count} battles`);
+    assert(CHALLENGE_ENEMY_BUDGETS[mode].length === count, `enemy budget rows must cover mode ${mode}'s ${count} battles`);
+    assert(CHALLENGE_ALLY_MAX_MEMBERS[mode].length === count, `ally max-member rows must cover mode ${mode}'s ${count} battles`);
+    assert(CHALLENGE_ENEMY_MAX_MEMBERS[mode].length === count, `enemy max-member rows must cover mode ${mode}'s ${count} battles`);
+    assert(CHALLENGE_ALLY_GROUP_CODES[mode].length === count, `ally group rows must cover mode ${mode}'s ${count} battles`);
+    assert(CHALLENGE_ENEMY_GROUP_CODES[mode].length === count, `enemy group rows must cover mode ${mode}'s ${count} battles`);
+    for (const row of CHALLENGE_ENEMY_GROUP_CODES[mode]) {
+      assert(row.length === 4, "each enemy group row carries the DOL's four random choices");
+      assert(
+        row.every((code) => CHALLENGE_GROUP_ROSTERS[code].length > 0),
+        `mode ${mode} enemy group row [${row.join(",")}] must only reference non-empty spawn pools`,
+      );
+    }
+    for (const row of CHALLENGE_ALLY_GROUP_CODES[mode]) {
+      assert(row.length === 4, "each ally group row carries the DOL's four random choices");
+      assert(
+        row.every((code) => CHALLENGE_GROUP_ROSTERS[code].length > 0),
+        `mode ${mode} ally group row [${row.join(",")}] must only reference non-empty spawn pools`,
+      );
+    }
+  }
+
+  // RAM-trace cross-check (research/traces/GG4E/spawn-evidence.json):
+  // battle1_start_checkpoint.sav captured a NORMAL BATTLE 1 with enemy borgs
+  // 0a05/0705 and CPU ally 020a. Those must be reachable from the round's
+  // DOL group rows (enemy row 48, ally row 50).
+  assert(
+    CHALLENGE_ENEMY_GROUP_CODES[0][0]!.every((code) => code === 48),
+    "NORMAL BATTLE 1 enemy group row must be the traced group 48",
+  );
+  assert(
+    CHALLENGE_ALLY_GROUP_CODES[0][0]!.every((code) => code === 50),
+    "NORMAL BATTLE 1 ally group row must be the traced group 50",
+  );
+  assert(
+    (CHALLENGE_GROUP_ROSTERS[48] as readonly string[]).includes("pl0a05") &&
+      (CHALLENGE_GROUP_ROSTERS[48] as readonly string[]).includes("pl0705"),
+    "group 48 must contain the enemy borgs (pl0a05, pl0705) observed in the battle-1 RAM trace",
+  );
+  assert(
+    (CHALLENGE_GROUP_ROSTERS[50] as readonly string[]).includes("pl020a"),
+    "group 50 must contain the CPU ally borg (pl020a) observed in the battle-1 RAM trace",
+  );
+}
+
+/**
+ * Deep per-round audit: for each difficulty, generate a full run and verify
+ * every battle's enemy/ally rosters, budgets, member caps, and stage selector
+ * bytes against the recovered DOL tables in challenge-reference.ts.
+ */
+function auditChallengeRunAgainstReference(borgs: BorgData): void {
+  const validBorgIds = new Set(readBorgs(borgs).map((b) => b.id));
+
+  // Every spawn-pool borg id must resolve against borgs.json.
+  for (const [group, roster] of Object.entries(CHALLENGE_GROUP_ROSTERS)) {
+    for (const id of roster) {
+      assert(validBorgIds.has(id), `group ${group} roster id ${id} must exist in borgs.json`);
+    }
+  }
+
+  const budgets: Array<[number, ChallengeMode]> = [
+    [CHALLENGE_DIFFICULTIES.NORMAL, 0],
+    [CHALLENGE_DIFFICULTIES.TUFF, 1],
+    [CHALLENGE_DIFFICULTIES.INSANE, 2],
+  ];
+
+  for (const [budget, mode] of budgets) {
+    const run = createChallengeRun({
+      budget,
+      playerCount: 1,
+      playerForces: [{ player: 0, borgIds: ["pl0615"] }],
+      borgs,
+    });
+    assert(run.mode === mode, `budget ${budget} must map to Challenge mode ${mode}`);
+    assert(run.battles.length === CHALLENGE_BATTLE_COUNTS[mode], `mode ${mode} run must have ${CHALLENGE_BATTLE_COUNTS[mode]} battles`);
+
+    let previousStageByte: number | null = null;
+    run.battles.forEach((battle, i) => {
+      const meta = battle.meta;
+      assert(meta !== undefined, `battle ${i + 1} must carry meta`);
+
+      // --- stage selector bytes ---
+      const stageByte = meta.stageByte;
+      assert(
+        typeof stageByte === "number" && (CHALLENGE_STAGE_BYTES as readonly number[]).includes(stageByte),
+        `battle ${i + 1} stage byte ${String(stageByte)} must come from the DOL Challenge stage table`,
+      );
+      assert(battle.arena === challengeStageId(stageByte as number), `battle ${i + 1} arena must match its stage byte`);
+      assert(stageByte !== previousStageByte, `battle ${i + 1} must not repeat the previous battle's stage byte`);
+      previousStageByte = stageByte as number;
+      assert(
+        typeof meta.stageSubtable === "number" && meta.stageSubtable >= 0 && meta.stageSubtable <= 2,
+        `battle ${i + 1} stage subtable must be 0..2`,
+      );
+      assert(
+        typeof meta.stageVariant === "number" &&
+          meta.stageVariant >= 0 &&
+          meta.stageVariant < challengeStageVariantCount(stageByte as number),
+        `battle ${i + 1} stage variant must respect the DOL variant-count table`,
+      );
+
+      // --- enemy rosters ---
+      const enemyForces = battle.forces.filter((f) => f.team === "enemy");
+      assert(enemyForces.length === 2, `battle ${i + 1} must carry the original two enemy CPU slots`);
+      const allowedEnemy = new Set<string>();
+      for (const code of CHALLENGE_ENEMY_GROUP_CODES[mode][i]!) {
+        for (const id of CHALLENGE_GROUP_ROSTERS[code as ChallengeGroupCode]) allowedEnemy.add(id);
+      }
+      const maxEnemyMembers = CHALLENGE_ENEMY_MAX_MEMBERS[mode][i]!;
+      for (const force of enemyForces) {
+        assert(force.borgIds.length <= maxEnemyMembers, `battle ${i + 1} enemy slot must respect the DOL member cap ${maxEnemyMembers}`);
+        for (const id of force.borgIds) {
+          assert(allowedEnemy.has(id), `battle ${i + 1} enemy borg ${id} must come from the round's DOL group rosters`);
+        }
+      }
+      const enemyCharges = meta.enemySlotBudgetCharge ?? [];
+      const enemyTarget = CHALLENGE_ENEMY_BUDGETS[mode][i]!;
+      assert(meta.enemyTargetEnergy === enemyTarget, `battle ${i + 1} enemy target must match the DOL budget table`);
+      for (const charge of enemyCharges) {
+        assert(charge <= enemyTarget, `battle ${i + 1} enemy slot charge ${charge} must fit the DOL budget ${enemyTarget}`);
+      }
+
+      // --- CPU ally roster (FIGHT ALONE) ---
+      const allyForce = battle.forces.find((f) => f.team === "player" && f.cpuAlly);
+      assert(allyForce !== undefined, `battle ${i + 1} FIGHT ALONE must include the CPU ally force`);
+      const allowedAlly = new Set<string>();
+      for (const code of CHALLENGE_ALLY_GROUP_CODES[mode][i]!) {
+        for (const id of CHALLENGE_GROUP_ROSTERS[code as ChallengeGroupCode]) allowedAlly.add(id);
+      }
+      const maxAllyMembers = CHALLENGE_ALLY_MAX_MEMBERS[mode][i]!;
+      assert(allyForce.borgIds.length <= maxAllyMembers, `battle ${i + 1} ally roster must respect the DOL member cap ${maxAllyMembers}`);
+      for (const id of allyForce.borgIds) {
+        assert(allowedAlly.has(id), `battle ${i + 1} ally borg ${id} must come from the round's DOL ally group rosters`);
+      }
+      const allyTarget = CHALLENGE_ALLY_BUDGETS[mode][i]!;
+      assert(meta.allyTargetEnergy === allyTarget, `battle ${i + 1} ally target must match the DOL budget table`);
+      assert((meta.allyBudgetCharge ?? 0) <= allyTarget, `battle ${i + 1} ally charge must fit the DOL budget ${allyTarget}`);
+    });
+  }
+  console.log("challenge per-round audit vs challenge-reference tables: PASS (NORMAL/TUFF/INSANE, stages+rosters+budgets)");
 }
 
 /** Find packages/assets/data by walking up from a start directory. */
@@ -85,6 +239,7 @@ function loadData(): { borgs: BorgData; stages: StagesData } {
 export function main(): void {
   const { borgs, stages } = loadData();
   assertChallengeReferenceInvariants();
+  auditChallengeRunAgainstReference(borgs);
 
   console.log("=".repeat(70));
   console.log("CHALLENGE — NORMAL run (budget", CHALLENGE_DIFFICULTIES.NORMAL, ")");

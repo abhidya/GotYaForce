@@ -3,6 +3,7 @@
 // nearest enemy, hold preferred engage range, lock on, and attack when in range. Deterministic.
 
 import { distXZ } from "@gf/physics";
+import { actionProfileForProfile } from "./actionProfiles.js";
 import { AI } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
@@ -67,6 +68,16 @@ export function stepAI(self: BorgRuntime, p: BorgProfile, all: BorgRuntime[]): P
     input.attack = true;
   } else if (p.hasShot && d <= AI.RANGED_RANGE + AI.RANGE_SLACK) {
     input.attack = true;
+  }
+
+  // Charge-shot borgs fire on RELEASE (combat.ts stepAttacks), so a CPU that held attack
+  // forever would never shoot. Release once a tier-1+ charge has built up: the sim reads the
+  // hold->release edge and fires the scaled projectile that frame. TUNED pacing choice.
+  if (input.attack) {
+    const shot = actionProfileForProfile(p).shot;
+    if (shot?.chargeable && (self.cooldowns["chargeFrames"] ?? 0) >= shot.chargeTier1Frames + 10) {
+      input.attack = false;
+    }
   }
 
   // Occasionally pop a special when off cooldown and an enemy is close-ish.

@@ -1,24 +1,56 @@
 /**
- * BattleHud — the in-battle HUD, per `challenge-8-in-battle-hud.png` (+ -9 critical).
+ * BattleHud — the in-battle HUD, rebuilt 1:1 against the real Dolphin captures
+ * `apps/game/reference/captures/challenge-8-in-battle-hud.png` (normal state)
+ * and `challenge-9-battle-critical-hp.png` (critical state).
  *
- * Mounts as a pointer-events:none overlay over the 3D arena. Layout matches the
- * capture exactly:
- *  - top-left  : green "<n> ALLY" meter stacked over red "ENEMY <n>" meter, both
- *                with zigzag/torn ends, numeric tabs, depleting fills. A yellow
- *                "!" alert sits to their right when triggered.
- *  - center    : orange lock-on reticle (gear ring + 4 inward blue triangles).
- *  - bottom-left: green circular HP gauge with the HP number (turns red when low).
- *  - bottom-right: Y special button with a circular cooldown ring, and a B attack
- *                  button with ammo count + cyan reload bar.
- * The active borg's real `bn<code>` name banner can be shown (optional slot).
+ * Layout model: everything is authored on a 640x480 design stage (the game's
+ * native frame) and the whole stage is scaled to the container with a
+ * ResizeObserver, so each element below can be placed at the exact pixel
+ * position measured from the captures (measured % of frame in comments).
  *
- * Drive it with update(state); nothing animates on its own except the reticle/
- * gear CSS spins.
+ * Real extracted art used:
+ *  - ascii.tpl bold glyph block (`/ui/tpl/ascii/image_00_IA4.png`) for every
+ *    HUD label/number, tinted per element like the game's vertex-colored font
+ *    quads (mint ally number, pink enemy number, yellow ALLY/ENEMY, chunky
+ *    yellow-green HP/ammo digits, black button letters).
+ *  - `bn<code>` name banner (optional slot, real per-borg plate).
+ * Per research/asset-inventory/ui-hud-assets.md + public/ui/hud/manifest.json
+ * the meter frames, gauge rings, button discs, gear and reticle are GAME-DRAWN
+ * GX geometry with no source sprite, so they are rebuilt as vector geometry
+ * matched to the captures (colors/shape measured). See
+ * research/game-design/HUD-FIDELITY-PLAN.md for the full measurement table.
+ *
+ * Elements (challenge-8 measurements, % of 640x480 frame):
+ *  - GF-energy meters top-left→center: green ally bar (left-anchored, fixed
+ *    torn-zigzag lead-in on its left) over red enemy bar (right-anchored,
+ *    fixed black torn zigzag on its right); "300 ALLY" arrow tab above,
+ *    "ENEMY 1267" arrow tab below.
+ *  - yellow "!" alert roundel right of the ally tab.
+ *  - dark gear + cyan ring (boost gauge) top-right.
+ *  - green ring HP gauge + chunky digits bottom-left; red capsule variant when
+ *    critical (challenge-9).
+ *  - bottom-right: X special prompt with dashed cooldown ring, cyan reload
+ *    pill + ammo digits + white B disc over a dark-red arc.
+ * Lock-on is a world-space marker owned by battleScene (not drawn here).
  */
 
-import { ASSETS, borgBannerPath } from "../assets.js";
+import { borgBannerPath } from "../assets.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { el, clamp01 } from "../dom.js";
+
+/** Native GameCube frame the HUD is authored against. */
+const FRAME_W = 640;
+const FRAME_H = 480;
+
+export interface TeammateMarker {
+  /** Short plate label, e.g. "CPU" or "ALLY". */
+  label: string;
+  /** Teammate HP fraction 0..1 (green segment of the mini bar). */
+  hp01: number;
+  /** Normalized screen position of the plate (0..1 of frame width/height). */
+  x01: number;
+  y01: number;
+}
 
 export interface HudState {
   /** Remaining ally GF-energy (sum of alive ally borg energy). */
@@ -33,20 +65,24 @@ export interface HudState {
   hp: number;
   /** Active borg max HP (for the gauge fill). */
   maxHp: number;
-  /** Ammo count shown on the B prompt. */
+  /** Ammo count shown next to the B prompt. */
   ammo: number;
-  /** Reload/charge progress 0..1 (cyan bar on B). */
+  /** Reload/charge progress 0..1 (cyan pill under the ammo count). */
   reload01: number;
-  /** Special cooldown progress 0..1 (ring on Y; 1 = ready). */
+  /** Special cooldown progress 0..1 (dashed ring on X; 1 = ready). */
   cooldown01: number;
   /** Active borg id (for the name banner art). */
   borgId: string;
-  /** Whether the lock-on reticle is visible. */
+  /** Lock-on flag (world-space reticle is drawn by battleScene, not the HUD). */
   lockOn: boolean;
   /** Remaining battle timer frames, or null when untimed. */
   timeRemainingFrames?: number | null;
-  /** Optional: show the yellow "!" alert. Defaults to false. */
+  /** Optional: show the yellow "!" alert roundel. Defaults to false. */
   alert?: boolean;
+  /** Optional boost/dash gauge 0..1 (cyan ring in the top-right gear). */
+  boost01?: number;
+  /** Optional floating teammate plates ("CPU"/"ALLY" + mini HP bar). */
+  teammates?: readonly TeammateMarker[];
 }
 
 export interface BattleHudOptions {
@@ -63,6 +99,13 @@ export interface BattleHudHandle {
 
 const NS = "http://www.w3.org/2000/svg";
 
+// HUD font tints sampled from challenge-8/-9 captures.
+const TINT_ALLY_NUM = "#c8ffd4"; // mint "300"
+const TINT_ENEMY_NUM = "#ff9ed8"; // pink "1267"
+const TINT_LABEL = "#ffd428"; // yellow "ALLY"/"ENEMY"
+const TINT_DIGITS = "#cde23c"; // chunky yellow-green HP/ammo digits
+const TINT_BLACK = "#161616"; // button letters / "!"
+
 function svgEl<K extends keyof SVGElementTagNameMap>(
   tag: K,
   attrs: Record<string, string | number>,
@@ -72,148 +115,356 @@ function svgEl<K extends keyof SVGElementTagNameMap>(
   return node;
 }
 
-/** A C-shaped ring gauge (used for HP and X cooldown). Returns the arc + a setter. */
-function ringGauge(
-  size: number,
-  color: string,
-  track: string,
-): { node: SVGSVGElement; set: (p01: number) => void } {
-  const r = size / 2 - 6;
-  const c = 2 * Math.PI * r;
-  const svg = svgEl("svg", { viewBox: `0 0 ${size} ${size}`, width: size, height: size });
-  svg.appendChild(svgEl("circle", { cx: size / 2, cy: size / 2, r, fill: "none", stroke: track, "stroke-width": 6 }));
-  const arc = svgEl("circle", {
-    cx: size / 2,
-    cy: size / 2,
-    r,
-    fill: "none",
-    stroke: color,
-    "stroke-width": 6,
-    "stroke-linecap": "round",
-    "stroke-dasharray": c,
-    "stroke-dashoffset": 0,
-    transform: `rotate(-90 ${size / 2} ${size / 2})`,
-  });
-  svg.appendChild(arc);
-  return {
-    node: svg,
-    set: (p01: number) => arc.setAttribute("stroke-dashoffset", String(c * (1 - clamp01(p01)))),
-  };
+/** Horizontal torn/zigzag path from x0..x1 around centerline y. */
+function zigzagPath(x0: number, y: number, x1: number, amp: number, period: number): string {
+  let d = `M ${x0} ${y}`;
+  let up = true;
+  for (let x = x0 + period / 2; x < x1; x += period / 2) {
+    d += ` L ${x.toFixed(1)} ${(up ? y - amp : y + amp).toFixed(1)}`;
+    up = !up;
+  }
+  d += ` L ${x1} ${y}`;
+  return d;
+}
+
+/** Absolutely positioned bitmap-text span on the 640x480 stage. */
+function hudText(className: string, left: number, top: number): HTMLSpanElement {
+  const node = bitmapText(`gf-hud-text ${className}`);
+  node.style.left = `${left}px`;
+  node.style.top = `${top}px`;
+  return node;
 }
 
 export function createBattleHud(container: HTMLElement, opts: BattleHudOptions = {}): BattleHudHandle {
   const critFrac = opts.criticalFraction ?? 0.25;
   const root = el("div", { class: "gf-hud" });
 
-  // ----- energy meters -----
-  const allyFill = el("div", { class: "gf-meter-fill" });
-  const allyTab = el("span", { class: "gf-meter-tab" }, [bitmapText("gf-meter-tab-text")]);
-  const allyMeter = el("div", { class: "gf-meter gf-meter-ally" }, [
-    allyTab,
-    el("div", { class: "gf-meter-track" }, [allyFill, el("span", { class: "gf-meter-name" }, [bitmapText("gf-meter-label-text")])]),
-  ]);
+  // One full-frame vector layer for all game-drawn geometry.
+  const svg = svgEl("svg", {
+    class: "gf-hud-vector",
+    viewBox: `0 0 ${FRAME_W} ${FRAME_H}`,
+    preserveAspectRatio: "none",
+    "aria-hidden": "true",
+  });
+  root.appendChild(svg);
 
-  const enemyFill = el("div", { class: "gf-meter-fill" });
-  const enemyTab = el("span", { class: "gf-meter-tab" }, [bitmapText("gf-meter-tab-text")]);
-  const enemyMeter = el("div", { class: "gf-meter gf-meter-enemy" }, [
-    enemyTab,
-    el("div", { class: "gf-meter-track" }, [enemyFill, el("span", { class: "gf-meter-name" }, [bitmapText("gf-meter-label-text")])]),
-  ]);
+  // ======================= GF-ENERGY METERS (top-left) =======================
+  // challenge-8: ally fill track x 80..293 (12.5%..45.8%W), y 37..50 (7.7%..10.4%H)
+  const ALLY_X = 80;
+  const ALLY_W = 213;
+  // enemy fill right-anchored at x 226 (35.3%W), full length 198, y 59..71 (12.3%..14.8%H)
+  const ENEMY_RIGHT = 226;
+  const ENEMY_W = 198;
 
-  const meters = el("div", { class: "gf-hud-meters" }, [allyMeter, enemyMeter]);
-  root.appendChild(meters);
+  // Fixed torn lead-in left of the ally bar: x 29..80 (4.5%..12.5%W), centerline y 43.
+  svg.appendChild(
+    svgEl("path", { d: zigzagPath(29, 43, 80, 5, 12), fill: "none", stroke: "#33261a", "stroke-width": 4 }),
+  );
+  // Ally track shadow (thin dark line under the green fill, visible when depleted).
+  svg.appendChild(svgEl("rect", { x: ALLY_X, y: 46, width: ALLY_W + 4, height: 6, fill: "rgba(0,0,0,0.42)" }));
+  // Ally fill: two-tone green (top half lighter), left-anchored, depletes from the right.
+  const allyFillHi = svgEl("rect", { x: ALLY_X, y: 37, width: ALLY_W, height: 7, fill: "#8aff54" });
+  const allyFillLo = svgEl("rect", { x: ALLY_X, y: 44, width: ALLY_W, height: 6, fill: "#2ce518" });
+  svg.appendChild(allyFillHi);
+  svg.appendChild(allyFillLo);
 
-  const alert = el("div", { class: "gf-hud-alert gf-hidden", text: "!" });
-  root.appendChild(alert);
+  // Fixed black torn zigzag between the rows: x 226..294 (35.3%..45.9%W), y ~55..62.
+  svg.appendChild(
+    svgEl("path", { d: zigzagPath(226, 60, 294, 6, 13), fill: "none", stroke: "#0e0e0e", "stroke-width": 5 }),
+  );
+  // Enemy fill: two-tone red, right-anchored at x 226, depletes from the left.
+  const enemyFillHi = svgEl("rect", { x: ENEMY_RIGHT - ENEMY_W, y: 59, width: ENEMY_W, height: 6, fill: "#ff7a52" });
+  const enemyFillLo = svgEl("rect", { x: ENEMY_RIGHT - ENEMY_W, y: 65, width: ENEMY_W, height: 6, fill: "#f2200a" });
+  svg.appendChild(enemyFillHi);
+  svg.appendChild(enemyFillLo);
 
+  // --- Ally tab "300 < ALLY": x 186..298 (29.1%..46.5%W), y 8..30 (1.7%..6.3%H) ---
+  svg.appendChild(
+    svgEl("polygon", {
+      points: "186,19 197,8 298,8 298,30 197,30",
+      fill: "#17671f",
+      stroke: "#06300a",
+      "stroke-width": 2,
+    }),
+  );
+  // Brighter right segment with the left-pointing chevron divider before "ALLY".
+  svg.appendChild(svgEl("polygon", { points: "254,8 298,8 298,30 254,30 243,19", fill: "#2f9e33" }));
+  const allyNum = hudText("gf-ally-num", 196, 11); // mint number, centered over x 196..242
+  const allyLabel = hudText("gf-ally-label", 252, 11);
+  root.appendChild(allyNum);
+  root.appendChild(allyLabel);
+  setBitmapText(allyLabel, "ALLY", { bold: true, scale: 2, advance: 11, tint: TINT_LABEL });
+
+  // --- Enemy tab "ENEMY > 1267": x 27..133 (4.3%..20.8%W), y 78..98 (16.3%..20.4%H) ---
+  svg.appendChild(
+    svgEl("polygon", {
+      points: "27,78 120,78 133,88 120,98 27,98",
+      fill: "#801b12",
+      stroke: "#400a05",
+      "stroke-width": 2,
+    }),
+  );
+  svg.appendChild(svgEl("polygon", { points: "84,78 120,78 133,88 120,98 84,98 94,88", fill: "#b52d1c" }));
+  const enemyLabel = hudText("gf-enemy-label", 31, 81);
+  const enemyNum = hudText("gf-enemy-num", 88, 81);
+  root.appendChild(enemyLabel);
+  root.appendChild(enemyNum);
+  setBitmapText(enemyLabel, "ENEMY", { bold: true, scale: 2, advance: 11, tint: TINT_LABEL });
+
+  // ===================== "!" ALERT (right of the ally tab) ====================
+  // challenge-8: yellow roundel center (318, 47) (49.7%W, 9.8%H), dia ~30px.
+  const alertG = svgEl("g", { class: "gf-hidden" });
+  alertG.appendChild(svgEl("circle", { cx: 318, cy: 47, r: 15, fill: "#ffdf1d", stroke: "#101010", "stroke-width": 3 }));
+  alertG.appendChild(svgEl("circle", { cx: 318, cy: 47, r: 11, fill: "none", stroke: "#ffffff", "stroke-width": 2 }));
+  svg.appendChild(alertG);
+  const alertGlyph = hudText("gf-alert-glyph gf-hidden", 310, 39);
+  root.appendChild(alertGlyph);
+  setBitmapText(alertGlyph, "!", { bold: true, scale: 2, tint: TINT_BLACK });
+
+  // ========================= TIMER (top-center pill) =========================
   const timerText = bitmapText("gf-hud-timer-text");
   const timer = el("div", { class: "gf-hud-timer gf-hidden" }, [timerText]);
   root.appendChild(timer);
 
-  // ----- optional name banner -----
+  // ================== BOOST GEAR (top-right, cyan inner ring) ================
+  // challenge-8: gear center (483, 48) (75.5%W, 10.0%H), outer dia ~70px;
+  // challenge-9 shows the cyan ring complete (full boost).
+  const gearG = svgEl("g", { transform: "translate(483 48)", opacity: 0.85 });
+  for (let i = 0; i < 8; i++) {
+    gearG.appendChild(
+      svgEl("rect", { x: -7, y: -38, width: 14, height: 12, rx: 2.5, fill: "#1d1d1d", transform: `rotate(${i * 45})` }),
+    );
+  }
+  gearG.appendChild(svgEl("circle", { r: 31, fill: "#1d1d1d" }));
+  gearG.appendChild(svgEl("circle", { r: 22, fill: "#0c0c0c" }));
+  svg.appendChild(gearG);
+  const BOOST_R = 15;
+  const BOOST_C = 2 * Math.PI * BOOST_R;
+  const boostArc = svgEl("circle", {
+    cx: 483,
+    cy: 48,
+    r: BOOST_R,
+    fill: "none",
+    stroke: "#3fe8c4",
+    "stroke-width": 7,
+    "stroke-dasharray": BOOST_C,
+    "stroke-dashoffset": 0,
+    transform: "rotate(-90 483 48)",
+  });
+  svg.appendChild(boostArc);
+
+  // ===================== optional real bn<code> name banner ===================
   let bannerImg: HTMLImageElement | null = null;
   if (opts.showBanner) {
     bannerImg = el("img", {
+      class: "gf-hud-banner",
       attrs: { alt: "", "aria-hidden": "true" },
-      style: { position: "absolute", top: "8px", left: "50%", transform: "translateX(-50%)", height: "28px", imageRendering: "pixelated" },
     }) as HTMLImageElement;
     bannerImg.addEventListener("error", () => (bannerImg!.style.visibility = "hidden"));
     root.appendChild(bannerImg);
   }
 
-  // ----- lock-on reticle -----
-  const reticle = el("div", { class: "gf-hud-reticle gf-hidden" });
-  reticle.appendChild(el("div", { class: "gf-reticle-ring" }));
-  // four inward-pointing triangles
-  const triPos: Array<Partial<CSSStyleDeclaration>> = [
-    { top: "2px", left: "50%", transform: "translateX(-50%)", borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderTop: "12px solid currentColor" },
-    { bottom: "2px", left: "50%", transform: "translateX(-50%)", borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderBottom: "12px solid currentColor" },
-    { left: "2px", top: "50%", transform: "translateY(-50%)", borderTop: "8px solid transparent", borderBottom: "8px solid transparent", borderLeft: "12px solid currentColor" },
-    { right: "2px", top: "50%", transform: "translateY(-50%)", borderTop: "8px solid transparent", borderBottom: "8px solid transparent", borderRight: "12px solid currentColor" },
-  ];
-  for (const p of triPos) reticle.appendChild(el("span", { class: "gf-reticle-tri", style: p }));
-  root.appendChild(reticle);
+  // ================== HP GAUGE (bottom-left ring / red capsule) ==============
+  // challenge-8: glossy green ring center (49, 398) (7.7%W, 82.9%H), outer dia ~64px,
+  // chunky digits overlapping to the right (digit height ~26px).
+  const HP_R = 25;
+  const HP_C = 2 * Math.PI * HP_R;
+  const hpRingG = svgEl("g", {});
+  hpRingG.appendChild(svgEl("circle", { cx: 49, cy: 398, r: 17.5, fill: "rgba(6,36,4,0.5)" }));
+  hpRingG.appendChild(
+    svgEl("circle", { cx: 49, cy: 398, r: HP_R, fill: "none", stroke: "rgba(10,46,8,0.62)", "stroke-width": 14 }),
+  );
+  const hpArc = svgEl("circle", {
+    cx: 49,
+    cy: 398,
+    r: HP_R,
+    fill: "none",
+    stroke: "#35d41c",
+    "stroke-width": 14,
+    "stroke-dasharray": HP_C,
+    "stroke-dashoffset": 0,
+    transform: "rotate(-90 49 398)",
+  });
+  hpRingG.appendChild(hpArc);
+  // Dark rim + white specular highlight (the ring reads glossy in the capture).
+  hpRingG.appendChild(svgEl("circle", { cx: 49, cy: 398, r: 32.5, fill: "none", stroke: "#10380a", "stroke-width": 2.5 }));
+  hpRingG.appendChild(svgEl("circle", { cx: 49, cy: 398, r: 17.5, fill: "none", stroke: "#10380a", "stroke-width": 2 }));
+  hpRingG.appendChild(
+    svgEl("circle", {
+      cx: 49,
+      cy: 398,
+      r: 29,
+      fill: "none",
+      stroke: "rgba(255,255,255,0.55)",
+      "stroke-width": 4,
+      "stroke-linecap": "round",
+      "stroke-dasharray": `24 ${HP_C * 2}`,
+      transform: "rotate(150 49 398)",
+    }),
+  );
+  svg.appendChild(hpRingG);
 
-  // ----- HP gauge (bottom-left) -----
-  const hpGauge = ringGauge(60, "#46c828", "rgba(0,0,0,0.4)");
-  const hpNum = bitmapText("gf-hp-num");
-  const hpWrap = el("div", { class: "gf-hud-hp" }, [
-    el("img", { class: "gf-hp-face-marker", attrs: { src: ASSETS.faceMarkerRoundel, alt: "", "aria-hidden": "true" } }),
-    el("div", { class: "gf-hp-ring" }, [hpGauge.node]),
-    hpNum,
-  ]);
-  root.appendChild(hpWrap);
+  // Critical capsule (challenge-9): red pill x 26..141 (4.1%..22.0%W), y 405..430 (84.4%..89.5%H).
+  const hpCritG = svgEl("g", { class: "gf-hidden" });
+  hpCritG.appendChild(
+    svgEl("rect", { x: 26, y: 405, width: 115, height: 25, rx: 12.5, fill: "#e8341a", stroke: "#6d0f06", "stroke-width": 2.5 }),
+  );
+  hpCritG.appendChild(svgEl("rect", { x: 38, y: 409, width: 94, height: 6, rx: 3, fill: "rgba(255,255,255,0.28)" }));
+  hpCritG.appendChild(svgEl("circle", { cx: 43, cy: 417.5, r: 13, fill: "none", stroke: "#b0220f", "stroke-width": 6 }));
+  hpCritG.appendChild(svgEl("rect", { x: 50, y: 414, width: 13, height: 7, fill: "#ffd428" }));
+  svg.appendChild(hpCritG);
 
-  // ----- weapon prompts (bottom-right) -----
-  const cooldown = ringGauge(56, "#cfd3da", "rgba(0,0,0,0.35)");
-  const weaponSpecial = el("div", { class: "gf-weapon-special" }, [
-    el("div", { class: "gf-cooldown-ring" }, [cooldown.node]),
-    el("div", { class: "gf-special-glyph" }, [bitmapText("gf-button-letter")]),
-  ]);
+  const hpNum = hudText("gf-hp-num", 60, 384); // digits start x ~60 (9.4%W), cap-height 24px
+  root.appendChild(hpNum);
 
-  const bReload = el("div", { class: "gf-b-reload", style: { width: "0%" } });
-  const bAmmo = bitmapText("gf-b-ammo");
-  const weaponB = el("div", { class: "gf-weapon-b" }, [
-    el("div", { class: "gf-b-track" }, [bReload, bAmmo]),
-    el("div", { class: "gf-b-glyph" }, [bitmapText("gf-button-letter")]),
-  ]);
+  // ============== WEAPON PROMPTS (bottom-right: X ring, B + reload) ==========
+  // X special: button center (600, 355) (93.8%W, 74.0%H), dashed cooldown ring dia ~48px.
+  const DASH_R = 24;
+  const dashRing = svgEl("circle", {
+    cx: 600,
+    cy: 355,
+    r: DASH_R,
+    fill: "none",
+    stroke: "#8a8071",
+    "stroke-width": 5,
+    "stroke-dasharray": "5 7.57",
+  });
+  svg.appendChild(dashRing);
+  const dashReady = svgEl("circle", {
+    cx: 600,
+    cy: 355,
+    r: DASH_R,
+    fill: "none",
+    stroke: "#f5f0e2",
+    "stroke-width": 5,
+    "stroke-dasharray": "5 7.57",
+    opacity: 0,
+  });
+  svg.appendChild(dashReady);
+  svg.appendChild(svgEl("circle", { cx: 600, cy: 355, r: 13.5, fill: "#f2f2f2", stroke: "#101010", "stroke-width": 2 }));
+  svg.appendChild(svgEl("circle", { cx: 596, cy: 350.5, r: 4.5, fill: "rgba(255,255,255,0.85)" }));
+  const xLetter = hudText("gf-button-letter", 592, 347);
+  root.appendChild(xLetter);
+  setBitmapText(xLetter, "X", { bold: true, scale: 2, tint: TINT_BLACK });
 
-  root.appendChild(el("div", { class: "gf-hud-weapon" }, [weaponSpecial, weaponB]));
+  // Dark-red arc swooshing under the B disc: from (487,448) to (585,420).
+  svg.appendChild(
+    svgEl("path", {
+      d: "M 487 448 Q 560 456 585 420",
+      fill: "none",
+      stroke: "#8c1710",
+      "stroke-width": 8,
+      "stroke-linecap": "round",
+    }),
+  );
+  // Cyan reload pill: x 486..566 (76.0%..88.4%W), y 413..429 (86.0%..89.3%H).
+  svg.appendChild(
+    svgEl("rect", { x: 486, y: 413, width: 80, height: 16, rx: 8, fill: "rgba(8,42,40,0.55)", stroke: "rgba(0,0,0,0.4)", "stroke-width": 1.5 }),
+  );
+  const RELOAD_W = 76;
+  const reloadFill = svgEl("rect", { x: 488, y: 415, width: RELOAD_W, height: 12, rx: 6, fill: "#3fe8cf" });
+  const reloadHi = svgEl("rect", { x: 490, y: 416.5, width: RELOAD_W - 4, height: 3.5, rx: 1.75, fill: "rgba(255,255,255,0.6)" });
+  svg.appendChild(reloadFill);
+  svg.appendChild(reloadHi);
+  // White B disc: center (565, 435) (88.3%W, 90.6%H), dia ~28px.
+  svg.appendChild(svgEl("circle", { cx: 565, cy: 435, r: 14, fill: "#f2f2f2", stroke: "#101010", "stroke-width": 2 }));
+  svg.appendChild(svgEl("circle", { cx: 561, cy: 430.5, r: 4.5, fill: "rgba(255,255,255,0.85)" }));
+  const bLetter = hudText("gf-button-letter", 557, 427);
+  root.appendChild(bLetter);
+  setBitmapText(bLetter, "B", { bold: true, scale: 2, tint: TINT_BLACK });
+  // Ammo digits above the pill's right half: "5" center ~ (518, 398) (81%W, 83%H).
+  const ammoNum = hudText("gf-ammo-num", 506, 380);
+  root.appendChild(ammoNum);
+
+  // ================= floating teammate plates ("CPU" + mini bar) =============
+  // challenge-8: "CPU" label x 56..60%W y 21.5..23.5%H, mini bar x 56.2..66%W
+  // y 25.2..26.4%H (bar ~63x6px). Positions are supplied per-frame via state.
+  const matesLayer = el("div", { class: "gf-hud-mates" });
+  root.appendChild(matesLayer);
 
   container.appendChild(root);
-  setBitmapText(allyMeter.querySelector(".gf-meter-label-text") as HTMLElement, "ALLY");
-  setBitmapText(enemyMeter.querySelector(".gf-meter-label-text") as HTMLElement, "ENEMY");
-  setBitmapText(weaponSpecial.querySelector(".gf-button-letter") as HTMLElement, "Y");
-  setBitmapText(weaponB.querySelector(".gf-button-letter") as HTMLElement, "B");
 
-  function setMeter(fill: HTMLElement, tab: HTMLElement, value: number, max: number): void {
-    const frac = max > 0 ? clamp01(value / max) : 0;
-    fill.style.transform = `scaleX(${frac})`;
-    const text = tab.querySelector(".gf-bitmap-text") as HTMLElement | null;
-    if (text) setBitmapText(text, String(Math.max(0, Math.round(value))));
+  // ---- scale the 640x480 stage to the container (non-uniform, like the game
+  // stretching its frame to the viewport) ----
+  function fit(): void {
+    const w = container.clientWidth || FRAME_W;
+    const h = container.clientHeight || FRAME_H;
+    root.style.transform = `scale(${w / FRAME_W}, ${h / FRAME_H})`;
   }
+  fit();
+  const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
+  ro?.observe(container);
+
+  // -------------------------------- update ----------------------------------
+  let lastAlly = Number.NaN;
+  let lastEnemy = Number.NaN;
+  let lastHp = Number.NaN;
+  let lastAmmo = Number.NaN;
 
   function update(s: HudState): void {
-    setMeter(allyFill, allyTab, s.allyEnergy, s.allyMax);
-    setMeter(enemyFill, enemyTab, s.enemyEnergy, s.enemyMax);
+    // GF-energy fills (value-proportional widths, anchored per the captures).
+    const allyFrac = s.allyMax > 0 ? clamp01(s.allyEnergy / s.allyMax) : 0;
+    const aw = Math.round(ALLY_W * allyFrac);
+    allyFillHi.setAttribute("width", String(aw));
+    allyFillLo.setAttribute("width", String(aw));
+    const enemyFrac = s.enemyMax > 0 ? clamp01(s.enemyEnergy / s.enemyMax) : 0;
+    const ew = Math.round(ENEMY_W * enemyFrac);
+    enemyFillHi.setAttribute("x", String(ENEMY_RIGHT - ew));
+    enemyFillHi.setAttribute("width", String(ew));
+    enemyFillLo.setAttribute("x", String(ENEMY_RIGHT - ew));
+    enemyFillLo.setAttribute("width", String(ew));
 
-    alert.classList.toggle("gf-hidden", !s.alert);
+    const allyVal = Math.max(0, Math.round(s.allyEnergy));
+    if (allyVal !== lastAlly) {
+      lastAlly = allyVal;
+      setBitmapText(allyNum, String(allyVal), { bold: true, scale: 2, advance: 12, tint: TINT_ALLY_NUM });
+    }
+    const enemyVal = Math.max(0, Math.round(s.enemyEnergy));
+    if (enemyVal !== lastEnemy) {
+      lastEnemy = enemyVal;
+      setBitmapText(enemyNum, String(enemyVal), { bold: true, scale: 2, advance: 11, tint: TINT_ENEMY_NUM });
+    }
+
+    const showAlert = Boolean(s.alert);
+    alertG.classList.toggle("gf-hidden", !showAlert);
+    alertGlyph.classList.toggle("gf-hidden", !showAlert);
+
     const hasTimer = s.timeRemainingFrames !== undefined && s.timeRemainingFrames !== null;
     timer.classList.toggle("gf-hidden", !hasTimer);
-    if (hasTimer) setBitmapText(timerText, formatFramesAsClock(s.timeRemainingFrames ?? 0));
+    if (hasTimer) {
+      setBitmapText(timerText, formatFramesAsClock(s.timeRemainingFrames ?? 0), { bold: true, scale: 2 });
+    }
 
-    reticle.classList.toggle("gf-hidden", !s.lockOn);
-
+    // HP ring / critical capsule.
     const hpFrac = s.maxHp > 0 ? clamp01(s.hp / s.maxHp) : 0;
-    hpGauge.set(hpFrac);
-    setBitmapText(hpNum, String(Math.max(0, Math.round(s.hp))));
+    hpArc.setAttribute("stroke-dashoffset", String(HP_C * (1 - hpFrac)));
     const critical = hpFrac <= critFrac;
-    hpWrap.classList.toggle("gf-critical", critical);
-    hpGauge.node.querySelector("circle:nth-child(2)")?.setAttribute("stroke", critical ? "#e8231b" : "#46c828");
+    hpRingG.classList.toggle("gf-hidden", critical);
+    hpCritG.classList.toggle("gf-hidden", !critical);
+    hpNum.classList.toggle("gf-critical", critical);
+    const hpVal = Math.max(0, Math.round(s.hp));
+    if (hpVal !== lastHp) {
+      lastHp = hpVal;
+      setBitmapText(hpNum, String(hpVal), { bold: true, scale: 3, advance: 21, tint: TINT_DIGITS });
+    }
 
-    cooldown.set(s.cooldown01);
-    bReload.style.width = `${clamp01(s.reload01) * 100}%`;
-    setBitmapText(bAmmo, String(Math.max(0, Math.round(s.ammo))));
+    // Boost gear ring (defaults to full when not driven).
+    const boost = clamp01(s.boost01 ?? 1);
+    boostArc.setAttribute("stroke-dashoffset", String(BOOST_C * (1 - boost)));
+
+    // Weapon prompts.
+    dashReady.setAttribute("opacity", String(clamp01(s.cooldown01)));
+    const rw = Math.round(RELOAD_W * clamp01(s.reload01));
+    reloadFill.setAttribute("width", String(Math.max(0, rw)));
+    reloadHi.setAttribute("width", String(Math.max(0, rw - 4)));
+    const ammoVal = Math.max(0, Math.round(s.ammo));
+    if (ammoVal !== lastAmmo) {
+      lastAmmo = ammoVal;
+      setBitmapText(ammoNum, String(ammoVal), { bold: true, scale: 3, advance: 21, tint: TINT_DIGITS });
+    }
+
+    // Floating teammate plates.
+    syncTeammates(matesLayer, s.teammates ?? []);
 
     if (bannerImg && s.borgId) {
       bannerImg.style.visibility = "visible";
@@ -223,8 +474,33 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
 
   return {
     update,
-    destroy: () => root.remove(),
+    destroy: () => {
+      ro?.disconnect();
+      root.remove();
+    },
   };
+}
+
+/** Reconcile the floating "CPU"/"ALLY" plates against the current state. */
+function syncTeammates(layer: HTMLElement, mates: readonly TeammateMarker[]): void {
+  while (layer.childElementCount > mates.length) layer.lastElementChild?.remove();
+  while (layer.childElementCount < mates.length) {
+    const label = bitmapText("gf-mate-label");
+    const fill = el("div", { class: "gf-mate-fill" });
+    const bar = el("div", { class: "gf-mate-bar" }, [fill]);
+    layer.appendChild(el("div", { class: "gf-mate" }, [label, bar]));
+  }
+  mates.forEach((mate, i) => {
+    const plate = layer.children[i] as HTMLElement;
+    plate.style.left = `${(mate.x01 * FRAME_W).toFixed(1)}px`;
+    plate.style.top = `${(mate.y01 * FRAME_H).toFixed(1)}px`;
+    const label = plate.querySelector(".gf-mate-label") as HTMLElement;
+    if (label.getAttribute("aria-label") !== mate.label) {
+      setBitmapText(label, mate.label, { bold: true, scale: 2, advance: 12 });
+    }
+    const fill = plate.querySelector(".gf-mate-fill") as HTMLElement;
+    fill.style.width = `${(clamp01(mate.hp01) * 100).toFixed(1)}%`;
+  });
 }
 
 function formatFramesAsClock(frames: number): string {

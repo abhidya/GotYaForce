@@ -29,6 +29,8 @@ export {
   type RangePref,
 } from "./stats.js";
 export {
+  CHARGE,
+  COMBO,
   DASH,
   DAMAGE,
   DEFAULT_BOUNDS,
@@ -55,6 +57,7 @@ export {
   type PrimaryAttackKind,
   type ShotActionDef,
   type SpecialActionDef,
+  type SwordBeamDef,
 } from "./actionProfiles.js";
 export {
   PARAM_TIER_RESET,

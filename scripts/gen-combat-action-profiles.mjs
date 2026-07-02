@@ -14,6 +14,15 @@ const paths = {
 
 const schema = "combat-action-profiles.v1";
 
+// G Red hero line, special-cased for the signature charge shot + sword beam (TUNED note,
+// verified 2026-07-02): weapon-attachment-map.json gives pl0615 (G RED) / pl0629 (NEO G RED) /
+// pl062a (G BLACK) only Low-confidence bulletProjectile/muzzle/impact families — no beam/cannon
+// signal — so the family-based `chargeable` heuristic below misses the line entirely, and no
+// `sword` family is attributed either despite pl0615 exporting 4 high-confidence attack_lunge
+// melee banks (borg-action-assets.json). The chain/charge/sword-beam mechanics themselves are
+// well-documented signature moves of this line; only the numeric tuning is invented.
+const HERO_CHARGE_IDS = new Set(["pl0615", "pl0629", "pl062a"]);
+
 function abs(relPath) {
   return path.join(repoRoot, relPath);
 }
@@ -77,7 +86,55 @@ function visualKindFor(families) {
   return "muzzle";
 }
 
-function meleeDef(borg, families, actionRecord) {
+/** Count distinct exported melee/sword animation banks (group:slot pairs) at the given
+ *  confidence levels. Real asset evidence for "this borg has N different swings". */
+function distinctMeleeBanks(actionRecord, confidences) {
+  const candidates = actionRecord?.actionCandidates?.["melee/sword"] ?? [];
+  const banks = new Set();
+  for (const candidate of candidates) {
+    if (!candidate?.exists) continue;
+    if (!confidences.includes(candidate.confidence)) continue;
+    banks.add(`${candidate.group}:${candidate.slot}`);
+  }
+  return banks.size;
+}
+
+/** Melee combo length derived from how many distinct swing banks the borg actually exports.
+ *  High-confidence banks (labeled attack_lunge etc.) are trusted directly; medium-confidence
+ *  generic attack_s# banks need a larger count before we grant a chain. Values are capped at 3
+ *  (classic s1/s2/s3 lunge chains, e.g. pl0615 G RED). The bank COUNT is real asset evidence;
+ *  the hit-chain semantics remain TUNED (hit-bin move records are still undecoded). */
+function comboHitsFor(actionRecord) {
+  const high = distinctMeleeBanks(actionRecord, ["high"]);
+  const broad = distinctMeleeBanks(actionRecord, ["high", "medium"]);
+  if (high >= 3) return 3;
+  if (high === 2) return 2;
+  if (broad >= 6) return 3;
+  if (broad >= 3) return 2;
+  return 1;
+}
+
+/** Sword-beam finisher (TUNED design choice): the LAST hit of a melee combo chain emits a fast,
+ *  short-lived projectile with melee-scaled damage. Granted to sword-family melee-primary borgs
+ *  and the G Red hero line (whose sword beam is the line's signature move — see HERO_CHARGE_IDS
+ *  note). "Combo finisher" was picked over "full-HP melee" as the trigger because it is always
+ *  reachable and testable; no ROM evidence distinguishes the two. */
+function swordBeamDef(borg, families, primary) {
+  const id = normalizeId(borg.id);
+  const hero = id !== null && HERO_CHARGE_IDS.has(id);
+  const sword = hasFamily(families, "sword");
+  if (!hero && !(sword && primary === "melee")) return null;
+  return {
+    speed: 30,
+    lifetime: hero ? 30 : 24,
+    hitRadius: 30,
+    damageMultiplier: hero ? 1.0 : 0.85,
+    homingTurn: 0.02,
+    visualKind: "energy",
+  };
+}
+
+function meleeDef(borg, families, actionRecord, primary) {
   const attack = numberOr(borg.attack, 0);
   if (attack <= 0) return null;
 
@@ -98,6 +155,9 @@ function meleeDef(borg, families, actionRecord) {
     yTolerance: heavy ? 64 : 50,
     damageMultiplier: heavy ? 1.3 : sword ? 1.15 : 1,
     knockbackMultiplier: heavy ? 1.35 : sword ? 1.15 : 1,
+    comboHits: comboHitsFor(actionRecord),
+    comboWindowFrames: quick ? 26 : 22,
+    swordBeam: swordBeamDef(borg, families, primary),
   };
 }
 
@@ -115,6 +175,15 @@ function shotDef(borg, families, actionRecord) {
 
   const baseCooldown = heavy ? 34 : rapid ? 8 : beam ? 16 : flame ? 20 : gun ? 12 : 14;
   const recovery = Math.max(8, Math.min(34, Math.round(clipFrames * (heavy ? 0.58 : 0.42))));
+  const visualKind = visualKindFor(families);
+  // Charge attack (hold B, release to fire a scaled shot): beam weapons + heavy cannon-class
+  // shooters + the G Red hero line (see HERO_CHARGE_IDS note). TUNED heuristic — no ROM
+  // per-move charge table is decoded; family/asset evidence only selects WHO charges.
+  const id = normalizeId(borg.id);
+  const chargeable = beam || heavy || (id !== null && HERO_CHARGE_IDS.has(id));
+  // Bullet drop only for ballistic "bullet" kinds (muzzle visuals): beams/flames fly straight.
+  // TUNED magnitude; the muzzle/bulletProjectile family evidence only selects WHO drops.
+  const ballistic = visualKind === "muzzle";
 
   return {
     cooldown: baseCooldown,
@@ -125,14 +194,25 @@ function shotDef(borg, families, actionRecord) {
     spreadRadians: rapid ? 0.055 : heavy ? 0.025 : 0,
     speed: heavy ? 18 : beam ? 30 : flame ? 18 : gun ? 28 : 22,
     lifetime: heavy ? 54 : beam ? 46 : flame ? 44 : 40,
-    homingTurn: beam ? 0.045 : flame ? 0.03 : heavy ? 0.02 : 0.08,
+    // Per-family homing (TUNED): beams track well, ballistic guns only slightly, lobbed
+    // heavy shells barely at all. Rapid multi-shot guns get low homing so the spread reads.
+    homingTurn: beam ? 0.045 : flame ? 0.03 : heavy ? 0.02 : rapid ? 0.05 : gun ? 0.06 : 0.075,
     hitRadius: heavy ? 58 : flame ? 46 : beam ? 34 : 35,
-    muzzleForwardOffset: heavy ? 46 : 30,
-    muzzleYOffset: heavy ? 28 : 20,
+    // Per-family muzzle origin (TUNED): replaces the old flat 30/20. No decoded per-borg muzzle
+    // node exists in the asset inventories (weapon-attachment-map only lists archive-level
+    // families), so these stay family-scale offsets, not per-model attachment points.
+    muzzleForwardOffset: heavy ? 46 : flame ? 40 : beam ? 38 : gun ? 34 : 30,
+    muzzleYOffset: heavy ? 28 : beam ? 24 : 20,
     damageMultiplier: heavy ? 1.75 : beam ? 1.15 : flame ? 1.2 : rapid ? 0.72 : 1,
     hitstunMultiplier: heavy ? 1.45 : 1,
     knockbackMultiplier: heavy ? 1.65 : beam ? 0.9 : rapid ? 0.8 : 1,
-    visualKind: visualKindFor(families),
+    visualKind,
+    chargeable,
+    chargeTier1Frames: 30,
+    chargeTier2Frames: 90,
+    chargeTier1DamageMult: 1.6,
+    chargeTier2DamageMult: heavy ? 2.6 : 2.4,
+    bulletDrop: ballistic ? (heavy ? 0.12 : 0.045) : 0,
   };
 }
 
@@ -171,7 +251,7 @@ async function main() {
     const actionRecord = actionById.get(id);
     const families = Object.keys(weaponRecord?.families ?? {}).sort();
     const primary = choosePrimary(borg, families);
-    const melee = meleeDef(borg, families, actionRecord);
+    const melee = meleeDef(borg, families, actionRecord, primary);
     const shot = shotDef(borg, families, actionRecord);
 
     profiles[id] = {
@@ -196,7 +276,7 @@ async function main() {
     generatedBy: "scripts/gen-combat-action-profiles.mjs",
     generatedFrom: [paths.borgs, paths.weaponMap, paths.actionAssets],
     note:
-      "TUNED, not DERIVED: per-borg attack primary/timing/projectile traits are generated from weapon-attachment and animation asset evidence. Hit-bin move records remain structurally parsed but semantically undecoded, so combat.ts keeps a generic fallback for missing profile fields.",
+      "TUNED, not DERIVED: per-borg attack primary/timing/projectile traits are generated from weapon-attachment and animation asset evidence. Hit-bin move records remain structurally parsed but semantically undecoded, so combat.ts keeps a generic fallback for missing profile fields. Combo chain length (melee.comboHits) counts real exported swing banks; charge shots (shot.chargeable) key off beam/heavy families + the G Red hero line; sword-beam finishers (melee.swordBeam) key off sword-family melee-primary borgs + the hero line. All numeric values for those mechanics are TUNED.",
     count: Object.keys(profiles).length,
     profiles,
   };
