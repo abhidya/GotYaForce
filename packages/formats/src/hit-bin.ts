@@ -66,8 +66,59 @@ export interface StageHitGrid {
   triangles: StageHitTriangle[];
 }
 
+export type ActorHitTableKind = "player" | "comhit" | "comhit2";
+
+export interface ParseActorHitTableOptions {
+  /**
+   * Selects one of the three observed actor/common HIT table layouts. If omitted,
+   * `fileName` is used to infer `comhit`/`comhit2`; otherwise the player-borg layout
+   * (`pl####hit.bin`) is used.
+   */
+  kind?: ActorHitTableKind;
+  fileName?: string;
+}
+
+export interface ActorHitTableLayout {
+  kind: ActorHitTableKind;
+  category: "player-borg-hit-table" | "global-common-hit-table" | "secondary-common-hit-table";
+  remapOffset: number;
+  remapBytes: number;
+  recordOffset: number;
+  recordSize: 0xf4;
+  expectedRecords: number | null;
+}
+
+export interface ActorHitRemapEntry {
+  index: number;
+  value: number;
+}
+
+export interface ActorHitRecord {
+  index: number;
+  offset: number;
+  raw: Uint8Array;
+  nonZero: boolean;
+  firstWord: number;
+  firstBytes: [number, number, number, number];
+  word8: number;
+  candidateFloats10: number[];
+}
+
+export interface ActorHitTable {
+  layout: ActorHitTableLayout;
+  bytes: number;
+  valid: boolean;
+  remapEntries: ActorHitRemapEntry[];
+  uniqueRemapValues: number[];
+  remapHasOutOfRangePlayerSlots: boolean;
+  records: ActorHitRecord[];
+  trailingBytes: number;
+  trailingLooksLikePadding: boolean;
+}
+
 const STIH_HEADER_BYTES = 0x28;
 const STAGE_RECORD_SIZE = 0x38;
+export const ACTOR_HIT_RECORD_SIZE = 0xf4;
 
 export function parseStageHitGrid(input: Uint8Array | ArrayBuffer): StageHitGrid {
   const bytes = asBytes(input);
@@ -138,8 +189,123 @@ export function stageBoundsFromHitGrid(grid: StageHitGrid): StageHitBounds2d {
   return { ...grid.header.bounds2d };
 }
 
+export function parseActorHitTable(
+  input: Uint8Array | ArrayBuffer,
+  options: ParseActorHitTableOptions = {},
+): ActorHitTable {
+  const bytes = asBytes(input);
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const layout = actorHitLayout(options);
+  if (bytes.byteLength < layout.recordOffset) {
+    throw new RangeError(`actor HIT table too small for ${layout.category}: ${bytes.byteLength} bytes`);
+  }
+
+  const completeRecordCount = Math.floor((bytes.byteLength - layout.recordOffset) / ACTOR_HIT_RECORD_SIZE);
+  const recordCount = layout.expectedRecords ?? completeRecordCount;
+  if (completeRecordCount < recordCount) {
+    throw new Error(
+      `actor HIT table has ${completeRecordCount} complete records, expected ${recordCount} for ${layout.category}`,
+    );
+  }
+
+  const remapEntries = activeActorHitRemapEntries(view, layout.remapOffset, layout.remapBytes, bytes.byteLength);
+  const uniqueRemapValues = [...new Set(remapEntries.map((entry) => entry.value))].sort((a, b) => a - b);
+  const remapHasOutOfRangePlayerSlots = layout.kind === "player" && uniqueRemapValues.some((value) => value >= 32);
+  const records = Array.from({ length: recordCount }, (_, index) =>
+    parseActorHitRecord(bytes, view, layout.recordOffset + index * ACTOR_HIT_RECORD_SIZE, index),
+  );
+  const trailingBytes = bytes.byteLength - layout.recordOffset - recordCount * ACTOR_HIT_RECORD_SIZE;
+  const trailingLooksLikePadding =
+    trailingBytes >= 0 && bytes.subarray(bytes.byteLength - trailingBytes).every((byte) => byte === 0);
+
+  return {
+    layout,
+    bytes: bytes.byteLength,
+    valid:
+      recordCount > 0 &&
+      trailingBytes >= 0 &&
+      !remapHasOutOfRangePlayerSlots &&
+      (layout.kind !== "player" || bytes.byteLength === 0x1ea0),
+    remapEntries,
+    uniqueRemapValues,
+    remapHasOutOfRangePlayerSlots,
+    records,
+    trailingBytes,
+    trailingLooksLikePadding,
+  };
+}
+
 function asBytes(input: Uint8Array | ArrayBuffer): Uint8Array {
   return input instanceof Uint8Array ? input : new Uint8Array(input);
+}
+
+function actorHitLayout(options: ParseActorHitTableOptions): ActorHitTableLayout {
+  const lower = options.fileName?.toLowerCase() ?? "";
+  const kind = options.kind ?? (lower === "comhit.bin" ? "comhit" : lower === "comhit2.bin" ? "comhit2" : "player");
+  if (kind === "comhit") {
+    return {
+      kind,
+      category: "global-common-hit-table",
+      remapOffset: 0,
+      remapBytes: 0x400,
+      recordOffset: 0x400,
+      recordSize: ACTOR_HIT_RECORD_SIZE,
+      expectedRecords: null,
+    };
+  }
+  if (kind === "comhit2") {
+    return {
+      kind,
+      category: "secondary-common-hit-table",
+      remapOffset: 0,
+      remapBytes: 0x20,
+      recordOffset: 0x20,
+      recordSize: ACTOR_HIT_RECORD_SIZE,
+      expectedRecords: 64,
+    };
+  }
+  return {
+    kind,
+    category: "player-borg-hit-table",
+    remapOffset: 0,
+    remapBytes: 0x20,
+    recordOffset: 0x20,
+    recordSize: ACTOR_HIT_RECORD_SIZE,
+    expectedRecords: 32,
+  };
+}
+
+function activeActorHitRemapEntries(
+  view: DataView,
+  start: number,
+  byteLength: number,
+  fileLength: number,
+): ActorHitRemapEntry[] {
+  const entries: ActorHitRemapEntry[] = [];
+  const end = Math.min(fileLength, start + byteLength);
+  for (let offset = start; offset < end; offset += 1) {
+    const value = view.getUint8(offset);
+    if (value !== 0xff) entries.push({ index: offset - start, value });
+  }
+  return entries;
+}
+
+function parseActorHitRecord(bytes: Uint8Array, view: DataView, offset: number, index: number): ActorHitRecord {
+  return {
+    index,
+    offset,
+    raw: bytes.slice(offset, offset + ACTOR_HIT_RECORD_SIZE),
+    nonZero: bytes.subarray(offset, offset + ACTOR_HIT_RECORD_SIZE).some((byte) => byte !== 0),
+    firstWord: view.getUint32(offset, false),
+    firstBytes: [
+      view.getUint8(offset),
+      view.getUint8(offset + 1),
+      view.getUint8(offset + 2),
+      view.getUint8(offset + 3),
+    ],
+    word8: view.getUint32(offset + 0x08, false),
+    candidateFloats10: Array.from({ length: 8 }, (_, i) => view.getFloat32(offset + 0x10 + i * 4, false)),
+  };
 }
 
 function parseCells(

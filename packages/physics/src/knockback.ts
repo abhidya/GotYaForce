@@ -50,23 +50,24 @@
 //     MELEE.KNOCKBACK / SHOT.KNOCKBACK / SPECIAL.KNOCKBACK in constants.ts remain TUNED flat
 //     scalars; only the DIRECTION those scalars get multiplied into is upgraded here.
 
+import {
+  BAM16_PER_RADIAN,
+  BAM16_WRAP,
+  DEGENERATE_MAG_SQ_THRESHOLD,
+  FALLBACK_DIR_COMPONENTS,
+} from "./knockback.generated.js";
 import { sub, type Vec3 } from "./index.js";
 
 /** Radians-to-BAM16 angle conversion. FLOAT_8043707c, confirmed == 65536/(2*PI) via direct
  *  ROM float read (research/decomp/data/knockback-direction-800300bc.json). */
-export const BAM16_PER_RADIAN = 65536 / (2 * Math.PI);
+export { BAM16_PER_RADIAN };
 
 /** Degenerate-vector magnitude-squared threshold. FLOAT_80436fc0, confirmed 0.01 via direct
  *  ROM float read. Below this, the ROM substitutes the fixed fallback vector (0,0,-1). */
-const DEGENERATE_MAG_SQ_THRESHOLD = 0.01;
 
 /** Fixed fallback direction when the source vector is degenerate (near-zero). FLOAT_80436f74
  *  = -1.0 confirmed via direct ROM float read; x/y = 0.0 (FLOAT_80436f68). */
-const FALLBACK_DIR: Vec3 = { x: 0, y: 0, z: -1 };
-
-/** One 16-bit BAM angle wraps at 0x10000 = 360 degrees, matching the borg heading convention
- *  at struct+0x72 (behavior-notes.md section 3). */
-const BAM16_WRAP = 0x10000;
+const FALLBACK_DIR: Vec3 = FALLBACK_DIR_COMPONENTS;
 
 export interface KnockbackAngle {
   /** BAM16 yaw, wrapped to a signed 16-bit range (-0x8000..0x7fff), same convention as

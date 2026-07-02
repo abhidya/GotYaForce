@@ -12,6 +12,8 @@ export type ChallengeGroupCode =
   | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 59 | 60 | 61
   | 62 | 63 | 64 | 65 | 66 | 67 | 68 | 69;
 
+export { CHALLENGE_GROUP_ROSTERS, CHALLENGE_GROUP_ROSTER_SOURCE } from "./challenge-spawn-pools.generated.js";
+
 export interface ChallengeStageSelection {
   /** Raw byte written to PTR_DAT_80433934[0x1c]. */
   stageByte: number;
@@ -142,31 +144,6 @@ export const CHALLENGE_ENEMY_GROUP_CODES = [
     [61, 61, 61, 61],
   ],
 ] as const satisfies readonly (readonly (readonly ChallengeGroupCode[])[])[];
-
-export const CHALLENGE_GROUP_ROSTERS = {
-  48: ["pl0008", "pl0105", "pl0206", "pl0303", "pl0705", "pl0a05", "pl0b05", "pl0f04", "pl000c", "pl030c", "pl030d", "pl070b", "pl090b"],
-  49: ["pl010a", "pl0807", "pl0406", "pl040b", "pl040c", "pl040d", "pl070c", "pl070d", "pl0b07", "pl0a0a"],
-  50: ["pl0000", "pl0003", "pl0100", "pl0103", "pl020a", "pl0300", "pl0301", "pl0b02", "pl0b03"],
-  51: ["pl0101", "pl0307", "pl0700", "pl0a00", "pl0b00", "pl0b01", "pl0b04", "pl0703", "pl0407"],
-  52: ["pl0306", "pl0005", "pl0200", "pl0201", "pl020c", "pl0702", "pl0d01", "pl0808", "pl0800", "pl0801", "pl0a03"],
-  53: ["pl0209", "pl0004", "pl0001", "pl0400", "pl0402", "pl0404", "pl0405", "pl0409", "pl0408", "pl0401", "pl0403"],
-  54: ["pl0a01", "pl020b", "pl0302", "pl0309", "pl050d", "pl050e"],
-  55: ["pl0701", "pl0708", "pl0802", "pl0a06", "pl020d"],
-  56: ["pl0c00", "pl0c01", "pl0619", "pl061f", "pl0625", "pl0c00", "pl0c01", "pl0619", "pl061f", "pl0625", "pl0628"],
-  57: ["pl0006", "pl0102", "pl0203", "pl0305", "pl0501", "pl0517", "pl0a08", "pl0c02"],
-  58: ["pl0007", "pl0104", "pl0202", "pl0204", "pl0704", "pl020e", "pl0208", "pl030a", "pl0706", "pl0804", "pl080c", "pl0a02"],
-  59: ["pl050c", "pl0515", "pl0516", "pl0502"],
-  60: ["pl0627", "pl0621", "pl0623", "pl0618", "pl061a", "pl061e", "pl0604", "pl0606", "pl0613", "pl0610"],
-  61: ["pl061c", "pl061d", "pl0616", "pl0617", "pl0600", "pl0601", "pl0608", "pl0609"],
-  62: [],
-  63: [],
-  64: ["pl0500", "pl0509", "pl050a"],
-  65: ["pl0e00", "pl0e03", "pl0e01", "pl0e02"],
-  66: ["pl0c04"],
-  67: ["pl0d06", "pl0809", "pl0c05"],
-  68: ["pl090a", "pl0908", "pl0909"],
-  69: ["pl0901", "pl090c", "pl080d", "pl0b06"],
-} as const satisfies Record<ChallengeGroupCode, readonly string[]>;
 
 export function challengeModeForPlayerBudget(budget: number): ChallengeMode {
   if (budget <= 1500) return 0;

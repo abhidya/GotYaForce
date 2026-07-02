@@ -1,12 +1,12 @@
-// Per-borg stat model. Drives all per-borg behavior from packages/assets/data/borgs.json.
+// Per-borg stat model. Drives all per-borg behavior from the original roster data.
 //
 // The JSON fields we consume (see borgs.json):
 //   energy  -> deploy cost AND the win/lose energy pool contribution
 //   hp      -> "L1/L10" string, e.g. "200/290"; we use the L1 (first) value as battle HP
-//   defense -> 0..10, reduces incoming damage
-//   shot    -> 0..10, ranged power; 0 means "no ranged weapon" (pure melee)
-//   attack  -> 0..10, melee power; 0 means "no melee" (pure ranged / projectile-only)
-//   speed   -> 0..10, movement speed scalar
+//   defense -> fallback only; runtime prefers pl####data.bin byte 0x1a4
+//   shot    -> fallback only; runtime prefers pl####data.bin byte 0x1a5
+//   attack  -> fallback only; runtime prefers pl####data.bin byte 0x1a6
+//   speed   -> fallback only; runtime prefers pl####data.bin byte 0x1a7
 //   jump    -> "Air jump level N" | "Boost jump" | "N/A" -> air-jump count + flyer flag
 //   type    -> "Long range type" etc. (informs AI preferred engage range)
 //   tribe   -> cosmetic / grouping, unused by the sim
@@ -16,6 +16,8 @@
 // raw-damage coefficients are still TUNED FROM THE STAT TABLE, not ported from the ROM
 // (`zz_003cd5c_` is known to be a table-driven formula, but not yet fully ported).
 // Clearly flagged in packages/combat/src/constants.ts.
+
+import { actorDataCombatStatsForBorgId } from "./actorDataStats.js";
 
 /**
  * Raw borg stats as they appear in borgs.json. Kept structurally compatible with the
@@ -105,17 +107,22 @@ function rangePrefOf(type: string | undefined, hasShot: boolean, hasMelee: boole
 /** Build the resolved per-borg profile consumed by movement/combat/AI. */
 export function buildProfile(s: BorgStats): BorgProfile {
   const { airJumpLevel, flyer } = parseJump(s.jump);
-  const hasShot = s.shot > 0;
-  const hasMelee = s.attack > 0;
+  const actorStats = actorDataCombatStatsForBorgId(s.id);
+  const defense = actorStats?.defense ?? s.defense;
+  const shot = actorStats?.shot ?? s.shot;
+  const attack = actorStats?.attack ?? s.attack;
+  const speed = actorStats?.speed ?? s.speed;
+  const hasShot = shot > 0;
+  const hasMelee = attack > 0;
   return {
     id: s.id,
     name: s.name,
     energy: s.energy,
     maxHp: parseHp(s.hp),
-    defense: s.defense,
-    shot: s.shot,
-    attack: s.attack,
-    speed: s.speed,
+    defense,
+    shot,
+    attack,
+    speed,
     airJumpLevel,
     flyer,
     hasShot,

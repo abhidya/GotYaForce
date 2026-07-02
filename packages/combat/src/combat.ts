@@ -17,13 +17,14 @@ import {
 } from "@gf/physics";
 import {
   DAMAGE,
-  LOCK,
   MELEE,
+  LOCK,
   SHOT,
   SPECIAL,
   STATE,
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
+import { actionProfileForProfile, type MeleeActionDef, type ShotActionDef } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
 import { typeDamageMultiplier } from "./typeDamage.js";
 import type { BorgRuntime, Projectile, ProjectileVisualKind } from "./types.js";
@@ -317,28 +318,34 @@ export function stepAttacks(
 ): AttackResult {
   const out: Projectile[] = [];
   if (isBusy(b) || !b.alive) return { projectiles: out };
+  const actionProfile = actionProfileForProfile(p);
+  const meleeDef = actionProfile.melee;
+  const shotDef = actionProfile.shot;
 
   // Reload bookkeeping for ranged.
-  if (p.hasShot) {
+  if (shotDef) {
     const reload = b.cooldowns["reload"] ?? 0;
     if (b.ammo <= 0 && reload <= 0) {
-      b.ammo = SHOT.AMMO_MAX;
+      b.ammo = shotDef.ammoMax;
     }
   }
 
   // --- Special (Y) -------------------------------------------------------------------
-  if (pressedSpecial && (b.cooldowns["special"] ?? 0) <= 0) {
-    b.cooldowns["special"] = SPECIAL.COOLDOWN;
+  const canStartAction = b.state !== "attack" && b.state !== "special";
+  if (canStartAction && pressedSpecial && (b.cooldowns["special"] ?? 0) <= 0) {
+    const specialDef = actionProfile.special;
+    b.cooldowns["special"] = specialDef.cooldown;
+    b.cooldowns["attackLock"] = specialDef.duration;
     b.state = "special";
     b.stateTime = 0;
     b.anim = "special";
     // AoE burst around the borg.
     const baseDmg =
       (p.hasMelee ? MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT : SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT) *
-      SPECIAL.DMG_MULT;
+      specialDef.damageMultiplier;
     for (const o of all) {
       if (!canReceiveHit(b, o)) continue;
-      if (distXZ(b.pos, o.pos) <= SPECIAL.RADIUS) {
+      if (distXZ(b.pos, o.pos) <= specialDef.radius) {
         const op = profiles.get(o.uid);
         if (op) {
           // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target,
@@ -347,7 +354,7 @@ export function stepAttacks(
             o,
             op,
             rawDamageForTarget(baseDmg, b.team, o.team, p.id, op.id),
-            SPECIAL.KNOCKBACK,
+            SPECIAL.KNOCKBACK * specialDef.knockbackMultiplier,
             { x: 0, y: 0, z: 0 },
             b.pos,
             true,
@@ -358,56 +365,69 @@ export function stepAttacks(
     return { projectiles: out };
   }
 
-  // --- Attack (B): melee if it has melee, else ranged shot --------------------------
-  if (pressedAttack) {
-    if (p.hasMelee && (b.cooldowns["melee"] ?? 0) <= 0) {
-      b.cooldowns["melee"] = MELEE.DURATION + MELEE.COOLDOWN;
-      b.cooldowns["meleeActive"] = MELEE.STARTUP + MELEE.ACTIVE;
-      b.state = "attack";
-      b.stateTime = 0;
-      b.anim = "melee";
-    } else if (p.hasShot && (b.cooldowns["shot"] ?? 0) <= 0 && b.ammo > 0) {
-      b.cooldowns["shot"] = SHOT.FIRE_COOLDOWN;
-      b.ammo -= 1;
-      if (b.ammo <= 0) b.cooldowns["reload"] = SHOT.RELOAD_FRAMES;
-      b.state = "attack";
-      b.stateTime = 0;
-      b.anim = "shoot";
-      out.push(spawnProjectile(b, p));
+  // --- Attack (B): asset-backed per-borg primary action, generic fallback-safe -------
+  if (canStartAction && pressedAttack) {
+    const order =
+      actionProfile.primary === "shot"
+        ? (["shot", "melee"] as const)
+        : (["melee", "shot"] as const);
+    for (const kind of order) {
+      if (kind === "melee" && meleeDef && (b.cooldowns["melee"] ?? 0) <= 0) {
+        startMeleeAttack(b, meleeDef);
+        break;
+      }
+      if (kind === "shot" && shotDef && (b.cooldowns["shot"] ?? 0) <= 0 && b.ammo > 0) {
+        b.cooldowns["shot"] = shotDef.cooldown;
+        b.ammo -= 1;
+        if (b.ammo <= 0) b.cooldowns["reload"] = shotDef.reloadFrames;
+        b.cooldowns["attackLock"] = shotDef.recovery;
+        b.state = "attack";
+        b.stateTime = 0;
+        b.anim = "shoot";
+        out.push(...spawnProjectiles(b, p, shotDef));
+        break;
+      }
     }
   }
 
   // --- Resolve an active melee swing against enemies in reach ------------------------
   const meleeActive = b.cooldowns["meleeActive"] ?? 0;
-  if (b.state === "attack" && p.hasMelee && meleeActive > 0 && STATE.MELEE_IFRAME_REFRESH_PER_FRAME) {
+  if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && STATE.MELEE_IFRAME_REFRESH_PER_FRAME) {
     b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
   }
-  if (b.state === "attack" && p.hasMelee && meleeActive > 0 && meleeActive <= MELEE.ACTIVE) {
+  if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && meleeActive <= meleeDef.active) {
     // Only the active window (after startup) deals damage; one hit per swing per target.
     const fwd = forwardFromYaw(b.rotY);
     for (const o of all) {
       if (!canReceiveHit(b, o)) continue;
       const d = distXZ(b.pos, o.pos);
-      if (d > MELEE.RANGE) continue;
-      if (Math.abs(o.pos.y - b.pos.y) > MELEE.Y_TOLERANCE) continue;
+      if (d > meleeDef.range) continue;
+      if (Math.abs(o.pos.y - b.pos.y) > meleeDef.yTolerance) continue;
       const to = normalize({ x: o.pos.x - b.pos.x, y: 0, z: o.pos.z - b.pos.z });
       if (fwd.x * to.x + fwd.z * to.z < 0) continue; // behind us
       const op = profiles.get(o.uid);
       if (!op) continue;
-      const raw = MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT;
+      const raw = (MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT) * meleeDef.damageMultiplier;
       // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
       // instead of the attacker's facing vector (`fwd`) used here previously.
-      applyHit(o, op, rawDamageForTarget(raw, b.team, o.team, p.id, op.id), MELEE.KNOCKBACK, { x: 0, y: 0, z: 0 }, b.pos);
+      applyHit(
+        o,
+        op,
+        rawDamageForTarget(raw, b.team, o.team, p.id, op.id),
+        MELEE.KNOCKBACK * meleeDef.knockbackMultiplier,
+        { x: 0, y: 0, z: 0 },
+        b.pos,
+      );
     }
   }
 
   // Return to idle when the attack animation finishes.
-  if (b.state === "attack" && b.stateTime >= MELEE.DURATION) {
+  if (b.state === "attack" && (b.cooldowns["attackLock"] ?? 0) <= 0) {
     b.state = "idle";
     b.stateTime = 0;
     b.anim = "idle";
   }
-  if (b.state === "special" && b.stateTime >= SPECIAL.DURATION) {
+  if (b.state === "special" && (b.cooldowns["attackLock"] ?? 0) <= 0) {
     b.state = "idle";
     b.stateTime = 0;
     b.anim = "idle";
@@ -416,22 +436,47 @@ export function stepAttacks(
   return { projectiles: out };
 }
 
-function spawnProjectile(b: BorgRuntime, p: BorgProfile): Projectile {
-  const fwd = forwardFromYaw(b.rotY);
-  const raw = SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT;
+function startMeleeAttack(b: BorgRuntime, meleeDef: MeleeActionDef): void {
+  b.cooldowns["melee"] = meleeDef.duration + meleeDef.cooldown;
+  b.cooldowns["meleeActive"] = meleeDef.startup + meleeDef.active;
+  b.cooldowns["attackLock"] = meleeDef.duration;
+  b.state = "attack";
+  b.stateTime = 0;
+  b.anim = "melee";
+}
+
+function spawnProjectiles(b: BorgRuntime, p: BorgProfile, shotDef: ShotActionDef): Projectile[] {
+  const count = Math.max(1, Math.floor(shotDef.projectileCount));
+  const projectiles: Projectile[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const centered = count === 1 ? 0 : i - (count - 1) / 2;
+    projectiles.push(spawnProjectile(b, p, shotDef, centered * shotDef.spreadRadians));
+  }
+  return projectiles;
+}
+
+function spawnProjectile(b: BorgRuntime, p: BorgProfile, shotDef: ShotActionDef, yawOffset: number): Projectile {
+  const yaw = b.rotY + yawOffset;
+  const fwd = { x: Math.sin(yaw), y: 0, z: Math.cos(yaw) };
+  const raw = (SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT) * shotDef.damageMultiplier;
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
     team: b.team,
-    pos: { x: b.pos.x + fwd.x * 30, y: b.pos.y + 20, z: b.pos.z + fwd.z * 30 },
-    vel: scale(fwd, SHOT.SPEED),
+    pos: {
+      x: b.pos.x + fwd.x * shotDef.muzzleForwardOffset,
+      y: b.pos.y + shotDef.muzzleYOffset,
+      z: b.pos.z + fwd.z * shotDef.muzzleForwardOffset,
+    },
+    vel: scale(fwd, shotDef.speed),
     damage: raw,
-    hitstun: SHOT.HITSTUN,
-    knockback: SHOT.KNOCKBACK,
+    hitstun: Math.max(1, Math.round(SHOT.HITSTUN * shotDef.hitstunMultiplier)),
+    knockback: SHOT.KNOCKBACK * shotDef.knockbackMultiplier,
+    homingTurn: shotDef.homingTurn,
     homingTarget: b.lockTarget,
-    life: SHOT.LIFETIME,
-    hitRadius: SHOT.HIT_RADIUS,
-    visualKind: projectileVisualKindForProfile(p),
+    life: shotDef.lifetime,
+    hitRadius: shotDef.hitRadius,
+    visualKind: shotDef.visualKind ?? projectileVisualKindForProfile(p),
   };
 }
 
@@ -458,9 +503,10 @@ export function stepProjectiles(
         let d = desired - cur;
         while (d > Math.PI) d -= Math.PI * 2;
         while (d < -Math.PI) d += Math.PI * 2;
-        const step = Math.max(-SHOT.HOMING_TURN, Math.min(SHOT.HOMING_TURN, d));
+        const step = Math.max(-pr.homingTurn, Math.min(pr.homingTurn, d));
         const newYaw = cur + step;
-        pr.vel = { x: Math.sin(newYaw) * SHOT.SPEED, y: pr.vel.y, z: Math.cos(newYaw) * SHOT.SPEED };
+        const speed = Math.hypot(pr.vel.x, pr.vel.z) || SHOT.SPEED;
+        pr.vel = { x: Math.sin(newYaw) * speed, y: pr.vel.y, z: Math.cos(newYaw) * speed };
       }
     }
 

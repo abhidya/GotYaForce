@@ -17,6 +17,8 @@
 
 import { el, legendItem, clear } from "../dom.js";
 import { ASSETS, borgBannerPath, borgMiniPath } from "../assets.js";
+import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
+import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 /** Minimal borg shape the builder needs (subset of borgs.json). */
 export interface ForceBorg {
@@ -57,8 +59,20 @@ export function createForceBuilder(
   const maxSlots = opts.maxSlots ?? 30;
   const byId = new Map(opts.catalog.map((b) => [b.id, b] as const));
   const force: string[] = [...(opts.initialForce ?? [])].filter((id) => byId.has(id)).slice(0, maxSlots);
+  const teardown: Array<() => void> = [];
 
-  const root = el("div", { class: "gf-screen", style: { background: "#0e2138" } });
+  const root = el("div", { class: "gf-screen gf-force-screen" });
+  const unitAllScene = createUiSceneHost("gf-ui-scene gf-force-unitall-scene");
+  root.appendChild(unitAllScene);
+  teardown.push(
+    mountUiSceneModels(unitAllScene, {
+      sceneId: "unitall",
+      fitSize: 900,
+      camera: { fov: 31, position: [0, 0, 980], lookAt: [0, 0, 0] },
+      rotation: [0, 0, 0],
+      maxModels: UI_SCENE_LAYOUTS.unitall.modelCount,
+    }),
+  );
   const layout = el("div", { class: "gf-force" });
 
   // ---- left column: EDIT tab + grid ----
@@ -253,6 +267,7 @@ export function createForceBuilder(
     getForce: () => [...force],
     totalCost,
     destroy: () => {
+      for (const stop of teardown) stop();
       window.removeEventListener("keydown", onKey);
       root.remove();
     },

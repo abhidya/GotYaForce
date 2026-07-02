@@ -6,7 +6,9 @@
 //   - Position is a contiguous vec3 (struct+0x44). We integrate pos += vel each frame.
 //
 // Controls: A=jump -> ground jump, then air-jumps up to the borg's jump level, then (flyers)
-// hold A for boost flight. Stick = move. dash = step/dodge with brief i-frames.
+// hold A for boost flight. While locked, stick input is target-relative: forward/back move
+// toward/away from the target, pure left/right triggers a dodge step, and forward+left/right
+// circle-strafes while heading remains slaved to the lock vector.
 //
 // Tuning constants live in constants.ts (single CONST block). Relative feel comes from the
 // borg's `speed`/jump stats; absolute scale is tuned.
@@ -30,6 +32,7 @@ const WALL_CLEARANCE = 0.25;
 const CEILING_NORMAL_MAX_Y = -0.5;
 const CEILING_BODY_CLEARANCE = JUMP.GROUND_Y;
 const CEILING_CLEARANCE = 0.25;
+const STICK_EPS = 0.001;
 
 export interface MoveContext {
   /** Resolved lock-on target position, if locked (face toward it). */
@@ -66,6 +69,7 @@ export function stepMovement(
   ctx: MoveContext,
 ): void {
   const free = canMove(b);
+  const horizontal = resolveHorizontalIntent(b, input, ctx.lockTargetPos);
 
   // --- Facing -------------------------------------------------------------------------
   // Face the lock target if locked; else face the movement direction.
@@ -82,10 +86,10 @@ export function stepMovement(
   // --- Dash / step --------------------------------------------------------------------
   // A dash overrides horizontal velocity for its duration and grants brief i-frames.
   const dashCd = b.cooldowns["dash"] ?? 0;
-  if (free && input.dash && dashCd <= 0 && (b.cooldowns["dashActive"] ?? 0) <= 0) {
-    // Dash in stick direction, or forward if no stick.
-    let dx = input.moveX;
-    let dz = input.moveZ;
+  if (free && (input.dash || horizontal.autoDodge) && dashCd <= 0 && (b.cooldowns["dashActive"] ?? 0) <= 0) {
+    // Dash in resolved stick direction, or forward if no stick.
+    let dx = horizontal.dashX;
+    let dz = horizontal.dashZ;
     if (dx === 0 && dz === 0) {
       const fwd = forwardFromYaw(b.rotY);
       dx = fwd.x;
@@ -107,8 +111,8 @@ export function stepMovement(
     const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1);
     let targetVx = 0;
     let targetVz = 0;
-    if (free && (input.moveX !== 0 || input.moveZ !== 0)) {
-      const dir = normalize({ x: input.moveX, y: 0, z: input.moveZ });
+    if (free && (horizontal.walkX !== 0 || horizontal.walkZ !== 0)) {
+      const dir = normalize({ x: horizontal.walkX, y: 0, z: horizontal.walkZ });
       targetVx = dir.x * maxSpeed;
       targetVz = dir.z * maxSpeed;
     }
@@ -200,6 +204,45 @@ function setState(b: BorgRuntime, s: BorgRuntime["state"]): void {
     b.stateTime = 0;
     b.anim = s;
   }
+}
+
+interface HorizontalIntent {
+  walkX: number;
+  walkZ: number;
+  dashX: number;
+  dashZ: number;
+  autoDodge: boolean;
+}
+
+function resolveHorizontalIntent(b: BorgRuntime, input: PlayerInput, lockTargetPos: Vec3 | null): HorizontalIntent {
+  const stickX = Math.abs(input.moveX) < STICK_EPS ? 0 : input.moveX;
+  const stickZ = Math.abs(input.moveZ) < STICK_EPS ? 0 : input.moveZ;
+  if (!lockTargetPos) {
+    return { walkX: stickX, walkZ: stickZ, dashX: stickX, dashZ: stickZ, autoDodge: false };
+  }
+
+  const toTargetX = lockTargetPos.x - b.pos.x;
+  const toTargetZ = lockTargetPos.z - b.pos.z;
+  const toTargetLen = Math.hypot(toTargetX, toTargetZ);
+  if (toTargetLen < STICK_EPS) {
+    return { walkX: stickX, walkZ: stickZ, dashX: stickX, dashZ: stickZ, autoDodge: false };
+  }
+
+  const towardX = toTargetX / toTargetLen;
+  const towardZ = toTargetZ / toTargetLen;
+  const rightX = towardZ;
+  const rightZ = -towardX;
+  const resolvedX = rightX * stickX + towardX * stickZ;
+  const resolvedZ = rightZ * stickX + towardZ * stickZ;
+  const pureLateral = stickX !== 0 && stickZ === 0;
+
+  return {
+    walkX: pureLateral ? 0 : resolvedX,
+    walkZ: pureLateral ? 0 : resolvedZ,
+    dashX: resolvedX,
+    dashZ: resolvedZ,
+    autoDodge: pureLateral,
+  };
 }
 
 function approachScalar(current: number, target: number, maxDelta: number): number {

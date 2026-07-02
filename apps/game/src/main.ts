@@ -9,6 +9,7 @@
 //   MainMenu -> (challenge) -> SelectDifficulty -> SelectPlayers -> LoadBoxData
 //     -> SelectForce -> ForceBuilder/edit -> BattleIntro -> BATTLE
 //     -> Results -> next battle / back to menu
+//   MainMenu -> (edit-force) -> ForceBuilder -> back to menu
 //   PauseMenu overlays the battle on Start/Esc.
 //
 // The existing three.js scene, stage rendering, lighting, camera, the Collada
@@ -58,6 +59,7 @@ import {
   createResults,
   createPauseMenu,
   createBattleHud,
+  type MainMenuMode,
   type ForceBorg,
   type ForceSlot,
   type BattleHudHandle,
@@ -70,7 +72,7 @@ import {
   DEFAULT_ARENA_STAGE,
   EXPORTED_STAGE_CATALOG,
   isExportedStageId,
-  stageIdForArena,
+  stageIdForBattleConfig,
 } from "./sim/adapter.js";
 import { BattleScene, type AnimSlot } from "./sim/battleScene.js";
 import { BattleCamera } from "./sim/camera.js";
@@ -527,6 +529,7 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     dash_back: ["g2_s5"],
     dash_left: ["g2_s7"],
     dash_right: ["g2_s7"],
+    jump: ["g2_s16"], // no g2_s24 vertical jump bank; keep the existing airborne fallback explicit
     fly: ["g2_s16"], // 61f rootZ 104
     shoot: ["g2_s30"], // 37f (this borg's attack-length pair sits at s30/s31)
     melee: ["g2_s31"], // 37f
@@ -539,6 +542,7 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     dash_back: ["g2_s5"], // 31f rootZ 500
     dash_left: ["g2_s7"], // 31f rootX 500 (mirrored for both sides)
     dash_right: ["g2_s7"],
+    jump: ["g2_s24"], // 61f, same vertical-root jump slot convention as pl0619
     fly: ["g2_s16"], // 61f rootZ 100
     shoot: ["g2_s30"], // 37f
     melee: ["g2_s31"], // 37f
@@ -546,20 +550,42 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     special: ["g2_s41"], // 63f (= pl0c00 g8_s1 length)
     death: ["g2_s44"], // 77f rootX 290, longest bank = death-per-convention; TUNED
   },
+  // ---- One-sided lateral dash exports ------------------------------------------------
+  // These families export only one lateral dash label. Use it as the mirrored opposite
+  // side instead of falling through to dash_fwd, which made a side-step animate forward.
+  pl0400: { dash_right: ["dash_left"] },
+  pl0401: { dash_right: ["dash_left"] },
+  pl0402: { dash_right: ["dash_left"] },
+  pl0403: { dash_right: ["dash_left"] },
+  pl0404: { dash_right: ["dash_left"] },
+  pl0405: { dash_right: ["dash_left"] },
+  pl0406: { dash_right: ["dash_left"] },
+  pl0407: { dash_right: ["dash_left"] },
+  pl040b: { dash_right: ["dash_left"] },
+  pl0602: { dash_right: ["dash_left"] },
   // ---- pl0c00-pl0c05 fortress family: attacks/flinches live in unlabeled group 7 -------
   // No group-1 attacks or group-3 reacts are exported; g7 carries 37f attack-length and
   // 13f flinch-length banks (verified in each borg's anim_index.json — same Rosetta as
   // the pl0619 comment above). melee/hit previously fell back to idle.
-  pl0c00: { melee: ["g7_s0"], hit: ["g7_s5"] },
-  pl0c01: { melee: ["g7_s0"], hit: ["g7_s5"] },
-  pl0c02: { melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c00: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c01: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c02: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
   pl0c05: {
+    dash_left: ["dash_right"],
     melee: ["g7_s0"], // 37f
     shoot: ["g7_s1"], // 37f; unlike its siblings pl0c05 has no special_s* for shoot to use
     hit: ["g7_s5"], // 13f
     special: ["g8_s2"], // 77f (rootZ 290 on sibling pl0c00), biggest action bank; TUNED
   },
-  pl0c04: { melee: ["g7_s0"] }, // 61f; only attack-plausible bank (no g1/g3 exported)
+  pl0c04: {
+    // No directional dash banks are exported. The 31f boost bank is the only short
+    // locomotion burst and was already selected through generic dash fallback.
+    dash_fwd: ["boost"],
+    dash_back: ["boost"],
+    dash_left: ["boost"],
+    dash_right: ["boost"],
+    melee: ["g7_s0"], // 61f; only attack-plausible bank (no g1/g3 exported)
+  },
   // ---- Borgs with no group-3 hit reacts: short group-4 launch flinches instead ---------
   // pl0604/pl0610/pl0613 export no hit_react/guard banks; their g4 sets carry 10-15f
   // clips with pure vertical root motion (rootY 161/215/182 per anim_index.json) — the
@@ -1043,16 +1069,19 @@ function mountScreen(build: (root: HTMLElement) => { destroy(): void }): void {
   activeHandle = build(ui);
 }
 
-function showMenu(): void {
+function showMenu(initial: MainMenuMode = "challenge"): void {
   flow.screen = "menu";
   queueBgm(AUDIO_CUES.menuBgm);
   mountScreen((root) =>
     createMainMenu(root, {
-      initial: "challenge",
+      initial,
       onSelect: (mode) => {
         if (mode === "challenge") {
           playConfirmSfx();
           showDifficulty();
+        } else if (mode === "edit-force") {
+          playEditSfx();
+          showForceBuilder("menu");
         }
       },
     }),
@@ -1134,7 +1163,7 @@ function showSelectForce(): void {
       onEdit: (slot) => {
         playEditSfx();
         flow.selectedForceSlot = Math.max(0, flow.forceSlots.findIndex((candidate) => candidate.no === slot.no));
-        showForceBuilder();
+        showForceBuilder("select-force");
       },
       onBack: () => {
         playBackSfx();
@@ -1144,7 +1173,7 @@ function showSelectForce(): void {
   );
 }
 
-function showForceBuilder(): void {
+function showForceBuilder(returnTo: "select-force" | "menu" = "select-force"): void {
   flow.screen = "force";
   mountScreen((root) =>
     createForceBuilder(root, {
@@ -1154,11 +1183,13 @@ function showForceBuilder(): void {
       onConfirm: (force) => {
         playConfirmSfx();
         updateSelectedForceSlot(force);
-        showSelectForce();
+        if (returnTo === "menu") showMenu("edit-force");
+        else showSelectForce();
       },
       onQuit: () => {
         playBackSfx();
-        showSelectForce();
+        if (returnTo === "menu") showMenu("edit-force");
+        else showSelectForce();
       },
     }),
   );
@@ -1236,7 +1267,7 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   activeHandle = null;
   ui.replaceChildren();
 
-  const stageId = stageIdForArena(config.arena);
+  const stageId = stageIdForBattleConfig(config);
   const stageResources = await loadStage(stageId);
   const stageBounds = stageResources.bounds ?? fallbackStageBounds;
 

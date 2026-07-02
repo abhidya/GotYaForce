@@ -5,66 +5,39 @@
 // cited address/evidence source. TUNED = an explicit, reasonable guess. Never silently
 // upgrade a TUNED value to DERIVED.
 //
-// ---------------------------------------------------------------------------------------
-// What's real (DERIVED) vs designed-by-us (TUNED) for this camera, and why:
+// Current evidence (behavior-notes.md §ac, 2026-07-01):
+// - Per-frame camera update is `zz_000bda4_` @ 0x8000bda4. It loops 12 static camera objects
+//   at `0x803c73b0 + i*0x3e4`; each camera chooses its target actor from the live actor array
+//   `(&DAT_803c4e84)[cam+0x2e5]`.
+// - Camera object layout is decoded: eye vec3 at +0x2e8, previous eye +0x2f4, interest vec3
+//   +0x300, previous interest +0x30c, up +0x330, view matrix +0x394.
+// - All four 4P versus cameras were live-confirmed as mode 1. Mode dispatch is through the
+//   table at 0x802c38cc; mode 1 is `FUN_8000c918`, which preserves previous eye/interest and
+//   dispatches a mode subhandler from 0x802c3894 before finalizing via `FUN_8000c314`.
+// - `FUN_8000c314` calls `C_MTXLookAt(cam+0x394, eye=cam+0x2e8, up=cam+0x330,
+//   interest=cam+0x300)`.
+// - The actor chain is live and replayable in 4P mode: `actor = *(u32*)0x803C4E84`,
+//   `pos = actor + 0x20/+0x24/+0x28`, `heading = actor + 0x72`. The same section's golden
+//   trace measured G Red ground speed from that chain.
 //
-// research/decomp/behavior-notes.md was searched in full (no prior "camera" section existed
-// before this pass) and the decompiled corpus (research/decomp/ghidra-export/, 11,972
-// functions) was grepped for camera-adjacent code. Result:
-//
-//  - The engine exposes a full HSD camera-OBJECT primitive suite (`HSD_CObjSetEyePosition`
-//    0x80247270, `HSD_CObjSetInterest` 0x80247198, `HSD_CObjSetFov`/`GetFov` 0x8024807c/
-//    0x80248058, `HSD_CObjSetupViewingMtx` 0x80246ab8, all chunk_0070.c) — this is generic
-//    shared HAL/AM2-lineage ("HSD"/Sysdolphin) engine plumbing, the same library used by
-//    GameCube-era Melee/Kirby Air Ride. These are primitives ("set the eye position to X"),
-//    not policy ("what X should be this frame for a Gotcha Force battle").
-//  - No caller of any of those primitives is resolvable anywhere else in the corpus by static
-//    address (they're dispatched through a C++ vtable on a `cBaseCamera`-style object, not a
-//    direct `bl` Ghidra can attribute) — a direct-address grep across all 80 chunks confirms
-//    zero call sites outside their own definitions. `cCameraManager::HasCamera` (0x80008998)
-//    and `nlDLRingGetStart<cBaseCamera>` (0x802af478) are the only named C++ camera-manager
-//    symbols in the whole 11,972-function index, and both are generic object-manager/ring-
-//    buffer boilerplate, not gameplay-specific framing logic.
-//  - A dedicated static-code search for a per-frame "camera update" function (reading the
-//    6-actor battle table `DAT_803c4e84` across multiple slots, or computing a multi-actor
-//    midpoint/spread) found no candidate — every multi-slot reader of that table is AI
-//    targeting/separation code, and every midpoint/sqrt-heavy function is HSD skeletal IK,
-//    not camera framing. Conclusion: there is no statically-locatable dedicated camera-policy
-//    function in this corpus (plausibly because it's dispatched via vtable, or is simpler/
-//    more scripted than expected). This mirrors the honest "not found" conclusions already on
-//    record for CPU-AI target-selection (behavior-notes.md §q) and dash/jump constants (§s).
-//  - research/decomp/ram-trace-analysis.md §3.1 (an EARLIER, already-existing live 2-save-state
-//    MEM1 diff, not new work from this pass) independently found a genuine runtime camera
-//    object at RAM 0x806A5300: a position with a sliding history buffer (smoothed, not an
-//    instant snap) plus an embedded 3x3 look-at matrix at 0x806A53A4, tracking toward the
-//    player. Two comparable frames give: constant height offset player+60 units (Y: cam=70.0
-//    vs player=10.0 in both samples — the one clean, repeated number here) and a horizontal
-//    trailing distance of ~467-505 units (noisy over just 2 samples, DERIVED-but-low-confidence
-//    for the exact magnitude, though the fact of "roughly ~470-510" and "smoothed/lagged, not
-//    instant" is solid). This is the best real evidence available; it does NOT cover multi-actor
-//    framing/zoom (only one borg was on-screen in that trace).
-//  - research/asset-inventory/stage-lighting-render-state.md's static `st00_mdl.arc` CObj scan
-//    gives an exact DERIVED initial/stage camera setup (eye/interest/fov/near/far baked into the
-//    stage file) — already wired via DEFAULT_RENDER_STATE.fov/near/far (43.191872/10/80000) in
-//    main.ts; that part predates this pass and needed no change, just this citation.
-//  - research/traces/GG4E/dolphin-gdb-trace-results.md's live GDB trace confirms the
-//    `C_MTXLookAt` callsite (0x8020b61c) is real and hit 65x in one pass, and later traced two
-//    callers (0x8008c93c, 0x8008ca90) — but those captured fixed setup vectors (e.g.
-//    eye=[0,0,100], interest=[0,0,-100]), not target-relative gameplay values, and the file's own
-//    "Implementation Gate" section explicitly says this "proves camera callsite/capture path,
-//    but not enough to replace the browser gameplay follow camera formula yet." Treated here as
-//    confirming the mechanism (a real look-at matrix is computed every frame) without supplying
-//    portable per-frame numbers.
-//
-// So: height offset (DERIVED, ~60 units above target) and smoothing behavior (DERIVED,
-// lagged/lerped rather than snapped) are ROM-confirmed via live trace. Horizontal follow
-// distance is DERIVED-but-approximate (~470-510, 2-sample trace). Multi-actor dynamic framing
-// (zooming/widening to keep 2 vs 3+ spread-apart borgs all in view) has NO ROM evidence either
-// way and is TUNED here as a standard fighting-game camera practice, clearly separated below so
-// nobody mistakes it for a ROM-confirmed algorithm.
-// ---------------------------------------------------------------------------------------
+// What this port can honestly use now:
+// - DERIVED: target/interest comes from actor +0x20/+0x24/+0x28, camera policy is stateful
+//   eye/interest smoothing, and the final primitive is a LookAt using separate eye/interest/up.
+// - DERIVED: mode-0/init code uses a 0x600 BAM16 pitch value for the eye offset.
+// - DERIVED-but-approximate: a prior live RAM camera trace found player+60 vertical offset and
+//   horizontal camera distance in the high 400s.
+// - DERIVED: mode-1's eye blend constants are read from boot.dol:
+//   FLOAT_80436acc=4, FLOAT_80436ae8=5, and FLOAT_80436ac4=0.5. The port uses those exact
+//   constants for the previous-eye blend and the target-height half blend.
+// - TUNED: multi-actor widen-to-fit behavior. That stays named TUNED until multi-actor traces
+//   are captured.
 
 import * as THREE from "three";
+import {
+  CAMERA_MODE1_EYE_BLEND_DENOMINATOR,
+  CAMERA_MODE1_HALF_BLEND,
+  CAMERA_MODE1_PREVIOUS_EYE_WEIGHT,
+} from "./camera.generated.js";
 
 export interface CameraFollowTarget {
   /** World position to frame (typically the local player's active borg). */
@@ -81,8 +54,9 @@ export interface StageBoundsLike {
 }
 
 /** DERIVED: ram-trace-analysis.md §3.1 — camera object 0x806A5300 sat exactly 60 world units
- * above the tracked player (Y=70.0 vs player Y=10.0) in both sampled frames. */
-export const CAMERA_HEIGHT_OFFSET_DERIVED = 60;
+ * above the tracked player (Y=70.0 vs player Y=10.0) in both sampled frames. The §ac decomp
+ * then confirmed mode handlers write a separate interest vec3 at camera+0x300 from actor+0x20. */
+export const CAMERA_TARGET_Y_OFFSET_DERIVED = 60;
 
 /** DERIVED-but-approximate: ram-trace-analysis.md §3.1 — horizontal camera-to-player distance
  * measured 466.5 and 504.9 world units across the only two sampled frames (mean ~485). Treated
@@ -91,17 +65,20 @@ export const CAMERA_HEIGHT_OFFSET_DERIVED = 60;
  * more precise than "roughly high-400s". */
 export const CAMERA_BASE_DISTANCE_DERIVED = 485;
 
-/** TUNED: how strongly the camera trails behind the target's facing direction rather than
- * sitting at a neutral angle. The live trace's yaw-vs-player-heading relationship was not
- * internally consistent enough across only 2 frames to derive a fixed trail angle (see
- * behavior-notes.md camera section), so this stays a designed choice, not a ROM number. */
-const TRAIL_BEHIND_WEIGHT_TUNED = 1.0;
+/** DERIVED: mode init writes camera+0x70 = 0x600 before computing eye from target/heading. */
+export const CAMERA_MODE_INIT_PITCH_BAM_DERIVED = 0x600;
+const BAM16_TO_RADIANS = (Math.PI * 2) / 0x10000;
+const CAMERA_MODE_INIT_PITCH_RADIANS_DERIVED =
+  CAMERA_MODE_INIT_PITCH_BAM_DERIVED * BAM16_TO_RADIANS;
 
-/** TUNED: smoothing rate. The live trace confirms the camera is smoothed/lagged (a sliding
- * position-history buffer), not snapped, but the exact filter constant/time-window was not
- * recoverable from 2 samples. This lerp factor is a standard-feel approximation. */
-const POSITION_SMOOTHING_TUNED = 0.08;
-const TARGET_SMOOTHING_TUNED = 0.1;
+/** DERIVED: FUN_8000c988 computes eye = (prevEye * 4 + goalEye) / 5. */
+const MODE1_EYE_PREV_WEIGHT_DERIVED = CAMERA_MODE1_PREVIOUS_EYE_WEIGHT;
+const MODE1_EYE_BLEND_DENOMINATOR_DERIVED = CAMERA_MODE1_EYE_BLEND_DENOMINATOR;
+
+/** DERIVED shape: mode-1 writes X/Z interest directly from actor+0x20/+0x28 and blends the
+ * Y target with FLOAT_80436ac4. The exact actor +0x6d0 / camera +0x350 height terms are not
+ * modeled yet, so the current `focus.y` remains the trace-derived actor+60 approximation. */
+const MODE1_INTEREST_Y_BLEND_DERIVED = CAMERA_MODE1_HALF_BLEND;
 
 /** TUNED: multi-actor dynamic framing. No ROM evidence (static or live-trace) of a 2-vs-3+
  * spread-apart zoom/framing algorithm was found — behavior-notes.md's camera section documents
@@ -123,6 +100,7 @@ const _goal = new THREE.Vector3();
 const _forward = new THREE.Vector3();
 const _inward = new THREE.Vector3();
 const _center = new THREE.Vector3();
+const _eyeGoal = new THREE.Vector3();
 const _spreadMin = new THREE.Vector3();
 const _spreadMax = new THREE.Vector3();
 
@@ -140,6 +118,8 @@ export interface BattleCameraOptions {
  * fights stay readable instead of clipping teammates/enemies out of frame.
  */
 export class BattleCamera {
+  private initialized = false;
+
   constructor(private readonly opts: BattleCameraOptions) {}
 
   update(
@@ -149,10 +129,12 @@ export class BattleCamera {
   ): void {
     const { camera, controlsTarget } = this.opts;
     const focusBase = primary?.pos ?? _center.set(0, 80, 0);
-    _focus.set(focusBase.x, focusBase.y + 90, focusBase.z);
-    controlsTarget.lerp(_focus, TARGET_SMOOTHING_TUNED);
+    _focus.set(focusBase.x, focusBase.y + CAMERA_TARGET_Y_OFFSET_DERIVED, focusBase.z);
 
-    if (!primary) return;
+    if (!primary) {
+      controlsTarget.copy(mode1InterestTarget(controlsTarget, _focus));
+      return;
+    }
 
     // TUNED spread metric: bounding-box diagonal (XZ) across all currently-live actors,
     // including the primary. Two actors close together -> near-zero spread -> base framing.
@@ -168,15 +150,16 @@ export class BattleCamera {
     );
 
     const distance = CAMERA_BASE_DISTANCE_DERIVED + extraDistance;
-    const height = CAMERA_HEIGHT_OFFSET_DERIVED + extraHeight;
+    const pitchSin = Math.sin(CAMERA_MODE_INIT_PITCH_RADIANS_DERIVED);
+    const pitchCos = Math.cos(CAMERA_MODE_INIT_PITCH_RADIANS_DERIVED);
+    const horizontalDistance = distance * pitchCos;
+    const verticalDistance = distance * pitchSin + extraHeight;
 
-    _forward.set(Math.sin(primary.rotY), 0, Math.cos(primary.rotY)).multiplyScalar(
-      TRAIL_BEHIND_WEIGHT_TUNED,
-    );
-    _goal.set(
-      focusBase.x - _forward.x * distance,
-      focusBase.y + height * 7, // matches the original 700:420-ish trail-height ratio (TUNED feel)
-      focusBase.z - _forward.z * distance,
+    _forward.set(Math.sin(primary.rotY), 0, Math.cos(primary.rotY));
+    _eyeGoal.set(
+      _focus.x - _forward.x * horizontalDistance,
+      _focus.y + verticalDistance,
+      _focus.z - _forward.z * horizontalDistance,
     );
 
     // Keep the browser camera inside the exported arena shell instead of letting the normal
@@ -185,24 +168,48 @@ export class BattleCamera {
     const centerX = (stageBounds.minX + stageBounds.maxX) * 0.5;
     const centerZ = (stageBounds.minZ + stageBounds.maxZ) * 0.5;
     const currentRadius = Math.hypot(focusBase.x - centerX, focusBase.z - centerZ);
-    const goalRadius = Math.hypot(_goal.x - centerX, _goal.z - centerZ);
+    const goalRadius = Math.hypot(_eyeGoal.x - centerX, _eyeGoal.z - centerZ);
     const shellGuardRadius =
       Math.min(stageBounds.maxX - stageBounds.minX, stageBounds.maxZ - stageBounds.minZ) * 0.25;
     if (currentRadius > shellGuardRadius && goalRadius > currentRadius + 80) {
       _inward.set(centerX - focusBase.x, 0, centerZ - focusBase.z);
       if (_inward.lengthSq() < 0.0001) _inward.copy(_forward).multiplyScalar(-1);
       _inward.normalize();
-      const pullDistance = distance * 1.57; // preserves original 700->1100 ratio
-      const pullHeight = height * 9.33; // preserves original 420->560 -> now scaled off height offset
-      _goal.set(
-        focusBase.x + _inward.x * pullDistance,
-        focusBase.y + pullHeight,
-        focusBase.z + _inward.z * pullDistance,
+      const pullDistance = horizontalDistance * 1.57; // TUNED wall-guard distance.
+      const pullHeight = verticalDistance + 120; // TUNED extra lift when pulled toward arena center.
+      _eyeGoal.set(
+        _focus.x + _inward.x * pullDistance,
+        _focus.y + pullHeight,
+        _focus.z + _inward.z * pullDistance,
       );
     }
 
-    camera.position.lerp(_goal, POSITION_SMOOTHING_TUNED);
+    if (!this.initialized) {
+      controlsTarget.copy(_focus);
+      camera.position.copy(_eyeGoal);
+      this.initialized = true;
+      return;
+    }
+
+    controlsTarget.copy(mode1InterestTarget(controlsTarget, _focus));
+    camera.position.copy(mode1BlendEye(camera.position, _eyeGoal));
   }
+}
+
+function mode1BlendEye(current: THREE.Vector3, target: THREE.Vector3): THREE.Vector3 {
+  return _goal
+    .copy(current)
+    .multiplyScalar(MODE1_EYE_PREV_WEIGHT_DERIVED)
+    .add(target)
+    .multiplyScalar(1 / MODE1_EYE_BLEND_DENOMINATOR_DERIVED);
+}
+
+function mode1InterestTarget(current: THREE.Vector3, target: THREE.Vector3): THREE.Vector3 {
+  return _goal.set(
+    target.x,
+    (current.y + target.y) * MODE1_INTEREST_Y_BLEND_DERIVED,
+    target.z,
+  );
 }
 
 /** TUNED helper: XZ bounding-box diagonal across all live actors (0 if <=1 actor). */

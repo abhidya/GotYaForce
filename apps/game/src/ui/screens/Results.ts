@@ -13,6 +13,7 @@
 
 import { ASSETS } from "../assets.js";
 import { el } from "../dom.js";
+import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export interface ResultStats {
   attack: number;
@@ -48,17 +49,28 @@ interface RowDef {
   neg?: boolean;
 }
 
+const RESULT_SCENES = {
+  win: { sceneId: "rpot20", modelPath: "/ui/scenes/rpot20/model_00.dae" },
+  lose: { sceneId: "rpot23", modelPath: "/ui/scenes/rpot23/model_00.dae" },
+} as const;
+
 function pct(n: number): string {
   return `${n.toFixed(2)}%`;
 }
 
 export function createResults(container: HTMLElement, opts: ResultsOptions = {}): ResultsHandle {
   const root = el("div", { class: "gf-screen gf-results" });
+  let mountedSceneId: string | null = null;
+  let stopScene: (() => void) | null = null;
+
   const backdrop = el("img", {
     class: "gf-results-backdrop",
     attrs: { src: ASSETS.resultsWin, alt: "", "aria-hidden": "true" },
   }) as HTMLImageElement;
   root.appendChild(backdrop);
+
+  const scene = createUiSceneHost("gf-ui-scene gf-results-real-scene");
+  root.appendChild(scene);
 
   const rows = el("div", { class: "gf-results-rows" });
   root.appendChild(rows);
@@ -80,6 +92,7 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
   }
 
   function render(result: "win" | "lose", s: ResultStats): void {
+    mountResultScene(result);
     backdrop.src = result === "win" ? ASSETS.resultsWin : ASSETS.resultsLose;
 
     const defs: RowDef[] = [
@@ -113,12 +126,27 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
     }
   }
 
+  function mountResultScene(result: "win" | "lose"): void {
+    const next = RESULT_SCENES[result];
+    if (mountedSceneId === next.sceneId) return;
+    stopScene?.();
+    mountedSceneId = next.sceneId;
+    scene.dataset["sourceModel"] = next.modelPath;
+    stopScene = mountUiSceneModels(scene, {
+      sceneId: next.sceneId,
+      fitSize: result === "win" ? 760 : 700,
+      camera: { fov: 31, position: [0, 90, 900], lookAt: [0, 0, -260] },
+      rotation: [-0.08, 0, 0],
+    });
+  }
+
   container.appendChild(root);
   window.addEventListener("keydown", onKey);
 
   return {
     render,
     destroy: () => {
+      stopScene?.();
       window.removeEventListener("keydown", onKey);
       root.remove();
     },

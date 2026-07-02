@@ -2,11 +2,11 @@
  * MainMenu - the mode hub, per reference `challenge-1-main-menu.png`.
  *
  * The real game renders this as a 3D desk diorama where each mode is a physical
- * object on the desk. `tl00_mdl.arc` is exported as DAE pieces, while the
- * captured native frames remain the exact visual keyframes for STORY and
- * CHALLENGE. Ghidra shows the menu-mode byte dispatch and 10-frame object tween;
- * this component mirrors that UX with a source-backed scene layer plus captured
- * frame fallbacks for the selected native states we have.
+ * object on the desk. `tl00_mdl.arc` and `optn00_mdl.arc` are exported as DAE
+ * pieces, while the captured native frames remain the exact visual keyframes for
+ * STORY and CHALLENGE. Ghidra shows the menu-mode byte dispatch and 10-frame
+ * object tween; this component mirrors that UX with source-backed scene layers
+ * plus captured frame fallbacks for the selected native states we have.
  */
 
 import { ASSETS } from "../assets.js";
@@ -80,7 +80,7 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
   });
   const frame = el("div", { class: "gf-mainmenu-frame" });
 
-  const scene = createUiSceneHost("gf-ui-scene gf-mainmenu-scene");
+  const scene = createUiSceneHost("gf-ui-scene gf-mainmenu-scene gf-mainmenu-hub-scene");
   frame.appendChild(scene);
   teardown.push(
     mountUiSceneModels(scene, {
@@ -88,6 +88,16 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
       fitSize: 540,
       camera: { fov: 30, position: [420, 260, 610], lookAt: [0, 30, 0] },
       rotation: [-0.22, -0.34, 0.03],
+    }),
+  );
+  const optionScene = createUiSceneHost("gf-ui-scene gf-mainmenu-scene gf-mainmenu-option-scene");
+  frame.appendChild(optionScene);
+  teardown.push(
+    mountUiSceneModels(optionScene, {
+      sceneId: "optn00",
+      fitSize: 440,
+      camera: { fov: 29, position: [330, 250, 520], lookAt: [0, 22, 0] },
+      rotation: [-0.16, -0.28, 0.02],
     }),
   );
 
@@ -150,6 +160,7 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
     const entry = ENTRIES.find((candidate) => candidate.mode === mode) ?? ENTRIES[0]!;
     const hasNativeCapture = Boolean(entry.nativeCapture || opts.deskImage);
     root.dataset["mode"] = mode;
+    root.dataset["menuScene"] = mode === "option" ? "option" : "hub";
     root.dataset["nativeCapture"] = String(hasNativeCapture);
     cursor.style.left = `${entry.x}%`;
     cursor.style.top = `${entry.y}%`;

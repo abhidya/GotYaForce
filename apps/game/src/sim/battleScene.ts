@@ -13,6 +13,12 @@
 
 import * as THREE from "three";
 import type { BorgRuntime, Projectile, ProjectileVisualKind } from "@gf/combat";
+import {
+  ARROW_MDL_BOUNDS,
+  ARROW_MDL_INDICES,
+  ARROW_MDL_POSITIONS,
+  ARROW_MDL_SOURCE,
+} from "./data/arrowMdlGeometry.generated.js";
 
 /** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
 export interface BorgAssets {
@@ -111,6 +117,8 @@ export class BattleScene {
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
   private impactTexture: THREE.Texture;
   private hitSparkTexture: THREE.Texture;
+  private lockMarker: THREE.Group;
+  private lockMarkerAge = 0;
 
   constructor(
     private readonly root: THREE.Group,
@@ -124,6 +132,8 @@ export class BattleScene {
     this.impactTexture = makeAtlasTexture(IMPACT_ATLAS_URL, 0, 0, 64, 32);
     this.hitSparkTexture = new THREE.TextureLoader().load(HIT_SPARK_URL);
     this.hitSparkTexture.colorSpace = THREE.SRGBColorSpace;
+    this.lockMarker = makeLockMarker();
+    this.root.add(this.lockMarker);
   }
 
   /** Map a sim state/action to one of the exported game animation groups. */
@@ -187,12 +197,18 @@ export class BattleScene {
         this.actors.delete(uid);
       }
     }
+    this.syncLockMarker(borgs);
     this.syncProjectiles(projectiles);
   }
 
   /** Advance all per-actor animation mixers. */
   update(dt: number): void {
     for (const actor of this.actors.values()) actor.mixer?.update(dt);
+    if (this.lockMarker.visible) {
+      this.lockMarkerAge += dt;
+      this.lockMarker.rotation.y += dt * 3.2;
+      this.lockMarker.rotation.z = Math.sin(this.lockMarkerAge * 5.4) * 0.16;
+    }
     this.updateImpacts(dt);
   }
 
@@ -205,6 +221,7 @@ export class BattleScene {
     this.projectileActors.clear();
     this.impactActors = [];
     this.pending.clear();
+    this.lockMarker.visible = false;
   }
 
   /** World position of an actor (for the camera to follow). */
@@ -234,6 +251,18 @@ export class BattleScene {
     };
     void this.attachModel(b.uid, actor, b.borgId, placeholder);
     return actor;
+  }
+
+  private syncLockMarker(borgs: readonly BorgRuntime[]): void {
+    const locked = borgs.find((b) => b.alive && b.ownerPlayer !== null && b.lockTarget);
+    const target = locked?.lockTarget ? borgs.find((b) => b.uid === locked.lockTarget && b.alive) : null;
+    if (!target) {
+      this.lockMarker.visible = false;
+      return;
+    }
+
+    this.lockMarker.visible = true;
+    this.lockMarker.position.set(target.pos.x, target.pos.y + 145, target.pos.z);
   }
 
   private makePlaceholder(team: number): THREE.Mesh {
@@ -452,6 +481,50 @@ function disposeMesh(obj: THREE.Object3D): void {
       for (const m of mats) m.dispose();
     }
   });
+}
+
+function makeLockMarker(): THREE.Group {
+  const group = new THREE.Group();
+  group.visible = false;
+  group.userData = {
+    sourceArchive: ARROW_MDL_SOURCE.archivePath,
+    sourceArchiveSha1: ARROW_MDL_SOURCE.archiveSha1,
+    sourceObj: ARROW_MDL_SOURCE.objPath,
+  };
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(ARROW_MDL_POSITIONS), 3));
+  geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(ARROW_MDL_INDICES), 1));
+  geometry.translate(-ARROW_MDL_BOUNDS.center[0], -ARROW_MDL_BOUNDS.center[1], -ARROW_MDL_BOUNDS.center[2]);
+  geometry.computeVertexNormals();
+
+  // arrow_mdl.arc has geometry but no decoded texture; colors are a tuned stand-in
+  // for the original runtime vertex colors until the GX material block is decoded.
+  const fill = new THREE.MeshBasicMaterial({
+    color: 0xff8a18,
+    transparent: true,
+    opacity: 0.74,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+  const mesh = new THREE.Mesh(geometry, fill);
+  mesh.renderOrder = 25;
+  mesh.scale.setScalar(44);
+  group.add(mesh);
+
+  const edgeGeometry = new THREE.EdgesGeometry(geometry, 24);
+  const edgeMaterial = new THREE.LineBasicMaterial({
+    color: 0x2c8cff,
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false,
+  });
+  const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+  edges.renderOrder = 26;
+  edges.scale.copy(mesh.scale);
+  group.add(edges);
+
+  return group;
 }
 
 function makeAtlasTexture(url: string, x: number, y: number, w: number, h: number): THREE.Texture {

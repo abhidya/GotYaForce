@@ -10,10 +10,13 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
+import { actorDataCombatStatsForBorgId, actorDataCombatStatsSummary } from "./actorDataStats.js";
 import { createBattle } from "./battle.js";
 import { stepAI } from "./ai.js";
+import { actionProfileForProfile, startingAmmoForProfile } from "./actionProfiles.js";
 import { projectileVisualKindForProfile, stepAttacks } from "./combat.js";
-import { JUMP, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
+import { DASH, JUMP, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
+import { stepMovement } from "./movement.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
 import { buildProfile, type BorgStats } from "./stats.js";
 import { typeCategoryForBorgId, typeDamageMultiplier } from "./typeDamage.js";
@@ -215,6 +218,122 @@ function assertTriangleCeilingCollision(borgs: BorgStats[]): void {
   console.log(`[selfcheck] STIH triangle ceiling capped p1 top at y=${maxTopY}`);
 }
 
+function assertPlayersAutoLockByDefault(borgs: BorgStats[]): void {
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
+      ],
+      bounds: { x: 100, z: 100 },
+    },
+    borgs,
+  );
+  battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
+  const activeUid = battle.state.activeUidByPlayer["p1"];
+  const active = battle.state.borgs.find((b) => b.uid === activeUid);
+  if (!active) throw new Error("[selfcheck] auto-lock test lost active p1 borg");
+  if (!active.lockTarget) {
+    throw new Error("[selfcheck] human-controlled borg did not auto-acquire a default lock target");
+  }
+  const target = battle.state.borgs.find((b) => b.uid === active.lockTarget);
+  if (!target || target.team === active.team) {
+    throw new Error("[selfcheck] human-controlled borg auto-locked an invalid target");
+  }
+  console.log(`[selfcheck] human-controlled borg auto-locked enemy ${active.lockTarget} by default`);
+}
+
+function assertActorDataStatsBound(borgs: BorgStats[]): void {
+  const expected = actorDataCombatStatsSummary.matchedMetadataRows;
+  for (const field of ["defense", "shot", "attack", "speed"] as const) {
+    if (actorDataCombatStatsSummary.exactMatches[field] !== expected) {
+      throw new Error(`[selfcheck] actor-data ${field} exact matches changed`);
+    }
+  }
+  if (actorDataCombatStatsSummary.mismatches.length > 0) {
+    throw new Error("[selfcheck] actor-data stat offsets have mismatches");
+  }
+
+  const gRed = borgById(borgs, "pl0615");
+  const actorStats = actorDataCombatStatsForBorgId(gRed.id);
+  if (!actorStats) throw new Error("[selfcheck] missing actor-data stats for pl0615");
+
+  const spoofedRosterStats: BorgStats = {
+    ...gRed,
+    defense: 0,
+    shot: 0,
+    attack: 0,
+    speed: 0,
+  };
+  const profile = buildProfile(spoofedRosterStats);
+  if (
+    profile.defense !== actorStats.defense ||
+    profile.shot !== actorStats.shot ||
+    profile.attack !== actorStats.attack ||
+    profile.speed !== actorStats.speed
+  ) {
+    throw new Error(
+      `[selfcheck] buildProfile did not bind pl####data.bin stats: profile=${JSON.stringify(profile)} actor=${JSON.stringify(actorStats)}`,
+    );
+  }
+  console.log(
+    `[selfcheck] actor-data stat bytes bound: ${expected} exact rows; pl0615 def/shot/atk/spd=${profile.defense}/${profile.shot}/${profile.attack}/${profile.speed}`,
+  );
+}
+
+function assertLockRelativeControls(borgs: BorgStats[]): void {
+  const profile = buildProfile(borgById(borgs, "pl0615"));
+  const bounds = { minX: -500, maxX: 500, minZ: -500, maxZ: 500 };
+  const ctx = {
+    lockTargetPos: { x: 0, y: JUMP.GROUND_Y, z: -100 },
+    bounds,
+    collision: null,
+  };
+  let uid = 0;
+  const makeLocked = (): BorgRuntime => {
+    const b = fakeRuntime(`locked_${uid++}`, 0, 0);
+    b.pos = { x: 0, y: JUMP.GROUND_Y, z: 0 };
+    b.rotY = 0;
+    b.state = "idle";
+    b.grounded = true;
+    return b;
+  };
+
+  const forward = makeLocked();
+  stepMovement(forward, profile, { ...emptyInput(), moveZ: 1 }, ctx);
+  if (!(forward.vel.z < -0.1 && Math.abs(forward.vel.x) < 0.001)) {
+    throw new Error(`[selfcheck] lock-relative forward should approach target: vel=${JSON.stringify(forward.vel)}`);
+  }
+
+  const back = makeLocked();
+  stepMovement(back, profile, { ...emptyInput(), moveZ: -1 }, ctx);
+  if (!(back.vel.z > 0.1 && Math.abs(back.vel.x) < 0.001)) {
+    throw new Error(`[selfcheck] lock-relative back should retreat straight away: vel=${JSON.stringify(back.vel)}`);
+  }
+
+  const lateral = makeLocked();
+  stepMovement(lateral, profile, { ...emptyInput(), moveX: 1 }, ctx);
+  if ((lateral.cooldowns["dashActive"] ?? 0) !== DASH.DURATION || Math.abs(lateral.vel.x) < DASH.SPEED * 0.9) {
+    throw new Error(`[selfcheck] lock-relative pure lateral should dodge dash: vel=${JSON.stringify(lateral.vel)}`);
+  }
+
+  const lateralOnCooldown = makeLocked();
+  lateralOnCooldown.cooldowns["dash"] = DASH.COOLDOWN;
+  stepMovement(lateralOnCooldown, profile, { ...emptyInput(), moveX: 1 }, ctx);
+  if ((lateralOnCooldown.cooldowns["dashActive"] ?? 0) > 0 || Math.hypot(lateralOnCooldown.vel.x, lateralOnCooldown.vel.z) > 0.001) {
+    throw new Error(`[selfcheck] lock-relative pure lateral should not become steady walk on dash cooldown: vel=${JSON.stringify(lateralOnCooldown.vel)}`);
+  }
+
+  const diagonal = makeLocked();
+  stepMovement(diagonal, profile, { ...emptyInput(), moveX: 1, moveZ: 1 }, ctx);
+  if ((diagonal.cooldowns["dashActive"] ?? 0) > 0 || !(diagonal.vel.x < -0.1 && diagonal.vel.z < -0.1)) {
+    throw new Error(`[selfcheck] lock-relative forward+lateral should circle-strafe, not dodge: vel=${JSON.stringify(diagonal.vel)}`);
+  }
+
+  console.log("[selfcheck] lock-relative controls: forward approach, back retreat, lateral dodge, diagonal circle-strafe");
+}
+
 function borgById(borgs: BorgStats[], id: string): BorgStats {
   const borg = borgs.find((entry) => entry.id === id);
   if (!borg) throw new Error(`[selfcheck] missing borg stats for ${id}`);
@@ -257,6 +376,40 @@ function assertProjectileVisualKinds(borgs: BorgStats[]): void {
     throw new Error(`[selfcheck] spawned Gatling Gunner projectile visualKind=${projectile.visualKind}`);
   }
   console.log(`[selfcheck] projectile visuals mapped gun/beam/flame assets; spawned ${projectile.visualKind}`);
+}
+
+function assertActionProfilesDrivePrimaryAttacks(borgs: BorgStats[]): void {
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  const swordKnight = buildProfile(borgById(borgs, "pl0200"));
+  const enemyProfile = buildProfile(borgById(borgs, "pl0008"));
+
+  const gRedRuntime = fakeRuntime("gred", 0, 0);
+  gRedRuntime.borgId = gRed.id;
+  gRedRuntime.ammo = startingAmmoForProfile(gRed);
+  const gRedEnemy = fakeRuntime("gred_enemy", 1, 220);
+  const gRedProfiles = new Map([
+    [gRedRuntime.uid, gRed],
+    [gRedEnemy.uid, enemyProfile],
+  ]);
+  const gRedResult = stepAttacks(gRedRuntime, gRed, true, false, [gRedRuntime, gRedEnemy], gRedProfiles);
+  if (actionProfileForProfile(gRed).primary !== "shot" || gRedResult.projectiles.length === 0 || gRedRuntime.anim !== "shoot") {
+    throw new Error("[selfcheck] action profile did not make mixed G RED fire as its primary B attack");
+  }
+
+  const swordRuntime = fakeRuntime("sword", 0, 0);
+  swordRuntime.borgId = swordKnight.id;
+  swordRuntime.ammo = startingAmmoForProfile(swordKnight);
+  const swordEnemy = fakeRuntime("sword_enemy", 1, 42);
+  const swordProfiles = new Map([
+    [swordRuntime.uid, swordKnight],
+    [swordEnemy.uid, enemyProfile],
+  ]);
+  const swordResult = stepAttacks(swordRuntime, swordKnight, true, false, [swordRuntime, swordEnemy], swordProfiles);
+  if (actionProfileForProfile(swordKnight).primary !== "melee" || swordResult.projectiles.length !== 0 || swordRuntime.anim !== "melee") {
+    throw new Error("[selfcheck] action profile did not keep Sword Knight melee as its primary B attack");
+  }
+
+  console.log("[selfcheck] action profiles route mixed/ranged borgs to shots and sword borgs to melee");
 }
 
 function assertSameTeamDamageDivisor(borgs: BorgStats[]): void {
@@ -325,7 +478,8 @@ function assertTypeDamageMatrixWired(borgs: BorgStats[]): void {
 function assertMeleeRefreshesInvincibility(borgs: BorgStats[]): void {
   const attacker = fakeRuntime("attacker", 0, 0);
   const enemy = fakeRuntime("enemy", 1, 20);
-  const profile = buildProfile(borgById(borgs, "pl0615"));
+  const profile = buildProfile(borgById(borgs, "pl0200"));
+  attacker.borgId = profile.id;
   const profiles = new Map([
     [attacker.uid, profile],
     [enemy.uid, profile],
@@ -383,7 +537,11 @@ export function main(): number {
   assertTriangleFloorGrounding(borgs);
   assertTriangleWallCollision(borgs);
   assertTriangleCeilingCollision(borgs);
+  assertPlayersAutoLockByDefault(borgs);
+  assertActorDataStatsBound(borgs);
+  assertLockRelativeControls(borgs);
   assertProjectileVisualKinds(borgs);
+  assertActionProfilesDrivePrimaryAttacks(borgs);
   assertSameTeamDamageDivisor(borgs);
   assertTypeDamageMatrixWired(borgs);
   assertMeleeRefreshesInvincibility(borgs);
@@ -409,7 +567,9 @@ export function main(): number {
   const inputs: Record<string, PlayerInput> = { p1: idle };
 
   let resolvedFrame = -1;
-  const MAX = 1200;
+  // Asset-backed action profiles add per-borg attack recovery/reload, so the old generic
+  // 1200-frame cap can stop just before the idle-player loss resolves.
+  const MAX = 2400;
   for (let f = 0; f < MAX; f++) {
     battle.step(1 / 60, inputs);
     assertSane(battle.state.borgs, f);
