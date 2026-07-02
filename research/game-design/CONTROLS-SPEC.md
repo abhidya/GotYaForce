@@ -85,6 +85,11 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
   `FUN_8015ae1c` dispatches `PTR_FUN_803448b0[actor+0x540]`, whose entry 2 is
   `FUN_8015b0b4`. A raw pointer at `0x80335c84` points to `FUN_801304b8`, but the
   dispatch reference for that table is not identified yet.
+- Static C also proves two cue arguments inside the `FUN_801304b8` B pressed-edge
+  candidate: borg id `0x0106` calls `zz_00f036c_(actor, 0xeb)` and borg id `0x0107`
+  calls `zz_00f036c_(actor, 0xaa)`. `zz_00f036c_` is an SFX request wrapper, but
+  those cue IDs are not browser gameplay rules until a live trace ties them to PAD,
+  action dispatch, and LR caller.
 - The same traces still contain no action-state/param-tier/audio correlation for B/X/Z.
   Fresh action traces from `dolphin/right before hit.sav` either filled on hot
   `audio-seq-continue` or timed out with zero input/action hits. Therefore exact B/X
@@ -223,6 +228,9 @@ Known mismatches:
 - Static table context: `FUN_800e622c` and `FUN_8015b0b4` are both entry 2 in their
   borg-specific `actor+0x540` dispatch tables. This proves where to break for live
   correlation; it still does not prove which visible move the browser should perform.
+- Static sound context: the `FUN_801304b8` B pressed-edge branch has exact
+  `zz_00f036c_` cue args `0xeb` and `0xaa` for two borg ids. Treat them as trace
+  targets only; browser per-action cue IDs stay `UNKNOWN`.
 
 ### Manual Borg Switch
 

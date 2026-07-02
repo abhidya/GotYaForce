@@ -19,8 +19,12 @@ const PROOF_IDS = {
   actorInput: [
     "normalized-pad-slot0-current-read",
     "normalized-pad-slot0-pressed-read",
+    "actor-update-spawn-entry",
+    "actor-update-no-input-54c78",
     "player-input-update-simple",
     "player-input-update-with-69960",
+    "actor-update-transition-entry",
+    "actor-common-update",
     "player-input-bridge",
     "input-command-mask-helper",
     "post-input-actor-command-update",
@@ -51,6 +55,7 @@ const PROOF_IDS = {
     "battle-frame-target-action-dispatch",
   ],
   audio: [
+    "audio-sfx-request-wrapper",
     "audio-sfx-playing",
     "audio-object-callback",
     "audio-seq-continue",

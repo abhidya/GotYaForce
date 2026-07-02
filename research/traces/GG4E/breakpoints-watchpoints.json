@@ -1073,6 +1073,40 @@
           "confidence": "confirmed decompiled caller"
         },
         {
+          "id": "actor-update-spawn-entry",
+          "type": "execute",
+          "address": "0x800547dc",
+          "dol_offset": "0x000517dc",
+          "section": "text1",
+          "symbol": "FUN_800547dc / actor spawn-entry update path calling FUN_80055568",
+          "event": "One of five known callers into common actor update FUN_80055568; does not call input bridge directly.",
+          "capture": [
+            "r3 actor",
+            "actor+0x19/+0x1a phase",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "actor-update-no-input-54c78",
+          "type": "execute",
+          "address": "0x80054c78",
+          "dol_offset": "0x00051c78",
+          "section": "text1",
+          "symbol": "FUN_80054c78 / actor update path calling FUN_80055568 without input bridge",
+          "event": "One of five known callers into common actor update FUN_80055568; useful liveness probe when player-input bridge misses.",
+          "capture": [
+            "r3 actor",
+            "actor+0x19 phase",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
           "id": "player-input-update-with-69960",
           "type": "execute",
           "address": "0x80054cf0",
@@ -1088,6 +1122,41 @@
             "r0-r31"
           ],
           "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "actor-update-transition-entry",
+          "type": "execute",
+          "address": "0x80054d54",
+          "dol_offset": "0x00051d54",
+          "section": "text1",
+          "symbol": "FUN_80054d54 / actor transition update path calling FUN_80055568",
+          "event": "One of five known callers into common actor update FUN_80055568; does not call input bridge directly.",
+          "capture": [
+            "r3 actor",
+            "actor+0x19/+0x1a phase",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "actor-common-update",
+          "type": "execute",
+          "address": "0x80055568",
+          "dol_offset": "0x00052568",
+          "section": "text1",
+          "symbol": "FUN_80055568 / common actor update, calls zz_0059068_",
+          "event": "Common actor update reached by all five static caller paths; calls zz_0059068_ where FUN_8005a298 Z candidate runs.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 command current",
+            "actor+0x5bc command pressed",
+            "actor+0x578 update phase",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled update root"
         },
         {
           "id": "input-command-mask-helper",
@@ -1393,6 +1462,26 @@
       "name": "audio-proof",
       "event_window": "Enable with an action-proof run. Exact cue IDs require audio hits in the same labeled B/X/Z trace plus argument/handle inspection; counts alone are not enough.",
       "breakpoints": [
+        {
+          "id": "audio-sfx-request-wrapper",
+          "type": "execute",
+          "address": "0x800f036c",
+          "dol_offset": "0x000ed36c",
+          "section": "text1",
+          "symbol": "zz_00f036c_ / actor positional SFX request wrapper",
+          "event": "Routes actor+cue requests to positional SFX playback; capture r3 actor and r4 cue id, then inspect lr caller.",
+          "capture": [
+            "r3 actor or null",
+            "r4 cue id",
+            "actor+0x3e8 borg id",
+            "actor+0x540 action dispatch index",
+            "actor+0x5b4 command current",
+            "actor+0x5bc command pressed",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled audio wrapper"
+        },
         {
           "id": "audio-sfx-playing",
           "type": "execute",
