@@ -122,8 +122,8 @@ export interface LocalControls {
  * plus an optional gamepad. Key mapping (per the brief):
  *   WASD / arrows         = move
  *   Space / J             = jump (A)
- *   K / X                 = attack (B)
- *   L / Y                 = special (Y)
+ *   K / B                 = attack (B)
+ *   L / X                 = special (X)
  *   Shift                 = dash (keyboard affordance; stick-snap dodge is handled by movement)
  *   U                     = explicit lockOn request (players auto-lock in combat core)
  *   R / Tab               = switchLock (GC R "lock-on switch": cycle enemy targets; edge-triggered in battle core)
@@ -141,8 +141,8 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
   if (keys.has("KeyS") || keys.has("ArrowDown")) moveZ -= 1;
 
   let jump = keys.has("Space") || keys.has("KeyJ");
-  let attack = keys.has("KeyK") || keys.has("KeyX");
-  let special = keys.has("KeyL") || keys.has("KeyY");
+  let attack = keys.has("KeyK") || keys.has("KeyB");
+  let special = keys.has("KeyL") || keys.has("KeyX");
   let dash = keys.has("ShiftLeft") || keys.has("ShiftRight");
   let lockOn = keys.has("KeyU");
   let switchLock = keys.has("KeyR") || keys.has("Tab");
@@ -156,8 +156,8 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
     if (Math.abs(ay) > 0.2) moveZ = -ay; // stick up = forward
     const b = (i: number) => pad.buttons[i]?.pressed ?? false;
     jump = jump || b(0); // A
-    attack = attack || b(1) || b(2); // B / X
-    special = special || b(3); // Y
+    attack = attack || b(1); // B
+    special = special || b(2); // X
     // Explicit lock is mostly diagnostic because player borgs auto-lock by default.
     lockOn = lockOn || b(6);
     switchLock = switchLock || b(5) || b(7);

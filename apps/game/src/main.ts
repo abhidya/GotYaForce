@@ -25,6 +25,8 @@ import borgs from "../../../packages/assets/data/borgs.json";
 
 import {
   setBorgStats,
+  actionProfileForProfile,
+  buildProfile,
   createBattle,
   DEFAULT_BOUNDS,
   emptyInput,
@@ -99,6 +101,9 @@ const allBorgs = (borgs as { borgs: BorgEntry[] }).borgs.filter((b) => b.id && b
 
 // Register the per-borg stat table with the sim once.
 setBorgStats(allBorgs as unknown as BorgStats[]);
+const BORG_PROFILES = new Map(
+  (allBorgs as unknown as BorgStats[]).map((borg) => [borg.id, buildProfile(borg)] as const),
+);
 
 // The force-builder catalog (id, name, energy), grouped by tribe then cost.
 const FORCE_CATALOG: ForceBorg[] = [...allBorgs]
@@ -492,7 +497,7 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     // g4s0 (81f) was previously wrongly used for "special" here, meaning G Red's special
     // attack was silently playing its own knockdown pose. DERIVED that g4s0 != special;
     // g4s1 as "the" special move is a reasonable TUNED pick among g4s1-4 (not individually
-    // decomp-confirmed which of s1-s4 maps to the Y-button special specifically).
+    // decomp-confirmed which of s1-s4 maps to the X-button special specifically).
     special: ["special_s1"],
     down: ["down_s0"],
     death: ["death"],
@@ -502,7 +507,7 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
   // (their old special_s0 override pointed at the knockdown pose, now down_s0 — see
   // research/format-specs/borg-animation-banks.md + behavior-notes.md s4r). Each has
   // a distinct special_s1+ bank confirmed present in its anim_index.json, used here
-  // instead. TUNED which of s1-s4 is "the" Y-button special where multiple exist.
+  // instead. TUNED which of s1-s4 is "the" X-button special where multiple exist.
   pl0008: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
@@ -1409,7 +1414,10 @@ function updateHud(): void {
   if (!session) return;
   const st = session.battle.state;
   const focus = localFocusBorg();
-  const ammoMax = 6;
+  const profile = focus ? BORG_PROFILES.get(focus.borgId) ?? null : null;
+  const actionProfile = profile ? actionProfileForProfile(profile) : null;
+  const ammoMax = actionProfile?.shot?.ammoMax ?? 0;
+  const specialCooldownMax = actionProfile?.special.cooldown ?? 90;
   session.hud.update({
     allyEnergy: st.energy[0] ?? 0,
     allyMax: session.allyMax,
@@ -1418,8 +1426,12 @@ function updateHud(): void {
     hp: focus?.hp ?? 0,
     maxHp: focus?.maxHp ?? 1,
     ammo: focus?.ammo ?? 0,
-    reload01: focus ? clamp01((focus.ammo ?? 0) / ammoMax) : 0,
-    cooldown01: focus ? (focus.cooldowns?.["special"] ? clamp01(1 - focus.cooldowns["special"] / 90) : 1) : 1,
+    reload01: focus && ammoMax > 0 ? clamp01((focus.ammo ?? 0) / ammoMax) : 0,
+    cooldown01: focus
+      ? focus.cooldowns?.["special"]
+        ? clamp01(1 - focus.cooldowns["special"] / specialCooldownMax)
+        : 1
+      : 1,
     borgId: focus?.borgId ?? DEFAULT_LEAD,
     lockOn: Boolean(focus?.lockTarget),
     timeRemainingFrames: st.timeRemainingFrames,

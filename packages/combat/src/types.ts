@@ -1,6 +1,6 @@
 // Public types for the deterministic battle API. Mirrors the contract in the task brief.
 // Control scheme (CONFIRMED from the game's controls screen + lock-relative movement trace):
-//   A=jump, B=attack(melee/contextual), Y=special, R=switch lock-on target,
+//   A=jump, B=attack(melee/contextual), X=special, R=switch lock-on target,
 //   Z=ally lock-on (target selection only; ally charge/power-up behavior not decoded yet),
 //   stick=move in the target-relative frame while locked. Pure left/right is a dodge step
 //   (surfaced as `dash`); forward+left/right is circle-strafe.
@@ -18,7 +18,7 @@ export interface PlayerInput {
   jump: boolean;
   /** B — melee / contextual attack. */
   attack: boolean;
-  /** Y — special attack. */
+  /** X — special attack. */
   special: boolean;
   /** Acquire / hold lock-on for non-player callers; human-controlled borgs auto-lock by default. */
   lockOn: boolean;

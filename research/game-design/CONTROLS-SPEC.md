@@ -23,14 +23,13 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
   `c181852eb9a5dfedd95fc8d550cbab3115569ac2`
   (`apps/game/public/ui/manifest.json:13237-13253`,
   `apps/game/public/ui/provenance.json:20158-20166`). Visual inspection of that texture
-  shows Control Stick move, stick-snap step/dodge, A jump, B attack, Y special attack,
+  shows Control Stick move, stick-snap step/dodge, A jump, B attack, X special attack,
   R "lock-on switch", and Z "ally lock-on".
 - Existing extracted-note table: `apps/game/UI-FIDELITY-SPEC.md:15-26`. It is useful
-  evidence, but it conflicts with the texture for R/Z: the note says R lock-on, Z switch,
-  ally lock-on unknown; the texture itself shows R switch-lock and Z ally-lock.
+  evidence and now matches the texture for B attack, X special, R switch-lock, and Z ally-lock.
 - HUD/UI observations: battle HUD attack/special prompt notes are at
-  `apps/game/UI-FIDELITY-SPEC.md:79-84`; the current HUD labels Y special and B attack at
-  `apps/game/src/ui/hud/BattleHud.ts:167-187`.
+  `apps/game/UI-FIDELITY-SPEC.md:79-84`; the current HUD labels X special and B attack at
+  `apps/game/src/ui/hud/BattleHud.ts`.
 - Current web input adapter: `inputFromKeys()` maps keyboard/gamepad to `PlayerInput`
   in `apps/game/src/sim/adapter.ts:121-170`; `main.ts` captures battle Tab and polls
   pause at `apps/game/src/main.ts:1005-1012` and `apps/game/src/main.ts:1345-1351`.
@@ -73,8 +72,8 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
 | Control Stick | Move | WASD/arrows; gamepad left stick axes 0/1 | `moveX/moveZ` feed `stepMovement()`; while locked, forward/back moves toward/away from target and diagonals circle-strafe | `CONFIRMED-ASSET` input, `CONFIRMED-CODE` web, movement semantics partly `TUNED` | Texture proves "move". Lock-relative movement is current code (`movement.ts:8-11`, `217-244`) and trace notes support default lock-relative play (`research/decomp/behavior-notes.md:1491-1508`). Still trace exact original stick vector handling. |
 | Fast stick snap | Step/dodge in pushed direction | ShiftLeft/ShiftRight; gamepad buttons 5 or 7; pure left/right stick while locked auto-dodges | Sets `dashActive`, `dash`, and i-frames; dashes in resolved stick direction | `CONFIRMED-ASSET` input, `TUNED` mechanics | Texture text says to snap/quickly move stick for step/dodge. Current code is `movement.ts:86-104` and pure-lateral auto-dodge is `movement.ts:237-244`. Constants are tuned (`constants.ts:156-174`). Decomp audit found no dash/step/dodge state (`behavior-notes.md:982-991`). Next: trace left/right dodge-dash position and `object+0x6fe`. |
 | A | Jump | Space or J; gamepad button 0 | Rising edge sets vertical velocity; air-jumps use `airJumps`; flyer holding jump spends boost fuel and enters fly | `CONFIRMED-ASSET` input, `TUNED` velocity/boost values | Texture proves A jump. Current mapping is `adapter.ts:139` and `:153`; mechanics are `movement.ts:126-198`; constants are `constants.ts:134-153`. Trace notes say tap A = jump and hold A = fly/boost (`behavior-notes.md:1500`). Exact original vertical field/velocity remains unknown (`behavior-notes.md:995-1000`, `1677-1684`). |
-| B | Attack | K or X; gamepad button 1 or 2 | B resolves per-borg primary action: melee if melee-primary/available, shot if shot-primary/available; shot consumes ammo/reload and may home to lock target | `CONFIRMED-ASSET` input, action semantics `TUNED` | Texture proves B attack. Current mapping is `adapter.ts:140` and `:154`; attack code is `combat.ts:368-388`, melee start `:439-446`, projectile spawn `:448-476`. Per-borg action profiles are asset-backed but tuned, not decoded hit-bin semantics (`packages/combat/src/data/actionProfiles.json:9`, `packages/combat/src/actionProfiles.ts:103-129`). Next: one close B and one ranged B Dolphin trace. |
-| Y | Special attack | L or Y; gamepad button 3 | Starts special if cooldown is clear; current generic implementation is radial/AoE burst with cooldown and action lock | `CONFIRMED-ASSET` input, `TUNED` mechanic | Texture proves Y special. Current mapping is `adapter.ts:141` and `:155`; special path is `combat.ts:333-366`; constants are `constants.ts:245-253`. Current HUD labels special as X (`BattleHud.ts:167-187`) while the control texture labels Y, so HUD prompt vs controls is `UNKNOWN` until an in-battle control prompt capture is checked. |
+| B | Attack | K or B; gamepad button 1 | B resolves per-borg primary action: melee if melee-primary/available, shot if shot-primary/available; shot consumes ammo/reload and may home to lock target | `CONFIRMED-ASSET` input, action semantics `TUNED` | Texture proves B attack. Current mapping is `adapter.ts`; attack code is `combat.ts`, melee start, projectile spawn. Per-borg action profiles are asset-backed but tuned, not decoded hit-bin semantics (`packages/combat/src/data/actionProfiles.json`, `packages/combat/src/actionProfiles.ts`). Next: one close B and one ranged B Dolphin trace. |
+| X | Special attack | L or X; gamepad button 2 | Starts special if cooldown is clear; current generic implementation is radial/AoE burst with cooldown and action lock | `CONFIRMED-ASSET` input, `TUNED` mechanic | Texture and in-battle HUD capture both show X special. Current mapping is `adapter.ts`; special path is `combat.ts`; constants are `constants.ts`. |
 | R | Lock-on switch (texture label: `ロックオン きりかえ`) | R or Tab; gamepad buttons 5 or 7 stand in for GC R | Human borgs auto-acquire locks; each R PRESS (edge-triggered) cycles to the next enemy by distance — never dead borgs, never self, never allies. The locked enemy is marked with a continuously spinning red ring reticle | Original input `CONFIRMED-ASSET`; current binding + enemy-only spinning reticle `CONFIRMED-CODE`; cycle algorithm `TUNED` | Texture shows R is switch-lock, not generic lock-on. Current code keeps Start/button 9 for pause and binds switch-lock to R-like buttons (`adapter.ts:147-148`, `:163`); the press latch lives in `battle.ts:242-262` and cycling in `combat.ts:142-153`. The reticle renders only over the local human's `lockTarget` and follows borg switches/deaths (`battleScene.ts:283-318`, `:542-`). Decomp search concluded no manual scan-select enemy-lock system exists (`behavior-notes.md:781-856`), so browser lock range/cone are tuned (`constants.ts:322-335`). Next: trace R in original battle to refine cycling order and camera behavior. |
 | Z | Ally lock-on (texture label: `みかた ロックオン`) | Z; gamepad left shoulder (button 4) stand-in | Each Z PRESS (edge-triggered) acquires the nearest same-team ally, or cycles allies if one is already locked; records a separate `allyLockTarget`, marked with a GREEN overhead arrow (different shape + color from the red enemy reticle); does not redirect attacks or trigger ally charge/power-up yet | `CONFIRMED-ASSET` input; current binding + distinct ally marker `CONFIRMED-CODE`; target selection `TUNED`; charge behavior `UNKNOWN` | Texture proves Z ally-lock exists as a command label. Current code carries this separately from enemy lock (`adapter.ts:149`, `:165`, `battle.ts:248-267`, `combat.ts:155-183`) so future charge/camera work has state to attach to; the ally marker is the extracted `arrow_mdl` geometry tinted green (`battleScene.ts:649-`). Next: trace Z with ally visible to identify original target choice, camera behavior, and charge/power-up side effects. |
 | Start | Pause / advance / skip, depending screen | Battle pause: Escape, Enter, gamepad button 9; Load Box skip currently S | Battle pause opens `PauseMenu`; menus use screen-specific handlers | Original battle binding `UNKNOWN`; current `CONFIRMED-CODE` | UI notes prove Start advances boot/title and Load Box has START=SKIP (`UI-FIDELITY-SPEC.md:59`, `:67-68`). Current pause poll is `main.ts:1345-1351`; Load Box keyboard skip is `LoadBoxData.ts:52-59`. Next: capture original pause/control screen for battle Start semantics. |
@@ -88,8 +87,8 @@ These are current implementation facts, not claims about the original:
 |---|---|---|---|
 | Move | WASD or arrows | axes 0/1 | `apps/game/src/sim/adapter.ts:130-138`, `:147-151` |
 | Jump | Space or J | button 0 | `adapter.ts:139`, `:153` |
-| Attack | K or X | buttons 1 or 2 | `adapter.ts:140`, `:154` |
-| Special | L or Y | button 3 | `adapter.ts:141`, `:155` |
+| Attack | K or B | button 1 | `adapter.ts` |
+| Special | L or X | button 2 | `adapter.ts` |
 | Dash | Shift | none; pure lateral stick while locked auto-dodges | `adapter.ts:142`; `movement.ts:237-244` |
 | Lock request | U | button 6 | `adapter.ts:147`, `:162` |
 | Switch-lock (cycle enemy) | R or Tab | buttons 5 or 7 | `adapter.ts:148`, `:163`; edge-trigger latch `battle.ts:242-262`; Tab focus suppression in battle at `main.ts` |
@@ -99,14 +98,10 @@ These are current implementation facts, not claims about the original:
 
 Known mismatches:
 
-- Existing note says `Space / A` for jump and `J / X` for attack
-  (`UI-FIDELITY-SPEC.md:21-22`), but current code maps J to jump and K/X to attack
-  (`adapter.ts:139-140`).
-- Existing note says R lock-on and Z switch-lock (`UI-FIDELITY-SPEC.md:24-26`), but
-  the actual texture shows R switch-lock and Z ally-lock.
 - Current switch-lock is still a web stand-in for GC R; exact GameCube trigger semantics
   need a live trace before calling the binding final.
-- Current HUD labels special as Y (`BattleHud.ts:186`), matching the control texture.
+- Current HUD labels special as X (`BattleHud.ts`), matching the control texture and
+  the in-battle reference capture.
 
 ## Menu Action Checklist
 
@@ -177,8 +172,8 @@ Known mismatches:
 
 ### Attack/Special
 
-- Control texture proves B attack and Y special. Current web code maps B-like attack to
-  K/X and special to L/Y (`adapter.ts:139-155`).
+- Control texture proves B attack and X special. Current web code maps B-like attack to
+  K/B and special to L/X (`adapter.ts`).
 - Current B primary action is per-borg and asset-backed but still `TUNED`, not decoded from
   hit-bin move semantics (`packages/combat/src/data/actionProfiles.json:9`,
   `packages/combat/src/actionProfiles.ts:103-129`).
@@ -191,7 +186,7 @@ Known mismatches:
   (`chunk_0007.c:4159-4178`, `:5529-5538`; summary in
   `research/decomp/behavior-notes.md:1106-1223`). It also proves `FUN_8005d494` re-arms
   invincibility at `object+0x720` each call (`chunk_0007.c:4676-4688`), but the exact
-  B/Y action mapping to state indices still requires live input correlation.
+  B/X action mapping to state indices still requires live input correlation.
 
 ### Manual Borg Switch
 
@@ -251,7 +246,7 @@ Known mismatches:
    `research/traces/GG4E/breakpoints-watchpoints.json:427-477`.
 3. Dash/step trace: full-stick left/right under lock. Capture position deltas and state index;
    treat left/right as dash events per `research/traces/GG4E/golden-trace-runbook.md:41-57`.
-4. B/Y trace: one close-range B, one ranged B, one Y. Correlate PAD bits to `object+0x6fe`,
+4. B/X trace: one close-range B, one ranged B, one X. Correlate PAD bits to `object+0x6fe`,
    `FUN_8005d494`, projectile spawn, cooldown/ammo fields, and animation request helper calls.
 5. Manual borg switch trace: press candidate buttons and separately let a borg die while
    watching `0x802807ac` / `0x80281c38` plus active borg slot/player state. Until then,

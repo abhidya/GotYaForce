@@ -19,8 +19,8 @@ Original GameCube mapping → our keyboard/gamepad binding (keep 1-to-1 semantic
 | 移動 Move | Control stick | WASD / left stick |
 | ステップ・かいひ Step/dodge | fast stick snap | Shift / pure lateral stick under lock |
 | ジャンプ Jump | **A** | Space or J / A |
-| こうげき Attack | **B** | K or X / B or X |
-| 特殊攻撃 Special attack | **Y** | L or Y / Y |
+| こうげき Attack | **B** | K or B / B |
+| 特殊攻撃 Special attack | **X** | L or X / X |
 | ロックオンきりかえ Switch lock-on | **R** | Tab / shoulder-trigger stand-in |
 | みかた ロックオン Ally lock-on | **Z** | — |
 
@@ -79,7 +79,7 @@ Player face icon (left) **Vs.** enemy emblem (right, Death Force = white disc + 
 This is the exact thing to rebuild. Observed layout:
 - **Top-left — the GF-energy meters (the two bars):** a **green bar labelled "<energy> ALLY"** (e.g. `300 ALLY`) stacked directly above a **red bar labelled "ENEMY <energy>"** (e.g. `ENEMY 540`). Both have **zigzag/torn ends**, a small numeric energy tab on the bar, and DEPLETE as each side's borgs are defeated (value = remaining sum of that force's borg energy). A yellow **"!"** alert icon sits just right of the bars in some states. → The web app's hardcoded `width:72%` divs must be replaced by these two labelled bars driven by `sum(borg.energy for alive borgs)` per side from `borgs.json`.
 - **Bottom-left:** a **green circular gauge with a number** (e.g. `200`) = the active borg's HP/boost gauge.
-- **Bottom-right:** weapon/attack prompts — a **B** button on a red arc with an **ammo count** (e.g. `5`) and a cyan reload/charge bar, and a **Y** button with a circular **cooldown** ring (special). Maps to attack/special with ammo+cooldown state.
+- **Bottom-right:** weapon/attack prompts — a **B** button on a red arc with an **ammo count** (e.g. `5`) and a cyan reload/charge bar, and an **X** button with a circular **cooldown** ring (special). Maps to attack/special with ammo+cooldown state.
 - **Lock-on reticle** appears over the locked target (R = switch lock-on target, Z = ally lock-on per extracted controls texture).
 - Camera = third-person behind the active borg; arena is the tiny-scale human-world environment (desk/ground, leaves, soda can, game cartridge as scenery).
 

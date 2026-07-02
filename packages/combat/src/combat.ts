@@ -1,4 +1,4 @@
-// Combat: lock-on, melee (B), ranged shot (B for ranged borgs), special (Y), projectiles
+// Combat: lock-on, melee (B), ranged shot (B for ranged borgs), special (X), projectiles
 // with homing, damage = f(attack/shot, defense), hitstun -> "hit", knockdown -> "down" ->
 // wake with invincTimer=60 (the decomp countdown, ported exactly), cooldowns + ammo/reload.
 //
@@ -418,7 +418,7 @@ export function stepAttacks(
     }
   }
 
-  // --- Special (Y) -------------------------------------------------------------------
+  // --- Special (X) -------------------------------------------------------------------
   const canStartAction = b.state !== "attack" && b.state !== "special";
   if (canStartAction && pressedSpecial && (b.cooldowns["special"] ?? 0) <= 0) {
     const specialDef = actionProfile.special;

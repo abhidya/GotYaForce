@@ -276,7 +276,7 @@ export const CHARGE = {
 } as const;
 
 export const SPECIAL = {
-  /** Special (Y) damage multiplier over a melee/shot hit. TUNED. */
+  /** Special (X) damage multiplier over a melee/shot hit. TUNED. */
   DMG_MULT: 2.0,
   /** Special cooldown (frames). */
   COOLDOWN: 90,
