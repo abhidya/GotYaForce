@@ -11,31 +11,56 @@ export const CAMERA_MODE1_SOURCE = {
     { address: "0x8000bda4", name: "zz_000bda4_" },
     { address: "0x8000c660", name: "FUN_8000c660" },
     { address: "0x8000c918", name: "FUN_8000c918" },
+    { address: "0x8000cb8c", name: "FUN_8000cb8c" },
+    { address: "0x8000cdc0", name: "FUN_8000cdc0" },
+    { address: "0x8000cf28", name: "FUN_8000cf28" },
+    { address: "0x8000fc2c", name: "FUN_8000fc2c" },
     { address: "0x8000c988", name: "FUN_8000c988" },
   ],
-  description: "ROM-confirmed float constants for the mode-1 battle-camera follow blend.",
+  description:
+    "ROM-confirmed constants for the mode-1 battle-camera goal-eye and the mode-2 approach camera.",
 } as const;
 
 export const CAMERA_MODE1_ROM_CONSTANTS = {
-  FLOAT_80436ac4: { address: "0x80436ac4", value: 0.5, role: "half blend used by camera target-height updates" },
-  FLOAT_80436acc: { address: "0x80436acc", value: 4, role: "mode-1 previous eye weight" },
-  FLOAT_80436ad8: { address: "0x80436ad8", value: 0.0010000000474974513, role: "mode-1 vector epsilon" },
-  FLOAT_80436ae0: { address: "0x80436ae0", value: 80, role: "mode-1 minimum camera distance" },
-  FLOAT_80436ae4: { address: "0x80436ae4", value: 0.8999999761581421, role: "mode-1 distance decay multiplier" },
-  FLOAT_80436ae8: { address: "0x80436ae8", value: 5, role: "mode-1 eye blend denominator" },
+  FLOAT_80436ac4: { address: "0x80436ac4", value: 0.5, role: "half blend used by camera interest-height updates" },
+  FLOAT_80436acc: { address: "0x80436acc", value: 4, role: "mode-1 previous eye XZ weight; also mode-2 eye-Y rise per frame (FUN_8000c988)" },
+  FLOAT_80436ad8: { address: "0x80436ad8", value: 0.0010000000474974513, role: "degenerate trail-direction epsilon (FUN_800452e4 callers)" },
+  FLOAT_80436adc: { address: "0x80436adc", value: 10, role: "mode-1 eye-Y blend denominator (FUN_8000cdc0); also mode-2 height-cap multiplier" },
+  FLOAT_80436ae0: { address: "0x80436ae0", value: 80, role: "mode-2 approach minimum camera distance (FUN_8000c988)" },
+  FLOAT_80436ae4: { address: "0x80436ae4", value: 0.8999999761581421, role: "mode-2 approach distance decay multiplier (FUN_8000c988)" },
+  FLOAT_80436ae8: { address: "0x80436ae8", value: 5, role: "mode-1 eye XZ blend denominator" },
+  FLOAT_80436af0: { address: "0x80436af0", value: 9, role: "mode-1 previous eye-Y weight (FUN_8000cdc0)" },
 } as const;
 
-/** FUN_8000c988: eye = (prevEye * FLOAT_80436acc + goalEye) / FLOAT_80436ae8. */
+/** FLOAT_80436acc: mode-1 XZ blend, eye = (prevEye * 4 + desired) / 5 (FUN_8000cdc0/FUN_8000c988). */
 export const CAMERA_MODE1_PREVIOUS_EYE_WEIGHT = 4;
 
-/** FUN_8000c988 denominator for the previous-eye blend. */
+/** FLOAT_80436ae8: denominator for the mode-1 previous-eye XZ blend. */
 export const CAMERA_MODE1_EYE_BLEND_DENOMINATOR = 5;
 
-/** FLOAT_80436ac4, used by mode-1 target-height blend paths. */
+/** FLOAT_80436af0: mode-1 eye-Y blend, eyeY = (prevY * 9 + desiredY) / 10 (FUN_8000cdc0). */
+export const CAMERA_MODE1_PREVIOUS_EYE_Y_WEIGHT = 9;
+
+/** FLOAT_80436adc: denominator for the mode-1 previous-eye-Y blend. */
+export const CAMERA_MODE1_EYE_Y_BLEND_DENOMINATOR = 10;
+
+/** FLOAT_80436ac4, used by mode-1 interest-height blend paths (FUN_8000fc2c). */
 export const CAMERA_MODE1_HALF_BLEND = 0.5;
 
-/** FLOAT_80436ae0, minimum mode-1 camera distance before decay logic. */
+/** FLOAT_80436ad8: if the trail direction collapses below this epsilon, FUN_800452e4 rebuilds
+ * it from a BAM16 heading as (sin, 0, cos). Used by FUN_8000cdc0/FUN_8000c988/FUN_800101c8. */
+export const CAMERA_MODE1_TRAIL_EPSILON = 0.0010000000474974513;
+
+/** FLOAT_80436ae0, minimum camera distance floor of the mode-2 approach (FUN_8000c988). */
 export const CAMERA_MODE1_MIN_DISTANCE = 80;
 
-/** FLOAT_80436ae4, mode-1 camera distance decay multiplier. */
+/** FLOAT_80436ae4, mode-2 approach per-frame distance decay multiplier (FUN_8000c988). */
 export const CAMERA_MODE1_DISTANCE_DECAY = 0.8999999761581421;
+
+/** FUN_8000c988 instruction immediate: per-frame yaw step (BAM16) applied to the trail
+ * direction via zz_00453fc_('y', dir, dir, 0x200). */
+export const CAMERA_MODE2_YAW_STEP_BAM = 512;
+
+/** FLOAT_80436acc reused as an addend in FUN_8000c988: the tracked eye-Y rises this many
+ * world units per frame until it reaches its cap. */
+export const CAMERA_MODE2_EYE_RISE_PER_FRAME = 4;

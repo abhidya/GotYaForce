@@ -13,6 +13,7 @@
 
 import { ASSETS } from "../assets.js";
 import { el } from "../dom.js";
+import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export interface ResultStats {
@@ -50,8 +51,16 @@ interface RowDef {
 }
 
 const RESULT_SCENES = {
-  win: { sceneId: "rpot20", modelPath: "/ui/scenes/rpot20/model_00.dae" },
-  lose: { sceneId: "rpot23", modelPath: "/ui/scenes/rpot23/model_00.dae" },
+  win: {
+    sceneId: "rpot20",
+    modelPath: "/ui/scenes/rpot20/model_00.dae",
+    layout: UI_SCENE_LAYOUTS.rpot20.semantics.results,
+  },
+  lose: {
+    sceneId: "rpot23",
+    modelPath: "/ui/scenes/rpot23/model_00.dae",
+    layout: UI_SCENE_LAYOUTS.rpot23.semantics.results,
+  },
 } as const;
 
 function pct(n: number): string {
@@ -132,12 +141,31 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
     stopScene?.();
     mountedSceneId = next.sceneId;
     scene.dataset["sourceModel"] = next.modelPath;
+    applyResultLayoutVars(next.layout);
     stopScene = mountUiSceneModels(scene, {
       sceneId: next.sceneId,
       fitSize: result === "win" ? 760 : 700,
       camera: { fov: 31, position: [0, 90, 900], lookAt: [0, 0, -260] },
       rotation: [-0.08, 0, 0],
     });
+  }
+
+  /**
+   * Scene-derived positioning for the score rows, following the SelectForce
+   * CSS-var pattern. The rpot20/rpot23 anchors are normalized against the
+   * scenes' 640x480 screen quad; only the rows' horizontal extent is trusted
+   * (the export is a rest pose - see the anchor caveat), vertical placement
+   * stays hand-tuned in CSS. CSS fallbacks cover a missing anchor.
+   */
+  function applyResultLayoutVars(layout: (typeof RESULT_SCENES)[keyof typeof RESULT_SCENES]["layout"]): void {
+    const rows = layout?.rows;
+    if (!rows) {
+      root.style.removeProperty("--gf-results-rows-left");
+      root.style.removeProperty("--gf-results-rows-width");
+      return;
+    }
+    root.style.setProperty("--gf-results-rows-left", `${rows.left}%`);
+    root.style.setProperty("--gf-results-rows-width", `${rows.width}%`);
   }
 
   container.appendChild(root);

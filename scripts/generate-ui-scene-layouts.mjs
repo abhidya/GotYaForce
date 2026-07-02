@@ -107,29 +107,82 @@ function inflateRect(rect, scaleX, scaleY = scaleX) {
 }
 
 function makeVselDifficultyAnchors(elements) {
-  const candidates = elements
-    .filter((element) => element.key !== "model_00")
-    .filter((element) => element.rectXY.centerY > 46)
-    .filter((element) => element.rectXY.width > 2 && element.rectXY.height > 2)
-    .sort((a, b) => b.rectXY.width * b.rectXY.height - a.rectXY.width * a.rectXY.height)
-    .slice(0, 8)
-    .sort((a, b) => {
-      const centerDelta = Math.abs(a.rectXY.centerY - 64) - Math.abs(b.rectXY.centerY - 64);
-      if (Math.abs(centerDelta) > 4) return centerDelta;
-      return a.rectXY.centerX - b.rectXY.centerX;
-    })
-    .slice(0, 3)
-    .sort((a, b) => a.rectXY.centerX - b.rectXY.centerX);
-
-  if (candidates.length !== 3) return null;
+  // The vsel00 export stacks every pad/gear object at the scene X-center: the
+  // per-difficulty placement lives on empty JOBJ joint nodes whose transforms the
+  // DAE geometry nodes never reference, so three distinct pad positions do NOT
+  // exist in the extracted geometry. The only defensible anchor is the option
+  // stage (the large pad ellipse) that the difficulty tiles sit on: the biggest
+  // foreground element (near-depth, below the header billboard band).
+  const stage = elements
+    .filter((element) => element.bounds.maxZ > -2000)
+    .filter((element) => element.rectXY.centerY > 40)
+    .filter((element) => element.rectXY.width < 40)
+    .sort((a, b) => b.rectXY.width * b.rectXY.height - a.rectXY.width * a.rectXY.height)[0];
+  if (!stage) return null;
 
   return {
     caveat:
-      "Semantic names are inferred from vsel00 lower-scene object order; DAE nodes are generic JOBJ/model labels.",
-    normal: inflateRect(candidates[0].rectXY, 1.18, 1.1),
-    tuff: inflateRect(candidates[1].rectXY, 1.18, 1.1),
-    insane: inflateRect(candidates[2].rectXY, 1.18, 1.1),
-    sourceModels: candidates.map((candidate) => candidate.key),
+      "vsel00 exports stack the pad/gear objects at the scene X-center (their placement transforms sit on empty JOBJ joints the geometry nodes never instance), so per-difficulty X offsets are NOT derivable; only the shared option-stage ellipse is. Consumers must keep hand-tuned pad spread.",
+    optionStage: stage.rectXY,
+    sourceModels: [stage.key],
+  };
+}
+
+function makeResultsAnchors(elements) {
+  // rpot2x scenes carry a 640x480 quad (the GC screen plane) as their backdrop;
+  // normalizing against it, rather than whole-scene bounds, yields true screen
+  // coordinates (the verdict badge is parked off-screen at rest, widening scene
+  // bounds).
+  const isScreenQuad = (bounds) =>
+    Math.abs(bounds.minX + 320) < 2 &&
+    Math.abs(bounds.maxX - 320) < 2 &&
+    Math.abs(bounds.minY + 240) < 2 &&
+    Math.abs(bounds.maxY - 240) < 2;
+  const panel = elements.find((element) => isScreenQuad(element.bounds));
+  if (!panel) return null;
+  const panelWidth = panel.bounds.maxX - panel.bounds.minX;
+  const panelHeight = panel.bounds.maxY - panel.bounds.minY;
+
+  // Row pills: >=3 same-geometry elements (identical world width/height/centerX)
+  // spanning a meaningful share of the panel, stacked vertically.
+  const groups = new Map();
+  for (const element of elements) {
+    if (element === panel) continue;
+    const width = element.bounds.maxX - element.bounds.minX;
+    const height = element.bounds.maxY - element.bounds.minY;
+    const centerX = (element.bounds.minX + element.bounds.maxX) / 2;
+    if (width < panelWidth * 0.25) continue;
+    if (isScreenQuad(element.bounds)) continue;
+    const key = `${width.toFixed(1)}|${height.toFixed(1)}|${centerX.toFixed(1)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(element);
+  }
+  const pills = [...groups.values()]
+    .filter((group) => group.length >= 3)
+    .sort((a, b) => b.length - a.length)[0];
+  if (!pills) return null;
+  pills.sort((a, b) => b.bounds.maxY - a.bounds.maxY);
+
+  const toPanelX = (x) => ((x - panel.bounds.minX) / panelWidth) * 100;
+  const toPanelY = (y) => ((panel.bounds.maxY - y) / panelHeight) * 100;
+  const first = pills[0];
+  const last = pills[pills.length - 1];
+  const centers = pills.map((pill) => toPanelY((pill.bounds.minY + pill.bounds.maxY) / 2));
+  const strides = centers.slice(1).map((center, index) => center - centers[index]);
+  const rowStride = strides.reduce((sum, value) => sum + value, 0) / Math.max(1, strides.length);
+
+  return {
+    caveat:
+      "Rest-state export: only the exported row-pill instances are present (the full table and the verdict badge are placed by runtime animation; the badge sits off-screen here), so trust the horizontal extent - vertical values describe the rest pose. Coordinates are normalized against the 640x480 screen quad, not whole-scene bounds.",
+    rows: {
+      left: round(toPanelX(first.bounds.minX)),
+      top: round(toPanelY(first.bounds.maxY)),
+      width: round(((first.bounds.maxX - first.bounds.minX) / panelWidth) * 100),
+      height: round(toPanelY(last.bounds.minY) - toPanelY(first.bounds.maxY)),
+      rowHeight: round(((first.bounds.maxY - first.bounds.minY) / panelHeight) * 100),
+      rowStride: round(rowStride),
+    },
+    sourceModels: [panel.key, ...pills.map((pill) => pill.key)],
   };
 }
 
@@ -189,6 +242,10 @@ async function buildScene(asset) {
     const selectForce = makeEntrySelectForceAnchors(elements);
     if (selectForce) semantics.selectForce = selectForce;
   }
+  if (/^rpot2\d$/.test(asset.id)) {
+    const results = makeResultsAnchors(elements);
+    if (results) semantics.results = results;
+  }
 
   return {
     sceneId: asset.id,
@@ -217,6 +274,10 @@ async function main() {
   console.log(`scenes: ${Object.keys(layouts).join(", ")}`);
   const vsel = layouts.vsel00?.semantics?.difficulty;
   if (vsel) console.log(`vsel00 difficulty source models: ${vsel.sourceModels.join(", ")}`);
+  for (const id of ["rpot20", "rpot23"]) {
+    const results = layouts[id]?.semantics?.results;
+    if (results) console.log(`${id} results source models: ${results.sourceModels.join(", ")}`);
+  }
 }
 
 main().catch((error) => {

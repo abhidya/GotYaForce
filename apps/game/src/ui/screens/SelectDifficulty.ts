@@ -9,7 +9,10 @@
 
 import { el, legendItem } from "../dom.js";
 import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
+import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+
+const DIFFICULTY_LAYOUT = UI_SCENE_LAYOUTS.vsel00.semantics.difficulty;
 
 export type Difficulty = "normal" | "tuff" | "insane";
 
@@ -48,7 +51,10 @@ export function createSelectDifficulty(
   let motion: ChallengeMenuMotionHandle | null = null;
   let choosing = false;
 
-  const root = el("div", { class: "gf-screen gf-vsel-screen gf-select-difficulty" });
+  const root = el("div", {
+    class: "gf-screen gf-vsel-screen gf-select-difficulty",
+    style: difficultyLayoutVars(),
+  });
   const frame = el("div", { class: "gf-vsel-frame" });
   root.appendChild(frame);
   frame.appendChild(el("div", { class: "gf-grid-bg gf-bg-blue" }));
@@ -170,4 +176,21 @@ export function createSelectDifficulty(
       root.remove();
     },
   };
+}
+
+/**
+ * Scene-derived positioning for the difficulty option row, following the
+ * SelectForce CSS-var pattern. The vsel00 export only yields the shared option
+ * stage (see the anchor's caveat: per-difficulty X offsets are runtime JOBJ
+ * placement and are not in the geometry), so only the row's center X/Y is
+ * derived; the pad spread stays hand-tuned in CSS, and CSS fallbacks cover a
+ * missing anchor.
+ */
+function difficultyLayoutVars(): Partial<CSSStyleDeclaration> {
+  const stage = DIFFICULTY_LAYOUT?.optionStage;
+  if (!stage) return {};
+  return {
+    "--gf-diff-row-top": `${stage.centerY}%`,
+    "--gf-diff-center-x": `${stage.centerX}%`,
+  } as Partial<CSSStyleDeclaration>;
 }

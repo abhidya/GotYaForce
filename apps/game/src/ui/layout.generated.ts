@@ -3031,7 +3031,25 @@ export const UI_SCENE_LAYOUTS = {
         }
       }
     ],
-    "semantics": {}
+    "semantics": {
+      "results": {
+        "caveat": "Rest-state export: only the exported row-pill instances are present (the full table and the verdict badge are placed by runtime animation; the badge sits off-screen here), so trust the horizontal extent - vertical values describe the rest pose. Coordinates are normalized against the 640x480 screen quad, not whole-scene bounds.",
+        "rows": {
+          "left": 17.94,
+          "top": 36.354,
+          "width": 64.119,
+          "height": 28.191,
+          "rowHeight": 7.358,
+          "rowStride": 10.417
+        },
+        "sourceModels": [
+          "model_00",
+          "model_02",
+          "model_03",
+          "model_04"
+        ]
+      }
+    }
   },
   "rpot21": {
     "sceneId": "rpot21",
@@ -3656,7 +3674,25 @@ export const UI_SCENE_LAYOUTS = {
         }
       }
     ],
-    "semantics": {}
+    "semantics": {
+      "results": {
+        "caveat": "Rest-state export: only the exported row-pill instances are present (the full table and the verdict badge are placed by runtime animation; the badge sits off-screen here), so trust the horizontal extent - vertical values describe the rest pose. Coordinates are normalized against the 640x480 screen quad, not whole-scene bounds.",
+        "rows": {
+          "left": 17.94,
+          "top": 36.354,
+          "width": 64.119,
+          "height": 28.191,
+          "rowHeight": 7.358,
+          "rowStride": 10.417
+        },
+        "sourceModels": [
+          "model_00",
+          "model_02",
+          "model_03",
+          "model_04"
+        ]
+      }
+    }
   },
   "rpot22": {
     "sceneId": "rpot22",
@@ -4281,7 +4317,25 @@ export const UI_SCENE_LAYOUTS = {
         }
       }
     ],
-    "semantics": {}
+    "semantics": {
+      "results": {
+        "caveat": "Rest-state export: only the exported row-pill instances are present (the full table and the verdict badge are placed by runtime animation; the badge sits off-screen here), so trust the horizontal extent - vertical values describe the rest pose. Coordinates are normalized against the 640x480 screen quad, not whole-scene bounds.",
+        "rows": {
+          "left": 17.94,
+          "top": 36.354,
+          "width": 64.119,
+          "height": 28.191,
+          "rowHeight": 7.358,
+          "rowStride": 10.417
+        },
+        "sourceModels": [
+          "model_00",
+          "model_02",
+          "model_03",
+          "model_04"
+        ]
+      }
+    }
   },
   "rpot23": {
     "sceneId": "rpot23",
@@ -4906,7 +4960,25 @@ export const UI_SCENE_LAYOUTS = {
         }
       }
     ],
-    "semantics": {}
+    "semantics": {
+      "results": {
+        "caveat": "Rest-state export: only the exported row-pill instances are present (the full table and the verdict badge are placed by runtime animation; the badge sits off-screen here), so trust the horizontal extent - vertical values describe the rest pose. Coordinates are normalized against the 640x480 screen quad, not whole-scene bounds.",
+        "rows": {
+          "left": 17.94,
+          "top": 36.354,
+          "width": 64.119,
+          "height": 28.191,
+          "rowHeight": 7.358,
+          "rowStride": 10.417
+        },
+        "sourceModels": [
+          "model_00",
+          "model_02",
+          "model_03",
+          "model_04"
+        ]
+      }
+    }
   },
   "staff00": {
     "sceneId": "staff00",
@@ -19008,35 +19080,17 @@ export const UI_SCENE_LAYOUTS = {
     ],
     "semantics": {
       "difficulty": {
-        "caveat": "Semantic names are inferred from vsel00 lower-scene object order; DAE nodes are generic JOBJ/model labels.",
-        "normal": {
-          "left": -4.771,
-          "top": 25.236,
-          "width": 62.552,
-          "height": 78.324,
-          "centerX": 26.505,
-          "centerY": 64.398
-        },
-        "tuff": {
-          "left": 39.177,
-          "top": 45.2,
-          "width": 26.781,
-          "height": 25.452,
+        "caveat": "vsel00 exports stack the pad/gear objects at the scene X-center (their placement transforms sit on empty JOBJ joints the geometry nodes never instance), so per-difficulty X offsets are NOT derivable; only the shared option-stage ellipse is. Consumers must keep hand-tuned pad spread.",
+        "optionStage": {
+          "left": 41.22,
+          "top": 46.357,
+          "width": 22.696,
+          "height": 23.138,
           "centerX": 52.568,
           "centerY": 57.926
         },
-        "insane": {
-          "left": 48.136,
-          "top": 56.459,
-          "width": 8.864,
-          "height": 4.222,
-          "centerX": 52.568,
-          "centerY": 58.57
-        },
         "sourceModels": [
-          "model_43",
-          "model_163",
-          "model_20"
+          "model_163"
         ]
       }
     }
