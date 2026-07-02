@@ -1056,6 +1056,40 @@
           "confidence": "confirmed decompiled input bridge"
         },
         {
+          "id": "player-input-update-simple",
+          "type": "execute",
+          "address": "0x80054cbc",
+          "dol_offset": "0x00051cbc",
+          "section": "text1",
+          "symbol": "FUN_80054cbc / actor update calls input bridge then FUN_80055568",
+          "event": "Caller path for FUN_80056900; if this misses, the active save path is not running this actor input/update route.",
+          "capture": [
+            "r3 actor",
+            "actor+0x3e4 port",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "player-input-update-with-69960",
+          "type": "execute",
+          "address": "0x80054cf0",
+          "dol_offset": "0x00051cf0",
+          "section": "text1",
+          "symbol": "FUN_80054cf0 / actor update calls FUN_80069960, input bridge, FUN_80055568",
+          "event": "Second caller path for FUN_80056900; also clears actor flags in mode 5 before update.",
+          "capture": [
+            "r3 actor",
+            "actor+0x3e4 port",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
           "id": "input-command-mask-helper",
           "type": "execute",
           "address": "0x8008bbc0",
@@ -1162,6 +1196,42 @@
           "confidence": "confirmed decompiled bit check, gameplay label unproven"
         },
         {
+          "id": "post-input-actor-command-update",
+          "type": "execute",
+          "address": "0x80059068",
+          "dol_offset": "0x00056068",
+          "section": "text1",
+          "symbol": "zz_0059068_ / post-input actor command update path",
+          "event": "Called from FUN_80055568 after input bridge callers; always calls FUN_8005a298 Z command candidate near tail.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 command current",
+            "actor+0x5bc command pressed",
+            "actor+0x5e4 dispatch index",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled update path"
+        },
+        {
+          "id": "x-table-dispatch-803188e8",
+          "type": "execute",
+          "address": "0x800e6048",
+          "dol_offset": "0x000e3048",
+          "section": "text1",
+          "symbol": "zz_00e6048_ / dispatch PTR_FUN_803188e8[actor+0x540]",
+          "event": "Borg-specific command/action dispatch table; raw DOL table entry +2 is FUN_800e622c, the X pressed-edge transition candidate.",
+          "capture": [
+            "r3 actor",
+            "actor+0x540 table index",
+            "actor+0x5bc press-edge word",
+            "actor+0x3e8 borg id",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled dispatch, gameplay label unproven"
+        },
+        {
           "id": "x-pressed-action-transition-candidate",
           "type": "execute",
           "address": "0x800e622c",
@@ -1197,6 +1267,24 @@
             "r0-r31"
           ],
           "confidence": "confirmed decompiled bit checks, gameplay label unproven"
+        },
+        {
+          "id": "bx-table-dispatch-803448b0",
+          "type": "execute",
+          "address": "0x8015ae1c",
+          "dol_offset": "0x00157e1c",
+          "section": "text1",
+          "symbol": "FUN_8015ae1c / dispatch PTR_FUN_803448b0[actor+0x540]",
+          "event": "Borg-specific command/action dispatch table; raw DOL table entry +2 is FUN_8015b0b4, the B/X current-bit conditional candidate.",
+          "capture": [
+            "r3 actor",
+            "actor+0x540 table index",
+            "actor+0x5b4 current command word",
+            "actor+0x3e8 borg id",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled dispatch, gameplay label unproven"
         },
         {
           "id": "bx-borg-conditional-action-061e",

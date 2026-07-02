@@ -493,7 +493,16 @@ function activeBorgBaseFromHit(breakpoint, regs) {
     ids.has("state-transition-primitive") ||
     ids.has("active-action-handler-invuln") ||
     ids.has("action-helper-cluster") ||
+    ids.has("player-input-update-simple") ||
+    ids.has("player-input-update-with-69960") ||
     ids.has("player-input-bridge") ||
+    ids.has("post-input-actor-command-update") ||
+    ids.has("z-command-state-candidate") ||
+    ids.has("x-table-dispatch-803188e8") ||
+    ids.has("x-pressed-action-transition-candidate") ||
+    ids.has("bx-pressed-borg-action-candidate") ||
+    ids.has("bx-table-dispatch-803448b0") ||
+    ids.has("bx-borg-conditional-action-061e") ||
     ids.has("param-tier-reset") ||
     ids.has("param-tier-delta-127") ||
     ids.has("param-tier-delta-63") ||

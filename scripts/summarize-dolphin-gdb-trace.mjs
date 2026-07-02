@@ -19,9 +19,21 @@ const PROOF_IDS = {
   actorInput: [
     "normalized-pad-slot0-current-read",
     "normalized-pad-slot0-pressed-read",
+    "player-input-update-simple",
+    "player-input-update-with-69960",
     "player-input-bridge",
+    "input-command-mask-helper",
+    "post-input-actor-command-update",
     "active-borg-command-current",
     "active-borg-command-pressed",
+  ],
+  commandConsumer: [
+    "z-command-state-candidate",
+    "x-table-dispatch-803188e8",
+    "x-pressed-action-transition-candidate",
+    "bx-pressed-borg-action-candidate",
+    "bx-table-dispatch-803448b0",
+    "bx-borg-conditional-action-061e",
   ],
   action: [
     "borg-state-dispatch",
@@ -47,6 +59,9 @@ const PROOF_IDS = {
     "audio-sfx-update",
   ],
 };
+
+const COMMAND_CONSUMER_IDS = new Set(PROOF_IDS.commandConsumer);
+const AUDIO_IDS = new Set(PROOF_IDS.audio);
 
 const PAD_BUTTONS = {
   0x0001: "dLeft",
@@ -101,6 +116,63 @@ function decodeU32(raw) {
   return Number.isInteger(value) ? { raw: raw.slice(0, 8), value, hex: `0x${value.toString(16).padStart(8, "0")}` } : null;
 }
 
+function hex(value, digits = 8) {
+  return `0x${(value >>> 0).toString(16).padStart(digits, "0")}`;
+}
+
+function regHex(hit, name) {
+  const value = hit.regs?.[name]?.value;
+  return Number.isInteger(value) ? hex(value) : null;
+}
+
+function bytesFromStruct(hit) {
+  const raw = hit.activeBaseStruct?.bytes?.raw;
+  if (typeof raw !== "string" || /[^0-9a-fA-F]/.test(raw)) return null;
+  return Buffer.from(raw, "hex");
+}
+
+function readU8(bytes, offset) {
+  return bytes && offset < bytes.length ? bytes.readUInt8(offset) : null;
+}
+
+function readU16(bytes, offset) {
+  return bytes && offset + 1 < bytes.length ? bytes.readUInt16BE(offset) : null;
+}
+
+function readU32(bytes, offset) {
+  return bytes && offset + 3 < bytes.length ? bytes.readUInt32BE(offset) : null;
+}
+
+function decodeActorFields(hit) {
+  const bytes = bytesFromStruct(hit);
+  if (!bytes) return null;
+  const u8 = (offset) => readU8(bytes, offset);
+  const u16 = (offset) => readU16(bytes, offset);
+  const u32 = (offset) => readU32(bytes, offset);
+  const actor = hit.activeBaseStruct?.base ?? regHex(hit, "r3");
+  return {
+    actor,
+    borgId: u16(0x3e8) == null ? null : hex(u16(0x3e8), 4),
+    actionIndex540: u8(0x540) == null ? null : hex(u8(0x540), 2),
+    localPhase544Word: u32(0x544) == null ? null : hex(u32(0x544)),
+    actionSelector591: u8(0x591) == null ? null : hex(u8(0x591), 2),
+    commandCurrent5b4: u32(0x5b4) == null ? null : hex(u32(0x5b4)),
+    commandPrevious5b8: u32(0x5b8) == null ? null : hex(u32(0x5b8)),
+    commandPressed5bc: u32(0x5bc) == null ? null : hex(u32(0x5bc)),
+    commandReleased5c0: u32(0x5c0) == null ? null : hex(u32(0x5c0)),
+    stateFlags5d4: u32(0x5d4) == null ? null : hex(u32(0x5d4)),
+    transitionState6fe: u8(0x6fe) == null ? null : hex(u8(0x6fe), 2),
+    zState73c: u8(0x73c) == null ? null : hex(u8(0x73c), 2),
+    paramTier74a: u8(0x74a) == null ? null : hex(u8(0x74a), 2),
+    paramTier74e: u16(0x74e) == null ? null : hex(u16(0x74e), 4),
+    paramTimer750: u16(0x750) == null ? null : hex(u16(0x750), 4),
+  };
+}
+
+function compactRegs(hit, names) {
+  return Object.fromEntries(names.map((name) => [name, regHex(hit, name)]));
+}
+
 function summarizeTrace(file) {
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   const counts = new Map();
@@ -111,6 +183,9 @@ function summarizeTrace(file) {
   let firstNormalizedPad = null;
   let firstCommandCurrent = null;
   let firstCommandPressed = null;
+  let firstCommandMask = null;
+  let firstCommandConsumer = null;
+  let firstAudio = null;
   for (const hit of data.hits ?? []) {
     const ids = idsForHit(hit);
     for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
@@ -160,6 +235,33 @@ function summarizeTrace(file) {
       const decoded = decodeU32(hit.watchpoint?.current?.raw);
       if (decoded) firstCommandPressed = { hit: hit.index ?? null, pc: hit.pc ?? null, lr: hit.lr ?? null, ...decoded };
     }
+    if (!firstCommandMask && ids.includes("input-command-mask-helper")) {
+      firstCommandMask = {
+        hit: hit.index ?? null,
+        pc: hit.pc ?? null,
+        lr: hit.lr ?? null,
+        regs: compactRegs(hit, ["r3", "r4", "r5", "r6"]),
+      };
+    }
+    if (!firstCommandConsumer && ids.some((id) => COMMAND_CONSUMER_IDS.has(id))) {
+      firstCommandConsumer = {
+        hit: hit.index ?? null,
+        ids,
+        pc: hit.pc ?? null,
+        lr: hit.lr ?? null,
+        regs: compactRegs(hit, ["r3", "r4", "r5", "r6", "r31"]),
+        actorFields: decodeActorFields(hit),
+      };
+    }
+    if (!firstAudio && ids.some((id) => AUDIO_IDS.has(id))) {
+      firstAudio = {
+        hit: hit.index ?? null,
+        ids,
+        pc: hit.pc ?? null,
+        lr: hit.lr ?? null,
+        regs: compactRegs(hit, ["r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10"]),
+      };
+    }
   }
   const countAny = (ids) => ids.reduce((sum, id) => sum + (counts.get(id) ?? 0), 0);
   const hasBOrXPad = observedButtons.has("B") || observedButtons.has("X");
@@ -194,6 +296,9 @@ function summarizeTrace(file) {
     firstNormalizedPad,
     firstCommandCurrent,
     firstCommandPressed,
+    firstCommandMask,
+    firstCommandConsumer,
+    firstAudio,
     proofCounts: Object.fromEntries(
       Object.entries(PROOF_IDS).map(([name, ids]) => [
         name,
@@ -205,6 +310,8 @@ function summarizeTrace(file) {
       bxActionMapping:
         gates.bOrXPadObserved && gates.actionStateObserved
           ? `candidate (${inputSource}): same trace has B/X PAD sample + action-state hits; inspect PAD bytes/registers to map B/X exactly`
+          : gates.bOrXPadObserved && countAny(PROOF_IDS.commandConsumer) > 0
+            ? `partial (${inputSource}): same trace has B/X PAD sample + command-consumer candidate; inspect actor fields/callsite before promoting action mapping`
           : gates.bOrXPadObserved && gates.actorInputObserved
             ? `partial (${inputSource}): B/X PAD sample reached actor input bridge/command fields; still missing action-state transition/handler hit`
           : "missing: needs non-neutral B or X PAD sample + action-state hits in the same labeled B/X capture",

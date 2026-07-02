@@ -71,10 +71,28 @@ Generated: 2026-06-30
   - `FUN_801304b8` contains B pressed-edge `0x200` and X pressed-edge `0x400`
     branches gated by borg ids and cooldown fields
     (`research/decomp/ghidra-export/chunk_0034.c:4873-4947`).
+- Direct `boot.dol` table reads on 2026-07-02 add exact table context for those
+  consumers:
+  - `zz_00e6048_` dispatches `PTR_FUN_803188e8[actor+0x540]`; raw DOL table
+    entry 2 at `0x803188f0` points to `FUN_800e622c`.
+  - `FUN_8015ae1c` dispatches `PTR_FUN_803448b0[actor+0x540]`; raw DOL table
+    entry 2 at `0x803448b8` points to `FUN_8015b0b4`.
+  - Raw DOL pointer `0x80335c84` points to `FUN_801304b8` as entry 3 in a small
+    table beginning near `0x80335c78`, but no decompiled dispatch reference to
+    that table base has been identified yet.
+  These table facts are exact code/data facts, not gameplay labels.
 - Static Z inventory found one exact Z current-bit consumer in the focused pass:
   `FUN_8005a298` tests `actor+0x5b4 & 0x10` and writes `actor+0x73c`
   (`research/decomp/ghidra-export/chunk_0007.c:2772-2805`). This is not enough to
   label ally-lock target selection, charge, or power-up.
+- Trace tooling update on 2026-07-02:
+  - `scripts/dolphin-gdb-trace.mjs` now treats the new caller/consumer/dispatch
+    breakpoints as active-actor hits, so traces dump `activeBaseStruct` and install
+    active-borg runtime watchpoints when they fire.
+  - `scripts/summarize-dolphin-gdb-trace.mjs` now reports `commandConsumer`
+    proof counts, `firstCommandConsumer` actor fields (`+0x3e8`, `+0x540`,
+    `+0x5b4`, `+0x5bc`, `+0x6fe`, `+0x73c`, `+0x74a/+0x74e/+0x750`), and
+    `firstAudio` register arguments for cue-handle inspection.
 - Fresh failed action/audio traces from `dolphin/right before hit.sav`:
   - `user-data/dolphin-trace/traces/input-bridge-action-only/gdb-trace-2026-07-02T21-06-13-352Z.json`
     captured 80 `audio-seq-continue` hits and no input/action hits. Result: the
@@ -82,6 +100,18 @@ Generated: 2026-06-30
   - `user-data/dolphin-trace/traces/input-bridge-action-noaudio/gdb-trace-2026-07-02T21-08-12-391Z.json`
     captured zero hits before timeout. Result: this save-state/launch path did not
     enter the current input/action bridge under the selected breakpoint set.
+- Fresh focused captures after adding caller/consumer IDs:
+  - `user-data/dolphin-trace/traces/x-consumer-candidates-2v2/gdb-trace-2026-07-02T21-31-10-770Z.json`
+    injected X for 90 frames from `2v2 gred cotrolled players no cpu.sav`.
+    It captured X PAD bytes and normalized current/pressed `0x00000400`, but zero
+    `player-input-bridge`, command-mask, actor command, command-consumer,
+    action-state, or audio hits.
+  - `user-data/dolphin-trace/traces/actor-update-candidate-liveness/gdb-trace-2026-07-02T21-34-15-797Z.json`
+    used no PAD breakpoints and watched the input bridge callers, post-input actor
+    update, B/X/Z consumer candidates, and action anchors from
+    `dolphin/right before hit.sav`. It captured zero hits before timeout.
+  Result: current save-state launch paths still do not produce original actor input
+  or action proof. Do not promote B/X/Z mechanics from these traces.
 
 ## Trace Files
 
@@ -143,6 +173,18 @@ Generated: 2026-06-30
   - Same save and action-focused IDs with the hot audio breakpoint removed.
   - 0 hits before timeout.
   - Result: this boot path still does not prove B/X/Z action consumers.
+- `user-data/dolphin-trace/traces/x-consumer-candidates-2v2/gdb-trace-2026-07-02T21-31-10-770Z.json`
+  - Deterministic X injection from `2v2 gred cotrolled players no cpu.sav`.
+  - 435 hits, with X observed in PADRead and normalized slot 0 as
+    `current=0x00000400`, `pressed=0x00000400`.
+  - Zero actor-input bridge, command-consumer, action-state, param-tier, or audio hits.
+  - Result: X still only proves PAD normalization on this save/launch path.
+- `user-data/dolphin-trace/traces/actor-update-candidate-liveness/gdb-trace-2026-07-02T21-34-15-797Z.json`
+  - No-PAD liveness check from `dolphin/right before hit.sav` using input bridge
+    callers and B/X/Z consumer/action anchors.
+  - 0 hits before timeout.
+  - Result: this save/launch path does not reach the actor update/action route under
+    the current selected anchors.
 
 ## Commands
 
@@ -166,8 +208,14 @@ Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, de
 - Active borg base from `0x8005d4b0` or `0x80055c00`.
 - Player input bridge from `0x80056900` (`FUN_80056900`) copying normalized
   `DAT_803c727c` into actor `+0x5b4` current command and `+0x5bc` pressed edge.
+- Input bridge callers at `0x80054cbc` and `0x80054cf0`, and post-input actor
+  command update at `0x80059068` (`zz_0059068_`). If those miss, the save/launch
+  path is not running the relevant actor update route.
 - Command-mask helper at `0x8008bbc0` (`zz_008bbc0_`) preserving B `0x200`,
   X `0x400`, and Z `0x10` before `actor+0x5b4`.
+- Candidate command consumers from static C/DOL table proof:
+  `FUN_8005a298`, `zz_00e6048_`/`FUN_800e622c`,
+  `FUN_801304b8`, and `FUN_8015ae1c`/`FUN_8015b0b4`.
 - Writes to `active_borg_base+0x544`, `+0x5e0`, `+0x6b4`, `+0x6b6`, `+0x6fe`, and `+0x720`.
 - Target pointer writer.
 - HP writer.
@@ -183,9 +231,9 @@ before promoting any rule:
 
 ```bash
 rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\right before hit.sav"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,input-command-mask-helper,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-borg-conditional-action-061e --inject-pad-buttons=B --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,input-command-mask-helper,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-borg-conditional-action-061e --inject-pad-buttons=X --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,input-command-mask-helper,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-borg-conditional-action-061e,param-tier-reset,param-tier-delta-127,param-tier-delta-63,param-tier-refresh --inject-pad-buttons=Z --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-update-simple,player-input-update-with-69960,player-input-bridge,input-command-mask-helper,post-input-actor-command-update,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-table-dispatch-803188e8,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-table-dispatch-803448b0,bx-borg-conditional-action-061e --inject-pad-buttons=B --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-update-simple,player-input-update-with-69960,player-input-bridge,input-command-mask-helper,post-input-actor-command-update,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-table-dispatch-803188e8,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-table-dispatch-803448b0,bx-borg-conditional-action-061e --inject-pad-buttons=X --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-update-simple,player-input-update-with-69960,player-input-bridge,input-command-mask-helper,post-input-actor-command-update,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,z-command-state-candidate,x-table-dispatch-803188e8,x-pressed-action-transition-candidate,bx-pressed-borg-action-candidate,bx-table-dispatch-803448b0,bx-borg-conditional-action-061e,param-tier-reset,param-tier-delta-127,param-tier-delta-63,param-tier-refresh --inject-pad-buttons=Z --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
 rtk .\tools\node\node.exe scripts\summarize-dolphin-gdb-trace.mjs user-data\dolphin-trace\traces\bx-close-b user-data\dolphin-trace\traces\x-special user-data\dolphin-trace\traces\z-ally-lock
 ```
 

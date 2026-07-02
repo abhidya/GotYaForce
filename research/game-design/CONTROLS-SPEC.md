@@ -80,6 +80,11 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
   X pressed-edge transition path, `FUN_801304b8` has borg-gated B and X pressed-edge
   paths, and `FUN_8005a298` is the only focused-pass exact Z `0x10` consumer found so
   far (`research/traces/GG4E/dolphin-gdb-trace-results.md`).
+- Direct `boot.dol` pointer-table reads refine two B/X candidates: `zz_00e6048_`
+  dispatches `PTR_FUN_803188e8[actor+0x540]`, whose entry 2 is `FUN_800e622c`;
+  `FUN_8015ae1c` dispatches `PTR_FUN_803448b0[actor+0x540]`, whose entry 2 is
+  `FUN_8015b0b4`. A raw pointer at `0x80335c84` points to `FUN_801304b8`, but the
+  dispatch reference for that table is not identified yet.
 - The same traces still contain no action-state/param-tier/audio correlation for B/X/Z.
   Fresh action traces from `dolphin/right before hit.sav` either filled on hot
   `audio-seq-continue` or timed out with zero input/action hits. Therefore exact B/X
@@ -215,6 +220,9 @@ Known mismatches:
   - `FUN_800e622c` has an X pressed-edge branch into an action helper path.
   - `FUN_801304b8` has B and X pressed-edge branches gated by borg id/cooldown.
   These are trace targets, not browser rules yet.
+- Static table context: `FUN_800e622c` and `FUN_8015b0b4` are both entry 2 in their
+  borg-specific `actor+0x540` dispatch tables. This proves where to break for live
+  correlation; it still does not prove which visible move the browser should perform.
 
 ### Manual Borg Switch
 
@@ -237,6 +245,10 @@ Known mismatches:
 - `FUN_8005a298` is the focused-pass exact Z `0x10` consumer found so far: it tests
   `actor+0x5b4 & 0x10` and writes `actor+0x73c`. That proves a Z command branch exists,
   but not ally target choice, charge, power-up, or camera behavior.
+- Its caller path is now identified statically: input bridge callers
+  `FUN_80054cbc`/`FUN_80054cf0` call `FUN_80055568`, which calls `zz_0059068_`;
+  `zz_0059068_` always calls `FUN_8005a298` near its tail. The fresh Dolphin liveness
+  capture still missed this whole actor-update route, so this remains static proof only.
 - The recovered C proves a tiered actor parameter system, but not enough browser-safe mapping
   yet: `reset_actor_param_tier` at `0x80068138` initializes `actor+0x74a`, `+0x74e`,
   and `+0x750`; `apply_actor_param_tier_delta_63` clamps deltas, accumulates `+0x74e`,
