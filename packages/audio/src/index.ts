@@ -8,9 +8,15 @@ export interface AudioManifestEntry {
   loop?: boolean;
   cue?: string;
   cues?: string[];
+  sourceArchive?: string;
+  afsIndex?: number;
+  sourceOffset?: number;
+  sourceBytes?: number;
+  sourceSha1?: string;
 }
 
 export interface AudioManifest {
+  sourceArchive?: string;
   files: AudioManifestEntry[];
 }
 

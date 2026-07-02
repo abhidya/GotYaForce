@@ -84,7 +84,7 @@ async function main() {
     await rm(tempDir, { recursive: true, force: true });
   }
 
-  const manifest = await buildManifestFromFiles(options.outDir);
+  const manifest = await buildManifestFromFiles(options.outDir, options.source, cues);
   const manifestPath = path.join(options.outDir, "manifest.json");
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
   console.log(`wrote ${path.relative(ROOT, manifestPath)} (${manifest.files.length} files)`);
@@ -306,8 +306,10 @@ async function exportCue(sourcePath, tempDir, cue, force) {
   await run("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-i", adxPath, "-c:a", "libvorbis", "-q:a", "5", cue.outPath]);
 }
 
-async function buildManifestFromFiles(outDir) {
+async function buildManifestFromFiles(outDir, sourcePath, cues) {
   const entries = [];
+  const cueByKey = new Map(cues.map((cue) => [cue.key, cue]));
+  const sourceArchive = path.relative(ROOT, sourcePath).replaceAll("\\", "/");
   for (const type of ["bgm", "sfx", "voice"]) {
     const dir = path.join(outDir, type);
     if (!(await exists(dir))) {
@@ -318,6 +320,10 @@ async function buildManifestFromFiles(outDir) {
     for (const file of files) {
       const fullPath = path.join(dir, file);
       const key = path.basename(file, ".ogg");
+      const cue = cueByKey.get(key);
+      if (!cue || cue.type !== type) {
+        throw new Error(`No poq_adx_usa.afs cue plan entry for exported audio ${type}/${file}`);
+      }
       const durationSec = await probeDuration(fullPath);
       entries.push({
         key,
@@ -327,6 +333,11 @@ async function buildManifestFromFiles(outDir) {
         loop: type === "bgm" ? durationSec >= 5 : false,
         bytes: (await stat(fullPath)).size,
         sha1: await sha1File(fullPath),
+        sourceArchive,
+        afsIndex: cue.index,
+        sourceOffset: cue.offset,
+        sourceBytes: cue.size,
+        sourceSha1: await sha1Range(sourcePath, cue.offset, cue.size),
       });
     }
   }
@@ -343,13 +354,26 @@ async function buildManifestFromFiles(outDir) {
   return {
     generated: new Date().toISOString().slice(0, 10),
     source: "Gotcha Force (GG4E) poq_adx_usa.afs - CRI ADX decoded with ffmpeg",
+    sourceArchive,
     format: "OGG Vorbis",
     counts,
     totalBytes,
     totalMB: Number((totalBytes / 1024 / 1024).toFixed(2)),
     notes: "BGM/SFX names follow poq_adx_usa.afs index mapping. Voice cues are generic/sample keys until a traced in-game voice table is available. AFS 2113..2114 are MPEG/Sofdec-like members and are excluded.",
     files: entries.map(({ bytes, sha1, ...entry }) => entry),
-    hashes: Object.fromEntries(entries.map((entry) => [entry.key, { bytes: entry.bytes, sha1: entry.sha1 }])),
+    hashes: Object.fromEntries(
+      entries.map((entry) => [
+        entry.key,
+        {
+          bytes: entry.bytes,
+          sha1: entry.sha1,
+          afsIndex: entry.afsIndex,
+          sourceOffset: entry.sourceOffset,
+          sourceBytes: entry.sourceBytes,
+          sourceSha1: entry.sourceSha1,
+        },
+      ]),
+    ),
   };
 }
 
@@ -364,6 +388,14 @@ async function probeDuration(filePath) {
 async function sha1File(filePath) {
   const hash = createHash("sha1");
   for await (const chunk of createReadStream(filePath)) {
+    hash.update(chunk);
+  }
+  return hash.digest("hex");
+}
+
+async function sha1Range(filePath, offset, size) {
+  const hash = createHash("sha1");
+  for await (const chunk of createReadStream(filePath, { start: offset, end: offset + size - 1 })) {
     hash.update(chunk);
   }
   return hash.digest("hex");

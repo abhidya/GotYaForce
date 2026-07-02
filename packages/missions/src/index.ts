@@ -68,12 +68,14 @@ export {
   CHALLENGE_ALLY_GROUP_CODES,
   CHALLENGE_ENEMY_GROUP_CODES,
   CHALLENGE_GROUP_ROSTERS,
+  CHALLENGE_STAGE_VARIANT_COUNTS,
   challengeModeForPlayerBudget,
   challengeBattleCount,
   challengeBudgetFor,
   challengeMaxMembersFor,
   challengeGroupChoicesFor,
   challengeStageId,
+  challengeStageVariantCount,
   selectChallengeStage,
 } from "./challenge-reference.js";
 export type {

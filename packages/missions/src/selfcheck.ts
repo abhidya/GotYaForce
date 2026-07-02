@@ -17,6 +17,7 @@ import { createChallengeRun, CHALLENGE_DIFFICULTIES, enemyTargetForBattle } from
 import {
   CHALLENGE_STAGE_BYTES,
   challengeStageId,
+  challengeStageVariantCount,
 } from "./challenge-reference.js";
 import { createAdventureCampaign } from "./adventure.js";
 import { computeResults, type BattleOutcome } from "./scoring.js";
@@ -46,6 +47,14 @@ function assertChallengeReferenceInvariants(): void {
   assert(
     CHALLENGE_STAGE_BYTES.map(challengeStageId).join(",") === "st00,st01,st02,st03,st04,st05,st08,st0a,st0b,st0c,st0e",
     "Challenge stage-byte table should map to the recovered exported base stage ids",
+  );
+  assert(
+    CHALLENGE_STAGE_BYTES.every((stageByte) => challengeStageVariantCount(stageByte) === 4),
+    "Challenge stage bytes should use the recovered DOL variant-count table, not a literal hardcoded count",
+  );
+  assert(
+    challengeStageVariantCount(0x09) === 5,
+    "DOL stage-variant count table should preserve the non-Challenge st09 five-variant entry",
   );
 }
 

@@ -1,0 +1,482 @@
+{
+  "notes": [
+    "PTR_DAT_80433934 is read from *(u32*)0x80433934.",
+    "DAT_803c4e84 actor table pointer is read from *(u32*)0x803c4e84.",
+    "Spawn-source fields are PTR_DAT_80433934 + 0x1604 + slot*0x0c (x/y/z), per chunk_0007.c:448-505.",
+    "Live actor position is actor +0x20/+0x24/+0x28, stride 0x1e00 from DAT_803c4e84."
+  ],
+  "sources": [
+    {
+      "path": "user-data/GG4E/traces/battle1_start_checkpoint.sav",
+      "dolphinVersion": "Dolphin 2506a",
+      "stateHeaderVersion": 1,
+      "compressionType": 1,
+      "uncompressedBytes": 187026760,
+      "chunks": [
+        {
+          "compressedBytes": 54078830,
+          "decompressedBytes": 187026760
+        }
+      ],
+      "kind": "dolphin-sav",
+      "mem1StateOffset": "0x620637e",
+      "mem1Bytes": 25165824,
+      "slotTablePointer": "0x803c5420",
+      "actorTablePointer": "0x805dbdc0",
+      "slots": [
+        {
+          "slot": 0,
+          "slotTeam": 0,
+          "activeBorgRaw": "0615",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0615",
+            "mode": 1,
+            "team": 0,
+            "hp": 136,
+            "maxHp": 200,
+            "position": [
+              4980.0,
+              -1.9e-05,
+              1079.936523
+            ],
+            "yawBam16": 26760,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 1,
+          "slotTeam": 0,
+          "activeBorgRaw": "020a",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "020a",
+            "mode": 1,
+            "team": 0,
+            "hp": 106,
+            "maxHp": 180,
+            "position": [
+              4774.615723,
+              -1.8e-05,
+              1086.595947
+            ],
+            "yawBam16": -4012,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 2,
+          "slotTeam": 1,
+          "activeBorgRaw": "0a05",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0a05",
+            "mode": 1,
+            "team": 1,
+            "hp": 50,
+            "maxHp": 50,
+            "position": [
+              4538.932129,
+              132.806458,
+              1670.763794
+            ],
+            "yawBam16": -8694,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 3,
+          "slotTeam": 1,
+          "activeBorgRaw": "0705",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0705",
+            "mode": 1,
+            "team": 1,
+            "hp": 33,
+            "maxHp": 50,
+            "position": [
+              4903.475586,
+              -1.2e-05,
+              639.5401
+            ],
+            "yawBam16": -3716,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 4,
+          "slotTeam": 255,
+          "activeBorgRaw": "ffff",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0000",
+            "mode": 0,
+            "team": 0,
+            "hp": 0,
+            "maxHp": 0,
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "yawBam16": 0,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 5,
+          "slotTeam": 255,
+          "activeBorgRaw": "ffff",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0000",
+            "mode": 0,
+            "team": 0,
+            "hp": 0,
+            "maxHp": 0,
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "yawBam16": 0,
+            "state544": 0
+          }
+        }
+      ]
+    },
+    {
+      "path": "user-data/GG4E/traces/mem1_t1.bin",
+      "kind": "mem1",
+      "mem1StateOffset": 0,
+      "bytes": 25165824,
+      "slotTablePointer": "0x803c5420",
+      "actorTablePointer": "0x805dbdc0",
+      "slots": [
+        {
+          "slot": 0,
+          "slotTeam": 0,
+          "activeBorgRaw": "0615",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0615",
+            "mode": 1,
+            "team": 0,
+            "hp": 137,
+            "maxHp": 200,
+            "position": [
+              3480.841553,
+              176.694138,
+              -2420.421631
+            ],
+            "yawBam16": 9674,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 1,
+          "slotTeam": 0,
+          "activeBorgRaw": "0000",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0000",
+            "mode": 1,
+            "team": 0,
+            "hp": 51,
+            "maxHp": 150,
+            "position": [
+              3537.814453,
+              34.111626,
+              -911.520935
+            ],
+            "yawBam16": 13914,
+            "state544": 1
+          }
+        },
+        {
+          "slot": 2,
+          "slotTeam": 1,
+          "activeBorgRaw": "0b05",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0b05",
+            "mode": 1,
+            "team": 1,
+            "hp": 29,
+            "maxHp": 50,
+            "position": [
+              3371.933838,
+              10.0,
+              -950.515198
+            ],
+            "yawBam16": 14132,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 3,
+          "slotTeam": 1,
+          "activeBorgRaw": "0b05",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0b05",
+            "mode": 1,
+            "team": 1,
+            "hp": 15,
+            "maxHp": 50,
+            "position": [
+              2510.672607,
+              1297.042847,
+              -1084.214844
+            ],
+            "yawBam16": 13647,
+            "state544": 1
+          }
+        },
+        {
+          "slot": 4,
+          "slotTeam": 255,
+          "activeBorgRaw": "ffff",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0000",
+            "mode": 0,
+            "team": 0,
+            "hp": 0,
+            "maxHp": 0,
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "yawBam16": 0,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 5,
+          "slotTeam": 255,
+          "activeBorgRaw": "ffff",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0000",
+            "mode": 0,
+            "team": 0,
+            "hp": 0,
+            "maxHp": 0,
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "yawBam16": 0,
+            "state544": 0
+          }
+        }
+      ]
+    },
+    {
+      "path": "user-data/GG4E/traces/mem1_t2.bin",
+      "kind": "mem1",
+      "mem1StateOffset": 0,
+      "bytes": 25165824,
+      "slotTablePointer": "0x803c5420",
+      "actorTablePointer": "0x805dbdc0",
+      "slots": [
+        {
+          "slot": 0,
+          "slotTeam": 0,
+          "activeBorgRaw": "0615",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0615",
+            "mode": 1,
+            "team": 0,
+            "hp": 73,
+            "maxHp": 200,
+            "position": [
+              513.950195,
+              731.040466,
+              -4050.662109
+            ],
+            "yawBam16": -20095,
+            "state544": 1
+          }
+        },
+        {
+          "slot": 1,
+          "slotTeam": 0,
+          "activeBorgRaw": "0003",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0003",
+            "mode": 1,
+            "team": 0,
+            "hp": 111,
+            "maxHp": 150,
+            "position": [
+              -976.238647,
+              10.0,
+              -3236.84375
+            ],
+            "yawBam16": 21435,
+            "state544": 1
+          }
+        },
+        {
+          "slot": 2,
+          "slotTeam": 1,
+          "activeBorgRaw": "070b",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "070b",
+            "mode": 1,
+            "team": 1,
+            "hp": 50,
+            "maxHp": 50,
+            "position": [
+              2979.664551,
+              152.540024,
+              -4980.0
+            ],
+            "yawBam16": -20095,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 3,
+          "slotTeam": 1,
+          "activeBorgRaw": "0b05",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0b05",
+            "mode": 1,
+            "team": 1,
+            "hp": 27,
+            "maxHp": 50,
+            "position": [
+              837.5625,
+              118.99617,
+              -3149.798584
+            ],
+            "yawBam16": -28699,
+            "state544": 1
+          }
+        },
+        {
+          "slot": 4,
+          "slotTeam": 255,
+          "activeBorgRaw": "ffff",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0000",
+            "mode": 0,
+            "team": 0,
+            "hp": 0,
+            "maxHp": 0,
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "yawBam16": 0,
+            "state544": 0
+          }
+        },
+        {
+          "slot": 5,
+          "slotTeam": 255,
+          "activeBorgRaw": "ffff",
+          "spawnSource": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "actor": {
+            "borgRaw": "0000",
+            "mode": 0,
+            "team": 0,
+            "hp": 0,
+            "maxHp": 0,
+            "position": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "yawBam16": 0,
+            "state544": 0
+          }
+        }
+      ]
+    }
+  ]
+}

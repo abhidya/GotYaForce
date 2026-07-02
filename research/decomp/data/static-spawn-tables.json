@@ -1,0 +1,8232 @@
+{
+  "sources": {
+    "dol": "user-data/GG4E/disc/sys/boot.dol",
+    "missionSpawnPointerTable": "0x8037f5d0",
+    "enemySpawnTable": "0x8037f8f0"
+  },
+  "notes": [
+    "zz_0186964_ reads mission records through (&PTR_DAT_8037f5d0)[battle_index].",
+    "Mission record offset +0x0c is the active/player spawn vector; +0x18 is the other-side spawn vector.",
+    "Enemy add rows come from DAT_8037f8f0 records; spawn vector is record +0x04/+0x08/+0x0c.",
+    "Y=0 means actor init queries STIH floor via FUN_8003d6e4 instead of using the raw Y."
+  ],
+  "missionRecords": [
+    {
+      "index": 0,
+      "address": "0x8037d050",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 1,
+      "address": "0x8037d080",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          1396.0,
+          0.0,
+          574.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 2,
+      "address": "0x8037d0b0",
+      "enemyRowIndices": [
+        0,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3081.0,
+          0.0,
+          -2409.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 3,
+      "address": "0x8037d0e0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4559.0,
+          0.0,
+          -4441.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3725.0,
+          0.0,
+          -4139.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 4,
+      "address": "0x8037d110",
+      "enemyRowIndices": [
+        2,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3260.0,
+          0.0,
+          -1456.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3201.0,
+          0.0,
+          -276.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 5,
+      "address": "0x8037d140",
+      "enemyRowIndices": [
+        3,
+        4,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 6,
+      "address": "0x8037d170",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3610.0,
+          0.0,
+          3293.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2630.0,
+          0.0,
+          3110.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 7,
+      "address": "0x8037d1a0",
+      "enemyRowIndices": [
+        5,
+        88,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 8,
+      "address": "0x8037d1d0",
+      "enemyRowIndices": [
+        6,
+        7,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 9,
+      "address": "0x8037d200",
+      "enemyRowIndices": [
+        8,
+        9,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          1853.0,
+          0.0,
+          1109.0
+        ],
+        "facingByte": 161,
+        "facingLowBits": 1,
+        "facingHighBits": 160
+      },
+      "otherSideSpawn": {
+        "pos": [
+          763.0,
+          0.0,
+          724.0
+        ],
+        "facingByte": 161,
+        "facingLowBits": 1,
+        "facingHighBits": 160
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 10,
+      "address": "0x8037d230",
+      "enemyRowIndices": [
+        10,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2129.0,
+          0.0,
+          687.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 11,
+      "address": "0x8037d260",
+      "enemyRowIndices": [
+        23,
+        24,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1322.0,
+          0.0,
+          -1229.0
+        ],
+        "facingByte": 144,
+        "facingLowBits": 0,
+        "facingHighBits": 144
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2030.0,
+          0.0,
+          -1686.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 12,
+      "address": "0x8037d290",
+      "enemyRowIndices": [
+        11,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3958.0,
+          0.0,
+          -3751.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 13,
+      "address": "0x8037d2c0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 14,
+      "address": "0x8037d2f0",
+      "enemyRowIndices": [
+        12,
+        13,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1699.0,
+          0.0,
+          1768.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -632.0,
+          0.0,
+          1549.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 15,
+      "address": "0x8037d320",
+      "enemyRowIndices": [
+        14,
+        15,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2189.0,
+          0.0,
+          -72.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1162.0,
+          0.0,
+          665.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 16,
+      "address": "0x8037d350",
+      "enemyRowIndices": [
+        16,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2389.0,
+          0.0,
+          -2565.0
+        ],
+        "facingByte": 16,
+        "facingLowBits": 0,
+        "facingHighBits": 16
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 17,
+      "address": "0x8037d380",
+      "enemyRowIndices": [
+        17,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -494.0,
+          0.0,
+          1519.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 18,
+      "address": "0x8037d3b0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 19,
+      "address": "0x8037d3e0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 20,
+      "address": "0x8037d410",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3800.0,
+          0.0,
+          -4559.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2497.0,
+          0.0,
+          -4267.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 21,
+      "address": "0x8037d440",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3793.0,
+          0.0,
+          3927.0
+        ],
+        "facingByte": 123,
+        "facingLowBits": 3,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3190.0,
+          0.0,
+          3863.0
+        ],
+        "facingByte": 123,
+        "facingLowBits": 3,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 22,
+      "address": "0x8037d470",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2369.0,
+          0.0,
+          -390.0
+        ],
+        "facingByte": 195,
+        "facingLowBits": 3,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1841.0,
+          0.0,
+          -808.0
+        ],
+        "facingByte": 195,
+        "facingLowBits": 3,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 23,
+      "address": "0x8037d4a0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4035.0,
+          0.0,
+          235.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3271.0,
+          0.0,
+          -167.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 24,
+      "address": "0x8037d4d0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 25,
+      "address": "0x8037d500",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4166.0,
+          0.0,
+          4394.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2135.0,
+          0.0,
+          4141.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 26,
+      "address": "0x8037d530",
+      "enemyRowIndices": [
+        47,
+        48,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -354.0,
+          2000.0,
+          -485.0
+        ],
+        "facingByte": 34,
+        "facingLowBits": 2,
+        "facingHighBits": 32
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -393.0,
+          2000.0,
+          -143.0
+        ],
+        "facingByte": 34,
+        "facingLowBits": 2,
+        "facingHighBits": 32
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 27,
+      "address": "0x8037d560",
+      "enemyRowIndices": [
+        18,
+        19,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -354.0,
+          3500.0,
+          -485.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -393.0,
+          3500.0,
+          -143.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 28,
+      "address": "0x8037d590",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4307.0,
+          0.0,
+          4363.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3874.0,
+          0.0,
+          3386.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 29,
+      "address": "0x8037d5c0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2858.0,
+          0.0,
+          -2829.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2186.0,
+          0.0,
+          -1437.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 30,
+      "address": "0x8037d5f0",
+      "enemyRowIndices": [
+        25,
+        26,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3500.0,
+          0.0,
+          2613.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4248.0,
+          0.0,
+          2207.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 31,
+      "address": "0x8037d620",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3647.0,
+          0.0,
+          2803.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2914.0,
+          0.0,
+          2002.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 32,
+      "address": "0x8037d650",
+      "enemyRowIndices": [
+        20,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1707.0,
+          0.0,
+          -353.0
+        ],
+        "facingByte": 177,
+        "facingLowBits": 1,
+        "facingHighBits": 176
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2045.0,
+          0.0,
+          -1030.0
+        ],
+        "facingByte": 177,
+        "facingLowBits": 1,
+        "facingHighBits": 176
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 33,
+      "address": "0x8037d680",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -397.0,
+          0.0,
+          -1648.0
+        ],
+        "facingByte": 16,
+        "facingLowBits": 0,
+        "facingHighBits": 16
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -722.0,
+          0.0,
+          -677.0
+        ],
+        "facingByte": 16,
+        "facingLowBits": 0,
+        "facingHighBits": 16
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 34,
+      "address": "0x8037d6b0",
+      "enemyRowIndices": [
+        22,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -252.0,
+          0.0,
+          -506.0
+        ],
+        "facingByte": 49,
+        "facingLowBits": 1,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -504.0,
+          0.0,
+          864.0
+        ],
+        "facingByte": 65,
+        "facingLowBits": 1,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 35,
+      "address": "0x8037d6e0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2407.0,
+          0.0,
+          -2617.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2326.0,
+          0.0,
+          -2054.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 36,
+      "address": "0x8037d710",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4291.399902,
+          0.0,
+          4812.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3768.0,
+          0.0,
+          3868.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 37,
+      "address": "0x8037d740",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4434.0,
+          0.0,
+          -3601.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -4346.0,
+          0.0,
+          -2796.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 38,
+      "address": "0x8037d770",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4291.399902,
+          0.0,
+          4812.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3768.0,
+          0.0,
+          3868.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 39,
+      "address": "0x8037d7a0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2459.300049,
+          0.0,
+          3003.399902
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1778.0,
+          0.0,
+          903.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 40,
+      "address": "0x8037d7d0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4525.299805,
+          0.0,
+          4514.399902
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3677.0,
+          0.0,
+          3645.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 41,
+      "address": "0x8037d800",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4605.0,
+          0.0,
+          -74.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3411.0,
+          0.0,
+          -99.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 42,
+      "address": "0x8037d830",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4605.0,
+          0.0,
+          -74.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3494.0,
+          0.0,
+          -652.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 43,
+      "address": "0x8037d860",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4522.0,
+          0.0,
+          -4477.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4253.0,
+          0.0,
+          -3528.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 44,
+      "address": "0x8037d890",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3610.0,
+          0.0,
+          3293.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2663.0,
+          0.0,
+          2743.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 45,
+      "address": "0x8037d8c0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1342.0,
+          0.0,
+          3547.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1148.0,
+          0.0,
+          2921.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 46,
+      "address": "0x8037d8f0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3527.0,
+          0.0,
+          2746.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2784.0,
+          0.0,
+          2727.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 47,
+      "address": "0x8037d920",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2812.0,
+          0.0,
+          4610.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2164.0,
+          0.0,
+          3604.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 48,
+      "address": "0x8037d950",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 49,
+      "address": "0x8037d980",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 50,
+      "address": "0x8037d9b0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3643.0,
+          0.0,
+          4437.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2752.0,
+          0.0,
+          3893.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 51,
+      "address": "0x8037d9e0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4627.0,
+          0.0,
+          -4687.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3505.0,
+          0.0,
+          -4540.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 52,
+      "address": "0x8037da10",
+      "enemyRowIndices": [
+        27,
+        28,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -895.0,
+          0.0,
+          3164.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -22.0,
+          0.0,
+          3231.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 53,
+      "address": "0x8037da40",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3492.0,
+          0.0,
+          978.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2753.0,
+          0.0,
+          349.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 54,
+      "address": "0x8037da70",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4732.0,
+          0.0,
+          865.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3972.0,
+          0.0,
+          515.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 55,
+      "address": "0x8037daa0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2916.0,
+          0.0,
+          -585.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2134.0,
+          0.0,
+          -1033.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 56,
+      "address": "0x8037dad0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4666.0,
+          0.0,
+          1303.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4105.0,
+          0.0,
+          1128.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 57,
+      "address": "0x8037db00",
+      "enemyRowIndices": [
+        29,
+        30,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1223.0,
+          0.0,
+          1650.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1021.0,
+          0.0,
+          2447.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 58,
+      "address": "0x8037db30",
+      "enemyRowIndices": [
+        31,
+        32,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3117.0,
+          0.0,
+          4934.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2447.0,
+          0.0,
+          4934.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 59,
+      "address": "0x8037db60",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          880.0,
+          0.0,
+          -4014.0
+        ],
+        "facingByte": 240,
+        "facingLowBits": 0,
+        "facingHighBits": 240
+      },
+      "otherSideSpawn": {
+        "pos": [
+          276.0,
+          0.0,
+          -3148.0
+        ],
+        "facingByte": 240,
+        "facingLowBits": 0,
+        "facingHighBits": 240
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 60,
+      "address": "0x8037db90",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2687.0,
+          0.0,
+          -573.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1546.0,
+          0.0,
+          -732.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 61,
+      "address": "0x8037dbc0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4835.0,
+          0.0,
+          -740.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -4281.0,
+          0.0,
+          -1258.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 62,
+      "address": "0x8037dbf0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          1884.0,
+          0.0,
+          -4205.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1055.0,
+          0.0,
+          -3992.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 63,
+      "address": "0x8037dc20",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4757.0,
+          0.0,
+          -1688.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -4141.0,
+          0.0,
+          -1118.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 64,
+      "address": "0x8037dc50",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4186.0,
+          0.0,
+          3848.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3257.0,
+          0.0,
+          3272.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 65,
+      "address": "0x8037dc80",
+      "enemyRowIndices": [
+        33,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4635.0,
+          0.0,
+          4660.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -4477.0,
+          0.0,
+          4062.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 66,
+      "address": "0x8037dcb0",
+      "enemyRowIndices": [
+        34,
+        35,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          760.0,
+          0.0,
+          2241.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1242.0,
+          0.0,
+          1278.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 67,
+      "address": "0x8037dce0",
+      "enemyRowIndices": [
+        37,
+        36,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2298.0,
+          0.0,
+          1850.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2891.0,
+          0.0,
+          2785.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 68,
+      "address": "0x8037dd10",
+      "enemyRowIndices": [
+        38,
+        39,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2892.0,
+          0.0,
+          2577.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2173.0,
+          0.0,
+          2702.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 69,
+      "address": "0x8037dd40",
+      "enemyRowIndices": [
+        41,
+        40,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -964.0,
+          0.0,
+          -3405.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1501.0,
+          0.0,
+          -3940.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 70,
+      "address": "0x8037dd70",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4818.0,
+          0.0,
+          -4823.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3865.0,
+          0.0,
+          -3905.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 71,
+      "address": "0x8037dda0",
+      "enemyRowIndices": [
+        43,
+        44,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          1268.0,
+          0.0,
+          3533.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          970.0,
+          0.0,
+          3215.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 72,
+      "address": "0x8037ddd0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4038.0,
+          0.0,
+          3298.0
+        ],
+        "facingByte": 112,
+        "facingLowBits": 0,
+        "facingHighBits": 112
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -4017.0,
+          0.0,
+          2633.0
+        ],
+        "facingByte": 112,
+        "facingLowBits": 0,
+        "facingHighBits": 112
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 73,
+      "address": "0x8037de00",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3202.0,
+          0.0,
+          -2036.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3082.0,
+          0.0,
+          -2379.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 74,
+      "address": "0x8037de30",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2807.0,
+          0.0,
+          -2760.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2948.0,
+          0.0,
+          -1727.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 75,
+      "address": "0x8037de60",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4530.0,
+          0.0,
+          4617.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3342.0,
+          0.0,
+          4224.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 76,
+      "address": "0x8037de90",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3245.0,
+          0.0,
+          -405.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2398.0,
+          0.0,
+          398.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 77,
+      "address": "0x8037dec0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2549.0,
+          0.0,
+          -3507.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2249.0,
+          0.0,
+          -3004.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 78,
+      "address": "0x8037def0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 79,
+      "address": "0x8037df20",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2550.0,
+          0.0,
+          -4028.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2550.0,
+          0.0,
+          -3456.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 80,
+      "address": "0x8037df50",
+      "enemyRowIndices": [
+        45,
+        46,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1535.0,
+          0.0,
+          1530.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1205.0,
+          600.0,
+          2233.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 81,
+      "address": "0x8037df80",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4062.0,
+          0.0,
+          1555.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3623.0,
+          0.0,
+          861.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 82,
+      "address": "0x8037dfb0",
+      "enemyRowIndices": [
+        49,
+        50,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -916.0,
+          0.0,
+          -1017.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -332.0,
+          612.0,
+          -1986.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 83,
+      "address": "0x8037dfe0",
+      "enemyRowIndices": [
+        51,
+        52,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2126.0,
+          0.0,
+          2319.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1575.0,
+          0.0,
+          5.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 84,
+      "address": "0x8037e010",
+      "enemyRowIndices": [
+        53,
+        54,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1915.0,
+          0.0,
+          3291.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2223.0,
+          0.0,
+          2287.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 85,
+      "address": "0x8037e040",
+      "enemyRowIndices": [
+        55,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1518.0,
+          0.0,
+          2785.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -766.0,
+          0.0,
+          2678.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 86,
+      "address": "0x8037e070",
+      "enemyRowIndices": [
+        56,
+        57,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          1275.0,
+          0.0,
+          1158.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1013.0,
+          0.0,
+          1983.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 87,
+      "address": "0x8037e0a0",
+      "enemyRowIndices": [
+        58,
+        59,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4446.0,
+          0.0,
+          24.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3827.0,
+          0.0,
+          516.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 88,
+      "address": "0x8037e0d0",
+      "enemyRowIndices": [
+        60,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1735.0,
+          0.0,
+          1892.0
+        ],
+        "facingByte": 145,
+        "facingLowBits": 1,
+        "facingHighBits": 144
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1626.0,
+          0.0,
+          1320.0
+        ],
+        "facingByte": 145,
+        "facingLowBits": 1,
+        "facingHighBits": 144
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 89,
+      "address": "0x8037e100",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3818.0,
+          0.0,
+          -447.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3340.0,
+          0.0,
+          -921.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 90,
+      "address": "0x8037e130",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3186.0,
+          0.0,
+          -1641.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1568.0,
+          0.0,
+          971.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 91,
+      "address": "0x8037e160",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          250.0,
+          0.0,
+          1250.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 92,
+      "address": "0x8037e190",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2888.0,
+          0.0,
+          -3679.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1955.0,
+          0.0,
+          -3917.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 93,
+      "address": "0x8037e1c0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3913.0,
+          0.0,
+          4141.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2211.0,
+          0.0,
+          3557.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 94,
+      "address": "0x8037e1f0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2721.0,
+          0.0,
+          -417.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 95,
+      "address": "0x8037e220",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3538.0,
+          0.0,
+          3259.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2654.0,
+          0.0,
+          3170.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 96,
+      "address": "0x8037e250",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4010.0,
+          0.0,
+          2040.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2192.0,
+          0.0,
+          2300.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 97,
+      "address": "0x8037e280",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3528.0,
+          3500.0,
+          300.0
+        ],
+        "facingByte": 66,
+        "facingLowBits": 2,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1120.0,
+          0.0,
+          1280.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 98,
+      "address": "0x8037e2b0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          377.0,
+          0.0,
+          4482.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          810.0,
+          3300.0,
+          3090.0
+        ],
+        "facingByte": 130,
+        "facingLowBits": 2,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 99,
+      "address": "0x8037e2e0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2544.0,
+          0.0,
+          -3962.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1678.0,
+          0.0,
+          -3087.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 100,
+      "address": "0x8037e310",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4200.0,
+          2300.0,
+          -4200.0
+        ],
+        "facingByte": 122,
+        "facingLowBits": 2,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -4200.0,
+          1500.0,
+          -4200.0
+        ],
+        "facingByte": 121,
+        "facingLowBits": 1,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 101,
+      "address": "0x8037e340",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1255.0,
+          0.0,
+          -4107.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -704.0,
+          0.0,
+          -2841.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 102,
+      "address": "0x8037e370",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1888.0,
+          0.0,
+          -337.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -814.0,
+          0.0,
+          -877.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 103,
+      "address": "0x8037e3a0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4800.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4155.0,
+          0.0,
+          -860.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 104,
+      "address": "0x8037e3d0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2773.0,
+          0.0,
+          -2002.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1313.0,
+          0.0,
+          -1412.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 105,
+      "address": "0x8037e400",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2543.0,
+          0.0,
+          4840.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1720.0,
+          0.0,
+          3830.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 106,
+      "address": "0x8037e430",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2593.0,
+          0.0,
+          4364.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -60.0,
+          0.0,
+          1900.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 107,
+      "address": "0x8037e460",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3174.0,
+          0.0,
+          -2572.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2636.0,
+          0.0,
+          -1553.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 108,
+      "address": "0x8037e490",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          575.0,
+          0.0,
+          -1192.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -844.0,
+          0.0,
+          -678.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 109,
+      "address": "0x8037e4c0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2533.0,
+          0.0,
+          -2535.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1904.0,
+          0.0,
+          -1018.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 110,
+      "address": "0x8037e4f0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4451.0,
+          0.0,
+          -1074.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1745.0,
+          0.0,
+          490.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 111,
+      "address": "0x8037e520",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3207.0,
+          0.0,
+          -1625.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1210.0,
+          0.0,
+          -1010.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 112,
+      "address": "0x8037e550",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1649.0,
+          0.0,
+          -148.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3209.0,
+          0.0,
+          2230.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 113,
+      "address": "0x8037e580",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          6.0,
+          0.0,
+          -3930.0
+        ],
+        "facingByte": 16,
+        "facingLowBits": 0,
+        "facingHighBits": 16
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -75.0,
+          0.0,
+          3881.0
+        ],
+        "facingByte": 112,
+        "facingLowBits": 0,
+        "facingHighBits": 112
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 114,
+      "address": "0x8037e5b0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2624.0,
+          0.0,
+          1101.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1176.0,
+          0.0,
+          1878.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 115,
+      "address": "0x8037e5e0",
+      "enemyRowIndices": [
+        61,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          762.0,
+          0.0,
+          2424.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -167.0,
+          0.0,
+          693.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 116,
+      "address": "0x8037e610",
+      "enemyRowIndices": [
+        62,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2014.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "otherSideSpawn": {
+        "pos": [
+          735.0,
+          0.0,
+          0.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 117,
+      "address": "0x8037e640",
+      "enemyRowIndices": [
+        62,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2014.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 118,
+      "address": "0x8037e670",
+      "enemyRowIndices": [
+        64,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4200.0,
+          3300.0,
+          -4200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4200.0,
+          2500.0,
+          -4200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 119,
+      "address": "0x8037e6a0",
+      "enemyRowIndices": [
+        64,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4200.0,
+          3300.0,
+          -4200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4200.0,
+          2500.0,
+          -4200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 120,
+      "address": "0x8037e6d0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1178.0,
+          0.0,
+          1840.0
+        ],
+        "facingByte": 129,
+        "facingLowBits": 1,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1385.0,
+          0.0,
+          1511.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 121,
+      "address": "0x8037e700",
+      "enemyRowIndices": [
+        65,
+        66,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1764.0,
+          0.0,
+          2031.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1464.0,
+          0.0,
+          1792.0
+        ],
+        "facingByte": 48,
+        "facingLowBits": 0,
+        "facingHighBits": 48
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 122,
+      "address": "0x8037e730",
+      "enemyRowIndices": [
+        67,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2263.0,
+          0.0,
+          -2699.0
+        ],
+        "facingByte": 240,
+        "facingLowBits": 0,
+        "facingHighBits": 240
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2775.0,
+          0.0,
+          -1174.0
+        ],
+        "facingByte": 240,
+        "facingLowBits": 0,
+        "facingHighBits": 240
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 123,
+      "address": "0x8037e760",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4596.0,
+          0.0,
+          416.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3481.0,
+          0.0,
+          1024.0
+        ],
+        "facingByte": 193,
+        "facingLowBits": 1,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 124,
+      "address": "0x8037e790",
+      "enemyRowIndices": [
+        68,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2645.0,
+          2000.0,
+          -2729.0
+        ],
+        "facingByte": 34,
+        "facingLowBits": 2,
+        "facingHighBits": 32
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3500.0,
+          500.0,
+          -3500.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 125,
+      "address": "0x8037e7c0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3573.0,
+          3000.0,
+          3039.0
+        ],
+        "facingByte": 122,
+        "facingLowBits": 2,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2697.0,
+          1500.0,
+          2167.0
+        ],
+        "facingByte": 122,
+        "facingLowBits": 2,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 126,
+      "address": "0x8037e7f0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4711.0,
+          0.0,
+          -876.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 127,
+      "address": "0x8037e820",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4138.0,
+          0.0,
+          -3923.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3503.0,
+          0.0,
+          -4094.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 128,
+      "address": "0x8037e850",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4093.0,
+          0.0,
+          2708.0
+        ],
+        "facingByte": 144,
+        "facingLowBits": 0,
+        "facingHighBits": 144
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4262.0,
+          0.0,
+          1986.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 129,
+      "address": "0x8037e880",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          646.0,
+          0.0,
+          1606.0
+        ],
+        "facingByte": 98,
+        "facingLowBits": 2,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1251.0,
+          500.0,
+          1493.0
+        ],
+        "facingByte": 97,
+        "facingLowBits": 1,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 130,
+      "address": "0x8037e8b0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4627.0,
+          0.0,
+          -4387.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4165.0,
+          0.0,
+          -3520.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 131,
+      "address": "0x8037e8e0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4641.0,
+          0.0,
+          4695.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3891.0,
+          0.0,
+          4519.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 132,
+      "address": "0x8037e910",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1739.0,
+          0.0,
+          -3130.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -2609.0,
+          0.0,
+          -4004.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 133,
+      "address": "0x8037e940",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2127.0,
+          0.0,
+          1256.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1911.0,
+          0.0,
+          392.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 134,
+      "address": "0x8037e970",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 135,
+      "address": "0x8037e9a0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3856.0,
+          0.0,
+          4612.0
+        ],
+        "facingByte": 144,
+        "facingLowBits": 0,
+        "facingHighBits": 144
+      },
+      "otherSideSpawn": {
+        "pos": [
+          4370.0,
+          0.0,
+          3378.0
+        ],
+        "facingByte": 144,
+        "facingLowBits": 0,
+        "facingHighBits": 144
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 136,
+      "address": "0x8037e9d0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          3856.0,
+          0.0,
+          4612.0
+        ],
+        "facingByte": 144,
+        "facingLowBits": 0,
+        "facingHighBits": 144
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 137,
+      "address": "0x8037ea00",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2369.0,
+          0.0,
+          -390.0
+        ],
+        "facingByte": 195,
+        "facingLowBits": 3,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1841.0,
+          0.0,
+          -808.0
+        ],
+        "facingByte": 195,
+        "facingLowBits": 3,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 138,
+      "address": "0x8037ea30",
+      "enemyRowIndices": [
+        69,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4680.0,
+          0.0,
+          -4680.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -4509.0,
+          0.0,
+          -3833.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 139,
+      "address": "0x8037ea60",
+      "enemyRowIndices": [
+        70,
+        71,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -441.0,
+          0.0,
+          3041.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "otherSideSpawn": {
+        "pos": [
+          595.0,
+          0.0,
+          2047.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 140,
+      "address": "0x8037ea90",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2500.0,
+          0.0,
+          537.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          525.0,
+          0.0,
+          981.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 141,
+      "address": "0x8037eac0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2775.0,
+          2000.0,
+          -857.0
+        ],
+        "facingByte": 50,
+        "facingLowBits": 2,
+        "facingHighBits": 48
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1632.0,
+          2000.0,
+          -450.0
+        ],
+        "facingByte": 50,
+        "facingLowBits": 2,
+        "facingHighBits": 48
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 142,
+      "address": "0x8037eaf0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2991.0,
+          0.0,
+          2384.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1923.0,
+          0.0,
+          661.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 143,
+      "address": "0x8037eb20",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -72.0,
+          2000.0,
+          3365.0
+        ],
+        "facingByte": 162,
+        "facingLowBits": 2,
+        "facingHighBits": 160
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -106.0,
+          2000.0,
+          2011.0
+        ],
+        "facingByte": 162,
+        "facingLowBits": 2,
+        "facingHighBits": 160
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 144,
+      "address": "0x8037eb50",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1896.0,
+          0.0,
+          3215.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -710.0,
+          0.0,
+          2426.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 145,
+      "address": "0x8037eb80",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4268.0,
+          0.0,
+          2213.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1778.0,
+          2000.0,
+          2033.0
+        ],
+        "facingByte": 178,
+        "facingLowBits": 2,
+        "facingHighBits": 176
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 146,
+      "address": "0x8037ebb0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1400.0,
+          0.0,
+          1500.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 147,
+      "address": "0x8037ebe0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1400.0,
+          0.0,
+          -200.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 148,
+      "address": "0x8037ec10",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -400.0,
+          0.0,
+          -550.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 149,
+      "address": "0x8037ec40",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1710.0,
+          0.0,
+          -1400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 150,
+      "address": "0x8037ec70",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2100.0,
+          0.0,
+          0.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 151,
+      "address": "0x8037eca0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1348.0,
+          2500.0,
+          3614.0
+        ],
+        "facingByte": 130,
+        "facingLowBits": 2,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1131.0,
+          0.0,
+          2929.0
+        ],
+        "facingByte": 129,
+        "facingLowBits": 1,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 152,
+      "address": "0x8037ecd0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2026.0,
+          0.0,
+          4001.0
+        ],
+        "facingByte": 112,
+        "facingLowBits": 0,
+        "facingHighBits": 112
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1938.0,
+          0.0,
+          3380.0
+        ],
+        "facingByte": 112,
+        "facingLowBits": 0,
+        "facingHighBits": 112
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 153,
+      "address": "0x8037ed00",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -675.0,
+          0.0,
+          -390.0
+        ],
+        "facingByte": 241,
+        "facingLowBits": 1,
+        "facingHighBits": 240
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -370.0,
+          0.0,
+          589.0
+        ],
+        "facingByte": 225,
+        "facingLowBits": 1,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 154,
+      "address": "0x8037ed30",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4156.0,
+          0.0,
+          -217.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1709.0,
+          0.0,
+          -785.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 155,
+      "address": "0x8037ed60",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          1884.0,
+          0.0,
+          -4205.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1055.0,
+          0.0,
+          -3992.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 156,
+      "address": "0x8037ed90",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -977.0,
+          0.0,
+          4732.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1407.0,
+          0.0,
+          3831.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 157,
+      "address": "0x8037edc0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -358.0,
+          612.0,
+          -2017.0
+        ],
+        "facingByte": 240,
+        "facingLowBits": 0,
+        "facingHighBits": 240
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1607.0,
+          0.0,
+          -435.0
+        ],
+        "facingByte": 240,
+        "facingLowBits": 0,
+        "facingHighBits": 240
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 158,
+      "address": "0x8037edf0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3777.0,
+          0.0,
+          -3777.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3543.0,
+          0.0,
+          -2578.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 159,
+      "address": "0x8037ee20",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -977.0,
+          0.0,
+          4732.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1407.0,
+          0.0,
+          3831.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 160,
+      "address": "0x8037ee50",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2645.0,
+          4000.0,
+          -2729.0
+        ],
+        "facingByte": 34,
+        "facingLowBits": 2,
+        "facingHighBits": 32
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3500.0,
+          0.0,
+          -3500.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 161,
+      "address": "0x8037ee80",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1426.0,
+          1800.0,
+          -15.0
+        ],
+        "facingByte": 130,
+        "facingLowBits": 2,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1399.0,
+          0.0,
+          -3013.0
+        ],
+        "facingByte": 129,
+        "facingLowBits": 1,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 162,
+      "address": "0x8037eeb0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3009.0,
+          0.0,
+          679.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1991.0,
+          0.0,
+          653.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 163,
+      "address": "0x8037eee0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2369.0,
+          0.0,
+          -390.0
+        ],
+        "facingByte": 195,
+        "facingLowBits": 3,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1841.0,
+          0.0,
+          -808.0
+        ],
+        "facingByte": 195,
+        "facingLowBits": 3,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 164,
+      "address": "0x8037ef10",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2369.0,
+          0.0,
+          -390.0
+        ],
+        "facingByte": 195,
+        "facingLowBits": 3,
+        "facingHighBits": 192
+      },
+      "otherSideSpawn": {
+        "pos": [
+          1841.0,
+          0.0,
+          -808.0
+        ],
+        "facingByte": 195,
+        "facingLowBits": 3,
+        "facingHighBits": 192
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 165,
+      "address": "0x8037ef40",
+      "enemyRowIndices": [
+        72,
+        73,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4373.0,
+          0.0,
+          -1321.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -4435.0,
+          0.0,
+          -1731.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 166,
+      "address": "0x8037ef70",
+      "enemyRowIndices": [
+        74,
+        75,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2778.0,
+          0.0,
+          4784.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "otherSideSpawn": {
+        "pos": [
+          3389.0,
+          0.0,
+          3351.0
+        ],
+        "facingByte": 80,
+        "facingLowBits": 0,
+        "facingHighBits": 80
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 167,
+      "address": "0x8037efa0",
+      "enemyRowIndices": [
+        76,
+        77,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2430.0,
+          0.0,
+          48.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2091.0,
+          0.0,
+          -774.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 168,
+      "address": "0x8037efd0",
+      "enemyRowIndices": [
+        78,
+        79,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -3357.0,
+          0.0,
+          -1496.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3497.0,
+          0.0,
+          -806.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 169,
+      "address": "0x8037f000",
+      "enemyRowIndices": [
+        80,
+        81,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          348.0,
+          0.0,
+          -3430.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "otherSideSpawn": {
+        "pos": [
+          986.0,
+          0.0,
+          -2562.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 170,
+      "address": "0x8037f030",
+      "enemyRowIndices": [
+        82,
+        83,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -2899.0,
+          0.0,
+          -907.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3211.0,
+          0.0,
+          -340.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 171,
+      "address": "0x8037f060",
+      "enemyRowIndices": [
+        84,
+        85,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -676.0,
+          0.0,
+          -4776.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -242.0,
+          0.0,
+          -4355.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 172,
+      "address": "0x8037f090",
+      "enemyRowIndices": [
+        86,
+        87,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -167.0,
+          775.0,
+          1935.0
+        ],
+        "facingByte": 144,
+        "facingLowBits": 0,
+        "facingHighBits": 144
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1080.0,
+          0.0,
+          1508.0
+        ],
+        "facingByte": 144,
+        "facingLowBits": 0,
+        "facingHighBits": 144
+      },
+      "timeMinutes": 0,
+      "flags": "0x41"
+    },
+    {
+      "index": 173,
+      "address": "0x8037f0c0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1483.0,
+          0.0,
+          3447.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1997.0,
+          0.0,
+          2237.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 174,
+      "address": "0x8037f0f0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 175,
+      "address": "0x8037f120",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 176,
+      "address": "0x8037f150",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 177,
+      "address": "0x8037f180",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 178,
+      "address": "0x8037f1b0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 179,
+      "address": "0x8037f1e0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 180,
+      "address": "0x8037f210",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 181,
+      "address": "0x8037f240",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 182,
+      "address": "0x8037f270",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 183,
+      "address": "0x8037f2a0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 184,
+      "address": "0x8037f2d0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 185,
+      "address": "0x8037f300",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 186,
+      "address": "0x8037f330",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 187,
+      "address": "0x8037f360",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 188,
+      "address": "0x8037f390",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 189,
+      "address": "0x8037f3c0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -4803.0,
+          0.0,
+          -36.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -3815.0,
+          0.0,
+          -400.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      },
+      "timeMinutes": 0,
+      "flags": "0x9"
+    },
+    {
+      "index": 190,
+      "address": "0x8037f3f0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          2468.0,
+          0.0,
+          -2466.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -226.0,
+          0.0,
+          -2780.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 191,
+      "address": "0x8037f420",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          4091.0,
+          0.0,
+          128.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      },
+      "otherSideSpawn": {
+        "pos": [
+          2291.0,
+          0.0,
+          1541.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 192,
+      "address": "0x8037f450",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 193,
+      "address": "0x8037f480",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 194,
+      "address": "0x8037f4b0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 195,
+      "address": "0x8037f4e0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 196,
+      "address": "0x8037f510",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 197,
+      "address": "0x8037f540",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 198,
+      "address": "0x8037f570",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    },
+    {
+      "index": 199,
+      "address": "0x8037f5a0",
+      "enemyRowIndices": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "playerSpawn": {
+        "pos": [
+          -1000.0,
+          0.0,
+          -1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "otherSideSpawn": {
+        "pos": [
+          -1200.0,
+          0.0,
+          -1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      },
+      "timeMinutes": 0,
+      "flags": "0x3"
+    }
+  ],
+  "enemySpawnRows": [
+    {
+      "index": 0,
+      "rowBytes": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          2154.0,
+          0.0,
+          1279.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 2,
+      "rowBytes": [
+        8,
+        2,
+        2,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1224.0,
+          0.0,
+          1589.0
+        ],
+        "facingByte": 112,
+        "facingLowBits": 0,
+        "facingHighBits": 112
+      }
+    },
+    {
+      "index": 3,
+      "rowBytes": [
+        11,
+        6,
+        3,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1000.0,
+          0.0,
+          1200.0
+        ],
+        "facingByte": 56,
+        "facingLowBits": 0,
+        "facingHighBits": 56
+      }
+    },
+    {
+      "index": 4,
+      "rowBytes": [
+        6,
+        2,
+        4,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1200.0,
+          0.0,
+          1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 5,
+      "rowBytes": [
+        4,
+        2,
+        5,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1000.0,
+          0.0,
+          1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 6,
+      "rowBytes": [
+        1,
+        1,
+        6,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1000.0,
+          0.0,
+          1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 7,
+      "rowBytes": [
+        2,
+        1,
+        7,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1000.0,
+          0.0,
+          1200.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 8,
+      "rowBytes": [
+        7,
+        2,
+        8,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -4218.0,
+          0.0,
+          -3419.0
+        ],
+        "facingByte": 33,
+        "facingLowBits": 1,
+        "facingHighBits": 32
+      }
+    },
+    {
+      "index": 9,
+      "rowBytes": [
+        8,
+        18,
+        9,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -1454.0,
+          0.0,
+          -1544.0
+        ],
+        "facingByte": 33,
+        "facingLowBits": 1,
+        "facingHighBits": 32
+      }
+    },
+    {
+      "index": 10,
+      "rowBytes": [
+        1,
+        1,
+        10,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -174.0,
+          775.0,
+          2044.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      }
+    },
+    {
+      "index": 11,
+      "rowBytes": [
+        9,
+        4,
+        11,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          548.0,
+          0.0,
+          -3337.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      }
+    },
+    {
+      "index": 12,
+      "rowBytes": [
+        7,
+        2,
+        12,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          2538.0,
+          0.0,
+          -2760.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 13,
+      "rowBytes": [
+        8,
+        3,
+        13,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1641.0,
+          0.0,
+          -1105.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 14,
+      "rowBytes": [
+        7,
+        3,
+        14,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -3834.0,
+          0.0,
+          1029.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 15,
+      "rowBytes": [
+        8,
+        4,
+        15,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -3665.0,
+          0.0,
+          1478.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 16,
+      "rowBytes": [
+        7,
+        3,
+        16,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          3063.0,
+          0.0,
+          -888.0
+        ],
+        "facingByte": 144,
+        "facingLowBits": 0,
+        "facingHighBits": 144
+      }
+    },
+    {
+      "index": 17,
+      "rowBytes": [
+        3,
+        12,
+        17,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          2304.0,
+          0.0,
+          2426.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      }
+    },
+    {
+      "index": 18,
+      "rowBytes": [
+        13,
+        12,
+        18,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          975.0,
+          3500.0,
+          819.0
+        ],
+        "facingByte": 162,
+        "facingLowBits": 2,
+        "facingHighBits": 160
+      }
+    },
+    {
+      "index": 19,
+      "rowBytes": [
+        10,
+        4,
+        19,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1200.0,
+          0.0,
+          1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 20,
+      "rowBytes": [
+        13,
+        12,
+        20,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -3144.0,
+          0.0,
+          -1360.0
+        ],
+        "facingByte": 49,
+        "facingLowBits": 1,
+        "facingHighBits": 48
+      }
+    },
+    {
+      "index": 22,
+      "rowBytes": [
+        13,
+        12,
+        22,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          4503.0,
+          0.0,
+          822.0
+        ],
+        "facingByte": 121,
+        "facingLowBits": 1,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 23,
+      "rowBytes": [
+        11,
+        6,
+        23,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2028.0,
+          0.0,
+          -3100.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 24,
+      "rowBytes": [
+        2,
+        4,
+        24,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2058.0,
+          0.0,
+          -4480.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 25,
+      "rowBytes": [
+        1,
+        6,
+        25,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          3520.0,
+          0.0,
+          -493.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 26,
+      "rowBytes": [
+        11,
+        6,
+        26,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          4248.0,
+          0.0,
+          -493.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 27,
+      "rowBytes": [
+        4,
+        6,
+        27,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          2498.0,
+          0.0,
+          1556.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      }
+    },
+    {
+      "index": 28,
+      "rowBytes": [
+        9,
+        6,
+        28,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          3402.0,
+          0.0,
+          1606.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      }
+    },
+    {
+      "index": 29,
+      "rowBytes": [
+        7,
+        7,
+        29,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1143.0,
+          0.0,
+          2370.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      }
+    },
+    {
+      "index": 30,
+      "rowBytes": [
+        2,
+        7,
+        30,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          518.0,
+          0.0,
+          2997.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      }
+    },
+    {
+      "index": 31,
+      "rowBytes": [
+        7,
+        7,
+        31,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -3117.0,
+          0.0,
+          3897.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 32,
+      "rowBytes": [
+        1,
+        7,
+        32,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2477.0,
+          0.0,
+          3921.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 33,
+      "rowBytes": [
+        3,
+        12,
+        33,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -3297.0,
+          0.0,
+          3509.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      }
+    },
+    {
+      "index": 34,
+      "rowBytes": [
+        11,
+        6,
+        34,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          732.0,
+          555.0,
+          -894.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 35,
+      "rowBytes": [
+        6,
+        2,
+        35,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1297.0,
+          0.0,
+          -2171.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 36,
+      "rowBytes": [
+        2,
+        3,
+        36,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2513.0,
+          0.0,
+          3875.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 37,
+      "rowBytes": [
+        1,
+        3,
+        37,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -3199.0,
+          0.0,
+          3875.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 38,
+      "rowBytes": [
+        11,
+        8,
+        38,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -863.0,
+          602.0,
+          1065.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      }
+    },
+    {
+      "index": 39,
+      "rowBytes": [
+        6,
+        5,
+        39,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -634.0,
+          0.0,
+          -655.0
+        ],
+        "facingByte": 224,
+        "facingLowBits": 0,
+        "facingHighBits": 224
+      }
+    },
+    {
+      "index": 40,
+      "rowBytes": [
+        2,
+        5,
+        40,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -4063.0,
+          0.0,
+          -3841.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      }
+    },
+    {
+      "index": 41,
+      "rowBytes": [
+        1,
+        5,
+        41,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2657.0,
+          0.0,
+          -3397.0
+        ],
+        "facingByte": 64,
+        "facingLowBits": 0,
+        "facingHighBits": 64
+      }
+    },
+    {
+      "index": 43,
+      "rowBytes": [
+        7,
+        12,
+        43,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          877.0,
+          0.0,
+          1561.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 44,
+      "rowBytes": [
+        8,
+        6,
+        44,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1310.0,
+          0.0,
+          1561.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 45,
+      "rowBytes": [
+        1,
+        5,
+        46,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          665.0,
+          0.0,
+          2373.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      }
+    },
+    {
+      "index": 46,
+      "rowBytes": [
+        2,
+        5,
+        45,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          381.0,
+          0.0,
+          2987.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      }
+    },
+    {
+      "index": 47,
+      "rowBytes": [
+        13,
+        12,
+        47,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          975.0,
+          2000.0,
+          819.0
+        ],
+        "facingByte": 162,
+        "facingLowBits": 2,
+        "facingHighBits": 160
+      }
+    },
+    {
+      "index": 48,
+      "rowBytes": [
+        10,
+        4,
+        48,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1200.0,
+          640.0,
+          1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    },
+    {
+      "index": 49,
+      "rowBytes": [
+        4,
+        6,
+        49,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          2521.0,
+          0.0,
+          -3379.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      }
+    },
+    {
+      "index": 50,
+      "rowBytes": [
+        6,
+        6,
+        50,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          3066.0,
+          1500.0,
+          -3088.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      }
+    },
+    {
+      "index": 51,
+      "rowBytes": [
+        4,
+        6,
+        51,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2161.0,
+          612.0,
+          -2013.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 52,
+      "rowBytes": [
+        11,
+        8,
+        52,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -349.0,
+          612.0,
+          -1992.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 53,
+      "rowBytes": [
+        4,
+        6,
+        53,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -1761.0,
+          0.0,
+          732.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 54,
+      "rowBytes": [
+        7,
+        12,
+        54,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -1409.0,
+          0.0,
+          234.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 55,
+      "rowBytes": [
+        1,
+        5,
+        55,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -766.0,
+          0.0,
+          2678.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      }
+    },
+    {
+      "index": 56,
+      "rowBytes": [
+        3,
+        12,
+        56,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -950.0,
+          0.0,
+          2849.0
+        ],
+        "facingByte": 97,
+        "facingLowBits": 1,
+        "facingHighBits": 96
+      }
+    },
+    {
+      "index": 57,
+      "rowBytes": [
+        12,
+        8,
+        57,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -569.0,
+          0.0,
+          3148.0
+        ],
+        "facingByte": 97,
+        "facingLowBits": 1,
+        "facingHighBits": 96
+      }
+    },
+    {
+      "index": 58,
+      "rowBytes": [
+        3,
+        12,
+        58,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1810.0,
+          0.0,
+          24.0
+        ],
+        "facingByte": 65,
+        "facingLowBits": 1,
+        "facingHighBits": 64
+      }
+    },
+    {
+      "index": 59,
+      "rowBytes": [
+        12,
+        8,
+        59,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1802.0,
+          0.0,
+          625.0
+        ],
+        "facingByte": 65,
+        "facingLowBits": 1,
+        "facingHighBits": 64
+      }
+    },
+    {
+      "index": 60,
+      "rowBytes": [
+        13,
+        12,
+        60,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2023.0,
+          3000.0,
+          -2302.0
+        ],
+        "facingByte": 2,
+        "facingLowBits": 2,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 61,
+      "rowBytes": [
+        13,
+        12,
+        61,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2585.0,
+          0.0,
+          -2253.0
+        ],
+        "facingByte": 32,
+        "facingLowBits": 0,
+        "facingHighBits": 32
+      }
+    },
+    {
+      "index": 62,
+      "rowBytes": [
+        3,
+        12,
+        62,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          2041.0,
+          0.0,
+          1000.0
+        ],
+        "facingByte": 129,
+        "facingLowBits": 1,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 64,
+      "rowBytes": [
+        10,
+        4,
+        64,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1200.0,
+          1000.0,
+          1000.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 65,
+      "rowBytes": [
+        12,
+        8,
+        65,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -785.0,
+          0.0,
+          2399.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      }
+    },
+    {
+      "index": 66,
+      "rowBytes": [
+        9,
+        6,
+        66,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -522.0,
+          0.0,
+          1923.0
+        ],
+        "facingByte": 176,
+        "facingLowBits": 0,
+        "facingHighBits": 176
+      }
+    },
+    {
+      "index": 67,
+      "rowBytes": [
+        10,
+        4,
+        67,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1210.0,
+          1400.0,
+          1010.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 68,
+      "rowBytes": [
+        13,
+        12,
+        68,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1500.0,
+          2000.0,
+          1500.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      }
+    },
+    {
+      "index": 69,
+      "rowBytes": [
+        10,
+        4,
+        69,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          0.0,
+          1500.0,
+          0.0
+        ],
+        "facingByte": 160,
+        "facingLowBits": 0,
+        "facingHighBits": 160
+      }
+    },
+    {
+      "index": 70,
+      "rowBytes": [
+        5,
+        4,
+        70,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          2974.0,
+          770.0,
+          1002.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      }
+    },
+    {
+      "index": 71,
+      "rowBytes": [
+        4,
+        4,
+        71,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1858.0,
+          0.0,
+          2464.0
+        ],
+        "facingByte": 192,
+        "facingLowBits": 0,
+        "facingHighBits": 192
+      }
+    },
+    {
+      "index": 72,
+      "rowBytes": [
+        11,
+        8,
+        72,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -4275.0,
+          0.0,
+          -2397.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 73,
+      "rowBytes": [
+        12,
+        8,
+        73,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -4533.0,
+          0.0,
+          -2557.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 74,
+      "rowBytes": [
+        3,
+        12,
+        74,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          4876.0,
+          0.0,
+          3826.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      }
+    },
+    {
+      "index": 75,
+      "rowBytes": [
+        9,
+        6,
+        75,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          4810.0,
+          0.0,
+          2787.0
+        ],
+        "facingByte": 208,
+        "facingLowBits": 0,
+        "facingHighBits": 208
+      }
+    },
+    {
+      "index": 76,
+      "rowBytes": [
+        3,
+        12,
+        76,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1981.0,
+          0.0,
+          -4262.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 77,
+      "rowBytes": [
+        13,
+        12,
+        77,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          2971.0,
+          0.0,
+          -4304.0
+        ],
+        "facingByte": 0,
+        "facingLowBits": 0,
+        "facingHighBits": 0
+      }
+    },
+    {
+      "index": 78,
+      "rowBytes": [
+        13,
+        12,
+        78,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -4477.0,
+          70.0,
+          -304.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      }
+    },
+    {
+      "index": 79,
+      "rowBytes": [
+        2,
+        6,
+        79,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -4658.0,
+          70.0,
+          165.0
+        ],
+        "facingByte": 96,
+        "facingLowBits": 0,
+        "facingHighBits": 96
+      }
+    },
+    {
+      "index": 80,
+      "rowBytes": [
+        9,
+        6,
+        80,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1543.0,
+          0.0,
+          428.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 81,
+      "rowBytes": [
+        10,
+        4,
+        81,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1200.0,
+          1550.0,
+          -500.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 82,
+      "rowBytes": [
+        5,
+        4,
+        82,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2987.0,
+          0.0,
+          3797.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 83,
+      "rowBytes": [
+        7,
+        4,
+        83,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -2597.0,
+          0.0,
+          2882.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 84,
+      "rowBytes": [
+        4,
+        4,
+        84,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -739.0,
+          0.0,
+          -3176.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 85,
+      "rowBytes": [
+        8,
+        6,
+        85,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          80.0,
+          0.0,
+          -2984.0
+        ],
+        "facingByte": 128,
+        "facingLowBits": 0,
+        "facingHighBits": 128
+      }
+    },
+    {
+      "index": 86,
+      "rowBytes": [
+        2,
+        6,
+        86,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -1777.0,
+          0.0,
+          -651.0
+        ],
+        "facingByte": 16,
+        "facingLowBits": 0,
+        "facingHighBits": 16
+      }
+    },
+    {
+      "index": 87,
+      "rowBytes": [
+        1,
+        5,
+        87,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          -1463.0,
+          0.0,
+          222.0
+        ],
+        "facingByte": 16,
+        "facingLowBits": 0,
+        "facingHighBits": 16
+      }
+    },
+    {
+      "index": 88,
+      "rowBytes": [
+        9,
+        2,
+        11,
+        0
+      ],
+      "spawn": {
+        "pos": [
+          1200.0,
+          0.0,
+          1000.0
+        ],
+        "facingByte": 120,
+        "facingLowBits": 0,
+        "facingHighBits": 120
+      }
+    }
+  ]
+}

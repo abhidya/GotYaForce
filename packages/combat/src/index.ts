@@ -56,6 +56,13 @@ export {
   type ShotActionDef,
   type SpecialActionDef,
 } from "./actionProfiles.js";
+export {
+  PARAM_TIER_RESET,
+  PARAM_TIER_TIMER_FRAMES,
+  applyActorParamTierDelta127,
+  applyActorParamTierDelta63,
+  resetActorParamTier,
+} from "./paramTier.js";
 export { stepAI } from "./ai.js";
 
 // --- Borg-stats registry ----------------------------------------------------------------

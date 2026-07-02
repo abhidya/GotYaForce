@@ -27,8 +27,20 @@ import {
 import { actionProfileForProfile, type MeleeActionDef, type ShotActionDef } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
 import { typeDamageMultiplier } from "./typeDamage.js";
-import type { BorgRuntime, Projectile, ProjectileVisualKind } from "./types.js";
+import type {
+  BorgRuntime,
+  Projectile,
+  ProjectileVisualKind,
+  RectStageBounds,
+  StageCollision,
+  StageCollisionTriangle,
+} from "./types.js";
 import projectileVisualFamilies from "./data/projectileVisualFamilies.json" with { type: "json" };
+
+export interface ProjectileContext {
+  bounds: RectStageBounds;
+  collision: StageCollision | null;
+}
 
 // ---------------------------------------------------------------------------------------
 // Invincibility timer — DIRECT PORT of the decompiled countdown (behavior-notes.md s4a).
@@ -57,7 +69,7 @@ export function stepCooldowns(b: BorgRuntime): void {
 }
 
 // ---------------------------------------------------------------------------------------
-// Lock-on (R) and switch-lock (Z).
+// Enemy lock-on (R switch-lock) and ally lock-on (Z).
 //
 // TUNED, and CHECKED CLOSED (2026-07-01, behavior-notes.md s4q): this is not a partially-derived
 // stand-in awaiting a future decode — a thorough corpus search (borg state-machine dispatch,
@@ -72,6 +84,10 @@ export function stepCooldowns(b: BorgRuntime): void {
 // ---------------------------------------------------------------------------------------
 function isEnemyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
   return o.alive && o.team !== self.team && o.uid !== self.uid;
+}
+
+function isAllyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
+  return o.alive && o.team === self.team && o.uid !== self.uid;
 }
 
 function canReceiveHit(self: BorgRuntime, o: BorgRuntime): boolean {
@@ -112,7 +128,7 @@ export function acquireLock(self: BorgRuntime, all: BorgRuntime[]): string | nul
   return best;
 }
 
-/** Cycle to the next enemy by distance (Z = switch lock-on target). */
+/** Cycle to the next enemy by distance (R = switch lock-on target). */
 export function cycleLock(self: BorgRuntime, all: BorgRuntime[]): string | null {
   const enemies = all
     .filter((o) => isEnemyAlive(self, o) && distXZ(self.pos, o.pos) <= LOCK.RANGE)
@@ -121,6 +137,22 @@ export function cycleLock(self: BorgRuntime, all: BorgRuntime[]): string | null 
   const curIdx = enemies.findIndex((o) => o.uid === self.lockTarget);
   const next = enemies[(curIdx + 1) % enemies.length];
   return next ? next.uid : null;
+}
+
+/** Z ally-lock target selection. CONFIRMED-ASSET input, TUNED nearest-ally selection.
+ * The original ally charge/power-up behavior is not decoded yet, so this only records a
+ * same-team target for HUD/debug/future mechanics and never redirects enemy attacks. */
+export function acquireAllyLock(self: BorgRuntime, all: BorgRuntime[]): string | null {
+  let best: string | null = null;
+  let bestDist = Infinity;
+  for (const o of all) {
+    if (!isAllyAlive(self, o)) continue;
+    const d = distXZ(self.pos, o.pos);
+    if (d > LOCK.RANGE || d >= bestDist) continue;
+    bestDist = d;
+    best = o.uid;
+  }
+  return best;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -488,6 +520,7 @@ export function stepProjectiles(
   all: BorgRuntime[],
   profiles: Map<string, BorgProfile>,
   byUid: Map<string, BorgRuntime>,
+  ctx?: ProjectileContext,
 ): Projectile[] {
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
@@ -511,6 +544,7 @@ export function stepProjectiles(
     }
 
     pr.pos = add(pr.pos, pr.vel as Vec3);
+    if (ctx && !projectileInPlayArea(pr, ctx)) continue;
 
     // Hit test against any non-owner borg. Same-team hits use the derived 0.25x reducer.
     let consumed = false;
@@ -543,4 +577,76 @@ export function stepProjectiles(
     if (!consumed) survivors.push(pr);
   }
   return survivors;
+}
+
+function projectileInPlayArea(projectile: Projectile, ctx: ProjectileContext): boolean {
+  const { pos } = projectile;
+  if (pos.x < ctx.bounds.minX || pos.x > ctx.bounds.maxX || pos.z < ctx.bounds.minZ || pos.z > ctx.bounds.maxZ) {
+    return false;
+  }
+  if (!ctx.collision || ctx.collision.triangles.length === 0) return true;
+  return floorSurfaceYAt(ctx.collision, pos.x, pos.z, pos.y) != null;
+}
+
+function floorSurfaceYAt(
+  collision: StageCollision,
+  x: number,
+  z: number,
+  maxSurfaceY: number,
+): number | null {
+  const primary = candidateTriangles(collision, x, z);
+  const primaryBest = bestFloorFromCandidates(primary, x, z, maxSurfaceY);
+  if (primaryBest != null || primary.length === collision.triangles.length) return primaryBest;
+  return bestFloorFromCandidates(collision.triangles, x, z, maxSurfaceY);
+}
+
+function candidateTriangles(collision: StageCollision, x: number, z: number): StageCollisionTriangle[] {
+  const grid = collision.grid;
+  if (!grid) return collision.triangles;
+  const cx = Math.floor((x - grid.origin.x) / grid.cellSize.x);
+  const cz = Math.floor((z - grid.origin.z) / grid.cellSize.z);
+  if (cx < 0 || cz < 0 || cx >= grid.gridCells.x || cz >= grid.gridCells.z) return [];
+  const cell = grid.cells[cz * grid.gridCells.x + cx];
+  if (!cell || cell.triangleIndices.length === 0) return [];
+  const out: StageCollisionTriangle[] = [];
+  for (const index of cell.triangleIndices) {
+    const tri = collision.triangles[index];
+    if (tri) out.push(tri);
+  }
+  return out;
+}
+
+function bestFloorFromCandidates(
+  triangles: readonly StageCollisionTriangle[],
+  x: number,
+  z: number,
+  maxSurfaceY: number,
+): number | null {
+  let best: number | null = null;
+  for (const tri of triangles) {
+    if (tri.marker !== 0xcccccccc) continue;
+    if (!isFiniteVec(tri.normal)) continue;
+    if (tri.normal.y < 0.5) continue;
+    if (!tri.vertices.every(isFiniteVec)) continue;
+    if (x < tri.bounds2d.minX || x > tri.bounds2d.maxX || z < tri.bounds2d.minZ || z > tri.bounds2d.maxZ) continue;
+    const y = yAtTriangleXZ(tri, x, z);
+    if (y == null || y > maxSurfaceY) continue;
+    if (best == null || y > best) best = y;
+  }
+  return best;
+}
+
+function yAtTriangleXZ(tri: StageCollisionTriangle, x: number, z: number): number | null {
+  const [a, b, c] = tri.vertices;
+  const denom = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+  if (Math.abs(denom) < 1e-5) return null;
+  const wa = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denom;
+  const wb = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denom;
+  const wc = 1 - wa - wb;
+  if (wa < -1e-4 || wb < -1e-4 || wc < -1e-4) return null;
+  return wa * a.y + wb * b.y + wc * c.y;
+}
+
+function isFiniteVec(v: Vec3): boolean {
+  return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
 }

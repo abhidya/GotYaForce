@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { createBattle, emptyInput } from "../packages/combat/dist/index.js";
+import { createBattle, emptyInput, JUMP } from "../packages/combat/dist/index.js";
 import { hitBin } from "../packages/formats/dist/index.js";
 import {
   CHALLENGE_DIFFICULTIES,
@@ -14,6 +14,7 @@ import {
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const STAGE_ID = "st00";
 const PLAYER_ID = "p0";
+const GROUND_SNAP_UP = 35;
 
 const borgsData = readJson("packages/assets/data/borgs.json");
 const stageCatalog = readJson("apps/game/public/stages/manifest.json");
@@ -202,10 +203,68 @@ function assertSane(frame) {
       if (!Number.isFinite(borg.pos[key])) throw new Error(`NaN pos.${key} on ${borg.uid} at frame ${frame}`);
       if (!Number.isFinite(borg.vel[key])) throw new Error(`NaN vel.${key} on ${borg.uid} at frame ${frame}`);
     }
+    const floorY = floorSurfaceYAt(stage.collision, borg.pos.x, borg.pos.z, borg.pos.y - JUMP.GROUND_Y + GROUND_SNAP_UP);
+    if (floorY == null) {
+      throw new Error(`1P Challenge smoke failed: ${borg.uid} left stage floor at frame ${frame} pos=${JSON.stringify(borg.pos)}`);
+    }
   }
   for (const value of Object.values(battle.state.energy)) {
     if (!Number.isFinite(value)) throw new Error(`NaN team energy at frame ${frame}`);
   }
+}
+
+function floorSurfaceYAt(collision, x, z, maxSurfaceY) {
+  let best = null;
+  const primary = candidateTriangles(collision, x, z);
+  best = bestFloorFromCandidates(primary, x, z, maxSurfaceY);
+  if (best != null || primary.length === collision.triangles.length) return best;
+  return bestFloorFromCandidates(collision.triangles, x, z, maxSurfaceY);
+}
+
+function candidateTriangles(collision, x, z) {
+  const grid = collision.grid;
+  if (!grid) return collision.triangles;
+  const cx = Math.floor((x - grid.origin.x) / grid.cellSize.x);
+  const cz = Math.floor((z - grid.origin.z) / grid.cellSize.z);
+  if (cx < 0 || cz < 0 || cx >= grid.gridCells.x || cz >= grid.gridCells.z) return [];
+  const cell = grid.cells[cz * grid.gridCells.x + cx];
+  if (!cell || cell.triangleIndices.length === 0) return [];
+  const out = [];
+  for (const index of cell.triangleIndices) {
+    const tri = collision.triangles[index];
+    if (tri) out.push(tri);
+  }
+  return out;
+}
+
+function bestFloorFromCandidates(triangles, x, z, maxSurfaceY) {
+  let best = null;
+  for (const tri of triangles) {
+    if (tri.marker !== 0xcccccccc) continue;
+    if (!isFiniteVec(tri.normal)) continue;
+    if (tri.normal.y < 0.5) continue;
+    if (!tri.vertices.every(isFiniteVec)) continue;
+    if (x < tri.bounds2d.minX || x > tri.bounds2d.maxX || z < tri.bounds2d.minZ || z > tri.bounds2d.maxZ) continue;
+    const y = yAtTriangleXZ(tri, x, z);
+    if (y == null || y > maxSurfaceY) continue;
+    if (best == null || y > best) best = y;
+  }
+  return best;
+}
+
+function yAtTriangleXZ(tri, x, z) {
+  const [a, b, c] = tri.vertices;
+  const denom = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+  if (Math.abs(denom) < 1e-5) return null;
+  const wa = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denom;
+  const wb = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denom;
+  const wc = 1 - wa - wb;
+  if (wa < -1e-4 || wb < -1e-4 || wc < -1e-4) return null;
+  return wa * a.y + wb * b.y + wc * c.y;
+}
+
+function isFiniteVec(v) {
+  return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
 }
 
 function energyChanged(before, after) {

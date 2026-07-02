@@ -1327,7 +1327,16 @@
   color: #fff;
   z-index: 10;
 }
-.gf-hud-meters { position: absolute; top: 12px; left: 12px; display: flex; flex-direction: column; gap: 8px; }
+.gf-hud-meters {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transform: scale(1.28);
+  transform-origin: top left;
+}
 .gf-meter { position: relative; width: 220px; height: 18px; display: flex; align-items: center; }
 .gf-meter-tab {
   position: relative;
@@ -1394,9 +1403,10 @@
 .gf-hud-alert.gf-hidden { display: none; }
 .gf-hud-timer {
   position: absolute;
-  top: 12px;
+  top: 18px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(1.2);
+  transform-origin: top center;
   min-width: 78px;
   height: 24px;
   display: grid;
@@ -1413,17 +1423,9 @@
   filter: drop-shadow(1px 1px 0 #000);
 }
 
-/* center lock-on reticle */
+/* World-space BattleScene marker owns lock-on; no fake centered HUD reticle. */
 .gf-hud-reticle {
-  position: absolute;
-  top: 44%;
-  left: 50%;
-  width: 78px;
-  height: 78px;
-  transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  transition: opacity 0.15s ease;
+  display: none;
 }
 .gf-hud-reticle.gf-hidden { opacity: 0; }
 .gf-reticle-ring {
@@ -1440,12 +1442,14 @@
 /* bottom-left HP gauge */
 .gf-hud-hp {
   position: absolute;
-  bottom: 16px;
-  left: 16px;
+  bottom: 34px;
+  left: 28px;
   width: 92px;
   height: 60px;
   display: grid;
   place-items: center;
+  transform: scale(1.35);
+  transform-origin: bottom left;
 }
 .gf-hp-face-marker {
   position: absolute;
@@ -1475,9 +1479,18 @@
 .gf-hud-hp.gf-critical .gf-hp-num { color: #fff; }
 
 /* bottom-right weapon prompts */
-.gf-hud-weapon { position: absolute; bottom: 16px; right: 16px; display: flex; align-items: flex-end; gap: 14px; }
-.gf-weapon-x { display: grid; place-items: center; width: 56px; height: 56px; }
-.gf-weapon-x .gf-x-glyph {
+.gf-hud-weapon {
+  position: absolute;
+  bottom: 34px;
+  right: 28px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  transform: scale(1.35);
+  transform-origin: bottom right;
+}
+.gf-weapon-special { display: grid; place-items: center; width: 56px; height: 56px; }
+.gf-weapon-special .gf-special-glyph {
   position: relative;
   z-index: 2;
   width: 26px;

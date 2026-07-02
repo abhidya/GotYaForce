@@ -148,8 +148,11 @@ export function stepMovement(
   b.pos.x = clamp(b.pos.x, ctx.bounds.minX, ctx.bounds.maxX);
   b.pos.z = clamp(b.pos.z, ctx.bounds.minZ, ctx.bounds.maxZ);
   resolveLateralCollision(ctx.collision, prevPos, b.pos, b.vel);
+  b.pos.x = clamp(b.pos.x, ctx.bounds.minX, ctx.bounds.maxX);
+  b.pos.z = clamp(b.pos.z, ctx.bounds.minZ, ctx.bounds.maxZ);
   resolveCeilingCollision(ctx.collision, prevPos, b.pos, b.vel);
 
+  keepOnStageFloor(ctx.collision, prevPos, b.pos, b.vel);
   const groundY = groundYAt(ctx.collision, b.pos.x, b.pos.z, b.pos.y);
   if (b.pos.y <= groundY) {
     b.pos.y = groundY;
@@ -256,6 +259,23 @@ function groundYAt(collision: StageCollision | null, x: number, z: number, curre
   // platforms/ceilings; exact step-up limits still need a DOL mechanics trace.
   const surfaceY = floorSurfaceYAt(collision, x, z, currentY - JUMP.GROUND_Y + GROUND_SNAP_UP);
   return surfaceY == null ? JUMP.GROUND_Y : surfaceY + JUMP.GROUND_Y;
+}
+
+function keepOnStageFloor(
+  collision: StageCollision | null,
+  previous: Vec3,
+  current: Vec3,
+  velocity: Vec3,
+): void {
+  if (!collision || collision.triangles.length === 0) return;
+  const maxSurfaceY = current.y - JUMP.GROUND_Y + GROUND_SNAP_UP;
+  if (floorSurfaceYAt(collision, current.x, current.z, maxSurfaceY) != null) return;
+  if (floorSurfaceYAt(collision, previous.x, previous.z, maxSurfaceY) == null) return;
+
+  current.x = previous.x;
+  current.z = previous.z;
+  velocity.x = 0;
+  velocity.z = 0;
 }
 
 function floorSurfaceYAt(

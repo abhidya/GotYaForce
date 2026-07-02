@@ -116,19 +116,16 @@ const MODE2_DISTANCE_DECAY_DERIVED = CAMERA_MODE1_DISTANCE_DECAY;
 const MODE2_YAW_STEP_RADIANS_DERIVED = CAMERA_MODE2_YAW_STEP_BAM * BAM16_TO_RADIANS;
 const MODE2_EYE_RISE_PER_FRAME_DERIVED = CAMERA_MODE2_EYE_RISE_PER_FRAME;
 
-/** TUNED: multi-actor dynamic framing. No ROM evidence (static or live-trace) of a 2-vs-3+
- * spread-apart zoom/framing algorithm was found — behavior-notes.md's camera section documents
- * an exhaustive corpus search that came up empty for this specific mechanic. This is a
- * standard-fighting-game-camera design choice (widen the shot to keep all active combatants in
- * view), not a port of confirmed ROM logic. */
+/** TUNED: multi-actor dynamic framing. Disabled until a ROM/trace rule is found: the old
+ * widen-to-fit overlay let escaped actors drag the camera into a huge gray void. */
 const MULTI_ACTOR_ZOOM_TUNED = {
   /** Extra world-unit distance added per unit of spread beyond the base single-target framing. */
-  spreadToDistanceGain: 0.55,
+  spreadToDistanceGain: 0,
   /** Cap so the camera doesn't zoom out indefinitely on a huge stage. */
-  maxExtraDistance: 900,
+  maxExtraDistance: 0,
   /** Extra height gained alongside the zoom-out, so wide shots read from slightly above. */
-  spreadToHeightGain: 0.18,
-  maxExtraHeight: 260,
+  spreadToHeightGain: 0,
+  maxExtraHeight: 0,
 };
 
 const _focus = new THREE.Vector3();
@@ -174,6 +171,34 @@ export class BattleCamera {
   private approachEyeY = 0;
 
   constructor(private readonly opts: BattleCameraOptions) {}
+
+  snapTo(primary: CameraFollowTarget | null): void {
+    this.approachActive = false;
+    this.approachDistance = 0;
+    this.approachEyeY = 0;
+    if (!primary) {
+      this.initialized = false;
+      return;
+    }
+
+    const { camera, controlsTarget } = this.opts;
+    _focus.set(primary.pos.x, primary.pos.y + CAMERA_TARGET_Y_OFFSET_DERIVED, primary.pos.z);
+    _trail.set(-Math.sin(primary.rotY), 0, -Math.cos(primary.rotY));
+    if (_trail.lengthSq() <= MODE1_TRAIL_EPSILON_DERIVED * MODE1_TRAIL_EPSILON_DERIVED) {
+      _trail.set(0, 0, -1);
+    } else {
+      _trail.normalize();
+    }
+    const distance = CAMERA_FOLLOW_MAX_DISTANCE_TRACE;
+    controlsTarget.copy(_focus);
+    this.goalEye.set(
+      _focus.x + _trail.x * distance,
+      _focus.y + distance * CAMERA_PITCH_TAN_DERIVED,
+      _focus.z + _trail.z * distance,
+    );
+    camera.position.copy(this.goalEye);
+    this.initialized = true;
+  }
 
   update(
     primary: CameraFollowTarget | null,

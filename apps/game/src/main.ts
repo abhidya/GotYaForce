@@ -124,10 +124,11 @@ const DEFAULT_FORCE_SLOTS: ForceSlot[] = [
 const AUDIO_CUES = {
   menuBgm: "bgm00",
   battleBgm: "bgm01",
-  confirm: "se00_00",
-  back: "se00_01",
-  edit: "se00_02",
+  confirm: null,
+  back: null,
+  edit: null,
 } as const;
+const ENABLE_TUNED_COMBAT_SFX = new URLSearchParams(window.location.search).has("tunedCombatSfx");
 
 // Combat SFX-per-animation-slot mapping. TUNED, NOT DERIVED: behavior-notes.md (t) confirms
 // there is no recovered ROM per-action audio-event table to port (AnimAudioEventLookup @
@@ -137,8 +138,9 @@ const AUDIO_CUES = {
 // se00_04 @ ~3.0s) are short enough to work as one-shot hit/impact stingers — the other three
 // (se00_00/02/03, all exactly 12.0s) are clearly loops/jingles, not hit-length one-shots, so
 // they're deliberately NOT reused here for combat hits. Until real per-move SFX IDs are
-// recovered from the ROM, every borg's melee/shot/special/hit/down/death events share these
-// same two generic stingers rather than inventing fake per-borg specificity.
+// recovered from the ROM, every borg's melee/shot/special/hit/down/death events would share these
+// same two generic stingers rather than inventing fake per-borg specificity. They are opt-in only
+// via ?tunedCombatSfx=1 because the default path should not play known-wrong combat audio.
 const COMBAT_SFX: Partial<Record<AnimSlot, string>> = {
   melee: "se00_04",
   melee_alt: "se00_04",
@@ -149,9 +151,33 @@ const COMBAT_SFX: Partial<Record<AnimSlot, string>> = {
   death: "se00_01",
 };
 
+const COMBAT_SFX_MIN_GAP_MS: Partial<Record<AnimSlot, number>> = {
+  melee: 220,
+  melee_alt: 220,
+  shoot: 180,
+  special: 450,
+  hit: 180,
+  down: 450,
+  death: 700,
+};
+const lastCombatSfxAt = new Map<string, number>();
+
 function playCombatSfx(slot: AnimSlot): void {
+  if (!ENABLE_TUNED_COMBAT_SFX) return;
   const key = COMBAT_SFX[slot];
-  if (key) playSfx(key);
+  if (!key) return;
+  const now = performance.now();
+  const minGap = COMBAT_SFX_MIN_GAP_MS[slot] ?? 250;
+  const last = lastCombatSfxAt.get(key) ?? -Infinity;
+  if (now - last < minGap) return;
+  lastCombatSfxAt.set(key, now);
+  playSfx(key);
+}
+
+type BattleEventCue = AnimSlot;
+
+function playBattleEventSfx(cue: BattleEventCue): void {
+  playCombatSfx(cue);
 }
 
 function selectedForce(): string[] {
@@ -250,6 +276,7 @@ const canvas = document.getElementById("app") as HTMLCanvasElement;
 if (!uiElement) throw new Error("Missing #ui");
 const ui = uiElement;
 ui.style.pointerEvents = "auto"; // the UI component library uses real buttons.
+const ENABLE_BATTLE_DEBUG_DATASET = new URLSearchParams(window.location.search).has("debugBattle");
 
 // preserveDrawingBuffer lets us snapshot the canvas via toDataURL for headless
 // verification (the preview tab is backgrounded so rAF render is throttled).
@@ -320,7 +347,14 @@ function buildClip(json: BakedClip): THREE.AnimationClip {
   for (const bone of json.bones) {
     const node = `JOBJ_${bone.i}`;
     if (bone.pos?.length === json.frameCount * 3) {
-      tracks.push(new THREE.VectorKeyframeTrack(`${node}.position`, times, Float32Array.from(bone.pos)));
+      const values = Float32Array.from(bone.pos);
+      if (bone.i === 0) {
+        for (let i = 0; i < values.length; i += 3) {
+          values[i] = 0;
+          values[i + 2] = 0;
+        }
+      }
+      tracks.push(new THREE.VectorKeyframeTrack(`${node}.position`, times, values));
     }
     if (bone.rot?.length === json.frameCount * 4) {
       tracks.push(new THREE.QuaternionKeyframeTrack(`${node}.quaternion`, times, Float32Array.from(bone.rot)));
@@ -698,7 +732,6 @@ async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.Animation
 const battleScene = new BattleScene(battleRoot, {
   loadModel: loadBorgModel,
   loadClip: loadBorgClip,
-  onSlotEnter: (_borgId, slot) => playCombatSfx(slot),
 });
 const battleCamera = new BattleCamera({ camera, controlsTarget: controls.target });
 const fallbackStageBounds: RectStageBounds = {
@@ -794,7 +827,14 @@ function stageModelPaths(manifest: StageManifest): string[] {
 
 async function loadStageCollision(stageId: string, manifest: StageManifest): Promise<StageResources> {
   const collisionFiles = [...(manifest.collision ?? [])].sort((a, b) => a.path.localeCompare(b.path));
-  if (collisionFiles.length === 0) return { bounds: undefined, collision: undefined };
+  if (collisionFiles.length === 0) {
+    const fallbackId = baseCollisionStageId(stageId);
+    if (fallbackId && fallbackId !== stageId && isExportedStageId(fallbackId)) {
+      const fallbackManifest = await fetch(`/stages/${fallbackId}/manifest.json`).then((r) => r.json() as Promise<StageManifest>);
+      return loadStageCollision(fallbackId, fallbackManifest);
+    }
+    return { bounds: undefined, collision: undefined };
+  }
 
   try {
     const parsed = [];
@@ -869,6 +909,16 @@ function layerIndexFromCollisionPath(path: string): number | null {
   return match ? Number(match[1]) : null;
 }
 
+function baseCollisionStageId(stageId: string): string | null {
+  const match = /^st([0-9a-f]{2})$/i.exec(stageId);
+  if (!match) return null;
+  const byteHex = match[1];
+  if (!byteHex) return null;
+  const byte = Number.parseInt(byteHex, 16);
+  if (!Number.isFinite(byte) || byte < 0x20 || byte >= 0x60) return null;
+  return `st${(byte & 0x1f).toString(16).padStart(2, "0")}`;
+}
+
 function sameHitGridHeader(a: ReturnType<typeof hitBin.parseStageHitGrid>, b: ReturnType<typeof hitBin.parseStageHitGrid>): boolean {
   return (
     a.header.cellSize.x === b.header.cellSize.x &&
@@ -904,7 +954,7 @@ async function loadStage(stageId: string): Promise<StageResources> {
         object.frustumCulled = false;
         const materials = Array.isArray(object.material) ? object.material : [object.material];
         for (const material of materials) {
-          material.side = THREE.DoubleSide;
+          material.side = THREE.FrontSide;
           if ("metalness" in material) (material as THREE.MeshStandardMaterial).metalness = 0;
         }
       }
@@ -978,7 +1028,8 @@ async function playPendingBgm(): Promise<void> {
   }
 }
 
-function playSfx(key: string): void {
+function playSfx(key: string | null): void {
+  if (!key) return;
   void initAudio().then((audio) => {
     if (!audio) return;
     void audio.playSfx(key).catch(() => undefined);
@@ -1256,6 +1307,20 @@ interface BattleSession {
   resolved: boolean;
 }
 
+interface BattleAudioBorgSnapshot {
+  hp: number;
+  alive: boolean;
+  state: BorgRuntime["state"];
+  anim: string;
+  lockTarget: string | null;
+  allyLockTarget: string | null;
+}
+
+interface BattleAudioSnapshot {
+  borgs: Map<string, BattleAudioBorgSnapshot>;
+  localActiveUid: string | null;
+}
+
 let session: BattleSession | null = null;
 let simAccumulator = 0;
 const SIM_DT = 1 / 60;
@@ -1305,37 +1370,125 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   battleScene.clear();
   flow.screen = "battle";
   // Prime the scene + HUD on frame 0.
-  battleScene.sync(battle.state.borgs, battle.state.projectiles);
+  const focusUid = localFocusBorg()?.uid ?? null;
+  battleScene.sync(battle.state.borgs, battle.state.projectiles, focusUid);
+  const focus = localFocusBorg();
+  const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
+  battleCamera.snapTo(focus && focusPos ? { pos: focusPos, rotY: focus.rotY } : null);
   updateHud();
+}
+
+function localActiveUid(): string | null {
+  if (!session) return null;
+  return session.battle.state.activeUidByPlayer[session.localPlayerId] ?? null;
 }
 
 function localActiveBorg(): BorgRuntime | null {
   if (!session) return null;
-  const uid = session.battle.state.activeUidByPlayer[session.localPlayerId];
+  const uid = localActiveUid();
   if (!uid) return null;
   return session.battle.state.borgs.find((b) => b.uid === uid) ?? null;
+}
+
+function localFocusBorg(): BorgRuntime | null {
+  if (!session) return null;
+  const active = localActiveBorg();
+  if (active?.alive) return active;
+
+  // TUNED: FIGHT ALONE can leave the player slot empty while a CPU ally is still
+  // alive. Keep presentation on the local team instead of drifting to stage center.
+  const fallbackTeam = active?.team ?? 0;
+  return (
+    session.battle.state.borgs.find((b) => b.alive && b.team === fallbackTeam) ??
+    session.battle.state.borgs.find((b) => b.alive) ??
+    null
+  );
 }
 
 function updateHud(): void {
   if (!session) return;
   const st = session.battle.state;
-  const active = localActiveBorg();
+  const focus = localFocusBorg();
   const ammoMax = 6;
   session.hud.update({
     allyEnergy: st.energy[0] ?? 0,
     allyMax: session.allyMax,
     enemyEnergy: st.energy[1] ?? 0,
     enemyMax: session.enemyMax,
-    hp: active?.hp ?? 0,
-    maxHp: active?.maxHp ?? 1,
-    ammo: active?.ammo ?? 0,
-    reload01: active ? clamp01((active.ammo ?? 0) / ammoMax) : 0,
-    cooldown01: active ? (active.cooldowns?.["special"] ? clamp01(1 - active.cooldowns["special"] / 90) : 1) : 1,
-    borgId: active?.borgId ?? DEFAULT_LEAD,
-    lockOn: Boolean(active?.lockTarget),
+    hp: focus?.hp ?? 0,
+    maxHp: focus?.maxHp ?? 1,
+    ammo: focus?.ammo ?? 0,
+    reload01: focus ? clamp01((focus.ammo ?? 0) / ammoMax) : 0,
+    cooldown01: focus ? (focus.cooldowns?.["special"] ? clamp01(1 - focus.cooldowns["special"] / 90) : 1) : 1,
+    borgId: focus?.borgId ?? DEFAULT_LEAD,
+    lockOn: Boolean(focus?.lockTarget),
     timeRemainingFrames: st.timeRemainingFrames,
     alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= session.allyMax * 0.25,
   });
+}
+
+function snapshotBattleAudio(battle: Battle, localPlayerId: string): BattleAudioSnapshot {
+  const borgs = new Map<string, BattleAudioBorgSnapshot>();
+  for (const b of battle.state.borgs) {
+    borgs.set(b.uid, {
+      hp: b.hp,
+      alive: b.alive,
+      state: b.state,
+      anim: b.anim,
+      lockTarget: b.lockTarget,
+      allyLockTarget: b.allyLockTarget,
+    });
+  }
+  return {
+    borgs,
+    localActiveUid: battle.state.activeUidByPlayer[localPlayerId] ?? null,
+  };
+}
+
+function emitBattleAudioEdges(before: BattleAudioSnapshot, after: BattleAudioSnapshot): void {
+  const emitted = new Set<BattleEventCue>();
+  const emit = (cue: BattleEventCue): void => {
+    if (emitted.has(cue)) return;
+    emitted.add(cue);
+    playBattleEventSfx(cue);
+  };
+
+  const localNext = after.localActiveUid ? after.borgs.get(after.localActiveUid) ?? null : null;
+  const localPrev = after.localActiveUid ? before.borgs.get(after.localActiveUid) ?? null : null;
+  if (localNext && localPrev) {
+    if (localNext.state === "death" && localPrev.state !== "death") emit("death");
+    else if (localNext.state === "down" && localPrev.state !== "down") emit("down");
+    else if (localNext.state === "hit" && (localPrev.state !== "hit" || localNext.hp < localPrev.hp)) emit("hit");
+    else if (localNext.state === "special" && localPrev.state !== "special") emit("special");
+    else if (
+      localNext.state === "attack" &&
+      localNext.anim === "shoot" &&
+      (localPrev.state !== "attack" || localPrev.anim !== "shoot")
+    ) {
+      emit("shoot");
+    } else if (
+      localNext.state === "attack" &&
+      localNext.anim === "melee" &&
+      (localPrev.state !== "attack" || localPrev.anim !== "melee")
+    ) {
+      emit("melee");
+    } else if (localNext.hp < localPrev.hp) {
+      emit("hit");
+    }
+  }
+
+  const localTargetUid = localNext?.lockTarget ?? null;
+  for (const [uid, next] of after.borgs) {
+    const prev = before.borgs.get(uid);
+    if (uid !== localTargetUid || uid === after.localActiveUid) continue;
+    if (!prev) continue;
+    if (next.hp >= prev.hp && next.state === prev.state) continue;
+
+    if (next.state === "death" && prev.state !== "death") emit("death");
+    else if (next.state === "down" && prev.state !== "down") emit("down");
+    else if (next.state === "hit" && (prev.state !== "hit" || next.hp < prev.hp)) emit("hit");
+    else if (next.hp < prev.hp) emit("hit");
+  }
 }
 
 function clamp01(v: number): number {
@@ -1403,13 +1556,19 @@ function stepBattle(dt: number): void {
 
   let steps = 0;
   while (simAccumulator >= SIM_DT && steps < 15) {
+    const audioBefore = snapshotBattleAudio(battle, session.localPlayerId);
     battle.step(SIM_DT, inputs);
+    emitBattleAudioEdges(audioBefore, snapshotBattleAudio(battle, session.localPlayerId));
     simAccumulator -= SIM_DT;
     steps += 1;
     if (battle.state.result !== "ongoing") break;
   }
 
-  battleScene.sync(battle.state.borgs, battle.state.projectiles);
+  battleScene.sync(
+    battle.state.borgs,
+    battle.state.projectiles,
+    localFocusBorg()?.uid ?? null,
+  );
   updateHud();
 
   if (battle.state.result !== "ongoing") resolveBattle();
@@ -1420,14 +1579,44 @@ function stepBattle(dt: number): void {
 // multi-actor widen-to-fit heuristic since no ROM multi-actor framing algorithm was found).
 function followCamera(): void {
   if (!session) return;
-  const active = localActiveBorg();
-  const target = active ? battleScene.positionOf(active.uid) : null;
-  const primary = active && target ? { pos: target, rotY: active.rotY } : null;
+  const focus = localFocusBorg();
+  const target = focus ? battleScene.positionOf(focus.uid) : null;
+  const primary = focus && target ? { pos: target, rotY: focus.rotY } : null;
   const liveActorPositions = session.battle.state.borgs
     .filter((b) => b.alive)
     .map((b) => battleScene.positionOf(b.uid))
     .filter((p): p is THREE.Vector3 => p !== null);
   battleCamera.update(primary, liveActorPositions, session.stageBounds);
+}
+
+function updateBattleDebugDataset(): void {
+  if (!ENABLE_BATTLE_DEBUG_DATASET) return;
+  if (!session || flow.screen !== "battle") {
+    delete ui.dataset["gfBattleDebug"];
+    return;
+  }
+  const activeUid = localActiveUid();
+  const focusUid = localFocusBorg()?.uid ?? null;
+  const rounded = (v: number): number => Math.round(v * 10) / 10;
+  ui.dataset["gfBattleDebug"] = JSON.stringify({
+    activeUid,
+    focusUid,
+    camera: [rounded(camera.position.x), rounded(camera.position.y), rounded(camera.position.z)],
+    target: [rounded(controls.target.x), rounded(controls.target.y), rounded(controls.target.z)],
+    bounds: session.stageBounds,
+    borgs: session.battle.state.borgs.map((b) => ({
+      uid: b.uid,
+      team: b.team,
+      borgId: b.borgId,
+      alive: b.alive,
+      hp: b.hp,
+      state: b.state,
+      pos: [rounded(b.pos.x), rounded(b.pos.y), rounded(b.pos.z)],
+      vel: [rounded(b.vel.x), rounded(b.vel.y), rounded(b.vel.z)],
+      lockTarget: b.lockTarget,
+      allyLockTarget: b.allyLockTarget,
+    })),
+  });
 }
 
 function resolveBattle(): void {
@@ -1524,6 +1713,7 @@ function tick(): void {
     battleScene.update(dt);
     if (flow.screen === "battle") followCamera();
   }
+  updateBattleDebugDataset();
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(tick);

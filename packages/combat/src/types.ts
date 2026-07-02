@@ -1,6 +1,7 @@
 // Public types for the deterministic battle API. Mirrors the contract in the task brief.
 // Control scheme (CONFIRMED from the game's controls screen + lock-relative movement trace):
-//   A=jump, B=attack(melee/contextual), Y=special, Z=switch lock-on target,
+//   A=jump, B=attack(melee/contextual), Y=special, R=switch lock-on target,
+//   Z=ally lock-on (target selection only; ally charge/power-up behavior not decoded yet),
 //   stick=move in the target-relative frame while locked. Pure left/right is a dodge step
 //   (surfaced as `dash`); forward+left/right is circle-strafe.
 
@@ -21,9 +22,11 @@ export interface PlayerInput {
   special: boolean;
   /** Acquire / hold lock-on for non-player callers; human-controlled borgs auto-lock by default. */
   lockOn: boolean;
-  /** Z — cycle lock-on target. */
+  /** R — cycle lock-on target. */
   switchLock: boolean;
-  /** Switch to the next borg in the force (manual). */
+  /** Z — ally lock-on request. Target selection is modeled; ally charge behavior is still unknown. */
+  allyLock: boolean;
+  /** Reserved/prototype; Challenge battle core ignores manual switching until original proof exists. */
   switchBorg: boolean;
   /** Step/dodge (stick-action). */
   dash: boolean;
@@ -38,6 +41,7 @@ export function emptyInput(): PlayerInput {
     special: false,
     lockOn: false,
     switchLock: false,
+    allyLock: false,
     switchBorg: false,
     dash: false,
   };
@@ -57,6 +61,15 @@ export type BorgState =
   | "spawn";
 
 /** Live, per-frame runtime state of one borg instance. */
+export interface ActorParamTier {
+  /** `actor+0x74a`, reset by C `reset_actor_param_tier` to 0x10. */
+  tier: number;
+  /** `actor+0x74e`, signed byte accumulator touched by `apply_actor_param_tier_delta_63`. */
+  deltaAccum: number;
+  /** `actor+0x750`, set to 900 by `apply_actor_param_tier_delta_63` when accumulator is nonzero. */
+  timerFrames: number;
+}
+
 export interface BorgRuntime {
   uid: string;
   borgId: string;
@@ -85,8 +98,12 @@ export interface BorgRuntime {
   cooldowns: Record<string, number>;
   /** Invincibility timer (struct+0x720, frames; counts down 1/frame). */
   invincTimer: number;
+  /** Proven actor param-tier state at `+0x74a/+0x74e/+0x750`; effect table mapping still unported. */
+  paramTier: ActorParamTier;
   /** Current lock-on target uid, or null. */
   lockTarget: string | null;
+  /** Current ally lock-on target uid, or null. Z control is asset-confirmed; downstream behavior is unknown. */
+  allyLockTarget: string | null;
   alive: boolean;
 }
 
@@ -148,11 +165,19 @@ export interface StageCollision {
   };
 }
 
+export interface SpawnPoint {
+  pos: Vec3;
+  /** Optional facing yaw in radians; omitted means face arena center. */
+  rotY?: number;
+}
+
 export interface BattleConfig {
   stageId: string;
   forces: ForceConfig[];
   bounds?: StageBounds;
   collision?: StageCollision;
+  /** Optional exact per-force spawn points from original stage/slot tables. */
+  spawnPoints?: SpawnPoint[];
   /** Original battle timer in frames; omitted means no timer. */
   timeLimitFrames?: number;
 }

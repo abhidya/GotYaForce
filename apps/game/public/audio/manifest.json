@@ -1,6 +1,7 @@
 {
-  "generated": "2026-06-30",
-  "source": "Gotcha Force (GG4E) poq_adx_usa.afs \u2014 CRI ADX, decoded with ffmpeg",
+  "generated": "2026-07-02",
+  "source": "Gotcha Force (GG4E) poq_adx_usa.afs - CRI ADX decoded with ffmpeg",
+  "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
   "format": "OGG Vorbis",
   "counts": {
     "bgm": 33,
@@ -9,595 +10,1689 @@
   },
   "totalBytes": 39818078,
   "totalMB": 37.97,
-  "notes": "Voices are a representative sample (first 2 clips per character pl00-pl12) out of ~2075 total. bgm tracks <5s are jingles/stingers (loop=false).",
+  "notes": "BGM/SFX names follow poq_adx_usa.afs index mapping. Voice cues are generic/sample keys until a traced in-game voice table is available. AFS 2113..2114 are MPEG/Sofdec-like members and are excluded.",
   "files": [
     {
       "key": "bgm00",
       "type": "bgm",
       "path": "audio/bgm/bgm00.ogg",
       "durationSec": 96.967,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 0,
+      "sourceOffset": 524288,
+      "sourceBytes": 4812800,
+      "sourceSha1": "378568b88ed07acff48670580a52f1a1dec58dd3"
     },
     {
       "key": "bgm01",
       "type": "bgm",
       "path": "audio/bgm/bgm01.ogg",
       "durationSec": 87.706,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1,
+      "sourceOffset": 5337088,
+      "sourceBytes": 4351374,
+      "sourceSha1": "1fbe45eab9fa0043224d2674ef7d9ed4522ba0fe"
     },
     {
       "key": "bgm01x",
       "type": "bgm",
       "path": "audio/bgm/bgm01x.ogg",
       "durationSec": 85.807,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 2,
+      "sourceOffset": 9689088,
+      "sourceBytes": 4257162,
+      "sourceSha1": "ad2733bc9f628f02a453dfb5ebe7c166c11746dd"
     },
     {
       "key": "bgm02",
       "type": "bgm",
       "path": "audio/bgm/bgm02.ogg",
       "durationSec": 40.868,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 3,
+      "sourceOffset": 13946880,
+      "sourceBytes": 2029568,
+      "sourceSha1": "1c527df2270ba2e3ce35762343cfad97b9661a41"
     },
     {
       "key": "bgm03",
       "type": "bgm",
       "path": "audio/bgm/bgm03.ogg",
       "durationSec": 57.215,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 4,
+      "sourceOffset": 15976448,
+      "sourceBytes": 2840576,
+      "sourceSha1": "c2501bd1c292680829a9a02e85e9a589b03d3b55"
     },
     {
       "key": "bgm04",
       "type": "bgm",
       "path": "audio/bgm/bgm04.ogg",
       "durationSec": 61.673,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 5,
+      "sourceOffset": 18817024,
+      "sourceBytes": 3061760,
+      "sourceSha1": "5dfa43cd84af32c4bf34753bd0a0f351838b1daf"
     },
     {
       "key": "bgm05",
       "type": "bgm",
       "path": "audio/bgm/bgm05.ogg",
       "durationSec": 60.651,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 6,
+      "sourceOffset": 21878784,
+      "sourceBytes": 3010560,
+      "sourceSha1": "8a25bb01af4ce71389fa1dfbd8618eee97821b4b"
     },
     {
       "key": "bgm06",
       "type": "bgm",
       "path": "audio/bgm/bgm06.ogg",
       "durationSec": 2.299,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 7,
+      "sourceOffset": 24889344,
+      "sourceBytes": 114102,
+      "sourceSha1": "21188aa8e0c6a7700857ed6094407e2f3ba989e7"
     },
     {
       "key": "bgm07",
       "type": "bgm",
       "path": "audio/bgm/bgm07.ogg",
       "durationSec": 51.967,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 8,
+      "sourceOffset": 25004032,
+      "sourceBytes": 2580480,
+      "sourceSha1": "856253993407f4652cb3c7180de7d43e76f19985"
     },
     {
       "key": "bgm08",
       "type": "bgm",
       "path": "audio/bgm/bgm08.ogg",
       "durationSec": 134.491,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 9,
+      "sourceOffset": 27584512,
+      "sourceBytes": 6674432,
+      "sourceSha1": "8d96e830916d53a113eb9111515be64e4f515a63"
     },
     {
       "key": "bgm09",
       "type": "bgm",
       "path": "audio/bgm/bgm09.ogg",
       "durationSec": 46.626,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 10,
+      "sourceOffset": 34258944,
+      "sourceBytes": 2314240,
+      "sourceSha1": "749ab82e98e9335be55ecb355768f2e65d56d4fd"
     },
     {
       "key": "bgm10",
       "type": "bgm",
       "path": "audio/bgm/bgm10.ogg",
       "durationSec": 53.389,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 11,
+      "sourceOffset": 36573184,
+      "sourceBytes": 2652160,
+      "sourceSha1": "d65154c9745e18b20e9513b0f922ae3202b3008f"
     },
     {
       "key": "bgm11",
       "type": "bgm",
       "path": "audio/bgm/bgm11.ogg",
       "durationSec": 137.231,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 12,
+      "sourceOffset": 39225344,
+      "sourceBytes": 6809600,
+      "sourceSha1": "01809a474da8c70b4db44e1fe438754def01a3d3"
     },
     {
       "key": "bgm12",
       "type": "bgm",
       "path": "audio/bgm/bgm12.ogg",
       "durationSec": 57.4,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 13,
+      "sourceOffset": 46034944,
+      "sourceBytes": 2850816,
+      "sourceSha1": "15ffe0abaf4abcb8088340f2d1f9b93090512c1e"
     },
     {
       "key": "bgm13",
       "type": "bgm",
       "path": "audio/bgm/bgm13.ogg",
       "durationSec": 50.342,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 14,
+      "sourceOffset": 48885760,
+      "sourceBytes": 2500608,
+      "sourceSha1": "fd61529a3d45c01940edc7fab705eda914adb634"
     },
     {
       "key": "bgm14",
       "type": "bgm",
       "path": "audio/bgm/bgm14.ogg",
       "durationSec": 91.116,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 15,
+      "sourceOffset": 51386368,
+      "sourceBytes": 4524032,
+      "sourceSha1": "7f04757c5680fb85a63450c51035a99d20232fed"
     },
     {
       "key": "bgm15",
       "type": "bgm",
       "path": "audio/bgm/bgm15.ogg",
       "durationSec": 98.421,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 16,
+      "sourceOffset": 55910400,
+      "sourceBytes": 4886528,
+      "sourceSha1": "77a2dbab69a6644a1709b7cfdf8cf2974e4860d1"
     },
     {
       "key": "bgm16",
       "type": "bgm",
       "path": "audio/bgm/bgm16.ogg",
       "durationSec": 260.459,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 17,
+      "sourceOffset": 60796928,
+      "sourceBytes": 12924928,
+      "sourceSha1": "09e0e7893ebca16854e2b32d007c9daf118ed309"
     },
     {
       "key": "bgm16x",
       "type": "bgm",
       "path": "audio/bgm/bgm16x.ogg",
       "durationSec": 166.07,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 18,
+      "sourceOffset": 73721856,
+      "sourceBytes": 8241152,
+      "sourceSha1": "2298d46d7133fa7aa21c219dad1c5e2e20fc6d14"
     },
     {
       "key": "bgm17",
       "type": "bgm",
       "path": "audio/bgm/bgm17.ogg",
       "durationSec": 20.388,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 19,
+      "sourceOffset": 81963008,
+      "sourceBytes": 1013760,
+      "sourceSha1": "8d45de002e2ed7c618bc73f6252bcc52b5610ce3"
     },
     {
       "key": "bgm18",
       "type": "bgm",
       "path": "audio/bgm/bgm18.ogg",
       "durationSec": 13.19,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 20,
+      "sourceOffset": 82976768,
+      "sourceBytes": 657408,
+      "sourceSha1": "12e4031d60879bbd4ed1153f0806cdf39633f222"
     },
     {
       "key": "bgm19",
       "type": "bgm",
       "path": "audio/bgm/bgm19.ogg",
       "durationSec": 11.037,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 21,
+      "sourceOffset": 83634176,
+      "sourceBytes": 547650,
+      "sourceSha1": "bf04cc99f924807aea0c9e1de1eb635f3bdca537"
     },
     {
       "key": "bgm20",
       "type": "bgm",
       "path": "audio/bgm/bgm20.ogg",
       "durationSec": 5.596,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 22,
+      "sourceOffset": 84183040,
+      "sourceBytes": 277686,
+      "sourceSha1": "be0881dec2deb33aca361d785b4022abe26a240f"
     },
     {
       "key": "bgm21",
       "type": "bgm",
       "path": "audio/bgm/bgm21.ogg",
       "durationSec": 10.077,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 23,
+      "sourceOffset": 84461568,
+      "sourceBytes": 500022,
+      "sourceSha1": "c35447f9365dcc0fba8a102dc518c8756576a08f"
     },
     {
       "key": "bgm22",
       "type": "bgm",
       "path": "audio/bgm/bgm22.ogg",
       "durationSec": 54.986,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 24,
+      "sourceOffset": 84963328,
+      "sourceBytes": 2729984,
+      "sourceSha1": "676378e3cd5edec4dee199264025dac8e1d7987e"
     },
     {
       "key": "bgm23",
       "type": "bgm",
       "path": "audio/bgm/bgm23.ogg",
       "durationSec": 57.096,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 25,
+      "sourceOffset": 87693312,
+      "sourceBytes": 2834432,
+      "sourceSha1": "1a1bb794ec5be74ba29251c02b31f88f36a088c7"
     },
     {
       "key": "bgm24",
       "type": "bgm",
       "path": "audio/bgm/bgm24.ogg",
       "durationSec": 85.264,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 26,
+      "sourceOffset": 90527744,
+      "sourceBytes": 4231168,
+      "sourceSha1": "b59baafd7f3e773344cb5e9185604df76f888a92"
     },
     {
       "key": "bgm25",
       "type": "bgm",
       "path": "audio/bgm/bgm25.ogg",
       "durationSec": 151.952,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 27,
+      "sourceOffset": 94758912,
+      "sourceBytes": 7540736,
+      "sourceSha1": "5260b3cc81dd706502396e94710907a1dd982faa"
     },
     {
       "key": "bgm26",
       "type": "bgm",
       "path": "audio/bgm/bgm26.ogg",
       "durationSec": 82.513,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 28,
+      "sourceOffset": 102299648,
+      "sourceBytes": 4093952,
+      "sourceSha1": "5ebe42a29de602853a3f33c2b9aeb8f7cd5fa811"
     },
     {
       "key": "bgm27",
       "type": "bgm",
       "path": "audio/bgm/bgm27.ogg",
       "durationSec": 138.508,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 29,
+      "sourceOffset": 106393600,
+      "sourceBytes": 6875136,
+      "sourceSha1": "fd56ff0b1b627b233956e2ae4cc2cb51c76c6a3e"
     },
     {
       "key": "bgm28",
       "type": "bgm",
       "path": "audio/bgm/bgm28.ogg",
       "durationSec": 15.023,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 30,
+      "sourceOffset": 113268736,
+      "sourceBytes": 745398,
+      "sourceSha1": "00de3d37991c5e8ca97f0991c8f36a288ba34df9"
     },
     {
       "key": "bgm29",
       "type": "bgm",
       "path": "audio/bgm/bgm29.ogg",
       "durationSec": 26.703,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 31,
+      "sourceOffset": 114014208,
+      "sourceBytes": 1324854,
+      "sourceSha1": "37f2e7a665c45f47dc83029b5a5ff3e4ad51d1b7"
     },
     {
       "key": "bgm30",
       "type": "bgm",
       "path": "audio/bgm/bgm30.ogg",
       "durationSec": 17.555,
-      "loop": true
+      "loop": true,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 32,
+      "sourceOffset": 115339264,
+      "sourceBytes": 872448,
+      "sourceSha1": "cfb5ead955fd347d3a69a8636c3784a126a63e0b"
     },
     {
       "key": "se00_00",
       "type": "sfx",
       "path": "audio/sfx/se00_00.ogg",
-      "durationSec": 12.0,
-      "loop": false
+      "durationSec": 12,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 33,
+      "sourceOffset": 116211712,
+      "sourceBytes": 33534,
+      "sourceSha1": "9257fed6d257ec11d6e7cbb6bd456e28a8359eaa"
     },
     {
       "key": "se00_01",
       "type": "sfx",
       "path": "audio/sfx/se00_01.ogg",
       "durationSec": 2.983,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 34,
+      "sourceOffset": 116246528,
+      "sourceBytes": 46206,
+      "sourceSha1": "c2ad621d443fd569b99aee27f822b5f84a57bfe1"
     },
     {
       "key": "se00_02",
       "type": "sfx",
       "path": "audio/sfx/se00_02.ogg",
-      "durationSec": 12.0,
-      "loop": false
+      "durationSec": 12,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 35,
+      "sourceOffset": 116293632,
+      "sourceBytes": 26550,
+      "sourceSha1": "ab2a96a5c831be508a9103c862d710b99e0aa67f"
     },
     {
       "key": "se00_03",
       "type": "sfx",
       "path": "audio/sfx/se00_03.ogg",
-      "durationSec": 12.0,
-      "loop": false
+      "durationSec": 12,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 36,
+      "sourceOffset": 116320256,
+      "sourceBytes": 11754,
+      "sourceSha1": "de70228385db9e6e79426a7c17ec1c6d12b4c550"
     },
     {
       "key": "se00_04",
       "type": "sfx",
       "path": "audio/sfx/se00_04.ogg",
       "durationSec": 3.033,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 37,
+      "sourceOffset": 116332544,
+      "sourceBytes": 16038,
+      "sourceSha1": "26f6da315c9dc10959fbc3dc81ec3f1e21f08e37"
     },
     {
       "key": "pl00_00_00",
       "type": "voice",
       "path": "audio/voice/pl00_00_00.ogg",
       "durationSec": 1.35,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 38,
+      "sourceOffset": 116348928,
+      "sourceBytes": 16902,
+      "sourceSha1": "c0af9b6a8e200e912d09f0e88f4988163ddd6559"
     },
     {
       "key": "pl00_00_01",
       "type": "voice",
       "path": "audio/voice/pl00_00_01.ogg",
       "durationSec": 1.86,
-      "loop": false
-    },
-    {
-      "key": "pl01_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl01_00_00.ogg",
-      "durationSec": 1.096,
-      "loop": false
-    },
-    {
-      "key": "pl01_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl01_00_01.ogg",
-      "durationSec": 1.009,
-      "loop": false
-    },
-    {
-      "key": "pl02_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl02_00_00.ogg",
-      "durationSec": 1.486,
-      "loop": false
-    },
-    {
-      "key": "pl02_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl02_00_01.ogg",
-      "durationSec": 1.268,
-      "loop": false
-    },
-    {
-      "key": "pl03_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl03_00_00.ogg",
-      "durationSec": 1.179,
-      "loop": false
-    },
-    {
-      "key": "pl03_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl03_00_01.ogg",
-      "durationSec": 0.991,
-      "loop": false
-    },
-    {
-      "key": "pl04_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl04_00_00.ogg",
-      "durationSec": 0.961,
-      "loop": false
-    },
-    {
-      "key": "pl04_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl04_00_01.ogg",
-      "durationSec": 0.921,
-      "loop": false
-    },
-    {
-      "key": "pl05_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl05_00_00.ogg",
-      "durationSec": 0.594,
-      "loop": false
-    },
-    {
-      "key": "pl05_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl05_00_01.ogg",
-      "durationSec": 0.808,
-      "loop": false
-    },
-    {
-      "key": "pl06_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl06_00_00.ogg",
-      "durationSec": 1.242,
-      "loop": false
-    },
-    {
-      "key": "pl06_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl06_00_01.ogg",
-      "durationSec": 1.533,
-      "loop": false
-    },
-    {
-      "key": "pl07_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl07_00_00.ogg",
-      "durationSec": 1.837,
-      "loop": false
-    },
-    {
-      "key": "pl07_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl07_00_01.ogg",
-      "durationSec": 1.848,
-      "loop": false
-    },
-    {
-      "key": "pl08_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl08_00_00.ogg",
-      "durationSec": 2.724,
-      "loop": false
-    },
-    {
-      "key": "pl08_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl08_00_01.ogg",
-      "durationSec": 2.613,
-      "loop": false
-    },
-    {
-      "key": "pl09_00_00",
-      "type": "voice",
-      "path": "audio/voice/pl09_00_00.ogg",
-      "durationSec": 1.009,
-      "loop": false
-    },
-    {
-      "key": "pl09_00_01",
-      "type": "voice",
-      "path": "audio/voice/pl09_00_01.ogg",
-      "durationSec": 1.342,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 39,
+      "sourceOffset": 116367360,
+      "sourceBytes": 12222,
+      "sourceSha1": "45ebb979eac97b5209fda7202b0052573ddc20c8"
     },
     {
       "key": "pl0a_00_00",
       "type": "voice",
       "path": "audio/voice/pl0a_00_00.ogg",
       "durationSec": 3.029,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 938,
+      "sourceOffset": 139261952,
+      "sourceBytes": 15102,
+      "sourceSha1": "8627a770835e6f388c0f83f261e39b4c887989a1"
     },
     {
       "key": "pl0a_00_01",
       "type": "voice",
       "path": "audio/voice/pl0a_00_01.ogg",
       "durationSec": 1.968,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 939,
+      "sourceOffset": 139278336,
+      "sourceBytes": 18828,
+      "sourceSha1": "e18fb6155d68c1ca64dbe422a5cc8600ba59838d"
     },
     {
       "key": "pl0b_00_00",
       "type": "voice",
       "path": "audio/voice/pl0b_00_00.ogg",
       "durationSec": 1.248,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1028,
+      "sourceOffset": 142292992,
+      "sourceBytes": 82404,
+      "sourceSha1": "b9922dcb5db6a7e0c610bac020c2048107d6fb0a"
     },
     {
       "key": "pl0b_00_01",
       "type": "voice",
       "path": "audio/voice/pl0b_00_01.ogg",
       "durationSec": 0.976,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1029,
+      "sourceOffset": 142376960,
+      "sourceBytes": 25056,
+      "sourceSha1": "5d0a458a01320149238bb3886a628f60c4133abe"
     },
     {
       "key": "pl0c_00_00",
       "type": "voice",
       "path": "audio/voice/pl0c_00_00.ogg",
       "durationSec": 2.694,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1118,
+      "sourceOffset": 144795648,
+      "sourceBytes": 25992,
+      "sourceSha1": "032ec56cb4031eef880002f02a8bee176a55e493"
     },
     {
       "key": "pl0c_00_01",
       "type": "voice",
       "path": "audio/voice/pl0c_00_01.ogg",
       "durationSec": 2.202,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1119,
+      "sourceOffset": 144822272,
+      "sourceBytes": 22446,
+      "sourceSha1": "4dc4429adc059dd53ee75d3100cede01b2527570"
     },
     {
       "key": "pl0d_00_00",
       "type": "voice",
       "path": "audio/voice/pl0d_00_00.ogg",
       "durationSec": 4.54,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1208,
+      "sourceOffset": 147826688,
+      "sourceBytes": 22050,
+      "sourceSha1": "7cad0d3b6144b54f708804ccc303e334a48c408c"
     },
     {
       "key": "pl0d_00_01",
       "type": "voice",
       "path": "audio/voice/pl0d_00_01.ogg",
       "durationSec": 3.646,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1209,
+      "sourceOffset": 147849216,
+      "sourceBytes": 16416,
+      "sourceSha1": "554c661f4f304ba56ca3df3bb3afd0aa28a7e321"
     },
     {
       "key": "pl0e_00_00",
       "type": "voice",
       "path": "audio/voice/pl0e_00_00.ogg",
       "durationSec": 0.778,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1298,
+      "sourceOffset": 150407168,
+      "sourceBytes": 18000,
+      "sourceSha1": "a8160c446330b767c8509b7cb7ac69a6e8b81083"
     },
     {
       "key": "pl0e_00_01",
       "type": "voice",
       "path": "audio/voice/pl0e_00_01.ogg",
       "durationSec": 0.868,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1299,
+      "sourceOffset": 150425600,
+      "sourceBytes": 22626,
+      "sourceSha1": "dbd6772f9a70145f2e95b9cea062bbef4a4a11f5"
     },
     {
       "key": "pl0f_00_00",
       "type": "voice",
       "path": "audio/voice/pl0f_00_00.ogg",
       "durationSec": 3.927,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1388,
+      "sourceOffset": 153370624,
+      "sourceBytes": 43830,
+      "sourceSha1": "d8151cc89a12ace260d8751c9856ece1045800c8"
     },
     {
       "key": "pl0f_00_01",
       "type": "voice",
       "path": "audio/voice/pl0f_00_01.ogg",
       "durationSec": 3.352,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1389,
+      "sourceOffset": 153415680,
+      "sourceBytes": 40320,
+      "sourceSha1": "94de91b176e436142f1378f2cecf5e778fa5365a"
+    },
+    {
+      "key": "pl01_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl01_00_00.ogg",
+      "durationSec": 1.096,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 128,
+      "sourceOffset": 118528000,
+      "sourceBytes": 24660,
+      "sourceSha1": "d7be9fd9df7001caaa790ff0dc9bd0661bacab07"
+    },
+    {
+      "key": "pl01_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl01_00_01.ogg",
+      "durationSec": 1.009,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 129,
+      "sourceOffset": 118554624,
+      "sourceBytes": 24246,
+      "sourceSha1": "a05006bc4190f15a57712118281bdf7622352730"
+    },
+    {
+      "key": "pl02_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl02_00_00.ogg",
+      "durationSec": 1.486,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 218,
+      "sourceOffset": 120283136,
+      "sourceBytes": 12492,
+      "sourceSha1": "83e028f1afb825063b901c983c82097413adf68c"
+    },
+    {
+      "key": "pl02_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl02_00_01.ogg",
+      "durationSec": 1.268,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 219,
+      "sourceOffset": 120297472,
+      "sourceBytes": 13734,
+      "sourceSha1": "61554444a62ebf241589e2f2945ffdb2d431f8c3"
+    },
+    {
+      "key": "pl03_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl03_00_00.ogg",
+      "durationSec": 1.179,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 308,
+      "sourceOffset": 122677248,
+      "sourceBytes": 21042,
+      "sourceSha1": "91ed1d5e832e698fbc2f208f07e1fdb1e6ad7d2f"
+    },
+    {
+      "key": "pl03_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl03_00_01.ogg",
+      "durationSec": 0.991,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 309,
+      "sourceOffset": 122699776,
+      "sourceBytes": 19368,
+      "sourceSha1": "359a5c1438a761d163bcf64f2f5b766a91939784"
+    },
+    {
+      "key": "pl04_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl04_00_00.ogg",
+      "durationSec": 0.961,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 398,
+      "sourceOffset": 125458432,
+      "sourceBytes": 17748,
+      "sourceSha1": "f6074a895d3bf45ee62879522824fcf30a2d2ad4"
+    },
+    {
+      "key": "pl04_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl04_00_01.ogg",
+      "durationSec": 0.921,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 399,
+      "sourceOffset": 125476864,
+      "sourceBytes": 12186,
+      "sourceSha1": "697df4ffbda00ac2b4772dedbc98ebc9cf3fddd6"
+    },
+    {
+      "key": "pl05_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl05_00_00.ogg",
+      "durationSec": 0.594,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 488,
+      "sourceOffset": 127748096,
+      "sourceBytes": 23940,
+      "sourceSha1": "7a510e348bfbf23fc439cae158204b0bf22edca6"
+    },
+    {
+      "key": "pl05_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl05_00_01.ogg",
+      "durationSec": 0.808,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 489,
+      "sourceOffset": 127772672,
+      "sourceBytes": 43110,
+      "sourceSha1": "979ae4432dcc0ca3e6cf42e867bd6bf67ac38552"
+    },
+    {
+      "key": "pl06_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl06_00_00.ogg",
+      "durationSec": 1.242,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 578,
+      "sourceOffset": 129767424,
+      "sourceBytes": 31554,
+      "sourceSha1": "8fc34689b9b695249d283d5618c8cd2cb4168a2b"
+    },
+    {
+      "key": "pl06_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl06_00_01.ogg",
+      "durationSec": 1.533,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 579,
+      "sourceOffset": 129800192,
+      "sourceBytes": 31806,
+      "sourceSha1": "b3a580858943318bd40135d0b07008f67a797f99"
+    },
+    {
+      "key": "pl07_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl07_00_00.ogg",
+      "durationSec": 1.837,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 668,
+      "sourceOffset": 131993600,
+      "sourceBytes": 40752,
+      "sourceSha1": "d545ac45dc30df2219170e33ae8ae49e6a550e42"
+    },
+    {
+      "key": "pl07_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl07_00_01.ogg",
+      "durationSec": 1.848,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 669,
+      "sourceOffset": 132034560,
+      "sourceBytes": 19584,
+      "sourceSha1": "b03a091ac44d6bbf71c9266ddef9c668b3d521f1"
+    },
+    {
+      "key": "pl08_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl08_00_00.ogg",
+      "durationSec": 2.724,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 758,
+      "sourceOffset": 134293504,
+      "sourceBytes": 16128,
+      "sourceSha1": "5f8f37cedf4491265d290ec539a5edb6fc3ce608"
+    },
+    {
+      "key": "pl08_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl08_00_01.ogg",
+      "durationSec": 2.613,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 759,
+      "sourceOffset": 134309888,
+      "sourceBytes": 31770,
+      "sourceSha1": "cc5bef71e5b30df9516a0f3f28d94e6ee33acf9e"
+    },
+    {
+      "key": "pl09_00_00",
+      "type": "voice",
+      "path": "audio/voice/pl09_00_00.ogg",
+      "durationSec": 1.009,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 848,
+      "sourceOffset": 136656896,
+      "sourceBytes": 25092,
+      "sourceSha1": "2ae301e9f514283fd455a7f5583fce26b203bc21"
+    },
+    {
+      "key": "pl09_00_01",
+      "type": "voice",
+      "path": "audio/voice/pl09_00_01.ogg",
+      "durationSec": 1.342,
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 849,
+      "sourceOffset": 136683520,
+      "sourceBytes": 35046,
+      "sourceSha1": "3f6be102d7936161856138672ccb799b66212834"
     },
     {
       "key": "pl10_00_00",
       "type": "voice",
       "path": "audio/voice/pl10_00_00.ogg",
       "durationSec": 0.742,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1478,
+      "sourceOffset": 155832320,
+      "sourceBytes": 31572,
+      "sourceSha1": "a5396b026311b7b1663c4203430c0b15de1cd158"
     },
     {
       "key": "pl10_00_01",
       "type": "voice",
       "path": "audio/voice/pl10_00_01.ogg",
       "durationSec": 0.689,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1479,
+      "sourceOffset": 155865088,
+      "sourceBytes": 21114,
+      "sourceSha1": "b826441e4cdae6b577898626aaeb20d2cd13ddee"
     },
     {
       "key": "pl11_00_00",
       "type": "voice",
       "path": "audio/voice/pl11_00_00.ogg",
       "durationSec": 1.753,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1568,
+      "sourceOffset": 158662656,
+      "sourceBytes": 30906,
+      "sourceSha1": "fd41e7f11a002db0e35e2d9999a89e94fa527868"
     },
     {
       "key": "pl11_00_01",
       "type": "voice",
       "path": "audio/voice/pl11_00_01.ogg",
       "durationSec": 2.171,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1569,
+      "sourceOffset": 158695424,
+      "sourceBytes": 43380,
+      "sourceSha1": "b3d2f29f461989227157b2edd5c86d581076b104"
     },
     {
       "key": "pl12_00_00",
       "type": "voice",
       "path": "audio/voice/pl12_00_00.ogg",
       "durationSec": 0.406,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1658,
+      "sourceOffset": 162332672,
+      "sourceBytes": 22392,
+      "sourceSha1": "68dc8f629e353c67a410712d70ba630118e5615c"
     },
     {
       "key": "pl12_00_01",
       "type": "voice",
       "path": "audio/voice/pl12_00_01.ogg",
       "durationSec": 0.444,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1659,
+      "sourceOffset": 162355200,
+      "sourceBytes": 27450,
+      "sourceSha1": "15be6df853e2fc99c1379294657c2e9dc22ca512"
     },
     {
       "key": "pl13_00_00",
       "type": "voice",
       "path": "audio/voice/pl13_00_00.ogg",
       "durationSec": 0.656,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1748,
+      "sourceOffset": 164861952,
+      "sourceBytes": 13590,
+      "sourceSha1": "b6178652c3e581dc62909fb462acf4d91d6a5052"
     },
     {
       "key": "pl13_00_01",
       "type": "voice",
       "path": "audio/voice/pl13_00_01.ogg",
       "durationSec": 0.734,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1749,
+      "sourceOffset": 164876288,
+      "sourceBytes": 14274,
+      "sourceSha1": "0d2f34d06526a06924c5b73360da158db78f554d"
     },
     {
       "key": "pl14_00_00",
       "type": "voice",
       "path": "audio/voice/pl14_00_00.ogg",
       "durationSec": 0.576,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1838,
+      "sourceOffset": 167442432,
+      "sourceBytes": 20502,
+      "sourceSha1": "b651d3aea69acd614e27512b338396faaf41c877"
     },
     {
       "key": "pl14_00_01",
       "type": "voice",
       "path": "audio/voice/pl14_00_01.ogg",
       "durationSec": 0.546,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1839,
+      "sourceOffset": 167464960,
+      "sourceBytes": 20538,
+      "sourceSha1": "79cbe0411af000ab4b4d74f18384b5896f07e82d"
     },
     {
       "key": "pl15_00_00",
       "type": "voice",
       "path": "audio/voice/pl15_00_00.ogg",
       "durationSec": 0.614,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1928,
+      "sourceOffset": 172670976,
+      "sourceBytes": 78534,
+      "sourceSha1": "458a671353e3f23358b37151daee638c5efb10b4"
     },
     {
       "key": "pl15_00_01",
       "type": "voice",
       "path": "audio/voice/pl15_00_01.ogg",
       "durationSec": 0.776,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 1929,
+      "sourceOffset": 172750848,
+      "sourceBytes": 39510,
+      "sourceSha1": "01adff158685c88346695aa821fc381e6ee92dec"
     },
     {
       "key": "pl16_00_00",
       "type": "voice",
       "path": "audio/voice/pl16_00_00.ogg",
       "durationSec": 0.895,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 2018,
+      "sourceOffset": 175380480,
+      "sourceBytes": 22734,
+      "sourceSha1": "0219c648d4a64581f7a30fcfda40d7ad3a1776b7"
     },
     {
       "key": "pl16_00_01",
       "type": "voice",
       "path": "audio/voice/pl16_00_01.ogg",
       "durationSec": 1.384,
-      "loop": false
+      "loop": false,
+      "sourceArchive": "user-data/GG4E/disc/root/poq_adx_usa.afs",
+      "afsIndex": 2019,
+      "sourceOffset": 175405056,
+      "sourceBytes": 15318,
+      "sourceSha1": "95060da43a6d14d8855dc4469ab6262e577079f0"
     }
-  ]
+  ],
+  "hashes": {
+    "bgm00": {
+      "bytes": 1763668,
+      "sha1": "151f804e1e2e051e9c98865c1413713282bd6a7d",
+      "afsIndex": 0,
+      "sourceOffset": 524288,
+      "sourceBytes": 4812800,
+      "sourceSha1": "378568b88ed07acff48670580a52f1a1dec58dd3"
+    },
+    "bgm01": {
+      "bytes": 1359120,
+      "sha1": "1481bda002b81e17c4acdf8e23546a5da4debd1a",
+      "afsIndex": 1,
+      "sourceOffset": 5337088,
+      "sourceBytes": 4351374,
+      "sourceSha1": "1fbe45eab9fa0043224d2674ef7d9ed4522ba0fe"
+    },
+    "bgm01x": {
+      "bytes": 1419406,
+      "sha1": "59efaa2693f94765141bee0523c7431dd2ec2823",
+      "afsIndex": 2,
+      "sourceOffset": 9689088,
+      "sourceBytes": 4257162,
+      "sourceSha1": "ad2733bc9f628f02a453dfb5ebe7c166c11746dd"
+    },
+    "bgm02": {
+      "bytes": 747790,
+      "sha1": "8810140ea4b888d431a2afd1d49330d58336c3b0",
+      "afsIndex": 3,
+      "sourceOffset": 13946880,
+      "sourceBytes": 2029568,
+      "sourceSha1": "1c527df2270ba2e3ce35762343cfad97b9661a41"
+    },
+    "bgm03": {
+      "bytes": 899835,
+      "sha1": "c055d36807378d3d3747ad3d5380c6ed492c386d",
+      "afsIndex": 4,
+      "sourceOffset": 15976448,
+      "sourceBytes": 2840576,
+      "sourceSha1": "c2501bd1c292680829a9a02e85e9a589b03d3b55"
+    },
+    "bgm04": {
+      "bytes": 965134,
+      "sha1": "d0d8a45eaf818146bfc6ef11573eb817a940faeb",
+      "afsIndex": 5,
+      "sourceOffset": 18817024,
+      "sourceBytes": 3061760,
+      "sourceSha1": "5dfa43cd84af32c4bf34753bd0a0f351838b1daf"
+    },
+    "bgm05": {
+      "bytes": 1057392,
+      "sha1": "728be3cb930a8dde4d1cbcfb62fb767ff19f44e5",
+      "afsIndex": 6,
+      "sourceOffset": 21878784,
+      "sourceBytes": 3010560,
+      "sourceSha1": "8a25bb01af4ce71389fa1dfbd8618eee97821b4b"
+    },
+    "bgm06": {
+      "bytes": 43018,
+      "sha1": "0e7b782be0913baa248aa45e223a155c292b09e0",
+      "afsIndex": 7,
+      "sourceOffset": 24889344,
+      "sourceBytes": 114102,
+      "sourceSha1": "21188aa8e0c6a7700857ed6094407e2f3ba989e7"
+    },
+    "bgm07": {
+      "bytes": 839156,
+      "sha1": "63739e66c40e26f93ec19aa0f8f9d12dc98b5500",
+      "afsIndex": 8,
+      "sourceOffset": 25004032,
+      "sourceBytes": 2580480,
+      "sourceSha1": "856253993407f4652cb3c7180de7d43e76f19985"
+    },
+    "bgm08": {
+      "bytes": 2268185,
+      "sha1": "15fcc487b704b89b9c845037ae26227a164eb357",
+      "afsIndex": 9,
+      "sourceOffset": 27584512,
+      "sourceBytes": 6674432,
+      "sourceSha1": "8d96e830916d53a113eb9111515be64e4f515a63"
+    },
+    "bgm09": {
+      "bytes": 760167,
+      "sha1": "4f542ce807e59e53b446a9977723299ab46f1246",
+      "afsIndex": 10,
+      "sourceOffset": 34258944,
+      "sourceBytes": 2314240,
+      "sourceSha1": "749ab82e98e9335be55ecb355768f2e65d56d4fd"
+    },
+    "bgm10": {
+      "bytes": 868966,
+      "sha1": "f923160613a95928ffc7fcffa6fe060a9c590819",
+      "afsIndex": 11,
+      "sourceOffset": 36573184,
+      "sourceBytes": 2652160,
+      "sourceSha1": "d65154c9745e18b20e9513b0f922ae3202b3008f"
+    },
+    "bgm11": {
+      "bytes": 2337291,
+      "sha1": "7bb4e9f7ff7de7c0d58ae24c21b09617559eb855",
+      "afsIndex": 12,
+      "sourceOffset": 39225344,
+      "sourceBytes": 6809600,
+      "sourceSha1": "01809a474da8c70b4db44e1fe438754def01a3d3"
+    },
+    "bgm12": {
+      "bytes": 936791,
+      "sha1": "ae9bd844ef0bbe45566bb0af77fa84b9c77a6566",
+      "afsIndex": 13,
+      "sourceOffset": 46034944,
+      "sourceBytes": 2850816,
+      "sourceSha1": "15ffe0abaf4abcb8088340f2d1f9b93090512c1e"
+    },
+    "bgm13": {
+      "bytes": 835620,
+      "sha1": "bfe9961b359172eda3a93493de01a052a9c7169c",
+      "afsIndex": 14,
+      "sourceOffset": 48885760,
+      "sourceBytes": 2500608,
+      "sourceSha1": "fd61529a3d45c01940edc7fab705eda914adb634"
+    },
+    "bgm14": {
+      "bytes": 1480643,
+      "sha1": "4c5d11b705a606b03994b375e759cd159e6d10b2",
+      "afsIndex": 15,
+      "sourceOffset": 51386368,
+      "sourceBytes": 4524032,
+      "sourceSha1": "7f04757c5680fb85a63450c51035a99d20232fed"
+    },
+    "bgm15": {
+      "bytes": 1628395,
+      "sha1": "e9b717b8594f6cbc66aaebadd050af14cde06266",
+      "afsIndex": 16,
+      "sourceOffset": 55910400,
+      "sourceBytes": 4886528,
+      "sourceSha1": "77a2dbab69a6644a1709b7cfdf8cf2974e4860d1"
+    },
+    "bgm16": {
+      "bytes": 4039533,
+      "sha1": "f09c8c14311f670bac0a7dcecbc9ccef853db7d9",
+      "afsIndex": 17,
+      "sourceOffset": 60796928,
+      "sourceBytes": 12924928,
+      "sourceSha1": "09e0e7893ebca16854e2b32d007c9daf118ed309"
+    },
+    "bgm16x": {
+      "bytes": 2786889,
+      "sha1": "20b8a4d23d0935da858e7da1b8e6dd720e8f26b4",
+      "afsIndex": 18,
+      "sourceOffset": 73721856,
+      "sourceBytes": 8241152,
+      "sourceSha1": "2298d46d7133fa7aa21c219dad1c5e2e20fc6d14"
+    },
+    "bgm17": {
+      "bytes": 346573,
+      "sha1": "c0c2065119dc9806be9d733d9ecd894534e502ac",
+      "afsIndex": 19,
+      "sourceOffset": 81963008,
+      "sourceBytes": 1013760,
+      "sourceSha1": "8d45de002e2ed7c618bc73f6252bcc52b5610ce3"
+    },
+    "bgm18": {
+      "bytes": 220832,
+      "sha1": "3c3d2a53befe7c2d87348a693a479e3282e93c1a",
+      "afsIndex": 20,
+      "sourceOffset": 82976768,
+      "sourceBytes": 657408,
+      "sourceSha1": "12e4031d60879bbd4ed1153f0806cdf39633f222"
+    },
+    "bgm19": {
+      "bytes": 165128,
+      "sha1": "8605705c096305394c63f748e84076de24072bc9",
+      "afsIndex": 21,
+      "sourceOffset": 83634176,
+      "sourceBytes": 547650,
+      "sourceSha1": "bf04cc99f924807aea0c9e1de1eb635f3bdca537"
+    },
+    "bgm20": {
+      "bytes": 98414,
+      "sha1": "9fbb66cf648ebc9c646fdb436a9657cd51dbbe3f",
+      "afsIndex": 22,
+      "sourceOffset": 84183040,
+      "sourceBytes": 277686,
+      "sourceSha1": "be0881dec2deb33aca361d785b4022abe26a240f"
+    },
+    "bgm21": {
+      "bytes": 147962,
+      "sha1": "65a0e87cc60a2316b111f5ac6fc36936b8a493b3",
+      "afsIndex": 23,
+      "sourceOffset": 84461568,
+      "sourceBytes": 500022,
+      "sourceSha1": "c35447f9365dcc0fba8a102dc518c8756576a08f"
+    },
+    "bgm22": {
+      "bytes": 851245,
+      "sha1": "7afdba12cc0172516fc22771a5d53ce5dcaa3261",
+      "afsIndex": 24,
+      "sourceOffset": 84963328,
+      "sourceBytes": 2729984,
+      "sourceSha1": "676378e3cd5edec4dee199264025dac8e1d7987e"
+    },
+    "bgm23": {
+      "bytes": 967061,
+      "sha1": "1faa4a8c7d94f146d837b5c6344c3539b0d9a812",
+      "afsIndex": 25,
+      "sourceOffset": 87693312,
+      "sourceBytes": 2834432,
+      "sourceSha1": "1a1bb794ec5be74ba29251c02b31f88f36a088c7"
+    },
+    "bgm24": {
+      "bytes": 1543809,
+      "sha1": "ab32dac3a4e54805fb28950caa71b9728c093848",
+      "afsIndex": 26,
+      "sourceOffset": 90527744,
+      "sourceBytes": 4231168,
+      "sourceSha1": "b59baafd7f3e773344cb5e9185604df76f888a92"
+    },
+    "bgm25": {
+      "bytes": 2679242,
+      "sha1": "d4763e320050cd40dd170a1263be2b8bb9725bae",
+      "afsIndex": 27,
+      "sourceOffset": 94758912,
+      "sourceBytes": 7540736,
+      "sourceSha1": "5260b3cc81dd706502396e94710907a1dd982faa"
+    },
+    "bgm26": {
+      "bytes": 1300233,
+      "sha1": "c27e11ac5440302914963a8e9115c4b1515a60c5",
+      "afsIndex": 28,
+      "sourceOffset": 102299648,
+      "sourceBytes": 4093952,
+      "sourceSha1": "5ebe42a29de602853a3f33c2b9aeb8f7cd5fa811"
+    },
+    "bgm27": {
+      "bytes": 2363958,
+      "sha1": "0b7be3ad65fd05ed9bac32f59bccc5e61843b6c9",
+      "afsIndex": 29,
+      "sourceOffset": 106393600,
+      "sourceBytes": 6875136,
+      "sourceSha1": "fd56ff0b1b627b233956e2ae4cc2cb51c76c6a3e"
+    },
+    "bgm28": {
+      "bytes": 234209,
+      "sha1": "9a2db294cb1b29ff76b1c7750b7643f1f594fc06",
+      "afsIndex": 30,
+      "sourceOffset": 113268736,
+      "sourceBytes": 745398,
+      "sourceSha1": "00de3d37991c5e8ca97f0991c8f36a288ba34df9"
+    },
+    "bgm29": {
+      "bytes": 420088,
+      "sha1": "3a1f4575d47c98c093c997fdf4d3b4b60e57c58d",
+      "afsIndex": 31,
+      "sourceOffset": 114014208,
+      "sourceBytes": 1324854,
+      "sourceSha1": "37f2e7a665c45f47dc83029b5a5ff3e4ad51d1b7"
+    },
+    "bgm30": {
+      "bytes": 260337,
+      "sha1": "cff6f6e7d8b9a53bd7eec5bb2b538e612c60e410",
+      "afsIndex": 32,
+      "sourceOffset": 115339264,
+      "sourceBytes": 872448,
+      "sourceSha1": "cfb5ead955fd347d3a69a8636c3784a126a63e0b"
+    },
+    "se00_00": {
+      "bytes": 127886,
+      "sha1": "b706014ad660af8a4a64b461c13f84749fb3f8a5",
+      "afsIndex": 33,
+      "sourceOffset": 116211712,
+      "sourceBytes": 33534,
+      "sourceSha1": "9257fed6d257ec11d6e7cbb6bd456e28a8359eaa"
+    },
+    "se00_01": {
+      "bytes": 33932,
+      "sha1": "3ace06bdfed76695027ec8b1ab3bdfe2f1b98d6a",
+      "afsIndex": 34,
+      "sourceOffset": 116246528,
+      "sourceBytes": 46206,
+      "sourceSha1": "c2ad621d443fd569b99aee27f822b5f84a57bfe1"
+    },
+    "se00_02": {
+      "bytes": 131223,
+      "sha1": "dd8aa2ef5dd7a4bfbdb1e33914f31391ec3a5e8f",
+      "afsIndex": 35,
+      "sourceOffset": 116293632,
+      "sourceBytes": 26550,
+      "sourceSha1": "ab2a96a5c831be508a9103c862d710b99e0aa67f"
+    },
+    "se00_03": {
+      "bytes": 134874,
+      "sha1": "4cfe2363b9c1d5c910732a039f2e6fc7c47fe0a0",
+      "afsIndex": 36,
+      "sourceOffset": 116320256,
+      "sourceBytes": 11754,
+      "sourceSha1": "de70228385db9e6e79426a7c17ec1c6d12b4c550"
+    },
+    "se00_04": {
+      "bytes": 34369,
+      "sha1": "b55d9a7648e339b7759c92f9216e566cfb85df96",
+      "afsIndex": 37,
+      "sourceOffset": 116332544,
+      "sourceBytes": 16038,
+      "sourceSha1": "26f6da315c9dc10959fbc3dc81ec3f1e21f08e37"
+    },
+    "pl00_00_00": {
+      "bytes": 14642,
+      "sha1": "4b9c7b8e2ab1f79f74f717cd79a87d642b5e4f6b",
+      "afsIndex": 38,
+      "sourceOffset": 116348928,
+      "sourceBytes": 16902,
+      "sourceSha1": "c0af9b6a8e200e912d09f0e88f4988163ddd6559"
+    },
+    "pl00_00_01": {
+      "bytes": 18506,
+      "sha1": "fbab5197d98a57fa04e7e137cf3b1ddfe0f27f71",
+      "afsIndex": 39,
+      "sourceOffset": 116367360,
+      "sourceBytes": 12222,
+      "sourceSha1": "45ebb979eac97b5209fda7202b0052573ddc20c8"
+    },
+    "pl0a_00_00": {
+      "bytes": 28515,
+      "sha1": "957ed34cf3128cc001bbc16a19d82511e4891140",
+      "afsIndex": 938,
+      "sourceOffset": 139261952,
+      "sourceBytes": 15102,
+      "sourceSha1": "8627a770835e6f388c0f83f261e39b4c887989a1"
+    },
+    "pl0a_00_01": {
+      "bytes": 19615,
+      "sha1": "481a87faa42dd42eda1b894862d1df6ab3855587",
+      "afsIndex": 939,
+      "sourceOffset": 139278336,
+      "sourceBytes": 18828,
+      "sourceSha1": "e18fb6155d68c1ca64dbe422a5cc8600ba59838d"
+    },
+    "pl0b_00_00": {
+      "bytes": 13796,
+      "sha1": "32f578b516bcf03191abdc293692fab0ffc76ca8",
+      "afsIndex": 1028,
+      "sourceOffset": 142292992,
+      "sourceBytes": 82404,
+      "sourceSha1": "b9922dcb5db6a7e0c610bac020c2048107d6fb0a"
+    },
+    "pl0b_00_01": {
+      "bytes": 11509,
+      "sha1": "f885f597946457f8ae5a0c4a7337ddc4f59b51c9",
+      "afsIndex": 1029,
+      "sourceOffset": 142376960,
+      "sourceBytes": 25056,
+      "sourceSha1": "5d0a458a01320149238bb3886a628f60c4133abe"
+    },
+    "pl0c_00_00": {
+      "bytes": 25231,
+      "sha1": "0c97b4d129c81ea9118032b0c47ef54f3a81deee",
+      "afsIndex": 1118,
+      "sourceOffset": 144795648,
+      "sourceBytes": 25992,
+      "sourceSha1": "032ec56cb4031eef880002f02a8bee176a55e493"
+    },
+    "pl0c_00_01": {
+      "bytes": 20967,
+      "sha1": "8814b4261132477dbe346261f6a1b5eb7dfdece7",
+      "afsIndex": 1119,
+      "sourceOffset": 144822272,
+      "sourceBytes": 22446,
+      "sourceSha1": "4dc4429adc059dd53ee75d3100cede01b2527570"
+    },
+    "pl0d_00_00": {
+      "bytes": 39721,
+      "sha1": "8dae3f22536694ce7ce20b218608ce004337e645",
+      "afsIndex": 1208,
+      "sourceOffset": 147826688,
+      "sourceBytes": 22050,
+      "sourceSha1": "7cad0d3b6144b54f708804ccc303e334a48c408c"
+    },
+    "pl0d_00_01": {
+      "bytes": 33461,
+      "sha1": "707a30922273cf56edf995977df2e364a1b7e24d",
+      "afsIndex": 1209,
+      "sourceOffset": 147849216,
+      "sourceBytes": 16416,
+      "sourceSha1": "554c661f4f304ba56ca3df3bb3afd0aa28a7e321"
+    },
+    "pl0e_00_00": {
+      "bytes": 9671,
+      "sha1": "c052a82660fecff5d5c5e3f472ab99ae9c332b38",
+      "afsIndex": 1298,
+      "sourceOffset": 150407168,
+      "sourceBytes": 18000,
+      "sourceSha1": "a8160c446330b767c8509b7cb7ac69a6e8b81083"
+    },
+    "pl0e_00_01": {
+      "bytes": 10193,
+      "sha1": "31b3a75d9f45fbac17457d08873478c22df8db51",
+      "afsIndex": 1299,
+      "sourceOffset": 150425600,
+      "sourceBytes": 22626,
+      "sourceSha1": "dbd6772f9a70145f2e95b9cea062bbef4a4a11f5"
+    },
+    "pl0f_00_00": {
+      "bytes": 35141,
+      "sha1": "924e1e4c1f996d75c4601bba70d26ae63ea81473",
+      "afsIndex": 1388,
+      "sourceOffset": 153370624,
+      "sourceBytes": 43830,
+      "sourceSha1": "d8151cc89a12ace260d8751c9856ece1045800c8"
+    },
+    "pl0f_00_01": {
+      "bytes": 30925,
+      "sha1": "47b9f85a1d98fa1db60fc6c88cec18130c46ec6b",
+      "afsIndex": 1389,
+      "sourceOffset": 153415680,
+      "sourceBytes": 40320,
+      "sourceSha1": "94de91b176e436142f1378f2cecf5e778fa5365a"
+    },
+    "pl01_00_00": {
+      "bytes": 12196,
+      "sha1": "92b31829ce102d350c08c1fca295d8eebd273095",
+      "afsIndex": 128,
+      "sourceOffset": 118528000,
+      "sourceBytes": 24660,
+      "sourceSha1": "d7be9fd9df7001caaa790ff0dc9bd0661bacab07"
+    },
+    "pl01_00_01": {
+      "bytes": 11721,
+      "sha1": "6097caa3709bdf47a72cadfb9c3a736854d19826",
+      "afsIndex": 129,
+      "sourceOffset": 118554624,
+      "sourceBytes": 24246,
+      "sourceSha1": "a05006bc4190f15a57712118281bdf7622352730"
+    },
+    "pl02_00_00": {
+      "bytes": 15419,
+      "sha1": "b89fe330f9476261a806957b8a8bc44b30c98a13",
+      "afsIndex": 218,
+      "sourceOffset": 120283136,
+      "sourceBytes": 12492,
+      "sourceSha1": "83e028f1afb825063b901c983c82097413adf68c"
+    },
+    "pl02_00_01": {
+      "bytes": 13343,
+      "sha1": "504b5baea24f2dbb320f2ff936a4846e6947d1df",
+      "afsIndex": 219,
+      "sourceOffset": 120297472,
+      "sourceBytes": 13734,
+      "sourceSha1": "61554444a62ebf241589e2f2945ffdb2d431f8c3"
+    },
+    "pl03_00_00": {
+      "bytes": 12996,
+      "sha1": "83764ad43ca34edea3e8103f4f370ea122c7f1a1",
+      "afsIndex": 308,
+      "sourceOffset": 122677248,
+      "sourceBytes": 21042,
+      "sourceSha1": "91ed1d5e832e698fbc2f208f07e1fdb1e6ad7d2f"
+    },
+    "pl03_00_01": {
+      "bytes": 11177,
+      "sha1": "e638495a92940b84bb5f0722cdd0cace5ba4a26e",
+      "afsIndex": 309,
+      "sourceOffset": 122699776,
+      "sourceBytes": 19368,
+      "sourceSha1": "359a5c1438a761d163bcf64f2f5b766a91939784"
+    },
+    "pl04_00_00": {
+      "bytes": 10971,
+      "sha1": "1c7fd590d3faa659f22969028f89a97abb3dd371",
+      "afsIndex": 398,
+      "sourceOffset": 125458432,
+      "sourceBytes": 17748,
+      "sourceSha1": "f6074a895d3bf45ee62879522824fcf30a2d2ad4"
+    },
+    "pl04_00_01": {
+      "bytes": 10763,
+      "sha1": "182480d11730e346585f1ea29030b9e2ce2936a9",
+      "afsIndex": 399,
+      "sourceOffset": 125476864,
+      "sourceBytes": 12186,
+      "sourceSha1": "697df4ffbda00ac2b4772dedbc98ebc9cf3fddd6"
+    },
+    "pl05_00_00": {
+      "bytes": 7991,
+      "sha1": "c144bf5013ece8647143cfe222b0f0106961308f",
+      "afsIndex": 488,
+      "sourceOffset": 127748096,
+      "sourceBytes": 23940,
+      "sourceSha1": "7a510e348bfbf23fc439cae158204b0bf22edca6"
+    },
+    "pl05_00_01": {
+      "bytes": 10034,
+      "sha1": "5bb1fcae18efbb9e1aa25d5bcc3880547f200276",
+      "afsIndex": 489,
+      "sourceOffset": 127772672,
+      "sourceBytes": 43110,
+      "sourceSha1": "979ae4432dcc0ca3e6cf42e867bd6bf67ac38552"
+    },
+    "pl06_00_00": {
+      "bytes": 13682,
+      "sha1": "2777cca626b4c9ba3917bc9b86ebf647d9ccc9db",
+      "afsIndex": 578,
+      "sourceOffset": 129767424,
+      "sourceBytes": 31554,
+      "sourceSha1": "8fc34689b9b695249d283d5618c8cd2cb4168a2b"
+    },
+    "pl06_00_01": {
+      "bytes": 16111,
+      "sha1": "22a32065354ab1e9c294ab00f8076827a3bad3b4",
+      "afsIndex": 579,
+      "sourceOffset": 129800192,
+      "sourceBytes": 31806,
+      "sourceSha1": "b3a580858943318bd40135d0b07008f67a797f99"
+    },
+    "pl07_00_00": {
+      "bytes": 18051,
+      "sha1": "36485853765fcffd9dac5e2abba12242484d61db",
+      "afsIndex": 668,
+      "sourceOffset": 131993600,
+      "sourceBytes": 40752,
+      "sourceSha1": "d545ac45dc30df2219170e33ae8ae49e6a550e42"
+    },
+    "pl07_00_01": {
+      "bytes": 18075,
+      "sha1": "9a4fa0d4562178a214476c5ee290e9611986c3b0",
+      "afsIndex": 669,
+      "sourceOffset": 132034560,
+      "sourceBytes": 19584,
+      "sourceSha1": "b03a091ac44d6bbf71c9266ddef9c668b3d521f1"
+    },
+    "pl08_00_00": {
+      "bytes": 25666,
+      "sha1": "6ff221ccd12eee4c2d2a04e6c2a197e3e822c73a",
+      "afsIndex": 758,
+      "sourceOffset": 134293504,
+      "sourceBytes": 16128,
+      "sourceSha1": "5f8f37cedf4491265d290ec539a5edb6fc3ce608"
+    },
+    "pl08_00_01": {
+      "bytes": 25420,
+      "sha1": "92e0d89ca5b2428561ceffe362bb8b55093e291d",
+      "afsIndex": 759,
+      "sourceOffset": 134309888,
+      "sourceBytes": 31770,
+      "sourceSha1": "cc5bef71e5b30df9516a0f3f28d94e6ee33acf9e"
+    },
+    "pl09_00_00": {
+      "bytes": 11702,
+      "sha1": "1615d635591ebf475f7467623ccdb5d533e16647",
+      "afsIndex": 848,
+      "sourceOffset": 136656896,
+      "sourceBytes": 25092,
+      "sourceSha1": "2ae301e9f514283fd455a7f5583fce26b203bc21"
+    },
+    "pl09_00_01": {
+      "bytes": 14201,
+      "sha1": "6ef1e015d26476c2281fd3f8a76747b47a88dfae",
+      "afsIndex": 849,
+      "sourceOffset": 136683520,
+      "sourceBytes": 35046,
+      "sourceSha1": "3f6be102d7936161856138672ccb799b66212834"
+    },
+    "pl10_00_00": {
+      "bytes": 11366,
+      "sha1": "eb26beb2dff516215113a70846f2a1b9464fea21",
+      "afsIndex": 1478,
+      "sourceOffset": 155832320,
+      "sourceBytes": 31572,
+      "sourceSha1": "a5396b026311b7b1663c4203430c0b15de1cd158"
+    },
+    "pl10_00_01": {
+      "bytes": 9459,
+      "sha1": "9e3167250c34fefb4ca222ccb038b09d38c5f2bb",
+      "afsIndex": 1479,
+      "sourceOffset": 155865088,
+      "sourceBytes": 21114,
+      "sourceSha1": "b826441e4cdae6b577898626aaeb20d2cd13ddee"
+    },
+    "pl11_00_00": {
+      "bytes": 17466,
+      "sha1": "ba439c0d3e30b763a5b9f1e7e8386f262e757ad4",
+      "afsIndex": 1568,
+      "sourceOffset": 158662656,
+      "sourceBytes": 30906,
+      "sourceSha1": "fd41e7f11a002db0e35e2d9999a89e94fa527868"
+    },
+    "pl11_00_01": {
+      "bytes": 20820,
+      "sha1": "5b80c8ce2a50e30bbaea5f310ee335b6ea9ad7b7",
+      "afsIndex": 1569,
+      "sourceOffset": 158695424,
+      "sourceBytes": 43380,
+      "sourceSha1": "b3d2f29f461989227157b2edd5c86d581076b104"
+    },
+    "pl12_00_00": {
+      "bytes": 6535,
+      "sha1": "172632d1d2567b518dd529e26c6b439c0bd0b205",
+      "afsIndex": 1658,
+      "sourceOffset": 162332672,
+      "sourceBytes": 22392,
+      "sourceSha1": "68dc8f629e353c67a410712d70ba630118e5615c"
+    },
+    "pl12_00_01": {
+      "bytes": 6955,
+      "sha1": "085849c8c7a60906d8366ba51c643c33d5d6d5ef",
+      "afsIndex": 1659,
+      "sourceOffset": 162355200,
+      "sourceBytes": 27450,
+      "sourceSha1": "15be6df853e2fc99c1379294657c2e9dc22ca512"
+    },
+    "pl13_00_00": {
+      "bytes": 8664,
+      "sha1": "a2f7678751fa374d32e1bfa34a1d8ce7a1444605",
+      "afsIndex": 1748,
+      "sourceOffset": 164861952,
+      "sourceBytes": 13590,
+      "sourceSha1": "b6178652c3e581dc62909fb462acf4d91d6a5052"
+    },
+    "pl13_00_01": {
+      "bytes": 9081,
+      "sha1": "207e3012cd6f18bb8953dad08cfa258f009841c1",
+      "afsIndex": 1749,
+      "sourceOffset": 164876288,
+      "sourceBytes": 14274,
+      "sourceSha1": "0d2f34d06526a06924c5b73360da158db78f554d"
+    },
+    "pl14_00_00": {
+      "bytes": 7726,
+      "sha1": "d30607e50b41db1e2b3d2f9aa8bc7d1008c078d8",
+      "afsIndex": 1838,
+      "sourceOffset": 167442432,
+      "sourceBytes": 20502,
+      "sourceSha1": "b651d3aea69acd614e27512b338396faaf41c877"
+    },
+    "pl14_00_01": {
+      "bytes": 7680,
+      "sha1": "e72b95d2c74ab23b1dcf332100d96e9c2be94d0c",
+      "afsIndex": 1839,
+      "sourceOffset": 167464960,
+      "sourceBytes": 20538,
+      "sourceSha1": "79cbe0411af000ab4b4d74f18384b5896f07e82d"
+    },
+    "pl15_00_00": {
+      "bytes": 8317,
+      "sha1": "b43f9e4bea0b3de4220f1e2d046cd9be5bc77e1c",
+      "afsIndex": 1928,
+      "sourceOffset": 172670976,
+      "sourceBytes": 78534,
+      "sourceSha1": "458a671353e3f23358b37151daee638c5efb10b4"
+    },
+    "pl15_00_01": {
+      "bytes": 9415,
+      "sha1": "43afecf3260766b7a7228e1810837bd81cade3fa",
+      "afsIndex": 1929,
+      "sourceOffset": 172750848,
+      "sourceBytes": 39510,
+      "sourceSha1": "01adff158685c88346695aa821fc381e6ee92dec"
+    },
+    "pl16_00_00": {
+      "bytes": 10293,
+      "sha1": "8e833194b8c61e3bdf2fae44fcaaa57118ebfcdb",
+      "afsIndex": 2018,
+      "sourceOffset": 175380480,
+      "sourceBytes": 22734,
+      "sourceSha1": "0219c648d4a64581f7a30fcfda40d7ad3a1776b7"
+    },
+    "pl16_00_01": {
+      "bytes": 14515,
+      "sha1": "e4a7b96b296bc37442f8f6bad996471bd52810fb",
+      "afsIndex": 2019,
+      "sourceOffset": 175405056,
+      "sourceBytes": 15318,
+      "sourceSha1": "95060da43a6d14d8855dc4469ab6262e577079f0"
+    }
+  }
 }

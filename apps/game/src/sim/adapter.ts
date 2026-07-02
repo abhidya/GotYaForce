@@ -23,6 +23,7 @@ import {
   EXPORTED_STAGE_CATALOG,
   EXPORTED_STAGE_IDS,
   isExportedStageId,
+  stageCatalogEntry,
 } from "../stages/catalog.generated.js";
 
 export { DEFAULT_ARENA_STAGE, EXPORTED_STAGE_CATALOG, EXPORTED_STAGE_IDS, isExportedStageId };
@@ -63,10 +64,10 @@ export function stageIdForBattleConfig(cfg: MissionBattleConfig): string {
   if (Number.isInteger(stageByte) && Number.isInteger(stageSubtable)) {
     const familyByte = (stageSubtable as number) * 0x20 + (stageByte as number);
     const familyId = stageIdFromByte(familyByte);
-    if (isExportedStageId(familyId)) return familyId;
+    if (stageHasCollision(familyId)) return familyId;
 
     const baseId = stageIdFromByte(stageByte as number);
-    if (isExportedStageId(baseId)) return baseId;
+    if (stageHasCollision(baseId)) return baseId;
   }
 
   return stageIdForArena(cfg.arena);
@@ -111,6 +112,7 @@ export interface LocalControls {
   special: boolean;
   lockOn: boolean;
   switchLock: boolean;
+  allyLock: boolean;
   switchBorg: boolean;
   dash: boolean;
 }
@@ -122,10 +124,12 @@ export interface LocalControls {
  *   Space / J             = jump (A)
  *   K / X                 = attack (B)
  *   L / Y                 = special (Y)
- *   Shift                 = dash
+ *   Shift                 = dash (keyboard affordance; stick-snap dodge is handled by movement)
  *   U                     = explicit lockOn request (players auto-lock in combat core)
- *   Tab                   = switchLock (Z)
- *   E                     = switchBorg
+ *   Tab                   = switchLock (GC R stand-in)
+ *   Z                     = allyLock (GC Z stand-in; target selection only until charge behavior is decoded)
+ * Manual borg switching is deliberately unbound: the extracted control texture does not
+ * show it, and current C evidence only proves death/auto-deploy swap flow.
  */
 export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): PlayerInput {
   let moveX = 0;
@@ -142,7 +146,8 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
   let dash = keys.has("ShiftLeft") || keys.has("ShiftRight");
   let lockOn = keys.has("KeyU");
   let switchLock = keys.has("Tab");
-  const switchBorg = keys.has("KeyE");
+  let allyLock = keys.has("KeyZ");
+  const switchBorg = false;
 
   if (pad) {
     const ax = pad.axes[0] ?? 0;
@@ -153,9 +158,11 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
     jump = jump || b(0); // A
     attack = attack || b(1) || b(2); // B / X
     special = special || b(3); // Y
-    dash = dash || b(5) || b(7); // shoulder/trigger
-    lockOn = lockOn || b(4) || b(6);
-    switchLock = switchLock || b(9);
+    // Explicit lock is mostly diagnostic because player borgs auto-lock by default.
+    lockOn = lockOn || b(6);
+    switchLock = switchLock || b(5) || b(7);
+    // XInput has no exact GC Z; use the left shoulder as the least-conflicting ally-lock stand-in.
+    allyLock = allyLock || b(4);
   }
 
   return {
@@ -166,6 +173,7 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
     special,
     lockOn,
     switchLock,
+    allyLock,
     switchBorg,
     dash,
   };
@@ -177,4 +185,9 @@ function clamp(v: number, lo: number, hi: number): number {
 
 function stageIdFromByte(byte: number): string {
   return `st${Math.max(0, byte).toString(16).padStart(2, "0")}`;
+}
+
+function stageHasCollision(stageId: string): boolean {
+  const entry = stageCatalogEntry(stageId);
+  return !!entry && entry.collisionCount > 0;
 }

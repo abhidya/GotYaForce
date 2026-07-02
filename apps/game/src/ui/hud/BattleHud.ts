@@ -8,7 +8,7 @@
  *                "!" alert sits to their right when triggered.
  *  - center    : orange lock-on reticle (gear ring + 4 inward blue triangles).
  *  - bottom-left: green circular HP gauge with the HP number (turns red when low).
- *  - bottom-right: X special button with a circular cooldown ring, and a B attack
+ *  - bottom-right: Y special button with a circular cooldown ring, and a B attack
  *                  button with ammo count + cyan reload bar.
  * The active borg's real `bn<code>` name banner can be shown (optional slot).
  *
@@ -37,7 +37,7 @@ export interface HudState {
   ammo: number;
   /** Reload/charge progress 0..1 (cyan bar on B). */
   reload01: number;
-  /** Special cooldown progress 0..1 (ring on X; 1 = ready). */
+  /** Special cooldown progress 0..1 (ring on Y; 1 = ready). */
   cooldown01: number;
   /** Active borg id (for the name banner art). */
   borgId: string;
@@ -166,9 +166,9 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
 
   // ----- weapon prompts (bottom-right) -----
   const cooldown = ringGauge(56, "#cfd3da", "rgba(0,0,0,0.35)");
-  const weaponX = el("div", { class: "gf-weapon-x" }, [
+  const weaponSpecial = el("div", { class: "gf-weapon-special" }, [
     el("div", { class: "gf-cooldown-ring" }, [cooldown.node]),
-    el("div", { class: "gf-x-glyph" }, [bitmapText("gf-button-letter")]),
+    el("div", { class: "gf-special-glyph" }, [bitmapText("gf-button-letter")]),
   ]);
 
   const bReload = el("div", { class: "gf-b-reload", style: { width: "0%" } });
@@ -178,12 +178,12 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
     el("div", { class: "gf-b-glyph" }, [bitmapText("gf-button-letter")]),
   ]);
 
-  root.appendChild(el("div", { class: "gf-hud-weapon" }, [weaponX, weaponB]));
+  root.appendChild(el("div", { class: "gf-hud-weapon" }, [weaponSpecial, weaponB]));
 
   container.appendChild(root);
   setBitmapText(allyMeter.querySelector(".gf-meter-label-text") as HTMLElement, "ALLY");
   setBitmapText(enemyMeter.querySelector(".gf-meter-label-text") as HTMLElement, "ENEMY");
-  setBitmapText(weaponX.querySelector(".gf-button-letter") as HTMLElement, "X");
+  setBitmapText(weaponSpecial.querySelector(".gf-button-letter") as HTMLElement, "Y");
   setBitmapText(weaponB.querySelector(".gf-button-letter") as HTMLElement, "B");
 
   function setMeter(fill: HTMLElement, tab: HTMLElement, value: number, max: number): void {

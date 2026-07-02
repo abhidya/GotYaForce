@@ -13,6 +13,7 @@
 import type { Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
 import {
+  acquireAllyLock,
   acquireLock,
   cycleLock,
   isBusy,
@@ -26,6 +27,7 @@ import {
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { DEFAULT_BOUNDS, JUMP, SIM, SPAWN_INVINCIBILITY_FRAMES } from "./constants.js";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
+import { resetActorParamTier } from "./paramTier.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import {
   emptyInput,
@@ -36,9 +38,15 @@ import {
   type DeployEntry,
   type PlayerInput,
   type RectStageBounds,
+  type SpawnPoint,
   type StageCollision,
   normalizeStageBounds,
 } from "./types.js";
+
+const SPAWN_RADIUS_FRACTION = 0.35;
+const SPAWN_RADIUS_MAX = 3200;
+const SPAWN_FLOOR_NORMAL_MIN_Y = 0.5;
+const SPAWN_LOW_SURFACE_Y_BAND = 640;
 
 /** Internal per-force runtime: the deploy queue + which team/owner it belongs to. */
 interface ForceRuntime {
@@ -60,6 +68,8 @@ class BattleImpl implements Battle {
   private forces: ForceRuntime[] = [];
   private bounds: RectStageBounds;
   private collision: StageCollision | null;
+  private readonly spawnArea: RectStageBounds;
+  private readonly spawnPoints: readonly SpawnPoint[];
   private readonly timeLimitFrames: number | null;
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
@@ -70,6 +80,8 @@ class BattleImpl implements Battle {
   ) {
     this.bounds = normalizeStageBounds(cfg.bounds ?? DEFAULT_BOUNDS);
     this.collision = cfg.collision ?? null;
+    this.spawnArea = playableSpawnArea(this.collision, this.bounds);
+    this.spawnPoints = cfg.spawnPoints ?? [];
     this.timeLimitFrames = cfg.timeLimitFrames !== undefined ? Math.max(0, Math.floor(cfg.timeLimitFrames)) : null;
     resetProjectileCounter();
 
@@ -109,18 +121,27 @@ class BattleImpl implements Battle {
 
   /** A deterministic spawn position per force, spread around the field facing center. */
   private spawnPosFor(forceIndex: number): { pos: Vec3; rotY: number } {
+    const exact = this.spawnPoints[forceIndex];
+    if (exact) {
+      const centerX = (this.bounds.minX + this.bounds.maxX) * 0.5;
+      const centerZ = (this.bounds.minZ + this.bounds.maxZ) * 0.5;
+      return {
+        pos: { ...exact.pos },
+        rotY: exact.rotY ?? Math.atan2(centerX - exact.pos.x, centerZ - exact.pos.z),
+      };
+    }
+
     const n = Math.max(1, this.forces.length);
     const angle = (forceIndex / n) * Math.PI * 2;
-    const centerX = (this.bounds.minX + this.bounds.maxX) * 0.5;
-    const centerZ = (this.bounds.minZ + this.bounds.maxZ) * 0.5;
-    const halfX = (this.bounds.maxX - this.bounds.minX) * 0.5;
-    const halfZ = (this.bounds.maxZ - this.bounds.minZ) * 0.5;
-    const radius = Math.min(halfX, halfZ) * 0.5;
-    const x = centerX + Math.sin(angle) * radius;
-    const z = centerZ + Math.cos(angle) * radius;
+    const centerX = (this.spawnArea.minX + this.spawnArea.maxX) * 0.5;
+    const centerZ = (this.spawnArea.minZ + this.spawnArea.maxZ) * 0.5;
+    const halfX = (this.spawnArea.maxX - this.spawnArea.minX) * 0.5;
+    const halfZ = (this.spawnArea.maxZ - this.spawnArea.minZ) * 0.5;
+    const radius = Math.min(SPAWN_RADIUS_MAX, Math.min(halfX, halfZ) * SPAWN_RADIUS_FRACTION);
+    const spawn = supportedSpawnPoint(this.collision, centerX, centerZ, angle, radius, this.spawnArea);
     // Face toward the center of the arena.
-    const rotY = Math.atan2(centerX - x, centerZ - z);
-    return { pos: { x, y: JUMP.GROUND_Y, z }, rotY };
+    const rotY = Math.atan2(centerX - spawn.x, centerZ - spawn.z);
+    return { pos: spawn, rotY };
   }
 
   private deployNext(force: ForceRuntime, spawn: { pos: Vec3; rotY: number }): void {
@@ -150,7 +171,9 @@ class BattleImpl implements Battle {
       ammo: startingAmmoForProfile(prof),
       cooldowns: { boostFuel: JUMP.BOOST_FUEL_FRAMES, jumpHeld: 0 },
       invincTimer: SPAWN_INVINCIBILITY_FRAMES,
+      paramTier: resetActorParamTier(),
       lockTarget: null,
+      allyLockTarget: null,
       alive: true,
     };
     this.state.borgs.push(b);
@@ -227,6 +250,10 @@ class BattleImpl implements Battle {
       }
       // Drop dead/invalid locks.
       if (b.lockTarget && !this.lockStillValid(b)) b.lockTarget = null;
+      if (input.allyLock && (b.allyLockTarget === null || !this.allyLockStillValid(b))) {
+        b.allyLockTarget = acquireAllyLock(b, all);
+      }
+      if (b.allyLockTarget && !this.allyLockStillValid(b)) b.allyLockTarget = null;
 
       const lockPos = b.lockTarget ? this.byUid.get(b.lockTarget)?.pos ?? null : null;
       const ctx: MoveContext = { lockTargetPos: lockPos, bounds: this.bounds, collision: this.collision };
@@ -248,7 +275,10 @@ class BattleImpl implements Battle {
     }
 
     // 3) Projectiles.
-    this.state.projectiles = stepProjectiles(this.state.projectiles, all, profiles, this.byUid);
+    this.state.projectiles = stepProjectiles(this.state.projectiles, all, profiles, this.byUid, {
+      bounds: this.bounds,
+      collision: this.collision,
+    });
 
     // 4) Process any deaths -> auto-deploy next from that force.
     if (this.spawnPlanned.size > 0) {
@@ -260,25 +290,6 @@ class BattleImpl implements Battle {
       }
       this.spawnPlanned.clear();
     }
-    // Manual switch-borg: if a player pressed switchBorg, retire current and deploy next.
-    for (let fi = 0; fi < this.forces.length; fi++) {
-      const force = this.forces[fi];
-      if (!force || force.ownerPlayer === null) continue;
-      const input = inputs[force.ownerPlayer];
-      if (input?.switchBorg && force.queue.length > 0 && force.activeUid) {
-        const cur = this.byUid.get(force.activeUid);
-        if (cur && cur.alive && !isBusy(cur)) {
-          // Re-queue current at the back and deploy next.
-          const prof = this.profiles.get(cur.uid);
-          if (prof) {
-            cur.alive = false; // retire from field
-            force.queue.push({ borgId: cur.borgId, profile: prof });
-            this.deployNext(force, this.spawnPosFor(fi));
-          }
-        }
-      }
-    }
-
     // 5) Energy + win/lose.
     this.recomputeEnergy();
     this.evaluateResult();
@@ -309,6 +320,12 @@ class BattleImpl implements Battle {
     return !!t && t.alive && t.team !== b.team;
   }
 
+  private allyLockStillValid(b: BorgRuntime): boolean {
+    if (!b.allyLockTarget) return false;
+    const t = this.byUid.get(b.allyLockTarget);
+    return !!t && t.alive && t.team === b.team && t.uid !== b.uid;
+  }
+
   private forceIndexOfUid(uid: string): number {
     return this.forces.findIndex((f) => f.activeUid === uid);
   }
@@ -332,6 +349,147 @@ class BattleImpl implements Battle {
       }
     }
   }
+}
+
+function playableSpawnArea(collision: StageCollision | null, fallback: RectStageBounds): RectStageBounds {
+  if (!collision || collision.triangles.length === 0) return fallback;
+  const lowSurfaceMaxY = spawnLowSurfaceMaxY(collision);
+  let out: RectStageBounds | null = null;
+  for (const tri of collision.triangles) {
+    if (!isSpawnFloorTriangle(tri, lowSurfaceMaxY)) continue;
+    out = out
+      ? {
+          minX: Math.min(out.minX, tri.bounds2d.minX),
+          maxX: Math.max(out.maxX, tri.bounds2d.maxX),
+          minZ: Math.min(out.minZ, tri.bounds2d.minZ),
+          maxZ: Math.max(out.maxZ, tri.bounds2d.maxZ),
+        }
+      : { ...tri.bounds2d };
+  }
+  if (!out) return fallback;
+  const clipped = {
+    minX: Math.max(fallback.minX, out.minX),
+    maxX: Math.min(fallback.maxX, out.maxX),
+    minZ: Math.max(fallback.minZ, out.minZ),
+    maxZ: Math.min(fallback.maxZ, out.maxZ),
+  };
+  return clipped.minX <= clipped.maxX && clipped.minZ <= clipped.maxZ ? clipped : fallback;
+}
+
+function supportedSpawnPoint(
+  collision: StageCollision | null,
+  centerX: number,
+  centerZ: number,
+  angle: number,
+  radius: number,
+  area: RectStageBounds,
+): Vec3 {
+  if (!collision || collision.triangles.length === 0) {
+    return {
+      x: clamp(centerX + Math.sin(angle) * radius, area.minX, area.maxX),
+      y: JUMP.GROUND_Y,
+      z: clamp(centerZ + Math.cos(angle) * radius, area.minZ, area.maxZ),
+    };
+  }
+  const lowSurfaceMaxY = spawnLowSurfaceMaxY(collision);
+  for (const radiusScale of [1, 0.75, 0.5, 0.25, 0]) {
+    const x = clamp(centerX + Math.sin(angle) * radius * radiusScale, area.minX, area.maxX);
+    const z = clamp(centerZ + Math.cos(angle) * radius * radiusScale, area.minZ, area.maxZ);
+    const surfaceY = spawnFloorSurfaceYAt(collision, x, z, lowSurfaceMaxY);
+    if (surfaceY != null) return { x, y: surfaceY + JUMP.GROUND_Y, z };
+  }
+  return nearestSpawnFloorPoint(collision, centerX, centerZ, area, lowSurfaceMaxY) ?? { x: centerX, y: JUMP.GROUND_Y, z: centerZ };
+}
+
+function spawnFloorSurfaceYAt(
+  collision: StageCollision | null,
+  x: number,
+  z: number,
+  lowSurfaceMaxY: number,
+): number | null {
+  if (!collision || collision.triangles.length === 0) return null;
+  let best: number | null = null;
+  for (const tri of collision.triangles) {
+    if (!isSpawnFloorTriangle(tri, lowSurfaceMaxY)) continue;
+    if (x < tri.bounds2d.minX || x > tri.bounds2d.maxX || z < tri.bounds2d.minZ || z > tri.bounds2d.maxZ) continue;
+    const y = yAtTriangleXZ(tri, x, z);
+    if (y == null || y > lowSurfaceMaxY) continue;
+    if (best == null || y < best) best = y;
+  }
+  return best;
+}
+
+function nearestSpawnFloorPoint(
+  collision: StageCollision,
+  centerX: number,
+  centerZ: number,
+  area: RectStageBounds,
+  lowSurfaceMaxY: number,
+): Vec3 | null {
+  let best: { pos: Vec3; distSq: number } | null = null;
+  for (const tri of collision.triangles) {
+    if (!isSpawnFloorTriangle(tri, lowSurfaceMaxY)) continue;
+    const x = (tri.vertices[0].x + tri.vertices[1].x + tri.vertices[2].x) / 3;
+    const z = (tri.vertices[0].z + tri.vertices[1].z + tri.vertices[2].z) / 3;
+    if (x < area.minX || x > area.maxX || z < area.minZ || z > area.maxZ) continue;
+    const y = yAtTriangleXZ(tri, x, z);
+    if (y == null || y > lowSurfaceMaxY) continue;
+    const dx = x - centerX;
+    const dz = z - centerZ;
+    const candidate = { pos: { x, y: y + JUMP.GROUND_Y, z }, distSq: dx * dx + dz * dz };
+    if (!best || candidate.distSq < best.distSq) best = candidate;
+  }
+  return best?.pos ?? null;
+}
+
+function spawnLowSurfaceMaxY(collision: StageCollision): number {
+  let minY = Infinity;
+  for (const tri of collision.triangles) {
+    if (
+      tri.marker !== 0xcccccccc ||
+      !isFiniteVec(tri.normal) ||
+      tri.normal.y < SPAWN_FLOOR_NORMAL_MIN_Y ||
+      !tri.vertices.every(isFiniteVec)
+    ) {
+      continue;
+    }
+    for (const v of tri.vertices) {
+      if (v.y < minY) minY = v.y;
+    }
+  }
+  return Number.isFinite(minY) ? minY + SPAWN_LOW_SURFACE_Y_BAND : Infinity;
+}
+
+function isSpawnFloorTriangle(
+  tri: { marker: number; normal: Vec3; vertices: [Vec3, Vec3, Vec3] },
+  lowSurfaceMaxY: number,
+): boolean {
+  return (
+    tri.marker === 0xcccccccc &&
+    isFiniteVec(tri.normal) &&
+    tri.normal.y >= SPAWN_FLOOR_NORMAL_MIN_Y &&
+    tri.vertices.every(isFiniteVec) &&
+    Math.max(...tri.vertices.map((v) => v.y)) <= lowSurfaceMaxY
+  );
+}
+
+function yAtTriangleXZ(tri: { vertices: [Vec3, Vec3, Vec3] }, x: number, z: number): number | null {
+  const [a, b, c] = tri.vertices;
+  const denom = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
+  if (Math.abs(denom) < 1e-5) return null;
+  const wa = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denom;
+  const wb = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denom;
+  const wc = 1 - wa - wb;
+  if (wa < -1e-4 || wb < -1e-4 || wc < -1e-4) return null;
+  return wa * a.y + wb * b.y + wc * c.y;
+}
+
+function clamp(v: number, lo: number, hi: number): number {
+  return v < lo ? lo : v > hi ? hi : v;
+}
+
+function isFiniteVec(v: Vec3): boolean {
+  return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
 }
 
 /** Build a battle from config. `borgStats` is the full per-borg table (borgs.json). */

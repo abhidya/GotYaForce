@@ -49,10 +49,10 @@ export function createLoadBoxData(
   }
 
   function onKey(ev: KeyboardEvent): void {
-    if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
+    if (ev.key === " " || ev.key.toLowerCase() === "a") {
       confirm();
       ev.preventDefault();
-    } else if (ev.key.toLowerCase() === "s") {
+    } else if (ev.key === "Enter" || ev.key.toLowerCase() === "s") {
       (opts.onSkip ?? opts.onConfirm)();
       ev.preventDefault();
     } else if (ev.key === "Escape" || ev.key.toLowerCase() === "b") {

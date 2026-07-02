@@ -163,7 +163,11 @@ export class BattleScene {
   }
 
   /** Reconcile the scene with the current list of live borgs. Call once per frame. */
-  sync(borgs: readonly BorgRuntime[], projectiles: readonly Projectile[] = []): void {
+  sync(
+    borgs: readonly BorgRuntime[],
+    projectiles: readonly Projectile[] = [],
+    localActiveUid: string | null = null,
+  ): void {
     const live = new Set<string>();
     for (const b of borgs) {
       live.add(b.uid);
@@ -197,7 +201,7 @@ export class BattleScene {
         this.actors.delete(uid);
       }
     }
-    this.syncLockMarker(borgs);
+    this.syncLockMarker(borgs, localActiveUid);
     this.syncProjectiles(projectiles);
   }
 
@@ -206,8 +210,8 @@ export class BattleScene {
     for (const actor of this.actors.values()) actor.mixer?.update(dt);
     if (this.lockMarker.visible) {
       this.lockMarkerAge += dt;
-      this.lockMarker.rotation.y += dt * 3.2;
-      this.lockMarker.rotation.z = Math.sin(this.lockMarkerAge * 5.4) * 0.16;
+      this.lockMarker.rotation.z += dt * 5.4;
+      this.lockMarker.rotation.y = Math.sin(this.lockMarkerAge * 4.2) * 0.18;
     }
     this.updateImpacts(dt);
   }
@@ -253,10 +257,12 @@ export class BattleScene {
     return actor;
   }
 
-  private syncLockMarker(borgs: readonly BorgRuntime[]): void {
-    const locked = borgs.find((b) => b.alive && b.ownerPlayer !== null && b.lockTarget);
+  private syncLockMarker(borgs: readonly BorgRuntime[], localActiveUid: string | null): void {
+    const locked = localActiveUid
+      ? borgs.find((b) => b.uid === localActiveUid && b.alive && b.lockTarget)
+      : borgs.find((b) => b.alive && b.ownerPlayer !== null && b.lockTarget);
     const target = locked?.lockTarget ? borgs.find((b) => b.uid === locked.lockTarget && b.alive) : null;
-    if (!target) {
+    if (!locked || !target || target.uid === locked.uid || target.team === locked.team) {
       this.lockMarker.visible = false;
       return;
     }

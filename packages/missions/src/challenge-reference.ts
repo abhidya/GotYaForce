@@ -43,6 +43,18 @@ export const CHALLENGE_STAGE_BYTES = [
   0x0e,
 ] as const;
 
+// Direct table behind the decompiled stage-variant lookup:
+// `LooseBallAnims__GetDesperationInfo_unsigned(stage_id)` / `StageVariantCount_Lookup_800825bc`
+// returns `*(u32*)(&DAT_802da5d0 + stage_id*4)` (`chunk_0012.c:5777-5782`).
+// Extracted from `boot.dol` address `0x802da5d0`; Challenge caller guards zero to one
+// before modulo-selecting the variant (`chunk_0048.c:659-661` / `challenge_deobfuscated.c:152-156`).
+export const CHALLENGE_STAGE_VARIANT_COUNTS = [
+  4, 4, 4, 4,
+  4, 4, 4, 4,
+  4, 5, 4, 4,
+  4, 4, 4, 4,
+] as const;
+
 export const CHALLENGE_ALLY_BUDGETS = [
   [1000, 1000, 1200, 1200, 1400],
   [1200, 1200, 1400, 1400, 1600, 1600, 1800, 1800, 2000, 2200],
@@ -171,6 +183,11 @@ export function challengeStageId(stageByte: number): string {
   return `st${stageByte.toString(16).padStart(2, "0")}`;
 }
 
+export function challengeStageVariantCount(stageByte: number): number {
+  const raw = CHALLENGE_STAGE_VARIANT_COUNTS[stageByte] ?? 0;
+  return raw === 0 ? 1 : raw;
+}
+
 export function selectChallengeStage(
   rng: () => number,
   previousStageByte: number | null = null,
@@ -184,7 +201,7 @@ export function selectChallengeStage(
     stageByte,
     stageId: challengeStageId(stageByte),
     stageSubtable: randomInt(rng, 3),
-    stageVariant: randomInt(rng, 4),
+    stageVariant: randomInt(rng, challengeStageVariantCount(stageByte)),
   };
 }
 
