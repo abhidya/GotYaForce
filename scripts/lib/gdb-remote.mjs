@@ -130,7 +130,15 @@ export class GdbRemote {
 
   /** Continue and wait for the next stop packet; returns { payload, pc }. */
   async continueAndWaitStop(ms = 60000) {
+    // Drop packets queued while no waiter was pending (e.g. a stop that raced a timeout).
+    // If the CPU was already halted, the `c` below simply resumes it and the next real
+    // stop arrives fresh — processing stale stops as fresh ones causes silent spin loops.
+    this.queue.length = 0;
     const payload = await this.send("c", ms);
-    return { payload, pc: parseStopPc(payload) };
+    let pc = parseStopPc(payload);
+    // Dolphin's stop-reply format isn't guaranteed to carry register 0x40 — when the
+    // packet doesn't parse, ask for the PC explicitly (the CPU is halted, so this is safe).
+    if (pc === null) pc = await this.readReg(0x40).catch(() => null);
+    return { payload, pc };
   }
 }

@@ -139,6 +139,7 @@ const AUDIO_CUES = {
 // same two generic stingers rather than inventing fake per-borg specificity.
 const COMBAT_SFX: Partial<Record<AnimSlot, string>> = {
   melee: "se00_04",
+  melee_alt: "se00_04",
   shoot: "se00_04",
   special: "se00_01",
   hit: "se00_01",
@@ -389,9 +390,16 @@ const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
   dash_left: [/^dash_left$/],
   dash_right: [/^dash_right$/],
   jump: [/^jump_takeoff$/, /^fly_transition$/, /^boost$/],
+  // Descending part of a jump. jump_land is the exported landing/air-recovery bank
+  // (g0s7 per research/format-specs/borg-animation-banks.md slot convention) — held
+  // clamped it reads as the falling pose. Falls back to jump for borgs without it.
+  fall: [/^jump_land$/],
   fly: [/^boost$/, /^fly_transition$/, /^move_s\d+$/],
   attack: [/^attack_s\d+$/, /^attack_lunge_s\d+$/],
   melee: [/^attack_lunge_s\d+$/, /^attack_s\d+$/],
+  // Resolved via SLOT_VARIANTS (second distinct melee-pattern bank) so borgs with
+  // multiple exported swings alternate; falls back to melee when only one exists.
+  melee_alt: [],
   shoot: [/^attack_s\d+$/, /^special_s\d+$/],
   special: [/^special_s\d+$/],
   hit: [/^hit_react_s\d+$/, /^guard_s\d+$/],
@@ -403,7 +411,11 @@ const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
   // a hit/guard/death clip). hit_react/guard/death stay as TUNED fallbacks for borgs
   // whose g4s0 bank is missing or not yet re-baked with the corrected label.
   down: [/^down_s0$/, /^hit_react_s\d+$/, /^guard_s\d+$/, /^death$/],
-  death: [/^death$/, /^win_or_death$/],
+  // down_s0 (the knockdown/fall-down pose, high-confidence per borg-animation-banks.md)
+  // is a TUNED last-resort death stand-in for borgs with no death/win_or_death bank at
+  // all (e.g. pl0500/pl0503/pl0504 flame dragons, pl0c00-pl0c05 fortresses) — previously
+  // those borgs died standing in their idle loop.
+  death: [/^death$/, /^win_or_death$/, /^down_s0$/],
   spawn: [/^pose_short$/, /^idle$/],
   victory: [/^victory$/, /^win_or_death$/],
 };
@@ -416,9 +428,11 @@ const SLOT_FALLBACKS: Partial<Record<AnimSlot, AnimSlot[]>> = {
   dash: ["move", "idle"],
   move: ["idle"],
   jump: ["fly", "move", "idle"],
+  fall: ["jump", "fly", "move", "idle"],
   fly: ["jump", "move", "idle"],
   attack: ["melee", "shoot", "move", "idle"],
   melee: ["attack", "idle"],
+  melee_alt: ["melee", "attack", "idle"],
   shoot: ["attack", "special", "move", "idle"],
   special: ["attack", "idle"],
   hit: ["idle"],
@@ -483,6 +497,89 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     down: ["down_s0"],
     death: ["death", "win_or_death"],
   },
+  // ---- Alt-mode-only borgs: whole moveset lives in unlabeled group-2 banks -------------
+  // pl0619/pl061f/pl0628 export only `idle` plus g2_s* banks (no g0 locomotion, no g1
+  // attacks), so every slot silently fell back to idle. Mappings DERIVED from a Rosetta
+  // comparison verified across anim_index.json files: pl0c00/pl0c01's LABELED banks match
+  // pl0619's g2 banks one-for-one on frames AND rootSpan (move 31f; dash 59f/rootZ 389;
+  // g6_s0 61f/rootZ 104; g7 attack-length 37f; g7 flinch-length 13f; down 76f), and the
+  // labeled siblings pl0604/pl0610/pl0613 embed byte-identical g2 sets (same frames and
+  // root spans) to pl0619/pl061f/pl0628 respectively. Which 37f bank is shoot vs melee,
+  // and dash sign (fwd-vs-back, left-vs-right; rootSpan is unsigned), are TUNED.
+  pl0619: {
+    move: ["g2_s1"], // 31f = pl0c00 `move` (31f)
+    dash_fwd: ["g2_s4"], // 59f rootZ 389 = pl0c00 `dash_fwd` (59f, rootZ 389)
+    dash_back: ["g2_s5"], // 59f = pl0c00 `dash_back`
+    dash_left: ["g2_s7"], // 59f = pl0c00 `dash_right` (mirrored; no left bank exported)
+    dash_right: ["g2_s7"],
+    jump: ["g2_s24"], // 61f, the only bank with vertical root motion (rootY 100)
+    fly: ["g2_s16"], // 61f rootZ 104 = pl0c00 `g6_s0` sustained-drift bank
+    shoot: ["g2_s20"], // 37f, pl0c00-g7 attack-length
+    melee: ["g2_s21"], // 37f
+    hit: ["g2_s22"], // 13f flinch (= pl0c00 g7_s5 length)
+    special: ["g2_s25"], // 81f rootZ 182, biggest action bank
+    down: ["g2_s15"], // 76f = pl0c00 `down_s0` (76f)
+    death: ["g2_s15"], // TUNED: knockdown pose held as death (no death bank exported)
+  },
+  pl061f: {
+    move: ["g2_s1"], // 31f
+    dash_fwd: ["g2_s4"], // 59f (structural analogy with pl0619; no rootSpan recorded)
+    dash_back: ["g2_s5"],
+    dash_left: ["g2_s7"],
+    dash_right: ["g2_s7"],
+    fly: ["g2_s16"], // 61f rootZ 104
+    shoot: ["g2_s30"], // 37f (this borg's attack-length pair sits at s30/s31)
+    melee: ["g2_s31"], // 37f
+    hit: ["g2_s32"], // 13f flinch
+    death: ["g2_s15"], // 76f knockdown-pose stand-in; its labeled down_s0 is only 15f
+  },
+  pl0628: {
+    move: ["g2_s2"], // 31f family walk convention (its g2_s1 is a 12f stub)
+    dash_fwd: ["g2_s4"], // 31f rootZ 500
+    dash_back: ["g2_s5"], // 31f rootZ 500
+    dash_left: ["g2_s7"], // 31f rootX 500 (mirrored for both sides)
+    dash_right: ["g2_s7"],
+    fly: ["g2_s16"], // 61f rootZ 100
+    shoot: ["g2_s30"], // 37f
+    melee: ["g2_s31"], // 37f
+    hit: ["g2_s35"], // 13f flinch
+    special: ["g2_s41"], // 63f (= pl0c00 g8_s1 length)
+    death: ["g2_s44"], // 77f rootX 290, longest bank = death-per-convention; TUNED
+  },
+  // ---- pl0c00-pl0c05 fortress family: attacks/flinches live in unlabeled group 7 -------
+  // No group-1 attacks or group-3 reacts are exported; g7 carries 37f attack-length and
+  // 13f flinch-length banks (verified in each borg's anim_index.json — same Rosetta as
+  // the pl0619 comment above). melee/hit previously fell back to idle.
+  pl0c00: { melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c01: { melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c02: { melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c05: {
+    melee: ["g7_s0"], // 37f
+    shoot: ["g7_s1"], // 37f; unlike its siblings pl0c05 has no special_s* for shoot to use
+    hit: ["g7_s5"], // 13f
+    special: ["g8_s2"], // 77f (rootZ 290 on sibling pl0c00), biggest action bank; TUNED
+  },
+  pl0c04: { melee: ["g7_s0"] }, // 61f; only attack-plausible bank (no g1/g3 exported)
+  // ---- Borgs with no group-3 hit reacts: short group-4 launch flinches instead ---------
+  // pl0604/pl0610/pl0613 export no hit_react/guard banks; their g4 sets carry 10-15f
+  // clips with pure vertical root motion (rootY 161/215/182 per anim_index.json) — the
+  // launch/knock-up flinch. Previously hit fell back to idle (no reaction at all).
+  pl0604: { hit: ["special_s2"] }, // 11f rootY 161
+  pl0610: { hit: ["special_s1"] }, // 15f rootY 215
+  pl0613: { hit: ["special_s2"] }, // 10f rootY 182
+  // ---- Borgs whose only group-4 bank is the knockdown pose (down_s0) -------------------
+  // After the g4s0 relabel (behavior-notes.md s4r) these have no special_s* left, so
+  // "special" fell back through attack to attack_s0 — a 2-frame placeholder on several.
+  // Use the longest exported lunge/attack bank instead (TUNED pick, banks verified in
+  // each borg's anim_index.json).
+  pl0301: { special: ["attack_lunge_s10"] }, // 54f
+  pl0800: { special: ["attack_lunge_s18"] }, // 50f
+  pl0805: { special: ["attack_lunge_s2"] }, // 71f
+  pl0807: { special: ["attack_lunge_s13"] }, // 51f
+  pl0808: { special: ["attack_lunge_s12"] }, // 50f
+  pl0a00: { special: ["attack_s7"] }, // 71f
+  pl0a01: { special: ["attack_s7"] }, // 51f
+  pl0a02: { special: ["attack_s7"] }, // 56f
 };
 
 async function loadAnimIndex(id: string): Promise<AnimIndex | null> {
@@ -496,6 +593,21 @@ async function loadAnimIndex(id: string): Promise<AnimIndex | null> {
   return p;
 }
 
+// Variant slots reuse another slot's label tables but pick the Nth distinct matching
+// bank, so the renderer can alternate between several exported swings/reacts. When a
+// borg has fewer matches than the index needs, the variant resolves to null and
+// SLOT_FALLBACKS (melee_alt -> melee) reproduces today's behavior exactly.
+const SLOT_VARIANTS: Partial<Record<AnimSlot, { base: AnimSlot; index: number }>> = {
+  melee_alt: { base: "melee", index: 1 },
+};
+
+// Banks shorter than this are placeholder poses (2-frame T-poses like pl0800's
+// attack_s0), not playable actions — skip them when a longer bank also matches.
+// idle/spawn are exempt: some borgs' real exported idle IS a 2f pose (pl0c00-pl0c05)
+// and spawn's pose_short is intentionally 2f.
+const MIN_ACTION_FRAMES = 5;
+const PLACEHOLDER_OK_SLOTS = new Set<AnimSlot>(["idle", "spawn"]);
+
 function pickAnimBank(index: AnimIndex, slot: AnimSlot): AnimBank | null {
   const direct = pickAnimBankDirect(index, slot);
   if (direct) return direct;
@@ -507,17 +619,37 @@ function pickAnimBank(index: AnimIndex, slot: AnimSlot): AnimBank | null {
 }
 
 function pickAnimBankDirect(index: AnimIndex, slot: AnimSlot): AnimBank | null {
+  const variant = SLOT_VARIANTS[slot];
+  const baseSlot = variant?.base ?? slot;
+  const matches = collectAnimBankMatches(index, baseSlot);
+  if (matches.length === 0) return null;
+  const usable = PLACEHOLDER_OK_SLOTS.has(baseSlot)
+    ? matches
+    : matches.filter((bank) => bank.frames >= MIN_ACTION_FRAMES);
+  const pool = usable.length > 0 ? usable : matches;
+  return pool[variant?.index ?? 0] ?? null;
+}
+
+/** Every bank matching the slot's preferred labels + patterns, in pick-priority order. */
+function collectAnimBankMatches(index: AnimIndex, slot: AnimSlot): AnimBank[] {
   const banks = [...index.banks].sort((a, b) => a.group - b.group || a.slot - b.slot || a.frames - b.frames);
+  const matches: AnimBank[] = [];
+  const seen = new Set<AnimBank>();
+  const push = (bank: AnimBank | undefined): void => {
+    if (bank && !seen.has(bank)) {
+      seen.add(bank);
+      matches.push(bank);
+    }
+  };
   for (const label of PREFERRED_LABELS[index.borg]?.[slot] ?? []) {
-    const match = banks.find((bank) => bank.label === label);
-    if (match) return match;
+    push(banks.find((bank) => bank.label === label));
   }
-  const patterns = SLOT_LABELS[slot];
-  for (const pattern of patterns) {
-    const match = banks.find((bank) => pattern.test(bank.label));
-    if (match) return match;
+  for (const pattern of SLOT_LABELS[slot]) {
+    for (const bank of banks) {
+      if (pattern.test(bank.label)) push(bank);
+    }
   }
-  return null;
+  return matches;
 }
 
 async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.AnimationClip | null> {

@@ -40,14 +40,16 @@ const SLOT_LABELS = {
   dash_left: [/^dash_left$/],
   dash_right: [/^dash_right$/],
   jump: [/^jump_takeoff$/, /^fly_transition$/, /^boost$/],
+  fall: [/^jump_land$/],
   fly: [/^boost$/, /^fly_transition$/, /^move_s\d+$/],
   attack: [/^attack_s\d+$/, /^attack_lunge_s\d+$/],
   melee: [/^attack_lunge_s\d+$/, /^attack_s\d+$/],
+  melee_alt: [],
   shoot: [/^attack_s\d+$/, /^special_s\d+$/],
   special: [/^special_s\d+$/],
   hit: [/^hit_react_s\d+$/, /^guard_s\d+$/],
-  down: [/^hit_react_s\d+$/, /^guard_s\d+$/, /^death$/],
-  death: [/^death$/, /^win_or_death$/],
+  down: [/^down_s0$/, /^hit_react_s\d+$/, /^guard_s\d+$/, /^death$/],
+  death: [/^death$/, /^win_or_death$/, /^down_s0$/],
   spawn: [/^pose_short$/, /^idle$/],
   victory: [/^victory$/, /^win_or_death$/],
 };
@@ -61,9 +63,11 @@ const SLOT_FALLBACKS = {
   dash: ["move", "idle"],
   move: ["idle"],
   jump: ["fly", "move", "idle"],
+  fall: ["jump", "fly", "move", "idle"],
   fly: ["jump", "move", "idle"],
   attack: ["melee", "shoot", "move", "idle"],
   melee: ["attack", "idle"],
+  melee_alt: ["melee", "attack", "idle"],
   shoot: ["attack", "special", "move", "idle"],
   special: ["attack", "idle"],
   hit: ["idle"],
@@ -79,36 +83,101 @@ const PREFERRED_LABELS = {
     shoot: ["attack_s4"],
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death"],
     victory: ["victory"],
   },
   pl0008: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death", "win_or_death"],
     victory: ["victory"],
   },
   pl000c: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death", "win_or_death"],
     victory: ["victory"],
   },
   pl0105: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death", "win_or_death"],
   },
   pl0109: {
     melee: ["attack_lunge_s1"],
     hit: ["guard_s11"],
-    special: ["special_s0"],
+    special: ["special_s1"],
+    down: ["down_s0"],
     death: ["death", "win_or_death"],
   },
+  // Alt-mode-only borgs (moveset in unlabeled group-2 banks) — see main.ts comments.
+  pl0619: {
+    move: ["g2_s1"],
+    dash_fwd: ["g2_s4"],
+    dash_back: ["g2_s5"],
+    dash_left: ["g2_s7"],
+    dash_right: ["g2_s7"],
+    jump: ["g2_s24"],
+    fly: ["g2_s16"],
+    shoot: ["g2_s20"],
+    melee: ["g2_s21"],
+    hit: ["g2_s22"],
+    special: ["g2_s25"],
+    down: ["g2_s15"],
+    death: ["g2_s15"],
+  },
+  pl061f: {
+    move: ["g2_s1"],
+    dash_fwd: ["g2_s4"],
+    dash_back: ["g2_s5"],
+    dash_left: ["g2_s7"],
+    dash_right: ["g2_s7"],
+    fly: ["g2_s16"],
+    shoot: ["g2_s30"],
+    melee: ["g2_s31"],
+    hit: ["g2_s32"],
+    death: ["g2_s15"],
+  },
+  pl0628: {
+    move: ["g2_s2"],
+    dash_fwd: ["g2_s4"],
+    dash_back: ["g2_s5"],
+    dash_left: ["g2_s7"],
+    dash_right: ["g2_s7"],
+    fly: ["g2_s16"],
+    shoot: ["g2_s30"],
+    melee: ["g2_s31"],
+    hit: ["g2_s35"],
+    special: ["g2_s41"],
+    death: ["g2_s44"],
+  },
+  // pl0c00-pl0c05 fortress family: attacks/flinches in unlabeled group 7.
+  pl0c00: { melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c01: { melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c02: { melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c05: { melee: ["g7_s0"], shoot: ["g7_s1"], hit: ["g7_s5"], special: ["g8_s2"] },
+  pl0c04: { melee: ["g7_s0"] },
+  // No group-3 reacts: short group-4 launch flinches used as hit.
+  pl0604: { hit: ["special_s2"] },
+  pl0610: { hit: ["special_s1"] },
+  pl0613: { hit: ["special_s2"] },
+  // Only group-4 bank is down_s0: longest lunge/attack as special.
+  pl0301: { special: ["attack_lunge_s10"] },
+  pl0800: { special: ["attack_lunge_s18"] },
+  pl0805: { special: ["attack_lunge_s2"] },
+  pl0807: { special: ["attack_lunge_s13"] },
+  pl0808: { special: ["attack_lunge_s12"] },
+  pl0a00: { special: ["attack_s7"] },
+  pl0a01: { special: ["attack_s7"] },
+  pl0a02: { special: ["attack_s7"] },
 };
 
 const args = new Set(process.argv.slice(2));
@@ -184,19 +253,45 @@ function sortedBanks(index) {
   return [...index.banks].sort((a, b) => a.group - b.group || a.slot - b.slot || a.frames - b.frames);
 }
 
+// Mirrored from apps/game/src/main.ts SLOT_VARIANTS / MIN_ACTION_FRAMES / PLACEHOLDER_OK_SLOTS.
+const SLOT_VARIANTS = {
+  melee_alt: { base: "melee", index: 1 },
+};
+const MIN_ACTION_FRAMES = 5;
+const PLACEHOLDER_OK_SLOTS = new Set(["idle", "spawn"]);
+
 function pickAnimBankDirect(index, slot) {
+  const variant = SLOT_VARIANTS[slot];
+  const baseSlot = variant?.base ?? slot;
+  const matches = collectAnimBankMatches(index, baseSlot);
+  if (matches.length === 0) return null;
+  const usable = PLACEHOLDER_OK_SLOTS.has(baseSlot)
+    ? matches
+    : matches.filter((bank) => bank.frames >= MIN_ACTION_FRAMES);
+  const pool = usable.length > 0 ? usable : matches;
+  return pool[variant?.index ?? 0] ?? null;
+}
+
+// Mirrored from apps/game/src/main.ts collectAnimBankMatches.
+function collectAnimBankMatches(index, slot) {
   const banks = sortedBanks(index);
+  const matches = [];
+  const seen = new Set();
+  const push = (bank) => {
+    if (bank && !seen.has(bank)) {
+      seen.add(bank);
+      matches.push(bank);
+    }
+  };
   for (const label of PREFERRED_LABELS[index.borg]?.[slot] ?? []) {
-    const match = banks.find((bank) => bank.label === label);
-    if (match) return match;
+    push(banks.find((bank) => bank.label === label));
   }
-  const patterns = SLOT_LABELS[slot];
-  if (!patterns) return null;
-  for (const pattern of patterns) {
-    const match = banks.find((bank) => typeof bank.label === "string" && pattern.test(bank.label));
-    if (match) return match;
+  for (const pattern of SLOT_LABELS[slot] ?? []) {
+    for (const bank of banks) {
+      if (typeof bank.label === "string" && pattern.test(bank.label)) push(bank);
+    }
   }
-  return null;
+  return matches;
 }
 
 function pickAnimBank(index, slot) {

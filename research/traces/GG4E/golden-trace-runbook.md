@@ -36,13 +36,19 @@ frame's pads, so each record pairs `input_N` with the state *after* frame N — 
    The script first waits for a wakeup anchor to resolve the borg base (it fires on spawn —
    if you're mid-battle, take a knockdown). Then it records; perform the recipe below.
    If the stub rejects per-frame breakpoints or is too slow, re-run with fewer frames.
-3. **Input recipe** (~30s, isolates each constant; keep the enemy away — hits contaminate):
+3. **Input recipe** (~35s). CONTROL MODEL IS LOCK-ON-RELATIVE (behavior-notes §y): while
+   auto-locked, forward = approach+turn-toward-enemy, **back = the only pure translation**,
+   left/right = **dodge dash** (not a walk), tap A = jump / hold A = fly. Recipe is built
+   around that so each constant is isolated cleanly:
+   - stand still 3s (baseline)
+   - hold stick full-BACK 5s, release, wait 2s (→ clean ground walk speed + accel, no turn
+     coupling). Repeat the back-walk once (second sample).
+   - 3 clean jumps: tap A, no stick, let land (→ jump velocity + gravity)
+   - 1 fly: tap+HOLD A ~3s, release, fall (→ boost thrust vs gravity)
+   - 3 LEFT dodge-dashes then 3 RIGHT, ~1s apart, from standstill (→ dash speed/duration)
    - stand still 3s
-   - hold stick full-forward 5s, release, wait 2s (→ max speed + accel)
-   - repeat forward run once (second sample)
-   - 3 clean jumps, no stick (→ jump velocity + gravity)
-   - 3 forward dashes from standstill, 1s apart (→ dash speed/duration)
-   - stand still 3s
+   Keep a locked enemy present but do NOT trade hits (damage frames contaminate). The recorder
+   also logs the locked enemy position so motion can be read in the lock frame.
 4. **Fit:**
    ```
    node scripts/trace-golden-analyze.mjs user-data/dolphin-trace/golden/<file>.jsonl
