@@ -1,6 +1,6 @@
 {
   "schema": "gotyaforce.actorDataCombatStats.v1",
-  "generatedAt": "2026-07-02T04:19:54.527Z",
+  "generatedAt": "2026-07-02T06:49:41.507Z",
   "generatedBy": "scripts/gen-borg-actor-data-stats.mjs",
   "source": {
     "region": "GG4E",
@@ -8,12 +8,21 @@
     "pattern": "pl####data.bin",
     "recordSize": 432,
     "offsets": {
+      "typeCode": "0x1a0",
+      "airJump": "0x1a3",
       "defense": "0x1a4",
       "shot": "0x1a5",
       "attack": "0x1a6",
       "speed": "0x1a7"
     },
-    "fields": "defense/shot/attack/speed are unsigned bytes at offsets 0x1a4..0x1a7."
+    "fields": "defense/shot/attack/speed are unsigned bytes at 0x1a4..0x1a7. typeCode (0x1a0) is the borg-type enum (0=long range, 1=short range, 2=speed, 3=almighty, 4=support). airJump (0x1a3) is the raw air-jump count byte: N for 'Air jump level N' borgs, 0 for 'Boost jump' borgs, 0xff observed for most 'N/A' flyers.",
+    "typeCodes": {
+      "long range type": 0,
+      "short range type": 1,
+      "speed type": 2,
+      "almighty type": 3,
+      "support type": 4
+    }
   },
   "verification": {
     "borgsJsonRows": 208,
@@ -21,15 +30,20 @@
     "runtimeProfiles": 198,
     "matchedMetadataRows": 190,
     "exactMatches": {
+      "typeCode": 190,
+      "airJump": 175,
       "defense": 190,
       "shot": 190,
       "attack": 190,
       "speed": 190
     },
+    "airJumpUnverifiable": 15,
     "mismatches": []
   },
   "profiles": {
     "pl0000": {
+      "typeCode": 3,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 3,
@@ -38,6 +52,8 @@
       "sourceSha1": "0f2201f55593224bec41f4d2ac296dc9e6b752ef"
     },
     "pl0001": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 6,
@@ -46,6 +62,8 @@
       "sourceSha1": "7a1257e66943f0d1e275dda8518f4ec7d207d16a"
     },
     "pl0002": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 3,
@@ -54,6 +72,8 @@
       "sourceSha1": "01efd010ea23380e97d5bb4e966a90e4dda955be"
     },
     "pl0003": {
+      "typeCode": 3,
+      "airJump": 3,
       "defense": 2,
       "shot": 3,
       "attack": 3,
@@ -62,6 +82,8 @@
       "sourceSha1": "ce37553aa1991e610cb94c9ab852cf60f6e4db19"
     },
     "pl0004": {
+      "typeCode": 2,
+      "airJump": 3,
       "defense": 3,
       "shot": 3,
       "attack": 4,
@@ -70,6 +92,8 @@
       "sourceSha1": "46b8b14f375d2aead4da21198ad37c13a2b70d7a"
     },
     "pl0005": {
+      "typeCode": 2,
+      "airJump": 3,
       "defense": 4,
       "shot": 3,
       "attack": 4,
@@ -78,6 +102,8 @@
       "sourceSha1": "e24faa747cacc636c9f497bcf2395ec90970044a"
     },
     "pl0006": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 2,
       "attack": 6,
@@ -86,6 +112,8 @@
       "sourceSha1": "5fb33d13a9c3add50a4cb576a58a680838e7dbb0"
     },
     "pl0007": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 4,
       "shot": 5,
       "attack": 5,
@@ -94,6 +122,8 @@
       "sourceSha1": "a0a6f70073d47eb80a408700726d04f01a7f397f"
     },
     "pl0008": {
+      "typeCode": 3,
+      "airJump": 3,
       "defense": 1,
       "shot": 1,
       "attack": 2,
@@ -102,6 +132,8 @@
       "sourceSha1": "0de9023856ff9ea98e0f5e313f0fcd70a9be8369"
     },
     "pl0009": {
+      "typeCode": 3,
+      "airJump": 3,
       "defense": 4,
       "shot": 2,
       "attack": 3,
@@ -110,6 +142,8 @@
       "sourceSha1": "0b373e124da5bd21d5b0366e4169e492687913ac"
     },
     "pl000a": {
+      "typeCode": 3,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 3,
@@ -118,6 +152,8 @@
       "sourceSha1": "0f2201f55593224bec41f4d2ac296dc9e6b752ef"
     },
     "pl000b": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 3,
@@ -126,6 +162,8 @@
       "sourceSha1": "d9a14cc79aa5647ed316c27298f768d528adbdf9"
     },
     "pl000c": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 2,
       "attack": 2,
@@ -134,6 +172,8 @@
       "sourceSha1": "668d651281d984fd2f7e3b37dcd16332f9a262e1"
     },
     "pl0100": {
+      "typeCode": 0,
+      "airJump": 3,
       "defense": 2,
       "shot": 4,
       "attack": 2,
@@ -142,6 +182,8 @@
       "sourceSha1": "be09f0b5ab82472daf5c929e86ee67cd56f6f593"
     },
     "pl0101": {
+      "typeCode": 0,
+      "airJump": 3,
       "defense": 2,
       "shot": 4,
       "attack": 2,
@@ -150,6 +192,8 @@
       "sourceSha1": "d3a141061eec5493951824bd48cd41f92ac65a81"
     },
     "pl0102": {
+      "typeCode": 0,
+      "airJump": 3,
       "defense": 3,
       "shot": 6,
       "attack": 0,
@@ -158,6 +202,8 @@
       "sourceSha1": "30686476ad4bddb3857b01c83a5f744cfcf14773"
     },
     "pl0103": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 3,
       "shot": 3,
       "attack": 2,
@@ -166,6 +212,8 @@
       "sourceSha1": "683e6bee631d2f207368fc66c26c0df67f7be399"
     },
     "pl0104": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 3,
       "shot": 6,
       "attack": 2,
@@ -174,6 +222,8 @@
       "sourceSha1": "38e747bf9461adeda468a796465952d034bb7cdb"
     },
     "pl0105": {
+      "typeCode": 0,
+      "airJump": 3,
       "defense": 1,
       "shot": 2,
       "attack": 0,
@@ -182,6 +232,8 @@
       "sourceSha1": "1f872faba74c6974dd06f87f641ca5c966910293"
     },
     "pl0106": {
+      "typeCode": 0,
+      "airJump": 3,
       "defense": 2,
       "shot": 4,
       "attack": 0,
@@ -190,6 +242,8 @@
       "sourceSha1": "4480f409070c4cf8f8e176daebed7a65e8ec53ea"
     },
     "pl0107": {
+      "typeCode": 0,
+      "airJump": 3,
       "defense": 2,
       "shot": 4,
       "attack": 0,
@@ -198,6 +252,8 @@
       "sourceSha1": "744531a450926e0fb5669cec7095f3de2526923e"
     },
     "pl0108": {
+      "typeCode": 0,
+      "airJump": 3,
       "defense": 2,
       "shot": 4,
       "attack": 2,
@@ -206,6 +262,8 @@
       "sourceSha1": "be09f0b5ab82472daf5c929e86ee67cd56f6f593"
     },
     "pl0109": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 0,
       "attack": 1,
@@ -214,6 +272,8 @@
       "sourceSha1": "524c89110a53abaa9b2ecfc50ad0708f2839b186"
     },
     "pl010a": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 3,
       "attack": 0,
@@ -222,6 +282,8 @@
       "sourceSha1": "6d5a35dd0e9427f96e538d50f843e2abcbea4827"
     },
     "pl0200": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 5,
       "shot": 1,
       "attack": 4,
@@ -230,6 +292,8 @@
       "sourceSha1": "d009b235660949e10c8bbc32c023ea1a0fb83f7a"
     },
     "pl0201": {
+      "typeCode": 1,
+      "airJump": 4,
       "defense": 3,
       "shot": 0,
       "attack": 6,
@@ -238,6 +302,8 @@
       "sourceSha1": "c55febddbc92db33bc1dde36fe8622b0a19a819b"
     },
     "pl0202": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 4,
       "shot": 3,
       "attack": 5,
@@ -246,6 +312,8 @@
       "sourceSha1": "b00288c812cc4efcb9f97ca9e81df66d04db990f"
     },
     "pl0203": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 6,
       "shot": 3,
       "attack": 6,
@@ -254,6 +322,8 @@
       "sourceSha1": "0015c3fc5ac348e22443fbc51e6f9cc7ac61c2c9"
     },
     "pl0204": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 4,
       "attack": 6,
@@ -262,6 +332,8 @@
       "sourceSha1": "9de99c2f458d6a70c757b0922965362acb51496c"
     },
     "pl0205": {
+      "typeCode": 3,
+      "airJump": 3,
       "defense": 7,
       "shot": 5,
       "attack": 5,
@@ -270,6 +342,8 @@
       "sourceSha1": "a486a0bdd580bd2cbecd553432ff453f1e984392"
     },
     "pl0206": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 0,
       "attack": 2,
@@ -278,6 +352,8 @@
       "sourceSha1": "bf44b55ca20ecfd6b0c5ab643c8608cb05df9708"
     },
     "pl0207": {
+      "typeCode": 1,
+      "airJump": 4,
       "defense": 5,
       "shot": 3,
       "attack": 5,
@@ -286,6 +362,8 @@
       "sourceSha1": "2d356340cfb1ffbd08ec7eb0d6e406b4e29130a0"
     },
     "pl0208": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 6,
       "shot": 6,
       "attack": 5,
@@ -294,6 +372,8 @@
       "sourceSha1": "e617dba655bd5cee01ca0497047ac26da9f7a9d5"
     },
     "pl0209": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 6,
       "shot": 3,
       "attack": 5,
@@ -302,6 +382,8 @@
       "sourceSha1": "71adf48c29dca384beebb1f9bc4496a3828da8ca"
     },
     "pl020a": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 4,
       "shot": 1,
       "attack": 3,
@@ -310,6 +392,8 @@
       "sourceSha1": "6169096e5193ada6fed4fd3554c5d3855f430be1"
     },
     "pl020b": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 3,
       "attack": 4,
@@ -318,6 +402,8 @@
       "sourceSha1": "f955078ed16fe37d5908ec2d0ea26d4f46f5d035"
     },
     "pl020c": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 4,
       "shot": 3,
       "attack": 4,
@@ -326,6 +412,8 @@
       "sourceSha1": "88c6b255aa55aab2fe10b45aacabadf03ba79ae8"
     },
     "pl020d": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 4,
       "attack": 5,
@@ -334,6 +422,8 @@
       "sourceSha1": "596fe340f869f3761e8cbd8d782f82e2b510a839"
     },
     "pl020e": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 6,
       "shot": 5,
       "attack": 5,
@@ -342,6 +432,8 @@
       "sourceSha1": "fa22ff523337460d615097f5ee1483c34e875fe2"
     },
     "pl020f": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 2,
@@ -350,6 +442,8 @@
       "sourceSha1": "4cd82462276e2c3f51d211dcb17690a37c40e5de"
     },
     "pl0300": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 2,
       "shot": 3,
       "attack": 2,
@@ -358,6 +452,8 @@
       "sourceSha1": "456662ca59cace1456b5b322952c14e29646be18"
     },
     "pl0301": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 3,
       "shot": 3,
       "attack": 2,
@@ -366,6 +462,8 @@
       "sourceSha1": "7270520877ed248ae30966d2c514c25ef6086d8f"
     },
     "pl0302": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 5,
       "shot": 3,
       "attack": 3,
@@ -374,6 +472,8 @@
       "sourceSha1": "fc419394b53bcbd0c11db5cfca28998d0253a2d7"
     },
     "pl0303": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 1,
       "shot": 3,
       "attack": 0,
@@ -382,6 +482,8 @@
       "sourceSha1": "af1c144f860ad9d595d73dcbdcaf5211dfea4751"
     },
     "pl0304": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 2,
       "shot": 5,
       "attack": 2,
@@ -390,6 +492,8 @@
       "sourceSha1": "7ed38706c8e8dee9f8cf3bd943baee6c146f0dc8"
     },
     "pl0305": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 3,
       "shot": 6,
       "attack": 2,
@@ -398,6 +502,8 @@
       "sourceSha1": "a758e306ca3db9855b23adf1f64a04f8d6c46adf"
     },
     "pl0306": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 2,
       "shot": 5,
       "attack": 0,
@@ -406,6 +512,8 @@
       "sourceSha1": "2d92ce270a41a52cd5123d03cf45f2e69b55d17a"
     },
     "pl0307": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 2,
       "shot": 3,
       "attack": 3,
@@ -414,6 +522,8 @@
       "sourceSha1": "c36895bce475b21cef00e571e0af5c7b4b3101e8"
     },
     "pl0308": {
+      "typeCode": 2,
+      "airJump": 3,
       "defense": 2,
       "shot": 0,
       "attack": 3,
@@ -422,6 +532,8 @@
       "sourceSha1": "ae6611fd52c2b5032d3ff6c50eedc0fd076a5abf"
     },
     "pl0309": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 3,
       "shot": 3,
       "attack": 3,
@@ -430,6 +542,8 @@
       "sourceSha1": "1987038ec021446f4547b01fb6e72e9b4804382b"
     },
     "pl030a": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 3,
       "shot": 6,
       "attack": 2,
@@ -438,6 +552,8 @@
       "sourceSha1": "a758e306ca3db9855b23adf1f64a04f8d6c46adf"
     },
     "pl030b": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 2,
       "shot": 3,
       "attack": 2,
@@ -446,6 +562,8 @@
       "sourceSha1": "456662ca59cace1456b5b322952c14e29646be18"
     },
     "pl030c": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 1,
       "shot": 0,
       "attack": 1,
@@ -454,6 +572,8 @@
       "sourceSha1": "c25e75bcaa4c0849447382fe43ff12185a0e6ffb"
     },
     "pl030d": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 1,
       "shot": 2,
       "attack": 2,
@@ -462,6 +582,8 @@
       "sourceSha1": "b1341bc0efd83d2c5f7aaae48cefcd9238aba054"
     },
     "pl0400": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 4,
       "shot": 3,
       "attack": 5,
@@ -470,6 +592,8 @@
       "sourceSha1": "c5f00fc87cc6bc4a246c994ed13d2097cfc42e02"
     },
     "pl0401": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 5,
       "shot": 3,
       "attack": 6,
@@ -478,6 +602,8 @@
       "sourceSha1": "605efcb50e211df2f351108190a23b94b5fb1598"
     },
     "pl0402": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 5,
       "shot": 3,
       "attack": 5,
@@ -486,6 +612,8 @@
       "sourceSha1": "cdce6ccb9760bd9e2c03c3d755de61a84532bf3c"
     },
     "pl0403": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 5,
       "shot": 3,
       "attack": 6,
@@ -494,6 +622,8 @@
       "sourceSha1": "f89a3f5e9d96ddd3e6374811dba2cb9c3e1c0d97"
     },
     "pl0404": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 4,
       "shot": 3,
       "attack": 5,
@@ -502,6 +632,8 @@
       "sourceSha1": "620798347b88a0872c5f54bdc8c15650a34a0620"
     },
     "pl0405": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 4,
       "shot": 3,
       "attack": 5,
@@ -510,6 +642,8 @@
       "sourceSha1": "f7df032d52f29d472837faf6b8e65cfcc596de74"
     },
     "pl0406": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 2,
       "shot": 0,
       "attack": 3,
@@ -518,6 +652,8 @@
       "sourceSha1": "b2a48e9c7e18f4494748eabd866cf43c77c02942"
     },
     "pl0407": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 4,
       "shot": 4,
       "attack": 5,
@@ -526,6 +662,8 @@
       "sourceSha1": "4153097222731b7a4447aa279a1ee0bd9a194bb7"
     },
     "pl0408": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 5,
       "shot": 2,
       "attack": 5,
@@ -534,6 +672,8 @@
       "sourceSha1": "fcaf1e2f4c0f3a646c04cd7188d0afdcdb426c99"
     },
     "pl0409": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 4,
       "shot": 3,
       "attack": 5,
@@ -542,6 +682,8 @@
       "sourceSha1": "d739bc8e3e0c0137b36f2e4462a2f353b960b7a3"
     },
     "pl040a": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 4,
       "shot": 3,
       "attack": 5,
@@ -550,6 +692,8 @@
       "sourceSha1": "c5f00fc87cc6bc4a246c994ed13d2097cfc42e02"
     },
     "pl040b": {
+      "typeCode": 1,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 4,
@@ -558,6 +702,8 @@
       "sourceSha1": "c83fbb5283ddb33a64e3267f8600daca7ea9273f"
     },
     "pl040c": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 0,
@@ -566,6 +712,8 @@
       "sourceSha1": "8d51fc19b6c2970a08c7a81ed5ae01e6f14725e4"
     },
     "pl040d": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 0,
@@ -574,6 +722,8 @@
       "sourceSha1": "b11390895f994c6a1527134d9ca08e0bbb186913"
     },
     "pl0500": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 8,
       "shot": 7,
       "attack": 2,
@@ -582,6 +732,8 @@
       "sourceSha1": "7c8a01ed7dcb1359051c492443d15d8b1aeef7e8"
     },
     "pl0501": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 4,
       "shot": 4,
       "attack": 4,
@@ -590,6 +742,8 @@
       "sourceSha1": "4f187302ab8ad29f73c452aa09e8cf87c3a52b8a"
     },
     "pl0502": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 5,
       "shot": 4,
       "attack": 5,
@@ -598,6 +752,8 @@
       "sourceSha1": "a977c6940d4ad232593c7383cbd06c718c0ef77f"
     },
     "pl0503": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 10,
       "shot": 9,
       "attack": 2,
@@ -606,6 +762,8 @@
       "sourceSha1": "c4861d4475697ad5f7fdc5643ea7e7571b61ec57"
     },
     "pl0504": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 9,
       "shot": 8,
       "attack": 2,
@@ -614,6 +772,8 @@
       "sourceSha1": "569fd480ada8675c3891fc5a18fed69241f4495c"
     },
     "pl0505": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 5,
       "shot": 5,
       "attack": 0,
@@ -622,6 +782,8 @@
       "sourceSha1": "45f869fc2d8d9235e2fd3a14985c728c8db3d056"
     },
     "pl0506": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 9,
       "shot": 8,
       "attack": 2,
@@ -630,6 +792,8 @@
       "sourceSha1": "ac5b8e96a194531b0ece0c1e520b8c0d672f15e3"
     },
     "pl0507": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 10,
       "shot": 9,
       "attack": 2,
@@ -638,6 +802,8 @@
       "sourceSha1": "637afbd0f3fcc6e870fcc6edac2d8faa0fae9668"
     },
     "pl0508": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 10,
       "shot": 9,
       "attack": 2,
@@ -646,6 +812,8 @@
       "sourceSha1": "73d60d1266ec6d552dc2f4449686c81fdcad47d5"
     },
     "pl0509": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 8,
       "shot": 7,
       "attack": 2,
@@ -654,6 +822,8 @@
       "sourceSha1": "b40059ba925bc9938e700003ecb75ad5b494231f"
     },
     "pl050a": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 8,
       "shot": 7,
       "attack": 2,
@@ -662,6 +832,8 @@
       "sourceSha1": "97b37f7f3e376d29749c0ee428cd37f3a6345774"
     },
     "pl050b": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 4,
       "shot": 4,
       "attack": 4,
@@ -670,6 +842,8 @@
       "sourceSha1": "cb881e8a482153abdf4e36acaee7840ea9dce758"
     },
     "pl050c": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 5,
       "shot": 6,
       "attack": 1,
@@ -678,6 +852,8 @@
       "sourceSha1": "6854929b0c203f7a95cf51d1f8991529dde97796"
     },
     "pl050d": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 3,
       "shot": 3,
       "attack": 3,
@@ -686,6 +862,8 @@
       "sourceSha1": "22e298d6b6e23767f3c8c2efa514b648951a25d7"
     },
     "pl050e": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 3,
       "shot": 3,
       "attack": 4,
@@ -694,6 +872,8 @@
       "sourceSha1": "9015d654041974c80c5b8750699792c02a121726"
     },
     "pl050f": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 8,
       "shot": 7,
       "attack": 1,
@@ -702,6 +882,8 @@
       "sourceSha1": "0eed95942d803ad7174acb1f68544e779df343ff"
     },
     "pl0510": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 6,
       "shot": 7,
       "attack": 1,
@@ -710,6 +892,8 @@
       "sourceSha1": "cab43c0387fcbf034d87dd004e7de41f82bd3ed9"
     },
     "pl0511": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 3,
       "shot": 4,
       "attack": 0,
@@ -718,6 +902,8 @@
       "sourceSha1": "3e7a3a06faba9540c05157832061f4e6cc2a3d8c"
     },
     "pl0512": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 8,
       "shot": 6,
       "attack": 1,
@@ -726,6 +912,8 @@
       "sourceSha1": "19973271007e50c274c182889238c0140a1b5a2e"
     },
     "pl0513": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 8,
       "shot": 7,
       "attack": 1,
@@ -734,6 +922,8 @@
       "sourceSha1": "0eed95942d803ad7174acb1f68544e779df343ff"
     },
     "pl0514": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 6,
       "shot": 7,
       "attack": 1,
@@ -742,6 +932,8 @@
       "sourceSha1": "619e6aab712f4d16f939458ad5bc922447333bdc"
     },
     "pl0515": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 5,
       "shot": 6,
       "attack": 1,
@@ -750,6 +942,8 @@
       "sourceSha1": "04e1f96dc7316ad3b186eef47137491dd788963e"
     },
     "pl0516": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 5,
       "shot": 6,
       "attack": 1,
@@ -758,6 +952,8 @@
       "sourceSha1": "9f5b5e8b8925856209e74e8d92845fe02c3483b4"
     },
     "pl0517": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 3,
       "shot": 3,
       "attack": 3,
@@ -766,6 +962,8 @@
       "sourceSha1": "77921fc18d8c8c4c93e3208750f09359cab71af3"
     },
     "pl0600": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 5,
       "attack": 5,
@@ -774,6 +972,8 @@
       "sourceSha1": "ea2f19a10e7384101b53d8043bf1ca3eca5dee59"
     },
     "pl0601": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 6,
       "shot": 5,
       "attack": 4,
@@ -782,6 +982,8 @@
       "sourceSha1": "6193bd157d2709f18699da105037c0569c59e2a9"
     },
     "pl0602": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 9,
       "shot": 7,
       "attack": 7,
@@ -790,6 +992,8 @@
       "sourceSha1": "f49d4baac437b2e65a3e91b5c54504e66f0e9f28"
     },
     "pl0603": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 9,
       "shot": 7,
       "attack": 7,
@@ -798,6 +1002,8 @@
       "sourceSha1": "b83f30839cfad31ac85fc844058b81a92fb39e54"
     },
     "pl0608": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 5,
       "attack": 5,
@@ -806,6 +1012,8 @@
       "sourceSha1": "b32c763a418c9d291138fbb9012b543c291b40d9"
     },
     "pl0609": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 6,
       "shot": 7,
       "attack": 4,
@@ -814,6 +1022,8 @@
       "sourceSha1": "e49590754aebc7ff057920d9ffa12fd9599538b7"
     },
     "pl060a": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 9,
       "shot": 8,
       "attack": 7,
@@ -822,6 +1032,8 @@
       "sourceSha1": "1c801f27825429b2db72a1aee50605cb3e4a1319"
     },
     "pl060b": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 9,
       "shot": 8,
       "attack": 7,
@@ -830,6 +1042,8 @@
       "sourceSha1": "71c813b93f627325aa9034c97a8cd75f6a0ec92c"
     },
     "pl060c": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 9,
       "shot": 8,
       "attack": 7,
@@ -838,6 +1052,8 @@
       "sourceSha1": "1c801f27825429b2db72a1aee50605cb3e4a1319"
     },
     "pl060d": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 9,
       "shot": 8,
       "attack": 7,
@@ -846,6 +1062,8 @@
       "sourceSha1": "71c813b93f627325aa9034c97a8cd75f6a0ec92c"
     },
     "pl060e": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 9,
       "shot": 7,
       "attack": 7,
@@ -854,6 +1072,8 @@
       "sourceSha1": "f49d4baac437b2e65a3e91b5c54504e66f0e9f28"
     },
     "pl060f": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 9,
       "shot": 7,
       "attack": 7,
@@ -862,6 +1082,8 @@
       "sourceSha1": "b83f30839cfad31ac85fc844058b81a92fb39e54"
     },
     "pl0615": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 3,
       "shot": 4,
       "attack": 4,
@@ -870,6 +1092,8 @@
       "sourceSha1": "f1cf654499690d38818564c11c0cd0e872136b38"
     },
     "pl0616": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 5,
       "attack": 5,
@@ -878,6 +1102,8 @@
       "sourceSha1": "e1cfd0919e69700a697dd6f36c2978d74873759a"
     },
     "pl0617": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 6,
       "shot": 5,
       "attack": 4,
@@ -886,6 +1112,8 @@
       "sourceSha1": "b061cb0ed15b4e0f7db2a3a669d2c6f5784a2acb"
     },
     "pl061c": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 5,
       "attack": 5,
@@ -894,6 +1122,8 @@
       "sourceSha1": "5cc9889d09879defce20556118b7042b964abf20"
     },
     "pl061d": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 6,
       "shot": 7,
       "attack": 4,
@@ -902,6 +1132,8 @@
       "sourceSha1": "ab467265d7f90e009f2abfa2e8dd24a25b48a12d"
     },
     "pl0629": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 5,
       "attack": 6,
@@ -910,6 +1142,8 @@
       "sourceSha1": "686e9287fef17af18348c3cad203a948541ab766"
     },
     "pl062a": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 4,
       "shot": 5,
       "attack": 6,
@@ -918,6 +1152,8 @@
       "sourceSha1": "c2a72b91f54cf039ba39c75fc00c83cf687cc8f4"
     },
     "pl0700": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 4,
@@ -926,6 +1162,8 @@
       "sourceSha1": "2569839a34b16e5dc082bc79e58ccc1ef97f256b"
     },
     "pl0701": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 3,
       "attack": 6,
@@ -934,6 +1172,8 @@
       "sourceSha1": "e9c33ef462ef6f4c3f14d890fc9a1e70651868bd"
     },
     "pl0702": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 4,
@@ -942,6 +1182,8 @@
       "sourceSha1": "8d19d3174af726b6e1cea89304e232d75647e15f"
     },
     "pl0703": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 4,
@@ -950,6 +1192,8 @@
       "sourceSha1": "b02b4bd278daf582b1460cb81dd0da01287dcb74"
     },
     "pl0704": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 5,
       "attack": 5,
@@ -958,6 +1202,8 @@
       "sourceSha1": "f035742fff9585484c75dedc1a11680764dc7086"
     },
     "pl0705": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 0,
       "attack": 3,
@@ -966,6 +1212,8 @@
       "sourceSha1": "9f1ad164a6ba091cdf8309d15ad19fe885a4ff25"
     },
     "pl0706": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 4,
       "shot": 0,
       "attack": 7,
@@ -974,6 +1222,8 @@
       "sourceSha1": "eeb4c2689999445dc401f8f4db5ece16659b0e91"
     },
     "pl0707": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 5,
       "shot": 2,
       "attack": 5,
@@ -982,6 +1232,8 @@
       "sourceSha1": "a65d8b938bb18e452671a416e2359ebb05b62cc0"
     },
     "pl0708": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 3,
       "attack": 6,
@@ -990,6 +1242,8 @@
       "sourceSha1": "e292326b8d9484f586fa4add83ebe756708d0445"
     },
     "pl0709": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 2,
       "attack": 4,
@@ -998,6 +1252,8 @@
       "sourceSha1": "548a3a09e8d492b15a8b75a8aada1decb5d8f1b8"
     },
     "pl070a": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 4,
@@ -1006,6 +1262,8 @@
       "sourceSha1": "8d19d3174af726b6e1cea89304e232d75647e15f"
     },
     "pl070b": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 2,
       "attack": 3,
@@ -1014,6 +1272,8 @@
       "sourceSha1": "f451ebb5a07dc45e31b40b972253efe1bc6761bd"
     },
     "pl070c": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 2,
       "attack": 3,
@@ -1022,6 +1282,8 @@
       "sourceSha1": "96bc36507f0dd92e9e2cc3b1fe345bb7d9388a58"
     },
     "pl070d": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 3,
       "attack": 3,
@@ -1030,6 +1292,8 @@
       "sourceSha1": "3d63d20384b0da038eb6c56fe6798ef3f6664fa9"
     },
     "pl0800": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 4,
@@ -1038,6 +1302,8 @@
       "sourceSha1": "fe696360fc9f1efe0c630af1d4ee7c511938b083"
     },
     "pl0801": {
+      "typeCode": 3,
+      "airJump": 3,
       "defense": 2,
       "shot": 3,
       "attack": 3,
@@ -1046,6 +1312,8 @@
       "sourceSha1": "0cbcc800abe6eb56d18e47893ba140a153037462"
     },
     "pl0804": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 3,
       "attack": 5,
@@ -1054,6 +1322,8 @@
       "sourceSha1": "90357c766f2699f6cf0e95b4f437a963cc22029c"
     },
     "pl0805": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 2,
       "shot": 2,
       "attack": 4,
@@ -1062,6 +1332,8 @@
       "sourceSha1": "1e14ba5514d5ab2abb3a8f7ff6a769f86ecaf699"
     },
     "pl0806": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 1,
       "attack": 0,
@@ -1070,6 +1342,8 @@
       "sourceSha1": "47aff16419171bc30dfc709f3e65fe7d240807e9"
     },
     "pl0807": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 0,
       "attack": 3,
@@ -1078,6 +1352,8 @@
       "sourceSha1": "29884af6c44f14934d54b2711393e611b9265560"
     },
     "pl0808": {
+      "typeCode": 3,
+      "airJump": 3,
       "defense": 3,
       "shot": 5,
       "attack": 5,
@@ -1086,6 +1362,8 @@
       "sourceSha1": "eb7dbc0b24b72b3748505f7e11dc854aea4e37e3"
     },
     "pl0809": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 0,
       "attack": 10,
@@ -1094,6 +1372,8 @@
       "sourceSha1": "06e301bc9f569cb414cd90a71b75a8986bfedaa6"
     },
     "pl080c": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 3,
       "attack": 5,
@@ -1102,6 +1382,8 @@
       "sourceSha1": "f2177ccb8fb14ea07c28b2e20483aee190f78943"
     },
     "pl080d": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 2,
       "attack": 4,
@@ -1110,6 +1392,8 @@
       "sourceSha1": "3d2802b43acdf8aa7febac1add1721b65f4a639e"
     },
     "pl080e": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 3,
       "shot": 2,
       "attack": 4,
@@ -1118,6 +1402,8 @@
       "sourceSha1": "3d2802b43acdf8aa7febac1add1721b65f4a639e"
     },
     "pl080f": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 1,
       "attack": 0,
@@ -1126,6 +1412,8 @@
       "sourceSha1": "cfd610afe946366c6588e334680a326d5ab6c8d7"
     },
     "pl0900": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1134,6 +1422,8 @@
       "sourceSha1": "73b288ab8272e25759b096dc2cc0fbbf381c43cb"
     },
     "pl0901": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1142,6 +1432,8 @@
       "sourceSha1": "c3341e577c9d167421cf27c5ce6352a7af6d32eb"
     },
     "pl0902": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1150,6 +1442,8 @@
       "sourceSha1": "2b7586e170a7cded5bf22b9e453f6cf8e69106dc"
     },
     "pl0903": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 5,
       "shot": 1,
       "attack": 1,
@@ -1158,6 +1452,8 @@
       "sourceSha1": "4cf09aebe40f392a104d040fbf1a62031053f93e"
     },
     "pl0904": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1166,6 +1462,8 @@
       "sourceSha1": "5d4168a5cd3173498ca694f353bbfc75a2e12cf8"
     },
     "pl0905": {
+      "typeCode": 2,
+      "airJump": 3,
       "defense": 0,
       "shot": 1,
       "attack": 0,
@@ -1174,6 +1472,8 @@
       "sourceSha1": "470b615b7230098f93c0f8769963b193e7d1b767"
     },
     "pl0906": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 1,
       "shot": 1,
       "attack": 1,
@@ -1182,6 +1482,8 @@
       "sourceSha1": "27365f01f891fb880a81a3f775a796ef181d1361"
     },
     "pl0907": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1190,6 +1492,8 @@
       "sourceSha1": "f5a318f252093e8721f65ad834e19cdbe4a6d5d4"
     },
     "pl0908": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1198,6 +1502,8 @@
       "sourceSha1": "7d7ea5d626e9a520385a10eae2da1ea68ac809fd"
     },
     "pl0909": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1206,6 +1512,8 @@
       "sourceSha1": "231398ce94e08a8d3fb77b082f0a621e080d7c7d"
     },
     "pl090a": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 6,
       "shot": 1,
       "attack": 1,
@@ -1214,6 +1522,8 @@
       "sourceSha1": "87df65b419ec4fbf6ee2eae9b9613b2906f3b70e"
     },
     "pl090b": {
+      "typeCode": 1,
+      "airJump": 3,
       "defense": 1,
       "shot": 1,
       "attack": 0,
@@ -1222,6 +1532,8 @@
       "sourceSha1": "c19e3d22e27313309d82e0e3b2abb2565201838c"
     },
     "pl090c": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1230,6 +1542,8 @@
       "sourceSha1": "c925d79eb118f9c9223b2c5478ab98804863b190"
     },
     "pl090d": {
+      "typeCode": 4,
+      "airJump": 3,
       "defense": 2,
       "shot": 1,
       "attack": 1,
@@ -1238,6 +1552,8 @@
       "sourceSha1": "7be41a358c48168f4d4b064f8548cdf88d4ceaf5"
     },
     "pl0a00": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 2,
@@ -1246,6 +1562,8 @@
       "sourceSha1": "dd5c3a029a682f54c47ff46e7b533dad5bd36cd0"
     },
     "pl0a01": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 3,
       "shot": 2,
       "attack": 4,
@@ -1254,6 +1572,8 @@
       "sourceSha1": "afa6bc32282f6de0e86ae8e79f417e4ad6b8d4b5"
     },
     "pl0a02": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 2,
       "shot": 3,
       "attack": 3,
@@ -1262,6 +1582,8 @@
       "sourceSha1": "53883bde65f819d02e51c07c5df7e047324b10e8"
     },
     "pl0a03": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 3,
       "shot": 4,
       "attack": 4,
@@ -1270,6 +1592,8 @@
       "sourceSha1": "9c51873f9eed11d8d289ed3cbedee330e6075ea2"
     },
     "pl0a04": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 6,
       "attack": 4,
@@ -1278,6 +1602,8 @@
       "sourceSha1": "5703d84ce741dee55f860f4f3cd332cb523580cb"
     },
     "pl0a05": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 1,
       "shot": 1,
       "attack": 2,
@@ -1286,6 +1612,8 @@
       "sourceSha1": "7139f1beff337960688c24fb61855081cf37a5ec"
     },
     "pl0a06": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 3,
       "shot": 4,
       "attack": 4,
@@ -1294,6 +1622,8 @@
       "sourceSha1": "9b3bc110e1277948b9e6a1a155f0343ad69061a5"
     },
     "pl0a07": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 2,
       "shot": 5,
       "attack": 4,
@@ -1302,6 +1632,8 @@
       "sourceSha1": "6d0e4c4eabfa363b85465eecfe18665a6e51a4dd"
     },
     "pl0a08": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 5,
       "attack": 4,
@@ -1310,6 +1642,8 @@
       "sourceSha1": "31b2874301cc390d7b3242782d34352830a0802e"
     },
     "pl0a09": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 6,
       "attack": 4,
@@ -1318,6 +1652,8 @@
       "sourceSha1": "5703d84ce741dee55f860f4f3cd332cb523580cb"
     },
     "pl0a0a": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 1,
       "shot": 2,
       "attack": 2,
@@ -1326,6 +1662,8 @@
       "sourceSha1": "3f4c6bb2217396979c18f128a0708409eeb873ae"
     },
     "pl0b00": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 2,
@@ -1334,6 +1672,8 @@
       "sourceSha1": "27a237bf081f6b19854d8717e61135a43bf1c54f"
     },
     "pl0b01": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 2,
@@ -1342,6 +1682,8 @@
       "sourceSha1": "27a7214eba06a0aa16144a05bbaf2fce53fcb68f"
     },
     "pl0b02": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 2,
@@ -1350,6 +1692,8 @@
       "sourceSha1": "55290a8e295cf48e9bd56ffef4f1fe7abe055e07"
     },
     "pl0b03": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 2,
@@ -1358,6 +1702,8 @@
       "sourceSha1": "b501748c676652ce32a44ef76c9affdd3250e146"
     },
     "pl0b04": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 2,
@@ -1366,6 +1712,8 @@
       "sourceSha1": "d6befb31dcb54c3811165b07e0740233ecd28a27"
     },
     "pl0b05": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 1,
       "shot": 1,
       "attack": 2,
@@ -1374,6 +1722,8 @@
       "sourceSha1": "353a2a535a71904f68b1cdf7becb3f957fc70991"
     },
     "pl0b06": {
+      "typeCode": 4,
+      "airJump": 0,
       "defense": 2,
       "shot": 2,
       "attack": 2,
@@ -1382,6 +1732,8 @@
       "sourceSha1": "ed31f00c85fae47603ae81dcfdea5a7257495431"
     },
     "pl0b07": {
+      "typeCode": 2,
+      "airJump": 0,
       "defense": 1,
       "shot": 2,
       "attack": 2,
@@ -1390,6 +1742,8 @@
       "sourceSha1": "6d6104d61eab7a1efcef68304f9e8d33179f71aa"
     },
     "pl0c00": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 4,
       "shot": 5,
       "attack": 0,
@@ -1398,6 +1752,8 @@
       "sourceSha1": "e9633ece16a919f94bd249eecfe74d1e734a2463"
     },
     "pl0c01": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 4,
       "shot": 6,
       "attack": 0,
@@ -1406,6 +1762,8 @@
       "sourceSha1": "a7fe40881612f51d904426da10cd74bdde6474fc"
     },
     "pl0c02": {
+      "typeCode": 3,
+      "airJump": 0,
       "defense": 5,
       "shot": 5,
       "attack": 4,
@@ -1414,6 +1772,8 @@
       "sourceSha1": "fd1d1fdca15687074566a8d3e575c87ac8385771"
     },
     "pl0c03": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 5,
       "shot": 0,
       "attack": 0,
@@ -1422,6 +1782,8 @@
       "sourceSha1": "d695ab78bb784e93c878034bfde1d9f8119d4087"
     },
     "pl0c04": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 6,
       "shot": 10,
       "attack": 0,
@@ -1430,6 +1792,8 @@
       "sourceSha1": "b109d73264084ee811c886306bee6bf877430210"
     },
     "pl0c05": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 3,
       "shot": 10,
       "attack": 0,
@@ -1438,6 +1802,8 @@
       "sourceSha1": "8cf82d07033330415a95cf6c9b49f0cfe0dffe87"
     },
     "pl0c06": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 4,
       "shot": 5,
       "attack": 0,
@@ -1446,6 +1812,8 @@
       "sourceSha1": "fa6777f1b8bc3d37c985fe6031f72fcfece71026"
     },
     "pl0d00": {
+      "typeCode": 2,
+      "airJump": 255,
       "defense": 2,
       "shot": 4,
       "attack": 0,
@@ -1454,6 +1822,8 @@
       "sourceSha1": "6e1d5a21893ec649e54904b4716894edeae413c1"
     },
     "pl0d01": {
+      "typeCode": 2,
+      "airJump": 255,
       "defense": 2,
       "shot": 4,
       "attack": 0,
@@ -1462,6 +1832,8 @@
       "sourceSha1": "37204abdc580ec96da1aa393b65a39acc8c87c05"
     },
     "pl0d02": {
+      "typeCode": 4,
+      "airJump": 255,
       "defense": 2,
       "shot": 3,
       "attack": 0,
@@ -1470,6 +1842,8 @@
       "sourceSha1": "692da6e334981110ae1e0afdce94a91e1ac54d25"
     },
     "pl0d03": {
+      "typeCode": 2,
+      "airJump": 255,
       "defense": 3,
       "shot": 4,
       "attack": 0,
@@ -1478,6 +1852,8 @@
       "sourceSha1": "0857df2d60c3362ef1199846d9cdaf7f8bc4639a"
     },
     "pl0d04": {
+      "typeCode": 2,
+      "airJump": 255,
       "defense": 2,
       "shot": 4,
       "attack": 0,
@@ -1486,6 +1862,8 @@
       "sourceSha1": "7bd95086a79b6016b376309631f633a04a25c225"
     },
     "pl0d05": {
+      "typeCode": 2,
+      "airJump": 255,
       "defense": 2,
       "shot": 3,
       "attack": 0,
@@ -1494,6 +1872,8 @@
       "sourceSha1": "a78c029cee444eb7556d730baab7a32118ee8c71"
     },
     "pl0d06": {
+      "typeCode": 2,
+      "airJump": 255,
       "defense": 2,
       "shot": 0,
       "attack": 10,
@@ -1502,6 +1882,8 @@
       "sourceSha1": "1ffb4ca22c91e989f38327bef932012154d05cac"
     },
     "pl0d07": {
+      "typeCode": 1,
+      "airJump": 255,
       "defense": 1,
       "shot": 0,
       "attack": 3,
@@ -1510,6 +1892,8 @@
       "sourceSha1": "e03d719eff367fa751b8d6e9d282a3f7df1f23f1"
     },
     "pl0e00": {
+      "typeCode": 0,
+      "airJump": 255,
       "defense": 9,
       "shot": 7,
       "attack": 0,
@@ -1518,6 +1902,8 @@
       "sourceSha1": "63fd37599f42586dfdb55f7a24bc8fe404d13007"
     },
     "pl0e01": {
+      "typeCode": 0,
+      "airJump": 255,
       "defense": 9,
       "shot": 6,
       "attack": 0,
@@ -1526,6 +1912,8 @@
       "sourceSha1": "f185e45e39e3574692d6930642a188f79d62b882"
     },
     "pl0e02": {
+      "typeCode": 0,
+      "airJump": 255,
       "defense": 9,
       "shot": 7,
       "attack": 0,
@@ -1534,6 +1922,8 @@
       "sourceSha1": "b4062da0fde03d65193aafe1bbecd9d7de66446f"
     },
     "pl0e03": {
+      "typeCode": 0,
+      "airJump": 255,
       "defense": 9,
       "shot": 6,
       "attack": 0,
@@ -1542,6 +1932,8 @@
       "sourceSha1": "010f0e43c3d5ab772c5a7f7feb41f4591d1b7e9f"
     },
     "pl0e04": {
+      "typeCode": 0,
+      "airJump": 255,
       "defense": 10,
       "shot": 8,
       "attack": 0,
@@ -1550,6 +1942,8 @@
       "sourceSha1": "f983371951369d5d34228cca42972c1a8ef4a8e2"
     },
     "pl0e05": {
+      "typeCode": 0,
+      "airJump": 255,
       "defense": 9,
       "shot": 7,
       "attack": 0,
@@ -1558,6 +1952,8 @@
       "sourceSha1": "75f408c684c9d5b8c74bfce10bec4438e16538e6"
     },
     "pl0f00": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 1,
       "shot": 1,
       "attack": 0,
@@ -1566,6 +1962,8 @@
       "sourceSha1": "bc5cb60ddab8234137632180dde80f917c0c994a"
     },
     "pl0f01": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 1,
       "shot": 1,
       "attack": 0,
@@ -1574,6 +1972,8 @@
       "sourceSha1": "ca0c8635ec33d04da30a3d66300e2bbfc3d87ae8"
     },
     "pl0f02": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 1,
       "shot": 1,
       "attack": 0,
@@ -1582,6 +1982,8 @@
       "sourceSha1": "70a625d497cd177d80899d9bf84adf5911958b31"
     },
     "pl0f03": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 1,
       "shot": 2,
       "attack": 0,
@@ -1590,6 +1992,8 @@
       "sourceSha1": "a109bd994a4ef7eff33cecfd95cc136d6403b8f2"
     },
     "pl0f04": {
+      "typeCode": 0,
+      "airJump": 0,
       "defense": 1,
       "shot": 1,
       "attack": 0,
@@ -1598,6 +2002,8 @@
       "sourceSha1": "8f95405c3bce5698aad9c0ff522cd1f387329883"
     },
     "pl0f05": {
+      "typeCode": 1,
+      "airJump": 1,
       "defense": 1,
       "shot": 1,
       "attack": 0,
@@ -1606,6 +2012,8 @@
       "sourceSha1": "a397fd9ce9a186e3caf0daa3ee9dc22895e23794"
     },
     "pl0f06": {
+      "typeCode": 0,
+      "airJump": 3,
       "defense": 1,
       "shot": 1,
       "attack": 0,

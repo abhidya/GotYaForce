@@ -8,7 +8,7 @@
 //   attack  -> fallback only; runtime prefers pl####data.bin byte 0x1a6
 //   speed   -> fallback only; runtime prefers pl####data.bin byte 0x1a7
 //   jump    -> "Air jump level N" | "Boost jump" | "N/A" -> air-jump count + flyer flag
-//   type    -> "Long range type" etc. (informs AI preferred engage range)
+//   type    -> fallback only; runtime prefers pl####data.bin byte 0x1a0 (type enum)
 //   tribe   -> cosmetic / grouping, unused by the sim
 //
 // Confidence note: the HP field (object+0x1C6) and subtract-and-clamp application are now
@@ -95,10 +95,22 @@ export function parseJump(jump: string | number | undefined): {
   return { airJumpLevel: 3, flyer: false };
 }
 
-function rangePrefOf(type: string | undefined, hasShot: boolean, hasMelee: boolean): RangePref {
-  const t = (type ?? "").toLowerCase();
-  if (t.includes("long range")) return "ranged";
-  if (t.includes("short range")) return "melee";
+function rangePrefOf(
+  typeCode: number | undefined,
+  type: string | undefined,
+  hasShot: boolean,
+  hasMelee: boolean,
+): RangePref {
+  // DERIVED: actor-data byte 0x1a0 is the borg-type enum (0=long range, 1=short range,
+  // 2=speed, 3=almighty, 4=support), verified against borgs.json for all 190 borgs with
+  // metadata. Prefer it; fall back to the borgs.json type string when no record exists.
+  if (typeCode === 0) return "ranged";
+  if (typeCode === 1) return "melee";
+  if (typeCode === undefined) {
+    const t = (type ?? "").toLowerCase();
+    if (t.includes("long range")) return "ranged";
+    if (t.includes("short range")) return "melee";
+  }
   if (!hasMelee && hasShot) return "ranged";
   if (hasMelee && !hasShot) return "melee";
   return "mixed";
@@ -127,7 +139,7 @@ export function buildProfile(s: BorgStats): BorgProfile {
     flyer,
     hasShot,
     hasMelee,
-    rangePref: rangePrefOf(s.type, hasShot, hasMelee),
+    rangePref: rangePrefOf(actorStats?.typeCode, s.type, hasShot, hasMelee),
   };
 }
 

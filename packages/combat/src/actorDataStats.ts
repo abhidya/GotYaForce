@@ -1,6 +1,18 @@
 import actorDataStatsData from "./data/actorDataStats.json" with { type: "json" };
 
 export interface ActorDataCombatStats {
+  /**
+   * Borg-type enum from actor data byte 0x1a0 (DERIVED, verified bijective against
+   * borgs.json "type" for all 190 borgs with metadata):
+   * 0=long range, 1=short range, 2=speed, 3=almighty, 4=support.
+   */
+  typeCode: number;
+  /**
+   * Raw air-jump count byte 0x1a3 (DERIVED on its verifiable domain: equals N for all
+   * "Air jump level N" borgs, 0 for all "Boost jump" borgs; 0xff observed for most
+   * "N/A" flyers). Not yet consumed by the sim.
+   */
+  airJump: number;
   defense: number;
   shot: number;
   attack: number;
@@ -12,7 +24,7 @@ export interface ActorDataCombatStats {
 type ActorDataStatsFile = {
   verification: {
     matchedMetadataRows: number;
-    exactMatches: Record<"defense" | "shot" | "attack" | "speed", number>;
+    exactMatches: Record<string, number>;
     mismatches: unknown[];
   };
   profiles: Record<string, ActorDataCombatStats>;

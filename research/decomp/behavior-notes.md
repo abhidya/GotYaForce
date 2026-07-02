@@ -1683,3 +1683,76 @@ driving P1; also read camera+0x2E5 per camera to learn the true player→slot as
 - Ops note: keyboard input to Dolphin requires the render window focused via a click that
   actually lands (title-bar clicks sometimes focus without giving the game pad focus);
   verify with the +0x20 control before trusting any capture window.
+
+### (ad) Mode-1 goal-eye algorithm extracted — sub-table 0x802c3894 dumped, follow policy is
+FUN_8000cdc0; the min-distance/decay constants belong to the mode-2 approach (2026-07-02)
+
+**Sub-table dump (PTR_caseD_4_802c3894, 6 entries, read from boot.dol .data):**
+
+| idx | ptr        | function     | role |
+|-----|------------|--------------|------|
+| 0   | 0x8000b780 | (no export)  | not in ghidra-export/_index.tsv; unreached in gameplay (see below) |
+| 1   | 0x8000cb8c | FUN_8000cb8c | mode-1 gameplay dispatcher (state machine over cam+0x2E6) |
+| 2   | 0x8000cdc0 | FUN_8000cdc0 | **no-lock follow — the primary gameplay goal-eye** |
+| 3   | 0x8000cf28 | FUN_8000cf28 | lock-on follow (rotates trail toward lock target actor+0x50C) |
+| 4   | 0x8000d11c | FUN_8000d11c | lock/unlock transition (distance-scaled blend weights) |
+| 5   | 0x8000d318 | FUN_8000d318 | actor+0x7C9 special (timered, decays back to state 2) |
+
+`FUN_8000c918` (mode 1) indexes this table by **actor+0x3F1**, but a corpus-wide grep shows
++0x3F1 is only ever written 0 (reset) or 1 (`FUN_8000c660` init, `FUN_8000cf28` lock loss), so
+gameplay always enters `FUN_8000cb8c`, which re-dispatches the SAME table by **cam+0x2E6**:
+0→2 promote; no lock target (actor+0x508==0) → state 2; lock target → state 3; target-behind
+check (rotate both dirs into heading frame via `zz_00453fc_`, compare z) gates 4→3; actor+0x7C9
+→ state 5. The mode table @ 0x802c38cc re-dumped: [0]=0x8000c660, [1]=0x8000c918,
+[2]=0x8000c988, [3]=0x8000d644, [4]/[5]=0x8000d5a0, [6]=0x8000d5f4, [7]=0x8000d600,
+[8]=0x8000d60c. Cinematic tables also dumped: PTR_FUN_804335b0 (zz_000d46c_ path, entry 0 =
+FUN_8000d560) and DAT_802c3900 (kill/victory cams, e.g. FUN_8000d990).
+
+**Primary follow (mode-1 state 2): `FUN_8000cdc0` @ 0x8000cdc0 + shared `FUN_8000fc2c` @
+0x8000fc2c**, per frame (all on the §ac camera object):
+1. `FUN_8000fc2c`: height offset eases `cam+0x350 = (actor[+0x88C + slot*4] * cam+0x354 +
+   cam+0x350) * 0.5`; **interest** = `(actor.x, (actor+0x6D0 + cam+0x350 + prevInterestY +
+   actor.y) * 0.5, actor.z)` (FLOAT_80436ac4=0.5); **distance** cam+0x348 = horizontal
+   `|goalEye(+0x318) - actorPos|` clamped to per-borg band `[actor+0x894, actor+0x898] *
+   cam+0x354` (slot 1 uses +0x89C/+0x8A0; ×FLOAT_80436ad0=1.3 in 1P/2P splitscreen); beyond
+   max it eases with FLOAT_80436b38=0.8.
+2. pitch cam+0x70 := 0x600 BAM (re-written every frame, confirming §ac's init value).
+3. trail dir = `goalEye - interest`, y forced 0; if |dir| ≤ FLOAT_80436ad8=0.001,
+   `FUN_800452e4` @ 0x800452e4 rebuilds it as `(sin(cam+0x72), 0, cos(cam+0x72))` BAM16;
+   else normalize.
+4. desired = interest + dir*dist; desiredY = interest.y + dist * tan(0x600) (`zz_004526c_` @
+   0x8004526c = tan(BAM16); FLOAT_80437078 = 2π/65536).
+5. goal-eye blend: XZ `(4*prev + desired)/5` (FLOAT_80436acc=4 / FLOAT_80436ae8=5); Y
+   `(9*prev + desired)/10` (**FLOAT_80436af0=9 / FLOAT_80436adc=10 — new extractions**).
+6. **re-projection**: eye(+0x2E8) = interest + normalize(goalEye - interest) * dist.
+7. correctives: `FUN_800101c8` @ 0x800101c8 recomputes dist/pitch/heading (atan2 BAM via
+   FUN_800452a0), clamps pitch to ±0x3000 × clamp(0.3·1.5·distToLock/actor+0x668, 0.3, 1)
+   (the 0x43300000 double-magic decodes to ±0x3000), publishes **actor+0x5B0 = cam heading
+   - 0x8000** (the behind-angle used by init/fallbacks); `FUN_8000fffc` @ 0x8000fffc
+   re-clamps distance to the band; both re-blend with (3*prev+new)/4 (FLOAT_80436b74=3,
+   FLOAT_80436b0c=0.25) when they fire. `FUN_8001063c`→`zz_0010664_` = stage-AABB inside test.
+
+**Lock-on (state 3, `FUN_8000cf28`)**: trail dir rotated toward `interest - lockTargetPos
+(+0x324 ← actor+0x50C)` by ≤ FLOAT_80436af4=0.589 rad/frame (`FUN_80045460` axis-angle),
+goal-eye blend weights 2/3 prev + 1/3 new (FLOAT_80436af8/afc), same re-projection. State 4
+scales the new-weight by distance (FLOAT_80436b00..b10). Not ported (web port has no lock-on).
+
+**Mode-2 approach (`FUN_8000c988` @ 0x8000c988, mode table [2]) — the actual home of the
+"min distance"/"decay" floats**: init captures trail = eye - interest (ε-fallback to
+actor+0x5B0), y=0; per frame `dist = dist <= 80 ? 80 : dist * 0.9` (FLOAT_80436ae0=80,
+FLOAT_80436ae4=0.9), trail yawed **+0x200 BAM/frame** (`zz_00453fc_('y',…,0x200)` —
+instruction immediate), tracked eyeY (+0x3C) rises **+4/frame** (FLOAT_80436acc reused) to cap
+`interest.y + 10 * actor+0x668` (FLOAT_80436adc reused ×), eye = `(4*prevEye + interest +
+trail*dist)/5`. It's a spiral-in/orbit camera; the mode-2 setter wasn't located in the export
+(no `cam+0x18 = 2` write; `zz_0010514_` checks mode==2 for viewport bank +6 swaps, so it does
+occur on gameplay cams). FLOAT_80436ae4 also appears in `zz_0010980_` as a fade-alpha decay —
+unrelated to distance.
+
+**Port status (apps/game/src/sim/camera.ts, 2026-07-02):** FUN_8000cdc0 steps 1-6 ported as
+the primary policy (constants via gen-camera-mode1-constants.mjs; FLOAT_80436af0/adc newly
+generated); FUN_8000c988 ported as the battle-entry approach replacing the instant snap
+(consumes 80/0.9/0x200/+4; exit-at-band is TUNED — ROM exit unknown). Still TUNED: per-borg
+band/height data (+0x894..+0x8A0, +0x6D0, +0x668 — trace band 466.5..504.9 substitutes),
+multi-actor widen, wall-guard; correctives FUN_800101c8/FUN_8000fffc unported. Helpers:
+`zz_0045204_`/`zz_0045238_` @ 0x80045204/0x80045238 = sin/cos(BAM16); DOUBLE_80436ab0/ab8
+(0.5/3.0) are just the PPC frsqrte Newton iteration, not tunables.
