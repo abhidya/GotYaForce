@@ -1477,3 +1477,209 @@ trigger sites are unnamed and not yet traced.
 
 Artifacts: `borg-struct-offsets.txt`, `borg-statemachine-head.txt`, `invincibility-disasm.txt`
 (this dir). Scripts: `scratchpad/dol.py`, `disasm.py`, `ppc.py`, `offsets.py`.
+
+---
+
+### (y) Control model is LOCK-ON-RELATIVE (player-observed 2026-07-01, verify vs traces)
+
+Source: direct player testimony during golden-trace setup — NOT yet ROM-confirmed. Flagged
+here because it changes how movement traces must be interpreted and recorded, and it likely
+explains why several movement constants (esp. DASH, TURN) never fit a world/camera-relative
+model. To be verified against a golden trace (record the locked enemy's position alongside the
+player's; decompose motion into toward/away/around the enemy).
+
+The player is normally **auto-locked onto an enemy**, and stick input is interpreted relative to
+that enemy, not the camera or world:
+- **Up/forward** = approach the locked enemy AND rotates facing toward them (heading is slaved to
+  the lock vector — heading @ +0x72 is NOT a free DOF while locked).
+- **Down/back** = retreat directly away. This is the ONLY pure translation with no turn coupling,
+  so it is the correct input for isolating raw ground-walk speed (`MOVE.GROUND_*`).
+- **Left/Right** = a **dodge dash / step** (not a lateral walk). These are the DASH samples; the
+  analyzer must treat left/right as dash events, not steady-speed runs.
+- **Forward + Left/Right** = circle-strafe around the enemy.
+- **Jump: tap A = jump; hold A = fly/boost** (matches JUMP.VELOCITY vs BOOST_THRUST split).
+
+Consequences for the trace harness:
+1. `scripts/trace-golden-analyze.mjs` currently infers "steady ground speed" from full-stick runs
+   — valid only for the BACK-walk segment. Left/right full-stick = dash, not walk. Recipe and
+   analyzer phase-detection updated accordingly (see golden-trace-runbook.md).
+2. Golden capture should also record the locked enemy's struct (position) so motion can be
+   decomposed in the lock frame; world-space deltas alone conflate approach/turn/strafe.
+3. This corroborates the standing "lock-on is central; no manual scan-select mechanic" finding
+   (combat.ts lock-on header + §q) — lock is the default state that shapes all movement.
+
+---
+
+### (z) Deterministic pointer chain to player 0's active borg — CONFIRMED (2026-07-01)
+
+DERIVED from the corpus (store-site + read-site proof). Lets a live reader (Dolphin Memory
+Engine) locate the REAL gameplay borg struct every frame with no RAM scanning, stable across
+pauses/deaths/borg-switch. Ported in `scripts/dme_borg.py`; recorder `scripts/dme_record_chain.py`.
+
+Chain (all big-endian MEM1):
+```
+T    = *(u32*) 0x80433934                 # battle/slot table ptr (0/!MEM1 => no battle)
+slot = *(s8*)  (T + 0xC0)                 # player 0's active-borg slot (clamp <0||>5 -> 0)
+base = *(u32*) (0x803C4E84 + slot*4)      # player 0 active borg struct pointer
+```
+Then all confirmed fields hang off base: +0x44/48/4c pos, +0x58/5c/60 vel, +0x72 heading,
++0x544 state, +0x720 invuln, +0x3e4 slot index, +0x88 team (0 = player/ally), +0 alive flag.
+
+Evidence (chunk:line in `research/decomp/ghidra-export/`):
+- **Store site** `zz_005809c_` @ 0x8005809c (chunk_0007.c:1149) writes each borg pointer into the
+  6-entry array at 0x803C4E84, records slot at borg+0x3e4, stride 0x1e00 between borgs.
+- **Player→slot** `zz_000bef4_` @ 0x8000bef4 (chunk_0001.c:558) uses `PTR_DAT_80433934[player+0xc0]`.
+- **Direct player-0 fetch** chunk_0001.c:4202/4301: `(&DAT_803c4e84)[(s8)PTR_DAT_80433934[0xc0]]`.
+- Array head `DAT_803c4e84` == player 0 active borg after per-frame update; single-player fast
+  path `base = *(u32*)0x803C4E84`.
+Validation gates for the live reader: state in [-1,64], pos in world range, borg+0x3e4 == slot,
++0x88 == 0. Avoid `DAT_804360dc` (spectator/camera cycle index, NOT player control).
+
+This finally supersedes the fragile live approaches tried this session (position value-scan and
+invuln-countdown scan both drowned in render-buffer/false-positive noise; render-pool addresses
+at 0x8068xxxx tracked position but did not persist). The pointer chain is the stable foundation.
+
+**IMPORTANT AMENDMENT (later same night, live-verified in 4P versus): the chain resolves but
+does NOT carry live position in 4-player versus mode — see §(aa).**
+
+---
+
+### (aa) 4P-versus live-capture findings — chain structs hold NO position; live world position
+is only in per-frame scratch data (2026-07-01, driven-input verification via computer-use)
+
+Setup: real 4P versus battle (user save `2v2 gred cotrolled players no cpu.sav`), single Dolphin
+2606-97 instance, DME reads, inputs driven programmatically (P1 keyboard: arrows + X=A) so every
+test was input-labeled ground truth.
+
+Findings (all live-verified, repeatable):
+1. The §(z) chain resolves correctly (T ok, slot 0, `0x803C4E84` array populated with SIX
+   contiguous objects at exactly stride 0x1E00 — layout matches the store site perfectly). BUT
+   in this mode all six objects have `+0x44/48/4c == (0,0,0)` at all times, `+0x544 == 0`,
+   `+0x720 == 0`, even while all four borgs visibly fight. The only responsive fields found in
+   a full 0x1E00 float scan during driven input are frame/sub-frame counters (`+0x1ADC` block:
+   x=z+1 counting 1.0/frame, y cycling 0..59) and small animation values (`+0x44` shows a
+   0..24.5 sawtooth during DASHES only). These objects appear to be slot/bookkeeping objects
+   in this mode, not the on-field actors — OR field state lives at other offsets entirely.
+2. An input-correlated full-MEM1 scan (drive still/walk/still/walk square wave; keep floats
+   that move ONLY in walk windows) returns 74 columns, ALL of which are transient scratch:
+   GX viewport dims (320x224 quadrants at 0x803c1084), a scratch transform pool at 0x803c1100
+   (translation column carries REAL world coords ~(-1106,224,-2997)..(400,22,-2218) but cycles
+   through different scene objects every frame), per-move effect accumulators (0x8044cfd4),
+   and mirrored copies at 0x8152xxxx/0x8153xxxx/0x81546xxx. No stable position column exists
+   that moves only with P1 input.
+3. Conclusion: in 4P versus, the persistent on-field borg state either lives in a different
+   allocation not reachable via `0x803C4E84`, or positions are stored in a form my float-triple
+   scans don't match (fixed-point? embedded deeper?). The world scale IS thousands of units
+   (scratch matrix translations), consistent with earlier modes.
+
+Next step (decisive, cheap, NOT another scan): set a WRITE WATCHPOINT on the scratch matrix
+translation `0x803c112c` (or a mirrored copy) via the Dolphin GDB stub, capture the writer PC,
+and read the writer function in the corpus — its source pointer chain IS the real per-actor
+world transform. Reload the `2v2` save state after the GDB session. Alternatively trace who
+consumes the §(z) pool objects (`zz_005809c_` callers in chunk_0056/0058) to find the field-
+actor allocation for versus mode.
+
+Working tooling from this session (all functional): `scripts/dme_lib.py`, `dme_borg.py`
+(chain reader), `dme_record_chain.py`, `dme_capture_session.py`, `dme_find_by_motion.py`,
+`dme_find_by_invuln.py`, plus computer-use-driven input recipes (P1: arrows + X). The analyzer
+`scripts/trace-golden-analyze.mjs` is self-test-proven and waiting on a genuine position trace.
+
+---
+
+### (ab) BREAKTHROUGH: per-player camera view-matrix chain CONFIRMED live; the borg-position
+door is one static trace away (2026-07-01 late, GDB matrix-catch + corpus read + DME verify)
+
+Method that finally worked: Z0 breakpoints on `PSMTXCopy` @ 0x8020af28 / `PSMTXConcat` @
+0x8020af5c (this build's stub REJECTS Z2 write watchpoints — empty reply), filtering for
+destination == the per-frame scratch matrix `DAT_803c1100`. (`scripts/gdb-catch-matrix-src.mjs`;
+run via `launch-dolphin-gdb.mjs`.) Caught sources, then read the calling code in the corpus.
+
+CONFIRMED chain (live-verified via DME, all four slots):
+```
+V   = *(u32*)0x80433930            # viewport/render table (sibling of the 0x80433934 table)
+mtx = *(u32*)(V + 0x14 + p*4)      # player p in 0..3 -> per-player VIEW matrix (3x4 row-major)
+                                    # resolved: 0x803c7744 / 7b28 / 7f0c / 82f0 (static, stride 0x3E4)
+camera world translation at mtx+0x0C/+0x1C/+0x2C
+```
+Evidence: `zz_008c440_` @ 0x8008c440 (chunk_0013.c) does
+`PSMTXCopy(*(float**)(PTR_DAT_80433930 + param_9*4 + 0x14), &DAT_803c1100)` then installs it on
+the HSD camera object `DAT_80436214` (+0x54). Verified live: the four pointers resolve exactly
+to the caught matrices; translations are world-scale and change between game states.
+
+The three viewport functions in chunk_0013.c:
+- `zz_008c440_` @ 0x8008c440 — installs a PRE-BUILT per-player view matrix (battle viewports).
+- `zz_008c88c_` @ 0x8008c88c — builds a FIXED view via `C_MTXLookAt(dst, &DAT_802da7bc eye,
+  &DAT_802da7d4, &DAT_802da7c8)` (menu camera; matches June's traced static vectors).
+- `zz_008c9d4_` @ 0x8008c9d4 — another fixed-vector LookAt from `DAT_802b0c84..0ca4` (special/
+  results camera; its scratch source was heap 0x8044d49c).
+
+REMAINING (the one static trace left): find who BUILDS/WRITES the per-player battle matrices at
+0x803c7744(+0x3E4*p) each frame — that builder calls C_MTXLookAt (or equivalent) with a live
+eye + INTEREST vector, and the interest is derived from the borg's real position, i.e. the
+builder's load chain exposes the live actor object for this mode. Search: corpus refs to
+0x803c7744 / 80433930-table writes / remaining `gnt4_C_MTXLookAt_bl` callers that use non-static
+vectors; or GDB-break on C_MTXLookAt during battle (NOT during menus) and read r4/r6 vectors +
+callstack. The eye/interest source structs ARE the per-player camera+target state (and §3.1's
+runtime camera object 0x806A5300 is almost certainly one of them).
+
+Session hazards worth remembering: this Dolphin build (2606-97) has a flaky stub — Z2
+unsupported, and long breakpoint sessions wedge (stops cease; game left paused even after
+release). The June GDB results were on build 2506a. For the next GDB pass, consider pinning
+the older build in a separate folder, or keep sessions short (<30s) and relaunch per pass.
+
+---
+
+### (ac) Camera system fully cracked — actor array RE-CONFIRMED live; position candidate is
+actor+0x20 vec3 in 4P mode (2026-07-01 ~10:30PM, static corpus trace from §ab's leads)
+
+The per-frame camera update is `zz_000bda4_` @ 0x8000bda4 (chunk_0001.c:464): loops **12 camera
+objects** at `0x803c73b0 + i*0x3E4` and pairs each with its target actor via
+```c
+actor = (&DAT_803c4e84)[ camera[0x2E5] ];   // camera's target-slot byte -> borg array (§z!)
+```
+then dispatches `zz_000c5f8_(cam, actor)` → per-mode policy from the **camera-mode function
+table @ 0x802c38cc** (mode byte = cam+0x18; 20 entries, all in chunk_0001: mode0=FUN_8000c660,
+1=FUN_8000c918, 2=FUN_8000c988, 3-12=thunks in FUN_8000d560, 13/14=zz_000d658_,
+15=FUN_8000e28c, 16=FUN_8000eaf4, 18=FUN_8000eee8, 19=FUN_8000f36c) → finalize
+`FUN_8000c314(cam)` which runs `C_MTXLookAt(cam+0x394, eye=cam+0x2E8, up=cam+0x330,
+interest=cam+0x300)`.
+
+**Camera object layout** (static array base 0x803c73b0, stride 0x3E4, 12 entries):
++0x00 active flag; +0x11 alt-path flag; +0x18 mode byte; +0x19 init flag; +0x2E4 bound flag;
++0x2E5 target actor slot (index into 0x803C4E84); +0x2E8 eye vec3; +0x2F4 prev eye; +0x300
+interest vec3; +0x30C prev interest; +0x330 up vec3; +0x33C direction; +0x394 view matrix
+(3x4; the §ab per-player matrices 0x803c7744+p*0x3E4 are exactly base+0x394).
+
+**This re-confirms the §z borg array 0x803C4E84 as the LIVE actor list even in 4P mode** —
+the camera reads real per-frame fields off those objects: +0x18 (>0 alive check),
++0xb4 (float the camera lerps toward), +0x72/+0x5b0 (headings), +0x3e5 (viewport mask byte),
++0x3f1, +0x43d (x7 reads), +0x4a1, +0x582, +0x5e0, +0x668, +0x6d0. The §aa observation that
++0x44/48/4c stay zero in this mode therefore means the POSITION lives at a different offset
+here, not that the objects are inert. Camera handlers read a **vec3 at actor+0x20/0x24/0x28**
+— the prime live-position candidate for this mode (to be DME-verified by driving P1).
+
+Verification plan (fast): read `*(u32*)0x803C4E84 + slot` actors, sample +0x20 vec3 while
+driving P1; also read camera+0x2E5 per camera to learn the true player→slot assignment
+(P1's camera is the one whose viewport is top-left; its +0x2E5 names P1's slot).
+
+**VERIFIED LIVE + FIRST REAL TRAJECTORY CAPTURED (same night, ~10:20PM):**
+- Camera→slot mapping confirmed 1:1 in 4P versus: cam0→slot0 … cam3→slot3, all mode=1.
+- All four actors carry live world positions at **+0x20/+0x24/+0x28** (spawns read
+  (-1000,0,-1200), (800,0,1400), (-800,0,-1400), (1400,0,800) — the four 2v2 corners).
+- **P1 chain (4P versus): `actor = *(u32*)0x803C4E84; pos = actor+0x20 vec3; heading =
+  actor+0x72 s16`.** Recorded a driven backward-walk golden
+  (`user-data/dolphin-trace/golden/recipe-pos20-pl0615-chain.jsonl`, 119 frames, clean):
+  perfectly smooth trajectory from spawn with CONSTANT per-frame delta (dx,dz)=(-16.9,-14.1),
+  i.e. **ground walk speed = 22.0 world-units/frame** (G Red, backward walk, single capture —
+  provisional DERIVED-by-trace; reproduce once more before touching constants.ts per the
+  standing rule). Heading BAM16 sweeps smoothly during the turn-coupled walk — usable for
+  TURN_RATE fitting too.
+- The +0x20 vec3 y-component stayed 0 through jumps; +0x24/+0xb4/+0x30 also flat in a jump
+  probe — BUT the probe's control failed (walk didn't register either in that pass; input
+  reached the game earlier, then stopped — round likely ended). **Vertical offset = the one
+  open detail.** Next session: verify input registers (drive walk, watch +0x20 move), then
+  rerun the labeled full-struct scan (script pattern in session log) — the field that arcs
+  during tap-A jumps is the vertical; also try actor+0x8c8 & the +0x50 region.
+- Ops note: keyboard input to Dolphin requires the render window focused via a click that
+  actually lands (title-bar clicks sometimes focus without giving the game pad focus);
+  verify with the +0x20 control before trusting any capture window.

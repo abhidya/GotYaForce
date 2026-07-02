@@ -103,17 +103,29 @@ export const SPAWN_INVINCIBILITY_FRAMES = 45;
 export const MOVE = {
   /**
    * Ground move speed (units/frame) = BASE + speed_stat * PER_STAT.
-   * speed stat ranges 0..10; G RED (speed 6) ~= 5.5 u/frame ~= 330 u/s, in line with the
-   * RAM trace where the player crossed ~284 units over the snapshot interval. TUNED scale.
+   *
+   * DERIVED-provisional anchor (2026-07-01, behavior-notes §ac): live per-frame trace of
+   * G RED (speed 6) walking in 4P versus measured a constant 22.0 world-units/frame
+   * (golden: user-data/dolphin-trace/golden/recipe-pos20-pl0615-chain.jsonl; position read
+   * from the confirmed actor chain *(u32*)0x803C4E84 → +0x20 vec3; per-frame deltas exactly
+   * (-16.9, -14.1)). BASE/PER_STAT are the old TUNED values scaled 4x so speed-6 hits the
+   * measured 22.0 while preserving the TUNED stat spread — the BASE/PER_STAT split itself is
+   * still TUNED (one data point can't pin two constants; capture a different-speed borg to
+   * derive the split). Single capture: reproduce before treating the anchor as fully DERIVED.
+   * Note: measured on the BACKWARD walk — the only pure translation under lock-relative
+   * controls (behavior-notes §y); forward/strafe may differ.
    */
-  GROUND_BASE: 1.0,
-  GROUND_PER_STAT: 0.75,
+  GROUND_BASE: 4.0,
+  GROUND_PER_STAT: 3.0,
   /** Flight horizontal speed is a touch faster than ground. */
   FLY_MULT: 1.15,
-  /** Acceleration toward target velocity (units/frame^2) for snappy-but-not-instant feel. */
-  ACCEL: 1.2,
-  /** Deceleration when no input (units/frame^2). */
-  DECEL: 1.6,
+  /**
+   * Acceleration toward target velocity (units/frame^2). TUNED-rescaled 4x alongside the
+   * DERIVED ground-speed anchor so spin-up time (frames to reach max) keeps its tuned feel.
+   */
+  ACCEL: 4.8,
+  /** Deceleration when no input (units/frame^2). TUNED-rescaled 4x (see ACCEL). */
+  DECEL: 6.4,
   /** Yaw turn rate toward facing target (radians/frame). */
   TURN_RATE: 0.35,
 } as const;
@@ -147,7 +159,12 @@ export const DASH = {
    * spawn-arc handler @0x8005e868, 30.0/60.0 in a respawn-reset helper @0x80060b60) and neither
    * is a dash/step state. No dash/dodge state was found anywhere in the corpus this pass.
    */
-  SPEED: 9.0,
+  /**
+   * TUNED-rescaled 4x (2026-07-01) alongside the DERIVED ground-speed anchor in MOVE — a
+   * dash must clearly outpace the measured 22.0 u/f walk. Absolute value still TUNED;
+   * capture left/right dodge-dashes on the +0x20 chain to derive it.
+   */
+  SPEED: 36.0,
   /** Dash duration (frames). TUNED — see SPEED note; no dash state found to time. */
   DURATION: 10,
   /** Invincibility frames granted by a dash/step (dodge). TUNED — see SPEED note. */

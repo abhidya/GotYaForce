@@ -84,17 +84,29 @@ function decodePad(buf, padIndex) {
   };
 }
 
-async function resolveBorgBase(gdb) {
+async function resolveBorgBase(gdb, deadlineMs = 10 * 60 * 1000) {
   if (BASE_OVERRIDE !== null) return { base: BASE_OVERRIDE, via: "cli-override" };
   const kinds = new Map();
   for (const a of BASE_ANCHORS) kinds.set(a.addr, await gdb.setBreak(a.addr));
   console.log("waiting for a wakeup anchor to resolve the active borg base");
   console.log("(spawn into the battle, or take a knockdown, if this stalls)");
+  const startedAt = process.hrtime.bigint();
   try {
     for (;;) {
-      const { pc } = await gdb.continueAndWaitStop(120000);
-      const anchor = BASE_ANCHORS.find((a) => a.addr === pc);
-      if (!anchor) continue; // unrelated stop; resume
+      let stop;
+      try {
+        stop = await gdb.continueAndWaitStop(60000);
+      } catch {
+        const elapsedMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+        if (elapsedMs > deadlineMs) throw new Error("gave up waiting for a wakeup anchor (10 min)");
+        console.log("  …still waiting (start/restart a battle so a borg spawns)");
+        continue;
+      }
+      const anchor = BASE_ANCHORS.find((a) => a.addr === stop.pc);
+      if (!anchor) {
+        console.log(`  stop at pc=0x${stop.pc?.toString(16) ?? "??"} (not an anchor); resuming`);
+        continue;
+      }
       const base = await gdb.readReg(anchor.regId);
       if (isMem1(base)) return { base, via: anchor.id };
       console.warn(`anchor ${anchor.id} hit but register not in MEM1 (0x${base?.toString(16)}); retrying`);
@@ -104,11 +116,24 @@ async function resolveBorgBase(gdb) {
   }
 }
 
+async function connectWithRetry(gdb, attempts = 24, delayMs = 5000) {
+  for (let i = 1; ; i += 1) {
+    try {
+      await gdb.connect();
+      return;
+    } catch (error) {
+      if (i >= attempts) throw error;
+      if (i === 1) console.log(`GDB stub not up yet (${error.code ?? error.message}); retrying every ${delayMs / 1000}s`);
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+}
+
 async function main() {
   if (!Number.isInteger(FRAMES) || FRAMES <= 0) throw new Error("--frames must be a positive integer");
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   const gdb = new GdbRemote(HOST, PORT);
-  await gdb.connect();
+  await connectWithRetry(gdb);
   console.log(`connected to Dolphin GDB stub at ${HOST}:${PORT}`);
   gdb.interrupt();
   await gdb.waitPacket(10000).catch(() => {}); // initial stop ack, if any
@@ -137,9 +162,20 @@ async function main() {
   console.log(`recording ${FRAMES} frames — perform the input recipe now`);
   let frames = 0;
   let padPtr = null;
+  let quietStreak = 0;
   try {
     while (frames < FRAMES) {
-      const { pc } = await gdb.continueAndWaitStop(30000);
+      let stop;
+      try {
+        stop = await gdb.continueAndWaitStop(30000);
+        quietStreak = 0;
+      } catch {
+        quietStreak += 1;
+        console.log(`  no frames for 30s (game paused/menus?) — ${frames} recorded so far`);
+        if (quietStreak >= 6) throw new Error("no PADRead hits for 3 minutes; stopping with what we have");
+        continue;
+      }
+      const { pc } = stop;
       if (pc !== PAD_READ) continue;
       padPtr = await gdb.readReg(3);
       if (!isMem1(padPtr)) continue;
