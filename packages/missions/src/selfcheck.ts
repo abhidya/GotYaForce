@@ -14,6 +14,10 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 import { createChallengeRun, CHALLENGE_DIFFICULTIES, enemyTargetForBattle } from "./challenge.js";
+import {
+  CHALLENGE_STAGE_BYTES,
+  challengeStageId,
+} from "./challenge-reference.js";
 import { createAdventureCampaign } from "./adventure.js";
 import { computeResults, type BattleOutcome } from "./scoring.js";
 import type { BorgData } from "./borg-data.js";
@@ -38,6 +42,10 @@ function assertChallengeReferenceInvariants(): void {
   assert(
     enemyTargetForBattle(CHALLENGE_DIFFICULTIES.NORMAL, 1) === 1000,
     "NORMAL BATTLE 2 target should match recovered DOL table",
+  );
+  assert(
+    CHALLENGE_STAGE_BYTES.map(challengeStageId).join(",") === "st00,st01,st02,st03,st04,st05,st08,st0a,st0b,st0c,st0e",
+    "Challenge stage-byte table should map to the recovered exported base stage ids",
   );
 }
 
@@ -85,6 +93,14 @@ export function main(): void {
   assert(run.battles.length === 5, "NORMAL Challenge run should default to DOL table count");
   assert(run.battles[0]?.label === "BATTLE 1 VS", "Challenge battle label should match captured VS flow");
   assert(run.battles[1]?.label === "BATTLE 2 VS", "WIN branch should advance to BATTLE 2 VS");
+  assert(
+    run.battles.every((battle) => /^st[0-9a-f]{2}$/.test(battle.arena)),
+    "Challenge generated battles should carry literal exported stage ids, not arena-name fallbacks",
+  );
+  assert(
+    run.battles.every((battle) => battle.meta?.stageByte !== undefined && battle.meta.stageSubtable !== undefined && battle.meta.stageVariant !== undefined),
+    "Challenge generated battles should preserve all three raw stage selector bytes",
+  );
   assert(
     run.battles[0]?.forces.filter((f) => f.team === "player" && f.ownerPlayer == null && f.cpuAlly).length === 1,
     "FIGHT ALONE should add one CPU ally on the player side",

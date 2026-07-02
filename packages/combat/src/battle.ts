@@ -23,6 +23,7 @@ import {
   stepInvincibility,
   stepProjectiles,
 } from "./combat.js";
+import { startingAmmoForProfile } from "./actionProfiles.js";
 import { DEFAULT_BOUNDS, JUMP, SIM, SPAWN_INVINCIBILITY_FRAMES } from "./constants.js";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
@@ -146,7 +147,7 @@ class BattleImpl implements Battle {
       state: "spawn",
       stateTime: 0,
       anim: "spawn",
-      ammo: prof.hasShot ? 6 : 0,
+      ammo: startingAmmoForProfile(prof),
       cooldowns: { boostFuel: JUMP.BOOST_FUEL_FRAMES, jumpHeld: 0 },
       invincTimer: SPAWN_INVINCIBILITY_FRAMES,
       lockTarget: null,
@@ -214,10 +215,10 @@ class BattleImpl implements Battle {
       stepCooldowns(b);
       stepInvincibility(b);
 
-      // Lock-on (R) / switch-lock (Z).
+      // Lock-on is the default player movement frame; `lockOn` also lets AI/future callers opt in.
       if (input.switchLock) {
         b.lockTarget = cycleLock(b, all);
-      } else if (input.lockOn) {
+      } else if (input.lockOn || b.ownerPlayer !== null) {
         if (b.lockTarget === null || !this.lockStillValid(b)) {
           b.lockTarget = acquireLock(b, all);
         }

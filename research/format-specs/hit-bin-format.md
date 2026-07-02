@@ -115,9 +115,15 @@ The layer names are not proven by code yet; they are density and naming-based la
 
 The actor/common record body is not semantically decoded yet. Treat it as a fixed-size record with named raw fields until gameplay code or traces identify actions, bones, hitbox shapes, damage, effect IDs, and timing.
 
-## Parser Skeleton
+## Shared Parser
 
-`scripts/inspect-hit-bins.mjs` implements the current skeleton:
+`packages/formats/src/hit-bin.ts` implements the reusable runtime/shared parser:
+
+- `parseStageHitGrid()` parses STIH headers, cells, record references, and 0x38 triangle records.
+- `stageBoundsFromHitGrid()` returns the decoded STIH arena rectangle.
+- `parseActorHitTable()` parses `pl####hit.bin`, `comhit.bin`, and `comhit2.bin` remap/index headers plus raw 0xF4 records without assigning unproven gameplay field names.
+
+`scripts/inspect-hit-bins.mjs` implements the research inventory scanner:
 
 - Validates `STIH` headers and declared file sizes.
 - Parses STIH grid dimensions, bounds, cell offset spans, record references, and 0x38 triangle records.

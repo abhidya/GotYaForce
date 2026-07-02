@@ -7,9 +7,10 @@
 //   - SIM_HZ = 60: DERIVED. GameCube ran at 60 fps; the "60 frames ~= 1s" note confirms it.
 //   - Ground plane Y and "forward = +Z": DERIVED. ram-trace-analysis.md s3.1 (Y=10 grounded,
 //     holding FORWARD produced +Z movement). GROUND_Y default 10 to match the trace.
-//   - Everything else (speeds, gravity, damage scale, ranges, cooldowns): TUNED to feel like
-//     a fast 3D arena fighter. RELATIVE values come from stats (speed/attack/shot/defense);
-//     the ABSOLUTE scale is a tuning choice.
+//   - Everything else (gravity, damage scale, ranges, cooldowns): TUNED to feel like
+//     a fast 3D arena fighter. RELATIVE speed/attack/shot/defense stats now come from
+//     original pl####data.bin actor-data bytes when present; the ABSOLUTE scale is still
+//     a tuning choice.
 //
 //   - HP field: DERIVED (2026-07-01). Confirmed live — a 16-bit uint mirrored at 5 fixed
 //     addresses (0x803b069c, 0x805dbf86, 0x805f3850/58/5c) tracks the on-screen HP gauge;

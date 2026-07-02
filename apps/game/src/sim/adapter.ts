@@ -42,6 +42,36 @@ export function stageIdForArena(arena: string | undefined): string {
   return DEFAULT_ARENA_STAGE;
 }
 
+/**
+ * Resolve the actual renderable stage for a mission battle.
+ *
+ * Challenge mode writes three raw selector bytes in the DOL-backed setup:
+ *   PTR_DAT_80433934[0x1c] = stage byte
+ *   PTR_DAT_80433934[0x1d] = subtable 0..2
+ *   PTR_DAT_80433934[0x1e] = variant within that subtable
+ *
+ * The stage asset loader indexes `PTR_DAT_802d07a0[stageByte * 3 + subtable]` and then
+ * the variant pointer inside that table. Browser exports currently expose the three visual
+ * subtable families as `st00`/`st20`/`st40` where those archives exist, but not every
+ * stage byte has every family exported. Use the subtable family when present, otherwise
+ * fall back to the base `st##` stage instead of fabricating a missing archive.
+ */
+export function stageIdForBattleConfig(cfg: MissionBattleConfig): string {
+  const meta = cfg.meta;
+  const stageByte = meta?.stageByte;
+  const stageSubtable = meta?.stageSubtable;
+  if (Number.isInteger(stageByte) && Number.isInteger(stageSubtable)) {
+    const familyByte = (stageSubtable as number) * 0x20 + (stageByte as number);
+    const familyId = stageIdFromByte(familyByte);
+    if (isExportedStageId(familyId)) return familyId;
+
+    const baseId = stageIdFromByte(stageByte as number);
+    if (isExportedStageId(baseId)) return baseId;
+  }
+
+  return stageIdForArena(cfg.arena);
+}
+
 /** Stable playerId for a 0-based human player index, matching the brief: 0 -> "p0". */
 export function playerIdFor(playerIndex: number): string {
   return `p${playerIndex}`;
@@ -55,7 +85,7 @@ export function playerIdFor(playerIndex: number): string {
  */
 export function convertBattleConfig(
   cfg: MissionBattleConfig,
-  stageId: string = stageIdForArena(cfg.arena),
+  stageId: string = stageIdForBattleConfig(cfg),
   bounds?: StageBounds,
   collision?: StageCollision,
 ): CombatBattleConfig {
@@ -93,7 +123,7 @@ export interface LocalControls {
  *   K / X                 = attack (B)
  *   L / Y                 = special (Y)
  *   Shift                 = dash
- *   U                     = lockOn (R)
+ *   U                     = explicit lockOn request (players auto-lock in combat core)
  *   Tab                   = switchLock (Z)
  *   E                     = switchBorg
  */
@@ -143,4 +173,8 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
 
 function clamp(v: number, lo: number, hi: number): number {
   return v < lo ? lo : v > hi ? hi : v;
+}
+
+function stageIdFromByte(byte: number): string {
+  return `st${Math.max(0, byte).toString(16).padStart(2, "0")}`;
 }

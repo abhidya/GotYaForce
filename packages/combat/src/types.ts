@@ -1,7 +1,8 @@
 // Public types for the deterministic battle API. Mirrors the contract in the task brief.
-// Control scheme (CONFIRMED from the game's controls screen):
-//   A=jump, B=attack(melee/contextual), Y=special, R=lock-on, Z=switch lock-on target,
-//   stick=move, step/dodge=stick-action (we surface it as `dash`).
+// Control scheme (CONFIRMED from the game's controls screen + lock-relative movement trace):
+//   A=jump, B=attack(melee/contextual), Y=special, Z=switch lock-on target,
+//   stick=move in the target-relative frame while locked. Pure left/right is a dodge step
+//   (surfaced as `dash`); forward+left/right is circle-strafe.
 
 import type { Vec3 } from "@gf/physics";
 import type { BorgProfile } from "./stats.js";
@@ -18,7 +19,7 @@ export interface PlayerInput {
   attack: boolean;
   /** Y — special attack. */
   special: boolean;
-  /** R — acquire / hold lock-on. */
+  /** Acquire / hold lock-on for non-player callers; human-controlled borgs auto-lock by default. */
   lockOn: boolean;
   /** Z — cycle lock-on target. */
   switchLock: boolean;
@@ -170,6 +171,7 @@ export interface Projectile {
   damage: number;
   hitstun: number;
   knockback: number;
+  homingTurn: number;
   homingTarget: string | null;
   life: number;
   hitRadius: number;

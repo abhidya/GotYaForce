@@ -1,21 +1,23 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-01T10:33:28.337Z",
+  "generatedAt": "2026-07-02T05:44:18.763Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
-    "screensUsingAnyRealExportedAsset": 8,
+    "screensUsingAnyRealExportedAsset": 10,
     "screensWithHandcodedSurfaceSignals": 9,
-    "screensWithRealSceneModel": 5,
+    "screensWithRealSceneModel": 7,
     "publicUiTextureExportedImages": 831,
-    "requestedUiSceneModelsExported": 6,
+    "requestedUiSceneModelsExported": 12,
     "publicStagesCompleteVisual": 40,
     "publicStagesTotal": 40,
     "publicStagesRenderState": 40,
     "runtimeStageFallback": "st00",
     "runtimeAcceptsHexStageIds": false,
     "runtimeAcceptsExportedStageCatalog": true,
+    "runtimeChallengeStageSelector": true,
+    "runtimeChallengeSpawnPools": true,
     "runtimeStageCollisionBounds": true,
     "runtimeStageTriangleCollision": true,
     "runtimeStageWallCollision": true,
@@ -23,17 +25,21 @@
     "runtimeProjectileFxFromExportedTextures": true,
     "runtimeBattleHudUsesAvailableFontAndRoundel": true,
     "runtimeBattleHudUsesAsIcon": false,
+    "runtimeLockTargetUsesArrowGeometry": true,
     "commonBattleArchiveInventoried": true,
     "commonBattleDataExactMatches": 2,
-    "runtimeActorDataBoundToCombat": false,
-    "runtimeBorgAnimationDirectMatches": 1326,
-    "runtimeBorgAnimationFallbacks": 78,
+    "runtimeActorDataBoundToCombat": true,
+    "runtimeTypeDamageMatrixFromDol": true,
+    "runtimeKnockbackDirectionFromDol": true,
+    "runtimeCameraMode1BlendFromDol": true,
+    "runtimeBorgAnimationDirectMatches": 1402,
+    "runtimeBorgAnimationFallbacks": 2,
     "runtimeBorgAnimationMissing": 0,
     "runtimeBoostFlyUsesExportedBoostClip": true,
     "runtimeItemsOrPowerupsModeled": false,
     "runtimeAudioFromExportedCues": true,
-    "formatParsersImplemented": 2,
-    "formatParsersTotal": 2
+    "formatParsersImplemented": 4,
+    "formatParsersTotal": 4
   },
   "screens": [
     {
@@ -70,11 +76,28 @@
       ],
       "nextReplacement": "Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:66",
-      "coverageLevel": "handcoded-or-unverified",
-      "realExportedAssetsUsed": [],
+      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:71",
+      "coverageLevel": "real-scene-partial-layout",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.mainMenuOption",
+          "publicPath": "/ui/hsd/optn00_mdl/texture_000_CI4.png",
+          "exists": true
+        },
+        {
+          "kind": "mounted-ui-scene",
+          "publicPath": "/ui/scenes/tl00/model_00.dae",
+          "exists": true
+        },
+        {
+          "kind": "mounted-ui-scene",
+          "publicPath": "/ui/scenes/optn00/model_00.dae",
+          "exists": true
+        }
+      ],
       "handcodedSurfaceSignals": [],
-      "replacementStatus": "No direct exported UI asset usage observed in this component."
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
       "id": "select-difficulty",
@@ -102,7 +125,7 @@
       ],
       "nextReplacement": "Use the original Challenge select scene textures/models for the three GF-energy pads and cursor.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:42",
+      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:43",
       "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
@@ -115,27 +138,27 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 49
+          "line": 54
         },
         {
           "kind": "css-gradient-surface",
           "pattern": "linear-gradient",
-          "line": 24
+          "line": 25
         },
         {
           "kind": "css-menu-gear",
           "pattern": "gf-menu-gear",
-          "line": 70
+          "line": 77
         },
         {
           "kind": "css-option-pad",
           "pattern": "gf-pad",
-          "line": 69
+          "line": 76
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 52
+          "line": 57
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -166,7 +189,7 @@
       ],
       "nextReplacement": "Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectPlayers.ts:48",
+      "fileRef": "apps/game/src/ui/screens/SelectPlayers.ts:36",
       "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
@@ -179,17 +202,17 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 56
+          "line": 48
         },
         {
           "kind": "css-option-pad",
           "pattern": "gf-pad",
-          "line": 80
+          "line": 74
         },
         {
           "kind": "css-label-pill",
           "pattern": "gf-pill",
-          "line": 81
+          "line": 75
         },
         {
           "kind": "handcoded-player-silhouette",
@@ -199,7 +222,7 @@
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 43
+          "line": 32
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -324,7 +347,7 @@
       ],
       "nextReplacement": "Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:36",
+      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:39",
       "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
@@ -366,17 +389,17 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 46
+          "line": 52
         },
         {
           "kind": "css-force-platform",
           "pattern": "gf-select-platform",
-          "line": 54
+          "line": 60
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 49
+          "line": 55
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -643,7 +666,7 @@
       ],
       "nextReplacement": "Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:165",
+      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:104",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
         {
@@ -653,33 +676,33 @@
           "exists": true
         },
         {
-          "kind": "named-texture",
-          "symbol": "ASSETS.fontAscii",
-          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
-          "exists": true
-        },
-        {
           "kind": "borg-ui-helper",
           "symbol": "borgBannerPath",
           "publicPathPattern": "/ui/tpl/bn<borgUiCode>/image_00_CI4.png",
           "exists": "per-borg"
+        },
+        {
+          "kind": "bitmap-font-helper",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
+          "exists": true
         }
       ],
       "handcodedSurfaceSignals": [
         {
           "kind": "svg-hud-gauge",
           "pattern": "ringGauge",
-          "line": 137
+          "line": 76
         },
         {
           "kind": "css-lockon-reticle",
           "pattern": "gf-reticle",
-          "line": 203
+          "line": 146
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 122
+          "line": 126
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -710,8 +733,8 @@
       ],
       "nextReplacement": "Export and mount the real result/podium scenes instead of CSS rows and sky backdrop.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/Results.ts:55",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/Results.ts:61",
+      "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
           "kind": "named-texture",
@@ -736,18 +759,28 @@
           "symbol": "ASSETS.resultsGameOver",
           "publicPath": "/ui/hsd/rpot23_mdl/texture_004_CI8.png",
           "exists": true
+        },
+        {
+          "kind": "literal-public-path",
+          "publicPath": "/ui/scenes/rpot20/model_00.dae",
+          "exists": true
+        },
+        {
+          "kind": "literal-public-path",
+          "publicPath": "/ui/scenes/rpot23/model_00.dae",
+          "exists": true
         }
       ],
       "handcodedSurfaceSignals": [
         {
           "kind": "css-results-row",
           "pattern": "gf-result-pill",
-          "line": 100
+          "line": 113
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 100
+          "line": 113
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -774,22 +807,24 @@
       ],
       "nextReplacement": "Find the original pause menu data/assets; current overlay is entirely recreated CSS/text.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/PauseMenu.ts:27",
-      "coverageLevel": "handcoded-or-unverified",
-      "realExportedAssetsUsed": [],
+      "fileRef": "apps/game/src/ui/screens/PauseMenu.ts:28",
+      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "realExportedAssetsUsed": [
+        {
+          "kind": "bitmap-font-helper",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
+          "exists": true
+        }
+      ],
       "handcodedSurfaceSignals": [
         {
           "kind": "css-pause-box",
           "pattern": "gf-pause-box",
-          "line": 32
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
           "line": 33
         }
       ],
-      "replacementStatus": "No direct exported UI asset usage observed in this component."
+      "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     }
   ],
   "stageCoverage": {
@@ -897,6 +932,9 @@
       "defaultStage": "st00",
       "literalStageIdsInAdapter": [
         "stea",
+        "st00",
+        "st20",
+        "st40",
         "stab"
       ],
       "generatedStageCatalog": {
@@ -949,18 +987,52 @@
       },
       "acceptsHexStageIds": false,
       "acceptsExportedStageCatalog": true,
+      "challengeStageSelector": {
+        "dolStageBytes": true,
+        "preservesSelectorMeta": true,
+        "resolvesSubtableFamilies": true,
+        "baseStageIds": [
+          "st80",
+          "st1c",
+          "st1d",
+          "st1e",
+          "st00",
+          "st01",
+          "st02",
+          "st03",
+          "st04",
+          "st05",
+          "st08",
+          "st0a",
+          "st0b",
+          "st0c",
+          "st0e"
+        ],
+        "adapterRef": "apps/game/src/sim/adapter.ts:59",
+        "challengeRef": "packages/missions/src/challenge-reference.ts:32"
+      },
+      "challengeSpawnPools": {
+        "generatedModule": "packages/missions/src/challenge-spawn-pools.generated.ts",
+        "generatedFromDecompTable": true,
+        "reexportedFromReference": true,
+        "runtimeUsesGeneratedRosters": true,
+        "groupCount": 22,
+        "totalBorgIds": 145,
+        "sourceRef": "packages/missions/src/challenge-spawn-pools.generated.ts:32",
+        "runtimeRef": "packages/missions/src/challenge.ts:364"
+      },
       "adapterRefs": {
         "defaultArenaStage": "apps/game/src/sim/adapter.ts:22",
         "catalogGate": "apps/game/src/sim/adapter.ts:25",
         "fallback": "apps/game/src/sim/adapter.ts:41"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:655",
-        "fetchStageManifest": "apps/game/src/main.ts:660",
-        "loadStageCollision": "apps/game/src/main.ts:567",
-        "parseStageHitGrid": "apps/game/src/main.ts:579",
-        "loadDefaultArena": "apps/game/src/main.ts:700",
-        "loadConvertedStage": "apps/game/src/main.ts:1033"
+        "loadStage": "apps/game/src/main.ts:881",
+        "fetchStageManifest": "apps/game/src/main.ts:886",
+        "loadStageCollision": "apps/game/src/main.ts:793",
+        "parseStageHitGrid": "apps/game/src/main.ts:805",
+        "loadDefaultArena": "apps/game/src/main.ts:926",
+        "loadConvertedStage": "apps/game/src/main.ts:1264"
       },
       "collisionBounds": {
         "usesStageHitParser": true,
@@ -970,7 +1042,7 @@
         "movementUsesTriangleCeilings": true,
         "parserPackage": "@gf/formats"
       },
-      "assessment": "Runtime authorizes literal exported st## ids through the generated stage catalog; arena-name to st## routing still falls back to st00 until traced."
+      "assessment": "Runtime authorizes literal exported st## ids, uses DOL-backed Challenge selector metadata to route exported stage subtable families when present, and builds CPU rosters from the recovered Challenge spawn-pool table; unverified Adventure/human arena names still fall back to st00."
     },
     "stageCodeEvidence": {
       "path": "research/asset-inventory/stage-code-evidence.json",
@@ -988,10 +1060,10 @@
       "candidates": 85,
       "requestedCandidates": 12,
       "faceCandidates": 73,
-      "copyReady": 6,
-      "exported": 6,
-      "modelFiles": 424,
-      "textureFiles": 33
+      "copyReady": 12,
+      "exported": 12,
+      "modelFiles": 611,
+      "textureFiles": 54
     },
     "requestedScenes": [
       {
@@ -1080,51 +1152,244 @@
       },
       {
         "id": "optn00",
-        "status": "not-exported",
+        "status": "exported",
         "sourceArchive": "user-data/GG4E/afs_data/root/optn00_mdl.arc",
-        "modelFiles": [],
-        "textureCount": 0,
-        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/optn00_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+        "modelFiles": [
+          "apps/game/public/ui/scenes/optn00/model_00.dae",
+          "apps/game/public/ui/scenes/optn00/model_01.dae",
+          "apps/game/public/ui/scenes/optn00/model_02.dae",
+          "apps/game/public/ui/scenes/optn00/model_03.dae",
+          "apps/game/public/ui/scenes/optn00/model_04.dae",
+          "apps/game/public/ui/scenes/optn00/model_05.dae",
+          "apps/game/public/ui/scenes/optn00/model_06.dae",
+          "apps/game/public/ui/scenes/optn00/model_07.dae",
+          "apps/game/public/ui/scenes/optn00/model_08.dae",
+          "apps/game/public/ui/scenes/optn00/model_09.dae",
+          "apps/game/public/ui/scenes/optn00/model_10.dae",
+          "apps/game/public/ui/scenes/optn00/model_11.dae",
+          "apps/game/public/ui/scenes/optn00/model_12.dae",
+          "apps/game/public/ui/scenes/optn00/model_13.dae",
+          "apps/game/public/ui/scenes/optn00/model_14.dae",
+          "apps/game/public/ui/scenes/optn00/model_15.dae",
+          "apps/game/public/ui/scenes/optn00/model_16.dae",
+          "apps/game/public/ui/scenes/optn00/model_17.dae",
+          "apps/game/public/ui/scenes/optn00/model_18.dae",
+          "apps/game/public/ui/scenes/optn00/model_19.dae",
+          "apps/game/public/ui/scenes/optn00/model_20.dae",
+          "apps/game/public/ui/scenes/optn00/model_21.dae",
+          "apps/game/public/ui/scenes/optn00/model_22.dae"
+        ],
+        "textureCount": 3,
+        "nextCommand": null
       },
       {
         "id": "rpot20",
-        "status": "not-exported",
+        "status": "exported",
         "sourceArchive": "user-data/GG4E/afs_data/root/rpot20_mdl.arc",
-        "modelFiles": [],
-        "textureCount": 0,
-        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/rpot20_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+        "modelFiles": [
+          "apps/game/public/ui/scenes/rpot20/model_00.dae",
+          "apps/game/public/ui/scenes/rpot20/model_01.dae",
+          "apps/game/public/ui/scenes/rpot20/model_02.dae",
+          "apps/game/public/ui/scenes/rpot20/model_03.dae",
+          "apps/game/public/ui/scenes/rpot20/model_04.dae",
+          "apps/game/public/ui/scenes/rpot20/model_05.dae",
+          "apps/game/public/ui/scenes/rpot20/model_06.dae",
+          "apps/game/public/ui/scenes/rpot20/model_07.dae",
+          "apps/game/public/ui/scenes/rpot20/model_08.dae",
+          "apps/game/public/ui/scenes/rpot20/model_09.dae",
+          "apps/game/public/ui/scenes/rpot20/model_10.dae",
+          "apps/game/public/ui/scenes/rpot20/model_11.dae",
+          "apps/game/public/ui/scenes/rpot20/model_12.dae",
+          "apps/game/public/ui/scenes/rpot20/model_13.dae",
+          "apps/game/public/ui/scenes/rpot20/model_14.dae",
+          "apps/game/public/ui/scenes/rpot20/model_15.dae",
+          "apps/game/public/ui/scenes/rpot20/model_16.dae",
+          "apps/game/public/ui/scenes/rpot20/model_17.dae",
+          "apps/game/public/ui/scenes/rpot20/model_18.dae",
+          "apps/game/public/ui/scenes/rpot20/model_19.dae",
+          "apps/game/public/ui/scenes/rpot20/model_20.dae"
+        ],
+        "textureCount": 4,
+        "nextCommand": null
       },
       {
         "id": "rpot21",
-        "status": "not-exported",
+        "status": "exported",
         "sourceArchive": "user-data/GG4E/afs_data/root/rpot21_mdl.arc",
-        "modelFiles": [],
-        "textureCount": 0,
-        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/rpot21_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+        "modelFiles": [
+          "apps/game/public/ui/scenes/rpot21/model_00.dae",
+          "apps/game/public/ui/scenes/rpot21/model_01.dae",
+          "apps/game/public/ui/scenes/rpot21/model_02.dae",
+          "apps/game/public/ui/scenes/rpot21/model_03.dae",
+          "apps/game/public/ui/scenes/rpot21/model_04.dae",
+          "apps/game/public/ui/scenes/rpot21/model_05.dae",
+          "apps/game/public/ui/scenes/rpot21/model_06.dae",
+          "apps/game/public/ui/scenes/rpot21/model_07.dae",
+          "apps/game/public/ui/scenes/rpot21/model_08.dae",
+          "apps/game/public/ui/scenes/rpot21/model_09.dae",
+          "apps/game/public/ui/scenes/rpot21/model_10.dae",
+          "apps/game/public/ui/scenes/rpot21/model_11.dae",
+          "apps/game/public/ui/scenes/rpot21/model_12.dae",
+          "apps/game/public/ui/scenes/rpot21/model_13.dae",
+          "apps/game/public/ui/scenes/rpot21/model_14.dae",
+          "apps/game/public/ui/scenes/rpot21/model_15.dae",
+          "apps/game/public/ui/scenes/rpot21/model_16.dae",
+          "apps/game/public/ui/scenes/rpot21/model_17.dae",
+          "apps/game/public/ui/scenes/rpot21/model_18.dae",
+          "apps/game/public/ui/scenes/rpot21/model_19.dae",
+          "apps/game/public/ui/scenes/rpot21/model_20.dae"
+        ],
+        "textureCount": 4,
+        "nextCommand": null
       },
       {
         "id": "rpot22",
-        "status": "not-exported",
+        "status": "exported",
         "sourceArchive": "user-data/GG4E/afs_data/root/rpot22_mdl.arc",
-        "modelFiles": [],
-        "textureCount": 0,
-        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/rpot22_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+        "modelFiles": [
+          "apps/game/public/ui/scenes/rpot22/model_00.dae",
+          "apps/game/public/ui/scenes/rpot22/model_01.dae",
+          "apps/game/public/ui/scenes/rpot22/model_02.dae",
+          "apps/game/public/ui/scenes/rpot22/model_03.dae",
+          "apps/game/public/ui/scenes/rpot22/model_04.dae",
+          "apps/game/public/ui/scenes/rpot22/model_05.dae",
+          "apps/game/public/ui/scenes/rpot22/model_06.dae",
+          "apps/game/public/ui/scenes/rpot22/model_07.dae",
+          "apps/game/public/ui/scenes/rpot22/model_08.dae",
+          "apps/game/public/ui/scenes/rpot22/model_09.dae",
+          "apps/game/public/ui/scenes/rpot22/model_10.dae",
+          "apps/game/public/ui/scenes/rpot22/model_11.dae",
+          "apps/game/public/ui/scenes/rpot22/model_12.dae",
+          "apps/game/public/ui/scenes/rpot22/model_13.dae",
+          "apps/game/public/ui/scenes/rpot22/model_14.dae",
+          "apps/game/public/ui/scenes/rpot22/model_15.dae",
+          "apps/game/public/ui/scenes/rpot22/model_16.dae",
+          "apps/game/public/ui/scenes/rpot22/model_17.dae",
+          "apps/game/public/ui/scenes/rpot22/model_18.dae",
+          "apps/game/public/ui/scenes/rpot22/model_19.dae",
+          "apps/game/public/ui/scenes/rpot22/model_20.dae"
+        ],
+        "textureCount": 4,
+        "nextCommand": null
       },
       {
         "id": "rpot23",
-        "status": "not-exported",
+        "status": "exported",
         "sourceArchive": "user-data/GG4E/afs_data/root/rpot23_mdl.arc",
-        "modelFiles": [],
-        "textureCount": 0,
-        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/rpot23_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+        "modelFiles": [
+          "apps/game/public/ui/scenes/rpot23/model_00.dae",
+          "apps/game/public/ui/scenes/rpot23/model_01.dae",
+          "apps/game/public/ui/scenes/rpot23/model_02.dae",
+          "apps/game/public/ui/scenes/rpot23/model_03.dae",
+          "apps/game/public/ui/scenes/rpot23/model_04.dae",
+          "apps/game/public/ui/scenes/rpot23/model_05.dae",
+          "apps/game/public/ui/scenes/rpot23/model_06.dae",
+          "apps/game/public/ui/scenes/rpot23/model_07.dae",
+          "apps/game/public/ui/scenes/rpot23/model_08.dae",
+          "apps/game/public/ui/scenes/rpot23/model_09.dae",
+          "apps/game/public/ui/scenes/rpot23/model_10.dae",
+          "apps/game/public/ui/scenes/rpot23/model_11.dae",
+          "apps/game/public/ui/scenes/rpot23/model_12.dae",
+          "apps/game/public/ui/scenes/rpot23/model_13.dae",
+          "apps/game/public/ui/scenes/rpot23/model_14.dae",
+          "apps/game/public/ui/scenes/rpot23/model_15.dae",
+          "apps/game/public/ui/scenes/rpot23/model_16.dae",
+          "apps/game/public/ui/scenes/rpot23/model_17.dae",
+          "apps/game/public/ui/scenes/rpot23/model_18.dae",
+          "apps/game/public/ui/scenes/rpot23/model_19.dae",
+          "apps/game/public/ui/scenes/rpot23/model_20.dae"
+        ],
+        "textureCount": 4,
+        "nextCommand": null
       },
       {
         "id": "staff00",
-        "status": "not-exported",
+        "status": "exported",
         "sourceArchive": "user-data/GG4E/afs_data/root/staff00_mdl.arc",
-        "modelFiles": [],
-        "textureCount": 0,
-        "nextCommand": "Need validated DAE/glTF export for user-data/GG4E/afs_data/root/staff00_mdl.arc; current scripts/export-ui-scenes.mjs only copies existing validated exports."
+        "modelFiles": [
+          "apps/game/public/ui/scenes/staff00/model_00.dae",
+          "apps/game/public/ui/scenes/staff00/model_01.dae",
+          "apps/game/public/ui/scenes/staff00/model_02.dae",
+          "apps/game/public/ui/scenes/staff00/model_03.dae",
+          "apps/game/public/ui/scenes/staff00/model_04.dae",
+          "apps/game/public/ui/scenes/staff00/model_05.dae",
+          "apps/game/public/ui/scenes/staff00/model_06.dae",
+          "apps/game/public/ui/scenes/staff00/model_07.dae",
+          "apps/game/public/ui/scenes/staff00/model_08.dae",
+          "apps/game/public/ui/scenes/staff00/model_09.dae",
+          "apps/game/public/ui/scenes/staff00/model_10.dae",
+          "apps/game/public/ui/scenes/staff00/model_11.dae",
+          "apps/game/public/ui/scenes/staff00/model_12.dae",
+          "apps/game/public/ui/scenes/staff00/model_13.dae",
+          "apps/game/public/ui/scenes/staff00/model_14.dae",
+          "apps/game/public/ui/scenes/staff00/model_15.dae",
+          "apps/game/public/ui/scenes/staff00/model_16.dae",
+          "apps/game/public/ui/scenes/staff00/model_17.dae",
+          "apps/game/public/ui/scenes/staff00/model_18.dae",
+          "apps/game/public/ui/scenes/staff00/model_19.dae",
+          "apps/game/public/ui/scenes/staff00/model_20.dae",
+          "apps/game/public/ui/scenes/staff00/model_21.dae",
+          "apps/game/public/ui/scenes/staff00/model_22.dae",
+          "apps/game/public/ui/scenes/staff00/model_23.dae",
+          "apps/game/public/ui/scenes/staff00/model_24.dae",
+          "apps/game/public/ui/scenes/staff00/model_25.dae",
+          "apps/game/public/ui/scenes/staff00/model_26.dae",
+          "apps/game/public/ui/scenes/staff00/model_27.dae",
+          "apps/game/public/ui/scenes/staff00/model_28.dae",
+          "apps/game/public/ui/scenes/staff00/model_29.dae",
+          "apps/game/public/ui/scenes/staff00/model_30.dae",
+          "apps/game/public/ui/scenes/staff00/model_31.dae",
+          "apps/game/public/ui/scenes/staff00/model_32.dae",
+          "apps/game/public/ui/scenes/staff00/model_33.dae",
+          "apps/game/public/ui/scenes/staff00/model_34.dae",
+          "apps/game/public/ui/scenes/staff00/model_35.dae",
+          "apps/game/public/ui/scenes/staff00/model_36.dae",
+          "apps/game/public/ui/scenes/staff00/model_37.dae",
+          "apps/game/public/ui/scenes/staff00/model_38.dae",
+          "apps/game/public/ui/scenes/staff00/model_39.dae",
+          "apps/game/public/ui/scenes/staff00/model_40.dae",
+          "apps/game/public/ui/scenes/staff00/model_41.dae",
+          "apps/game/public/ui/scenes/staff00/model_42.dae",
+          "apps/game/public/ui/scenes/staff00/model_43.dae",
+          "apps/game/public/ui/scenes/staff00/model_44.dae",
+          "apps/game/public/ui/scenes/staff00/model_45.dae",
+          "apps/game/public/ui/scenes/staff00/model_46.dae",
+          "apps/game/public/ui/scenes/staff00/model_47.dae",
+          "apps/game/public/ui/scenes/staff00/model_48.dae",
+          "apps/game/public/ui/scenes/staff00/model_49.dae",
+          "apps/game/public/ui/scenes/staff00/model_50.dae",
+          "apps/game/public/ui/scenes/staff00/model_51.dae",
+          "apps/game/public/ui/scenes/staff00/model_52.dae",
+          "apps/game/public/ui/scenes/staff00/model_53.dae",
+          "apps/game/public/ui/scenes/staff00/model_54.dae",
+          "apps/game/public/ui/scenes/staff00/model_55.dae",
+          "apps/game/public/ui/scenes/staff00/model_56.dae",
+          "apps/game/public/ui/scenes/staff00/model_57.dae",
+          "apps/game/public/ui/scenes/staff00/model_58.dae",
+          "apps/game/public/ui/scenes/staff00/model_59.dae",
+          "apps/game/public/ui/scenes/staff00/model_60.dae",
+          "apps/game/public/ui/scenes/staff00/model_61.dae",
+          "apps/game/public/ui/scenes/staff00/model_62.dae",
+          "apps/game/public/ui/scenes/staff00/model_63.dae",
+          "apps/game/public/ui/scenes/staff00/model_64.dae",
+          "apps/game/public/ui/scenes/staff00/model_65.dae",
+          "apps/game/public/ui/scenes/staff00/model_66.dae",
+          "apps/game/public/ui/scenes/staff00/model_67.dae",
+          "apps/game/public/ui/scenes/staff00/model_68.dae",
+          "apps/game/public/ui/scenes/staff00/model_69.dae",
+          "apps/game/public/ui/scenes/staff00/model_70.dae",
+          "apps/game/public/ui/scenes/staff00/model_71.dae",
+          "apps/game/public/ui/scenes/staff00/model_72.dae",
+          "apps/game/public/ui/scenes/staff00/model_73.dae",
+          "apps/game/public/ui/scenes/staff00/model_74.dae",
+          "apps/game/public/ui/scenes/staff00/model_75.dae",
+          "apps/game/public/ui/scenes/staff00/model_76.dae",
+          "apps/game/public/ui/scenes/staff00/model_77.dae",
+          "apps/game/public/ui/scenes/staff00/model_78.dae",
+          "apps/game/public/ui/scenes/staff00/model_79.dae"
+        ],
+        "textureCount": 2,
+        "nextCommand": null
       },
       {
         "id": "tl00",
@@ -1693,7 +1958,19 @@
     "asIconExists": true,
     "battleHudUsesFontAscii": true,
     "battleHudUsesFaceRoundel": true,
-    "battleHudUsesAsIcon": false
+    "battleHudUsesAsIcon": false,
+    "arrowGeometry": {
+      "sourceArchive": "user-data/GG4E/afs_data/root/arrow_mdl.arc",
+      "sourceArchiveExists": true,
+      "sourceObj": "user-data/GG4E/hsd-test-python/arrow_mdl.obj",
+      "sourceObjExists": true,
+      "generatedModule": "apps/game/src/sim/data/arrowMdlGeometry.generated.ts",
+      "generatedModuleExists": true,
+      "generatedFromArchive": true,
+      "vertexCount": 84,
+      "triangleCount": 72,
+      "battleSceneUsesGeometry": true
+    }
   },
   "commonBattleArchiveEvidence": {
     "path": "research/asset-inventory/pzz-arz-inventory.json",
@@ -1998,20 +2275,82 @@
         }
       }
     ],
+    "actorDataStatOffsets": {
+      "recordSize": 432,
+      "offsets": {
+        "defense": "0x01a4",
+        "shot": "0x01a5",
+        "attack": "0x01a6",
+        "speed": "0x01a7"
+      },
+      "matchedMetadataRows": 190,
+      "exactMatches": {
+        "defense": 190,
+        "shot": 190,
+        "attack": 190,
+        "speed": 190
+      },
+      "allFieldsExact": true,
+      "mismatches": [],
+      "assessment": "defense/shot/attack/speed are exact unsigned-byte matches at pl####data.bin offsets 0x1a4..0x1a7 for every actor-data file that has borgs.json metadata."
+    },
     "runtimeBinding": {
       "appImportsBorgsJson": true,
+      "actorDataStatsJsonExists": true,
+      "actorDataStatsAccessorExists": true,
+      "buildProfileUsesActorDataStats": true,
+      "actorDataStatsBoundToCombat": true,
       "buildProfileConsumesBorgsJsonFields": true,
       "combatConstantsDeclareTunedFormulas": true,
       "formatsPzzStillTodo": false,
       "refs": {
         "appBorgImport": "apps/game/src/main.ts:23",
-        "buildProfile": "packages/combat/src/stats.ts:104",
-        "tunedFormulaNote": "packages/combat/src/constants.ts:10",
+        "buildProfile": "packages/combat/src/stats.ts:108",
+        "actorDataStats": "packages/combat/src/actorDataStats.ts:25",
+        "actorDataStatsJson": "packages/combat/src/data/actorDataStats.json",
+        "tunedFormulaNote": "packages/combat/src/constants.ts:28",
         "pzzParser": "packages/formats/src/pzz.ts:103"
       },
-      "assessment": "Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet."
+      "assessment": "Runtime combat profiles now bind defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, jump, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven."
     },
-    "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation."
+    "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. defense/shot/attack/speed are now exact-mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation."
+  },
+  "typeDamageEvidence": {
+    "generatedModule": "packages/combat/src/typeDamage.generated.ts",
+    "generatedFromDolTables": true,
+    "runtimeImportsGeneratedTables": true,
+    "runtimeDamagePipelineUsesTypeMultiplier": true,
+    "selfcheckCoversMatrixSample": true,
+    "remapRows": 16,
+    "matrixRows": 20,
+    "matrixColumns": 20,
+    "mappedBorgIds": 208,
+    "sourceRef": "packages/combat/src/typeDamage.generated.ts:720",
+    "runtimeRef": "packages/combat/src/typeDamage.ts:11",
+    "pipelineRef": "packages/combat/src/combat.ts:88"
+  },
+  "knockbackEvidence": {
+    "generatedModule": "packages/physics/src/knockback.generated.ts",
+    "generatedFromDolFunction": true,
+    "runtimeImportsGeneratedConstants": true,
+    "runtimeCombatUsesKnockbackDirection": true,
+    "modeCount": 5,
+    "bam16PerRadian": 10430.3779296875,
+    "degenerateThreshold": 0.009999999776482582,
+    "sourceRef": "packages/physics/src/knockback.generated.ts:7",
+    "runtimeRef": "packages/physics/src/knockback.ts:58",
+    "pipelineRef": "packages/combat/src/combat.ts:12"
+  },
+  "cameraEvidence": {
+    "generatedModule": "apps/game/src/sim/camera.generated.ts",
+    "generatedFromBootDol": true,
+    "runtimeImportsGeneratedConstants": true,
+    "runtimeUsesMode1Blend": true,
+    "previousEyeWeight": 4,
+    "eyeBlendDenominator": 5,
+    "halfBlend": 0.5,
+    "sourceRef": "apps/game/src/sim/camera.generated.ts:6",
+    "runtimeRef": "apps/game/src/sim/camera.ts:40"
   },
   "borgAnimationCoverage": {
     "path": "research/asset-inventory/borg-animation-action-gaps.md",
@@ -2020,8 +2359,8 @@
     "indexesParsed": 108,
     "exportedBanks": 4894,
     "canonicalSlotChecks": 1404,
-    "directRuntimeMatches": 1326,
-    "runtimeFallbacks": 78,
+    "directRuntimeMatches": 1402,
+    "runtimeFallbacks": 2,
     "missingRuntimeMatches": 0,
     "parseErrors": 0,
     "slotRows": [
@@ -2034,94 +2373,94 @@
       },
       {
         "slot": "move",
-        "direct": 105,
-        "fallback": 3,
+        "direct": 108,
+        "fallback": 0,
         "missing": 0,
-        "notes": "idle -> idle x3"
+        "notes": "none"
       },
       {
         "slot": "dash_fwd",
-        "direct": 104,
-        "fallback": 4,
+        "direct": 108,
+        "fallback": 0,
         "missing": 0,
-        "notes": "idle -> idle x3; dash -> boost x1"
+        "notes": "none"
       },
       {
         "slot": "dash_back",
-        "direct": 104,
-        "fallback": 4,
+        "direct": 108,
+        "fallback": 0,
         "missing": 0,
-        "notes": "idle -> idle x3; dash -> boost x1"
+        "notes": "none"
       },
       {
         "slot": "dash_left",
-        "direct": 100,
-        "fallback": 8,
+        "direct": 108,
+        "fallback": 0,
         "missing": 0,
-        "notes": "idle -> idle x3; dash -> dash_fwd x4; dash -> boost x1"
+        "notes": "none"
       },
       {
         "slot": "dash_right",
-        "direct": 94,
-        "fallback": 14,
+        "direct": 108,
+        "fallback": 0,
         "missing": 0,
-        "notes": "dash -> dash_fwd x10; idle -> idle x3; dash -> boost x1"
+        "notes": "none"
       },
       {
         "slot": "jump",
-        "direct": 105,
-        "fallback": 3,
+        "direct": 108,
+        "fallback": 0,
         "missing": 0,
-        "notes": "idle -> idle x3"
+        "notes": "none"
       },
       {
         "slot": "fly",
-        "direct": 105,
-        "fallback": 3,
+        "direct": 108,
+        "fallback": 0,
         "missing": 0,
-        "notes": "idle -> idle x3"
+        "notes": "none"
       },
       {
         "slot": "shoot",
+        "direct": 108,
+        "fallback": 0,
+        "missing": 0,
+        "notes": "none"
+      },
+      {
+        "slot": "melee",
+        "direct": 108,
+        "fallback": 0,
+        "missing": 0,
+        "notes": "none"
+      },
+      {
+        "slot": "special",
+        "direct": 108,
+        "fallback": 0,
+        "missing": 0,
+        "notes": "none"
+      },
+      {
+        "slot": "hit",
         "direct": 106,
         "fallback": 2,
         "missing": 0,
         "notes": "idle -> idle x2"
       },
       {
-        "slot": "melee",
-        "direct": 100,
-        "fallback": 8,
-        "missing": 0,
-        "notes": "idle -> idle x8"
-      },
-      {
-        "slot": "special",
-        "direct": 102,
-        "fallback": 6,
-        "missing": 0,
-        "notes": "idle -> idle x2; attack -> attack_s0 x4"
-      },
-      {
-        "slot": "hit",
-        "direct": 96,
-        "fallback": 12,
-        "missing": 0,
-        "notes": "idle -> idle x12"
-      },
-      {
         "slot": "death",
-        "direct": 97,
-        "fallback": 11,
+        "direct": 108,
+        "fallback": 0,
         "missing": 0,
-        "notes": "idle -> idle x11"
+        "notes": "none"
       }
     ],
     "runtimeResolverRefs": {
-      "slotLabels": "apps/game/src/main.ts:341",
-      "slotFallbacks": "apps/game/src/main.ts:362",
-      "pickAnimBank": "apps/game/src/main.ts:430",
-      "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:111"
+      "slotLabels": "apps/game/src/main.ts:384",
+      "slotFallbacks": "apps/game/src/main.ts:423",
+      "pickAnimBank": "apps/game/src/main.ts:635",
+      "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:140"
     },
     "boostFlyMapped": true
   },
@@ -2129,9 +2468,9 @@
     "battleStateHasItems": false,
     "battleRuntimeSpawnsDrops": false,
     "evidenceRefs": {
-      "battleState": "packages/combat/src/types.ts:177",
-      "deployNextBorg": "packages/combat/src/battle.ts:122",
-      "deathProcessing": "packages/combat/src/battle.ts:249",
+      "battleState": "packages/combat/src/types.ts:181",
+      "deployNextBorg": "packages/combat/src/battle.ts:126",
+      "deathProcessing": "packages/combat/src/battle.ts:253",
       "particleInventory": "research/asset-inventory/particle-effect-inventory.json",
       "hudInventory": "research/asset-inventory/ui-hud-assets.md"
     },
@@ -2193,6 +2532,18 @@
         "source": "packages/formats/src/arz.ts",
         "implemented": true,
         "evidence": "Direct ARZ/PZZP wrapper; pzz-arz inventory currently lists 103 direct ARZ files."
+      },
+      {
+        "format": "STIH stage HIT",
+        "source": "packages/formats/src/hit-bin.ts",
+        "implemented": true,
+        "evidence": "Shared parser for STIH stage collision grids; hit-bin inventory currently lists 54 stage files."
+      },
+      {
+        "format": "Actor/common HIT",
+        "source": "packages/formats/src/hit-bin.ts",
+        "implemented": true,
+        "evidence": "Shared raw parser for pl####hit.bin/comhit*.bin remap headers plus 0xF4 records; inventory lists 210 player and 2 common files."
       }
     ],
     "inventory": {
@@ -2200,7 +2551,12 @@
       "parses": true,
       "directArzFileCount": 103,
       "pzzArchiveCount": 252,
-      "pzzMemberCount": 3104
+      "pzzMemberCount": 3104,
+      "hitBinPath": "research/asset-inventory/hit-bin-inventory.json",
+      "hitBinParses": true,
+      "stageHitBinCount": 54,
+      "playerHitBinCount": 210,
+      "commonHitBinCount": 2
     }
   },
   "modeNamingRisks": {
@@ -2217,9 +2573,9 @@
   },
   "nextMostUsefulReplacements": [
     "Trace and wire the original arena-name/Challenge rotation -> st## table; runtime now authorizes exported literal st## ids through a generated catalog, but untraced names still fall back to st00.",
-    "Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.",
+    "Use the now-exported tl00/optn00/staff00/vsel00/vsel01/brif00/entry00/rpot20-23 scene models plus generated layout bounds to replace the remaining CSS/DOM menu surfaces.",
     "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
-    "Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges.",
+    "Map remaining battle HUD from comhit/cmn_data/as_icon/font assets and DOL HUD state; arrow_mdl target geometry is now wired, while the center HUD reticle/gauges are still CSS/SVG.",
     "Resolve remaining borg animation fallbacks/misses from research/asset-inventory/borg-animation-action-gaps.md, especially missing move clips and fallback hit/death labels."
   ]
 }

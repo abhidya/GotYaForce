@@ -42,6 +42,20 @@ export {
   STATE,
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
+export {
+  actorDataCombatStatsForBorgId,
+  actorDataCombatStatsSummary,
+  type ActorDataCombatStats,
+} from "./actorDataStats.js";
+export {
+  actionProfileForProfile,
+  startingAmmoForProfile,
+  type BorgActionProfile,
+  type MeleeActionDef,
+  type PrimaryAttackKind,
+  type ShotActionDef,
+  type SpecialActionDef,
+} from "./actionProfiles.js";
 export { stepAI } from "./ai.js";
 
 // --- Borg-stats registry ----------------------------------------------------------------

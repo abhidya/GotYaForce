@@ -16,8 +16,9 @@
  * gear CSS spins.
  */
 
-import { el, clamp01 } from "../dom.js";
 import { ASSETS, borgBannerPath } from "../assets.js";
+import { bitmapText, setBitmapText } from "../bitmapText.js";
+import { el, clamp01 } from "../dom.js";
 
 export interface HudState {
   /** Remaining ally GF-energy (sum of alive ally borg energy). */
@@ -61,7 +62,6 @@ export interface BattleHudHandle {
 }
 
 const NS = "http://www.w3.org/2000/svg";
-const ASCII_CELL = 8;
 
 function svgEl<K extends keyof SVGElementTagNameMap>(
   tag: K,
@@ -70,35 +70,6 @@ function svgEl<K extends keyof SVGElementTagNameMap>(
   const node = document.createElementNS(NS, tag);
   for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
   return node;
-}
-
-function bitmapText(className: string): HTMLSpanElement {
-  const node = el("span", { class: `gf-bitmap-text ${className}` });
-  node.setAttribute("aria-hidden", "true");
-  return node;
-}
-
-function setBitmapText(node: HTMLElement, value: string): void {
-  node.replaceChildren(
-    ...[...value.toUpperCase()].map((char) => {
-      if (char === " ") return el("span", { class: "gf-bitmap-space" });
-      // ascii.tpl atlas is ASCII-ordered from 0x20 (space), 16 glyphs per row, 8px cells:
-      // row0 punctuation, row1 digits, rows2-3 uppercase, rows4-5 lowercase.
-      const code = char.charCodeAt(0);
-      if (code < 0x20 || code > 0x7e) return el("span", { class: "gf-bitmap-fallback", text: char });
-      const idx = code - 0x20;
-      const col = idx % 16;
-      const row = Math.floor(idx / 16);
-      return el("span", {
-        class: "gf-bitmap-glyph",
-        style: {
-          backgroundImage: `url(${ASSETS.fontAscii})`,
-          backgroundPosition: `-${col * ASCII_CELL}px -${row * ASCII_CELL}px`,
-        },
-      });
-    }),
-  );
-  node.setAttribute("aria-label", value);
 }
 
 /** A C-shaped ring gauge (used for HP and X cooldown). Returns the arc + a setter. */

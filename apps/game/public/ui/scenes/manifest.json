@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/export-ui-scenes.mjs",
-  "generatedAt": "2026-06-30T22:56:59.555Z",
+  "generatedAt": "2026-07-02T05:34:47.004Z",
   "region": "GG4E",
   "mode": "export",
   "sourceRoot": "user-data/GG4E/afs_data/root",
@@ -10,10 +10,10 @@
     "candidates": 85,
     "requestedCandidates": 12,
     "faceCandidates": 73,
-    "copyReady": 6,
-    "exported": 6,
-    "modelFiles": 424,
-    "textureFiles": 33
+    "copyReady": 12,
+    "exported": 12,
+    "modelFiles": 611,
+    "textureFiles": 54
   },
   "caveats": [
     "Asset plumbing only: no runtime UI replacement, menu layout reconstruction, camera setup, or UI behavior is generated here.",
@@ -894,156 +894,2676 @@
       "id": "optn00",
       "kind": "ui-scene-model",
       "requested": true,
-      "status": "not-exported",
+      "status": "exported",
       "sourceArchive": {
         "sourceName": "optn00_mdl.arc",
         "sourcePath": "user-data/GG4E/afs_data/root/optn00_mdl.arc",
         "sourceBytes": 376123
       },
       "existingExport": {
-        "sourceDir": null,
-        "modelCount": 0,
-        "textureCount": 0,
-        "models": [],
-        "textures": []
+        "sourceDir": "user-data/GG4E/gltf-export/optn00",
+        "modelCount": 23,
+        "textureCount": 3,
+        "models": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_00.dae",
+            "sourceBytes": 6960,
+            "sha1": "15cfd6e38b989c9ad3d47ed4a8a744799399efa7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_01.dae",
+            "sourceBytes": 6709,
+            "sha1": "65bb1befa4a2c092bd8c1815eaf0ad5fb1984ea4"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_02.dae",
+            "sourceBytes": 6708,
+            "sha1": "4cf032259cbfd5b15fc46005a5e5d6165cb3a4a6"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_03.dae",
+            "sourceBytes": 6702,
+            "sha1": "049f181367e1eac02a1744d0979c3c19c00c56fa"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_04.dae",
+            "sourceBytes": 6707,
+            "sha1": "53f50e0ffa5e14fff0202eedb483757b457ce29e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_05.dae",
+            "sourceBytes": 6705,
+            "sha1": "d6335d8027cb2b9ec5783a540ce854d323498354"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_06.dae",
+            "sourceBytes": 6705,
+            "sha1": "8e1c2ce6a2d1419ab429f0d499183e1e0e630f29"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_07.dae",
+            "sourceBytes": 6711,
+            "sha1": "8bc6de7f5b0d925166525f20024e2654b2848be9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_08.dae",
+            "sourceBytes": 6702,
+            "sha1": "06fc0c4e84ee2007d51f0552c962956f9415ccf5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_09.dae",
+            "sourceBytes": 6704,
+            "sha1": "c2f11d1c64ff8b06be9a4ae6bbb21348874cb17e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_10.dae",
+            "sourceBytes": 6705,
+            "sha1": "974f286592d9eb0f727a3e2936763613df435f1d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_11.dae",
+            "sourceBytes": 6700,
+            "sha1": "8865f79ad155caf5b2ba02b995aabd544cb54ac6"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_12.dae",
+            "sourceBytes": 6701,
+            "sha1": "e38d6cacc01752b62ac7cc76f856a2f1c99d70d3"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_13.dae",
+            "sourceBytes": 6700,
+            "sha1": "1f904357acd643f3a29f2b94d1263d5b4ab323cd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_14.dae",
+            "sourceBytes": 6920,
+            "sha1": "8744b640c24662efde122c30d6f0f99c792ab699"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_15.dae",
+            "sourceBytes": 6920,
+            "sha1": "a8dc2cc073f0bf0acb317b13f86e23bb9fe9e4c1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_16.dae",
+            "sourceBytes": 6921,
+            "sha1": "af89b8965e3cce450316a4bdf14bf82354c827f2"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_17.dae",
+            "sourceBytes": 6922,
+            "sha1": "947288c10c996e615e569b84e2be14468c6c37d0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_18.dae",
+            "sourceBytes": 7407,
+            "sha1": "3eb55705c347276e72ed9c16cc8ed20f09d33a77"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_19.dae",
+            "sourceBytes": 6705,
+            "sha1": "61424e395bc873b4b2e8bc0925795b96d31fa3db"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_20.dae",
+            "sourceBytes": 6707,
+            "sha1": "fa70b5af766503e587f5d2eeeb9a55b9c1f64a3f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_21.dae",
+            "sourceBytes": 8251,
+            "sha1": "4b16b25eb25a0229318a590cc71cf00bd4db747e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/model_22.dae",
+            "sourceBytes": 6346,
+            "sha1": "160bb55790b07b1cd9c15f9729854af900971dfe"
+          }
+        ],
+        "textures": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/Texture_0_CI4_RGB5A3.png",
+            "sourceBytes": 4985,
+            "sha1": "bd93bce0a35cd9987dc9cbdb100ed22484f8c4c0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/Texture_0_CI8_RGB5A3.png",
+            "sourceBytes": 3100,
+            "sha1": "ded97d9a02db59f176d6de540b28ccdbd54d26fe"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/optn00/Texture_0_RGBA8.png",
+            "sourceBytes": 137831,
+            "sha1": "98e3abf5aeefd732435ea1de73a8f06dd8cf707b"
+          }
+        ]
       },
       "outputDir": "apps/game/public/ui/scenes/optn00",
-      "modelFiles": [],
-      "textureFiles": [],
-      "textureCount": 0,
+      "modelFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_00.dae",
+          "publicPath": "/ui/scenes/optn00/model_00.dae",
+          "bytes": 6960,
+          "sha1": "15cfd6e38b989c9ad3d47ed4a8a744799399efa7",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_00.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_01.dae",
+          "publicPath": "/ui/scenes/optn00/model_01.dae",
+          "bytes": 6709,
+          "sha1": "65bb1befa4a2c092bd8c1815eaf0ad5fb1984ea4",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_01.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_02.dae",
+          "publicPath": "/ui/scenes/optn00/model_02.dae",
+          "bytes": 6708,
+          "sha1": "4cf032259cbfd5b15fc46005a5e5d6165cb3a4a6",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_02.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_03.dae",
+          "publicPath": "/ui/scenes/optn00/model_03.dae",
+          "bytes": 6702,
+          "sha1": "049f181367e1eac02a1744d0979c3c19c00c56fa",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_03.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_04.dae",
+          "publicPath": "/ui/scenes/optn00/model_04.dae",
+          "bytes": 6707,
+          "sha1": "53f50e0ffa5e14fff0202eedb483757b457ce29e",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_04.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_05.dae",
+          "publicPath": "/ui/scenes/optn00/model_05.dae",
+          "bytes": 6705,
+          "sha1": "d6335d8027cb2b9ec5783a540ce854d323498354",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_05.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_06.dae",
+          "publicPath": "/ui/scenes/optn00/model_06.dae",
+          "bytes": 6705,
+          "sha1": "8e1c2ce6a2d1419ab429f0d499183e1e0e630f29",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_06.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_07.dae",
+          "publicPath": "/ui/scenes/optn00/model_07.dae",
+          "bytes": 6711,
+          "sha1": "8bc6de7f5b0d925166525f20024e2654b2848be9",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_07.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_08.dae",
+          "publicPath": "/ui/scenes/optn00/model_08.dae",
+          "bytes": 6702,
+          "sha1": "06fc0c4e84ee2007d51f0552c962956f9415ccf5",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_08.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_09.dae",
+          "publicPath": "/ui/scenes/optn00/model_09.dae",
+          "bytes": 6704,
+          "sha1": "c2f11d1c64ff8b06be9a4ae6bbb21348874cb17e",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_09.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_10.dae",
+          "publicPath": "/ui/scenes/optn00/model_10.dae",
+          "bytes": 6705,
+          "sha1": "974f286592d9eb0f727a3e2936763613df435f1d",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_10.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_11.dae",
+          "publicPath": "/ui/scenes/optn00/model_11.dae",
+          "bytes": 6700,
+          "sha1": "8865f79ad155caf5b2ba02b995aabd544cb54ac6",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_11.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_12.dae",
+          "publicPath": "/ui/scenes/optn00/model_12.dae",
+          "bytes": 6701,
+          "sha1": "e38d6cacc01752b62ac7cc76f856a2f1c99d70d3",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_12.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_13.dae",
+          "publicPath": "/ui/scenes/optn00/model_13.dae",
+          "bytes": 6700,
+          "sha1": "1f904357acd643f3a29f2b94d1263d5b4ab323cd",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_13.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_14.dae",
+          "publicPath": "/ui/scenes/optn00/model_14.dae",
+          "bytes": 6920,
+          "sha1": "8744b640c24662efde122c30d6f0f99c792ab699",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_14.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_15.dae",
+          "publicPath": "/ui/scenes/optn00/model_15.dae",
+          "bytes": 6920,
+          "sha1": "a8dc2cc073f0bf0acb317b13f86e23bb9fe9e4c1",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_15.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_16.dae",
+          "publicPath": "/ui/scenes/optn00/model_16.dae",
+          "bytes": 6921,
+          "sha1": "af89b8965e3cce450316a4bdf14bf82354c827f2",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_16.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_17.dae",
+          "publicPath": "/ui/scenes/optn00/model_17.dae",
+          "bytes": 6922,
+          "sha1": "947288c10c996e615e569b84e2be14468c6c37d0",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_17.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_18.dae",
+          "publicPath": "/ui/scenes/optn00/model_18.dae",
+          "bytes": 7407,
+          "sha1": "3eb55705c347276e72ed9c16cc8ed20f09d33a77",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_18.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_19.dae",
+          "publicPath": "/ui/scenes/optn00/model_19.dae",
+          "bytes": 6705,
+          "sha1": "61424e395bc873b4b2e8bc0925795b96d31fa3db",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_19.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_20.dae",
+          "publicPath": "/ui/scenes/optn00/model_20.dae",
+          "bytes": 6707,
+          "sha1": "fa70b5af766503e587f5d2eeeb9a55b9c1f64a3f",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_20.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_21.dae",
+          "publicPath": "/ui/scenes/optn00/model_21.dae",
+          "bytes": 8251,
+          "sha1": "4b16b25eb25a0229318a590cc71cf00bd4db747e",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_21.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/model_22.dae",
+          "publicPath": "/ui/scenes/optn00/model_22.dae",
+          "bytes": 6346,
+          "sha1": "160bb55790b07b1cd9c15f9729854af900971dfe",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/model_22.dae"
+        }
+      ],
+      "textureFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/optn00/Texture_0_CI4_RGB5A3.png",
+          "publicPath": "/ui/scenes/optn00/Texture_0_CI4_RGB5A3.png",
+          "bytes": 4985,
+          "sha1": "bd93bce0a35cd9987dc9cbdb100ed22484f8c4c0",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/Texture_0_CI4_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/Texture_0_CI8_RGB5A3.png",
+          "publicPath": "/ui/scenes/optn00/Texture_0_CI8_RGB5A3.png",
+          "bytes": 3100,
+          "sha1": "ded97d9a02db59f176d6de540b28ccdbd54d26fe",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/Texture_0_CI8_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/optn00/Texture_0_RGBA8.png",
+          "publicPath": "/ui/scenes/optn00/Texture_0_RGBA8.png",
+          "bytes": 137831,
+          "sha1": "98e3abf5aeefd732435ea1de73a8f06dd8cf707b",
+          "sourcePath": "user-data/GG4E/gltf-export/optn00/Texture_0_RGBA8.png"
+        }
+      ],
+      "textureCount": 3,
       "caveats": [
-        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
-        "No validated model export output to copy."
+        "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
+        "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."
       ]
     },
     {
       "id": "rpot20",
       "kind": "ui-scene-model",
       "requested": true,
-      "status": "not-exported",
+      "status": "exported",
       "sourceArchive": {
         "sourceName": "rpot20_mdl.arc",
         "sourcePath": "user-data/GG4E/afs_data/root/rpot20_mdl.arc",
         "sourceBytes": 1358767
       },
       "existingExport": {
-        "sourceDir": null,
-        "modelCount": 0,
-        "textureCount": 0,
-        "models": [],
-        "textures": []
+        "sourceDir": "user-data/GG4E/gltf-export/rpot20",
+        "modelCount": 21,
+        "textureCount": 4,
+        "models": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_00.dae",
+            "sourceBytes": 9380,
+            "sha1": "9d49abcaf86582eed1e997471ba6a7e4eb452264"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_01.dae",
+            "sourceBytes": 14267,
+            "sha1": "372793f3f88ed0d77eb1c0eed9c0019421d800df"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_02.dae",
+            "sourceBytes": 15353,
+            "sha1": "9971e5ee06aa9a6b50a95832f6fd77707d9854a1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_03.dae",
+            "sourceBytes": 15364,
+            "sha1": "a3f85f455d365595e6630f17b0a864abc6128a65"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_04.dae",
+            "sourceBytes": 15365,
+            "sha1": "a409278d8c8e30808c6b7eb0303d0f43b2fd889d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_05.dae",
+            "sourceBytes": 6675,
+            "sha1": "0b11459101f53b5adc50a7b95edd3c4671fa0aad"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_06.dae",
+            "sourceBytes": 917,
+            "sha1": "bcb23a0470ce1463f6bf5afb0dcb39478913a430"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_07.dae",
+            "sourceBytes": 906,
+            "sha1": "94cb58d167d365749a2e2c23349a386dceb3f28d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_08.dae",
+            "sourceBytes": 6646,
+            "sha1": "b2231c863db15c8908f9d4ff49d02fc39eb1c4fe"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_09.dae",
+            "sourceBytes": 6642,
+            "sha1": "3be2d91755bc40660122e3dc27780d7194b96d60"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_10.dae",
+            "sourceBytes": 6646,
+            "sha1": "a32a61c16878e5a9223e387ef996e64efde30ef9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_11.dae",
+            "sourceBytes": 906,
+            "sha1": "90b0c5164629a6f80b927c7b71368a817bf059a0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_12.dae",
+            "sourceBytes": 6647,
+            "sha1": "76e862f51387e3e1514a9022193f58a4b652859e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_13.dae",
+            "sourceBytes": 6644,
+            "sha1": "2090d234cf0a86f6010e340390783413f68cd9e0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_14.dae",
+            "sourceBytes": 15075,
+            "sha1": "d74b7a4667335eebc519df72db9b7067cb4488e6"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_15.dae",
+            "sourceBytes": 5210,
+            "sha1": "296a60a031e4265e81aa3517b15f6d1f49a857dd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_16.dae",
+            "sourceBytes": 6759,
+            "sha1": "5bba6ea05ae4e8776e916280182b66b2106c5452"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_17.dae",
+            "sourceBytes": 6673,
+            "sha1": "493d3ed3c74c18382b66f0d9d2ba16e97db33796"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_18.dae",
+            "sourceBytes": 6677,
+            "sha1": "7b3867e5a8a1e70b61157629cd8a228015804df0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_19.dae",
+            "sourceBytes": 6676,
+            "sha1": "40d6ef585f0afb588b38198cd77d857b1cae8a8f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_20.dae",
+            "sourceBytes": 9550,
+            "sha1": "33f8a2293fa9e74e1ff87f7ae4dea585517df654"
+          }
+        ],
+        "textures": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/Texture_0_CI4_RGB5A3.png",
+            "sourceBytes": 11797,
+            "sha1": "8e13255bfc7bd4dd42516c5e90300e15e66c6821"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/Texture_0_CI8_RGB5A3.png",
+            "sourceBytes": 27124,
+            "sha1": "33fbbe51380d43a7a414e6cb6553d26b964c03df"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/Texture_0_I8.png",
+            "sourceBytes": 80212,
+            "sha1": "5c00836094d8ea8f651ef1a412dac26b24caf6ec"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot20/Texture_0_RGBA8.png",
+            "sourceBytes": 301154,
+            "sha1": "a949cdb2a3b71f3f0802e956c1c7f3456c922c3e"
+          }
+        ]
       },
       "outputDir": "apps/game/public/ui/scenes/rpot20",
-      "modelFiles": [],
-      "textureFiles": [],
-      "textureCount": 0,
+      "modelFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_00.dae",
+          "publicPath": "/ui/scenes/rpot20/model_00.dae",
+          "bytes": 9380,
+          "sha1": "9d49abcaf86582eed1e997471ba6a7e4eb452264",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_00.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_01.dae",
+          "publicPath": "/ui/scenes/rpot20/model_01.dae",
+          "bytes": 14267,
+          "sha1": "372793f3f88ed0d77eb1c0eed9c0019421d800df",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_01.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_02.dae",
+          "publicPath": "/ui/scenes/rpot20/model_02.dae",
+          "bytes": 15353,
+          "sha1": "9971e5ee06aa9a6b50a95832f6fd77707d9854a1",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_02.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_03.dae",
+          "publicPath": "/ui/scenes/rpot20/model_03.dae",
+          "bytes": 15364,
+          "sha1": "a3f85f455d365595e6630f17b0a864abc6128a65",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_03.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_04.dae",
+          "publicPath": "/ui/scenes/rpot20/model_04.dae",
+          "bytes": 15365,
+          "sha1": "a409278d8c8e30808c6b7eb0303d0f43b2fd889d",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_04.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_05.dae",
+          "publicPath": "/ui/scenes/rpot20/model_05.dae",
+          "bytes": 6675,
+          "sha1": "0b11459101f53b5adc50a7b95edd3c4671fa0aad",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_05.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_06.dae",
+          "publicPath": "/ui/scenes/rpot20/model_06.dae",
+          "bytes": 917,
+          "sha1": "bcb23a0470ce1463f6bf5afb0dcb39478913a430",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_06.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_07.dae",
+          "publicPath": "/ui/scenes/rpot20/model_07.dae",
+          "bytes": 906,
+          "sha1": "94cb58d167d365749a2e2c23349a386dceb3f28d",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_07.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_08.dae",
+          "publicPath": "/ui/scenes/rpot20/model_08.dae",
+          "bytes": 6646,
+          "sha1": "b2231c863db15c8908f9d4ff49d02fc39eb1c4fe",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_08.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_09.dae",
+          "publicPath": "/ui/scenes/rpot20/model_09.dae",
+          "bytes": 6642,
+          "sha1": "3be2d91755bc40660122e3dc27780d7194b96d60",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_09.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_10.dae",
+          "publicPath": "/ui/scenes/rpot20/model_10.dae",
+          "bytes": 6646,
+          "sha1": "a32a61c16878e5a9223e387ef996e64efde30ef9",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_10.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_11.dae",
+          "publicPath": "/ui/scenes/rpot20/model_11.dae",
+          "bytes": 906,
+          "sha1": "90b0c5164629a6f80b927c7b71368a817bf059a0",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_11.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_12.dae",
+          "publicPath": "/ui/scenes/rpot20/model_12.dae",
+          "bytes": 6647,
+          "sha1": "76e862f51387e3e1514a9022193f58a4b652859e",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_12.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_13.dae",
+          "publicPath": "/ui/scenes/rpot20/model_13.dae",
+          "bytes": 6644,
+          "sha1": "2090d234cf0a86f6010e340390783413f68cd9e0",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_13.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_14.dae",
+          "publicPath": "/ui/scenes/rpot20/model_14.dae",
+          "bytes": 15075,
+          "sha1": "d74b7a4667335eebc519df72db9b7067cb4488e6",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_14.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_15.dae",
+          "publicPath": "/ui/scenes/rpot20/model_15.dae",
+          "bytes": 5210,
+          "sha1": "296a60a031e4265e81aa3517b15f6d1f49a857dd",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_15.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_16.dae",
+          "publicPath": "/ui/scenes/rpot20/model_16.dae",
+          "bytes": 6759,
+          "sha1": "5bba6ea05ae4e8776e916280182b66b2106c5452",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_16.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_17.dae",
+          "publicPath": "/ui/scenes/rpot20/model_17.dae",
+          "bytes": 6673,
+          "sha1": "493d3ed3c74c18382b66f0d9d2ba16e97db33796",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_17.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_18.dae",
+          "publicPath": "/ui/scenes/rpot20/model_18.dae",
+          "bytes": 6677,
+          "sha1": "7b3867e5a8a1e70b61157629cd8a228015804df0",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_18.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_19.dae",
+          "publicPath": "/ui/scenes/rpot20/model_19.dae",
+          "bytes": 6676,
+          "sha1": "40d6ef585f0afb588b38198cd77d857b1cae8a8f",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_19.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/model_20.dae",
+          "publicPath": "/ui/scenes/rpot20/model_20.dae",
+          "bytes": 9550,
+          "sha1": "33f8a2293fa9e74e1ff87f7ae4dea585517df654",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/model_20.dae"
+        }
+      ],
+      "textureFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/Texture_0_CI4_RGB5A3.png",
+          "publicPath": "/ui/scenes/rpot20/Texture_0_CI4_RGB5A3.png",
+          "bytes": 11797,
+          "sha1": "8e13255bfc7bd4dd42516c5e90300e15e66c6821",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/Texture_0_CI4_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/Texture_0_CI8_RGB5A3.png",
+          "publicPath": "/ui/scenes/rpot20/Texture_0_CI8_RGB5A3.png",
+          "bytes": 27124,
+          "sha1": "33fbbe51380d43a7a414e6cb6553d26b964c03df",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/Texture_0_CI8_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/Texture_0_I8.png",
+          "publicPath": "/ui/scenes/rpot20/Texture_0_I8.png",
+          "bytes": 80212,
+          "sha1": "5c00836094d8ea8f651ef1a412dac26b24caf6ec",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/Texture_0_I8.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot20/Texture_0_RGBA8.png",
+          "publicPath": "/ui/scenes/rpot20/Texture_0_RGBA8.png",
+          "bytes": 301154,
+          "sha1": "a949cdb2a3b71f3f0802e956c1c7f3456c922c3e",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot20/Texture_0_RGBA8.png"
+        }
+      ],
+      "textureCount": 4,
       "caveats": [
-        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
-        "No validated model export output to copy."
+        "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
+        "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."
       ]
     },
     {
       "id": "rpot21",
       "kind": "ui-scene-model",
       "requested": true,
-      "status": "not-exported",
+      "status": "exported",
       "sourceArchive": {
         "sourceName": "rpot21_mdl.arc",
         "sourcePath": "user-data/GG4E/afs_data/root/rpot21_mdl.arc",
         "sourceBytes": 1358767
       },
       "existingExport": {
-        "sourceDir": null,
-        "modelCount": 0,
-        "textureCount": 0,
-        "models": [],
-        "textures": []
+        "sourceDir": "user-data/GG4E/gltf-export/rpot21",
+        "modelCount": 21,
+        "textureCount": 4,
+        "models": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_00.dae",
+            "sourceBytes": 9380,
+            "sha1": "b5d26eb4941285cb1d5acb7017c9b07bfae3626e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_01.dae",
+            "sourceBytes": 14267,
+            "sha1": "4c7a1ac8255c02bdca2587e68a3832e956e231d8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_02.dae",
+            "sourceBytes": 15353,
+            "sha1": "abc82d6a552ea3db49b565612e22c82345eadc08"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_03.dae",
+            "sourceBytes": 15363,
+            "sha1": "1e395f2ddd9c60ca764871bbcec686a0ea8b252b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_04.dae",
+            "sourceBytes": 15365,
+            "sha1": "7b223b08507419e8897bc8748e8cfa7cea6a9f65"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_05.dae",
+            "sourceBytes": 6676,
+            "sha1": "a5fa87bd756a541911caba3c11cdfc7841d78482"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_06.dae",
+            "sourceBytes": 917,
+            "sha1": "aed26245cadfeb34df46a3ee36aea594598a5b31"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_07.dae",
+            "sourceBytes": 906,
+            "sha1": "8fdf4bbc540392031404c48addc71c2a43672f1d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_08.dae",
+            "sourceBytes": 6645,
+            "sha1": "0268e130d01ede8cb5bddb836eb39d12e90c5f53"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_09.dae",
+            "sourceBytes": 6642,
+            "sha1": "1d874fc7a7059b701c4cc9b9fbb22389870b180d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_10.dae",
+            "sourceBytes": 6646,
+            "sha1": "1cf092608123f95c007ca7632ad144b8044489d8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_11.dae",
+            "sourceBytes": 906,
+            "sha1": "a92b23199d8efa7e751f8be3e5b5c6e4bd898418"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_12.dae",
+            "sourceBytes": 6647,
+            "sha1": "268da65b3710da6879beab0ca3fe9766e2a908d9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_13.dae",
+            "sourceBytes": 6644,
+            "sha1": "93fc59abdf44509628056fa08b67005c8edc2323"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_14.dae",
+            "sourceBytes": 15076,
+            "sha1": "158eaaaa4b997b3c7338e8db5cf8b70dde6b582c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_15.dae",
+            "sourceBytes": 5210,
+            "sha1": "1802a73533e400809fbd0d2fbb2d4c3e320f71fb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_16.dae",
+            "sourceBytes": 6760,
+            "sha1": "19a32ab766c0ad41e68ab3a07d6413a84d246c5f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_17.dae",
+            "sourceBytes": 6673,
+            "sha1": "dabf3bcedc309aaf3d3a0a43982346e873e81f61"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_18.dae",
+            "sourceBytes": 6677,
+            "sha1": "0007ebd023999d75d81d1b377b4ca11c4d80f890"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_19.dae",
+            "sourceBytes": 6675,
+            "sha1": "00eea37e89aa9ae8c431e810e568a35a1b61a04a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_20.dae",
+            "sourceBytes": 9534,
+            "sha1": "c18f1a143c6109be7f90b3796a9fd19b7efc01ae"
+          }
+        ],
+        "textures": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/Texture_0_CI4_RGB5A3.png",
+            "sourceBytes": 11797,
+            "sha1": "8e13255bfc7bd4dd42516c5e90300e15e66c6821"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/Texture_0_CI8_RGB5A3.png",
+            "sourceBytes": 27124,
+            "sha1": "33fbbe51380d43a7a414e6cb6553d26b964c03df"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/Texture_0_I8.png",
+            "sourceBytes": 103742,
+            "sha1": "e23ba808fe4da7b1ba6a8939a10d7290494a11a4"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot21/Texture_0_RGBA8.png",
+            "sourceBytes": 467463,
+            "sha1": "25923a6d3659e0e7f7591626d8dca79e4b485f50"
+          }
+        ]
       },
       "outputDir": "apps/game/public/ui/scenes/rpot21",
-      "modelFiles": [],
-      "textureFiles": [],
-      "textureCount": 0,
+      "modelFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_00.dae",
+          "publicPath": "/ui/scenes/rpot21/model_00.dae",
+          "bytes": 9380,
+          "sha1": "b5d26eb4941285cb1d5acb7017c9b07bfae3626e",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_00.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_01.dae",
+          "publicPath": "/ui/scenes/rpot21/model_01.dae",
+          "bytes": 14267,
+          "sha1": "4c7a1ac8255c02bdca2587e68a3832e956e231d8",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_01.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_02.dae",
+          "publicPath": "/ui/scenes/rpot21/model_02.dae",
+          "bytes": 15353,
+          "sha1": "abc82d6a552ea3db49b565612e22c82345eadc08",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_02.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_03.dae",
+          "publicPath": "/ui/scenes/rpot21/model_03.dae",
+          "bytes": 15363,
+          "sha1": "1e395f2ddd9c60ca764871bbcec686a0ea8b252b",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_03.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_04.dae",
+          "publicPath": "/ui/scenes/rpot21/model_04.dae",
+          "bytes": 15365,
+          "sha1": "7b223b08507419e8897bc8748e8cfa7cea6a9f65",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_04.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_05.dae",
+          "publicPath": "/ui/scenes/rpot21/model_05.dae",
+          "bytes": 6676,
+          "sha1": "a5fa87bd756a541911caba3c11cdfc7841d78482",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_05.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_06.dae",
+          "publicPath": "/ui/scenes/rpot21/model_06.dae",
+          "bytes": 917,
+          "sha1": "aed26245cadfeb34df46a3ee36aea594598a5b31",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_06.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_07.dae",
+          "publicPath": "/ui/scenes/rpot21/model_07.dae",
+          "bytes": 906,
+          "sha1": "8fdf4bbc540392031404c48addc71c2a43672f1d",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_07.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_08.dae",
+          "publicPath": "/ui/scenes/rpot21/model_08.dae",
+          "bytes": 6645,
+          "sha1": "0268e130d01ede8cb5bddb836eb39d12e90c5f53",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_08.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_09.dae",
+          "publicPath": "/ui/scenes/rpot21/model_09.dae",
+          "bytes": 6642,
+          "sha1": "1d874fc7a7059b701c4cc9b9fbb22389870b180d",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_09.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_10.dae",
+          "publicPath": "/ui/scenes/rpot21/model_10.dae",
+          "bytes": 6646,
+          "sha1": "1cf092608123f95c007ca7632ad144b8044489d8",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_10.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_11.dae",
+          "publicPath": "/ui/scenes/rpot21/model_11.dae",
+          "bytes": 906,
+          "sha1": "a92b23199d8efa7e751f8be3e5b5c6e4bd898418",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_11.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_12.dae",
+          "publicPath": "/ui/scenes/rpot21/model_12.dae",
+          "bytes": 6647,
+          "sha1": "268da65b3710da6879beab0ca3fe9766e2a908d9",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_12.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_13.dae",
+          "publicPath": "/ui/scenes/rpot21/model_13.dae",
+          "bytes": 6644,
+          "sha1": "93fc59abdf44509628056fa08b67005c8edc2323",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_13.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_14.dae",
+          "publicPath": "/ui/scenes/rpot21/model_14.dae",
+          "bytes": 15076,
+          "sha1": "158eaaaa4b997b3c7338e8db5cf8b70dde6b582c",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_14.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_15.dae",
+          "publicPath": "/ui/scenes/rpot21/model_15.dae",
+          "bytes": 5210,
+          "sha1": "1802a73533e400809fbd0d2fbb2d4c3e320f71fb",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_15.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_16.dae",
+          "publicPath": "/ui/scenes/rpot21/model_16.dae",
+          "bytes": 6760,
+          "sha1": "19a32ab766c0ad41e68ab3a07d6413a84d246c5f",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_16.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_17.dae",
+          "publicPath": "/ui/scenes/rpot21/model_17.dae",
+          "bytes": 6673,
+          "sha1": "dabf3bcedc309aaf3d3a0a43982346e873e81f61",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_17.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_18.dae",
+          "publicPath": "/ui/scenes/rpot21/model_18.dae",
+          "bytes": 6677,
+          "sha1": "0007ebd023999d75d81d1b377b4ca11c4d80f890",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_18.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_19.dae",
+          "publicPath": "/ui/scenes/rpot21/model_19.dae",
+          "bytes": 6675,
+          "sha1": "00eea37e89aa9ae8c431e810e568a35a1b61a04a",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_19.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/model_20.dae",
+          "publicPath": "/ui/scenes/rpot21/model_20.dae",
+          "bytes": 9534,
+          "sha1": "c18f1a143c6109be7f90b3796a9fd19b7efc01ae",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/model_20.dae"
+        }
+      ],
+      "textureFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/Texture_0_CI4_RGB5A3.png",
+          "publicPath": "/ui/scenes/rpot21/Texture_0_CI4_RGB5A3.png",
+          "bytes": 11797,
+          "sha1": "8e13255bfc7bd4dd42516c5e90300e15e66c6821",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/Texture_0_CI4_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/Texture_0_CI8_RGB5A3.png",
+          "publicPath": "/ui/scenes/rpot21/Texture_0_CI8_RGB5A3.png",
+          "bytes": 27124,
+          "sha1": "33fbbe51380d43a7a414e6cb6553d26b964c03df",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/Texture_0_CI8_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/Texture_0_I8.png",
+          "publicPath": "/ui/scenes/rpot21/Texture_0_I8.png",
+          "bytes": 103742,
+          "sha1": "e23ba808fe4da7b1ba6a8939a10d7290494a11a4",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/Texture_0_I8.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot21/Texture_0_RGBA8.png",
+          "publicPath": "/ui/scenes/rpot21/Texture_0_RGBA8.png",
+          "bytes": 467463,
+          "sha1": "25923a6d3659e0e7f7591626d8dca79e4b485f50",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot21/Texture_0_RGBA8.png"
+        }
+      ],
+      "textureCount": 4,
       "caveats": [
-        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
-        "No validated model export output to copy."
+        "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
+        "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."
       ]
     },
     {
       "id": "rpot22",
       "kind": "ui-scene-model",
       "requested": true,
-      "status": "not-exported",
+      "status": "exported",
       "sourceArchive": {
         "sourceName": "rpot22_mdl.arc",
         "sourcePath": "user-data/GG4E/afs_data/root/rpot22_mdl.arc",
         "sourceBytes": 1358767
       },
       "existingExport": {
-        "sourceDir": null,
-        "modelCount": 0,
-        "textureCount": 0,
-        "models": [],
-        "textures": []
+        "sourceDir": "user-data/GG4E/gltf-export/rpot22",
+        "modelCount": 21,
+        "textureCount": 4,
+        "models": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_00.dae",
+            "sourceBytes": 9380,
+            "sha1": "17e38346a3fd1d38ff91b354d296ea49ade60a6e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_01.dae",
+            "sourceBytes": 14265,
+            "sha1": "609098a58919cdd3e7366326a54d81c2c789ab41"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_02.dae",
+            "sourceBytes": 15353,
+            "sha1": "64ec285080bcfd8574e7ed213faf16b3edfca46e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_03.dae",
+            "sourceBytes": 15364,
+            "sha1": "b01933a9decdd0b33749672522c82cbc66335352"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_04.dae",
+            "sourceBytes": 15365,
+            "sha1": "e26b412a2734c9d0d86d8ee20312bc7d7f2e0b36"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_05.dae",
+            "sourceBytes": 6676,
+            "sha1": "1a9fd3b6e42635d0fc98fd8bcae91d3fed46f5bd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_06.dae",
+            "sourceBytes": 918,
+            "sha1": "c58d8fe6a88f0b8175b76efe0c330e3a0a467108"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_07.dae",
+            "sourceBytes": 906,
+            "sha1": "240a656b5ea1f683e33b508401ea7965f22ef3aa"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_08.dae",
+            "sourceBytes": 6646,
+            "sha1": "4cff7906add5a330283d8b823ad47418dd25b4ec"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_09.dae",
+            "sourceBytes": 6642,
+            "sha1": "c5f590d045ec6983d29a62e5c4c83b69aa03ac54"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_10.dae",
+            "sourceBytes": 6646,
+            "sha1": "c14ab0711e092b4298b77a67153582c3c44e4576"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_11.dae",
+            "sourceBytes": 906,
+            "sha1": "f6ef4d87aa4f325b706f1a03b3eccc9c85365703"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_12.dae",
+            "sourceBytes": 6647,
+            "sha1": "7387f228b5720b01c9bde2e2979495d09594959c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_13.dae",
+            "sourceBytes": 6644,
+            "sha1": "d73b021021a93ad70ac496c3d038a9c49d30fa71"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_14.dae",
+            "sourceBytes": 15076,
+            "sha1": "12dd7a3ccf3740c31588b951c654e2220a76ee30"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_15.dae",
+            "sourceBytes": 5210,
+            "sha1": "51c8f52785d27cc71453d2905e31cb753f0e5ac1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_16.dae",
+            "sourceBytes": 6759,
+            "sha1": "c82c18c951f33fe241a32c0e53056221dbd14b45"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_17.dae",
+            "sourceBytes": 6673,
+            "sha1": "a7761fc80286134d439cd8fce9e9399e291abb03"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_18.dae",
+            "sourceBytes": 6678,
+            "sha1": "95fb9139b4819d9204a25553b969d3d9bf738af3"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_19.dae",
+            "sourceBytes": 6676,
+            "sha1": "a29314124921a2e0ed51d8a06eba760e075ec895"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_20.dae",
+            "sourceBytes": 9560,
+            "sha1": "1ca07f56f6f4b6cfef61fd785de50c53c6ecfe85"
+          }
+        ],
+        "textures": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/Texture_0_CI4_RGB5A3.png",
+            "sourceBytes": 11797,
+            "sha1": "8e13255bfc7bd4dd42516c5e90300e15e66c6821"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/Texture_0_CI8_RGB5A3.png",
+            "sourceBytes": 27124,
+            "sha1": "33fbbe51380d43a7a414e6cb6553d26b964c03df"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/Texture_0_I8.png",
+            "sourceBytes": 80886,
+            "sha1": "2f3d84529ad796d9d12df4390e3ed4406cbbbbf5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot22/Texture_0_RGBA8.png",
+            "sourceBytes": 287340,
+            "sha1": "75b1162fc158b26c31e52e85d4e7c92e4e1b7861"
+          }
+        ]
       },
       "outputDir": "apps/game/public/ui/scenes/rpot22",
-      "modelFiles": [],
-      "textureFiles": [],
-      "textureCount": 0,
+      "modelFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_00.dae",
+          "publicPath": "/ui/scenes/rpot22/model_00.dae",
+          "bytes": 9380,
+          "sha1": "17e38346a3fd1d38ff91b354d296ea49ade60a6e",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_00.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_01.dae",
+          "publicPath": "/ui/scenes/rpot22/model_01.dae",
+          "bytes": 14265,
+          "sha1": "609098a58919cdd3e7366326a54d81c2c789ab41",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_01.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_02.dae",
+          "publicPath": "/ui/scenes/rpot22/model_02.dae",
+          "bytes": 15353,
+          "sha1": "64ec285080bcfd8574e7ed213faf16b3edfca46e",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_02.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_03.dae",
+          "publicPath": "/ui/scenes/rpot22/model_03.dae",
+          "bytes": 15364,
+          "sha1": "b01933a9decdd0b33749672522c82cbc66335352",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_03.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_04.dae",
+          "publicPath": "/ui/scenes/rpot22/model_04.dae",
+          "bytes": 15365,
+          "sha1": "e26b412a2734c9d0d86d8ee20312bc7d7f2e0b36",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_04.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_05.dae",
+          "publicPath": "/ui/scenes/rpot22/model_05.dae",
+          "bytes": 6676,
+          "sha1": "1a9fd3b6e42635d0fc98fd8bcae91d3fed46f5bd",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_05.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_06.dae",
+          "publicPath": "/ui/scenes/rpot22/model_06.dae",
+          "bytes": 918,
+          "sha1": "c58d8fe6a88f0b8175b76efe0c330e3a0a467108",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_06.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_07.dae",
+          "publicPath": "/ui/scenes/rpot22/model_07.dae",
+          "bytes": 906,
+          "sha1": "240a656b5ea1f683e33b508401ea7965f22ef3aa",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_07.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_08.dae",
+          "publicPath": "/ui/scenes/rpot22/model_08.dae",
+          "bytes": 6646,
+          "sha1": "4cff7906add5a330283d8b823ad47418dd25b4ec",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_08.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_09.dae",
+          "publicPath": "/ui/scenes/rpot22/model_09.dae",
+          "bytes": 6642,
+          "sha1": "c5f590d045ec6983d29a62e5c4c83b69aa03ac54",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_09.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_10.dae",
+          "publicPath": "/ui/scenes/rpot22/model_10.dae",
+          "bytes": 6646,
+          "sha1": "c14ab0711e092b4298b77a67153582c3c44e4576",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_10.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_11.dae",
+          "publicPath": "/ui/scenes/rpot22/model_11.dae",
+          "bytes": 906,
+          "sha1": "f6ef4d87aa4f325b706f1a03b3eccc9c85365703",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_11.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_12.dae",
+          "publicPath": "/ui/scenes/rpot22/model_12.dae",
+          "bytes": 6647,
+          "sha1": "7387f228b5720b01c9bde2e2979495d09594959c",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_12.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_13.dae",
+          "publicPath": "/ui/scenes/rpot22/model_13.dae",
+          "bytes": 6644,
+          "sha1": "d73b021021a93ad70ac496c3d038a9c49d30fa71",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_13.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_14.dae",
+          "publicPath": "/ui/scenes/rpot22/model_14.dae",
+          "bytes": 15076,
+          "sha1": "12dd7a3ccf3740c31588b951c654e2220a76ee30",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_14.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_15.dae",
+          "publicPath": "/ui/scenes/rpot22/model_15.dae",
+          "bytes": 5210,
+          "sha1": "51c8f52785d27cc71453d2905e31cb753f0e5ac1",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_15.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_16.dae",
+          "publicPath": "/ui/scenes/rpot22/model_16.dae",
+          "bytes": 6759,
+          "sha1": "c82c18c951f33fe241a32c0e53056221dbd14b45",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_16.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_17.dae",
+          "publicPath": "/ui/scenes/rpot22/model_17.dae",
+          "bytes": 6673,
+          "sha1": "a7761fc80286134d439cd8fce9e9399e291abb03",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_17.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_18.dae",
+          "publicPath": "/ui/scenes/rpot22/model_18.dae",
+          "bytes": 6678,
+          "sha1": "95fb9139b4819d9204a25553b969d3d9bf738af3",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_18.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_19.dae",
+          "publicPath": "/ui/scenes/rpot22/model_19.dae",
+          "bytes": 6676,
+          "sha1": "a29314124921a2e0ed51d8a06eba760e075ec895",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_19.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/model_20.dae",
+          "publicPath": "/ui/scenes/rpot22/model_20.dae",
+          "bytes": 9560,
+          "sha1": "1ca07f56f6f4b6cfef61fd785de50c53c6ecfe85",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/model_20.dae"
+        }
+      ],
+      "textureFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/Texture_0_CI4_RGB5A3.png",
+          "publicPath": "/ui/scenes/rpot22/Texture_0_CI4_RGB5A3.png",
+          "bytes": 11797,
+          "sha1": "8e13255bfc7bd4dd42516c5e90300e15e66c6821",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/Texture_0_CI4_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/Texture_0_CI8_RGB5A3.png",
+          "publicPath": "/ui/scenes/rpot22/Texture_0_CI8_RGB5A3.png",
+          "bytes": 27124,
+          "sha1": "33fbbe51380d43a7a414e6cb6553d26b964c03df",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/Texture_0_CI8_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/Texture_0_I8.png",
+          "publicPath": "/ui/scenes/rpot22/Texture_0_I8.png",
+          "bytes": 80886,
+          "sha1": "2f3d84529ad796d9d12df4390e3ed4406cbbbbf5",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/Texture_0_I8.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot22/Texture_0_RGBA8.png",
+          "publicPath": "/ui/scenes/rpot22/Texture_0_RGBA8.png",
+          "bytes": 287340,
+          "sha1": "75b1162fc158b26c31e52e85d4e7c92e4e1b7861",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot22/Texture_0_RGBA8.png"
+        }
+      ],
+      "textureCount": 4,
       "caveats": [
-        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
-        "No validated model export output to copy."
+        "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
+        "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."
       ]
     },
     {
       "id": "rpot23",
       "kind": "ui-scene-model",
       "requested": true,
-      "status": "not-exported",
+      "status": "exported",
       "sourceArchive": {
         "sourceName": "rpot23_mdl.arc",
         "sourcePath": "user-data/GG4E/afs_data/root/rpot23_mdl.arc",
         "sourceBytes": 1358727
       },
       "existingExport": {
-        "sourceDir": null,
-        "modelCount": 0,
-        "textureCount": 0,
-        "models": [],
-        "textures": []
+        "sourceDir": "user-data/GG4E/gltf-export/rpot23",
+        "modelCount": 21,
+        "textureCount": 4,
+        "models": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_00.dae",
+            "sourceBytes": 9380,
+            "sha1": "219306e270f8ef92f74d5c453a2ea8a87e60ef8d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_01.dae",
+            "sourceBytes": 14257,
+            "sha1": "619c13f2706e56a16d156b548e065d62df96f15f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_02.dae",
+            "sourceBytes": 15353,
+            "sha1": "a7ccb39a1427d696e268668fa7dd019bc03314f8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_03.dae",
+            "sourceBytes": 15364,
+            "sha1": "20580f4468ce9992ad9ed49297f54d39c3c63442"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_04.dae",
+            "sourceBytes": 15365,
+            "sha1": "57d9d59d645dbde2206814548e5e9472d79ca93a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_05.dae",
+            "sourceBytes": 6675,
+            "sha1": "31695eb9a8b86536a3f23a4d780dc0ca7ba2e88a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_06.dae",
+            "sourceBytes": 918,
+            "sha1": "a7e3ec7371e9468d21e197929ea960713dfad981"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_07.dae",
+            "sourceBytes": 906,
+            "sha1": "6578884dd5d35b777c8044139b690a292c494107"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_08.dae",
+            "sourceBytes": 6646,
+            "sha1": "5c717e78a5433aaeb3ed1d6e5ba104ab1ebcaca5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_09.dae",
+            "sourceBytes": 6642,
+            "sha1": "7fcd17bab00c6e7d6c7c59f44bbcbecc740f867e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_10.dae",
+            "sourceBytes": 6645,
+            "sha1": "43d1f5089ec63afb330f7270c41c3553d1b44ef9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_11.dae",
+            "sourceBytes": 906,
+            "sha1": "5cac94172ece4324e6e6b792d577423a7f38754b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_12.dae",
+            "sourceBytes": 6646,
+            "sha1": "9de41f35b1ce3a673d867453dd06162db2c745cd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_13.dae",
+            "sourceBytes": 6644,
+            "sha1": "6842f22e9572e713b233b4c0f05c9d0d42e8a252"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_14.dae",
+            "sourceBytes": 15076,
+            "sha1": "6942db2f6015f1333d8f65b17392b824f39a945e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_15.dae",
+            "sourceBytes": 5210,
+            "sha1": "bb40e63334f68ea3ada6c09a70faaaf88564b759"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_16.dae",
+            "sourceBytes": 6760,
+            "sha1": "ec72367dd320bfe07aac7885a4fd165ce46ddfb9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_17.dae",
+            "sourceBytes": 6673,
+            "sha1": "1e05cb2cc413aaa411eb3061d062a9e85fb5ebe4"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_18.dae",
+            "sourceBytes": 6678,
+            "sha1": "0731d437124636431a2b98ceb0bc4017b60b4322"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_19.dae",
+            "sourceBytes": 6676,
+            "sha1": "ec3dc0c8302d690b60ab5f74aba70abee80e3586"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_20.dae",
+            "sourceBytes": 9535,
+            "sha1": "40001c01bda55557044d01cbde28de863f4d9341"
+          }
+        ],
+        "textures": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/Texture_0_CI4_RGB5A3.png",
+            "sourceBytes": 11797,
+            "sha1": "8e13255bfc7bd4dd42516c5e90300e15e66c6821"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/Texture_0_CI8_RGB5A3.png",
+            "sourceBytes": 23651,
+            "sha1": "f186856b557eac0c52ab0983f88802c14d670730"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/Texture_0_I8.png",
+            "sourceBytes": 50365,
+            "sha1": "d3a22c514345120807f47be4aae0c0f8319a93ad"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/rpot23/Texture_0_RGBA8.png",
+            "sourceBytes": 84586,
+            "sha1": "b41ea2e5dad682dffe494ed8b1a8d2cb1ab3b3c7"
+          }
+        ]
       },
       "outputDir": "apps/game/public/ui/scenes/rpot23",
-      "modelFiles": [],
-      "textureFiles": [],
-      "textureCount": 0,
+      "modelFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_00.dae",
+          "publicPath": "/ui/scenes/rpot23/model_00.dae",
+          "bytes": 9380,
+          "sha1": "219306e270f8ef92f74d5c453a2ea8a87e60ef8d",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_00.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_01.dae",
+          "publicPath": "/ui/scenes/rpot23/model_01.dae",
+          "bytes": 14257,
+          "sha1": "619c13f2706e56a16d156b548e065d62df96f15f",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_01.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_02.dae",
+          "publicPath": "/ui/scenes/rpot23/model_02.dae",
+          "bytes": 15353,
+          "sha1": "a7ccb39a1427d696e268668fa7dd019bc03314f8",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_02.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_03.dae",
+          "publicPath": "/ui/scenes/rpot23/model_03.dae",
+          "bytes": 15364,
+          "sha1": "20580f4468ce9992ad9ed49297f54d39c3c63442",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_03.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_04.dae",
+          "publicPath": "/ui/scenes/rpot23/model_04.dae",
+          "bytes": 15365,
+          "sha1": "57d9d59d645dbde2206814548e5e9472d79ca93a",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_04.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_05.dae",
+          "publicPath": "/ui/scenes/rpot23/model_05.dae",
+          "bytes": 6675,
+          "sha1": "31695eb9a8b86536a3f23a4d780dc0ca7ba2e88a",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_05.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_06.dae",
+          "publicPath": "/ui/scenes/rpot23/model_06.dae",
+          "bytes": 918,
+          "sha1": "a7e3ec7371e9468d21e197929ea960713dfad981",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_06.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_07.dae",
+          "publicPath": "/ui/scenes/rpot23/model_07.dae",
+          "bytes": 906,
+          "sha1": "6578884dd5d35b777c8044139b690a292c494107",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_07.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_08.dae",
+          "publicPath": "/ui/scenes/rpot23/model_08.dae",
+          "bytes": 6646,
+          "sha1": "5c717e78a5433aaeb3ed1d6e5ba104ab1ebcaca5",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_08.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_09.dae",
+          "publicPath": "/ui/scenes/rpot23/model_09.dae",
+          "bytes": 6642,
+          "sha1": "7fcd17bab00c6e7d6c7c59f44bbcbecc740f867e",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_09.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_10.dae",
+          "publicPath": "/ui/scenes/rpot23/model_10.dae",
+          "bytes": 6645,
+          "sha1": "43d1f5089ec63afb330f7270c41c3553d1b44ef9",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_10.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_11.dae",
+          "publicPath": "/ui/scenes/rpot23/model_11.dae",
+          "bytes": 906,
+          "sha1": "5cac94172ece4324e6e6b792d577423a7f38754b",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_11.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_12.dae",
+          "publicPath": "/ui/scenes/rpot23/model_12.dae",
+          "bytes": 6646,
+          "sha1": "9de41f35b1ce3a673d867453dd06162db2c745cd",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_12.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_13.dae",
+          "publicPath": "/ui/scenes/rpot23/model_13.dae",
+          "bytes": 6644,
+          "sha1": "6842f22e9572e713b233b4c0f05c9d0d42e8a252",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_13.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_14.dae",
+          "publicPath": "/ui/scenes/rpot23/model_14.dae",
+          "bytes": 15076,
+          "sha1": "6942db2f6015f1333d8f65b17392b824f39a945e",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_14.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_15.dae",
+          "publicPath": "/ui/scenes/rpot23/model_15.dae",
+          "bytes": 5210,
+          "sha1": "bb40e63334f68ea3ada6c09a70faaaf88564b759",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_15.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_16.dae",
+          "publicPath": "/ui/scenes/rpot23/model_16.dae",
+          "bytes": 6760,
+          "sha1": "ec72367dd320bfe07aac7885a4fd165ce46ddfb9",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_16.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_17.dae",
+          "publicPath": "/ui/scenes/rpot23/model_17.dae",
+          "bytes": 6673,
+          "sha1": "1e05cb2cc413aaa411eb3061d062a9e85fb5ebe4",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_17.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_18.dae",
+          "publicPath": "/ui/scenes/rpot23/model_18.dae",
+          "bytes": 6678,
+          "sha1": "0731d437124636431a2b98ceb0bc4017b60b4322",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_18.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_19.dae",
+          "publicPath": "/ui/scenes/rpot23/model_19.dae",
+          "bytes": 6676,
+          "sha1": "ec3dc0c8302d690b60ab5f74aba70abee80e3586",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_19.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/model_20.dae",
+          "publicPath": "/ui/scenes/rpot23/model_20.dae",
+          "bytes": 9535,
+          "sha1": "40001c01bda55557044d01cbde28de863f4d9341",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/model_20.dae"
+        }
+      ],
+      "textureFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/Texture_0_CI4_RGB5A3.png",
+          "publicPath": "/ui/scenes/rpot23/Texture_0_CI4_RGB5A3.png",
+          "bytes": 11797,
+          "sha1": "8e13255bfc7bd4dd42516c5e90300e15e66c6821",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/Texture_0_CI4_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/Texture_0_CI8_RGB5A3.png",
+          "publicPath": "/ui/scenes/rpot23/Texture_0_CI8_RGB5A3.png",
+          "bytes": 23651,
+          "sha1": "f186856b557eac0c52ab0983f88802c14d670730",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/Texture_0_CI8_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/Texture_0_I8.png",
+          "publicPath": "/ui/scenes/rpot23/Texture_0_I8.png",
+          "bytes": 50365,
+          "sha1": "d3a22c514345120807f47be4aae0c0f8319a93ad",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/Texture_0_I8.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/rpot23/Texture_0_RGBA8.png",
+          "publicPath": "/ui/scenes/rpot23/Texture_0_RGBA8.png",
+          "bytes": 84586,
+          "sha1": "b41ea2e5dad682dffe494ed8b1a8d2cb1ab3b3c7",
+          "sourcePath": "user-data/GG4E/gltf-export/rpot23/Texture_0_RGBA8.png"
+        }
+      ],
+      "textureCount": 4,
       "caveats": [
-        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
-        "No validated model export output to copy."
+        "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
+        "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."
       ]
     },
     {
       "id": "staff00",
       "kind": "ui-scene-model",
       "requested": true,
-      "status": "not-exported",
+      "status": "exported",
       "sourceArchive": {
         "sourceName": "staff00_mdl.arc",
         "sourcePath": "user-data/GG4E/afs_data/root/staff00_mdl.arc",
         "sourceBytes": 168323
       },
       "existingExport": {
-        "sourceDir": null,
-        "modelCount": 0,
-        "textureCount": 0,
-        "models": [],
-        "textures": []
+        "sourceDir": "user-data/GG4E/gltf-export/staff00",
+        "modelCount": 80,
+        "textureCount": 2,
+        "models": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_00.dae",
+            "sourceBytes": 5418,
+            "sha1": "ef3821c7b0444a5c9b737a41c45892ba2d26bc56"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_01.dae",
+            "sourceBytes": 6651,
+            "sha1": "4f3f4cf1c729ad2128f7db083d11bc8ae2820bad"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_02.dae",
+            "sourceBytes": 6645,
+            "sha1": "76279f6c9ccff9cbc2ecbfea791763a0127e0b29"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_03.dae",
+            "sourceBytes": 6653,
+            "sha1": "5a2cfa495ae03605ee5f59e1f7e0ec7299b60243"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_04.dae",
+            "sourceBytes": 6649,
+            "sha1": "3543de3e316035c5fc1581c0715a834fab09fdfc"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_05.dae",
+            "sourceBytes": 6650,
+            "sha1": "d314d2cd6d4ff705b77910c3ffe5c368122768e8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_06.dae",
+            "sourceBytes": 6649,
+            "sha1": "fd7c8b8cc0debcd142aac36d9e08475cfe5b6e87"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_07.dae",
+            "sourceBytes": 6649,
+            "sha1": "6d9cddbd3e6dbdb35f996aee007c5aa7881fcadb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_08.dae",
+            "sourceBytes": 6651,
+            "sha1": "31e4a49cc2e6f9b6ce33ee908437acee691187a7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_09.dae",
+            "sourceBytes": 6646,
+            "sha1": "f71b9a9c7e00064a3d83bd401edf26e24dcd7a8c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_10.dae",
+            "sourceBytes": 6647,
+            "sha1": "cd173d5d26aa30b8538bf35130c524854fe4540b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_11.dae",
+            "sourceBytes": 6649,
+            "sha1": "0abbfd99792f24ff8bbfb965408ca3dd1d580461"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_12.dae",
+            "sourceBytes": 6647,
+            "sha1": "690922994535040bd87b971fcbdb741e9815d479"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_13.dae",
+            "sourceBytes": 6649,
+            "sha1": "f5ef52ff3cec2ff685019f7d2827a24698e854ad"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_14.dae",
+            "sourceBytes": 6656,
+            "sha1": "bbaebc46fdbd416decb4eb5b2c6f64b2e8996da2"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_15.dae",
+            "sourceBytes": 6646,
+            "sha1": "2ccb889cb421b6c5283ec1e5f6b5c2f42c3997b6"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_16.dae",
+            "sourceBytes": 6647,
+            "sha1": "293f34112713024f9b6f19d679efa63adf27af0d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_17.dae",
+            "sourceBytes": 6647,
+            "sha1": "44a9fff1fdd589ca0eb7de60405c6fdbda1c3545"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_18.dae",
+            "sourceBytes": 6647,
+            "sha1": "6530fdb5007e483abff9168af9ee7443bfd8cf2f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_19.dae",
+            "sourceBytes": 6655,
+            "sha1": "191d04dced005f56053c8817629c794e940b1c14"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_20.dae",
+            "sourceBytes": 6653,
+            "sha1": "a20765897704c4c8590a406719cca295bb654dbb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_21.dae",
+            "sourceBytes": 6651,
+            "sha1": "f4c17bd1f249385b8e525026b0a97550f3b25cd4"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_22.dae",
+            "sourceBytes": 6652,
+            "sha1": "1a25447201914882953fcd83fc5c571b06e528ce"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_23.dae",
+            "sourceBytes": 6649,
+            "sha1": "c2bd98abed77b3653c109a1f2d55e988e33d1dc7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_24.dae",
+            "sourceBytes": 6651,
+            "sha1": "d9a1859ad0aed554159d13d9b4408a0d1b9057cd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_25.dae",
+            "sourceBytes": 6645,
+            "sha1": "d1d534210f96dafbd439203b74c1e0d20d956da1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_26.dae",
+            "sourceBytes": 6650,
+            "sha1": "abe0434ec1a8b06cca024aa5c2ff98cd961ecbfa"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_27.dae",
+            "sourceBytes": 6659,
+            "sha1": "860c81cb7173df741e66e634343fb3553a32f9e6"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_28.dae",
+            "sourceBytes": 6647,
+            "sha1": "d22004592fce57f8ef734bf14268d7d38989a44b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_29.dae",
+            "sourceBytes": 6651,
+            "sha1": "657ed10cc27d529ea8f712e69384156193f61533"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_30.dae",
+            "sourceBytes": 6652,
+            "sha1": "f9fa0a37a59304410b718733cdfaef63b19703bb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_31.dae",
+            "sourceBytes": 6653,
+            "sha1": "2b67808bd1edc8bda3d0cde638fc45c721a7a628"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_32.dae",
+            "sourceBytes": 6649,
+            "sha1": "fa13ba053e7705ac7dcd98ddb4bb655f3da7ce3b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_33.dae",
+            "sourceBytes": 6653,
+            "sha1": "8f7da3740b71345b4b1f924bf8f8791abe142591"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_34.dae",
+            "sourceBytes": 6649,
+            "sha1": "13d97659ce39250f5b2b13a7bcdee0ef1c3910c4"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_35.dae",
+            "sourceBytes": 6649,
+            "sha1": "502ef2dbef4d68365c358d17908cca77d4b966c6"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_36.dae",
+            "sourceBytes": 6647,
+            "sha1": "15d53b8141e68db43fa17dcaeba94ccf9de2c0c3"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_37.dae",
+            "sourceBytes": 6647,
+            "sha1": "f2a6ba87f9a5c2b1abe7eb409d7b8a4ccb838c17"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_38.dae",
+            "sourceBytes": 6648,
+            "sha1": "326562a7e207c467da98d588a984d8322747d506"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_39.dae",
+            "sourceBytes": 6647,
+            "sha1": "e475c0eaddbeca7cb01ad4e20ad0a21395260005"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_40.dae",
+            "sourceBytes": 6649,
+            "sha1": "9079ddee01515d2e174231b5768130ebd9e85d6b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_41.dae",
+            "sourceBytes": 6650,
+            "sha1": "7e650e0dbfee2c0539cde758a2e48b25ef7420a8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_42.dae",
+            "sourceBytes": 6655,
+            "sha1": "eb99c21f1016c231fc1b4a7b2498df75f1788306"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_43.dae",
+            "sourceBytes": 6651,
+            "sha1": "93afa1e010d9fa28c5d8ab6a7451a14bc5583577"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_44.dae",
+            "sourceBytes": 6651,
+            "sha1": "4bc59b43cf4d0c629eb2a057f98e9cb35ed7c2a7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_45.dae",
+            "sourceBytes": 6654,
+            "sha1": "4fda6c4a4c0cc01a49ba19c95a29bcb5b1170a8d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_46.dae",
+            "sourceBytes": 6653,
+            "sha1": "054ee5d08a3928bc1aec3c88e68a58d039f7a1b6"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_47.dae",
+            "sourceBytes": 6654,
+            "sha1": "bedd073aac62a54fce6435eb826cbcfe8782571c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_48.dae",
+            "sourceBytes": 6653,
+            "sha1": "ea40c6788bdeddffe4aaee13f706c6c65e6a08a1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_49.dae",
+            "sourceBytes": 6653,
+            "sha1": "813f51c2d7a42c6258be32f94af614e77f1a7f8c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_50.dae",
+            "sourceBytes": 6651,
+            "sha1": "48b23ee1b0e0e36db2a62ae5d5f4a2170611d26f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_51.dae",
+            "sourceBytes": 6651,
+            "sha1": "af133407a186a90c77be7ce28c823e4a69f071df"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_52.dae",
+            "sourceBytes": 6652,
+            "sha1": "d75c17ca5ee0a8ac88b34675ee46d4052c53f933"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_53.dae",
+            "sourceBytes": 6663,
+            "sha1": "102f8b44eecc81e68e19ab8463b6ceca68ef0539"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_54.dae",
+            "sourceBytes": 6647,
+            "sha1": "e48e7f1ac9ca3eb0b5c89088a6d19157fbdfc0f1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_55.dae",
+            "sourceBytes": 6658,
+            "sha1": "bd8471dc035175d87e952c03da924ed3bc5d34bd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_56.dae",
+            "sourceBytes": 6660,
+            "sha1": "fc918655888fe6e3bb9ec3ec6ad32967cde8a56c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_57.dae",
+            "sourceBytes": 6659,
+            "sha1": "fea06df1b04ea5d2c97f36a529b5d2511bd80a20"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_58.dae",
+            "sourceBytes": 6653,
+            "sha1": "d8052a7d889dcaf1d50b9522f7a162be50b4c29b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_59.dae",
+            "sourceBytes": 6653,
+            "sha1": "eca6ddaf79132086c49764bcb5ab8303f1159abb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_60.dae",
+            "sourceBytes": 6649,
+            "sha1": "1d8de55b0d19c8626dfa5922dca5e66bcf544829"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_61.dae",
+            "sourceBytes": 6653,
+            "sha1": "c7838bd27971b2880b2615d5d431257802cbeb42"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_62.dae",
+            "sourceBytes": 6652,
+            "sha1": "7ef8e9a10fc4545098782f605c4e7e7a02b9394e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_63.dae",
+            "sourceBytes": 6663,
+            "sha1": "61701b394b06cf0b375a96bfc49a74ee926dfc5b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_64.dae",
+            "sourceBytes": 6651,
+            "sha1": "91b8a19688810f1ecee74fb5524ae16a06bfe559"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_65.dae",
+            "sourceBytes": 6656,
+            "sha1": "5581090ed4f280330b5be8990da03269d411945f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_66.dae",
+            "sourceBytes": 6656,
+            "sha1": "9396cee6edb6dbed50659a6f1bdd9d86188aae83"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_67.dae",
+            "sourceBytes": 6656,
+            "sha1": "3163451f0a07d850cc9ceea571eabed5e26e323e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_68.dae",
+            "sourceBytes": 6650,
+            "sha1": "11e9104f1d9c533fbf67c461e8f130f4faba9f5a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_69.dae",
+            "sourceBytes": 6655,
+            "sha1": "752bc78520b2b64cafdbc1663c4837ac70a64b4e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_70.dae",
+            "sourceBytes": 6649,
+            "sha1": "08351504d19eb6cf462841f6aa2b7f59e4e83861"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_71.dae",
+            "sourceBytes": 6655,
+            "sha1": "6889b00f089ebca0f228040e4e89a3d353929b42"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_72.dae",
+            "sourceBytes": 6653,
+            "sha1": "42c6e68a1b2c09fb07ee63a0ff8969beed524551"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_73.dae",
+            "sourceBytes": 6655,
+            "sha1": "a26eed2f3f20fca4aa6848da2fa89a6a4cc5420b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_74.dae",
+            "sourceBytes": 6649,
+            "sha1": "4462ed2577d6e79be0c0ec15b6646071a0165533"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_75.dae",
+            "sourceBytes": 6725,
+            "sha1": "5c32ffe67d3d275d4cbe71365e452fa20cd308f9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_76.dae",
+            "sourceBytes": 6730,
+            "sha1": "08f6f431b78561ccc79f24af93e9570ec7ca280c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_77.dae",
+            "sourceBytes": 6648,
+            "sha1": "34a3904e0e7109f4d8284c4deaefa8d8df7afe00"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_78.dae",
+            "sourceBytes": 6731,
+            "sha1": "03e11daf57d96c342bb5b830df7020143483a3d7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/model_79.dae",
+            "sourceBytes": 6664,
+            "sha1": "15b515dc2b03f13c618d2fd8d2aa9e6da9ebb769"
+          }
+        ],
+        "textures": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/Texture_0_CI8_RGB5A3.png",
+            "sourceBytes": 8302,
+            "sha1": "19892a3e36513781a8f1a0f7a752ce5805e0ca16"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/staff00/Texture_0_CMP.png",
+            "sourceBytes": 4712,
+            "sha1": "47ad7359933c2e127663e489a54e9744b6e15f4b"
+          }
+        ]
       },
       "outputDir": "apps/game/public/ui/scenes/staff00",
-      "modelFiles": [],
-      "textureFiles": [],
-      "textureCount": 0,
+      "modelFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_00.dae",
+          "publicPath": "/ui/scenes/staff00/model_00.dae",
+          "bytes": 5418,
+          "sha1": "ef3821c7b0444a5c9b737a41c45892ba2d26bc56",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_00.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_01.dae",
+          "publicPath": "/ui/scenes/staff00/model_01.dae",
+          "bytes": 6651,
+          "sha1": "4f3f4cf1c729ad2128f7db083d11bc8ae2820bad",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_01.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_02.dae",
+          "publicPath": "/ui/scenes/staff00/model_02.dae",
+          "bytes": 6645,
+          "sha1": "76279f6c9ccff9cbc2ecbfea791763a0127e0b29",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_02.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_03.dae",
+          "publicPath": "/ui/scenes/staff00/model_03.dae",
+          "bytes": 6653,
+          "sha1": "5a2cfa495ae03605ee5f59e1f7e0ec7299b60243",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_03.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_04.dae",
+          "publicPath": "/ui/scenes/staff00/model_04.dae",
+          "bytes": 6649,
+          "sha1": "3543de3e316035c5fc1581c0715a834fab09fdfc",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_04.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_05.dae",
+          "publicPath": "/ui/scenes/staff00/model_05.dae",
+          "bytes": 6650,
+          "sha1": "d314d2cd6d4ff705b77910c3ffe5c368122768e8",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_05.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_06.dae",
+          "publicPath": "/ui/scenes/staff00/model_06.dae",
+          "bytes": 6649,
+          "sha1": "fd7c8b8cc0debcd142aac36d9e08475cfe5b6e87",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_06.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_07.dae",
+          "publicPath": "/ui/scenes/staff00/model_07.dae",
+          "bytes": 6649,
+          "sha1": "6d9cddbd3e6dbdb35f996aee007c5aa7881fcadb",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_07.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_08.dae",
+          "publicPath": "/ui/scenes/staff00/model_08.dae",
+          "bytes": 6651,
+          "sha1": "31e4a49cc2e6f9b6ce33ee908437acee691187a7",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_08.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_09.dae",
+          "publicPath": "/ui/scenes/staff00/model_09.dae",
+          "bytes": 6646,
+          "sha1": "f71b9a9c7e00064a3d83bd401edf26e24dcd7a8c",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_09.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_10.dae",
+          "publicPath": "/ui/scenes/staff00/model_10.dae",
+          "bytes": 6647,
+          "sha1": "cd173d5d26aa30b8538bf35130c524854fe4540b",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_10.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_11.dae",
+          "publicPath": "/ui/scenes/staff00/model_11.dae",
+          "bytes": 6649,
+          "sha1": "0abbfd99792f24ff8bbfb965408ca3dd1d580461",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_11.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_12.dae",
+          "publicPath": "/ui/scenes/staff00/model_12.dae",
+          "bytes": 6647,
+          "sha1": "690922994535040bd87b971fcbdb741e9815d479",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_12.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_13.dae",
+          "publicPath": "/ui/scenes/staff00/model_13.dae",
+          "bytes": 6649,
+          "sha1": "f5ef52ff3cec2ff685019f7d2827a24698e854ad",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_13.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_14.dae",
+          "publicPath": "/ui/scenes/staff00/model_14.dae",
+          "bytes": 6656,
+          "sha1": "bbaebc46fdbd416decb4eb5b2c6f64b2e8996da2",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_14.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_15.dae",
+          "publicPath": "/ui/scenes/staff00/model_15.dae",
+          "bytes": 6646,
+          "sha1": "2ccb889cb421b6c5283ec1e5f6b5c2f42c3997b6",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_15.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_16.dae",
+          "publicPath": "/ui/scenes/staff00/model_16.dae",
+          "bytes": 6647,
+          "sha1": "293f34112713024f9b6f19d679efa63adf27af0d",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_16.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_17.dae",
+          "publicPath": "/ui/scenes/staff00/model_17.dae",
+          "bytes": 6647,
+          "sha1": "44a9fff1fdd589ca0eb7de60405c6fdbda1c3545",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_17.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_18.dae",
+          "publicPath": "/ui/scenes/staff00/model_18.dae",
+          "bytes": 6647,
+          "sha1": "6530fdb5007e483abff9168af9ee7443bfd8cf2f",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_18.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_19.dae",
+          "publicPath": "/ui/scenes/staff00/model_19.dae",
+          "bytes": 6655,
+          "sha1": "191d04dced005f56053c8817629c794e940b1c14",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_19.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_20.dae",
+          "publicPath": "/ui/scenes/staff00/model_20.dae",
+          "bytes": 6653,
+          "sha1": "a20765897704c4c8590a406719cca295bb654dbb",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_20.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_21.dae",
+          "publicPath": "/ui/scenes/staff00/model_21.dae",
+          "bytes": 6651,
+          "sha1": "f4c17bd1f249385b8e525026b0a97550f3b25cd4",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_21.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_22.dae",
+          "publicPath": "/ui/scenes/staff00/model_22.dae",
+          "bytes": 6652,
+          "sha1": "1a25447201914882953fcd83fc5c571b06e528ce",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_22.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_23.dae",
+          "publicPath": "/ui/scenes/staff00/model_23.dae",
+          "bytes": 6649,
+          "sha1": "c2bd98abed77b3653c109a1f2d55e988e33d1dc7",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_23.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_24.dae",
+          "publicPath": "/ui/scenes/staff00/model_24.dae",
+          "bytes": 6651,
+          "sha1": "d9a1859ad0aed554159d13d9b4408a0d1b9057cd",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_24.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_25.dae",
+          "publicPath": "/ui/scenes/staff00/model_25.dae",
+          "bytes": 6645,
+          "sha1": "d1d534210f96dafbd439203b74c1e0d20d956da1",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_25.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_26.dae",
+          "publicPath": "/ui/scenes/staff00/model_26.dae",
+          "bytes": 6650,
+          "sha1": "abe0434ec1a8b06cca024aa5c2ff98cd961ecbfa",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_26.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_27.dae",
+          "publicPath": "/ui/scenes/staff00/model_27.dae",
+          "bytes": 6659,
+          "sha1": "860c81cb7173df741e66e634343fb3553a32f9e6",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_27.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_28.dae",
+          "publicPath": "/ui/scenes/staff00/model_28.dae",
+          "bytes": 6647,
+          "sha1": "d22004592fce57f8ef734bf14268d7d38989a44b",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_28.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_29.dae",
+          "publicPath": "/ui/scenes/staff00/model_29.dae",
+          "bytes": 6651,
+          "sha1": "657ed10cc27d529ea8f712e69384156193f61533",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_29.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_30.dae",
+          "publicPath": "/ui/scenes/staff00/model_30.dae",
+          "bytes": 6652,
+          "sha1": "f9fa0a37a59304410b718733cdfaef63b19703bb",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_30.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_31.dae",
+          "publicPath": "/ui/scenes/staff00/model_31.dae",
+          "bytes": 6653,
+          "sha1": "2b67808bd1edc8bda3d0cde638fc45c721a7a628",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_31.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_32.dae",
+          "publicPath": "/ui/scenes/staff00/model_32.dae",
+          "bytes": 6649,
+          "sha1": "fa13ba053e7705ac7dcd98ddb4bb655f3da7ce3b",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_32.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_33.dae",
+          "publicPath": "/ui/scenes/staff00/model_33.dae",
+          "bytes": 6653,
+          "sha1": "8f7da3740b71345b4b1f924bf8f8791abe142591",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_33.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_34.dae",
+          "publicPath": "/ui/scenes/staff00/model_34.dae",
+          "bytes": 6649,
+          "sha1": "13d97659ce39250f5b2b13a7bcdee0ef1c3910c4",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_34.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_35.dae",
+          "publicPath": "/ui/scenes/staff00/model_35.dae",
+          "bytes": 6649,
+          "sha1": "502ef2dbef4d68365c358d17908cca77d4b966c6",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_35.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_36.dae",
+          "publicPath": "/ui/scenes/staff00/model_36.dae",
+          "bytes": 6647,
+          "sha1": "15d53b8141e68db43fa17dcaeba94ccf9de2c0c3",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_36.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_37.dae",
+          "publicPath": "/ui/scenes/staff00/model_37.dae",
+          "bytes": 6647,
+          "sha1": "f2a6ba87f9a5c2b1abe7eb409d7b8a4ccb838c17",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_37.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_38.dae",
+          "publicPath": "/ui/scenes/staff00/model_38.dae",
+          "bytes": 6648,
+          "sha1": "326562a7e207c467da98d588a984d8322747d506",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_38.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_39.dae",
+          "publicPath": "/ui/scenes/staff00/model_39.dae",
+          "bytes": 6647,
+          "sha1": "e475c0eaddbeca7cb01ad4e20ad0a21395260005",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_39.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_40.dae",
+          "publicPath": "/ui/scenes/staff00/model_40.dae",
+          "bytes": 6649,
+          "sha1": "9079ddee01515d2e174231b5768130ebd9e85d6b",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_40.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_41.dae",
+          "publicPath": "/ui/scenes/staff00/model_41.dae",
+          "bytes": 6650,
+          "sha1": "7e650e0dbfee2c0539cde758a2e48b25ef7420a8",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_41.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_42.dae",
+          "publicPath": "/ui/scenes/staff00/model_42.dae",
+          "bytes": 6655,
+          "sha1": "eb99c21f1016c231fc1b4a7b2498df75f1788306",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_42.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_43.dae",
+          "publicPath": "/ui/scenes/staff00/model_43.dae",
+          "bytes": 6651,
+          "sha1": "93afa1e010d9fa28c5d8ab6a7451a14bc5583577",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_43.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_44.dae",
+          "publicPath": "/ui/scenes/staff00/model_44.dae",
+          "bytes": 6651,
+          "sha1": "4bc59b43cf4d0c629eb2a057f98e9cb35ed7c2a7",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_44.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_45.dae",
+          "publicPath": "/ui/scenes/staff00/model_45.dae",
+          "bytes": 6654,
+          "sha1": "4fda6c4a4c0cc01a49ba19c95a29bcb5b1170a8d",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_45.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_46.dae",
+          "publicPath": "/ui/scenes/staff00/model_46.dae",
+          "bytes": 6653,
+          "sha1": "054ee5d08a3928bc1aec3c88e68a58d039f7a1b6",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_46.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_47.dae",
+          "publicPath": "/ui/scenes/staff00/model_47.dae",
+          "bytes": 6654,
+          "sha1": "bedd073aac62a54fce6435eb826cbcfe8782571c",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_47.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_48.dae",
+          "publicPath": "/ui/scenes/staff00/model_48.dae",
+          "bytes": 6653,
+          "sha1": "ea40c6788bdeddffe4aaee13f706c6c65e6a08a1",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_48.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_49.dae",
+          "publicPath": "/ui/scenes/staff00/model_49.dae",
+          "bytes": 6653,
+          "sha1": "813f51c2d7a42c6258be32f94af614e77f1a7f8c",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_49.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_50.dae",
+          "publicPath": "/ui/scenes/staff00/model_50.dae",
+          "bytes": 6651,
+          "sha1": "48b23ee1b0e0e36db2a62ae5d5f4a2170611d26f",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_50.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_51.dae",
+          "publicPath": "/ui/scenes/staff00/model_51.dae",
+          "bytes": 6651,
+          "sha1": "af133407a186a90c77be7ce28c823e4a69f071df",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_51.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_52.dae",
+          "publicPath": "/ui/scenes/staff00/model_52.dae",
+          "bytes": 6652,
+          "sha1": "d75c17ca5ee0a8ac88b34675ee46d4052c53f933",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_52.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_53.dae",
+          "publicPath": "/ui/scenes/staff00/model_53.dae",
+          "bytes": 6663,
+          "sha1": "102f8b44eecc81e68e19ab8463b6ceca68ef0539",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_53.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_54.dae",
+          "publicPath": "/ui/scenes/staff00/model_54.dae",
+          "bytes": 6647,
+          "sha1": "e48e7f1ac9ca3eb0b5c89088a6d19157fbdfc0f1",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_54.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_55.dae",
+          "publicPath": "/ui/scenes/staff00/model_55.dae",
+          "bytes": 6658,
+          "sha1": "bd8471dc035175d87e952c03da924ed3bc5d34bd",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_55.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_56.dae",
+          "publicPath": "/ui/scenes/staff00/model_56.dae",
+          "bytes": 6660,
+          "sha1": "fc918655888fe6e3bb9ec3ec6ad32967cde8a56c",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_56.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_57.dae",
+          "publicPath": "/ui/scenes/staff00/model_57.dae",
+          "bytes": 6659,
+          "sha1": "fea06df1b04ea5d2c97f36a529b5d2511bd80a20",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_57.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_58.dae",
+          "publicPath": "/ui/scenes/staff00/model_58.dae",
+          "bytes": 6653,
+          "sha1": "d8052a7d889dcaf1d50b9522f7a162be50b4c29b",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_58.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_59.dae",
+          "publicPath": "/ui/scenes/staff00/model_59.dae",
+          "bytes": 6653,
+          "sha1": "eca6ddaf79132086c49764bcb5ab8303f1159abb",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_59.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_60.dae",
+          "publicPath": "/ui/scenes/staff00/model_60.dae",
+          "bytes": 6649,
+          "sha1": "1d8de55b0d19c8626dfa5922dca5e66bcf544829",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_60.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_61.dae",
+          "publicPath": "/ui/scenes/staff00/model_61.dae",
+          "bytes": 6653,
+          "sha1": "c7838bd27971b2880b2615d5d431257802cbeb42",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_61.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_62.dae",
+          "publicPath": "/ui/scenes/staff00/model_62.dae",
+          "bytes": 6652,
+          "sha1": "7ef8e9a10fc4545098782f605c4e7e7a02b9394e",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_62.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_63.dae",
+          "publicPath": "/ui/scenes/staff00/model_63.dae",
+          "bytes": 6663,
+          "sha1": "61701b394b06cf0b375a96bfc49a74ee926dfc5b",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_63.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_64.dae",
+          "publicPath": "/ui/scenes/staff00/model_64.dae",
+          "bytes": 6651,
+          "sha1": "91b8a19688810f1ecee74fb5524ae16a06bfe559",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_64.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_65.dae",
+          "publicPath": "/ui/scenes/staff00/model_65.dae",
+          "bytes": 6656,
+          "sha1": "5581090ed4f280330b5be8990da03269d411945f",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_65.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_66.dae",
+          "publicPath": "/ui/scenes/staff00/model_66.dae",
+          "bytes": 6656,
+          "sha1": "9396cee6edb6dbed50659a6f1bdd9d86188aae83",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_66.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_67.dae",
+          "publicPath": "/ui/scenes/staff00/model_67.dae",
+          "bytes": 6656,
+          "sha1": "3163451f0a07d850cc9ceea571eabed5e26e323e",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_67.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_68.dae",
+          "publicPath": "/ui/scenes/staff00/model_68.dae",
+          "bytes": 6650,
+          "sha1": "11e9104f1d9c533fbf67c461e8f130f4faba9f5a",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_68.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_69.dae",
+          "publicPath": "/ui/scenes/staff00/model_69.dae",
+          "bytes": 6655,
+          "sha1": "752bc78520b2b64cafdbc1663c4837ac70a64b4e",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_69.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_70.dae",
+          "publicPath": "/ui/scenes/staff00/model_70.dae",
+          "bytes": 6649,
+          "sha1": "08351504d19eb6cf462841f6aa2b7f59e4e83861",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_70.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_71.dae",
+          "publicPath": "/ui/scenes/staff00/model_71.dae",
+          "bytes": 6655,
+          "sha1": "6889b00f089ebca0f228040e4e89a3d353929b42",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_71.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_72.dae",
+          "publicPath": "/ui/scenes/staff00/model_72.dae",
+          "bytes": 6653,
+          "sha1": "42c6e68a1b2c09fb07ee63a0ff8969beed524551",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_72.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_73.dae",
+          "publicPath": "/ui/scenes/staff00/model_73.dae",
+          "bytes": 6655,
+          "sha1": "a26eed2f3f20fca4aa6848da2fa89a6a4cc5420b",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_73.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_74.dae",
+          "publicPath": "/ui/scenes/staff00/model_74.dae",
+          "bytes": 6649,
+          "sha1": "4462ed2577d6e79be0c0ec15b6646071a0165533",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_74.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_75.dae",
+          "publicPath": "/ui/scenes/staff00/model_75.dae",
+          "bytes": 6725,
+          "sha1": "5c32ffe67d3d275d4cbe71365e452fa20cd308f9",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_75.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_76.dae",
+          "publicPath": "/ui/scenes/staff00/model_76.dae",
+          "bytes": 6730,
+          "sha1": "08f6f431b78561ccc79f24af93e9570ec7ca280c",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_76.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_77.dae",
+          "publicPath": "/ui/scenes/staff00/model_77.dae",
+          "bytes": 6648,
+          "sha1": "34a3904e0e7109f4d8284c4deaefa8d8df7afe00",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_77.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_78.dae",
+          "publicPath": "/ui/scenes/staff00/model_78.dae",
+          "bytes": 6731,
+          "sha1": "03e11daf57d96c342bb5b830df7020143483a3d7",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_78.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/model_79.dae",
+          "publicPath": "/ui/scenes/staff00/model_79.dae",
+          "bytes": 6664,
+          "sha1": "15b515dc2b03f13c618d2fd8d2aa9e6da9ebb769",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/model_79.dae"
+        }
+      ],
+      "textureFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/staff00/Texture_0_CI8_RGB5A3.png",
+          "publicPath": "/ui/scenes/staff00/Texture_0_CI8_RGB5A3.png",
+          "bytes": 8302,
+          "sha1": "19892a3e36513781a8f1a0f7a752ce5805e0ca16",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/Texture_0_CI8_RGB5A3.png"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/staff00/Texture_0_CMP.png",
+          "publicPath": "/ui/scenes/staff00/Texture_0_CMP.png",
+          "bytes": 4712,
+          "sha1": "47ad7359933c2e127663e489a54e9744b6e15f4b",
+          "sourcePath": "user-data/GG4E/gltf-export/staff00/Texture_0_CMP.png"
+        }
+      ],
+      "textureCount": 2,
       "caveats": [
-        "Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.",
-        "No validated model export output to copy."
+        "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
+        "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."
       ]
     },
     {

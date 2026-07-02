@@ -9,8 +9,11 @@
 
 import { ASSETS, borgBannerPath, borgFacePath, borgMiniPath } from "../assets.js";
 import { clear, el, legendItem } from "../dom.js";
+import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
+
+const SELECT_FORCE_LAYOUT = UI_SCENE_LAYOUTS.entry00.semantics.selectForce;
 
 export interface ForceSlot {
   no: number;
@@ -42,7 +45,10 @@ export function createSelectForce(
   let selectedSlot = clampSlot(opts.selectedSlot, slots.length);
   let stopLeadModel: (() => void) | null = null;
 
-  const root = el("div", { class: "gf-screen gf-select-force" });
+  const root = el("div", {
+    class: "gf-screen gf-select-force",
+    style: selectForceLayoutVars(),
+  });
   root.appendChild(el("div", { class: "gf-grid-bg gf-bg-purple" }));
   const entryScene = createUiSceneHost("gf-ui-scene gf-select-entry-scene");
   root.appendChild(entryScene);
@@ -172,7 +178,7 @@ export function createSelectForce(
     fitSize: 780,
     camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 20, 0] },
     rotation: [-0.12, 0, 0],
-    maxModels: 29,
+    maxModels: UI_SCENE_LAYOUTS.entry00.modelCount,
   });
   window.addEventListener("keydown", onKey);
 
@@ -184,6 +190,23 @@ export function createSelectForce(
       root.remove();
     },
   };
+}
+
+function selectForceLayoutVars(): Partial<CSSStyleDeclaration> {
+  const platform = SELECT_FORCE_LAYOUT.platform;
+  const title = SELECT_FORCE_LAYOUT.title;
+  const vars: Record<string, string> = {
+    "--gf-select-platform-left": `${platform.left}%`,
+    "--gf-select-platform-top": `${platform.top}%`,
+    "--gf-select-platform-width": `${platform.width}%`,
+    "--gf-select-platform-height": `${platform.height}%`,
+  };
+  if (title) {
+    vars["--gf-select-title-left"] = `${title.left}%`;
+    vars["--gf-select-title-top"] = `${title.top}%`;
+    vars["--gf-select-title-width"] = `${title.width}%`;
+  }
+  return vars as Partial<CSSStyleDeclaration>;
 }
 
 function forceBanner(borgId: string, fallbackText: string): HTMLElement {

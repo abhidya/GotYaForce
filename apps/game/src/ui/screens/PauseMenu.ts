@@ -7,6 +7,7 @@
  * (Challenge focus is 1P/2P; `playerLabel` remains for the TEAM UP branch).
  */
 
+import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { el, faceButton } from "../dom.js";
 
 export type PauseAction = "resume" | "quit";
@@ -30,24 +31,30 @@ export function createPauseMenu(container: HTMLElement, opts: PauseMenuOptions):
 
   const overlay = el("div", { class: "gf-pause-overlay" });
   const box = el("div", { class: "gf-pause-box" });
-  box.appendChild(el("div", { class: "gf-pause-title", text: `${opts.playerLabel ?? "1P"} PAUSE` }));
+  const titleLabel = `${opts.playerLabel ?? "1P"} PAUSE`;
+  const titleText = bitmapText("gf-pause-title-text");
+  setBitmapText(titleText, titleLabel);
+  box.appendChild(el("div", { class: "gf-pause-title", attrs: { "aria-label": titleLabel } }, [titleText]));
 
   const items = el("div", { class: "gf-pause-items" });
   const nodes = new Map<PauseAction, HTMLButtonElement>();
   for (const action of order) {
+    const label = action === "resume" ? "RESUME" : "QUIT";
+    const labelText = bitmapText("gf-pause-item-text");
+    setBitmapText(labelText, label);
     const bullet = el("span", { class: "gf-pause-bullet" });
     bullet.appendChild(faceButton("a"));
     const node = el(
       "button",
       {
         class: "gf-pause-item",
-        attrs: { type: "button", "data-action": action },
+        attrs: { type: "button", "data-action": action, "aria-label": label },
         onClick: () => {
           select(action);
           confirm();
         },
       },
-      [bullet, el("span", { text: action === "resume" ? "RESUME" : "QUIT" })],
+      [bullet, labelText],
     );
     nodes.set(action, node);
     items.appendChild(node);

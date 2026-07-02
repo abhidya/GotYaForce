@@ -1,11 +1,11 @@
 # Common Battle Data Inventory
 
-Generated: 2026-07-01T03:29:26.489Z
+Generated: 2026-07-02T04:19:54.601Z
 Scanner: `scripts/inventory-common-battle-data.mjs`
 
 ## Scope
 
-Byte-level inventory only. This compares cmn_data.pzz member 003 against the solved 432-byte pl####data.bin actor-data record size without naming fields or binding runtime mechanics.
+Byte-level inventory for common battle data and actor-data records. Four combat-stat bytes are named only where they match every metadata-backed pl####data.bin record exactly.
 
 ## Summary
 
@@ -14,7 +14,8 @@ Byte-level inventory only. This compares cmn_data.pzz member 003 against the sol
 - Actor data files compared: 198
 - Member 003 splits into 2 x 432-byte candidate records.
 - Exact actor-data matches: pl0f05 ROACH, pl0f06 DEATH EYE.
-- Runtime currently consumes borgs.json stats: yes.
+- Actor-data stat offsets exact: yes (190 metadata rows).
+- Runtime binds actor-data combat stats: yes.
 
 ## Candidate Records
 
@@ -55,18 +56,32 @@ Same-offset u16 values observed in actor data: 216
 | `user-data/GG4E/afs_data/root/pl0c06data.bin` | LEOPARD | 361 | 173 | 164 | 69 | 0.8356 |
 | `user-data/GG4E/afs_data/root/pl0c01data.bin` | GATLING TANK | 362 | 171 | 164 | 67 | 0.838 |
 
+## Actor Data Combat Stat Offsets
+
+defense/shot/attack/speed are exact unsigned-byte matches at pl####data.bin offsets 0x1a4..0x1a7 for every actor-data file that has borgs.json metadata.
+
+| Field | Offset | Exact matches |
+|---|---:|---:|
+| defense | `0x01a4` | 190/190 |
+| shot | `0x01a5` | 190/190 |
+| attack | `0x01a6` | 190/190 |
+| speed | `0x01a7` | 190/190 |
+
 ## Assessment
 
-cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation.
+cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. defense/shot/attack/speed are now exact-mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation.
 
-## Runtime Binding Gap
+## Runtime Binding
 
 - App imports borgs.json: yes (apps/game/src/main.ts:23)
-- Combat buildProfile consumes stat fields: yes (packages/combat/src/stats.ts:104)
-- Combat constants still declare tuned formulas: yes (packages/combat/src/constants.ts:10)
+- Generated actor-data stats JSON exists: yes (packages/combat/src/data/actorDataStats.json)
+- Actor-data stats accessor exists: yes (packages/combat/src/actorDataStats.ts:25)
+- Combat buildProfile consumes actor-data stats: yes (packages/combat/src/stats.ts:108)
+- Combat buildProfile consumes stat fields: yes (packages/combat/src/stats.ts:108)
+- Combat constants still declare tuned formulas: yes (packages/combat/src/constants.ts:28)
 - Generic PZZ parser package implemented: yes (packages/formats/src/pzz.ts:103)
 
-Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet.
+Runtime combat profiles now bind defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, jump, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven.
 
 ## Verification
 

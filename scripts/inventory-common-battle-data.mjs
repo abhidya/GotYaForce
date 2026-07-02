@@ -14,6 +14,8 @@ const borgMetadataPath = path.join(repoRoot, "packages", "assets", "data", "borg
 const runtimePaths = {
   appMain: path.join(repoRoot, "apps", "game", "src", "main.ts"),
   combatStats: path.join(repoRoot, "packages", "combat", "src", "stats.ts"),
+  combatActorDataStats: path.join(repoRoot, "packages", "combat", "src", "actorDataStats.ts"),
+  combatActorDataStatsJson: path.join(repoRoot, "packages", "combat", "src", "data", "actorDataStats.json"),
   combatConstants: path.join(repoRoot, "packages", "combat", "src", "constants.ts"),
   formatsPzz: path.join(repoRoot, "packages", "formats", "src", "pzz.ts"),
 };
@@ -22,6 +24,12 @@ const pzzBlockSize = 0x800;
 const pzzCompressedFlag = 0x40000000;
 const pzzBlockCountMask = 0x3fffffff;
 const actorDataRecordSize = 432;
+const actorDataStatOffsets = {
+  defense: 0x1a4,
+  shot: 0x1a5,
+  attack: 0x1a6,
+  speed: 0x1a7,
+};
 
 function rel(absPath) {
   return path.relative(repoRoot, absPath).replaceAll(path.sep, "/");
@@ -227,26 +235,79 @@ function lineOf(text, needle) {
   return text.slice(0, index).split(/\r?\n/).length;
 }
 
-function inspectRuntimeBinding() {
+function inspectActorDataStatOffsets(actorFiles) {
+  const fields = Object.keys(actorDataStatOffsets);
+  const matched = actorFiles.filter((file) => file.metadata);
+  const exactMatches = Object.fromEntries(fields.map((field) => [field, 0]));
+  const mismatches = [];
+  for (const file of matched) {
+    for (const field of fields) {
+      const offset = actorDataStatOffsets[field];
+      const actorDataValue = file.buffer.readUInt8(offset);
+      const metadataValue = file.metadata[field];
+      if (actorDataValue === metadataValue) {
+        exactMatches[field] += 1;
+      } else {
+        mismatches.push({
+          id: file.id,
+          path: file.path,
+          field,
+          offset: hex(offset, 4),
+          actorDataValue,
+          metadataValue,
+        });
+      }
+    }
+  }
+  return {
+    recordSize: actorDataRecordSize,
+    offsets: Object.fromEntries(Object.entries(actorDataStatOffsets).map(([field, offset]) => [field, hex(offset, 4)])),
+    matchedMetadataRows: matched.length,
+    exactMatches,
+    allFieldsExact: fields.every((field) => exactMatches[field] === matched.length) && mismatches.length === 0,
+    mismatches,
+    assessment:
+      "defense/shot/attack/speed are exact unsigned-byte matches at pl####data.bin offsets 0x1a4..0x1a7 for every actor-data file that has borgs.json metadata.",
+  };
+}
+
+function inspectRuntimeBinding(actorStatEvidence) {
   const appMain = readTextIfExists(runtimePaths.appMain);
   const stats = readTextIfExists(runtimePaths.combatStats);
+  const actorDataStats = readTextIfExists(runtimePaths.combatActorDataStats);
   const constants = readTextIfExists(runtimePaths.combatConstants);
   const pzz = readTextIfExists(runtimePaths.formatsPzz);
+  const actorDataStatsJsonExists = fs.existsSync(runtimePaths.combatActorDataStatsJson);
+  const buildProfileUsesActorDataStats =
+    stats.includes("actorDataCombatStatsForBorgId") &&
+    ["defense", "shot", "attack", "speed"].every((field) => stats.includes(`actorStats?.${field}`));
+  const actorDataStatsBoundToCombat =
+    actorStatEvidence.allFieldsExact &&
+    actorDataStatsJsonExists &&
+    actorDataStats.includes("actorDataCombatStatsForBorgId") &&
+    buildProfileUsesActorDataStats;
   return {
     appImportsBorgsJson: appMain.includes("packages/assets/data/borgs.json"),
+    actorDataStatsJsonExists,
+    actorDataStatsAccessorExists: actorDataStats.includes("actorDataCombatStatsForBorgId"),
+    buildProfileUsesActorDataStats,
+    actorDataStatsBoundToCombat,
     buildProfileConsumesBorgsJsonFields:
       stats.includes("export function buildProfile") &&
       ["energy", "hp", "defense", "shot", "attack", "speed", "jump"].every((field) => stats.includes(`${field}:`)),
-    combatConstantsDeclareTunedFormulas: constants.includes("Everything else (speeds, gravity, damage scale, ranges, cooldowns): TUNED"),
+    combatConstantsDeclareTunedFormulas: constants.includes("The exact attack/defense-to-raw-damage coefficients"),
     formatsPzzStillTodo: pzz.includes("TODO: implement unpack"),
     refs: {
       appBorgImport: `${rel(runtimePaths.appMain)}:${lineOf(appMain, "packages/assets/data/borgs.json")}`,
       buildProfile: `${rel(runtimePaths.combatStats)}:${lineOf(stats, "export function buildProfile")}`,
-      tunedFormulaNote: `${rel(runtimePaths.combatConstants)}:${lineOf(constants, "Everything else (speeds, gravity, damage scale")}`,
+      actorDataStats: `${rel(runtimePaths.combatActorDataStats)}:${lineOf(actorDataStats, "actorDataCombatStatsForBorgId")}`,
+      actorDataStatsJson: rel(runtimePaths.combatActorDataStatsJson),
+      tunedFormulaNote: `${rel(runtimePaths.combatConstants)}:${lineOf(constants, "The exact attack/defense-to-raw-damage coefficients")}`,
       pzzParser: `${rel(runtimePaths.formatsPzz)}:${lineOf(pzz, "export function unpack")}`,
     },
-    assessment:
-      "Runtime combat profiles are currently derived from packages/assets/data/borgs.json and tuned constants. The exact cmn_data/pl####data byte matches are source evidence, but no runtime parser binds 432-byte actor-data fields to movement, HP, damage, AI, or ability parameters yet.",
+    assessment: actorDataStatsBoundToCombat
+      ? "Runtime combat profiles now bind defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, jump, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven."
+      : "Runtime combat profiles are still not fully bound to original actor-data bytes. The exact cmn_data/pl####data byte matches are source evidence, but runtime binding is incomplete.",
   };
 }
 
@@ -347,7 +408,8 @@ function renderMarkdown(report) {
   lines.push(`- Actor data files compared: ${report.actorDataReference.count}`);
   lines.push(`- Member 003 splits into ${report.commonRecords.length} x ${actorDataRecordSize}-byte candidate records.`);
   lines.push(`- Exact actor-data matches: ${report.exactActorDataMatches.map((match) => `${match.id} ${match.metadata?.name ?? ""}`.trim()).join(", ") || "none"}.`);
-  lines.push(`- Runtime currently consumes borgs.json stats: ${report.runtimeBinding.appImportsBorgsJson ? "yes" : "no"}.`);
+  lines.push(`- Actor-data stat offsets exact: ${report.actorDataStatOffsets.allFieldsExact ? "yes" : "no"} (${report.actorDataStatOffsets.matchedMetadataRows} metadata rows).`);
+  lines.push(`- Runtime binds actor-data combat stats: ${report.runtimeBinding.actorDataStatsBoundToCombat ? "yes" : "no"}.`);
   lines.push("");
   lines.push("## Candidate Records");
   lines.push("");
@@ -378,13 +440,26 @@ function renderMarkdown(report) {
     }
     lines.push("");
   }
+  lines.push("## Actor Data Combat Stat Offsets");
+  lines.push("");
+  lines.push(report.actorDataStatOffsets.assessment);
+  lines.push("");
+  lines.push("| Field | Offset | Exact matches |");
+  lines.push("|---|---:|---:|");
+  for (const [field, offset] of Object.entries(report.actorDataStatOffsets.offsets)) {
+    lines.push(`| ${field} | \`${offset}\` | ${report.actorDataStatOffsets.exactMatches[field]}/${report.actorDataStatOffsets.matchedMetadataRows} |`);
+  }
+  lines.push("");
   lines.push("## Assessment");
   lines.push("");
   lines.push(report.assessment);
   lines.push("");
-  lines.push("## Runtime Binding Gap");
+  lines.push("## Runtime Binding");
   lines.push("");
   lines.push(`- App imports borgs.json: ${report.runtimeBinding.appImportsBorgsJson ? "yes" : "no"} (${report.runtimeBinding.refs.appBorgImport})`);
+  lines.push(`- Generated actor-data stats JSON exists: ${report.runtimeBinding.actorDataStatsJsonExists ? "yes" : "no"} (${report.runtimeBinding.refs.actorDataStatsJson})`);
+  lines.push(`- Actor-data stats accessor exists: ${report.runtimeBinding.actorDataStatsAccessorExists ? "yes" : "no"} (${report.runtimeBinding.refs.actorDataStats})`);
+  lines.push(`- Combat buildProfile consumes actor-data stats: ${report.runtimeBinding.buildProfileUsesActorDataStats ? "yes" : "no"} (${report.runtimeBinding.refs.buildProfile})`);
   lines.push(`- Combat buildProfile consumes stat fields: ${report.runtimeBinding.buildProfileConsumesBorgsJsonFields ? "yes" : "no"} (${report.runtimeBinding.refs.buildProfile})`);
   lines.push(`- Combat constants still declare tuned formulas: ${report.runtimeBinding.combatConstantsDeclareTunedFormulas ? "yes" : "no"} (${report.runtimeBinding.refs.tunedFormulaNote})`);
   lines.push(`- Generic PZZ parser package implemented: ${report.runtimeBinding.formatsPzzStillTodo ? "no" : "yes"} (${report.runtimeBinding.refs.pzzParser})`);
@@ -402,7 +477,8 @@ function renderMarkdown(report) {
 const archivePath = path.join(assetRoot, "cmn_data.pzz");
 const member = readPzzMember(archivePath, 3);
 const actorFiles = listActorDataFiles();
-  const commonRecords = [];
+const actorDataStatOffsetEvidence = inspectActorDataStatOffsets(actorFiles);
+const commonRecords = [];
 for (let offset = 0, index = 0; offset + actorDataRecordSize <= member.payload.length; offset += actorDataRecordSize, index += 1) {
   commonRecords.push(summarizeRecord(member.payload.subarray(offset, offset + actorDataRecordSize), index));
 }
@@ -416,11 +492,11 @@ const comparisons = commonRecords.map((record) => {
 });
 
 const report = {
-  schema: "gotyaforce.commonBattleDataInventory.v1",
+  schema: "gotyaforce.commonBattleDataInventory.v2",
   generatedAt: new Date().toISOString(),
   generatedBy: rel(fileURLToPath(import.meta.url)),
   scope:
-    "Byte-level inventory only. This compares cmn_data.pzz member 003 against the solved 432-byte pl####data.bin actor-data record size without naming fields or binding runtime mechanics.",
+    "Byte-level inventory for common battle data and actor-data records. Four combat-stat bytes are named only where they match every metadata-backed pl####data.bin record exactly.",
   source: {
     archive: rel(archivePath),
     memberId: member.memberId,
@@ -438,6 +514,7 @@ const report = {
   },
   commonRecords,
   comparisons,
+  actorDataStatOffsets: actorDataStatOffsetEvidence,
   exactActorDataMatches: comparisons.flatMap((comparison) =>
     comparison.topByteMatches
       .filter((match) => match.byteMatchRatio === 1)
@@ -448,10 +525,10 @@ const report = {
         metadata: match.metadata,
       })),
   ),
-  runtimeBinding: inspectRuntimeBinding(),
+  runtimeBinding: inspectRuntimeBinding(actorDataStatOffsetEvidence),
   assessment:
     member.payload.length % actorDataRecordSize === 0
-      ? "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. The same-offset comparisons make it a strong common actor/battle-parameter candidate, but field names still require DOL/runtime trace or HexWorkshop bookmark correlation."
+      ? "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. defense/shot/attack/speed are now exact-mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation."
       : "cmn_data.pzz member 003 does not cleanly split into the known 432-byte actor-data stride.",
 };
 

@@ -171,6 +171,11 @@ function readJson(file) {
   }
 }
 
+function numberFromText(text, pattern) {
+  const match = text.match(pattern);
+  return match ? Number(match[1]) : null;
+}
+
 function lineOf(text, needle) {
   const index = text.indexOf(needle);
   if (index < 0) return null;
@@ -214,6 +219,10 @@ function assetSourcesUsed(text) {
       used.push({ kind: "borg-ui-helper", symbol: name, publicPathPattern, exists: "per-borg" });
     }
   }
+  if (usesBitmapTextHelper(text) && !used.some((asset) => asset.symbol === "ASSETS.fontAscii")) {
+    const publicPath = assetConstants.ASSETS.fontAscii;
+    used.push({ kind: "bitmap-font-helper", symbol: "ASSETS.fontAscii", publicPath, exists: publicPathExists(publicPath) });
+  }
   const literalPublicPaths = [...text.matchAll(/["'](\/(?:ui|stages|models)\/[^"']+)["']/g)].map((match) => match[1]);
   for (const publicPath of literalPublicPaths) {
     if (!used.some((asset) => asset.publicPath === publicPath)) {
@@ -228,6 +237,10 @@ function assetSourcesUsed(text) {
     }
   }
   return used;
+}
+
+function usesBitmapTextHelper(text) {
+  return /\b(?:bitmapText|setBitmapText)\s*\(/.test(text);
 }
 
 function coverageLevel(realAssets, fakeHits) {
@@ -268,6 +281,9 @@ function inspectStages() {
   const adapter = readText("apps/game/src/sim/adapter.ts");
   const stageCatalog = readText("apps/game/src/stages/catalog.generated.ts");
   const main = readText("apps/game/src/main.ts");
+  const challengeReference = readText("packages/missions/src/challenge-reference.ts");
+  const challengeRuntime = readText("packages/missions/src/challenge.ts");
+  const challengeSpawnPools = readText("packages/missions/src/challenge-spawn-pools.generated.ts");
   const publicStages = rootManifest.value?.stages ?? [];
   const completeVisual = publicStages.filter((stage) => stage.visualComplete === true);
   const collisionCovered = publicStages.filter((stage) => stage.collisionCount > 0);
@@ -313,6 +329,33 @@ function inspectStages() {
       },
       acceptsHexStageIds: adapter.includes("^st[0-9a-f]{2}$"),
       acceptsExportedStageCatalog: adapter.includes("isExportedStageId"),
+      challengeStageSelector: {
+        dolStageBytes: challengeReference.includes("CHALLENGE_STAGE_BYTES"),
+        preservesSelectorMeta:
+          challengeRuntime.includes("stageMeta(stage)") &&
+          challengeRuntime.includes("stageSubtable") &&
+          challengeRuntime.includes("stageVariant"),
+        resolvesSubtableFamilies:
+          adapter.includes("stageIdForBattleConfig") &&
+          adapter.includes("stageSubtable") &&
+          adapter.includes("* 0x20") &&
+          main.includes("stageIdForBattleConfig(config)"),
+        baseStageIds: [...new Set([...challengeReference.matchAll(/0x([0-9a-f]{2})/gi)].map((match) => `st${match[1].toLowerCase()}`))],
+        adapterRef: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "stageIdForBattleConfig")}`,
+        challengeRef: `packages/missions/src/challenge-reference.ts:${lineOf(challengeReference, "CHALLENGE_STAGE_BYTES")}`,
+      },
+      challengeSpawnPools: {
+        generatedModule: "packages/missions/src/challenge-spawn-pools.generated.ts",
+        generatedFromDecompTable:
+          challengeSpawnPools.includes("research/decomp/data/spawn-pools-80380804.json") &&
+          challengeSpawnPools.includes('address: "0x80380804"'),
+        reexportedFromReference: challengeReference.includes("challenge-spawn-pools.generated.js"),
+        runtimeUsesGeneratedRosters: challengeRuntime.includes("CHALLENGE_GROUP_ROSTERS[groupCode]"),
+        groupCount: Number.parseInt(/groupCount:\s*(\d+)/.exec(challengeSpawnPools)?.[1] ?? "0", 10),
+        totalBorgIds: Number.parseInt(/totalBorgIds:\s*(\d+)/.exec(challengeSpawnPools)?.[1] ?? "0", 10),
+        sourceRef: `packages/missions/src/challenge-spawn-pools.generated.ts:${lineOf(challengeSpawnPools, "sourcePath")}`,
+        runtimeRef: `packages/missions/src/challenge.ts:${lineOf(challengeRuntime, "CHALLENGE_GROUP_ROSTERS[groupCode]")}`,
+      },
       adapterRefs: {
         defaultArenaStage: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "DEFAULT_ARENA_STAGE")}`,
         catalogGate: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "isExportedStageId")}`,
@@ -335,11 +378,13 @@ function inspectStages() {
         parserPackage: main.includes("@gf/formats") ? "@gf/formats" : null,
       },
       assessment:
-        publicStages.length > 1 && adapter.includes("isExportedStageId")
-          ? "Runtime authorizes literal exported st## ids through the generated stage catalog; arena-name to st## routing still falls back to st00 until traced."
-          : publicStages.length > 1
-            ? "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
-          : "Runtime and public export are both effectively st00-only.",
+        publicStages.length > 1 && adapter.includes("stageIdForBattleConfig")
+          ? "Runtime authorizes literal exported st## ids, uses DOL-backed Challenge selector metadata to route exported stage subtable families when present, and builds CPU rosters from the recovered Challenge spawn-pool table; unverified Adventure/human arena names still fall back to st00."
+          : publicStages.length > 1 && adapter.includes("isExportedStageId")
+            ? "Runtime authorizes literal exported st## ids through the generated stage catalog; arena-name to st## routing still falls back to st00 until traced."
+            : publicStages.length > 1
+              ? "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."
+              : "Runtime and public export are both effectively st00-only.",
     },
     stageCodeEvidence: {
       path: "research/asset-inventory/stage-code-evidence.json",
@@ -439,8 +484,14 @@ function inspectCombatFx() {
 function inspectHudAssetEvidence() {
   const manifest = readJson("apps/game/public/ui/hud/manifest.json");
   const battleHud = readText("apps/game/src/ui/hud/BattleHud.ts");
+  const bitmapText = readText("apps/game/src/ui/bitmapText.ts");
+  const battleScene = readText("apps/game/src/sim/battleScene.ts");
+  const arrowGeometry = readText("apps/game/src/sim/data/arrowMdlGeometry.generated.ts");
   const available = manifest.value?.available ?? {};
   const notAvailableAsSprites = manifest.value?.notAvailableAsSprites ?? {};
+  const battleHudUsesFontAscii =
+    battleHud.includes("ASSETS.fontAscii") ||
+    (usesBitmapTextHelper(battleHud) && bitmapText.includes("ASSETS.fontAscii"));
   const availableRows = Object.entries(available).map(([key, value]) => ({
     key,
     file: value.file ?? null,
@@ -450,7 +501,7 @@ function inspectHudAssetEvidence() {
     confidence: value.confidence ?? null,
     role: value.role ?? null,
     usedInBattleHud:
-      (key === "fontAscii" && battleHud.includes("ASSETS.fontAscii")) ||
+      (key === "fontAscii" && battleHudUsesFontAscii) ||
       (key === "faceIconRoundel" && battleHud.includes("ASSETS.faceMarkerRoundel")) ||
       (key === "asIcon" && battleHud.includes("as_icon")),
   }));
@@ -462,9 +513,24 @@ function inspectHudAssetEvidence() {
     gameDrawnRows: Object.entries(notAvailableAsSprites).map(([key, note]) => ({ key, note })),
     asIconPublicPath: "/ui/tpl/as_icon/image_00_CI8.png",
     asIconExists: publicPathExists("/ui/tpl/as_icon/image_00_CI8.png"),
-    battleHudUsesFontAscii: battleHud.includes("ASSETS.fontAscii"),
+    battleHudUsesFontAscii,
     battleHudUsesFaceRoundel: battleHud.includes("ASSETS.faceMarkerRoundel"),
     battleHudUsesAsIcon: battleHud.includes("as_icon"),
+    arrowGeometry: {
+      sourceArchive: `user-data/${region}/afs_data/root/arrow_mdl.arc`,
+      sourceArchiveExists: fs.existsSync(abs(`user-data/${region}/afs_data/root/arrow_mdl.arc`)),
+      sourceObj: `user-data/${region}/hsd-test-python/arrow_mdl.obj`,
+      sourceObjExists: fs.existsSync(abs(`user-data/${region}/hsd-test-python/arrow_mdl.obj`)),
+      generatedModule: "apps/game/src/sim/data/arrowMdlGeometry.generated.ts",
+      generatedModuleExists: arrowGeometry.length > 0,
+      generatedFromArchive: arrowGeometry.includes(`archivePath: "user-data/${region}/afs_data/root/arrow_mdl.arc"`),
+      vertexCount: numberFromText(arrowGeometry, /vertexCount:\s*(\d+)/),
+      triangleCount: numberFromText(arrowGeometry, /triangleCount:\s*(\d+)/),
+      battleSceneUsesGeometry:
+        battleScene.includes("ARROW_MDL_POSITIONS") &&
+        battleScene.includes("makeLockMarker") &&
+        battleScene.includes("lockTarget"),
+    },
   };
 }
 
@@ -528,8 +594,82 @@ function inspectCommonBattleDataEvidence() {
       firstFloatWords: record.firstFloatWords?.slice(0, 8) ?? [],
     })),
     exactActorDataMatches: inventory.value?.exactActorDataMatches ?? [],
+    actorDataStatOffsets: inventory.value?.actorDataStatOffsets ?? null,
     runtimeBinding: inventory.value?.runtimeBinding ?? null,
     assessment: inventory.value?.assessment ?? null,
+  };
+}
+
+function inspectTypeDamageEvidence() {
+  const generated = readText("packages/combat/src/typeDamage.generated.ts");
+  const typeDamage = readText("packages/combat/src/typeDamage.ts");
+  const combat = readText("packages/combat/src/combat.ts");
+  const selfcheck = readText("packages/combat/src/selfcheck.ts");
+  const numberField = (field) => Number.parseInt(new RegExp(`${field}:\\s*(\\d+)`).exec(generated)?.[1] ?? "0", 10);
+  return {
+    generatedModule: "packages/combat/src/typeDamage.generated.ts",
+    generatedFromDolTables:
+      generated.includes("research/decomp/data/type-category-remap-802f2e28.json") &&
+      generated.includes("research/decomp/data/type-multiplier-matrix-802c5d60.json") &&
+      generated.includes('remapAddress: "0x802f2e28"') &&
+      generated.includes('matrixAddress: "0x802c5d60"'),
+    runtimeImportsGeneratedTables: typeDamage.includes("typeDamage.generated.js"),
+    runtimeDamagePipelineUsesTypeMultiplier: combat.includes("typeDamageMultiplier(") && combat.includes("rawDamageForTarget"),
+    selfcheckCoversMatrixSample: selfcheck.includes('typeDamageMultiplier("pl0b00", "pl0701")'),
+    remapRows: numberField("remapRows"),
+    matrixRows: numberField("matrixRows"),
+    matrixColumns: numberField("matrixColumns"),
+    mappedBorgIds: numberField("mappedBorgIds"),
+    sourceRef: `packages/combat/src/typeDamage.generated.ts:${lineOf(generated, "remapSourcePath")}`,
+    runtimeRef: `packages/combat/src/typeDamage.ts:${lineOf(typeDamage, "typeDamage.generated.js")}`,
+    pipelineRef: `packages/combat/src/combat.ts:${lineOf(combat, "typeDamageMultiplier(")}`,
+  };
+}
+
+function inspectKnockbackEvidence() {
+  const generated = readText("packages/physics/src/knockback.generated.ts");
+  const knockback = readText("packages/physics/src/knockback.ts");
+  const combat = readText("packages/combat/src/combat.ts");
+  const numberField = (field) => Number.parseInt(new RegExp(`${field}:\\s*(\\d+)`).exec(generated)?.[1] ?? "0", 10);
+  const floatConst = (name) => Number.parseFloat(new RegExp(`export const ${name} = ([0-9.e+-]+)`).exec(generated)?.[1] ?? "0");
+  return {
+    generatedModule: "packages/physics/src/knockback.generated.ts",
+    generatedFromDolFunction:
+      generated.includes("research/decomp/data/knockback-direction-800300bc.json") &&
+      generated.includes('address: "0x800300bc"'),
+    runtimeImportsGeneratedConstants: knockback.includes("knockback.generated.js"),
+    runtimeCombatUsesKnockbackDirection:
+      combat.includes("knockbackDirectionFromPositions") &&
+      combat.includes("applyHit("),
+    modeCount: numberField("modeCount"),
+    bam16PerRadian: floatConst("BAM16_PER_RADIAN"),
+    degenerateThreshold: floatConst("DEGENERATE_MAG_SQ_THRESHOLD"),
+    sourceRef: `packages/physics/src/knockback.generated.ts:${lineOf(generated, "sourcePath")}`,
+    runtimeRef: `packages/physics/src/knockback.ts:${lineOf(knockback, "knockback.generated.js")}`,
+    pipelineRef: `packages/combat/src/combat.ts:${lineOf(combat, "knockbackDirectionFromPositions")}`,
+  };
+}
+
+function inspectCameraEvidence() {
+  const generated = readText("apps/game/src/sim/camera.generated.ts");
+  const camera = readText("apps/game/src/sim/camera.ts");
+  const floatConst = (name) => Number.parseFloat(new RegExp(`export const ${name} = ([0-9.e+-]+)`).exec(generated)?.[1] ?? "0");
+  return {
+    generatedModule: "apps/game/src/sim/camera.generated.ts",
+    generatedFromBootDol:
+      generated.includes("user-data/GG4E/disc/sys/boot.dol") &&
+      generated.includes("research/decomp/ghidra-export/chunk_0001.c") &&
+      generated.includes('address: "0x8000c988"'),
+    runtimeImportsGeneratedConstants: camera.includes("camera.generated.js"),
+    runtimeUsesMode1Blend:
+      camera.includes("CAMERA_MODE1_PREVIOUS_EYE_WEIGHT") &&
+      camera.includes("CAMERA_MODE1_EYE_BLEND_DENOMINATOR") &&
+      camera.includes("mode1BlendEye("),
+    previousEyeWeight: floatConst("CAMERA_MODE1_PREVIOUS_EYE_WEIGHT"),
+    eyeBlendDenominator: floatConst("CAMERA_MODE1_EYE_BLEND_DENOMINATOR"),
+    halfBlend: floatConst("CAMERA_MODE1_HALF_BLEND"),
+    sourceRef: `apps/game/src/sim/camera.generated.ts:${lineOf(generated, "bootDolPath")}`,
+    runtimeRef: `apps/game/src/sim/camera.ts:${lineOf(camera, "camera.generated.js")}`,
   };
 }
 
@@ -627,8 +767,13 @@ function inspectAudioRuntime() {
 function inspectFormatParserCoverage() {
   const pzzSource = readText("packages/formats/src/pzz.ts");
   const arzSource = readText("packages/formats/src/arz.ts");
+  const hitSource = readText("packages/formats/src/hit-bin.ts");
   const pzzInventory = readJson("research/asset-inventory/pzz-arz-inventory.json");
+  const hitInventory = readJson("research/asset-inventory/hit-bin-inventory.json");
   const directArzCount = pzzInventory.value?.summary?.directArzFileCount ?? null;
+  const stageHitBinCount = hitInventory.value?.summary?.stageHitBinCount ?? null;
+  const playerHitBinCount = hitInventory.value?.summary?.playerHitBinCount ?? null;
+  const commonHitBinCount = hitInventory.value?.summary?.commonHitBinCount ?? null;
   return {
     parsers: [
       {
@@ -643,6 +788,18 @@ function inspectFormatParserCoverage() {
         implemented: arzSource.includes("export function decompress") && arzSource.includes("decompressPzzpStream"),
         evidence: `Direct ARZ/PZZP wrapper; pzz-arz inventory currently lists ${directArzCount ?? "unknown"} direct ARZ files.`,
       },
+      {
+        format: "STIH stage HIT",
+        source: "packages/formats/src/hit-bin.ts",
+        implemented: hitSource.includes("export function parseStageHitGrid") && hitSource.includes("stageBoundsFromHitGrid"),
+        evidence: `Shared parser for STIH stage collision grids; hit-bin inventory currently lists ${stageHitBinCount ?? "unknown"} stage files.`,
+      },
+      {
+        format: "Actor/common HIT",
+        source: "packages/formats/src/hit-bin.ts",
+        implemented: hitSource.includes("export function parseActorHitTable") && hitSource.includes("ACTOR_HIT_RECORD_SIZE"),
+        evidence: `Shared raw parser for pl####hit.bin/comhit*.bin remap headers plus 0xF4 records; inventory lists ${playerHitBinCount ?? "unknown"} player and ${commonHitBinCount ?? "unknown"} common files.`,
+      },
     ],
     inventory: {
       path: "research/asset-inventory/pzz-arz-inventory.json",
@@ -650,6 +807,11 @@ function inspectFormatParserCoverage() {
       directArzFileCount: directArzCount,
       pzzArchiveCount: pzzInventory.value?.summary?.pzzArchiveCount ?? null,
       pzzMemberCount: pzzInventory.value?.summary?.pzzMemberCount ?? null,
+      hitBinPath: "research/asset-inventory/hit-bin-inventory.json",
+      hitBinParses: hitInventory.ok,
+      stageHitBinCount,
+      playerHitBinCount,
+      commonHitBinCount,
     },
   };
 }
@@ -664,6 +826,9 @@ function buildReport() {
   const hudAssetEvidence = inspectHudAssetEvidence();
   const commonBattleArchiveEvidence = inspectCommonBattleArchiveEvidence();
   const commonBattleDataEvidence = inspectCommonBattleDataEvidence();
+  const typeDamageEvidence = inspectTypeDamageEvidence();
+  const knockbackEvidence = inspectKnockbackEvidence();
+  const cameraEvidence = inspectCameraEvidence();
   const borgAnimationCoverage = inspectBorgAnimationCoverage();
   const powerupRuntimeGap = inspectPowerupRuntimeGap();
   const audioRuntime = inspectAudioRuntime();
@@ -681,6 +846,14 @@ function buildReport() {
     runtimeStageFallback: stageCoverage.runtimeUse.defaultStage,
     runtimeAcceptsHexStageIds: stageCoverage.runtimeUse.acceptsHexStageIds,
     runtimeAcceptsExportedStageCatalog: stageCoverage.runtimeUse.acceptsExportedStageCatalog,
+    runtimeChallengeStageSelector:
+      stageCoverage.runtimeUse.challengeStageSelector.dolStageBytes &&
+      stageCoverage.runtimeUse.challengeStageSelector.preservesSelectorMeta &&
+      stageCoverage.runtimeUse.challengeStageSelector.resolvesSubtableFamilies,
+    runtimeChallengeSpawnPools:
+      stageCoverage.runtimeUse.challengeSpawnPools.generatedFromDecompTable &&
+      stageCoverage.runtimeUse.challengeSpawnPools.reexportedFromReference &&
+      stageCoverage.runtimeUse.challengeSpawnPools.runtimeUsesGeneratedRosters,
     runtimeStageCollisionBounds: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesBoundsToCombat,
     runtimeStageTriangleCollision: stageCoverage.runtimeUse.collisionBounds.usesStageHitParser && stageCoverage.runtimeUse.collisionBounds.passesTrianglesToCombat,
     runtimeStageWallCollision: stageCoverage.runtimeUse.collisionBounds.movementUsesTriangleWalls,
@@ -692,9 +865,24 @@ function buildReport() {
     runtimeBattleHudUsesAvailableFontAndRoundel:
       hudAssetEvidence.battleHudUsesFontAscii && hudAssetEvidence.battleHudUsesFaceRoundel,
     runtimeBattleHudUsesAsIcon: hudAssetEvidence.battleHudUsesAsIcon,
+    runtimeLockTargetUsesArrowGeometry:
+      hudAssetEvidence.arrowGeometry.generatedFromArchive &&
+      hudAssetEvidence.arrowGeometry.battleSceneUsesGeometry,
     commonBattleArchiveInventoried: Boolean(commonBattleArchiveEvidence.cmnDataPzz),
     commonBattleDataExactMatches: commonBattleDataEvidence.exactActorDataMatches.length,
-    runtimeActorDataBoundToCombat: Boolean(commonBattleDataEvidence.runtimeBinding) && !commonBattleDataEvidence.runtimeBinding.formatsPzzStillTodo && !commonBattleDataEvidence.runtimeBinding.combatConstantsDeclareTunedFormulas,
+    runtimeActorDataBoundToCombat: commonBattleDataEvidence.runtimeBinding?.actorDataStatsBoundToCombat === true,
+    runtimeTypeDamageMatrixFromDol:
+      typeDamageEvidence.generatedFromDolTables &&
+      typeDamageEvidence.runtimeImportsGeneratedTables &&
+      typeDamageEvidence.runtimeDamagePipelineUsesTypeMultiplier,
+    runtimeKnockbackDirectionFromDol:
+      knockbackEvidence.generatedFromDolFunction &&
+      knockbackEvidence.runtimeImportsGeneratedConstants &&
+      knockbackEvidence.runtimeCombatUsesKnockbackDirection,
+    runtimeCameraMode1BlendFromDol:
+      cameraEvidence.generatedFromBootDol &&
+      cameraEvidence.runtimeImportsGeneratedConstants &&
+      cameraEvidence.runtimeUsesMode1Blend,
     runtimeBorgAnimationDirectMatches: borgAnimationCoverage.directRuntimeMatches,
     runtimeBorgAnimationFallbacks: borgAnimationCoverage.runtimeFallbacks,
     runtimeBorgAnimationMissing: borgAnimationCoverage.missingRuntimeMatches,
@@ -723,19 +911,33 @@ function buildReport() {
     hudAssetEvidence,
     commonBattleArchiveEvidence,
     commonBattleDataEvidence,
+    typeDamageEvidence,
+    knockbackEvidence,
+    cameraEvidence,
     borgAnimationCoverage,
     powerupRuntimeGap,
     audioRuntime,
     formatParserCoverage,
     modeNamingRisks,
-    nextMostUsefulReplacements: [
-      "Trace and wire the original arena-name/Challenge rotation -> st## table; runtime now authorizes exported literal st## ids through a generated catalog, but untraced names still fall back to st00.",
-      "Generalize UI scene model export beyond box00 so tl00/optn00/vsel00/vsel01/brif00/entry00/rpot20-23 can replace CSS scene recreations.",
-      "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
-      "Map battle HUD from comhit/cmn_data/as_icon/arrow/font assets and DOL HUD state instead of CSS/SVG gauges.",
-      "Resolve remaining borg animation fallbacks/misses from research/asset-inventory/borg-animation-action-gaps.md, especially missing move clips and fallback hit/death labels.",
-    ],
+    nextMostUsefulReplacements: nextMostUsefulReplacements(summary, uiSceneExports),
   };
+}
+
+function nextMostUsefulReplacements(summary, uiSceneExports) {
+  const items = [
+    "Trace and wire the original arena-name/Challenge rotation -> st## table; runtime now authorizes exported literal st## ids through a generated catalog, but untraced names still fall back to st00.",
+  ];
+  if (summary.requestedUiSceneModelsExported < uiSceneExports.requestedScenes.length) {
+    items.push("Finish validated UI scene model exports for the remaining requested archives before replacing CSS scene recreations.");
+  } else {
+    items.push("Use the now-exported tl00/optn00/staff00/vsel00/vsel01/brif00/entry00/rpot20-23 scene models plus generated layout bounds to replace the remaining CSS/DOM menu surfaces.");
+  }
+  items.push(
+    "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
+    "Map remaining battle HUD from comhit/cmn_data/as_icon/font assets and DOL HUD state; arrow_mdl target geometry is now wired, while the center HUD reticle/gauges are still CSS/SVG.",
+    "Resolve remaining borg animation fallbacks/misses from research/asset-inventory/borg-animation-action-gaps.md, especially missing move clips and fallback hit/death labels.",
+  );
+  return items;
 }
 
 function mdTable(rows, columns) {
@@ -773,21 +975,27 @@ function renderMarkdown(report) {
   add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses exported font/roundel: ${report.summary.runtimeBattleHudUsesAvailableFontAndRoundel ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses as_icon: ${report.summary.runtimeBattleHudUsesAsIcon ? "yes" : "no"} (manifest marks as_icon low-confidence for battle HUD)`);
+  add(`- Runtime lock target uses arrow_mdl geometry: ${report.summary.runtimeLockTargetUsesArrowGeometry ? "yes" : "no"}`);
   add(`- Common battle archive inventoried: ${report.summary.commonBattleArchiveInventoried ? "yes" : "no"}`);
   add(`- Common battle data exact actor matches: ${report.summary.commonBattleDataExactMatches}`);
   add(`- Runtime actor-data bytes bound to combat formulas: ${report.summary.runtimeActorDataBoundToCombat ? "yes" : "no"}`);
+  add(`- Runtime type damage matrix from DOL tables: ${report.summary.runtimeTypeDamageMatrixFromDol ? "yes" : "no"}`);
+  add(`- Runtime knockback direction from DOL function: ${report.summary.runtimeKnockbackDirectionFromDol ? "yes" : "no"}`);
+  add(`- Runtime battle camera mode-1 blend from DOL constants: ${report.summary.runtimeCameraMode1BlendFromDol ? "yes" : "no"}`);
   add(`- Runtime borg animation direct matches: ${report.summary.runtimeBorgAnimationDirectMatches}/${report.borgAnimationCoverage.canonicalSlotChecks}`);
   add(`- Runtime borg animation fallbacks/missing: ${report.summary.runtimeBorgAnimationFallbacks}/${report.summary.runtimeBorgAnimationMissing}`);
   add(`- Runtime fly uses exported boost clip: ${report.summary.runtimeBoostFlyUsesExportedBoostClip ? "yes" : "no"}`);
   add(`- Runtime items/powerups modeled: ${report.summary.runtimeItemsOrPowerupsModeled ? "yes" : "no"}`);
   add(`- Runtime audio from exported cues: ${report.summary.runtimeAudioFromExportedCues ? "yes" : "no"}`);
-  add(`- Shared PZZ/ARZ parsers implemented: ${report.summary.formatParsersImplemented}/${report.summary.formatParsersTotal}`);
+  add(`- Shared binary parsers implemented: ${report.summary.formatParsersImplemented}/${report.summary.formatParsersTotal}`);
   add(`- Runtime stage fallback: ${report.summary.runtimeStageFallback ?? "unknown"}`);
   add(`- Runtime accepts exported stage catalog ids: ${report.summary.runtimeAcceptsExportedStageCatalog ? "yes" : "no"}`);
+  add(`- Runtime Challenge CPU spawn pools from DOL table: ${report.summary.runtimeChallengeSpawnPools ? "yes" : "no"}`);
   add();
   add("## Format Parser Coverage");
   add();
-  add(`Inventory: ${report.formatParserCoverage.inventory.path} (${report.formatParserCoverage.inventory.pzzArchiveCount ?? "unknown"} PZZ archives, ${report.formatParserCoverage.inventory.pzzMemberCount ?? "unknown"} PZZ members, ${report.formatParserCoverage.inventory.directArzFileCount ?? "unknown"} direct ARZ files).`);
+  add(`Archive inventory: ${report.formatParserCoverage.inventory.path} (${report.formatParserCoverage.inventory.pzzArchiveCount ?? "unknown"} PZZ archives, ${report.formatParserCoverage.inventory.pzzMemberCount ?? "unknown"} PZZ members, ${report.formatParserCoverage.inventory.directArzFileCount ?? "unknown"} direct ARZ files).`);
+  add(`HIT inventory: ${report.formatParserCoverage.inventory.hitBinPath} (${report.formatParserCoverage.inventory.stageHitBinCount ?? "unknown"} STIH stage files, ${report.formatParserCoverage.inventory.playerHitBinCount ?? "unknown"} player hit tables, ${report.formatParserCoverage.inventory.commonHitBinCount ?? "unknown"} common hit tables).`);
   add();
   add(
     mdTable(report.formatParserCoverage.parsers, [
@@ -830,6 +1038,9 @@ function renderMarkdown(report) {
   add();
   add(`Runtime collision parser: ${report.stageCoverage.runtimeUse.collisionBounds.parserPackage ?? "none"} (bounds ${report.summary.runtimeStageCollisionBounds ? "wired" : "not wired"}, triangles ${report.summary.runtimeStageTriangleCollision ? "wired" : "not wired"}, walls ${report.summary.runtimeStageWallCollision ? "wired" : "not wired"}, ceilings ${report.summary.runtimeStageCeilingCollision ? "wired" : "not wired"})`);
   add();
+  add(`Challenge stage selector: ${report.summary.runtimeChallengeStageSelector ? "DOL selector bytes wired to exported runtime stage routing" : "not fully wired"} (${report.stageCoverage.runtimeUse.challengeStageSelector.challengeRef}; ${report.stageCoverage.runtimeUse.challengeStageSelector.adapterRef}).`);
+  add(`Challenge CPU spawn pools: ${report.summary.runtimeChallengeSpawnPools ? "generated from recovered 0x80380804 table" : "not fully wired"} (${report.stageCoverage.runtimeUse.challengeSpawnPools.groupCount} groups, ${report.stageCoverage.runtimeUse.challengeSpawnPools.totalBorgIds} borg ids; ${report.stageCoverage.runtimeUse.challengeSpawnPools.sourceRef}; ${report.stageCoverage.runtimeUse.challengeSpawnPools.runtimeRef}).`);
+  add();
   add(report.stageCoverage.runtimeUse.assessment);
   if (report.stageCoverage.stageCodeEvidence.parses) {
     add();
@@ -868,6 +1079,9 @@ function renderMarkdown(report) {
   );
   add();
   add(`as_icon public export: ${report.hudAssetEvidence.asIconPublicPath} (${report.hudAssetEvidence.asIconExists ? "exists" : "missing"}). It remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.`);
+  add();
+  const arrow = report.hudAssetEvidence.arrowGeometry;
+  add(`arrow_mdl geometry binding: source archive ${arrow.sourceArchiveExists ? "exists" : "missing"}, HSDRaw OBJ ${arrow.sourceObjExists ? "exists" : "missing"}, generated module ${arrow.generatedModuleExists ? "exists" : "missing"}, runtime scene uses geometry ${arrow.battleSceneUsesGeometry ? "yes" : "no"} (${arrow.vertexCount ?? "unknown"} verts, ${arrow.triangleCount ?? "unknown"} tris).`);
   add();
   add("Original HUD elements not available as discrete sprites:");
   add(
@@ -937,15 +1151,54 @@ function renderMarkdown(report) {
   );
   add();
   add(report.commonBattleDataEvidence.assessment);
+  if (report.commonBattleDataEvidence.actorDataStatOffsets) {
+    add();
+    add("Actor-data combat-stat offsets:");
+    add(report.commonBattleDataEvidence.actorDataStatOffsets.assessment);
+    mdTable(
+      Object.entries(report.commonBattleDataEvidence.actorDataStatOffsets.offsets ?? {}).map(([field, offset]) => ({
+        field,
+        offset,
+        exact: report.commonBattleDataEvidence.actorDataStatOffsets.exactMatches?.[field] ?? 0,
+        total: report.commonBattleDataEvidence.actorDataStatOffsets.matchedMetadataRows ?? 0,
+      })),
+      [
+        { title: "Field", value: (row) => row.field },
+        { title: "Offset", value: (row) => row.offset },
+        { title: "Exact matches", value: (row) => `${row.exact}/${row.total}` },
+      ],
+    );
+  }
   if (report.commonBattleDataEvidence.runtimeBinding) {
     add();
-    add("Runtime binding gap:");
+    add("Runtime binding:");
     add(`- App imports borgs.json: ${report.commonBattleDataEvidence.runtimeBinding.appImportsBorgsJson ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.appBorgImport ?? "n/a"})`);
+    add(`- Generated actor-data stats JSON: ${report.commonBattleDataEvidence.runtimeBinding.actorDataStatsJsonExists ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.actorDataStatsJson ?? "n/a"})`);
+    add(`- Combat buildProfile consumes actor-data stats: ${report.commonBattleDataEvidence.runtimeBinding.buildProfileUsesActorDataStats ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.buildProfile ?? "n/a"})`);
     add(`- Combat buildProfile consumes stats: ${report.commonBattleDataEvidence.runtimeBinding.buildProfileConsumesBorgsJsonFields ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.buildProfile ?? "n/a"})`);
     add(`- Combat formulas still marked tuned: ${report.commonBattleDataEvidence.runtimeBinding.combatConstantsDeclareTunedFormulas ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.tunedFormulaNote ?? "n/a"})`);
     add(`- Generic PZZ package parser implemented: ${report.commonBattleDataEvidence.runtimeBinding.formatsPzzStillTodo ? "no" : "yes"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.pzzParser ?? "n/a"})`);
     add(report.commonBattleDataEvidence.runtimeBinding.assessment);
   }
+  add();
+  add("Type damage matrix:");
+  add(`- Generated from DOL tables: ${report.typeDamageEvidence.generatedFromDolTables ? "yes" : "no"} (${report.typeDamageEvidence.sourceRef})`);
+  add(`- Runtime imports generated tables: ${report.typeDamageEvidence.runtimeImportsGeneratedTables ? "yes" : "no"} (${report.typeDamageEvidence.runtimeRef})`);
+  add(`- Damage pipeline uses multiplier: ${report.typeDamageEvidence.runtimeDamagePipelineUsesTypeMultiplier ? "yes" : "no"} (${report.typeDamageEvidence.pipelineRef})`);
+  add(`- Shape: remap ${report.typeDamageEvidence.remapRows} rows; matrix ${report.typeDamageEvidence.matrixRows}x${report.typeDamageEvidence.matrixColumns}; mapped borg ids ${report.typeDamageEvidence.mappedBorgIds}.`);
+  add(`- Selfcheck covers sample multiplier: ${report.typeDamageEvidence.selfcheckCoversMatrixSample ? "yes" : "no"}.`);
+  add();
+  add("Knockback direction:");
+  add(`- Generated from DOL function evidence: ${report.knockbackEvidence.generatedFromDolFunction ? "yes" : "no"} (${report.knockbackEvidence.sourceRef})`);
+  add(`- Runtime imports generated constants: ${report.knockbackEvidence.runtimeImportsGeneratedConstants ? "yes" : "no"} (${report.knockbackEvidence.runtimeRef})`);
+  add(`- Combat pipeline uses direction helper: ${report.knockbackEvidence.runtimeCombatUsesKnockbackDirection ? "yes" : "no"} (${report.knockbackEvidence.pipelineRef})`);
+  add(`- Shape/constants: ${report.knockbackEvidence.modeCount} modes; BAM16/radian ${report.knockbackEvidence.bam16PerRadian}; degenerate threshold ${report.knockbackEvidence.degenerateThreshold}.`);
+  add();
+  add("Battle camera mode-1 blend:");
+  add(`- Generated from boot.dol/decomp: ${report.cameraEvidence.generatedFromBootDol ? "yes" : "no"} (${report.cameraEvidence.sourceRef})`);
+  add(`- Runtime imports generated constants: ${report.cameraEvidence.runtimeImportsGeneratedConstants ? "yes" : "no"} (${report.cameraEvidence.runtimeRef})`);
+  add(`- Runtime uses mode-1 blend: ${report.cameraEvidence.runtimeUsesMode1Blend ? "yes" : "no"}.`);
+  add(`- Shape/constants: eye previous weight ${report.cameraEvidence.previousEyeWeight}; denominator ${report.cameraEvidence.eyeBlendDenominator}; half blend ${report.cameraEvidence.halfBlend}.`);
   add();
   add("## Borg Animation Coverage");
   add();
@@ -1014,6 +1267,6 @@ fs.writeFileSync(outJson, `${JSON.stringify(report, null, 2)}\n`);
 fs.writeFileSync(outMd, renderMarkdown(report));
 
 console.log(`asset coverage audit: screens ${report.summary.screens}, real-ui ${report.summary.screensUsingAnyRealExportedAsset}, handcoded ${report.summary.screensWithHandcodedSurfaceSignals}`);
-console.log(`stage exports: ${report.summary.publicStagesCompleteVisual}/${report.summary.publicStagesTotal} complete visual; runtime fallback ${report.summary.runtimeStageFallback ?? "unknown"}; catalog ids ${report.summary.runtimeAcceptsExportedStageCatalog ? "yes" : "no"}`);
+console.log(`stage exports: ${report.summary.publicStagesCompleteVisual}/${report.summary.publicStagesTotal} complete visual; default ${report.summary.runtimeStageFallback ?? "unknown"}; catalog ids ${report.summary.runtimeAcceptsExportedStageCatalog ? "yes" : "no"}; challenge selector ${report.summary.runtimeChallengeStageSelector ? "yes" : "no"}; challenge spawn pools ${report.summary.runtimeChallengeSpawnPools ? "yes" : "no"}`);
 console.log(`wrote ${rel(outJson)}`);
 console.log(`wrote ${rel(outMd)}`);
