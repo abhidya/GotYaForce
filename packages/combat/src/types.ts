@@ -104,6 +104,10 @@ export interface BorgRuntime {
   lockTarget: string | null;
   /** Current ally lock-on target uid, or null. Z control is asset-confirmed; downstream behavior is unknown. */
   allyLockTarget: string | null;
+  /** Uids already struck by the CURRENT melee swing (enforces one hit per swing per target).
+   *  Transient bookkeeping, reset on every swing start; optional so external constructors
+   *  (tests/fakes) don't need to provide it. */
+  meleeHitUids?: string[];
   alive: boolean;
 }
 
@@ -201,6 +205,8 @@ export interface Projectile {
   life: number;
   hitRadius: number;
   visualKind: ProjectileVisualKind;
+  /** Ballistic drop subtracted from vel.y each frame (bullet kinds only). Optional; 0/absent = none. */
+  drop?: number;
 }
 
 export interface BattleState {

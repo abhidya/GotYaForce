@@ -126,8 +126,8 @@ export interface LocalControls {
  *   L / Y                 = special (Y)
  *   Shift                 = dash (keyboard affordance; stick-snap dodge is handled by movement)
  *   U                     = explicit lockOn request (players auto-lock in combat core)
- *   Tab                   = switchLock (GC R stand-in)
- *   Z                     = allyLock (GC Z stand-in; target selection only until charge behavior is decoded)
+ *   R / Tab               = switchLock (GC R "lock-on switch": cycle enemy targets; edge-triggered in battle core)
+ *   Z                     = allyLock (GC Z "ally lock-on"; target selection only until charge behavior is decoded)
  * Manual borg switching is deliberately unbound: the extracted control texture does not
  * show it, and current C evidence only proves death/auto-deploy swap flow.
  */
@@ -145,7 +145,7 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
   let special = keys.has("KeyL") || keys.has("KeyY");
   let dash = keys.has("ShiftLeft") || keys.has("ShiftRight");
   let lockOn = keys.has("KeyU");
-  let switchLock = keys.has("Tab");
+  let switchLock = keys.has("KeyR") || keys.has("Tab");
   let allyLock = keys.has("KeyZ");
   const switchBorg = false;
 

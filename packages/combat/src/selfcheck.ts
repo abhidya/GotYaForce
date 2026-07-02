@@ -14,8 +14,8 @@ import { actorDataCombatStatsForBorgId, actorDataCombatStatsSummary } from "./ac
 import { createBattle } from "./battle.js";
 import { stepAI } from "./ai.js";
 import { actionProfileForProfile, startingAmmoForProfile } from "./actionProfiles.js";
-import { projectileVisualKindForProfile, stepAttacks, stepProjectiles } from "./combat.js";
-import { DASH, JUMP, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
+import { projectileVisualKindForProfile, stepAttacks, stepCooldowns, stepProjectiles } from "./combat.js";
+import { DASH, JUMP, MELEE, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
 import { stepMovement } from "./movement.js";
 import {
   PARAM_TIER_RESET,
@@ -25,7 +25,7 @@ import {
   resetActorParamTier,
 } from "./paramTier.js";
 import { emptyInput, type BorgRuntime, type PlayerInput, type Projectile, type StageCollision, type StageCollisionTriangle } from "./types.js";
-import { buildProfile, type BorgStats } from "./stats.js";
+import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import { typeCategoryForBorgId, typeDamageMultiplier } from "./typeDamage.js";
 
 function loadBorgs(): BorgStats[] {
@@ -663,6 +663,18 @@ function assertProjectilesCullOutsideStageFloor(): void {
   console.log("[selfcheck] projectile arena cull removes shots outside bounds or unsupported floor");
 }
 
+/** Advance one manual combat frame: tick cooldowns, then run stepAttacks with a held state. */
+function pumpAttackFrame(
+  b: BorgRuntime,
+  p: BorgProfile,
+  attackHeld: boolean,
+  all: BorgRuntime[],
+  profiles: Map<string, BorgProfile>,
+): Projectile[] {
+  stepCooldowns(b);
+  return stepAttacks(b, p, attackHeld, false, all, profiles).projectiles;
+}
+
 function assertActionProfilesDrivePrimaryAttacks(borgs: BorgStats[]): void {
   const gRed = buildProfile(borgById(borgs, "pl0615"));
   const swordKnight = buildProfile(borgById(borgs, "pl0200"));
@@ -676,9 +688,16 @@ function assertActionProfilesDrivePrimaryAttacks(borgs: BorgStats[]): void {
     [gRedRuntime.uid, gRed],
     [gRedEnemy.uid, enemyProfile],
   ]);
-  const gRedResult = stepAttacks(gRedRuntime, gRed, true, false, [gRedRuntime, gRedEnemy], gRedProfiles);
-  if (actionProfileForProfile(gRed).primary !== "shot" || gRedResult.projectiles.length === 0 || gRedRuntime.anim !== "shoot") {
-    throw new Error("[selfcheck] action profile did not make mixed G RED fire as its primary B attack");
+  // G RED's shot is chargeable (hero line): holding B charges, releasing fires.
+  const whileHeld = pumpAttackFrame(gRedRuntime, gRed, true, [gRedRuntime, gRedEnemy], gRedProfiles);
+  const onRelease = pumpAttackFrame(gRedRuntime, gRed, false, [gRedRuntime, gRedEnemy], gRedProfiles);
+  if (
+    actionProfileForProfile(gRed).primary !== "shot" ||
+    whileHeld.length !== 0 ||
+    onRelease.length === 0 ||
+    gRedRuntime.anim !== "shoot"
+  ) {
+    throw new Error("[selfcheck] action profile did not make mixed G RED charge-and-release as its primary B attack");
   }
 
   const swordRuntime = fakeRuntime("sword", 0, 0);
@@ -695,6 +714,204 @@ function assertActionProfilesDrivePrimaryAttacks(borgs: BorgStats[]): void {
   }
 
   console.log("[selfcheck] action profiles route mixed/ranged borgs to shots and sword borgs to melee");
+}
+
+function assertMeleeComboChains(borgs: BorgStats[]): void {
+  const swordKnight = buildProfile(borgById(borgs, "pl0200"));
+  const action = actionProfileForProfile(swordKnight);
+  const meleeDef = action.melee;
+  if (!meleeDef || meleeDef.comboHits < 2) {
+    throw new Error(`[selfcheck] Sword Knight should have a multi-hit combo chain: ${JSON.stringify(meleeDef)}`);
+  }
+
+  const attacker = fakeRuntime("combo", 0, 0);
+  attacker.borgId = swordKnight.id;
+  const enemy = fakeRuntime("combo_enemy", 1, 40);
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [attacker.uid, swordKnight],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+
+  let maxStep = 0;
+  let swingStarts = 0;
+  let prevMeleeActive = 0;
+  for (let f = 0; f < 240; f += 1) {
+    pumpAttackFrame(attacker, swordKnight, true, [attacker, enemy], profiles);
+    const active = attacker.cooldowns["meleeActive"] ?? 0;
+    if (active > prevMeleeActive) swingStarts += 1; // meleeActive only grows on a new swing
+    prevMeleeActive = active;
+    maxStep = Math.max(maxStep, attacker.cooldowns["comboStep"] ?? 0);
+    assertSane([attacker, enemy], f);
+  }
+  if (maxStep !== meleeDef.comboHits - 1) {
+    throw new Error(`[selfcheck] combo chain never reached its finisher: maxStep=${maxStep}, comboHits=${meleeDef.comboHits}`);
+  }
+  if (swingStarts < meleeDef.comboHits) {
+    throw new Error(`[selfcheck] combo chain produced too few swings: ${swingStarts}`);
+  }
+  if (enemy.hp >= enemy.maxHp) {
+    throw new Error("[selfcheck] combo chain dealt no damage");
+  }
+  console.log(
+    `[selfcheck] melee combo chained to step ${maxStep} (${meleeDef.comboHits} hits) over ${swingStarts} swings while holding B`,
+  );
+}
+
+function assertMeleeHitsOncePerSwing(borgs: BorgStats[]): void {
+  const profile = buildProfile(borgById(borgs, "pl0200"));
+  const attacker = fakeRuntime("onehit", 0, 0);
+  attacker.borgId = profile.id;
+  const enemy = fakeRuntime("onehit_enemy", 1, 40);
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [attacker.uid, profile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+
+  const meleeDef = actionProfileForProfile(profile).melee;
+  if (!meleeDef) throw new Error("[selfcheck] one-hit-per-swing test needs a melee profile");
+  // One press -> one swing; run through the whole active window.
+  pumpAttackFrame(attacker, profile, true, [attacker, enemy], profiles);
+  for (let f = 0; f < meleeDef.startup + meleeDef.active + 2; f += 1) {
+    pumpAttackFrame(attacker, profile, false, [attacker, enemy], profiles);
+  }
+  const damage = enemy.maxHp - enemy.hp;
+  // Generous single-hit ceiling (1.5x covers type-matrix boosts) — the old bug applied the
+  // hit on EVERY active frame (~6-9x), which this bound catches.
+  const singleHitCap = (MELEE.DMG_BASE + profile.attack * MELEE.DMG_PER_STAT) * meleeDef.damageMultiplier * 1.5;
+  if (damage <= 0 || damage > singleHitCap) {
+    throw new Error(`[selfcheck] melee swing did not hit exactly once: damage=${damage}, singleHitCap=${singleHitCap}`);
+  }
+  console.log(`[selfcheck] melee swing hit once per target (damage=${damage} within single-hit cap)`);
+}
+
+function assertChargeShotTiers(borgs: BorgStats[]): void {
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  const action = actionProfileForProfile(gRed);
+  const shotDef = action.shot;
+  if (!shotDef?.chargeable) {
+    throw new Error("[selfcheck] G RED (pl0615, hero line) should have a chargeable shot");
+  }
+
+  const enemyProfile = buildProfile(borgById(borgs, "pl0008"));
+  const fireAfterHold = (holdFrames: number): Projectile => {
+    const b = fakeRuntime("charge", 0, 0);
+    b.borgId = gRed.id;
+    b.ammo = startingAmmoForProfile(gRed);
+    const enemy = fakeRuntime("charge_enemy", 1, 500);
+    const profiles = new Map([
+      [b.uid, gRed],
+      [enemy.uid, enemyProfile],
+    ]);
+    for (let f = 0; f < holdFrames; f += 1) {
+      const spawned = pumpAttackFrame(b, gRed, true, [b, enemy], profiles);
+      if (spawned.length > 0) throw new Error("[selfcheck] chargeable shot fired while still holding");
+    }
+    const released = pumpAttackFrame(b, gRed, false, [b, enemy], profiles);
+    const proj = released[0];
+    if (!proj) throw new Error(`[selfcheck] charge release after ${holdFrames} held frames spawned nothing`);
+    return proj;
+  };
+
+  const tier0 = fireAfterHold(3);
+  const tier1 = fireAfterHold(shotDef.chargeTier1Frames + 5);
+  const tier2 = fireAfterHold(shotDef.chargeTier2Frames + 30); // accumulator caps at tier2Frames
+  const r1 = tier1.damage / tier0.damage;
+  const r2 = tier2.damage / tier0.damage;
+  if (Math.abs(r1 - shotDef.chargeTier1DamageMult) > 1e-6 || Math.abs(r2 - shotDef.chargeTier2DamageMult) > 1e-6) {
+    throw new Error(`[selfcheck] charge tier damage scaling wrong: r1=${r1}, r2=${r2}`);
+  }
+  const speed0 = Math.hypot(tier0.vel.x, tier0.vel.z);
+  const speed2 = Math.hypot(tier2.vel.x, tier2.vel.z);
+  if (!(speed2 > speed0) || !(tier2.hitRadius > tier0.hitRadius)) {
+    throw new Error("[selfcheck] tier-2 charge shot should be faster and larger than a tap shot");
+  }
+  if (shotDef.bulletDrop > 0 && tier0.drop !== shotDef.bulletDrop) {
+    throw new Error(`[selfcheck] ballistic drop not applied to spawned bullet: ${tier0.drop}`);
+  }
+  console.log(
+    `[selfcheck] charge tiers OK: tap=${tier0.damage.toFixed(1)} dmg, tier1 x${r1.toFixed(2)}, tier2 x${r2.toFixed(2)} (drop=${tier0.drop ?? 0})`,
+  );
+}
+
+function assertSwordBeamFinisher(borgs: BorgStats[]): void {
+  const run = (id: string, forceMelee: boolean): Projectile[] => {
+    const profile = buildProfile(borgById(borgs, id));
+    const meleeDef = actionProfileForProfile(profile).melee;
+    if (!meleeDef?.swordBeam) {
+      throw new Error(`[selfcheck] ${id} should have a sword-beam finisher`);
+    }
+    const attacker = fakeRuntime(`beam_${id}`, 0, 0);
+    attacker.borgId = profile.id;
+    const enemy = fakeRuntime(`beam_enemy_${id}`, 1, 40);
+    enemy.hp = enemy.maxHp = 5000;
+    const profiles = new Map([
+      [attacker.uid, profile],
+      [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+    ]);
+    const hasShot = actionProfileForProfile(profile).shot !== null;
+    const beams: Projectile[] = [];
+    for (let f = 0; f < 300; f += 1) {
+      if (forceMelee || hasShot) {
+        // Route any shooter onto its sword (empty magazine + reloading) so every spawned
+        // projectile in this loop is a sword beam, not a gun shot.
+        attacker.ammo = 0;
+        attacker.cooldowns["reload"] = 10;
+      }
+      beams.push(...pumpAttackFrame(attacker, profile, true, [attacker, enemy], profiles));
+      assertSane([attacker, enemy], f);
+    }
+    return beams;
+  };
+
+  const knightBeams = run("pl0200", false); // sword-family melee-primary borg
+  const gRedBeams = run("pl0615", true); // hero line, melee forced via empty magazine
+  if (knightBeams.length === 0 || gRedBeams.length === 0) {
+    throw new Error(`[selfcheck] sword-beam finisher spawned nothing: knight=${knightBeams.length}, gRed=${gRedBeams.length}`);
+  }
+  for (const beam of [...knightBeams, ...gRedBeams]) {
+    if (beam.visualKind !== "energy") {
+      throw new Error(`[selfcheck] sword beam should reuse the existing 'energy' visual, got ${beam.visualKind}`);
+    }
+  }
+  console.log(
+    `[selfcheck] sword-beam finishers fired: Sword Knight x${knightBeams.length}, G RED x${gRedBeams.length} (energy visuals)`,
+  );
+}
+
+function assertActionProfileFallbackDefaults(borgs: BorgStats[]): void {
+  // An id with no generated profile entry must resolve to the generic TUNED defaults:
+  // single-hit melee, no sword beam, non-chargeable autofire shot, no bullet drop.
+  const base = buildProfile(borgById(borgs, "pl0615"));
+  const unknown = { ...base, id: "zz9999" };
+  const action = actionProfileForProfile(unknown);
+  if (action.confidence !== "fallback") {
+    throw new Error(`[selfcheck] unknown borg id should resolve fallback confidence, got ${action.confidence}`);
+  }
+  if (!action.melee || action.melee.comboHits !== 1 || action.melee.swordBeam !== null) {
+    throw new Error(`[selfcheck] fallback melee defaults wrong: ${JSON.stringify(action.melee)}`);
+  }
+  if (!action.shot || action.shot.chargeable || action.shot.bulletDrop !== 0) {
+    throw new Error(`[selfcheck] fallback shot defaults wrong: ${JSON.stringify(action.shot)}`);
+  }
+
+  // And behavior: a non-chargeable shooter autofires on the first held frame. (Shot-only
+  // spoof: the mixed spoof above resolves melee-primary via the stats fallback, so it would
+  // swing instead of shoot.)
+  const shooter = { ...base, id: "zz9998", hasMelee: false };
+  const b = fakeRuntime("fallback", 0, 0);
+  b.ammo = action.shot.ammoMax;
+  const enemy = fakeRuntime("fallback_enemy", 1, 500);
+  const profiles = new Map([
+    [b.uid, shooter],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const spawned = pumpAttackFrame(b, shooter, true, [b, enemy], profiles);
+  if (spawned.length === 0) {
+    throw new Error("[selfcheck] fallback-profile shooter did not autofire while holding attack");
+  }
+  console.log("[selfcheck] fallback action profile keeps generic single-hit melee + autofire shot");
 }
 
 function assertSameTeamDamageDivisor(borgs: BorgStats[]): void {
@@ -891,6 +1108,11 @@ export function main(): number {
   assertProjectileVisualKinds(borgs);
   assertProjectilesCullOutsideStageFloor();
   assertActionProfilesDrivePrimaryAttacks(borgs);
+  assertMeleeComboChains(borgs);
+  assertMeleeHitsOncePerSwing(borgs);
+  assertChargeShotTiers(borgs);
+  assertSwordBeamFinisher(borgs);
+  assertActionProfileFallbackDefaults(borgs);
   assertSameTeamDamageDivisor(borgs);
   assertTypeDamageMatrixWired(borgs);
   assertMeleeRefreshesInvincibility(borgs);

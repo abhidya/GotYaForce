@@ -16,6 +16,8 @@ import {
   type Vec3,
 } from "@gf/physics";
 import {
+  CHARGE,
+  COMBO,
   DAMAGE,
   MELEE,
   LOCK,
@@ -24,7 +26,12 @@ import {
   STATE,
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
-import { actionProfileForProfile, type MeleeActionDef, type ShotActionDef } from "./actionProfiles.js";
+import {
+  actionProfileForProfile,
+  type MeleeActionDef,
+  type ShotActionDef,
+  type SwordBeamDef,
+} from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
 import { typeDamageMultiplier } from "./typeDamage.js";
 import type {
@@ -62,8 +69,19 @@ export function isInvincible(b: BorgRuntime): boolean {
 export function stepCooldowns(b: BorgRuntime): void {
   for (const k of Object.keys(b.cooldowns)) {
     const v = b.cooldowns[k] ?? 0;
-    // jumpHeld / boostFuel are latches/fuel, not countdown timers — skip them here.
-    if (k === "jumpHeld" || k === "boostFuel") continue;
+    // jumpHeld / switchLockHeld / allyLockHeld / attackHeld are 0/1 press latches,
+    // boostFuel is a fuel gauge, chargeFrames is a hold-B charge accumulator, and
+    // comboStep is the current melee-chain index — none are countdown timers; skip them here.
+    if (
+      k === "jumpHeld" ||
+      k === "boostFuel" ||
+      k === "switchLockHeld" ||
+      k === "allyLockHeld" ||
+      k === "attackHeld" ||
+      k === "chargeFrames" ||
+      k === "comboStep"
+    )
+      continue;
     if (v > 0) b.cooldowns[k] = v - 1;
   }
 }
@@ -128,7 +146,9 @@ export function acquireLock(self: BorgRuntime, all: BorgRuntime[]): string | nul
   return best;
 }
 
-/** Cycle to the next enemy by distance (R = switch lock-on target). */
+/** Cycle to the next enemy by distance (R = switch lock-on target). Enemy-only by
+ * construction (isEnemyAlive filters dead borgs, self, and same-team allies); the caller
+ * (battle.ts) edge-triggers this so holding R does not re-cycle every frame. */
 export function cycleLock(self: BorgRuntime, all: BorgRuntime[]): string | null {
   const enemies = all
     .filter((o) => isEnemyAlive(self, o) && distXZ(self.pos, o.pos) <= LOCK.RANGE)
@@ -153,6 +173,20 @@ export function acquireAllyLock(self: BorgRuntime, all: BorgRuntime[]): string |
     best = o.uid;
   }
   return best;
+}
+
+/** Cycle to the next same-team ally by distance (repeated Z presses). Ally-only by
+ * construction (isAllyAlive filters dead borgs, self, and enemies). With no current
+ * ally lock this selects the nearest ally, matching acquireAllyLock. TUNED — the
+ * original per-press Z semantics are untraced; edge-triggering lives in battle.ts. */
+export function cycleAllyLock(self: BorgRuntime, all: BorgRuntime[]): string | null {
+  const allies = all
+    .filter((o) => isAllyAlive(self, o) && distXZ(self.pos, o.pos) <= LOCK.RANGE)
+    .sort((a, b) => distXZ(self.pos, a.pos) - distXZ(self.pos, b.pos));
+  if (allies.length === 0) return null;
+  const curIdx = allies.findIndex((o) => o.uid === self.allyLockTarget);
+  const next = allies[(curIdx + 1) % allies.length];
+  return next ? next.uid : null;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -339,11 +373,25 @@ export function projectileVisualKindForProfile(p: BorgProfile): ProjectileVisual
 /**
  * Process B (attack) and Y (special) for one borg. Mutates `b` (state, cooldowns, ammo) and
  * resolves melee hits immediately against `all`. Ranged borgs spawn projectiles.
+ *
+ * `attackHeld` is the button's HELD state each frame (adapter/AI pass held booleans);
+ * press/release edges are detected internally via the `attackHeld` cooldown latch. Three
+ * profile-driven mechanics hang off it (all with generic fallbacks, all TUNED — see
+ * constants.ts COMBO/CHARGE and actionProfiles.json's note):
+ *   - Melee combo chains: borgs with comboHits > 1 chain follow-up swings when attack is
+ *     pressed (or still held) within comboWindowFrames after a swing's recovery. Chained
+ *     swings bypass the melee cooldown, start up faster, ramp damage, and the final hit
+ *     forces a knockdown.
+ *   - Charge shots: borgs with shot.chargeable accumulate chargeFrames while attack is held
+ *     (capped at chargeTier2Frames) and fire on RELEASE, scaled by the reached tier.
+ *     Non-chargeable shooters keep the fire-while-held autofire behavior.
+ *   - Sword beams: borgs with melee.swordBeam emit a fast short-lived projectile on the
+ *     combo finisher's first active frame, damage scaled from the MELEE formula.
  */
 export function stepAttacks(
   b: BorgRuntime,
   p: BorgProfile,
-  pressedAttack: boolean,
+  attackHeld: boolean,
   pressedSpecial: boolean,
   all: BorgRuntime[],
   profiles: Map<string, BorgProfile>,
@@ -353,6 +401,14 @@ export function stepAttacks(
   const actionProfile = actionProfileForProfile(p);
   const meleeDef = actionProfile.melee;
   const shotDef = actionProfile.shot;
+
+  // Press/release edge detection for the attack button (latch survives across frames).
+  const prevAttackHeld = (b.cooldowns["attackHeld"] ?? 0) > 0;
+  b.cooldowns["attackHeld"] = attackHeld ? 1 : 0;
+  const releasedAttack = !attackHeld && prevAttackHeld;
+
+  // Drop the combo chain once its window lapses.
+  if ((b.cooldowns["comboWindow"] ?? 0) <= 0) b.cooldowns["comboStep"] = 0;
 
   // Reload bookkeeping for ranged.
   if (shotDef) {
@@ -398,26 +454,47 @@ export function stepAttacks(
   }
 
   // --- Attack (B): asset-backed per-borg primary action, generic fallback-safe -------
-  if (canStartAction && pressedAttack) {
+  if (canStartAction && (attackHeld || releasedAttack)) {
     const order =
       actionProfile.primary === "shot"
         ? (["shot", "melee"] as const)
         : (["melee", "shot"] as const);
     for (const kind of order) {
-      if (kind === "melee" && meleeDef && (b.cooldowns["melee"] ?? 0) <= 0) {
-        startMeleeAttack(b, meleeDef);
-        break;
+      if (kind === "melee" && meleeDef && attackHeld) {
+        const window = b.cooldowns["comboWindow"] ?? 0;
+        const prevStep = b.cooldowns["comboStep"] ?? 0;
+        // Chain: within the combo window and more hits remain — bypass the melee cooldown.
+        const canChain = window > 0 && prevStep + 1 < meleeDef.comboHits;
+        const canFresh = (b.cooldowns["melee"] ?? 0) <= 0;
+        if (canChain || canFresh) {
+          startMeleeAttack(b, meleeDef, canChain ? prevStep + 1 : 0);
+          break;
+        }
+        continue; // melee gated — a hybrid may still fire its gun below
       }
       if (kind === "shot" && shotDef && (b.cooldowns["shot"] ?? 0) <= 0 && b.ammo > 0) {
-        b.cooldowns["shot"] = shotDef.cooldown;
-        b.ammo -= 1;
-        if (b.ammo <= 0) b.cooldowns["reload"] = shotDef.reloadFrames;
-        b.cooldowns["attackLock"] = shotDef.recovery;
-        b.state = "attack";
-        b.stateTime = 0;
-        b.anim = "shoot";
-        out.push(...spawnProjectiles(b, p, shotDef));
-        break;
+        if (shotDef.chargeable) {
+          if (attackHeld) {
+            // Hold-to-charge: accumulate (capped) and consume the button for this frame.
+            b.cooldowns["chargeFrames"] = Math.min(
+              shotDef.chargeTier2Frames,
+              (b.cooldowns["chargeFrames"] ?? 0) + 1,
+            );
+            break;
+          }
+          if (releasedAttack && (b.cooldowns["chargeFrames"] ?? 0) > 0) {
+            const frames = b.cooldowns["chargeFrames"] ?? 0;
+            b.cooldowns["chargeFrames"] = 0;
+            const tier = frames >= shotDef.chargeTier2Frames ? 2 : frames >= shotDef.chargeTier1Frames ? 1 : 0;
+            startShotAttack(b, p, shotDef, tier, out);
+            break;
+          }
+          continue;
+        }
+        if (attackHeld) {
+          startShotAttack(b, p, shotDef, 0, out);
+          break;
+        }
       }
     }
   }
@@ -428,10 +505,23 @@ export function stepAttacks(
     b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
   }
   if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && meleeActive <= meleeDef.active) {
+    const comboStep = b.cooldowns["comboStep"] ?? 0;
+    const isFinisher = comboStep >= meleeDef.comboHits - 1;
+    // Sword beam: the combo finisher's FIRST active frame emits a fast short-lived projectile
+    // with melee-scaled damage (TUNED design; see actionProfiles.ts SwordBeamDef).
+    if (meleeDef.swordBeam && isFinisher && meleeActive === meleeDef.active) {
+      out.push(spawnSwordBeam(b, p, meleeDef, meleeDef.swordBeam));
+    }
     // Only the active window (after startup) deals damage; one hit per swing per target.
     const fwd = forwardFromYaw(b.rotY);
+    const stepMult =
+      COMBO.STEP_DAMAGE_MULT[Math.min(comboStep, COMBO.STEP_DAMAGE_MULT.length - 1)] ?? 1;
     for (const o of all) {
       if (!canReceiveHit(b, o)) continue;
+      // One hit per swing per target: skip anyone this swing already struck. (This enforces
+      // the long-documented contract; previously the active window re-applied damage every
+      // frame, silently multiplying melee damage by the active-frame count.)
+      if (b.meleeHitUids?.includes(o.uid)) continue;
       const d = distXZ(b.pos, o.pos);
       if (d > meleeDef.range) continue;
       if (Math.abs(o.pos.y - b.pos.y) > meleeDef.yTolerance) continue;
@@ -439,17 +529,22 @@ export function stepAttacks(
       if (fwd.x * to.x + fwd.z * to.z < 0) continue; // behind us
       const op = profiles.get(o.uid);
       if (!op) continue;
-      const raw = (MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT) * meleeDef.damageMultiplier;
+      const raw = (MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT) * meleeDef.damageMultiplier * stepMult;
+      const knockbackMult =
+        meleeDef.knockbackMultiplier * (isFinisher && meleeDef.comboHits > 1 ? COMBO.FINISHER_KNOCKBACK_MULT : 1);
       // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
       // instead of the attacker's facing vector (`fwd`) used here previously.
-      applyHit(
+      const dealt = applyHit(
         o,
         op,
         rawDamageForTarget(raw, b.team, o.team, p.id, op.id),
-        MELEE.KNOCKBACK * meleeDef.knockbackMultiplier,
+        MELEE.KNOCKBACK * knockbackMult,
         { x: 0, y: 0, z: 0 },
         b.pos,
+        // A multi-hit chain's finisher launches: forced knockdown (TUNED game-feel choice).
+        isFinisher && meleeDef.comboHits > 1,
       );
+      if (dealt > 0) (b.meleeHitUids ??= []).push(o.uid);
     }
   }
 
@@ -468,29 +563,100 @@ export function stepAttacks(
   return { projectiles: out };
 }
 
-function startMeleeAttack(b: BorgRuntime, meleeDef: MeleeActionDef): void {
+function startMeleeAttack(b: BorgRuntime, meleeDef: MeleeActionDef, comboStep: number): void {
+  // Chained swings come out faster (COMBO.STEP_STARTUP_SCALE); the opener uses full startup.
+  const startup =
+    comboStep > 0 ? Math.max(2, Math.round(meleeDef.startup * COMBO.STEP_STARTUP_SCALE)) : meleeDef.startup;
   b.cooldowns["melee"] = meleeDef.duration + meleeDef.cooldown;
-  b.cooldowns["meleeActive"] = meleeDef.startup + meleeDef.active;
+  b.cooldowns["meleeActive"] = startup + meleeDef.active;
   b.cooldowns["attackLock"] = meleeDef.duration;
+  // The chain window covers this swing plus a grace period after its recovery. The renderer
+  // alternates melee/melee_alt banks on each melee re-entry (battleScene meleeParity), and the
+  // >=1 idle frame between chained swings is what lets it see the re-entry.
+  b.cooldowns["comboWindow"] = meleeDef.duration + meleeDef.comboWindowFrames;
+  b.cooldowns["comboStep"] = comboStep;
+  b.meleeHitUids = []; // fresh swing: everyone is hittable once again
   b.state = "attack";
   b.stateTime = 0;
   b.anim = "melee";
 }
 
-function spawnProjectiles(b: BorgRuntime, p: BorgProfile, shotDef: ShotActionDef): Projectile[] {
+/** Fire a (possibly charge-scaled) shot: consumes ammo, sets cooldowns/anim, spawns projectiles.
+ *  chargeTier 0 = normal shot; tiers 1/2 scale damage per-profile and speed/radius/hitstun/
+ *  knockback via the TUNED CHARGE constants. */
+function startShotAttack(
+  b: BorgRuntime,
+  p: BorgProfile,
+  shotDef: ShotActionDef,
+  chargeTier: number,
+  out: Projectile[],
+): void {
+  b.cooldowns["shot"] = shotDef.cooldown;
+  b.ammo -= 1;
+  if (b.ammo <= 0) b.cooldowns["reload"] = shotDef.reloadFrames;
+  b.cooldowns["attackLock"] = shotDef.recovery;
+  b.state = "attack";
+  b.stateTime = 0;
+  b.anim = "shoot";
+  out.push(...spawnProjectiles(b, p, shotDef, chargeTier));
+}
+
+/** Per-tier charge scaling (tier 0 = all 1x). Damage mults come from the profile; the rest
+ *  from the TUNED CHARGE constants. */
+function chargeScaling(shotDef: ShotActionDef, tier: number): {
+  damage: number;
+  speed: number;
+  radius: number;
+  hitstun: number;
+  knockback: number;
+} {
+  if (tier >= 2) {
+    return {
+      damage: shotDef.chargeTier2DamageMult,
+      speed: CHARGE.TIER2_SPEED_MULT,
+      radius: CHARGE.TIER2_RADIUS_MULT,
+      hitstun: CHARGE.TIER2_HITSTUN_MULT,
+      knockback: CHARGE.TIER2_KNOCKBACK_MULT,
+    };
+  }
+  if (tier === 1) {
+    return {
+      damage: shotDef.chargeTier1DamageMult,
+      speed: CHARGE.TIER1_SPEED_MULT,
+      radius: CHARGE.TIER1_RADIUS_MULT,
+      hitstun: CHARGE.TIER1_HITSTUN_MULT,
+      knockback: CHARGE.TIER1_KNOCKBACK_MULT,
+    };
+  }
+  return { damage: 1, speed: 1, radius: 1, hitstun: 1, knockback: 1 };
+}
+
+function spawnProjectiles(
+  b: BorgRuntime,
+  p: BorgProfile,
+  shotDef: ShotActionDef,
+  chargeTier = 0,
+): Projectile[] {
   const count = Math.max(1, Math.floor(shotDef.projectileCount));
   const projectiles: Projectile[] = [];
   for (let i = 0; i < count; i += 1) {
     const centered = count === 1 ? 0 : i - (count - 1) / 2;
-    projectiles.push(spawnProjectile(b, p, shotDef, centered * shotDef.spreadRadians));
+    projectiles.push(spawnProjectile(b, p, shotDef, centered * shotDef.spreadRadians, chargeTier));
   }
   return projectiles;
 }
 
-function spawnProjectile(b: BorgRuntime, p: BorgProfile, shotDef: ShotActionDef, yawOffset: number): Projectile {
+function spawnProjectile(
+  b: BorgRuntime,
+  p: BorgProfile,
+  shotDef: ShotActionDef,
+  yawOffset: number,
+  chargeTier = 0,
+): Projectile {
   const yaw = b.rotY + yawOffset;
   const fwd = { x: Math.sin(yaw), y: 0, z: Math.cos(yaw) };
-  const raw = (SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT) * shotDef.damageMultiplier;
+  const tier = chargeScaling(shotDef, chargeTier);
+  const raw = (SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT) * shotDef.damageMultiplier * tier.damage;
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
@@ -500,15 +666,47 @@ function spawnProjectile(b: BorgRuntime, p: BorgProfile, shotDef: ShotActionDef,
       y: b.pos.y + shotDef.muzzleYOffset,
       z: b.pos.z + fwd.z * shotDef.muzzleForwardOffset,
     },
-    vel: scale(fwd, shotDef.speed),
+    vel: scale(fwd, shotDef.speed * tier.speed),
     damage: raw,
-    hitstun: Math.max(1, Math.round(SHOT.HITSTUN * shotDef.hitstunMultiplier)),
-    knockback: SHOT.KNOCKBACK * shotDef.knockbackMultiplier,
+    hitstun: Math.max(1, Math.round(SHOT.HITSTUN * shotDef.hitstunMultiplier * tier.hitstun)),
+    knockback: SHOT.KNOCKBACK * shotDef.knockbackMultiplier * tier.knockback,
     homingTurn: shotDef.homingTurn,
     homingTarget: b.lockTarget,
     life: shotDef.lifetime,
-    hitRadius: shotDef.hitRadius,
+    hitRadius: shotDef.hitRadius * tier.radius,
     visualKind: shotDef.visualKind ?? projectileVisualKindForProfile(p),
+    ...(shotDef.bulletDrop > 0 ? { drop: shotDef.bulletDrop } : {}),
+  };
+}
+
+/** Combo-finisher sword beam: fast, short-lived, damage scaled off the MELEE damage formula
+ *  (attack stat), not the shot stat — this is the sword swing "extending", not a gun. */
+function spawnSwordBeam(
+  b: BorgRuntime,
+  p: BorgProfile,
+  meleeDef: MeleeActionDef,
+  beam: SwordBeamDef,
+): Projectile {
+  const fwd = forwardFromYaw(b.rotY);
+  const raw = (MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT) * meleeDef.damageMultiplier * beam.damageMultiplier;
+  return {
+    uid: `proj_${projCounter++}`,
+    ownerUid: b.uid,
+    team: b.team,
+    pos: {
+      x: b.pos.x + fwd.x * 40,
+      y: b.pos.y + 20,
+      z: b.pos.z + fwd.z * 40,
+    },
+    vel: scale(fwd, beam.speed),
+    damage: raw,
+    hitstun: SHOT.HITSTUN,
+    knockback: SHOT.KNOCKBACK * meleeDef.knockbackMultiplier,
+    homingTurn: beam.homingTurn,
+    homingTarget: b.lockTarget,
+    life: beam.lifetime,
+    hitRadius: beam.hitRadius,
+    visualKind: beam.visualKind,
   };
 }
 
@@ -542,6 +740,9 @@ export function stepProjectiles(
         pr.vel = { x: Math.sin(newYaw) * speed, y: pr.vel.y, z: Math.cos(newYaw) * speed };
       }
     }
+
+    // Ballistic drop for bullet-kind projectiles (profile-driven; 0/absent for beams/flames).
+    if (pr.drop) pr.vel.y -= pr.drop;
 
     pr.pos = add(pr.pos, pr.vel as Vec3);
     if (ctx && !projectileInPlayArea(pr, ctx)) continue;

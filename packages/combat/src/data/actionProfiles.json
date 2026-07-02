@@ -6,7 +6,7 @@
     "research/asset-inventory/weapon-attachment-map.json",
     "research/animation-actions/borg-action-assets.json"
   ],
-  "note": "TUNED, not DERIVED: per-borg attack primary/timing/projectile traits are generated from weapon-attachment and animation asset evidence. Hit-bin move records remain structurally parsed but semantically undecoded, so combat.ts keeps a generic fallback for missing profile fields.",
+  "note": "TUNED, not DERIVED: per-borg attack primary/timing/projectile traits are generated from weapon-attachment and animation asset evidence. Hit-bin move records remain structurally parsed but semantically undecoded, so combat.ts keeps a generic fallback for missing profile fields. Combo chain length (melee.comboHits) counts real exported swing banks; charge shots (shot.chargeable) key off beam/heavy families + the G Red hero line; sword-beam finishers (melee.swordBeam) key off sword-family melee-primary borgs + the hero line. All numeric values for those mechanics are TUNED.",
   "count": 208,
   "profiles": {
     "pl0000": {
@@ -29,7 +29,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -40,14 +43,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -79,7 +88,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -90,14 +109,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -128,7 +153,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -139,14 +167,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -176,7 +210,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -187,14 +224,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -224,7 +267,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -235,14 +281,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -272,7 +324,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 2,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -283,14 +338,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -323,7 +384,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 20,
@@ -336,12 +407,18 @@
         "lifetime": 44,
         "homingTurn": 0.03,
         "hitRadius": 46,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 40,
         "muzzleYOffset": 20,
         "damageMultiplier": 1.2,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "flame"
+        "visualKind": "flame",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -374,7 +451,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -385,14 +465,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -422,7 +508,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -433,14 +522,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -470,7 +565,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 2,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -481,14 +579,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -518,7 +622,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -529,14 +636,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -566,7 +679,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -577,14 +693,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -614,7 +736,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -625,14 +750,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -665,7 +796,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -676,14 +810,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -716,7 +856,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -727,14 +870,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -769,14 +918,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -809,7 +964,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -820,14 +978,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -862,7 +1026,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -875,12 +1042,18 @@
         "lifetime": 46,
         "homingTurn": 0.045,
         "hitRadius": 34,
-        "muzzleForwardOffset": 30,
-        "muzzleYOffset": 20,
+        "muzzleForwardOffset": 38,
+        "muzzleYOffset": 24,
         "damageMultiplier": 1.15,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.9,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -914,14 +1087,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -963,7 +1142,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -1005,7 +1190,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -1038,7 +1229,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -1049,14 +1243,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1086,7 +1286,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -1119,14 +1322,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1157,7 +1366,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -1168,14 +1387,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1206,7 +1431,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": null,
       "special": {
@@ -1238,7 +1473,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -1249,14 +1494,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1287,7 +1538,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -1298,14 +1559,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1338,7 +1605,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 12,
@@ -1349,14 +1626,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1389,7 +1672,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 12,
@@ -1400,14 +1693,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1437,7 +1736,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -1469,7 +1771,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -1480,14 +1792,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1520,7 +1838,10 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -1531,14 +1852,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1569,7 +1896,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -1580,14 +1917,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1618,7 +1961,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -1629,14 +1982,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1668,7 +2027,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -1679,14 +2048,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -1717,7 +2092,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -1728,14 +2113,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1768,7 +2159,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 12,
@@ -1779,14 +2180,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1819,7 +2226,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 12,
@@ -1830,14 +2247,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1867,7 +2290,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -1878,14 +2304,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1915,7 +2347,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -1926,14 +2361,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -1963,7 +2404,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -1974,14 +2418,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2011,7 +2461,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -2022,14 +2475,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2063,14 +2522,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2102,7 +2567,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -2113,14 +2581,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2153,7 +2627,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -2164,14 +2641,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -2205,14 +2688,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2242,7 +2731,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -2253,14 +2745,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2291,7 +2789,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -2323,7 +2824,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -2334,14 +2838,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -2374,7 +2884,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -2385,14 +2898,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -2422,7 +2941,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -2433,14 +2955,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2470,7 +2998,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -2501,7 +3032,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -2512,14 +3046,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2550,7 +3090,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -2561,14 +3111,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2599,7 +3155,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -2610,14 +3176,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2647,7 +3219,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -2658,14 +3233,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2696,7 +3277,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -2707,14 +3298,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2745,7 +3342,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -2756,14 +3363,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2793,7 +3406,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -2804,14 +3420,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2841,7 +3463,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -2875,7 +3500,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -2886,14 +3521,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2923,7 +3564,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -2934,14 +3578,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -2971,7 +3621,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -2982,14 +3635,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3020,7 +3679,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -3031,14 +3700,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3069,7 +3744,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -3080,14 +3765,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3121,14 +3812,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3162,14 +3859,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3203,7 +3906,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 20,
@@ -3216,12 +3922,18 @@
         "lifetime": 44,
         "homingTurn": 0.03,
         "hitRadius": 46,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 40,
         "muzzleYOffset": 20,
         "damageMultiplier": 1.2,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "flame"
+        "visualKind": "flame",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -3253,7 +3965,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -3264,14 +3979,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3305,7 +4026,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 20,
@@ -3318,12 +4042,18 @@
         "lifetime": 44,
         "homingTurn": 0.03,
         "hitRadius": 46,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 40,
         "muzzleYOffset": 20,
         "damageMultiplier": 1.2,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "flame"
+        "visualKind": "flame",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -3356,7 +4086,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 34,
@@ -3374,7 +4107,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -3406,7 +4145,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -3417,14 +4159,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -3458,14 +4206,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3498,7 +4252,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -3509,14 +4266,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -3549,7 +4312,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 34,
@@ -3567,7 +4333,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -3601,7 +4373,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 16,
@@ -3614,12 +4389,18 @@
         "lifetime": 46,
         "homingTurn": 0.045,
         "hitRadius": 34,
-        "muzzleForwardOffset": 30,
-        "muzzleYOffset": 20,
+        "muzzleForwardOffset": 38,
+        "muzzleYOffset": 24,
         "damageMultiplier": 1.15,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.9,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -3651,7 +4432,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -3662,14 +4446,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -3701,7 +4491,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -3712,14 +4505,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3752,7 +4551,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 20,
@@ -3765,12 +4567,18 @@
         "lifetime": 44,
         "homingTurn": 0.03,
         "hitRadius": 46,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 40,
         "muzzleYOffset": 20,
         "damageMultiplier": 1.2,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "flame"
+        "visualKind": "flame",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -3801,7 +4609,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -3812,14 +4630,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -3850,7 +4674,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -3861,14 +4688,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -3900,7 +4733,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -3911,14 +4747,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -3950,7 +4792,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -3961,14 +4806,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4002,14 +4853,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -4041,7 +4898,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -4052,14 +4912,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4091,7 +4957,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4102,14 +4971,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4141,7 +5016,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -4152,14 +5030,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4191,7 +5075,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -4202,14 +5089,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4239,7 +5132,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -4250,14 +5146,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -4289,7 +5191,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4300,14 +5205,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4339,7 +5250,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4350,14 +5264,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -4390,7 +5310,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4401,14 +5324,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -4439,7 +5368,17 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -4450,14 +5389,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4489,7 +5434,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4500,14 +5448,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4540,7 +5494,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4551,14 +5508,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -4591,7 +5554,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4602,14 +5568,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -4642,7 +5614,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4653,14 +5628,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -4693,7 +5674,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4704,14 +5688,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -4744,7 +5734,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4755,14 +5748,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 120,
@@ -4794,7 +5793,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4805,14 +5807,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4843,7 +5851,17 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -4854,14 +5872,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -4893,7 +5917,17 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 30,
+          "hitRadius": 30,
+          "damageMultiplier": 1,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -4904,14 +5938,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -4943,7 +5983,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -4954,14 +5997,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -4993,7 +6042,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -5004,14 +6056,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5042,7 +6100,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -5053,14 +6121,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5102,7 +6176,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -5134,7 +6214,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -5145,14 +6228,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5183,7 +6272,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -5194,14 +6286,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -5233,7 +6331,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -5244,14 +6345,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -5283,7 +6390,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -5294,14 +6404,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5333,7 +6449,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -5344,14 +6463,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5393,7 +6518,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -5426,14 +6557,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -5465,7 +6602,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -5476,14 +6616,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5515,7 +6661,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 8,
@@ -5526,14 +6675,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5575,7 +6730,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -5606,7 +6767,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -5617,14 +6788,20 @@
         "spreadRadians": 0.055,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5666,7 +6843,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -5698,7 +6881,17 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 30,
+          "hitRadius": 30,
+          "damageMultiplier": 1,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -5709,14 +6902,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5748,7 +6947,17 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 30,
+          "hitRadius": 30,
+          "damageMultiplier": 1,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 8,
@@ -5759,14 +6968,20 @@
         "spreadRadians": 0.055,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.05,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 0.72,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.8,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5797,7 +7012,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -5808,14 +7033,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5846,7 +7077,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -5857,14 +7098,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5895,7 +7142,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -5906,14 +7163,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5944,7 +7207,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -5955,14 +7228,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -5996,7 +7275,10 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -6007,14 +7289,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6044,7 +7332,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -6079,7 +7370,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": null,
       "special": {
@@ -6111,7 +7412,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6122,14 +7433,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6160,7 +7477,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6171,14 +7498,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6209,7 +7542,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6220,14 +7563,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6258,7 +7607,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6269,14 +7628,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6306,7 +7671,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -6317,14 +7685,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6354,7 +7728,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -6365,14 +7742,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6402,7 +7785,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -6413,14 +7799,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6451,7 +7843,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 26,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6462,14 +7864,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6499,7 +7907,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -6510,14 +7921,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6547,7 +7964,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -6558,14 +7978,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6596,7 +8022,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6607,14 +8043,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6645,7 +8087,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6656,14 +8108,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6695,14 +8153,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6732,7 +8196,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -6766,7 +8233,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -6777,14 +8247,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -6816,7 +8292,17 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": null,
       "special": {
@@ -6847,7 +8333,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -6879,7 +8368,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 2,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6890,14 +8389,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6928,7 +8433,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6939,14 +8454,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -6977,7 +8498,17 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": {
+          "speed": 30,
+          "lifetime": 24,
+          "hitRadius": 30,
+          "damageMultiplier": 0.85,
+          "homingTurn": 0.02,
+          "visualKind": "energy"
+        }
       },
       "shot": {
         "cooldown": 14,
@@ -6988,14 +8519,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7027,14 +8564,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7064,7 +8607,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7075,14 +8621,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7112,7 +8664,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7123,14 +8678,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7160,7 +8721,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7171,14 +8735,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7208,7 +8778,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7219,14 +8792,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7256,7 +8835,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7267,14 +8849,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7304,7 +8892,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7315,14 +8906,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7352,7 +8949,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7363,14 +8963,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7400,7 +9006,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7411,14 +9020,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7448,7 +9063,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7459,14 +9077,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7496,7 +9120,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7507,14 +9134,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7546,14 +9179,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7583,7 +9222,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7594,14 +9236,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7631,7 +9279,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7642,14 +9293,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7680,7 +9337,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7691,14 +9351,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -7729,7 +9395,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7740,14 +9409,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -7778,7 +9453,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7789,14 +9467,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -7830,7 +9514,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 16,
@@ -7843,12 +9530,18 @@
         "lifetime": 46,
         "homingTurn": 0.045,
         "hitRadius": 34,
-        "muzzleForwardOffset": 30,
-        "muzzleYOffset": 20,
+        "muzzleForwardOffset": 38,
+        "muzzleYOffset": 24,
         "damageMultiplier": 1.15,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.9,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -7881,7 +9574,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -7892,14 +9588,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -7929,7 +9631,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -7940,14 +9645,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -7981,7 +9692,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 16,
@@ -7994,12 +9708,18 @@
         "lifetime": 46,
         "homingTurn": 0.045,
         "hitRadius": 34,
-        "muzzleForwardOffset": 30,
-        "muzzleYOffset": 20,
+        "muzzleForwardOffset": 38,
+        "muzzleYOffset": 24,
         "damageMultiplier": 1.15,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.9,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -8032,7 +9752,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -8043,14 +9766,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -8084,7 +9813,10 @@
         "range": 86,
         "yTolerance": 50,
         "damageMultiplier": 1.15,
-        "knockbackMultiplier": 1.15
+        "knockbackMultiplier": 1.15,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -8095,14 +9827,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -8135,7 +9873,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 12,
@@ -8146,14 +9887,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -8183,7 +9930,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8194,14 +9944,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8231,7 +9987,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8242,14 +10001,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8279,7 +10044,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8290,14 +10058,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8327,7 +10101,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8338,14 +10115,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8375,7 +10158,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8386,14 +10172,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8423,7 +10215,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8434,14 +10229,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8471,7 +10272,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8482,14 +10286,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8519,7 +10329,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 3,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8530,14 +10343,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8567,7 +10386,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 14,
@@ -8578,14 +10400,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8627,7 +10455,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -8669,7 +10503,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -8704,7 +10544,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": {
         "cooldown": 34,
@@ -8722,7 +10565,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -8764,7 +10613,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 120,
@@ -8806,7 +10661,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 120,
@@ -8848,7 +10709,13 @@
         "damageMultiplier": 1.75,
         "hitstunMultiplier": 1.45,
         "knockbackMultiplier": 1.65,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.6,
+        "bulletDrop": 0.12
       },
       "special": {
         "cooldown": 90,
@@ -8882,14 +10749,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8923,14 +10796,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -8962,14 +10841,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9003,14 +10888,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9044,14 +10935,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9083,14 +10980,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9121,7 +11024,10 @@
         "range": 78,
         "yTolerance": 64,
         "damageMultiplier": 1.3,
-        "knockbackMultiplier": 1.35
+        "knockbackMultiplier": 1.35,
+        "comboHits": 1,
+        "comboWindowFrames": 26,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -9153,7 +11059,10 @@
         "range": 64,
         "yTolerance": 50,
         "damageMultiplier": 1,
-        "knockbackMultiplier": 1
+        "knockbackMultiplier": 1,
+        "comboHits": 1,
+        "comboWindowFrames": 22,
+        "swordBeam": null
       },
       "shot": null,
       "special": {
@@ -9188,14 +11097,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -9233,12 +11148,18 @@
         "lifetime": 46,
         "homingTurn": 0.045,
         "hitRadius": 34,
-        "muzzleForwardOffset": 30,
-        "muzzleYOffset": 20,
+        "muzzleForwardOffset": 38,
+        "muzzleYOffset": 24,
         "damageMultiplier": 1.15,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 0.9,
-        "visualKind": "energy"
+        "visualKind": "energy",
+        "chargeable": true,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0
       },
       "special": {
         "cooldown": 90,
@@ -9272,14 +11193,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -9313,14 +11240,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -9354,14 +11287,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -9395,14 +11334,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 120,
@@ -9436,14 +11381,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9477,14 +11428,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9518,14 +11475,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9559,14 +11522,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9600,14 +11569,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9639,14 +11614,20 @@
         "spreadRadians": 0,
         "speed": 22,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.075,
         "hitRadius": 35,
         "muzzleForwardOffset": 30,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,
@@ -9680,14 +11661,20 @@
         "spreadRadians": 0,
         "speed": 28,
         "lifetime": 40,
-        "homingTurn": 0.08,
+        "homingTurn": 0.06,
         "hitRadius": 35,
-        "muzzleForwardOffset": 30,
+        "muzzleForwardOffset": 34,
         "muzzleYOffset": 20,
         "damageMultiplier": 1,
         "hitstunMultiplier": 1,
         "knockbackMultiplier": 1,
-        "visualKind": "muzzle"
+        "visualKind": "muzzle",
+        "chargeable": false,
+        "chargeTier1Frames": 30,
+        "chargeTier2Frames": 90,
+        "chargeTier1DamageMult": 1.6,
+        "chargeTier2DamageMult": 2.4,
+        "bulletDrop": 0.045
       },
       "special": {
         "cooldown": 90,

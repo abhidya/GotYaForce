@@ -942,8 +942,10 @@
 }
 .gf-select-cost {
   position: absolute;
-  left: 10%;
+  left: 6%;
   bottom: 24%;
+  /* Cap the block so it can never run under the force-name grid on the right. */
+  max-width: 34%;
   z-index: 3;
   display: grid;
   grid-template-columns: auto auto;
@@ -959,7 +961,7 @@
   color: var(--gf-yellow);
 }
 .gf-select-cost-value {
-  font-size: clamp(44px, 8vw, 90px);
+  font-size: clamp(38px, 7vw, 90px);
 }
 .gf-select-name {
   position: absolute;
@@ -967,14 +969,15 @@
   bottom: 21%;
   z-index: 3;
   display: grid;
-  grid-template-columns: auto minmax(160px, 448px);
+  grid-template-columns: auto minmax(120px, 1fr);
   grid-template-areas:
     "no banner"
     "force force"
     "limit limit";
   gap: 6px 14px;
   align-items: center;
-  min-width: min(48vw, 520px);
+  /* Never overlap the COST readout on the left. */
+  width: min(52%, 520px);
   color: #ffffff;
 }
 .gf-select-no {
@@ -1190,37 +1193,59 @@
   min-height: 0;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  /* The real extracted per-borg art (`mn<code>`) is a 224x32 name plate, not a
+     square icon, so each option is a wide row: [name plate | cost]. */
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
   gap: 6px;
   padding: 10px;
   border-radius: 10px;
   background: linear-gradient(#1d3a63, #12263f);
   border: 2px solid #2f5e96;
+  align-content: start;
 }
 .gf-borg-cell {
   position: relative;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
   border-radius: 8px;
-  background: #e9eef5;
+  background: linear-gradient(#8b93a5, #5c6374);
   border: 2px solid #b9c4d3;
   cursor: pointer;
   overflow: hidden;
-  padding: 0;
+  padding: 2px 4px;
 }
-.gf-borg-cell img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+.gf-borg-cell img {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+  image-rendering: pixelated;
+}
+.gf-borg-cell .gf-borg-cell-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 10px;
+  color: #f4f7fb;
+  -webkit-text-stroke: 0.5px #1a2233;
+  paint-order: stroke fill;
+}
 .gf-borg-cell.gf-in-force { border-color: var(--gf-yellow); box-shadow: 0 0 0 2px var(--gf-yellow) inset; }
 .gf-borg-cell.gf-disabled { opacity: 0.35; cursor: not-allowed; }
 .gf-borg-cell .gf-cost-tag {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  font-size: 9px;
+  flex: none;
+  font-size: 10px;
   background: rgba(0, 0, 0, 0.7);
   color: #ffd21e;
-  padding: 0 3px;
-  border-top-left-radius: 4px;
+  padding: 1px 4px;
+  border-radius: 4px;
 }
 .gf-borg-cell .gf-new-badge {
   position: absolute;
@@ -1318,226 +1343,98 @@
 .gf-cost-panel.gf-over .gf-cost-val.gf-remain { color: var(--gf-red); }
 
 /* ============================ BATTLE HUD ============================ */
+/* Rebuilt 1:1 against reference/captures/challenge-8-in-battle-hud.png and
+   challenge-9-battle-critical-hp.png. The HUD is authored on the game's
+   native 640x480 frame; BattleHud.ts scales the whole stage to the container
+   (non-uniform, like the real frame stretching to the viewport). All element
+   positions live in BattleHud.ts with the capture-measured %s commented. */
 .gf-hud {
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: 0;
+  width: 640px;
+  height: 480px;
+  transform-origin: 0 0;
   pointer-events: none;
-  font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
-  font-weight: 800;
-  color: #fff;
   z-index: 10;
 }
-.gf-hud-meters {
-  position: absolute;
-  top: 18px;
-  left: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transform: scale(1.28);
-  transform-origin: top left;
+.gf-hud .gf-hidden {
+  display: none;
 }
-.gf-meter { position: relative; width: 220px; height: 18px; display: flex; align-items: center; }
-.gf-meter-tab {
-  position: relative;
-  z-index: 2;
-  min-width: 38px;
+.gf-hud-vector {
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  display: grid;
-  place-items: center;
-  padding: 0 6px;
-  font-size: 13px;
-  color: #fff;
-  -webkit-text-stroke: 0.5px #000;
-  paint-order: stroke fill;
+  overflow: visible;
 }
-.gf-meter-tab .gf-bitmap-text {
-  transform: scale(1.35);
-  transform-origin: center;
-  filter: drop-shadow(1px 1px 0 #000);
-}
-.gf-meter-ally .gf-meter-tab { background: var(--gf-green-deep); border-radius: 4px 0 0 4px; }
-.gf-meter-enemy .gf-meter-tab { background: var(--gf-red-deep); border-radius: 4px 0 0 4px; }
-.gf-meter-track {
-  position: relative;
-  flex: 1;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.55);
-  /* zigzag/torn right end */
-  clip-path: polygon(0 0, 100% 0, 96% 25%, 100% 50%, 96% 75%, 100% 100%, 0 100%);
-  overflow: hidden;
-}
-.gf-meter-fill { position: absolute; inset: 0; transform-origin: left center; transition: transform 0.25s ease; }
-.gf-meter-ally .gf-meter-fill { background: linear-gradient(#7be85a, var(--gf-green)); }
-.gf-meter-enemy .gf-meter-fill { background: linear-gradient(#ff6a5f, var(--gf-red)); }
-.gf-meter-name {
+/* absolutely positioned real ascii.tpl bitmap text on the 640x480 stage */
+.gf-hud-text {
   position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  -webkit-text-stroke: 0.5px #000;
-  paint-order: stroke fill;
 }
-.gf-meter-name .gf-bitmap-text {
-  transform: scale(1.25);
-  transform-origin: right center;
-  filter: drop-shadow(1px 1px 0 #000);
+/* ally energy number is centered in its tab segment (x 196..242 measured) */
+.gf-ally-num {
+  width: 46px;
+  justify-content: center;
 }
-.gf-hud-alert {
-  position: absolute;
-  top: 14px;
-  left: 244px;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--gf-yellow);
-  color: var(--gf-outline);
-  font-size: 18px;
-  border: 2px solid #fff;
+/* HP digits move into the red capsule in the critical state (challenge-9) */
+.gf-hp-num.gf-critical {
+  left: 66px !important;
+  top: 402px !important;
 }
-.gf-hud-alert.gf-hidden { display: none; }
+/* top-center timer pill (untimed challenge battles hide it) */
 .gf-hud-timer {
   position: absolute;
-  top: 18px;
-  left: 50%;
-  transform: translateX(-50%) scale(1.2);
-  transform-origin: top center;
+  top: 8px;
+  left: 320px;
+  transform: translateX(-50%);
   min-width: 78px;
-  height: 24px;
+  height: 26px;
   display: grid;
   place-items: center;
   border-radius: 999px;
   background: linear-gradient(#eef2f7, #9aa0ab);
   border: 2px solid #ffffff;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.24), 0 3px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.24);
 }
-.gf-hud-timer.gf-hidden { display: none; }
-.gf-hud-timer-text {
-  transform: scale(1.65);
-  transform-origin: center;
-  filter: drop-shadow(1px 1px 0 #000);
-}
-
-/* World-space BattleScene marker owns lock-on; no fake centered HUD reticle. */
-.gf-hud-reticle {
+.gf-hud-timer.gf-hidden {
   display: none;
 }
-.gf-hud-reticle.gf-hidden { opacity: 0; }
-.gf-reticle-ring {
+/* real per-borg bn<code> name banner (optional slot) */
+.gf-hud-banner {
+  position: absolute;
+  top: 40px;
+  left: 320px;
+  transform: translateX(-50%);
+  height: 28px;
+  image-rendering: pixelated;
+}
+/* floating teammate plates ("CPU"/"ALLY" + green-on-red mini HP bar).
+   challenge-8 example: CPU label at 56..60%W / 21.5..23.5%H, bar 63x6px below. */
+.gf-hud-mates {
   position: absolute;
   inset: 0;
-  border: 4px solid var(--gf-orange);
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
-  animation: gf-reticle-spin 4s linear infinite;
 }
-@keyframes gf-reticle-spin { to { transform: rotate(360deg); } }
-.gf-reticle-tri { position: absolute; width: 0; height: 0; color: #3a7bd5; }
-
-/* bottom-left HP gauge */
-.gf-hud-hp {
+.gf-mate {
   position: absolute;
-  bottom: 34px;
-  left: 28px;
-  width: 92px;
-  height: 60px;
-  display: grid;
-  place-items: center;
-  transform: scale(1.35);
-  transform-origin: bottom left;
-}
-.gf-hp-face-marker {
-  position: absolute;
-  left: -7px;
-  top: -9px;
-  width: 42px;
-  height: 42px;
-  object-fit: none;
-  object-position: 0 0;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.4));
-}
-.gf-hp-ring { position: absolute; inset: 0; }
-.gf-hp-num {
-  position: relative;
-  z-index: 2;
-  font-size: 26px;
-  color: var(--gf-yellow);
-  -webkit-text-stroke: 1.4px var(--gf-outline);
-  paint-order: stroke fill;
-}
-.gf-hp-num.gf-bitmap-text {
-  transform: scale(2.6);
-  transform-origin: center;
-  filter: drop-shadow(1px 1px 0 var(--gf-outline));
-}
-.gf-hud-hp.gf-critical .gf-hp-num { color: #fff; }
-
-/* bottom-right weapon prompts */
-.gf-hud-weapon {
-  position: absolute;
-  bottom: 34px;
-  right: 28px;
+  transform: translateX(-50%);
   display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  transform: scale(1.35);
-  transform-origin: bottom right;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
-.gf-weapon-special { display: grid; place-items: center; width: 56px; height: 56px; }
-.gf-weapon-special .gf-special-glyph {
-  position: relative;
-  z-index: 2;
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #cfd3da, #7d828c);
-  color: var(--gf-outline);
-  font-size: 14px;
-  font-weight: 900;
+.gf-mate-label .gf-bitmap-glyph {
+  filter: drop-shadow(1px 1px 0 rgba(16, 24, 60, 0.85));
 }
-.gf-button-letter {
-  transform: scale(1.6);
-  transform-origin: center;
-  filter: drop-shadow(1px 1px 0 rgba(255, 255, 255, 0.45));
+.gf-mate-bar {
+  width: 63px;
+  height: 6px;
+  background: #f2200a;
+  border: 1px solid rgba(0, 0, 0, 0.7);
 }
-.gf-cooldown-ring { position: absolute; inset: 0; }
-.gf-weapon-b { display: flex; align-items: center; gap: 6px; }
-.gf-b-track {
-  position: relative;
-  width: 70px;
-  height: 16px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.55);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  padding-left: 8px;
-}
-.gf-b-reload { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gf-cyan); transition: width 0.2s ease; }
-.gf-b-ammo { position: relative; z-index: 2; color: var(--gf-yellow); font-size: 15px; -webkit-text-stroke: 1px var(--gf-outline); paint-order: stroke fill; }
-.gf-b-ammo.gf-bitmap-text {
-  transform: scale(1.5);
-  transform-origin: left center;
-  filter: drop-shadow(1px 1px 0 var(--gf-outline));
-}
-.gf-b-glyph {
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ff5a4f, var(--gf-red-deep));
-  color: #fff;
-  font-size: 14px;
-  font-weight: 900;
+.gf-mate-fill {
+  height: 100%;
+  background: #2ce518;
 }
 
 /* ============================ RESULTS ============================ */
