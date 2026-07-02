@@ -23,6 +23,29 @@ Generated: 2026-06-30
   `game-pad-normalization-cluster` hits, decoded `padButtons: {"none": 80}`, and
   captured zero action-state/audio hits. Result: the attempted keyboard `C`/GC-X input
   did not reach the sampled PAD frames before the short trace filled; it is not X proof.
+- Corrected GDB-injection input proof on 2026-07-02:
+  - `scripts/dolphin-gdb-trace.mjs` now supports `--inject-pad-buttons`,
+    `--inject-pad-frames`, and `--inject-pad-port`.
+  - Injection happens at `0x8010d4d0`, after `PADRead` returns and before
+    `zz_010d450_` copies/clamps the `PADStatus[4]` buffer into normalized globals.
+    The injector also clears `PADStatus.err` to zero; preserving Dolphin's `err=-3`
+    made the game-side normalizer ignore the synthetic button.
+  - `pad-normalization-complete` at `0x8010d86c` captures `DAT_803c727c` after the
+    normalizer writes current/previous/pressed/released slot records.
+  - These traces are explicitly `gdb-pad-injection`, not physical keyboard/controller
+    captures. They prove the downstream normalizer path for injected PADStatus bits,
+    not full player action semantics.
+- Corrected normalized-input captures from `2v2 gred cotrolled players no cpu.sav`:
+  - B: raw write `020000000000000000000000`; normalized slot-0 current
+    `0x00000200`, pressed `0x00000200`.
+  - X: raw write `040000000000000000000000`; normalized slot-0 current
+    `0x00000400`, pressed `0x00000400`.
+  - Z: raw write `001000000000000000000000`; normalized slot-0 current
+    `0x00000010`, pressed `0x00000010`.
+  - The same corrected runs still captured zero `player-input-bridge`,
+    `action-handler-table`, `borg-state-dispatch`, `state-transition-primitive`,
+    param-tier, or audio hits. Therefore B/X action mapping, Z ally-lock/charge or
+    power-up side effects, and cue IDs remain unproven.
 
 ## Trace Files
 
@@ -57,6 +80,24 @@ Generated: 2026-06-30
     `firstNonNeutralPad: null`, and zero action/audio proof IDs.
   - Result: proves the new proof summarizer can reject a mislabeled/too-short X run;
     does not prove B/X mapping, Z behavior, or cue IDs.
+- `user-data/dolphin-trace/traces/b-normalization-complete/gdb-trace-2026-07-02T20-35-11-537Z.json`
+  - Corrected post-PADRead GDB injection from `2v2 gred cotrolled players no cpu.sav`.
+  - 100 hits, no errors. B is observed at PADRead and normalized slot 0 as
+    `current=0x00000200`, `pressed=0x00000200`.
+  - Result: proves injected GC-B survives through `zz_010d450_` normalization; no
+    actor/action/param/audio consumer fired.
+- `user-data/dolphin-trace/traces/x-normalization-complete/gdb-trace-2026-07-02T20-35-42-336Z.json`
+  - Corrected post-PADRead GDB injection from the same save.
+  - 100 hits, no errors. X is observed at PADRead and normalized slot 0 as
+    `current=0x00000400`, `pressed=0x00000400`.
+  - Result: proves injected GC-X survives through `zz_010d450_` normalization; no
+    actor/action/audio consumer fired.
+- `user-data/dolphin-trace/traces/z-normalization-paramtier/gdb-trace-2026-07-02T20-36-13-645Z.json`
+  - Corrected post-PADRead GDB injection from the same save.
+  - 150 hits, no errors. Z is observed at PADRead and normalized slot 0 as
+    `current=0x00000010`, `pressed=0x00000010`.
+  - Result: proves injected GC-Z survives through `zz_010d450_` normalization; zero
+    param-tier/action/audio hits, so no ally-lock charge or power-up behavior is proven.
 
 ## Commands
 
@@ -78,6 +119,8 @@ Note: do not probe `127.0.0.1:5555` with `Test-NetConnection` before tracing; Do
 Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, death-to-next-borg, B/X action mapping, Z ally-charge/power-up behavior, per-action audio cue IDs, or CPU AI from guesses. The current browser mechanics remain candidate wiring until one action-specific trace captures the original DOL state transitions:
 
 - Active borg base from `0x8005d4b0` or `0x80055c00`.
+- Player input bridge from `0x80056900` (`FUN_80056900`) copying normalized
+  `DAT_803c727c` into actor `+0x5b4` current command and `+0x5bc` pressed edge.
 - Writes to `active_borg_base+0x544`, `+0x5e0`, `+0x6b4`, `+0x6b6`, `+0x6fe`, and `+0x720`.
 - Target pointer writer.
 - HP writer.
@@ -87,17 +130,16 @@ Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, de
 ## Next Trace
 
 Use visible Dolphin or a verified gameplay save-state boot path, then run one trace per
-action. Keep the trace alive long enough to inject the key; the 2026-07-02 `x-special`
-attempt filled `max-hits=160` before any non-neutral PAD sample was captured. For B/X/Z/audio
-proof, use the expanded proof IDs and summarize the ignored raw JSON before promoting any rule:
+action. For physical controller proof, do not use `--inject-pad-buttons`; for deterministic
+downstream PADStatus proof, use the post-PADRead injector below. Summarize the ignored raw JSON
+before promoting any rule:
 
 ```bash
 rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\right before hit.sav"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids pad-read,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --max-hits 3000 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids pad-read,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --max-hits 3000 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-ranged-b"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids pad-read,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --max-hits 3000 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids pad-read,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,param-tier-reset,param-tier-delta-127,param-tier-delta-63,param-tier-refresh,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --max-hits 3000 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
-rtk .\tools\node\node.exe scripts\summarize-dolphin-gdb-trace.mjs user-data\dolphin-trace\traces\bx-close-b user-data\dolphin-trace\traces\bx-ranged-b user-data\dolphin-trace\traces\x-special user-data\dolphin-trace\traces\z-ally-lock
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --inject-pad-buttons=B --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --inject-pad-buttons=X --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids=pad-read,pad-post-read-normalization,pad-normalization-complete,game-pad-normalization-cluster,player-input-bridge,active-borg-command-current,active-borg-command-pressed,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-handler-table,action-helper-cluster,battle-frame-target-action-dispatch,param-tier-reset,param-tier-delta-127,param-tier-delta-63,param-tier-refresh,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --inject-pad-buttons=Z --inject-pad-frames=90 --max-hits=1200 --timeout-ms=60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
+rtk .\tools\node\node.exe scripts\summarize-dolphin-gdb-trace.mjs user-data\dolphin-trace\traces\bx-close-b user-data\dolphin-trace\traces\x-special user-data\dolphin-trace\traces\z-ally-lock
 ```
 
 Proof gate: a B/X mapping needs PAD bytes and either `state-transition-primitive` or

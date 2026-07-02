@@ -142,6 +142,38 @@
       "status": "runtime_capture_required"
     },
     {
+      "id": "active-borg-command-current",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x5b4",
+      "dol_offset": null,
+      "size": 4,
+      "install_after": "Capture active_borg_base from r3 at player-input-bridge 0x80056900.",
+      "capture": [
+        "old/new current command word",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
+      "id": "active-borg-command-pressed",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x5bc",
+      "dol_offset": null,
+      "size": 4,
+      "install_after": "Capture active_borg_base from r3 at player-input-bridge 0x80056900 after DAT_803c727c is normalized.",
+      "capture": [
+        "old/new edge-pressed command word",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
       "id": "active-borg-wakeup-invulnerability-timer",
       "type": "read_write",
       "address": "runtime:active_borg_base+0x720",
@@ -923,6 +955,70 @@
           "confidence": "playbook_lead"
         },
         {
+          "id": "pad-post-read-normalization",
+          "type": "execute",
+          "address": "0x8010d4d0",
+          "dol_offset": "0x0010a4d0",
+          "section": "text1",
+          "symbol": "zz_010d450_ after PADRead before PADClampCircle",
+          "event": "Post-PADRead point where DAT_803c72fc can be sampled or injected before game-side normalization consumes it.",
+          "capture": [
+            "DAT_803c72fc PADStatus[4] raw bytes",
+            "r24 pad buffer pointer",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "disassembled from boot.dol"
+        },
+        {
+          "id": "pad-normalization-complete",
+          "type": "execute",
+          "address": "0x8010d86c",
+          "dol_offset": "0x0010a86c",
+          "section": "text1",
+          "symbol": "zz_010d450_ after DAT_803c727c slot copy",
+          "event": "Normalized PAD globals have been written: current at DAT_803c727c, press edge at DAT_803c7284, release edge at DAT_803c7288.",
+          "capture": [
+            "DAT_803c72fc PADStatus[4]",
+            "DAT_803c727c normalized slot records",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "disassembled from boot.dol"
+        },
+        {
+          "id": "normalized-pad-slot0-current-read",
+          "type": "read",
+          "address": "0x803c727c",
+          "dol_offset": null,
+          "section": "bss/runtime",
+          "size": 4,
+          "symbol": "DAT_803c727c slot0 normalized current input word",
+          "event": "Reader of slot-0 normalized input current word after zz_010d450_ copies PADStatus.",
+          "capture": [
+            "reader pc/lr",
+            "old/current word",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled normalized PAD buffer"
+        },
+        {
+          "id": "normalized-pad-slot0-pressed-read",
+          "type": "read",
+          "address": "0x803c7284",
+          "dol_offset": null,
+          "section": "bss/runtime",
+          "size": 4,
+          "symbol": "DAT_803c7284 slot0 normalized press-edge word",
+          "event": "Reader of slot-0 normalized input press-edge word.",
+          "capture": [
+            "reader pc/lr",
+            "old/current word",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled normalized PAD buffer"
+        },
+        {
           "id": "borg-state-dispatch",
           "type": "execute",
           "address": "0x8005c694",
@@ -940,6 +1036,24 @@
             "r0-r31"
           ],
           "confidence": "confirmed"
+        },
+        {
+          "id": "player-input-bridge",
+          "type": "execute",
+          "address": "0x80056900",
+          "dol_offset": "0x00053900",
+          "section": "text1",
+          "symbol": "FUN_80056900 / DAT_803c727c to actor command fields",
+          "event": "Copies normalized controller word into actor+0x5b4 and derives actor+0x5bc press-edge word.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 current command word",
+            "actor+0x5b8 previous command word",
+            "actor+0x5bc press-edge word",
+            "actor+0x5c0 release-edge word",
+            "DAT_803c727c slot word"
+          ],
+          "confidence": "confirmed decompiled input bridge"
         },
         {
           "id": "state-transition-primitive",

@@ -13,10 +13,29 @@ const port = Number.parseInt(argsByName.get("port") ?? process.env.GDB_PORT ?? "
 const maxHits = Number.parseInt(argsByName.get("max-hits") ?? process.env.TRACE_MAX_HITS ?? "120", 10);
 const timeoutMs = Number.parseInt(argsByName.get("timeout-ms") ?? process.env.TRACE_TIMEOUT_MS ?? "60000", 10);
 const commandTimeoutMs = Number.parseInt(argsByName.get("command-timeout-ms") ?? process.env.TRACE_COMMAND_TIMEOUT_MS ?? "15000", 10);
+const injectPadButtonsRaw = argsByName.get("inject-pad-buttons") ?? process.env.TRACE_INJECT_PAD_BUTTONS ?? "";
+const injectPadFrames = Number.parseInt(argsByName.get("inject-pad-frames") ?? process.env.TRACE_INJECT_PAD_FRAMES ?? "0", 10);
+const injectPadPort = Number.parseInt(argsByName.get("inject-pad-port") ?? process.env.TRACE_INJECT_PAD_PORT ?? "0", 10);
 const groupsFilter = csvSet(argsByName.get("groups") ?? process.env.TRACE_GROUPS);
 const skipIds = csvSet(argsByName.get("skip-ids") ?? process.env.TRACE_SKIP_IDS);
 const onlyIds = csvSet(argsByName.get("only-ids") ?? process.env.TRACE_ONLY_IDS);
 const dryRun = argsByName.has("dry-run") || process.env.TRACE_DRY_RUN === "1";
+
+const PAD_STATUS_SIZE = 12;
+const PAD_BUTTON_BITS = {
+  dLeft: 0x0001,
+  dRight: 0x0002,
+  dDown: 0x0004,
+  dUp: 0x0008,
+  Z: 0x0010,
+  R: 0x0020,
+  L: 0x0040,
+  A: 0x0100,
+  B: 0x0200,
+  X: 0x0400,
+  Y: 0x0800,
+  Start: 0x1000,
+};
 
 function parseArgs(argv) {
   const parsed = new Map();
@@ -25,13 +44,50 @@ function parseArgs(argv) {
     if (!arg.startsWith("--")) continue;
     const eq = arg.indexOf("=");
     if (eq >= 0) parsed.set(arg.slice(2, eq), arg.slice(eq + 1));
-    else parsed.set(arg.slice(2), argv[++i] ?? "");
+    else if (argv[i + 1] && !argv[i + 1].startsWith("--")) parsed.set(arg.slice(2), argv[++i]);
+    else parsed.set(arg.slice(2), "");
   }
   return parsed;
 }
 
 function csvSet(value) {
   return new Set((value ?? "").split(",").map((v) => v.trim()).filter(Boolean));
+}
+
+function parseButtonList(value) {
+  return (value ?? "")
+    .split(/[,+|]/)
+    .map((button) => button.trim())
+    .filter(Boolean);
+}
+
+function makePadInjectionConfig() {
+  const buttons = parseButtonList(injectPadButtonsRaw);
+  if (buttons.length === 0 && injectPadFrames <= 0) return null;
+  if (buttons.length === 0) throw new Error("--inject-pad-buttons is required when --inject-pad-frames is set");
+  const unknown = buttons.filter((button) => PAD_BUTTON_BITS[button] == null);
+  if (unknown.length > 0) {
+    throw new Error(`unknown --inject-pad-buttons value(s): ${unknown.join(", ")}`);
+  }
+  if (!Number.isInteger(injectPadFrames) || injectPadFrames <= 0) {
+    throw new Error("--inject-pad-frames must be a positive integer when --inject-pad-buttons is set");
+  }
+  if (!Number.isInteger(injectPadPort) || injectPadPort < 0 || injectPadPort > 3) {
+    throw new Error("--inject-pad-port must be 0, 1, 2, or 3");
+  }
+  const buttonMask = buttons.reduce((mask, button) => mask | PAD_BUTTON_BITS[button], 0);
+  return {
+    enabled: true,
+    buttons,
+    buttonMask,
+    buttonMaskHex: `0x${buttonMask.toString(16).padStart(4, "0")}`,
+    framesRequested: injectPadFrames,
+    framesRemaining: injectPadFrames,
+    port: injectPadPort,
+    lastPadPtr: null,
+    strategy:
+      "remember PADRead r3 PADStatus[4] pointer, then overwrite one PADStatus.button field and clear PADStatus.err at 0x8010d4d0 after PADRead returns and before game-side normalization consumes it",
+  };
 }
 
 function packet(payload) {
@@ -126,6 +182,22 @@ function loadStaticWatchpoints() {
 
 function loadRuntimeWatchpoints() {
   const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
+  const templates = (plan.runtime_field_watchpoints ?? [])
+    .filter((wp) => typeof wp.address === "string" && wp.address.startsWith("runtime:active_borg_base+"))
+    .filter((wp) => !onlyIds.size || onlyIds.has(wp.id))
+    .map((wp) => {
+      const offset = Number.parseInt(wp.address.slice("runtime:active_borg_base+".length), 16);
+      return {
+        id: wp.id,
+        type: wp.type,
+        offset,
+        size: wp.size,
+        sourceAddress: wp.address,
+      };
+    })
+    .filter((wp) => Number.isInteger(wp.offset) && Number.isInteger(wp.size))
+    .slice(0, 8);
+  if (templates.length > 0 || !onlyIds.size) return templates;
   return (plan.runtime_field_watchpoints ?? [])
     .filter((wp) => typeof wp.address === "string" && wp.address.startsWith("runtime:active_borg_base+"))
     .map((wp) => {
@@ -139,7 +211,7 @@ function loadRuntimeWatchpoints() {
       };
     })
     .filter((wp) => Number.isInteger(wp.offset) && Number.isInteger(wp.size))
-    .slice(0, 6);
+    .slice(0, 8);
 }
 
 async function installStaticWatchpoints(gdb, trace, staticWatchpoints, installed) {
@@ -284,6 +356,46 @@ async function readMem(gdb, address, bytes) {
   return raw.startsWith("E") ? { error: raw } : { raw };
 }
 
+async function writeMem(gdb, address, bytes) {
+  const rawBytes = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
+  const raw = await gdb.send(`M${address.toString(16)},${rawBytes.length.toString(16)}:${rawBytes.toString("hex")}`, 3000);
+  return raw.startsWith("E") ? { error: raw } : { raw };
+}
+
+async function maybeInjectPad(gdb, trace, injection, reason, hitIndex) {
+  if (!injection?.enabled || injection.framesRemaining <= 0 || !isMem1(injection.lastPadPtr)) return;
+  const address = (injection.lastPadPtr + injection.port * PAD_STATUS_SIZE) >>> 0;
+  if (!isMem1(address) || !isMem1(address + PAD_STATUS_SIZE - 1)) return;
+  const before = await readMem(gdb, address, PAD_STATUS_SIZE);
+  const bytes = Buffer.alloc(PAD_STATUS_SIZE);
+  if (typeof before.raw === "string" && before.raw.length >= PAD_STATUS_SIZE * 2 && !/[^0-9a-fA-F]/.test(before.raw)) {
+    Buffer.from(before.raw.slice(0, PAD_STATUS_SIZE * 2), "hex").copy(bytes);
+  }
+  bytes.writeUInt16BE(injection.buttonMask, 0);
+  bytes.writeInt8(0, 10);
+  const write = await writeMem(gdb, address, bytes);
+  const after = await readMem(gdb, address, PAD_STATUS_SIZE).catch((error) => ({ error: error.message }));
+  const record = {
+    hitIndex,
+    reason,
+    port: injection.port,
+    address: hex32(address),
+    buttons: injection.buttons,
+    buttonMask: injection.buttonMaskHex,
+    before,
+    write,
+    after,
+    framesRemainingBefore: injection.framesRemaining,
+  };
+  if (write.error) {
+    trace.errors.push({ where: "padInjection", ...record });
+  } else {
+    injection.framesRemaining -= 1;
+    record.framesRemainingAfter = injection.framesRemaining;
+  }
+  trace.padInjectionWrites.push(record);
+}
+
 async function installDerivedWatchpoints(gdb, trace, templates, activeBase, installed, installedDerived) {
   if (!isMem1(activeBase) || installedDerived.size > 0) return;
   for (const template of templates) {
@@ -381,6 +493,7 @@ function activeBorgBaseFromHit(breakpoint, regs) {
     ids.has("state-transition-primitive") ||
     ids.has("active-action-handler-invuln") ||
     ids.has("action-helper-cluster") ||
+    ids.has("player-input-bridge") ||
     ids.has("param-tier-reset") ||
     ids.has("param-tier-delta-127") ||
     ids.has("param-tier-delta-63") ||
@@ -406,6 +519,7 @@ async function main() {
     throw new Error("No execute breakpoints or static watchpoints selected.");
   }
   const runtimeWatchpointTemplates = loadRuntimeWatchpoints();
+  const padInjection = makePadInjectionConfig();
   if (dryRun) {
     console.log(JSON.stringify({
       planPath,
@@ -414,6 +528,15 @@ async function main() {
         onlyIds: [...onlyIds],
         skipIds: [...skipIds],
       },
+      padInjection: padInjection
+        ? {
+            buttons: padInjection.buttons,
+            buttonMask: padInjection.buttonMaskHex,
+            framesRequested: padInjection.framesRequested,
+            port: padInjection.port,
+            strategy: padInjection.strategy,
+          }
+        : null,
       breakpoints,
       staticWatchpoints: staticWatchpoints.map((wp) => ({
         ...wp,
@@ -442,6 +565,16 @@ async function main() {
       maxHits,
       timeoutMs,
     },
+    padInjection: padInjection
+      ? {
+          buttons: padInjection.buttons,
+          buttonMask: padInjection.buttonMaskHex,
+          framesRequested: padInjection.framesRequested,
+          port: padInjection.port,
+          strategy: padInjection.strategy,
+        }
+      : null,
+    padInjectionWrites: [],
     breakpoints,
     staticWatchpoints,
     runtimeWatchpointTemplates,
@@ -492,6 +625,7 @@ async function main() {
       const watchAddress = parseWatchAddress(stop);
       const watched = watchAddress == null ? null : installedWatchpoints.get(watchAddress) ?? null;
       const watchpoint = watched ? await snapshotWatchpoint(gdb, watched) : null;
+      const breakpointIds = new Set(breakpoint?.ids ?? []);
       if (!breakpoint && !watchpoint) {
         trace.controlStops.push({
           at: new Date().toISOString(),
@@ -501,6 +635,12 @@ async function main() {
         });
         continue;
       }
+      if (breakpointIds.has("pad-read")) {
+        padInjection && (padInjection.lastPadPtr = regs.r3?.value ?? null);
+      }
+      if (breakpointIds.has("pad-post-read-normalization")) {
+        await maybeInjectPad(gdb, trace, padInjection, "after-pad-read-before-game-normalization", trace.hits.length);
+      }
       const pointers = {};
       for (const name of ["r1", "r3", "r4", "r5", "r6", "r31"]) {
         const value = regs[name]?.value;
@@ -508,6 +648,17 @@ async function main() {
         pointers[name] = {
           address: hex32(value),
           bytes: await readMem(gdb, value, name === "r1" ? 0x80 : 0x40),
+        };
+      }
+      const fixedMemory = {};
+      if (breakpointIds.has("pad-post-read-normalization") || breakpointIds.has("pad-normalization-complete")) {
+        fixedMemory.padStatus = {
+          address: "0x803c72fc",
+          bytes: await readMem(gdb, 0x803c72fc, 0x30),
+        };
+        fixedMemory.normalizedPad = {
+          address: "0x803c727c",
+          bytes: await readMem(gdb, 0x803c727c, 0x80),
         };
       }
 
@@ -543,6 +694,7 @@ async function main() {
         watchpoint,
         regs,
         pointers,
+        fixedMemory,
         activeBaseStruct,
       });
     }
@@ -558,6 +710,7 @@ async function main() {
     }
   } finally {
     trace.finishedAt = new Date().toISOString();
+    if (trace.padInjection && padInjection) trace.padInjection.framesRemaining = padInjection.framesRemaining;
     const safeTime = startedAt.toISOString().replace(/[:.]/g, "-");
     const outPath = path.join(outDir, `gdb-trace-${safeTime}.json`);
     fs.writeFileSync(outPath, `${JSON.stringify(trace, null, 2)}\n`);

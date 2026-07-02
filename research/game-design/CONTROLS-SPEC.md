@@ -64,12 +64,15 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
     `research/decomp/index/function-evidence-index.md:56-57`,
     `research/decomp/ghidra-export/chunk_0076.c:3819-3821`,
     `research/decomp/ghidra-export/chunk_0076.c:4844-4897`.
-- Existing ignored Dolphin traces under `user-data/dolphin-trace/traces/` prove the GDB,
-  PAD, and camera capture path only. Parsed saved traces contain `pad-read`,
-  `pad-clamp-circle`, `game-pad-normalization-cluster`, and `camera-lookat-final` hits, but
-  no `action-state-entry`, `action-handler-table`, or `action-helper-cluster` hits for B/X/Z.
-  Therefore exact B/X action-index mapping, Z charge/power-up side effects, and per-action
-  audio cue IDs remain unproven.
+- Ignored Dolphin traces under `user-data/dolphin-trace/traces/` now prove the GDB/PAD
+  capture path and the corrected post-PADRead injection path through `zz_010d450_`
+  normalization: B -> normalized current/pressed `0x00000200`, X -> `0x00000400`,
+  Z -> `0x00000010` (`research/traces/GG4E/dolphin-gdb-trace-results.md`). These
+  are `gdb-pad-injection` traces, not physical controller captures.
+- The same traces still contain no `player-input-bridge`, `action-state-entry`,
+  `action-handler-table`, `action-helper-cluster`, param-tier, or audio hits for B/X/Z.
+  Therefore exact B/X action-index mapping, Z charge/power-up side effects, and
+  per-action audio cue IDs remain unproven.
 
 ## GC Battle Control Checklist
 

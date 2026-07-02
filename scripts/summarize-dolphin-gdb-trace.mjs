@@ -15,12 +15,20 @@ const inputs = args.length
   : [path.join(repoRoot, "user-data", "dolphin-trace", "traces")];
 
 const PROOF_IDS = {
-  input: ["pad-read", "game-pad-normalization-cluster"],
+  input: ["pad-read", "pad-post-read-normalization", "pad-normalization-complete", "game-pad-normalization-cluster"],
+  actorInput: [
+    "normalized-pad-slot0-current-read",
+    "normalized-pad-slot0-pressed-read",
+    "player-input-bridge",
+    "active-borg-command-current",
+    "active-borg-command-pressed",
+  ],
   action: [
     "borg-state-dispatch",
     "state-transition-primitive",
     "active-action-handler-invuln",
     "action-helper-cluster",
+    "action-handler-table",
     "battle-frame-target-action-dispatch",
   ],
   paramTier: [
@@ -70,7 +78,7 @@ function walkJsonFiles(inputPath) {
 function idsForHit(hit) {
   const bp = hit.breakpoint ?? {};
   const wp = hit.watchpoint ?? {};
-  return [...(bp.ids ?? []), ...(wp.ids ?? [])].filter(Boolean);
+  return [...new Set([...(bp.ids ?? []), ...(wp.ids ?? []), wp.id].filter(Boolean))];
 }
 
 function decodePadButtons(raw) {
@@ -87,12 +95,22 @@ function decodePadButtons(raw) {
   };
 }
 
+function decodeU32(raw) {
+  if (typeof raw !== "string" || raw.length < 8) return null;
+  const value = Number.parseInt(raw.slice(0, 8), 16) >>> 0;
+  return Number.isInteger(value) ? { raw: raw.slice(0, 8), value, hex: `0x${value.toString(16).padStart(8, "0")}` } : null;
+}
+
 function summarizeTrace(file) {
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   const counts = new Map();
   const groups = new Map();
   const padButtons = new Map();
+  const observedButtons = new Set();
   let firstNonNeutralPad = null;
+  let firstNormalizedPad = null;
+  let firstCommandCurrent = null;
+  let firstCommandPressed = null;
   for (const hit of data.hits ?? []) {
     const ids = idsForHit(hit);
     for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
@@ -103,6 +121,9 @@ function summarizeTrace(file) {
       if (!decoded) continue;
       const label = decoded.buttons.join("+");
       padButtons.set(label, (padButtons.get(label) ?? 0) + 1);
+      for (const button of decoded.buttons) {
+        if (button !== "none") observedButtons.add(button);
+      }
       if (!firstNonNeutralPad && label !== "none") {
         firstNonNeutralPad = {
           hit: hit.index ?? null,
@@ -113,11 +134,43 @@ function summarizeTrace(file) {
         };
       }
     }
+    if (!firstCommandCurrent && ids.includes("active-borg-command-current")) {
+      const decoded = decodeU32(hit.watchpoint?.current?.raw);
+      if (decoded) firstCommandCurrent = { hit: hit.index ?? null, pc: hit.pc ?? null, lr: hit.lr ?? null, ...decoded };
+    }
+    if (!firstNormalizedPad && ids.includes("pad-normalization-complete")) {
+      const raw = hit.fixedMemory?.normalizedPad?.bytes?.raw;
+      const current = decodeU32(raw);
+      const previous = decodeU32(raw?.slice(8));
+      const pressed = decodeU32(raw?.slice(16));
+      const released = decodeU32(raw?.slice(24));
+      if (current || pressed) {
+        firstNormalizedPad = {
+          hit: hit.index ?? null,
+          pc: hit.pc ?? null,
+          lr: hit.lr ?? null,
+          current,
+          previous,
+          pressed,
+          released,
+        };
+      }
+    }
+    if (!firstCommandPressed && ids.includes("active-borg-command-pressed")) {
+      const decoded = decodeU32(hit.watchpoint?.current?.raw);
+      if (decoded) firstCommandPressed = { hit: hit.index ?? null, pc: hit.pc ?? null, lr: hit.lr ?? null, ...decoded };
+    }
   }
   const countAny = (ids) => ids.reduce((sum, id) => sum + (counts.get(id) ?? 0), 0);
+  const hasBOrXPad = observedButtons.has("B") || observedButtons.has("X");
+  const hasZPad = observedButtons.has("Z");
+  const inputSource = data.padInjection ? "gdb-pad-injection" : "controller-or-keyboard-capture";
   const gates = {
     inputObserved: countAny(PROOF_IDS.input) > 0,
     nonNeutralPadObserved: firstNonNeutralPad != null,
+    bOrXPadObserved: hasBOrXPad,
+    zPadObserved: hasZPad,
+    actorInputObserved: countAny(PROOF_IDS.actorInput) > 0,
     actionStateObserved: countAny(PROOF_IDS.action) > 0,
     paramTierObserved: countAny(PROOF_IDS.paramTier) > 0,
     audioObserved: countAny(PROOF_IDS.audio) > 0,
@@ -126,9 +179,21 @@ function summarizeTrace(file) {
     file: path.relative(repoRoot, file),
     hits: data.hits?.length ?? 0,
     errors: data.errors?.length ?? 0,
+    inputSource,
+    padInjection: data.padInjection
+      ? {
+          ...data.padInjection,
+          writeCount: data.padInjectionWrites?.length ?? 0,
+          firstWrite: data.padInjectionWrites?.[0] ?? null,
+        }
+      : null,
     groups: Object.fromEntries([...groups.entries()].sort()),
     padButtons: Object.fromEntries([...padButtons.entries()].sort((a, b) => b[1] - a[1])),
+    observedButtons: [...observedButtons].sort(),
     firstNonNeutralPad,
+    firstNormalizedPad,
+    firstCommandCurrent,
+    firstCommandPressed,
     proofCounts: Object.fromEntries(
       Object.entries(PROOF_IDS).map(([name, ids]) => [
         name,
@@ -138,16 +203,18 @@ function summarizeTrace(file) {
     gates,
     decisive: {
       bxActionMapping:
-        gates.nonNeutralPadObserved && gates.actionStateObserved
-          ? "candidate: same trace has input + action-state hits; inspect PAD bytes/registers to map B/X exactly"
-          : "missing: needs non-neutral B/X PAD sample + action-state hits in the same labeled B/X capture",
+        gates.bOrXPadObserved && gates.actionStateObserved
+          ? `candidate (${inputSource}): same trace has B/X PAD sample + action-state hits; inspect PAD bytes/registers to map B/X exactly`
+          : gates.bOrXPadObserved && gates.actorInputObserved
+            ? `partial (${inputSource}): B/X PAD sample reached actor input bridge/command fields; still missing action-state transition/handler hit`
+          : "missing: needs non-neutral B or X PAD sample + action-state hits in the same labeled B/X capture",
       zPowerUp:
-        gates.nonNeutralPadObserved && gates.paramTierObserved
-          ? "candidate: same trace has input + param-tier hits; inspect PAD bytes/registers to tie to Z"
+        gates.zPadObserved && gates.paramTierObserved
+          ? `candidate (${inputSource}): same trace has Z PAD sample + param-tier hits; inspect PAD bytes/registers to tie to Z`
           : "missing: needs non-neutral Z-labeled PAD sample + param-tier hits",
       audioCue:
         gates.nonNeutralPadObserved && gates.actionStateObserved && gates.audioObserved
-          ? "candidate: same trace has input + action + audio hits; inspect call args/cue handles before assigning cue IDs"
+          ? `candidate (${inputSource}): same trace has input + action + audio hits; inspect call args/cue handles before assigning cue IDs`
           : "missing: needs non-neutral action-labeled trace with audio hits",
     },
   };
