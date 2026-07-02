@@ -41,9 +41,11 @@ export type AnimSlot =
   | "dash_left"
   | "dash_right"
   | "jump"
+  | "fall"
   | "fly"
   | "attack"
   | "melee"
+  | "melee_alt"
   | "shoot"
   | "special"
   | "hit"
@@ -60,6 +62,13 @@ interface Actor {
   actions: Partial<Record<AnimSlot, THREE.AnimationAction>>;
   current: AnimSlot | null;
   lastSeenSlot: AnimSlot | null;
+  /**
+   * Alternates the melee slot between "melee" and "melee_alt" on each new melee entry so
+   * borgs with several exported swing banks don't repeat the same swing every attack.
+   * (melee_alt resolves to the borg's second melee-pattern bank in main.ts and falls back
+   * to the plain melee bank when only one exists, so this is visual-only and fallback-safe.)
+   */
+  meleeParity: boolean;
   /** True once the (async) model has been attached. */
   ready: boolean;
   isPlaceholder: boolean;
@@ -131,7 +140,14 @@ export class BattleScene {
       return "attack";
     }
     if (b.state === "fly") return "fly";
-    if (b.state === "jump") return "jump";
+    if (b.state === "jump") {
+      // Rising vs falling: the sim keeps state "jump" for the whole airborne arc while
+      // gravity (JUMP.GRAVITY 0.42/frame) drives vel.y negative after the apex. -0.6
+      // (~1.5 frames past apex) keeps apex jitter and boost-thrust oscillation from
+      // flip-flopping the slot. "fall" maps to the exported jump_land bank and falls
+      // back to jump/fly for borgs without one.
+      return b.vel.y < -0.6 ? "fall" : "jump";
+    }
     if (b.state === "move") return "move";
     return "idle";
   }
@@ -150,7 +166,12 @@ export class BattleScene {
       actor.group.position.set(b.pos.x, b.pos.y, b.pos.z);
       actor.group.rotation.y = b.rotY;
       // Animation slot from state.
-      const slot = this.slotForBorg(b);
+      let slot = this.slotForBorg(b);
+      if (slot === "melee") {
+        const wasMelee = actor.lastSeenSlot === "melee" || actor.lastSeenSlot === "melee_alt";
+        if (!wasMelee) actor.meleeParity = !actor.meleeParity;
+        if (actor.meleeParity) slot = "melee_alt";
+      }
       const slotChanged = actor.lastSeenSlot !== slot;
       if (slot === "hit" && slotChanged) this.spawnHitSpark(actor.group.position);
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid);
@@ -207,6 +228,7 @@ export class BattleScene {
       actions: {},
       current: null,
       lastSeenSlot: null,
+      meleeParity: true, // first melee entry flips this to false => plain "melee" first
       ready: false,
       isPlaceholder: true,
     };
