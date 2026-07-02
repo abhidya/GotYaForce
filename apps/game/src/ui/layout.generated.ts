@@ -8333,6 +8333,5880 @@ export const UI_SCENE_LAYOUTS = {
     ],
     "semantics": {}
   },
+  "unitall": {
+    "sceneId": "unitall",
+    "sourceArchive": "user-data/GG4E/afs_data/root/unitall_mdl.arc",
+    "modelCount": 202,
+    "bounds": {
+      "minX": -346.585,
+      "maxX": 2248.703,
+      "minY": -4311.17,
+      "maxY": 220.649,
+      "minZ": 115,
+      "maxZ": 115
+    },
+    "elements": [
+      {
+        "key": "model_00",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_00.dae",
+        "publicPath": "/ui/scenes/unitall/model_00.dae",
+        "bounds": {
+          "minX": -146.781,
+          "maxX": -75.781,
+          "minY": 102.296,
+          "maxY": 198.296,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 7.699,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 9.067,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 7.699,
+          "top": 0.493,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 9.067,
+          "centerY": 1.552
+        }
+      },
+      {
+        "key": "model_01",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_01.dae",
+        "publicPath": "/ui/scenes/unitall/model_01.dae",
+        "bounds": {
+          "minX": 60.863,
+          "maxX": 187.863,
+          "minY": -2.509,
+          "maxY": 120.562,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.7,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 18.146,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.7,
+          "top": 2.209,
+          "width": 4.893,
+          "height": 2.716,
+          "centerX": 18.146,
+          "centerY": 3.566
+        }
+      },
+      {
+        "key": "model_02",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_02.dae",
+        "publicPath": "/ui/scenes/unitall/model_02.dae",
+        "bounds": {
+          "minX": 14.713,
+          "maxX": 85.713,
+          "minY": 124.649,
+          "maxY": 220.649,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 13.921,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 15.289,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 13.921,
+          "top": 0,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 15.289,
+          "centerY": 1.059
+        }
+      },
+      {
+        "key": "model_03",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_03.dae",
+        "publicPath": "/ui/scenes/unitall/model_03.dae",
+        "bounds": {
+          "minX": 277.326,
+          "maxX": 348.326,
+          "minY": -10.06,
+          "maxY": 85.94,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 24.04,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 25.408,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 24.04,
+          "top": 2.973,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 25.408,
+          "centerY": 4.032
+        }
+      },
+      {
+        "key": "model_04",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_04.dae",
+        "publicPath": "/ui/scenes/unitall/model_04.dae",
+        "bounds": {
+          "minX": 666.279,
+          "maxX": 737.279,
+          "minY": -8.569,
+          "maxY": 87.431,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 39.027,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 40.395,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 39.027,
+          "top": 2.94,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 40.395,
+          "centerY": 3.999
+        }
+      },
+      {
+        "key": "model_05",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_05.dae",
+        "publicPath": "/ui/scenes/unitall/model_05.dae",
+        "bounds": {
+          "minX": 556.45,
+          "maxX": 683.45,
+          "minY": -1.796,
+          "maxY": 93.204,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 34.795,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 37.242,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 34.795,
+          "top": 2.812,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 37.242,
+          "centerY": 3.86
+        }
+      },
+      {
+        "key": "model_06",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_06.dae",
+        "publicPath": "/ui/scenes/unitall/model_06.dae",
+        "bounds": {
+          "minX": 375.485,
+          "maxX": 446.485,
+          "minY": -19.21,
+          "maxY": 76.79,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 27.822,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 29.19,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 27.822,
+          "top": 3.174,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 29.19,
+          "centerY": 4.234
+        }
+      },
+      {
+        "key": "model_07",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_07.dae",
+        "publicPath": "/ui/scenes/unitall/model_07.dae",
+        "bounds": {
+          "minX": 815.699,
+          "maxX": 942.699,
+          "minY": -1.796,
+          "maxY": 93.204,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 44.784,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 47.231,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 44.784,
+          "top": 2.812,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 47.231,
+          "centerY": 3.86
+        }
+      },
+      {
+        "key": "model_08",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_08.dae",
+        "publicPath": "/ui/scenes/unitall/model_08.dae",
+        "bounds": {
+          "minX": -102.411,
+          "maxX": -35.94,
+          "minY": -4162.178,
+          "maxY": -4077.777,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 9.408,
+          "top": 100,
+          "width": 2.561,
+          "height": 0.001,
+          "centerX": 10.689,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 9.408,
+          "top": 94.85,
+          "width": 2.561,
+          "height": 1.862,
+          "centerX": 10.689,
+          "centerY": 95.781
+        }
+      },
+      {
+        "key": "model_09",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_09.dae",
+        "publicPath": "/ui/scenes/unitall/model_09.dae",
+        "bounds": {
+          "minX": 1058.868,
+          "maxX": 1185.868,
+          "minY": -1.796,
+          "maxY": 93.204,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 54.154,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 56.601,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 54.154,
+          "top": 2.812,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 56.601,
+          "centerY": 3.86
+        }
+      },
+      {
+        "key": "model_10",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_10.dae",
+        "publicPath": "/ui/scenes/unitall/model_10.dae",
+        "bounds": {
+          "minX": -74.595,
+          "maxX": -3.595,
+          "minY": 101.315,
+          "maxY": 197.315,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 10.48,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 11.848,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 10.48,
+          "top": 0.515,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 11.848,
+          "centerY": 1.574
+        }
+      },
+      {
+        "key": "model_11",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_100.dae",
+        "publicPath": "/ui/scenes/unitall/model_100.dae",
+        "bounds": {
+          "minX": 67.855,
+          "maxX": 194.855,
+          "minY": -1170.479,
+          "maxY": -1075.479,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.969,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 18.416,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.969,
+          "top": 28.601,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 18.416,
+          "centerY": 29.649
+        }
+      },
+      {
+        "key": "model_12",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_101.dae",
+        "publicPath": "/ui/scenes/unitall/model_101.dae",
+        "bounds": {
+          "minX": 213.522,
+          "maxX": 308.522,
+          "minY": -1201.704,
+          "maxY": -1074.704,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 21.582,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 23.412,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 21.582,
+          "top": 28.584,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 23.412,
+          "centerY": 29.985
+        }
+      },
+      {
+        "key": "model_13",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_102.dae",
+        "publicPath": "/ui/scenes/unitall/model_102.dae",
+        "bounds": {
+          "minX": 321.808,
+          "maxX": 448.808,
+          "minY": -1170.48,
+          "maxY": -1075.48,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.754,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 28.201,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.754,
+          "top": 28.601,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 28.201,
+          "centerY": 29.649
+        }
+      },
+      {
+        "key": "model_14",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_103.dae",
+        "publicPath": "/ui/scenes/unitall/model_103.dae",
+        "bounds": {
+          "minX": 470.511,
+          "maxX": 565.511,
+          "minY": -1195.767,
+          "maxY": -1068.767,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 31.484,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 33.314,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 31.484,
+          "top": 28.453,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 33.314,
+          "centerY": 29.854
+        }
+      },
+      {
+        "key": "model_15",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_104.dae",
+        "publicPath": "/ui/scenes/unitall/model_104.dae",
+        "bounds": {
+          "minX": 590.349,
+          "maxX": 685.349,
+          "minY": -1186.362,
+          "maxY": -1059.362,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 36.101,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 37.932,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 36.101,
+          "top": 28.245,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 37.932,
+          "centerY": 29.646
+        }
+      },
+      {
+        "key": "model_16",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_105.dae",
+        "publicPath": "/ui/scenes/unitall/model_105.dae",
+        "bounds": {
+          "minX": 727.012,
+          "maxX": 822.012,
+          "minY": -1206.253,
+          "maxY": -1079.253,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 41.367,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 43.197,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 41.367,
+          "top": 28.684,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 43.197,
+          "centerY": 30.085
+        }
+      },
+      {
+        "key": "model_17",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_106.dae",
+        "publicPath": "/ui/scenes/unitall/model_106.dae",
+        "bounds": {
+          "minX": 836.277,
+          "maxX": 963.277,
+          "minY": -1170.48,
+          "maxY": -1075.48,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 45.577,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 48.024,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 45.577,
+          "top": 28.601,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 48.024,
+          "centerY": 29.649
+        }
+      },
+      {
+        "key": "model_18",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_107.dae",
+        "publicPath": "/ui/scenes/unitall/model_107.dae",
+        "bounds": {
+          "minX": 978.226,
+          "maxX": 1105.226,
+          "minY": -1170.48,
+          "maxY": -1075.48,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 51.047,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 53.494,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 51.047,
+          "top": 28.601,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 53.494,
+          "centerY": 29.649
+        }
+      },
+      {
+        "key": "model_19",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_108.dae",
+        "publicPath": "/ui/scenes/unitall/model_108.dae",
+        "bounds": {
+          "minX": 1138.378,
+          "maxX": 1233.378,
+          "minY": -1178.661,
+          "maxY": -1051.661,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 57.218,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 59.048,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 57.218,
+          "top": 28.075,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 59.048,
+          "centerY": 29.476
+        }
+      },
+      {
+        "key": "model_20",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_109.dae",
+        "publicPath": "/ui/scenes/unitall/model_109.dae",
+        "bounds": {
+          "minX": 1282.773,
+          "maxX": 1377.773,
+          "minY": -1177.907,
+          "maxY": -1050.907,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 62.781,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 64.612,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 62.781,
+          "top": 28.058,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 64.612,
+          "centerY": 29.46
+        }
+      },
+      {
+        "key": "model_21",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_11.dae",
+        "publicPath": "/ui/scenes/unitall/model_11.dae",
+        "bounds": {
+          "minX": 85.733,
+          "maxX": 156.733,
+          "minY": 124.255,
+          "maxY": 220.255,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 16.658,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 18.026,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 16.658,
+          "top": 0.009,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 18.026,
+          "centerY": 1.068
+        }
+      },
+      {
+        "key": "model_22",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_110.dae",
+        "publicPath": "/ui/scenes/unitall/model_110.dae",
+        "bounds": {
+          "minX": 1414.708,
+          "maxX": 1541.708,
+          "minY": -1170.48,
+          "maxY": -1075.48,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 67.865,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 70.312,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 67.865,
+          "top": 28.601,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 70.312,
+          "centerY": 29.649
+        }
+      },
+      {
+        "key": "model_23",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_111.dae",
+        "publicPath": "/ui/scenes/unitall/model_111.dae",
+        "bounds": {
+          "minX": 1572.197,
+          "maxX": 1667.197,
+          "minY": -1162.271,
+          "maxY": -1035.271,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 73.933,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 75.764,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 73.933,
+          "top": 27.713,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 75.764,
+          "centerY": 29.115
+        }
+      },
+      {
+        "key": "model_24",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_112.dae",
+        "publicPath": "/ui/scenes/unitall/model_112.dae",
+        "bounds": {
+          "minX": 1692.469,
+          "maxX": 1819.469,
+          "minY": -1170.48,
+          "maxY": -1075.48,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 78.568,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 81.014,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 78.568,
+          "top": 28.601,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 81.014,
+          "centerY": 29.649
+        }
+      },
+      {
+        "key": "model_25",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_113.dae",
+        "publicPath": "/ui/scenes/unitall/model_113.dae",
+        "bounds": {
+          "minX": 2059.727,
+          "maxX": 2154.727,
+          "minY": -1174.899,
+          "maxY": -1047.899,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 92.718,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 94.549,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 92.718,
+          "top": 27.992,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 94.549,
+          "centerY": 29.393
+        }
+      },
+      {
+        "key": "model_26",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_114.dae",
+        "publicPath": "/ui/scenes/unitall/model_114.dae",
+        "bounds": {
+          "minX": 1963.13,
+          "maxX": 2058.13,
+          "minY": -1174.46,
+          "maxY": -1047.46,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 88.996,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 90.827,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 88.996,
+          "top": 27.982,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 90.827,
+          "centerY": 29.384
+        }
+      },
+      {
+        "key": "model_27",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_115.dae",
+        "publicPath": "/ui/scenes/unitall/model_115.dae",
+        "bounds": {
+          "minX": -79.084,
+          "maxX": 47.916,
+          "minY": -1352.901,
+          "maxY": -1257.901,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 10.307,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 12.754,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 10.307,
+          "top": 32.626,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 12.754,
+          "centerY": 33.674
+        }
+      },
+      {
+        "key": "model_28",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_116.dae",
+        "publicPath": "/ui/scenes/unitall/model_116.dae",
+        "bounds": {
+          "minX": -11.144,
+          "maxX": 168.398,
+          "minY": -1376.537,
+          "maxY": -1222.2,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 12.925,
+          "top": 100,
+          "width": 6.918,
+          "height": 0.001,
+          "centerX": 16.384,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 12.925,
+          "top": 31.838,
+          "width": 6.918,
+          "height": 3.406,
+          "centerX": 16.384,
+          "centerY": 33.541
+        }
+      },
+      {
+        "key": "model_29",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_117.dae",
+        "publicPath": "/ui/scenes/unitall/model_117.dae",
+        "bounds": {
+          "minX": 184.321,
+          "maxX": 311.321,
+          "minY": -1384.792,
+          "maxY": -1257.901,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 20.457,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 22.903,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 20.457,
+          "top": 32.626,
+          "width": 4.893,
+          "height": 2.8,
+          "centerX": 22.903,
+          "centerY": 34.026
+        }
+      },
+      {
+        "key": "model_30",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_118.dae",
+        "publicPath": "/ui/scenes/unitall/model_118.dae",
+        "bounds": {
+          "minX": 315.26,
+          "maxX": 442.26,
+          "minY": -1352.901,
+          "maxY": -1257.901,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.502,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 27.949,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.502,
+          "top": 32.626,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 27.949,
+          "centerY": 33.674
+        }
+      },
+      {
+        "key": "model_31",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_119.dae",
+        "publicPath": "/ui/scenes/unitall/model_119.dae",
+        "bounds": {
+          "minX": 445.072,
+          "maxX": 595.816,
+          "minY": -1352.671,
+          "maxY": -1232.782,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 30.504,
+          "top": 100,
+          "width": 5.808,
+          "height": 0.001,
+          "centerX": 33.408,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 30.504,
+          "top": 32.072,
+          "width": 5.808,
+          "height": 2.645,
+          "centerX": 33.408,
+          "centerY": 33.394
+        }
+      },
+      {
+        "key": "model_32",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_12.dae",
+        "publicPath": "/ui/scenes/unitall/model_12.dae",
+        "bounds": {
+          "minX": -104.605,
+          "maxX": -35.94,
+          "minY": -4162.178,
+          "maxY": -4053.617,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 9.324,
+          "top": 100,
+          "width": 2.646,
+          "height": 0.001,
+          "centerX": 10.647,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 9.324,
+          "top": 94.317,
+          "width": 2.646,
+          "height": 2.396,
+          "centerX": 10.647,
+          "centerY": 95.515
+        }
+      },
+      {
+        "key": "model_33",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_120.dae",
+        "publicPath": "/ui/scenes/unitall/model_120.dae",
+        "bounds": {
+          "minX": -59.734,
+          "maxX": 26.949,
+          "minY": -4311.169,
+          "maxY": -4222.542,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.053,
+          "top": 100,
+          "width": 3.34,
+          "height": 0.001,
+          "centerX": 12.723,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.053,
+          "top": 98.044,
+          "width": 3.34,
+          "height": 1.956,
+          "centerX": 12.723,
+          "centerY": 99.022
+        }
+      },
+      {
+        "key": "model_34",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_121.dae",
+        "publicPath": "/ui/scenes/unitall/model_121.dae",
+        "bounds": {
+          "minX": 588.42,
+          "maxX": 778.438,
+          "minY": -1372.073,
+          "maxY": -1252.99,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 36.027,
+          "top": 100,
+          "width": 7.322,
+          "height": 0.001,
+          "centerX": 39.688,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 36.027,
+          "top": 32.518,
+          "width": 7.322,
+          "height": 2.628,
+          "centerX": 39.688,
+          "centerY": 33.831
+        }
+      },
+      {
+        "key": "model_35",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_122.dae",
+        "publicPath": "/ui/scenes/unitall/model_122.dae",
+        "bounds": {
+          "minX": 816.494,
+          "maxX": 943.494,
+          "minY": -1352.901,
+          "maxY": -1257.901,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 44.815,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 47.262,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 44.815,
+          "top": 32.626,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 47.262,
+          "centerY": 33.674
+        }
+      },
+      {
+        "key": "model_36",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_123.dae",
+        "publicPath": "/ui/scenes/unitall/model_123.dae",
+        "bounds": {
+          "minX": 903.179,
+          "maxX": 1073.484,
+          "minY": -1384.169,
+          "maxY": -1257.169,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 48.155,
+          "top": 100,
+          "width": 6.562,
+          "height": 0.001,
+          "centerX": 51.436,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 48.155,
+          "top": 32.61,
+          "width": 6.562,
+          "height": 2.802,
+          "centerX": 51.436,
+          "centerY": 34.011
+        }
+      },
+      {
+        "key": "model_37",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_124.dae",
+        "publicPath": "/ui/scenes/unitall/model_124.dae",
+        "bounds": {
+          "minX": 1084.217,
+          "maxX": 1211.217,
+          "minY": -1352.901,
+          "maxY": -1257.901,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 55.131,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 57.578,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 55.131,
+          "top": 32.626,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 57.578,
+          "centerY": 33.674
+        }
+      },
+      {
+        "key": "model_38",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_125.dae",
+        "publicPath": "/ui/scenes/unitall/model_125.dae",
+        "bounds": {
+          "minX": 1215.967,
+          "maxX": 1350.418,
+          "minY": -1380.819,
+          "maxY": -1257.9,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 60.207,
+          "top": 100,
+          "width": 5.181,
+          "height": 0.001,
+          "centerX": 62.798,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 60.207,
+          "top": 32.626,
+          "width": 5.181,
+          "height": 2.712,
+          "centerX": 62.798,
+          "centerY": 33.982
+        }
+      },
+      {
+        "key": "model_39",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_126.dae",
+        "publicPath": "/ui/scenes/unitall/model_126.dae",
+        "bounds": {
+          "minX": -59.734,
+          "maxX": 26.949,
+          "minY": -4311.17,
+          "maxY": -4198.734,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.053,
+          "top": 100,
+          "width": 3.34,
+          "height": 0.001,
+          "centerX": 12.723,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.053,
+          "top": 97.519,
+          "width": 3.34,
+          "height": 2.481,
+          "centerX": 12.723,
+          "centerY": 98.759
+        }
+      },
+      {
+        "key": "model_40",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_127.dae",
+        "publicPath": "/ui/scenes/unitall/model_127.dae",
+        "bounds": {
+          "minX": -60.523,
+          "maxX": 48.044,
+          "minY": -4310.73,
+          "maxY": -4198.734,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.022,
+          "top": 100,
+          "width": 4.183,
+          "height": 0.001,
+          "centerX": 13.114,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.022,
+          "top": 97.519,
+          "width": 4.183,
+          "height": 2.471,
+          "centerX": 13.114,
+          "centerY": 98.755
+        }
+      },
+      {
+        "key": "model_41",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_128.dae",
+        "publicPath": "/ui/scenes/unitall/model_128.dae",
+        "bounds": {
+          "minX": -57.391,
+          "maxX": 47.954,
+          "minY": -4301.263,
+          "maxY": -4198.569,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.143,
+          "top": 100,
+          "width": 4.059,
+          "height": 0.001,
+          "centerX": 13.173,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.143,
+          "top": 97.515,
+          "width": 4.059,
+          "height": 2.266,
+          "centerX": 13.173,
+          "centerY": 98.648
+        }
+      },
+      {
+        "key": "model_42",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_129.dae",
+        "publicPath": "/ui/scenes/unitall/model_129.dae",
+        "bounds": {
+          "minX": -220.411,
+          "maxX": -149.411,
+          "minY": -1507.765,
+          "maxY": -1411.765,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 4.862,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 6.23,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 4.862,
+          "top": 36.021,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 6.23,
+          "centerY": 37.08
+        }
+      },
+      {
+        "key": "model_43",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_13.dae",
+        "publicPath": "/ui/scenes/unitall/model_13.dae",
+        "bounds": {
+          "minX": -111.372,
+          "maxX": -40.372,
+          "minY": -118.004,
+          "maxY": -22.004,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 9.063,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 10.431,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 9.063,
+          "top": 5.354,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 10.431,
+          "centerY": 6.414
+        }
+      },
+      {
+        "key": "model_44",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_130.dae",
+        "publicPath": "/ui/scenes/unitall/model_130.dae",
+        "bounds": {
+          "minX": 64.209,
+          "maxX": 191.209,
+          "minY": -1488.439,
+          "maxY": -1393.439,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.828,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 18.275,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.828,
+          "top": 35.617,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 18.275,
+          "centerY": 36.665
+        }
+      },
+      {
+        "key": "model_45",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_131.dae",
+        "publicPath": "/ui/scenes/unitall/model_131.dae",
+        "bounds": {
+          "minX": 385.551,
+          "maxX": 456.551,
+          "minY": -1480.693,
+          "maxY": -1384.693,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 28.21,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 29.578,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 28.21,
+          "top": 35.424,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 29.578,
+          "centerY": 36.483
+        }
+      },
+      {
+        "key": "model_46",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_132.dae",
+        "publicPath": "/ui/scenes/unitall/model_132.dae",
+        "bounds": {
+          "minX": 257.292,
+          "maxX": 328.292,
+          "minY": -1494.219,
+          "maxY": -1398.219,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 23.268,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 24.636,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 23.268,
+          "top": 35.722,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 24.636,
+          "centerY": 36.781
+        }
+      },
+      {
+        "key": "model_47",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_133.dae",
+        "publicPath": "/ui/scenes/unitall/model_133.dae",
+        "bounds": {
+          "minX": 588.62,
+          "maxX": 715.62,
+          "minY": -1488.44,
+          "maxY": -1393.44,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 36.035,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 38.481,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 36.035,
+          "top": 35.617,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 38.481,
+          "centerY": 36.665
+        }
+      },
+      {
+        "key": "model_48",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_134.dae",
+        "publicPath": "/ui/scenes/unitall/model_134.dae",
+        "bounds": {
+          "minX": 491.842,
+          "maxX": 562.842,
+          "minY": -1500.981,
+          "maxY": -1404.981,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 32.306,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 33.674,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 32.306,
+          "top": 35.871,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 33.674,
+          "centerY": 36.931
+        }
+      },
+      {
+        "key": "model_49",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_135.dae",
+        "publicPath": "/ui/scenes/unitall/model_135.dae",
+        "bounds": {
+          "minX": -188.829,
+          "maxX": -125.136,
+          "minY": -4168.146,
+          "maxY": -4064.969,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 6.079,
+          "top": 100,
+          "width": 2.454,
+          "height": 0.001,
+          "centerX": 7.306,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 6.079,
+          "top": 94.567,
+          "width": 2.454,
+          "height": 2.277,
+          "centerX": 7.306,
+          "centerY": 95.706
+        }
+      },
+      {
+        "key": "model_50",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_136.dae",
+        "publicPath": "/ui/scenes/unitall/model_136.dae",
+        "bounds": {
+          "minX": 801.511,
+          "maxX": 872.511,
+          "minY": -1500.981,
+          "maxY": -1404.981,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 44.238,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 45.606,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 44.238,
+          "top": 35.871,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 45.606,
+          "centerY": 36.931
+        }
+      },
+      {
+        "key": "model_51",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_137.dae",
+        "publicPath": "/ui/scenes/unitall/model_137.dae",
+        "bounds": {
+          "minX": 922.448,
+          "maxX": 993.448,
+          "minY": -1500.983,
+          "maxY": -1404.983,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 48.898,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 50.265,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 48.898,
+          "top": 35.872,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 50.265,
+          "centerY": 36.931
+        }
+      },
+      {
+        "key": "model_52",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_138.dae",
+        "publicPath": "/ui/scenes/unitall/model_138.dae",
+        "bounds": {
+          "minX": 1037.339,
+          "maxX": 1108.339,
+          "minY": -1500.982,
+          "maxY": -1404.982,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 53.324,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 54.692,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 53.324,
+          "top": 35.871,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 54.692,
+          "centerY": 36.931
+        }
+      },
+      {
+        "key": "model_53",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_139.dae",
+        "publicPath": "/ui/scenes/unitall/model_139.dae",
+        "bounds": {
+          "minX": 1164.323,
+          "maxX": 1235.323,
+          "minY": -1500.983,
+          "maxY": -1404.983,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 58.217,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 59.585,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 58.217,
+          "top": 35.872,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 59.585,
+          "centerY": 36.931
+        }
+      },
+      {
+        "key": "model_54",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_14.dae",
+        "publicPath": "/ui/scenes/unitall/model_14.dae",
+        "bounds": {
+          "minX": 211.993,
+          "maxX": 282.993,
+          "minY": -134.696,
+          "maxY": -38.696,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 21.523,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 22.891,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 21.523,
+          "top": 5.723,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 22.891,
+          "centerY": 6.782
+        }
+      },
+      {
+        "key": "model_55",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_140.dae",
+        "publicPath": "/ui/scenes/unitall/model_140.dae",
+        "bounds": {
+          "minX": 1460.342,
+          "maxX": 1587.342,
+          "minY": -1488.439,
+          "maxY": -1393.439,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 69.623,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 72.07,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 69.623,
+          "top": 35.617,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 72.07,
+          "centerY": 36.665
+        }
+      },
+      {
+        "key": "model_56",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_141.dae",
+        "publicPath": "/ui/scenes/unitall/model_141.dae",
+        "bounds": {
+          "minX": 1594.45,
+          "maxX": 1721.45,
+          "minY": -1488.44,
+          "maxY": -1393.44,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 74.791,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 77.237,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 74.791,
+          "top": 35.617,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 77.237,
+          "centerY": 36.665
+        }
+      },
+      {
+        "key": "model_57",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_142.dae",
+        "publicPath": "/ui/scenes/unitall/model_142.dae",
+        "bounds": {
+          "minX": -200.172,
+          "maxX": -97.662,
+          "minY": -4074.819,
+          "maxY": -3964.746,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 5.641,
+          "top": 100,
+          "width": 3.95,
+          "height": 0.001,
+          "centerX": 7.616,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 5.641,
+          "top": 92.356,
+          "width": 3.95,
+          "height": 2.429,
+          "centerX": 7.616,
+          "centerY": 93.57
+        }
+      },
+      {
+        "key": "model_58",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_143.dae",
+        "publicPath": "/ui/scenes/unitall/model_143.dae",
+        "bounds": {
+          "minX": -69.309,
+          "maxX": 25.691,
+          "minY": -1645.394,
+          "maxY": -1518.394,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 10.684,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 12.514,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 10.684,
+          "top": 38.374,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 12.514,
+          "centerY": 39.775
+        }
+      },
+      {
+        "key": "model_59",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_144.dae",
+        "publicPath": "/ui/scenes/unitall/model_144.dae",
+        "bounds": {
+          "minX": 58.328,
+          "maxX": 153.328,
+          "minY": -1647.64,
+          "maxY": -1520.64,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.602,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 17.432,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.602,
+          "top": 38.424,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 17.432,
+          "centerY": 39.825
+        }
+      },
+      {
+        "key": "model_60",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_145.dae",
+        "publicPath": "/ui/scenes/unitall/model_145.dae",
+        "bounds": {
+          "minX": 177.885,
+          "maxX": 304.885,
+          "minY": -1646.741,
+          "maxY": -1551.741,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 20.209,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 22.655,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 20.209,
+          "top": 39.11,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 22.655,
+          "centerY": 40.158
+        }
+      },
+      {
+        "key": "model_61",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_146.dae",
+        "publicPath": "/ui/scenes/unitall/model_146.dae",
+        "bounds": {
+          "minX": 311.5,
+          "maxX": 438.5,
+          "minY": -1646.741,
+          "maxY": -1551.741,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.357,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 27.804,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.357,
+          "top": 39.11,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 27.804,
+          "centerY": 40.158
+        }
+      },
+      {
+        "key": "model_62",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_147.dae",
+        "publicPath": "/ui/scenes/unitall/model_147.dae",
+        "bounds": {
+          "minX": 436.5,
+          "maxX": 563.5,
+          "minY": -1646.74,
+          "maxY": -1551.74,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 30.173,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 32.62,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 30.173,
+          "top": 39.11,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 32.62,
+          "centerY": 40.158
+        }
+      },
+      {
+        "key": "model_63",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_148.dae",
+        "publicPath": "/ui/scenes/unitall/model_148.dae",
+        "bounds": {
+          "minX": -116.4,
+          "maxX": -50.465,
+          "minY": -4145.756,
+          "maxY": -4066.862,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 8.869,
+          "top": 100,
+          "width": 2.541,
+          "height": 0.001,
+          "centerX": 10.14,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 8.869,
+          "top": 94.609,
+          "width": 2.541,
+          "height": 1.741,
+          "centerX": 10.14,
+          "centerY": 95.479
+        }
+      },
+      {
+        "key": "model_64",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_149.dae",
+        "publicPath": "/ui/scenes/unitall/model_149.dae",
+        "bounds": {
+          "minX": 686.5,
+          "maxX": 813.5,
+          "minY": -1646.741,
+          "maxY": -1551.741,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 39.806,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 42.253,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 39.806,
+          "top": 39.11,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 42.253,
+          "centerY": 40.158
+        }
+      },
+      {
+        "key": "model_65",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_15.dae",
+        "publicPath": "/ui/scenes/unitall/model_15.dae",
+        "bounds": {
+          "minX": 125.02,
+          "maxX": 196.02,
+          "minY": -140.26,
+          "maxY": -44.26,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 18.172,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 19.539,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 18.172,
+          "top": 5.846,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 19.539,
+          "centerY": 6.905
+        }
+      },
+      {
+        "key": "model_66",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_150.dae",
+        "publicPath": "/ui/scenes/unitall/model_150.dae",
+        "bounds": {
+          "minX": 835.356,
+          "maxX": 930.356,
+          "minY": -1638.272,
+          "maxY": -1511.272,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 45.542,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 47.372,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 45.542,
+          "top": 38.217,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 47.372,
+          "centerY": 39.618
+        }
+      },
+      {
+        "key": "model_67",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_151.dae",
+        "publicPath": "/ui/scenes/unitall/model_151.dae",
+        "bounds": {
+          "minX": 942.054,
+          "maxX": 1069.054,
+          "minY": -1646.741,
+          "maxY": -1531.211,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 49.653,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 52.1,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 49.653,
+          "top": 38.657,
+          "width": 4.893,
+          "height": 2.549,
+          "centerX": 52.1,
+          "centerY": 39.932
+        }
+      },
+      {
+        "key": "model_68",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_152.dae",
+        "publicPath": "/ui/scenes/unitall/model_152.dae",
+        "bounds": {
+          "minX": 1071.989,
+          "maxX": 1198.989,
+          "minY": -1646.74,
+          "maxY": -1551.74,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 54.66,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 57.106,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 54.66,
+          "top": 39.11,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 57.106,
+          "centerY": 40.158
+        }
+      },
+      {
+        "key": "model_69",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_153.dae",
+        "publicPath": "/ui/scenes/unitall/model_153.dae",
+        "bounds": {
+          "minX": -118.74,
+          "maxX": -36.267,
+          "minY": -4071.552,
+          "maxY": -3988.008,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 8.779,
+          "top": 100,
+          "width": 3.178,
+          "height": 0.001,
+          "centerX": 10.368,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 8.779,
+          "top": 92.869,
+          "width": 3.178,
+          "height": 1.843,
+          "centerX": 10.368,
+          "centerY": 93.791
+        }
+      },
+      {
+        "key": "model_70",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_154.dae",
+        "publicPath": "/ui/scenes/unitall/model_154.dae",
+        "bounds": {
+          "minX": 1326.937,
+          "maxX": 1453.937,
+          "minY": -1646.741,
+          "maxY": -1551.741,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 64.483,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 66.93,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 64.483,
+          "top": 39.11,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 66.93,
+          "centerY": 40.158
+        }
+      },
+      {
+        "key": "model_71",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_155.dae",
+        "publicPath": "/ui/scenes/unitall/model_155.dae",
+        "bounds": {
+          "minX": 1447.543,
+          "maxX": 1542.543,
+          "minY": -1645.58,
+          "maxY": -1518.58,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 69.13,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 70.96,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 69.13,
+          "top": 38.378,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 70.96,
+          "centerY": 39.779
+        }
+      },
+      {
+        "key": "model_72",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_156.dae",
+        "publicPath": "/ui/scenes/unitall/model_156.dae",
+        "bounds": {
+          "minX": -63.5,
+          "maxX": 63.5,
+          "minY": -1819.477,
+          "maxY": -1693.666,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 10.908,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 13.354,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 10.908,
+          "top": 42.242,
+          "width": 4.893,
+          "height": 2.776,
+          "centerX": 13.354,
+          "centerY": 43.63
+        }
+      },
+      {
+        "key": "model_73",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_157.dae",
+        "publicPath": "/ui/scenes/unitall/model_157.dae",
+        "bounds": {
+          "minX": 30.815,
+          "maxX": 196.818,
+          "minY": -1800.845,
+          "maxY": -1705.845,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 14.542,
+          "top": 100,
+          "width": 6.396,
+          "height": 0.001,
+          "centerX": 17.74,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 14.542,
+          "top": 42.51,
+          "width": 6.396,
+          "height": 2.096,
+          "centerX": 17.74,
+          "centerY": 43.559
+        }
+      },
+      {
+        "key": "model_74",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_158.dae",
+        "publicPath": "/ui/scenes/unitall/model_158.dae",
+        "bounds": {
+          "minX": 198.587,
+          "maxX": 355.366,
+          "minY": -1811.429,
+          "maxY": -1692.268,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 21.006,
+          "top": 100,
+          "width": 6.041,
+          "height": 0.001,
+          "centerX": 24.027,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 21.006,
+          "top": 42.211,
+          "width": 6.041,
+          "height": 2.629,
+          "centerX": 24.027,
+          "centerY": 43.526
+        }
+      },
+      {
+        "key": "model_75",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_159.dae",
+        "publicPath": "/ui/scenes/unitall/model_159.dae",
+        "bounds": {
+          "minX": 315.094,
+          "maxX": 464.066,
+          "minY": -1804.62,
+          "maxY": -1677.62,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.495,
+          "top": 100,
+          "width": 5.74,
+          "height": 0.001,
+          "centerX": 28.365,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.495,
+          "top": 41.888,
+          "width": 5.74,
+          "height": 2.802,
+          "centerX": 28.365,
+          "centerY": 43.289
+        }
+      },
+      {
+        "key": "model_76",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_16.dae",
+        "publicPath": "/ui/scenes/unitall/model_16.dae",
+        "bounds": {
+          "minX": 309.123,
+          "maxX": 436.123,
+          "minY": -126.796,
+          "maxY": -31.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.265,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 27.712,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.265,
+          "top": 5.571,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 27.712,
+          "centerY": 6.619
+        }
+      },
+      {
+        "key": "model_77",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_160.dae",
+        "publicPath": "/ui/scenes/unitall/model_160.dae",
+        "bounds": {
+          "minX": 419.82,
+          "maxX": 570.345,
+          "minY": -1796.738,
+          "maxY": -1669.738,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 29.531,
+          "top": 100,
+          "width": 5.8,
+          "height": 0.001,
+          "centerX": 32.431,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 29.531,
+          "top": 41.714,
+          "width": 5.8,
+          "height": 2.802,
+          "centerX": 32.431,
+          "centerY": 43.115
+        }
+      },
+      {
+        "key": "model_78",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_161.dae",
+        "publicPath": "/ui/scenes/unitall/model_161.dae",
+        "bounds": {
+          "minX": 56.425,
+          "maxX": 157.936,
+          "minY": -4031.086,
+          "maxY": -3886.212,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.529,
+          "top": 100,
+          "width": 3.911,
+          "height": 0.001,
+          "centerX": 17.484,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.529,
+          "top": 90.623,
+          "width": 3.911,
+          "height": 3.197,
+          "centerX": 17.484,
+          "centerY": 92.221
+        }
+      },
+      {
+        "key": "model_79",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_162.dae",
+        "publicPath": "/ui/scenes/unitall/model_162.dae",
+        "bounds": {
+          "minX": 987.189,
+          "maxX": 1148.449,
+          "minY": -1804.719,
+          "maxY": -1677.719,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 51.392,
+          "top": 100,
+          "width": 6.214,
+          "height": 0.001,
+          "centerX": 54.499,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 51.392,
+          "top": 41.89,
+          "width": 6.214,
+          "height": 2.802,
+          "centerX": 54.499,
+          "centerY": 43.291
+        }
+      },
+      {
+        "key": "model_80",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_163.dae",
+        "publicPath": "/ui/scenes/unitall/model_163.dae",
+        "bounds": {
+          "minX": 859.889,
+          "maxX": 1036.269,
+          "minY": -1788.665,
+          "maxY": -1675.987,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 46.487,
+          "top": 100,
+          "width": 6.796,
+          "height": 0.001,
+          "centerX": 49.885,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 46.487,
+          "top": 41.852,
+          "width": 6.796,
+          "height": 2.486,
+          "centerX": 49.885,
+          "centerY": 43.095
+        }
+      },
+      {
+        "key": "model_81",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_164.dae",
+        "publicPath": "/ui/scenes/unitall/model_164.dae",
+        "bounds": {
+          "minX": 527.993,
+          "maxX": 677.567,
+          "minY": -1806.749,
+          "maxY": -1679.749,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 33.699,
+          "top": 100,
+          "width": 5.763,
+          "height": 0.001,
+          "centerX": 36.58,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 33.699,
+          "top": 41.935,
+          "width": 5.763,
+          "height": 2.802,
+          "centerX": 36.58,
+          "centerY": 43.336
+        }
+      },
+      {
+        "key": "model_82",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_165.dae",
+        "publicPath": "/ui/scenes/unitall/model_165.dae",
+        "bounds": {
+          "minX": 619.113,
+          "maxX": 774.327,
+          "minY": -1809.027,
+          "maxY": -1682.027,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 37.21,
+          "top": 100,
+          "width": 5.981,
+          "height": 0.001,
+          "centerX": 40.2,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 37.21,
+          "top": 41.985,
+          "width": 5.981,
+          "height": 2.802,
+          "centerX": 40.2,
+          "centerY": 43.386
+        }
+      },
+      {
+        "key": "model_83",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_166.dae",
+        "publicPath": "/ui/scenes/unitall/model_166.dae",
+        "bounds": {
+          "minX": 56.425,
+          "maxX": 157.936,
+          "minY": -4031.086,
+          "maxY": -3886.212,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.529,
+          "top": 100,
+          "width": 3.911,
+          "height": 0.001,
+          "centerX": 17.484,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.529,
+          "top": 90.623,
+          "width": 3.911,
+          "height": 3.197,
+          "centerX": 17.484,
+          "centerY": 92.221
+        }
+      },
+      {
+        "key": "model_84",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_167.dae",
+        "publicPath": "/ui/scenes/unitall/model_167.dae",
+        "bounds": {
+          "minX": -84.652,
+          "maxX": 42.348,
+          "minY": -1973.165,
+          "maxY": -1852.421,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 10.093,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 12.539,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 10.093,
+          "top": 45.745,
+          "width": 4.893,
+          "height": 2.664,
+          "centerX": 12.539,
+          "centerY": 47.077
+        }
+      },
+      {
+        "key": "model_85",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_168.dae",
+        "publicPath": "/ui/scenes/unitall/model_168.dae",
+        "bounds": {
+          "minX": 56.45,
+          "maxX": 183.45,
+          "minY": -1961.492,
+          "maxY": -1852.42,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.529,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 17.976,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.529,
+          "top": 45.745,
+          "width": 4.893,
+          "height": 2.407,
+          "centerX": 17.976,
+          "centerY": 46.948
+        }
+      },
+      {
+        "key": "model_86",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_169.dae",
+        "publicPath": "/ui/scenes/unitall/model_169.dae",
+        "bounds": {
+          "minX": 189.709,
+          "maxX": 316.709,
+          "minY": -1959.157,
+          "maxY": -1852.42,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 20.664,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 23.111,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 20.664,
+          "top": 45.745,
+          "width": 4.893,
+          "height": 2.355,
+          "centerX": 23.111,
+          "centerY": 46.922
+        }
+      },
+      {
+        "key": "model_87",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_17.dae",
+        "publicPath": "/ui/scenes/unitall/model_17.dae",
+        "bounds": {
+          "minX": 436.5,
+          "maxX": 563.5,
+          "minY": -126.796,
+          "maxY": -31.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 30.173,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 32.62,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 30.173,
+          "top": 5.571,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 32.62,
+          "centerY": 6.619
+        }
+      },
+      {
+        "key": "model_88",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_170.dae",
+        "publicPath": "/ui/scenes/unitall/model_170.dae",
+        "bounds": {
+          "minX": 335.051,
+          "maxX": 462.051,
+          "minY": -1970.052,
+          "maxY": -1852.421,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 26.264,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 28.711,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 26.264,
+          "top": 45.745,
+          "width": 4.893,
+          "height": 2.596,
+          "centerX": 28.711,
+          "centerY": 47.043
+        }
+      },
+      {
+        "key": "model_89",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_171.dae",
+        "publicPath": "/ui/scenes/unitall/model_171.dae",
+        "bounds": {
+          "minX": 463.307,
+          "maxX": 590.307,
+          "minY": -1961.493,
+          "maxY": -1852.421,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 31.206,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 33.653,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 31.206,
+          "top": 45.745,
+          "width": 4.893,
+          "height": 2.407,
+          "centerX": 33.653,
+          "centerY": 46.948
+        }
+      },
+      {
+        "key": "model_90",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_172.dae",
+        "publicPath": "/ui/scenes/unitall/model_172.dae",
+        "bounds": {
+          "minX": 243.224,
+          "maxX": 337.147,
+          "minY": -4146.079,
+          "maxY": -4042.468,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 22.726,
+          "top": 100,
+          "width": 3.619,
+          "height": 0.001,
+          "centerX": 24.536,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 22.726,
+          "top": 94.071,
+          "width": 3.619,
+          "height": 2.286,
+          "centerX": 24.536,
+          "centerY": 95.214
+        }
+      },
+      {
+        "key": "model_91",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_173.dae",
+        "publicPath": "/ui/scenes/unitall/model_173.dae",
+        "bounds": {
+          "minX": 718.227,
+          "maxX": 845.227,
+          "minY": -1972.383,
+          "maxY": -1852.421,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 41.029,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 43.475,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 41.029,
+          "top": 45.745,
+          "width": 4.893,
+          "height": 2.647,
+          "centerX": 43.475,
+          "centerY": 47.068
+        }
+      },
+      {
+        "key": "model_92",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_174.dae",
+        "publicPath": "/ui/scenes/unitall/model_174.dae",
+        "bounds": {
+          "minX": 150.157,
+          "maxX": 244.08,
+          "minY": -4146.064,
+          "maxY": -4037.373,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 19.14,
+          "top": 100,
+          "width": 3.619,
+          "height": 0.001,
+          "centerX": 20.95,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 19.14,
+          "top": 93.958,
+          "width": 3.619,
+          "height": 2.398,
+          "centerX": 20.95,
+          "centerY": 95.158
+        }
+      },
+      {
+        "key": "model_93",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_175.dae",
+        "publicPath": "/ui/scenes/unitall/model_175.dae",
+        "bounds": {
+          "minX": -201.968,
+          "maxX": -130.968,
+          "minY": -2102.893,
+          "maxY": -2006.893,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 5.572,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 6.94,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 5.572,
+          "top": 49.153,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 6.94,
+          "centerY": 50.213
+        }
+      },
+      {
+        "key": "model_94",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_176.dae",
+        "publicPath": "/ui/scenes/unitall/model_176.dae",
+        "bounds": {
+          "minX": -82.079,
+          "maxX": -11.079,
+          "minY": -2091.035,
+          "maxY": -1995.035,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 10.192,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 11.56,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 10.192,
+          "top": 48.892,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 11.56,
+          "centerY": 49.951
+        }
+      },
+      {
+        "key": "model_95",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_177.dae",
+        "publicPath": "/ui/scenes/unitall/model_177.dae",
+        "bounds": {
+          "minX": 24.176,
+          "maxX": 120.176,
+          "minY": -2079.148,
+          "maxY": -2008.148,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 14.286,
+          "top": 100,
+          "width": 3.699,
+          "height": 0.001,
+          "centerX": 16.135,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 14.286,
+          "top": 49.181,
+          "width": 3.699,
+          "height": 1.567,
+          "centerX": 16.135,
+          "centerY": 49.964
+        }
+      },
+      {
+        "key": "model_96",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_178.dae",
+        "publicPath": "/ui/scenes/unitall/model_178.dae",
+        "bounds": {
+          "minX": 159.21,
+          "maxX": 273.736,
+          "minY": -2122.301,
+          "maxY": -1995.301,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 19.489,
+          "top": 100,
+          "width": 4.413,
+          "height": 0.001,
+          "centerX": 21.695,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 19.489,
+          "top": 48.898,
+          "width": 4.413,
+          "height": 2.802,
+          "centerX": 21.695,
+          "centerY": 50.299
+        }
+      },
+      {
+        "key": "model_97",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_179.dae",
+        "publicPath": "/ui/scenes/unitall/model_179.dae",
+        "bounds": {
+          "minX": 285.921,
+          "maxX": 412.921,
+          "minY": -2070.374,
+          "maxY": -1975.374,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 24.371,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 26.818,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 24.371,
+          "top": 48.458,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 26.818,
+          "centerY": 49.506
+        }
+      },
+      {
+        "key": "model_98",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_18.dae",
+        "publicPath": "/ui/scenes/unitall/model_18.dae",
+        "bounds": {
+          "minX": -1.935,
+          "maxX": 67.773,
+          "minY": -4152.119,
+          "maxY": -4042.356,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 13.28,
+          "top": 100,
+          "width": 2.686,
+          "height": 0.001,
+          "centerX": 14.623,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 13.28,
+          "top": 94.068,
+          "width": 2.686,
+          "height": 2.422,
+          "centerX": 14.623,
+          "centerY": 95.279
+        }
+      },
+      {
+        "key": "model_99",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_180.dae",
+        "publicPath": "/ui/scenes/unitall/model_180.dae",
+        "bounds": {
+          "minX": -202.516,
+          "maxX": -131.516,
+          "minY": -2000.595,
+          "maxY": -1904.595,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 5.551,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 6.919,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 5.551,
+          "top": 46.896,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 6.919,
+          "centerY": 47.955
+        }
+      },
+      {
+        "key": "model_100",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_181.dae",
+        "publicPath": "/ui/scenes/unitall/model_181.dae",
+        "bounds": {
+          "minX": -63.5,
+          "maxX": 63.5,
+          "minY": -2200.564,
+          "maxY": -2105.564,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 10.908,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 13.354,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 10.908,
+          "top": 51.331,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 13.354,
+          "centerY": 52.379
+        }
+      },
+      {
+        "key": "model_101",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_182.dae",
+        "publicPath": "/ui/scenes/unitall/model_182.dae",
+        "bounds": {
+          "minX": 435.843,
+          "maxX": 562.843,
+          "minY": -2101.882,
+          "maxY": -2006.882,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 30.148,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 32.595,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 30.148,
+          "top": 49.153,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 32.595,
+          "centerY": 50.201
+        }
+      },
+      {
+        "key": "model_102",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_183.dae",
+        "publicPath": "/ui/scenes/unitall/model_183.dae",
+        "bounds": {
+          "minX": 192.41,
+          "maxX": 319.41,
+          "minY": -2200.564,
+          "maxY": -2105.564,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 20.768,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 23.215,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 20.768,
+          "top": 51.331,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 23.215,
+          "centerY": 52.379
+        }
+      },
+      {
+        "key": "model_103",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_184.dae",
+        "publicPath": "/ui/scenes/unitall/model_184.dae",
+        "bounds": {
+          "minX": 311.5,
+          "maxX": 438.5,
+          "minY": -2200.563,
+          "maxY": -2105.563,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.357,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 27.804,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.357,
+          "top": 51.331,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 27.804,
+          "centerY": 52.379
+        }
+      },
+      {
+        "key": "model_104",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_185.dae",
+        "publicPath": "/ui/scenes/unitall/model_185.dae",
+        "bounds": {
+          "minX": 436.5,
+          "maxX": 563.5,
+          "minY": -2200.564,
+          "maxY": -2105.564,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 30.173,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 32.62,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 30.173,
+          "top": 51.331,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 32.62,
+          "centerY": 52.379
+        }
+      },
+      {
+        "key": "model_105",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_186.dae",
+        "publicPath": "/ui/scenes/unitall/model_186.dae",
+        "bounds": {
+          "minX": 561.5,
+          "maxX": 688.5,
+          "minY": -2101.137,
+          "maxY": -2006.138,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 34.99,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 37.437,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 34.99,
+          "top": 49.137,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 37.437,
+          "centerY": 50.185
+        }
+      },
+      {
+        "key": "model_106",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_187.dae",
+        "publicPath": "/ui/scenes/unitall/model_187.dae",
+        "bounds": {
+          "minX": 704.789,
+          "maxX": 800.789,
+          "minY": -2202.091,
+          "maxY": -2131.091,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 40.511,
+          "top": 100,
+          "width": 3.699,
+          "height": 0.001,
+          "centerX": 42.36,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 40.511,
+          "top": 51.894,
+          "width": 3.699,
+          "height": 1.567,
+          "centerX": 42.36,
+          "centerY": 52.677
+        }
+      },
+      {
+        "key": "model_107",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_188.dae",
+        "publicPath": "/ui/scenes/unitall/model_188.dae",
+        "bounds": {
+          "minX": 811.5,
+          "maxX": 938.5,
+          "minY": -2206.564,
+          "maxY": -2111.564,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 44.623,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 47.069,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 44.623,
+          "top": 51.463,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 47.069,
+          "centerY": 52.511
+        }
+      },
+      {
+        "key": "model_108",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_189.dae",
+        "publicPath": "/ui/scenes/unitall/model_189.dae",
+        "bounds": {
+          "minX": -136.243,
+          "maxX": 42.021,
+          "minY": -2328.463,
+          "maxY": -2233.463,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 8.105,
+          "top": 100,
+          "width": 6.869,
+          "height": 0.001,
+          "centerX": 11.539,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 8.105,
+          "top": 54.153,
+          "width": 6.869,
+          "height": 2.096,
+          "centerX": 11.539,
+          "centerY": 55.201
+        }
+      },
+      {
+        "key": "model_109",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_19.dae",
+        "publicPath": "/ui/scenes/unitall/model_19.dae",
+        "bounds": {
+          "minX": 686.54,
+          "maxX": 813.54,
+          "minY": -126.796,
+          "maxY": -31.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 39.808,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 42.254,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 39.808,
+          "top": 5.571,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 42.254,
+          "centerY": 6.619
+        }
+      },
+      {
+        "key": "model_110",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_190.dae",
+        "publicPath": "/ui/scenes/unitall/model_190.dae",
+        "bounds": {
+          "minX": 51.508,
+          "maxX": 249.596,
+          "minY": -2335.07,
+          "maxY": -2240.07,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.339,
+          "top": 100,
+          "width": 7.633,
+          "height": 0.001,
+          "centerX": 19.155,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.339,
+          "top": 54.299,
+          "width": 7.633,
+          "height": 2.096,
+          "centerX": 19.155,
+          "centerY": 55.347
+        }
+      },
+      {
+        "key": "model_111",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_191.dae",
+        "publicPath": "/ui/scenes/unitall/model_191.dae",
+        "bounds": {
+          "minX": 186.5,
+          "maxX": 313.5,
+          "minY": -2320.217,
+          "maxY": -2205.648,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 20.54,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 22.987,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 20.54,
+          "top": 53.539,
+          "width": 4.893,
+          "height": 2.528,
+          "centerX": 22.987,
+          "centerY": 54.803
+        }
+      },
+      {
+        "key": "model_112",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_192.dae",
+        "publicPath": "/ui/scenes/unitall/model_192.dae",
+        "bounds": {
+          "minX": 278.166,
+          "maxX": 423.775,
+          "minY": -2340.071,
+          "maxY": -2213.071,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 24.073,
+          "top": 100,
+          "width": 5.611,
+          "height": 0.001,
+          "centerX": 26.878,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 24.073,
+          "top": 53.703,
+          "width": 5.611,
+          "height": 2.802,
+          "centerX": 26.878,
+          "centerY": 55.104
+        }
+      },
+      {
+        "key": "model_113",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_193.dae",
+        "publicPath": "/ui/scenes/unitall/model_193.dae",
+        "bounds": {
+          "minX": 436.5,
+          "maxX": 590.286,
+          "minY": -2339.17,
+          "maxY": -2244.17,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 30.173,
+          "top": 100,
+          "width": 5.926,
+          "height": 0.001,
+          "centerX": 33.136,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 30.173,
+          "top": 54.389,
+          "width": 5.926,
+          "height": 2.096,
+          "centerX": 33.136,
+          "centerY": 55.437
+        }
+      },
+      {
+        "key": "model_114",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_194.dae",
+        "publicPath": "/ui/scenes/unitall/model_194.dae",
+        "bounds": {
+          "minX": 574.46,
+          "maxX": 766.036,
+          "minY": -2335.07,
+          "maxY": -2240.07,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 35.489,
+          "top": 100,
+          "width": 7.382,
+          "height": 0.001,
+          "centerX": 39.18,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 35.489,
+          "top": 54.299,
+          "width": 7.382,
+          "height": 2.096,
+          "centerX": 39.18,
+          "centerY": 55.347
+        }
+      },
+      {
+        "key": "model_115",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_195.dae",
+        "publicPath": "/ui/scenes/unitall/model_195.dae",
+        "bounds": {
+          "minX": 104.954,
+          "maxX": 199.5,
+          "minY": -4170.728,
+          "maxY": -4103.615,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 17.398,
+          "top": 100,
+          "width": 3.643,
+          "height": 0.001,
+          "centerX": 19.22,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 17.398,
+          "top": 95.42,
+          "width": 3.643,
+          "height": 1.481,
+          "centerX": 19.22,
+          "centerY": 96.161
+        }
+      },
+      {
+        "key": "model_116",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_196.dae",
+        "publicPath": "/ui/scenes/unitall/model_196.dae",
+        "bounds": {
+          "minX": -346.585,
+          "maxX": -299.534,
+          "minY": -3823.447,
+          "maxY": -3724.396,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 0,
+          "top": 100,
+          "width": 1.813,
+          "height": 0.001,
+          "centerX": 0.906,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 0,
+          "top": 87.052,
+          "width": 1.813,
+          "height": 2.186,
+          "centerX": 0.906,
+          "centerY": 88.145
+        }
+      },
+      {
+        "key": "model_117",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_197.dae",
+        "publicPath": "/ui/scenes/unitall/model_197.dae",
+        "bounds": {
+          "minX": -286.711,
+          "maxX": -231.361,
+          "minY": -3820.981,
+          "maxY": -3719.361,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 2.307,
+          "top": 100,
+          "width": 2.133,
+          "height": 0.001,
+          "centerX": 3.373,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 2.307,
+          "top": 86.941,
+          "width": 2.133,
+          "height": 2.242,
+          "centerX": 3.373,
+          "centerY": 88.062
+        }
+      },
+      {
+        "key": "model_118",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_198.dae",
+        "publicPath": "/ui/scenes/unitall/model_198.dae",
+        "bounds": {
+          "minX": -241.696,
+          "maxX": -165.878,
+          "minY": -3815.016,
+          "maxY": -3732.328,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 4.042,
+          "top": 100,
+          "width": 2.921,
+          "height": 0.001,
+          "centerX": 5.502,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 4.042,
+          "top": 87.227,
+          "width": 2.921,
+          "height": 1.825,
+          "centerX": 5.502,
+          "centerY": 88.139
+        }
+      },
+      {
+        "key": "model_119",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_199.dae",
+        "publicPath": "/ui/scenes/unitall/model_199.dae",
+        "bounds": {
+          "minX": 122.382,
+          "maxX": 199.624,
+          "minY": -3855.421,
+          "maxY": -3763.178,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 18.07,
+          "top": 100,
+          "width": 2.976,
+          "height": 0.001,
+          "centerX": 19.558,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 18.07,
+          "top": 87.908,
+          "width": 2.976,
+          "height": 2.035,
+          "centerX": 19.558,
+          "centerY": 88.926
+        }
+      },
+      {
+        "key": "model_120",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_20.dae",
+        "publicPath": "/ui/scenes/unitall/model_20.dae",
+        "bounds": {
+          "minX": 50.416,
+          "maxX": 121.416,
+          "minY": -140.26,
+          "maxY": -44.26,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.297,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 16.665,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.297,
+          "top": 5.846,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 16.665,
+          "centerY": 6.905
+        }
+      },
+      {
+        "key": "model_121",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_200.dae",
+        "publicPath": "/ui/scenes/unitall/model_200.dae",
+        "bounds": {
+          "minX": 780.26,
+          "maxX": 907.26,
+          "minY": -2449.224,
+          "maxY": -2354.224,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 43.419,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 45.866,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 43.419,
+          "top": 56.818,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 45.866,
+          "centerY": 57.866
+        }
+      },
+      {
+        "key": "model_122",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_201.dae",
+        "publicPath": "/ui/scenes/unitall/model_201.dae",
+        "bounds": {
+          "minX": 147.668,
+          "maxX": 199.5,
+          "minY": -4003.311,
+          "maxY": -3944.701,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 19.044,
+          "top": 100,
+          "width": 1.997,
+          "height": 0.001,
+          "centerX": 20.043,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 19.044,
+          "top": 91.913,
+          "width": 1.997,
+          "height": 1.293,
+          "centerX": 20.043,
+          "centerY": 92.56
+        }
+      },
+      {
+        "key": "model_123",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_21.dae",
+        "publicPath": "/ui/scenes/unitall/model_21.dae",
+        "bounds": {
+          "minX": 543.439,
+          "maxX": 614.439,
+          "minY": -129.132,
+          "maxY": -33.132,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 34.294,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 35.662,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 34.294,
+          "top": 5.6,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 35.662,
+          "centerY": 6.659
+        }
+      },
+      {
+        "key": "model_124",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_22.dae",
+        "publicPath": "/ui/scenes/unitall/model_22.dae",
+        "bounds": {
+          "minX": 50.523,
+          "maxX": 113.026,
+          "minY": -4128.222,
+          "maxY": -4030.193,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.301,
+          "top": 100,
+          "width": 2.408,
+          "height": 0.001,
+          "centerX": 16.505,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.301,
+          "top": 93.8,
+          "width": 2.408,
+          "height": 2.163,
+          "centerX": 16.505,
+          "centerY": 94.881
+        }
+      },
+      {
+        "key": "model_125",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_23.dae",
+        "publicPath": "/ui/scenes/unitall/model_23.dae",
+        "bounds": {
+          "minX": -94.558,
+          "maxX": 1.949,
+          "minY": -4120.025,
+          "maxY": -4028.385,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 9.711,
+          "top": 100,
+          "width": 3.719,
+          "height": 0.001,
+          "centerX": 11.57,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 9.711,
+          "top": 93.76,
+          "width": 3.719,
+          "height": 2.022,
+          "centerX": 11.57,
+          "centerY": 94.771
+        }
+      },
+      {
+        "key": "model_126",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_24.dae",
+        "publicPath": "/ui/scenes/unitall/model_24.dae",
+        "bounds": {
+          "minX": -57.215,
+          "maxX": 37.785,
+          "minY": -253.033,
+          "maxY": -126.033,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.15,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 12.98,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.15,
+          "top": 7.65,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 12.98,
+          "centerY": 9.051
+        }
+      },
+      {
+        "key": "model_127",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_25.dae",
+        "publicPath": "/ui/scenes/unitall/model_25.dae",
+        "bounds": {
+          "minX": 15.848,
+          "maxX": 172.191,
+          "minY": -268.98,
+          "maxY": -141.98,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 13.965,
+          "top": 100,
+          "width": 6.024,
+          "height": 0.001,
+          "centerX": 16.977,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 13.965,
+          "top": 8.002,
+          "width": 6.024,
+          "height": 2.802,
+          "centerX": 16.977,
+          "centerY": 9.403
+        }
+      },
+      {
+        "key": "model_128",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_26.dae",
+        "publicPath": "/ui/scenes/unitall/model_26.dae",
+        "bounds": {
+          "minX": 178.529,
+          "maxX": 273.529,
+          "minY": -274.198,
+          "maxY": -147.197,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 20.233,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 22.064,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 20.233,
+          "top": 8.117,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 22.064,
+          "centerY": 9.518
+        }
+      },
+      {
+        "key": "model_129",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_27.dae",
+        "publicPath": "/ui/scenes/unitall/model_27.dae",
+        "bounds": {
+          "minX": 299.618,
+          "maxX": 424.527,
+          "minY": -272.388,
+          "maxY": -156.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 24.899,
+          "top": 100,
+          "width": 4.813,
+          "height": 0.001,
+          "centerX": 27.306,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 24.899,
+          "top": 8.329,
+          "width": 4.813,
+          "height": 2.551,
+          "centerX": 27.306,
+          "centerY": 9.604
+        }
+      },
+      {
+        "key": "model_130",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_28.dae",
+        "publicPath": "/ui/scenes/unitall/model_28.dae",
+        "bounds": {
+          "minX": 1507.349,
+          "maxX": 1617.3,
+          "minY": -274.198,
+          "maxY": -147.198,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 71.435,
+          "top": 100,
+          "width": 4.237,
+          "height": 0.001,
+          "centerX": 73.553,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 71.435,
+          "top": 8.117,
+          "width": 4.237,
+          "height": 2.802,
+          "centerX": 73.553,
+          "centerY": 9.518
+        }
+      },
+      {
+        "key": "model_131",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_29.dae",
+        "publicPath": "/ui/scenes/unitall/model_29.dae",
+        "bounds": {
+          "minX": 543.379,
+          "maxX": 670.379,
+          "minY": -325.018,
+          "maxY": -172.198,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 34.292,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 36.738,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 34.292,
+          "top": 8.669,
+          "width": 4.893,
+          "height": 3.372,
+          "centerX": 36.738,
+          "centerY": 10.355
+        }
+      },
+      {
+        "key": "model_132",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_30.dae",
+        "publicPath": "/ui/scenes/unitall/model_30.dae",
+        "bounds": {
+          "minX": -133.782,
+          "maxX": -42.122,
+          "minY": -3790.679,
+          "maxY": -3683.972,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 8.2,
+          "top": 100,
+          "width": 3.532,
+          "height": 0.001,
+          "centerX": 9.965,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 8.2,
+          "top": 86.16,
+          "width": 3.532,
+          "height": 2.355,
+          "centerX": 9.965,
+          "centerY": 87.337
+        }
+      },
+      {
+        "key": "model_133",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_31.dae",
+        "publicPath": "/ui/scenes/unitall/model_31.dae",
+        "bounds": {
+          "minX": 774.291,
+          "maxX": 845.291,
+          "minY": -248.591,
+          "maxY": -152.591,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 43.189,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 44.557,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 43.189,
+          "top": 8.236,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 44.557,
+          "centerY": 9.295
+        }
+      },
+      {
+        "key": "model_134",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_32.dae",
+        "publicPath": "/ui/scenes/unitall/model_32.dae",
+        "bounds": {
+          "minX": 1960.756,
+          "maxX": 2098.483,
+          "minY": -232.179,
+          "maxY": -105.179,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 88.905,
+          "top": 100,
+          "width": 5.307,
+          "height": 0.001,
+          "centerX": 91.558,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 88.905,
+          "top": 7.19,
+          "width": 5.307,
+          "height": 2.802,
+          "centerX": 91.558,
+          "centerY": 8.591
+        }
+      },
+      {
+        "key": "model_135",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_33.dae",
+        "publicPath": "/ui/scenes/unitall/model_33.dae",
+        "bounds": {
+          "minX": 544.729,
+          "maxX": 671.729,
+          "minY": -236.498,
+          "maxY": -85.707,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 34.344,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 36.79,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 34.344,
+          "top": 6.76,
+          "width": 4.893,
+          "height": 3.327,
+          "centerX": 36.79,
+          "centerY": 8.424
+        }
+      },
+      {
+        "key": "model_136",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_34.dae",
+        "publicPath": "/ui/scenes/unitall/model_34.dae",
+        "bounds": {
+          "minX": 1197.05,
+          "maxX": 1324.829,
+          "minY": -285.232,
+          "maxY": -156.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 59.478,
+          "top": 100,
+          "width": 4.923,
+          "height": 0.001,
+          "centerX": 61.94,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 59.478,
+          "top": 8.329,
+          "width": 4.923,
+          "height": 2.834,
+          "centerX": 61.94,
+          "centerY": 9.746
+        }
+      },
+      {
+        "key": "model_137",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_35.dae",
+        "publicPath": "/ui/scenes/unitall/model_35.dae",
+        "bounds": {
+          "minX": 1334.542,
+          "maxX": 1429.542,
+          "minY": -234.653,
+          "maxY": -107.653,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 64.776,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 66.606,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 64.776,
+          "top": 7.244,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 66.606,
+          "centerY": 8.646
+        }
+      },
+      {
+        "key": "model_138",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_36.dae",
+        "publicPath": "/ui/scenes/unitall/model_36.dae",
+        "bounds": {
+          "minX": 1454.469,
+          "maxX": 1581.719,
+          "minY": -220.666,
+          "maxY": -117.552,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 69.397,
+          "top": 100,
+          "width": 4.903,
+          "height": 0.001,
+          "centerX": 71.849,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 69.397,
+          "top": 7.463,
+          "width": 4.903,
+          "height": 2.275,
+          "centerX": 71.849,
+          "centerY": 8.6
+        }
+      },
+      {
+        "key": "model_139",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_37.dae",
+        "publicPath": "/ui/scenes/unitall/model_37.dae",
+        "bounds": {
+          "minX": 1640.871,
+          "maxX": 1755.099,
+          "minY": -258.932,
+          "maxY": -131.932,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 76.579,
+          "top": 100,
+          "width": 4.401,
+          "height": 0.001,
+          "centerX": 78.78,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 76.579,
+          "top": 7.78,
+          "width": 4.401,
+          "height": 2.802,
+          "centerX": 78.78,
+          "centerY": 9.181
+        }
+      },
+      {
+        "key": "model_140",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_38.dae",
+        "publicPath": "/ui/scenes/unitall/model_38.dae",
+        "bounds": {
+          "minX": 1821.482,
+          "maxX": 1971.913,
+          "minY": -237.616,
+          "maxY": -110.616,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 83.539,
+          "top": 100,
+          "width": 5.796,
+          "height": 0.001,
+          "centerX": 86.437,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 83.539,
+          "top": 7.31,
+          "width": 5.796,
+          "height": 2.802,
+          "centerX": 86.437,
+          "centerY": 8.711
+        }
+      },
+      {
+        "key": "model_141",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_39.dae",
+        "publicPath": "/ui/scenes/unitall/model_39.dae",
+        "bounds": {
+          "minX": 68.815,
+          "maxX": 170.435,
+          "minY": -3886.063,
+          "maxY": -3761.55,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 16.006,
+          "top": 100,
+          "width": 3.916,
+          "height": 0.001,
+          "centerX": 17.964,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 16.006,
+          "top": 87.872,
+          "width": 3.916,
+          "height": 2.748,
+          "centerX": 17.964,
+          "centerY": 89.246
+        }
+      },
+      {
+        "key": "model_142",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_40.dae",
+        "publicPath": "/ui/scenes/unitall/model_40.dae",
+        "bounds": {
+          "minX": -157.013,
+          "maxX": -86.013,
+          "minY": -387.062,
+          "maxY": -291.062,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 7.304,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 8.672,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 7.304,
+          "top": 11.292,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 8.672,
+          "centerY": 12.351
+        }
+      },
+      {
+        "key": "model_143",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_41.dae",
+        "publicPath": "/ui/scenes/unitall/model_41.dae",
+        "bounds": {
+          "minX": 62.248,
+          "maxX": 189.248,
+          "minY": -376.796,
+          "maxY": -281.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.753,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 18.2,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.753,
+          "top": 11.087,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 18.2,
+          "centerY": 12.135
+        }
+      },
+      {
+        "key": "model_144",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_42.dae",
+        "publicPath": "/ui/scenes/unitall/model_42.dae",
+        "bounds": {
+          "minX": -48.957,
+          "maxX": 22.043,
+          "minY": -381.681,
+          "maxY": -285.681,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.468,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 12.836,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.468,
+          "top": 11.173,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 12.836,
+          "centerY": 12.232
+        }
+      },
+      {
+        "key": "model_145",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_43.dae",
+        "publicPath": "/ui/scenes/unitall/model_43.dae",
+        "bounds": {
+          "minX": -39.43,
+          "maxX": 7.479,
+          "minY": -4162.178,
+          "maxY": -4072.705,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.835,
+          "top": 100,
+          "width": 1.807,
+          "height": 0.001,
+          "centerX": 12.739,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.835,
+          "top": 94.738,
+          "width": 1.807,
+          "height": 1.974,
+          "centerX": 12.739,
+          "centerY": 95.725
+        }
+      },
+      {
+        "key": "model_146",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_44.dae",
+        "publicPath": "/ui/scenes/unitall/model_44.dae",
+        "bounds": {
+          "minX": 292.531,
+          "maxX": 363.531,
+          "minY": -390.261,
+          "maxY": -294.261,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 24.626,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 25.994,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 24.626,
+          "top": 11.362,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 25.994,
+          "centerY": 12.421
+        }
+      },
+      {
+        "key": "model_147",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_45.dae",
+        "publicPath": "/ui/scenes/unitall/model_45.dae",
+        "bounds": {
+          "minX": 419.473,
+          "maxX": 490.473,
+          "minY": -390.702,
+          "maxY": -294.702,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 29.517,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 30.885,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 29.517,
+          "top": 11.372,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 30.885,
+          "centerY": 12.431
+        }
+      },
+      {
+        "key": "model_148",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_46.dae",
+        "publicPath": "/ui/scenes/unitall/model_46.dae",
+        "bounds": {
+          "minX": 165.975,
+          "maxX": 236.975,
+          "minY": -388.559,
+          "maxY": -292.559,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 19.75,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 21.118,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 19.75,
+          "top": 11.325,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 21.118,
+          "centerY": 12.384
+        }
+      },
+      {
+        "key": "model_149",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_47.dae",
+        "publicPath": "/ui/scenes/unitall/model_47.dae",
+        "bounds": {
+          "minX": 706.359,
+          "maxX": 777.359,
+          "minY": -388.843,
+          "maxY": -292.843,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 40.571,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 41.939,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 40.571,
+          "top": 11.331,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 41.939,
+          "centerY": 12.39
+        }
+      },
+      {
+        "key": "model_150",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_48.dae",
+        "publicPath": "/ui/scenes/unitall/model_48.dae",
+        "bounds": {
+          "minX": 480.034,
+          "maxX": 551.034,
+          "minY": -370.864,
+          "maxY": -274.864,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 31.851,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 33.219,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 31.851,
+          "top": 10.934,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 33.219,
+          "centerY": 11.993
+        }
+      },
+      {
+        "key": "model_151",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_49.dae",
+        "publicPath": "/ui/scenes/unitall/model_49.dae",
+        "bounds": {
+          "minX": 579.016,
+          "maxX": 650.016,
+          "minY": -382.729,
+          "maxY": -286.729,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 35.665,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 37.033,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 35.665,
+          "top": 11.196,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 37.033,
+          "centerY": 12.255
+        }
+      },
+      {
+        "key": "model_152",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_50.dae",
+        "publicPath": "/ui/scenes/unitall/model_50.dae",
+        "bounds": {
+          "minX": 833.817,
+          "maxX": 904.817,
+          "minY": -399.857,
+          "maxY": -303.857,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 45.483,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 46.85,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 45.483,
+          "top": 11.574,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 46.85,
+          "centerY": 12.633
+        }
+      },
+      {
+        "key": "model_153",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_51.dae",
+        "publicPath": "/ui/scenes/unitall/model_51.dae",
+        "bounds": {
+          "minX": 938.876,
+          "maxX": 1009.876,
+          "minY": -385.36,
+          "maxY": -289.36,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 49.531,
+          "top": 100,
+          "width": 2.736,
+          "height": 0.001,
+          "centerX": 50.898,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 49.531,
+          "top": 11.254,
+          "width": 2.736,
+          "height": 2.118,
+          "centerX": 50.898,
+          "centerY": 12.313
+        }
+      },
+      {
+        "key": "model_154",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_52.dae",
+        "publicPath": "/ui/scenes/unitall/model_52.dae",
+        "bounds": {
+          "minX": 11.118,
+          "maxX": 69.349,
+          "minY": -4157.602,
+          "maxY": -4063.057,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 13.783,
+          "top": 100,
+          "width": 2.244,
+          "height": 0.001,
+          "centerX": 14.905,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 13.783,
+          "top": 94.525,
+          "width": 2.244,
+          "height": 2.086,
+          "centerX": 14.905,
+          "centerY": 95.568
+        }
+      },
+      {
+        "key": "model_155",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_53.dae",
+        "publicPath": "/ui/scenes/unitall/model_53.dae",
+        "bounds": {
+          "minX": 60.268,
+          "maxX": 123.533,
+          "minY": -4166.988,
+          "maxY": -4055.793,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.677,
+          "top": 100,
+          "width": 2.438,
+          "height": 0.001,
+          "centerX": 16.895,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.677,
+          "top": 94.365,
+          "width": 2.438,
+          "height": 2.454,
+          "centerX": 16.895,
+          "centerY": 95.592
+        }
+      },
+      {
+        "key": "model_156",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_54.dae",
+        "publicPath": "/ui/scenes/unitall/model_54.dae",
+        "bounds": {
+          "minX": -65.129,
+          "maxX": 61.871,
+          "minY": -506.801,
+          "maxY": -411.801,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 10.845,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 13.292,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 10.845,
+          "top": 13.956,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 13.292,
+          "centerY": 15.004
+        }
+      },
+      {
+        "key": "model_157",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_55.dae",
+        "publicPath": "/ui/scenes/unitall/model_55.dae",
+        "bounds": {
+          "minX": 48.57,
+          "maxX": 165.999,
+          "minY": -530.13,
+          "maxY": -403.13,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 15.226,
+          "top": 100,
+          "width": 4.525,
+          "height": 0.001,
+          "centerX": 17.488,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 15.226,
+          "top": 13.764,
+          "width": 4.525,
+          "height": 2.802,
+          "centerX": 17.488,
+          "centerY": 15.166
+        }
+      },
+      {
+        "key": "model_158",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_56.dae",
+        "publicPath": "/ui/scenes/unitall/model_56.dae",
+        "bounds": {
+          "minX": 189.554,
+          "maxX": 284.554,
+          "minY": -533.04,
+          "maxY": -406.04,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 20.658,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 22.488,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 20.658,
+          "top": 13.829,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 22.488,
+          "centerY": 15.23
+        }
+      },
+      {
+        "key": "model_159",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_57.dae",
+        "publicPath": "/ui/scenes/unitall/model_57.dae",
+        "bounds": {
+          "minX": 296.056,
+          "maxX": 455.954,
+          "minY": -542.238,
+          "maxY": -413.832,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 24.762,
+          "top": 100,
+          "width": 6.161,
+          "height": 0.001,
+          "centerX": 27.842,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 24.762,
+          "top": 14.001,
+          "width": 6.161,
+          "height": 2.833,
+          "centerX": 27.842,
+          "centerY": 15.417
+        }
+      },
+      {
+        "key": "model_160",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_58.dae",
+        "publicPath": "/ui/scenes/unitall/model_58.dae",
+        "bounds": {
+          "minX": 458.938,
+          "maxX": 553.938,
+          "minY": -526.777,
+          "maxY": -399.777,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 31.038,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 32.868,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 31.038,
+          "top": 13.69,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 32.868,
+          "centerY": 15.092
+        }
+      },
+      {
+        "key": "model_161",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_59.dae",
+        "publicPath": "/ui/scenes/unitall/model_59.dae",
+        "bounds": {
+          "minX": 565.722,
+          "maxX": 692.722,
+          "minY": -508.796,
+          "maxY": -413.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 35.152,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 37.599,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 35.152,
+          "top": 14,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 37.599,
+          "centerY": 15.048
+        }
+      },
+      {
+        "key": "model_162",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_60.dae",
+        "publicPath": "/ui/scenes/unitall/model_60.dae",
+        "bounds": {
+          "minX": -3.737,
+          "maxX": 75.784,
+          "minY": -3915.078,
+          "maxY": -3787.69,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 13.21,
+          "top": 100,
+          "width": 3.064,
+          "height": 0.001,
+          "centerX": 14.742,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 13.21,
+          "top": 88.449,
+          "width": 3.064,
+          "height": 2.811,
+          "centerX": 14.742,
+          "centerY": 89.854
+        }
+      },
+      {
+        "key": "model_163",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_61.dae",
+        "publicPath": "/ui/scenes/unitall/model_61.dae",
+        "bounds": {
+          "minX": 851.106,
+          "maxX": 946.106,
+          "minY": -522.4,
+          "maxY": -395.4,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 46.149,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 47.979,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 46.149,
+          "top": 13.594,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 47.979,
+          "centerY": 14.995
+        }
+      },
+      {
+        "key": "model_164",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_62.dae",
+        "publicPath": "/ui/scenes/unitall/model_62.dae",
+        "bounds": {
+          "minX": 992.957,
+          "maxX": 1087.957,
+          "minY": -525.549,
+          "maxY": -398.549,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 51.614,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 53.445,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 51.614,
+          "top": 13.663,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 53.445,
+          "centerY": 15.065
+        }
+      },
+      {
+        "key": "model_165",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_63.dae",
+        "publicPath": "/ui/scenes/unitall/model_63.dae",
+        "bounds": {
+          "minX": 1104.565,
+          "maxX": 1231.565,
+          "minY": -508.796,
+          "maxY": -413.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 55.915,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 58.362,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 55.915,
+          "top": 14,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 58.362,
+          "centerY": 15.048
+        }
+      },
+      {
+        "key": "model_166",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_64.dae",
+        "publicPath": "/ui/scenes/unitall/model_64.dae",
+        "bounds": {
+          "minX": 1237.322,
+          "maxX": 1364.322,
+          "minY": -508.796,
+          "maxY": -413.796,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 61.03,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 63.477,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 61.03,
+          "top": 14,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 63.477,
+          "centerY": 15.048
+        }
+      },
+      {
+        "key": "model_167",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_65.dae",
+        "publicPath": "/ui/scenes/unitall/model_65.dae",
+        "bounds": {
+          "minX": -211.366,
+          "maxX": -115.681,
+          "minY": -3911.102,
+          "maxY": -3805.204,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 5.21,
+          "top": 100,
+          "width": 3.687,
+          "height": 0.001,
+          "centerX": 7.054,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 5.21,
+          "top": 88.835,
+          "width": 3.687,
+          "height": 2.337,
+          "centerX": 7.054,
+          "centerY": 90.004
+        }
+      },
+      {
+        "key": "model_168",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_66.dae",
+        "publicPath": "/ui/scenes/unitall/model_66.dae",
+        "bounds": {
+          "minX": -4.404,
+          "maxX": 78.174,
+          "minY": -3890.554,
+          "maxY": -3785.593,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 13.185,
+          "top": 100,
+          "width": 3.182,
+          "height": 0.001,
+          "centerX": 14.776,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 13.185,
+          "top": 88.403,
+          "width": 3.182,
+          "height": 2.316,
+          "centerX": 14.776,
+          "centerY": 89.561
+        }
+      },
+      {
+        "key": "model_169",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_67.dae",
+        "publicPath": "/ui/scenes/unitall/model_67.dae",
+        "bounds": {
+          "minX": -15.44,
+          "maxX": 83.255,
+          "minY": -3898.994,
+          "maxY": -3790.951,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 12.759,
+          "top": 100,
+          "width": 3.803,
+          "height": 0.001,
+          "centerX": 14.661,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 12.759,
+          "top": 88.521,
+          "width": 3.803,
+          "height": 2.384,
+          "centerX": 14.661,
+          "centerY": 89.713
+        }
+      },
+      {
+        "key": "model_170",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_68.dae",
+        "publicPath": "/ui/scenes/unitall/model_68.dae",
+        "bounds": {
+          "minX": -48.663,
+          "maxX": 116.67,
+          "minY": -709.506,
+          "maxY": -569.489,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.479,
+          "top": 100,
+          "width": 6.371,
+          "height": 0.001,
+          "centerX": 14.665,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.479,
+          "top": 17.435,
+          "width": 6.371,
+          "height": 3.09,
+          "centerX": 14.665,
+          "centerY": 18.98
+        }
+      },
+      {
+        "key": "model_171",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_69.dae",
+        "publicPath": "/ui/scenes/unitall/model_69.dae",
+        "bounds": {
+          "minX": 1242.55,
+          "maxX": 1382.568,
+          "minY": -649.679,
+          "maxY": -544.941,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 61.232,
+          "top": 100,
+          "width": 5.395,
+          "height": 0.001,
+          "centerX": 63.929,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 61.232,
+          "top": 16.894,
+          "width": 5.395,
+          "height": 2.311,
+          "centerX": 63.929,
+          "centerY": 18.049
+        }
+      },
+      {
+        "key": "model_172",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_70.dae",
+        "publicPath": "/ui/scenes/unitall/model_70.dae",
+        "bounds": {
+          "minX": 188.76,
+          "maxX": 380.959,
+          "minY": -689.488,
+          "maxY": -551.786,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 20.628,
+          "top": 100,
+          "width": 7.406,
+          "height": 0.001,
+          "centerX": 24.33,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 20.628,
+          "top": 17.045,
+          "width": 7.406,
+          "height": 3.039,
+          "centerX": 24.33,
+          "centerY": 18.564
+        }
+      },
+      {
+        "key": "model_173",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_71.dae",
+        "publicPath": "/ui/scenes/unitall/model_71.dae",
+        "bounds": {
+          "minX": 308.689,
+          "maxX": 448.732,
+          "minY": -696.918,
+          "maxY": -556.9,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.249,
+          "top": 100,
+          "width": 5.396,
+          "height": 0.001,
+          "centerX": 27.947,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.249,
+          "top": 17.158,
+          "width": 5.396,
+          "height": 3.09,
+          "centerX": 27.947,
+          "centerY": 18.702
+        }
+      },
+      {
+        "key": "model_174",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_72.dae",
+        "publicPath": "/ui/scenes/unitall/model_72.dae",
+        "bounds": {
+          "minX": 391.697,
+          "maxX": 539.191,
+          "minY": -678.28,
+          "maxY": -538.263,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 28.447,
+          "top": 100,
+          "width": 5.683,
+          "height": 0.001,
+          "centerX": 31.289,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 28.447,
+          "top": 16.746,
+          "width": 5.683,
+          "height": 3.09,
+          "centerX": 31.289,
+          "centerY": 18.291
+        }
+      },
+      {
+        "key": "model_175",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_73.dae",
+        "publicPath": "/ui/scenes/unitall/model_73.dae",
+        "bounds": {
+          "minX": 535.356,
+          "maxX": 675.373,
+          "minY": -675.33,
+          "maxY": -570.592,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 33.982,
+          "top": 100,
+          "width": 5.395,
+          "height": 0.001,
+          "centerX": 36.68,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 33.982,
+          "top": 17.46,
+          "width": 5.395,
+          "height": 2.311,
+          "centerX": 36.68,
+          "centerY": 18.615
+        }
+      },
+      {
+        "key": "model_176",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_74.dae",
+        "publicPath": "/ui/scenes/unitall/model_74.dae",
+        "bounds": {
+          "minX": 689.353,
+          "maxX": 835.514,
+          "minY": -721.555,
+          "maxY": -546.738,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 39.916,
+          "top": 100,
+          "width": 5.632,
+          "height": 0.001,
+          "centerX": 42.732,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 39.916,
+          "top": 16.933,
+          "width": 5.632,
+          "height": 3.858,
+          "centerX": 42.732,
+          "centerY": 18.862
+        }
+      },
+      {
+        "key": "model_177",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_75.dae",
+        "publicPath": "/ui/scenes/unitall/model_75.dae",
+        "bounds": {
+          "minX": 835.276,
+          "maxX": 997.091,
+          "minY": -687.537,
+          "maxY": -547.52,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 45.539,
+          "top": 100,
+          "width": 6.235,
+          "height": 0.001,
+          "centerX": 48.656,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 45.539,
+          "top": 16.951,
+          "width": 6.235,
+          "height": 3.09,
+          "centerX": 48.656,
+          "centerY": 18.495
+        }
+      },
+      {
+        "key": "model_178",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_76.dae",
+        "publicPath": "/ui/scenes/unitall/model_76.dae",
+        "bounds": {
+          "minX": 977.162,
+          "maxX": 1132.022,
+          "minY": -676.771,
+          "maxY": -536.754,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 51.006,
+          "top": 100,
+          "width": 5.967,
+          "height": 0.001,
+          "centerX": 53.989,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 51.006,
+          "top": 16.713,
+          "width": 5.967,
+          "height": 3.09,
+          "centerX": 53.989,
+          "centerY": 18.258
+        }
+      },
+      {
+        "key": "model_179",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_77.dae",
+        "publicPath": "/ui/scenes/unitall/model_77.dae",
+        "bounds": {
+          "minX": 1097.05,
+          "maxX": 1237.067,
+          "minY": -649.616,
+          "maxY": -544.879,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 55.625,
+          "top": 100,
+          "width": 5.395,
+          "height": 0.001,
+          "centerX": 58.323,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 55.625,
+          "top": 16.892,
+          "width": 5.395,
+          "height": 2.311,
+          "centerX": 58.323,
+          "centerY": 18.048
+        }
+      },
+      {
+        "key": "model_180",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_78.dae",
+        "publicPath": "/ui/scenes/unitall/model_78.dae",
+        "bounds": {
+          "minX": -36.044,
+          "maxX": 83.925,
+          "minY": -855.695,
+          "maxY": -754.095,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.966,
+          "top": 100,
+          "width": 4.623,
+          "height": 0.001,
+          "centerX": 14.277,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.966,
+          "top": 21.509,
+          "width": 4.623,
+          "height": 2.242,
+          "centerX": 14.277,
+          "centerY": 22.63
+        }
+      },
+      {
+        "key": "model_181",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_79.dae",
+        "publicPath": "/ui/scenes/unitall/model_79.dae",
+        "bounds": {
+          "minX": 1263.216,
+          "maxX": 1364.816,
+          "minY": -793.667,
+          "maxY": -717.667,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 62.028,
+          "top": 100,
+          "width": 3.915,
+          "height": 0.001,
+          "centerX": 63.985,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 62.028,
+          "top": 20.705,
+          "width": 3.915,
+          "height": 1.677,
+          "centerX": 63.985,
+          "centerY": 21.544
+        }
+      },
+      {
+        "key": "model_182",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_80.dae",
+        "publicPath": "/ui/scenes/unitall/model_80.dae",
+        "bounds": {
+          "minX": 204.838,
+          "maxX": 344.302,
+          "minY": -844.311,
+          "maxY": -744.391,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 21.247,
+          "top": 100,
+          "width": 5.374,
+          "height": 0.001,
+          "centerX": 23.934,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 21.247,
+          "top": 21.295,
+          "width": 5.374,
+          "height": 2.205,
+          "centerX": 23.934,
+          "centerY": 22.397
+        }
+      },
+      {
+        "key": "model_183",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_81.dae",
+        "publicPath": "/ui/scenes/unitall/model_81.dae",
+        "bounds": {
+          "minX": 322.663,
+          "maxX": 424.282,
+          "minY": -842.721,
+          "maxY": -741.121,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.787,
+          "top": 100,
+          "width": 3.916,
+          "height": 0.001,
+          "centerX": 27.745,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.787,
+          "top": 21.223,
+          "width": 3.916,
+          "height": 2.242,
+          "centerX": 27.745,
+          "centerY": 22.344
+        }
+      },
+      {
+        "key": "model_184",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_82.dae",
+        "publicPath": "/ui/scenes/unitall/model_82.dae",
+        "bounds": {
+          "minX": 408.538,
+          "maxX": 515.563,
+          "minY": -828.096,
+          "maxY": -726.496,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 29.096,
+          "top": 100,
+          "width": 4.124,
+          "height": 0.001,
+          "centerX": 31.158,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 29.096,
+          "top": 20.9,
+          "width": 4.124,
+          "height": 2.242,
+          "centerX": 31.158,
+          "centerY": 22.021
+        }
+      },
+      {
+        "key": "model_185",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_83.dae",
+        "publicPath": "/ui/scenes/unitall/model_83.dae",
+        "bounds": {
+          "minX": 556.858,
+          "maxX": 658.458,
+          "minY": -822.802,
+          "maxY": -746.802,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 34.811,
+          "top": 100,
+          "width": 3.915,
+          "height": 0.001,
+          "centerX": 36.768,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 34.811,
+          "top": 21.348,
+          "width": 3.915,
+          "height": 1.677,
+          "centerX": 36.768,
+          "centerY": 22.186
+        }
+      },
+      {
+        "key": "model_186",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_84.dae",
+        "publicPath": "/ui/scenes/unitall/model_84.dae",
+        "bounds": {
+          "minX": 700.611,
+          "maxX": 806.669,
+          "minY": -862.551,
+          "maxY": -735.7,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 40.35,
+          "top": 100,
+          "width": 4.087,
+          "height": 0.001,
+          "centerX": 42.393,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 40.35,
+          "top": 21.103,
+          "width": 4.087,
+          "height": 2.799,
+          "centerX": 42.393,
+          "centerY": 22.503
+        }
+      },
+      {
+        "key": "model_187",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_85.dae",
+        "publicPath": "/ui/scenes/unitall/model_85.dae",
+        "bounds": {
+          "minX": 847.186,
+          "maxX": 964.602,
+          "minY": -835.183,
+          "maxY": -733.583,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 45.998,
+          "top": 100,
+          "width": 4.524,
+          "height": 0.001,
+          "centerX": 48.26,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 45.998,
+          "top": 21.056,
+          "width": 4.524,
+          "height": 2.242,
+          "centerX": 48.26,
+          "centerY": 22.177
+        }
+      },
+      {
+        "key": "model_188",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_86.dae",
+        "publicPath": "/ui/scenes/unitall/model_86.dae",
+        "bounds": {
+          "minX": 985.937,
+          "maxX": 1098.307,
+          "minY": -824.17,
+          "maxY": -722.57,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 51.344,
+          "top": 100,
+          "width": 4.33,
+          "height": 0.001,
+          "centerX": 53.509,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 51.344,
+          "top": 20.813,
+          "width": 4.33,
+          "height": 2.242,
+          "centerX": 53.509,
+          "centerY": 21.934
+        }
+      },
+      {
+        "key": "model_189",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_87.dae",
+        "publicPath": "/ui/scenes/unitall/model_87.dae",
+        "bounds": {
+          "minX": 1117.867,
+          "maxX": 1219.467,
+          "minY": -793.551,
+          "maxY": -717.551,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 56.427,
+          "top": 100,
+          "width": 3.915,
+          "height": 0.001,
+          "centerX": 58.385,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 56.427,
+          "top": 20.703,
+          "width": 3.915,
+          "height": 1.677,
+          "centerX": 58.385,
+          "centerY": 21.541
+        }
+      },
+      {
+        "key": "model_190",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_88.dae",
+        "publicPath": "/ui/scenes/unitall/model_88.dae",
+        "bounds": {
+          "minX": -48.822,
+          "maxX": 46.178,
+          "minY": -1013.063,
+          "maxY": -886.063,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.473,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 13.303,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.473,
+          "top": 24.421,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 13.303,
+          "centerY": 25.822
+        }
+      },
+      {
+        "key": "model_191",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_89.dae",
+        "publicPath": "/ui/scenes/unitall/model_89.dae",
+        "bounds": {
+          "minX": 81.923,
+          "maxX": 176.923,
+          "minY": -1018.939,
+          "maxY": -891.939,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 16.511,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 18.341,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 16.511,
+          "top": 24.551,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 18.341,
+          "centerY": 25.952
+        }
+      },
+      {
+        "key": "model_192",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_90.dae",
+        "publicPath": "/ui/scenes/unitall/model_90.dae",
+        "bounds": {
+          "minX": 312.036,
+          "maxX": 439.036,
+          "minY": -1008.6,
+          "maxY": -913.6,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 25.378,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 27.824,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 25.378,
+          "top": 25.029,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 27.824,
+          "centerY": 26.077
+        }
+      },
+      {
+        "key": "model_193",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_91.dae",
+        "publicPath": "/ui/scenes/unitall/model_91.dae",
+        "bounds": {
+          "minX": 454.822,
+          "maxX": 549.822,
+          "minY": -1020.811,
+          "maxY": -893.811,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 30.879,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 32.71,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 30.879,
+          "top": 24.592,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 32.71,
+          "centerY": 25.993
+        }
+      },
+      {
+        "key": "model_194",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_92.dae",
+        "publicPath": "/ui/scenes/unitall/model_92.dae",
+        "bounds": {
+          "minX": 536.003,
+          "maxX": 631.003,
+          "minY": -974.745,
+          "maxY": -847.745,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 34.007,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 35.838,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 34.007,
+          "top": 23.575,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 35.838,
+          "centerY": 24.977
+        }
+      },
+      {
+        "key": "model_195",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_93.dae",
+        "publicPath": "/ui/scenes/unitall/model_93.dae",
+        "bounds": {
+          "minX": 726.165,
+          "maxX": 821.165,
+          "minY": -1012.391,
+          "maxY": -885.391,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 41.335,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 43.165,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 41.335,
+          "top": 24.406,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 43.165,
+          "centerY": 25.807
+        }
+      },
+      {
+        "key": "model_196",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_94.dae",
+        "publicPath": "/ui/scenes/unitall/model_94.dae",
+        "bounds": {
+          "minX": 1237.946,
+          "maxX": 1364.946,
+          "minY": -1008.6,
+          "maxY": -913.6,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 61.054,
+          "top": 100,
+          "width": 4.893,
+          "height": 0.001,
+          "centerX": 63.501,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 61.054,
+          "top": 25.029,
+          "width": 4.893,
+          "height": 2.096,
+          "centerX": 63.501,
+          "centerY": 26.077
+        }
+      },
+      {
+        "key": "model_197",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_95.dae",
+        "publicPath": "/ui/scenes/unitall/model_95.dae",
+        "bounds": {
+          "minX": 1407.424,
+          "maxX": 1502.424,
+          "minY": -1028.422,
+          "maxY": -901.422,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 67.584,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 69.415,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 67.584,
+          "top": 24.76,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 69.415,
+          "centerY": 26.161
+        }
+      },
+      {
+        "key": "model_198",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_96.dae",
+        "publicPath": "/ui/scenes/unitall/model_96.dae",
+        "bounds": {
+          "minX": 2153.703,
+          "maxX": 2248.703,
+          "minY": -1173.335,
+          "maxY": -1046.335,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 96.34,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 98.17,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 96.34,
+          "top": 27.958,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 98.17,
+          "centerY": 29.359
+        }
+      },
+      {
+        "key": "model_199",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_97.dae",
+        "publicPath": "/ui/scenes/unitall/model_97.dae",
+        "bounds": {
+          "minX": 1697.578,
+          "maxX": 1792.578,
+          "minY": -1009.42,
+          "maxY": -882.42,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 78.764,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 80.595,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 78.764,
+          "top": 24.341,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 80.595,
+          "centerY": 25.742
+        }
+      },
+      {
+        "key": "model_200",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_98.dae",
+        "publicPath": "/ui/scenes/unitall/model_98.dae",
+        "bounds": {
+          "minX": 1846.969,
+          "maxX": 1941.969,
+          "minY": -1040.412,
+          "maxY": -913.412,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 84.521,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 86.351,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 84.521,
+          "top": 25.024,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 86.351,
+          "centerY": 26.426
+        }
+      },
+      {
+        "key": "model_201",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_99.dae",
+        "publicPath": "/ui/scenes/unitall/model_99.dae",
+        "bounds": {
+          "minX": -48.196,
+          "maxX": 46.804,
+          "minY": -1200.3,
+          "maxY": -1073.3,
+          "minZ": 115,
+          "maxZ": 115
+        },
+        "rectXZ": {
+          "left": 11.497,
+          "top": 100,
+          "width": 3.66,
+          "height": 0.001,
+          "centerX": 13.328,
+          "centerY": 100
+        },
+        "rectXY": {
+          "left": 11.497,
+          "top": 28.553,
+          "width": 3.66,
+          "height": 2.802,
+          "centerX": 13.328,
+          "centerY": 29.954
+        }
+      }
+    ],
+    "semantics": {}
+  },
   "vsel00": {
     "sceneId": "vsel00",
     "sourceArchive": "user-data/GG4E/afs_data/root/vsel00_mdl.arc",

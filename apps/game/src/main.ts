@@ -9,6 +9,7 @@
 //   MainMenu -> (challenge) -> SelectDifficulty -> SelectPlayers -> LoadBoxData
 //     -> SelectForce -> ForceBuilder/edit -> BattleIntro -> BATTLE
 //     -> Results -> next battle / back to menu
+//   MainMenu -> (edit-force) -> ForceBuilder -> back to menu
 //   PauseMenu overlays the battle on Start/Esc.
 //
 // The existing three.js scene, stage rendering, lighting, camera, the Collada
@@ -58,6 +59,7 @@ import {
   createResults,
   createPauseMenu,
   createBattleHud,
+  type MainMenuMode,
   type ForceBorg,
   type ForceSlot,
   type BattleHudHandle,
@@ -1067,16 +1069,19 @@ function mountScreen(build: (root: HTMLElement) => { destroy(): void }): void {
   activeHandle = build(ui);
 }
 
-function showMenu(): void {
+function showMenu(initial: MainMenuMode = "challenge"): void {
   flow.screen = "menu";
   queueBgm(AUDIO_CUES.menuBgm);
   mountScreen((root) =>
     createMainMenu(root, {
-      initial: "challenge",
+      initial,
       onSelect: (mode) => {
         if (mode === "challenge") {
           playConfirmSfx();
           showDifficulty();
+        } else if (mode === "edit-force") {
+          playEditSfx();
+          showForceBuilder("menu");
         }
       },
     }),
@@ -1158,7 +1163,7 @@ function showSelectForce(): void {
       onEdit: (slot) => {
         playEditSfx();
         flow.selectedForceSlot = Math.max(0, flow.forceSlots.findIndex((candidate) => candidate.no === slot.no));
-        showForceBuilder();
+        showForceBuilder("select-force");
       },
       onBack: () => {
         playBackSfx();
@@ -1168,7 +1173,7 @@ function showSelectForce(): void {
   );
 }
 
-function showForceBuilder(): void {
+function showForceBuilder(returnTo: "select-force" | "menu" = "select-force"): void {
   flow.screen = "force";
   mountScreen((root) =>
     createForceBuilder(root, {
@@ -1178,11 +1183,13 @@ function showForceBuilder(): void {
       onConfirm: (force) => {
         playConfirmSfx();
         updateSelectedForceSlot(force);
-        showSelectForce();
+        if (returnTo === "menu") showMenu("edit-force");
+        else showSelectForce();
       },
       onQuit: () => {
         playBackSfx();
-        showSelectForce();
+        if (returnTo === "menu") showMenu("edit-force");
+        else showSelectForce();
       },
     }),
   );

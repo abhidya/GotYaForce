@@ -933,7 +933,7 @@ function nextMostUsefulReplacements(summary, uiSceneExports) {
     items.push("Use the now-exported tl00/optn00/staff00/vsel00/vsel01/brif00/entry00/rpot20-23 scene models plus generated layout bounds to replace the remaining CSS/DOM menu surfaces.");
   }
   items.push(
-    "Replace ForceBuilder/SelectForce surfaces with unitall/plcmndata/allbox/gets-driven original layouts; they currently use real borg icons/banners inside handcoded DOM.",
+    "Finish replacing ForceBuilder/SelectForce handcoded grid/ring/slot surfaces with unitall/plcmndata/allbox/gets-driven original layouts; ForceBuilder now mounts the exported unitall scene but still uses DOM controls for interaction.",
     "Map remaining battle HUD from comhit/cmn_data/as_icon/font assets and DOL HUD state; arrow_mdl target geometry is now wired, while the center HUD reticle/gauges are still CSS/SVG.",
     "Resolve remaining borg animation fallbacks/misses from research/asset-inventory/borg-animation-action-gaps.md, especially missing move clips and fallback hit/death labels.",
   );

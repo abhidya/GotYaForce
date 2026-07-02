@@ -1,19 +1,19 @@
 {
   "generatedBy": "scripts/export-ui-scenes.mjs",
-  "generatedAt": "2026-07-02T05:34:47.004Z",
+  "generatedAt": "2026-07-02T05:57:47.583Z",
   "region": "GG4E",
   "mode": "export",
   "sourceRoot": "user-data/GG4E/afs_data/root",
   "existingExportRoot": "user-data/GG4E/gltf-export",
   "publicScenesRoot": "apps/game/public/ui/scenes",
   "counts": {
-    "candidates": 85,
-    "requestedCandidates": 12,
+    "candidates": 86,
+    "requestedCandidates": 13,
     "faceCandidates": 73,
-    "copyReady": 12,
-    "exported": 12,
-    "modelFiles": 611,
-    "textureFiles": 54
+    "copyReady": 13,
+    "exported": 13,
+    "modelFiles": 813,
+    "textureFiles": 55
   },
   "caveats": [
     "Asset plumbing only: no runtime UI replacement, menu layout reconstruction, camera setup, or UI behavior is generated here.",
@@ -4083,6 +4083,2472 @@
         }
       ],
       "textureCount": 4,
+      "caveats": [
+        "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
+        "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."
+      ]
+    },
+    {
+      "id": "unitall",
+      "kind": "ui-scene-model",
+      "requested": true,
+      "status": "exported",
+      "sourceArchive": {
+        "sourceName": "unitall_mdl.arc",
+        "sourcePath": "user-data/GG4E/afs_data/root/unitall_mdl.arc",
+        "sourceBytes": 2148499
+      },
+      "existingExport": {
+        "sourceDir": "user-data/GG4E/gltf-export/unitall",
+        "modelCount": 202,
+        "textureCount": 1,
+        "models": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_00.dae",
+            "sourceBytes": 6674,
+            "sha1": "62c1a857eaab9f35760095f930ca0bf76f8488b7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_01.dae",
+            "sourceBytes": 6894,
+            "sha1": "6f3a5dc81a0d3884cc9c44ca342a2edfd745b91e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_02.dae",
+            "sourceBytes": 6595,
+            "sha1": "2b4c9bb52ba3501dd18f69c5e29e8058482e2e3d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_03.dae",
+            "sourceBytes": 6670,
+            "sha1": "9792ae52bc0a4c67d513f5264ad075fe578888ee"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_04.dae",
+            "sourceBytes": 6664,
+            "sha1": "0541a9927a594fe74d99e98ce872d894fb2a8ed8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_05.dae",
+            "sourceBytes": 6675,
+            "sha1": "1cc4132468572447ff7c710e86e4f6841cd94d97"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_06.dae",
+            "sourceBytes": 6666,
+            "sha1": "33a95bf79d977e36b4840532132eebdccdb9317a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_07.dae",
+            "sourceBytes": 6673,
+            "sha1": "94c32d7c2fba7c00fb5d854830e060e46c0d04b1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_08.dae",
+            "sourceBytes": 6742,
+            "sha1": "d8f8bb8a286d6ae14fd28e6aeb7b6d7da4580d55"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_09.dae",
+            "sourceBytes": 6673,
+            "sha1": "a7fa9d02e0b8c229e119cf99a8349ca01dc51c78"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_10.dae",
+            "sourceBytes": 6672,
+            "sha1": "c59bb6a2384921fed761fa5f3fa1ef1859dd56d8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_100.dae",
+            "sourceBytes": 6678,
+            "sha1": "4c4ec0288a068726182bd15ed7baac107ba46643"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_101.dae",
+            "sourceBytes": 6674,
+            "sha1": "5d6a7801f29b53626347cdb1435f4390c6776761"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_102.dae",
+            "sourceBytes": 6679,
+            "sha1": "de68738580c1ae5ce49e7b17906e9a7d524b7995"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_103.dae",
+            "sourceBytes": 6675,
+            "sha1": "376addb4f29c60b5bce5ed9000c2e5bc47f1e190"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_104.dae",
+            "sourceBytes": 6672,
+            "sha1": "5e483dad28969f46d98d5ea6b2de5cd77609e473"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_105.dae",
+            "sourceBytes": 6672,
+            "sha1": "e3df540b48724e8f993b792b5646ede688133012"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_106.dae",
+            "sourceBytes": 6668,
+            "sha1": "16e3976fe68631b8a99952c67e65f2c78b42c3cf"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_107.dae",
+            "sourceBytes": 6670,
+            "sha1": "2d4094132a729dc77bdef3a67ed0e0340a53a1b9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_108.dae",
+            "sourceBytes": 6677,
+            "sha1": "9aae1217bb52032b16cb83dc7a399de19c84fdac"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_109.dae",
+            "sourceBytes": 6680,
+            "sha1": "e43c75ebb3b46c7069f1a52ee85fb8319411e02f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_11.dae",
+            "sourceBytes": 6669,
+            "sha1": "5861b2b23787315f08baf59ac3beb6883f5003e2"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_110.dae",
+            "sourceBytes": 6680,
+            "sha1": "62c109c9860973942ec53d89bfa039bee3a6571d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_111.dae",
+            "sourceBytes": 6680,
+            "sha1": "68e723a1cbf890316a709729926feac2093c17a2"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_112.dae",
+            "sourceBytes": 6676,
+            "sha1": "eb1d0794dfd5c331874ec8463b9336ddeda7edcc"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_113.dae",
+            "sourceBytes": 6600,
+            "sha1": "a456eee4dc8c5bd46bf26ef7d7b82b215afbf781"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_114.dae",
+            "sourceBytes": 6667,
+            "sha1": "995d43f920ccd72547f0838c28f1bcaceadf0dc3"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_115.dae",
+            "sourceBytes": 6678,
+            "sha1": "1fd99c0bf710c2d5b813c658adcfaa851c44a896"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_116.dae",
+            "sourceBytes": 7736,
+            "sha1": "ed9038fc1986ff26ae0132c58a10147b67459e36"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_117.dae",
+            "sourceBytes": 7039,
+            "sha1": "0a0f9e83b2143170a056f7d5298ca9ab0c32cedc"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_118.dae",
+            "sourceBytes": 6674,
+            "sha1": "3d76d9eb0fb960525d3616a099a28c0ddec45f77"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_119.dae",
+            "sourceBytes": 7646,
+            "sha1": "3585c8d6639d787d132755f60c303bd47d2c8848"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_12.dae",
+            "sourceBytes": 6957,
+            "sha1": "2cabfdc87215066506917f250bb27f44d388068b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_120.dae",
+            "sourceBytes": 6737,
+            "sha1": "b4e81e5d65754d3e9c40b05a5cf24201c8da054a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_121.dae",
+            "sourceBytes": 6894,
+            "sha1": "978447861d411cef4d47dcf6604a26fd752288b7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_122.dae",
+            "sourceBytes": 6676,
+            "sha1": "54b06476ae86fc9dd418a43efe3e970c58853d32"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_123.dae",
+            "sourceBytes": 7043,
+            "sha1": "6d110d6c5db4f8c1219769e432ac9ca3e89276f0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_124.dae",
+            "sourceBytes": 6680,
+            "sha1": "7ff1ab7db0820ad4f95a121f5607ba58af40e9b8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_125.dae",
+            "sourceBytes": 7039,
+            "sha1": "4fb84244e6f14b30fedc2e9a40472f7bd824f613"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_126.dae",
+            "sourceBytes": 6961,
+            "sha1": "13ec6de068e3182e0d9b7ee0750f4a8c3a1d39c5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_127.dae",
+            "sourceBytes": 7313,
+            "sha1": "ea8d43b764537a4c4e2d57eac68f39c1b7fb30bb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_128.dae",
+            "sourceBytes": 7180,
+            "sha1": "bba9eaddae3b5b13a4d6932287f8068a45a91296"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_129.dae",
+            "sourceBytes": 6680,
+            "sha1": "5b2445b84c4f7a62dff40cec3c45702c9ae2f326"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_13.dae",
+            "sourceBytes": 6683,
+            "sha1": "bedcac0a82f7feea440009f91b09f2de97364ab0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_130.dae",
+            "sourceBytes": 6676,
+            "sha1": "9b12373d261535050ea7fd2c05161341b9046283"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_131.dae",
+            "sourceBytes": 6676,
+            "sha1": "86c9913fabeb51fcb5adb3ccb2e7154037b694a7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_132.dae",
+            "sourceBytes": 6675,
+            "sha1": "154156db79c2ad91f03ee4c775b3f95bba64a439"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_133.dae",
+            "sourceBytes": 6675,
+            "sha1": "cf18c4c7a05f646a5eb80c9301a1972fff124929"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_134.dae",
+            "sourceBytes": 6672,
+            "sha1": "c2b0ae5c723d08d47a72e0b67282251c717a62cb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_135.dae",
+            "sourceBytes": 6745,
+            "sha1": "5a514cf1f646b27e9f9d5b7c4b81947d499c10c8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_136.dae",
+            "sourceBytes": 6672,
+            "sha1": "f10e1baaf993ed9a87a53ffe0cd97bcbab856dbc"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_137.dae",
+            "sourceBytes": 6672,
+            "sha1": "17ddd871820b8822d3a3ee63f0ad118ff067be34"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_138.dae",
+            "sourceBytes": 6676,
+            "sha1": "931263a9fb18edfa8edb0939ee1861319a875503"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_139.dae",
+            "sourceBytes": 6675,
+            "sha1": "e1eee833e9e794c27cb27e27af7c9230923527d0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_14.dae",
+            "sourceBytes": 6671,
+            "sha1": "9cc1822d6f1d76359f954afaf718854fe18c7ef1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_140.dae",
+            "sourceBytes": 6676,
+            "sha1": "a3dae9cee7d3e9912cfb01605e79f9d3b4617bdb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_141.dae",
+            "sourceBytes": 6680,
+            "sha1": "de975d9d1aba006afd3891e37c3b103c1b84978c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_142.dae",
+            "sourceBytes": 6811,
+            "sha1": "8917c50009f0911fb7805db6e00555cdcdaba9fd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_143.dae",
+            "sourceBytes": 6683,
+            "sha1": "ea1ba35f3e65acd78a7954beb6a36e99dce27fd0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_144.dae",
+            "sourceBytes": 6678,
+            "sha1": "f088269a75fce9159e363878980d1a7a51b3e046"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_145.dae",
+            "sourceBytes": 6680,
+            "sha1": "93dba69d8e8e809144eb0c9beaf62bc81c382edd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_146.dae",
+            "sourceBytes": 6675,
+            "sha1": "842ce05926d160986ce1a5f05bfefed1026af72b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_147.dae",
+            "sourceBytes": 6664,
+            "sha1": "22cc9266ad3af2402de475a02efafd578ca3c1e5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_148.dae",
+            "sourceBytes": 6737,
+            "sha1": "3403b6e8eb837942e6f5acaefe79a22620bbe382"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_149.dae",
+            "sourceBytes": 6675,
+            "sha1": "bcde1853506536b7de9109043f5f2499c2ce3db9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_15.dae",
+            "sourceBytes": 6674,
+            "sha1": "598d6faee69fe7ed30da426dfd827e09b3793270"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_150.dae",
+            "sourceBytes": 6680,
+            "sha1": "213a788f116247f67eb0632bd77a243631666376"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_151.dae",
+            "sourceBytes": 6895,
+            "sha1": "783103ff344aaeee715fe6894abd8fcac59051ca"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_152.dae",
+            "sourceBytes": 6680,
+            "sha1": "8adc41b5bfbb8cf3cbfd6ae8cae64095f0cb951e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_153.dae",
+            "sourceBytes": 6737,
+            "sha1": "7198a24e08e75cc9a54fad06c4f37fd036de85c7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_154.dae",
+            "sourceBytes": 6675,
+            "sha1": "273144f3f2d3a69d6fac445b8f00a2a29dc05e75"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_155.dae",
+            "sourceBytes": 6676,
+            "sha1": "ea013738a2356b5f067336decb2eee7a763fc6ea"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_156.dae",
+            "sourceBytes": 6892,
+            "sha1": "8beba5b58abe594a727ca888cb793c5198eb57fd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_157.dae",
+            "sourceBytes": 6889,
+            "sha1": "f04562b9fec954f1dab2c8b26de6ebff8325a1cf"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_158.dae",
+            "sourceBytes": 7464,
+            "sha1": "9c94f6415f073b7161771b25d8dc9bc20ecdc504"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_159.dae",
+            "sourceBytes": 6901,
+            "sha1": "c5bf2b6b2b8608795dee9655d5c4a3a1c15d2f7a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_16.dae",
+            "sourceBytes": 6680,
+            "sha1": "cf3c07d61dc5b1a71424110583740f7fae8e4eb7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_160.dae",
+            "sourceBytes": 6899,
+            "sha1": "29c7149963ec0864f5d3aa582d36d9fcf00d7c91"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_161.dae",
+            "sourceBytes": 7008,
+            "sha1": "9bd622943d17249629fcd41a9ae4ef8a6670b861"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_162.dae",
+            "sourceBytes": 7032,
+            "sha1": "6c874e2b313ccb02a89fb1f4ed45d4bc8ccae32c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_163.dae",
+            "sourceBytes": 6898,
+            "sha1": "612e0917e81516749f48ec403ecb52baab8cd96b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_164.dae",
+            "sourceBytes": 7045,
+            "sha1": "0b8099a775ee1bf51c218c75d6b36f746149d8fd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_165.dae",
+            "sourceBytes": 7037,
+            "sha1": "97d0e03978f6ef58e8d83153a80f55d6cd5450ce"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_166.dae",
+            "sourceBytes": 7246,
+            "sha1": "6e9b366aa2cbc75b676ee938777bd9c723a8e1f8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_167.dae",
+            "sourceBytes": 7177,
+            "sha1": "d255e77be08a96b97cb896d1db93df8da27edc51"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_168.dae",
+            "sourceBytes": 7104,
+            "sha1": "26dbb6d255f638d88a40bc237bbab96f107975b9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_169.dae",
+            "sourceBytes": 7106,
+            "sha1": "6e1393db7298c23533359de514e2e297707bee04"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_17.dae",
+            "sourceBytes": 6677,
+            "sha1": "54505a3575cc8a5d62dfb6bb9e0e11a947ea1b9e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_170.dae",
+            "sourceBytes": 7158,
+            "sha1": "ad76230a7699592152e81336d05065f94ba2e23c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_171.dae",
+            "sourceBytes": 7095,
+            "sha1": "992cd9646480dbacf5f0bf984f3fb320e4274438"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_172.dae",
+            "sourceBytes": 6816,
+            "sha1": "aa893f1ef4b564367d3bc79278e0919c97ad2c26"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_173.dae",
+            "sourceBytes": 7078,
+            "sha1": "8dd3695569b47940ece7b31b179a4fca405fff6e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_174.dae",
+            "sourceBytes": 7041,
+            "sha1": "62c8145179da5c81eff7f73b4ffb037a5ccd3b42"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_175.dae",
+            "sourceBytes": 6677,
+            "sha1": "7212c16ec3008e0891290ff25487de5e1495e602"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_176.dae",
+            "sourceBytes": 6679,
+            "sha1": "de932157db02e7ce2d61628e0beb38758cb5505c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_177.dae",
+            "sourceBytes": 6675,
+            "sha1": "b23dbd31a3a6a8ff4df19670bd12d8be0e940e58"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_178.dae",
+            "sourceBytes": 7044,
+            "sha1": "cc3712d861312b0dd0c8d3c92843ac6d4e41541c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_179.dae",
+            "sourceBytes": 6679,
+            "sha1": "d4b4ac1cd59d5d4d97a5c313a189fd1f47886cb6"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_18.dae",
+            "sourceBytes": 6983,
+            "sha1": "fcf3fb972e6bc36703a659085660f08de8b010d1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_180.dae",
+            "sourceBytes": 6680,
+            "sha1": "83369a2b6673f52f866ac61518171b984d276d17"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_181.dae",
+            "sourceBytes": 6679,
+            "sha1": "b45d3efe5430ce7ef0762211d23670326573cc6c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_182.dae",
+            "sourceBytes": 6680,
+            "sha1": "372291a66f48269683049e0e65d7dbb2ec9d21db"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_183.dae",
+            "sourceBytes": 6676,
+            "sha1": "18a325b7ff74817ed1b75be53b860b610df76f94"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_184.dae",
+            "sourceBytes": 6676,
+            "sha1": "71fcf2ec9aec9a7a72788f7ea0a862bef88d9b1c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_185.dae",
+            "sourceBytes": 6663,
+            "sha1": "90afcdb18aa5473df4111430f0cb39399cc3b000"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_186.dae",
+            "sourceBytes": 6664,
+            "sha1": "e19d9faef542f9ecf84d343ac31aec2f622647a5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_187.dae",
+            "sourceBytes": 6676,
+            "sha1": "6ce91e0182df1144e942f5f0cd42fc7cff97e5e5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_188.dae",
+            "sourceBytes": 6675,
+            "sha1": "cc527a5dc0ca56ce4ff1b8014e8ffdf29ecba83a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_189.dae",
+            "sourceBytes": 6896,
+            "sha1": "715a8c3a18d00f77cc3af5abcdbdd1ee8b21f65b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_19.dae",
+            "sourceBytes": 6667,
+            "sha1": "603e6ce0c53918746d0a809513807a9fa37f4f2c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_190.dae",
+            "sourceBytes": 6887,
+            "sha1": "0c92df72e2785fdeb1232af496ed52a4b38be25e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_191.dae",
+            "sourceBytes": 7045,
+            "sha1": "99b385d201ca23d7d05f66f5b9ba2668f7d8c28a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_192.dae",
+            "sourceBytes": 6892,
+            "sha1": "aaf0385d31f9cc710cc2f77a474b9249a8effa09"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_193.dae",
+            "sourceBytes": 7028,
+            "sha1": "edccfb7c39b666f3e191bc98f8fa35242abe380c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_194.dae",
+            "sourceBytes": 6894,
+            "sha1": "c7bfcc7db0e1c9c33cdc6c55cec0faf154c5f6fb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_195.dae",
+            "sourceBytes": 6680,
+            "sha1": "ca67444dbfdce9ea6af31cef5666b71f137243c2"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_196.dae",
+            "sourceBytes": 6672,
+            "sha1": "364be3da3fc0b0d5bdf0fa4b3787726980e20b4b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_197.dae",
+            "sourceBytes": 6673,
+            "sha1": "ca691616918a17123bee212c9218308b3cc973b0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_198.dae",
+            "sourceBytes": 6821,
+            "sha1": "50f31a294a50b5eb5ea5e938e0830bdaef1e9790"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_199.dae",
+            "sourceBytes": 6668,
+            "sha1": "c0d64c69f07dc6479b2b079d91687b1180ecc194"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_20.dae",
+            "sourceBytes": 6676,
+            "sha1": "8209c041ef9c6638f5ef87592e170985fcff80b2"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_200.dae",
+            "sourceBytes": 6667,
+            "sha1": "e6deab8d8854272db943884a831ff9bf7584740e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_201.dae",
+            "sourceBytes": 6669,
+            "sha1": "07582150f6b2e1c9e4e87026b6a591b3c08b6d73"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_21.dae",
+            "sourceBytes": 6674,
+            "sha1": "0533a60d63782c5904fc2de8281ad36c3d18762d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_22.dae",
+            "sourceBytes": 6733,
+            "sha1": "e928664d0aa504cfc9a2d600227c61d9f0f66ab1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_23.dae",
+            "sourceBytes": 6817,
+            "sha1": "736129f1fbbd8468a5cd99cdc6dda1645434b536"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_24.dae",
+            "sourceBytes": 6679,
+            "sha1": "339b4ca8dc1454394d1f549abc54be2059af3e99"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_25.dae",
+            "sourceBytes": 6906,
+            "sha1": "0b8d50048ecd1f45f9b361b2a168ca5ef0580e0d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_26.dae",
+            "sourceBytes": 6677,
+            "sha1": "4b6c67a2cd88dbc1fd2f02578b3203cee6698bdf"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_27.dae",
+            "sourceBytes": 7116,
+            "sha1": "9358af40ec4314d919a0b2540e069fbbb890f803"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_28.dae",
+            "sourceBytes": 7193,
+            "sha1": "a87e53cdb015becc78ab225c66e985d36cd5e09e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_29.dae",
+            "sourceBytes": 6892,
+            "sha1": "523dd5ab0d5b63b182668e100a416461b8f0132c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_30.dae",
+            "sourceBytes": 6799,
+            "sha1": "cd2a7b258fdfbbcac832814035e65951928f3446"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_31.dae",
+            "sourceBytes": 6668,
+            "sha1": "1e2c3301a31a6ccd9a3d9a6272f731b8ecb47284"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_32.dae",
+            "sourceBytes": 6901,
+            "sha1": "d88371c5eaac39f24881373a2a1bcd7aa6cde0b9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_33.dae",
+            "sourceBytes": 6888,
+            "sha1": "2172ff6fb24872885f58b17857f0523ca92e0900"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_34.dae",
+            "sourceBytes": 6897,
+            "sha1": "2e0f579ce882010a9f2ce47b41041a938714fb12"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_35.dae",
+            "sourceBytes": 6679,
+            "sha1": "a4ef64ed6b61efcf82a2d0288b29a2e66ebe1a15"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_36.dae",
+            "sourceBytes": 6902,
+            "sha1": "ab33adcd2b0b7b2c5c775b12e51a15de5907e273"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_37.dae",
+            "sourceBytes": 7201,
+            "sha1": "479a3b26597deb60c020793d989e9ca62b558939"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_38.dae",
+            "sourceBytes": 6895,
+            "sha1": "604df7972c778e887c060c3c4d63b4b0c6ae20d5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_39.dae",
+            "sourceBytes": 6667,
+            "sha1": "05e0fd790389cb2ddc6ec616a06db5be1579fbaa"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_40.dae",
+            "sourceBytes": 6678,
+            "sha1": "4a388174f215213f31b649782933237efb70dc38"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_41.dae",
+            "sourceBytes": 6680,
+            "sha1": "62bf007fe8091d73a2ae9edfb7ce524f127d2cef"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_42.dae",
+            "sourceBytes": 6677,
+            "sha1": "f12e8503d710935127bdce15db4890c669326147"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_43.dae",
+            "sourceBytes": 6740,
+            "sha1": "3ffcbd7c4c28c4cf11859d043ccbbbb445e0d877"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_44.dae",
+            "sourceBytes": 6672,
+            "sha1": "20b61869d51807d1069d0566d890dfff4af8d7fa"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_45.dae",
+            "sourceBytes": 6675,
+            "sha1": "64a4851dd08b93af86408f7852db233d260f5a6b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_46.dae",
+            "sourceBytes": 6676,
+            "sha1": "fefeffbae7368cbc47f344f0c6a253abf9ead127"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_47.dae",
+            "sourceBytes": 6676,
+            "sha1": "fd526df5f8fa4713a74d6c05e923a771293372d5"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_48.dae",
+            "sourceBytes": 6673,
+            "sha1": "08b533c438eb2c84b0d87f449214067af75d25ed"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_49.dae",
+            "sourceBytes": 6671,
+            "sha1": "85154928bec797b7d472719b1c19abbbf86f4e14"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_50.dae",
+            "sourceBytes": 6672,
+            "sha1": "30be4b9a0d38d9569dc00847e15ebf7aa5fbaf14"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_51.dae",
+            "sourceBytes": 6666,
+            "sha1": "a9dd0ee284481ebf0da6078acec0a484847886ad"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_52.dae",
+            "sourceBytes": 6797,
+            "sha1": "7dd2cec7f2e6fd44226d6de68b0df0d2ffccd91c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_53.dae",
+            "sourceBytes": 6814,
+            "sha1": "84c6d42822374340e67c3d1879d7c60709676b18"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_54.dae",
+            "sourceBytes": 6675,
+            "sha1": "fb674d29d32ae6b73ccd9bb8c3834731c6f4f3db"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_55.dae",
+            "sourceBytes": 6888,
+            "sha1": "3b2a45a006041bf8ed14727b2d141329b8e55b6d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_56.dae",
+            "sourceBytes": 6672,
+            "sha1": "ef72bda9766c315aaf9acfdb2f4216ed841841d7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_57.dae",
+            "sourceBytes": 7135,
+            "sha1": "93b0aff18e3b4cbfc215dff8d1c1a6ab928b04c3"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_58.dae",
+            "sourceBytes": 6676,
+            "sha1": "765fd5d5a8a0581dc6f795c1692fbbf71e0f2515"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_59.dae",
+            "sourceBytes": 6680,
+            "sha1": "2531617269d564780efb6b18192ad6c144aae7d4"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_60.dae",
+            "sourceBytes": 6791,
+            "sha1": "9c3001b27967ebd95e63ffbb86d39d9a94dc7b04"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_61.dae",
+            "sourceBytes": 6676,
+            "sha1": "5327b360893cf16ca1cde96e7daae3fa7e0b69ed"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_62.dae",
+            "sourceBytes": 6672,
+            "sha1": "b9cbf95577f821806645b794fcee257dd762d51e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_63.dae",
+            "sourceBytes": 6668,
+            "sha1": "cec998df70de8b9e207e5168c91080cc9466880b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_64.dae",
+            "sourceBytes": 6670,
+            "sha1": "0f964ce85f9ddf8ee829bb5c8f990d33e5e66c11"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_65.dae",
+            "sourceBytes": 6817,
+            "sha1": "24ecf9f4683ea44f0f2b3831b5ca45aff93f9a1a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_66.dae",
+            "sourceBytes": 6730,
+            "sha1": "fcfd5a9097f92394b9b4859d173ba6cf6a9569c1"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_67.dae",
+            "sourceBytes": 6858,
+            "sha1": "6c19cdef8b5cf89569f3e027b3090456404ab5b4"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_68.dae",
+            "sourceBytes": 7237,
+            "sha1": "f037465d441920e012f87599b2766ec35f3fb13b"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_69.dae",
+            "sourceBytes": 6676,
+            "sha1": "27d0af6438cbf4dab12a769ef50562432c8fd40a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_70.dae",
+            "sourceBytes": 7515,
+            "sha1": "bad0a75bc54cf81fa4f4eb39e75b069757ef035c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_71.dae",
+            "sourceBytes": 7041,
+            "sha1": "698dafa526ae3aa576ee10a3642c7173b2348a44"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_72.dae",
+            "sourceBytes": 7239,
+            "sha1": "8dcf5ffccb7cb19d4a0c1cea21b6d07795ce1889"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_73.dae",
+            "sourceBytes": 6668,
+            "sha1": "7908acc5a9226e8f24b76e475e6f57731e34df48"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_74.dae",
+            "sourceBytes": 7249,
+            "sha1": "ff56d5d9efcf189fc6c0245c9f06338b42c86881"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_75.dae",
+            "sourceBytes": 7213,
+            "sha1": "a2da1d8179c6307a896910581d8bef66cc9586a9"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_76.dae",
+            "sourceBytes": 7033,
+            "sha1": "be3a2c0f2a062776f00ed338f541d2c3c4f7c1c8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_77.dae",
+            "sourceBytes": 6678,
+            "sha1": "05a5842ad31e5e4d797749b29fc4f3e258ce92e2"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_78.dae",
+            "sourceBytes": 7231,
+            "sha1": "0a6c9de5d1570787fce6a0fa8afb1dff669adabc"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_79.dae",
+            "sourceBytes": 6676,
+            "sha1": "7c386f37080158fbd2fba189b4ec37bd65d942ed"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_80.dae",
+            "sourceBytes": 7516,
+            "sha1": "077c3c7771bb971fda69f48558e0310f6cb5fadd"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_81.dae",
+            "sourceBytes": 7038,
+            "sha1": "7c78463a1ceeda75c28b7c2a81cd5eb5096c82cf"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_82.dae",
+            "sourceBytes": 7258,
+            "sha1": "e38ca49d0e2dede06863e40df835da92949e94e7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_83.dae",
+            "sourceBytes": 6677,
+            "sha1": "2c787300c427996fe6f145903a47b7d852318fd0"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_84.dae",
+            "sourceBytes": 7246,
+            "sha1": "8dc31f43e1dc93b5359846007079532f7f6b708e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_85.dae",
+            "sourceBytes": 7210,
+            "sha1": "5069a720216ccd8594d64ba1dd797baed52382c8"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_86.dae",
+            "sourceBytes": 7019,
+            "sha1": "a68ed28ccb953123070f1f827d1e152708c740de"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_87.dae",
+            "sourceBytes": 6678,
+            "sha1": "5ea7945da3c64885ab52ff9ef086197941cac6fb"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_88.dae",
+            "sourceBytes": 6677,
+            "sha1": "807448fa4b779feca5cc223488468c4aad149b4e"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_89.dae",
+            "sourceBytes": 6682,
+            "sha1": "f595e33ff666f902db83cdd10fa65076f6062a50"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_90.dae",
+            "sourceBytes": 6672,
+            "sha1": "592c943bd4fbc1c742a637a3919ba78aa5622255"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_91.dae",
+            "sourceBytes": 6680,
+            "sha1": "8f66ef267666aec1df5878e1a6ce7713f5958901"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_92.dae",
+            "sourceBytes": 6672,
+            "sha1": "731f6324c4b40ecf2f8d81bf972e2a4f94c8c03f"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_93.dae",
+            "sourceBytes": 6674,
+            "sha1": "4c93140e7990dfbca9ac53b156344afc1311b62d"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_94.dae",
+            "sourceBytes": 6681,
+            "sha1": "a40f7cdeb3ce962447e02d4ad18bd627d2a736d7"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_95.dae",
+            "sourceBytes": 6675,
+            "sha1": "0e6fd45748e5b892d7108f2ea6a30cce461efb6a"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_96.dae",
+            "sourceBytes": 6673,
+            "sha1": "17c056e4605c4117a38dd3b7021ec95533e7cc10"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_97.dae",
+            "sourceBytes": 6676,
+            "sha1": "26a0aba7887a95572de41aad5cbc8224af2ada21"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_98.dae",
+            "sourceBytes": 6680,
+            "sha1": "8cf67f9ea9541acbe232c87a651c93f0119afe8c"
+          },
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/model_99.dae",
+            "sourceBytes": 6667,
+            "sha1": "ab82a1bf2cf82f6f9413823a1fa92ef30be3a81d"
+          }
+        ],
+        "textures": [
+          {
+            "sourcePath": "user-data/GG4E/gltf-export/unitall/Texture_0_CI8_RGB5A3.png",
+            "sourceBytes": 106730,
+            "sha1": "2fc886befd5d3a68e63c195b427d906c28eb6be0"
+          }
+        ]
+      },
+      "outputDir": "apps/game/public/ui/scenes/unitall",
+      "modelFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_00.dae",
+          "publicPath": "/ui/scenes/unitall/model_00.dae",
+          "bytes": 6674,
+          "sha1": "62c1a857eaab9f35760095f930ca0bf76f8488b7",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_00.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_01.dae",
+          "publicPath": "/ui/scenes/unitall/model_01.dae",
+          "bytes": 6894,
+          "sha1": "6f3a5dc81a0d3884cc9c44ca342a2edfd745b91e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_01.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_02.dae",
+          "publicPath": "/ui/scenes/unitall/model_02.dae",
+          "bytes": 6595,
+          "sha1": "2b4c9bb52ba3501dd18f69c5e29e8058482e2e3d",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_02.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_03.dae",
+          "publicPath": "/ui/scenes/unitall/model_03.dae",
+          "bytes": 6670,
+          "sha1": "9792ae52bc0a4c67d513f5264ad075fe578888ee",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_03.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_04.dae",
+          "publicPath": "/ui/scenes/unitall/model_04.dae",
+          "bytes": 6664,
+          "sha1": "0541a9927a594fe74d99e98ce872d894fb2a8ed8",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_04.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_05.dae",
+          "publicPath": "/ui/scenes/unitall/model_05.dae",
+          "bytes": 6675,
+          "sha1": "1cc4132468572447ff7c710e86e4f6841cd94d97",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_05.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_06.dae",
+          "publicPath": "/ui/scenes/unitall/model_06.dae",
+          "bytes": 6666,
+          "sha1": "33a95bf79d977e36b4840532132eebdccdb9317a",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_06.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_07.dae",
+          "publicPath": "/ui/scenes/unitall/model_07.dae",
+          "bytes": 6673,
+          "sha1": "94c32d7c2fba7c00fb5d854830e060e46c0d04b1",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_07.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_08.dae",
+          "publicPath": "/ui/scenes/unitall/model_08.dae",
+          "bytes": 6742,
+          "sha1": "d8f8bb8a286d6ae14fd28e6aeb7b6d7da4580d55",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_08.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_09.dae",
+          "publicPath": "/ui/scenes/unitall/model_09.dae",
+          "bytes": 6673,
+          "sha1": "a7fa9d02e0b8c229e119cf99a8349ca01dc51c78",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_09.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_10.dae",
+          "publicPath": "/ui/scenes/unitall/model_10.dae",
+          "bytes": 6672,
+          "sha1": "c59bb6a2384921fed761fa5f3fa1ef1859dd56d8",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_10.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_100.dae",
+          "publicPath": "/ui/scenes/unitall/model_100.dae",
+          "bytes": 6678,
+          "sha1": "4c4ec0288a068726182bd15ed7baac107ba46643",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_100.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_101.dae",
+          "publicPath": "/ui/scenes/unitall/model_101.dae",
+          "bytes": 6674,
+          "sha1": "5d6a7801f29b53626347cdb1435f4390c6776761",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_101.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_102.dae",
+          "publicPath": "/ui/scenes/unitall/model_102.dae",
+          "bytes": 6679,
+          "sha1": "de68738580c1ae5ce49e7b17906e9a7d524b7995",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_102.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_103.dae",
+          "publicPath": "/ui/scenes/unitall/model_103.dae",
+          "bytes": 6675,
+          "sha1": "376addb4f29c60b5bce5ed9000c2e5bc47f1e190",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_103.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_104.dae",
+          "publicPath": "/ui/scenes/unitall/model_104.dae",
+          "bytes": 6672,
+          "sha1": "5e483dad28969f46d98d5ea6b2de5cd77609e473",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_104.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_105.dae",
+          "publicPath": "/ui/scenes/unitall/model_105.dae",
+          "bytes": 6672,
+          "sha1": "e3df540b48724e8f993b792b5646ede688133012",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_105.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_106.dae",
+          "publicPath": "/ui/scenes/unitall/model_106.dae",
+          "bytes": 6668,
+          "sha1": "16e3976fe68631b8a99952c67e65f2c78b42c3cf",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_106.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_107.dae",
+          "publicPath": "/ui/scenes/unitall/model_107.dae",
+          "bytes": 6670,
+          "sha1": "2d4094132a729dc77bdef3a67ed0e0340a53a1b9",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_107.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_108.dae",
+          "publicPath": "/ui/scenes/unitall/model_108.dae",
+          "bytes": 6677,
+          "sha1": "9aae1217bb52032b16cb83dc7a399de19c84fdac",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_108.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_109.dae",
+          "publicPath": "/ui/scenes/unitall/model_109.dae",
+          "bytes": 6680,
+          "sha1": "e43c75ebb3b46c7069f1a52ee85fb8319411e02f",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_109.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_11.dae",
+          "publicPath": "/ui/scenes/unitall/model_11.dae",
+          "bytes": 6669,
+          "sha1": "5861b2b23787315f08baf59ac3beb6883f5003e2",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_11.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_110.dae",
+          "publicPath": "/ui/scenes/unitall/model_110.dae",
+          "bytes": 6680,
+          "sha1": "62c109c9860973942ec53d89bfa039bee3a6571d",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_110.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_111.dae",
+          "publicPath": "/ui/scenes/unitall/model_111.dae",
+          "bytes": 6680,
+          "sha1": "68e723a1cbf890316a709729926feac2093c17a2",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_111.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_112.dae",
+          "publicPath": "/ui/scenes/unitall/model_112.dae",
+          "bytes": 6676,
+          "sha1": "eb1d0794dfd5c331874ec8463b9336ddeda7edcc",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_112.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_113.dae",
+          "publicPath": "/ui/scenes/unitall/model_113.dae",
+          "bytes": 6600,
+          "sha1": "a456eee4dc8c5bd46bf26ef7d7b82b215afbf781",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_113.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_114.dae",
+          "publicPath": "/ui/scenes/unitall/model_114.dae",
+          "bytes": 6667,
+          "sha1": "995d43f920ccd72547f0838c28f1bcaceadf0dc3",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_114.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_115.dae",
+          "publicPath": "/ui/scenes/unitall/model_115.dae",
+          "bytes": 6678,
+          "sha1": "1fd99c0bf710c2d5b813c658adcfaa851c44a896",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_115.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_116.dae",
+          "publicPath": "/ui/scenes/unitall/model_116.dae",
+          "bytes": 7736,
+          "sha1": "ed9038fc1986ff26ae0132c58a10147b67459e36",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_116.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_117.dae",
+          "publicPath": "/ui/scenes/unitall/model_117.dae",
+          "bytes": 7039,
+          "sha1": "0a0f9e83b2143170a056f7d5298ca9ab0c32cedc",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_117.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_118.dae",
+          "publicPath": "/ui/scenes/unitall/model_118.dae",
+          "bytes": 6674,
+          "sha1": "3d76d9eb0fb960525d3616a099a28c0ddec45f77",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_118.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_119.dae",
+          "publicPath": "/ui/scenes/unitall/model_119.dae",
+          "bytes": 7646,
+          "sha1": "3585c8d6639d787d132755f60c303bd47d2c8848",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_119.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_12.dae",
+          "publicPath": "/ui/scenes/unitall/model_12.dae",
+          "bytes": 6957,
+          "sha1": "2cabfdc87215066506917f250bb27f44d388068b",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_12.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_120.dae",
+          "publicPath": "/ui/scenes/unitall/model_120.dae",
+          "bytes": 6737,
+          "sha1": "b4e81e5d65754d3e9c40b05a5cf24201c8da054a",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_120.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_121.dae",
+          "publicPath": "/ui/scenes/unitall/model_121.dae",
+          "bytes": 6894,
+          "sha1": "978447861d411cef4d47dcf6604a26fd752288b7",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_121.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_122.dae",
+          "publicPath": "/ui/scenes/unitall/model_122.dae",
+          "bytes": 6676,
+          "sha1": "54b06476ae86fc9dd418a43efe3e970c58853d32",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_122.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_123.dae",
+          "publicPath": "/ui/scenes/unitall/model_123.dae",
+          "bytes": 7043,
+          "sha1": "6d110d6c5db4f8c1219769e432ac9ca3e89276f0",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_123.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_124.dae",
+          "publicPath": "/ui/scenes/unitall/model_124.dae",
+          "bytes": 6680,
+          "sha1": "7ff1ab7db0820ad4f95a121f5607ba58af40e9b8",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_124.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_125.dae",
+          "publicPath": "/ui/scenes/unitall/model_125.dae",
+          "bytes": 7039,
+          "sha1": "4fb84244e6f14b30fedc2e9a40472f7bd824f613",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_125.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_126.dae",
+          "publicPath": "/ui/scenes/unitall/model_126.dae",
+          "bytes": 6961,
+          "sha1": "13ec6de068e3182e0d9b7ee0750f4a8c3a1d39c5",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_126.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_127.dae",
+          "publicPath": "/ui/scenes/unitall/model_127.dae",
+          "bytes": 7313,
+          "sha1": "ea8d43b764537a4c4e2d57eac68f39c1b7fb30bb",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_127.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_128.dae",
+          "publicPath": "/ui/scenes/unitall/model_128.dae",
+          "bytes": 7180,
+          "sha1": "bba9eaddae3b5b13a4d6932287f8068a45a91296",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_128.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_129.dae",
+          "publicPath": "/ui/scenes/unitall/model_129.dae",
+          "bytes": 6680,
+          "sha1": "5b2445b84c4f7a62dff40cec3c45702c9ae2f326",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_129.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_13.dae",
+          "publicPath": "/ui/scenes/unitall/model_13.dae",
+          "bytes": 6683,
+          "sha1": "bedcac0a82f7feea440009f91b09f2de97364ab0",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_13.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_130.dae",
+          "publicPath": "/ui/scenes/unitall/model_130.dae",
+          "bytes": 6676,
+          "sha1": "9b12373d261535050ea7fd2c05161341b9046283",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_130.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_131.dae",
+          "publicPath": "/ui/scenes/unitall/model_131.dae",
+          "bytes": 6676,
+          "sha1": "86c9913fabeb51fcb5adb3ccb2e7154037b694a7",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_131.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_132.dae",
+          "publicPath": "/ui/scenes/unitall/model_132.dae",
+          "bytes": 6675,
+          "sha1": "154156db79c2ad91f03ee4c775b3f95bba64a439",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_132.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_133.dae",
+          "publicPath": "/ui/scenes/unitall/model_133.dae",
+          "bytes": 6675,
+          "sha1": "cf18c4c7a05f646a5eb80c9301a1972fff124929",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_133.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_134.dae",
+          "publicPath": "/ui/scenes/unitall/model_134.dae",
+          "bytes": 6672,
+          "sha1": "c2b0ae5c723d08d47a72e0b67282251c717a62cb",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_134.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_135.dae",
+          "publicPath": "/ui/scenes/unitall/model_135.dae",
+          "bytes": 6745,
+          "sha1": "5a514cf1f646b27e9f9d5b7c4b81947d499c10c8",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_135.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_136.dae",
+          "publicPath": "/ui/scenes/unitall/model_136.dae",
+          "bytes": 6672,
+          "sha1": "f10e1baaf993ed9a87a53ffe0cd97bcbab856dbc",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_136.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_137.dae",
+          "publicPath": "/ui/scenes/unitall/model_137.dae",
+          "bytes": 6672,
+          "sha1": "17ddd871820b8822d3a3ee63f0ad118ff067be34",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_137.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_138.dae",
+          "publicPath": "/ui/scenes/unitall/model_138.dae",
+          "bytes": 6676,
+          "sha1": "931263a9fb18edfa8edb0939ee1861319a875503",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_138.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_139.dae",
+          "publicPath": "/ui/scenes/unitall/model_139.dae",
+          "bytes": 6675,
+          "sha1": "e1eee833e9e794c27cb27e27af7c9230923527d0",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_139.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_14.dae",
+          "publicPath": "/ui/scenes/unitall/model_14.dae",
+          "bytes": 6671,
+          "sha1": "9cc1822d6f1d76359f954afaf718854fe18c7ef1",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_14.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_140.dae",
+          "publicPath": "/ui/scenes/unitall/model_140.dae",
+          "bytes": 6676,
+          "sha1": "a3dae9cee7d3e9912cfb01605e79f9d3b4617bdb",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_140.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_141.dae",
+          "publicPath": "/ui/scenes/unitall/model_141.dae",
+          "bytes": 6680,
+          "sha1": "de975d9d1aba006afd3891e37c3b103c1b84978c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_141.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_142.dae",
+          "publicPath": "/ui/scenes/unitall/model_142.dae",
+          "bytes": 6811,
+          "sha1": "8917c50009f0911fb7805db6e00555cdcdaba9fd",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_142.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_143.dae",
+          "publicPath": "/ui/scenes/unitall/model_143.dae",
+          "bytes": 6683,
+          "sha1": "ea1ba35f3e65acd78a7954beb6a36e99dce27fd0",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_143.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_144.dae",
+          "publicPath": "/ui/scenes/unitall/model_144.dae",
+          "bytes": 6678,
+          "sha1": "f088269a75fce9159e363878980d1a7a51b3e046",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_144.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_145.dae",
+          "publicPath": "/ui/scenes/unitall/model_145.dae",
+          "bytes": 6680,
+          "sha1": "93dba69d8e8e809144eb0c9beaf62bc81c382edd",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_145.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_146.dae",
+          "publicPath": "/ui/scenes/unitall/model_146.dae",
+          "bytes": 6675,
+          "sha1": "842ce05926d160986ce1a5f05bfefed1026af72b",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_146.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_147.dae",
+          "publicPath": "/ui/scenes/unitall/model_147.dae",
+          "bytes": 6664,
+          "sha1": "22cc9266ad3af2402de475a02efafd578ca3c1e5",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_147.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_148.dae",
+          "publicPath": "/ui/scenes/unitall/model_148.dae",
+          "bytes": 6737,
+          "sha1": "3403b6e8eb837942e6f5acaefe79a22620bbe382",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_148.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_149.dae",
+          "publicPath": "/ui/scenes/unitall/model_149.dae",
+          "bytes": 6675,
+          "sha1": "bcde1853506536b7de9109043f5f2499c2ce3db9",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_149.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_15.dae",
+          "publicPath": "/ui/scenes/unitall/model_15.dae",
+          "bytes": 6674,
+          "sha1": "598d6faee69fe7ed30da426dfd827e09b3793270",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_15.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_150.dae",
+          "publicPath": "/ui/scenes/unitall/model_150.dae",
+          "bytes": 6680,
+          "sha1": "213a788f116247f67eb0632bd77a243631666376",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_150.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_151.dae",
+          "publicPath": "/ui/scenes/unitall/model_151.dae",
+          "bytes": 6895,
+          "sha1": "783103ff344aaeee715fe6894abd8fcac59051ca",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_151.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_152.dae",
+          "publicPath": "/ui/scenes/unitall/model_152.dae",
+          "bytes": 6680,
+          "sha1": "8adc41b5bfbb8cf3cbfd6ae8cae64095f0cb951e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_152.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_153.dae",
+          "publicPath": "/ui/scenes/unitall/model_153.dae",
+          "bytes": 6737,
+          "sha1": "7198a24e08e75cc9a54fad06c4f37fd036de85c7",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_153.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_154.dae",
+          "publicPath": "/ui/scenes/unitall/model_154.dae",
+          "bytes": 6675,
+          "sha1": "273144f3f2d3a69d6fac445b8f00a2a29dc05e75",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_154.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_155.dae",
+          "publicPath": "/ui/scenes/unitall/model_155.dae",
+          "bytes": 6676,
+          "sha1": "ea013738a2356b5f067336decb2eee7a763fc6ea",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_155.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_156.dae",
+          "publicPath": "/ui/scenes/unitall/model_156.dae",
+          "bytes": 6892,
+          "sha1": "8beba5b58abe594a727ca888cb793c5198eb57fd",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_156.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_157.dae",
+          "publicPath": "/ui/scenes/unitall/model_157.dae",
+          "bytes": 6889,
+          "sha1": "f04562b9fec954f1dab2c8b26de6ebff8325a1cf",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_157.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_158.dae",
+          "publicPath": "/ui/scenes/unitall/model_158.dae",
+          "bytes": 7464,
+          "sha1": "9c94f6415f073b7161771b25d8dc9bc20ecdc504",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_158.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_159.dae",
+          "publicPath": "/ui/scenes/unitall/model_159.dae",
+          "bytes": 6901,
+          "sha1": "c5bf2b6b2b8608795dee9655d5c4a3a1c15d2f7a",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_159.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_16.dae",
+          "publicPath": "/ui/scenes/unitall/model_16.dae",
+          "bytes": 6680,
+          "sha1": "cf3c07d61dc5b1a71424110583740f7fae8e4eb7",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_16.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_160.dae",
+          "publicPath": "/ui/scenes/unitall/model_160.dae",
+          "bytes": 6899,
+          "sha1": "29c7149963ec0864f5d3aa582d36d9fcf00d7c91",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_160.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_161.dae",
+          "publicPath": "/ui/scenes/unitall/model_161.dae",
+          "bytes": 7008,
+          "sha1": "9bd622943d17249629fcd41a9ae4ef8a6670b861",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_161.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_162.dae",
+          "publicPath": "/ui/scenes/unitall/model_162.dae",
+          "bytes": 7032,
+          "sha1": "6c874e2b313ccb02a89fb1f4ed45d4bc8ccae32c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_162.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_163.dae",
+          "publicPath": "/ui/scenes/unitall/model_163.dae",
+          "bytes": 6898,
+          "sha1": "612e0917e81516749f48ec403ecb52baab8cd96b",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_163.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_164.dae",
+          "publicPath": "/ui/scenes/unitall/model_164.dae",
+          "bytes": 7045,
+          "sha1": "0b8099a775ee1bf51c218c75d6b36f746149d8fd",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_164.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_165.dae",
+          "publicPath": "/ui/scenes/unitall/model_165.dae",
+          "bytes": 7037,
+          "sha1": "97d0e03978f6ef58e8d83153a80f55d6cd5450ce",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_165.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_166.dae",
+          "publicPath": "/ui/scenes/unitall/model_166.dae",
+          "bytes": 7246,
+          "sha1": "6e9b366aa2cbc75b676ee938777bd9c723a8e1f8",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_166.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_167.dae",
+          "publicPath": "/ui/scenes/unitall/model_167.dae",
+          "bytes": 7177,
+          "sha1": "d255e77be08a96b97cb896d1db93df8da27edc51",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_167.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_168.dae",
+          "publicPath": "/ui/scenes/unitall/model_168.dae",
+          "bytes": 7104,
+          "sha1": "26dbb6d255f638d88a40bc237bbab96f107975b9",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_168.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_169.dae",
+          "publicPath": "/ui/scenes/unitall/model_169.dae",
+          "bytes": 7106,
+          "sha1": "6e1393db7298c23533359de514e2e297707bee04",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_169.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_17.dae",
+          "publicPath": "/ui/scenes/unitall/model_17.dae",
+          "bytes": 6677,
+          "sha1": "54505a3575cc8a5d62dfb6bb9e0e11a947ea1b9e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_17.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_170.dae",
+          "publicPath": "/ui/scenes/unitall/model_170.dae",
+          "bytes": 7158,
+          "sha1": "ad76230a7699592152e81336d05065f94ba2e23c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_170.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_171.dae",
+          "publicPath": "/ui/scenes/unitall/model_171.dae",
+          "bytes": 7095,
+          "sha1": "992cd9646480dbacf5f0bf984f3fb320e4274438",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_171.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_172.dae",
+          "publicPath": "/ui/scenes/unitall/model_172.dae",
+          "bytes": 6816,
+          "sha1": "aa893f1ef4b564367d3bc79278e0919c97ad2c26",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_172.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_173.dae",
+          "publicPath": "/ui/scenes/unitall/model_173.dae",
+          "bytes": 7078,
+          "sha1": "8dd3695569b47940ece7b31b179a4fca405fff6e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_173.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_174.dae",
+          "publicPath": "/ui/scenes/unitall/model_174.dae",
+          "bytes": 7041,
+          "sha1": "62c8145179da5c81eff7f73b4ffb037a5ccd3b42",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_174.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_175.dae",
+          "publicPath": "/ui/scenes/unitall/model_175.dae",
+          "bytes": 6677,
+          "sha1": "7212c16ec3008e0891290ff25487de5e1495e602",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_175.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_176.dae",
+          "publicPath": "/ui/scenes/unitall/model_176.dae",
+          "bytes": 6679,
+          "sha1": "de932157db02e7ce2d61628e0beb38758cb5505c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_176.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_177.dae",
+          "publicPath": "/ui/scenes/unitall/model_177.dae",
+          "bytes": 6675,
+          "sha1": "b23dbd31a3a6a8ff4df19670bd12d8be0e940e58",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_177.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_178.dae",
+          "publicPath": "/ui/scenes/unitall/model_178.dae",
+          "bytes": 7044,
+          "sha1": "cc3712d861312b0dd0c8d3c92843ac6d4e41541c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_178.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_179.dae",
+          "publicPath": "/ui/scenes/unitall/model_179.dae",
+          "bytes": 6679,
+          "sha1": "d4b4ac1cd59d5d4d97a5c313a189fd1f47886cb6",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_179.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_18.dae",
+          "publicPath": "/ui/scenes/unitall/model_18.dae",
+          "bytes": 6983,
+          "sha1": "fcf3fb972e6bc36703a659085660f08de8b010d1",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_18.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_180.dae",
+          "publicPath": "/ui/scenes/unitall/model_180.dae",
+          "bytes": 6680,
+          "sha1": "83369a2b6673f52f866ac61518171b984d276d17",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_180.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_181.dae",
+          "publicPath": "/ui/scenes/unitall/model_181.dae",
+          "bytes": 6679,
+          "sha1": "b45d3efe5430ce7ef0762211d23670326573cc6c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_181.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_182.dae",
+          "publicPath": "/ui/scenes/unitall/model_182.dae",
+          "bytes": 6680,
+          "sha1": "372291a66f48269683049e0e65d7dbb2ec9d21db",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_182.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_183.dae",
+          "publicPath": "/ui/scenes/unitall/model_183.dae",
+          "bytes": 6676,
+          "sha1": "18a325b7ff74817ed1b75be53b860b610df76f94",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_183.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_184.dae",
+          "publicPath": "/ui/scenes/unitall/model_184.dae",
+          "bytes": 6676,
+          "sha1": "71fcf2ec9aec9a7a72788f7ea0a862bef88d9b1c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_184.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_185.dae",
+          "publicPath": "/ui/scenes/unitall/model_185.dae",
+          "bytes": 6663,
+          "sha1": "90afcdb18aa5473df4111430f0cb39399cc3b000",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_185.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_186.dae",
+          "publicPath": "/ui/scenes/unitall/model_186.dae",
+          "bytes": 6664,
+          "sha1": "e19d9faef542f9ecf84d343ac31aec2f622647a5",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_186.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_187.dae",
+          "publicPath": "/ui/scenes/unitall/model_187.dae",
+          "bytes": 6676,
+          "sha1": "6ce91e0182df1144e942f5f0cd42fc7cff97e5e5",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_187.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_188.dae",
+          "publicPath": "/ui/scenes/unitall/model_188.dae",
+          "bytes": 6675,
+          "sha1": "cc527a5dc0ca56ce4ff1b8014e8ffdf29ecba83a",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_188.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_189.dae",
+          "publicPath": "/ui/scenes/unitall/model_189.dae",
+          "bytes": 6896,
+          "sha1": "715a8c3a18d00f77cc3af5abcdbdd1ee8b21f65b",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_189.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_19.dae",
+          "publicPath": "/ui/scenes/unitall/model_19.dae",
+          "bytes": 6667,
+          "sha1": "603e6ce0c53918746d0a809513807a9fa37f4f2c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_19.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_190.dae",
+          "publicPath": "/ui/scenes/unitall/model_190.dae",
+          "bytes": 6887,
+          "sha1": "0c92df72e2785fdeb1232af496ed52a4b38be25e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_190.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_191.dae",
+          "publicPath": "/ui/scenes/unitall/model_191.dae",
+          "bytes": 7045,
+          "sha1": "99b385d201ca23d7d05f66f5b9ba2668f7d8c28a",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_191.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_192.dae",
+          "publicPath": "/ui/scenes/unitall/model_192.dae",
+          "bytes": 6892,
+          "sha1": "aaf0385d31f9cc710cc2f77a474b9249a8effa09",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_192.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_193.dae",
+          "publicPath": "/ui/scenes/unitall/model_193.dae",
+          "bytes": 7028,
+          "sha1": "edccfb7c39b666f3e191bc98f8fa35242abe380c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_193.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_194.dae",
+          "publicPath": "/ui/scenes/unitall/model_194.dae",
+          "bytes": 6894,
+          "sha1": "c7bfcc7db0e1c9c33cdc6c55cec0faf154c5f6fb",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_194.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_195.dae",
+          "publicPath": "/ui/scenes/unitall/model_195.dae",
+          "bytes": 6680,
+          "sha1": "ca67444dbfdce9ea6af31cef5666b71f137243c2",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_195.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_196.dae",
+          "publicPath": "/ui/scenes/unitall/model_196.dae",
+          "bytes": 6672,
+          "sha1": "364be3da3fc0b0d5bdf0fa4b3787726980e20b4b",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_196.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_197.dae",
+          "publicPath": "/ui/scenes/unitall/model_197.dae",
+          "bytes": 6673,
+          "sha1": "ca691616918a17123bee212c9218308b3cc973b0",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_197.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_198.dae",
+          "publicPath": "/ui/scenes/unitall/model_198.dae",
+          "bytes": 6821,
+          "sha1": "50f31a294a50b5eb5ea5e938e0830bdaef1e9790",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_198.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_199.dae",
+          "publicPath": "/ui/scenes/unitall/model_199.dae",
+          "bytes": 6668,
+          "sha1": "c0d64c69f07dc6479b2b079d91687b1180ecc194",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_199.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_20.dae",
+          "publicPath": "/ui/scenes/unitall/model_20.dae",
+          "bytes": 6676,
+          "sha1": "8209c041ef9c6638f5ef87592e170985fcff80b2",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_20.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_200.dae",
+          "publicPath": "/ui/scenes/unitall/model_200.dae",
+          "bytes": 6667,
+          "sha1": "e6deab8d8854272db943884a831ff9bf7584740e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_200.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_201.dae",
+          "publicPath": "/ui/scenes/unitall/model_201.dae",
+          "bytes": 6669,
+          "sha1": "07582150f6b2e1c9e4e87026b6a591b3c08b6d73",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_201.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_21.dae",
+          "publicPath": "/ui/scenes/unitall/model_21.dae",
+          "bytes": 6674,
+          "sha1": "0533a60d63782c5904fc2de8281ad36c3d18762d",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_21.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_22.dae",
+          "publicPath": "/ui/scenes/unitall/model_22.dae",
+          "bytes": 6733,
+          "sha1": "e928664d0aa504cfc9a2d600227c61d9f0f66ab1",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_22.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_23.dae",
+          "publicPath": "/ui/scenes/unitall/model_23.dae",
+          "bytes": 6817,
+          "sha1": "736129f1fbbd8468a5cd99cdc6dda1645434b536",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_23.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_24.dae",
+          "publicPath": "/ui/scenes/unitall/model_24.dae",
+          "bytes": 6679,
+          "sha1": "339b4ca8dc1454394d1f549abc54be2059af3e99",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_24.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_25.dae",
+          "publicPath": "/ui/scenes/unitall/model_25.dae",
+          "bytes": 6906,
+          "sha1": "0b8d50048ecd1f45f9b361b2a168ca5ef0580e0d",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_25.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_26.dae",
+          "publicPath": "/ui/scenes/unitall/model_26.dae",
+          "bytes": 6677,
+          "sha1": "4b6c67a2cd88dbc1fd2f02578b3203cee6698bdf",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_26.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_27.dae",
+          "publicPath": "/ui/scenes/unitall/model_27.dae",
+          "bytes": 7116,
+          "sha1": "9358af40ec4314d919a0b2540e069fbbb890f803",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_27.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_28.dae",
+          "publicPath": "/ui/scenes/unitall/model_28.dae",
+          "bytes": 7193,
+          "sha1": "a87e53cdb015becc78ab225c66e985d36cd5e09e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_28.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_29.dae",
+          "publicPath": "/ui/scenes/unitall/model_29.dae",
+          "bytes": 6892,
+          "sha1": "523dd5ab0d5b63b182668e100a416461b8f0132c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_29.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_30.dae",
+          "publicPath": "/ui/scenes/unitall/model_30.dae",
+          "bytes": 6799,
+          "sha1": "cd2a7b258fdfbbcac832814035e65951928f3446",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_30.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_31.dae",
+          "publicPath": "/ui/scenes/unitall/model_31.dae",
+          "bytes": 6668,
+          "sha1": "1e2c3301a31a6ccd9a3d9a6272f731b8ecb47284",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_31.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_32.dae",
+          "publicPath": "/ui/scenes/unitall/model_32.dae",
+          "bytes": 6901,
+          "sha1": "d88371c5eaac39f24881373a2a1bcd7aa6cde0b9",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_32.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_33.dae",
+          "publicPath": "/ui/scenes/unitall/model_33.dae",
+          "bytes": 6888,
+          "sha1": "2172ff6fb24872885f58b17857f0523ca92e0900",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_33.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_34.dae",
+          "publicPath": "/ui/scenes/unitall/model_34.dae",
+          "bytes": 6897,
+          "sha1": "2e0f579ce882010a9f2ce47b41041a938714fb12",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_34.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_35.dae",
+          "publicPath": "/ui/scenes/unitall/model_35.dae",
+          "bytes": 6679,
+          "sha1": "a4ef64ed6b61efcf82a2d0288b29a2e66ebe1a15",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_35.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_36.dae",
+          "publicPath": "/ui/scenes/unitall/model_36.dae",
+          "bytes": 6902,
+          "sha1": "ab33adcd2b0b7b2c5c775b12e51a15de5907e273",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_36.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_37.dae",
+          "publicPath": "/ui/scenes/unitall/model_37.dae",
+          "bytes": 7201,
+          "sha1": "479a3b26597deb60c020793d989e9ca62b558939",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_37.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_38.dae",
+          "publicPath": "/ui/scenes/unitall/model_38.dae",
+          "bytes": 6895,
+          "sha1": "604df7972c778e887c060c3c4d63b4b0c6ae20d5",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_38.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_39.dae",
+          "publicPath": "/ui/scenes/unitall/model_39.dae",
+          "bytes": 6667,
+          "sha1": "05e0fd790389cb2ddc6ec616a06db5be1579fbaa",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_39.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_40.dae",
+          "publicPath": "/ui/scenes/unitall/model_40.dae",
+          "bytes": 6678,
+          "sha1": "4a388174f215213f31b649782933237efb70dc38",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_40.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_41.dae",
+          "publicPath": "/ui/scenes/unitall/model_41.dae",
+          "bytes": 6680,
+          "sha1": "62bf007fe8091d73a2ae9edfb7ce524f127d2cef",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_41.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_42.dae",
+          "publicPath": "/ui/scenes/unitall/model_42.dae",
+          "bytes": 6677,
+          "sha1": "f12e8503d710935127bdce15db4890c669326147",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_42.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_43.dae",
+          "publicPath": "/ui/scenes/unitall/model_43.dae",
+          "bytes": 6740,
+          "sha1": "3ffcbd7c4c28c4cf11859d043ccbbbb445e0d877",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_43.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_44.dae",
+          "publicPath": "/ui/scenes/unitall/model_44.dae",
+          "bytes": 6672,
+          "sha1": "20b61869d51807d1069d0566d890dfff4af8d7fa",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_44.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_45.dae",
+          "publicPath": "/ui/scenes/unitall/model_45.dae",
+          "bytes": 6675,
+          "sha1": "64a4851dd08b93af86408f7852db233d260f5a6b",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_45.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_46.dae",
+          "publicPath": "/ui/scenes/unitall/model_46.dae",
+          "bytes": 6676,
+          "sha1": "fefeffbae7368cbc47f344f0c6a253abf9ead127",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_46.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_47.dae",
+          "publicPath": "/ui/scenes/unitall/model_47.dae",
+          "bytes": 6676,
+          "sha1": "fd526df5f8fa4713a74d6c05e923a771293372d5",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_47.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_48.dae",
+          "publicPath": "/ui/scenes/unitall/model_48.dae",
+          "bytes": 6673,
+          "sha1": "08b533c438eb2c84b0d87f449214067af75d25ed",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_48.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_49.dae",
+          "publicPath": "/ui/scenes/unitall/model_49.dae",
+          "bytes": 6671,
+          "sha1": "85154928bec797b7d472719b1c19abbbf86f4e14",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_49.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_50.dae",
+          "publicPath": "/ui/scenes/unitall/model_50.dae",
+          "bytes": 6672,
+          "sha1": "30be4b9a0d38d9569dc00847e15ebf7aa5fbaf14",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_50.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_51.dae",
+          "publicPath": "/ui/scenes/unitall/model_51.dae",
+          "bytes": 6666,
+          "sha1": "a9dd0ee284481ebf0da6078acec0a484847886ad",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_51.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_52.dae",
+          "publicPath": "/ui/scenes/unitall/model_52.dae",
+          "bytes": 6797,
+          "sha1": "7dd2cec7f2e6fd44226d6de68b0df0d2ffccd91c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_52.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_53.dae",
+          "publicPath": "/ui/scenes/unitall/model_53.dae",
+          "bytes": 6814,
+          "sha1": "84c6d42822374340e67c3d1879d7c60709676b18",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_53.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_54.dae",
+          "publicPath": "/ui/scenes/unitall/model_54.dae",
+          "bytes": 6675,
+          "sha1": "fb674d29d32ae6b73ccd9bb8c3834731c6f4f3db",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_54.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_55.dae",
+          "publicPath": "/ui/scenes/unitall/model_55.dae",
+          "bytes": 6888,
+          "sha1": "3b2a45a006041bf8ed14727b2d141329b8e55b6d",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_55.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_56.dae",
+          "publicPath": "/ui/scenes/unitall/model_56.dae",
+          "bytes": 6672,
+          "sha1": "ef72bda9766c315aaf9acfdb2f4216ed841841d7",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_56.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_57.dae",
+          "publicPath": "/ui/scenes/unitall/model_57.dae",
+          "bytes": 7135,
+          "sha1": "93b0aff18e3b4cbfc215dff8d1c1a6ab928b04c3",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_57.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_58.dae",
+          "publicPath": "/ui/scenes/unitall/model_58.dae",
+          "bytes": 6676,
+          "sha1": "765fd5d5a8a0581dc6f795c1692fbbf71e0f2515",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_58.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_59.dae",
+          "publicPath": "/ui/scenes/unitall/model_59.dae",
+          "bytes": 6680,
+          "sha1": "2531617269d564780efb6b18192ad6c144aae7d4",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_59.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_60.dae",
+          "publicPath": "/ui/scenes/unitall/model_60.dae",
+          "bytes": 6791,
+          "sha1": "9c3001b27967ebd95e63ffbb86d39d9a94dc7b04",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_60.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_61.dae",
+          "publicPath": "/ui/scenes/unitall/model_61.dae",
+          "bytes": 6676,
+          "sha1": "5327b360893cf16ca1cde96e7daae3fa7e0b69ed",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_61.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_62.dae",
+          "publicPath": "/ui/scenes/unitall/model_62.dae",
+          "bytes": 6672,
+          "sha1": "b9cbf95577f821806645b794fcee257dd762d51e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_62.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_63.dae",
+          "publicPath": "/ui/scenes/unitall/model_63.dae",
+          "bytes": 6668,
+          "sha1": "cec998df70de8b9e207e5168c91080cc9466880b",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_63.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_64.dae",
+          "publicPath": "/ui/scenes/unitall/model_64.dae",
+          "bytes": 6670,
+          "sha1": "0f964ce85f9ddf8ee829bb5c8f990d33e5e66c11",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_64.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_65.dae",
+          "publicPath": "/ui/scenes/unitall/model_65.dae",
+          "bytes": 6817,
+          "sha1": "24ecf9f4683ea44f0f2b3831b5ca45aff93f9a1a",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_65.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_66.dae",
+          "publicPath": "/ui/scenes/unitall/model_66.dae",
+          "bytes": 6730,
+          "sha1": "fcfd5a9097f92394b9b4859d173ba6cf6a9569c1",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_66.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_67.dae",
+          "publicPath": "/ui/scenes/unitall/model_67.dae",
+          "bytes": 6858,
+          "sha1": "6c19cdef8b5cf89569f3e027b3090456404ab5b4",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_67.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_68.dae",
+          "publicPath": "/ui/scenes/unitall/model_68.dae",
+          "bytes": 7237,
+          "sha1": "f037465d441920e012f87599b2766ec35f3fb13b",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_68.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_69.dae",
+          "publicPath": "/ui/scenes/unitall/model_69.dae",
+          "bytes": 6676,
+          "sha1": "27d0af6438cbf4dab12a769ef50562432c8fd40a",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_69.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_70.dae",
+          "publicPath": "/ui/scenes/unitall/model_70.dae",
+          "bytes": 7515,
+          "sha1": "bad0a75bc54cf81fa4f4eb39e75b069757ef035c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_70.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_71.dae",
+          "publicPath": "/ui/scenes/unitall/model_71.dae",
+          "bytes": 7041,
+          "sha1": "698dafa526ae3aa576ee10a3642c7173b2348a44",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_71.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_72.dae",
+          "publicPath": "/ui/scenes/unitall/model_72.dae",
+          "bytes": 7239,
+          "sha1": "8dcf5ffccb7cb19d4a0c1cea21b6d07795ce1889",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_72.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_73.dae",
+          "publicPath": "/ui/scenes/unitall/model_73.dae",
+          "bytes": 6668,
+          "sha1": "7908acc5a9226e8f24b76e475e6f57731e34df48",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_73.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_74.dae",
+          "publicPath": "/ui/scenes/unitall/model_74.dae",
+          "bytes": 7249,
+          "sha1": "ff56d5d9efcf189fc6c0245c9f06338b42c86881",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_74.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_75.dae",
+          "publicPath": "/ui/scenes/unitall/model_75.dae",
+          "bytes": 7213,
+          "sha1": "a2da1d8179c6307a896910581d8bef66cc9586a9",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_75.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_76.dae",
+          "publicPath": "/ui/scenes/unitall/model_76.dae",
+          "bytes": 7033,
+          "sha1": "be3a2c0f2a062776f00ed338f541d2c3c4f7c1c8",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_76.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_77.dae",
+          "publicPath": "/ui/scenes/unitall/model_77.dae",
+          "bytes": 6678,
+          "sha1": "05a5842ad31e5e4d797749b29fc4f3e258ce92e2",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_77.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_78.dae",
+          "publicPath": "/ui/scenes/unitall/model_78.dae",
+          "bytes": 7231,
+          "sha1": "0a6c9de5d1570787fce6a0fa8afb1dff669adabc",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_78.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_79.dae",
+          "publicPath": "/ui/scenes/unitall/model_79.dae",
+          "bytes": 6676,
+          "sha1": "7c386f37080158fbd2fba189b4ec37bd65d942ed",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_79.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_80.dae",
+          "publicPath": "/ui/scenes/unitall/model_80.dae",
+          "bytes": 7516,
+          "sha1": "077c3c7771bb971fda69f48558e0310f6cb5fadd",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_80.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_81.dae",
+          "publicPath": "/ui/scenes/unitall/model_81.dae",
+          "bytes": 7038,
+          "sha1": "7c78463a1ceeda75c28b7c2a81cd5eb5096c82cf",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_81.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_82.dae",
+          "publicPath": "/ui/scenes/unitall/model_82.dae",
+          "bytes": 7258,
+          "sha1": "e38ca49d0e2dede06863e40df835da92949e94e7",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_82.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_83.dae",
+          "publicPath": "/ui/scenes/unitall/model_83.dae",
+          "bytes": 6677,
+          "sha1": "2c787300c427996fe6f145903a47b7d852318fd0",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_83.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_84.dae",
+          "publicPath": "/ui/scenes/unitall/model_84.dae",
+          "bytes": 7246,
+          "sha1": "8dc31f43e1dc93b5359846007079532f7f6b708e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_84.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_85.dae",
+          "publicPath": "/ui/scenes/unitall/model_85.dae",
+          "bytes": 7210,
+          "sha1": "5069a720216ccd8594d64ba1dd797baed52382c8",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_85.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_86.dae",
+          "publicPath": "/ui/scenes/unitall/model_86.dae",
+          "bytes": 7019,
+          "sha1": "a68ed28ccb953123070f1f827d1e152708c740de",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_86.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_87.dae",
+          "publicPath": "/ui/scenes/unitall/model_87.dae",
+          "bytes": 6678,
+          "sha1": "5ea7945da3c64885ab52ff9ef086197941cac6fb",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_87.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_88.dae",
+          "publicPath": "/ui/scenes/unitall/model_88.dae",
+          "bytes": 6677,
+          "sha1": "807448fa4b779feca5cc223488468c4aad149b4e",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_88.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_89.dae",
+          "publicPath": "/ui/scenes/unitall/model_89.dae",
+          "bytes": 6682,
+          "sha1": "f595e33ff666f902db83cdd10fa65076f6062a50",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_89.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_90.dae",
+          "publicPath": "/ui/scenes/unitall/model_90.dae",
+          "bytes": 6672,
+          "sha1": "592c943bd4fbc1c742a637a3919ba78aa5622255",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_90.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_91.dae",
+          "publicPath": "/ui/scenes/unitall/model_91.dae",
+          "bytes": 6680,
+          "sha1": "8f66ef267666aec1df5878e1a6ce7713f5958901",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_91.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_92.dae",
+          "publicPath": "/ui/scenes/unitall/model_92.dae",
+          "bytes": 6672,
+          "sha1": "731f6324c4b40ecf2f8d81bf972e2a4f94c8c03f",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_92.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_93.dae",
+          "publicPath": "/ui/scenes/unitall/model_93.dae",
+          "bytes": 6674,
+          "sha1": "4c93140e7990dfbca9ac53b156344afc1311b62d",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_93.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_94.dae",
+          "publicPath": "/ui/scenes/unitall/model_94.dae",
+          "bytes": 6681,
+          "sha1": "a40f7cdeb3ce962447e02d4ad18bd627d2a736d7",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_94.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_95.dae",
+          "publicPath": "/ui/scenes/unitall/model_95.dae",
+          "bytes": 6675,
+          "sha1": "0e6fd45748e5b892d7108f2ea6a30cce461efb6a",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_95.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_96.dae",
+          "publicPath": "/ui/scenes/unitall/model_96.dae",
+          "bytes": 6673,
+          "sha1": "17c056e4605c4117a38dd3b7021ec95533e7cc10",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_96.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_97.dae",
+          "publicPath": "/ui/scenes/unitall/model_97.dae",
+          "bytes": 6676,
+          "sha1": "26a0aba7887a95572de41aad5cbc8224af2ada21",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_97.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_98.dae",
+          "publicPath": "/ui/scenes/unitall/model_98.dae",
+          "bytes": 6680,
+          "sha1": "8cf67f9ea9541acbe232c87a651c93f0119afe8c",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_98.dae"
+        },
+        {
+          "path": "apps/game/public/ui/scenes/unitall/model_99.dae",
+          "publicPath": "/ui/scenes/unitall/model_99.dae",
+          "bytes": 6667,
+          "sha1": "ab82a1bf2cf82f6f9413823a1fa92ef30be3a81d",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/model_99.dae"
+        }
+      ],
+      "textureFiles": [
+        {
+          "path": "apps/game/public/ui/scenes/unitall/Texture_0_CI8_RGB5A3.png",
+          "publicPath": "/ui/scenes/unitall/Texture_0_CI8_RGB5A3.png",
+          "bytes": 106730,
+          "sha1": "2fc886befd5d3a68e63c195b427d906c28eb6be0",
+          "sourcePath": "user-data/GG4E/gltf-export/unitall/Texture_0_CI8_RGB5A3.png"
+        }
+      ],
+      "textureCount": 1,
       "caveats": [
         "Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.",
         "Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."

@@ -1135,7 +1135,23 @@
 }
 
 /* ============================ FORCE BUILDER ============================ */
-.gf-force { display: grid; grid-template-columns: 1fr minmax(280px, 42%); gap: 12px; padding: 12px; box-sizing: border-box; height: 100%; }
+.gf-force-screen {
+  background: #0e2138;
+}
+.gf-force-unitall-scene {
+  left: 10px;
+  top: 54px;
+  right: calc(42% + 24px);
+  bottom: 68px;
+  z-index: 3;
+  opacity: 0.16;
+  transform: scale(1.03);
+  transform-origin: center;
+  mix-blend-mode: screen;
+  filter: saturate(1.18) drop-shadow(0 18px 18px rgba(0, 0, 0, 0.36));
+}
+.gf-force { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr minmax(280px, 42%); gap: 12px; padding: 12px; box-sizing: border-box; height: 100%; }
+.gf-force-screen .gf-legend { z-index: 4; }
 .gf-force-unitall-atlas {
   position: absolute;
   left: 14px;
@@ -1144,7 +1160,7 @@
   max-height: calc(100% - 118px);
   object-fit: cover;
   object-position: top left;
-  opacity: 0.18;
+  opacity: 0.12;
   image-rendering: pixelated;
   pointer-events: none;
 }

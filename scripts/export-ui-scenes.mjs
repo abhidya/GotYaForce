@@ -24,6 +24,7 @@ const requiredSceneNames = [
   "staff00",
   "box00",
   "entry00",
+  "unitall",
   "brif00",
   "vsel00",
   "vsel01",
