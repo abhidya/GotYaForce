@@ -59,3 +59,6 @@ hp_log.csv
 
 # User save files (local)
 *.sav
+
+# Local extraction/build scratch.
+.tmp/

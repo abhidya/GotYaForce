@@ -1,0 +1,112 @@
+{
+  "status": "ok",
+  "generatedAt": "2026-07-02T17:35:32.0167886Z",
+  "decoder": "tools/HSDLib/HSDRaw GXImageConverter",
+  "assets": [
+    {
+      "sourcePath": "user-data/GG4E/afs_data/root/ptcl00.txg",
+      "kind": "txg",
+      "status": "exported",
+      "error": null,
+      "decoder": "tools/HSDLib/HSDRaw GXImageConverter",
+      "outputs": [
+        {
+          "path": "apps/game/public/ui/txg/ptcl00/image_00_I4.png",
+          "imageIndex": 0,
+          "width": 32,
+          "height": 32,
+          "format": "I4",
+          "paletteFormat": null,
+          "bytes": 595,
+          "sha1": "41fbe5148298836ef9a94782983b56856d8835cb",
+          "hsdModelIndex": null,
+          "hsdTextureIndex": null
+        },
+        {
+          "path": "apps/game/public/ui/txg/ptcl00/image_01_RGB565.png",
+          "imageIndex": 1,
+          "width": 32,
+          "height": 32,
+          "format": "RGB565",
+          "paletteFormat": null,
+          "bytes": 1364,
+          "sha1": "8372b8359b079470181e4fceefb6dc55c12ed86f",
+          "hsdModelIndex": null,
+          "hsdTextureIndex": null
+        },
+        {
+          "path": "apps/game/public/ui/txg/ptcl00/image_02_RGB565.png",
+          "imageIndex": 2,
+          "width": 16,
+          "height": 16,
+          "format": "RGB565",
+          "paletteFormat": null,
+          "bytes": 436,
+          "sha1": "c4cbbaf5a7b2b414d0d61a22a0eecb291ffe917b",
+          "hsdModelIndex": null,
+          "hsdTextureIndex": null
+        },
+        {
+          "path": "apps/game/public/ui/txg/ptcl00/image_03_I8.png",
+          "imageIndex": 3,
+          "width": 32,
+          "height": 32,
+          "format": "I8",
+          "paletteFormat": null,
+          "bytes": 568,
+          "sha1": "9bc4c8b48a3b1afb30341ae86b4371405a544289",
+          "hsdModelIndex": null,
+          "hsdTextureIndex": null
+        },
+        {
+          "path": "apps/game/public/ui/txg/ptcl00/image_04_I8.png",
+          "imageIndex": 4,
+          "width": 16,
+          "height": 16,
+          "format": "I8",
+          "paletteFormat": null,
+          "bytes": 230,
+          "sha1": "b1c24c13dfa5613303939fe590ae0f78d194038f",
+          "hsdModelIndex": null,
+          "hsdTextureIndex": null
+        },
+        {
+          "path": "apps/game/public/ui/txg/ptcl00/image_05_RGB565.png",
+          "imageIndex": 5,
+          "width": 16,
+          "height": 16,
+          "format": "RGB565",
+          "paletteFormat": null,
+          "bytes": 371,
+          "sha1": "6bdab04adfb8be9640ef232b88505d28ca801f87",
+          "hsdModelIndex": null,
+          "hsdTextureIndex": null
+        },
+        {
+          "path": "apps/game/public/ui/txg/ptcl00/image_06_RGB565.png",
+          "imageIndex": 6,
+          "width": 32,
+          "height": 32,
+          "format": "RGB565",
+          "paletteFormat": null,
+          "bytes": 1052,
+          "sha1": "f05a960851ae8a4f1c107a8b8ff2212267f12e03",
+          "hsdModelIndex": null,
+          "hsdTextureIndex": null
+        },
+        {
+          "path": "apps/game/public/ui/txg/ptcl00/image_07_RGB565.png",
+          "imageIndex": 7,
+          "width": 64,
+          "height": 64,
+          "format": "RGB565",
+          "paletteFormat": null,
+          "bytes": 2111,
+          "sha1": "e21d355b435db0e13b3ec6997a79738b7ab48d28",
+          "hsdModelIndex": null,
+          "hsdTextureIndex": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T03:42:49.855Z",
+  "generatedAt": "2026-07-02T17:34:58.595Z",
   "scanner": "scripts/inspect-particle-effects.mjs",
   "inputs": [
     "research/asset-inventory/weapons-effects-projectiles.json",
@@ -29073,7 +29073,7 @@
           "text": "`scripts/extract-pzz-members.mjs --borg pl0008,pl000c --member mot` before baking.)"
         },
         {
-          "line": 159,
+          "line": 173,
           "text": "manifest <mot.bin> <model.arc> 0x100`."
         }
       ]
@@ -29086,11 +29086,11 @@
           "text": "The actor/common record body is not semantically decoded yet. Treat it as a fixed-size record with named raw fields until gameplay code or traces identify actions, bones, hitbox shapes, damage, effect IDs, and timing."
         },
         {
-          "line": 124,
+          "line": 130,
           "text": "- Validates record markers, normal lengths, record ref alignment, and record-section divisibility."
         },
         {
-          "line": 140,
+          "line": 146,
           "text": "- Actor/common 0xF4 field meanings: flags, action IDs, damage, hitbox shape, bone/attachment IDs, effect IDs, and timing."
         }
       ]

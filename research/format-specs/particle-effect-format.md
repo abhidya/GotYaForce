@@ -1,6 +1,6 @@
 # Gotcha Force particle/effect format notes
 
-Generated: 2026-07-01T03:42:49.855Z
+Generated: 2026-07-02T17:34:58.595Z
 Scanner: `scripts/inspect-particle-effects.mjs`
 
 ## Inputs
@@ -224,8 +224,8 @@ ARZ header groups:
 ## Existing spec evidence used
 
 - `research/format-specs/arc-hsd-format.md` lines 1, 7, 9, 13, 14, 22, 33, 49, 57, 61, 70, 71
-- `research/format-specs/borg-animation-banks.md` lines 52, 53, 159
-- `research/format-specs/hit-bin-format.md` lines 116, 124, 140
+- `research/format-specs/borg-animation-banks.md` lines 52, 53, 173
+- `research/format-specs/hit-bin-format.md` lines 116, 130, 146
 - `research/format-specs/hsd-animation-semantics.md` lines 36, 54, 59
 - `research/format-specs/mot-animation-format.md` lines 7, 69, 70
 - `research/format-specs/particle-effect-format.md` lines 1, 4, 11, 12, 13, 14, 19, 20, 26, 27, 28, 29
