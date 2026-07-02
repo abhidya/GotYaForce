@@ -73,10 +73,19 @@ Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, de
 
 ## Next Trace
 
-Use visible Dolphin or a verified gameplay save-state boot path, then run one short trace per action. Start with camera and one manual jump/shot:
+Use visible Dolphin or a verified gameplay save-state boot path, then run one short trace per action. For B/X/Z/audio proof, use the expanded proof groups and summarize the ignored raw JSON before promoting any rule:
 
 ```bash
 rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\soon we fight mirror b.sav"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups camera --max-hits 30 --timeout-ms 30000
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids action-state-entry,action-helper-cluster,movement-helper-cluster --max-hits 40 --timeout-ms 60000
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups action-proof,audio-proof --max-hits 80 --timeout-ms 45000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups action-proof,audio-proof --max-hits 80 --timeout-ms 45000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-ranged-b"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups action-proof,audio-proof --max-hits 80 --timeout-ms 45000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups action-proof,power-up/param-tier,audio-proof --max-hits 80 --timeout-ms 45000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
+rtk .\tools\node\node.exe scripts\summarize-dolphin-gdb-trace.mjs user-data\dolphin-trace\traces\bx-close-b user-data\dolphin-trace\traces\bx-ranged-b user-data\dolphin-trace\traces\x-special user-data\dolphin-trace\traces\z-ally-lock
 ```
+
+Proof gate: a B/X mapping needs PAD bytes and either `state-transition-primitive` or
+`borg-state-dispatch`/`active-action-handler-invuln` in the same labeled capture. Z
+charge/power-up needs a Z-labeled PAD sample and a `param-tier-*` hit. Audio cue IDs need
+an action-labeled trace with audio hits plus argument/handle inspection; counts alone do not
+identify a cue.

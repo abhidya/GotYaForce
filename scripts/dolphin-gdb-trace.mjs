@@ -376,6 +376,18 @@ function summarizeHit(hit) {
 
 function activeBorgBaseFromHit(breakpoint, regs) {
   const ids = new Set(breakpoint?.ids ?? []);
+  if (
+    ids.has("borg-state-dispatch") ||
+    ids.has("state-transition-primitive") ||
+    ids.has("active-action-handler-invuln") ||
+    ids.has("action-helper-cluster") ||
+    ids.has("param-tier-reset") ||
+    ids.has("param-tier-delta-127") ||
+    ids.has("param-tier-delta-63") ||
+    ids.has("param-tier-refresh")
+  ) {
+    return regs.r3?.value ?? null;
+  }
   if (ids.has("wakeup-invulnerability-init") || ids.has("secondary-wakeup-timer-init")) {
     return regs.r3?.value ?? null;
   }
