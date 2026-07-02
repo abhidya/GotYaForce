@@ -17,6 +17,12 @@ Generated: 2026-06-30
 - Fresh local parse on 2026-07-02 checked every JSON under
   `user-data/dolphin-trace/traces/` (including `camera-next/`, `damage-next/`, and
   `summary.json`): all returned zero hits for those three action IDs.
+- Fresh visible-Dolphin attempt on 2026-07-02 from `dolphin/right before hit.sav`
+  wrote `user-data/dolphin-trace/traces/x-special/gdb-trace-2026-07-02T19-28-49-065Z.json`
+  (ignored raw trace). It captured 80 `pad-read` and 80
+  `game-pad-normalization-cluster` hits, decoded `padButtons: {"none": 80}`, and
+  captured zero action-state/audio hits. Result: the attempted keyboard `C`/GC-X input
+  did not reach the sampled PAD frames before the short trace filled; it is not X proof.
 
 ## Trace Files
 
@@ -44,6 +50,13 @@ Generated: 2026-06-30
     - `0x8008c93c`: eye `[0, 0, 100]`, up `[0, 1, 0]`, interest `[0, 0, -100]`.
     - `0x8008ca90`: eye `[0, 0, 0]`, up `[0, 1, 0]`, interest `[0, 0, -10]`.
   - Result: proves camera callsite/capture path, but not enough to replace the browser gameplay follow camera formula yet.
+- `user-data/dolphin-trace/traces/x-special/gdb-trace-2026-07-02T19-28-49-065Z.json`
+  - Visible Dolphin pass from local save `dolphin/right before hit.sav`.
+  - 160 hits, no errors.
+  - `scripts/summarize-dolphin-gdb-trace.mjs` reports `padButtons: {"none": 80}`,
+    `firstNonNeutralPad: null`, and zero action/audio proof IDs.
+  - Result: proves the new proof summarizer can reject a mislabeled/too-short X run;
+    does not prove B/X mapping, Z behavior, or cue IDs.
 
 ## Commands
 
@@ -73,14 +86,17 @@ Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, de
 
 ## Next Trace
 
-Use visible Dolphin or a verified gameplay save-state boot path, then run one short trace per action. For B/X/Z/audio proof, use the expanded proof groups and summarize the ignored raw JSON before promoting any rule:
+Use visible Dolphin or a verified gameplay save-state boot path, then run one trace per
+action. Keep the trace alive long enough to inject the key; the 2026-07-02 `x-special`
+attempt filled `max-hits=160` before any non-neutral PAD sample was captured. For B/X/Z/audio
+proof, use the expanded proof IDs and summarize the ignored raw JSON before promoting any rule:
 
 ```bash
-rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\soon we fight mirror b.sav"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups action-proof,audio-proof --max-hits 80 --timeout-ms 45000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups action-proof,audio-proof --max-hits 80 --timeout-ms 45000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-ranged-b"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups action-proof,audio-proof --max-hits 80 --timeout-ms 45000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
-rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups action-proof,power-up/param-tier,audio-proof --max-hits 80 --timeout-ms 45000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
+rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\right before hit.sav"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids pad-read,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --max-hits 3000 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-close-b"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids pad-read,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --max-hits 3000 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\bx-ranged-b"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids pad-read,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --max-hits 3000 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\x-special"
+rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids pad-read,state-transition-primitive,borg-state-dispatch,active-action-handler-invuln,action-helper-cluster,battle-frame-target-action-dispatch,param-tier-reset,param-tier-delta-127,param-tier-delta-63,param-tier-refresh,audio-sfx-playing,audio-object-callback,audio-seq-continue,audio-sfx-init,audio-sfx-update --max-hits 3000 --timeout-ms 60000 --out-dir "D:\GotYaForce\user-data\dolphin-trace\traces\z-ally-lock"
 rtk .\tools\node\node.exe scripts\summarize-dolphin-gdb-trace.mjs user-data\dolphin-trace\traces\bx-close-b user-data\dolphin-trace\traces\bx-ranged-b user-data\dolphin-trace\traces\x-special user-data\dolphin-trace\traces\z-ally-lock
 ```
 
