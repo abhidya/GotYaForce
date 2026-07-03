@@ -8491,5 +8491,81 @@
     "tris": 437,
     "textures": [],
     "files": []
+  },
+  {
+    "id": "pl0507",
+    "name": "CYBER DEATH DRAGON",
+    "tribe": "Dragon Borg",
+    "energy": 2000,
+    "dae": "pl0507.dae",
+    "bones": 32,
+    "meshes": 71,
+    "tris": 5458,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18815,
+        "sha1": "b4bdbbb0e6b7602d60226acd9c2285fe87acd093"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10319,
+        "sha1": "a65452dd17e8784548a48d2ae2cae8d159779311"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15799,
+        "sha1": "4e6f97905f0644e6248aaaacbba17b80bcd9c2e9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4838,
+        "sha1": "a327bd0f21624d068510d3dceabd904501619365"
+      }
+    ]
+  },
+  {
+    "id": "pl0513",
+    "name": "MACHINE DRAGON",
+    "tribe": "Dragon Borg",
+    "energy": 1500,
+    "dae": "pl0513.dae",
+    "bones": 32,
+    "meshes": 71,
+    "tris": 5459,
+    "textures": [
+      "Texture_0_CMP.png",
+      "Texture_1_CMP.png",
+      "Texture_2_CMP.png",
+      "Texture_3_CMP.png"
+    ],
+    "files": [
+      {
+        "name": "Texture_0_CMP.png",
+        "bytes": 18815,
+        "sha1": "b4bdbbb0e6b7602d60226acd9c2285fe87acd093"
+      },
+      {
+        "name": "Texture_1_CMP.png",
+        "bytes": 10319,
+        "sha1": "a65452dd17e8784548a48d2ae2cae8d159779311"
+      },
+      {
+        "name": "Texture_2_CMP.png",
+        "bytes": 15799,
+        "sha1": "4e6f97905f0644e6248aaaacbba17b80bcd9c2e9"
+      },
+      {
+        "name": "Texture_3_CMP.png",
+        "bytes": 4838,
+        "sha1": "a327bd0f21624d068510d3dceabd904501619365"
+      }
+    ]
   }
 ]
