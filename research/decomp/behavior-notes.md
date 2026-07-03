@@ -2420,3 +2420,34 @@ page, Data Crystals page, Codejunkies AR list. Tier OBSERVED_WIKI unless noted.
   90/206 borgs need 2-5 pieces; per-borg dataCrystals count on wiki pages (G Red 1,
   Gatling Gunner 2). Collection metadata — cross-references the save's acquisition
   log; not combat-mechanics.
+
+### (aw) Full wiki harvest: 459 per-move records extracted and cross-validated against ROM rows (2026-07-03)
+
+Using the user's own wiki session (cookies supplied in-session; kept in scratchpad only,
+never committed), all 242 content pages were fetched via the MediaWiki API as wikitext
+and the structured templates parsed into
+**research/decomp/data/wiki-borg-moves.json** (extracted field values only; source
+CC-BY-SA with attribution in the provenance block). Contents: 207 borg pages (205
+roster-id-matched), BorgInfoBox fields (number/cost/crystals/tribe/type/rarity/
+lv1-lv10 HP/stats/jump type/level-up schedule) + 459 moves from BorgMoveBox/
+BorgMoveSimple templates with per-move Solidity / Penetration (None-Borgs-Total) /
+RefillType / lv1-lv10 Ammo / Explodes / Effect.
+
+Embedded cross-validation vs the extracted ROM stat rows:
+- **HP lv1/lv10 vs rows[2]/[11]: 200/203 exact** — the (av) level->row rule
+  (rowIndex = displayLevel + 1) is near-universal; the 3 mismatches are the
+  non-normal-schedule candidates (listed in the JSON) and the concrete lead for the
+  per-borg schedule question.
+- **B-shot RefillType vs w0 type byte: 113/117** — wiki "All at Once" = type 0, wiki
+  "Gradual"/"Over time" = type 1 confirmed at scale. One mismatch pairs a wiki
+  "Over Time" with ROM type 2 (pl0f05) — first behavioral hint that type 2 is a
+  gradual VARIANT (the unread refill mode from (al)-era ammo work).
+- **B-shot lv1 ammo vs w0 max: 119/128** — 9 mismatches recorded verbatim for
+  adjudication (several look like the wiki counting burst volleys vs ammo units).
+
+Practical yields: ATK-007/ATK-008 now have per-move solidity/penetration data for the
+whole roster (taxonomy tier OBSERVED_WIKI — trace T5/T6 still decides engine truth);
+the effects column seeds the status-id mapping (Q8/T8); the mechanics pages' wikitext
+(Attacks, Level, Stages, Power Burst, Missions, etc.) was harvested to the session
+scratchpad for reference — re-harvest with fresh cookies if needed later (raw bulk
+wikitext intentionally not committed; the extracted dataset is the artifact).
