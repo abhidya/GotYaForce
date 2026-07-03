@@ -73,7 +73,7 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Gauge stagger (down/balance) | DONE | gauges.ts + applyHit | (ag)/(ah)/(s) | — |
 | Knockback **direction** | DONE (mode 1) | physics/knockback.ts | zz_00300bc_ (p) | modes 0/2/3/4 need muzzle/camera vectors |
 | Knockback **magnitude** | DERIVED (found, bc) | constants MELEE/SHOT KNOCKBACK (TUNED, port pending) | DAT_802dd8a0[str]=str*7, DAT_802d3664[str]=(str+1)*8, str=actor+0x702 (bc) | port strength-indexed magnitude (scale-reconcile) — T9 NO LONGER trace-blocked |
-| B/X contextual resolve | schema; resolver DERIVED (bd) | command.ts (upgradeable) | testers: bit 0x400→type3, 0x1000→type5, etc. (bd) | fill type/subtype resolver from (bd); only pad-bit↔button label still needs a dig |
+| B/X contextual resolve | **type resolver IMPLEMENTED (2a08a35c)** | command.ts resolveCommandType() | tester priority FUN_800699d8:228-238 (bd) | wire into stepAttacks (ATK-003); subtype+pad-button binding still need state/pad-decode |
 | Melee contexts (5-way) | schema | movementContextOf | subtype +0x586; wiki 5-context (av) | trace T2 |
 | Ammo/refill (3 weapon cells) | DONE (values extracted) | ammo.selftest, combat.ts | zz_006dbe0_/006dcc0_/006de10_ (ai/aw) | X-attack→cell-1 (survey UI #2); types 2/3 = dead (ax) |
 | Penetration (none/borgs/total) | data (moveProperties) | borgMoveProperties.json | wiki (aw) + rehit chunk_0013 (O) | trace T6 to confirm engine gate |
