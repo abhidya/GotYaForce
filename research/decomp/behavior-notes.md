@@ -2290,3 +2290,94 @@ Extracted leads worth keeping:
    pipeline. Also: AObj F-curve tracks are Hermite-interpolated — verify
    packages/formats/src/hsd-anim.ts replicates tangents, not linear lerp (fidelity
    check for animation timing).
+
+### (as) Three targeted hunts: mode-conditional respawn i-frames RESOLVED, nurse-heal entry found, knockback magnitude still open (2026-07-03)
+
+Corpus greps (single-pass agent) + same-session verification reads:
+
+- **Respawn invincibility is mode-conditional in DURATION, not bypassed** (refines the
+  (ar) survey claim). ROM float dump re-verified THIS session: FLOAT_80437558 = 30.0,
+  FLOAT_80437564 = 60.0 — confirming (af)'s mapping and correcting the grep agent's
+  swapped reading. FUN_80060b60: `+0x6cb == 1 -> +0x720 = 30.0, else 60.0`
+  (chunk_0007.c:6787-6791). NEW: the +0x6cb writer is chunk_0007.c:2625-2638 — set
+  once per actor (when active and unset) to 1 under a mission-mode-ish condition,
+  else 2; the exact condition expression still needs a careful read (agent elided
+  it). So story/mission actors get HALF the respawn protection of versus actors —
+  a portable, testable rule once the writer's condition is quoted. The balance-break
+  grant (zz_005c290_, chunk_0007.c:3997) stays unconditional 60.0. No "bypass" exists.
+- **Nurse X-heal entry point found**: chunk_0006.c:3374-3379 — spawn ids 0x900/0x90d/
+  0x908 (Angel Nurse / Nao / Angel Rescue; note DEATH BORG THETA 0x906 is NOT in this
+  check — its 37-HP heal must ride another path) install FUN_8004ecb0 as the object
+  callback. Read this session: FUN_8004ecb0 (chunk_0006.c:3405-3411) is a trampoline
+  — `(*(&PTR_FUN_802d1130)[obj+0x18])(obj)` — i.e. the heal logic sits behind ANOTHER
+  dispatch table at 0x802d1130, dumpable exactly like 0x802d3570/0x802da740. Next
+  step queued. CORRECTION to the agent's report: its "partner heal via zz_002f8dc_"
+  is a misread — zz_002f8dc_ is the kill-event accounting ((af)); the call at
+  chunk_0003.c:8055 with the partner pointer is kill-credit routing, not healing.
+- **Knockback magnitude consumer: STILL NOT FOUND** (honest negative). The agent's
+  "found" quote is zz_00300bc_ itself — the already-decoded angle WRITER ((p)) — and
+  it misread the per-move yaw/pitch TRIM bytes (record +0x14/+0x15) as a magnitude
+  source. One unverified lead survives: velocity-field writes near a +0xb4 read at
+  chunk_0006.c:2579-2585 and 7257-7263 (careful: (ah) identifies +0xb4 as the
+  defender level/defense float — plausible misattribution). Needs a careful re-read;
+  trace T9 remains the reliable path.
+
+### (at) PTR_FUN_802da740 dumped: 12 handlers — REINTERPRETED as the hitbox SHAPE-KIND evaluator table (2026-07-03)
+
+Corpus dig (single-pass agent; table dump verified against boot.dol). The 12-pointer
+table at 0x802da740 (0x8003a4b8..0x8003ca48, all bodies in chunk_0004.c:5316-6600,
+boundary confirmed by non-code data after entry 11) dispatches on the byte the
+chunk_0013.c:1172 caller reads from the HIT-RECORD — i.e. this is most plausibly the
+**shapeKind evaluator table** for the 0x50-byte hit-bin records (hit-bin-format.md's
+u8 +0x00 "hitbox shape dispatch"), NOT per-projectile behavior. The handlers compute
+geometry only (vertex frames, face normals, spans, radial points); collision PAIRING
+stays in the chunk_0003.c passes — consistent with the (al)-era negative.
+
+Shape-kind candidates (agent labels, single-pass; verify before schema use):
+0 simple point/capsule (optional bounce via owner flags 0x81) · 1 bouncing with
+WALL-CONTACT SELF-KILL (`obj+0x13 = 1`, chunk_0004.c:5400 — detonate-on-terrain) ·
+2 rigid 8-vertex/6-normal polyhedron · 3 truncated 3-normal variant (Likely barrier/
+shield plane) · 4 expanding bidirectional pulse (front/back span from owner velocity)
+· 5 guided/homing frame (state machine 2/3/5) · 6 homing 4-point · 7 beam/trail
+6-point · 8 spinning 6-radial disc (60-degree step via FLOAT_80437020) · 9 shuriken
+6-radial with proximity pre-check · 10 straight-line penetrator span · 11 proximity
+sphere with squared-distance AOE falloff (chunk_0004.c:6563-6583 — the best candidate
+carrier for ICBM/Walking-Bomb contact detonation, W4/W11).
+
+Practical yields: (a) the hit-bin shapeKind byte now has candidate semantics — feeds
+the hitbox port (ATK-005/X mapping) and the trace T2 capture (log shapeKind per move);
+(b) obj+0x13 as a self-kill byte and shape 11's proximity-AOE shape give the suicide
+borgs a concrete mechanism path; (c) projectile-vs-projectile/solidity is NOT here —
+Q6 narrows to the chunk_0003.c collision passes' list pairing and per-move flags.
+CAVEATS: agent-reported struct offsets partially conflict with the (al)-era object
+struct reading (e.g. +0x28 owner vs +0x20) — a reconciliation read is needed before
+any of this reaches a ticket as DERIVED.
+
+### (au) Save-file format DECODED — serializer found in ROM, CRC + scrambling cracked, per-borg level/color/exp storage proven (2026-07-03)
+
+Full spec: research/format-specs/save-gci-format.md; inspector:
+scripts/inspect-gotcha-save.mjs (argv = .gci path). Highlights (container layout is
+DERIVED_ROM — the serializer was located verbatim in chunk_0014.c):
+
+- Image = banner/comment + 5 CRC'd sections: options / Gotcha Box (2000 x 16-byte
+  cells + 1000 x 12-byte acquisition log) / 20 force slots + 200-entry member pool /
+  story progress (GF energy u32 at s4+0x78; cap constant 0x898 = 2200 via
+  zz_0181c30_) / profile (Shift-JIS player name, save counters, two 206-byte per-borg
+  color-catalog bitmasks).
+- Integrity: CRC-16 poly 0x1021 (zz_008e704_), residual-0 — validates 6/6 regions on
+  ALL THREE saves. Sections 2/3/5 are XOR-scrambled with a keyed-digest-derived byte;
+  recovered per save and verified. Re-signing edited saves needs the ROM digest/LUT
+  tables (documented as the remaining blocker).
+- **Borg record = u16 id (family<<8|variant; 0xFFFF empty), u8 color 0-5, u8 level
+  (0-BASED), u32 acquisitionSeq, u32 exp.** Cross-save differential proof: the same
+  acquisition-lineage Neo G Red appears L3/exp99 (2023 save) -> L6/exp214 (2025) —
+  per-borg EXP thresholds are now empirically derivable from save data (feeds the
+  (ap) level system; W6/ATK-020 follow-up).
+- Predictions CONFIRMED: G BLACK = 0x062A and GALACTIC EMPEROR = 0x0E04 found exactly
+  in the 2011 save's pool; starter code hardcodes 0x615/0x629; roster-id hit rate
+  100% across every parsed entry of all three saves (borgs.json 208 ids).
+- Premise corrections recorded: 20 force slots (not 10), only slot 0 used by story;
+  the u16 at box+0xABE0 is the BOX COUNT, not GF energy; levels store 0-based and
+  stay low even on 100% saves (leveling concentrates in ~15 used borgs).
+- Cost table zz_0066168_ indexes 6 cost entries per variant = 6 colors — color
+  variants have their own costs (new mechanic detail).

@@ -14,6 +14,11 @@ a ROM/trace source for per-projectile solidity exists.
 - Corpus negative: no proj-vs-proj logic in the generic collision passes
   (collision_hit_pair_pass_* @0x8002da88/0x8002db58, chunk_0003.c:7031-7223); per-type
   dispatch (PTR_FUN_802da740, chunk_0013.c:1172) unread.
+- UPDATE (behavior-notes (at)): PTR_FUN_802da740 was dumped and read — it is the
+  hitbox SHAPE-KIND evaluator table (12 geometry handlers), NOT projectile behavior,
+  and contains no proj-vs-proj logic either. Solidity therefore lives (if anywhere)
+  in the chunk_0003.c collision passes' object-list pairing rules and per-move flags
+  — or only as trace-observable behavior. T5 is now the primary path.
 - Do NOT use projectileVisualFamilies.json as a solidity source (visual-only, behavior-notes (t)).
 
 ## Dependencies
