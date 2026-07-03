@@ -18,6 +18,12 @@ init rule is found.
 - DAT_804339e8 single-pass dump in (ak) — MUST be re-verified with a dol.py read and
   persisted to research/decomp/data/level-row-offsets-804339e8.json as part of this ticket
   (follow the existing generator pattern; cite (ak)).
+- FOLLOW-UP (behavior-notes (av)): the level->row mapping is now empirically solved
+  for normal-schedule borgs — rowIndex = displayLevel + 1 (= saved 0-based level + 2),
+  4-point exact cross-validation (G RED 200/5@row2, 290/8@row11; GATLING GUNNER
+  250/100@row2, 295@row11). Wire this rule into the level-aware selection and add the
+  four anchors as tests; note deviating level-up schedules exist per the wiki category
+  (per-borg schedule = open item).
 - Formula reads: dmg *= 1 + 0.5*(attackerFloat@+0xc4 - 1) and inverse for victim +0xb4
   (behavior-notes (ah) steps 2/13) — ALREADY implemented as attackerPower/defenderPower in
   packages/combat/src/damageFormula.ts:96,116; leave defaults at 1.0.

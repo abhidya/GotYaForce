@@ -2381,3 +2381,42 @@ DERIVED_ROM — the serializer was located verbatim in chunk_0014.c):
   stay low even on 100% saves (leveling concentrates in ~15 used borgs).
 - Cost table zz_0066168_ indexes 6 cost entries per variant = 6 colors — color
   variants have their own costs (new mechanic detail).
+
+### (av) Wiki per-move infobox taxonomy + AR box anchor + LEVEL->ROW MAPPING SOLVED empirically (2026-07-03)
+
+Source: user-supplied wiki borg pages (CC-BY-SA; facts paraphrased), Borg Modifier AR
+page, Data Crystals page, Codejunkies AR list. Tier OBSERVED_WIKI unless noted.
+
+- **LEVEL -> STAT-ROW MAPPING (4-point exact cross-validation, this session)**: wiki
+  lvl-1/lvl-10 values vs extracted rows: pl0615 G RED 200/5 = row[2], 290/8 = row[11];
+  pl0102 GATLING GUNNER 250/100 (+X ammo 4 = weapon cell 1 [4,4] — another B/X cell
+  binding hit) = row[2], 295 = row[11]. **Empirical rule for "Normal Level-up
+  Schedule" borgs: rowIndex = displayLevel + 1 = savedLevel(0-based) + 2.** This is
+  the rule ATK-020's selection needed; the (ag) row formula's subIdx/+0x3ec split
+  producing it still deserves one code-side confirmation (DAT_804339e8's sparse values
+  don't directly equal level+1 — subIdx must carry part of it). The wiki category
+  "Borgs Following the Normal Level-up Schedule" implies DEVIATING schedules exist
+  (ninja-guide lore: Sasuke/Shijima gain ammo with level; Death Borgs grow fast) —
+  per-borg schedule = which rows the level walk visits.
+- **Per-move wiki infobox fields are exactly the port schema's blocked fields**:
+  Solidity (Solid/Nonsolid), Penetration (None / Borgs / Total), Refill Type
+  (All at once / Gradual), Explodes (Y/N), Effect, lvl-1/lvl-10 ammo — the community
+  has this cataloged across ~248 pages. Verified samples: G Red Beam Gun = Nonsolid /
+  Penetration: Borgs / All-at-once / 5-8 ammo (refill type matches extracted w0type=0);
+  melee + charge + X = Penetration: Total (matches the melee-total-penetration
+  taxonomy); Gatling Gunner grenade = SOLID + Explodes. **Penetration is a 3-class
+  per-move enum {None, Borgs, Total}** — the target semantics for ATK-008's policy
+  field and the T5/T6 traces. HARVEST PLAN: direct fandom fetch 402s; the efficient
+  path is a MediaWiki Special:Export XML dump of the borg pages (user-suppliable),
+  then a cheap agent parses all Moves tables into guide-anchors data.
+- **Borg Modifier AR code (NTSC): 16-bit write of a borg id to RAM 0x80587F10** — a
+  live anchor into the Gotcha Box memory image (bottom-right cell id; PAL variant
+  0x80591550). Useful for save<->RAM structure mapping and Dolphin-side box editing;
+  also yet another independent confirmation of the id encoding (page's own G Black
+  example = 0x062a). Codejunkies encrypted codes (inf HP/ammo/GF, one-hit kills,
+  collection complete) decryptable via GCNCrypt (game id 245 NTSC) if their addresses
+  are ever wanted — low priority, our RAM anchors are better.
+- **Data crystals**: code = colorLetter + 3-digit borg number + piece letter A-E;
+  90/206 borgs need 2-5 pieces; per-borg dataCrystals count on wiki pages (G Red 1,
+  Gatling Gunner 2). Collection metadata — cross-references the save's acquisition
+  log; not combat-mechanics.

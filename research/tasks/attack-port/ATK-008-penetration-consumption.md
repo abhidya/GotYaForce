@@ -10,6 +10,12 @@ hard-coded `break`, matching the ROM's structure (persistence is the default; de
 type-gated; re-hits are interval-paced).
 
 ## Evidence
+- TARGET SEMANTICS (behavior-notes (av), OBSERVED_WIKI): penetration is a per-move
+  3-class enum — **None** (consumed by first borg hit), **Borgs** (passes through
+  borgs; e.g. G Red's beam gun), **Total** (passes everything; all melee/charge/X
+  examples). The consumeOnHit boolean shipped by this ticket maps to None vs
+  Borgs/Total; the Borgs-vs-Total split (terrain interaction) is a follow-up once the
+  wiki Moves tables are harvested and T6 confirms.
 - Rehit: damage record s8+0x16 reloads per-OBJECT counter object+0x4e; interval 0 =
   unlimited rehit (chunk_0013.c:1175-1182) (corpus read, audit).
 - Despawn: object+0x10=2 is actor-gated, not collision-coded (chunk_0013.c:1188).
