@@ -83,6 +83,7 @@ import {
   battlePresentationState,
   battleSceneState,
   battleAudioEvents,
+  battleVoiceCues,
   liveActorPositions as battleLiveActorPositions,
   snapshotBattleAudio,
   type BattleEventCue,
@@ -182,6 +183,22 @@ function playCombatSfx(cue: BattleEventCue): void {
 
 function playBattleEventSfx(cue: BattleEventCue): void {
   playCombatSfx(cue);
+}
+
+// Per-borg VOICE cues (behavior-notes (az)): deploy shout / death cry keyed on the borg family.
+// The family→voice-group mapping is DERIVED from the asset naming; the deploy=00 / death=01 role
+// binding is TUNED (no traced voice table). Rate-limited per voice key so a rapid deploy→KO→deploy
+// cycle can't stack the same clip on itself. playSfx transparently resolves voice-type manifest
+// keys (the audio manager falls back to its voice map) and swallows a missing/blocked key.
+const VOICE_MIN_GAP_MS = 500;
+const lastVoiceAt = new Map<string, number>();
+
+function playBorgVoice(key: string): void {
+  if (DISABLE_COMBAT_SFX) return;
+  const now = performance.now();
+  if (now - (lastVoiceAt.get(key) ?? -Infinity) < VOICE_MIN_GAP_MS) return;
+  lastVoiceAt.set(key, now);
+  playSfx(key);
 }
 
 function selectedForce(): string[] {
@@ -1231,8 +1248,13 @@ function stepBattle(dt: number): void {
   while (simAccumulator >= SIM_DT && steps < 15) {
     const audioBefore = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax);
     battle.step(SIM_DT, inputs);
-    for (const cue of battleAudioEvents(audioBefore, snapshotBattleAudio(battle, session.localPlayerId, session.allyMax))) {
+    const audioAfter = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax);
+    for (const cue of battleAudioEvents(audioBefore, audioAfter)) {
       playBattleEventSfx(cue);
+    }
+    // Per-borg voice cues (deploy shout / death cry), (az) — TUNED role binding.
+    for (const voiceKey of battleVoiceCues(audioBefore, audioAfter)) {
+      playBorgVoice(voiceKey);
     }
     simAccumulator -= SIM_DT;
     steps += 1;

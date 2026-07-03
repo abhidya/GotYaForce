@@ -9,6 +9,7 @@ import type { HudState } from "../ui/index.js";
 export type BattleEventCue = AnimSlot | "lockon" | "charge_release" | "alert";
 
 export interface BattleAudioBorgSnapshot {
+  borgId: string;
   hp: number;
   alive: boolean;
   state: BorgRuntime["state"];
@@ -28,6 +29,7 @@ export function snapshotBattleAudio(battle: Battle, localPlayerId: string, allyM
   const borgs = new Map<string, BattleAudioBorgSnapshot>();
   for (const b of battle.state.borgs) {
     borgs.set(b.uid, {
+      borgId: b.borgId,
       hp: b.hp,
       alive: b.alive,
       state: b.state,
@@ -96,6 +98,62 @@ export function battleAudioEvents(before: BattleAudioSnapshot, after: BattleAudi
   }
 
   return events;
+}
+
+/**
+ * Map a borg id to one of its two per-family voice-cue manifest keys.
+ *
+ * DERIVED from the voice-asset naming (behavior-notes.md (az)): the 46 extracted cues are keyed
+ * `pl{familyByte}_00_{variant}` where the family byte is the borg id's family nibble-pair
+ * (id.slice(2,4)) and variant ∈ {00, 01}. Every roster family (0x00–0x0f) has a group, so all
+ * 208 roster borgs resolve (e.g. pl0615 G RED → family 06 → `pl06_00_0N`). The family→group
+ * mapping is DERIVED; the cue-VARIANT role (which of 00/01 is "deploy" vs "KO") is TUNED — no
+ * trace confirms it, so the caller's event→variant binding below is a documented default,
+ * pending an SE/voice-dispatch trace. Returns null for a non-`pl####` id.
+ */
+export function voiceKeyForBorgId(borgId: string, variant: 0 | 1): string | null {
+  if (!/^pl[0-9a-fA-F]{4}$/.test(borgId)) return null;
+  const family = borgId.slice(2, 4).toLowerCase();
+  return `pl${family}_00_0${variant}`;
+}
+
+/**
+ * Per-borg VOICE cues for the frame (behavior-notes (az)). Scoped to the LOCAL player's active
+ * borg only (TUNED — avoids 8-borg voice spam; the player hears their own borg's deploy shout
+ * and death cry). Event→variant binding is the TUNED default from (az): a fresh deploy plays
+ * cue 00, entering the death state plays cue 01. Returns manifest keys to hand straight to the
+ * audio manager (playSfx falls back to the voice map). Handles same-frame death+deploy: the
+ * outgoing borg's death cry (keyed on the previous-frame active uid) and the incoming borg's
+ * deploy shout (keyed on the new active uid) are both emitted.
+ */
+export function battleVoiceCues(before: BattleAudioSnapshot, after: BattleAudioSnapshot): string[] {
+  const out: string[] = [];
+
+  // Death cry (cue 01): the borg the player controlled last frame entered "death" this frame.
+  // The dead borg lingers in after.borgs (death-visual-but-accounted) so this resolves even when
+  // the active slot has already switched to the auto-deployed replacement the same frame.
+  const prevUid = before.localActiveUid;
+  if (prevUid) {
+    const deathNext = after.borgs.get(prevUid);
+    const deathPrev = before.borgs.get(prevUid);
+    if (deathNext && deathPrev && deathNext.state === "death" && deathPrev.state !== "death") {
+      const key = voiceKeyForBorgId(deathNext.borgId, 1);
+      if (key) out.push(key);
+    }
+  }
+
+  // Deploy shout (cue 00): the local active-borg uid changed to a new, live borg this frame
+  // (first deploy, or an auto-deploy after a KO).
+  const curUid = after.localActiveUid;
+  if (curUid && curUid !== before.localActiveUid) {
+    const cur = after.borgs.get(curUid);
+    if (cur && cur.alive && cur.state !== "death") {
+      const key = voiceKeyForBorgId(cur.borgId, 0);
+      if (key) out.push(key);
+    }
+  }
+
+  return out;
 }
 
 export interface BattleHudPresentationInput {

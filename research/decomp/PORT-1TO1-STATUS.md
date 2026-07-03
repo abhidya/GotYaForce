@@ -32,7 +32,7 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
 | Assets: animation playback | ~85% | state→(group,slot) dispatch trace |
 | Audio: BGM/menu | ~90% | — |
-| Audio: combat/voice | ~20% | **no ROM table — needs SE-dispatch trace**; 46 voice cues unwired |
+| Audio: combat/voice | ~40% (46 voice cues wired, az) | combat SFX still generic — SE-dispatch trace; voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
 | FX: particles/projectiles | ~70% | PTL/REF decode; 3D weapon meshes |
 
@@ -193,7 +193,9 @@ down like `tuned-burndown.md`.
 5. ✅ DONE (commit fcb9c2bc) — level-aware row-index CORRECTED to row = levelByte + 2 (the
    old DAT_804339e8[level] was non-monotonic and wrong; retained for reference only).
    levelRows.selftest rewritten, 42/42. Outliers pl0400/pl0507/pl0d01 remain open.
-6. Wire the 46 extracted voice cues to deploy/KO/win events (real assets, currently unused).
+6. ✅ DONE (commit pending) — 46 voice cues wired: decoded plXX = borg family (az, 208/208
+   covered), battleVoiceCues plays cue 00 on deploy / cue 01 on death for the local borg
+   (family→group DERIVED, cue-role TUNED). Validation script 8/8 (roster coverage 208/208).
 
 **Tier B — corpus digs (agent-runnable):**
 7. ⛔ DEAD-END (ay) — Nurse heal HP-write NOT in corpus. Re-traced table 0x802d1130 + Death
