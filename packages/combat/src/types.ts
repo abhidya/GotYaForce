@@ -331,6 +331,13 @@ export interface BattleState {
   /** Frames remaining on the battle timer, or null when untimed. */
   timeRemainingFrames: number | null;
   result: BattleResult;
+  /**
+   * ROM winner mask (behavior-notes (ae), PTR_DAT_80433934[0x1f], judge zz_00297c8_): bit0 =
+   * side 0 won, bit1 = side 1 won, 3 = mutual simultaneous destruction, 4 = timeout no-winner,
+   * 0 = ongoing. `result` is derived from it via the ROM's equality/advance test. Optional so
+   * pre-existing state constructors stay valid; absent === 0 (ongoing).
+   */
+  winnerMask?: number;
 }
 
 /** The driver object returned by createBattle. */

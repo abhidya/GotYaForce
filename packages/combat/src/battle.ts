@@ -403,7 +403,10 @@ class BattleImpl implements Battle {
     // result, chunk_0003.c:4547-4553); every per-side "won" flag is an equality
     // test (mask == 1<<side, chunk_0003.c:4560-4604), so a timeout displays as a
     // loss for every player. "draw" is the sim-side name for that mask-4 state.
-    if (remaining <= 0) this.state.result = "draw";
+    if (remaining <= 0) {
+      this.state.result = "draw";
+      this.state.winnerMask = 4; // mask 4 = timeout no-winner (chunk_0003.c:4547-4553)
+    }
   }
 
   private sideRankForTeam(team: number): number {
@@ -438,23 +441,32 @@ class BattleImpl implements Battle {
   }
 
   private evaluateResult(): void {
-    // Teams with any borg ever, and their current energy.
+    if (this.state.result !== "ongoing") return;
+    // Winner-mask judge (behavior-notes (ae), zz_00297c8_ @0x800297c8). A side is "destroyed"
+    // when its remaining force reaches 0 — the ROM tests count byte OR energy s32 (rule-flag
+    // selectable, chunk_0003.c:4519-4529); here count and energy are coupled (recomputeEnergy
+    // sums remaining borgs), so energy<=0 is the single destroyed test. The winner mask
+    // (PTR_DAT_80433934[0x1f]) marks who WON: bit0 = side 0, bit1 = side 1, 3 = mutual
+    // simultaneous destruction, 0 = no winner yet.
     const teams = [...new Set(this.forces.map((f) => f.team))];
-    const alive = teams.filter((t) => (this.state.energy[t] ?? 0) > 0);
+    const survivors = teams.filter((t) => (this.state.energy[t] ?? 0) > 0);
+    if (survivors.length === teams.length) return; // nobody destroyed -> battle ongoing
 
-    if (alive.length <= 1) {
-      // Determine the "player" perspective: first force with a human owner.
-      const human = this.forces.find((f) => f.ownerPlayer !== null);
-      const playerTeam = human?.team;
-      if (alive.length === 0) {
-        this.state.result = "draw";
-      } else if (playerTeam !== undefined) {
-        this.state.result = alive[0] === playerTeam ? "win" : "lose";
-      } else {
-        // All-CPU battle: just mark a win for the surviving team.
-        this.state.result = "win";
-      }
+    const mask = survivors.length === 0 ? 3 : survivors.reduce((m, t) => m | (1 << t), 0);
+    this.state.winnerMask = mask;
+
+    const human = this.forces.find((f) => f.ownerPlayer !== null);
+    const playerTeam = human?.team;
+    if (playerTeam === undefined) {
+      // All-CPU battle: a lone survivor wins; mutual destruction is a no-winner draw.
+      this.state.result = mask === 3 ? "draw" : "win";
+      return;
     }
+    // Per-side "won" is an EQUALITY test mask == 1<<side, and Challenge advances only when
+    // (mask & 1<<playerSide) && mask <= 2 (FUN_801969a0, chunk_0048.c:466-506). Mask 3 (mutual)
+    // exits to the same failure screen as a loss, so it resolves to "lose" for the player.
+    const playerBit = 1 << playerTeam;
+    this.state.result = (mask & playerBit) !== 0 && mask <= 2 ? "win" : "lose";
   }
 }
 
