@@ -1,0 +1,109 @@
+{
+  "_meta": {
+    "title": "State-handler dispatch table PTR_FUN_802d3570 -> animation (group, slot) map",
+    "date": "2026-07-03",
+    "notes_section": "behavior-notes.md (ba)",
+    "corpus": "research/decomp/ghidra-export/",
+    "index": "research/decomp/ghidra-export/_index.tsv",
+    "summary": "The 35-slot function-pointer table at 0x802d3570 (three views: +0x540 full, +0x591 = +0x540-4, +0x6fe = +0x540-9). Each slot is a per-frame state handler. Handlers that visibly select a new animation call the bank setter zz_004beb8_ (0x8004beb8), either directly or through the thin wrapper zz_005f188_ (0x8005f188). This file records, per slot, the (bank, group/subtable, slot) constants passed at the actual call site with chunk:line evidence.",
+    "table_structure_source": "behavior-notes.md lines 1163-1199 (prior session; 35-slot table dump, addresses raw-ROM confirmed). This file ADDS the resolved (group,slot) animation each handler plays."
+  },
+
+  "anim_setter": {
+    "name": "zz_004beb8_",
+    "address": "0x8004beb8",
+    "chunk": "chunk_0006.c:1429-1492",
+    "signature_ghidra": "void zz_004beb8_(double rate, int actor, uint limbMask, uint groupSel, int slot, uint startFrame, uint endFrame)",
+    "arg_semantics": {
+      "rate": "playback/blend rate float (FLOAT_80437464 typical, FLOAT_804374e8 for react)",
+      "actor": "borg actor pointer (param_1 of the handler)",
+      "limbMask": "arg3 (0xf / 0xd / 2) is a per-limb CHANNEL mask ANDed with actor+0x579 (line 1441), looped over 4 channels (line 1481). NOT the animation group. 0xf = all 4 channels.",
+      "groupSel": "arg4 = the BANK/GROUP selector. Bit 0x80 chooses which loaded anim-DAT root pointer to index: (arg4 & 0x80)==0 -> uses actor+0x1d80 (line 1446); set -> uses actor+0x1d84 (line 1464). The low 7 bits (arg4 & 0x7f) index a per-group short table inside that DAT (lines 1461 / 1476). arg4==0 defaults the group to actor+0x582 (line 1459).",
+      "slot": "arg5 = the SLOT (sub-action / action-id) index within the selected group: sVar1 = *(short*)(iVar2 + slot*2) (line 1479). Written to channel state at line 1484.",
+      "startFrame_endFrame": "0xffffffff/0xffffffff = play whole clip; explicit values = frame window."
+    },
+    "group_axis_mapping": {
+      "note": "The ROM addresses anims as (dat_root, group7bit, slot). actor+0x1d80 and actor+0x1d84 are two loaded animation-DAT roots set per-borg-type at model load (default DAT_802bf040 / DAT_802bc080 in chunk_0010.c:135-136; overridden per borg in chunk_0029/0033/0046/0049/0050/0052). The mot.bin master-table 'group' axis in research/format-specs/borg-animation-banks.md (g0=locomotion, g1=attack, g3=damage, g4=knockdown, g5=death) is applied at load; the handler constants give the group7bit (subtable) and slot directly. Movement family uses groupSel 0x80 (=subtable 0 = locomotion/group 0); attack family uses 0x81 (=subtable 1 = attack/group 1); some use 0x82 (=subtable 2).",
+      "subtable_0": "groupSel 0x80 or 0 (default actor+0x582, which is 0 or 1 by borg type; chunk_0009.c:4093-4101). Maps to mot GROUP 0 = locomotion (idle/move/dash/turn). CONFIRMED by slot values matching the g0 slot convention (idle=0, move=1, dash=2-5).",
+      "subtable_1": "groupSel 0x81. Attack/hit-react bank (mot GROUP 1 = attack per spec).",
+      "subtable_2": "groupSel 0x82. Third bank (used by attack-windup slots 22/23)."
+    }
+  },
+
+  "anim_setter_wrapper": {
+    "name": "zz_005f188_",
+    "address": "0x8005f188",
+    "chunk": "chunk_0007.c:5817-5839",
+    "signature": "void zz_005f188_(int actor, char groupSel, char slot)",
+    "behavior": "If the requested (groupSel,slot) already matches the currently playing clip (actor+0x1d0c/+0x1d0d) it either advances (zz_004cd24_) or re-issues; otherwise it calls zz_004beb8_(FLOAT_80437464, actor, 0xf, groupSel, slot, -1, -1). Effectively 'play (group=groupSel&0x7f, slot) unless already playing it.' Used by the movement/turn/attack-startup handlers. groupSel -0x80 = 0x80 = subtable 0; -0x7f = 0x81 = subtable 1."
+  },
+
+  "anim_advancer": {
+    "name": "zz_004cd24_",
+    "address": "0x8004cd24",
+    "chunk": "chunk_0006.c:1996",
+    "signature": "undefined4 zz_004cd24_(int actor, uint limbMask)",
+    "behavior": "Per-frame ADVANCE of the currently-playing clip on the given channel mask (0xf). Returns completion (sets +0x1d0e when a channel finishes). Does NOT select a new (group,slot). Called by nearly every handler to step the active anim."
+  },
+
+  "table_base": "0x802d3570",
+  "table_length": 35,
+  "table_range": "0x802d3570 .. 0x802d35f8 (raw-ROM confirmed prior session; slot 35+ is non-code data DAT_802d35fc onward)",
+
+  "slots": [
+    {"slot":0,"plus540":0,"handler":"0x8005be08","name":"FUN_8005be08","chunk":"chunk_0007.c:3788","anim":null,"confidence":"UNRESOLVED","evidence":"Deploy drop-in phase 0. Counts +0x558 timer down, no zz_004beb8_/zz_005f188_ call. Spawn pose is not selected via this table."},
+    {"slot":1,"plus540":1,"handler":"0x8005bec8","name":"FUN_8005bec8","chunk":"chunk_0007.c:3818","anim":null,"confidence":"UNRESOLVED","evidence":"Deploy phase 1. Calls dispatch_slot_action_update(actor,2) (chunk_0007.c:3841) which is an AI/match slot dispatch (chunk_0008.c:4373), NOT an animation call. No bank anim selected."},
+    {"slot":2,"plus540":2,"handler":"0x8005bf6c","name":"FUN_8005bf6c","chunk":"chunk_0007.c:3847","anim":null,"confidence":"UNRESOLVED","evidence":"Deploy phase 2 (landing). Timer countdown + flag clears, no zz_004beb8_ call."},
+    {"slot":3,"plus540":3,"handler":"0x8005bfec","name":"FUN_8005bfec","chunk":"chunk_0007.c(unread)","anim":null,"confidence":"UNRESOLVED","evidence":"Present in raw pointer table; not individually decompiled/read this session."},
+    {"slot":4,"plus540":4,"plus591":0,"handler":"0x8005c4a4","name":"FUN_8005c4a4","chunk":"chunk_0007.c:4054","anim":"INDIRECT","confidence":"INFERRED","evidence":"One-line wrapper: calls zz_005f00c_(actor) (0x8005f00c, chunk_0007.c:5744), the IDLE decision handler. zz_005f00c_ does NOT set an anim; it computes next +0x6fe (movement sub-state) from input/velocity flags and writes +0x6fe = bVar3+1 (chunk_0007.c:5790). The actual idle/move anim is then played by the resulting movement handler (slots 10-12) via zz_005f188_(actor,-0x80,dir) = group0. So slot 4 selects idle/move STATE; anim = group0 slot0 (idle) when no movement."},
+    {"slot":5,"plus540":5,"plus591":1,"handler":"0x8005c4c8","name":"FUN_8005c4c8","chunk":"chunk_0007.c:4065","anim":"INDIRECT","confidence":"INFERRED","evidence":"Same zz_005f00c_ idle-decision call plus a guard-flag promotion. Anim resolved downstream = group0 locomotion."},
+    {"slot":6,"plus540":6,"plus591":2,"handler":"0x8005c530","name":"FUN_8005c530","chunk":"chunk_0007.c:4081","anim":"INDIRECT","confidence":"INFERRED","evidence":"idle-decision variant, promotes to slots 24/25. Anim resolved downstream."},
+    {"slot":7,"plus540":7,"plus591":3,"handler":"0x8005c5ac","name":"FUN_8005c5ac","chunk":"chunk_0007.c:4107","anim":"INDIRECT","confidence":"INFERRED","evidence":"idle-decision variant, zz_005f00c_ only."},
+    {"slot":8,"plus540":8,"plus591":4,"handler":"0x8005c5d0","name":"FUN_8005c5d0","chunk":"chunk_0007.c:4118","anim":null,"confidence":"UNRESOLVED","evidence":"Returns bool; enters action 4 via zz_00ea2c8_(actor,4). No zz_004beb8_ constant visible (block/guard-start; anim selected in zz_00ea2c8_ path, not read)."},
+    {"slot":9,"plus540":9,"plus591":5,"plus6fe":0,"handler":"0x8005c7f0","name":"FUN_8005c7f0","chunk":"chunk_0007.c:4219","anim":"INDIRECT","confidence":"INFERRED","evidence":"One-liner: zz_006a474_(actor) (0x8006a474, chunk_0009.c:708) = 'return to neutral' trampoline. zz_006a474_ calls zz_006a750_(actor,0) (state transition), not an anim setter. Neutral -> idle group0 slot0 downstream."},
+    {"slot":10,"plus540":10,"plus591":6,"plus6fe":1,"handler":"0x8005c810","name":"FUN_8005c810","chunk":"chunk_0007.c:4230","anim":{"group":0,"slot":"0..4 (direction bucket)"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4252 zz_005f188_(actor,-0x80,cVar4) where cVar4 is a 0..4 direction bucket from zz_0046510_. -0x80 => subtable 0 = group 0 (locomotion). slot 0=idle-facing/4=neutral => idle/walk/dash family. CONFIRMS group0 locomotion, direction-indexed slots."},
+    {"slot":11,"plus540":11,"plus591":7,"plus6fe":2,"handler":"0x8005c95c","name":"FUN_8005c95c","chunk":"chunk_0007.c:4281","anim":{"group":0,"slot":"5..8 (dir bucket + 5)"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4299 zz_005f188_(actor,-0x80,(char)iVar3 + 5). group0, slots 5..8 (dash-right / jump / turn range per g0 slot convention)."},
+    {"slot":12,"plus540":12,"plus591":8,"plus6fe":3,"handler":"0x8005ca80","name":"FUN_8005ca80","chunk":"chunk_0007.c:4323","anim":{"group":0,"slot":"9..11 (bVar5 + 9)"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4349 zz_005f188_(actor,-0x80,bVar5 + 9). group0, slots 9..11 (fly/air-transition range)."},
+    {"slot":13,"plus540":13,"plus591":9,"plus6fe":4,"handler":"0x8005c7f0","name":"FUN_8005c7f0","chunk":"chunk_0007.c:4219","anim":"INDIRECT","confidence":"INFERRED","evidence":"Duplicate pointer to slot 9 (return-to-neutral trampoline)."},
+    {"slot":14,"plus540":14,"plus591":10,"plus6fe":5,"handler":"0x8005c810","name":"FUN_8005c810","chunk":"chunk_0007.c:4230","anim":{"group":0,"slot":"0..4"},"confidence":"DERIVED_ROM","evidence":"Duplicate pointer to slot 10 (group0 direction locomotion)."},
+    {"slot":15,"plus540":15,"plus591":11,"plus6fe":6,"handler":"0x8005c95c","name":"FUN_8005c95c","chunk":"chunk_0007.c:4281","anim":{"group":0,"slot":"5..8"},"confidence":"DERIVED_ROM","evidence":"Duplicate pointer to slot 11."},
+    {"slot":16,"plus540":16,"plus591":12,"plus6fe":7,"handler":"0x8005ca80","name":"FUN_8005ca80","chunk":"chunk_0007.c:4323","anim":{"group":0,"slot":"9..11"},"confidence":"DERIVED_ROM","evidence":"Duplicate pointer to slot 12."},
+    {"slot":17,"plus540":17,"plus591":13,"plus6fe":8,"handler":"0x8005ca80","name":"FUN_8005ca80","chunk":"chunk_0007.c:4323","anim":{"group":0,"slot":"9..11"},"confidence":"DERIVED_ROM","evidence":"Second duplicate of slot 12."},
+    {"slot":18,"plus540":18,"plus591":14,"plus6fe":9,"handler":"0x8005cc00","name":"zz_005cc00_","chunk":"chunk_0007.c:4371","anim":{"group":1,"slot":"cVar6+5 or cVar6 (dir), attack-startup"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4415 zz_005f188_(actor,-0x7f,cVar4). -0x7f => subtable 1 = group 1 (attack). slot = direction bucket (cVar6, or cVar6+5 when +0x6fe!=5). Attack-startup/turn-then-commit."},
+    {"slot":19,"plus540":19,"plus591":15,"plus6fe":10,"handler":"0x8005ce14","name":"FUN_8005ce14","chunk":"chunk_0007.c:4447","anim":{"group":1,"slot":"bVar5+9 (dir)"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4520 zz_005f188_(actor,-0x7f,bVar5 + 9). group1 (attack), slots 9..11. Attack-commit follow-up (velocity atan2 turn)."},
+    {"slot":20,"plus540":20,"plus591":16,"plus6fe":11,"handler":"0x8005d0a8","name":"FUN_8005d0a8","chunk":"chunk_0007.c:4529","anim":{"group":1,"slot":"cVar4+0xd (13..)"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4567 zz_005f188_(actor,-0x7f,cVar4 + 0xd). group1 (attack), slot 13+dir. Exits via zz_005ec04_(actor,10)."},
+    {"slot":21,"plus540":21,"plus591":17,"plus6fe":12,"handler":"0x8005d224","name":"FUN_8005d224","chunk":"chunk_0007.c:4580","anim":{"group":1,"slot":"(inherits slot 18)"},"confidence":"INFERRED","evidence":"Sets +0x720 invincibility to FLOAT_80437448 then tail-calls zz_005cc00_ (slot 18). Same group1 attack-startup anim as slot 18 with a fresh i-frame grant."},
+    {"slot":22,"plus540":22,"plus591":18,"plus6fe":13,"handler":"0x8005d258","name":"FUN_8005d258","chunk":"chunk_0007.c:4594","anim":{"group":2,"slot":"+0x1d0f or +0x1d0f+2 (attack sub)"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4615 zz_004beb8_(rate,actor,0xf,0x82,(int)*(char*)(actor+0x1d0f),-1,-1) and :4643 zz_004beb8_(...,0x82,*(char*)(actor+0x1d0f)+2,...). 0x82 => subtable 2, slot = current attack index (+0x1d0f) possibly +2. Longer attack/special windup, exits to slot 20."},
+    {"slot":23,"plus540":23,"plus591":19,"plus6fe":14,"handler":"0x8005d494","name":"FUN_8005d494","chunk":"chunk_0007.c:4676","anim":{"group":2,"slot":"+0x1d0f+4 / +0x1cef+4 / iVar3+8 (attack-execute, command-typed)"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4699 zz_004beb8_(...,0x82,*(char*)(actor+0x1d0f)+4,...); :4706 zz_004beb8_(...,0x82,*(char*)(actor+0x1cef)+4,...,0); :4738 zz_004beb8_(...,0x82,*(char*)(actor+0x1d0f)+4,...); :4746 zz_004beb8_(...,0x82,iVar3+8,...). 0x82 => subtable 2. slot depends on command-type +0x591 (branches on 1/2 and 4/5/6, direction tables DAT_80433820/28). Core melee-attack-active handler; re-arms +0x720 invincibility to FLOAT_80437448 EVERY frame (chunk_0007.c:4686)."},
+    {"slot":24,"plus540":24,"plus591":20,"plus6fe":15,"handler":"0x8005d9d8","name":"FUN_8005d9d8","chunk":"chunk_0007.c:4827","anim":{"group":1,"slot":"+0x1cef+0x11 (17+)"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4878 zz_004beb8_(rate,actor,0xf,0x81,*(char*)(actor+0x1cef)+0x11,-1,-1). 0x81 => subtable 1 = group 1. slot 0x11+dir. Attack-recovery/end-lag (velocity damping FLOAT_80437474)."},
+    {"slot":25,"plus540":25,"plus591":21,"plus6fe":16,"handler":"0x8005db44","name":"FUN_8005db44","chunk":"chunk_0007.c:4890","anim":{"group":0,"slot":13},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4910 zz_004beb8_(rate,actor,0xf,0x80,0xd,-1,-1). 0x80 => subtable 0 = group 0. slot 0xd (13). Hit-reaction/knockback entry (snaps facing away from knockback angle +0x284, sets +0x5e0|=0x10000000)."},
+    {"slot":26,"plus540":26,"plus591":22,"plus6fe":17,"handler":"0x8005dc24","name":"FUN_8005dc24","chunk":"chunk_0007.c:4924","anim":{"group":0,"slot":14},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4944 zz_004beb8_(rate,actor,0xf,0x80,0xe,-1,-1). group0 slot 0xe (14). Hit-reaction variant (restores +0x50 from per-borg table)."},
+    {"slot":27,"plus540":27,"plus591":23,"plus6fe":18,"handler":"0x8005dd10","name":"FUN_8005dd10","chunk":"chunk_0007.c:4958","anim":{"group":1,"slot":"iVar3+0x13 or iVar3+0x17"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:4994 zz_004beb8_(...,0x81,iVar3+0x13,...) when +0x6fe==0xf else :4997 zz_004beb8_(...,0x81,iVar3+0x17,...). 0x81 => group 1. slot 0x13/0x17 + dir. Hit-react recovery / knockdown-adjacent (+0x568 timer)."},
+    {"slot":28,"plus540":28,"plus591":24,"plus6fe":19,"handler":"0x8005dd10","name":"FUN_8005dd10","chunk":"chunk_0007.c:4958","anim":{"group":1,"slot":"0x13/0x17"},"confidence":"DERIVED_ROM","evidence":"Duplicate pointer to slot 27."},
+    {"slot":29,"plus540":29,"plus591":25,"plus6fe":20,"handler":"0x8005df2c","name":"FUN_8005df2c","chunk":"chunk_0007.c:5029","anim":{"group":0,"slot":13},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:5047 zz_004beb8_(rate,actor,0xf,0x80,0xd,-1,-1). group0 slot 13. Sibling hit-react of slot 25."},
+    {"slot":30,"plus540":30,"plus591":26,"plus6fe":21,"handler":"0x8005dffc","name":"FUN_8005dffc","chunk":"chunk_0007.c:5061","anim":{"group":0,"slot":15},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:5109 zz_004beb8_(rate,actor,0xf,0x80,0xf,-1,-1). group0 slot 0xf (15). Full knockdown/getting-up sequence (all +0x568/56c/570 arc fields). NOTE: this is group0 slot15, distinct from the mot GROUP 4 slot 0 that the port labels 'down' (see notes (ba) caveat)."},
+    {"slot":31,"plus540":31,"plus591":27,"plus6fe":22,"handler":"0x8005e31c","name":"FUN_8005e31c","chunk":"chunk_0007.c:5179","anim":{"group":"default(+0x582, =0 or 1)","slot":"0xf then 0xe"},"confidence":"DERIVED_ROM","evidence":"chunk_0007.c:5248 zz_004beb8_(rate,actor,0xf,0,0xe,0,0) (phase0) and :5213 zz_004beb8_(rate,actor,0xf,0,0xf,-1,-1) (phase2). groupSel 0 => default group actor+0x582. slots 0xe/0xf. Scripted per-borg-type landing/special-body sequence."},
+    {"slot":32,"plus540":32,"plus591":28,"plus6fe":23,"handler":"0x8005e5a8","name":"FUN_8005e5a8","chunk":"chunk_0007.c:5275","anim":null,"confidence":"UNRESOLVED","evidence":"No zz_004beb8_ call; calls zz_01ee744_(actor,0) and FUN_8005ef08. Sets +0x7de=1, gated by +0x550 countdown. Exits via zz_005ec04_(actor,5) -> +0x6fe-space slot 5 = absolute slot 14 (group0 movement). Anim, if any, is issued inside zz_01ee744_ (not read)."},
+    {"slot":33,"plus540":33,"plus591":29,"plus6fe":24,"handler":"0x8005e868","name":"FUN_8005e868","chunk":"chunk_0007.c:5393","anim":null,"confidence":"UNRESOLVED","evidence":"No zz_004beb8_ call. Scripted matrix-transform (gnt4_PSMTXMultVec_bl) spawn/warp-entrance with arc Y-velocity; no bank anim selected via this table."}
+  ],
+
+  "death_dispatch": {
+    "entry":"zz_005bbc0_",
+    "entry_address":"0x8005bbc0",
+    "entry_chunk":"chunk_0007.c:3716",
+    "phase_runner":"zz_005bccc_",
+    "phase_runner_address":"0x8005bccc",
+    "dispatch_line":"chunk_0007.c:3781",
+    "dispatch_code":"(*(code *)(&PTR_FUN_802d3570)[*(char *)(param_1 + 0x540)])(param_1)",
+    "note":"Death runs the SAME 35-slot table indexed by +0x540. zz_005bbc0_ does not set +0x540 to a fixed death constant in its own body; +0x540 retains the borg's current slot (typically the knockdown family 30, or hit-react 25-29). The death-specific longest clip (mot group5 slot1 per borg-animation-banks.md) is NOT selected by a constant in this dispatch path in the read handlers -> death (group,slot) stays UNRESOLVED from static dispatch; only the knockdown/hit-react slots (which are group0/group1 as above) are cited."
+  },
+
+  "resolution_summary": {
+    "total_slots":35,
+    "DERIVED_ROM":16,
+    "INFERRED":6,
+    "INDIRECT_state_only":6,
+    "UNRESOLVED":7,
+    "note":"DERIVED_ROM = a constant (group,slot) or (group, dir-indexed slot) read directly at a zz_004beb8_/zz_005f188_ call site inside the handler. INFERRED = handler routes to another handler / trampoline whose anim is known. INDIRECT = handler picks a STATE (via zz_005f00c_) not an anim; anim is one of the group0 locomotion slots downstream. UNRESOLVED = no bank-setter constant visible (deploy 0-3, guard-start 8, big-special 32/33)."
+  }
+}

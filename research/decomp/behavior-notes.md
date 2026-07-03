@@ -2571,3 +2571,119 @@ refers to this role/table, NOT the family grouping, which the AFS index order + 
 establish structurally). Reasonable TUNED default for the port: cue 00 on deploy/spawn,
 cue 01 on KO/death — clearly labeled, pending an SE/voice-dispatch trace. Corrects the
 tracker's "46 voice cues are generic" framing: they are per-family, just role-unmapped.
+
+### (ba) State→animation dispatch RESOLVED: anim-setter `zz_004beb8_` found, 16/35 table slots mapped to (group,slot) from ROM constants (2026-07-03)
+
+**The animation setter is `zz_004beb8_` @0x8004beb8 (chunk_0006.c:1429-1492).** This is the
+function that writes an actor's current animation by (bank, group, slot). Signature (Ghidra):
+
+```c
+void zz_004beb8_(double rate, int actor, uint limbMask, uint groupSel, int slot,
+                 uint startFrame, uint endFrame);
+```
+
+Argument semantics, read directly from the body:
+- **`limbMask`** (arg3, the `0xf`/`0xd`/`2` seen at every call site) is a **per-limb CHANNEL
+  mask** — `uVar5 = param_3 & *(char*)(actor+0x579)` (line 1441), then looped over 4 channels
+  (`1 << iVar4`, line 1481-1489). `0xf` = all 4 channels. It is **NOT** the animation group; the
+  §4r/§5 confusion (mode constants 2/0xf/0x10) was this mask, not a bank id.
+- **`groupSel`** (arg4) is the **bank/group selector**. Bit `0x80` chooses which loaded anim-DAT
+  root the actor indexes: `(groupSel & 0x80)==0` -> `actor+0x1d80` (line 1446); set -> `actor+0x1d84`
+  (line 1464). The low 7 bits index a per-group `short` offset table inside that DAT (lines
+  1461/1476). `groupSel==0` defaults the group to `actor+0x582` (line 1459), which is 0 or 1 by
+  borg type (chunk_0009.c:4093-4101). `actor+0x1d80`/`+0x1d84` are set per-borg-type at model load
+  (defaults `DAT_802bf040`/`DAT_802bc080`, chunk_0010.c:135-136; overridden in
+  chunk_0029/0033/0046/0049/0050/0052).
+- **`slot`** (arg5) is the **slot / action-id** within the group: `sVar1 = *(short*)(iVar2 +
+  slot*2)` (line 1479), written to channel state at line 1484.
+- **`startFrame`/`endFrame`** (args 6/7): `0xffffffff` = whole clip; explicit = frame window.
+
+Two thin wrappers funnel into it:
+- **`zz_005f188_(actor, char groupSel, char slot)`** @0x8005f188 (chunk_0007.c:5817): "play
+  (groupSel&0x7f, slot) unless it's already playing." Calls `zz_004beb8_(FLOAT_80437464, actor,
+  0xf, groupSel, slot, -1, -1)`. Used by all the movement/turn/attack-startup handlers.
+  `groupSel = -0x80 (=0x80)` -> **subtable 0 = group 0 (locomotion)**; `-0x7f (=0x81)` -> **subtable
+  1 = group 1 (attack)**.
+- **`zz_004cd24_(actor, limbMask)`** @0x8004cd24 (chunk_0006.c:1996) is the per-frame **ADVANCE**
+  of the current clip (returns completion via `+0x1d0e`); it does NOT pick a new (group,slot).
+  This is the `zz_004cd24_(actor,0xf)` seen in nearly every handler.
+
+**The three "views" (§ around line 1163) of the `0x802d3570` table now resolve to concrete anims.**
+Death confirmed to run the same table: `zz_005bccc_` @0x8005bccc line 3781 —
+`(*(code*)(&PTR_FUN_802d3570)[*(char*)(actor+0x540)])(actor)`.
+
+**How many of the 35 slots resolved (full per-slot map in
+`research/decomp/data/state-anim-dispatch-802d3570.json`):**
+
+| category | count | slots |
+|---|---|---|
+| **DERIVED_ROM** (constant (group,slot) read at a `zz_004beb8_`/`zz_005f188_` call in the handler) | 16 | 10,11,12,14,15,16,17,18,19,20,22,23,24,25,26,27 (+dups 28,29,30) |
+| DERIVED_ROM hit/knockdown detail | (incl.) | 25=g0s13, 26=g0s14, 27=g1s0x13/0x17, 28=dup27, 29=g0s13, 30=g0s15 |
+| INFERRED (routes to another handler/trampoline) | 6 | 4,5,6,7 (->movement), 13 (dup 9), 21 (->18) |
+| INDIRECT — state-only (picks a `+0x6fe` sub-state via `zz_005f00c_`; anim = group0 locomotion downstream) | (incl. 4-7) | 9 |
+| **UNRESOLVED** (no bank-setter constant visible) | 7 | 0,1,2,3 (deploy), 8 (guard-start via `zz_00ea2c8_`), 32,33 (big-special/spawn-warp) |
+
+Representative DERIVED_ROM call sites (quoted):
+
+```c
+// slot 10 (0x8005c810) — group 0 locomotion, direction-indexed:
+zz_005f188_(param_1,-0x80,cVar4);                                  // chunk_0007.c:4252  (-0x80 => g0)
+// slot 18 (0x8005cc00) — group 1 attack-startup:
+zz_005f188_(param_1,-0x7f,cVar4);                                  // chunk_0007.c:4415  (-0x7f => g1)
+// slot 23 (0x8005d494) — melee-execute, subtable 2 (0x82), command-typed slot:
+zz_004beb8_((double)FLOAT_80437464,param_1,0xf,0x82,*(char *)(param_1 + 0x1d0f) + 4,-1,-1); // :4699
+// slot 25 (0x8005db44) — hit-react, group 0 slot 13:
+zz_004beb8_(dVar2,param_1,0xf,0x80,0xd,0xffffffff,0xffffffff);     // chunk_0007.c:4910
+// slot 30 (0x8005dffc) — knockdown/get-up, group 0 slot 15:
+zz_004beb8_(dVar5,param_1,0xf,0x80,0xf,0xffffffff,0xffffffff);     // chunk_0007.c:5109
+```
+
+**Status of the port's 5 existing anchors** (behavior-notes (r) / borg-animation-banks.md):
+
+- **idle = group0/slot0 — CONFIRMED (state routing).** Idle handlers (slots 4-9) route through
+  `zz_005f00c_` to the movement family (slot 10), which plays `zz_005f188_(actor,-0x80,dir)` =
+  **group 0**, direction 0 (neutral) = slot 0. The setter proves the bank is group 0; slot 0 is
+  the no-movement case. DERIVED_ROM for the group; slot-0 mapping matches the g0 slot convention.
+- **move = group0/slot1 — CONFIRMED (group).** Slot 10 plays group 0 with a 0..4 direction
+  bucket; the walking case is slot 1 per the g0 convention. Group is ROM-proven (`-0x80`); exact
+  slot is direction-computed and slot 1 = walk is consistent.
+- **dash = group0/slot2-5 — CONFIRMED (group).** Slots 10/11 play group 0 slots in the 0..8 range
+  via the direction bucket (`cVar4`, `iVar3+5`); dashes are the +/-direction slots 2-5 per the
+  root-motion-verified convention. Group ROM-proven; slot range consistent.
+- **hit = group3 — CORRECTED to group 0 / group 1.** The hit-reaction handlers (slots 25/26/29)
+  call `zz_004beb8_(...,0x80,0xd/0xe,...)` = **group 0 slots 13/14**, and the recovery handler
+  (slot 27) uses `0x81,0x13/0x17` = **group 1**. The port's/spec's "hit = group 3" is NOT what the
+  live state handlers select: the ROM plays hit reactions out of **group 0 (slots 13-15) and
+  group 1 (slots ~0x13-0x17)**, not group 3. **CORRECTED.**
+- **down = group4/slot0 — CORRECTED to group 0 / slot 15.** The knockdown/getting-up sequence
+  (slot 30, `0x8005dffc`, the richest +0x568/56c/570 arc handler = the "down" state) plays
+  `zz_004beb8_(...,0x80,0xf,...)` = **group 0 slot 15**, NOT group 4 slot 0. **CORRECTED** — with
+  the caveat below that this is the setter's group7bit value; if a borg's `+0x1d80` DAT remaps
+  subtable-0 slot 15 onto mot g4s0 at load, they could coincide (that remap is not statically
+  visible), so treat g4s0 as UNCONFIRMED and g0s15-via-setter as the ROM-cited value.
+
+**Honest caveats (do not over-read):**
+1. The ROM addresses anims as **(dat_root in {+0x1d80,+0x1d84}, group7bit = groupSel&0x7f, slot)**.
+   The mot.bin master-table "group" axis (g0..g8) in borg-animation-banks.md is applied at model
+   load; the correspondence group7bit <-> mot-group is **direct for group 0/1** (movement uses
+   `-0x80`=g0, attack `-0x7f`=g1, and the slot values line up with the g0 slot convention
+   idle=0/move=1/dash=2-5), but for the `0x82` (subtable 2) attack-execute slots and the
+   `+0x582`-default slots there is no static proof the group7bit equals the same integer the port
+   uses. Where the JSON says `group:2` it is the raw `groupSel&0x7f`, not a verified mot g2.
+2. **Death (group,slot) stays UNRESOLVED from static dispatch.** Death re-runs the table by
+   `+0x540`, but `zz_005bbc0_` does not set `+0x540` to a fixed death constant; it plays whatever
+   slot the borg is in (knockdown/hit-react, i.e. group0/group1 above). The dedicated death clip
+   (mot g5s1 per spec) is NOT selected by a constant in any handler read here.
+3. **Deploy/spawn slots 0-3 and big-special slots 32/33 play no bank anim through this table** —
+   slot 1 calls `dispatch_slot_action_update` (an AI/match dispatch, chunk_0008.c:4373, not anim);
+   slots 32/33 issue anims (if any) inside `zz_01ee744_`/scripted matrix code not read this
+   session. These are honestly UNRESOLVED, not guessed.
+
+**Net for the port:** the heuristic `pickAnimBank`/`PREFERRED_LABELS` can be replaced for the
+movement and hit/knockdown states with the ROM-cited groups: idle/move/dash = **group 0**
+(direction-indexed slots 0-11, DERIVED_ROM); melee attack = **group 1** startup (slots via
+`-0x7f`) and **subtable 2** execute (slots +0x1d0f-relative); hit-reaction = **group 0 slots
+13/14**; knockdown/down = **group 0 slot 15** (NOT g4s0). Attack sub-slots inside groups 1/2 are
+direction/command-typed (`+0x591`, `+0x1d0f`) rather than fixed, so they remain per-input-computed,
+not a single constant. Full evidence table:
+`research/decomp/data/state-anim-dispatch-802d3570.json`.
