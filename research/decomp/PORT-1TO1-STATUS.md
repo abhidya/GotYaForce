@@ -31,7 +31,7 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | UI: HUD | ~90% (charge✓ cursor✓ X-ammo✓ boost✓ jump✓) | burst meter only (fill data is T3-blocked) |
 | Challenge flow | ~85% DERIVED (winner-mask✓) | 3-phase deploy (mostly moot) |
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
-| Assets: animation playback | ~85% (dispatch mapped, ba) | verify GLB banks vs ROM group7bit, then rewire hit/down |
+| Assets: animation playback | ~88% (dispatch mapped+reconciled, ba/bb) | asset re-bake: relabel g4s0 special_s0→down_s0 (worktree); death/deploy slots unresolved |
 | Audio: BGM/menu | ~90% | — |
 | Audio: combat/voice | ~40% (46 voice cues wired, az) | combat SFX still generic — SE-dispatch trace; voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
@@ -205,12 +205,13 @@ down like `tuned-burndown.md`.
 8. ✅ DONE + PORTED (commit aef234f1) — Vampire lifesteal decoded (ay) AND wired into combat:
    steal = floor(dmg/2) heal-on-hit capped at maxHP, passive 1 HP / 30-frame bleed floored at 1.
    HEAL.VAMPIRE_ENABLED flipped on; healing.selftest 47/47.
-9. ✅ RESEARCH DONE (commit 4cc03780, (ba)) — state→animation dispatch: anim-setter zz_004beb8_
-   found, 20/34 table slots mapped DERIVED_ROM. idle/move/dash=group0 CONFIRMED (port already
-   matches). hit(g0 s13/14)/down(g0 s15) are ROM-cited CORRECTIONS to the port's group3/g4s0, but
-   PORT-FIX GATED: the group7bit↔GLB-mot-group mapping is only proven for group 0/1, and g0s15
-   could coincide with g4s0 via an unproven load-time remap — needs GLB-bank-content verification
-   before rewiring (the port's g4s0 fixed a real bug in (r); don't regress it on caveated evidence).
+9. ✅ DONE + RECONCILED (commits 4cc03780 (ba) + this (bb)) — state→animation dispatch: anim-setter
+   zz_004beb8_ found, 20/34 slots mapped DERIVED_ROM, THEN verified against the port's own extracted
+   anim banks: the port's hit=group3 / down=g4s0 are CORRECT (ROM subtable-0 slot 13/14 = port
+   group3-slot-13/14 with slot preserved; ROM slot-15 down remapped to g4s0 at load — confirmed by
+   the absence of any g00_s15 bank). NO port rewire needed — applying (ba) verbatim would have
+   regressed working animation. Surfaced one real asset bug: g4s0 mislabeled special_s0 on some
+   borgs (down falls back) — an asset re-bake handled in a separate worktree, not here.
 10. Annotate the 150 understood functions into the index (coverage burn-down).
 
 **Also landed this session (beyond the original Tier-A/B list):**

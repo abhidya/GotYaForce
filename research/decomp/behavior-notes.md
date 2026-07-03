@@ -2687,3 +2687,38 @@ movement and hit/knockdown states with the ROM-cited groups: idle/move/dash = **
 direction/command-typed (`+0x591`, `+0x1d0f`) rather than fixed, so they remain per-input-computed,
 not a single constant. Full evidence table:
 `research/decomp/data/state-anim-dispatch-802d3570.json`.
+
+### (bb) Animation dispatch RECONCILED with the port's assets — port's hit=g3 / down=g4s0 are CORRECT; (ba)'s "corrections" do NOT apply to the port (2026-07-03)
+
+Verified (ba)'s ROM-cited hit/down groups against the port's OWN extracted animation banks
+(`apps/game/public/models/pl*/anim_g{GG}_s{SS}_{label}.json`, named by mot group+slot). Result:
+the port needs **NO change** — its `hit=group3` / `down=g4s0` selections are correct for the
+port's asset layout, and applying (ba)'s "group 0 slot 13/15" verbatim would have REGRESSED
+working animation.
+
+- **Hit reactions: SLOT preserved, GROUP differs.** The ROM setter addresses hit-react via
+  `groupSel=0x80` (subtable 0) slot `0xd/0xe` = "group 0 slot 13/14" (ba). The port extracts the
+  SAME clips as **`anim_g03_s13_hit_react_s13` / `..s14..`** — i.e. **mot group 3, slot 13/14**.
+  The slot index (13/14) matches exactly; only the group axis differs (ROM subtable-0 ≠ port
+  mot-group-3). Confirmed across pl0000/pl0008/pl0615 (all carry `g03_s1x_hit_react`). So the
+  port's `PREFERRED_LABELS.hit = /^hit_react_s\d+$/` (= its group-3 bank) is the RIGHT bank; (ba)'s
+  "group 0" is the setter's subtable id, not the port's mot group. **(ba) caveat #1 CONFIRMED:
+  group7bit ≠ port mot-group; the slot number is the portable axis.**
+- **Down/knockdown: LOAD-REMAP confirmed by absence.** (ba) said knockdown = subtable-0 slot 15,
+  "with the caveat that g0s15 could coincide with g4s0 via an unproven load-time remap." The port
+  has **NO `g00_s15`** for any borg checked, and its knockdown pose is **`anim_g04_s00`** (g4s0,
+  DERIVED from the decomp per borg-animation-banks.md and the main.ts g4s0 override). The absence
+  of a g0_s15 bank + the presence of g4s0-as-knockdown is direct evidence that the ROM's
+  subtable-0-slot-15 is remapped to the port's mot **g4s0** at model load. So the port's
+  `down=g4s0` is correct; (ba)'s "NOT g4s0" was the ROM-addressing view, now reconciled.
+
+**Net: the state→anim map is fully reconciled — no port rewire.** The (ba) research is the
+ROM-side truth; this note is the ROM↔port-asset bridge. The animation dispatch 1:1 mapping is
+therefore CLOSED for the movement/hit/down states (idle/move/dash group0, hit group3-slot-N,
+down g4s0), with death/deploy/big-special still UNRESOLVED per (ba).
+
+**One real open ASSET bug surfaced (not a dispatch bug):** several borgs' g4s0 bank is still
+labeled `special_s0` in the main tree (e.g. pl0000, pl0615: `anim_g04_s00_special_s0.json`), so
+`PREFERRED_LABELS.down = /^down_s0$/` misses them and "down" falls back to a hit/guard clip
+(the exact bug main.ts:432-439 describes). Fixing it is an asset RE-BAKE/relabel (g4s0 ->
+`down_s0`), which is in-progress in a separate worktree — left to that pipeline, not touched here.
