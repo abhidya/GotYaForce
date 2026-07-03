@@ -478,18 +478,26 @@ export const MASH = {
 
 export const HEAL = {
   /**
-   * BLOCKED (ATK-019, vampire lifesteal). Corpus-evidenced increment: chunk_0003.c:6318-6323 —
-   * for ids 0x702/0x70a (VAMPIRE KNIGHT pl0702, VLAD pl070a), `hp += (&DAT_803b0638)[slot*2]`,
-   * clamped to max (behavior-notes.md (al), corrected by (an) §2 — the (al)-era reading of
-   * this site as "nurse healing" was WRONG; it is vampire lifesteal). The accumulator's WRITER
-   * (what fills DAT_803b0638[slot] — dealt melee damage, per the guide's "regains health with
-   * any melee attack") remains untraced, and the guide-documented passive drain
-   * (~2-3 HP/sec, floors at 1 HP — research/decomp/data/guide-anchors-movelist.json
-   * lifestealVampire) has no located ROM drain loop at all (OPEN — re-grep with the vampire
-   * path as anchor). Stays false until both the accumulator writer and the drain loop are
-   * traced; this scaffold never invents a lifesteal rate or a drain rate.
+   * ENABLED (ATK-019, vampire lifesteal) — the full path is now traced end to end
+   * (behavior-notes.md (ay)). For ids 0x702/0x70a (VAMPIRE KNIGHT pl0702, VLAD pl070a):
+   *  - STEAL: on every hit the vampire deals, the ROM banks `damage/2` into a per-slot
+   *    accumulator DAT_803b0638[slot] (writer FOUND at chunk_0003.c:7982-7986), then drains
+   *    that bank into its own HP capped at max (apply chunk_0003.c:6318-6323). Ported as an
+   *    immediate heal-on-hit of floor(dmg/2) (equivalent in sum to bank-then-apply).
+   *  - BLEED: a passive self-drain of 1 HP every 30 frames, floored at 1 HP (never self-kills)
+   *    — drain loop FOUND at chunk_0006.c:7900-7912 (`if 1 < HP: HP -= 1` every 0x1e frames).
+   *    1 HP / 30f = 2 HP/sec at 60fps, matching the guide's "~2-3 HP/sec"
+   *    (research/decomp/data/guide-anchors-movelist.json lifestealVampire).
+   * The one TUNED element is the bleed GATE: the ROM keys it on state bytes +0x18==1/+0x19==2
+   * (an active-normal state) and the steal on a +0x83==0 byte; lacking a proven mapping for
+   * those, the port applies steal on any hit the vampire lands and bleed whenever it is alive
+   * and out of death/spawn (the guide frames both as constant passive behavior).
    */
-  VAMPIRE_ENABLED: false,
+  VAMPIRE_ENABLED: true,
+  /** Vampire steal divisor: banked HP = floor(damageDealt / this) (ROM `dmg/2`, (ay)). */
+  VAMPIRE_STEAL_DIVISOR: 2,
+  /** Vampire passive-bleed cadence: 1 HP lost every N frames, floored at 1 HP (ROM 0x1e, (ay)). */
+  VAMPIRE_BLEED_INTERVAL_FRAMES: 30,
   /**
    * BLOCKED (ATK-019, nurse heal). Nurse healing is a SEPARATE mechanism from the vampire path
    * above (corrected by (an) §2) — an X-attack that dashes to a target and heals a FIXED

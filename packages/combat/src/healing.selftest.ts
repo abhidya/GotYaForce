@@ -17,8 +17,10 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { applyHeal, stepVampireDrain } from "./combat.js";
+import { applyHeal, applyHit, isVampireBorgId, stepVampireDrain } from "./combat.js";
 import { HEAL, HEAL_NURSE_BORG_IDS, HEAL_VAMPIRE_BORG_IDS } from "./constants.js";
+import { DAMAGE_RECORD_INDEX, damageRecordByIndex } from "./gauges.js";
+import { buildProfile, type BorgStats } from "./stats.js";
 import type { BorgRuntime } from "./types.js";
 
 // --- Test scaffolding --------------------------------------------------------------------
@@ -140,19 +142,22 @@ function testApplyHealIgnoresNonPositiveAmount(): void {
   assertEqual(b.hp, 50, "hp unchanged by non-positive heal attempts");
 }
 
-// --- Disabled-flag / stub tests --------------------------------------------------------------
+// --- Flag-state / non-vampire guard tests ----------------------------------------------------
 
-function testFlagsDefaultDisabled(): void {
-  assertEqual(HEAL.NURSE_ENABLED, false, "HEAL.NURSE_ENABLED default is false");
-  assertEqual(HEAL.VAMPIRE_ENABLED, false, "HEAL.VAMPIRE_ENABLED default is false");
+function testFlagState(): void {
+  // Nurse heal stays disabled (its HP-write is not in the corpus — (ay)); vampire lifesteal is
+  // now ENABLED (full path traced, (ay)).
+  assertEqual(HEAL.NURSE_ENABLED, false, "HEAL.NURSE_ENABLED stays false (nurse HP-write not found)");
+  assertEqual(HEAL.VAMPIRE_ENABLED, true, "HEAL.VAMPIRE_ENABLED is true (vampire path traced, ay)");
 }
 
-function testVampireDrainStubNoOp(): void {
-  const b = makeBorg({ hp: 77, maxHp: 100 });
+function testNonVampireNeverBleeds(): void {
+  // stepVampireDrain must be a no-op for a non-vampire borg even with the mechanic enabled.
+  const b = makeBorg({ borgId: "test", hp: 77, maxHp: 100 });
+  assertTrue(!isVampireBorgId("test"), "'test' id is not a vampire id");
   const before = JSON.stringify(b);
-  stepVampireDrain(b);
-  const after = JSON.stringify(b);
-  assertEqual(after, before, "stepVampireDrain mutates nothing while HEAL.VAMPIRE_ENABLED is false");
+  for (let i = 0; i < 300; i++) stepVampireDrain(b);
+  assertEqual(JSON.stringify(b), before, "300 frames of stepVampireDrain leave a non-vampire borg untouched");
 }
 
 function testNurseHealAmountsAreDataOnly(): void {
@@ -164,18 +169,92 @@ function testNurseHealAmountsAreDataOnly(): void {
   assertEqual(HEAL.NURSE_HEAL_HP.pl0908, 100, "Angel Rescue OBSERVED_GUIDE heal amount is 100");
 }
 
-// --- Both-flags-off battle regression (identical outcomes) ------------------------------------
+// --- Enabled vampire behavior (ay): bleed + steal ---------------------------------------------
 
-/** With both flags off, applyHeal/stepVampireDrain existing in the module has zero effect on
- *  an unrelated borg's hp/state across many frames (nothing calls them from the battle loop
- *  for this ticket — ATK-019 intentionally does not wire battle.ts — but this proves the mere
- *  presence of the shell doesn't perturb ordinary hp bookkeeping). */
-function testBothFlagsOffNoUnintendedHpDrift(): void {
-  const b = makeBorg({ hp: 80, maxHp: 100 });
-  for (let i = 0; i < 300; i++) {
-    stepVampireDrain(b); // the only ATK-019 per-frame stub; battle.ts does not call this yet
-  }
-  assertEqual(b.hp, 80, "300 frames of the disabled vampire-drain stub leave hp untouched");
+/** Passive self-bleed: a vampire loses 1 HP every 30 frames, floored at 1 (never self-kills). */
+function testVampireBleeds(): void {
+  const v = makeBorg({ borgId: "pl0702", hp: 100, maxHp: 200, state: "idle" });
+  // 29 frames: counter climbs, no HP loss yet.
+  for (let i = 0; i < 29; i++) stepVampireDrain(v);
+  assertEqual(v.hp, 100, "no HP lost before the 30-frame bleed interval elapses");
+  // 30th frame: exactly 1 HP lost.
+  stepVampireDrain(v);
+  assertEqual(v.hp, 99, "vampire loses exactly 1 HP on the 30th frame");
+  // Another full interval: another 1 HP.
+  for (let i = 0; i < 30; i++) stepVampireDrain(v);
+  assertEqual(v.hp, 98, "vampire loses 1 more HP after a second 30-frame interval");
+
+  // Floor at 1 HP: drive it near the floor and confirm it never reaches 0 from the bleed.
+  v.hp = 1;
+  for (let i = 0; i < 300; i++) stepVampireDrain(v);
+  assertEqual(v.hp, 1, "bleed floors at 1 HP (never self-kills)");
+
+  // A dead / spawning vampire does not bleed.
+  const dead = makeBorg({ borgId: "pl0702", hp: 50, maxHp: 200, state: "death" });
+  for (let i = 0; i < 60; i++) stepVampireDrain(dead);
+  assertEqual(dead.hp, 50, "a dead vampire does not bleed");
+}
+
+/** Steal: on a landed hit, a vampire heals floor(damageDealt / 2), capped at its maxHp. */
+function testVampireSteal(): void {
+  const raw = JSON.parse(readFileSync(borgsPath, "utf8")) as { borgs: BorgStats[] };
+  const vampStats = raw.borgs.find((b) => b.id === "pl0702");
+  const victimStats = raw.borgs.find((b) => b.id === "pl0008");
+  assertTrue(!!vampStats && !!victimStats, "roster has pl0702 (vampire) and pl0008 (victim)");
+  if (!vampStats || !victimStats) return;
+  const vampProfile = buildProfile(vampStats);
+  const victimProfile = buildProfile(victimStats);
+
+  const vampire = makeBorg({ borgId: "pl0702", hp: 50, maxHp: 200, state: "attack" });
+  const victim = makeBorg({ uid: "v", borgId: "pl0008", team: 1, hp: 100000, maxHp: 100000, invincTimer: 0, state: "idle" });
+
+  const hpBefore = vampire.hp;
+  const dmg = applyHit(
+    victim,
+    victimProfile,
+    0,
+    0,
+    { x: 0, y: 0, z: 0 },
+    { x: victim.pos.x, y: victim.pos.y, z: victim.pos.z - 10 },
+    false,
+    damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
+    { attacker: vampire, attackerProfile: vampProfile },
+  );
+  assertTrue(dmg > 0, "vampire's hit deals positive damage");
+  assertEqual(vampire.hp, hpBefore + Math.floor(dmg / 2), "vampire heals floor(dmg/2) on the hit (steal)");
+
+  // Cap at maxHp: a near-full vampire cannot overheal past maxHp.
+  const full = makeBorg({ borgId: "pl0702", hp: 199, maxHp: 200, state: "attack" });
+  const victim2 = makeBorg({ uid: "v2", borgId: "pl0008", team: 1, hp: 100000, maxHp: 100000, invincTimer: 0, state: "idle" });
+  applyHit(
+    victim2,
+    victimProfile,
+    0,
+    0,
+    { x: 0, y: 0, z: 0 },
+    { x: victim2.pos.x, y: victim2.pos.y, z: victim2.pos.z - 10 },
+    false,
+    damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
+    { attacker: full, attackerProfile: vampProfile },
+  );
+  assertEqual(full.hp, 200, "vampire steal is capped at maxHp (no overheal)");
+
+  // A non-vampire attacker never steals.
+  const normal = makeBorg({ borgId: "pl0008", hp: 50, maxHp: 200, state: "attack" });
+  const victim3 = makeBorg({ uid: "v3", borgId: "pl0615", team: 1, hp: 100000, maxHp: 100000, invincTimer: 0, state: "idle" });
+  const normalHpBefore = normal.hp;
+  applyHit(
+    victim3,
+    buildProfile(raw.borgs.find((b) => b.id === "pl0615")!),
+    0,
+    0,
+    { x: 0, y: 0, z: 0 },
+    { x: victim3.pos.x, y: victim3.pos.y, z: victim3.pos.z - 10 },
+    false,
+    damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
+    { attacker: normal, attackerProfile: victimProfile },
+  );
+  assertEqual(normal.hp, normalHpBefore, "a non-vampire attacker never heals from a hit");
 }
 
 // --- Roster verification (required test + NOTES-ATK-019.md) -----------------------------------
@@ -305,10 +384,11 @@ export function runSelfTest(): number {
   testApplyHealNeverRevives();
   testApplyHealAtFullHpIsNoOp();
   testApplyHealIgnoresNonPositiveAmount();
-  testFlagsDefaultDisabled();
-  testVampireDrainStubNoOp();
+  testFlagState();
+  testNonVampireNeverBleeds();
   testNurseHealAmountsAreDataOnly();
-  testBothFlagsOffNoUnintendedHpDrift();
+  testVampireBleeds();
+  testVampireSteal();
   testRosterIdsResolveWithExpectedNames();
 
   // Always write the notes file (regardless of pass/fail), per the ticket's "Done when" clause.

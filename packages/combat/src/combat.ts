@@ -23,6 +23,7 @@ import {
   CONTACT_DAMAGE,
   DAMAGE,
   HEAL,
+  HEAL_VAMPIRE_BORG_IDS,
   MASH,
   MELEE,
   LOCK,
@@ -398,6 +399,18 @@ export function applyHit(
     : mitigate(rawDamage, victimProfile.defense);
   victim.hp -= dmg;
 
+  // Vampire lifesteal STEAL (ATK-019, behavior-notes (ay)): a vampire (ids 0x702/0x70a) banks
+  // half of every damage point it deals and drains it into its own HP, capped at max. The ROM
+  // banks dmg/2 into a per-slot accumulator (chunk_0003.c:7982) then applies+caps it
+  // (chunk_0003.c:6318); collapsed here to an immediate heal-on-hit (equivalent in sum). Fires
+  // on the killing blow too (before the lethal-return below).
+  if (HEAL.VAMPIRE_ENABLED && source && isVampireBorgId(source.attacker.borgId)) {
+    const steal = Math.floor(dmg / HEAL.VAMPIRE_STEAL_DIVISOR);
+    if (steal > 0 && source.attacker.alive && source.attacker.state !== "death") {
+      source.attacker.hp = Math.min(source.attacker.maxHp, source.attacker.hp + steal);
+    }
+  }
+
   // Knockback DIRECTION — ROM-accurate port of zz_00300bc_ (0x800300bc), mode 1 ("attacker to
   // target" relative-position vector -> atan2 -> BAM16 yaw), the only one of the ROM's 5 vector-
   // source modes this port has enough data to compute (see packages/physics/src/knockback.ts
@@ -520,17 +533,33 @@ export function applyHeal(b: BorgRuntime, amount: number): number {
   return healed;
 }
 
+/** True for the two vampire-lifesteal borg ids (0x702 Vampire Knight, 0x70a Vlad). */
+export function isVampireBorgId(borgId: string): boolean {
+  return (HEAL_VAMPIRE_BORG_IDS as readonly string[]).includes(borgId);
+}
+
 /**
- * DISABLED stub (ATK-019, vampire lifesteal). See constants.ts HEAL.VAMPIRE_ENABLED for the
- * full evidence citation: the HP-regain accumulator's writer (dealt melee damage, per the
- * guide) and the passive ~2-3 HP/sec drain loop are both untraced — this scaffold reserves
- * the per-frame call site without inventing either rate. Immediate no-op while disabled
- * (the default, always, today).
+ * Vampire passive self-BLEED (ATK-019, behavior-notes (ay)). For a vampire borg (ids
+ * 0x702/0x70a), lose 1 HP every HEAL.VAMPIRE_BLEED_INTERVAL_FRAMES (30) frames, floored at
+ * 1 HP so it never self-kills — the ROM drain loop chunk_0006.c:7900-7912 (`if 1 < HP: HP -= 1`
+ * every 0x1e frames). The steal half of the mechanic is applied in applyHit. Gate (TUNED): the
+ * ROM keys the loop on state bytes +0x18==1/+0x19==2; the port bleeds whenever the vampire is
+ * alive and out of the death/spawn states (the guide frames the drain as constant passive
+ * behavior). No-op for non-vampires and while VAMPIRE_ENABLED is false. Called once per frame
+ * from battle.ts. Uses the cooldowns map (`vampBleedFrames`) for the cadence counter — no new
+ * runtime field.
  */
-export function stepVampireDrain(_b: BorgRuntime): void {
+export function stepVampireDrain(b: BorgRuntime): void {
   if (!HEAL.VAMPIRE_ENABLED) return;
-  // Intentionally unreachable while disabled: no drain rate, regain rate, or floor behavior
-  // is invented here. See the header comment above and constants.ts HEAL.
+  if (!isVampireBorgId(b.borgId)) return;
+  if (!b.alive || b.state === "death" || b.state === "spawn") return;
+  const next = (b.cooldowns["vampBleedFrames"] ?? 0) + 1;
+  if (next >= HEAL.VAMPIRE_BLEED_INTERVAL_FRAMES) {
+    b.cooldowns["vampBleedFrames"] = 0;
+    if (b.hp > 1) b.hp -= 1;
+  } else {
+    b.cooldowns["vampBleedFrames"] = next;
+  }
 }
 
 // ---------------------------------------------------------------------------------------

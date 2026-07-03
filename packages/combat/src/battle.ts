@@ -28,6 +28,7 @@ import {
   stepGaugeWindows,
   stepInvincibility,
   stepProjectiles,
+  stepVampireDrain,
 } from "./combat.js";
 import { challengeSideRanksForMode } from "./damageFormula.js";
 import { gaugeInitForBorgId } from "./gauges.js";
@@ -333,6 +334,10 @@ class BattleImpl implements Battle {
       // CONTACT_DAMAGE.ENABLED stays false (the default) — see combat.ts stepContactDamage
       // for the evidence gap and the per-borg-data enable path.
       stepContactDamage(b, all);
+
+      // Vampire passive self-bleed (ATK-019, (ay)): 1 HP / 30 frames for ids 0x702/0x70a,
+      // floored at 1 HP. No-op for non-vampires. The steal half is applied in applyHit.
+      stepVampireDrain(b);
 
       // Advance hit/down/death/spawn timers.
       b.stateTime += 1;
