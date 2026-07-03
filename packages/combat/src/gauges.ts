@@ -46,6 +46,15 @@ export interface DamageRecord {
   forceGaugeCurveIndex: number;
   /** u8 +0x0b — reaction flags; bits 2|0x80 force a stagger regardless of gauges. */
   reactionFlags: number;
+  /**
+   * u8 +0x0d — hit-severity byte (behavior-notes (bc)/(bd)). Dual role: it selects the reaction-
+   * anim variant AND is the KNOCKBACK-MAGNITUDE index — chunk_0003.c:8047 copies it to the victim's
+   * actor+0x702, which then indexes DAT_802dd8a0[s]=s*7 (horizontal launch, zz_005ec20_) and
+   * DAT_802d3664[s]=(s+1)*8 (velocity, FUN_8005ed38). See KNOCKBACK_STRENGTH_TABLE below. The
+   * port's knockback APPLICATION stays anchored-TUNED (flat per-attack magnitude in applyHit)
+   * pending a model restructure to single-base × strength — PORT-1TO1-STATUS §1 knockback row.
+   */
+  reactionAnimVariant: number;
   /** u16 +0x10 — formula/guard flags. */
   flagsA: number;
   /** u16 +0x12 — formula/guard flags. */
@@ -64,6 +73,30 @@ const DAMAGE_RECORDS_FILE = damageRecordsData as unknown as DamageRecordsFile;
 
 /** The 9 borg-family damage records (DAT_802d46e0), VERIFIED extraction. */
 export const DAMAGE_RECORDS: readonly DamageRecord[] = DAMAGE_RECORDS_FILE.records;
+
+/**
+ * DERIVED_ROM knockback-magnitude tables (behavior-notes (bc), verified chunk_0007.c:5568/5630).
+ * Indexed by a hit's strength byte (the damage record's `reactionAnimVariant` = record+0xd, copied
+ * to actor+0x702 and clamped 0..15):
+ *   - HORIZONTAL[s] = DAT_802dd8a0[s] = s*7   (launch h-speed factor, zz_005ec20_)
+ *   - VELOCITY[s]   = DAT_802d3664[s] = (s+1)*8 (velocity magnitude, FUN_8005ed38)
+ * These are the real ROM values (T9 resolved statically). NOT yet wired into applyHit — the port
+ * keeps its anchored-TUNED flat knockback until the model is restructured to single-base × strength
+ * with a scale reconciled to the port's ~4× world rescale (see the knockback-port task / §1). This
+ * export makes the DERIVED model available to that port and to tests without changing gameplay.
+ */
+export const KNOCKBACK_STRENGTH_TABLE = {
+  /** DAT_802dd8a0[s] = s*7, s∈0..15 — horizontal launch factor. */
+  HORIZONTAL: Object.freeze(Array.from({ length: 16 }, (_, s) => s * 7)) as readonly number[],
+  /** DAT_802d3664[s] = (s+1)*8, s∈0..15 — velocity magnitude. */
+  VELOCITY: Object.freeze(Array.from({ length: 16 }, (_, s) => (s + 1) * 8)) as readonly number[],
+} as const;
+
+/** Clamp a strength byte to 0..15 (the ROM clamps actor+0x702 to the 16-entry tables). */
+export function knockbackStrengthClamp(strength: number): number {
+  const s = Math.trunc(strength);
+  return s < 0 ? 0 : s > 15 ? 15 : s;
+}
 
 /**
  * DERIVED fallback for borg ids missing from the extracted table: 500/100 are the modal

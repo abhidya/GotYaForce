@@ -57,8 +57,10 @@ export {
 export {
   DAMAGE_RECORDS,
   DAMAGE_RECORD_INDEX,
+  KNOCKBACK_STRENGTH_TABLE,
   REACTION_FORCE_STAGGER_MASK,
   damageRecordByIndex,
+  knockbackStrengthClamp,
   gaugeInitForBorgId,
   type BorgGaugeInit,
   type DamageRecord,
