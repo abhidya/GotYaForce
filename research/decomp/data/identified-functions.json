@@ -2,8 +2,8 @@
   "_meta": {
     "generated_note": "Consolidated source map of every Gotcha Force (GG4E/NTSC-U) game-logic function the project's decompilation research has assigned a concrete role. Built by cross-referencing behavior-notes.md sections (a)-(bb), attack-mechanics-findings.md / -ledger.json, and state-anim-dispatch-802d3570.json against ghidra-export/_index.tsv for canonical name+chunk. One entry per address (deduped). Only functions with an identifiable game-logic role are included; addresses cited only in passing (constants, data-table addresses, mid-function instruction PCs, engine calls named without a role) were skipped -- see cited_addresses_skipped_roleless.",
     "total_corpus_functions": 11972,
-    "identified_count": 133,
-    "coverage_percent": 1.111,
+    "identified_count": 213,
+    "coverage_percent": 1.78,
     "confidence_legend": {
       "DERIVED_ROM": "role read directly from decompiled C / raw-ROM data (matches the notebook's DERIVED tier)",
       "INFERRED": "role inferred from field reuse / call shape / handler routing / confirmed asset-container decode, not a direct gameplay-code read",
@@ -16,7 +16,8 @@
       "research/decomp/data/attack-mechanics-ledger.json",
       "research/decomp/data/state-anim-dispatch-802d3570.json",
       "research/decomp/ghidra-export/_index.tsv"
-    ]
+    ],
+    "last_expanded": "2026-07-03: +80 via actor/ai/fx corpus-analysis clusters"
   },
   "functions": [
     {
@@ -1086,6 +1087,726 @@
       "role": "HSD joint matrix setup",
       "evidence": "(d)",
       "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8002cb20",
+      "name": "mutual_actor_contact_mask_update",
+      "chunk": "chunk_0003.c:6454",
+      "role": "per-frame pairwise actor-contact pass: double-loops the 6 active borgs (stride 0x1e00 from DAT_803c4e84), and when both actors mutually mark each other in their +0x71e and +0x71f slot bitmasks, pushes the slower/airborne one out via zz_0035ca4_ with the other actor's motion vector +0x1cc",
+      "evidence": "if (((int)pcVar4[0x71e] & 1 << (int)pcVar3[0x3e4]) != 0) { ... zz_0035ca4_((int)pcVar4,(float *)(pcVar3 + 0x1cc));",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8002caa8",
+      "name": "zz_002caa8_",
+      "chunk": "chunk_0003.c:6430",
+      "role": "push-apart weight applier: scales an actor's push-apart accumulator/velocity field +0xb4 by a fractional weight passed in from the contact loop in battle_frame_target_action_dispatch",
+      "evidence": "*(float *)(param_2 + 0xb4) = (float)((double)*(float *)(param_2 + 0xb4) * param_1);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8002ce44",
+      "name": "zz_002ce44_",
+      "chunk": "chunk_0003.c:6604",
+      "role": "per-frame contact-force application pass: iterates actor slot lists and adds an active hitting actor's motion vector +0x1cc into the passive actor's position/velocity (collision push resolution)",
+      "evidence": "gnt4_PSVECAdd_bl((float *)(pcVar2 + 100),(float *)(iVar1 + 0x1cc),(float *)(pcVar2 + 100));",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80035ca4",
+      "name": "zz_0035ca4_",
+      "chunk": "chunk_0004.c:2832",
+      "role": "collision-impulse applier: adds a supplied impulse vector into the target actor's position accumulator +0x1cc and propagates it to all actors in its contact mask (the push-out primitive used by mutual_actor_contact_mask_update)",
+      "evidence": "gnt4_PSVECAdd_bl((float *)(param_1 + 0x1cc),param_2,(float *)(param_1 + 0x1cc));",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80067310",
+      "name": "FUN_80067310",
+      "chunk": "chunk_0008.c:3780",
+      "role": "core velocity->position integrator: advances world position +0x20/+0x24/+0x28 by horizontal speed +0x44 projected through facing angle (sin/cos via zz_0045204_/zz_0045238_) scaled by frame speed +0x5f4*+0x5f8, then integrates ground accel +0x4c into +0x44 and vertical accel +0x50 into +0x48 with floor/ceiling clamps; calls ground-snap zz_0068030_",
+      "evidence": "*(float *)(param_2 + 0x20) = (float)(dVar3 * (double)(float)((double)*(float *)(param_2 + 0x44) * dVar2) + (double)*(float *)(param_2 + 0x20)); ... zz_0068030_(param_2);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80067458",
+      "name": "zz_0067458_",
+      "chunk": "chunk_0008.c:3834",
+      "role": "velocity integrator variant: calls FUN_80067310 then additionally clamps horizontal speed +0x44 to per-actor cap +0x678 and vertical speed +0x48 into the band [+0x680, +0x67c]",
+      "evidence": "FUN_80067310(param_1,param_2,param_3); ... fVar2 = *(float *)(param_2 + 0x678); ... *(float *)(param_2 + 0x44) = fVar2;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80068030",
+      "name": "zz_0068030_",
+      "chunk": "chunk_0008.c:4335",
+      "role": "gravity ground-snap: when the actor's foot (Y +0x24 + foot-offset +0x668) would sink below the stage floor plane DAT_8043625c+0x34 and vertical velocity +0x48 is downward, zeroes +0x48 and snaps Y +0x24 up onto the floor (returns landed flag)",
+      "evidence": "*(float *)(param_1 + 0x48) = FLOAT_804375d0; fVar1 = *(float *)(DAT_8043625c + 0x34) - *(float *)(param_1 + 0x668); ... *(float *)(param_1 + 0x24) = fVar1;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005ef08",
+      "name": "FUN_8005ef08",
+      "chunk": "chunk_0007.c:5684",
+      "role": "per-move ground/terrain height snap + wall block: queries floor height at the actor's XZ via FUN_8003d6e4, writes Y +0x24, and if the step-up exceeds ledge threshold +0x674 restores the previous position (+0x2c/+0x30/+0x34) blocking the move; returns 1 when blocked",
+      "evidence": "dVar2 = FUN_8003d6e4((double)*(float *)(param_1 + 0x668),param_1,(float *)(param_1 + 0x20)); *(float *)(param_1 + 0x24) = (float)dVar2; fVar1 = *(float *)(param_1 + 0x24) - *(float *)(param_1 + 0x30);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8003d6e4",
+      "name": "FUN_8003d6e4",
+      "chunk": "chunk_0004.c:6962",
+      "role": "terrain raycast: tests the actor's XZ position against stage collision triangles (barycentric edge tests) and returns the floor Y at that point, used by movement height-snap and knockback distance",
+      "evidence": "if (((fVar2 * fVar6 <= fVar5 * fVar3) && (fVar3 * fVar7 <= fVar6 * fVar4)) && (fVar4 * fVar5 <= fVar7 * fVar2))",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005ee0c",
+      "name": "zz_005ee0c_",
+      "chunk": "chunk_0007.c:5644",
+      "role": "wall-collision resolution + state transition: after FUN_8005ef08 reports a blocked move, computes remaining slide distance from prev-vs-cur position, boosts speed +0x44 toward the wall-slide direction (atan2 via FUN_800452a0 into facing +0x5ae), sets impact flag +0x5e0|0x2000000, and transitions the actor to state 0xc via zz_005ec04_",
+      "evidence": "iVar2 = FUN_8005ef08(param_1); if (iVar2 != 0) { ... zz_005ec04_(param_1,0xc); }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005ec20",
+      "name": "zz_005ec20_",
+      "chunk": "chunk_0007.c:5544",
+      "role": "knockback launch setup: reads knockback strength +0x702 (clamped 0..15), sets horizontal launch speed +0x44 from launch-table DAT_802dd8a0[strength] scaled by +0x298/+0xc4, sets ground decel +0x4c and vertical accel/speed +0x50/+0x48",
+      "evidence": "*(float *)(param_1 + 0x44) = fVar1 * *(float *)(&DAT_802dd8a0 + cVar5 * 4); *(float *)(param_1 + 0x4c) = -*(float *)(param_1 + 0x44) / fVar4;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005ecb0",
+      "name": "zz_005ecb0_",
+      "chunk": "chunk_0007.c:5578",
+      "role": "post-launch facing update: while a knockback (+0x702) is active and the launch hasn't settled, rotates the actor's heading toward the knockback direction +0x284 via turn helper zz_00670dc_, and latches settled flag +0x1d9b when speed +0x44 drops below threshold +0x1dac",
+      "evidence": "if ((*(char *)(param_1 + 0x702) != '\\0') && (*(char *)(param_1 + 0x1d9b) == '\\0')) { ... zz_00670dc_(param_1,*(short *)(param_1 + 0x284));",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005ed38",
+      "name": "FUN_8005ed38",
+      "chunk": "chunk_0007.c:5601",
+      "role": "knockback velocity-vector builder: from knockback strength +0x702 (+2 when airborne bit +0x6fd&0x80) picks magnitude from DAT_802d3664[strength], splits it into ground accel components +0x44/+0x48 via sin/cos of knockback pitch -+0x282, and sets decel/gravity +0x4c/+0x50",
+      "evidence": "dVar7 = (double)*(float *)(&DAT_802d3664 + cVar5 * 4); dVar6 = zz_0045238_(-sVar2); *(float *)(param_1 + 0x44) = (float)(dVar7 * dVar6);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006a5a4",
+      "name": "zz_006a5a4_",
+      "chunk": "chunk_0009.c:768",
+      "role": "hit-reaction exit/cleanup: on knockback/hit-react recovery clears collision-active flags, resets the reaction bookkeeping byte +0x590, and (player-controlled path) applies a position offset before returning control",
+      "evidence": "*(undefined1 *)(param_1 + 0x590) = 1;",
+      "confidence": "INFERRED",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005c15c",
+      "name": "zz_005c15c_",
+      "chunk": "chunk_0007.c:3930",
+      "role": "per-actor per-frame limb/attachment reset before state dispatch: calls zz_005c080_, masks the +0x5e0 flag word (keep 0x5ff0040), and zeroes the per-limb transform triads +0x18d4/+0x18d6/+0x18d8 for every limb in the actor's limb list (+0x4b0[+0xb0..])",
+      "evidence": "zz_005c080_(param_1); *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0x5ff0040; ... *(undefined2 *)(iVar1 + 0x18d8) = 0;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005c080",
+      "name": "zz_005c080_",
+      "chunk": "chunk_0007.c:3895",
+      "role": "per-frame motion/flag reset: restores default per-frame accel +0x1dcc and step +0x1d9c, masks guard flags +0x272 down to 0x43, clears Power-Burst arm +0x6fb, and runs the actor's vtable teardown thunk +0x4c4",
+      "evidence": "*(float *)(param_1 + 0x1dcc) = FLOAT_80437440; ... *(ushort *)(param_1 + 0x272) = *(ushort *)(param_1 + 0x272) & 0x43; ... (**(code **)(param_1 + 0x4c4))(param_1);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005bab8",
+      "name": "zz_005bab8_",
+      "chunk": "chunk_0007.c:3672",
+      "role": "per-frame stat-tier timer + facing smoothing: decrements the buff/debuff duration timer +0x750 and, on expiry, reverts the accumulated param-tier delta +0x74e via apply_actor_param_tier_delta_127; separately eases the current facing-scale +0xb4 toward target +0xb8 and mirrors it into +0x58/+0x5c/+0x60/+0xc0/+0xc4",
+      "evidence": "sVar2 = *(short *)(param_1 + 0x750) + -1; *(short *)(param_1 + 0x750) = sVar2; if (sVar2 < 1) { apply_actor_param_tier_delta_127(param_1,-(int)*(char *)(param_1 + 0x74e));",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80068138",
+      "name": "reset_actor_param_tier",
+      "chunk": "chunk_0008.c:4389",
+      "role": "resets an actor's stat-buff tier: sets base tier +0x74a=0x10, clears accumulated delta +0x74e and timer +0x750, then rebuilds the derived params via refresh_actor_param_tier_table",
+      "evidence": "*(undefined1 *)(actor + 0x74a) = 0x10; *(undefined1 *)(actor + 0x74e) = 0; *(undefined2 *)(actor + 0x750) = 0; refresh_actor_param_tier_table(actor);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006817c",
+      "name": "apply_actor_param_tier_delta_127",
+      "chunk": "chunk_0008.c:4410",
+      "role": "adds a signed delta to the actor stat-buff tier +0x74a clamped to [-0x7f,0x7f], then refreshes derived params; the low-level tier mutator used on timer-expiry revert",
+      "evidence": "unclamped_tier = *(char *)(actor + 0x74a) + signed_delta; ... *(char *)(actor + 0x74a) = (char)unclamped_tier; ... refresh_actor_param_tier_table(actor);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800681e4",
+      "name": "apply_actor_param_tier_delta_63",
+      "chunk": "chunk_0008.c:4442",
+      "role": "gameplay-facing stat-buff/debuff apply (called each frame from the actor loop with DAT_8043612c[slot]): clamps tier +0x74a to [-0x3f,0x3f], accumulates the applied delta into +0x74e, arms the 900-frame revert timer +0x750, and delegates to apply_actor_param_tier_delta_127",
+      "evidence": "*(char *)(actor + 0x74e) = *(char *)(actor + 0x74e) + (char)applied_delta; if (*(char *)(actor + 0x74e) != '\\0') { *(undefined2 *)(actor + 0x750) = 900; } apply_actor_param_tier_delta_127(actor,applied_delta);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006826c",
+      "name": "refresh_actor_param_tier_table",
+      "chunk": "chunk_0008.c:4485",
+      "role": "recomputes derived actor stats from the current buff tier: clamps +0x74a into [+0x74c,+0x74d] as +0x74b, indexes stat table PTR_DAT_804339e0[model_variant][tier*0xc], and writes the three derived fields +0xb8 (scale), +0x1dd0, +0x5f8 (frame speed multiplier)",
+      "evidence": "tier_params = (undefined4 *)((&PTR_DAT_804339e0)[*(byte *)(*(int *)(actor + 0x4ac) + 0xa3)] + *(char *)(actor + 0x74b) * 0xc); *(undefined4 *)(actor + 0xb8) = *tier_params; ... *(undefined4 *)(actor + 0x5f8) = tier_params[2];",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005efc4",
+      "name": "zz_005efc4_",
+      "chunk": "chunk_0007.c:5718",
+      "role": "action-update mode selector: reads the actor's per-frame condition byte +0x1da and picks slot-action mode 2 (airborne bit 0x80), 0 (bits 0x72 hit/reaction), or 1 (neutral), then calls dispatch_slot_action_update; invoked on idle/death paths",
+      "evidence": "if (((int)param_2 & 0x80U) == 0) { if (((int)param_2 & 0x72U) == 0) { iVar1 = 1; } ... dispatch_slot_action_update(param_1,iVar1);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005f114",
+      "name": "zz_005f114_",
+      "chunk": "chunk_0007.c:5797",
+      "role": "buffered-attack trigger: when the actor is not dead (+0x5e0&0x80000000==0), not in special command states +0x591 (1,2,7,8), its startup timer +0x6b4 is 0, and the buffered-attack bit +0x5bc&0x100 is set, transitions to attack state 0x13 via zz_005ec04_",
+      "evidence": "((*(short *)(param_1 + 0x6b4) == 0 && ((*(uint *)(param_1 + 0x5bc) & 0x100) != 0)))) { zz_005ec04_(param_1,0x13);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005c638",
+      "name": "FUN_8005c638",
+      "chunk": "chunk_0007.c:4136",
+      "role": "guard/block-entry state handler (sibling of slot-8 FUN_8005c5d0): if not already locked (+0x1da&0x10) and the guard input +0x6fd&0x80 is held, grants block invincibility +0x720=FLOAT_80437448 and sets guard flags +0x272|0x43, then enters block action 4 via zz_00ea2c8_",
+      "evidence": "*(float *)(param_1 + 0x720) = FLOAT_80437448; *(ushort *)(param_1 + 0x272) = *(ushort *)(param_1 + 0x272) | 0x43; ... zz_00ea2c8_(param_1,4);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80065d14",
+      "name": "FUN_80065d14",
+      "chunk": "chunk_0008.c:2694",
+      "role": "victory/win-pose state handler: on first entry (+0x544==0) sets phase, clears +0x5e0 bit 0x2000, and plays win-pose anim slot 0xf (variant chosen by whether this actor's side is the winning side per PTR_DAT_80433934[0x1f]); thereafter advances the clip via zz_004cd24_",
+      "evidence": "if (*(char *)(param_1 + 0x544) == '\\0') { *(undefined1 *)(param_1 + 0x544) = 1; ... zz_004beb8_((double)FLOAT_804374e8,param_1,0xf,0,0x28,0xffffffff,0xffffffff);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80065e64",
+      "name": "FUN_80065e64",
+      "chunk": "chunk_0008.c:2757",
+      "role": "state-entry setup that resets vertical accel/velocity (+0x69c, +0x50, +0x48) and routes to the return-to-neutral state transition zz_006a750_ (state 0 if command +0x661==6, else state 7)",
+      "evidence": "*(float *)(param_1 + 0x50) = fVar1; *(float *)(param_1 + 0x48) = fVar1; if (*(char *)(param_1 + 0x661) == '\\x06') { zz_006a750_(param_1,0); } else { zz_006a750_(param_1,7); }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005f23c",
+      "name": "FUN_8005f23c",
+      "chunk": "chunk_0007.c:5843",
+      "role": "conditional anim-branch handler: when any of the sub-flags +0x1cec/+0x1ced/+0x1cee is set plays anim slot 0xd (0x80/13), otherwise advances the current clip via zz_004cd24_",
+      "evidence": "if (((*(char *)(param_1 + 0x1cec) != '\\0') || (*(char *)(param_1 + 0x1ced) != '\\0')) ...",
+      "confidence": "INFERRED",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005f2a4",
+      "name": "FUN_8005f2a4",
+      "chunk": "chunk_0007.c:5859",
+      "role": "conditional anim-branch handler variant: gated on state flag +0x5e0&1 and sub-flags +0x1d0c/+0x1d0d/+0x1d0e, plays anim slot 2 or advances current clip via zz_004cd24_",
+      "evidence": "if (((*(uint *)(param_1 + 0x5e0) & 1) == 0) && (((*(char *)(param_1 + 0x1d0c) != '\\0'",
+      "confidence": "INFERRED",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005f318",
+      "name": "zz_005f318_",
+      "chunk": "chunk_0007.c:5876",
+      "role": "scripted-entrance/special state handler: on first entry (+0x540==0) sets phase, toggles facing flag +0x1b04 for borg-type 0x04, derives a param from float +0x1b2c, and plays anim slot 0xd",
+      "evidence": "if (*(char *)(param_1 + 0x540) == '\\0') { *(undefined1 *)(param_1 + 0x540) = 1;",
+      "confidence": "INFERRED",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005f3a0",
+      "name": "FUN_8005f3a0",
+      "chunk": "chunk_0007.c:5902",
+      "role": "scripted state handler with facing setup: on first entry (+0x544==0) sets phase, calls turn/rotate zz_0066ac0_, sets flag +0x5e0|0x10, computes facing angle and plays anim slot 2",
+      "evidence": "if (*(char *)(param_1 + 0x544) == '\\0') { *(undefined1 *)(param_1 + 0x544) = 1; zz_0066ac0_(param_1,0);",
+      "confidence": "INFERRED",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005b880",
+      "name": "zz_005b880_",
+      "chunk": "chunk_0007.c:3579",
+      "role": "per-frame scripted-event/limb-trigger scan: walks the actor's 4 event tracks (+0x1ad4 stride 0x40) and for each entry in the referenced list (+0x4e8) evaluates a frame-window condition and fires zz_005b98c_ (used for timed body/effect triggers)",
+      "evidence": "zz_005b98c_((double)*(float *)(iVar3 + 8),(double)*(float *)(iVar3 + 0x10),param_1,puVar4);",
+      "confidence": "INFERRED",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8005b98c",
+      "name": "zz_005b98c_",
+      "chunk": "chunk_0007.c:3628",
+      "role": "scripted-event dispatcher: given a frame-window and event record, if the current window is active fires the event through zz_00f036c_/zz_00f061c_ with a value selected by event kind (+3 byte) and, for kind 1, the actor's turn/facing scalar +0xb4",
+      "evidence": "if (bVar1 == 1) { if (FLOAT_8043740c <= *(float *)(param_3 + 0xb4)) { ... zz_00f036c_(param_3,uVar2); } else if (bVar1 == 0) { zz_00f036c_(param_3,(uint)param_4[2]);",
+      "confidence": "INFERRED",
+      "source_pass": "actor-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80056900",
+      "name": "FUN_80056900",
+      "chunk": "chunk_0007.c:230",
+      "role": "PER-ACTOR INPUT-SOURCE SELECTOR (human vs CPU vs none). Picks control mode cVar5 from +0x488; also forced to CPU-mode (2) when versus/giant-boss flag PTR_DAT_80433934[0x1829]!=0 or difficulty/force knob PTR_DAT_80433934[0x45] > 4. mode 0 = read HUMAN pad (zz_008bbc0_(slot, DAT_803c727c[slot*8]) -> raw input word +0x5b4); mode 1 = zero input; mode 2 (AI) = run the CPU behavior brain zz_001c9d0_. Then derives edge/hold masks +0x5bc/+0x5c0 from +0x5b4 vs previous +0x5b8.",
+      "evidence": "line 260-263 'if (cVar5 == 0) { uVar4 = zz_008bbc0_((int)param_1[0x3e4],(&DAT_803c727c)[param_1[0x3e4] * 8]); *(uint *)(param_1 + 0x5b4) = uVar4;' ; line 250 'if (4 < (char)PTR_DAT_80433934[0x45]) cVar5 = 2;' ; line 284 'if ((cVar2 != 0) && (cVar5 != 2)) zz_001c9d0_(param_1);'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8008bbc0",
+      "name": "zz_008bbc0_",
+      "chunk": "chunk_0013.c:2199",
+      "role": "HUMAN PAD-WORD NORMALIZER: masks the raw controller word to the valid game-input bits (0xff1f7f) before it becomes the actor raw-input word +0x5b4. Confirms DAT_803c727c[slot*8] is the per-player pad buffer read by the mode-0 (human) branch of the input-source selector.",
+      "evidence": "line 2202 'return param_2 & 0xff1f7f;'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8016f80c",
+      "name": "FUN_8016f80c",
+      "chunk": "chunk_0043.c:6038",
+      "role": "HUMAN-PLAYER JOIN/CPU MASK ARBITER (the 'which slots are human vs computer' knob). Loops 4 player slots; for each, reads the per-slot pad state PTR_DAT_80433944[0x10e + slot*0x80] (bits 0x80 press / 0x100 join / 0x200 leave) and sets/clears that slot's human-controlled bit in the global human mask PTR_DAT_80433930[2], keeping the human count in PTR_DAT_80433930[3]. PTR_DAT_80433944[0x14] = allowed-players mask. This mask is exactly what the spawn code ANDs against +0x3e5 to mark an actor CPU vs human.",
+      "evidence": "line 6058 'if (((byte)PTR_DAT_80433944[0x14] & uVar6) == 0)' ; line 6076 'PTR_DAT_80433930[2] = PTR_DAT_80433930[2] | bVar2;' ; line 6093-6094 'if (((int)(char)PTR_DAT_80433930[2] & uVar6) != 0) PTR_DAT_80433930[3] = PTR_DAT_80433930[3] + 1;'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8001c9d0",
+      "name": "zz_001c9d0_",
+      "chunk": "chunk_0002.c:3795",
+      "role": "CPU BEHAVIOR BRAIN ROOT (per-actor AI think). Only called by the input-source selector when the actor is CPU-controlled (+0x3e6!=0, mode!=2-forced). Clears the actor raw-input word +0x5b4, runs the CPU aim/lock pass (FUN_80025a84) and partner-pairing pass (zz_0026050_/zz_00262b4_), then dispatches per-borg-class movement/attack state via a switch on class byte +0x661 and behavior-state byte +0x2e4, writing synthesized inputs into +0x5b4. A +0x352==2 branch does a nearest-non-teammate distance scan to abort a fleeing target-mode.",
+      "evidence": "line 3812 'param_1[0x5b4] = 0;' (clears input word) ; line 3843 'FUN_80025a84((int)param_1);' ; line 3851 'zz_0026050_(param_1);' ; line 3858 'switch(param_1[0x661])' with per-state calls zz_001d058_/zz_001d5a0_/etc.",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80025a84",
+      "name": "FUN_80025a84",
+      "chunk": "chunk_0003.c:1663",
+      "role": "CPU TARGET-AIM / LOCK-TOGGLE pass. When AI target-mode +0x352==10, loops the enemy actor-list slice (iVar6 + (idx)*4 + 0x144, idx 0..3, offset by 4 above a height threshold), computes PSVECSquareDistance to each and keeps the NEAREST enemy (iVar5). Compares nearest vs current stored targets +0x508/+0x300 and OR's the lock/retarget input bits (0x10, 0x20) into raw-input word +0x5b4, with a 0x1e-frame cooldown at +0x30f. This is the CPU nearest-enemy target-acquire/retarget driver.",
+      "evidence": "line 1693 'dVar7 = gnt4_PSVECSquareDistance_bl((float *)(param_1 + 0x20),(float *)(iVar2 + 0x20))' keep-nearest at 1695 'iVar5 = iVar2; dVar8 = dVar7;' ; line 1711 '*(uint *)(param_1 + 0x5b4) = *(uint *)(param_1 + 0x5b4) | 0x20;' ; line 1717 '| 0x10' with '*(undefined1 *)(param_1 + 0x30f) = 0x1e;'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80026050",
+      "name": "zz_0026050_",
+      "chunk": "chunk_0003.c:1880",
+      "role": "CPU AUTO PAIR-UP / FUSION-PARTNER ACQUISITION. Scans the caller's team actor lists (DAT_803c6dec / DAT_803c6df0, indexed by team byte +0x88, stride 0x18) for another actor whose Power-Burst arm flag +0x6fb or fusion state +0x4a1 is set; on a hit stores partner ptr into +0x360 and sets pairing flag +0x364=1 (bidirectionally in the second scan). The second scan is gated by a per-team AI/difficulty table PTR_DAT_80433934[team*0x3c + 0xf6]==0 && [+0x103]!=0 (auto-fuse enabled for this team).",
+      "evidence": "line 1897 'if ((pcVar1 != param_1) && ((pcVar1[0x6fb] != 0 || (pcVar1[0x4a1] != 0)))) { *(char **)(param_1 + 0x360) = pcVar1; param_1[0x364] = 1;' ; line 1916 'if ((PTR_DAT_80433934[iVar3 * 0x3c + 0xf6] == 0) && (PTR_DAT_80433934[iVar3 * 0x3c + 0x103] != 0))'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80026250",
+      "name": "zz_00262b4_",
+      "chunk": "chunk_0003.c:1952",
+      "role": "CPU PAIRING-STATE ADVANCER. Consumes the partner acquired by zz_0026050_ (+0x360 ptr, +0x364 pairing state, +0x365 sub-state), validates the partner is still active (+0x18==1) and still bursting (+0x6fb/+0x4a1), and while pairing OR's the fusion-trigger input bit 0x800 into raw-input word +0x5b4 so the CPU actually presses the fuse button.",
+      "evidence": "line 1987-1988 'if ((*(uint *)(param_1 + 0x5b8) & 0x800) == 0) { *(uint *)(param_1 + 0x5b4) = *(uint *)(param_1 + 0x5b4) | 0x800;' ; line 1976 'if ((pcVar2[0x6fb] == 0) && (pcVar2[0x4a1] == 0)) { *(param_1+0x364)=0;'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80026370",
+      "name": "zz_0026370_",
+      "chunk": "chunk_0003.c:2013",
+      "role": "CPU RANDOM BEHAVIOR/AGGRESSION ROLL. For class-byte +0x661 in {0,1}, draws the RNG (zz_00055fc_) and indexes a 16-entry signed lookup table (DAT_802cfad4, or DAT_802cfae4 when +0x7cd==1) to produce a randomized decision value. Used by the idle-state handler to pick a facing/approach direction (+0x336) -- the AI's stochastic wander/commit knob.",
+      "evidence": "line 2021-2027 'if (*(char *)(param_1 + 0x7cd) == 1) { uVar1 = zz_00055fc_(); iVar2 = (int)(char)(&DAT_802cfae4)[uVar1 & 0xf]; } else { ... (&DAT_802cfad4)[uVar1 & 0xf]; }'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8001d058",
+      "name": "zz_001d058_",
+      "chunk": "chunk_0002.c:4019",
+      "role": "CPU GROUND/IDLE MOVEMENT state handler (behavior-state +0x2e4==0). Runs approach logic toward the target: computes desired height via FUN_8003d964, and when the target is above/away OR's the forward/approach input bit 0x100 into raw-input word +0x5b4; drives sub-state +0x2e5 (0..2) for approach vs settle, ticks the movement timer +0x328, and calls zz_0026370_ to pick a facing. Class byte +0x661==2 gates the ranged-approach variant.",
+      "evidence": "line 4072-4073 'if ((*(uint *)(param_1 + 0x5b8) & 0x100) == 0) { *(uint *)(param_1 + 0x5b4) = *(uint *)(param_1 + 0x5b4) | 0x100;' ; line 4135 'iVar2 = zz_0026370_((int)param_1);' driving +0x336 facing",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8001d464",
+      "name": "zz_001d464_",
+      "chunk": "chunk_0002.c:4167",
+      "role": "CPU MOVE/ATTACK-WINDOW state handler (the '+0x2e4 < 0' negative-state branch shared by class 3 and 6). Gated by the movement-allowed check zz_00694c0_ (stun timer +0x736) and a range/eligibility check zz_002115c_; on failure it either counts down the action timer +0x328 or advances to the attack step via zz_0023bf4_/zz_002104c_, else commits the attack via zz_0021148_. A CPU commit-to-attack gate.",
+      "evidence": "line 4174-4185 'uVar1 = zz_00694c0_(param_1); if ((uVar1 == 0) || (iVar2 = zz_002115c_(param_1), iVar2 == 0)) { if (*(short *)(param_1 + 0x328) < 1) { zz_0023bf4_(param_1); zz_002104c_(param_1);} ...} else { zz_0021148_(param_1); }'",
+      "confidence": "INFERRED",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8001d5a0",
+      "name": "zz_001d5a0_",
+      "chunk": "chunk_0002.c:4240",
+      "role": "CPU CHASE/AIR-MANEUVER state handler (behavior-state +0x2e4 in {1,2}). Branches on air/attack sub-state +0x2e5 to route to jump/air-move sub-brains (zz_001e11c_, zz_001e810_, FUN_8001e9a4, zz_001f034_, zz_001f438_), most gated by the reach/landing test zz_001d6ec_. Ticks the chase timer +0x308 and can transition back to ground state (+0x2e4=1).",
+      "evidence": "line 4256-4268 'if (cVar1 < 2) { if (-1 < cVar1) { if ((*(uint *)(param_1 + 0x5e0) & 0x10) == 0) { param_1[0x2e4] = 1; zz_001e11c_(param_1); } else { iVar2 = zz_001d6ec_((int)param_1); if (iVar2 != 0) zz_001e11c_(param_1);}}}'",
+      "confidence": "INFERRED",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800685c0",
+      "name": "zz_00685c0_",
+      "chunk": "chunk_0008.c:4671",
+      "role": "TRANSFORMED-INPUT-WORD BUILDER. Clears the decision input word +0x5d4 and rebuilds it every frame by running per-command edge/timing decoders (zz_0068b8c_ with per-command param tables DAT_802d38f8.. and result bits 0x20/0x40/0x80/0x200/0x2000/etc.), then the analog/booster pass zz_00686f0_. +0x5d4 is the word FUN_800699d8's attack-decision layer reads -- the shared abstraction fed by both human pad and CPU brain (via +0x5b4).",
+      "evidence": "line 4675 '*(undefined4 *)(param_1 + 0x5d4) = 0;' ; lines 4676-4685 repeated 'zz_0068b8c_(param_1,&DAT_802d38f8,(byte *)(param_1 + 0x614),0x20);' with distinct result-bit masks ; line 4686 'zz_00686f0_(param_1);'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80068b8c",
+      "name": "zz_0068b8c_",
+      "chunk": "chunk_0008.c:4874",
+      "role": "PER-COMMAND INPUT DECODER (one command slot). Runs the command's per-state micro-handler via jump table PTR_FUN_802d3988[state]; if the command's active-timer byte param_3[3] is nonzero it decrements it and OR's that command's result bit (param_4) into the transformed input word +0x5d4. This is the primitive that turns a held/charged control into a discrete decision bit.",
+      "evidence": "line 4879 '(*(code *)(&PTR_FUN_802d3988)[*param_3])();' ; line 4881-4883 'if (bVar1 != 0) { param_3[3] = bVar1 - 1; *(uint *)(param_1 + 0x5d4) = *(uint *)(param_1 + 0x5d4) | param_4; }'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800686f0",
+      "name": "zz_00686f0_",
+      "chunk": "chunk_0008.c:4697",
+      "role": "BOOSTER/ANALOG INPUT + BURST-SCALED CHARGE pass of the input-word builder. Iterates the 3 movement command slots off the command struct +0x4b0 (offset 0xbb per slot), accumulates a per-slot charge value (+0x648) scaled by +0x768 and boosted by FLOAT_80437628 when the Power-Burst pair flag +0x6fc is set, and sets/clears the transformed input bits (via *puVar6 into +0x5d4) and the boost-active byte +0x655. Confirms +0x6fc (burst) increases input responsiveness for both human and CPU.",
+      "evidence": "line 4713-4714 'if (*(char *)(param_1 + 0x6fc) != 0) { dVar10 = (double)(float)(dVar10 * (double)FLOAT_80437628); }' ; line 4726 'if (*(char *)(*(int *)(param_1 + 0x4b0) + iVar5 + 0xbb) != -1)' ; line 4733 '*(uint *)(param_1 + 0x5d4) = *(uint *)(param_1 + 0x5d4) | *puVar6;'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800694c0",
+      "name": "zz_00694c0_",
+      "chunk": "chunk_0008.c:5337",
+      "role": "MOVEMENT-ALLOWED / NOT-STUNNED gate used by the CPU movement state handlers. Returns 1 if the actor has no active stun-lock (+0x7cd==0), else returns (stun timer +0x736)!=0 as a bool -- i.e. CPU may move only while the hitstun/knockdown timer is running down. Gate for zz_001d058_/zz_001d464_ approach vs commit.",
+      "evidence": "line 5340-5343 'if (*(char *)(param_1 + 0x7cd) == 0) return 1; return (uint)(-(int)*(short *)(param_1 + 0x736) & ~(int)*(short *)(param_1 + 0x736)) >> 0x1f;'",
+      "confidence": "INFERRED",
+      "source_pass": "ai-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8002d7c4",
+      "name": "collision_hit_pair_pass_active_vs_borgs",
+      "chunk": "chunk_0003.c:7031",
+      "role": "collision pass A: iterates active hit-objects (list &DAT_803c477c, count DAT_80436250) against the borg list (&DAT_803c2f7c, count DAT_80436248); per pair applies collision gate ((atk[0x28]+2 & 0x4000)==0 || (tgt[0x28]+2 & 0x2000)!=0), broadphase zz_002fd7c_, radius test zz_0039f6c_, narrowphase zz_0030348_/zz_0030490_, then calls resolve_hitbox_target_effects_and_damage on hit. NOTE: correct address is 0x8002d7c4, not the 0x8002da88 guessed in behavior-notes.",
+      "evidence": "chunk_0003.c:7080 `((*(ushort *)(*(int *)(iVar17 + 0x28) + 2) & 0x4000) == 0) || ...0x2000)` then :7124 `resolve_hitbox_target_effects_and_damage(iVar17,iVar16);`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8002df08",
+      "name": "collision_hit_pair_pass_object_lists",
+      "chunk": "chunk_0003.c:7315",
+      "role": "collision pass C: third of the three per-frame overlap passes; loops object list &DAT_803c177c (count DAT_80436240) vs &DAT_803c117c (count DAT_8043623e), same broadphase/narrowphase/resolve chain; handles the plain object-vs-object bucket (bit 0x80 candidates enrolled by zz_008a2bc_)",
+      "evidence": "chunk_0003.c:7339 `piVar4 = &DAT_803c177c;` :7388 `resolve_hitbox_target_effects_and_damage(iVar12,iVar11);`; called at chunk_0003.c:6214",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8002e1c8",
+      "name": "zz_002e1c8_",
+      "chunk": "chunk_0003.c:7432",
+      "role": "pre-activation contact/proximity pass: loops list &DAT_803c357c (count DAT_8043624a, the +0x58==0 not-yet-active objects); copies shape into scratch 0x803b04cc and, when owner is near enough (float table &DAT_803b0708 by borg slot 0x3e4), calls FUN_80035e58 to promote/wake the object",
+      "evidence": "chunk_0003.c:7447 `if (*(int *)(iVar6 + 0x58) == 0)` :7460-7463 distance test then `FUN_80035e58(-0x7fc4fb30);`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8002fd7c",
+      "name": "zz_002fd7c_",
+      "chunk": "chunk_0003.c:8399",
+      "role": "hit-eligibility / broadphase gate (attacker,target,rehitMask): rejects self-hit (same +0x20), same-team friendly-fire flag (+0x88 with hitrec+0x10 bit0x80), guard-direction flag (+0x12 & 0x3c0), the 8-entry recent-hit dedup ring at target+0x20c..0x21a compared to attacker+0x26c, and the rehit-window bit (target+0x272 & mask); returns 1 if the pair may hit this frame",
+      "evidence": "chunk_0003.c:8416 `if (iVar5 == iVar6) return 0;` :8459 `if (sVar1 == *(short *)(iVar10 + 0x20c)) return 0;` :8519 `if (((int)*(short *)(iVar6 + 0x272) & param_3) == 0)`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80039f6c",
+      "name": "zz_0039f6c_",
+      "chunk": "chunk_0004.c:5097",
+      "role": "sphere-vs-sphere broadphase overlap test (objA+0x58,objB+0x58): reads each object's radius at +0x24 and center at +0xc, computes reciprocal-sqrt-refined distance, returns 1 if distance <= sum of radii; gates every candidate pair in all three collision passes",
+      "evidence": "chunk_0004.c:5104 `if (FLOAT_80437004 < *(float *)(param_1 + 0x24))` :5114 `if ((double)(*(float *)(param_1 + 0x24) + *(float *)(param_2 + 0x24)) < dVar2) uVar1 = 0; else uVar1 = 1;`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80030490",
+      "name": "zz_0030490_",
+      "chunk": "chunk_0003.c:8691",
+      "role": "narrowphase overlap-test dispatcher: indexes the shape-pair kind byte (&DAT_802cff68)[pairKind] to select an overlap primitive from PTR_FUN_802cff2c; high bit selects 2-arg vs 0-arg variant; returns hit boolean and the contact point is written to DAT_803b0720 by the primitive (e.g. FUN_80030500 sphere-sphere)",
+      "evidence": "chunk_0003.c:8697 `bVar1 = (&DAT_802cff68)[param_3];` :8702 `uVar2 = (*(code *)(&PTR_FUN_802cff2c)[bVar1 & 0x7f])();`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80030348",
+      "name": "zz_0030348_",
+      "chunk": "chunk_0003.c:8633",
+      "role": "narrowphase shape-transform setup: for each of the two objects, calls PTR_LAB_802cff98[shapeKind] to build the world-space collision shape into scratch buffers (0x803b04d0 / 0x803b0368) before zz_0030490_ tests overlap",
+      "evidence": "chunk_0003.c:8636 `(*(code *)(&PTR_LAB_802cff98)[param_3])();` :8637 `(*(code *)(&PTR_LAB_802cff98)[param_4])(param_2);`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80030500",
+      "name": "FUN_80030500",
+      "chunk": "chunk_0003.c:8714",
+      "role": "sphere-vs-sphere overlap primitive (one PTR_FUN_802cff2c table entry): tests distance(A+0xc,B+0xc) <= rA+rB (radii at +0x30), and on overlap writes the contact point onto B's surface into DAT_803b0720",
+      "evidence": "chunk_0003.c:8723 `if (dVar2 <= (double)(*(float *)(param_1 + 0x30) + *(float *)(param_2 + 0x30)))` :8728 `gnt4_PSVECAdd_bl(...,(float *)&DAT_803b0720);`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8003d344",
+      "name": "zz_003d344_",
+      "chunk": "chunk_0004.c:6834",
+      "role": "applyHit / HP subtract (the applyHit ROM equivalent called by resolve_hitbox_target_effects_and_damage): saves prev HP to +0x1c8, subtracts damage from curHP +0x1c6, clamps to [0, maxHP +0x1c4], mirrors to linked object +0x4a4, returns 1 (via countLeadingZeros>>5) when HP reached 0 -> triggers kill accounting zz_002f8dc_",
+      "evidence": "chunk_0004.c:6848 `*(short *)(param_1 + 0x1c6) = *(short *)(param_1 + 0x1c6) - param_2;` :6858 `uVar1 = countLeadingZeros((int)*(short *)(param_1 + 0x1c6)); return uVar1 >> 5;`; caller chunk_0003.c:7989 `uVar10 = zz_003d344_((int)pcVar18,(short)uVar10);` :8054 `zz_002f8dc_(...)`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8003d3e8",
+      "name": "zz_003d3e8_",
+      "chunk": "chunk_0004.c:6866",
+      "role": "recompute balance/stagger gauge target +0x6c6 from base +0x6c4 scaled by defense-ratio (+0xb4); called on ring-out reset path (battle_frame_target_action_dispatch, chunk_0003.c:6258)",
+      "evidence": "chunk_0004.c:6869 `*(short *)(param_1 + 0x6c6) = *(short *)(param_1 + 0x6c4) + ...(*(float *)(param_1 + 0xb4) - FLOAT_80436f78));`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8003d444",
+      "name": "zz_003d444_",
+      "chunk": "chunk_0004.c:6882",
+      "role": "recompute secondary/link-object balance gauge +0x7dc from +0x7d6 scaled by +0xb4 defense ratio; sibling of zz_003d3e8_ on the ring-out/reset path (battle_frame_target_action_dispatch, chunk_0003.c:6285)",
+      "evidence": "chunk_0004.c:6885 `*(short *)(param_1 + 0x7dc) = *(short *)(param_1 + 0x7d6) + ...(*(float *)(param_1 + 0xb4) - FLOAT_80436f78));`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80088aa0",
+      "name": "zz_0088aa0_",
+      "chunk": "chunk_0012.c:6366",
+      "role": "game-object SPAWN/allocator (owner,shapeKind,category,tail?,jobjCount): pops a node from the free pool (zz_0088d98_), links it into the per-category head/tail bucket arrays &DAT_803c706c/&DAT_803c6f6c indexed by (category | owner-slot), sets object type +0x83 from table &DAT_802da700, and allocates up to jobjCount(<=8) render sub-nodes at +0xe0 via zz_0006d4c_; the shared spawn entry for projectiles, hitboxes and effects",
+      "evidence": "chunk_0012.c:6380 `pvVar1 = zz_0088d98_(param_2);` :6390 `*(undefined *)((int)pvVar1 + 0x83) = (&DAT_802da700)[param_3];` :6392-6393 bucket link into (&DAT_803c706c)[param_3]",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80088c40",
+      "name": "zz_0088c40_",
+      "chunk": "chunk_0012.c:6447",
+      "role": "sibling/child object SPAWN: allocates a node (zz_0088d98_) and splices it adjacent to an existing list node param_2 (before/after by param_3) inheriting its category byte +1; used to attach effect/segment children next to a parent object in the same bucket",
+      "evidence": "chunk_0012.c:6461 `pvVar1 = zz_0088d98_(param_1);` :6467-6470 splice `*(void **)(param_2 + 4) = pvVar1; ...(int)pvVar1 + 8) = param_2;`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80088d98",
+      "name": "zz_0088d98_",
+      "chunk": "chunk_0012.c:6519",
+      "role": "raw pool allocator: pops the head of free-list &DAT_803c716c[bank], decrements free count &DAT_803c71ac[bank], zeroes the node for its size class (&DAT_802da660[kind*2]) preserving kind byte +2 and bank byte +3; the backing store for zz_0088aa0_/zz_0088c40_",
+      "evidence": "chunk_0012.c:6526 `__s = (void *)(&DAT_803c716c)[param_1];` :6535 `gnt4_memset(__s,0,(uint)*(ushort *)(&DAT_802da660 + cVar1 * 2));`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80088e50",
+      "name": "zz_0088e50_",
+      "chunk": "chunk_0012.c:6546",
+      "role": "game-object DESPAWN: unlinks the node from its head/tail bucket (&DAT_803c706c/&DAT_803c6f6c[category]), frees its up-to-8 render sub-nodes at +0xe0 (zz_0006d80_ -> HSD_JObjUnref), then returns the node to the free pool via zz_0089814_; the teardown path invoked from FUN_8008a65c when object flag +0x1d8 is set",
+      "evidence": "chunk_0012.c:6570 bucket unlink `(&DAT_803c706c)[cVar1] = 0;` :6591 `zz_0006d80_(...,*(int **)(puVar6 + 0xe0),...)` :6599 `zz_0089814_(param_9);`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80088f98",
+      "name": "zz_0088f98_",
+      "chunk": "chunk_0013.c:1",
+      "role": "object bucket RE-LINK (move object to a new category/team list): unlinks from current head/tail bucket then re-inserts into a recomputed bucket index (category masked with owner slot +0x3e4) at head or tail per param_3; used when an object changes team/category mid-life",
+      "evidence": "chunk_0013.c:14-27 unlink logic on (&DAT_803c706c)[uVar3] :31 `uVar3 = (uVar3 & 0xfffffff8) + *(char *)(param_2 + 0x3e4) + 1;` :36-45 re-link",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8008a2bc",
+      "name": "zz_008a2bc_",
+      "chunk": "chunk_0013.c:975",
+      "role": "collision-candidate ENROLL: reads the object's active hit-record flags (rec+2) and, gated by owner not being in i-frames (borg+0x720<=0) and the rehit mask borg+0x272, appends the object pointer into the appropriate per-frame candidate list (borg list &DAT_803c2f7c/count DAT_80436248, secondary &DAT_803c417c, object &DAT_803c177c, etc.) that the three collision passes iterate; called from FUN_8008a65c after a hitbox activates",
+      "evidence": "chunk_0013.c:995-998 `(*(ushort *)(iVar1 + 2) & 0x40)... (&DAT_803c2f7c)[uVar3] = param_1;` :1077-1079 `(&DAT_803c177c)[uVar3] = param_1;`; called at chunk_0013.c:1192,1231,1240",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8008a16c",
+      "name": "zz_008a16c_",
+      "chunk": "chunk_0013.c:885",
+      "role": "per-frame reset of the object head/tail bucket arrays (&DAT_803c6e4c..&DAT_803c6f38, ~60 buckets) to 0 at the top of the object update tick, before objects re-enroll",
+      "evidence": "chunk_0013.c:888-947 sequence `DAT_803c6efc = 0; ... DAT_803c6ea8 = 0;`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8008a28c",
+      "name": "zz_008a28c_",
+      "chunk": "chunk_0013.c:955",
+      "role": "per-frame reset of the collision-candidate list COUNTS (DAT_80436250,DAT_8043624e,DAT_8043624c,DAT_8043624a,DAT_80436248,DAT_80436246,DAT_80436244,DAT_80436242,DAT_80436240,DAT_8043623e) to 0 before zz_008a2bc_ re-enrolls candidates; these are exactly the loop bounds of the three hit-pair passes",
+      "evidence": "chunk_0013.c:958-967 `DAT_80436250 = 0; ... DAT_8043623e = 0;`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8008a5d0",
+      "name": "zz_008a5d0_",
+      "chunk": "chunk_0013.c:1087",
+      "role": "hit REGISTER / hit-ID stamp: bumps the global hit-sequence counter DAT_8043623c (skipping 0) and stamps it onto the attacker object +0x26c (the value the dedup ring in zz_002fd7c_ compares); increments attacker hit-count +0x404 and, on a cross-team connect, the victim's got-hit count +0x40c; called from FUN_8008a65c when a hitbox's rehit counter fires",
+      "evidence": "chunk_0013.c:1092-1096 `DAT_8043623c = DAT_8043623c + 1; ... *(short *)(param_1 + 0x26c) = DAT_8043623c;` :1104 `*(int *)(param_2 + 0x404) = *(int *)(param_2 + 0x404) + 1;`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8008aff0",
+      "name": "zz_008aff0_",
+      "chunk": "chunk_0013.c:1503",
+      "role": "flag object for teardown/despawn: sets object +0x1d8 = 1 (the teardown flag FUN_8008a65c checks each frame to invoke zz_0088e50_), gated to real render categories (+2 == 3 or 0); the despawn-request primitive used by projectile/effect end-of-life paths",
+      "evidence": "chunk_0013.c:1509 `*(undefined1 *)(param_1 + 0x1d8) = 1;`; consumed at chunk_0013.c:1140 `if ((pcVar7[0x1d8] == '\\0') ...) else zz_0088e50_(...)`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006ee14",
+      "name": "zz_006ee14_",
+      "chunk": "chunk_0009.c:3769",
+      "role": "PROJECTILE SPAWN (owner, muzzleIndex): allocates a category-3 object via zz_0088aa0_, tags it as projectile (type +0x83=0x10, +0x10=0xe), installs per-frame update FUN_8006f0cc and hit-callback FUN_8006f4b8, copies owner transform/team, computes muzzle world position and initial velocity vector +0x38 from the weapon-parameter table &DAT_802d39dc[muzzle], and plays the fire cue zz_00f036c_; the bullet/deployed-weapon spawn entry",
+      "evidence": "chunk_0009.c:3785 `puVar2 = zz_0088aa0_(iVar6,3,8,0,2)` :3787 `puVar2[0x83] = 0x10;` :3790 `*(code **)(puVar2 + 0xc) = FUN_8006f0cc;` :3819 velocity table `&DAT_802d39dc + iVar3` :3859 `zz_00f036c_(param_1,8);`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006f0cc",
+      "name": "FUN_8006f0cc",
+      "chunk": "chunk_0009.c:3868",
+      "role": "per-frame PROJECTILE UPDATE dispatcher: runs the owner-liveness/despawn check zz_00840b8_ then dispatches the projectile's phase handler via PTR_FUN_802d3ac4[obj+0x18] (state 0=init FUN_8006f11c, 1=fly zz_006f268_, ...); the projectile state machine driver installed at object+0xc by the spawn",
+      "evidence": "chunk_0009.c:3871 `zz_00840b8_(param_1);` :3872 `(*(code *)(&PTR_FUN_802d3ac4)[*(char *)(param_1 + 0x18)])(param_1);`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006f11c",
+      "name": "FUN_8006f11c",
+      "chunk": "chunk_0009.c:3880",
+      "role": "projectile INIT state (+0x18==0): sets lifetime timer +0x1c=600 frames, spawns the projectile's own attack hitbox set via zz_008ac80_ (falls to despawn state 2 if that fails), scales launch velocity +0x38 by the muzzle speed &DAT_802d39c0, seeds gravity/spin fields, then advances to the fly state via zz_006f268_",
+      "evidence": "chunk_0009.c:3907 `*(undefined2 *)(param_9 + 0x1c) = 600;` :3908 `iVar3 = zz_008ac80_(param_9,...)` :3910 `*(undefined1 *)(param_9 + 0x18) = 2;` :3928 `zz_006f268_(param_9);`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006f268",
+      "name": "zz_006f268_",
+      "chunk": "chunk_0009.c:3937",
+      "role": "projectile per-frame FLY/PHYSICS + LIFETIME + DESPAWN: decrements lifetime +0x1c and spin +0x72, on lifetime<=0 flips to despawn state 2 and requests teardown (zz_008aff0_); otherwise integrates gravity/drag (FUN_80083874/FUN_80083ad4) and tests terrain/wall impact (zz_0083244_/zz_0083714_) -> on hit snaps position, spawns impact and despawns",
+      "evidence": "chunk_0009.c:3949 `*(short *)(param_1 + 0x1c) = *(short *)(param_1 + 0x1c) + -1;` :3951-3953 `if (*(short *)(param_1 + 0x1c) < 1) { ...+0x18) = 2; zz_008aff0_(param_1); }` :3956 `iVar1 = zz_0083244_((float *)(param_1 + 0x20));`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006f3ec",
+      "name": "FUN_8006f3ec",
+      "chunk": "chunk_0009.c:4000",
+      "role": "projectile DESPAWN/teardown state (+0x18==3): sets teardown flag via zz_008aff0_ and clears the projectile's active-cue byte +0x82; the terminal state after impact/lifeout",
+      "evidence": "chunk_0009.c:4003 `*(undefined1 *)(param_1 + 0x18) = 3;` :4004 `zz_008aff0_(param_1);` :4005 `*(undefined1 *)(param_1 + 0x82) = 0;`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006c334",
+      "name": "FUN_8006c334",
+      "chunk": "chunk_0009.c:1995",
+      "role": "HOMING aim-cone test (halfAngle, projObj, targetPos): normalizes projectile facing +0x38, forms vector to target, and returns 1 iff acos(dot) <= threshold*halfAngle i.e. the target lies within the projectile's homing cone; used at spawn to decide whether a fired projectile locks onto a target",
+      "evidence": "chunk_0009.c:2015 `dVar2 = (double)gnt4_acos_bl(dVar2);` :2016 `if ((float)dVar2 <= (float)((double)FLOAT_8043768c * param_1)) uVar1 = 1;`; called from spawn chunk_0009.c:3841 `FUN_8006c334(...,(int)puVar2,...)`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006c1c8",
+      "name": "FUN_8006c1c8",
+      "chunk": "chunk_0009.c:1947",
+      "role": "HOMING STEER: rotates the projectile velocity vector +0x38 toward the target point by a per-frame-clamped angle (turn limited to threshold*param_1 via acos, axis = facing x toTarget); the actual homing turn applied each frame",
+      "evidence": "chunk_0009.c:1980 `gnt4_PSMTXRotAxisRad_bl(dVar1,afStack_5c,&local_68);` :1981 `gnt4_PSMTXMultVecSR_bl(afStack_5c,(float *)(param_2 + 0x38),(float *)(param_2 + 0x38));`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006c440",
+      "name": "zz_006c440_",
+      "chunk": "chunk_0009.c:2033",
+      "role": "HOMING move step: applies the steer (FUN_8006c1c8) then advances the projectile position +0x20 by the re-normalized velocity scaled by speed +0x44; the combined homing update called by the fly state",
+      "evidence": "chunk_0009.c:2036 `FUN_8006c1c8(param_1,param_2,param_3);` :2038-2040 `gnt4_PSQUATScale_bl(...+0x44...); gnt4_PSVECAdd_bl((float *)(param_2 + 0x20),(float *)(param_2 + 0x38),(float *)(param_2 + 0x20));`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80070558",
+      "name": "zz_0070558_",
+      "chunk": "chunk_0009.c:4650",
+      "role": "weapon-FIRE action handler: sets fire state +0x6ee, decrements the burst counter +0x6ef, consumes ammo via zz_006dbe0_, and on success spawns the projectile through zz_006ee14_ selecting the muzzle by borg type (family 10 -> muzzle 4, family 3 -> muzzles 0 and 2 when +0x7c8 set, else muzzle 0); the trigger that turns an attack command into a projectile",
+      "evidence": "chunk_0009.c:4657 `iVar1 = zz_006dbe0_(param_1,0,1,1);` :4659-4669 `zz_006ee14_(param_1,4)/...(param_1,0)/...(param_1,2)` by `*(short *)(param_1 + 1000)`",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8006f4b8",
+      "name": "FUN_8006f4b8",
+      "chunk": "chunk_0009.c:4046",
+      "role": "projectile visual/PARTICLE hit-callback (object+0x10c): attaches/updates the projectile's render sub-node (+0xe0) at its world matrix +0x114 via zz_00076d0_ and issues effect-event 0x47 (zz_00097b4_); the per-frame draw/trail hook for the flying projectile",
+      "evidence": "chunk_0009.c:4052 `zz_00076d0_(...,*(int *)(param_9 + 0xe0),(float *)(param_9 + 0x114),...)` :4055 `zz_00097b4_(*(int *)(param_9 + 0xe0),0x47);`",
+      "confidence": "INFERRED",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800840b8",
+      "name": "zz_00840b8_",
+      "chunk": "chunk_0012.c:3216",
+      "role": "projectile/effect OWNER-LIVENESS despawn: when the object is in a fly state and its owning borg (+0x90) has died (owner +0x18 state) or morphed to a different type (owner +1000 != cached +0x94), flips the object to despawn state +0x18=2 and requests teardown (zz_008aff0_); prevents orphaned projectiles/effects after the owner leaves",
+      "evidence": "chunk_0012.c:3226-3228 owner-changed test then :3231 `*(undefined1 *)(param_1 + 0x18) = 2;` :3235 `zz_008aff0_(param_1);`; called from FUN_8006f0cc chunk_0009.c:3871",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8002fc18",
+      "name": "zz_002fc18_",
+      "chunk": "chunk_0003.c:8337",
+      "role": "hit-REACTION EFFECT selector: on a fresh hit (target +0x2ae==0) latches reaction id +0x2ae=4 and derives a reaction/effect variant from the hit-strength byte and the impact speed +0x7fc (stepping the low bits by float thresholds); feeds the visual hit-spark/reaction chosen when a hitbox connects",
+      "evidence": "chunk_0003.c:8344 `if (*(char *)(param_2 + 0x2ae) == '\\0')` :8346 `*(undefined1 *)(param_2 + 0x2ae) = 4;` :8348-8357 speed-thresholded `uVar2 = uVar2 + 1;`",
+      "confidence": "INFERRED",
+      "source_pass": "fx-cluster-2026-07-03"
     }
   ]
 }

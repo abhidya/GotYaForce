@@ -172,15 +172,23 @@ Detail in the asset survey (session 2026-07-03) + `research/format-specs/*`, `re
 ## 6. The port's C-code disambiguation coverage
 
 Of 11,972 decompiled functions (`_index.tsv`): the research has now assigned a concrete
-game-logic **role** to **133** functions — **1.11%** (133 / 11,972) — consolidated into the
+game-logic **role** to **213** functions — **1.78%** (213 / 11,972) — consolidated into the
 machine-readable source map `research/decomp/data/identified-functions.json` (one deduped entry
-per address; each traces to a `behavior-notes.md` section and/or an attack-mechanics findings
-mechanic, with a confidence tier DERIVED_ROM / INFERRED / NAMED_ONLY). This supersedes the
-earlier ~1.2% / 143 estimate: 108 of the 133 are DERIVED_ROM (role read directly from decompiled
-C or raw ROM data). The identified set covers the load-bearing combat spine (hit resolution,
-damage formula, HP/ammo/gauge init, the 35-slot state-handler table, the animation setter,
-challenge flow + battle judge, camera policy, and the command/ammo/burst systems). The rest of
-the corpus is ~89% still auto-named (zz_/FUN_) plus ~9% SDK/middleware (gnt4/HSD/OS/TRK).
+per address; each traces to a `behavior-notes.md` section, an attack-mechanics findings mechanic,
+or a 2026-07-03 corpus-analysis cluster, with a confidence tier DERIVED_ROM / INFERRED /
+NAMED_ONLY). This supersedes the earlier ~1.2% / 143 estimate: **176 of the 213 are DERIVED_ROM**
+(role read directly from decompiled C or raw ROM data), 21 INFERRED, 16 NAMED_ONLY. The initial
+133 covered the load-bearing combat spine (hit resolution, damage formula, HP/ammo/gauge init,
+the 35-slot state-handler table, the animation setter, challenge flow + battle judge, camera
+policy, command/ammo/burst). The 2026-07-03 expansion added 80 more across three clusters:
+**actor update/state-machine/physics-integration** (32 — velocity→position integrator, gravity
+ground-snap, param-tier buff system, state-reset/guard/victory handlers), **AI/CPU control**
+(15 — the human-vs-CPU input fork FUN_80056900, CPU brain zz_001c9d0_, nearest-enemy targeting,
+auto-fusion pairing, difficulty knobs), and **projectile/collision/FX** (33 — the 3 collision
+passes, the applyHit ROM equiv zz_003d344_, full projectile lifecycle spawn→fly→despawn, homing,
+object pool). The expansion also CORRECTED the collision-pass anchor (real fn 0x8002d7c4, not the
+mid-function 0x8002da88). The rest of the corpus is still auto-named (zz_/FUN_) plus ~9%
+SDK/middleware (gnt4/HSD/OS/TRK).
 Topic-hint buckets in `function-evidence-index.json` (movement-physics 2765, knockback-targeting
 2054, force-setup 1566, challenge-menu 569, assets-animation 599) are the unexplored frontier —
 movement-physics is the bucket that would retire the most TUNED constants.
