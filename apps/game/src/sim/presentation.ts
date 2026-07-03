@@ -215,6 +215,20 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
   const st = battle.state;
   const ammoMax = actionProfile?.shot?.ammoMax ?? 0;
   const specialCooldownMax = actionProfile?.special.cooldown ?? 90;
+
+  // Hold-B charge gauge (TUNED-faithful-to-sim): chargeFrames is a TUNED accumulator (combat.ts
+  // stepAttacks) capped at shot.chargeTier2Frames. Read the cap from the profile; guard absent
+  // key / zero cap -> 0 so the meter stays hidden for non-charge borgs.
+  const chargeCap = actionProfile?.shot?.chargeTier2Frames ?? 90;
+  const chargeFrames = focus?.cooldowns?.["chargeFrames"] ?? 0;
+  const charge01 = chargeCap > 0 ? clamp01(chargeFrames / chargeCap) : 0;
+
+  // Melee/"battle mode" flag: true when the focus borg has a lock target within melee reach.
+  // Behavior-notes (ao): the target cursor flips yellow -> red at this range. The exact ROM
+  // threshold FLOAT_8043762c is trace-T1-blocked (behavior-notes (ai)/(av)); we use the profile's
+  // melee reach where present, else a documented TUNED fallback (MELEE.RANGE = 60 XZ units).
+  const meleeRange = focusHasMeleeRangeTarget(battle, focus, actionProfile);
+
   return {
     allyEnergy: st.energy[0] ?? 0,
     allyMax,
@@ -235,9 +249,34 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
     // flying, refills on land). Absent key = full fuel. BOOST_FUEL_FRAMES=90 is the drain
     // budget; TUNED, so the gauge faithfully reads the sim rather than a ROM-timed value.
     boost01: focus ? clamp01((focus.cooldowns?.["boostFuel"] ?? BOOST_FUEL_FRAMES) / BOOST_FUEL_FRAMES) : 1,
+    charge01,
+    meleeRange,
     timeRemainingFrames: st.timeRemainingFrames,
     alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= allyMax * 0.25,
   };
+}
+
+/**
+ * TUNED melee-reach fallback when a borg's action profile has no melee def (XZ units).
+ * Mirrors combat MELEE.RANGE (60). The exact ROM value (FLOAT_8043762c) is trace-T1-blocked
+ * per behavior-notes (ai)/(av) — this is a display-only threshold, not a gameplay one.
+ */
+const MELEE_RANGE_HUD_FALLBACK = 60;
+
+/** True when the focus borg has a lock target whose XZ distance is within melee reach. */
+function focusHasMeleeRangeTarget(
+  battle: Battle,
+  focus: BorgRuntime | null,
+  actionProfile: BorgActionProfile | null,
+): boolean {
+  if (!focus?.lockTarget) return false;
+  const target = battle.state.borgs.find((b) => b.uid === focus.lockTarget && b.alive);
+  if (!target) return false;
+  const dx = focus.pos.x - target.pos.x;
+  const dz = focus.pos.z - target.pos.z;
+  const distXZ = Math.hypot(dx, dz);
+  const reach = actionProfile?.melee?.range ?? MELEE_RANGE_HUD_FALLBACK;
+  return distXZ <= reach;
 }
 
 function clamp01(v: number): number {

@@ -1239,9 +1239,12 @@ function stepBattle(dt: number): void {
     if (battle.state.result !== "ongoing") break;
   }
 
-  const sceneState = battleSceneState(battle, localFocusBorg());
-  battleScene.sync(sceneState.borgs, sceneState.projectiles, sceneState.focusUid);
-  updateHud();
+  // Compute the presentation once: it drives both the world scene (reticle color = melee mode)
+  // and the HUD, keeping the "battle mode" signal single-sourced from battleHudState.
+  const presentation = currentBattlePresentation();
+  const sceneState = battleSceneState(battle, presentation?.focus ?? localFocusBorg());
+  battleScene.sync(sceneState.borgs, sceneState.projectiles, sceneState.focusUid, Boolean(presentation?.hud.meleeRange));
+  if (presentation) session.hud.update(presentation.hud);
 
   if (battle.state.result !== "ongoing") resolveBattle();
 }

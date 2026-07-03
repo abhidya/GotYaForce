@@ -238,6 +238,7 @@ export class BattleScene {
     borgs: readonly BorgRuntime[],
     projectiles: readonly Projectile[] = [],
     localActiveUid: string | null = null,
+    meleeMode = false,
   ): void {
     const live = new Set<string>();
     for (const b of borgs) {
@@ -278,7 +279,7 @@ export class BattleScene {
         this.actors.delete(uid);
       }
     }
-    this.syncLockMarkers(borgs, localActiveUid);
+    this.syncLockMarkers(borgs, localActiveUid, meleeMode);
     this.syncProjectiles(projectiles);
   }
 
@@ -364,7 +365,11 @@ export class BattleScene {
    * and `target.uid !== self.uid`, and the ally marker is a different shape+color, so an enemy
    * reticle can never appear over the player's own borg or an ally.
    */
-  private syncLockMarkers(borgs: readonly BorgRuntime[], localActiveUid: string | null): void {
+  private syncLockMarkers(
+    borgs: readonly BorgRuntime[],
+    localActiveUid: string | null,
+    meleeMode = false,
+  ): void {
     const byUid = localActiveUid ? borgs.find((b) => b.uid === localActiveUid) : undefined;
     const fallback = localActiveUid ? undefined : borgs.find((b) => b.alive && b.ownerPlayer !== null);
     const candidate = byUid ?? fallback ?? null;
@@ -379,6 +384,10 @@ export class BattleScene {
     if (showEnemy && enemy) {
       // Centered on the target's torso like the original ring, not floating above the head.
       this.enemyReticle.position.set(enemy.pos.x, enemy.pos.y + 80, enemy.pos.z);
+      // Reticle color = "battle mode" cue (behavior-notes (ao), NA manual): the cursor is yellow
+      // at ranged distance and flips RED when the locked enemy is within melee reach. The base
+      // ring texture is drawn near-white so this material tint controls the actual hue.
+      this.enemyReticleRing.color.set(meleeMode ? RETICLE_MELEE_COLOR : RETICLE_RANGED_COLOR);
     }
 
     const ally = self?.allyLockTarget ? borgs.find((b) => b.uid === self.allyLockTarget) : undefined;
@@ -735,6 +744,14 @@ const ALLY_MARKER_SPIN_RAD_PER_S = 2.2;
 /** World size of the enemy reticle sprites (borgs are ~120-150 units tall). */
 const ENEMY_RETICLE_WORLD_SIZE = 210;
 
+// Reticle "battle mode" tints (behavior-notes (ao), NA instruction manual): the target cursor is
+// yellow at ranged distance and flips RED when the locked enemy is within melee reach. Applied as
+// a SpriteMaterial.color tint over a near-white base ring texture. TUNED hues matched to the
+// challenge-8 capture's red-orange lock ring; the exact melee threshold that drives the flip is
+// trace-T1-blocked (FLOAT_8043762c, behavior-notes (ai)/(av)) and computed in presentation.ts.
+const RETICLE_RANGED_COLOR = 0xffd21e; // yellow (default lock)
+const RETICLE_MELEE_COLOR = 0xff3c14; // red-orange (battle/melee mode)
+
 /**
  * Enemy lock-on reticle: a camera-facing red-orange ring with four lugs (drawn on the spinning
  * sprite) plus four static inward-pointing blue triangles, reproducing the original battle
@@ -782,7 +799,9 @@ function drawReticleRingTexture(): THREE.CanvasTexture {
   if (ctx) {
     const c = size / 2;
     const radius = 88;
-    // White underlay ring, then the red ring on top -> white outline on both edges.
+    // Bright underlay ring, then a near-white core ring on top -> white outline on both edges.
+    // The core is drawn near-white (not red) so the SpriteMaterial.color tint (yellow ranged /
+    // red melee, see RETICLE_*_COLOR) actually controls the ring's hue at runtime.
     ctx.beginPath();
     ctx.arc(c, c, radius, 0, Math.PI * 2);
     ctx.strokeStyle = "#ffffff";
@@ -790,7 +809,7 @@ function drawReticleRingTexture(): THREE.CanvasTexture {
     ctx.stroke();
     ctx.beginPath();
     ctx.arc(c, c, radius, 0, Math.PI * 2);
-    ctx.strokeStyle = "#ff3c14";
+    ctx.strokeStyle = "#fff4e0";
     ctx.lineWidth = 18;
     ctx.stroke();
     // Four lugs riding the ring (their off-axis placement makes the spin visible).
@@ -803,7 +822,7 @@ function drawReticleRingTexture(): THREE.CanvasTexture {
       ctx.rotate(a);
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(-17, -17, 34, 34);
-      ctx.fillStyle = "#ff3c14";
+      ctx.fillStyle = "#fff4e0";
       ctx.fillRect(-12, -12, 24, 24);
       ctx.restore();
     }

@@ -81,6 +81,19 @@ export interface HudState {
   alert?: boolean;
   /** Optional boost/dash gauge 0..1 (cyan ring in the top-right gear). */
   boost01?: number;
+  /**
+   * Optional hold-B charge gauge 0..1 (small meter by the ammo/cooldown block).
+   * Sourced from the TUNED `chargeFrames` accumulator (combat.ts stepAttacks) over the
+   * charge cap; only non-zero while the player is holding B to charge a shot. 0/absent = hidden.
+   */
+  charge01?: number;
+  /**
+   * Optional "melee/battle mode" flag: true when the focus borg's locked enemy is within melee
+   * reach. Per the NA instruction manual (behavior-notes (ao)) the target cursor flips
+   * yellow -> red in this state. The world-space reticle color is driven by battleScene; this
+   * field just surfaces the same sim signal on the HudState. Defaults to false.
+   */
+  meleeRange?: boolean;
   /** Optional floating teammate plates ("CPU"/"ALLY" + mini HP bar). */
   teammates?: readonly TeammateMarker[];
 }
@@ -376,6 +389,23 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   const ammoNum = hudText("gf-ammo-num", 506, 380);
   root.appendChild(ammoNum);
 
+  // ===================== CHARGE GAUGE (hold-B charge meter) ==================
+  // TUNED-faithful-to-sim: reads the `chargeFrames` accumulator (a TUNED hold-B counter, no
+  // ROM value) surfaced as HudState.charge01. Reuses the reload-pill gauge style (filled bar +
+  // specular). Placed just above the reload pill so it reads as a second, distinct meter, and is
+  // shown only while actually charging (charge01 > 0). Behavior-notes (ao): "hold B to fill, at
+  // max release for super".
+  const chargeG = svgEl("g", { class: "gf-hidden" });
+  chargeG.appendChild(
+    svgEl("rect", { x: 486, y: 393, width: 80, height: 12, rx: 6, fill: "rgba(46,12,42,0.55)", stroke: "rgba(0,0,0,0.4)", "stroke-width": 1.5 }),
+  );
+  const CHARGE_W = 76;
+  const chargeFill = svgEl("rect", { x: 488, y: 395, width: 0, height: 8, rx: 4, fill: "#ffb02e" });
+  const chargeHi = svgEl("rect", { x: 490, y: 396, width: 0, height: 2.5, rx: 1.25, fill: "rgba(255,255,255,0.6)" });
+  chargeG.appendChild(chargeFill);
+  chargeG.appendChild(chargeHi);
+  svg.appendChild(chargeG);
+
   // ================= floating teammate plates ("CPU" + mini bar) =============
   // challenge-8: "CPU" label x 56..60%W y 21.5..23.5%H, mini bar x 56.2..66%W
   // y 25.2..26.4%H (bar ~63x6px). Positions are supplied per-frame via state.
@@ -461,6 +491,17 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
     if (ammoVal !== lastAmmo) {
       lastAmmo = ammoVal;
       setBitmapText(ammoNum, String(ammoVal), { bold: true, scale: 3, advance: 21, tint: TINT_DIGITS });
+    }
+
+    // Charge gauge (only visible while holding B to charge; flares white at full = "release super").
+    const charge = clamp01(s.charge01 ?? 0);
+    chargeG.classList.toggle("gf-hidden", charge <= 0);
+    if (charge > 0) {
+      const cw = Math.round(CHARGE_W * charge);
+      chargeFill.setAttribute("width", String(Math.max(0, cw)));
+      chargeHi.setAttribute("width", String(Math.max(0, cw - 4)));
+      // At/near full the meter goes bright to cue the super release.
+      chargeFill.setAttribute("fill", charge >= 1 ? "#fff2b0" : "#ffb02e");
     }
 
     // Floating teammate plates.
