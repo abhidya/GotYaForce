@@ -2451,3 +2451,51 @@ the effects column seeds the status-id mapping (Q8/T8); the mechanics pages' wik
 (Attacks, Level, Stages, Power Burst, Missions, etc.) was harvested to the session
 scratchpad for reference — re-harvest with fresh cookies if needed later (raw bulk
 wikitext intentionally not committed; the extracted dataset is the artifact).
+
+### (ax) Corpus digs: nurse dispatch table, +0x6cb is a RING-OUT check (corrects (as)/(ar)), refill types 2/3 unused; Dolphin session status (2026-07-03)
+
+**Nurse heal table 0x802d1130 dumped** (4 entries: FUN_8004ed04 dash/setup ->
+zz_004ee58_ target-state -> [0x8004eee4 unmapped] -> FUN_8004eef4 effect), indexed by
+obj+0x18, installed for ids 0x900/0x908/0x90d (chunk_0006.c:3374-3379). DEATH BORG
+THETA 0x906 rides a DIFFERENT path (chunk_0050.c:89: `if id==0x906 zz_0082824_(obj,0x6a)`).
+NEGATIVE: the HP-add site and the 37/50/100 amount source are NOT in this table — the
+heal application is deeper (candidate zz_0088e50_, tail-called from FUN_8004eef4, undecoded;
+amounts likely per-borg data off obj+0x90). Healing verb is located; the write site
+remains open (T8/T10 trace or a follow dig on zz_0088e50_).
+
+**CORRECTION to (as)/(ar): +0x6cb is NOT a battle-mode flag — it is a RING-OUT /
+out-of-bounds respawn trigger.** Full quote (FUN_80059e58, chunk_0007.c:2620-2651):
+the block fires only when the actor position (+0x20 x, +0x28 z) leaves the arena bounds
+struct DAT_8043625c (fields +0x38/+0x3c x-range, +0x40/+0x44 z-range) for a counter
++0x6cc exceeding 0x1d (29 frames). On trigger it sets +0x6cb and calls the death/reaction
+cues zz_006a750_/zz_006a6fc_(borg,9). The 1-vs-2 split is `(+0x5e0 & 0x5000000)`: bits
+CLEAR -> +0x6cb=1 (30-frame respawn i-frames via FLOAT_80437558, re-verified 30.0),
+SET -> +0x6cb=2 (60 via FLOAT_80437564, 60.0) plus +0x272 |= 0x43. 0x5000000 = the
+0x1000000 (in-hit-reaction) | 0x4000000 (defensive-buff/half-damage) status bits from
+(al)/(aq) — NOT the mode byte PTR_DAT_80433930[0x32]. So the survey's "invincibility
+bypassed in Challenge/Story" claim is REFUTED: there's no mode bypass; this is a
+fall-off-stage respawn whose i-frame length depends on the victim's status bits at
+ring-out time. behavior-notes (as) lead 1 and (ar) lead 1 are corrected accordingly.
+
+**Refill types 2/3 are dead at runtime**: zz_006dcc0_ (chunk_0009.c:2909-2973) has
+branches ONLY for type 1 (gradual) and type<=0 (all-at-once); init (chunk_0007.c:88-90)
+catches `type<4` and resets the timer, but no per-frame handler consumes 2/3 and no
+other reader of the type field (+0x790/+0x798/+0x79e) with value 2/3 exists in the
+corpus. So the (aw) wiki "Over Time" -> ROM type-2 mismatch is explained: type 2 is
+initialized-but-unconsumed (behaves as no-refill / effectively all-at-once fallback);
+the wiki label is the authors' interpretation, not a distinct engine mode. ATK-009's
+type<=0/1 model is complete; treat 2/3 as no-op.
+
+**Dolphin live-capture session (permission granted this session):** infrastructure
+PROVEN — Dolphin boots the disc under the GDB stub (scripts/launch-dolphin-gdb.mjs),
+loads savestates, memory reads succeed (e.g. *(0x80433934)=0x80003154), code
+breakpoints set/fire (PADRead 0x8021379c hit live), and scripts/trace-attack-mechanics.mjs
+connects and records. BLOCKED on autonomous DYNAMIC capture: the T1-T10 scenarios need a
+controller input recipe driven through the event (e.g. "CPU hit on idle player") and the
+live borg base resolves reliably only mid-battle; headless batch boot + the available
+savestates land in states where the fast-path actor address reads null and no input is
+injected, so recorded frames are idle (T9 capture ran 600 frames, 0 change points). This
+confirms the plan's tagging of T1-T10 as human/Dolphin-in-the-loop tasks. To finish
+autonomously would require TAS-movie input injection (a separate tooling ticket); with a
+human at the controller the harness is ready as-is. Proven launch procedure appended to
+the trace plan.

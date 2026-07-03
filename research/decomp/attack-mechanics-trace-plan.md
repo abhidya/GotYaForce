@@ -242,3 +242,24 @@ pairs, status borgs, solid/piercing projectile borgs, all refill-mode archetypes
 Import it into Dolphin's memory card A before any trace session; per-scenario borg
 picks in the sections above no longer need availability workarounds. See
 behavior-notes (aq); format decode in progress (scripts/inspect-gotcha-save.mjs).
+
+## Proven launch procedure (2026-07-03) + the input-injection gap
+
+Verified working this session:
+1. `node scripts/launch-dolphin-gdb.mjs --save-state "<path.sav>"` boots the disc under the
+   GDB stub on port 5555 (`--batch --debugger`, GG4E guard on the savestate). The three
+   .gci saves go in Dolphin's memory card A; the .sav savestates jump to a battle moment.
+2. Wait ~20s for boot, then `node scripts/trace-attack-mechanics.mjs --preset T<n> --frames N`.
+3. Memory reads, code breakpoints (PADRead 0x8021379c), and frame recording all work.
+
+GAP that makes T1-T10 human-in-the-loop (not autonomous): each scenario needs a controller
+input recipe performed THROUGH the combat event, and the live borg base resolves only while
+a battle is actively running. Headless boot + savestate lands idle, so an unattended capture
+records no change points. Two ways to close it:
+- **Human driver (ready now):** a person performs each preset's input recipe while the
+  harness records — no code changes needed.
+- **TAS-movie injection (future ticket):** script the input recipe as a .dtm and boot with
+  it, making captures fully autonomous. Recommended if many trace iterations are expected.
+
+Stub note: it accepts one client at a time; a stray probe connection can drop the session —
+run the harness/diagnostic directly, don't pre-probe the port.
