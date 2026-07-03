@@ -1,0 +1,110 @@
+{
+  "$comment": "Curated FACTUAL anchors extracted from player guides (Voltrox747 move list + glitch FAQ, Sabre929 borg list, Fury_Hikari walkthrough, t3h_chosen_1 ninja guide) supplied in-session. Facts only, paraphrased; confidence tier OBSERVED_GUIDE — player-measured, never DERIVED. Damage values were measured by the guide author against a level-7 Neo G Red unless noted (stagger-prone moves vs Blizzard Dragon). Use as trace anchors (T1/T2/T7/T8/T9/T10) and validation vectors; never port numbers directly. See behavior-notes.md (an).",
+  "confidence": "OBSERVED_GUIDE",
+  "idEncodingValidation": {
+    "$comment": "Glitch-FAQ force codes = sum of 2^(force-1) = the game's two-byte borg id (family<<8|variant). Roster-validated exact matches.",
+    "checks": [
+      { "codeForces": [10], "id": "0x200", "expect": "SWORD KNIGHT" },
+      { "codeForces": [2, 4, 10], "id": "0x20a", "expect": "NORMAL KNIGHT", "rosterMatch": "pl020a" },
+      { "codeForces": [1, 4, 10], "id": "0x209", "expect": "IMPERIAL KNIGHT", "rosterMatch": "pl0209" },
+      { "codeForces": [1, 9, 10, 11], "id": "0x701", "expect": "DEMON SAMURAI", "rosterMatch": "pl0701" },
+      { "codeForces": [2, 9, 10, 11], "id": "0x702", "expect": "VAMPIRE KNIGHT", "rosterMatch": "pl0702" },
+      { "codeForces": [2, 4, 9, 10, 11], "id": "0x70a", "expect": "VLAD", "rosterMatch": "pl070a" }
+    ]
+  },
+  "levelColorEncoding": {
+    "value": "(colorVariant << 8) | levelByte",
+    "colorVariants": { "0": "normal", "1": "alternate", "2": "gold", "3": "silver", "4": "crystal", "5": "black" },
+    "expRule": "2 exp per battle participation (1 on loss/quit); exp-to-level varies per borg (10/20/40)",
+    "romCounterpart": "zz_005814c_ writes u16 +0x3ea/+1000 and byte +0x3ed/+0x3ec (behavior-notes (ak))"
+  },
+  "meleeContextTaxonomy": {
+    "universalContexts": ["standing", "ground_dash", "landing", "normal_air", "air_dash"],
+    "flyerContexts": ["hovering", "dashing", "diving"],
+    "extraContexts": ["above_enemy (sword-drop/lance-stab specials)"],
+    "moveAttributes": {
+      "CN": "cancellable into another attack",
+      "SB": "breaks through shields (at least one hit)",
+      "MH": "continuous hits while in contact (rehit-interval family)",
+      "WV": "emits wave projectile with the swing"
+    }
+  },
+  "ammoRechargeAnchors": {
+    "$comment": "Guide 'Recharge: Yes' = regenerates without emptying first (gradual); 'No' = all-at-once family. Cross-validate vs stat-row refillType (behavior-notes (am)).",
+    "examples": [
+      { "borg": "pl0615 G RED", "move": "B laser", "ammo": 5, "recharge": false, "rowRefillType": 0, "match": true },
+      { "borg": "pl0500 FLAME DRAGON", "move": "B flame bomb", "ammo": 5, "recharge": true, "rowRefillType": 1, "match": true },
+      { "borg": "NEO G RED", "move": "B laser", "ammo": 11, "recharge": false },
+      { "borg": "pl0503 CYBER DEATH DRAGON (Death Head/Cyber Dragon lineage)", "move": "X pods", "ammo": 8, "recharge": null },
+      { "borg": "GATLING GUNNER", "move": "B gatling", "ammo": 100, "recharge": false, "note": "shots never stagger the victim (record with tiny gauge damage — good damage-record probe)" },
+      { "borg": "VAMPIRE KNIGHT", "move": "B X-slash", "ammo": 5, "recharge": true },
+      { "borg": "NORMAL NINJA", "move": "B shuriken", "ammo": 10, "recharge": false },
+      { "borg": "NORMAL NINJA", "move": "X bomb", "ammo": 5, "recharge": false },
+      { "borg": "SHURIKEN NINJA", "move": "B shuriken", "ammo": 30, "recharge": false },
+      { "borg": "ICBM TANK", "move": "X ICBM", "ammo": 1, "recharge": null, "damageAnchor": 584 }
+    ],
+    "specialRefillModes": [
+      "deployed-return: Demon Samurai skulls, Elemental Knight fist, Megaton Robot head, Tao Master swords, Cyber Girl Super/Hyper remotes, Mechanical/Cyber Dragon pods — fire blocked until the object returns/dies",
+      "on-expiry-return: Time/Remote Bomber floating bombs free a slot when they explode",
+      "instant-restore-on-transform: transforming machine borgs restore all ammo on transform"
+    ]
+  },
+  "statusObservations": [
+    { "status": "poison/DoT", "source": "Poison Worm (+20 over time), Venom Worm (+26)", "note": "on-hit DoT exists; corpus DoT-loop negative is revised (see vampire drain)" },
+    { "status": "freeze", "source": "Ice/Blizzard Dragon B projectile direct hit", "note": "mashing buttons/directions shortens the freeze — links the +0x550 mash counter as a status-recovery consumer candidate" },
+    { "status": "time_stop", "source": "Chrono Samurai X charge", "note": "victims attackable; stagger-locked; ~115 max observed on Neo G" },
+    { "status": "aim_scramble", "source": "Pop Honey X", "note": "spins victim, aim lost, movement unaffected" },
+    { "status": "transform_victim", "source": "Death Borg Omicron X charge (to Death Eye), Bug Witch X (to Roach)", "note": "temporary; HP retained" },
+    { "status": "enlarge", "source": "Patra Witch (slight), Isis Witch (great)", "note": "stat increase" },
+    { "status": "shrink", "source": "Bastet Witch (slight), Sekhmet Witch (great)", "note": "stat decrease" },
+    { "status": "slow_field", "source": "Jelly/Tar Diver X spheres (slight/great)", "note": "area effect" },
+    { "status": "speed_buff/debuff", "source": "Quick/Slow Valkrie B charge shot on target" },
+    { "status": "tether", "source": "Arrow Ninja/Shijima X arrows (8 ammo, stackable position tethers)" },
+    { "status": "position_swap", "source": "Switching Ninja X" }
+  ],
+  "barrierAnchors": [
+    { "source": "BARRIER GIRL X (self)", "absorbs": 80 },
+    { "source": "GUARD WITCH X (blocks the TARGET's own shots, fired at an enemy)", "absorbs": 200, "stackable": true },
+    { "source": "SHIELD WITCH X", "absorbs": 280, "stackable": true },
+    { "source": "CYBER MACHINE fusion P2 X", "note": "directional shields, ~1s, 3 charges, high absorb" }
+  ],
+  "lifestealVampire": {
+    "borgs": ["pl0702 VAMPIRE KNIGHT", "pl070a VLAD"],
+    "passiveDrain": "~2-3 HP/sec, floors at 1 HP",
+    "regain": "any connecting melee restores HP",
+    "romAnchor": "chunk_0003.c:6318-6323 increment gated on ids 0x702/0x70a (behavior-notes (al)/(an))"
+  },
+  "swordGrowth": {
+    "borgs": ["pl0701 DEMON SAMURAI", "pl0708 AKUMA SAMURAI"],
+    "rule": "swords lengthen as enemies die (any killer)",
+    "romAnchor": "chunk_0003.c:6237 id check 0x701/0x708 (behavior-notes (an))"
+  },
+  "nurseHeals": [
+    { "borg": "DEATH BORG THETA (0x906)", "healHp": 37 },
+    { "borg": "pl0900 ANGEL NURSE", "healHp": 50 },
+    { "borg": "pl0908 ANGEL RESCUE", "healHp": 100 },
+    { "borg": "pl090d NAO", "healHp": null, "note": "heals ally OR enemy; re-use blocked until target's heal animation ends" }
+  ],
+  "contactDamage": {
+    "$comment": "Contact damage is AUTHORED PER-BORG, not engine-global (mechanic L refinement).",
+    "examples": [
+      { "borg": "dragon family (Fire/Ice/Thunder/Space/Cosmic)", "move": "stepping on borgs (walking or airborne feet contact)", "damage": 22 },
+      { "borg": "FLAME/BLIZZARD/PLASMA DRAGON", "move": "stepping", "damage": 44 },
+      { "borg": "ACCELERATION NINJA", "move": "air-dash/jump body contact (blades out)", "damage": 44, "note": "no normal melee at all — touch attacks only" },
+      { "borg": "DEATH ICBM / WALKING BOMB / DEATH BOMB", "move": "contact-triggered self-detonation", "note": "suicide is collision-scripted, not a button; owner dies by own move (consistent with unconditional owner exclusion, (al))" }
+    ]
+  },
+  "damageFormulaVectors": {
+    "$comment": "End-to-end validation targets once level floats are wired (measured vs level-7 Neo G Red).",
+    "examples": [
+      { "attacker": "pl0615 G RED", "move": "B laser", "observed": 17 },
+      { "attacker": "pl0615 G RED", "move": "standing melee combo (3 hits)", "observed": 70 },
+      { "attacker": "NEO G RED", "move": "X lunge", "observed": 70 },
+      { "attacker": "BEAM SATELLITE", "move": "X down-laser", "observed": 476, "victim": "Blizzard Dragon pre-stagger" },
+      { "attacker": "ICBM TANK", "move": "X missile", "observed": 584 },
+      { "attacker": "MACHINE DRAGON (fusion)", "move": "dual-charged X beam", "observed": 2280, "victim": "level-4 Sirius" },
+      { "attacker": "DEATH ICBM", "move": "detonation", "observed": "~500 vs large borgs; outright kill vs most" }
+    ]
+  },
+  "fusionControlNote": "Guide states the co-op fused machine splits ATTACKS vs MOVEMENT between the two players — conflicts with the corpus reading of one shared command struct ((aj)); resolve via trace T3."
+}

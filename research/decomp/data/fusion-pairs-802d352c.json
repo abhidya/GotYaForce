@@ -1,0 +1,393 @@
+{
+ "provenance": {
+  "extractor": "scripts/gen_fusion_pairs.py",
+  "citation": "research/decomp/behavior-notes.md (aj) Power Burst fusion system decoded",
+  "readMethod": "dol.py-style: DOL section table parsed directly from user-data/GG4E/disc/sys/boot.dol, addr_to_off()+struct.unpack for each read.",
+  "romConstant": "DAT_802d352c",
+  "date": "2026-07-03"
+ },
+ "pairTable": {
+  "addr": "0x802d352c",
+  "hardBoundCount": 17,
+  "hardBoundNote": "17 entries only (families 0-16). The word at 0x802d3570 belongs to the 35-slot state-handler table, NOT this table -- verified above by asserting the overflow words look like code pointers.",
+  "entries": [
+   {
+    "family": 0,
+    "addr": "0x802d352c",
+    "listPtr": null
+   },
+   {
+    "family": 1,
+    "addr": "0x802d3530",
+    "listPtr": null
+   },
+   {
+    "family": 2,
+    "addr": "0x802d3534",
+    "listPtr": null
+   },
+   {
+    "family": 3,
+    "addr": "0x802d3538",
+    "listPtr": null
+   },
+   {
+    "family": 4,
+    "addr": "0x802d353c",
+    "listPtr": null
+   },
+   {
+    "family": 5,
+    "addr": "0x802d3540",
+    "listPtr": "0x802d3420"
+   },
+   {
+    "family": 6,
+    "addr": "0x802d3544",
+    "listPtr": "0x802d3480"
+   },
+   {
+    "family": 7,
+    "addr": "0x802d3548",
+    "listPtr": null
+   },
+   {
+    "family": 8,
+    "addr": "0x802d354c",
+    "listPtr": null
+   },
+   {
+    "family": 9,
+    "addr": "0x802d3550",
+    "listPtr": null
+   },
+   {
+    "family": 10,
+    "addr": "0x802d3554",
+    "listPtr": null
+   },
+   {
+    "family": 11,
+    "addr": "0x802d3558",
+    "listPtr": null
+   },
+   {
+    "family": 12,
+    "addr": "0x802d355c",
+    "listPtr": null
+   },
+   {
+    "family": 13,
+    "addr": "0x802d3560",
+    "listPtr": null
+   },
+   {
+    "family": 14,
+    "addr": "0x802d3564",
+    "listPtr": null
+   },
+   {
+    "family": 15,
+    "addr": "0x802d3568",
+    "listPtr": null
+   },
+   {
+    "family": 16,
+    "addr": "0x802d356c",
+    "listPtr": null
+   }
+  ],
+  "emptyFamilies": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16
+  ],
+  "nonNullFamilies": [
+   5,
+   6
+  ]
+ },
+ "rawRegion": {
+  "note": "Raw bytes for the whole 0x802d3420..0x802d352c region: this is the two PER-VARIANT POINTER ARRAYS for families 5 and 6 (listPtr + variant*4), NOT the pair sub-lists themselves -- the sub-lists those pointers target live in separate, non-adjacent regions (family 5's in a 0x80433... rodata blob, family 6's just BEFORE this window at 0x802d33f0..0x802d3420). Recorded verbatim per (aj)'s 'dump raw bytes... record both the raw hex AND your parsed interpretation' instruction. Each variant's actual pair sub-list raw bytes are recorded separately as families[*].variants[*].subListRawHex below.",
+  "start": "0x802d3420",
+  "end": "0x802d352c",
+  "hex": "0000000000000000000000000000000000000000804337f8804338000000000000000000000000000000000000000000000000000000000000000000000000000000000080433808804338100000000000000000000000000000000000000000802d33f0802d33fc000000000000000000000000000000000000000000000000802d3408802d3414000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+ },
+ "families": {
+  "5": {
+   "familyByte": 5,
+   "listPtr": "0x802d3420",
+   "listWordCount": 24,
+   "listBoundNote": "bound is address-adjacency confirmed (next known table start), not symbol-named -- see module docstring",
+   "nonNullVariantCount": 4,
+   "variants": [
+    {
+     "variant": 5,
+     "listEntryAddr": "0x802d3434",
+     "subListPtr": "0x804337f8",
+     "pairCount": 1,
+     "pairs": [
+      {
+       "partner": {
+        "spawnId": 1286,
+        "family": 5,
+        "variant": 6,
+        "plId": "pl0506"
+       },
+       "result": {
+        "spawnId": 1287,
+        "family": 5,
+        "variant": 7,
+        "plId": "pl0507"
+       }
+      }
+     ],
+     "subListRawHex": "05060507ffff0000"
+    },
+    {
+     "variant": 6,
+     "listEntryAddr": "0x802d3438",
+     "subListPtr": "0x80433800",
+     "pairCount": 1,
+     "pairs": [
+      {
+       "partner": {
+        "spawnId": 1285,
+        "family": 5,
+        "variant": 5,
+        "plId": "pl0505"
+       },
+       "result": {
+        "spawnId": 1287,
+        "family": 5,
+        "variant": 7,
+        "plId": "pl0507"
+       }
+      }
+     ],
+     "subListRawHex": "05050507ffff0000"
+    },
+    {
+     "variant": 17,
+     "listEntryAddr": "0x802d3464",
+     "subListPtr": "0x80433808",
+     "pairCount": 1,
+     "pairs": [
+      {
+       "partner": {
+        "spawnId": 1298,
+        "family": 5,
+        "variant": 18,
+        "plId": "pl0512"
+       },
+       "result": {
+        "spawnId": 1299,
+        "family": 5,
+        "variant": 19,
+        "plId": "pl0513"
+       }
+      }
+     ],
+     "subListRawHex": "05120513ffff0000"
+    },
+    {
+     "variant": 18,
+     "listEntryAddr": "0x802d3468",
+     "subListPtr": "0x80433810",
+     "pairCount": 1,
+     "pairs": [
+      {
+       "partner": {
+        "spawnId": 1297,
+        "family": 5,
+        "variant": 17,
+        "plId": "pl0511"
+       },
+       "result": {
+        "spawnId": 1299,
+        "family": 5,
+        "variant": 19,
+        "plId": "pl0513"
+       }
+      }
+     ],
+     "subListRawHex": "05110513ffff0000"
+    }
+   ]
+  },
+  "6": {
+   "familyByte": 6,
+   "listPtr": "0x802d3480",
+   "listWordCount": 43,
+   "listBoundNote": "bound is address-adjacency confirmed (next known table start), not symbol-named -- see module docstring",
+   "nonNullVariantCount": 4,
+   "variants": [
+    {
+     "variant": 0,
+     "listEntryAddr": "0x802d3480",
+     "subListPtr": "0x802d33f0",
+     "pairCount": 2,
+     "pairs": [
+      {
+       "partner": {
+        "spawnId": 1537,
+        "family": 6,
+        "variant": 1,
+        "plId": "pl0601"
+       },
+       "result": {
+        "spawnId": 1538,
+        "family": 6,
+        "variant": 2,
+        "plId": "pl0602"
+       }
+      },
+      {
+       "partner": {
+        "spawnId": 1545,
+        "family": 6,
+        "variant": 9,
+        "plId": "pl0609"
+       },
+       "result": {
+        "spawnId": 1548,
+        "family": 6,
+        "variant": 12,
+        "plId": "pl060c"
+       }
+      }
+     ],
+     "subListRawHex": "060106020609060cffff0000"
+    },
+    {
+     "variant": 1,
+     "listEntryAddr": "0x802d3484",
+     "subListPtr": "0x802d33fc",
+     "pairCount": 2,
+     "pairs": [
+      {
+       "partner": {
+        "spawnId": 1536,
+        "family": 6,
+        "variant": 0,
+        "plId": "pl0600"
+       },
+       "result": {
+        "spawnId": 1538,
+        "family": 6,
+        "variant": 2,
+        "plId": "pl0602"
+       }
+      },
+      {
+       "partner": {
+        "spawnId": 1544,
+        "family": 6,
+        "variant": 8,
+        "plId": "pl0608"
+       },
+       "result": {
+        "spawnId": 1550,
+        "family": 6,
+        "variant": 14,
+        "plId": "pl060e"
+       }
+      }
+     ],
+     "subListRawHex": "060006020608060effff0000"
+    },
+    {
+     "variant": 8,
+     "listEntryAddr": "0x802d34a0",
+     "subListPtr": "0x802d3408",
+     "pairCount": 2,
+     "pairs": [
+      {
+       "partner": {
+        "spawnId": 1537,
+        "family": 6,
+        "variant": 1,
+        "plId": "pl0601"
+       },
+       "result": {
+        "spawnId": 1550,
+        "family": 6,
+        "variant": 14,
+        "plId": "pl060e"
+       }
+      },
+      {
+       "partner": {
+        "spawnId": 1545,
+        "family": 6,
+        "variant": 9,
+        "plId": "pl0609"
+       },
+       "result": {
+        "spawnId": 1546,
+        "family": 6,
+        "variant": 10,
+        "plId": "pl060a"
+       }
+      }
+     ],
+     "subListRawHex": "0601060e0609060affff0000"
+    },
+    {
+     "variant": 9,
+     "listEntryAddr": "0x802d34a4",
+     "subListPtr": "0x802d3414",
+     "pairCount": 2,
+     "pairs": [
+      {
+       "partner": {
+        "spawnId": 1536,
+        "family": 6,
+        "variant": 0,
+        "plId": "pl0600"
+       },
+       "result": {
+        "spawnId": 1548,
+        "family": 6,
+        "variant": 12,
+        "plId": "pl060c"
+       }
+      },
+      {
+       "partner": {
+        "spawnId": 1544,
+        "family": 6,
+        "variant": 8,
+        "plId": "pl0608"
+       },
+       "result": {
+        "spawnId": 1546,
+        "family": 6,
+        "variant": 10,
+        "plId": "pl060a"
+       }
+      }
+     ],
+     "subListRawHex": "0600060c0608060affff0000"
+    }
+   ]
+  }
+ },
+ "unknownIds": [],
+ "spawnIdPacking": {
+  "formula": "family = spawnId >> 8; variant = spawnId & 0xff; plId = f'pl{family:02x}{variant:02x}'",
+  "citation": "behavior-notes.md (n)"
+ }
+}

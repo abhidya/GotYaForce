@@ -1,0 +1,324 @@
+{
+  "generatedBy": "Claude/Fable 5 audit",
+  "generatedOn": "2026-07-03",
+  "scope": "Gotcha Force GG4E attack/combat mechanics",
+  "humanReadableTwin": "research/decomp/attack-mechanics-findings.md",
+  "provenanceNote": "Evidence entries whose summary says 'corpus read (audit)' are single-pass reads of research/decomp/ghidra-export/chunk_*.c with quoted code but no second verification; behavior-notes.md citations inherit that notebook's confidence.",
+  "confidenceVocabulary": [
+    "DERIVED_ROM", "DERIVED_TRACE", "CONFIRMED_ASSET", "ASSET_INFERRED",
+    "WIKI_TAXONOMY_ONLY", "CURRENT_PORT", "TUNED_EXISTING", "FALLBACK_RECOMMENDED",
+    "BLOCKED", "CHECKED_CLOSED"
+  ],
+  "mechanics": [
+    {
+      "id": "contextual_attack_resolution",
+      "wikiClaim": "B is a context-dependent attack (melee when appropriate, ranged otherwise); X is the secondary/special attack.",
+      "currentPort": {
+        "summary": "PlayerInput has attack(B held)/special(X) booleans only; stepAttacks iterates [melee,shot] ordered by static actionProfile.primary; no distance/context logic; no command vocabulary shared with AI.",
+        "files": ["packages/combat/src/types.ts", "packages/combat/src/combat.ts", "packages/combat/src/actionProfiles.ts", "packages/combat/src/battle.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0007.c", "function": "FUN_800562b8", "address": "0x800562b8", "linesOrOffsets": "23", "summary": "commandStruct(actor+0x4b0) bytes +0/+1/+4 copied to actor+0x660/+0x661/+0x591 (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_006a8c0_", "address": "0x8006a8c0", "linesOrOffsets": "978-980", "summary": "same copy on the player-controlled path (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "FUN_800699d8", "address": "0x800699d8", "linesOrOffsets": "220+", "summary": "decision brain: tests transformed button word actor+0x5d4 in priority order, sets command type actor+0x585 in {1,2,3,5} via testers zz_0069a88_/zz_0069b10_/zz_0069b98_/zz_0069bf0_/zz_0069c50_/zz_0069cb0_ (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_0069cb0_", "address": "unresolved (chunk_0009.c:405-449)", "linesOrOffsets": "412", "summary": "ranged command rejected when no target: if (actor+0x4a0 == 0) return 0 (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_0069ea4_ / zz_0069fe0_", "address": "chunk_0009.c:500-534 / 554-587", "linesOrOffsets": "497-498, 555-556", "summary": "subtype actor+0x586 in 0-5; distance gates FLOAT_8043762c vs actor+0x694/+0x6a4 select charged-ranged variants (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_006a104_", "address": "0x8006a104", "linesOrOffsets": "603-662", "summary": "(type,subtype) executed through per-actor table at +0x4ec (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0007.c", "function": "FUN_8005d494", "address": "0x8005d494", "linesOrOffsets": "4750-4782", "summary": "attack-active handler branches +0x591==1/2 (melee family) vs 4/5/6 (ranged family) (corpus read, audit)" }
+      ],
+      "confidence": "DERIVED_ROM (pipeline structure) + BLOCKED (button-bit identities, command-struct writer, 0x585/0x586 to 0x591 correspondence, FLOAT_8043762c value)",
+      "unknowns": [
+        "physical GC button -> +0x5d4 transformed-bit mapping (two corpus reads disagree on bit 0x200)",
+        "writer of the +0x4b0 command struct (player pad plumbing and CPU AI issuer both unfound)",
+        "numeric value of FLOAT_8043762c (dumpable via research/decomp/dol.py)",
+        "meaning of command value 7 and type 3"
+      ],
+      "traceNeeded": ["T1 (attack-mechanics-trace-plan.md)"],
+      "recommendedSchema": { "see": "research/decomp/data/attack-profile-port-schema.json#inputBindings/contextualAttacks" },
+      "cheapAgentTickets": ["ATK-001", "ATK-002", "ATK-003"]
+    },
+    {
+      "id": "melee_priority_at_range",
+      "wikiClaim": "At melee range, B produces the melee attack even for borgs that normally shoot.",
+      "currentPort": {
+        "summary": "No distance check; actionProfile.primary fixes the melee/shot order permanently per borg.",
+        "files": ["packages/combat/src/combat.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_0069ea4_/zz_0069fe0_", "address": "chunk_0009.c:497-498,555-556", "linesOrOffsets": "FLOAT_8043762c vs +0x694/+0x6a4", "summary": "distance-gated variant selection exists in the command layer, but only proven for charged-ranged subtype selection (corpus read, audit)" }
+      ],
+      "confidence": "BLOCKED (exact melee-priority rule)",
+      "unknowns": ["whether melee-over-ranged is distance-, target-state-, or per-borg-driven"],
+      "traceNeeded": ["T1 distance sweep"],
+      "recommendedSchema": {},
+      "cheapAgentTickets": ["ATK-003"]
+    },
+    {
+      "id": "weapon_capability_gating",
+      "wikiClaim": "Ranged-only and melee-only borgs exist; buttons fall through to what the borg has.",
+      "currentPort": {
+        "summary": "profile.hasMelee/hasShot (asset-generated) null out action defs; primary falls back to the existing kind.",
+        "files": ["packages/combat/src/actionProfiles.ts", "packages/combat/src/stats.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_006a104_", "address": "0x8006a104", "linesOrOffsets": "603+", "summary": "capability is data-driven: (type,subtype) resolved through per-actor table at +0x4ec (format unread) (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0002.c", "function": "(fire gate block)", "address": "chunk_0002.c:7158-7165", "linesOrOffsets": "7158-7165", "summary": "weapon unusable when cur<1 unless max==0 (infinite) (corpus read, audit)" }
+      ],
+      "confidence": "ASSET_INFERRED (current flags) + DERIVED_ROM (gating mechanisms) + BLOCKED (+0x4ec table format)",
+      "unknowns": ["+0x4ec action-table layout and its source data file"],
+      "traceNeeded": [],
+      "recommendedSchema": {},
+      "cheapAgentTickets": ["ATK-005"]
+    },
+    {
+      "id": "contextual_melee_variants",
+      "wikiClaim": "Melee differs by movement context: standing, ground dash, air dash, flying, stabbing (above enemy), jumping, neutral air, landing.",
+      "currentPort": {
+        "summary": "One MeleeActionDef per borg with a combo chain; startable from any non-busy state; no context variants.",
+        "files": ["packages/combat/src/combat.ts", "packages/combat/src/actionProfiles.ts", "packages/combat/src/movement.ts"]
+      },
+      "evidence": [
+        { "type": "CONFIRMED_ASSET", "path": "research/format-specs/borg-animation-banks.md", "function": "n/a", "address": "n/a", "linesOrOffsets": "group semantics table", "summary": "NEGATIVE: animation banks are flat (group,slot) enums; no movement-context axis; group 1 = 5-23 generic attack slots per borg" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_0069ea4_/zz_0069fe0_", "address": "chunk_0009.c:500-587", "linesOrOffsets": "subtype +0x586 0-5", "summary": "a real context/variant channel exists: subtype 4 set on air/elevated gate; grounded checks in testers (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0007.c", "function": "FUN_8005d494 et al.", "address": "0x8005d494", "linesOrOffsets": "4259-4813", "summary": "+0x1d0f per-attack direction/variant selector 0-5 consumed by attack handlers (corpus read, audit)" },
+        { "type": "CONFIRMED_ASSET", "path": "research/format-specs/hit-bin-format.md", "function": "zz_008ac80_", "address": "0x8008ac80", "linesOrOffsets": "remap B, 64 x 0x50 attack records", "summary": "authored per-move hitboxes with frame windows exist to back per-context attacks" }
+      ],
+      "confidence": "DERIVED_ROM (a variant channel exists) + WIKI_TAXONOMY_ONLY (the specific 8-context list) + BLOCKED (context -> variant -> bank/hitbox mapping)",
+      "unknowns": ["context -> (command,subtype) mapping", "(command,subtype) -> animation bank + remap-B slot mapping"],
+      "traceNeeded": ["T2 (after T1)"],
+      "recommendedSchema": { "see": "attack-profile-port-schema.json#movementContexts" },
+      "cheapAgentTickets": ["ATK-004", "ATK-005"]
+    },
+    {
+      "id": "passive_contact_damage",
+      "wikiClaim": "Some borgs damage enemies by stepping on them, flying into them sword-out, air-dashing through them, or landing on them.",
+      "currentPort": {
+        "summary": "Not modeled; damage only via swings/specials/projectiles.",
+        "files": []
+      },
+      "evidence": [
+        { "type": "ASSET_INFERRED", "path": "research/format-specs/hit-bin-format.md", "function": "n/a", "address": "n/a", "linesOrOffsets": "activeEnd=-1 semantics", "summary": "persistent attack records are representable in the format (activeEnd=-1), but none was confirmed used as movement-contact damage" },
+        { "type": "CHECKED_CLOSED", "path": "research/decomp/behavior-notes.md", "function": "35-slot state handlers", "address": "0x802d3570 table", "linesOrOffsets": "section (u)", "summary": "NEGATIVE: every state-handler body was read in (u); none applies damage as a movement side effect" }
+      ],
+      "confidence": "WIKI_TAXONOMY_ONLY; FALLBACK_RECOMMENDED: disabled",
+      "unknowns": ["whether contact damage is authored as persistent attack hitboxes tied to movement states", "per-target re-hit pacing (rehit interval would cover it)"],
+      "traceNeeded": ["T2 extension: stomp/contact script with a giant borg"],
+      "recommendedSchema": {},
+      "cheapAgentTickets": ["ATK-006"]
+    },
+    {
+      "id": "projectile_solidity",
+      "wikiClaim": "Solid projectiles (missiles, drills) are physical and can be destroyed mid-air by melee, solids, or nonsolids; nonsolid energy shots pass through each other.",
+      "currentPort": {
+        "summary": "Projectiles never interact with each other or with melee swings.",
+        "files": ["packages/combat/src/combat.ts"]
+      },
+      "evidence": [
+        { "type": "CHECKED_CLOSED", "path": "research/decomp/ghidra-export/chunk_0003.c", "function": "collision_hit_pair_pass_active_vs_borgs / _active_vs_secondary", "address": "0x8002da88 / 0x8002db58", "linesOrOffsets": "7031-7173", "summary": "NEGATIVE (generic path only): no proj-vs-proj loop and no solidity flag in the generic collision passes; searched zz_008893c_ spawn sites, DAT_803c477c/DAT_803c2f7c list loops, 'penetrat|pierce' strings (corpus read, audit). Per-object-type dispatch PTR_FUN_802da740 bodies remain unread, so this is NOT closed for the whole binary." }
+      ],
+      "confidence": "WIKI_TAXONOMY_ONLY (behavior) + BLOCKED (per-type dispatch unread)",
+      "unknowns": ["candidate solidity field on the object struct", "which +0x11 object types participate"],
+      "traceNeeded": ["T5"],
+      "recommendedSchema": { "see": "attack-profile-port-schema.json#projectileProperties.solidity" },
+      "cheapAgentTickets": ["ATK-007"]
+    },
+    {
+      "id": "projectile_vs_projectile",
+      "wikiClaim": "Projectiles can collide with and destroy other projectiles per the solid/nonsolid rules.",
+      "currentPort": { "summary": "Not modeled.", "files": ["packages/combat/src/combat.ts"] },
+      "evidence": [
+        { "type": "CHECKED_CLOSED", "path": "research/decomp/ghidra-export/chunk_0003.c", "function": "generic collision passes", "address": "0x8002da88/0x8002db58", "linesOrOffsets": "7031-7223", "summary": "same negative as projectile_solidity; only object-list vs object-list passes with owner/team/flag gates (corpus read, audit)" }
+      ],
+      "confidence": "BLOCKED",
+      "unknowns": ["whether PvP collision exists per-type"],
+      "traceNeeded": ["T5"],
+      "recommendedSchema": {},
+      "cheapAgentTickets": ["ATK-007"]
+    },
+    {
+      "id": "penetration",
+      "wikiClaim": "Certain attacks penetrate certain objects; melee and explosions effectively have total penetration.",
+      "currentPort": {
+        "summary": "stepProjectiles consumes every projectile on first valid borg hit (consumed=true; break). Melee swings already hit multiple targets once each via meleeHitUids.",
+        "files": ["packages/combat/src/combat.ts", "packages/combat/src/types.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0013.c", "function": "FUN_8008a65c (object frame dispatch)", "address": "0x8008a65c", "linesOrOffsets": "1121-1193 (esp. 1175-1182)", "summary": "rehit mechanism: damage record s8+0x16 reloads per-object counter +0x4e; on expiry the hit re-applies; interval 0 = unlimited (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0013.c", "function": "FUN_8008a65c", "address": "0x8008a65c", "linesOrOffsets": "1188", "summary": "object despawn (object+0x10=2) is actor-flag gated (+0x281), not written by the collision resolver — persistence after hit is the structural default (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0003.c", "function": "collision_hit_pair_pass_active_vs_borgs", "address": "0x8002da88", "linesOrOffsets": "7080", "summary": "collision gate: hit allowed iff (attackerRec.flagsB & 0x4000)==0 || (targetRec.flagsB & 0x2000)!=0. WARNING: flagsB 0x4000 is also the skip-combo-falloff bit in zz_003cd5c_ step 16 — semantics not settled (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "packages/combat/src/data/damageRecords.json", "function": "n/a", "address": "DAT_802d46e0", "linesOrOffsets": "records[0..8]", "summary": "all 9 borg-family records have rehitIntervalFrames=0 and flagsB=0 — the interesting values live in generic/comhit and per-move hit-bin data" }
+      ],
+      "confidence": "DERIVED_ROM (mechanisms) + BLOCKED (per-move values, flag semantics)",
+      "unknowns": ["which moves persist through borgs", "explosion spawn-on-impact (no effect-id consumer found in the generic hit path)", "true meaning of flagsB 0x4000/0x2000 in the collision gate"],
+      "traceNeeded": ["T6"],
+      "recommendedSchema": { "see": "attack-profile-port-schema.json#penetration" },
+      "cheapAgentTickets": ["ATK-008"]
+    },
+    {
+      "id": "ammo_refill",
+      "wikiClaim": "Gradual refill starts right after use (one shot at a time); all-at-once refill starts only when fully depleted; deployed weapons refill when the object returns/dies; Hyper Mode reloads (nearly) instantly.",
+      "currentPort": {
+        "summary": "Single ammo pool: refill-to-max when empty and reload cooldown expired; firing decrements and arms reload when empty. ammoMax/reloadFrames are TUNED profile values.",
+        "files": ["packages/combat/src/combat.ts", "packages/combat/src/actionProfiles.ts", "packages/combat/src/types.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0007.c", "function": "FUN_800562b8 (stat loader)", "address": "0x800562b8", "linesOrOffsets": "60-94", "summary": "3 weapon cells init from the same stat row as HP: cur/prev s16 at +0x774/+0x77c/+0x784, timer f32 +0x778/.., max/type/param s16 at +0x78c-cells; refill-type-specific timer init (corpus read, audit; row source zz_0055f90_ per behavior-notes (ag))" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_006dbe0_", "address": "0x8006dbe0", "linesOrOffsets": "2866-2905", "summary": "fire gate (actor, weaponIdx, cost, actuallyFire): blocks if cur<cost, dry-run mode, decrement with prev=cur; 65+ call sites (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_006dcc0_", "address": "0x8006dcc0", "linesOrOffsets": "2909-2973", "summary": "per-frame refill: rate float +0x768 (x FLOAT_804376c8 when +0x6fc burst set), per-weapon disable bits +0x597; type 1 gradual fractional grant; type<=0 all-at-once on timer expiry (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_006de10_", "address": "0x8006de10", "linesOrOffsets": "2977-2991", "summary": "one-shot grant: cur+=1 clamp max (deployed-object return path) (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0029.c", "function": "(deployed object handler)", "address": "chunk_0029.c:2270-2301", "linesOrOffsets": "2274-2275", "summary": "failed/dead deploy restores weapon-2 ammo to max; more handlers in chunk_0036.c (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0002.c", "function": "(fire gating)", "address": "chunk_0002.c:7158-7165", "linesOrOffsets": "7158-7165", "summary": "max==0 means infinite ammo (corpus read, audit)" },
+        { "type": "DERIVED_TRACE", "path": "research/decomp/data/borg-hp-stat-rows-802f2988.json", "function": "zz_0055f90_", "address": "0x80055f90", "linesOrOffsets": "u16[1..] of each row", "summary": "weapon-0 per-borg values extracted; G RED ammo 5 live-verified (behavior-notes (ag))" }
+      ],
+      "confidence": "DERIVED_ROM (mechanism end-to-end); values partially extracted (weapon 0 only)",
+      "unknowns": ["weapon-1/2 row columns (re-extract via dol.py)", "+0x768 rate init site AND role conflict (see open-questions Q7)", "refill types 2/3 runtime semantics", "FLOAT_804376c8 burst multiplier value (undumped)"],
+      "traceNeeded": ["T7"],
+      "recommendedSchema": { "see": "attack-profile-port-schema.json#refillMode" },
+      "cheapAgentTickets": ["ATK-009"]
+    },
+    {
+      "id": "status_effects",
+      "wikiClaim": "Attacks inflict statuses: freeze/shock/stun, poison, shrink/grow, pull/tether, barrier/block (blocks enemy-team projectiles).",
+      "currentPort": {
+        "summary": "None. BorgRuntime.paramTier fields exist but nothing consumes them.",
+        "files": ["packages/combat/src/types.ts", "packages/combat/src/paramTier.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0003.c", "function": "resolve_hitbox_target_effects_and_damage", "address": "0x8002e2a8", "linesOrOffsets": "7638-7651", "summary": "status id victim+0x71a = hitboxRecord[1]&0x3f; timer victim+0x71c max-merged from record[4]; gates: immunity +0x5a0 bit N, 0x5e0&0x20000000 (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0004.c", "function": "zz_003cd5c_", "address": "0x8003cd5c", "linesOrOffsets": "6693-6699", "summary": "immunity bit also zeroes HP damage (formula step 1; behavior-notes (ah))" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0007.c", "function": "(status tick)", "address": "chunk_0007.c:2868-2883", "linesOrOffsets": "2868-2883", "summary": "+0x71c decrements per frame; shrink +0x70c / grow +0x70e multiply a scale-related float via LUT DAT_802dd57c (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0008.c", "function": "reset_actor_param_tier / apply_actor_param_tier_delta_63 / refresh_actor_param_tier_table", "address": "chunk_0008.c:4396-4519", "linesOrOffsets": "4396-4519", "summary": "param tier +0x74a (accum +0x74e, timer +0x750=900) indexes PTR_DAT_804339e0 rows feeding actor+0xb8/+0x1dd0/+0x5f8 (corpus read, audit)" },
+        { "type": "CHECKED_CLOSED", "path": "research/decomp/ghidra-export/chunk_0004.c", "function": "zz_003cd5c_ + hit path", "address": "0x8003cd5c", "linesOrOffsets": "formula end 6818-6821", "summary": "NEGATIVE: no DoT HP-drain loop found; no OHKO path (damage floors at 1) (corpus read, audit)" }
+      ],
+      "confidence": "DERIVED_ROM (framework fields) + BLOCKED (per-status-id semantics, durations, which moves inflict what)",
+      "unknowns": ["status id -> effect table", "immunity mask init from pl data", "DAT_802dd57c LUT contents", "poison mechanism (no DoT found)", "barrier/block status implementation"],
+      "traceNeeded": ["T8"],
+      "recommendedSchema": { "see": "attack-profile-port-schema.json#statusEffects" },
+      "cheapAgentTickets": ["ATK-010"]
+    },
+    {
+      "id": "stagger_safety_model",
+      "wikiClaim": "Attacks carry values controlling how fast a hit borg staggers or enters invulnerable safety.",
+      "currentPort": {
+        "summary": "PORTED: gauge-based stagger (down/balance gauges + record reactionFlags), balance-break-only 60 stagger i-frames, 60-frame post-hit windows, combo accum/rank, wake invincibility 60.",
+        "files": ["packages/combat/src/gauges.ts", "packages/combat/src/combat.ts", "packages/combat/src/constants.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/behavior-notes.md", "function": "sections (ag)/(ah)/(s)", "address": "0x8002e2a8 / 0x8003cd5c", "linesOrOffsets": "chunk_0003.c:6255-6263, 7995-8030; chunk_0007.c:47-52", "summary": "gauge model, damage records, and windows all derived and ported; per-borg gauge init extracted (gaugeInit.json)" }
+      ],
+      "confidence": "DERIVED_ROM + CURRENT_PORT (match)",
+      "unknowns": ["reaction LENGTHS (animation-gated; TUNED)", "exact hit->reaction state-slot transition (zz_005f00c_ lead, behavior-notes (s)/(u))"],
+      "traceNeeded": ["T4", "T9"],
+      "doNotDoubleApply": [
+        "No per-hit flat hitstun exists in the ROM — do not add one.",
+        "No separate super-armor flag — high gauge bases model it.",
+        "Stagger i-frames are balance-break only.",
+        "Do not port 60.0 as MELEE/SHOT.HITSTUN (behavior-notes (s))."
+      ],
+      "recommendedSchema": {},
+      "cheapAgentTickets": []
+    },
+    {
+      "id": "hyper_mode",
+      "wikiClaim": "Power Burst (Y, meter-gated): instantly-reloading ammo, massive speed, much higher damage; co-op sync and fusion interactions.",
+      "currentPort": { "summary": "Nothing: no Y input field, no meter, no burst flag. damageFormula.ts already exposes attackerPairAttack/defenderPairAttack context params (default false) that map to the burst flag's damage effects.", "files": ["packages/combat/src/types.ts", "packages/combat/src/damageFormula.ts"] },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "FUN_80069814", "address": "0x80069814", "linesOrOffsets": "104-115", "summary": "arm gate: transformed button word +0x5d4 bit 0x200 sets +0x6fb=6 (6-frame arm window) (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0007.c", "function": "zz_005b2b8_", "address": "0x8005b2b8", "linesOrOffsets": "3354-3494 (set at 3439-3441)", "summary": "consumes +0x6fb, pair-match via zz_005b678_ (species table 0x802d352c), sets +0x6fc=1 and +0x6fa=1; paired path syncs headings (3192-3198) (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0004.c", "function": "zz_003cd5c_", "address": "0x8003cd5c", "linesOrOffsets": "6705-6707, 6761-6763", "summary": "+0x6fc effects: outgoing damage x2.0 (FLOAT_80436f9c), incoming x0.5 (FLOAT_80436f7c) (behavior-notes (ah) steps 3/10)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0009.c", "function": "zz_006dcc0_", "address": "0x8006dcc0", "linesOrOffsets": "2923-2927", "summary": "+0x6fc multiplies ammo refill rate by FLOAT_804376c8 — matches wiki 'instantly-reloading ammo' directionally (corpus read, audit)" },
+        { "type": "CHECKED_CLOSED", "path": "research/decomp/ghidra-export", "function": "corpus-wide greps", "address": "n/a", "linesOrOffsets": "n/a", "summary": "NEGATIVES: no meter accumulator in the damage path; no +0x6fc-gated speed modifier; no explicit +0x6fc clear; no hyper/burst strings in DOL (corpus read, audit)" }
+      ],
+      "confidence": "DERIVED_ROM (flags + activation chain + 3 effects) + BLOCKED (meter fill, activation precondition, duration, speed effects)",
+      "unknowns": ["meter field + fill rule", "what clears +0x6fc / burst duration", "speed effect channel (param tier? another field?)", "+0x5d4 bit 0x200 physical button identity", "FLOAT_804376c8 value"],
+      "traceNeeded": ["T3 (RAM diff for the meter)"],
+      "recommendedSchema": { "see": "attack-profile-port-schema.json#hyperModifiers" },
+      "cheapAgentTickets": ["ATK-011", "ATK-012"]
+    },
+    {
+      "id": "mash_extra_hits",
+      "wikiClaim": "Mashing buttons (or moving the stick) during certain attacks adds extra hits.",
+      "currentPort": { "summary": "Not modeled.", "files": [] },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0007.c", "function": "FUN_8005d494 (attack-active handler slot 23)", "address": "0x8005d494", "linesOrOffsets": "4809-4816", "summary": "press flag +0x1d10 increments counter +0x550 per frame; phase advances when 4 < +0x550 (cap 4) or +0x552 != 0 (corpus read, audit)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0007.c", "function": "(input edge)", "address": "chunk_0007.c:291", "linesOrOffsets": "291", "summary": "press edges: +0x5bc = +0x5b4 & ~+0x5b8 (corpus read, audit)" },
+        { "type": "CHECKED_CLOSED", "path": "research/decomp/ghidra-export", "function": "corpus-wide", "address": "n/a", "linesOrOffsets": "n/a", "summary": "NEGATIVE: no stick-rotation accumulator; stick out-of-deadzone is a binary flag (+0x6fd & 0x40) used for direction selection only (corpus read, audit)" }
+      ],
+      "confidence": "DERIVED_ROM (counter+cap mechanism) + BLOCKED (which moves consume it and what an extra count does)",
+      "unknowns": ["downstream consumer of +0x550 (extra hitbox activations? duration extension?)"],
+      "traceNeeded": ["T2 (log +0x550 while mashing)"],
+      "recommendedSchema": {},
+      "cheapAgentTickets": ["ATK-017"]
+    },
+    {
+      "id": "resistance_falloff",
+      "wikiClaim": "Repeated hits on the same target deal less and less damage (hidden resistance that recovers over time).",
+      "currentPort": {
+        "summary": "PORTED AND IDENTICAL: computeSourceDamage applies comboRankScale_802c7ca0[victim.comboRank] unless record.flagsB & 0x4000; comboAccum/comboRank grow per hit and reset on the 60-frame window expiry.",
+        "files": ["packages/combat/src/damageFormula.ts", "packages/combat/src/combat.ts", "packages/combat/src/types.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0004.c", "function": "zz_003cd5c_", "address": "0x8003cd5c", "linesOrOffsets": "6804-6806", "summary": "dmg *= DAT_802c7ca0[victim+0x6ca] = [1.0,0.8,0.5,0.25,0.1,0.05,0.02,...] (behavior-notes (ah) step 16)" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0003.c", "function": "resolve_hitbox_target_effects_and_damage", "address": "0x8002e2a8", "linesOrOffsets": "8021-8030", "summary": "accumulator +0x6c8 (0-99) rolls into rank +0x6ca (cap 0x3f); window reset chunk_0006.c:8009-8010" }
+      ],
+      "confidence": "DERIVED_ROM, ported. RESOLVED: the wiki mechanic IS comboRankScale_802c7ca0 — do not implement anything new.",
+      "unknowns": [],
+      "doubleApplicationRisk": "HIGH if any agent adds a separate per-target damage-decay layer. Explicit instruction: never do this.",
+      "traceNeeded": [],
+      "recommendedSchema": {},
+      "cheapAgentTickets": ["ATK-013"]
+    },
+    {
+      "id": "friendly_fire",
+      "wikiClaim": "Teammates take reduced damage from each other; OHKO attacks ignore the reduction.",
+      "currentPort": {
+        "summary": "PORTED in formula (x0.25 same-team unless flagsA&0x1000; /40 block divisor exists but never activated by callers). Teammates ARE hittable in the sim: canReceiveHit excludes only self; projectiles hit any non-owner.",
+        "files": ["packages/combat/src/damageFormula.ts", "packages/combat/src/combat.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/ghidra-export/chunk_0004.c", "function": "zz_003cd5c_", "address": "0x8003cd5c", "linesOrOffsets": "6811-6821", "summary": "sameTeam && !(flagsA&0x1000) -> x0.25 (FLOAT_80437024); (flagsA&0x1000) && victim+0x59c&0x1000 -> /40 (FLOAT_80437028); floor 1 -> int (behavior-notes (ah) step 18; (o))" },
+        { "type": "DERIVED_ROM", "path": "research/decomp/data/borg-gauge-init-pldata.json", "function": "gauge init", "address": "chunk_0007.c:47-52", "linesOrOffsets": "+0x59c = pl####data.bin u16@0xa8", "summary": "the /40 gate's victim-side flag word source (behavior-notes (ag))" },
+        { "type": "CHECKED_CLOSED", "path": "research/decomp/ghidra-export/chunk_0004.c", "function": "zz_003cd5c_ + hit path", "address": "0x8003cd5c", "linesOrOffsets": "6818-6821", "summary": "NEGATIVE: no OHKO/instant-kill damage path; damage floors at 1 (corpus read, audit). Wiki OHKO = presumably moves with hpDamage above any HP pool; flagsA&0x1000 is the FF-exemption channel." }
+      ],
+      "confidence": "DERIVED_ROM, ported; OHKO path CHECKED_CLOSED (formula)",
+      "unknowns": ["which real moves carry flagsA&0x1000 (per-move hit-bin data)"],
+      "traceNeeded": ["T10 (golden regression capture)"],
+      "recommendedSchema": {},
+      "cheapAgentTickets": ["ATK-014"]
+    },
+    {
+      "id": "damage_formula_context",
+      "wikiClaim": "n/a (interaction check: wiki resistance/FF vs current combo/rank/FF scalars).",
+      "currentPort": {
+        "summary": "computeSourceDamage implements behavior-notes (ah) with documented defaults (heroTable 0, levels 1.0, pair/burst false, handicap neutral, force-ratio 0, block off); steps 5 and 17 unmodeled. Combo falloff + same-team + type matrix + curves live.",
+        "files": ["packages/combat/src/damageFormula.ts"]
+      },
+      "evidence": [
+        { "type": "DERIVED_ROM", "path": "research/decomp/data/damage-formula-tables-804335e0.json", "function": "zz_003cd5c_", "address": "0x8003cd5c", "linesOrOffsets": "all 18 stages", "summary": "full pipeline decoded and tables extracted (behavior-notes (ah))" }
+      ],
+      "confidence": "CURRENT_PORT faithful for the modeled subset",
+      "unknowns": ["actor level float init sites (+0xc4/+0xb4)", "+0x43a handicap init", "hero flag +0x3e6 semantics in battle modes"],
+      "warning": "Wire burst via existing attackerPairAttack/defenderPairAttack params; never add parallel multipliers.",
+      "traceNeeded": [],
+      "recommendedSchema": {},
+      "cheapAgentTickets": ["ATK-011", "ATK-012", "ATK-014"]
+    },
+    {
+      "id": "action_hitbox_mapping",
+      "wikiClaim": "n/a (engineering necessity for 1:1 attacks).",
+      "currentPort": {
+        "summary": "actionProfiles.json generated heuristically from asset inventories (TUNED); hitboxes are radius checks; damage records mapped by 3 archetypes (MELEE=1, SHOT=0, CHARGE_OR_SPECIAL=2) in gauges.ts.",
+        "files": ["packages/combat/src/actionProfiles.ts", "packages/combat/src/gauges.ts", "scripts/gen-combat-action-profiles.mjs"]
+      },
+      "evidence": [
+        { "type": "CONFIRMED_ASSET", "path": "research/format-specs/hit-bin-format.md", "function": "zz_008ab30_/zz_008ac80_", "address": "0x8008ab30/0x8008ac80", "linesOrOffsets": "remap A/B; 0x50 records; u16+0x04 damageRecordIndex; s16+0x06/+0x08 active window", "summary": "hitbox containers fully decoded; per-move binding (bank -> remap slot -> records) missing" },
+        { "type": "CONFIRMED_ASSET", "path": "research/format-specs/borg-animation-banks.md", "function": "n/a", "address": "n/a", "linesOrOffsets": "(group,slot) addressing", "summary": "animation banks enumerable per borg; group 1 attack slots 5-23 per borg" }
+      ],
+      "confidence": "CONFIRMED_ASSET (containers) + BLOCKED (binding)",
+      "unknowns": ["(move/animation bank) -> remap-B 'kind' -> record indices", "comhit2.bin layout", "record bytes +0x28..+0x4f for non-capsule shapes"],
+      "traceNeeded": ["T2"],
+      "recommendedSchema": { "see": "attack-profile-port-schema.json#hitboxReferences" },
+      "cheapAgentTickets": ["ATK-005", "ATK-016"]
+    }
+  ]
+}

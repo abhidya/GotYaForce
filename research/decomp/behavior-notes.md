@@ -1898,3 +1898,395 @@ ALL tables extracted to research/decomp/data/damage-formula-tables-804335e0.json
 actor level floats ctx+0xc4 / victim+0xb4 init sites (level system; 1.0 at base level) and
 per-borg +0x43a handicap byte init (0 default). With those defaulted to 1.0/0, the formula
 is computable from extracted data end-to-end.
+
+### (ai) Attack-mechanics audit: findings package for the wiki-taxonomy port plan (2026-07-03)
+
+Full audit of the wiki "Attacks" taxonomy against the corpus + assets + current TS port,
+persisted as a standalone findings package (this section is a pointer, not the content):
+
+- `research/decomp/attack-mechanics-findings.md` — mechanic-by-mechanic audit (A-X).
+- `research/decomp/data/attack-mechanics-ledger.json` — machine-readable ledger.
+- `research/decomp/attack-mechanics-open-questions.md` — ranked open questions Q1-Q12.
+- `research/decomp/attack-mechanics-trace-plan.md` — Dolphin traces T1-T10.
+- `research/decomp/data/attack-profile-port-schema.json` — proposed port data schema.
+- `research/tasks/attack-port/ATK-001..017` — cheap-agent tickets.
+
+Headline NEW corpus leads (single-pass reads with quoted code; addresses cited in the
+findings doc — verify before treating as Confirmed): attack-command decision layer
+(FUN_800699d8 @0x800699d8, actor+0x585/+0x586 -> command struct at +0x4b0 -> +0x591);
+complete ammo/refill system (3 weapon cells +0x774/+0x77c/+0x784, fire gate zz_006dbe0_
+@0x8006dbe0, refill zz_006dcc0_ @0x8006dcc0, grant zz_006de10_ @0x8006de10, max==0 =
+infinite); status framework (+0x71a id / +0x71c timer / +0x5a0 immunity, shrink +0x70c,
+grow +0x70e); Power Burst chain (Y-gate FUN_80069814 -> +0x6fb=6 -> zz_005b2b8_ ->
++0x6fc/+0x6fa; +0x6fc = the (ah) "pair-attack" flag, also boosts ammo refill); mash counter
+(+0x550 cap 4 in FUN_8005d494). Key resolved question: the wiki's hidden damage
+resistance/falloff IS the already-ported comboRankScale_802c7ca0 — never add a second
+layer. Key negatives: no OHKO damage path; no DoT loop; no proj-vs-proj logic in the
+generic collision passes (per-type dispatch PTR_FUN_802da740 unread); no stick-rotation
+accumulator; no +0x6fc-gated speed modifier; no burst meter accumulator in the hit path.
+Known conflict to resolve before use: +0x768 read as ammo refill rate (chunk_0009.c:2923)
+AND as a scale-related float (chunk_0007.c:2868-2876) — see open-questions Q7.
+
+### (aj) Power Burst fusion system decoded — pair table, in-place link, +0x4a1 state machine (2026-07-03)
+
+Corpus read (single-pass, quoted code; wiki-mechanics-queue.md W1). Full report in the
+audit session; essentials:
+
+- **Pair table** `DAT_802d352c`: indexed by FAMILY byte (+0x3e8), 4-byte pointer entries.
+  **Bounds correction vs the raw dump**: the table is exactly 17 entries (families 0-16,
+  0x802d352c..0x802d356c) — the next word 0x802d3570 is the already-confirmed 35-slot
+  state-handler table (s4u), so any "pairs" read at index >= 17 are overflow into code
+  pointers, not data. Only families 5 and 6 have non-null pair-list pointers
+  (0x802d3420, 0x802d3480). Pair list: `listPtr + variant(+0x3e9)*4`, entries
+  (s16 partnerSpawnId, s16 resultSpawnId), terminated by partnerId == -1.
+- **Match path** (`zz_005b678_` chunk_0007.c:3518-3574): NO new actor is spawned — the two
+  source actors are linked bidirectionally (+0x4a4 = partner ptr) and transformed in place:
+  result spawn id written to +0x48c (with +1 / role arithmetic per player slot +0x4a8),
+  head byte +0x3ec copied to +0x48e, roles to +0x4a9. Caller (chunk_0007.c:3450-3460)
+  clears link state (zz_005c15c_), sets **+0x4a1 = 1** on both, and triggers action 0x19
+  via zz_006a750_ (chunk_0009.c:859-880 — writes action id +0x5e4/anim byte +0x5db from a
+  per-actor action table at +0x4f0; returns 0 if the actor lacks that action).
+- **Fusion state machine on +0x4a1** (chunk_0007.c:3170-3272): 1 -> 2 (ready) -> 3 (bound,
+  both must be 2) -> 5 -> 6 (locked, both must be 5); 7 = ending, both at 7 -> unfuse
+  (restore +0x4a0/+0x4a9, finalize via zz_006a868_ from stored +0x48c/+0x48e).
+- **Burst timer**: +0x6fb decrements in the per-slot loop (chunk_0007.c:3473-3490); its
+  expiry drives the burst/fusion end path. (Note: the audit's earlier reading of +0x6fb as
+  only a "6-frame arm window" needs reconciling — trace T3 should log +0x6fb end-to-end.)
+- **Control**: both linked actors read the SAME +0x4b0 command struct during fusion; no
+  per-part dual-input routing was found (the wiki's "parts controlled by their own
+  players" is NOT corpus-confirmed — mark taxonomy-only pending trace).
+- Negatives: no +0x18 deactivation during fusion; no part-destroyed early-unfuse check
+  found.
+
+### (ak) Borg level system — level-byte writers found, formula floats still uninitialized-in-corpus (2026-07-03)
+
+Corpus read (single-pass, quoted code; wiki-mechanics-queue.md W6):
+
+- **Level byte +0x3ec writers**: spawn-time from the roster/state table
+  `PTR_DAT_80433934[subtype + 0xa0]` (chunk_0006.c:6541 zz_00536b0_; :7056 FUN_800541ac;
+  chunk_0007.c:920 FUN_80057b78), plus a direct setter `zz_005814c_` @chunk_0007.c:1193
+  (writes +0x3ea/+1000/+0x3ed/+0x3ec) called from story-mode progression
+  (chunk_0056.c:1612/1637/1649-1650, chunk_0058.c:1347). No per-battle EXP accumulator was
+  found — story flow sets the level directly at checkpoints.
+- **Damage-formula level floats +0xc4 (attacker ctx) / +0xb4 (victim)**: STILL NOT FOUND as
+  writes — reads confirmed at chunk_0004.c:6702-6703/6776 only. The (ah) "remaining
+  unknown" stands. Likely inline/init-table code not isolated yet; next lead is the actor
+  construction path around the same PTR_DAT_80433934 reads.
+- **DAT_804339e8 (level -> stat-row offset) dumped** (32 bytes): [2,2,8,6,0,4,0,0,0,0,0,1,
+  0,1,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1] — sparse; levels 0-5 spread across row offsets
+  {2,2,8,6,0,4}, higher levels mostly 0/1. Single-pass dump; re-verify before persisting to
+  research/decomp/data/.
+- **Down-gauge level scaling site**: chunk_0003.c:7997-8002 — down-gauge damage scaled by
+  `0.5 * (float@+0xb4 - 1.0)` where the pointer is the VICTIM (pcVar18). CONFLICT NOTE:
+  gauges.ts's doc comment says down damage scales with ATTACKER level; this read says the
+  +0xb4 float on the victim object. Single-pass vs prior census — do not change gauges.ts
+  until re-read or traced (T9/T4 can log it).
+- **+0x768 init**: the only write found (chunk_0076.c:2337, FUN_8027e48c) is a bulk init on
+  what looks like a different (graphics/audio) struct — supports open-questions Q7's
+  suspicion that the chunk_0007 "scale" reader and the chunk_0009 "refill rate" reader may
+  be on different object types. Q7 stays open; refill-rate init remains unknown.
+
+### (al) Healing, magnet/pull, self-hit exclusion, burst-passthrough negative (2026-07-03)
+
+Corpus read (single-pass, quoted code; wiki-mechanics-queue.md W2-W5):
+
+- **Healing CONFIRMED as a dedicated HP-increment path**, not a damage-formula effect:
+  battle_frame_target_action_dispatch (chunk_0003.c:6318-6323) — when the borg's spawn id
+  (+1000) is 0x702 or 0x70a (family 7 = Nurse variants), `+0x1c6 += (&DAT_803b0638)[slot*2]`,
+  clamped to max +0x1c4. A companion check at :6237 looks for peer ids 0x701/0x708. The
+  grep census found this is the ONLY += write to +0x1c6 in the corpus. The accumulator
+  DAT_803b0638's writers were not fully traced — what fills it (heal-beam hits? passive?)
+  is the open half. Healing is NOT ammo-gated (no zz_006dbe0_ path from these sites).
+- **Magnet/pull CONFIRMED multi-frame**: hit-record byte puVar17[8] & 0x10 stores world
+  target vectors to (&DAT_803b06c0/c4/c8)[slot*0xc] (chunk_0003.c:7687-7708) consumed by
+  start_forced_move_to_point (chunk_0009.c:1064 family), with +0x5e0 |= 0x1000 marking
+  forced-move. This upgrades the (q)-era "hit-reactive bookkeeping" reading: it is the
+  authored pull/tether channel.
+- **Self-hit exclusion is unconditional**: both collision passes gate on the object's
+  owner pointer +0x1e4 != target (chunk_0003.c:7088/7090 and 7231/7233); no record flag
+  bypass found. Wiki self-damage (ICBM-style) therefore must arrive via a child object
+  with different ownership, or not at all — unresolved.
+- **Burst ally-passthrough NOT found — and a constant-value correction**: the agent-read
+  "burst 0.25 divisor" at chunk_0003.c:7546-7549 multiplies by FLOAT_80436f9c, which is
+  already ROM-confirmed = 2.0 exactly ((o)); i.e. that site is burst-attacker DOUBLING
+  (applied in the gauge/hit-resolution path when attacker +0x6fc set), consistent with the
+  formula's step 3. No code path skips a hit for allied/self attackers during burst; the
+  wiki passthrough claim stays WIKI_TAXONOMY_ONLY (trace T3/T10 can test it live).
+
+### (am) Guide-mining cross-check: stat-row column layout decoded; observational mechanics anchors (2026-07-03)
+
+Player guides (GameFAQs move list/strategy guides via search extracts — direct fetch
+blocked; Speed Demos Archive page fetched directly) were mined as OBSERVED-BEHAVIOR
+taxonomy. All claims paraphrased. Two products:
+
+**1. Stat-row column layout decoded via anchor cross-check.** The 9-u16 rows in
+`research/decomp/data/borg-hp-stat-rows-802f2988.json` (source zz_0055f90_, (ag)) read as:
+`[HP, w0cur, w0max, w0refillType, w0refillParam, w1cur, w1max, w1refillType, w1refillParam]`.
+Four independent guide anchors match exactly at default row[2]:
+- pl0500 FLAME DRAGON [1000, 5,5,1,300, 1,1,1,300] — guide: B ammo 5, X ammo 1. Both
+  weapons refillType 1 (gradual, matches the (al)-era refill enum), param 300.
+- pl0503 CYBER DEATH DRAGON [2500, 5,5,0,300, 8,8,0,300] — guide: X ammo 8.
+- pl0505 DEATH HEAD [500, 10,10,0,180, 1,1,0,180] — guide (level-glitch lore): 10 B ammo.
+- pl0615 G RED [200, 5,5,0,180, ...] — the (ag) live anchor, refillType 0 (all-at-once).
+Also: SDA's measured DEATH ICBM HP 118 sits exactly at pl0d06 row[11] (rows step +2 from
+96) — the guide number lies on the extracted lattice, further validating both. The
+refillParam=180/300 reading as "refill timer frames (3s/5s)" is a strong data-level
+inference, NOT code-derived — verify in trace T7 before promoting.
+
+**2. Observational mechanics (upgrade several taxonomy items to observed-behavior):**
+- **Passive contact damage EXISTS** (upgrades findings mechanic L from wiki-only):
+  speedrunners report big borgs (e.g. the plasma dragon) stepping on allies and thereby
+  granting them hit-invincibility — i.e. contact hits are real hits that trigger the
+  i-frame machinery. Also "hitting allies to make them invincible" is deliberate speedrun
+  tech — friendly-fire hits granting invincibility windows (consistent with the
+  balance-break stagger i-frames already ported).
+- **Self-damage is move-scripted suicide, not owner-collision**: the Death ICBM detonates
+  and dies as part of its own move. Consistent with (al)'s finding that owner exclusion is
+  unconditional — no collision-level self-hit needed; the move kills its owner directly.
+  Resolves the W4 puzzle's direction: look for a self-kill in the ICBM move handler, not a
+  collision flag.
+- **OHKO reading confirmed directionally**: the ICBM blast outright kills low-HP borgs
+  (satellites, prototypes) but only damages fortresses/high-HP borgs — i.e. "OHKO" is big
+  hpDamage vs HP pools, matching the CHECKED_CLOSED no-OHKO-path finding.
+- **Shields are physical blockers**: knight-family shields block breath attacks
+  positionally (the two-shield knight blocks more than one-shield knights) — barrier/guard
+  is at least partly hitbox/object-level, relevant to W7 and the /40 divisor question.
+- **Hyper meter fills from damage dealt AND received** (manual/guides), fill rate varies
+  by attack; **burst damage bonus evaluates at HIT time, not fire time** (a projectile
+  fired before activation gets the bonus if it lands during burst) — consistent with
+  +0x6fc being read inside the damage resolver, and a good T3 test vector.
+- **X doubles as flight control on flyer borgs** (dive; A/hold = rise) — the B/X
+  contextual resolver must account for per-borg X overloading, not just "X = special".
+- **Cyber Death Dragon mid-air X fires a dual shot** when multiple X ammo remain — an
+  air-context ranged variant (relevant to command subtype 4 = air/elevated, (ai)).
+- **Post-hit damage resistance "lasts several seconds"** per speedrunners — cross-
+  validates the 60-frame combo/falloff windows (mechanic U) at the feel level.
+
+### (an) Guide-corpus extraction: borg-ID encoding validated; (al) healing finding CORRECTED to vampire lifesteal; five-context melee taxonomy (2026-07-03)
+
+Source: user-supplied text of the GameFAQs guides (Voltrox747 move list + glitch FAQ,
+Sabre929 borg list, Fury_Hikari walkthrough, t3h_chosen_1 ninja guide). All content
+below is extracted FACTS (numbers/mechanics), paraphrased — treat as OBSERVED_GUIDE
+tier: reliable player measurements, never DERIVED. Full curated anchor data:
+research/decomp/data/guide-anchors-movelist.json.
+
+**1. The 20th-Force glitch codes ARE the two-byte spawn ids — roster-validated.**
+The glitch FAQ's force-code binary encoding (sum of 2^(force-1)) produces the game's
+borg id. Cross-checked against packages/assets/data/borgs.json: Sword Knight code {10}
+= 0x200 (family 02 variant 00), Normal Knight {2,4,10} = 0x20a = pl020a NORMAL KNIGHT
+(exact roster match), Imperial Knight {1,4,10} = 0x209 = pl0209 (exact), Demon Samurai
+{1,9,10,11} = 0x701 = pl0701 (exact), Vampire Knight {2,9,10,11} = 0x702 = pl0702
+(exact), Vlad {2,4,9,10,11} = 0x70a = pl070a (exact). The FAQ's per-borg code list is
+therefore a COMPLETE independent id→borg mapping usable for validation.
+
+**2. CORRECTION to (al): the HP-increment path at chunk_0003.c:6318-6323 is VAMPIRE
+LIFESTEAL, not nurse healing.** The gated ids 0x702/0x70a are Vampire Knight/Vlad —
+the guide-documented lifesteal borgs ("regains health with any melee attack") who ALSO
+"constantly lose HP at ~2-3/sec". So: (a) DAT_803b0638[slot] accumulates that slot's
+dealt melee damage for HP regain (lifesteal), and (b) a periodic HP-DRAIN loop must
+exist for these borgs — revising (al)'s and the status sweep's "no DoT/periodic drain"
+negative (the drain writer was simply not found; re-grep with the vampire path as the
+anchor). The companion check at :6237 gates ids 0x701/0x708 = Demon/Akuma Samurai —
+the guide-documented "swords grow in length as enemies die" mechanic, i.e. that site
+is the sword-growth trigger, not a heal-peer check.
+**Nurse healing is a separate mechanism**: X-attack targeted heal with fixed amounts —
+Death Borg Theta 37 HP (id 0x906 by code {2,3,9,12} — family 09 = nurse family),
+Angel Nurse 50 (pl0900), Angel Rescue 100 (pl0908), Nao (pl090d) heals ally or enemy.
+ATK-019 rewritten accordingly.
+
+**3. Five-context melee taxonomy (mechanics D-K refinement).** The move list documents
+melee variants as a UNIVERSAL five-way split: standing, ground dash, landing (from a
+jump), normal air, air dash — plus per-borg extras: "above enemy" specials (sword-drop
+stabs: Normal Ninja/Sasuke/Double Ninja/Death Borg Alpha; Sapphire/Ruby Knight
+above-enemy lance stab) and a flyer set (hovering, dashing, diving). Transformed forms
+(Gold/Metal Hero, Panther/Titan/Eagle/Victory robots) swap the whole moveset; some
+moves differ per form. This is the concrete context vocabulary for the resolver
+(ATK-004 enum is compatible; add above_enemy already present, flyer contexts map to
+fly state) and for trace T2's capture matrix.
+
+**4. Move-attribute vocabulary (candidate hit-record flag semantics):** CN =
+cancellable into other attacks; SB = breaks through shields; MH = hits continuously
+while in contact (matches the rehit-interval mechanism, chunk_0013.c:1175-1182); WV =
+emits a wave projectile alongside the swing. Guide also documents per-move "Recharge:
+Yes/No" for projectiles = regenerates without emptying first — i.e. the per-move
+gradual vs all-at-once flag, cross-validating the stat-row refillType column ((am));
+a scripted sweep of guide Recharge flags vs extracted refillType per borg is a cheap
+validation task.
+
+**5. Status/effect observations with numbers:** poison (Poison/Venom Worm) = +20/+26
+damage-over-time on top of the hit; freeze (Ice/Blizzard Dragon) = frozen state whose
+duration SHORTENS with button/stick mashing (mash-to-recover — connects the (am) mash
+counter to status recovery as a second consumer candidate); Chrono Samurai = time stop
+(enemies stagger-locked, max 115 observed on Neo G); Pop Honey = aim-scramble spin;
+Switching Ninja = position swap; Death Borg Omicron/Bug Witch = transform victim
+(temporary); Patra/Isis = enlarge (stat up), Bastet/Sekhmet = shrink (stat down);
+Barrier Girl self-barrier absorbs ~80, Guard Witch enemy-blocking barrier ~200, Shield
+Witch ~280; Thunder Robot = damage tether between allies; Wire/Arrow tether mechanics;
+dragons' stomp contact damage listed as an explicit per-dragon "Special" move with
+values (22/44) — contact damage is AUTHORED PER-BORG data, not an engine-wide rule
+(mechanic L refinement).
+**Fusion forms**: Machine Dragon combined X charge measured 2280 on a Sirius; the
+dual-control split is attacks vs movement per player (contradicts the corpus reading
+of one shared command struct — trace target).
+**Self-damage**: Death ICBM/Walking Bomb/Death Bomb explode on CONTACT (collision-
+triggered suicide, no button) — consistent with (al)'s unconditional owner exclusion:
+the mover dies by its own scripted detonation, not by being hit.
+
+**6. Level/color byte encoding (glitch FAQ, matches zz_005814c_'s +0x3ea u16 +
++0x3ec byte writers from (ak)):** stored value = (colorVariant << 8) | level, with
+color variants 0=normal, 1=alt, 2=gold, 3=silver, 4=crystal, 5=black; level byte
+1-255. Levels beyond the authored row range read neighboring rows (matches the (ag)
+row arithmetic and the SDA mutation lore). Also: EXP rule per Fury_Hikari — every
+participating borg gets 2 exp per battle (1 on loss/quit); per-borg exp-to-level
+varies (10/20/40).
+
+**7. Damage anchors**: the move list's per-move damage values were measured against a
+LEVEL 7 Neo G Red (or Blizzard Dragon for stagger-prone moves) — usable as end-to-end
+damage-formula validation vectors once level floats are wired (e.g. G Red B shot = 17,
+melee ground combo = 70, Neo G Red X = 70; Death ICBM ~500 vs large borgs; Beam
+Satellite X = 476 vs Blizzard Dragon pre-stagger). Bomb-type X of ICBM Tank = 584.
+
+### (ao) Official NA instruction manual scanned and read — controls/HUD semantics, tier CONFIRMED_MANUAL (2026-07-03)
+
+Source: user-supplied scan of the North American instruction manual ("Imgur Album Gotcha
+Force Manual NA.zip" at repo root; extracted pages read in-session, pages 4-6 are the
+payload). Tier: CONFIRMED_MANUAL — official Capcom documentation of player-facing
+behavior; stronger than fan guides for control/UI semantics, still not numeric ROM
+truth. Paraphrased facts:
+
+- **B contextual rule is OFFICIAL**: far from the enemy = open fire; close = battle
+  (melee) attack; and the TARGET CURSOR changes yellow -> red to indicate battle mode.
+  The melee/ranged threshold is therefore HUD-observable — trace T1 gains a visual
+  calibration signal for FLOAT_8043762c (watch the cursor color flip vs logged
+  distance). Feeds mechanic A/B and ATK-003.
+- **Separate B and X ammo counters are OFFICIAL** ("B Bullets" / "X Bullets" HUD
+  meters) — binding the ROM's weapon cells: weapon 0 = B-attack ammo, weapon 1 =
+  X-attack ammo. ATK-009 follow-up unlocked: the port's X/special should consume
+  weapon cell 1 (today specials are cooldown-only).
+- **Charge Gauge OFFICIAL**: hold B to fill; at max, release for a super Charge
+  Attack (the port's chargeable-shot model matches; HUD gauge exists).
+- **Y = Power Burst**: press when the burst gauge is at MAX; friends pressing at the
+  same time get simultaneous power bursts — reading the (aj) +0x6fb = 6 arm window as
+  the co-op simultaneity tolerance (reconcile in T3). Burst meter officially "fills as
+  the player inflicts and receives damage" (StrategyWiki interface page corroborates).
+- **L AND R both switch targets** (port models only R); **Z = HOLD to lock onto your
+  partner** (port models Z as press-to-cycle ally lock — semantics differ);
+  **A while blown away = jump away from danger** — an AIR RECOVERY mechanic the port
+  lacks entirely (new queue item W14); **stick double-tap = evade dash** (port
+  triggers dodge differently — W15); A hold = booster jump rise, with a Jump Gauge
+  showing multi-level jumps.
+- Versus rule setup: GF-energy limit adjustable (Y raises it), X toggles computer
+  attacks on/off, X changes the computer force — mode-setup semantics for battle.ts
+  config, not combat math.
+- Extracted manual pages live in the session scratchpad only; the zip stays at repo
+  root (user-owned scan, do not commit extracted images).
+
+### (ap) Japanese Wikipedia extraction: Gundam-vs lineage, auto-shield rule, level cap, flight models (2026-07-03)
+
+Source: user-supplied machine translation of the Japanese Wikipedia article (CC-BY-SA;
+paraphrased facts only). Tier: OBSERVED_WIKI — secondary-source claims, some possibly
+editor interpretation; use as taxonomy/anchors, never numeric truth.
+
+- **Design lineage (interpretive lens)**: the game is by the Gundam-vs.-series planner
+  (Atsushi Tomita) and explicitly based on that series' control/system model; some of
+  its systems (charge attacks, indestructible shields) were later re-imported into
+  Gundam SEED Union vs. Z.A.F.T. When a mechanic here is ambiguous, the Gundam-vs
+  convention (knockdown/juggle rules, boost economy, auto-aim melee/shot split) is a
+  reasonable interpretation PRIOR — never evidence, but useful for framing traces.
+- **Two attack buttons with AUTOMATIC shot-vs-melee selection** (restated as the core
+  difference from Gundam vs.' three buttons) — third independent confirmation of
+  mechanic A. Some borgs bind one button to fly/transform instead; some have no melee
+  at all or shoot regardless of range (per-borg binding table, consistent with the
+  +0x4ec action-table reading and W12).
+- **AUTO-SHIELD RULE (new, feeds W7)**: shields have INFINITE durability, take no
+  damage, require no input — a frontal hit while NOT attacking is blocked
+  automatically. This is a concrete candidate semantic for the /40 "block divisor"
+  gate (record flagsA & 0x1000 + victim +0x59c & 0x1000, formula step 18): +0x59c
+  (from pl data u16@0xa8) as "has shield" and the state condition as "not attacking,
+  hit from front". Trace vector: knight vs pea-shooter, log damage while idle-facing
+  vs while mid-swing. Distinct from the Witch/Barrier-Girl OBJECT barriers, which have
+  finite HP (80/200/280 anchors, (an)).
+- **Level system**: +1 exp per battle appearance, +1 more on victory; LEVEL CAP 10
+  (vs Fury_Hikari's "2 per participation, 1 on loss" — minor accounting discrepancy,
+  both cap-10 compatible). Level-up raises HP, ammo, and shortens charge/reload time.
+  Feeds ATK-020: valid level range is 1-10 for normal play (glitch levels beyond are
+  out-of-range row reads); "charge/reload time scales with level" is another candidate
+  consumer for the unresolved refill-rate source (Q7).
+- **Three flight models** (movement fidelity, new queue item W17): (1) winged borgs:
+  unlimited-duration button-flight, constantly moving forward, stick steers left/right
+  only, altitude locked during flight; (2) air-class borgs: permanently airborne,
+  stick climbs/descends, jump button accelerates; (3) boost borgs: the existing
+  boost-jump model. The port's single FLY_MULT model matches none of these exactly.
+- **Tribe-affinity corroboration for the type matrix**: the article states explicit
+  tribe-vs-tribe modifiers (gun slightly weaker vs girl; musha slightly stronger vs
+  knight; angel slightly stronger vs demon; tank stronger-attack/weaker-defense vs
+  flying) — matching the ported 20x20 matrix's sparse ±5-25% cells ((l)/(w)). A cheap
+  validation: check the extracted matrix cells for exactly these four asymmetries
+  using the category remap.
+- **X Charge (JP name for Power Burst)**: consumes the battle-accumulated gauge to
+  strengthen "the team" for a limited time (equivalent to Hyper Combination in the
+  contemporaries) — team-wide phrasing is loose secondary-source wording; the
+  per-actor +0x6fc model stands until T3 says otherwise. Combination requires
+  specific pairs + X Charge; in 2P the fused body's controls are split between
+  players (consistent with the guide's attacks-vs-movement split, still conflicting
+  with the corpus shared-command-struct reading — T3 item).
+- Misc: hidden per-enemy-type drop points accumulate toward borg/crystal rewards
+  (meta-game); ~18h first lap; boss battles vs the giant leader use GF energy to
+  grow the player borg giant (story finale mechanic — out of combat-port scope).
+
+### (aq) 100%-completion save added (gotcha_force_100_usa.gci) — trace enabler + save-format datamine (2026-07-03)
+
+User added a user-owned 100% NTSC-U save at repo root: `gotcha_force_100_usa.gci`
+(validated: GG4E08, "GG4E_GOTCHA_FORCE_USA", 0x40 GCI header + exactly 10 x 8192-byte
+blocks — matching the manual's 10-block requirement ((ao)); internal comment dated
+2025-01-15). Two uses:
+
+1. **Trace enabler**: every borg needed by the attack-mechanics trace plan (fusion
+   pairs for T3, status borgs for T8, solid/piercing projectile borgs for T5/T6,
+   gradual/all-at-once/deploy borgs for T7, per-record hitStrength probes for T9) is
+   unlocked. This save is now the STANDARD starting save for T1-T10 — noted in
+   attack-mechanics-trace-plan.md.
+2. **Save-format datamine (in flight)**: the Gotcha Box collection should persist the
+   per-borg (colorVariant<<8 | level) u16 ((an) §6) plus EXP — decoding it can pin
+   level/exp storage without a live trace and gives packages/save (currently a stub)
+   its format spec. Agent dispatched: locate box/force arrays via roster-id patterns
+   (family<<8|variant vs borgs.json), cross-reference the ROM's CARD/serializer code,
+   document checksum. Deliverables: scripts/inspect-gotcha-save.mjs +
+   research/format-specs/save-gci-format.md.
+
+The .gci stays at repo root uncommitted (user-owned save data — same policy as the
+.sav files and disc image; add to .gitignore if not already covered).
+
+**(aq) addendum:** two more independent saves added at repo root (all validated GG4E08,
+10 blocks): `allborgsgotcha-force.28411.gci` (internal date 2023-03-04, all-borgs) and
+`gblack-galatic-emperor-save=gotcha-force.22132.gci` (2011-11-17, advertised as
+containing the two unobtainable borgs). Decode upgraded to three-way DIFFERENTIAL
+analysis (identical bytes = format/defaults; differing = state) with checksum
+verification across all three. Special-id predictions from the validated glitch
+encoding: Neo G Red 0x0629, G BLACK 0x062a, GALACTIC EMPEROR 0x0e04 (G Red 0x0615
+already roster-confirmed) — finding 0x062a/0x0e04 only in the 2011 save doubles as
+box-array + id-table validation. All *.gci gitignored.
+
+### (ar) User-supplied secondary RE survey — mostly redundant, three usable leads (2026-07-03)
+
+A user-supplied research report (AI-survey style; treat every claim as
+UNVERIFIED_SECONDARY) restated known ground (Sysdolphin lineage §2, Melee-map reuse,
+Dolphin watchpoint method §h, m2c/HSDRaw; its "wake-up invincibility 60.0 @0x80437448"
+example is this notebook's own §(a) with slightly garbled instruction addresses).
+Extracted leads worth keeping:
+1. **Mode-conditional wake-up invincibility (TESTABLE)**: claims the wake-up i-frame
+   path is bypassed in Challenge/Story via a conditional branch before the +0x720
+   write, so CPU pressure works in single-player. Unverified; possibly related to the
+   (af) respawn-reset conditional (+0x6cb==1 -> 30.0 else 60.0, FUN_80060b60). Check:
+   grep conditional guards around every +0x720 = 60.0 write vs the mode byte
+   (PTR_DAT_80433930[0x32] family) — or T4 trace: wake up a CPU in Versus vs Challenge
+   and watch +0x720.
+2. **Blender SysDolphin addon imports CameraSet nodes as animated cameras** — direct
+   tooling lead for the camera workstream (apps/game camera is OrbitControls, known
+   non-1:1) and any title-sequence port; complements the existing HSDRaw pipeline.
+3. **NeoGF toolchain** (gcmtool/afstool/pzztool/mottool/mdttool/doltool, Python) —
+   community equivalents of this repo's extraction scripts; cross-reference if a
+   format edge case (e.g. the POBJ "out of struct range" case) resists the current
+   pipeline. Also: AObj F-curve tracks are Hermite-interpolated — verify
+   packages/formats/src/hsd-anim.ts replicates tangents, not linear lerp (fidelity
+   check for animation timing).
