@@ -1,0 +1,6481 @@
+{
+ "schema": "gotyaforce.borgMoveProperties.v1",
+ "provenance": {
+  "source": "research/decomp/data/wiki-borg-moves.json (Gotcha Force Wiki harvest, behavior-notes (aw))",
+  "generator": "scripts/gen-borg-move-properties.mjs",
+  "tier": "OBSERVED_WIKI — community-cataloged; solidity/penetration are the arbiter-pending taxonomy for ATK-007/008 (traces T5/T6); refill labels cross-validated to ROM weapon-cell types (all_at_once=type0, gradual=type1, behavior-notes (aw)/(ax); ROM types 2/3 are dead per (ax))",
+  "license": "Source wiki content CC-BY-SA; extracted field values with attribution"
+ },
+ "penetrationEnum": [
+  "none",
+  "borgs",
+  "total"
+ ],
+ "romCrossValidation": {
+  "hp_lv1_lv10_vs_rows2_11": {
+   "match": 200,
+   "of": 203,
+   "mismatches": [
+    "pl0400 wiki 300/390 rom 300/380",
+    "pl0507 wiki 2500/3400 rom 2500/3040",
+    "pl0d01 wiki 150/195 rom 150/168"
+   ]
+  },
+  "bshot_refill_type_vs_w0type": {
+   "match": 113,
+   "mismatches": [
+    "pl0f02 Beam: wiki All at Once rom type 1",
+    "pl0502 Beam Cannon: wiki Gradual rom type 0",
+    "pl0f05 Bomb: wiki Over Time rom type 2",
+    "pl050e Beam Cannon: wiki Gradual rom type 0"
+   ]
+  },
+  "bshot_lv1_ammo_vs_w0max": {
+   "match": 119,
+   "mismatches": [
+    "pl0908 Rescue Shot: wiki lv1 ammo 5 rom w0max 10",
+    "pl0108 Fast Shooting: wiki lv1 ammo 15 rom w0max 20",
+    "pl0e05 AntiAircraft Gun: wiki lv1 ammo 20 rom w0max 30",
+    "pl0105 Shot: wiki lv1 ammo 10 rom w0max 5",
+    "pl0303 Shot: wiki lv1 ammo 2 rom w0max 6",
+    "pl0802 Power Shot: wiki lv1 ammo 20 rom w0max 10",
+    "pl061c Beam Rifle: wiki lv1 ammo 3 rom w0max 5",
+    "pl0801 Spirit Shot: wiki lv1 ammo 4 rom w0max 5",
+    "pl0c04 Vulcan & Missile: wiki lv1 ammo 100 rom w0max 200"
+   ]
+  }
+ },
+ "borgs": {
+  "pl0302": {
+   "wikiTitle": "Barrier Girl",
+   "moves": [
+    {
+     "name": "Charge Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Yoyo",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Charge Shot",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Barrier",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0002": {
+   "wikiTitle": "Arrow Ninja",
+   "moves": [
+    {
+     "name": "Shuriken",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Kunai",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ninpo Kagenui Arrow",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 8,
+      "lv10": 8
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0004": {
+   "wikiTitle": "Acceleration Ninja",
+   "moves": [
+    {
+     "name": "Kamaitachi",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    },
+    {
+     "name": "Nidare Kamaitachi",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ninpo Full Throttle",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0207": {
+   "wikiTitle": "Alien Insect",
+   "moves": [
+    {
+     "name": "Insect Bomb",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Insect Slicer",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Insect Scope",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0300": {
+   "wikiTitle": "Battle Girl",
+   "moves": [
+    {
+     "name": "Sub Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Knife",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Missile Launcher",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0900": {
+   "wikiTitle": "Angel Nurse",
+   "moves": [
+    {
+     "name": "Nurse Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Nurse Attack",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Healing",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0708": {
+   "wikiTitle": "Akuma Samurai",
+   "moves": [
+    {
+     "name": "Akuma Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "raw": "5"
+     },
+     "effect": null
+    },
+    {
+     "name": "Akuma Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Random Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0204": {
+   "wikiTitle": "Axe Knight",
+   "moves": [
+    {
+     "name": "Great Axe",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Axe Boomerang",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Axe",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0e03": {
+   "wikiTitle": "Antares",
+   "moves": [
+    {
+     "name": "Beam Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Alpha Wing",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0c02": {
+   "wikiTitle": "Beam Tank",
+   "moves": [
+    {
+     "name": "Tripple Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 50,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Drill Attack",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Mega Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0907": {
+   "wikiTitle": "Bastet Witch",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of Reduction",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Small Spell",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0908": {
+   "wikiTitle": "Angel Rescue",
+   "moves": [
+    {
+     "name": "Rescue Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Rescue Attack",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ultra Healing",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0408": {
+   "wikiTitle": "Army Robot",
+   "moves": [
+    {
+     "name": "Army Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Army Arm",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Set Pillar",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0e01": {
+   "wikiTitle": "Beam Satellite",
+   "moves": [
+    {
+     "name": "Reflector Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "borgs",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": null,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Satalite Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0706": {
+   "wikiTitle": "Beam Samurai",
+   "moves": [
+    {
+     "name": "Beam Blade",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Beam Charge",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0a04": {
+   "wikiTitle": "Anubis Wing",
+   "moves": [
+    {
+     "name": "Fire Ball",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 9,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Anubis Blade",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fire Bomb",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": true,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0108": {
+   "wikiTitle": "Billy",
+   "moves": [
+    {
+     "name": "Fast Shooting",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 15,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Blues 'n Rock",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Double Recoil",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0504": {
+   "wikiTitle": "Cosmic Dragon",
+   "moves": [
+    {
+     "name": "Cosmic Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    },
+    {
+     "name": "Cosmic Breath",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    },
+    {
+     "name": "Black Hole",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl050d": {
+   "wikiTitle": "Claw Worm",
+   "moves": [
+    {
+     "name": "String Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Jaw Claw",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Set String",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0201": {
+   "wikiTitle": "Chainsaw Knight",
+   "moves": [
+    {
+     "name": "Chain Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Wire Arm",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0806": {
+   "wikiTitle": "Copy Man",
+   "moves": [
+    {
+     "name": "Copy Attack",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0400": {
+   "wikiTitle": "Claw Robot",
+   "moves": [
+    {
+     "name": "Quaternary Missile",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 4,
+      "lv10": 4
+     },
+     "effect": null
+    },
+    {
+     "name": "Iron Claw",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Iron Spin",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0402": {
+   "wikiTitle": "Build Robot",
+   "moves": [
+    {
+     "name": "Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Build Arm",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Set Pillar",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "raw": "10"
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0707": {
+   "wikiTitle": "Chrono Samurai",
+   "moves": [
+    {
+     "name": "Shinku Slash",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Space-Time Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Time Stop",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0d00": {
+   "wikiTitle": "Blue Striker",
+   "moves": [
+    {
+     "name": "Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 40,
+      "lv10": 40
+     },
+     "effect": null
+    },
+    {
+     "name": "Power Beam",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Missile",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 4,
+      "lv10": 4
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0d02": {
+   "wikiTitle": "Carrier Helicopter",
+   "moves": [
+    {
+     "name": "Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 40,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Missile",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Catch Crane",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0609": {
+   "wikiTitle": "Cyber Atlas",
+   "moves": [
+    {
+     "name": "Arm Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Punch Kick",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Remote Beam",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": null,
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shoulder Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "A. R. B.",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": null,
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0901": {
+   "wikiTitle": "Bug Witch",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of Transform",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Bug Spell",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0a03": {
+   "wikiTitle": "Beam Wing Blue",
+   "moves": [
+    {
+     "name": "Twin Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Future Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Acceleration Scope",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0a06": {
+   "wikiTitle": "Beam Wing Red",
+   "moves": [
+    {
+     "name": "Twin Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Future Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Wing Beam",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0e05": {
+   "wikiTitle": "Death Arc",
+   "moves": [
+    {
+     "name": "AntiAircraft Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Gun",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Max Shot",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": true,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0008": {
+   "wikiTitle": "Death Borg Alpha",
+   "moves": [
+    {
+     "name": "Shuriken",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "raw": "10/20?"
+     },
+     "effect": null
+    },
+    {
+     "name": "Blade",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl000c": {
+   "wikiTitle": "Death Borg Alpha II",
+   "moves": [
+    {
+     "name": "Shurekin",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "raw": "10/20?"
+     },
+     "effect": null
+    },
+    {
+     "name": "Blade",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Bomb",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "raw": "5/10?"
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0109": {
+   "wikiTitle": "Death Borg Beta",
+   "moves": [
+    {
+     "name": "Punch Kick",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Double Punch",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0105": {
+   "wikiTitle": "Death Borg Beta II",
+   "moves": [
+    {
+     "name": "Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "raw": "10/20?"
+     },
+     "effect": null
+    },
+    {
+     "name": "Double Shot",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0d07": {
+   "wikiTitle": "Death Bomb",
+   "moves": [
+    {
+     "name": "Drop",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0309": {
+   "wikiTitle": "Cyber Girl",
+   "moves": [
+    {
+     "name": "Quaternary Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Claw",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Double Beam Claw",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0305": {
+   "wikiTitle": "Cyber Girl Super",
+   "moves": [
+    {
+     "name": "Quatinary Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Plasma Circle",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Remote Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0608": {
+   "wikiTitle": "Cyber Mars",
+   "moves": [
+    {
+     "name": "Beam Rifle",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Buster Laser",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0808": {
+   "wikiTitle": "Cyber Hero",
+   "moves": [
+    {
+     "name": "Hero Attack",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Hero Spin",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Hero Shot",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Hero Beam",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl030a": {
+   "wikiTitle": "Cyber Girl Hyper",
+   "moves": [
+    {
+     "name": "Quaternary Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 8,
+      "lv10": 8
+     },
+     "effect": null
+    },
+    {
+     "name": "Plasma Circle",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Remote Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 12,
+      "lv10": 12
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl010a": {
+   "wikiTitle": "Death Borg Beta III",
+   "moves": [
+    {
+     "name": "Death Eye Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0206": {
+   "wikiTitle": "Death Borg Gamma",
+   "moves": [
+    {
+     "name": "Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl020f": {
+   "wikiTitle": "Death Borg Gamma II",
+   "moves": [
+    {
+     "name": "Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Death Eye Throw",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl030c": {
+   "wikiTitle": "Death Borg Delta",
+   "moves": [
+    {
+     "name": "Iron Knuckle",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0303": {
+   "wikiTitle": "Death Borg Delta II",
+   "moves": [
+    {
+     "name": "Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Big Shot",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl030d": {
+   "wikiTitle": "Death Borg Delta III",
+   "moves": [
+    {
+     "name": "Death Eye Yoyo",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Yoyo Throw",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl090b": {
+   "wikiTitle": "Death Borg Iota",
+   "moves": [
+    {
+     "name": "Flame Thrower",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 100,
+      "lv10": 100
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0b05": {
+   "wikiTitle": "Death Borg Lambda",
+   "moves": [
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0b07": {
+   "wikiTitle": "Death Borg Lambda II",
+   "moves": [
+    {
+     "name": "Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Attack",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0f01": {
+   "wikiTitle": "Death Borg Nu",
+   "moves": [
+    {
+     "name": "Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0f02": {
+   "wikiTitle": "Death Borg Nu II",
+   "moves": [
+    {
+     "name": "Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0f03": {
+   "wikiTitle": "Death Borg Nu III",
+   "moves": [
+    {
+     "name": "Buster Laser",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": true,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl080f": {
+   "wikiTitle": "Death Borg Omicron",
+   "moves": [
+    {
+     "name": "Metamorphose",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0f04": {
+   "wikiTitle": "Death Borg Chi",
+   "moves": [
+    {
+     "name": "Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl040c": {
+   "wikiTitle": "Death Borg Omega III",
+   "moves": [
+    {
+     "name": "Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl040d": {
+   "wikiTitle": "Death Borg Omega IV",
+   "moves": [
+    {
+     "name": "Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0003": {
+   "wikiTitle": "Double Ninja",
+   "moves": [
+    {
+     "name": "Shuriken",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Shinobi Gatana",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shinobi Bomb",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    },
+    {
+     "name": "Ninpo Kage Bunshin",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0e02": {
+   "wikiTitle": "Death Saucer",
+   "moves": [
+    {
+     "name": "Bizarre Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Hyper Death Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0202": {
+   "wikiTitle": "Elemental Knight",
+   "moves": [
+    {
+     "name": "Elemental Punch",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Elemental Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Elemental Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0701": {
+   "wikiTitle": "Demon Samurai",
+   "moves": [
+    {
+     "name": "Soul Ball",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Demon Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Random Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl061b": {
+   "wikiTitle": "Eagle Jet",
+   "moves": [
+    {
+     "name": "Eagle Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Eagle Saber",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0705": {
+   "wikiTitle": "Death Borg Zeta",
+   "moves": [
+    {
+     "name": "Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl070b": {
+   "wikiTitle": "Death Borg Zeta II",
+   "moves": [
+    {
+     "name": "Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl070c": {
+   "wikiTitle": "Death Borg Zeta III",
+   "moves": [
+    {
+     "name": "Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl070d": {
+   "wikiTitle": "Death Borg Zeta IV",
+   "moves": [
+    {
+     "name": "Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0807": {
+   "wikiTitle": "Death Borg Tau",
+   "moves": [
+    {
+     "name": "Physical Attcak",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0f06": {
+   "wikiTitle": "Death Eye",
+   "moves": [
+    {
+     "name": "Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "raw": "5/10?"
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl050c": {
+   "wikiTitle": "Fire Dragon",
+   "moves": [
+    {
+     "name": "Fire Bomb",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Fire Breath",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0401": {
+   "wikiTitle": "Drill Robot",
+   "moves": [
+    {
+     "name": "Drill Missile",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 2,
+      "lv10": 2
+     },
+     "effect": null
+    },
+    {
+     "name": "Drill Arm",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Tunnel Attack",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0606": {
+   "wikiTitle": "Eagle Robot",
+   "moves": [
+    {
+     "name": "Eagle Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Tonfa",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Transform",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0615": {
+   "wikiTitle": "G Red",
+   "moves": [
+    {
+     "name": "Beam Gun",
+     "button": "B Shot",
+     "flair": "Laser",
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 8
+     },
+     "effect": null
+    },
+    {
+     "name": "Plasma Knuckle",
+     "button": "B Attack",
+     "flair": "Fist",
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "G Buster",
+     "button": "B Charge",
+     "flair": "Laser",
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "G Crash",
+     "button": "X",
+     "flair": "Fist",
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0a09": {
+   "wikiTitle": "Garuda",
+   "moves": [
+    {
+     "name": "Fire Ball",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 9,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Garuda Blade",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fire Bomb",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": true,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0d03": {
+   "wikiTitle": "Flying Saucer",
+   "moves": [
+    {
+     "name": "Maser",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Devastation Laser",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl020b": {
+   "wikiTitle": "Ghost Knight",
+   "moves": [
+    {
+     "name": "Ghost Punch",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Ghost Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ghost Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl020c": {
+   "wikiTitle": "Hammer Knight",
+   "moves": [
+    {
+     "name": "Hammer Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Hammer",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0903": {
+   "wikiTitle": "Guard Witch",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of Guard",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Barrier Spell",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": null,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0c01": {
+   "wikiTitle": "Gatling Tank",
+   "moves": [
+    {
+     "name": "Quaternary Gatling",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 50,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Missile",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0006": {
+   "wikiTitle": "Flame Ninja",
+   "moves": [
+    {
+     "name": "Fire Ball",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Flame Thrower",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ninpo Dragon Explosion",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0102": {
+   "wikiTitle": "Gatling Gunner",
+   "moves": [
+    {
+     "name": "Special Gatling",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 100,
+      "lv10": 100
+     },
+     "effect": null
+    },
+    {
+     "name": "Grenade",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0802": {
+   "wikiTitle": "Gold Hero",
+   "moves": [
+    {
+     "name": "Power Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Ogon Ken",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Gold Set Up",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "??? Unnamed Beam Shot (Power Beam)",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "??? Unnamed Melee (Beam Ogon Ken)",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "??? Unnamed Riser Beam (Golden Raiser)",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0500": {
+   "wikiTitle": "Flame Dragon",
+   "moves": [
+    {
+     "name": "Fire Bomb",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "raw": "5?/??"
+     },
+     "effect": null
+    },
+    {
+     "name": "Fire Breath",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl040a": {
+   "wikiTitle": "Isaac",
+   "moves": [
+    {
+     "name": "Isaac Missile",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 4,
+      "lv10": 4
+     },
+     "effect": null
+    },
+    {
+     "name": "Isaac Claw",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Isaac Spin",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl030b": {
+   "wikiTitle": "Kei",
+   "moves": [
+    {
+     "name": "Sub Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Knife",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Missile Launcher",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0c06": {
+   "wikiTitle": "Leopard",
+   "moves": [
+    {
+     "name": "Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "raw": "20"
+     },
+     "effect": null
+    },
+    {
+     "name": "Leopard Cannon",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 6,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl080e": {
+   "wikiTitle": "Jack",
+   "moves": [
+    {
+     "name": "Jelly Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Jelly Punch",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Jelly Scope",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl020d": {
+   "wikiTitle": "Hatchet Knight",
+   "moves": [
+    {
+     "name": "Hatchet",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Hatchet Boomerang",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Hatchet",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0800": {
+   "wikiTitle": "Kung-Fu Master",
+   "moves": [
+    {
+     "name": "Spirit Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    },
+    {
+     "name": "Cosmic Kenpo",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Senpuken",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0805": {
+   "wikiTitle": "Jelly Diver",
+   "moves": [
+    {
+     "name": "Jelly Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Jelly Punch",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Jelly Scope",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0a01": {
+   "wikiTitle": "Jet Hero",
+   "moves": [
+    {
+     "name": "Blade Gun Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Blade Gun Thrust",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Power Scope",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0b01": {
+   "wikiTitle": "Ice Valkrie",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of Ice",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ice Spell",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0209": {
+   "wikiTitle": "Imperial Knight",
+   "moves": [
+    {
+     "name": "Alpha Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Alpha Cross Slash",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Omega Sword",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Omega Cross Slash",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0c05": {
+   "wikiTitle": "ICBM Tank",
+   "moves": [
+    {
+     "name": "Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Final Missile",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0304": {
+   "wikiTitle": "Killer Girl",
+   "moves": [
+    {
+     "name": "Assault Rifle",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Killer Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Buster Killer Laser",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0516": {
+   "wikiTitle": "Ice Dragon",
+   "moves": [
+    {
+     "name": "Ice Bomb",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Ice Breath",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0909": {
+   "wikiTitle": "Isis Witch",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of S. Enlarge",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Very Big Spell",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0403": {
+   "wikiTitle": "Hammer Robot",
+   "moves": [
+    {
+     "name": "Double Hammer Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Double Hammer",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Lay the Mine",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": true,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0000": {
+   "wikiTitle": "Normal Ninja",
+   "moves": [
+    {
+     "name": "Shuriken",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Shinobi Gatana",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shinobi Bomb",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl090d": {
+   "wikiTitle": "Nao",
+   "moves": [
+    {
+     "name": "Nurse Shot",
+     "button": "B Shot",
+     "flair": "Bullet",
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 13
+     },
+     "effect": null
+    },
+    {
+     "name": "Nurse Attack",
+     "button": "B Attack",
+     "flair": "Wand",
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Super Healing",
+     "button": "X",
+     "flair": "Heal",
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": "Heal"
+    }
+   ]
+  },
+  "pl0709": {
+   "wikiTitle": "Musashi",
+   "moves": [
+    {
+     "name": "Shinku Slash",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    },
+    {
+     "name": "Furinmaru / Kazanmaru",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0629": {
+   "wikiTitle": "Neo G Red",
+   "moves": [
+    {
+     "name": "Beam Gatling",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 13
+     },
+     "effect": null
+    },
+    {
+     "name": "Plasma Blade",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "G Buster",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Neo G Crash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0512": {
+   "wikiTitle": "Mechanical Dragon",
+   "moves": [
+    {
+     "name": "Machine Destruction",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "other",
+     "explodes": null,
+     "ammo": {
+      "raw": "???"
+     },
+     "effect": null
+    },
+    {
+     "name": "Mechanical Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "other",
+     "explodes": null,
+     "ammo": {
+      "raw": "???"
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0511": {
+   "wikiTitle": "Machine Head",
+   "moves": [
+    {
+     "name": "Machine Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Machine Breath",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl020a": {
+   "wikiTitle": "Normal Knight",
+   "moves": [
+    {
+     "name": "Broad Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Cross-Shape Slash",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shield Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0405": {
+   "wikiTitle": "Magnet Robot (+)",
+   "moves": [
+    {
+     "name": "Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Magnet Arm",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Magnet Scope",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0407": {
+   "wikiTitle": "Megaton Robot",
+   "moves": [
+    {
+     "name": "Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Megaton Arm",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Megaton Hamer",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": true,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0409": {
+   "wikiTitle": "Magnet Robot (-)",
+   "moves": [
+    {
+     "name": "Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Magnet Arm",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Magnet Scope",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl080a": {
+   "wikiTitle": "Metal Hero",
+   "moves": [
+    {
+     "name": "Metal Karate",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Metal Set Up",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": null,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    },
+    {
+     "name": "??? Unnamed Sword Melee (Metal Kendo)",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "??? Unnamed OHKO Melee/Beam (Iron Beam Crash)",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0600": {
+   "wikiTitle": "Machine Red",
+   "moves": [
+    {
+     "name": "Beam Rifle",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Blade",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Buster Laser",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0601": {
+   "wikiTitle": "Machine Blue",
+   "moves": [
+    {
+     "name": "Arm Missile",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Punch Kick",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shoulder Cannon",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0101": {
+   "wikiTitle": "Powered Gunman",
+   "moves": [
+    {
+     "name": "Double Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Punch Kick",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Powered Shot",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Powered Long Shot",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": true,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0517": {
+   "wikiTitle": "Poison Worm",
+   "moves": [
+    {
+     "name": "Poison Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Poison Claw",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Poison Trap",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0700": {
+   "wikiTitle": "Normal Samurai",
+   "moves": [
+    {
+     "name": "Shinku Slash",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0902": {
+   "wikiTitle": "Patra Witch",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of Enlargement",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Big Spell",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0904": {
+   "wikiTitle": "Pop Honey",
+   "moves": [
+    {
+     "name": "Honey Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Honey Mike",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Lovely Voice",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0c00": {
+   "wikiTitle": "Normal Tank",
+   "moves": [
+    {
+     "name": "Machine Gun",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Cannonball",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 6,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0628": {
+   "wikiTitle": "Panther Vehicle",
+   "moves": [
+    {
+     "name": "Panther Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Panther Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0d04": {
+   "wikiTitle": "Orange Fighter",
+   "moves": [
+    {
+     "name": "Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 40,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Power Beam",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Napalm Bomb",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl061c": {
+   "wikiTitle": "Proto Mars",
+   "moves": [
+    {
+     "name": "Beam Rifle",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Buster Laser",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl061d": {
+   "wikiTitle": "Proto Atlas",
+   "moves": [
+    {
+     "name": "Arm Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Punch Kick",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Remote Beam",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shoulder Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "A. R. B.",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl061e": {
+   "wikiTitle": "Proto King",
+   "moves": [
+    {
+     "name": "Victory Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Twin Beam Slash",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Windmill Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0502": {
+   "wikiTitle": "Phoenix Dragon",
+   "moves": [
+    {
+     "name": "Beam Cannon",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": null,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Phoenix Attack",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0613": {
+   "wikiTitle": "Panther Robot",
+   "moves": [
+    {
+     "name": "Panther Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Panther Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Wheel Attack",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Transform",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl000a": {
+   "wikiTitle": "Sasuke",
+   "moves": [
+    {
+     "name": "Shuriken",
+     "button": "B Shot",
+     "flair": "Bullet",
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 15
+     },
+     "effect": null
+    },
+    {
+     "name": "Tsumujimaru",
+     "button": "B Attack",
+     "flair": "Sword",
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shinobi Bomb",
+     "button": "X",
+     "flair": "Bomb",
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl000b": {
+   "wikiTitle": "Shijima",
+   "moves": [
+    {
+     "name": "Shuriken",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Kunai",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ninpo Kagenui Arrow",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 8,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0001": {
+   "wikiTitle": "Shuriken Ninja",
+   "moves": [
+    {
+     "name": "Shuriken",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 30,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Shinobi Physical Attack",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shuriken Cutter",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0100": {
+   "wikiTitle": "Revolver Gunman",
+   "moves": [
+    {
+     "name": "Fast Shooting",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Punch Kick",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Double Recoil",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0107": {
+   "wikiTitle": "Remote Bomber",
+   "moves": [
+    {
+     "name": "Set Bomb",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": true,
+     "ammo": {
+      "lv1": 8,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Detonation",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0f05": {
+   "wikiTitle": "Roach",
+   "moves": [
+    {
+     "name": "Bomb",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "raw": "1/2?"
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl090a": {
+   "wikiTitle": "Shield Witch",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of S. Guard",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Super Barrier Spell",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0b00": {
+   "wikiTitle": "Quick Valkrie",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of Time (Gold)",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Quick Spell",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0b04": {
+   "wikiTitle": "Ring Valkrie",
+   "moves": [
+    {
+     "name": "Ring Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Aura Blade",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ring Crash",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0704": {
+   "wikiTitle": "Samurai Shogun",
+   "moves": [
+    {
+     "name": "Shinku Slash",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    },
+    {
+     "name": "Shogun Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shogun Slash",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0d01": {
+   "wikiTitle": "Red Attacker",
+   "moves": [
+    {
+     "name": "Napalm Bomb",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Power Bomb",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0208": {
+   "wikiTitle": "Sapphire Knight",
+   "moves": [
+    {
+     "name": "Beam Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Lance",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Mega Beam Lance",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl090c": {
+   "wikiTitle": "Sekhmet Witch",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of S. Reduction",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Very Small Spell",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0005": {
+   "wikiTitle": "Teleport Ninja",
+   "moves": [
+    {
+     "name": "Double Kamaitachi",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Arm Cutter",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Ninpo Teleport",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": "gradual",
+     "explodes": null,
+     "ammo": {
+      "lv1": 2,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Teleport Slash",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0510": {
+   "wikiTitle": "Space Dragon",
+   "moves": [
+    {
+     "name": "Space Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Space Breath",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    },
+    {
+     "name": "Black Hole",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0106": {
+   "wikiTitle": "Time Bomber",
+   "moves": [
+    {
+     "name": "Set Bomb",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": true,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Bomb Shot",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": true,
+     "ammo": {
+      "lv1": 3,
+      "lv10": 3
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0200": {
+   "wikiTitle": "Sword Knight",
+   "moves": [
+    {
+     "name": "Great Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Cross-Shape Slash",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Shield Slash",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0307": {
+   "wikiTitle": "Spinner Girl",
+   "moves": [
+    {
+     "name": "Super Beam Yoyo",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Super Beam Yoyo Throw",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0703": {
+   "wikiTitle": "Sonic Samurai",
+   "moves": [
+    {
+     "name": "Shinku Slash",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Sonic Nitoryu",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Sonic Musoken",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0801": {
+   "wikiTitle": "Tao Master",
+   "moves": [
+    {
+     "name": "Spirit Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Cosmic Kenpo",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Tao Sword",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0404": {
+   "wikiTitle": "Thunder Robot",
+   "moves": [
+    {
+     "name": "Thunder Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 4,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Thunder Claw",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Thunder Wire",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0203": {
+   "wikiTitle": "Spike Knight",
+   "moves": [
+    {
+     "name": "Spike Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Spike Hammer",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Hammer",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Rolling Spike",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "other",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl080d": {
+   "wikiTitle": "Tar Diver",
+   "moves": [
+    {
+     "name": "Tar Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Tar Punch",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Tar Scope",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0b06": {
+   "wikiTitle": "Slow Valkrie",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": 10
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of Time (Silver)",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Slow Spell",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0604": {
+   "wikiTitle": "Titan Robot",
+   "moves": [
+    {
+     "name": "Titan Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 20,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Beam Javelin",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Javelin Shot",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Transform",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl070a": {
+   "wikiTitle": "Vlad",
+   "moves": [
+    {
+     "name": "Sonic Slash",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": 5
+     },
+     "effect": null
+    },
+    {
+     "name": "Shadow Bringer",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Blood Dance",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0702": {
+   "wikiTitle": "Vampire Knight",
+   "moves": [
+    {
+     "name": "Sonic Slash",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Blood Slash",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Blood Dance",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0809": {
+   "wikiTitle": "Walking Bomb",
+   "moves": [
+    {
+     "name": "Catch",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0a00": {
+   "wikiTitle": "Wing Soldier",
+   "moves": [
+    {
+     "name": "Arrow Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Wing Sword",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0b02": {
+   "wikiTitle": "Tornado Valkrie",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Stick of Tornado",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Tornado Spell",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0b03": {
+   "wikiTitle": "Wind Valkrie",
+   "moves": [
+    {
+     "name": "Magic Shot",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Butterfly Fan",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Big Fan",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "total",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0619": {
+   "wikiTitle": "Titan Tank",
+   "moves": [
+    {
+     "name": "Titan Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Javelin Shot",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "total",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl061f": {
+   "wikiTitle": "Victory Tank",
+   "moves": [
+    {
+     "name": "Victory Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Victory Cannon",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0620": {
+   "wikiTitle": "Victory Jet",
+   "moves": [
+    {
+     "name": "Victory Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Victory Bomb",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 3,
+      "lv10": null
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl0d05": {
+   "wikiTitle": "Violet Attacker",
+   "moves": [
+    {
+     "name": "Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 40,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Power Bomb",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": true,
+     "ammo": {
+      "lv1": 1,
+      "lv10": 1
+     },
+     "effect": null
+    }
+   ]
+  },
+  "pl050e": {
+   "wikiTitle": "Wing Dragon",
+   "moves": [
+    {
+     "name": "Beam Cannon",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "gradual",
+     "explodes": false,
+     "ammo": {
+      "lv1": null,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Wing Attack",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "borgs",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Fly",
+     "button": "X",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0610": {
+   "wikiTitle": "Victory King",
+   "moves": [
+    {
+     "name": "Victory Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Twin Beam Saber",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Windmill Slash",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": null,
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Transform",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0623": {
+   "wikiTitle": "Victory Baron",
+   "moves": [
+    {
+     "name": "Victory Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Twin Beam Saber",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Windmill Slash",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": null,
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Transform",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0621": {
+   "wikiTitle": "Victory Duke",
+   "moves": [
+    {
+     "name": "Victory Beam",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 5,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Twin Beam Sabers",
+     "button": "B Attack",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Windmill Slash",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": null,
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Transform",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0c04": {
+   "wikiTitle": "Ultimate Cannon",
+   "moves": [
+    {
+     "name": "Vulcan & Missile",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": "all_at_once",
+     "explodes": null,
+     "ammo": {
+      "lv1": 100,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Quaternary Beam",
+     "button": "X",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": "borgs",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 1,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Ultimate Beam",
+     "button": "X Charge",
+     "flair": null,
+     "solidity": "nonsolid",
+     "penetration": null,
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  },
+  "pl0625": {
+   "wikiTitle": "Victory Machine",
+   "moves": [
+    {
+     "name": "Victory Vulcan",
+     "button": "B Shot",
+     "flair": null,
+     "solidity": null,
+     "penetration": "none",
+     "refill": "all_at_once",
+     "explodes": false,
+     "ammo": {
+      "lv1": 10,
+      "lv10": null
+     },
+     "effect": null
+    },
+    {
+     "name": "Victory Cannon",
+     "button": "B Charge",
+     "flair": null,
+     "solidity": "solid",
+     "penetration": "none",
+     "refill": null,
+     "explodes": false,
+     "ammo": null,
+     "effect": null
+    },
+    {
+     "name": "Transform",
+     "button": "X",
+     "flair": null,
+     "solidity": null,
+     "penetration": null,
+     "refill": null,
+     "explodes": null,
+     "ammo": null,
+     "effect": null
+    }
+   ]
+  }
+ }
+}

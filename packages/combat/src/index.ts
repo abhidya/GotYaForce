@@ -92,6 +92,18 @@ export {
   resetActorParamTier,
 } from "./paramTier.js";
 export { stepAI } from "./ai.js";
+export {
+  moveProfileForBorgId,
+  moveByButton,
+  moveDataCoverage,
+  moveCrossValidation,
+  type BorgMove,
+  type BorgMoveProfile,
+  type MoveAmmo,
+  type MoveRefill,
+  type MoveSolidity,
+  type Penetration,
+} from "./moveProperties.js";
 
 // --- Borg-stats registry ----------------------------------------------------------------
 // The brief's createBattle signature is `createBattle(cfg): Battle`, but the sim needs the
