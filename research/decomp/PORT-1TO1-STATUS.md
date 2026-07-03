@@ -23,11 +23,12 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | Combat: knockback **magnitude** | TUNED | **not in code — needs trace T9** |
 | Combat: B/X contextual resolver | schema only | **trace T1** (command→button map) |
 | Combat: ammo/refill | mechanism DERIVED, values extracted | X-attack→cell-1 wiring |
-| Combat: statuses / hyper / fusion | shells only | traces T3/T8 + heal-write dig |
+| Combat: vampire lifesteal | DONE (ported, ay) | — |
+| Combat: statuses / hyper / fusion | shells only | traces T3/T8 (nurse heal-write not in corpus) |
 | Physics: movement/jump/dash | TUNED constants | trace-fit from goldens |
 | UI: screens | ~9 real screens | 6 modes are dead menu entries |
-| UI: HUD | ~60% | X-ammo, charge, burst, jump gauges, cursor color |
-| Challenge flow | ~80% DERIVED | winner-mask judge; 3-phase deploy |
+| UI: HUD | ~75% (charge✓, cursor✓) | X-ammo (in progress), burst, jump gauges |
+| Challenge flow | ~85% DERIVED (winner-mask✓) | 3-phase deploy (mostly moot) |
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
 | Assets: animation playback | ~85% | state→(group,slot) dispatch trace |
 | Audio: BGM/menu | ~90% | — |
@@ -65,7 +66,7 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Hyper / Power Burst | shell (ATK-011) | burst.ts | +0x6fb/+0x6fc, zz_005b2b8_ (aj/S) | **trace T3** — meter+duration |
 | Fusion | data + shell (ATK-018) | fusion-pairs JSON | pair table 0x802d352c (aj) | trace T3 (co-op control split) |
 | Statuses (id/timer/immunity) | shell (ATK-010) | status.ts | +0x71a/+0x71c/+0x5a0 (Q/aw effects) | trace T8 per-id semantics |
-| Vampire lifesteal | **DECODED (ay)** | ATK-019 shell | steal chunk_0003.c:7982/apply 6318/bleed chunk_0006.c:7900 | port steal=dmg/2, cap@maxHP, 1HP/30f bleed |
+| Vampire lifesteal | **PORTED (aef234f1)** | combat.ts steal+bleed, wired | steal chunk_0003.c:7982/apply 6318/bleed chunk_0006.c:7900 | done: steal=dmg/2 cap@maxHP + 1HP/30f bleed, 47/47 test |
 | Nurse heal | **HP-write ABSENT (ay)** | ATK-019 shell | table 0x802d1130 (ax); no +0x1c6 write reachable | Dolphin-trace +0x1c6 on healed ally |
 | Mash extra hits | shell (ATK-017) | constants MASH | +0x550 cap 4 (T/ax) | trace consumer |
 | Contact damage | scaffold (ATK-006) | disabled | per-borg authored (am/av) | trace T2 stomp |
@@ -185,8 +186,10 @@ down like `tuned-burndown.md`.
 3. 3-phase deploy timing (20/1/15f, ally cue 8) — values DERIVED in (af); replaces flat 45f.
    NOTE: SPAWN_DURATION is already 36; verify whether the 3-phase split changes observable
    behavior before investing (may be a doc-only refinement).
-4. Winner-mask judge: port the per-side count/energy/rule-flag equality model (ae) into
-   battle.ts evaluateResult.
+4. ✅ DONE (commit 3f66777b) — Winner-mask judge: per-side destroyed/equality model (ae) ported
+   into battle.ts evaluateResult; BattleState.winnerMask (bit0/bit1/3-mutual/4-timeout) exposed;
+   mutual destruction now resolves to 'lose' for the player (was 'draw'), matching FUN_801969a0.
+   battleJudge.selftest 16/16.
 5. ✅ DONE (commit fcb9c2bc) — level-aware row-index CORRECTED to row = levelByte + 2 (the
    old DAT_804339e8[level] was non-monotonic and wrong; retained for reference only).
    levelRows.selftest rewritten, 42/42. Outliers pl0400/pl0507/pl0d01 remain open.
@@ -196,9 +199,9 @@ down like `tuned-burndown.md`.
 7. ⛔ DEAD-END (ay) — Nurse heal HP-write NOT in corpus. Re-traced table 0x802d1130 + Death
    Borg Theta 0x6a path; no +0x1c6 heal write reachable. Heal amount is inlined/table-indexed
    or truncated. Re-tagged as a Dolphin-trace candidate (watch +0x1c6 on a nurse-healed ally).
-8. ✅ DONE (ay) — Vampire lifesteal FULLY decoded: steal = damage/2 banked
-   (chunk_0003.c:7982), applied+capped to own HP (6318), passive 1 HP / 30-frame bleed
-   (chunk_0006.c:7900). Ready for a faithful ATK-019 port.
+8. ✅ DONE + PORTED (commit aef234f1) — Vampire lifesteal decoded (ay) AND wired into combat:
+   steal = floor(dmg/2) heal-on-hit capped at maxHP, passive 1 HP / 30-frame bleed floored at 1.
+   HEAL.VAMPIRE_ENABLED flipped on; healing.selftest 47/47.
 9. state→(group,slot) animation dispatch (trace zz_004beb8_ callers / 35-slot table) — converts
    heuristic anim labels to source-proven.
 10. Annotate the 150 understood functions into the index (coverage burn-down).
