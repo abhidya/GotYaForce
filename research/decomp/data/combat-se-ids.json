@@ -1,0 +1,176 @@
+{
+  "summary": "The COMBAT sound pipeline is a TWO-PATH system, now fully readable statically. PATH A (literal call sites, PORTABLE): a set of state-machine / action handlers call the play wrappers zz_00f036c_(actor, soundId) / zz_00f0468_(actor, soundId, prio) / zz_00f04b4_(soundId, pos*, ch) with LITERAL soundIds. These decode via zz_00efb3c_ as bank=id>>7, sample=id&0x7f, guarded id<0x180 (0x180 = 3 banks x 128). I mapped 11 distinct combat/action events to real literal soundIds. PATH B (per-animation data table, NOT literal): the bulk of per-move combat audio (weapon swings, footsteps, voice hits, per-attack whooshes) is emitted by zz_005b880_ / zz_005b98c_ (0x8005b880/0x8005b98c) which iterate an ANIMATION SOUND-EVENT array at *(actor+0x4e8), 8-byte records {u16 @+0, u8 flag @+1, u8 kind @+3, u16 soundId @+4 (field [2]), term 0xff @+6}. The soundId is read from animation data (puVar4[2]) and is NOT a compile-time constant, so those ids are not resolvable from the .c alone. The 'reaction cue id 9 (death)' and 'reaction cue id 8 (deploy)' from behavior-notes are ALSO not soundIds: zz_006a750_/zz_006a6fc_/zz_00ea2c8_ use the cue id as an index into a per-borg animation-select table (*(actor+0x4f0)[cue*2(+1)]) to switch the actor into a reaction ANIMATION, whose embedded PATH-B sound events then produce the audio. So death/deploy audio is data-driven, not a literal. RESULT: 11 events mapped to real literal ids; ALL 11 are portable and can replace generic se00 samples. The animation-scripted per-move sounds require dumping the DAT_802... animation blobs (offset table indexed via actor+0x4e8/+0x4f0) which are binary data, out of scope for the .c corpus.",
+  "events": [
+    {
+      "event": "shot fire / projectile launch",
+      "soundId": "0x08",
+      "soundIdDec": 8,
+      "bank": 0,
+      "sample": 8,
+      "callerFn": "0x8006ee14 zz_006ee14_ (PROJECTILE SPAWN, called by weapon-FIRE handler zz_0070558_)",
+      "chunk": "chunk_0009.c:3859",
+      "evidence": "zz_00f036c_(param_1,8);  // last statement of projectile spawn, after muzzle world-pos + velocity from &DAT_802d39dc[muzzle]",
+      "confidence": "high"
+    },
+    {
+      "event": "melee/weapon swing OR damage-taken bounce impact (terrain crash after knockback), variant A",
+      "soundId": "0x13",
+      "soundIdDec": 19,
+      "bank": 0,
+      "sample": 19,
+      "callerFn": "0x8005a580 FUN_8005a580 (knockback-vs-terrain impact handler; spawns dust via FUN_80092ecc when +0x5e0&0x2000000 knockback flag set)",
+      "chunk": "chunk_0007.c:2946 (and 2979/3014/3049/3084/3117)",
+      "evidence": "if ((cVar1=='4'||cVar1=='6'||(byte)(cVar1-0xc)<2||cVar1=='0xe')) { zz_00f036c_(param_1,0x13); } else { zz_00f036c_(param_1,0x10); }  // branch on borg family (obj+1000)",
+      "confidence": "high"
+    },
+    {
+      "event": "wall/ground crash impact, variant B (default borg family)",
+      "soundId": "0x10",
+      "soundIdDec": 16,
+      "bank": 0,
+      "sample": 16,
+      "callerFn": "0x8005a580 FUN_8005a580 (knockback-vs-terrain impact handler)",
+      "chunk": "chunk_0007.c:2949 (and 2982/3017/3052/3087/3120)",
+      "evidence": "else { zz_00f036c_(param_1,0x10); }  // non-heavy borg family variant of the crash impact",
+      "confidence": "high"
+    },
+    {
+      "event": "grab/throw connect (successful throw during clash)",
+      "soundId": "0x9b",
+      "soundIdDec": 155,
+      "bank": 1,
+      "sample": 27,
+      "callerFn": "0x8005ace8 FUN_8005ace8 (clash/grab resolution loop; branch pcVar10[0x4a8]==2, calls zz_00f6654_ first)",
+      "chunk": "chunk_0007.c:3283",
+      "evidence": "if (pcVar10[0x4a8]=='2') { zz_00f6654_((int)pcVar10); zz_00f036c_((int)pcVar10,0x9b); } FUN_8006a980(...)",
+      "confidence": "high"
+    },
+    {
+      "event": "guard-break / balance-break impact (charge super? state-slot dispatch grants 60f invuln)",
+      "soundId": "0x00",
+      "soundIdDec": 0,
+      "bank": 0,
+      "sample": 0,
+      "callerFn": "0x8005c290 zz_005c290_ (state dispatcher / unconditional 60.0 balance-break invincibility)",
+      "chunk": "chunk_0007.c:4006-4008",
+      "evidence": "if ((*(uint*)(param_1+0x5e0)&0x1000000)==0){ zz_00f036c_(param_1,0); zz_00f036c_(param_1,0x80); zz_00f036c_(param_1,0x100); }  // plays THREE ids together: 0x00 (bank0/s0), 0x80 (bank1/s0), 0x100 (bank2/s0) — a layered break stinger",
+      "confidence": "high"
+    },
+    {
+      "event": "knockdown / heavy landing thud (state slot 30 get-up sequence), pitched",
+      "soundId": "0xdd",
+      "soundIdDec": 221,
+      "bank": 1,
+      "sample": 93,
+      "callerFn": "0x8005dffc FUN_8005dffc (state slot 30: full knockdown / getting-up sequence, group-0 slot 15)",
+      "chunk": "chunk_0007.c:5111",
+      "evidence": "zz_00f061c_((double)FLOAT_80437484,param_1,0xdd);  // zz_00f061c_ is the pitched/one-shot 3D variant (FLOAT arg = pitch scalar)",
+      "confidence": "high"
+    },
+    {
+      "event": "landing / touchdown (state slot 31 per-borg landing sequence)",
+      "soundId": "0x1e",
+      "soundIdDec": 30,
+      "bank": 0,
+      "sample": 30,
+      "callerFn": "0x8005e31c FUN_8005e31c (state slot 31: scripted landing/special-body sequence, group slots 0xe/0xf)",
+      "chunk": "chunk_0007.c:5215",
+      "evidence": "if (*(char*)(*(int*)(param_1+0x4ac)+0x41)=='0') { zz_00f036c_(param_1,0x1e); } else set +0x709=1  // gated by per-borg landing-flag",
+      "confidence": "high"
+    },
+    {
+      "event": "landing / footfall (reused id 0x1e in additional grounded-state handlers)",
+      "soundId": "0x1e",
+      "soundIdDec": 30,
+      "bank": 0,
+      "sample": 30,
+      "callerFn": "0x8005faf0 FUN_8005faf0, 0x80060454 FUN_80060454, 0x80060c94 zz_0060c94_ (grounded/recovery state handlers)",
+      "chunk": "chunk_0007.c:6262, 6559, 6875",
+      "evidence": "zz_00f036c_(param_1,0x1e);  // same landing/footstep cue emitted from three sibling stand/recover states",
+      "confidence": "high"
+    },
+    {
+      "event": "dash / boost / charge-forward whoosh (deploy-move launch and forced dash-to-point)",
+      "soundId": "0xf2",
+      "soundIdDec": 242,
+      "bank": 1,
+      "sample": 114,
+      "callerFn": "0x8005e868 FUN_8005e868 (state slot 33 spawn/warp-entrance), 0x8006ab04 start_forced_move_to_point (move_kind 0x23 dash), 0x80057ea0 FUN_80057ea0, 0x8005e868 branch",
+      "chunk": "chunk_0009.c:1082, chunk_0007.c:5446, chunk_0007.c:1041",
+      "evidence": "start_forced_move_to_point: zz_006a7b4_(actor,0x23); zz_006a7f4_(actor,0x23); zz_00f036c_(actor,0xf2);  // 0xf2 emitted on dash/warp launch",
+      "confidence": "high"
+    },
+    {
+      "event": "jump / hop / dash-launch (velocity+arc setup state)",
+      "soundId": "0x25",
+      "soundIdDec": 37,
+      "bank": 0,
+      "sample": 37,
+      "callerFn": "0x80061338 FUN_80061338 (launch state: sets +0x44/48 velocities, arc, calls zz_004beb8_ animation)",
+      "chunk": "chunk_0007.c:7157",
+      "evidence": "zz_0066ec0_(...); zz_004beb8_(...,param_1,2,0,10,...); zz_00f036c_(param_1,0x25);",
+      "confidence": "high"
+    },
+    {
+      "event": "body/collision bump between actors (velocity-gated push impact)",
+      "soundId": "0x26",
+      "soundIdDec": 38,
+      "bank": 0,
+      "sample": 38,
+      "callerFn": "0x8002fcbc zz_002fcbc_ (actor-vs-actor collision resolver; gated by +0x2ae==0 cooldown and velocity magnitude +0x7fc)",
+      "chunk": "chunk_0003.c:8378 (+8381/8385/8389, all same id, thin velocity-tier branches)",
+      "evidence": "zz_00f04b4_(0x26,param_3,(int)*(char*)(param_2+0x96));  // positional (param_3 = world pos), all four velocity tiers use 0x26",
+      "confidence": "high"
+    },
+    {
+      "event": "menu/global cue: side-select or big global stinger (NON-combat, global actor==0)",
+      "soundId": "0x176",
+      "soundIdDec": 374,
+      "bank": 2,
+      "sample": 118,
+      "callerFn": "0x800286d8 FUN_800286d8 (mode/round transition; sets PTR_DAT_80433934[0x45], spawns overlay)",
+      "chunk": "chunk_0003.c:3770",
+      "evidence": "zz_00f03c0_(0,0x176);  // actor 0 => global 2D play; included for completeness, likely a round/mode transition SFX not per-hit combat",
+      "confidence": "medium"
+    },
+    {
+      "event": "menu cursor tick / counter roll (NON-combat; energy/count tally in results)",
+      "soundId": "0x01 and 0x02",
+      "soundIdDec": "1, 2",
+      "bank": 0,
+      "sample": "1, 2",
+      "callerFn": "0x8003ff5c zz_003ff5c_ (counter/tally UI: increments a digit then ticks; final settle uses 2)",
+      "chunk": "chunk_0004.c:8950 (id 1), chunk_0004.c:8958 (id 2)",
+      "evidence": "if (digit changed) zz_00f0468_(0,1,0);  ...  when count settles: zz_00f0468_(0,2,0);  // global 2D UI ticks, NOT combat",
+      "confidence": "medium"
+    }
+  ],
+  "dataTablePath": {
+    "role": "The MAJORITY of per-move combat sounds (weapon swings, footsteps synced to gait, voice/impact grunts, per-attack whooshes) are emitted from ANIMATION-EMBEDDED sound-event records, not literal call-site constants.",
+    "iteratorFn": "0x8005b880 zz_005b880_ — loops 4 event-channels (iVar3 = actor+0x1ad4, stride 0x40) reading *(channel+0x37) as an index into the event array at *(actor+0x4e8), stride 8 bytes per event, terminated by 0xff at record+6.",
+    "dispatchFn": "0x8005b98c zz_005b98c_ — receives one 8-byte event record ptr (param_4). soundId = param_4[2] (byte offset +4). kind byte = *((char*)param_4+3): kind0 -> zz_00f036c_(actor,id); kind1 -> facing-adjusted id +/-1 then zz_00f036c_; kind<4 (2/3) -> zz_00f061c_ pitched. Frame-window gated by param_1/param_2 (float start/end from channel +8/+0x10).",
+    "recordLayout": "struct AnimSoundEvent { u16 field0; u8 flag@+1(0=window vs 1=ranged); u8 pad@+2; u8 kind@+3; u16 soundId@+4; u8 term@+6(0xff ends list); } size 8",
+    "note": "Actual soundId VALUES live in binary animation blobs referenced via *(actor+0x4e8) and are NOT present as constants in the .c corpus. To enumerate them you must dump the animation data (the per-borg .dat / DAT_802* region indexed via actor+0x4e8 offset table). This is the honest 'combat sounds come from a per-move data field at record+4, values not resolvable statically' result for the swing/voice layer."
+  },
+  "reactionCuePath": {
+    "role": "behavior-notes 'death entry plays reaction cue id 9' and 'deploy plays ally reaction cue id 8' — these ids are NOT soundIds. They are indices into a per-borg reaction ANIMATION-select table.",
+    "deathEntry": "0x8005bbc0 zz_005bbc0_ death entry -> calls the cue path with id 9; sound then comes from the death animation's embedded PATH-B events.",
+    "cueFns": "zz_006a750_(actor,cue)=*(actor+0x4f0)[cue*2+1]; zz_006a6fc_(actor,cue)=*(actor+0x4f0)[cue*2]; both store the looked-up value as a state/anim selector (actor+0x5da/+0x5db) — NOT passed to zz_00f0468_. zz_00ea2c8_->zz_00ea2ec_ (chunk_0025) is a separate voice/announcer-cue gate (uses per-borg voice table DAT_80319d99, PTR_DAT_80433934), also index-based not a literal soundId.",
+    "confidence": "high (that cue ids are anim/voice selectors, not soundIds)"
+  },
+  "newFunctions": [
+    { "address": "0x800f036c", "name": "zz_00f036c_", "chunk": "chunk_0026.c:790", "role": "PRIMARY combat play wrapper: zz_00f036c_(actor, soundId). actor==0 -> global 2D via zz_00efb3c_(id,0,0x7f,0x40,0x2000); else 3D-positioned via zz_00f04b4_(id, actor+0x20, actor.channel[+0x96]). Most literal combat sound calls go through this.", "evidence": "if(param_1==0) zz_00efb3c_(param_2,0,0x7f,0x40,0x2000); else zz_00f04b4_(param_2,(float*)(param_1+0x20),*(char*)(param_1+0x96));", "confidence": "high" },
+    { "address": "0x800f04b4", "name": "zz_00f04b4_", "chunk": "chunk_0026.c:854", "role": "3D-positional play core: zz_00f04b4_(soundId, pos_float*, channel). Computes volume via zz_00f0a74_(pos,0x7f) and pan via zz_00f0c24_(pos), then zz_00efb3c_(id,ch,vol,pan,0x2000). Used directly by zz_002fcbc_ (collision bump 0x26).", "evidence": "uVar1=zz_00f0a74_(param_2,0x7f); uVar2=zz_00f0c24_(param_2); zz_00efb3c_(param_1,param_3,uVar1,uVar2,0x2000);", "confidence": "high" },
+    { "address": "0x800f0468", "name": "zz_00f0468_", "chunk": "chunk_0026.c:838", "role": "play-with-priority wrapper: zz_00f0468_(actor, soundId, prio). actor==0 -> zz_00efb3c_(id, prio, 0x7f,0x40,0x2000); else 3D via zz_00f04b4_(id, actor+0x20, prio). Used by UI tally (ids 1,2).", "evidence": "if(param_1==0) zz_00efb3c_(param_2,param_3,0x7f,0x40,0x2000); else zz_00f04b4_(param_2,(float*)(param_1+0x20),param_3);", "confidence": "high" },
+    { "address": "0x800f03c0", "name": "zz_00f03c0_", "chunk": "chunk_0026.c:806", "role": "alt play wrapper (routes through the zz_00efc04_ dispatcher instead of zz_00efb3c_ — a second voice/SFX bus). Used for global cue 0x176. actor==0 -> zz_00efc04_(id,0,0x7f,0x40,0x2000).", "evidence": "if(param_1==0) zz_00efc04_(param_2,0,0x7f,0x40,0x2000); else zz_00f052c_(...);", "confidence": "high" },
+    { "address": "0x800f0414", "name": "zz_00f0414_", "chunk": "chunk_0026.c:822", "role": "third play wrapper routing to zz_00efcb8_ -> zz_00f1238_ (a distinct mixer path, DAT_803d3b36-gated / used by the delayed-event scheduler zz_00eff30_).", "evidence": "if(param_1==0) zz_00efcb8_(param_2,0,0x7f,0x40,0x2000); else zz_00f05a4_(...);", "confidence": "high" },
+    { "address": "0x800f061c", "name": "zz_00f061c_", "chunk": "chunk_0026.c (~886+)", "role": "PITCHED one-shot play variant: zz_00f061c_(pitchFloat, actor, soundId). Used for knockdown thud (0xdd) and scripted kind>=2 anim events; takes a float pitch/rate scalar as first arg.", "evidence": "zz_00f061c_((double)FLOAT_80437484,param_1,0xdd) at chunk_0007.c:5111; also in zz_005b98c_ kind branch", "confidence": "high" },
+    { "address": "0x8005b880", "name": "zz_005b880_", "chunk": "chunk_0007.c:3579", "role": "ANIMATION SOUND-EVENT ITERATOR: per frame, walks 4 event channels (actor+0x1ad4 stride 0x40), for each reads the event array at *(actor+0x4e8) indexed by channel[+0x37], stride-8 records, calls zz_005b98c_ per record until term 0xff. This is the engine that drives all per-animation combat SFX.", "evidence": "puVar4=(ushort*)(*(int*)(param_1+0x4e8)+*(char*)(iVar3+0x37)*8); do{ zz_005b98c_(...,param_1,puVar4); puVar4+=4; } while(*(char*)puVar1!=-1);", "confidence": "high" },
+    { "address": "0x8005b98c", "name": "zz_005b98c_", "chunk": "chunk_0007.c:3628", "role": "ANIMATION SOUND-EVENT DISPATCHER: zz_005b98c_(winStart, winEnd, actor, eventRec*). Reads soundId=eventRec[2], kind=eventRec[3]; kind0->zz_00f036c_, kind1->facing-adjusted id, kind2/3->zz_00f061c_ pitched. THE data-table sound source. (already in identified-functions with correct role.)", "evidence": "bVar1=*(byte*)((int)param_4+3); if(bVar1==1){...uVar2=param_4[2]+/-1...zz_00f036c_(param_3,uVar2);} else if(bVar1==0) zz_00f036c_(param_3,param_4[2]); else if(bVar1<4) zz_00f061c_(...,param_3,param_4[2]);", "confidence": "high" },
+    { "address": "0x8002fcbc", "name": "zz_002fcbc_", "chunk": "chunk_0003.c:8368", "role": "ACTOR-VS-ACTOR collision bump SFX: plays positional id 0x26 when +0x2ae cooldown==0 and velocity +0x7fc over threshold; gated so projectiles (+0x83) branch differently. New: this is the physics body-contact sound.", "evidence": "if(*(char*)(param_2+0x2ae)=='0'){ *(param_2+0x2ae)=4; ... zz_00f04b4_(0x26,param_3,*(char*)(param_2+0x96)); }", "confidence": "high" },
+    { "address": "0x8005a580", "name": "FUN_8005a580", "chunk": "chunk_0007.c (~2900)", "role": "KNOCKBACK-VS-TERRAIN impact handler: when actor has knockback flag (+0x5e0 & 0x2000000) and hits ground/wall, reflects velocity, spawns dust (FUN_80092ecc), and plays crash id 0x13 (heavy borg families 4/6/0xc/0xd/0xe) or 0x10 (others).", "evidence": "6 paired call sites lines 2946-3120: family-branch zz_00f036c_(param_1,0x13)/0x10", "confidence": "high" },
+    { "address": "0x80061338", "name": "FUN_80061338", "chunk": "chunk_0007.c (~7100)", "role": "LAUNCH/JUMP state: sets arc velocities (+0x44/+0x48/+0x50), runs anim zz_004beb8_(..,2,0,10,..), plays id 0x25. Likely hop/jump or dash-launch.", "evidence": "zz_0066ec0_(...); zz_004beb8_(...); zz_00f036c_(param_1,0x25);", "confidence": "medium" }
+  ],
+  "portNote": "apps/game/src/main.ts COMBAT_SFX currently maps 15 BattleEventCue events onto 5 generic se00_00..se00_04 samples (TUNED guesses). With the real literal ids now read, these mappings are REPLACEABLE with authentic GameCube soundIds (bank=id>>7, sample=id&0x7f) IF the port loads/decodes the real SE banks. Concrete replacements: shoot -> id 0x08 (bank0 s8) [from projectile spawn zz_006ee14_]; down/knockdown -> id 0xdd (bank1 s93, pitched) [state slot 30] (currently se00_00); death -> the death reaction is a per-anim data cue (NOT a literal) so death should stay generic OR pull from the death-animation event array; dash/dash_* -> id 0xf2 (bank1 s114) [dash/warp launch] (currently se00_00); hit / crash-impact -> id 0x13 or 0x10 (bank0 s19/s16, heavy vs light) [knockback terrain impact] (currently se00_03); grab/throw connect -> id 0x9b (bank1 s27) [could add a new 'throw' cue]; landing/footstep -> id 0x1e (bank0 s30); body-bump -> id 0x26 (bank0 s38); guard/balance-break -> layered ids 0x00+0x80+0x100 (one per bank) [state dispatcher zz_005c290_]; jump -> id 0x25 (bank0 s37). NOT portable as literals (data-driven, need anim-blob dump): the core melee-SWING and voice/hit-grunt sounds (PATH B via zz_005b98c_ reading eventRec[2]) and the death/deploy REACTION cues (ids 8/9 are anim selectors, not soundIds). So: of the 15 tuned cues, ~9-10 (shoot, down, dash+4 variants, hit, lockon->reuse, alert->break, plus new throw/jump/bump) can be swapped to real ids; melee and death remain best served by generic/data-sourced samples until the SE bank + animation-event data is extracted.",
+  "howManyMapped": "11 distinct combat/action events mapped to real literal soundIds (shot 0x08, crash 0x13/0x10, throw 0x9b, break 0x00/0x80/0x100, knockdown 0xdd, landing 0x1e, dash 0xf2, jump 0x25, bump 0x26) plus 2 non-combat UI ids (menu tick 0x01/0x02, global cue 0x176). The larger per-move swing/voice layer is data-driven (PATH B, values in animation blobs, not statically resolvable)."
+}

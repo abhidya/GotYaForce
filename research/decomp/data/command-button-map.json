@@ -1,0 +1,152 @@
+{
+  "summary": "The command TYPE layer (input-bit +0x5d4 -> command type +0x585) is FULLY READABLE in the corpus and is now resolved: each decision-tester under FUN_800699d8 tests one bit of the transformed input word actor+0x5d4 and writes a fixed command-type byte to actor+0x585. The command SUBTYPE (+0x586) is then chosen by state/context (+0x5e0 flags, +0x7cc, target-proximity +0x748, cooldown timer +0x694/+0x6a4) in zz_0069ea4_ (melee path) / zz_0069fe0_ (ranged path). This resolves command.ts's schema-only stubs for types 1,2,3,5 and clarifies the near/far split. The ONE remaining gap is the RAW-PAD -> +0x5d4-bit binding: which physical button (B/X/Y/A) lights each +0x5d4 bit is set one layer earlier by zz_00685c0_/zz_0068b8c_ via per-actor input-source descriptors (DAT_802d38xx) whose physical-button origin lives in the pad/CPU-input abstraction (+0x5b4 / +0x600-region buffers, chunk_0002 + SDK PAD layer) -- that binding is data-table-driven and NOT resolved by button name here. So: COMMAND-TYPE assignment = fully code-resolved; PHYSICAL-BUTTON labels = still inferred from the manual, not proven in code. FLOAT_8043762c is NOT a distance threshold -- it reads 0.0 from the DOL (it is a zero-constant used in `0.0 < timer` positive-timer gates).",
+
+  "constantsResolved": {
+    "FLOAT_8043762c": {"value": 0.0, "u32": "0x00000000", "note": "NOT a distance threshold. It is 0.0. Gates like `FLOAT_8043762c < actor+0x694` mean `0.0 < cooldownTimer` i.e. 'a refire/cooldown timer is still positive'. The task's assumption that this is the B near/far distance threshold is FALSIFIED by the DOL read.", "source": "boot.dol @0x8043762c via dol.py section map"},
+    "FLOAT_80437628": {"value": 10.0, "u32": "0x41200000", "note": "scale/step constant used in the input-word builder zz_00686f0_"},
+    "FLOAT_80437634": {"value": 2.0, "u32": "0x40000000"},
+    "FLOAT_80437630": {"value": 1.0, "u32": "0x3f800000"},
+    "FLOAT_8043764c": {"value": -1.0, "u32": "0xbf800000", "note": "arg to zz_004beb8_ in zz_006a104_ (dual-actor combo trigger)"},
+    "anchorValidation": {"addr": "0x80437448", "value": 60.0, "note": "matches known invincibility-timer constant -> DOL section map is correct, float reads are trustworthy"}
+  },
+
+  "mappings": [
+    {
+      "button": "(input bit 0x20; manual role: B contextual shot/melee near)",
+      "inputBit": "actor+0x5d4 & 0x20",
+      "commandType": 1,
+      "commandSubtype": "chosen downstream by zz_0069dd0_->zz_0069ea4_/zz_0069fe0_ from +0x5e0 state and +0x7cc (0-5)",
+      "condition": "context byte drives type: if actor+0x748 == 2 (target-proximity state 2) OR (actor+0x58e & 1) set -> +0x585 = 1, else +0x585 = 0; then re-checked against an already-fired mask (actor+0x58e & (1<<type))",
+      "fn": "0x80069a88 zz_0069a88_",
+      "chunk": "chunk_0009.c:267-291",
+      "evidence": "if ((*(uint *)(param_1 + 0x5d4) & 0x20) == 0) { uVar1 = 0; } else { if ((*(char *)(param_1 + 0x748) == '\\x02') || ((*(byte *)(param_1 + 0x58e) & 1) != 0)) { *(undefined1 *)(param_1 + 0x585) = 1; } else { *(undefined1 *)(param_1 + 0x585) = 0; } ... uVar1 = zz_0069dd0_(param_1); }",
+      "confidence": "high (bit test -> +0x585 write is directly read)"
+    },
+    {
+      "button": "(input bit 0x40; manual role: B/melee, contextual)",
+      "inputBit": "actor+0x5d4 & 0x40",
+      "commandType": 1,
+      "commandSubtype": "downstream",
+      "condition": "gated: skip if actor+0x748 == 1; skip if (actor+0x58e & 2); requires ((actor+0x58e & 1) OR (actor+0x7d2 & 8)); then +0x585 = 1",
+      "fn": "0x80069b10 zz_0069b10_",
+      "chunk": "chunk_0009.c:297-322",
+      "evidence": "if ((*(uint *)(param_1 + 0x5d4) & 0x40) == 0) { uVar1 = 0; } else if (*(char *)(param_1 + 0x748) == '\\x01') { uVar1 = 0; } else if ((*(byte *)(param_1 + 0x58e) & 2) == 0) { if (((*(byte *)(param_1 + 0x58e) & 1) == 0) && ((*(byte *)(param_1 + 0x7d2) & 8) == 0)) { uVar1 = 0; } else { *(undefined1 *)(param_1 + 0x585) = 1; uVar1 = zz_0069dd0_(param_1); } }",
+      "confidence": "high"
+    },
+    {
+      "button": "(input bit 0x80; manual role: X second weapon)",
+      "inputBit": "actor+0x5d4 & 0x80",
+      "commandType": 2,
+      "commandSubtype": "downstream",
+      "condition": "skip if (actor+0x58e & 4) already-fired; else +0x585 = 2",
+      "fn": "0x80069b98 zz_0069b98_",
+      "chunk": "chunk_0009.c:328-347",
+      "evidence": "if ((*(byte *)(param_1 + 0x58e) & 4) == 0) { if ((*(uint *)(param_1 + 0x5d4) & 0x80) == 0) { uVar1 = 0; } else { *(undefined1 *)(param_1 + 0x585) = 2; uVar1 = zz_0069dd0_(param_1); } }",
+      "confidence": "high"
+    },
+    {
+      "button": "(input bit 0x400)",
+      "inputBit": "actor+0x5d4 & 0x400",
+      "commandType": 3,
+      "commandSubtype": "downstream (also sets +0x595 = 1 = 'forced/charged' flag)",
+      "condition": "skip if (actor+0x58e & 8) already-fired; else +0x585 = 3, +0x595 = 1",
+      "fn": "0x80069bf0 zz_0069bf0_",
+      "chunk": "chunk_0009.c:353-373",
+      "evidence": "if ((*(byte *)(param_1 + 0x58e) & 8) == 0) { if ((*(uint *)(param_1 + 0x5d4) & 0x400) == 0) { uVar1 = 0; } else { *(undefined1 *)(param_1 + 0x585) = 3; *(undefined1 *)(param_1 + 0x595) = 1; uVar1 = zz_0069dd0_(param_1); } }",
+      "confidence": "high",
+      "portImpact": "RESOLVES AttackCommandType.Unmapped3 -> it IS a real settable command type (the tester is zz_0069bf0_, driven by +0x5d4 bit 0x400, and it sets the +0x595 charged/forced flag). command.ts labels 3 as BLOCKED 'tester not found' -- now found."
+    },
+    {
+      "button": "(input bit 0x1000; ranged / target-required)",
+      "inputBit": "actor+0x5d4 & 0x1000",
+      "commandType": 5,
+      "commandSubtype": "downstream (sets +0x595 = 1)",
+      "condition": "skip if (actor+0x58e & 0x20) already-fired; else +0x585 = 5, +0x595 = 1",
+      "fn": "0x80069c50 zz_0069c50_",
+      "chunk": "chunk_0009.c:379-399",
+      "evidence": "if ((*(byte *)(param_1 + 0x58e) & 0x20) == 0) { if ((*(uint *)(param_1 + 0x5d4) & 0x1000) == 0) { uVar1 = 0; } else { *(undefined1 *)(param_1 + 0x585) = 5; *(undefined1 *)(param_1 + 0x595) = 1; uVar1 = zz_0069dd0_(param_1); } }",
+      "confidence": "high"
+    },
+    {
+      "button": "(input bit 0x1000; ranged, LIVE-TARGET-lock variant)",
+      "inputBit": "actor+0x5d4 & 0x1000",
+      "commandType": 5,
+      "commandSubtype": "downstream; also mirrors state to the LOCKED PARTNER actor (+0x4a4): partner +0x585 = 5, partner +0x584 = 5, partner +0x5e0 |= 3",
+      "condition": "requires live target (actor+0x4a0 != 0); if +0x593 timer <= 0 arms it to 6 when bit 0x1000 set and not already-fired; writes +0x585 = 5, +0x595 = 1",
+      "fn": "0x80069cb0 zz_0069cb0_",
+      "chunk": "chunk_0009.c:405-450",
+      "evidence": "if (*(char *)(param_1 + 0x4a0) == '\\0') { return 0; } ... if ((*(uint *)(param_1 + 0x5d4) & 0x1000) == 0) { return 0; } *(undefined1 *)(param_1 + 0x593) = 6; ... *(undefined1 *)(param_1 + 0x585) = 5; *(undefined1 *)(param_1 + 0x595) = 1; iVar2 = zz_0069dd0_(param_1);",
+      "confidence": "high",
+      "portImpact": "matches command.ts Ranged5 note (zz_0069cb0_ 'requires a live target actor+0x4a0' and zz_0069c50_ 'bit 0x1000') -- CONFIRMED, and now shown to also drive the partner/ally-lock actor."
+    },
+    {
+      "button": "Y (Power Burst)",
+      "inputBit": "actor+0x5d4 & 0x200",
+      "commandType": "N/A (does NOT write +0x585) -> sets burst-arm byte actor+0x6fb = 6",
+      "commandSubtype": "N/A",
+      "condition": "requires roster/state gate PTR_DAT_80433934[actor+0x88 * 0x3c + 0x103] != 0 AND (actor+0x5d4 & 0x200) set",
+      "fn": "0x80069814 FUN_80069814",
+      "chunk": "chunk_0009.c:104-115",
+      "evidence": "if (PTR_DAT_80433934[*(char *)(param_1 + 0x88) * 0x3c + 0x103] == '\\0') { return 0; } if ((*(uint *)(param_1 + 0x5d4) & 0x200) == 0) { return 0; } *(undefined1 *)(param_1 + 0x6fb) = 6; return 0;",
+      "confidence": "high (matches behavior-notes (aj) Y-burst chain; Y is the Power-Burst gate, NOT an attack-command type)"
+    }
+  ],
+
+  "commandSubtypeResolution": {
+    "note": "+0x586 (subtype) is NOT chosen by an input bit -- it is chosen by combat STATE after the type is picked. Two selectors, both keyed on actor+0x5e0 state flags plus +0x7cc and cooldown timers.",
+    "meleePath": {
+      "fn": "0x80069ea4 zz_0069ea4_", "chunk": "chunk_0009.c:491-542",
+      "subtypeMap": "+0x5e0 & 0x100 -> 5 ; &0x80 -> 4 ; &0x20 branch (+0x7cc==0 ? (0/3 by &0x40) : 2) ; &0x40 or +0x5e4==4 -> 3 ; &0x10 -> 1 ; else -> 0",
+      "cooldownGate": "guarded by (actor+0x595==0 && 0.0 < actor+0x694) early-return -> refire only after +0x694 cooldown drains or on a forced (+0x595) command"
+    },
+    "rangedPath": {
+      "fn": "0x80069fe0 zz_0069fe0_", "chunk": "chunk_0009.c:548-599",
+      "subtypeMap": "0.0 < actor+0x6a4 -> 5 (charged-ranged, SUSPECTED) ; &0x80 -> 4 ; &0x20 branch (+0x7cc==0 ? (0/2 by &0x40) : 1) ; &0x40 group -> 2 ; else (+0x200 ? 3 : 0)",
+      "note": "This CONFIRMS command.ts's Unmapped5 hypothesis: subtype 5 IS the charged-ranged variant, gated by `0.0 < actor+0x6a4` (a charge/hold timer being positive). The undumped 'threshold' is just 0.0, so the gate is simply 'charge timer nonzero'. AirElevated4 (subtype 4) confirmed = +0x5e0 & 0x80 branch."
+    },
+    "finalDispatch": {
+      "fn": "0x8006a104 zz_006a104_", "chunk": "chunk_0009.c:605+",
+      "note": "consumes the (type,subtype) via a 3-level table lookup actor+0x4ec[type*4][subtype*0x10 or *4][+0x587*4], copies chosen move id, writes +0x584 (active command) = +0x585, +0x580/+0x581 = move params, updates +0x5e0 flags. This is where +0x585 becomes the active +0x584/+0x591 dispatch value that FUN_8005d494 reads."
+    }
+  },
+
+  "inputWordBuild": {
+    "note": "How actor+0x5d4 bits are lit (one layer above the testers). zz_00685c0_ zeroes +0x5d4 then calls zz_0068b8c_ once per input source; each call OR-masks a fixed bit into +0x5d4 IF that source fired this frame. This is the +0x5d4 bit ASSIGNMENT, but each source is a per-actor input DESCRIPTOR (DAT_802d38xx), not a named physical button -- the physical B/X/Y/A origin is resolved further upstream in the pad/CPU-input abstraction and is NOT proven here.",
+    "fn": "0x800685c0 zz_00685c0_", "chunk": "chunk_0008.c:4671-4688",
+    "bitAssignments": [
+      {"bit": "0x20",  "descriptor": "DAT_802d3958", "consumedByTester": "zz_0069a88_ -> type 1"},
+      {"bit": "0x40",  "descriptor": "DAT_802d3934 (also carries a repeat-count byte 04)", "consumedByTester": "zz_0069b10_ -> type 1"},
+      {"bit": "0x80",  "descriptor": "DAT_802d3910", "consumedByTester": "zz_0069b98_ -> type 2"},
+      {"bit": "0x200", "descriptor": "DAT_802d391c", "consumedByTester": "FUN_80069814 (Y / Power Burst)"},
+      {"bit": "0x400", "descriptor": "DAT_802d3940", "consumedByTester": "zz_0069bf0_ -> type 3"},
+      {"bit": "0x800", "descriptor": "DAT_802d394c", "consumedByTester": "(no direct single-bit tester found in FUN_800699d8 chain; used in subtype/other logic)"},
+      {"bit": "0x1000","descriptor": "DAT_802d3964 (carries a 0x0f low-nibble mask)", "consumedByTester": "zz_0069c50_ / zz_0069cb0_ -> type 5"},
+      {"bit": "0x01",  "descriptor": "DAT_802d3928 (count 0x10)", "consumedByTester": "downstream (movement/other)"},
+      {"bit": "0x02",  "descriptor": "DAT_802d3934", "consumedByTester": "FUN_80069860 (also reads bit 0x2, action 0x1c)"},
+      {"bit": "0x04",  "descriptor": "DAT_802d3940", "consumedByTester": "downstream"},
+      {"bit": "0x08",  "descriptor": "DAT_802d394c", "consumedByTester": "downstream"},
+      {"bit": "0x10",  "descriptor": "DAT_802d3958", "consumedByTester": "downstream"},
+      {"bit": "0x2000","descriptor": "DAT_802d3964", "consumedByTester": "downstream"}
+    ],
+    "gapNote": "zz_0068b8c_ dispatches through PTR_FUN_802d3988[*param_3] (a small state-machine per source) and OR's `param_4` (the bit) into +0x5d4 when the source's countdown byte param_3[3] fires. The DAT_802d38xx descriptors are edge/hold/repeat state, seeded from the resolved-intent field +0x5b4 and the +0x600-region raw buffers. Mapping +0x5b4 bits -> physical GameCube pad buttons (PAD_BUTTON_A/B/X/Y) requires reading the pad-read/CPU-input population layer (chunk_0002 writes +0x5b4 for CPU actors; the SDK PAD read for humans) -- a separate trace, not completed here.",
+    "rawButtonFieldNote": "actor+0x5b4 is the 'resolved intent' button field (both human pad-decode and CPU AI write it). In chunk_0002 the CPU AI ORs bits like 0x100 (attack intent) into +0x5b4. No literal PAD_BUTTON_A/B/X/Y constant or GameCube pad bitmask (e.g. 0x0100/0x0200/0x0400/0x0800 in the PADStatus sense) was found being tested inside the input-word builder or FUN_800699d8 -- the game abstracts pad state into +0x5b4/+0x5d4 well before the attack-decision layer, so no button-name literal is readable at this layer."
+  },
+
+  "newFunctions": [
+    {"address": "0x80069a88", "name": "zz_0069a88_", "chunk": "chunk_0009.c:267-291", "role": "command tester: +0x5d4&0x20 -> +0x585=1 (contextual via +0x748/+0x58e)", "evidence": "*(undefined1 *)(param_1 + 0x585) = 1; / = 0; under (*(uint *)(param_1 + 0x5d4) & 0x20)", "confidence": "high"},
+    {"address": "0x80069b10", "name": "zz_0069b10_", "chunk": "chunk_0009.c:297-322", "role": "command tester: +0x5d4&0x40 -> +0x585=1 (gated by +0x748/+0x58e/+0x7d2)", "evidence": "*(undefined1 *)(param_1 + 0x585) = 1; under (*(uint *)(param_1 + 0x5d4) & 0x40)", "confidence": "high"},
+    {"address": "0x80069b98", "name": "zz_0069b98_", "chunk": "chunk_0009.c:328-347", "role": "command tester: +0x5d4&0x80 -> +0x585=2", "evidence": "*(undefined1 *)(param_1 + 0x585) = 2; under (*(uint *)(param_1 + 0x5d4) & 0x80)", "confidence": "high"},
+    {"address": "0x80069bf0", "name": "zz_0069bf0_", "chunk": "chunk_0009.c:353-373", "role": "command tester: +0x5d4&0x400 -> +0x585=3, +0x595=1 (RESOLVES Unmapped3)", "evidence": "*(undefined1 *)(param_1 + 0x585) = 3; *(undefined1 *)(param_1 + 0x595) = 1; under (*(uint *)(param_1 + 0x5d4) & 0x400)", "confidence": "high"},
+    {"address": "0x80069c50", "name": "zz_0069c50_", "chunk": "chunk_0009.c:379-399", "role": "command tester: +0x5d4&0x1000 -> +0x585=5, +0x595=1", "evidence": "*(undefined1 *)(param_1 + 0x585) = 5; under (*(uint *)(param_1 + 0x5d4) & 0x1000)", "confidence": "high"},
+    {"address": "0x80069cb0", "name": "zz_0069cb0_", "chunk": "chunk_0009.c:405-450", "role": "command tester: +0x5d4&0x1000 -> +0x585=5 (live-target-lock variant, mirrors to partner +0x4a4)", "evidence": "requires actor+0x4a0 live; *(undefined1 *)(param_1 + 0x585) = 5; and partner *(undefined1 *)(iVar2 + 0x585) = 5;", "confidence": "high"},
+    {"address": "0x80069dd0", "name": "zz_0069dd0_", "chunk": "chunk_0009.c:456-485", "role": "command-issue dispatcher: reads command-descriptor byte at (*(actor+0x4b0) + type + 0xb8); ==1 -> melee path zz_0069ea4_, negative -> ranged path zz_0069fe0_; also handles the +0x5e0&3 dual-actor/combo gate via +0x57a mask", "evidence": "cVar1 = *(char *)(*(int *)(param_1 + 0x4b0) + (int)*(char *)(param_1 + 0x585) + 0xb8); if (cVar1 == '\\x01') { uVar2 = zz_0069ea4_(param_1); } else if ((cVar1 < 1) && (-1 < cVar1)) { uVar2 = zz_0069fe0_(param_1); }", "confidence": "high"},
+    {"address": "0x80069ea4", "name": "zz_0069ea4_", "chunk": "chunk_0009.c:491-542", "role": "melee subtype selector: writes +0x586 (0-5) from +0x5e0 state flags and +0x7cc; then final move lookup via zz_006a104_", "evidence": "*(undefined1 *)(param_1 + 0x586) = 0..5 branches on *(uint *)(param_1 + 0x5e0)", "confidence": "high"},
+    {"address": "0x80069fe0", "name": "zz_0069fe0_", "chunk": "chunk_0009.c:548-599", "role": "ranged subtype selector: writes +0x586; subtype 5 = charged (0.0 < +0x6a4), 4 = air (+0x5e0&0x80); final move lookup via zz_006a104_", "evidence": "if (FLOAT_8043762c < *(float *)(param_1 + 0x6a4)) { *(undefined1 *)(param_1 + 0x586) = 5; } ... *(undefined1 *)(param_1 + 0x586) = 4/2/1/3/0", "confidence": "high"},
+    {"address": "0x8006a104", "name": "zz_006a104_", "chunk": "chunk_0009.c:605+", "role": "final command commit: 3-level table lookup actor+0x4ec[type][subtype][+0x587] -> move; sets +0x584(active)=+0x585, +0x580/+0x581 params, updates +0x5e0", "evidence": "*(undefined1 *)(param_1 + 0x584) = *(undefined1 *)(param_1 + 0x585); ... *(char *)(param_1 + 0x580) = param_2[2];", "confidence": "high"},
+    {"address": "0x800685c0", "name": "zz_00685c0_", "chunk": "chunk_0008.c:4671-4688", "role": "input-word builder: zeroes +0x5d4 then OR-assigns per-source bits via zz_0068b8c_ (bit table 0x20/0x40/0x80/0x200/0x400/0x1000/etc)", "evidence": "*(undefined4 *)(param_1 + 0x5d4) = 0; zz_0068b8c_(param_1,&DAT_802d3958,(byte *)(param_1 + 0x610),0x10); ... (0x200),(0x400),(0x1000) calls", "confidence": "high"},
+    {"address": "0x80068b8c", "name": "zz_0068b8c_", "chunk": "chunk_0008.c:4874-4886", "role": "per-source input state-machine: dispatches PTR_FUN_802d3988[*param_3]; if source-countdown byte param_3[3] fired, OR bit param_4 into +0x5d4", "evidence": "if (bVar1 != 0) { param_3[3] = bVar1 - 1; *(uint *)(param_1 + 0x5d4) = *(uint *)(param_1 + 0x5d4) | param_4; }", "confidence": "high"},
+    {"address": "0x80069814", "name": "FUN_80069814", "chunk": "chunk_0009.c:104-115", "role": "Y / Power Burst gate: +0x5d4&0x200 + roster gate -> +0x6fb=6 (arms burst)", "evidence": "if ((*(uint *)(param_1 + 0x5d4) & 0x200) == 0) { return 0; } *(undefined1 *)(param_1 + 0x6fb) = 6;", "confidence": "high"}
+  ],
+
+  "portNote": "PARTIALLY YES. command.ts's resolver can be FILLED for the input-bit -> command-type stage (the part that was schema-only) directly from these tester functions, WITHOUT trace T1: (a) RESOLVE AttackCommandType.Unmapped3 -> it is a real command type written by zz_0069bf0_ from +0x5d4 bit 0x400, and it sets the +0x595 charged/forced flag; relabel it (e.g. Charged3 / family per FUN_8005d494 -- verify its +0x591 dispatch branch, which the corpus did place in the ranged/other group). (b) RESOLVE AttackCommandSubtype.Unmapped5 -> it IS the charged-ranged variant (zz_0069fe0_ sets +0x586=5 when 0.0 < +0x6a4, i.e. charge timer positive); the 'undumped threshold' is just 0.0. (c) The Ranged4/Ranged6 'which tester writes it' note can be tightened: types 4 and 6 are NOT written by a +0x5d4-bit tester at all -- they are SUBTYPE-derived at the +0x591 dispatch, not +0x585-assigned; +0x585 only ever takes values {0,1,2,3,5} from the testers (0/1 from zz_0069a88_, 1 from zz_0069b10_, 2 from zz_0069b98_, 3 from zz_0069bf0_, 5 from zz_0069c50_/zz_0069cb0_). So command.ts's claim that testers write 4/5/6 is imprecise: testers write {0,1,2,3,5}; 4 and 6 arise later. (d) Wire the full resolver as: buildInputWord(+0x5d4) -> FUN_800699d8 tester chain (bit->+0x585) -> zz_0069dd0_ (+0x4b0[type+0xb8] selects melee/ranged path) -> zz_0069ea4_/zz_0069fe0_ (+0x586 from +0x5e0/+0x7cc/timers) -> zz_006a104_ (table commit). WHAT IS STILL BLOCKED (needs trace/further static read, NOT the manual): the PHYSICAL-BUTTON label for each +0x5d4 bit. The corpus abstracts pad input into +0x5b4/+0x5d4 before the attack layer; no PAD_BUTTON_A/B/X/Y literal is tested in this chain. Mapping bit 0x20/0x40/0x80/0x400/0x1000 back to B/X/A requires reading the pad-decode layer that populates the DAT_802d38xx input descriptors and +0x5b4 (the SDK PAD read + CPU-AI writer in chunk_0002). So: command TYPE/SUBTYPE tables = fillable now from static reads; the button-NAME binding = still open (Y->burst is the only button whose physical identity is corpus-consistent, via the 0x200 bit and behavior-notes (aj))."
+}

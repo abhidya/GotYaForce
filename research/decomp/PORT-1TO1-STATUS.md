@@ -21,11 +21,11 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | Combat: gauges/stagger | ~95% DERIVED | reaction lengths (animation-gated) |
 | Combat: knockback direction | DERIVED, ported (mode 1) | modes 0/2/3/4 need sub-object data |
 | Combat: knockback **magnitude** | DERIVED (found, bc) — port pending | strength-indexed tables DAT_802dd8a0/DAT_802d3664; port needs scale reconcile |
-| Combat: B/X contextual resolver | schema only | **trace T1** (command→button map) |
+| Combat: B/X contextual resolver | resolver DERIVED (bd), port upgradeable | fill type/subtype from testers; only pad-bit↔button label needs a dig |
 | Combat: ammo/refill | DONE (B cell-0 + X cell-1 wired) | — |
 | Combat: projectile penetration | wired OBSERVED_WIKI (borgs/total→persist) | trace T6 confirms engine gate; terrain-penetration + solidity still open |
 | Combat: vampire lifesteal | DONE (ported, ay) | — |
-| Combat: statuses / hyper / fusion | shells only | traces T3/T8 (nurse heal-write not in corpus) |
+| Combat: statuses / hyper / fusion | status framework DERIVED (bd); hyper/fusion shells | status catalog T8-blocked; burst/fusion T3; nurse heal-write not in corpus |
 | Physics: movement/jump/dash | DERIVED values found (bc), port TUNED | per-borg data.bin values known — scale-reconcile to port, then swap |
 | UI: screens | ~9 real screens | 6 modes are dead menu entries |
 | UI: HUD | ~90% (charge✓ cursor✓ X-ammo✓ boost✓ jump✓) | burst meter only (fill data is T3-blocked) |
@@ -33,17 +33,21 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
 | Assets: animation playback | ~88% (dispatch mapped+reconciled, ba/bb) | asset re-bake: relabel g4s0 special_s0→down_s0 (worktree); death/deploy slots unresolved |
 | Audio: BGM/menu | ~90% | — |
-| Audio: combat/voice | ~45% (voice wired az; sound dispatch mapped bc) | combat SE ids need trace at call sites; voice cue-role TUNED |
+| Audio: combat/voice | ~55% (voice az; SE ids MAPPED bd) | 11 combat events→real ids known; wiring PENDING SE-bank extraction from AFS; voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
 | FX: particles/projectiles | ~70% | PTL/REF decode; 3D weapon meshes |
 
 **Trace status update (2026-07-03, (bc)):** T9 (knockback magnitude) is **no longer trace-blocked**
 — it was found statically in the DOL as strength-indexed tables (DAT_802dd8a0/DAT_802d3664), and
 movement physics turned out to be per-borg data-driven (pl####data.bin), not the "unfindable global
-constants" §s concluded. The remaining Dolphin-trace unblocks are **T1** command mapping, **T3**
-burst meter, **T8** status semantics, and the combat **SE-dispatch** (the menu sound path IS mapped
-now, (bc)/menu-cluster: zz_00f0468_ → zz_00efb3c_, id>>7 bank / id&0x7f sample). These need a human
-at the controller or TAS-movie injection (see `attack-mechanics-trace-plan.md`).
+constants" §s concluded. **Further re-digs (2026-07-03, (bd)) shrank the trace-blocked list again:** **T1** command resolve
+is now mostly STATIC — the input-bit→command-type/subtype resolver is DERIVED (only the physical
+pad-button↔bit label needs a further static dig, not a trace). **Combat SE ids** are MAPPED (11
+events → real ids); wiring is PENDING an SE-bank asset extraction (static, from the AFS), not a
+trace. **T8** status per-id semantics is CONFIRMED genuinely trace-blocked (the id is an
+immunity/bone index, not a behavior selector — honest negative). So the true remaining
+Dolphin-trace unblocks are **T3** (burst meter fill) and **T8** (status catalog); **T2** melee
+contexts and knockback-magnitude PORTING are static-but-deferred (scale/strength-source digs).
 
 **Challenge PLAYABILITY verified (2026-07-03):** `scripts/selfcheck-1p-challenge.mjs` (full 1P
 battle runs, energy drains, borgs fight), `scripts/selfcheck-challenge-stages.mjs` (all 11
@@ -69,14 +73,14 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Gauge stagger (down/balance) | DONE | gauges.ts + applyHit | (ag)/(ah)/(s) | — |
 | Knockback **direction** | DONE (mode 1) | physics/knockback.ts | zz_00300bc_ (p) | modes 0/2/3/4 need muzzle/camera vectors |
 | Knockback **magnitude** | DERIVED (found, bc) | constants MELEE/SHOT KNOCKBACK (TUNED, port pending) | DAT_802dd8a0[str]=str*7, DAT_802d3664[str]=(str+1)*8, str=actor+0x702 (bc) | port strength-indexed magnitude (scale-reconcile) — T9 NO LONGER trace-blocked |
-| B/X contextual resolve | schema (ATK-001) | command.ts | FUN_800699d8 + testers (ai) | **trace T1** — +0x585/+0x586 ↔ button map |
+| B/X contextual resolve | schema; resolver DERIVED (bd) | command.ts (upgradeable) | testers: bit 0x400→type3, 0x1000→type5, etc. (bd) | fill type/subtype resolver from (bd); only pad-bit↔button label still needs a dig |
 | Melee contexts (5-way) | schema | movementContextOf | subtype +0x586; wiki 5-context (av) | trace T2 |
 | Ammo/refill (3 weapon cells) | DONE (values extracted) | ammo.selftest, combat.ts | zz_006dbe0_/006dcc0_/006de10_ (ai/aw) | X-attack→cell-1 (survey UI #2); types 2/3 = dead (ax) |
 | Penetration (none/borgs/total) | data (moveProperties) | borgMoveProperties.json | wiki (aw) + rehit chunk_0013 (O) | trace T6 to confirm engine gate |
 | Projectile solidity/PvP | data + BLOCKED | moveProperties | shape table 0x802da740 = NOT pvp (at) | trace T5 |
 | Hyper / Power Burst | shell (ATK-011) | burst.ts | +0x6fb/+0x6fc, zz_005b2b8_ (aj/S) | **trace T3** — meter+duration |
 | Fusion | data + shell (ATK-018) | fusion-pairs JSON | pair table 0x802d352c (aj) | trace T3 (co-op control split) |
-| Statuses (id/timer/immunity) | shell (ATK-010) | status.ts | +0x71a/+0x71c/+0x5a0 (Q/aw effects) | trace T8 per-id semantics |
+| Statuses (id/timer/immunity) | framework DERIVED (bd), catalog T8-blocked | status.ts | +0x71a=immunity-idx+bone-idx (NOT behavior-selector); tick FUN_8005a378 id-agnostic (bd) | port isImmune/i-frames/hitstun; per-id wiki behaviors genuinely need T8 trace |
 | Vampire lifesteal | **PORTED (aef234f1)** | combat.ts steal+bleed, wired | steal chunk_0003.c:7982/apply 6318/bleed chunk_0006.c:7900 | done: steal=dmg/2 cap@maxHP + 1HP/30f bleed, 47/47 test |
 | Nurse heal | **HP-write ABSENT (ay)** | ATK-019 shell | table 0x802d1130 (ax); no +0x1c6 write reachable | Dolphin-trace +0x1c6 on healed ally |
 | Mash extra hits | shell (ATK-017) | constants MASH | +0x550 cap 4 (T/ax) | trace consumer |
@@ -186,7 +190,7 @@ game-logic **role** to **213** functions — **1.78%** (213 / 11,972) — consol
 machine-readable source map `research/decomp/data/identified-functions.json` (one deduped entry
 per address; each traces to a `behavior-notes.md` section, an attack-mechanics findings mechanic,
 or a 2026-07-03 corpus-analysis cluster, with a confidence tier DERIVED_ROM / INFERRED /
-NAMED_ONLY). This supersedes the earlier ~1.2% / 143 estimate: **205 of the 242 are DERIVED_ROM**
+NAMED_ONLY). This supersedes the earlier ~1.2% / 143 estimate: **223 of the 262 are DERIVED_ROM**
 (role read directly from decompiled C or raw ROM data), 21 INFERRED, 16 NAMED_ONLY. The initial
 133 covered the load-bearing combat spine (hit resolution, damage formula, HP/ammo/gauge init,
 the 35-slot state-handler table, the animation setter, challenge flow + battle judge, camera

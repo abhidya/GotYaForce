@@ -2770,3 +2770,56 @@ is a runtime BSS pointer (per-stage, resolved at load).
 reconcile scale first (raw 35.0 vs port 8.0 is ≈4.4×, consistent with the rescale — the port's 8.0
 may already be ~correct). The clean structural win to port is the knockback MAGNITUDE model
 (strength-indexed, not flat) — see the tracker's T9 row, now DERIVED not trace-blocked.
+
+### (bd) Three "trace-blocked" items re-dug statically after the T9 precedent: SE ids MAPPED, T1 resolver DERIVED, T8 confirmed genuinely blocked (2026-07-03)
+
+Following the (bc) discovery that T9 was findable statically (not trace-only), re-dug three more
+tracker "trace-blocked" items. Two yielded real static results; one is an honest confirmed negative.
+
+**COMBAT SE ids — MAPPED (partially corrects "no ROM audio table exists").** The sound dispatch
+`zz_00f0468_`/`zz_00f036c_`/`zz_00f04b4_`(3D)/`zz_00f061c_`(pitched) → `zz_00efb3c_` (bank=id>>7,
+sample=id&0x7f, <0x180). 11 combat events map to LITERAL call-site ids (research/decomp/data/
+combat-se-ids.json): shot 0x08 (zz_006ee14_), crash-heavy 0x13 / crash-light 0x10 (FUN_8005a580),
+grab/throw 0x9b (FUN_8005ace8), guard-break layered 0x00+0x80+0x100 (zz_005c290_), knockdown 0xdd
+(FUN_8005dffc), landing 0x1e, dash/warp 0xf2, jump 0x25 (FUN_80061338), body-bump 0x26 (zz_002fcbc_).
+**Path B (honest partial):** the bulk of per-move audio (swings, voice, footsteps) comes from
+`zz_005b880_`/`zz_005b98c_` iterating an ANIMATION sound-event array at `*(actor+0x4e8)` (8-byte
+records, soundId=record[+4]) — so a per-animation audio table DOES exist (corrects the old
+"AnimAudioEventLookup is the only candidate and it's a red herring" framing), but its values live
+in the anim data blobs, not the .c. Reaction cues 8/9 are anim-SELECT indices (zz_006a750_), not
+soundIds. **Portability:** ~9-10 of the port's 15 generic se00_* COMBAT_SFX mappings could take the
+real ids — BUT the port only extracted 5 SE samples; the referenced bank/sample pairs aren't
+extracted, so wiring is PENDING an SE-bank asset extraction from poq_adx_usa.afs (follow-up).
+
+**T1 command→button — command-TYPE/SUBTYPE resolver DERIVED (button-name binding still needs one
+more dig).** Each tester under FUN_800699d8 tests one bit of the transformed input word actor+0x5d4
+and writes a fixed type to actor+0x585 (research/decomp/data/command-button-map.json): bit 0x20→type1
+(zz_0069a88_, contextual via +0x748 proximity), 0x40→type1 (zz_0069b10_), 0x80→type2 (zz_0069b98_),
+**0x400→type3** (zz_0069bf0_, sets +0x595 charged flag — **resolves the port's "Unmapped3"**),
+0x1000→type5 (zz_0069c50_/cb0_, ranged), 0x200(Y)→burst (FUN_80069814, +0x6fb=6). Subtype +0x586 is
+chosen AFTER by state (zz_0069ea4_ melee / zz_0069fe0_ ranged on +0x5e0/+0x7cc/charge timers), then
+committed via a 3-level table `actor+0x4ec[type][subtype][+0x587]` (zz_006a104_). CORRECTIONS:
+FLOAT_8043762c = **0.0** (DOL-read, anchor-validated vs 60.0@0x80437448) — it is NOT the B near/far
+melee threshold (that premise is falsified; it's a `0.0 < timer` positive-gate constant). Unmapped5
+subtype = charged-ranged (zz_0069fe0_ when 0.0 < +0x6a4 charge timer). Testers only write +0x585 ∈
+{0,1,2,3,5}; types 4/6 arise later at the +0x591 dispatch, so command.ts's "testers write 4/5/6"
+note is imprecise. **Still blocked:** the physical B/X/A pad-button → +0x5d4-bit binding — the game
+abstracts pad state into +0x5b4/+0x5d4 before this layer (no PAD_BUTTON_* literal in the chain), so
+bit→button labels are manual-only (ao) except Y→burst (bit 0x200, physically confirmed). command.ts
+can now be upgraded from schema-only to a real type/subtype resolver; the button labels stay OBSERVED.
+
+**T8 status semantics — CONFIRMED genuinely trace-blocked (honest negative, validates the tracker).**
+actor+0x71a is NOT a per-id behavior selector: it's an immunity-BIT-INDEX into the +0x5a0 mask
+(hit skipped if `+0x5a0 & (1<<+0x71a)`, chunk_0004.c:6693 / chunk_0003.c:7648) AND a bone/attach
+index for hit-spark placement (zz_0066408_). No switch on +0x71a, no status-descriptor table exists
+in the corpus. The per-frame status TICK (FUN_8005a378, chunk_0007.c:2881) decrements +0x71c and
+forces frozen anim/physics but is ID-AGNOSTIC (~15 movement handlers gate on `+0x71c==0`). So the
+wiki status behaviors (poison DoT, freeze, mash-recover, aim-scramble, swap, transform) are NOT
+reachable through this id statically — 0 ids resolved to a wiki behavior; a live trace remains
+required (T8 blocker is real). PORTABLE framework extracted regardless: isImmune(id)=(mask&(1<<id)),
+the i-frame window (+0x5a0=0xffffffff on spawn/wake), and the id-agnostic hitstun/freeze timer
+(+0x71c) — mechanically what "freeze"/"time-stop" ARE. Apply fn resolve_hitbox_target_effects_and_damage
+@0x8002e2a8 is the sole +0x71a writer (& 0x3f).
+
+Net: SE + T1 moved from "trace-blocked" to "mostly static" (SE portable-pending-assets, T1 resolver
+fillable); T8 confirmed genuinely trace-blocked. Source map +20 → 262. See the three data JSONs.

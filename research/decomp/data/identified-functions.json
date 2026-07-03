@@ -2,8 +2,8 @@
   "_meta": {
     "generated_note": "Consolidated source map of every Gotcha Force (GG4E/NTSC-U) game-logic function the project's decompilation research has assigned a concrete role. Built by cross-referencing behavior-notes.md sections (a)-(bb), attack-mechanics-findings.md / -ledger.json, and state-anim-dispatch-802d3570.json against ghidra-export/_index.tsv for canonical name+chunk. One entry per address (deduped). Only functions with an identifiable game-logic role are included; addresses cited only in passing (constants, data-table addresses, mid-function instruction PCs, engine calls named without a role) were skipped -- see cited_addresses_skipped_roleless.",
     "total_corpus_functions": 11972,
-    "identified_count": 242,
-    "coverage_percent": 2.02,
+    "identified_count": 262,
+    "coverage_percent": 2.19,
     "confidence_legend": {
       "DERIVED_ROM": "role read directly from decompiled C / raw-ROM data (matches the notebook's DERIVED tier)",
       "INFERRED": "role inferred from field reuse / call shape / handler routing / confirmed asset-container decode, not a direct gameplay-code read",
@@ -2068,6 +2068,186 @@
       "evidence": "+0x44 = (+0x298/+0xc4) * DAT_802dd8a0[strength]; +0x44 = DAT_802d3664[strength]*cos, +0x48 = *sin",
       "confidence": "DERIVED_ROM",
       "source_pass": "physics-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800f036c",
+      "name": "zz_00f036c_",
+      "chunk": "chunk_0026.c:790",
+      "role": "PRIMARY combat play wrapper: zz_00f036c_(actor, soundId). actor==0 -> global 2D via zz_00efb3c_(id,0,0x7f,0x40,0x2000); else 3D-positioned via zz_00f04b4_(id, actor+0x20, actor.channel[+0x96]). Most literal combat sound calls go through this.",
+      "evidence": "if(param_1==0) zz_00efb3c_(param_2,0,0x7f,0x40,0x2000); else zz_00f04b4_(param_2,(float*)(param_1+0x20),*(char*)(param_1+0x96));",
+      "confidence": "high",
+      "source_pass": "se-dispatch-2026-07-03"
+    },
+    {
+      "address": "0x800f04b4",
+      "name": "zz_00f04b4_",
+      "chunk": "chunk_0026.c:854",
+      "role": "3D-positional play core: zz_00f04b4_(soundId, pos_float*, channel). Computes volume via zz_00f0a74_(pos,0x7f) and pan via zz_00f0c24_(pos), then zz_00efb3c_(id,ch,vol,pan,0x2000). Used directly by zz_002fcbc_ (collision bump 0x26).",
+      "evidence": "uVar1=zz_00f0a74_(param_2,0x7f); uVar2=zz_00f0c24_(param_2); zz_00efb3c_(param_1,param_3,uVar1,uVar2,0x2000);",
+      "confidence": "high",
+      "source_pass": "se-dispatch-2026-07-03"
+    },
+    {
+      "address": "0x800f03c0",
+      "name": "zz_00f03c0_",
+      "chunk": "chunk_0026.c:806",
+      "role": "alt play wrapper (routes through the zz_00efc04_ dispatcher instead of zz_00efb3c_ — a second voice/SFX bus). Used for global cue 0x176. actor==0 -> zz_00efc04_(id,0,0x7f,0x40,0x2000).",
+      "evidence": "if(param_1==0) zz_00efc04_(param_2,0,0x7f,0x40,0x2000); else zz_00f052c_(...);",
+      "confidence": "high",
+      "source_pass": "se-dispatch-2026-07-03"
+    },
+    {
+      "address": "0x800f0414",
+      "name": "zz_00f0414_",
+      "chunk": "chunk_0026.c:822",
+      "role": "third play wrapper routing to zz_00efcb8_ -> zz_00f1238_ (a distinct mixer path, DAT_803d3b36-gated / used by the delayed-event scheduler zz_00eff30_).",
+      "evidence": "if(param_1==0) zz_00efcb8_(param_2,0,0x7f,0x40,0x2000); else zz_00f05a4_(...);",
+      "confidence": "high",
+      "source_pass": "se-dispatch-2026-07-03"
+    },
+    {
+      "address": "0x800f061c",
+      "name": "zz_00f061c_",
+      "chunk": "chunk_0026.c (~886+)",
+      "role": "PITCHED one-shot play variant: zz_00f061c_(pitchFloat, actor, soundId). Used for knockdown thud (0xdd) and scripted kind>=2 anim events; takes a float pitch/rate scalar as first arg.",
+      "evidence": "zz_00f061c_((double)FLOAT_80437484,param_1,0xdd) at chunk_0007.c:5111; also in zz_005b98c_ kind branch",
+      "confidence": "high",
+      "source_pass": "se-dispatch-2026-07-03"
+    },
+    {
+      "address": "0x8002fcbc",
+      "name": "zz_002fcbc_",
+      "chunk": "chunk_0003.c:8368",
+      "role": "ACTOR-VS-ACTOR collision bump SFX: plays positional id 0x26 when +0x2ae cooldown==0 and velocity +0x7fc over threshold; gated so projectiles (+0x83) branch differently. New: this is the physics body-contact sound.",
+      "evidence": "if(*(char*)(param_2+0x2ae)=='0'){ *(param_2+0x2ae)=4; ... zz_00f04b4_(0x26,param_3,*(char*)(param_2+0x96)); }",
+      "confidence": "high",
+      "source_pass": "se-dispatch-2026-07-03"
+    },
+    {
+      "address": "0x8005a580",
+      "name": "FUN_8005a580",
+      "chunk": "chunk_0007.c (~2900)",
+      "role": "KNOCKBACK-VS-TERRAIN impact handler: when actor has knockback flag (+0x5e0 & 0x2000000) and hits ground/wall, reflects velocity, spawns dust (FUN_80092ecc), and plays crash id 0x13 (heavy borg families 4/6/0xc/0xd/0xe) or 0x10 (others).",
+      "evidence": "6 paired call sites lines 2946-3120: family-branch zz_00f036c_(param_1,0x13)/0x10",
+      "confidence": "high",
+      "source_pass": "se-dispatch-2026-07-03"
+    },
+    {
+      "address": "0x80061338",
+      "name": "FUN_80061338",
+      "chunk": "chunk_0007.c (~7100)",
+      "role": "LAUNCH/JUMP state: sets arc velocities (+0x44/+0x48/+0x50), runs anim zz_004beb8_(..,2,0,10,..), plays id 0x25. Likely hop/jump or dash-launch.",
+      "evidence": "zz_0066ec0_(...); zz_004beb8_(...); zz_00f036c_(param_1,0x25);",
+      "confidence": "medium",
+      "source_pass": "se-dispatch-2026-07-03"
+    },
+    {
+      "address": "0x8005a378",
+      "name": "FUN_8005a378",
+      "chunk": "chunk_0007.c:2881",
+      "role": "HITSTUN/FREEZE TIMER TICK (per-frame): decrements +0x71c; while nonzero forces the actor's anim/physics rate fields (+0x5f4,+0x1dc8) to a frozen constant and early-returns (stun-lock); on reaching 0 restores the normal +0x768-derived rate. This is the per-frame 'status tick' the tracker was looking for -- but it is ID-AGNOSTIC (does not read +0x71a).",
+      "evidence": "if (*(char *)(param_1 + 0x71c) != '\\0') { cVar4 = *(char *)(param_1 + 0x71c) + -1; *(char *)(param_1 + 0x71c) = cVar4; ... if (cVar4 != '\\0') { *(float *)(param_1 + 0x5f4) = FLOAT_804373dc; ... return; } }",
+      "confidence": "high",
+      "source_pass": "status-t8-2026-07-03"
+    },
+    {
+      "address": "0x80066408",
+      "name": "zz_0066408_",
+      "chunk": "chunk_0008.c:3045",
+      "role": "BONE-INDEXED EFFECT PLACEMENT: takes a bone index (frequently the status id +0x71a) and applies a coordinate transform from the actor's 0x30-byte joint array (+0x8d4) to place an impact/spark effect. This is why +0x71a is read in the collision-response paths -- for VISUAL attach-point, not behavior. Negative index falls back to a default bone.",
+      "evidence": "if (param_2 < 0) { param_2 = (int)*(char *)(*(int *)(param_1 + 0x4b0) + 0x10); } zz_004516c_((float *)(param_1 + param_2 * 0x30 + 0x8d4),param_3,param_4);",
+      "confidence": "high",
+      "source_pass": "status-t8-2026-07-03"
+    },
+    {
+      "address": "0x800061a8",
+      "name": "FUN_800061a8",
+      "chunk": "chunk_0000.c:862",
+      "role": "ON-HIT EFFECT TRIGGER (thin wrapper -> zz_00061f0_ 0x800061f0): installs a timed effect descriptor from a PTR table (&PTR_DAT_802c3770)[type] into the actor's effect slot (+0x7ec/+0x7e4). Called by the APPLY fn when not immune. Selects effect by the hardcoded arg (1), NOT by +0x71a -- so the on-hit spark is fixed, not per-status-id.",
+      "evidence": "*(undefined **)(iVar2 + 0x7ec) = (&PTR_DAT_802c3770)[param_2]; ... param_2 passed as literal 1 from FUN_800061a8",
+      "confidence": "high",
+      "source_pass": "status-t8-2026-07-03"
+    },
+    {
+      "address": "0x80069a88",
+      "name": "zz_0069a88_",
+      "chunk": "chunk_0009.c:267-291",
+      "role": "command tester: +0x5d4&0x20 -> +0x585=1 (contextual via +0x748/+0x58e)",
+      "evidence": "*(undefined1 *)(param_1 + 0x585) = 1; / = 0; under (*(uint *)(param_1 + 0x5d4) & 0x20)",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x80069b10",
+      "name": "zz_0069b10_",
+      "chunk": "chunk_0009.c:297-322",
+      "role": "command tester: +0x5d4&0x40 -> +0x585=1 (gated by +0x748/+0x58e/+0x7d2)",
+      "evidence": "*(undefined1 *)(param_1 + 0x585) = 1; under (*(uint *)(param_1 + 0x5d4) & 0x40)",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x80069b98",
+      "name": "zz_0069b98_",
+      "chunk": "chunk_0009.c:328-347",
+      "role": "command tester: +0x5d4&0x80 -> +0x585=2",
+      "evidence": "*(undefined1 *)(param_1 + 0x585) = 2; under (*(uint *)(param_1 + 0x5d4) & 0x80)",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x80069bf0",
+      "name": "zz_0069bf0_",
+      "chunk": "chunk_0009.c:353-373",
+      "role": "command tester: +0x5d4&0x400 -> +0x585=3, +0x595=1 (RESOLVES Unmapped3)",
+      "evidence": "*(undefined1 *)(param_1 + 0x585) = 3; *(undefined1 *)(param_1 + 0x595) = 1; under (*(uint *)(param_1 + 0x5d4) & 0x400)",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x80069c50",
+      "name": "zz_0069c50_",
+      "chunk": "chunk_0009.c:379-399",
+      "role": "command tester: +0x5d4&0x1000 -> +0x585=5, +0x595=1",
+      "evidence": "*(undefined1 *)(param_1 + 0x585) = 5; under (*(uint *)(param_1 + 0x5d4) & 0x1000)",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x80069cb0",
+      "name": "zz_0069cb0_",
+      "chunk": "chunk_0009.c:405-450",
+      "role": "command tester: +0x5d4&0x1000 -> +0x585=5 (live-target-lock variant, mirrors to partner +0x4a4)",
+      "evidence": "requires actor+0x4a0 live; *(undefined1 *)(param_1 + 0x585) = 5; and partner *(undefined1 *)(iVar2 + 0x585) = 5;",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x80069dd0",
+      "name": "zz_0069dd0_",
+      "chunk": "chunk_0009.c:456-485",
+      "role": "command-issue dispatcher: reads command-descriptor byte at (*(actor+0x4b0) + type + 0xb8); ==1 -> melee path zz_0069ea4_, negative -> ranged path zz_0069fe0_; also handles the +0x5e0&3 dual-actor/combo gate via +0x57a mask",
+      "evidence": "cVar1 = *(char *)(*(int *)(param_1 + 0x4b0) + (int)*(char *)(param_1 + 0x585) + 0xb8); if (cVar1 == '\\x01') { uVar2 = zz_0069ea4_(param_1); } else if ((cVar1 < 1) && (-1 < cVar1)) { uVar2 = zz_0069fe0_(param_1); }",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x80069ea4",
+      "name": "zz_0069ea4_",
+      "chunk": "chunk_0009.c:491-542",
+      "role": "melee subtype selector: writes +0x586 (0-5) from +0x5e0 state flags and +0x7cc; then final move lookup via zz_006a104_",
+      "evidence": "*(undefined1 *)(param_1 + 0x586) = 0..5 branches on *(uint *)(param_1 + 0x5e0)",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x80069fe0",
+      "name": "zz_0069fe0_",
+      "chunk": "chunk_0009.c:548-599",
+      "role": "ranged subtype selector: writes +0x586; subtype 5 = charged (0.0 < +0x6a4), 4 = air (+0x5e0&0x80); final move lookup via zz_006a104_",
+      "evidence": "if (FLOAT_8043762c < *(float *)(param_1 + 0x6a4)) { *(undefined1 *)(param_1 + 0x586) = 5; } ... *(undefined1 *)(param_1 + 0x586) = 4/2/1/3/0",
+      "confidence": "high",
+      "source_pass": "command-t1-2026-07-03"
     }
   ]
 }
