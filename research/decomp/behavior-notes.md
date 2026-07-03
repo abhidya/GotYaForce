@@ -2550,3 +2550,24 @@ this is zero-runtime-risk and makes the dormant path correct. levelRows.selftest
 byte 0 (lv1) -> row 2 -> HP 200, byte 9 (lv10) -> row 11 -> HP 290, full monotonic sweep +
 clamp-to-rows; 42/42 pass. The 3 outliers pl0400/pl0507/pl0d01 (wiki non-"Normal Level-up
 Schedule" borgs) still deviate — per-borg schedules remain an OPEN item.
+
+### (az) Voice-cue asset naming decoded: plXX = borg FAMILY, 2 cues/family, 100% roster coverage (2026-07-03)
+
+The 46 extracted voice cues (apps/game/public/audio/manifest.json, type "voice", from
+poq_adx_usa.afs indices ~38+) are NOT generic samples — the key pattern `plXX_00_YY`
+decodes as **XX = the borg family byte, YY ∈ {00,01} = a two-cue-per-family split**:
+23 families (0x00–0x16) × 2 cues = 46. Cross-checked against the roster
+(packages/assets/data/borgs.json): every roster borg's family (id.slice(2,4), 16 families
+0x00–0x0f) has a matching voice group, so **208/208 roster borgs are covered** (the extra
+groups pl10–pl16 are families 0x10–0x16 = boss/non-standard borgs beyond the 208 roster).
+Examples: pl0615 (G RED, family 06) -> group `pl06`; pl070a (VLAD, family 07) -> `pl07`;
+pl0008 (family 00) -> `pl00`.
+
+This makes a **DERIVED family→voice-group mapping** available for wiring (borgId ->
+`pl{familyByte}` -> two cues). What stays **TUNED** is the cue-ROLE and event binding: no
+trace confirms whether cue `_00` vs `_01` is "deploy" vs "KO/win" or "attack" vs "damage"
+(the manifest note "generic/sample keys until a traced in-game voice table is available"
+refers to this role/table, NOT the family grouping, which the AFS index order + key naming
+establish structurally). Reasonable TUNED default for the port: cue 00 on deploy/spawn,
+cue 01 on KO/death — clearly labeled, pending an SE/voice-dispatch trace. Corrects the
+tracker's "46 voice cues are generic" framing: they are per-family, just role-unmapped.
