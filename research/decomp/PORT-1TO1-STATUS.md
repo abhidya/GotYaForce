@@ -22,7 +22,8 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | Combat: knockback direction | DERIVED, ported (mode 1) | modes 0/2/3/4 need sub-object data |
 | Combat: knockback **magnitude** | TUNED | **not in code — needs trace T9** |
 | Combat: B/X contextual resolver | schema only | **trace T1** (command→button map) |
-| Combat: ammo/refill | mechanism DERIVED, values extracted | X-attack→cell-1 wiring |
+| Combat: ammo/refill | DONE (B cell-0 + X cell-1 wired) | — |
+| Combat: projectile penetration | wired OBSERVED_WIKI (borgs/total→persist) | trace T6 confirms engine gate; terrain-penetration + solidity still open |
 | Combat: vampire lifesteal | DONE (ported, ay) | — |
 | Combat: statuses / hyper / fusion | shells only | traces T3/T8 (nurse heal-write not in corpus) |
 | Physics: movement/jump/dash | TUNED constants | trace-fit from goldens |
@@ -204,9 +205,14 @@ down like `tuned-burndown.md`.
 8. ✅ DONE + PORTED (commit aef234f1) — Vampire lifesteal decoded (ay) AND wired into combat:
    steal = floor(dmg/2) heal-on-hit capped at maxHP, passive 1 HP / 30-frame bleed floored at 1.
    HEAL.VAMPIRE_ENABLED flipped on; healing.selftest 47/47.
-9. state→(group,slot) animation dispatch (trace zz_004beb8_ callers / 35-slot table) — converts
-   heuristic anim labels to source-proven.
+9. 🔻 IN PROGRESS (corpus agent) — state→(group,slot) animation dispatch (35-slot table
+   0x802d3570 handlers) — converts heuristic anim labels to source-proven.
 10. Annotate the 150 understood functions into the index (coverage burn-down).
+
+**Also landed this session (beyond the original Tier-A/B list):**
+- ✅ Projectile penetration wired (commit 3fea73e8, OBSERVED_WIKI): borgs whose B-shot is
+  cataloged 'borgs'/'total' now fire persistent (pass-through) projectiles. The static half of
+  T5/T6 — the engine gate is still the trace's to confirm. projectilePenetration.selftest 7/7.
 
 **Tier C — Dolphin traces (human/TAS-in-the-loop; harness proven):**
 11. **T1** command→button mapping (unblocks B/X resolver, biggest feel item) — cursor-flip
