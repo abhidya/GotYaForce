@@ -29,7 +29,7 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | Physics: movement/jump/dash | TUNED constants | trace-fit from goldens |
 | UI: screens | ~9 real screens | 6 modes are dead menu entries |
 | UI: HUD | ~90% (charge✓ cursor✓ X-ammo✓ boost✓ jump✓) | burst meter only (fill data is T3-blocked) |
-| Challenge flow | ~85% DERIVED (winner-mask✓) | 3-phase deploy (mostly moot) |
+| Challenge flow | PLAYABLE (verified) + ~85% DERIVED | deploy sub-phases (moot, 36f total already correct) |
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
 | Assets: animation playback | ~88% (dispatch mapped+reconciled, ba/bb) | asset re-bake: relabel g4s0 special_s0→down_s0 (worktree); death/deploy slots unresolved |
 | Audio: BGM/menu | ~90% | — |
@@ -41,6 +41,13 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 meter, T9 knockback magnitude) + the SE-dispatch audio trace. Corpus mapping is largely
 exhausted for these; they need a human at the controller or TAS-movie injection (see
 `attack-mechanics-trace-plan.md` "Proven launch procedure").
+
+**Challenge PLAYABILITY verified (2026-07-03):** `scripts/selfcheck-1p-challenge.mjs` (full 1P
+battle runs, energy drains, borgs fight), `scripts/selfcheck-challenge-stages.mjs` (all 11
+Challenge stages load collision + run 1200f each), and `scripts/run-challenge-tables-crosscheck.mjs`
+(battle counts 5/10/15, energy 1500/2000/2500, full stage pool = DOL extract) all PASS. The
+"~85%" on Challenge flow is remaining DERIVED-vs-trace FIDELITY (deploy sub-phases), not a
+playability gap — a full Challenge run is start-to-finish playable.
 
 ---
 
