@@ -107,6 +107,29 @@ export interface BorgRuntime {
   cooldowns: Record<string, number>;
   /** Invincibility timer (struct+0x720, frames; counts down 1/frame). */
   invincTimer: number;
+  /** Balance gauge (struct+0x6c2, u16); a hit that depletes it forces a stagger
+   *  (0x6fd |= 0xa6). Init = balanceGaugeMax from the borg's pl####data.bin u16[0]
+   *  (chunk_0007.c:47-52); refills to max when balanceRefillDelay expires. */
+  balanceGauge: number;
+  /** Balance gauge max (struct+0x6be) — per-borg VERIFIED data (data/gaugeInit.json). */
+  balanceGaugeMax: number;
+  /** Down gauge (struct+0x6c6, u16); a hit that drops it below 1 staggers. Init/reset =
+   *  downGaugeBase (pl####data.bin u16[1]); resets to base when downResetDelay expires
+   *  (zz_003d3e8_, chunk_0004.c:6866-6876) and on stagger entry. */
+  downGauge: number;
+  /** Down gauge base (struct+0x6c4) — per-borg VERIFIED data (data/gaugeInit.json). */
+  downGaugeBase: number;
+  /** Post-hit window (struct+0x684, frames): balance refills to max on expiry. Set to 60 on
+   *  every hit taken; frozen while in a hit reaction (see constants.ts STAGGER). */
+  balanceRefillDelay: number;
+  /** Post-hit window (struct+0x688, frames): down gauge resets to base on expiry. */
+  downResetDelay: number;
+  /** Post-hit combo window (struct+0x68c, frames): comboAccum/comboRank reset on expiry. */
+  comboWindow: number;
+  /** Combo accumulator (struct+0x6c8, clamped 0-99). */
+  comboAccum: number;
+  /** Combo rank byte (struct+0x6ca). Reset with comboAccum; rank derivation untraced. */
+  comboRank: number;
   /** Proven actor param-tier state at `+0x74a/+0x74e/+0x750`; effect table mapping still unported. */
   paramTier: ActorParamTier;
   /** Current lock-on target uid, or null. */
@@ -142,6 +165,16 @@ export interface BattleConfig {
   spawnPoints?: SpawnPoint[];
   /** Original battle timer in frames; omitted means no timer. */
   timeLimitFrames?: number;
+  /**
+   * DERIVED — model of the original timer-pause flag PTR_DAT_80433934[0x50].
+   * The countdown (zz_0029b58_ @0x80029b58, chunk_0003.c:4631-4638) and BOTH
+   * timeout branches of the battle-end judge (zz_00297c8_ @0x800297c8,
+   * chunk_0003.c:4519-4529 and :4547-4553) run only while [0x50] == 0.
+   * Challenge setup writes timeLimit=18000 AND [0x50]=1 (chunk_0048.c:390-392),
+   * so original Challenge battles display a timer value but can never time out.
+   * Versus with a selected limit writes seconds*60 and [0x50]=0 (chunk_0044.c:366-373).
+   */
+  timerFrozen?: boolean;
 }
 
 export type BattleResult = "ongoing" | "win" | "lose" | "draw";
@@ -165,6 +198,9 @@ export interface Projectile {
   visualKind: ProjectileVisualKind;
   /** Ballistic drop subtracted from vel.y each frame (bullet kinds only). Optional; 0/absent = none. */
   drop?: number;
+  /** Damage-record index into gauges.ts DAMAGE_RECORDS for the gauge/stagger model
+   *  (DERIVED mapping — see gauges.ts DAMAGE_RECORD_INDEX). Absent = normal shot (record 0). */
+  damageRecordIndex?: number;
 }
 
 export interface BattleState {
@@ -172,6 +208,10 @@ export interface BattleState {
   projectiles: Projectile[];
   /** Remaining energy per team = sum of (alive + not-yet-deployed) borg energy. */
   energy: Record<number, number>;
+  /** Whole borgs defeated per team, counted at the source death event before auto-deploy. */
+  defeated: Record<number, number>;
+  /** Energy/cost defeated per team, counted from each defeated borg's profile energy. */
+  defeatedEnergy: Record<number, number>;
   /** The currently-active (controllable) borg uid per player id. */
   activeUidByPlayer: Record<string, string>;
   frame: number;

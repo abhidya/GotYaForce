@@ -12,7 +12,11 @@ const effectsInventoryPath = "research/asset-inventory/weapons-effects-projectil
 const borgDataPath = "packages/assets/data/borgs.json";
 
 const STAGE_RECORD_SIZE = 0x38;
-const HITBOX_RECORD_SIZE = 0xf4;
+// VERIFIED 0x50 from the DOL spawner indexing (record = base + idx*0x50):
+// chunk_0013.c zz_008ab30_ @0x8008ab30:1297, zz_008ac80_ @0x8008ac80:1349,
+// zz_008ae60_ @0x8008ae60:1439. The old 0xF4 model was a size coincidence
+// (32*0xF4 + 0x20 == 0x20 + 32*0x50 + 0x80 + 64*0x50 == 0x1EA0).
+const HITBOX_RECORD_SIZE = 0x50;
 
 function abs(relPath) {
   return path.resolve(repoRoot, relPath);
@@ -391,119 +395,139 @@ function parseStageHit(buffer, relPath) {
   };
 }
 
-function parseActorHit(buffer, relPath, borgMap) {
-  const name = path.basename(relPath);
-  const isPlayer = /^pl[0-9a-f]{4}hit\.bin$/i.test(name);
-  const isComhit = /^comhit2?\.bin$/i.test(name);
-  const borgId = isPlayer ? name.slice(0, 6).toLowerCase() : null;
-  const lower = name.toLowerCase();
-  const layout =
-    lower === "comhit.bin"
-      ? { remapOffset: 0, remapBytes: 0x400, recordOffset: 0x400, expectedRecords: null, label: "global-common-hit-table" }
-      : { remapOffset: 0, remapBytes: 0x20, recordOffset: 0x20, expectedRecords: isPlayer ? 32 : 64, label: isPlayer ? "player-borg-hit-table" : "secondary-common-hit-table" };
+function parseActorHitSectionStats(buffer, sectionName, remapOffset, remapBytes, remapSlotStride, recordOffset, recordCount) {
+  const remapEntries = [];
+  for (let slot = 0; slot < remapBytes / remapSlotStride; slot += 1) {
+    for (let position = 0; position < remapSlotStride; position += 1) {
+      const value = buffer.readUInt8(remapOffset + slot * remapSlotStride + position);
+      if (value === 0xff) break; // 0xFF terminates a slot's list (chunk_0013.c:1439)
+      remapEntries.push({ slot, position, value });
+    }
+  }
+  const remapValues = remapEntries.map((entry) => entry.value);
 
-  const completeRecordCount = Math.floor(Math.max(buffer.length - layout.recordOffset, 0) / HITBOX_RECORD_SIZE);
-  const recordCount = layout.expectedRecords == null ? completeRecordCount : Math.min(layout.expectedRecords, completeRecordCount);
-  const trailingBytes = buffer.length - layout.recordOffset - recordCount * HITBOX_RECORD_SIZE;
-  const activeEntries = activeRemapEntries(buffer, layout.remapOffset, layout.remapBytes);
-  const activeValues = activeEntries.map((entry) => entry.value);
-  const uniqueActiveValues = [...new Set(activeValues)].sort((a, b) => a - b);
-  const remapMax = activeValues.length > 0 ? Math.max(...activeValues) : null;
-  const remapHasOutOfRangeValues = remapMax != null && remapMax >= 32 && isPlayer;
-
-  const records = [];
+  const sampleRecords = [];
   let nonZeroRecordCount = 0;
   let maxNonZeroRecordIndex = null;
-  const firstWordCounts = new Map();
-  const floatBounds = { min: Infinity, max: -Infinity, count: 0 };
-
+  let persistentCount = 0;
+  const damageIndexCounts = new Map();
   for (let index = 0; index < recordCount; index += 1) {
-    const offset = layout.recordOffset + index * HITBOX_RECORD_SIZE;
+    const offset = recordOffset + index * HITBOX_RECORD_SIZE;
     const nonZero = nonZeroSlice(buffer, offset, HITBOX_RECORD_SIZE);
-    if (nonZero) {
-      nonZeroRecordCount += 1;
-      maxNonZeroRecordIndex = index;
-    }
-    const firstWord = buffer.readUInt32BE(offset);
-    firstWordCounts.set(firstWord, (firstWordCounts.get(firstWord) ?? 0) + 1);
-
-    for (let cursor = offset; cursor + 4 <= offset + HITBOX_RECORD_SIZE; cursor += 4) {
-      const value = buffer.readFloatBE(cursor);
-      if (Number.isFinite(value) && Math.abs(value) <= 100000 && value !== 0) {
-        floatBounds.min = Math.min(floatBounds.min, value);
-        floatBounds.max = Math.max(floatBounds.max, value);
-        floatBounds.count += 1;
-      }
-    }
-
-    if (records.length < 8 && (nonZero || index < 3)) {
-      records.push({
+    if (!nonZero) continue;
+    nonZeroRecordCount += 1;
+    maxNonZeroRecordIndex = index;
+    const activeEnd = buffer.readInt16BE(offset + 0x08);
+    if (activeEnd === -1) persistentCount += 1;
+    const damageRecordIndex = buffer.readUInt16BE(offset + 0x04);
+    damageIndexCounts.set(damageRecordIndex, (damageIndexCounts.get(damageRecordIndex) ?? 0) + 1);
+    if (sampleRecords.length < 8) {
+      const bone = buffer.readUInt8(offset + 0x01);
+      sampleRecords.push({
         index,
         offset: hex(offset),
-        nonZero,
-        firstWord: hex(firstWord),
-        firstBytes: [...buffer.subarray(offset, offset + 4)].map((byte) => hex(byte, 2)),
-        word8: hex(buffer.readUInt32BE(offset + 0x08)),
-        candidateFloats10: Array.from({ length: 8 }, (_, i) => round(buffer.readFloatBE(offset + 0x10 + i * 4))),
+        shapeKind: buffer.readUInt8(offset + 0x00),
+        boneIndex: bone & 0x7f,
+        attachToRoot: (bone & 0x80) !== 0,
+        collisionFlags: hex(buffer.readUInt16BE(offset + 0x02)),
+        damageRecordIndex,
+        activeStart: buffer.readInt16BE(offset + 0x06),
+        activeEnd,
+        localOffset: [0x0c, 0x10, 0x14].map((o) => round(buffer.readFloatBE(offset + o))),
+        halfExtent: [0x18, 0x1c, 0x20].map((o) => round(buffer.readFloatBE(offset + o))),
+        radius: round(buffer.readFloatBE(offset + 0x24)),
       });
     }
   }
 
-  const commonTailLooksPadding =
-    trailingBytes >= 0 &&
-    buffer.subarray(buffer.length - trailingBytes).every((byte) => byte === 0);
-
   return {
-    path: relPath,
-    fileName: name,
-    category: layout.label,
-    valid:
-      (isPlayer ? buffer.length === 0x1ea0 : true) &&
-      recordCount > 0 &&
-      trailingBytes >= 0 &&
-      (!isPlayer || !remapHasOutOfRangeValues),
-    bytes: buffer.length,
-    sha1: sha1(buffer),
-    linkedBorgId: borgId,
-    linkedBorgName: borgId ? borgMap.get(borgId)?.name ?? null : null,
+    name: sectionName,
     layout: {
-      remapOffset: hex(layout.remapOffset),
-      remapBytes: layout.remapBytes,
-      recordOffset: hex(layout.recordOffset),
+      remapOffset: hex(remapOffset),
+      remapBytes,
+      remapSlotStride,
+      recordOffset: hex(recordOffset),
       recordSize: HITBOX_RECORD_SIZE,
       recordCount,
-      expectedRecords: layout.expectedRecords,
-      trailingBytes,
-      trailingLooksLikePadding: commonTailLooksPadding,
     },
     remap: {
-      activeCount: activeEntries.length,
-      uniqueActiveCount: uniqueActiveValues.length,
-      maxValue: remapMax,
-      outOfRangeForPlayerRecordSlots: remapHasOutOfRangeValues,
-      activeValueHistogram: byteHistogram(activeValues),
-      sampleEntries: activeEntries.slice(0, 32),
+      activeCount: remapEntries.length,
+      uniqueActiveCount: new Set(remapValues).size,
+      maxValue: remapValues.length > 0 ? Math.max(...remapValues) : null,
+      activeValueHistogram: byteHistogram(remapValues),
+      sampleEntries: remapEntries.slice(0, 32),
     },
     records: {
       nonZeroRecordCount,
       zeroRecordCount: recordCount - nonZeroRecordCount,
       maxNonZeroRecordIndex,
-      firstWordHistogram: [...firstWordCounts.entries()]
+      persistentRecordCount: persistentCount,
+      damageRecordIndexHistogram: [...damageIndexCounts.entries()]
         .sort((a, b) => b[1] - a[1] || a[0] - b[0])
         .slice(0, 12)
-        .map(([value, count]) => ({ value: hex(value), count })),
-      floatLikeRange: {
-        min: Number.isFinite(floatBounds.min) ? round(floatBounds.min) : null,
-        max: Number.isFinite(floatBounds.max) ? round(floatBounds.max) : null,
-        count: floatBounds.count,
-        note: "Range scans 4-byte aligned big-endian floats only as a hint; records mix packed flags, shorts, and floats.",
-      },
-      sampleRecords: records,
+        .map(([value, count]) => ({ value, count })),
+      sampleRecords,
     },
+  };
+}
+
+function parseActorHit(buffer, relPath, borgMap) {
+  const name = path.basename(relPath);
+  const isPlayer = /^pl[0-9a-f]{4}hit\.bin$/i.test(name);
+  const lower = name.toLowerCase();
+  const borgId = isPlayer ? name.slice(0, 6).toLowerCase() : null;
+  const base = {
+    path: relPath,
+    fileName: name,
+    bytes: buffer.length,
+    sha1: sha1(buffer),
+    linkedBorgId: borgId,
+    linkedBorgName: borgId ? borgMap.get(borgId)?.name ?? null : null,
+  };
+
+  if (lower === "comhit2.bin") {
+    // EXPLICITLY OPEN: 0x3D40 fits neither the refuted 0xF4 model nor the proven
+    // 0x50 two-section model cleanly. Do not guess a stride.
+    return {
+      ...base,
+      category: "secondary-common-hit-table-UNVERIFIED",
+      valid: false,
+      sections: [],
+      unknowns: [
+        "comhit2.bin (0x3D40) layout is unresolved: no DOL reader indexing it has been identified yet.",
+      ],
+    };
+  }
+
+  if (lower === "comhit.bin") {
+    const valid = buffer.length === 0x5400;
+    return {
+      ...base,
+      category: "global-common-hit-table",
+      valid,
+      sections: valid
+        ? [parseActorHitSectionStats(buffer, "commonHitboxes", 0x000, 0x400, 4, 0x400, 256)]
+        : [],
+      unknowns: [
+        "comhit remap slot -> gameplay event mapping (which slot each common effect uses) is consumer-side (zz_008ae60_ arg), not in the file.",
+      ],
+    };
+  }
+
+  const valid = buffer.length === 0x1ea0;
+  return {
+    ...base,
+    category: "player-borg-hit-table",
+    valid,
+    sections: valid
+      ? [
+          parseActorHitSectionStats(buffer, "bodyHurtboxes", 0x000, 0x20, 1, 0x020, 32),
+          parseActorHitSectionStats(buffer, "attackHitboxes", 0xa20, 0x80, 4, 0xaa0, 64),
+        ]
+      : [],
     unknowns: [
-      "0xF4-byte record field semantics are still unnamed; first 4 bytes look like packed flags/IDs.",
-      "The 0xFFFF0000 word at record offset 0x08 is common but not universal.",
-      "Remap bytes select or order hit records/actions, but the caller-side mapping is not confirmed.",
+      "Record bytes +0x28..+0x4F are zero in sampled borg records; other shape kinds may use them.",
+      "Attack remap slot index -> move/animation mapping is consumer-side (zz_008ac80_ kind arg).",
     ],
   };
 }
@@ -576,7 +600,8 @@ async function main() {
 
   const playerActiveCounts = {};
   for (const file of player) {
-    const key = String(file.remap.activeCount);
+    const total = (file.sections ?? []).reduce((sum, section) => sum + section.remap.activeCount, 0);
+    const key = String(total);
     playerActiveCounts[key] = (playerActiveCounts[key] ?? 0) + 1;
   }
 
@@ -602,9 +627,9 @@ async function main() {
       playerActiveRemapCountHistogram: playerActiveCounts,
       observedFormats: [
         "STIH stage spatial collision grid: big-endian header, 42x42 cells, 0x38-byte triangle plane records.",
-        "pl####hit actor hit table: 0x20-byte remap header plus 32 records of 0xF4 bytes.",
-        "comhit2 actor/common table: 0x20-byte remap header plus 64 complete 0xF4 records and 0x20 zero tail bytes.",
-        "comhit global table: 0x400-byte remap/index area plus complete 0xF4 records and zero tail padding.",
+        "pl####hit actor hit table (0x1EA0, VERIFIED vs DOL spawners chunk_0013.c:1297/1349): [0x000 32 x u8 remap A][0x020 32 x 0x50 body hurtbox records][0xA20 32 x u8[4] remap B slots, 0xFF-terminated][0xAA0 64 x 0x50 attack/child hitbox records].",
+        "comhit global table (0x5400, VERIFIED vs zz_008ae60_ chunk_0013.c:1439): [0x000 256 x u8[4] remap slots][0x400 256 x 0x50 records]; no tail padding.",
+        "comhit2 (0x3D40): EXPLICITLY OPEN — fits neither the refuted 0xF4 model nor the 0x50 two-section model; no DOL reader identified.",
       ],
     },
     formatFindings: {
@@ -629,25 +654,28 @@ async function main() {
         { offset: "0x28", type: "f32[3]", name: "normal" },
         { offset: "0x34", type: "f32", name: "planeD_or_distance_candidate" },
       ],
-      actorHitRecordF4: {
-        status: "skeleton only",
-        known: [
-          "Records are fixed 0xF4 bytes in pl####hit.bin, comhit2.bin, and comhit.bin record areas.",
-          "Record offset 0x00 is a packed u32 or four packed bytes; offset 0x08 is often 0xFFFF0000.",
-          "Many later 4-byte aligned fields decode as plausible big-endian floats for hitbox/radius/offset values.",
+      actorHitRecord50: {
+        status: "VERIFIED against DOL readers (chunk_0013.c FUN_8008a65c:1121, zz_008ab30_:1297, zz_008ac80_:1349, zz_008ae60_:1439; chunk_0004.c FUN_8003c8b4:6481)",
+        fields: [
+          { offset: "0x00", type: "u8", name: "shapeKind", note: "dispatch PTR_FUN_802da740/802da758" },
+          { offset: "0x01", type: "u8", name: "boneIndex", note: "bit 0x80 = actor root matrix (+0x1aa4), else actor+0x8d4+bone*0x30" },
+          { offset: "0x02", type: "u16", name: "collisionFlags", note: "zz_008a2bc_ chunk_0013.c:973; bit 0x40 = attack list gated by i-frames" },
+          { offset: "0x04", type: "u16", name: "damageRecordIndex", note: "into the 0x18-stride DOL damage table at actor+0x27c (borg family: 9 records @0x802d46e0)" },
+          { offset: "0x06", type: "s16", name: "activeStart", note: "borgs: anim-frame threshold vs actor+0x1cdc" },
+          { offset: "0x08", type: "s16", name: "activeEnd", note: "-1 = persistent (body hurtboxes)" },
+          { offset: "0x0c", type: "f32[3]", name: "localOffset" },
+          { offset: "0x18", type: "f32[3]", name: "halfExtent", note: "capsule endpoints = offset ± this" },
+          { offset: "0x24", type: "f32", name: "radius", note: "scaled by actor scale +0xc0" },
         ],
-        unknown: [
-          "Exact flag names, action IDs, bone/attachment IDs, damage/effect fields, and shape type fields.",
-          "Whether every record is a hitbox, hurtbox, effect trigger, or mixed action metadata.",
-        ],
+        unknown: ["Bytes +0x28..+0x4F (zero in sampled borg records; other shape kinds may use them)."],
       },
     },
     files: { stage, common, player },
     stillUnknown: [
       "STIH cell offset entries 0 and 1 are anomalous in every file; they may be unused edge cells or table padding.",
       "STIH layer suffixes 0/1/2 are not semantically named by the binaries alone.",
-      "Actor/common 0xF4 records need caller code or gameplay traces to label flags, actions, bones, damage, and effect IDs.",
-      "comhit.bin's 0x400-byte remap area is clearly byte-indexed, but the index space it maps from is not proven.",
+      "comhit2.bin (0x3D40) layout — EXPLICITLY OPEN, no DOL reader identified.",
+      "Attack remap slot -> move/animation mapping is consumer-side (spawner args), not in the files.",
     ],
   };
 

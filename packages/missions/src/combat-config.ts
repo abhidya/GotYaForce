@@ -54,6 +54,7 @@ export function toCombatBattleConfig(
     ...(options.bounds ? { bounds: options.bounds } : {}),
     ...(options.collision ? { collision: options.collision } : {}),
     ...(cfg.timeLimitFrames !== undefined ? { timeLimitFrames: cfg.timeLimitFrames } : {}),
+    ...(cfg.timerFrozen !== undefined ? { timerFrozen: cfg.timerFrozen } : {}),
     forces: cfg.forces.map((force) => ({
       team: force.team === "player" ? 0 : 1,
       ownerPlayer: force.ownerPlayer == null ? null : playerIdFor(force.ownerPlayer),

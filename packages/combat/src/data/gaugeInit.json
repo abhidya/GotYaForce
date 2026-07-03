@@ -1,0 +1,801 @@
+{
+ "provenance": {
+  "source": "research/decomp/data/borg-gauge-init-pldata.json (extracted from user-data/GG4E/afs_data/root/pl####data.bin)",
+  "reader": "borg init chunk_0007.c:47-52: balance max/cur (+0x6be/+0x6c2) = u16[0] of the borg pl####data.bin actor-data page; down base/cur (+0x6c6 cur / +0x6c4 base) = u16[1]",
+  "fields": "balanceGaugeMax = u16@0x00, downGaugeBase = u16@0x02"
+ },
+ "borgs": {
+  "pl0000": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0001": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0002": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0003": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0004": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0005": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0006": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0007": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0008": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0009": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl000a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl000b": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl000c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0100": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0101": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0102": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0103": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0104": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0105": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0106": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0107": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0108": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0109": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl010a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0200": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0201": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0202": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0203": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0204": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0205": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0206": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0207": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0208": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0209": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl020a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl020b": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl020c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl020d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl020e": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl020f": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0300": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0301": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0302": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0303": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0304": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0305": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0306": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0307": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0308": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0309": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl030a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl030b": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl030c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl030d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0400": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0401": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0402": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0403": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0404": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0405": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0406": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0407": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0408": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0409": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl040a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl040b": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl040c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl040d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0500": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 700
+  },
+  "pl0501": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 200
+  },
+  "pl0502": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 200
+  },
+  "pl0503": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 1000
+  },
+  "pl0504": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 700
+  },
+  "pl0505": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0506": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 1000
+  },
+  "pl0507": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 1000
+  },
+  "pl0508": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 1000
+  },
+  "pl0509": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 700
+  },
+  "pl050a": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 700
+  },
+  "pl050b": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 200
+  },
+  "pl050c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 350
+  },
+  "pl050d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl050e": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl050f": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0510": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 350
+  },
+  "pl0511": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 250
+  },
+  "pl0512": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0513": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0514": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0515": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 350
+  },
+  "pl0516": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 350
+  },
+  "pl0517": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0600": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0601": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0602": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 1000
+  },
+  "pl0603": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 1000
+  },
+  "pl0608": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0609": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl060a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 1000
+  },
+  "pl060b": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 1000
+  },
+  "pl060c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 1000
+  },
+  "pl060d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 1000
+  },
+  "pl060e": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 1000
+  },
+  "pl060f": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 1000
+  },
+  "pl0615": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0616": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0617": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl061c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl061d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 500
+  },
+  "pl0629": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl062a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0700": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0701": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0702": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0703": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0704": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0705": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0706": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0707": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0708": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0709": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl070a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl070b": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl070c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl070d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0800": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0801": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0804": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0805": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0806": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0807": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0808": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0809": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl080c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl080d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl080e": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl080f": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0900": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0901": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0902": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0903": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0904": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0905": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0906": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0907": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0908": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0909": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl090a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl090b": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl090c": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl090d": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a00": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a01": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a02": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a03": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a04": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a05": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a06": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a07": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a08": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a09": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0a0a": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0b00": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0b01": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0b02": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0b03": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0b04": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0b05": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0b06": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0b07": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0c00": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0c01": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0c02": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0c03": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0c04": {
+   "balanceGaugeMax": 700,
+   "downGaugeBase": 400
+  },
+  "pl0c05": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0c06": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0d00": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0d01": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0d02": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0d03": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0d04": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0d05": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0d06": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0d07": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0e00": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 250
+  },
+  "pl0e01": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 250
+  },
+  "pl0e02": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 250
+  },
+  "pl0e03": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 250
+  },
+  "pl0e04": {
+   "balanceGaugeMax": 30000,
+   "downGaugeBase": 30000
+  },
+  "pl0e05": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 250
+  },
+  "pl0f00": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0f01": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0f02": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0f03": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0f04": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 150
+  },
+  "pl0f05": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  },
+  "pl0f06": {
+   "balanceGaugeMax": 500,
+   "downGaugeBase": 100
+  }
+ }
+}

@@ -978,8 +978,14 @@ function isTextInputTarget(target: EventTarget | null): boolean {
   );
 }
 
-function activeGamepad(): Gamepad | null {
-  return navigator.getGamepads?.().find((g) => g?.connected) ?? null;
+const NO_KEYS: ReadonlySet<string> = new Set();
+
+function activeGamepad(playerIndex = 0, allowFallback = playerIndex === 0): Gamepad | null {
+  const pads = navigator.getGamepads?.();
+  if (!pads) return null;
+  const exact = pads[playerIndex];
+  if (exact?.connected) return exact;
+  return allowFallback ? pads.find((g) => g?.connected) ?? null : null;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1196,12 +1202,10 @@ interface BattleSession {
   config: MissionBattleConfig;
   hud: BattleHudHandle;
   localPlayerId: string;
+  localPlayerIds: string[];
   stageBounds: RectStageBounds;
   allyMax: number;
   enemyMax: number;
-  // outcome telemetry accumulated across the battle
-  startEnemyBorgCount: number;
-  startPlayerBorgCount: number;
   paused: boolean;
   pauseHandle: { destroy(): void } | null;
   resolved: boolean;
@@ -1227,7 +1231,10 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   });
   const battle = createBattle(combatCfg);
 
-  const localPlayerId = playerIdFor(0);
+  const localPlayerIds = Array.from({ length: Math.max(1, Math.min(flow.playerCount, 2)) }, (_, player) =>
+    playerIdFor(player),
+  );
+  const localPlayerId = localPlayerIds[0] ?? playerIdFor(0);
 
   // Energy maxima for the HUD meters (team 0 = ally, team 1 = enemy).
   const allyMax = battle.state.energy[0] ?? 0;
@@ -1236,20 +1243,15 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   // Mount the HUD.
   const hud = createBattleHud(ui, { showBanner: false });
 
-  // Count starting borgs per side (for results telemetry).
-  const startEnemy = combatCfg.forces.filter((f) => f.team === 1).reduce((n, f) => n + f.borgIds.length, 0);
-  const startPlayer = combatCfg.forces.filter((f) => f.team === 0).reduce((n, f) => n + f.borgIds.length, 0);
-
   session = {
     battle,
     config,
     hud,
     localPlayerId,
+    localPlayerIds,
     stageBounds,
     allyMax,
     enemyMax,
-    startEnemyBorgCount: startEnemy,
-    startPlayerBorgCount: startPlayer,
     paused: false,
     pauseHandle: null,
     resolved: false,
@@ -1366,8 +1368,14 @@ function stepBattle(dt: number): void {
   simAccumulator += Math.min(dt, 0.25);
   // Fixed 60 Hz; collect local input once and apply for each sub-step.
   const inputs: Record<string, PlayerInput> = {};
-  const active = localActiveBorg();
-  inputs[session.localPlayerId] = active ? inputFromKeys(keys, activeGamepad()) : emptyInput();
+  for (let playerIndex = 0; playerIndex < session.localPlayerIds.length; playerIndex += 1) {
+    const playerId = session.localPlayerIds[playerIndex] ?? playerIdFor(playerIndex);
+    const uid = battle.state.activeUidByPlayer[playerId] ?? null;
+    const active = uid ? battle.state.borgs.find((b) => b.uid === uid) ?? null : null;
+    const keySource = playerIndex === 0 ? keys : NO_KEYS;
+    const pad = activeGamepad(playerIndex, session.localPlayerIds.length === 1 && playerIndex === 0);
+    inputs[playerId] = active ? inputFromKeys(keySource, pad) : emptyInput();
+  }
 
   let steps = 0;
   while (simAccumulator >= SIM_DT && steps < 15) {
@@ -1442,14 +1450,12 @@ function resolveBattle(): void {
   const st = session.battle.state;
   const win = st.result === "win";
 
-  // Derive results telemetry from the end state (the sim doesn't emit per-shot
-  // telemetry, so attack/hit/dodge are estimated from energy deltas).
-  const enemyRemaining = st.borgs.filter((b) => b.team === 1 && b.alive).length;
-  const playerRemaining = st.borgs.filter((b) => b.team === 0 && b.alive).length;
-  const enemyDefeated = Math.max(0, session.startEnemyBorgCount - enemyRemaining);
-  const playerDefeated = Math.max(0, session.startPlayerBorgCount - playerRemaining);
-  const costWon = session.enemyMax - (st.energy[1] ?? 0);
-  const costLost = session.allyMax - (st.energy[0] ?? 0);
+  // Death counts/costs come from the combat death event before auto-deploy, matching force queues.
+  // Attack/hit/dodge ratios remain a tuned results model until the original scoring branch is traced.
+  const enemyDefeated = st.defeated[1] ?? 0;
+  const playerDefeated = st.defeated[0] ?? 0;
+  const costWon = st.defeatedEnergy[1] ?? 0;
+  const costLost = st.defeatedEnergy[0] ?? 0;
 
   const outcome: BattleOutcome = {
     win,

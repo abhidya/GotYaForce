@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-03T01:55:54.773Z",
+  "generatedAt": "2026-07-03T06:17:31.563Z",
   "generatedBy": "scripts/inventory-borg-assets.mjs",
   "inputs": {
     "discRoot": "user-data/GG4E/afs_data/root",
@@ -15,8 +15,12 @@
         "bytes": 11194
       },
       {
+        "path": "research/format-specs/comhit-bin-notes.md",
+        "bytes": 5273
+      },
+      {
         "path": "research/format-specs/hit-bin-format.md",
-        "bytes": 6461
+        "bytes": 8742
       },
       {
         "path": "research/format-specs/hsd-animation-semantics.md",
@@ -50,10 +54,10 @@
     "discBorgIds": 219,
     "sourcePrimaryModels": 207,
     "sourceMotFiles": 104,
-    "browserDaeExports": 208,
+    "browserDaeExports": 209,
     "browserTextureExports": 206,
     "browserAnimationMapped": 185,
-    "safeStaticRenderNow": 208,
+    "safeStaticRenderNow": 209,
     "safeAnimatedRenderNow": 185,
     "tPoseMotMappingRisk": 0,
     "topMissingCategories": [
@@ -62,12 +66,12 @@
         "count": 12
       },
       {
-        "category": "browser-dae",
+        "category": "metadata",
         "count": 11
       },
       {
-        "category": "metadata",
-        "count": 11
+        "category": "browser-dae",
+        "count": 10
       },
       {
         "category": "source-pzz",
@@ -64658,7 +64662,7 @@
     {
       "id": "pl0f07",
       "name": null,
-      "energy": null,
+      "energy": 0,
       "number": null,
       "tribe": null,
       "type": null,
@@ -64691,15 +64695,22 @@
         "other": []
       },
       "exportedBrowserModel": {
-        "status": "missing",
-        "daeFiles": [],
-        "directories": [],
+        "status": "ready",
+        "daeFiles": [
+          {
+            "path": "apps/game/public/models/library/pl0f07/pl0f07.dae",
+            "bytes": 74954
+          }
+        ],
+        "directories": [
+          "apps/game/public/models/library/pl0f07"
+        ],
         "manifest": {
-          "present": false,
-          "dae": null,
-          "bones": null,
-          "meshes": null,
-          "tris": null,
+          "present": true,
+          "dae": "pl0f07.dae",
+          "bones": 3,
+          "meshes": 6,
+          "tris": 610,
           "textures": []
         }
       },
@@ -64712,17 +64723,16 @@
         "browserAnimationFiles": []
       },
       "textureStatus": {
-        "status": "not-exported",
+        "status": "no-exported-textures",
         "exportedPngFiles": [],
         "expectedFromManifest": []
       },
-      "renderReadiness": "not-exported",
-      "safeStaticRenderNow": false,
+      "renderReadiness": "static-ready",
+      "safeStaticRenderNow": true,
       "safeAnimatedRenderNow": false,
       "wouldTPoseBecauseMotMappingMissing": false,
       "missingPieces": [
-        "metadata",
-        "browser-dae"
+        "metadata"
       ]
     }
   ]

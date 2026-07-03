@@ -1,0 +1,651 @@
+{
+  "provenance": {
+    "source": "GG4E boot.dol (sha inherits repo disc extraction)",
+    "extractor": "scripts/extract-challenge-tables.py",
+    "functions": {
+      "poll_challenge_menu_selection": "0x80196030 (chunk_0048.c:153)",
+      "build_challenge_battle_setup": "0x801962c4 (chunk_0048.c:234)",
+      "stage_rotation_zz_0196dac_": "0x80196dac (chunk_0048.c:643)",
+      "post_battle_branch_FUN_801969a0": "0x801969a0 (chunk_0048.c:466)",
+      "battle_end_judge_zz_00297c8_": "0x800297c8 (chunk_0003.c:4488)"
+    },
+    "notes": [
+      "CPU team generation counts each rolled borg at floor(cost*2/3) against side budget (chunk_0048.c:351).",
+      "Stage rotation: uniform pick from stagePool (11 entries), reroll while equal to previous stage (chunk_0048.c:649-656).",
+      "Stage variant: rand % variantCount(stage) via DAT_802da5d0 table (already in packages/missions/src/challenge-reference.ts).",
+      "Challenge freezes the 18000-frame battle timer: PTR_DAT_80433934[0x50]=1 (chunk_0048.c:392); judge timeout branches require [0x50]==0, so Challenge battles cannot time out.",
+      "Winner mask [0x1f]: bit0=side0 wins, bit1=side1 wins, 4=timeout-draw (versus only), 8=unused-4th; Challenge continues only when mask has the player's side bit and mask<=2 (chunk_0048.c:486-502)."
+    ]
+  },
+  "battleCountsPerDifficulty": {
+    "normal": 5,
+    "tuff": 10,
+    "insane": 15
+  },
+  "energyLimitsPerDifficulty": {
+    "normal": 1500,
+    "tuff": 2000,
+    "insane": 2500
+  },
+  "stagePool": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    8,
+    10,
+    11,
+    12,
+    14
+  ],
+  "perDifficultyExtras": {
+    "DAT_804356e4_pairs": [
+      [
+        0,
+        31
+      ],
+      [
+        10,
+        5
+      ],
+      [
+        28,
+        4
+      ]
+    ],
+    "DAT_804356ec_sideValues": {
+      "normal": [
+        7,
+        4
+      ],
+      "tuff": [
+        7,
+        7
+      ],
+      "insane": [
+        7,
+        12
+      ]
+    }
+  },
+  "battles": {
+    "normal": [
+      {
+        "battle": 0,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1000,
+        "side1Budget": 1000,
+        "side0PoolIds": [
+          50,
+          50,
+          50,
+          50
+        ],
+        "side1PoolIds": [
+          48,
+          48,
+          48,
+          48
+        ]
+      },
+      {
+        "battle": 1,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1000,
+        "side1Budget": 1000,
+        "side0PoolIds": [
+          50,
+          50,
+          50,
+          50
+        ],
+        "side1PoolIds": [
+          49,
+          49,
+          49,
+          49
+        ]
+      },
+      {
+        "battle": 2,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 8,
+        "side0Budget": 1200,
+        "side1Budget": 1200,
+        "side0PoolIds": [
+          50,
+          50,
+          50,
+          50
+        ],
+        "side1PoolIds": [
+          50,
+          50,
+          50,
+          50
+        ]
+      },
+      {
+        "battle": 3,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 8,
+        "side0Budget": 1200,
+        "side1Budget": 1200,
+        "side0PoolIds": [
+          50,
+          50,
+          50,
+          50
+        ],
+        "side1PoolIds": [
+          51,
+          51,
+          51,
+          51
+        ]
+      },
+      {
+        "battle": 4,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 1,
+        "side0Budget": 1400,
+        "side1Budget": 1400,
+        "side0PoolIds": [
+          50,
+          50,
+          50,
+          50
+        ],
+        "side1PoolIds": [
+          64,
+          64,
+          64,
+          64
+        ]
+      }
+    ],
+    "tuff": [
+      {
+        "battle": 0,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1200,
+        "side1Budget": 1200,
+        "side0PoolIds": [
+          51,
+          51,
+          51,
+          51
+        ],
+        "side1PoolIds": [
+          49,
+          49,
+          49,
+          49
+        ]
+      },
+      {
+        "battle": 1,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1200,
+        "side1Budget": 1200,
+        "side0PoolIds": [
+          51,
+          51,
+          51,
+          51
+        ],
+        "side1PoolIds": [
+          50,
+          50,
+          50,
+          50
+        ]
+      },
+      {
+        "battle": 2,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1400,
+        "side1Budget": 1400,
+        "side0PoolIds": [
+          51,
+          51,
+          51,
+          51
+        ],
+        "side1PoolIds": [
+          51,
+          51,
+          51,
+          51
+        ]
+      },
+      {
+        "battle": 3,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 1400,
+        "side1Budget": 1400,
+        "side0PoolIds": [
+          51,
+          51,
+          51,
+          51
+        ],
+        "side1PoolIds": [
+          52,
+          52,
+          52,
+          52
+        ]
+      },
+      {
+        "battle": 4,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 2,
+        "side0Budget": 1600,
+        "side1Budget": 1600,
+        "side0PoolIds": [
+          51,
+          51,
+          51,
+          51
+        ],
+        "side1PoolIds": [
+          66,
+          66,
+          66,
+          66
+        ]
+      },
+      {
+        "battle": 5,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 1600,
+        "side1Budget": 1600,
+        "side0PoolIds": [
+          52,
+          52,
+          52,
+          52
+        ],
+        "side1PoolIds": [
+          53,
+          53,
+          53,
+          53
+        ]
+      },
+      {
+        "battle": 6,
+        "side0AllyCount": 6,
+        "side1EnemyCount": 10,
+        "side0Budget": 1800,
+        "side1Budget": 1800,
+        "side0PoolIds": [
+          52,
+          52,
+          52,
+          52
+        ],
+        "side1PoolIds": [
+          54,
+          54,
+          54,
+          54
+        ]
+      },
+      {
+        "battle": 7,
+        "side0AllyCount": 6,
+        "side1EnemyCount": 10,
+        "side0Budget": 1800,
+        "side1Budget": 1800,
+        "side0PoolIds": [
+          52,
+          52,
+          52,
+          52
+        ],
+        "side1PoolIds": [
+          55,
+          55,
+          55,
+          55
+        ]
+      },
+      {
+        "battle": 8,
+        "side0AllyCount": 6,
+        "side1EnemyCount": 10,
+        "side0Budget": 2000,
+        "side1Budget": 2000,
+        "side0PoolIds": [
+          52,
+          52,
+          52,
+          52
+        ],
+        "side1PoolIds": [
+          56,
+          56,
+          56,
+          56
+        ]
+      },
+      {
+        "battle": 9,
+        "side0AllyCount": 7,
+        "side1EnemyCount": 2,
+        "side0Budget": 2200,
+        "side1Budget": 2200,
+        "side0PoolIds": [
+          52,
+          52,
+          52,
+          52
+        ],
+        "side1PoolIds": [
+          65,
+          65,
+          65,
+          65
+        ]
+      }
+    ],
+    "insane": [
+      {
+        "battle": 0,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 800,
+        "side1Budget": 1400,
+        "side0PoolIds": [
+          52,
+          52,
+          52,
+          52
+        ],
+        "side1PoolIds": [
+          50,
+          50,
+          50,
+          50
+        ]
+      },
+      {
+        "battle": 1,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 900,
+        "side1Budget": 1400,
+        "side0PoolIds": [
+          52,
+          53,
+          52,
+          53
+        ],
+        "side1PoolIds": [
+          51,
+          51,
+          51,
+          51
+        ]
+      },
+      {
+        "battle": 2,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1000,
+        "side1Budget": 1600,
+        "side0PoolIds": [
+          53,
+          53,
+          53,
+          53
+        ],
+        "side1PoolIds": [
+          52,
+          52,
+          52,
+          52
+        ]
+      },
+      {
+        "battle": 3,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1100,
+        "side1Budget": 1600,
+        "side0PoolIds": [
+          53,
+          54,
+          53,
+          54
+        ],
+        "side1PoolIds": [
+          54,
+          54,
+          54,
+          54
+        ]
+      },
+      {
+        "battle": 4,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1200,
+        "side1Budget": 1800,
+        "side0PoolIds": [
+          54,
+          54,
+          54,
+          54
+        ],
+        "side1PoolIds": [
+          67,
+          67,
+          67,
+          67
+        ]
+      },
+      {
+        "battle": 5,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1300,
+        "side1Budget": 1800,
+        "side0PoolIds": [
+          54,
+          55,
+          54,
+          55
+        ],
+        "side1PoolIds": [
+          64,
+          53,
+          53,
+          53
+        ]
+      },
+      {
+        "battle": 6,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1400,
+        "side1Budget": 2000,
+        "side0PoolIds": [
+          55,
+          55,
+          55,
+          55
+        ],
+        "side1PoolIds": [
+          55,
+          68,
+          55,
+          55
+        ]
+      },
+      {
+        "battle": 7,
+        "side0AllyCount": 4,
+        "side1EnemyCount": 10,
+        "side0Budget": 1500,
+        "side1Budget": 2000,
+        "side0PoolIds": [
+          55,
+          56,
+          55,
+          56
+        ],
+        "side1PoolIds": [
+          56,
+          56,
+          69,
+          56
+        ]
+      },
+      {
+        "battle": 8,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 1600,
+        "side1Budget": 2200,
+        "side0PoolIds": [
+          56,
+          56,
+          56,
+          56
+        ],
+        "side1PoolIds": [
+          58,
+          58,
+          58,
+          64
+        ]
+      },
+      {
+        "battle": 9,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 1700,
+        "side1Budget": 2200,
+        "side0PoolIds": [
+          56,
+          57,
+          56,
+          57
+        ],
+        "side1PoolIds": [
+          66,
+          66,
+          66,
+          66
+        ]
+      },
+      {
+        "battle": 10,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 1800,
+        "side1Budget": 2400,
+        "side0PoolIds": [
+          57,
+          57,
+          57,
+          57
+        ],
+        "side1PoolIds": [
+          57,
+          57,
+          69,
+          57
+        ]
+      },
+      {
+        "battle": 11,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 1900,
+        "side1Budget": 2400,
+        "side0PoolIds": [
+          57,
+          58,
+          57,
+          58
+        ],
+        "side1PoolIds": [
+          59,
+          68,
+          59,
+          59
+        ]
+      },
+      {
+        "battle": 12,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 2000,
+        "side1Budget": 2600,
+        "side0PoolIds": [
+          58,
+          58,
+          58,
+          58
+        ],
+        "side1PoolIds": [
+          60,
+          60,
+          66,
+          60
+        ]
+      },
+      {
+        "battle": 13,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 2100,
+        "side1Budget": 2600,
+        "side0PoolIds": [
+          58,
+          60,
+          58,
+          60
+        ],
+        "side1PoolIds": [
+          65,
+          61,
+          61,
+          61
+        ]
+      },
+      {
+        "battle": 14,
+        "side0AllyCount": 5,
+        "side1EnemyCount": 10,
+        "side0Budget": 2200,
+        "side1Budget": 2800,
+        "side0PoolIds": [
+          60,
+          61,
+          60,
+          58
+        ],
+        "side1PoolIds": [
+          61,
+          61,
+          61,
+          61
+        ]
+      }
+    ]
+  }
+}

@@ -148,12 +148,17 @@ export function createForceBuilder(
     for (const borg of opts.catalog) {
       const inForce = force.includes(borg.id);
       const disabled = !inForce && !canAdd(borg.id);
+      const attrs: Record<string, string> = { type: "button", "data-id": borg.id };
+      if (disabled) {
+        attrs["disabled"] = "";
+        attrs["aria-disabled"] = "true";
+      }
       const cell = el(
         "button",
         {
           class: `gf-borg-cell${inForce ? " gf-in-force" : ""}${disabled ? " gf-disabled" : ""}`,
           title: `${borg.name} — ${borg.energy}`,
-          attrs: { type: "button", "data-id": borg.id },
+          attrs,
           onClick: () => toggle(borg.id),
         },
       );

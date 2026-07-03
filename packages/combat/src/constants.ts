@@ -195,13 +195,16 @@ export const MELEE = {
   DMG_BASE: 6,
   DMG_PER_STAT: 4,
   /**
-   * Hitstun applied to the victim (frames). TUNED — audited 2026-07-01 (s4s). A real, address-
-   * cited 60-frame timer trio (object+0x684/+0x688/+0x68c, set by
-   * resolve_hitbox_target_effects_and_damage @0x8002e2a8, decremented by the confirmed +0x1dcc
-   * step) is set on every non-lethal hit — structurally hitstun-shaped, but its actual gameplay
-   * role is unconfirmed (it feeds attack-flag logic in zz_005f00c_ @0x8005f00c alongside a
-   * separate combo/rank counter, not a clean "borg can't act" gate). Do not port 60 here without
-   * confirming what +0x684/688/68c actually locks out — see s4s for the exact next trace step.
+   * Reaction LENGTH after a confirmed melee stagger (frames). Still TUNED — the original's
+   * stagger reaction duration is animation-gated (per-borg anim completion flags), not a ROM
+   * constant, so this stays a tuned stand-in for the animation length. The stagger TRIGGER,
+   * however, is now DERIVED and lives in the gauge model (combat.ts applyHit + gauges.ts +
+   * STAGGER below): the original has NO flat per-hit hitstun — a hit only interrupts when the
+   * down gauge (+0x6c6) drops below 1, the balance gauge (+0x6c2) depletes (0x6fd |= 0xa6),
+   * or the damage record's reaction flags (+0x0b bits 2|0x80) force it
+   * (chunk_0003.c:6255-6263 routes non-staggering hits straight to
+   * dispatch_slot_action_update). The old s4s mystery is resolved: the +0x684/+0x688/+0x68c
+   * 60-frame trio is the balance-refill / down-reset / combo-window timers (see STAGGER).
    */
   HITSTUN: 14,
   /** Knockback speed imparted (units/frame). TUNED — s4p derived knockback DIRECTION fully
@@ -230,10 +233,11 @@ export const SHOT = {
    *  0-10 `shot` int. */
   DMG_BASE: 4,
   DMG_PER_STAT: 3,
-  /** Hitstun applied on projectile hit (frames). TUNED — same +0x684/688/68c caveat as
-   *  MELEE.HITSTUN above (behavior-notes.md s4s); the timer trio is hit-generic (set by the same
-   *  resolve_hitbox_target_effects_and_damage path for both melee and shot hits), so the same
-   *  "don't port 60 without confirming the gate" caution applies here too. */
+  /** Reaction LENGTH after a confirmed shot stagger (frames). Still TUNED (animation-gated in
+   *  ROM — see MELEE.HITSTUN note); the stagger TRIGGER is now DERIVED via the gauge model
+   *  (combat.ts applyHit + gauges.ts). Normal shots map to damage record 0 (reactionFlags 1,
+   *  no forced stagger), so a shot only interrupts once it depletes a gauge — a lone shot no
+   *  longer flinches the victim at all. */
   HITSTUN: 10,
   /** Knockback imparted (units/frame). TUNED — see MELEE.KNOCKBACK note; direction is DERIVED
    *  (s4p), magnitude is not. */
@@ -286,8 +290,34 @@ export const SPECIAL = {
   DURATION: 26,
   /** Knockback (units/frame). */
   KNOCKBACK: 7,
-  /** Hitstun (frames). */
+  /** Reaction LENGTH after a confirmed special-hit stagger (frames). Still TUNED (animation-
+   *  gated in ROM — see MELEE.HITSTUN note); the stagger TRIGGER is now DERIVED via the gauge
+   *  model (specials map to damage record 2, reactionFlags 1 — no forced stagger). */
   HITSTUN: 18,
+} as const;
+
+export const STAGGER = {
+  /**
+   * DERIVED — the three post-hit victim windows are all set to the same 60.0-frame constant
+   * (FLOAT_80436fac) by resolve_hitbox_target_effects_and_damage @0x8002e2a8
+   * (chunk_0003.c:7995-8010) on every hit, and decremented once per frame while the victim is
+   * NOT in a hit reaction (chunk_0006.c:7982-8011; frozen while 0x5e0 bit 0x1000000 is set).
+   * On expiry:
+   *   +0x684 -> balance gauge refills to max          (chunk_0006.c:7988)
+   *   +0x688 -> down gauge resets to base (+50%/level via zz_003d3e8_, chunk_0004.c:6866-6876)
+   *   +0x68c -> combo accumulator (+0x6c8, 0-99) and combo rank byte (+0x6ca) reset
+   *             (chunk_0006.c:8009-8010)
+   */
+  BALANCE_REFILL_DELAY: 60,
+  DOWN_RESET_DELAY: 60,
+  COMBO_WINDOW: 60,
+  /**
+   * DERIVED — entering a balance-break stagger (flag bits 0x6fd |= 0xa6) grants the victim
+   * 60.0 i-frames: zz_005c290_ writes FLOAT_80437448 (60.0) to +0x720 on entry
+   * (chunk_0007.c:3985-4050) and sets "in hit reaction" (0x5e0 bit 0x1000000), which freezes
+   * the three windows above for the reaction's duration.
+   */
+  STAGGER_IFRAMES: 60,
 } as const;
 
 export const DAMAGE = {

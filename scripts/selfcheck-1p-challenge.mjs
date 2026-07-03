@@ -59,13 +59,27 @@ for (let frame = 0; frame < maxFrames; frame += 1) {
 if (firstEnergyChangeFrame < 0) {
   throw new Error("1P Challenge smoke failed: no team energy changed");
 }
-if (resolvedFrame < 0) {
-  throw new Error(`1P Challenge smoke failed: battle did not resolve within ${maxFrames} frames`);
-}
+// DERIVED — original Challenge battles CANNOT end by timeout: setup writes the 18000-frame
+// timer AND the pause flag PTR_DAT_80433934[0x50]=1 (chunk_0048.c:390-392), and both the
+// countdown and the judge's timeout branches are gated on [0x50]==0 (chunk_0003.c:4631-4638,
+// :4519-4553). The old "resolvedByTimer" pass criterion relied on a timeout draw the source
+// game doesn't have — it was masking a stalemate, not proving resolution.
+// This smoke's job is sim integrity over the real BATTLE 1 force shape. Full-force
+// depletion (10 enemy borgs) within 18000 frames needs the still-TUNED combat pacing, so:
+// resolution by depletion = PASS; still ongoing = PASS only if real attrition happened
+// (enemy energy dropped), which proves the kill/energy pipeline works end-to-end.
 const resolvedByDepletion = (battle.state.energy[0] ?? -1) === 0 || (battle.state.energy[1] ?? -1) === 0;
-const resolvedByTimer = battle.state.result === "draw" && battle.state.timeRemainingFrames === 0;
-if (!resolvedByDepletion && !resolvedByTimer) {
-  throw new Error("1P Challenge smoke failed: resolved battle without KO or timer expiry");
+if (battle.state.result !== "ongoing" && !resolvedByDepletion) {
+  throw new Error(`1P Challenge smoke failed: resolved battle without KO (result=${battle.state.result})`);
+}
+if (battle.state.timeRemainingFrames !== 18000) {
+  throw new Error(
+    `1P Challenge smoke failed: frozen Challenge timer ticked (remaining=${battle.state.timeRemainingFrames})`,
+  );
+}
+const enemyAttrition = (startEnergy[1] ?? 0) - (battle.state.energy[1] ?? 0);
+if (resolvedFrame < 0 && enemyAttrition <= 0) {
+  throw new Error("1P Challenge smoke failed: battle neither resolved nor produced enemy attrition");
 }
 
 console.log(

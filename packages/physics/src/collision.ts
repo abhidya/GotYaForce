@@ -171,8 +171,7 @@ export function candidateTrianglesForSegment(collision: StageCollision, a: Vec3,
   const grid = collision.grid;
   if (!grid) return collision.triangles;
   const indices = new Set<number>();
-  addNeighborCellTriangles(indices, collision, a.x, a.z);
-  addNeighborCellTriangles(indices, collision, b.x, b.z);
+  addSegmentCellTriangles(indices, collision, a, b);
   if (indices.size === 0) return collision.triangles;
   const out: StageCollisionTriangle[] = [];
   for (const index of indices) {
@@ -220,8 +219,69 @@ export function isFiniteVec(v: Vec3): boolean {
 function addNeighborCellTriangles(out: Set<number>, collision: StageCollision, x: number, z: number): void {
   const grid = collision.grid;
   if (!grid) return;
+  const cell = cellCoords(collision, x, z);
+  if (!cell) return;
+  addNeighborCellTrianglesByCell(out, collision, cell.cx, cell.cz);
+}
+
+function addSegmentCellTriangles(out: Set<number>, collision: StageCollision, a: Vec3, b: Vec3): void {
+  const grid = collision.grid;
+  if (!grid || grid.cellSize.x <= 0 || grid.cellSize.z <= 0) return;
+  const start = cellCoords(collision, a.x, a.z);
+  const end = cellCoords(collision, b.x, b.z);
+  if (!start || !end) {
+    addNeighborCellTriangles(out, collision, a.x, a.z);
+    addNeighborCellTriangles(out, collision, b.x, b.z);
+    return;
+  }
+
+  let cx = start.cx;
+  let cz = start.cz;
+  const endCx = end.cx;
+  const endCz = end.cz;
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const stepX = dx > 0 ? 1 : dx < 0 ? -1 : 0;
+  const stepZ = dz > 0 ? 1 : dz < 0 ? -1 : 0;
+  const tDeltaX = stepX === 0 ? Infinity : grid.cellSize.x / Math.abs(dx);
+  const tDeltaZ = stepZ === 0 ? Infinity : grid.cellSize.z / Math.abs(dz);
+  let tMaxX =
+    stepX === 0 ? Infinity : (grid.origin.x + (stepX > 0 ? cx + 1 : cx) * grid.cellSize.x - a.x) / dx;
+  let tMaxZ =
+    stepZ === 0 ? Infinity : (grid.origin.z + (stepZ > 0 ? cz + 1 : cz) * grid.cellSize.z - a.z) / dz;
+  const maxSteps = grid.gridCells.x + grid.gridCells.z + 4;
+
+  for (let steps = 0; steps <= maxSteps; steps += 1) {
+    addNeighborCellTrianglesByCell(out, collision, cx, cz);
+    if (cx === endCx && cz === endCz) return;
+    if (tMaxX < tMaxZ) {
+      cx += stepX;
+      tMaxX += tDeltaX;
+    } else if (tMaxZ < tMaxX) {
+      cz += stepZ;
+      tMaxZ += tDeltaZ;
+    } else {
+      cx += stepX;
+      cz += stepZ;
+      tMaxX += tDeltaX;
+      tMaxZ += tDeltaZ;
+    }
+    if (cx < 0 || cz < 0 || cx >= grid.gridCells.x || cz >= grid.gridCells.z) return;
+  }
+}
+
+function cellCoords(collision: StageCollision, x: number, z: number): { cx: number; cz: number } | null {
+  const grid = collision.grid;
+  if (!grid) return null;
   const cx = Math.floor((x - grid.origin.x) / grid.cellSize.x);
   const cz = Math.floor((z - grid.origin.z) / grid.cellSize.z);
+  if (cx < 0 || cz < 0 || cx >= grid.gridCells.x || cz >= grid.gridCells.z) return null;
+  return { cx, cz };
+}
+
+function addNeighborCellTrianglesByCell(out: Set<number>, collision: StageCollision, cx: number, cz: number): void {
+  const grid = collision.grid;
+  if (!grid) return;
   for (let dz = -1; dz <= 1; dz += 1) {
     for (let dx = -1; dx <= 1; dx += 1) {
       const nx = cx + dx;
