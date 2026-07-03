@@ -13,6 +13,40 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 
 ---
 
+## ★ Finish-line handoff (what's left, prioritized) — 2026-07-03
+
+The port is **playable end-to-end** (challenge verified) with every cleanly-derivable mechanic
+ported and tested (15 combat suites + 3 challenge selfchecks green). Source map: **300 functions**
+role-identified (`identified-functions.json`). What remains splits into exactly three buckets:
+
+**A. Needs a LIVE DOLPHIN SESSION (you drive; I run the presets) — the only true blockers:**
+1. **T3 — Power-Burst meter FILL** ("fills as you inflict/receive damage"). The burst state machine,
+   arm window, and damage-multiplier EFFECT are mapped (be); only the fill *source* isn't static.
+   Trace: watch the burst gauge field vs damage events. Unblocks the burst HUD meter + full burst.
+2. **T8 — status per-id CATALOG** (poison/freeze/scramble/swap/transform behaviors). VERIFIED not in
+   the static corpus (the status id is an immunity/bone index, not a behavior selector — (bd)).
+   Trace: apply each status in-game, watch the actor fields. Unblocks status.ts beyond the framework.
+   (Preset scaffolds for both are in `scripts/trace-attack-mechanics.mjs`.)
+
+**B. STATIC but substantial refactors (queued as task chips — dedicated sessions, real risk):**
+3. **Knockback magnitude port** — DERIVED data ready (KNOCKBACK_STRENGTH_TABLE + record+0xd). Needs
+   the model restructured to single-base × strength across all call sites (naive swap double-counts).
+4. **SE-bank extraction** — 11 combat events→real ids mapped (bd); needs the AFS soundbank format
+   decoded to extract the referenced samples, then wire main.ts COMBAT_SFX.
+5. **Command resolver → stepAttacks** — `resolveCommandType()` implemented + tested; wiring it in is
+   the ATK-003 refactor of working attack code.
+
+**C. Open research reconciliations (low-risk, no gameplay impact):**
+6. The `+0x3ec` byte identity: (ak) reads it as level, (be) as size/scale class — reconcile which
+   field drives the stat row (the level-row port is validated vs wiki and unaffected either way).
+7. The 3 non-normal-schedule borgs (pl0400/pl0507/pl0d01) — per-level HP off the row grid.
+8. g4s0 `special_s0`→`down_s0` anim relabel (asset re-bake, separate worktree).
+
+Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. The corpus is otherwise
+~97% HAL Sysdolphin / SDK / codec middleware with no game-logic role to assign.
+
+---
+
 ## 0. Executive scorecard
 
 | Subsystem | 1:1 coverage | Gating blocker to finish |
