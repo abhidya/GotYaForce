@@ -23,6 +23,8 @@ export {
   type Vec3,
 } from "@gf/physics";
 export * from "./types.js";
+export { AttackCommandType, AttackCommandSubtype, COMMAND_FAMILY, type AttackCommand } from "./command.js";
+export { movementContextOf, type MovementContext } from "./movement.js";
 export {
   buildProfile,
   forceEnergy,
@@ -44,6 +46,7 @@ export {
   LOCK,
   MELEE,
   MOVE,
+  MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES,
   SHOT,
   SIM,
   SPECIAL,

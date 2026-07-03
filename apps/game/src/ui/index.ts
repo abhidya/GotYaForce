@@ -65,3 +65,6 @@ export type { PauseAction, PauseMenuOptions, PauseMenuHandle } from "./screens/P
 // ---- HUD ----
 export { createBattleHud } from "./hud/BattleHud.js";
 export type { HudState, BattleHudOptions, BattleHudHandle, TeammateMarker } from "./hud/BattleHud.js";
+
+export { createDebugOverlay } from "./hud/DebugOverlay.js";
+export type { DebugOverlayHandle } from "./hud/DebugOverlay.js";

@@ -39,6 +39,10 @@ export interface PlayerInput {
   switchBorg: boolean;
   /** Step/dodge (stick-action). */
   dash: boolean;
+  /** Y — Hyper/Power Burst arm input. Evidence: `FUN_80069814` chunk_0009.c:104-115 (Y-family
+   *  bit in transformed word +0x5d4 sets +0x6fb = 6, a 6-frame arm window). Shell only (ATK-011);
+   *  no gameplay effects until ATK-012. */
+  hyper: boolean;
 }
 
 export function emptyInput(): PlayerInput {
@@ -53,6 +57,7 @@ export function emptyInput(): PlayerInput {
     allyLock: false,
     switchBorg: false,
     dash: false,
+    hyper: false,
   };
 }
 
@@ -79,6 +84,35 @@ export interface ActorParamTier {
   timerFrames: number;
 }
 
+/** ROM refill-type enum for a weapon cell's aux `+0x790` field (ATK-009, findings mechanic P):
+ *  `type <= 0` = all-at-once (cur stays 0 until the refill timer expires, then jumps to max);
+ *  `type === 1` = gradual (fractional grant toward max every frame the timer is running);
+ *  `type 2/3` = "special" — the ROM initializes a constant timer for these but the per-frame
+ *  consumer semantics are unread (chunk_0009.c:2909-2973 only handles cases 1 and <=0), so the
+ *  port treats 2/3 the same as all-at-once until decoded further. */
+export type WeaponRefillType = number;
+
+/**
+ * One ROM weapon-cell (struct+0x774 + weaponIdx*8, aux struct+0x78c + weaponIdx*8; ATK-009,
+ * findings.md mechanic P; row source `research/decomp/data/borg-hp-stat-rows-802f2988.json`,
+ * live-verified G RED/pl0615 -> ammo 5). Weapon 0 mirrors `BorgRuntime.ammo`.
+ */
+export interface WeaponCell {
+  /** Current ammo (struct+0x774/+0x77c/+0x784). */
+  cur: number;
+  /** Ammo max (struct aux +0x78e/…). `0` = infinite: firing is never blocked and cur is not
+   *  decremented (chunk_0002.c:7158-7165). */
+  max: number;
+  /** Refill type (struct aux +0x790/…). See WeaponRefillType. */
+  refillType: WeaponRefillType;
+  /** Refill param (struct aux +0x792/…) — refill-timer seed, ROM units (frames-ish; the exact
+   *  float conversion is TUNED, see constants.ts AMMO.REFILL_RATE_PER_FRAME / open-questions Q7). */
+  refillParam: number;
+  /** Refill timer (struct+0x778/…, f32). Counts down; on expiry (all-at-once) or while running
+   *  (gradual, fractional grant) drives the refill per stepAmmoRefill. */
+  timer: number;
+}
+
 export interface BorgRuntime {
   uid: string;
   borgId: string;
@@ -101,8 +135,19 @@ export interface BorgRuntime {
   stateTime: number;
   /** Current animation label (cosmetic; render reads it). */
   anim: string;
-  /** Ranged ammo remaining before reload. */
+  /** Ranged ammo remaining before reload. Kept as the WEAPON-0 alias for compat: every
+   *  existing reader/writer of `b.ammo` keeps working unchanged, mirroring
+   *  `weaponCells[0].cur` (ATK-009, findings.md mechanic P). */
   ammo: number;
+  /**
+   * Per-weapon ammo cells (struct+0x774/+0x77c/+0x784, stride 8; ROM models 3). Optional and
+   * lazily initialized (same convention as `meleeHitUids` below) so existing constructors/
+   * fakes that only set `ammo` keep compiling — combat.ts's ammo helpers self-heal it from
+   * the borg's action profile on first use. Weapon 0 mirrors `ammo` and drives the existing
+   * shot path (B); cells 1/2 exist structurally but are unused until the per-weapon command
+   * resolver lands (ATK-009 "Required behavior").
+   */
+  weaponCells?: WeaponCell[];
   /** Named cooldown timers (frames remaining). */
   cooldowns: Record<string, number>;
   /** Invincibility timer (struct+0x720, frames; counts down 1/frame). */
@@ -132,6 +177,20 @@ export interface BorgRuntime {
   comboRank: number;
   /** Proven actor param-tier state at `+0x74a/+0x74e/+0x750`; effect table mapping still unported. */
   paramTier: ActorParamTier;
+  /** Status-effect id (struct+0x71a, masked to 0x3f), 0 = none. ATK-010 shell only — no
+   *  status has a gameplay effect yet; see status.ts. (research/decomp/attack-mechanics-
+   *  findings.md mechanic Q, chunk_0003.c:7641-7642). OBSERVED_GUIDE (player-documented
+   *  status catalog, not yet id-mapped): freeze/mash-to-recover, poison DoT, time stop,
+   *  shrink/grow, aim-scramble, transform, tether, position-swap — see research/decomp/
+   *  data/guide-anchors-movelist.json statusObservations. */
+  statusId: number;
+  /** Status duration in frames (struct+0x71c), decrements 1/frame (chunk_0007.c:2881-2883);
+   *  clears statusId at 0. Application max-merges with any running timer (never shortens). */
+  statusTimer: number;
+  /** Per-status immunity bitmask (struct+0x5a0); bit N set blocks status N application AND
+   *  (per formula step 1, chunk_0004.c:6693-6699) zeroes HP damage for that hit. Init 0
+   *  (chunk_0006.c:7107-7110) — no borg grants immunity yet in this port. */
+  statusImmunityMask: number;
   /** Current lock-on target uid, or null. */
   lockTarget: string | null;
   /** Current ally lock-on target uid, or null. Z control is asset-confirmed; downstream behavior is unknown. */
@@ -140,6 +199,38 @@ export interface BorgRuntime {
    *  Transient bookkeeping, reset on every swing start; optional so external constructors
    *  (tests/fakes) don't need to provide it. */
   meleeHitUids?: string[];
+  /** Power Burst arm window (ROM +0x6fb), frames remaining. Y press edge sets this to
+   *  BURST.ARM_WINDOW_FRAMES (6, DERIVED — `FUN_80069814` chunk_0009.c:113); decrements to 0
+   *  per frame (mirrors `zz_005b2b8_` chunk_0007.c:3473-3490); a re-press re-arms it. NOTE
+   *  (behavior-notes.md (aj)): the ROM also decrements +0x6fb in the fusion per-slot loop and
+   *  its expiry there drives the burst/fusion END path — the audit's "6-frame arm window" and
+   *  the fusion timer may be the SAME field read in two different contexts, not two fields;
+   *  this still needs trace T3 to reconcile before ATK-012 wires any real duration/effects.
+   *  UPDATE (behavior-notes.md (ao), official NA instruction manual, CONFIRMED_MANUAL tier):
+   *  "press the button at the same time [as your partner] for simultaneous power bursts" — this
+   *  gives the 6-frame window a coherent reading as a SIMULTANEITY tolerance for synchronized
+   *  co-op bursts/fusion (partner's Y within the window counts as "same time"), not merely an
+   *  arm/activation buffer. Manual text is still not numeric ROM truth, so the exact semantics
+   *  (whose window, how it gates pairing) remain for trace T3 to reconcile. */
+  burstArmFrames: number;
+  /** Power Burst activation flag (ROM +0x6fc = 1, set by `zz_005b2b8_` when +0x6fb is nonzero
+   *  and the borg is active). Gated behind constants.ts BURST.ENABLED (default false, BLOCKED-
+   *  until-T3) so this is always false in real battles; has ZERO gameplay effects (ATK-011
+   *  shell only — see ATK-012). Per (ao) (official manual, CONFIRMED_MANUAL): real activation's
+   *  precondition is "the burst gauge is at max" — the gauge itself is still unlocated in RAM,
+   *  which is exactly why BURST.ENABLED stays false until that meter is found and wired. */
+  burstActive: boolean;
+  /** Power Burst "paired" flag (ROM +0x6fa = 1, set alongside +0x6fc by `zz_005b2b8_`). Shell
+   *  bookkeeping only; not wired to fusion pairing (fusionPartnerUid/fusionState below) until
+   *  a later ticket confirms the relationship. See (ao) note on burstArmFrames re: simultaneous
+   *  co-op bursts — "paired" may end up meaning that, but it is UNCONFIRMED pending T3. */
+  burstPaired: boolean;
+  /** Power Burst fusion partner uid, or null when not fused/linked (ROM +0x4a4 partner
+   *  pointer, modeled as a uid). Nothing sets this yet (ATK-018 shell only). */
+  fusionPartnerUid: string | null;
+  /** Power Burst fusion state (ROM +0x4a1 vocabulary): 0 = none, 1->2->3->5->6 locked,
+   *  7 = ending. Nothing sets this yet (ATK-018 shell only; see behavior-notes.md (aj)). */
+  fusionState: number;
   /** True once the HP-zero kill event has already removed this borg's force cost. */
   defeatAccounted: boolean;
   alive: boolean;
@@ -206,6 +297,23 @@ export interface Projectile {
   /** Damage-record index into gauges.ts DAMAGE_RECORDS for the gauge/stagger model
    *  (DERIVED mapping — see gauges.ts DAMAGE_RECORD_INDEX). Absent = normal shot (record 0). */
   damageRecordIndex?: number;
+  /** Consumption policy on a valid borg hit (ATK-008). `!== false` (including absent) is the
+   *  default: first valid hit consumes the projectile — today's behavior, unchanged bit-for-bit.
+   *  `false` means the projectile persists through hits and re-hits are paced by
+   *  `rehitCounter`/`record.rehitIntervalFrames` instead of being destroyed. The ROM's
+   *  structural default is persistence (object death is actor-gated, not collision-coded:
+   *  chunk_0013.c:1188); despawn-on-hit is what the port's stepProjectiles has always modeled,
+   *  so it stays the default here. No gameplay caller sets this to `false` yet — that flip is
+   *  T6's outcome (research/decomp/attack-mechanics-findings.md mechanic O). */
+  consumeOnHit?: boolean;
+  /** Frames remaining before this projectile may apply its next hit while persisting
+   *  (`consumeOnHit === false`). Mirrors the ROM's SINGLE per-object counter at object+0x4e,
+   *  reloaded from the damage record's s8+0x16 `rehitIntervalFrames` on every hit application
+   *  (chunk_0013.c:1175-1182) — NOT a per-target map. Interval 0 reloads to 0, so the object
+   *  stays hit-ready and can re-hit (a new target, or the same one) every frame it overlaps
+   *  (chunk_0013.c:1188 gates despawn, not this counter). Absent/undefined = not yet initialized;
+   *  treated as hit-ready (0) the first time stepProjectiles sees a persisting projectile. */
+  rehitCounter?: number;
 }
 
 export interface BattleState {

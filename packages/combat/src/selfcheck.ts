@@ -26,7 +26,7 @@ import {
   stepProjectiles,
 } from "./combat.js";
 import { DASH, JUMP, MELEE, STAGGER, STATE, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
-import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId } from "./gauges.js";
+import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, type DamageRecord } from "./gauges.js";
 import { stepMovement } from "./movement.js";
 import {
   PARAM_TIER_RESET,
@@ -38,6 +38,8 @@ import {
 import { emptyInput, type BorgRuntime, type PlayerInput, type Projectile, type StageCollision, type StageCollisionTriangle } from "./types.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import { typeCategoryForBorgId, typeDamageMultiplier } from "./typeDamage.js";
+import { computeSourceDamage } from "./damageFormula.js";
+import damageFormulaData from "./data/damageFormula.json" with { type: "json" };
 
 function loadBorgs(): BorgStats[] {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -842,6 +844,56 @@ function assertChargeShotTiers(borgs: BorgStats[]): void {
   );
 }
 
+// ATK-002 case 5: chargeable shooter — hold N frames < tier1 releases tier 0, hold >= tier2
+// releases tier 2; also pins the projectile's damageRecordIndex (DERIVED mapping, gauges.ts):
+// tier0 uses the normal-shot record (SHOT=0), a charged release (tier>=1) uses the
+// charge/special record (CHARGE_OR_SPECIAL=2) — spawnProjectile in combat.ts.
+function assertResolverChargeTierSelectsDamageRecord(borgs: BorgStats[]): void {
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  const action = actionProfileForProfile(gRed);
+  const shotDef = action.shot;
+  if (!shotDef?.chargeable) {
+    throw new Error("[selfcheck] resolver charge tier: G RED (pl0615) should have a chargeable shot");
+  }
+  const enemyProfile = buildProfile(borgById(borgs, "pl0008"));
+  const fireAfterHold = (holdFrames: number): Projectile => {
+    const b = fakeRuntime("resolver_charge", 0, 0);
+    b.borgId = gRed.id;
+    b.ammo = startingAmmoForProfile(gRed);
+    const enemy = fakeRuntime("resolver_charge_enemy", 1, 500);
+    const profiles = new Map([
+      [b.uid, gRed],
+      [enemy.uid, enemyProfile],
+    ]);
+    for (let f = 0; f < holdFrames; f += 1) pumpAttackFrame(b, gRed, true, [b, enemy], profiles);
+    const released = pumpAttackFrame(b, gRed, false, [b, enemy], profiles);
+    const proj = released[0];
+    if (!proj) throw new Error(`[selfcheck] resolver charge tier: release after ${holdFrames} frames spawned nothing`);
+    return proj;
+  };
+
+  const belowTier1 = fireAfterHold(Math.max(1, shotDef.chargeTier1Frames - 5));
+  const atOrAboveTier2 = fireAfterHold(shotDef.chargeTier2Frames + 10);
+  if ((belowTier1.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT) !== DAMAGE_RECORD_INDEX.SHOT) {
+    throw new Error(
+      `[selfcheck] resolver charge tier: below-tier1 release should use the SHOT record: got=${belowTier1.damageRecordIndex}`,
+    );
+  }
+  if (atOrAboveTier2.damageRecordIndex !== DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL) {
+    throw new Error(
+      `[selfcheck] resolver charge tier: tier-2 release should use the CHARGE_OR_SPECIAL record: got=${atOrAboveTier2.damageRecordIndex}`,
+    );
+  }
+  if (!(atOrAboveTier2.damage > belowTier1.damage)) {
+    throw new Error(
+      `[selfcheck] resolver charge tier: tier-2 damage multiplier should exceed tier-0: tier0=${belowTier1.damage}, tier2=${atOrAboveTier2.damage}`,
+    );
+  }
+  console.log(
+    `[selfcheck] resolver charge tier: below-tier1 release=SHOT record, tier2 release=CHARGE_OR_SPECIAL record (damage ${belowTier1.damage.toFixed(2)} -> ${atOrAboveTier2.damage.toFixed(2)})`,
+  );
+}
+
 function assertSwordBeamFinisher(borgs: BorgStats[]): void {
   const run = (id: string, forceMelee: boolean): Projectile[] => {
     const profile = buildProfile(borgById(borgs, id));
@@ -921,6 +973,162 @@ function assertActionProfileFallbackDefaults(borgs: BorgStats[]): void {
   console.log("[selfcheck] fallback action profile keeps generic single-hit melee + autofire shot");
 }
 
+// ---------------------------------------------------------------------------------------
+// ATK-002: pin the CURRENT B/X contextual-resolver selection order with synthetic
+// BorgProfiles (unregistered ids, so RAW_PROFILES has no entry and resolveActionProfile()
+// falls back to chooseFallbackPrimary purely from hasMelee/hasShot/rangePref — the same
+// synthetic-profile pattern as assertActionProfileFallbackDefaults above). Evidence: stepAttacks
+// order from actionProfile.primary (combat.ts:592-635); charge accumulate/release (:610-633);
+// combo window/step (:598-609, :710-726); special AoE (:549-589). BEFORE the resolver
+// restructure (ATK-003) so this is a regression net for the selection order specifically.
+// ---------------------------------------------------------------------------------------
+function assertResolverPrimaryMeleeHybridStartsMelee(borgs: BorgStats[]): void {
+  const base = buildProfile(borgById(borgs, "pl0615"));
+  // Hybrid (both melee and shot usable) with rangePref "melee" -> chooseFallbackPrimary
+  // picks "melee" (actionProfiles.ts chooseFallbackPrimary: hasMelee && !hasShot -> melee;
+  // otherwise falls through to rangePref==="ranged" ? shot : melee).
+  const hybridMelee = { ...base, id: "zzatk002a", hasMelee: true, hasShot: true, rangePref: "melee" as const };
+  if (actionProfileForProfile(hybridMelee).primary !== "melee") {
+    throw new Error("[selfcheck] resolver: melee-preferring hybrid synthetic profile should resolve primary=melee");
+  }
+  const attacker = fakeRuntime("resolver_melee_hybrid", 0, 0);
+  const enemy = fakeRuntime("resolver_melee_hybrid_enemy", 1, 220);
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [attacker.uid, hybridMelee],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  attacker.ammo = startingAmmoForProfile(hybridMelee);
+  const result = pumpAttackFrame(attacker, hybridMelee, true, [attacker, enemy], profiles);
+  if (attacker.state !== "attack" || attacker.anim !== "melee") {
+    throw new Error(
+      `[selfcheck] resolver: primary=melee hybrid held B should start melee: state=${attacker.state}, anim=${attacker.anim}`,
+    );
+  }
+  if (result.length !== 0) {
+    throw new Error("[selfcheck] resolver: primary=melee hybrid should not fire a shot on the same B press");
+  }
+  console.log("[selfcheck] resolver: primary=melee hybrid at B held starts melee (state=attack, anim=melee)");
+}
+
+function assertResolverPrimaryShotHybridFiresShotFirst(borgs: BorgStats[]): void {
+  const base = buildProfile(borgById(borgs, "pl0615"));
+  // Hybrid with rangePref "ranged" -> chooseFallbackPrimary picks "shot".
+  const hybridShot = { ...base, id: "zzatk002b", hasMelee: true, hasShot: true, rangePref: "ranged" as const };
+  if (actionProfileForProfile(hybridShot).primary !== "shot") {
+    throw new Error("[selfcheck] resolver: ranged-preferring hybrid synthetic profile should resolve primary=shot");
+  }
+  const shooter = fakeRuntime("resolver_shot_hybrid", 0, 0);
+  const enemy = fakeRuntime("resolver_shot_hybrid_enemy", 1, 220);
+  shooter.ammo = startingAmmoForProfile(hybridShot);
+  const startAmmo = shooter.ammo;
+  const profiles = new Map([
+    [shooter.uid, hybridShot],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const spawned = pumpAttackFrame(shooter, hybridShot, true, [shooter, enemy], profiles);
+  if (spawned.length === 0 || shooter.ammo !== startAmmo - 1) {
+    throw new Error(
+      `[selfcheck] resolver: primary=shot hybrid held B should fire the shot first: spawned=${spawned.length}, ammo=${shooter.ammo}/${startAmmo}`,
+    );
+  }
+  if (shooter.state !== "attack" || shooter.anim !== "shoot") {
+    throw new Error(
+      `[selfcheck] resolver: primary=shot hybrid should end up in the shoot anim: state=${shooter.state}, anim=${shooter.anim}`,
+    );
+  }
+  console.log("[selfcheck] resolver: primary=shot hybrid at B held fires the shot first (ammo decremented, projectile spawned)");
+}
+
+function assertResolverMeleeOnlyNeverAttemptsShot(borgs: BorgStats[]): void {
+  const base = buildProfile(borgById(borgs, "pl0615"));
+  const meleeOnly = { ...base, id: "zzatk002c", hasMelee: true, hasShot: false };
+  const action = actionProfileForProfile(meleeOnly);
+  if (action.primary !== "melee" || action.shot !== null) {
+    throw new Error(`[selfcheck] resolver: melee-only synthetic profile should have primary=melee, shot=null: ${JSON.stringify(action)}`);
+  }
+  const attacker = fakeRuntime("resolver_melee_only", 0, 0);
+  const enemy = fakeRuntime("resolver_melee_only_enemy", 1, 220);
+  enemy.hp = enemy.maxHp = 5000;
+  attacker.ammo = 0; // melee-only borgs never carry ammo; confirms a shot cannot be attempted
+  const profiles = new Map([
+    [attacker.uid, meleeOnly],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const result = pumpAttackFrame(attacker, meleeOnly, true, [attacker, enemy], profiles);
+  if (attacker.state !== "attack" || attacker.anim !== "melee" || result.length !== 0) {
+    throw new Error(
+      `[selfcheck] resolver: melee-only B should start melee and never spawn a shot: state=${attacker.state}, anim=${attacker.anim}, projectiles=${result.length}`,
+    );
+  }
+  console.log("[selfcheck] resolver: melee-only (shot=null) at B starts melee; shot never attempted");
+}
+
+function assertResolverShotOnlyNeverAttemptsMelee(borgs: BorgStats[]): void {
+  const base = buildProfile(borgById(borgs, "pl0615"));
+  const shotOnly = { ...base, id: "zzatk002d", hasMelee: false, hasShot: true };
+  const action = actionProfileForProfile(shotOnly);
+  if (action.primary !== "shot" || action.melee !== null) {
+    throw new Error(`[selfcheck] resolver: shot-only synthetic profile should have primary=shot, melee=null: ${JSON.stringify(action)}`);
+  }
+  const shooter = fakeRuntime("resolver_shot_only", 0, 0);
+  const enemy = fakeRuntime("resolver_shot_only_enemy", 1, 220);
+  shooter.ammo = startingAmmoForProfile(shotOnly);
+  const profiles = new Map([
+    [shooter.uid, shotOnly],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const spawned = pumpAttackFrame(shooter, shotOnly, true, [shooter, enemy], profiles);
+  if (spawned.length === 0 || shooter.anim !== "shoot") {
+    throw new Error(
+      `[selfcheck] resolver: shot-only B should fire a shot: spawned=${spawned.length}, anim=${shooter.anim}`,
+    );
+  }
+  console.log("[selfcheck] resolver: shot-only (melee=null) at B fires a shot");
+}
+
+function assertResolverSpecialHitsOnceAndSetsCooldown(borgs: BorgStats[]): void {
+  // 6) X pressed -> special AoE damages a borg in radius exactly once, sets cooldown.
+  const base = buildProfile(borgById(borgs, "pl0615"));
+  const attacker = fakeRuntime("resolver_special", 0, 0);
+  const target = fakeRuntime("resolver_special_target", 1, 20); // inside SPECIAL.RADIUS (110)
+  target.hp = target.maxHp = 5000;
+  const profile = { ...base, id: "zzatk002e" };
+  const profiles = new Map([
+    [attacker.uid, profile],
+    [target.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const specialCooldown = actionProfileForProfile(profile).special.cooldown;
+
+  stepCooldowns(attacker);
+  const result = stepAttacks(attacker, profile, false, true, [attacker, target], profiles);
+  const damageAfterOneHit = target.maxHp - target.hp;
+  if (damageAfterOneHit <= 0) {
+    throw new Error("[selfcheck] resolver: X special did not damage a borg inside its radius");
+  }
+  if (attacker.cooldowns["special"] !== specialCooldown) {
+    throw new Error(
+      `[selfcheck] resolver: X special did not set its cooldown: got=${attacker.cooldowns["special"]}, want=${specialCooldown}`,
+    );
+  }
+  if (attacker.state !== "special" || result.projectiles.length !== 0) {
+    throw new Error(`[selfcheck] resolver: X special should enter the special state: state=${attacker.state}`);
+  }
+
+  // Re-pressing X immediately (cooldown still active) must NOT deal a second hit.
+  stepCooldowns(attacker);
+  stepAttacks(attacker, profile, false, true, [attacker, target], profiles);
+  const damageAfterSecondPress = target.maxHp - target.hp;
+  if (damageAfterSecondPress !== damageAfterOneHit) {
+    throw new Error(
+      `[selfcheck] resolver: X special should not re-hit while its cooldown/attackLock is active: first=${damageAfterOneHit}, after=${damageAfterSecondPress}`,
+    );
+  }
+  console.log(
+    `[selfcheck] resolver: X special hit the in-radius target exactly once (damage=${damageAfterOneHit}) and set cooldown=${attacker.cooldowns["special"]}`,
+  );
+}
+
 function assertSameTeamDamageDivisor(borgs: BorgStats[]): void {
   const attacker = fakeRuntime("attacker", 0, 0);
   const ally = fakeRuntime("ally", 0, 20);
@@ -940,6 +1148,204 @@ function assertSameTeamDamageDivisor(borgs: BorgStats[]): void {
     throw new Error(`[selfcheck] same-team routed damage failed: ally=${allyDamage}, enemy=${enemyDamage}`);
   }
   console.log(`[selfcheck] same-team hit divisor reduced raw damage: ally=${allyDamage}, enemy=${enemyDamage}`);
+}
+
+// ---------------------------------------------------------------------------------------
+// ATK-014: friendly-fire regression tests. ROM: same team && !(flagsA & 0x1000) -> x0.25
+// (FLOAT_80437024); (flagsA & 0x1000) && victim+0x59c & 0x1000 -> /40; floor at 1
+// (zz_003cd5c_ step 18, behavior-notes.md (ah)/(o), chunk_0004.c:6811-6821). Port:
+// damageFormula.ts:133-138; teammates hittable via canReceiveHit (combat.ts:118-120) in
+// melee (:655) and special (:560) loops; projectiles hit any non-owner (:903).
+// ---------------------------------------------------------------------------------------
+function assertFriendlyFireFormulaExactly0p25x(borgs: BorgStats[]): void {
+  // 1) Formula-level: identical hit context, enemy vs teammate victim -> teammate damage is
+  //    exactly 0.25x (subject to the floor(1) and int truncation — computed THROUGH
+  //    computeSourceDamage itself with only the victim's team swapped).
+  //
+  // defenderSideRank is pinned explicitly: computeSourceDamage's default side-rank picks
+  // Challenge-NORMAL byte 0 for team 0 vs byte 1 for team 1 (defaultChallengeNormalSideRank,
+  // damageFormula.ts), which would otherwise vary the defenseRankCurves multiplier between the
+  // enemy (team 1) and teammate (team 0) calls below — a confound unrelated to the same-team
+  // 0.25x reducer under test here. attackerSideRank is pinned for the same reason.
+  const attackerProfile = buildProfile(borgById(borgs, "pl0615"));
+  const victimProfile = buildProfile(borgById(borgs, "pl0008"));
+  const attacker = fakeRuntime("ff_attacker", 0, 0);
+  attacker.borgId = attackerProfile.id;
+  const record = damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
+  const pinnedSideRank = 16;
+
+  const makeVictim = (team: number): BorgRuntime => {
+    const v = fakeRuntime("ff_victim", team, 100);
+    v.borgId = victimProfile.id;
+    v.maxHp = v.hp = 10_000_000; // stabilize the defender hp-ratio curve index
+    return v;
+  };
+
+  const enemyVictim = makeVictim(1);
+  const teammateVictim = makeVictim(0); // same team as attacker (team 0)
+  const enemyDamage = computeSourceDamage({
+    attacker,
+    attackerProfile,
+    victim: enemyVictim,
+    victimProfile,
+    record,
+    attackerSideRank: pinnedSideRank,
+    defenderSideRank: pinnedSideRank,
+  });
+  const teammateDamage = computeSourceDamage({
+    attacker,
+    attackerProfile,
+    victim: teammateVictim,
+    victimProfile,
+    record,
+    attackerSideRank: pinnedSideRank,
+    defenderSideRank: pinnedSideRank,
+  });
+  const expectedTeammateDamage = Math.max(1, Math.trunc(enemyDamage * 0.25));
+  if (teammateDamage !== expectedTeammateDamage) {
+    throw new Error(
+      `[selfcheck] friendly fire: expected exactly 0.25x (floor 1) of enemy damage: enemy=${enemyDamage}, teammate=${teammateDamage}, expected=${expectedTeammateDamage}`,
+    );
+  }
+
+  // 2) Synthetic record with flagsA = 0x1000: teammate damage NOT reduced (exemption channel).
+  const exemptRecord: DamageRecord = { ...record, flagsA: record.flagsA | 0x1000 };
+  const exemptTeammateVictim = makeVictim(0);
+  const exemptTeammateDamage = computeSourceDamage({
+    attacker,
+    attackerProfile,
+    victim: exemptTeammateVictim,
+    victimProfile,
+    record: exemptRecord,
+    attackerSideRank: pinnedSideRank,
+    defenderSideRank: pinnedSideRank,
+  });
+  if (exemptTeammateDamage !== enemyDamage) {
+    throw new Error(
+      `[selfcheck] friendly fire: flagsA 0x1000 should exempt same-team hits from the 0.25x reducer: enemy=${enemyDamage}, exemptTeammate=${exemptTeammateDamage}`,
+    );
+  }
+
+  // 5) blockDivisorActive + flagsA 0x1000 -> damage divided by 40 (formula-level; no sim
+  //    caller yet — assert the formula path works so future guard wiring has coverage).
+  const blockDivVictim = makeVictim(0);
+  const blockDivDamage = computeSourceDamage({
+    attacker,
+    attackerProfile,
+    victim: blockDivVictim,
+    victimProfile,
+    record: exemptRecord,
+    blockDivisorActive: true,
+    attackerSideRank: pinnedSideRank,
+    defenderSideRank: pinnedSideRank,
+  });
+  const expectedBlockDivDamage = Math.max(1, Math.trunc(enemyDamage / 40));
+  if (blockDivDamage !== expectedBlockDivDamage) {
+    throw new Error(
+      `[selfcheck] friendly fire: blockDivisorActive + flagsA 0x1000 should divide by 40: got=${blockDivDamage}, expected=${expectedBlockDivDamage}`,
+    );
+  }
+
+  console.log(
+    `[selfcheck] friendly fire formula pinned: enemy=${enemyDamage}, teammate=${teammateDamage} (0.25x), ` +
+      `flagsA-exempt teammate=${exemptTeammateDamage}, blockDiv/40=${blockDivDamage}`,
+  );
+}
+
+function assertFriendlyFireMeleeSimLevel(borgs: BorgStats[]): void {
+  // 3) Sim-level: two same-team borgs, one melee swing connecting -> teammate takes damage > 0
+  //    (teammates are hittable via canReceiveHit) and less than the enemy-case damage.
+  const profile = buildProfile(borgById(borgs, "pl0200")); // Sword Knight (melee-primary)
+  const enemyProfile = buildProfile(borgById(borgs, "pl0008"));
+
+  const runMelee = (victimTeam: number): number => {
+    const attacker = fakeRuntime("ff_melee_attacker", 0, 0);
+    attacker.borgId = profile.id;
+    const victim = fakeRuntime("ff_melee_victim", victimTeam, 20);
+    victim.hp = victim.maxHp = 5000;
+    const profiles = new Map([
+      [attacker.uid, profile],
+      [victim.uid, victimTeam === 0 ? profile : enemyProfile],
+    ]);
+    pumpAttackFrame(attacker, profile, true, [attacker, victim], profiles);
+    const meleeDef = actionProfileForProfile(profile).melee;
+    if (!meleeDef) throw new Error("[selfcheck] friendly fire melee sim test needs a melee profile");
+    for (let f = 0; f < meleeDef.startup + meleeDef.active + 2; f += 1) {
+      pumpAttackFrame(attacker, profile, false, [attacker, victim], profiles);
+    }
+    return victim.maxHp - victim.hp;
+  };
+
+  const teammateDamage = runMelee(0);
+  const enemyDamage = runMelee(1);
+  if (!(teammateDamage > 0 && teammateDamage < enemyDamage)) {
+    throw new Error(
+      `[selfcheck] friendly fire: melee swing should damage a teammate but less than an enemy: teammate=${teammateDamage}, enemy=${enemyDamage}`,
+    );
+  }
+  console.log(
+    `[selfcheck] friendly fire melee sim: teammate hittable and reduced (teammate=${teammateDamage} < enemy=${enemyDamage})`,
+  );
+}
+
+function assertFriendlyFireProjectileSimLevel(borgs: BorgStats[]): void {
+  // 4) Projectile same-team: teammate hit consumes the projectile and applies reduced damage.
+  const shooterProfile = buildProfile(borgById(borgs, "pl0102")); // Gatling Gunner
+  const enemyProfile = buildProfile(borgById(borgs, "pl0008"));
+
+  const shooter = fakeRuntime("ff_proj_shooter", 0, 0);
+  shooter.borgId = shooterProfile.id;
+  const teammateVictim = fakeRuntime("ff_proj_teammate", 0, 40);
+  teammateVictim.hp = teammateVictim.maxHp = 5000;
+  const enemyVictim = fakeRuntime("ff_proj_enemy", 1, 40);
+  enemyVictim.hp = enemyVictim.maxHp = 5000;
+  const profiles = new Map([
+    [shooter.uid, shooterProfile],
+    [teammateVictim.uid, shooterProfile],
+    [enemyVictim.uid, enemyProfile],
+  ]);
+  const byUid = new Map([
+    [shooter.uid, shooter],
+    [teammateVictim.uid, teammateVictim],
+    [enemyVictim.uid, enemyVictim],
+  ]);
+
+  const projTeammate = fakeProjectile("ff_proj_1", { x: 40, y: 0, z: 0 }, { x: 0, y: 0, z: 0 });
+  projTeammate.ownerUid = shooter.uid;
+  projTeammate.team = shooter.team;
+  projTeammate.damage = 20;
+  projTeammate.hitRadius = 50;
+
+  const survivorsAfterTeammateHit = stepProjectiles(
+    [projTeammate],
+    [shooter, teammateVictim],
+    profiles,
+    byUid,
+  );
+  const teammateDamage = teammateVictim.maxHp - teammateVictim.hp;
+  if (survivorsAfterTeammateHit.length !== 0) {
+    throw new Error("[selfcheck] friendly fire: same-team projectile hit should be consumed, not survive");
+  }
+  if (teammateDamage <= 0) {
+    throw new Error("[selfcheck] friendly fire: same-team projectile hit dealt no damage");
+  }
+
+  const projEnemy = fakeProjectile("ff_proj_2", { x: 40, y: 0, z: 0 }, { x: 0, y: 0, z: 0 });
+  projEnemy.ownerUid = shooter.uid;
+  projEnemy.team = shooter.team;
+  projEnemy.damage = 20;
+  projEnemy.hitRadius = 50;
+  stepProjectiles([projEnemy], [shooter, enemyVictim], profiles, byUid);
+  const enemyDamage = enemyVictim.maxHp - enemyVictim.hp;
+
+  if (!(teammateDamage < enemyDamage)) {
+    throw new Error(
+      `[selfcheck] friendly fire: projectile teammate damage should be reduced vs enemy damage: teammate=${teammateDamage}, enemy=${enemyDamage}`,
+    );
+  }
+  console.log(
+    `[selfcheck] friendly fire projectile sim: teammate hit consumed the projectile and applied reduced damage (teammate=${teammateDamage} < enemy=${enemyDamage})`,
+  );
 }
 
 function assertTypeDamageMatrixWired(borgs: BorgStats[]): void {
@@ -1314,6 +1720,112 @@ function assertGaugeStaggerModel(borgs: BorgStats[]): void {
   );
 }
 
+// ---------------------------------------------------------------------------------------
+// ATK-013: resistance/falloff pin-down tests. The wiki's "hidden per-target damage
+// resistance" is NOT a separate mechanic — it IS the already-ported combo-rank falloff
+// (comboRankScale_802c7ca0, damageFormula.ts). See the guard comment above the falloff line
+// in damageFormula.ts and research/tasks/attack-port/ATK-013-resistance-falloff-audit-note.md.
+// ---------------------------------------------------------------------------------------
+function assertResistanceFalloffPinned(borgs: BorgStats[]): void {
+  const comboRankScale: number[] = (damageFormulaData as { comboRankScale_802c7ca0: number[] })
+    .comboRankScale_802c7ca0;
+  const attackerProfile = buildProfile(borgById(borgs, "pl0615"));
+  const victimProfile = buildProfile(borgById(borgs, "pl0008"));
+  const attacker = fakeRuntime("falloff_attacker", 0, 0);
+  attacker.borgId = attackerProfile.id;
+  // Large hpDamage minimizes Math.trunc() rounding noise so the outputs' ratios closely
+  // track the extracted table ratios (computeSourceDamage truncates once, at the very end).
+  const bigRecord: DamageRecord = { ...damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE), hpDamage: 1_000_000 };
+
+  // 1) Same victim hit repeatedly fast enough to roll the accumulator: damage at comboRank
+  //    0,1,2,3 must track the extracted falloff table's ratios (via computeSourceDamage).
+  const dmgAtRank = (rank: number): number => {
+    const victim = fakeRuntime("falloff_victim", 1, 100);
+    victim.borgId = victimProfile.id;
+    victim.maxHp = victim.hp = 10_000_000; // keep hp-ratio curve index stable across ranks
+    victim.comboRank = rank;
+    return computeSourceDamage({
+      attacker,
+      attackerProfile,
+      victim,
+      victimProfile,
+      record: bigRecord,
+    });
+  };
+  const d0 = dmgAtRank(0);
+  const d1 = dmgAtRank(1);
+  const d2 = dmgAtRank(2);
+  const d3 = dmgAtRank(3);
+  if (d0 <= 0) throw new Error("[selfcheck] resistance falloff: baseline comboRank 0 damage was <=0");
+  for (const [rank, dmg] of [
+    [0, d0],
+    [1, d1],
+    [2, d2],
+    [3, d3],
+  ] as const) {
+    const expectedRatio = comboRankScale[rank] ?? 1;
+    const actualRatio = dmg / d0;
+    if (Math.abs(actualRatio - expectedRatio) > 1e-3) {
+      throw new Error(
+        `[selfcheck] resistance falloff: comboRank ${rank} ratio ${actualRatio} did not match extracted table ratio ${expectedRatio} (d0=${d0}, dmg=${dmg})`,
+      );
+    }
+  }
+
+  // 2) flagsB & 0x4000 record: falloff skipped (damage independent of comboRank).
+  const exemptRecord: DamageRecord = { ...bigRecord, flagsB: bigRecord.flagsB | 0x4000 };
+  const exemptAtRank = (rank: number): number => {
+    const victim = fakeRuntime("falloff_exempt_victim", 1, 100);
+    victim.borgId = victimProfile.id;
+    victim.maxHp = victim.hp = 10_000_000;
+    victim.comboRank = rank;
+    return computeSourceDamage({
+      attacker,
+      attackerProfile,
+      victim,
+      victimProfile,
+      record: exemptRecord,
+    });
+  };
+  const e0 = exemptAtRank(0);
+  const e3 = exemptAtRank(3);
+  if (e0 <= 0 || e0 !== e3) {
+    throw new Error(`[selfcheck] resistance falloff: flagsB 0x4000 record should skip falloff, e0=${e0} e3=${e3}`);
+  }
+
+  // 3) 60 frames without a hit (stepGaugeWindows) -> comboAccum/comboRank reset -> damage
+  //    back to full (i.e. matches the comboRank-0 case again through computeSourceDamage).
+  const recovering = fakeRuntime("falloff_recover", 1, 100);
+  recovering.borgId = victimProfile.id;
+  recovering.maxHp = recovering.hp = 10_000_000;
+  recovering.comboAccum = 42;
+  recovering.comboRank = 3;
+  recovering.comboWindow = STAGGER.COMBO_WINDOW;
+  for (let f = 0; f < STAGGER.COMBO_WINDOW; f += 1) stepGaugeWindows(recovering);
+  if (recovering.comboAccum !== 0 || recovering.comboRank !== 0) {
+    throw new Error(
+      `[selfcheck] resistance falloff: 60f window did not reset combo accumulator/rank: accum=${recovering.comboAccum}, rank=${recovering.comboRank}`,
+    );
+  }
+  const dmgAfterReset = computeSourceDamage({
+    attacker,
+    attackerProfile,
+    victim: recovering,
+    victimProfile,
+    record: bigRecord,
+  });
+  if (Math.abs(dmgAfterReset / d0 - 1) > 1e-3) {
+    throw new Error(
+      `[selfcheck] resistance falloff: damage after 60f reset should match comboRank-0 baseline: dmgAfterReset=${dmgAfterReset}, d0=${d0}`,
+    );
+  }
+
+  console.log(
+    `[selfcheck] resistance falloff pinned: ranks 0-3 track extracted table ratios ` +
+      `(${comboRankScale.slice(0, 4).join(", ")}); flagsB 0x4000 skips falloff; 60f window resets to full damage`,
+  );
+}
+
 function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
   return {
     uid,
@@ -1344,8 +1856,16 @@ function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
     comboAccum: 0,
     comboRank: 0,
     paramTier: resetActorParamTier(),
+      statusId: 0,
+      statusTimer: 0,
+      statusImmunityMask: 0,
       lockTarget: null,
       allyLockTarget: null,
+      burstArmFrames: 0,
+      burstActive: false,
+      burstPaired: false,
+      fusionPartnerUid: null,
+      fusionState: 0,
       defeatAccounted: false,
       alive: true,
     };
@@ -1393,7 +1913,16 @@ export function main(): number {
   assertChargeShotTiers(borgs);
   assertSwordBeamFinisher(borgs);
   assertActionProfileFallbackDefaults(borgs);
+  assertResolverPrimaryMeleeHybridStartsMelee(borgs);
+  assertResolverPrimaryShotHybridFiresShotFirst(borgs);
+  assertResolverMeleeOnlyNeverAttemptsShot(borgs);
+  assertResolverShotOnlyNeverAttemptsMelee(borgs);
+  assertResolverChargeTierSelectsDamageRecord(borgs);
+  assertResolverSpecialHitsOnceAndSetsCooldown(borgs);
   assertSameTeamDamageDivisor(borgs);
+  assertFriendlyFireFormulaExactly0p25x(borgs);
+  assertFriendlyFireMeleeSimLevel(borgs);
+  assertFriendlyFireProjectileSimLevel(borgs);
   assertTypeDamageMatrixWired(borgs);
   assertMeleeRefreshesInvincibility(borgs);
   assertAiKeepsLockedTarget(borgs);
@@ -1402,6 +1931,7 @@ export function main(): number {
   assertDeathAccountingAtKillEvent(borgs);
   assertActorParamTierMatchesCClamp();
   assertGaugeStaggerModel(borgs);
+  assertResistanceFalloffPinned(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

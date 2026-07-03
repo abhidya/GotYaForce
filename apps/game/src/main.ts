@@ -58,9 +58,11 @@ import {
   createResults,
   createPauseMenu,
   createBattleHud,
+  createDebugOverlay,
   type MainMenuMode,
   type ForceSlot,
   type BattleHudHandle,
+  type DebugOverlayHandle,
 } from "./ui/index.js";
 
 import {
@@ -263,6 +265,12 @@ ui.style.pointerEvents = "auto"; // the UI component library uses real buttons.
 const urlParams = new URLSearchParams(window.location.search);
 const ENABLE_BATTLE_DEBUG_DATASET = urlParams.has("debugBattle");
 const ENABLE_RENDER_DEBUG = urlParams.has("debugRender") || urlParams.has("capture");
+
+// ATK-015: minimal read-only debug overlay (sim state readout for the focused borg). Mounted
+// once at startup, hidden by default; toggled with the backtick key or ?debugOverlay=1. See
+// apps/game/src/ui/hud/DebugOverlay.ts and research/tasks/attack-port/ATK-015-debug-overlay-fields.md.
+const debugOverlay: DebugOverlayHandle = createDebugOverlay(ui);
+if (urlParams.has("debugOverlay")) debugOverlay.setVisible(true);
 
 const viewport = createThreeViewport(canvas, {
   debugCapture: ENABLE_RENDER_DEBUG,
@@ -830,6 +838,8 @@ window.addEventListener("keydown", (e) => {
   void playPendingBgm();
   // Tab would move focus; capture it for switch-lock during battle.
   if (e.code === "Tab" && flow.screen === "battle") e.preventDefault();
+  // Backquote toggles the ATK-015 debug overlay (sim-state readout for the focused borg).
+  if (e.code === "Backquote") debugOverlay.setVisible(!debugOverlay.visible);
   keys.add(e.code);
 });
 window.addEventListener("keyup", (e) => keys.delete(e.code));
@@ -1349,6 +1359,9 @@ function tick(): void {
     if (flow.screen === "battle") followCamera();
   }
   updateBattleDebugDataset();
+  if (debugOverlay.visible) {
+    debugOverlay.update(flow.screen === "battle" ? localFocusBorg() : null);
+  }
   controls.update();
   viewport.render();
 }

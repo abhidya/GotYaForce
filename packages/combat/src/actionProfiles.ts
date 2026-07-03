@@ -1,6 +1,7 @@
-import { MELEE, SHOT, SPECIAL } from "./constants.js";
+import { AMMO, MELEE, SHOT, SPECIAL } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
-import type { ProjectileVisualKind } from "./types.js";
+import type { ProjectileVisualKind, WeaponRefillType } from "./types.js";
+import { sourceStatsForBorgId } from "./sourceBorgStats.js";
 import actionProfileData from "./data/actionProfiles.json" with { type: "json" };
 
 export type PrimaryAttackKind = "melee" | "shot";
@@ -60,6 +61,15 @@ export interface ShotActionDef {
   chargeTier2DamageMult: number;
   /** Ballistic drop applied to the projectile's Y velocity each frame (0 = none). TUNED. */
   bulletDrop: number;
+  /** Weapon-0 refill type (ATK-009, WeaponRefillType). DERIVED per-borg where the extracted
+   *  stat row has data (research/decomp/data/borg-hp-stat-rows-802f2988.json via
+   *  sourceBorgStats.json weaponSlots[0].chargeType); TUNED_EXISTING fallback (all-at-once)
+   *  for borgs missing a row. */
+  refillType: WeaponRefillType;
+  /** Weapon-0 refill param (aux +0x792 feed; ROM-units timer seed). DERIVED per-borg where
+   *  available (weaponSlots[0].chargeCount); falls back to a value that reproduces
+   *  SHOT.RELOAD_FRAMES via AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES. */
+  refillParam: number;
 }
 
 export interface SpecialActionDef {
@@ -125,6 +135,9 @@ const DEFAULT_SHOT: ShotActionDef = {
   chargeTier1DamageMult: 1.6,
   chargeTier2DamageMult: 2.4,
   bulletDrop: 0,
+  // TUNED_EXISTING fallback: all-at-once at the pre-ATK-009 reload feel (see AMMO constants).
+  refillType: 0,
+  refillParam: AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES,
 };
 
 const DEFAULT_SPECIAL: SpecialActionDef = {
@@ -156,7 +169,9 @@ export function actionProfileForProfile(profile: BorgProfile): BorgActionProfile
 function resolveActionProfile(profile: BorgProfile): BorgActionProfile {
   const raw = RAW_PROFILES[profile.id];
   const melee = profile.hasMelee ? { ...DEFAULT_MELEE, ...(raw?.melee ?? {}) } : null;
-  const shot = profile.hasShot ? { ...DEFAULT_SHOT, ...(raw?.shot ?? {}) } : null;
+  const shot = profile.hasShot
+    ? { ...DEFAULT_SHOT, ...(raw?.shot ?? {}), ...weaponZeroRowOverrides(profile.id) }
+    : null;
 
   let primary = raw?.primary ?? chooseFallbackPrimary(profile);
   if (primary === "melee" && melee === null && shot !== null) primary = "shot";
@@ -168,6 +183,63 @@ function resolveActionProfile(profile: BorgProfile): BorgActionProfile {
     melee,
     shot,
     special: { ...DEFAULT_SPECIAL, ...(raw?.special ?? {}) },
+  };
+}
+
+/**
+ * Weapon-0 ammoMax/refillType/refillParam sourced from the ROM's per-borg stat row (ATK-009,
+ * findings.md mechanic P; row source `research/decomp/data/borg-hp-stat-rows-802f2988.json`,
+ * resolved per-borg-id via `sourceBorgStats.json`'s already-verified extraction).
+ *
+ * Row layout CONFIRMED by re-reading the init code (chunk_0007.c:60-94) against an
+ * independent player-guide cross-check (behavior-notes.md section (am), 4 exact anchors:
+ * G RED/pl0615, FLAME DRAGON/pl0500, CYBER DEATH DRAGON/pl0503, DEATH HEAD/pl0505):
+ *   row = [hp, w0cur, w0max, w0refillType, w0refillParam, w1cur, w1max, w1refillType, w1refillParam]
+ * `sourceBorgStats.json`'s `weaponSlots[N].ammoType`/`ammoCount` are that weapon's
+ * row cur/max u16s (always equal at spawn — a fresh cell starts full); `chargeType`/
+ * `chargeCount` are that weapon's row refillType/refillParam u16s. Live-verified anchor:
+ * G RED (pl0615) -> weapon-0 ammoCount 5, matching the captured HUD value (behavior-notes.md
+ * ag). refillParam's frames interpretation (180/300 ~= 3s/5s) is strong-but-unverified per
+ * (am) — AMMO.REFILL_RATE_PER_FRAME / AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES remain the
+ * labeled-TUNED conversion knobs for borgs without a usable row value.
+ *
+ * Only overrides fields the row actually has data for (ammoMax > 0); borgs missing a row, or
+ * with a 0 weapon-0 ammo feed (melee-only borgs — DEFAULT_SHOT/raw profile still apply for
+ * borgs that HAVE a shot action per profile.hasShot), keep the actionProfiles.json/DEFAULT_SHOT
+ * fallback untouched (labeled TUNED_EXISTING there).
+ */
+function weaponZeroRowOverrides(borgId: string): Partial<ShotActionDef> {
+  const weapon0 = sourceStatsForBorgId(borgId)?.weaponSlots[0];
+  if (!weapon0 || weapon0.ammoCount <= 0) return {};
+  return {
+    ammoMax: weapon0.ammoCount,
+    refillType: weapon0.chargeType,
+    refillParam: weapon0.chargeCount > 0 ? weapon0.chargeCount : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES,
+  };
+}
+
+/**
+ * Weapon-1 cell source (ATK-009 follow-up per behavior-notes.md (am)): same row/field
+ * semantics as weapon 0 (see weaponZeroRowOverrides), just `weaponSlots[1]`. Weapon 1 is
+ * structurally modeled (combat.ts weapon-cell array index 1) but STILL UNUSED gameplay-wise
+ * — no per-weapon command resolver dispatches to it yet (ATK-009 "Required behavior") — this
+ * only sources its DATA so the cell is ROM-accurate once something does wire it up. Returns
+ * null when the borg has no row or a 0 weapon-1 ammo feed (melee-only weapon-1, or borgs
+ * without an extracted row).
+ */
+export interface WeaponOneCellSource {
+  max: number;
+  refillType: number;
+  refillParam: number;
+}
+
+export function weaponOneCellSourceForBorgId(borgId: string): WeaponOneCellSource | null {
+  const weapon1 = sourceStatsForBorgId(borgId)?.weaponSlots[1];
+  if (!weapon1 || weapon1.ammoCount <= 0) return null;
+  return {
+    max: weapon1.ammoCount,
+    refillType: weapon1.chargeType,
+    refillParam: weapon1.chargeCount > 0 ? weapon1.chargeCount : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES,
   };
 }
 

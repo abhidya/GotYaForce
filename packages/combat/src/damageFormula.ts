@@ -48,7 +48,15 @@ export interface SourceDamageContext {
   /** Source side-rank bytes. Defaults to Challenge NORMAL: side 0 = 0, side 1 = 31. */
   attackerSideRank?: number | undefined;
   defenderSideRank?: number | undefined;
-  /** Source level/power floats default to 1.0 until actor level init sites are ported. */
+  /**
+   * Source level/power floats default to 1.0 until actor level init sites are ported.
+   * ATK-020: the borg LEVEL byte itself (actor+0x3ec) IS plumbed now (BorgProfile.level,
+   * stats.ts/sourceBorgStats.ts row selection) and does drive HP/ammo row selection — but the
+   * damage-formula floats read here (ctx+0xc4 attacker / +0xb4 victim, behavior-notes.md ah
+   * steps 2/13) are a SEPARATE, still-unfound init site (behavior-notes.md ak: "STILL NOT
+   * FOUND as writes"). Do NOT feed BorgProfile.level into attackerPower/defenderPower —
+   * these params stay defaulted to 1.0 until that init rule is found.
+   */
   attackerPower?: number | undefined;
   defenderPower?: number | undefined;
   /** Pair-attack flags are not modeled yet; defaults preserve normal battle damage. */
@@ -62,6 +70,11 @@ export interface SourceDamageContext {
   defenderForceRatioIndex?: number | undefined;
   /** Reflect/block divisor gate; no caller wires this until guard state is ported. */
   blockDivisorActive?: boolean | undefined;
+  /** ATK-010: formula step 1 — the victim's per-status immunity bit for the incoming hit's
+   *  status also zeroes HP damage for that hit (chunk_0004.c:6693-6699). No caller wires this
+   *  yet (status.ts's immunity gate isn't fed a real per-hit status id); default/absent = no
+   *  change to existing damage output. */
+  victimStatusImmune?: boolean | undefined;
 }
 
 export const damageFormulaSummary = {
@@ -78,6 +91,10 @@ export function challengeSideRanksForMode(mode: ChallengeDamageMode = 0): readon
 }
 
 export function computeSourceDamage(ctx: SourceDamageContext): number {
+  // ATK-010 formula step 1 (chunk_0004.c:6693-6699): the victim's per-status immunity bit for
+  // the incoming hit's status zeroes HP damage for that hit. No caller sets this yet (default/
+  // absent = false) — existing damage output is unchanged.
+  if (ctx.victimStatusImmune) return 0;
   const recordBase = ctx.record.hpDamage * (ctx.damageScale ?? 1);
   if (recordBase <= 0) return 0;
 
@@ -127,6 +144,13 @@ export function computeSourceDamage(ctx: SourceDamageContext): number {
     ctx.defenderForceRatioIndex ?? 0,
   );
   dmg *= flatValue(DATA.defenseHandicap_80433618, hero, handicapIndex(ctx.defenderHandicapIndex));
+  // ATK-013: the wiki's "hidden per-target damage resistance" is NOT a separate mechanic —
+  // it IS this already-ported combo-rank falloff. ROM: dmg *= DAT_802c7ca0[victim+0x6ca]
+  // (comboRankScale_802c7ca0 above) unless record flagsB & 0x4000 (zz_003cd5c_ step 16,
+  // behavior-notes.md (ah), chunk_0004.c:6804-6806); accumulator/rank chunk_0003.c:8021-8030;
+  // 60-frame window reset chunk_0006.c:8009-8010. See research/tasks/attack-port/
+  // ATK-013-resistance-falloff-audit-note.md. Do NOT add a second resistance/falloff layer —
+  // that would double-apply the same ROM mechanic.
   if ((ctx.record.flagsB & 0x4000) === 0) {
     dmg *= DATA.comboRankScale_802c7ca0[clampIndex(ctx.victim.comboRank, DATA.comboRankScale_802c7ca0.length)] ?? 1;
   }

@@ -17,9 +17,13 @@ import {
   type Vec3,
 } from "@gf/physics";
 import {
+  AMMO,
   CHARGE,
   COMBO,
+  CONTACT_DAMAGE,
   DAMAGE,
+  HEAL,
+  MASH,
   MELEE,
   LOCK,
   SHOT,
@@ -36,18 +40,21 @@ import {
 } from "./gauges.js";
 import {
   actionProfileForProfile,
+  weaponOneCellSourceForBorgId,
   type MeleeActionDef,
   type ShotActionDef,
   type SwordBeamDef,
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
 import { computeSourceDamage } from "./damageFormula.js";
+import { applyStatusFromRecord } from "./status.js";
 import type {
   BorgRuntime,
   Projectile,
   ProjectileVisualKind,
   RectStageBounds,
   StageCollision,
+  WeaponCell,
 } from "./types.js";
 import projectileVisualFamilies from "./data/projectileVisualFamilies.json" with { type: "json" };
 
@@ -76,21 +83,162 @@ export function isInvincible(b: BorgRuntime): boolean {
 export function stepCooldowns(b: BorgRuntime): void {
   for (const k of Object.keys(b.cooldowns)) {
     const v = b.cooldowns[k] ?? 0;
-    // jumpHeld / switchLockHeld / allyLockHeld / attackHeld are 0/1 press latches,
-    // boostFuel is a fuel gauge, chargeFrames is a hold-B charge accumulator, and
-    // comboStep is the current melee-chain index — none are countdown timers; skip them here.
+    // jumpHeld / switchLockHeld / allyLockHeld / hyperHeld / attackHeld are 0/1 press latches,
+    // boostFuel is a fuel gauge, chargeFrames is a hold-B charge accumulator, comboStep is the
+    // current melee-chain index, and mashCount (ATK-017) is a press-edge COUNTER (not a
+    // countdown timer) that combat.ts's mash-counting code owns entirely (increments on press
+    // edges during an active swing, resets on swing start) — none of these decay 1/frame like
+    // the countdown timers this loop drives, so all are skipped here.
     if (
       k === "jumpHeld" ||
       k === "boostFuel" ||
       k === "switchLockHeld" ||
       k === "allyLockHeld" ||
+      k === "hyperHeld" ||
       k === "attackHeld" ||
       k === "chargeFrames" ||
-      k === "comboStep"
+      k === "comboStep" ||
+      k === "mashCount"
     )
       continue;
     if (v > 0) b.cooldowns[k] = v - 1;
   }
+}
+
+// ---------------------------------------------------------------------------------------
+// Ammo / weapon cells (ATK-009, findings.md mechanic P; row source
+// research/decomp/data/borg-hp-stat-rows-802f2988.json, live-verified G RED/pl0615 -> ammo 5).
+//
+// ROM shape: 3 weapon cells (struct+0x774/+0x77c/+0x784, stride 8; aux max/refillType/
+// refillParam at struct+0x78c stride 8). Weapon 0 drives the existing shot path (B) and
+// mirrors BorgRuntime.ammo for compat; cells 1/2 exist structurally but nothing reads them
+// yet (no per-weapon command resolver in the port).
+//
+// Refill semantics (zz_006dcc0_, chunk_0009.c:2909-2973):
+//   - max === 0 -> infinite: the fire gate is skipped entirely (chunk_0002.c:7158-7165), cur
+//     is never decremented below 0.
+//   - refillType 1 (gradual): a per-frame TUNED rate (AMMO.REFILL_RATE_PER_FRAME — the ROM's
+//     real rate float at actor+0x768 has an unresolved init site and a conflicting second
+//     reader, open-questions Q7) grants ammo fractionally toward max every frame; firing is
+//     allowed again as soon as cur >= 1 (not gated behind a full-magazine wait).
+//   - refillType <= 0 (all-at-once) or 2/3 (special, unread — treated as all-at-once): cur
+//     stays 0 for the full refillParam-seeded timer, then jumps straight to max.
+// ---------------------------------------------------------------------------------------
+
+/** Build fresh weapon cells from the borg's action-profile shot def (weapon 0: ammoMax/
+ *  refillType/refillParam — DERIVED per-borg where the stat row has data, TUNED_EXISTING
+ *  fallback otherwise; see actionProfiles.ts weaponZeroRowOverrides) and the stat-row's
+ *  weapon-1 slot (DERIVED where available via weaponOneCellSourceForBorgId — behavior-notes.md
+ *  section (am) cross-check; see that function's doc for the row-layout citation). Weapon 1
+ *  is data-sourced but STILL STRUCTURALLY UNUSED (no per-weapon command resolver dispatches to
+ *  it yet — ATK-009 "Required behavior"); weapon 2 has no stat-row data at all (the ROM's
+ *  per-borg row only carries 2 weapon segments) and stays fully inert (max 0 = infinite/
+ *  unused). */
+function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
+  const shotDef = actionProfileForProfile(p).shot;
+  const max = shotDef?.ammoMax ?? 0;
+  const refillType = shotDef?.refillType ?? 0;
+  const refillParam = shotDef?.refillParam ?? AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES;
+  const weapon0: WeaponCell = {
+    cur: b.ammo,
+    max,
+    refillType,
+    refillParam,
+    timer: refillType === 1 ? 0 : refillParam,
+  };
+  const weapon1Source = weaponOneCellSourceForBorgId(p.id);
+  const weapon1: WeaponCell = weapon1Source
+    ? {
+        cur: weapon1Source.max, // weapon 1 is never fired by the port yet; start full like spawn init does.
+        max: weapon1Source.max,
+        refillType: weapon1Source.refillType,
+        refillParam: weapon1Source.refillParam,
+        timer: weapon1Source.refillType === 1 ? 0 : weapon1Source.refillParam,
+      }
+    : { cur: 0, max: 0, refillType: 0, refillParam: 0, timer: 0 };
+  const weapon2: WeaponCell = { cur: 0, max: 0, refillType: 0, refillParam: 0, timer: 0 };
+  return [weapon0, weapon1, weapon2];
+}
+
+/** Ensure `b.weaponCells` exists (lazy self-heal for constructors/fakes that only set `ammo`
+ *  — same convention as `meleeHitUids`), and keep weapon-0's `cur` mirrored with `b.ammo` so
+ *  external readers of the compat alias always see a live, consistent value. Infinite cells
+ *  (max <= 0, chunk_0002.c:7158-7165) mirror `b.ammo` as `Infinity` so the pre-existing
+ *  `b.ammo > 0` fire-gate downstream in stepAttacks (outside this ticket's edit zone) never
+ *  blocks firing and never decrements below 0 — the cell's own `cur` stays a harmless 0 since
+ *  an infinite cell has no real magazine to track. */
+function ensureWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
+  if (!b.weaponCells) {
+    b.weaponCells = initWeaponCells(b, p);
+  }
+  syncAmmoAlias(b, b.weaponCells[0]);
+  return b.weaponCells;
+}
+
+function syncAmmoAlias(b: BorgRuntime, weapon0: WeaponCell | undefined): void {
+  if (!weapon0) return;
+  if (weapon0.max <= 0) {
+    b.ammo = Number.POSITIVE_INFINITY;
+    return;
+  }
+  if (weapon0.cur !== b.ammo) weapon0.cur = b.ammo;
+}
+
+/**
+ * Per-frame ammo refill (ATK-009). Advances every weapon cell's refill timer/grant and keeps
+ * `b.ammo` mirrored to weapon-0's `cur` (or `Infinity` for an infinite weapon-0). Call once
+ * per frame per borg (battle.ts, adjacent to stepCooldowns).
+ */
+export function stepAmmoRefill(b: BorgRuntime, p: BorgProfile): void {
+  const cells = ensureWeaponCells(b, p);
+  for (const cell of cells) {
+    stepWeaponCellRefill(cell);
+  }
+  const weapon0 = cells[0];
+  if (weapon0 && weapon0.max > 0) b.ammo = weapon0.cur;
+}
+
+function stepWeaponCellRefill(cell: WeaponCell): void {
+  if (cell.max <= 0) return; // infinite ammo: no cell state to advance.
+  if (cell.cur >= cell.max) return;
+
+  if (cell.refillType === 1) {
+    // Gradual: fractional grant toward max every frame (chunk_0009.c:2909-2973 sVar4===1).
+    cell.cur = Math.min(cell.max, cell.cur + AMMO.REFILL_RATE_PER_FRAME);
+    return;
+  }
+
+  // All-at-once (refillType <= 0) or special (2/3, unread — treated as all-at-once): cur
+  // stays put until the timer counts down 1 frame/frame, then jumps straight to max.
+  // refillParam is modeled as a direct frame count — behavior-notes.md section (am)'s
+  // player-guide cross-check found 180/300 lining up with round 3s/5s at 60fps
+  // (strong-but-unverified, not a decoded conversion formula; see
+  // AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES for the fallback derivation).
+  if (cell.timer > 0) {
+    cell.timer -= 1;
+    if (cell.timer <= 0) {
+      cell.timer = 0;
+      cell.cur = cell.max;
+    }
+  } else if (cell.cur <= 0) {
+    // Timer already elapsed (e.g. freshly emptied this frame) — arm a new one.
+    cell.timer = cell.refillParam > 0 ? cell.refillParam : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES;
+  }
+}
+
+/**
+ * Deploy-return one-shot grant (ATK-009 `grantAmmo` helper): +1 to weaponIdx's cur, clamped
+ * at max (zz_006de10_, +1 clamp max — chunk_0009.c:2965-2973-adjacent one-shot path). Exposed
+ * for the future deploy-return wiring; nothing calls this yet (per the ticket: "nothing calls
+ * it").
+ */
+export function grantAmmo(b: BorgRuntime, weaponIdx: number, p: BorgProfile): void {
+  const cells = ensureWeaponCells(b, p);
+  const cell = cells[weaponIdx];
+  if (!cell) return;
+  if (cell.max <= 0) return; // infinite cells have nothing to grant toward.
+  cell.cur = Math.min(cell.max, cell.cur + 1);
+  if (weaponIdx === 0) b.ammo = cell.cur;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -310,6 +458,11 @@ export function applyHit(
     victim.comboRank = Math.min(0x3f, victim.comboRank + 1);
   }
 
+  // Status-effect application (ATK-010 shell, chunk_0003.c:7638-7651): today's 3 archetype
+  // DamageRecords carry no status bytes, so statusId is always 0 here — the parameter exists
+  // for a future per-move hit-record. See status.ts; NO gameplay effect is applied.
+  applyStatusFromRecord(victim, 0, 0);
+
   // Stagger gate (chunk_0003.c:6255-6263): the hit interrupts the victim ONLY when the down
   // gauge dropped below 1, the balance gauge broke, or the record's reaction flags force it
   // (byte +0x0b bits 2|0x80). Otherwise the victim keeps acting normally — the ROM routes
@@ -342,6 +495,42 @@ export function applyHit(
     enterHit(victim, MELEE.HITSTUN);
   }
   return dmg;
+}
+
+// ---------------------------------------------------------------------------------------
+// Healing & lifesteal shells (ATK-019, REWRITTEN after behavior-notes.md (an) corrected the
+// (al)-era misread of chunk_0003.c:6318-6323 as nurse healing — that site is VAMPIRE
+// LIFESTEAL, gated on ids 0x702/0x70a). Two independently-flagged, currently-disabled
+// mechanisms; see constants.ts HEAL for the evidence/citations.
+// ---------------------------------------------------------------------------------------
+
+/**
+ * Apply a flat HP heal to `b`. Clamps to maxHp, is a no-op on a dead/departed borg (hp <= 0 or
+ * state "death" — healing never revives), and never routes through applyHit/mitigate/the
+ * damage formula (ATK-019 "Do not change": healing is a dedicated HP-increment path in the
+ * ROM, not a damage-formula effect — behavior-notes.md (al)). Returns the ACTUAL amount
+ * healed (may be less than `amount` if clamped by maxHp, or 0 if the no-op guard applies).
+ */
+export function applyHeal(b: BorgRuntime, amount: number): number {
+  if (b.hp <= 0 || b.state === "death") return 0;
+  if (amount <= 0) return 0;
+  const healed = Math.min(amount, b.maxHp - b.hp);
+  if (healed <= 0) return 0;
+  b.hp += healed;
+  return healed;
+}
+
+/**
+ * DISABLED stub (ATK-019, vampire lifesteal). See constants.ts HEAL.VAMPIRE_ENABLED for the
+ * full evidence citation: the HP-regain accumulator's writer (dealt melee damage, per the
+ * guide) and the passive ~2-3 HP/sec drain loop are both untraced — this scaffold reserves
+ * the per-frame call site without inventing either rate. Immediate no-op while disabled
+ * (the default, always, today).
+ */
+export function stepVampireDrain(_b: BorgRuntime): void {
+  if (!HEAL.VAMPIRE_ENABLED) return;
+  // Intentionally unreachable while disabled: no drain rate, regain rate, or floor behavior
+  // is invented here. See the header comment above and constants.ts HEAL.
 }
 
 // ---------------------------------------------------------------------------------------
@@ -456,6 +645,45 @@ export function isBusy(b: BorgRuntime): boolean {
 }
 
 // ---------------------------------------------------------------------------------------
+// Passive contact damage (ATK-006) — DISABLED scaffold, reserving the code path per
+// findings mechanic L / behavior-notes.md (am)/(an) and open-questions Q12.
+//
+// Evidence gap: no ROM/asset proof of a contact-damage code path exists yet — the borg
+// state handlers were read in full (behavior-notes.md (u)) with no movement-triggered
+// damage side effect found. What upgraded this from wiki-only to worth-scaffolding is
+// OBSERVED_BEHAVIOR: speedrunners report big borgs (plasma dragon family) stepping on
+// allies and granting them hit-invincibility (i.e. contact is a REAL hit that arms the
+// i-frame machinery, not cosmetic), and the guide move-lists list contact damage as an
+// explicit per-borg "Special" move with concrete numbers — dragon-family stepping 22
+// (Flame/Blizzard/Plasma Dragon 44), Acceleration Ninja air-dash/jump body contact 44
+// (that borg has NO normal melee at all — touch attacks only). See
+// research/decomp/data/guide-anchors-movelist.json `contactDamage` (OBSERVED_GUIDE) and
+// behavior-notes.md (an) §5.
+//
+// Per (an)/(ao): contact damage is AUTHORED PER-BORG DATA (a hitbox/move attached to
+// specific borg ids with specific damage values), NOT an engine-wide "any two borgs
+// overlapping deal damage" rule. So the future enable path is a per-borg contact-hitbox
+// data table (which ids carry one, its damage/radius/rehit-interval), not a single global
+// on/off toggle with one damage number — CONTACT_DAMAGE.ENABLED only gates whether that
+// (still-unbuilt) per-borg table is ever consulted at all.
+//
+// Plausible carrier if/when traced: a persistent attack-hitbox record (activeEnd = -1 in
+// the attack region, hit-bin-format.md) combined with the existing rehit-interval
+// mechanism already ported for persisting projectiles (chunk_0013.c:1175-1182,
+// Projectile.rehitCounter/consumeOnHit in stepProjectiles above) — a borg's own body could
+// plausibly reuse that same rehit-paced hit-application shape. This is a plausibility note
+// for a future trace, NOT a decoded mechanism; nothing here implements it.
+//
+// See open-questions Q12 and the T2 contact-script trace extension for what would need to
+// be found before this can honestly flip to per-borg data + ENABLED = true.
+// ---------------------------------------------------------------------------------------
+export function stepContactDamage(_b: BorgRuntime, _all: BorgRuntime[]): void {
+  if (!CONTACT_DAMAGE.ENABLED) return;
+  // Intentionally unreachable while disabled (the default, always, today): no damage
+  // numbers, radii, or cooldowns are invented here. See the header comment above.
+}
+
+// ---------------------------------------------------------------------------------------
 // Attacks. Returns a (possibly empty) list of projectiles spawned this frame.
 // ---------------------------------------------------------------------------------------
 export interface AttackResult {
@@ -534,15 +762,31 @@ export function stepAttacks(
   b.cooldowns["attackHeld"] = attackHeld ? 1 : 0;
   const releasedAttack = !attackHeld && prevAttackHeld;
 
+  // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false, BLOCKED-
+  // until-Q9): count attack-button PRESS EDGES (not held frames) into b.cooldowns["mashCount"]
+  // while an active melee swing is in progress (b.state==="attack" && b.anim==="melee" — set by
+  // startMeleeAttack and cleared when the swing's attackLock expires below), clamped at
+  // MASH.PRESS_CAP (4, DERIVED chunk_0007.c:4809-4816). Reset to 0 on every swing start
+  // (startMeleeAttack). This counting always runs (cheap: one comparison + one increment) —
+  // nothing reads b.cooldowns["mashCount"] for gameplay purposes yet; it exists only for the
+  // debug overlay (ATK-015 picks up all cooldowns automatically) until Q9 identifies a real
+  // consumer.
+  const pressedAttackEdge = attackHeld && !prevAttackHeld;
+  if (pressedAttackEdge && b.state === "attack" && b.anim === "melee") {
+    b.cooldowns["mashCount"] = Math.min(MASH.PRESS_CAP, (b.cooldowns["mashCount"] ?? 0) + 1);
+  }
+
   // Drop the combo chain once its window lapses.
   if ((b.cooldowns["comboWindow"] ?? 0) <= 0) b.cooldowns["comboStep"] = 0;
 
-  // Reload bookkeeping for ranged.
+  // Reload bookkeeping for ranged (ATK-009): the actual refill grant now happens once/frame
+  // in stepAmmoRefill (battle.ts calls it adjacent to stepCooldowns, before stepAttacks runs
+  // each frame), driven by weapon-0's cell (gradual/all-at-once/infinite — see combat.ts's
+  // ammo/weapon-cells section above stepCooldowns). This just self-heals `b.weaponCells` for
+  // any caller that constructed/reset the borg without going through stepAmmoRefill first, so
+  // `b.ammo`/`b.weaponCells[0]` never drift out of sync before the fire-gate check below.
   if (shotDef) {
-    const reload = b.cooldowns["reload"] ?? 0;
-    if (b.ammo <= 0 && reload <= 0) {
-      b.ammo = shotDef.ammoMax;
-    }
+    ensureWeaponCells(b, p);
   }
 
   // --- Special (X) -------------------------------------------------------------------
@@ -720,6 +964,9 @@ function startMeleeAttack(b: BorgRuntime, meleeDef: MeleeActionDef, comboStep: n
   b.cooldowns["comboWindow"] = meleeDef.duration + meleeDef.comboWindowFrames;
   b.cooldowns["comboStep"] = comboStep;
   b.meleeHitUids = []; // fresh swing: everyone is hittable once again
+  // ATK-017 mash-counter scaffold: every new swing (opener or chained) resets the press-edge
+  // counter to 0 — see the mash-counting block in stepAttacks for what increments it.
+  b.cooldowns["mashCount"] = 0;
   b.state = "attack";
   b.stateTime = 0;
   b.anim = "melee";
@@ -736,8 +983,23 @@ function startShotAttack(
   out: Projectile[],
 ): void {
   b.cooldowns["shot"] = shotDef.cooldown;
-  b.ammo -= 1;
-  if (b.ammo <= 0) b.cooldowns["reload"] = shotDef.reloadFrames;
+  // ATK-009: consume from weapon-0's cell, not a flat pool. Fire-gate cost is a flat 1 (the
+  // ROM's zz_006dbe0_ cost check/decrement — chunk_0009.c:2866-2905 — takes a per-call cost
+  // param; every stepAttacks call site here always passes the implicit cost of 1 shot). max
+  // <= 0 (infinite) never decrements, matching the ROM's max==0 gate skip
+  // (chunk_0002.c:7158-7165); b.ammo stays mirrored to Infinity by ensureWeaponCells in that
+  // case, so this early-return is just belt-and-suspenders against stale callers.
+  const cell = ensureWeaponCells(b, p)[0];
+  if (cell && cell.max > 0) {
+    cell.cur = Math.max(0, cell.cur - 1);
+    b.ammo = cell.cur;
+    // Arm the all-at-once timer the instant the cell empties (mirrors zz_006dcc0_'s
+    // sVar4<1 branch re-arming on cur===0; gradual cells don't use this timer path at all —
+    // stepWeaponCellRefill only reads `timer` for refillType<=0/2/3).
+    if (cell.cur <= 0 && cell.refillType !== 1) {
+      cell.timer = cell.refillParam > 0 ? cell.refillParam : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES;
+    }
+  }
   b.cooldowns["attackLock"] = shotDef.recovery;
   b.state = "attack";
   b.stateTime = 0;
@@ -898,47 +1160,78 @@ export function stepProjectiles(
     if (ctx && !projectileInPlayArea(pr, ctx)) continue;
 
     // Hit test against any non-owner borg. Same-team hits use the derived 0.25x reducer.
+    //
+    // Consumption policy (ATK-008, research/decomp/attack-mechanics-findings.md mechanic O):
+    //   - Default (`pr.consumeOnHit !== false`, including absent): FIRST valid hit consumes the
+    //     projectile — unchanged from the pre-ATK-008 behavior, bit-for-bit.
+    //   - Persist (`pr.consumeOnHit === false`): the projectile survives hits; re-hits are paced
+    //     by a SINGLE per-object counter (`pr.rehitCounter`), mirroring the ROM's one counter per
+    //     object at object+0x4e (NOT a per-target map) reloaded from the damage record's s8+0x16
+    //     `rehitIntervalFrames` (chunk_0013.c:1175-1182). The counter gates the NEXT damage
+    //     application: if it's > 0 this frame, it only ticks down and no hit is applied (even if
+    //     overlapping a valid target); once it reaches 0 the object is hit-ready, applies at most
+    //     ONE hit this frame (first valid target found), then reloads — so it can't double-fire
+    //     against multiple overlapping targets on the same frame. Interval 0 reloads to 0, so a
+    //     hit-ready object stays hit-ready next frame too (unlimited rehit while overlapping,
+    //     matching the ROM's interval-0 semantics).
+    const persistent = pr.consumeOnHit === false;
     let consumed = false;
-    for (const o of all) {
-      if (!isTargetable(o) || o.uid === pr.ownerUid) continue;
-      if (isInvincible(o)) continue;
-      if (distXZ(pr.pos, o.pos) <= pr.hitRadius && Math.abs(pr.pos.y - o.pos.y) <= 60) {
-        const op = profiles.get(o.uid);
-        if (op) {
-          // Intentionally NOT the zero-vector convention: a projectile's own travel vector
-          // (which may have curved via homing) is a more accurate knockback direction than
-          // recomputing the ROM's mode-1 attacker->target vector from a possibly-stale shooter
-          // origin. Neither is a ROM-confirmed mode for the projectile case specifically (the
-          // ROM caller always passes the same hit-context wrapper regardless of melee/shot), so
-          // this remains a TUNED choice between two reasonable direction sources.
-          const attacker = byUid.get(pr.ownerUid);
-          const attackerProfile = profiles.get(pr.ownerUid);
-          applyHit(
-            o,
-            op,
-            pr.damage,
-            pr.knockback,
-            pr.vel as Vec3,
-            pr.pos,
-            false,
-            // Per-projectile record (charge/special = 2, normal shot = 0; gauges.ts).
-            damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT),
-            attacker && attackerProfile
-              ? {
-                  attacker,
-                  attackerProfile,
-                  damageScale: pr.damage,
-                  attackerSideRank: damageContext.sideRankForTeam?.(attacker.team),
-                  defenderSideRank: damageContext.sideRankForTeam?.(o.team),
-                }
-              : undefined,
-          );
+    if (persistent && (pr.rehitCounter ?? 0) > 0) {
+      // Counter still cooling down: tick it, no hit test this frame.
+      pr.rehitCounter = (pr.rehitCounter ?? 0) - 1;
+    } else {
+      for (const o of all) {
+        if (!isTargetable(o) || o.uid === pr.ownerUid) continue;
+        if (isInvincible(o)) continue;
+        if (distXZ(pr.pos, o.pos) <= pr.hitRadius && Math.abs(pr.pos.y - o.pos.y) <= 60) {
+          const op = profiles.get(o.uid);
+          const record = damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT);
+          if (op) {
+            // Intentionally NOT the zero-vector convention: a projectile's own travel vector
+            // (which may have curved via homing) is a more accurate knockback direction than
+            // recomputing the ROM's mode-1 attacker->target vector from a possibly-stale shooter
+            // origin. Neither is a ROM-confirmed mode for the projectile case specifically (the
+            // ROM caller always passes the same hit-context wrapper regardless of melee/shot), so
+            // this remains a TUNED choice between two reasonable direction sources.
+            const attacker = byUid.get(pr.ownerUid);
+            const attackerProfile = profiles.get(pr.ownerUid);
+            applyHit(
+              o,
+              op,
+              pr.damage,
+              pr.knockback,
+              pr.vel as Vec3,
+              pr.pos,
+              false,
+              // Per-projectile record (charge/special = 2, normal shot = 0; gauges.ts).
+              record,
+              attacker && attackerProfile
+                ? {
+                    attacker,
+                    attackerProfile,
+                    damageScale: pr.damage,
+                    attackerSideRank: damageContext.sideRankForTeam?.(attacker.team),
+                    defenderSideRank: damageContext.sideRankForTeam?.(o.team),
+                  }
+                : undefined,
+            );
+          }
+          if (persistent) {
+            // Reload the single per-object counter immediately so this same frame's loop can't
+            // apply a second hit (the ROM shape: counter gates the next application, then
+            // reloads on use). Interval 0 reloads to 0, so the object is still hit-ready next
+            // frame (unlimited rehit while overlapping).
+            pr.rehitCounter = record.rehitIntervalFrames;
+            break;
+          }
+          consumed = true;
+          break;
         }
-        consumed = true;
-        break;
       }
     }
-    if (!consumed) survivors.push(pr);
+    // Persisting projectiles are never removed by a hit (only life expiry / out-of-bounds
+    // above can drop them); the counter above already governs re-hit pacing.
+    if (persistent || !consumed) survivors.push(pr);
   }
   return survivors;
 }

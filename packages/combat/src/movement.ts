@@ -25,7 +25,7 @@ import {
   yawFromXZ,
   type Vec3,
 } from "@gf/physics";
-import { DASH, JUMP, MOVE } from "./constants.js";
+import { DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
 
@@ -42,6 +42,48 @@ export interface MoveContext {
   lockTargetPos: Vec3 | null;
   bounds: RectStageBounds;
   collision: StageCollision | null;
+}
+
+/**
+ * Port-side movement-context capture (ATK-004). WIKI_TAXONOMY_ONLY — this is explicitly NOT
+ * a ROM enum; it is a derived label over signals the sim already tracks (dash cooldown,
+ * grounded, fly state, vertical velocity, landing edge), captured so the future command
+ * resolver (ATK-003) and melee-context mapping (ATK-005) have an input once the ROM's
+ * variant channel (subtype byte actor+0x586, air gate at chunk_0009.c:500-534; see
+ * command.ts AttackCommandSubtype.AirElevated4) is mapped to it. Nothing consumes this for
+ * gameplay yet — see research/decomp/attack-mechanics-findings.md mechanics D-K.
+ */
+export type MovementContext =
+  | "standing"
+  | "ground_dash"
+  | "air_dash"
+  | "flying"
+  | "jump_rise"
+  | "neutral_air"
+  | "landing";
+
+/**
+ * Derive this frame's {@link MovementContext} for `b`. Pure/read-only — does not mutate `b`.
+ * Precedence (checked top to bottom; first match wins), per ATK-004:
+ *   1. "landing"     — within MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES of the last onLand edge
+ *                       (b.cooldowns["landedFrames"] > 0, set/ticked in onLand/stepCooldowns).
+ *   2. "air_dash"     — airborne (!grounded) AND mid-dash (cooldowns["dashActive"] > 0).
+ *   3. "ground_dash"  — grounded AND mid-dash (cooldowns["dashActive"] > 0).
+ *   4. "flying"       — state === "fly" (boost-flight, movement.ts handleJump/stepMovement).
+ *   5. "jump_rise"    — airborne, not flying/dashing, rising (vel.y > 0).
+ *   6. "neutral_air"  — airborne, not flying/dashing, not rising (vel.y <= 0; apex or falling).
+ *   7. "standing"     — grounded, none of the above (idle or walking).
+ */
+export function movementContextOf(b: BorgRuntime): MovementContext {
+  const dashing = (b.cooldowns["dashActive"] ?? 0) > 0;
+  const landing = (b.cooldowns["landedFrames"] ?? 0) > 0;
+
+  if (landing) return "landing";
+  if (!b.grounded && dashing) return "air_dash";
+  if (b.grounded && dashing) return "ground_dash";
+  if (b.state === "fly") return "flying";
+  if (!b.grounded) return b.vel.y > 0 ? "jump_rise" : "neutral_air";
+  return "standing";
 }
 
 /** True if the borg's current state allows free movement input. */
@@ -202,6 +244,10 @@ export function clearJumpLatch(b: BorgRuntime, jumpHeld: boolean): void {
 function onLand(b: BorgRuntime, p: BorgProfile): void {
   b.airJumps = p.airJumpLevel;
   b.cooldowns["boostFuel"] = JUMP.BOOST_FUEL_FRAMES;
+  // Landing-edge window for movementContextOf below: ticks down like any other cooldown
+  // (see stepCooldowns in combat.ts), consumed as a capture-only signal — nothing currently
+  // reads b.cooldowns["landedFrames"] for gameplay.
+  b.cooldowns["landedFrames"] = MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES;
 }
 
 function setState(b: BorgRuntime, s: BorgRuntime["state"]): void {

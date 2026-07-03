@@ -99,6 +99,15 @@ export const WAKE_UP_INVINCIBILITY_FRAMES = 60;
 /** Spawn (deploy) invincibility, frames. TUNED — brief protection on auto-spawn. */
 export const SPAWN_INVINCIBILITY_FRAMES = 45;
 
+/**
+ * "landing" MovementContext window after `onLand` (movement.ts), frames. TUNED — a port-side
+ * capture constant, not a ROM value (see ATK-004 / attack-mechanics-findings.md mechanics
+ * D-K: the movement-context enum itself is WIKI_TAXONOMY_ONLY, so there is no ROM landing-
+ * window constant to derive this from). Kept small so "landing" reads as a brief edge window
+ * right after touchdown rather than a long recovery state.
+ */
+export const MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES = 6;
+
 export const MOVE = {
   /**
    * Ground move speed (units/frame) = BASE + speed_stat * PER_STAT.
@@ -236,6 +245,43 @@ export const SHOT = {
   /** Knockback imparted (units/frame). TUNED — see MELEE.KNOCKBACK note; direction is DERIVED
    *  (s4p), magnitude is not. */
   KNOCKBACK: 3,
+} as const;
+
+export const AMMO = {
+  /**
+   * Per-frame ammo-refill rate (ammo units/frame), consumed by stepAmmoRefill (combat.ts,
+   * ATK-009) for gradual-type weapon cells and as the "how fast does the timer run down"
+   * scale for all-at-once cells. TUNED — the ROM's real rate float lives at actor+0x768
+   * (`zz_006dcc0_`, chunk_0009.c:2909-2973), but its INIT SITE is unresolved and the offset
+   * has a conflicting second reader (a status/scale-related float read at the same offset by
+   * a separate corpus pass) — see research/decomp/attack-mechanics-open-questions.md Q7
+   * ("What is actor+0x768 really — ammo refill rate, scale-related float, or both consumers
+   * misread?"). Until Q7 resolves which struct/site is authoritative, this stays a named
+   * TUNED constant rather than a guessed DERIVED value.
+   *
+   * Default derivation: chosen so a default borg's effective shots-per-minute stays within
+   * the port's PRE-ATK-009 feel. The old model fired SHOT.AMMO_MAX (6) shots at
+   * SHOT.FIRE_COOLDOWN (12f) spacing, then waited SHOT.RELOAD_FRAMES (60f) for an instant
+   * full refill — a full magazine (6 ammo) took 60 frames to come back. Gradual refill grants
+   * fractionally every frame (see stepAmmoRefill), so setting the rate to
+   * AMMO_MAX / RELOAD_FRAMES = 6/60 = 0.1 ammo/frame reproduces the same "empty-to-full in
+   * ~60 frames" envelope for a default-shaped borg, keeping shots-per-minute within the
+   * pre-change baseline (ATK-002).
+   */
+  REFILL_RATE_PER_FRAME: SHOT.AMMO_MAX / SHOT.RELOAD_FRAMES,
+  /**
+   * All-at-once cells (refillType <= 0) don't grant fractionally; they wait out a timer then
+   * jump straight to max (chunk_0009.c:2909-2973, sVar4 < 1 branch). Per-borg refillParam
+   * (weapon aux +0x792, row source borg-hp-stat-rows-802f2988.json u16[4]/u16[8]) seeds that
+   * timer. A player-guide cross-check (behavior-notes.md section (am): G RED refillParam 180,
+   * Flame/Cyber Death Dragon 300, Death Head 180) found refillParam values of 180/300 lining
+   * up suspiciously well with round 3s/5s at 60fps — the port treats refillParam as a direct
+   * frame count on that strength, but the interpretation is STRONG-BUT-UNVERIFIED (data-level
+   * inference from (am), not a decoded conversion formula) rather than DERIVED. This constant
+   * is only the FALLBACK frame count for borgs without a usable refillParam (falls back to
+   * SHOT.RELOAD_FRAMES so they still reload in roughly the pre-ATK-009 envelope).
+   */
+  DEFAULT_ALL_AT_ONCE_TIMER_FRAMES: SHOT.RELOAD_FRAMES,
 } as const;
 
 export const COMBO = {
@@ -407,3 +453,139 @@ export const AI = {
 
 /** Default stage half-extent if a BattleConfig omits bounds (XZ units from origin). */
 export const DEFAULT_BOUNDS = { x: 4000, z: 4000 } as const;
+
+export const MASH = {
+  /**
+   * BLOCKED-until-Q9 (ATK-017): the counter's downstream CONSUMER is UNKNOWN — attack-active
+   * handler slot 23 (`FUN_8005d494`) advances a phase once `4 < +0x550` or `+0x552 != 0`
+   * (chunk_0007.c:4809-4816, corpus read, audit), but nothing in the corpus was found to gate
+   * on the counter besides that phase advance itself, and what that phase transition actually
+   * DOES in gameplay terms is still open (research/decomp/attack-mechanics-open-questions.md
+   * Q9). Also (behavior-notes.md (an) §5): freeze status duration is guide-documented to
+   * SHORTEN with button/stick mashing — a second, still-unconfirmed candidate consumer for
+   * this same counter shape. Stays false (counting-only, no gameplay effect) until Q9
+   * resolves which consumer (if any) this feeds.
+   */
+  ENABLED: false,
+  /**
+   * DERIVED — chunk_0007.c:4809-4816: the phase-advance condition is `4 < +0x550`, i.e. the
+   * counter caps its gameplay-relevant range at 5 distinct values (0-4) before the phase
+   * advances; ported as a hard clamp at 4 (count never exceeds 4, matching "more than 4"
+   * being the trigger threshold rather than continuing to climb unbounded).
+   */
+  PRESS_CAP: 4,
+} as const;
+
+export const HEAL = {
+  /**
+   * BLOCKED (ATK-019, vampire lifesteal). Corpus-evidenced increment: chunk_0003.c:6318-6323 —
+   * for ids 0x702/0x70a (VAMPIRE KNIGHT pl0702, VLAD pl070a), `hp += (&DAT_803b0638)[slot*2]`,
+   * clamped to max (behavior-notes.md (al), corrected by (an) §2 — the (al)-era reading of
+   * this site as "nurse healing" was WRONG; it is vampire lifesteal). The accumulator's WRITER
+   * (what fills DAT_803b0638[slot] — dealt melee damage, per the guide's "regains health with
+   * any melee attack") remains untraced, and the guide-documented passive drain
+   * (~2-3 HP/sec, floors at 1 HP — research/decomp/data/guide-anchors-movelist.json
+   * lifestealVampire) has no located ROM drain loop at all (OPEN — re-grep with the vampire
+   * path as anchor). Stays false until both the accumulator writer and the drain loop are
+   * traced; this scaffold never invents a lifesteal rate or a drain rate.
+   */
+  VAMPIRE_ENABLED: false,
+  /**
+   * BLOCKED (ATK-019, nurse heal). Nurse healing is a SEPARATE mechanism from the vampire path
+   * above (corrected by (an) §2) — an X-attack that dashes to a target and heals a FIXED
+   * amount. No ROM code path has been isolated for it at all (OBSERVED_GUIDE only — see
+   * NURSE_HEAL_HP below and research/decomp/data/guide-anchors-movelist.json nurseHeals).
+   * Stays false until a real trace lands.
+   */
+  NURSE_ENABLED: false,
+  /**
+   * OBSERVED_GUIDE (an) §2 / guide-anchors-movelist.json `nurseHeals` — fixed X-attack heal
+   * amounts, data only (no active behavior while NURSE_ENABLED is false). Keys are the nurse
+   * borg ids from HEAL_NURSE_BORG_IDS below.
+   */
+  NURSE_HEAL_HP: {
+    pl0906: 37, // DEATH BORG THETA
+    pl0900: 50, // ANGEL NURSE
+    pl0908: 100, // ANGEL RESCUE
+    // pl090d (NAO) has no fixed guide amount — "heals ally or enemy; blocked while target's
+    // heal animation runs" (an §2) — intentionally absent from this data map.
+  },
+} as const;
+
+/**
+ * Vampire-lifesteal borg ids (family 7 = Nurse-adjacent variants per the corpus id check,
+ * behavior-notes.md (an) §1/§2 — roster-validated via the 20th-Force glitch-code cross-check:
+ * Vampire Knight {2,9,10,11} = 0x702 = pl0702 exact match, Vlad {2,4,9,10,11} = 0x70a = pl070a
+ * exact match against packages/assets/data/borgs.json).
+ */
+export const HEAL_VAMPIRE_BORG_IDS = ["pl0702", "pl070a"] as const;
+
+/**
+ * Nurse-heal borg ids (0x9xx / "family 09" per (an) §2's id-prefix grouping). Death Borg
+ * Theta's roster id was looked up by NAME per the ticket (expected family-09 variant) —
+ * packages/assets/data/borgs.json confirms pl0906's NAME is an EXACT match ("DEATH BORG
+ * THETA"), so no name-mismatch STOP was triggered. NOTE: pl0906's roster `tribe` field is
+ * "Death Borg", NOT "Nurse Borg" like its 09xx siblings (pl0900/pl0908/pl090d are all tribe
+ * "Nurse Borg") — a non-blocking discrepancy between (an)'s "family 09 = nurse family"
+ * id-prefix framing and the roster's actual tribe grouping; logged in NOTES-ATK-019.md
+ * (generated by healing.selftest.ts) rather than treated as the ticket's name-mismatch stop
+ * condition, since the name itself resolved correctly.
+ */
+export const HEAL_NURSE_BORG_IDS = ["pl0906", "pl0900", "pl0908", "pl090d"] as const;
+
+export const CONTACT_DAMAGE = {
+  /**
+   * WIKI_TAXONOMY_ONLY (ATK-006) — no ROM/asset proof of a contact-damage code path has been
+   * found (findings mechanic L; the state handlers were read in full in behavior-notes.md (u)
+   * with no movement-triggered damage side effects). Upgraded to OBSERVED_BEHAVIOR-adjacent
+   * status by (am)/(an): speedrunners document big borgs (the plasma dragon family) stepping
+   * on allies and granting them hit-invincibility (contact is a real hit that arms the i-frame
+   * machinery), and the guide move-lists document contact damage as an explicit per-borg
+   * "Special" move — dragon-family stepping 22 (Flame/Blizzard/Plasma Dragon 44), Acceleration
+   * Ninja air-dash/jump body contact 44 with NO normal melee at all (research/decomp/data/
+   * guide-anchors-movelist.json contactDamage; behavior-notes.md (an) §5). Contact damage is
+   * therefore AUTHORED PER-BORG DATA (a move/hitbox attached to specific borgs), not an
+   * engine-wide "any overlap deals damage" rule — so the eventual enable path is a per-borg
+   * data table (which borg ids carry a contact hitbox, and its damage/radius), not a single
+   * global constant here. See open-questions Q12 and the T2 contact-script trace extension.
+   * Stays false until that per-borg trace lands; this scaffold never invents damage numbers,
+   * radii, or cooldowns for the general case.
+   */
+  ENABLED: false,
+} as const;
+
+export const BURST = {
+  /**
+   * DERIVED — `FUN_80069814` (chunk_0009.c:104-115): the Y-family input bit in the
+   * transformed input word (+0x5d4) sets object+0x6fb = 6 on the press edge. Ported as the
+   * exact 6-frame arm window (press edge -> burstArmFrames = 6, decrement 1/frame, re-press
+   * re-arms), mirroring `zz_005b2b8_` (chunk_0007.c:3354-3494) consuming +0x6fb while nonzero.
+   * NOTE (behavior-notes.md (aj)): +0x6fb is ALSO read/decremented in the fusion per-slot loop
+   * (chunk_0007.c:3473-3490) where its expiry drives the burst/fusion end path — the "6-frame
+   * arm window" reading and that fusion-timer reading may be the same field seen in two
+   * contexts, not two separate constants. Needs trace T3 to reconcile; do not assume either
+   * reading supersedes the other yet.
+   * UPDATE (behavior-notes.md (ao), official NA instruction manual, CONFIRMED_MANUAL tier —
+   * still not numeric ROM truth): the manual describes simultaneous-press co-op bursts ("press
+   * the button at the same time for simultaneous power bursts"), which gives 6 a coherent
+   * reading as the SIMULTANEITY tolerance window for a partner's paired Y press, not just a
+   * solo activation buffer. Reconcile the exact semantics (whose window, how pairing is judged)
+   * in trace T3 before ATK-012 depends on either interpretation.
+   */
+  ARM_WINDOW_FRAMES: 6,
+  /**
+   * BLOCKED-until-T3. Real activation (ROM +0x6fc = 1) preconditions beyond "armed" are
+   * UNKNOWN — no meter/resource model exists in the port yet (see ATK-011/ATK-012). Keeping
+   * this false makes the whole burst shell inert in real battles: burstArmFrames/burstActive/
+   * burstPaired are tracked but never change gameplay output until this flips (and ATK-012
+   * wires real effects) after trace T3 lands.
+   * Per (ao) (official NA instruction manual, CONFIRMED_MANUAL): activation's real precondition
+   * is "press when the burst gauge is at max" — a full Power Burst meter, officially named in
+   * the manual and corroborated by StrategyWiki's interface page, which also documents the
+   * meter's fill direction: it "fills as the player inflicts and receives damage." That meter
+   * is still unlocated in RAM, so this stays false until it's found and a real fill/consume
+   * model backs it (future ATK-012 work) — the manual only tells us WHAT gates activation, not
+   * HOW to compute it yet.
+   */
+  ENABLED: false,
+} as const;

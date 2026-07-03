@@ -65,6 +65,7 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
   let switchLock = keys.has("KeyR") || keys.has("Tab");
   let allyLock = keys.has("KeyZ");
   const switchBorg = false;
+  let hyper = keys.has("KeyY") || keys.has("KeyH");
 
   if (pad) {
     const ax = pad.axes[0] ?? 0;
@@ -80,6 +81,9 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
     switchLock = switchLock || b(5) || b(7);
     // XInput has no exact GC Z; use the left shoulder as the least-conflicting ally-lock stand-in.
     allyLock = allyLock || b(4);
+    // XInput button 3 (Y on the standard mapping) is otherwise unused here — natural stand-in
+    // for GC Y (shell input only, ATK-011; no gameplay effect).
+    hyper = hyper || b(3);
   }
 
   return {
@@ -93,6 +97,7 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
     allyLock,
     switchBorg,
     dash,
+    hyper,
   };
 }
 

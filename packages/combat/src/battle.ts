@@ -12,6 +12,7 @@
 
 import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
+import { stepBurst } from "./burst.js";
 import {
   acquireAllyLock,
   acquireLock,
@@ -20,7 +21,9 @@ import {
   isBusy,
   resetProjectileCounter,
   stepActionState,
+  stepAmmoRefill,
   stepAttacks,
+  stepContactDamage,
   stepCooldowns,
   stepGaugeWindows,
   stepInvincibility,
@@ -29,6 +32,7 @@ import {
 import { challengeSideRanksForMode } from "./damageFormula.js";
 import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
+import { stepStatus } from "./status.js";
 import { DEFAULT_BOUNDS, JUMP, SIM, SPAWN_INVINCIBILITY_FRAMES } from "./constants.js";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
 import { resetActorParamTier } from "./paramTier.js";
@@ -194,8 +198,16 @@ class BattleImpl implements Battle {
       comboAccum: 0,
       comboRank: 0,
       paramTier: resetActorParamTier(),
+      statusId: 0,
+      statusTimer: 0,
+      statusImmunityMask: 0,
       lockTarget: null,
       allyLockTarget: null,
+      burstArmFrames: 0,
+      burstActive: false,
+      burstPaired: false,
+      fusionPartnerUid: null,
+      fusionState: 0,
       defeatAccounted: false,
       alive: true,
     };
@@ -263,6 +275,15 @@ class BattleImpl implements Battle {
       // frame's gating is correct. stepGaugeWindows self-freezes while in hit/down (the
       // ROM's "in hit reaction" gate, chunk_0006.c:7982-8011).
       stepCooldowns(b);
+      // Y (Hyper/Power Burst arm) is EDGE-TRIGGERED via the same 0/1 press-latch pattern as
+      // switchLockHeld/allyLockHeld below: re-arming must happen once per fresh press, not
+      // every frame the button is held. Shell only (ATK-011) — stepBurst has zero gameplay
+      // effects while constants.ts BURST.ENABLED stays false.
+      const hyperPressed = input.hyper && (b.cooldowns["hyperHeld"] ?? 0) === 0;
+      b.cooldowns["hyperHeld"] = input.hyper ? 1 : 0;
+      stepBurst(b, hyperPressed);
+      stepAmmoRefill(b, prof);
+      stepStatus(b);
       stepInvincibility(b);
       stepGaugeWindows(b);
 
@@ -307,6 +328,11 @@ class BattleImpl implements Battle {
         });
         if (res.projectiles.length) this.state.projectiles.push(...res.projectiles);
       }
+
+      // Passive contact damage (ATK-006 scaffold): immediate no-op while
+      // CONTACT_DAMAGE.ENABLED stays false (the default) — see combat.ts stepContactDamage
+      // for the evidence gap and the per-borg-data enable path.
+      stepContactDamage(b, all);
 
       // Advance hit/down/death/spawn timers.
       b.stateTime += 1;

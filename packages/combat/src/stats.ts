@@ -58,6 +58,16 @@ export interface BorgProfile {
   /** Has a usable melee attack. */
   hasMelee: boolean;
   rangePref: RangePref;
+  /**
+   * ATK-020: the borg's level BYTE (behavior-notes.md ak: actor+0x3ec), when known. Selects the
+   * stat row via row = subIdx + variant*0x14 + DAT_804339e8[level] (ag). Undefined means "use
+   * the default row" (level 0, DAT_804339e8[0]=2) -- the SAME row every pre-ATK-020 profile was
+   * already built from, so omitting this field reproduces today's extracted values exactly
+   * (G RED (pl0615) default row -> HP 200 / ammo 5, the live-verified anchor).
+   * Stored value packing (colorVariant<<8 | level) is OBSERVED_GUIDE context from (an) section
+   * 6 -- not itself parsed here; callers pass the already-unpacked level byte.
+   */
+  level?: number;
 }
 
 /** Parse the "L1/L10" hp string (or number) to the level-1 battle HP. */
@@ -115,15 +125,24 @@ function rangePrefOf(
   return "mixed";
 }
 
-/** Build the resolved per-borg profile consumed by movement/combat/AI. */
-export function buildProfile(s: BorgStats): BorgProfile {
+/**
+ * Build the resolved per-borg profile consumed by movement/combat/AI.
+ *
+ * `level` (ATK-020, optional): the borg's level BYTE (behavior-notes.md ak, actor+0x3ec).
+ * Omitting it (the default) reproduces every pre-ATK-020 caller's behavior EXACTLY -- it
+ * resolves to the same default row (DAT_804339e8[0]=2) that sourceStatsForBorgId(id) already
+ * returned with no level argument. Passing a level re-selects the stat row per (ag)'s
+ * arithmetic (row = subIdx + variant*0x14 + DAT_804339e8[level]), clamped to the table's 32
+ * entries by sourceStatsForBorgId itself.
+ */
+export function buildProfile(s: BorgStats, level?: number): BorgProfile {
   const { airJumpLevel, flyer } = parseJump(s.jump);
   const actorStats = actorDataCombatStatsForBorgId(s.id);
   const defense = actorStats?.defense ?? s.defense;
   const shot = actorStats?.shot ?? s.shot;
   const attack = actorStats?.attack ?? s.attack;
   const speed = actorStats?.speed ?? s.speed;
-  const sourceStats = sourceStatsForBorgId(s.id);
+  const sourceStats = sourceStatsForBorgId(s.id, level);
   const hasShot = shot > 0;
   const hasMelee = attack > 0;
   return {
@@ -140,6 +159,7 @@ export function buildProfile(s: BorgStats): BorgProfile {
     hasShot,
     hasMelee,
     rangePref: rangePrefOf(actorStats?.typeCode, s.type, hasShot, hasMelee),
+    ...(level !== undefined ? { level } : {}),
   };
 }
 
