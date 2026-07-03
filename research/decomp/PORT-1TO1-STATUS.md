@@ -171,16 +171,23 @@ Detail in the asset survey (session 2026-07-03) + `research/format-specs/*`, `re
 
 ## 6. The port's C-code disambiguation coverage
 
-Of 11,972 decompiled functions (`_index.tsv`): ~89.8% still auto-named (zz_/FUN_), ~9% SDK/
-middleware (gnt4/HSD/OS/TRK), ~1.2% (143) given game-logic names. The named set covers the
-load-bearing combat spine (hit resolution, damage, param tier, challenge flow, menu dispatch).
+Of 11,972 decompiled functions (`_index.tsv`): the research has now assigned a concrete
+game-logic **role** to **133** functions — **1.11%** (133 / 11,972) — consolidated into the
+machine-readable source map `research/decomp/data/identified-functions.json` (one deduped entry
+per address; each traces to a `behavior-notes.md` section and/or an attack-mechanics findings
+mechanic, with a confidence tier DERIVED_ROM / INFERRED / NAMED_ONLY). This supersedes the
+earlier ~1.2% / 143 estimate: 108 of the 133 are DERIVED_ROM (role read directly from decompiled
+C or raw ROM data). The identified set covers the load-bearing combat spine (hit resolution,
+damage formula, HP/ammo/gauge init, the 35-slot state-handler table, the animation setter,
+challenge flow + battle judge, camera policy, and the command/ammo/burst systems). The rest of
+the corpus is ~89% still auto-named (zz_/FUN_) plus ~9% SDK/middleware (gnt4/HSD/OS/TRK).
 Topic-hint buckets in `function-evidence-index.json` (movement-physics 2765, knockback-targeting
 2054, force-setup 1566, challenge-menu 569, assets-animation 599) are the unexplored frontier —
 movement-physics is the bucket that would retire the most TUNED constants.
 
-**Recommended metric to track:** promote the ~150 behavior-notes-understood functions into the
-index as real names (or a sidecar annotations file) so "disambiguated %" becomes a tracked burn-
-down like `tuned-burndown.md`.
+**Recommended metric to track:** `identified-functions.json` is the canonical disambiguation
+tally; keep it current as new functions get roles (or fold it back into the index as real names)
+so "disambiguated %" becomes a tracked burn-down like `tuned-burndown.md`.
 
 ---
 

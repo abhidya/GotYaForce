@@ -1,0 +1,1091 @@
+{
+  "_meta": {
+    "generated_note": "Consolidated source map of every Gotcha Force (GG4E/NTSC-U) game-logic function the project's decompilation research has assigned a concrete role. Built by cross-referencing behavior-notes.md sections (a)-(bb), attack-mechanics-findings.md / -ledger.json, and state-anim-dispatch-802d3570.json against ghidra-export/_index.tsv for canonical name+chunk. One entry per address (deduped). Only functions with an identifiable game-logic role are included; addresses cited only in passing (constants, data-table addresses, mid-function instruction PCs, engine calls named without a role) were skipped -- see cited_addresses_skipped_roleless.",
+    "total_corpus_functions": 11972,
+    "identified_count": 133,
+    "coverage_percent": 1.111,
+    "confidence_legend": {
+      "DERIVED_ROM": "role read directly from decompiled C / raw-ROM data (matches the notebook's DERIVED tier)",
+      "INFERRED": "role inferred from field reuse / call shape / handler routing / confirmed asset-container decode, not a direct gameplay-code read",
+      "NAMED_ONLY": "cited in prose but NOT a function entry in _index.tsv (mid-function PC, differently-attributed symbol, or engine/library symbol named without a Gotcha-Force gameplay role) -- name is the prose/engine-map name"
+    },
+    "cited_addresses_skipped_roleless": "~40 cited 0x8xxxxxxx tokens resolve to data/constant addresses (SDA floats e.g. 0x80437448, dispatch/lookup-table bases e.g. 0x802d3570 / 0x802f2e28 / 0x802d46e0 / 0x802c4760, mid-function instruction PCs e.g. 0x80055c00 / 0x8005c7d8 / 0x8005d4b0) rather than role-bearing function entries; those are referenced inside the role text of the owning function rather than given their own entry. A handful of camera sub-thunks (0x8000d5a0/d5f4/d600/d60c/d644) and boundary markers were also left out as roleless.",
+    "sources": [
+      "research/decomp/behavior-notes.md (sections a-bb)",
+      "research/decomp/attack-mechanics-findings.md",
+      "research/decomp/data/attack-mechanics-ledger.json",
+      "research/decomp/data/state-anim-dispatch-802d3570.json",
+      "research/decomp/ghidra-export/_index.tsv"
+    ]
+  },
+  "functions": [
+    {
+      "address": "0x8000bda4",
+      "name": "zz_000bda4_",
+      "chunk": "chunk_0001.c",
+      "role": "per-frame camera update: loops 12 camera objects (0x803c73b0 stride 0x3E4), pairs each with its target actor via cam[0x2E5], dispatches per-mode policy",
+      "evidence": "(ac)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000bef4",
+      "name": "zz_000bef4_",
+      "chunk": "chunk_0001.c",
+      "role": "player->slot resolver: reads PTR_DAT_80433934[player+0xc0] to get player 0's active-borg slot",
+      "evidence": "(z)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000c660",
+      "name": "FUN_8000c660",
+      "chunk": "chunk_0001.c",
+      "role": "camera mode-0 init handler (also inits actor+0x3F1, +0x5B0 behind-angle)",
+      "evidence": "(ac) / (ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000c918",
+      "name": "FUN_8000c918",
+      "chunk": "chunk_0001.c",
+      "role": "camera mode-1 handler: indexes goal-eye sub-table 0x802c3894 by actor+0x3F1",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000c988",
+      "name": "FUN_8000c988",
+      "chunk": "chunk_0001.c",
+      "role": "camera mode-2 approach: spiral-in/orbit (dist>80?dist*0.9, trail yaw +0x200/frame, eyeY +4/frame)",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000cb8c",
+      "name": "FUN_8000cb8c",
+      "chunk": "chunk_0001.c",
+      "role": "camera mode-1 gameplay dispatcher (state machine over cam+0x2E6)",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000cdc0",
+      "name": "FUN_8000cdc0",
+      "chunk": "chunk_0001.c",
+      "role": "camera primary no-lock follow (mode-1 state 2): the main gameplay goal-eye policy",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000cf28",
+      "name": "FUN_8000cf28",
+      "chunk": "chunk_0001.c",
+      "role": "camera lock-on follow (state 3): rotates trail toward lock target actor+0x50C",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000d11c",
+      "name": "FUN_8000d11c",
+      "chunk": "chunk_0001.c",
+      "role": "camera lock/unlock transition (distance-scaled blend weights)",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000d318",
+      "name": "FUN_8000d318",
+      "chunk": "chunk_0001.c",
+      "role": "camera actor+0x7C9 special (timered, decays back to state 2)",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000fc2c",
+      "name": "FUN_8000fc2c",
+      "chunk": "chunk_0001.c",
+      "role": "shared camera goal-eye math (height ease, interest, distance-band clamp)",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8000fffc",
+      "name": "FUN_8000fffc",
+      "chunk": "chunk_0001.c",
+      "role": "camera distance re-clamp to per-borg band",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x800101c8",
+      "name": "FUN_800101c8",
+      "chunk": "chunk_0001.c",
+      "role": "camera correctives: recomputes dist/pitch/heading, publishes actor+0x5B0 behind-angle",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80018c58",
+      "name": "PlatAudio::IsSFXPlaying(unsigned",
+      "chunk": "chunk_0002.c",
+      "role": "platform SFX-playing query (engine audio)",
+      "evidence": "(g)",
+      "confidence": "NAMED_ONLY",
+      "note": "prose alias: PlatAudio::IsSFXPlaying"
+    },
+    {
+      "address": "0x800297c8",
+      "name": "zz_00297c8_",
+      "chunk": "chunk_0003.c",
+      "role": "battle-end judge: computes winner mask PTR_DAT_80433934[0x1f] (bit0/bit1 side win, 4=timeout draw), per-side result flags",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80029b58",
+      "name": "zz_0029b58_",
+      "chunk": "chunk_0003.c",
+      "role": "battle timer countdown: decrements +0x4c only when battle-state[0x45]==4 AND freeze-flag[0x50]==0",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8002bb14",
+      "name": "battle_frame_target_action_dispatch",
+      "chunk": "chunk_0003.c",
+      "role": "per-frame target/effect/action dispatch: resets per-slot target globals, pairwise push-apart weighting, vampire-lifesteal HP apply, nurse-heal apply",
+      "evidence": "(q) / (al) / (ay)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8002da88",
+      "name": "collision_hit_pair_pass_active_vs_borgs",
+      "chunk": null,
+      "role": "generic collision pass: active-object vs borg-list pairing; collision gate (attackerRec.flagsB&0x4000)==0 || (targetRec.flagsB&0x2000)!=0",
+      "evidence": "mechanic M / mechanic O",
+      "confidence": "NAMED_ONLY",
+      "note": "not in _index.tsv"
+    },
+    {
+      "address": "0x8002db58",
+      "name": "collision_hit_pair_pass_active_vs_secondary",
+      "chunk": "chunk_0003.c",
+      "role": "generic collision pass: active-object vs secondary-object list pairing (owner/team/flag gates, no solidity flag)",
+      "evidence": "mechanic M / mechanic N / (al)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8002e2a8",
+      "name": "resolve_hitbox_target_effects_and_damage",
+      "chunk": "chunk_0003.c",
+      "role": "hit resolution: computes raw damage (type-mismatch quarter at +0x88), applies HP subtract, sets +0x684/688/68c 60-frame reaction timers, damage accumulators +0x41c/+0x42c",
+      "evidence": "(h) / (i) / (j) / (o) / (s) / (p)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8002f8dc",
+      "name": "zz_002f8dc_",
+      "chunk": "chunk_0003.c",
+      "role": "kill-event accounting: subtracts victim cost from side energy, decrements side count, records last-kill pointers, bumps kill/loss counters and team score",
+      "evidence": "(af) / (as)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x800300bc",
+      "name": "zz_00300bc_",
+      "chunk": "chunk_0003.c",
+      "role": "knockback DIRECTION computer: 5 authored vector-source modes -> yaw/pitch (BAM16) written to defender +0x284/+0x282, plus per-move angle trim",
+      "evidence": "(k) / (p)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8003a4b8",
+      "name": "FUN_8003a4b8",
+      "chunk": "chunk_0004.c",
+      "role": "hitbox shape-kind evaluator table entry 0 (PTR_FUN_802da740[0]): simple point/capsule geometry",
+      "evidence": "(at) / mechanic X",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8003ca48",
+      "name": "FUN_8003ca48",
+      "chunk": "chunk_0004.c",
+      "role": "hitbox shape-kind evaluator table entry 11: proximity sphere with squared-distance AOE falloff (ICBM/walking-bomb detonation candidate)",
+      "evidence": "(at)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8003cd5c",
+      "name": "zz_003cd5c_",
+      "chunk": "chunk_0004.c",
+      "role": "base-damage formula: 18-stage pipeline from move power through stat/rank/HP-ratio/type-matrix/handicap/combo-falloff/friendly-fire; all tables extracted",
+      "evidence": "(j) / (o) / (ah)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80045204",
+      "name": "zz_0045204_",
+      "chunk": "chunk_0005.c",
+      "role": "sin(BAM16) helper (used by knockback + scripted arcs + camera)",
+      "evidence": "(p) / (ac) / (ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80045238",
+      "name": "zz_0045238_",
+      "chunk": "chunk_0005.c",
+      "role": "cos(BAM16) helper (used by knockback + scripted arcs + camera)",
+      "evidence": "(p) / (ac) / (ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8004526c",
+      "name": "zz_004526c_",
+      "chunk": "chunk_0005.c",
+      "role": "tan(BAM16) helper (camera pitch)",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x800452e4",
+      "name": "FUN_800452e4",
+      "chunk": "chunk_0005.c",
+      "role": "direction-from-heading rebuild `(sin(yaw),0,cos(yaw))` BAM16 (camera trail fallback)",
+      "evidence": "(ad)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80046510",
+      "name": "zz_0046510_",
+      "chunk": "chunk_0005.c",
+      "role": "heading/angle arithmetic helper (turn-direction bucket, used by walk/turn handlers)",
+      "evidence": "(c) / (u) / (r)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8004beb8",
+      "name": "zz_004beb8_",
+      "chunk": "chunk_0006.c",
+      "role": "animation setter: writes actor's current anim by (limbMask, groupSel/bank, slot, frame window); the core (group,slot) anim dispatcher",
+      "evidence": "(ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8004cd24",
+      "name": "zz_004cd24_",
+      "chunk": "chunk_0006.c",
+      "role": "per-frame animation ADVANCE of current clip (returns completion via +0x1d0e); does not pick a new (group,slot)",
+      "evidence": "(c) / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8004ecb0",
+      "name": "FUN_8004ecb0",
+      "chunk": "chunk_0006.c",
+      "role": "nurse object callback trampoline: `PTR_FUN_802d1130[obj+0x18](obj)` — dispatches nurse heal logic",
+      "evidence": "(as) / (ax)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8004ed04",
+      "name": "FUN_8004ed04",
+      "chunk": "chunk_0006.c",
+      "role": "nurse heal table entry 0: dash/setup",
+      "evidence": "(ax)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8004ee58",
+      "name": "zz_004ee58_",
+      "chunk": "chunk_0006.c",
+      "role": "nurse heal table entry 1: target-state",
+      "evidence": "(ax)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8004eef4",
+      "name": "FUN_8004eef4",
+      "chunk": "chunk_0006.c",
+      "role": "nurse heal table entry 3: effect (tail-calls the undecoded HP-write path)",
+      "evidence": "(ax)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005568c",
+      "name": "zz_005568c_",
+      "chunk": "chunk_0006.c",
+      "role": "invincibility timer countdown: per-frame `if borg[0x720]>0: borg[0x720] -= borg[0x1dcc]; clamp 0; clear flag borg[0x272]` (the stfs write is at instr 0x80055c00)",
+      "evidence": "(a) / (s)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80055f90",
+      "name": "zz_0055f90_",
+      "chunk": "chunk_0006.c",
+      "role": "HP/ammo stat loader: writes max/cur HP (+0x1c4/1c6/1c8) and weapon ammo/charge from stat row (&PTR_DAT_802f2988)[family] indexed by variant/level",
+      "evidence": "(ag)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x800562b8",
+      "name": "FUN_800562b8",
+      "chunk": "chunk_0007.c",
+      "role": "per-borg gauge/weapon-cell init + command-struct copy: inits 3 weapon cells from stat row, copies actor+0x4b0 command bytes to +0x660/+0x661/+0x591",
+      "evidence": "(ag) / mechanic A / mechanic P",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005809c",
+      "name": "zz_005809c_",
+      "chunk": "chunk_0007.c",
+      "role": "borg-pointer store: writes each active borg pointer into the 6-entry actor array 0x803C4E84, records slot at borg+0x3e4 (stride 0x1e00)",
+      "evidence": "(z) / (aa)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005b2b8",
+      "name": "zz_005b2b8_",
+      "chunk": "chunk_0007.c",
+      "role": "Power Burst consume: requires +0x6fb!=0, attempts pair-match via zz_005b678_ (pair table 0x802d352c), sets +0x6fc=1 (2x out / 0.5x in) and +0x6fa=1",
+      "evidence": "(ai) / (aj) / mechanic S",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005bbc0",
+      "name": "zz_005bbc0_",
+      "chunk": "chunk_0007.c",
+      "role": "death entry: clears active status (+0x18=2), sets 0x5e0|=0x80000000, clears deploy mask bit, plays reaction cue id 9, runs death anim via the state table",
+      "evidence": "(af) / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005bccc",
+      "name": "zz_005bccc_",
+      "chunk": "chunk_0007.c",
+      "role": "state/death dispatcher (alias view): `PTR_FUN_802d3570[borg[0x540]](borg)`; death re-runs the same 35-slot table",
+      "evidence": "(u) / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005be08",
+      "name": "FUN_8005be08",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 0: spawn drop-in phase 0 (counts +0x558 descent timer 20.0->0)",
+      "evidence": "(u) slot0 / (af) / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005bec8",
+      "name": "FUN_8005bec8",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 1: spawn drop-in phase 1 (resets +0x558=15.0, plays ally reaction cue id 8, calls dispatch_slot_action_update)",
+      "evidence": "(u) slot1 / (af) / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005bf6c",
+      "name": "FUN_8005bf6c",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 2: spawn drop-in phase 2 / landing (counts +0x558 15.0->0, clears spawn flags, become controllable)",
+      "evidence": "(u) slot2 / (af) / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005c028",
+      "name": "zz_005c028_",
+      "chunk": "chunk_0007.c",
+      "role": "spawn phase-0 init selector: picks descent timer 20.0/30.0 by borg[0x6fe]",
+      "evidence": "(af)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005c290",
+      "name": "zz_005c290_",
+      "chunk": "chunk_0007.c",
+      "role": "state dispatcher (alias view): `PTR_FUN_802d3580[borg[0x591]](borg)`; also grants unconditional 60.0 balance-break invincibility",
+      "evidence": "(u) / (as)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005c4a4",
+      "name": "FUN_8005c4a4",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 4: idle/neutral handler (calls idle-decision zz_005f00c_)",
+      "evidence": "(u) slot4 / (ba)",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x8005c4c8",
+      "name": "FUN_8005c4c8",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 5: idle-with-guard-available variant (zz_005f00c_ + guard-flag promotion)",
+      "evidence": "(u) slot5 / (ba)",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x8005c530",
+      "name": "FUN_8005c530",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 6: idle variant promoting to guard-entry slots 24/25 via parity check",
+      "evidence": "(u) slot6 / (ba)",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x8005c5ac",
+      "name": "FUN_8005c5ac",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 7: third idle/neutral flavor (zz_005f00c_ only)",
+      "evidence": "(u) slot7 / (ba)",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x8005c5d0",
+      "name": "FUN_8005c5d0",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 8: block/guard-start handler (enters action 4 via zz_00ea2c8_, gated on +0x1da bit 0x10)",
+      "evidence": "(u) slot8 / (ba)",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x8005c694",
+      "name": "zz_005c694_",
+      "chunk": "chunk_0007.c",
+      "role": "per-frame state dispatcher: `PTR_FUN_802d35a4[borg[0x6fe]](borg)` — real per-frame state selector is borg+0x6fe",
+      "evidence": "(u)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005c7f0",
+      "name": "FUN_8005c7f0",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 9/13: return-to-neutral trampoline (calls zz_006a474_)",
+      "evidence": "(u) slot9,13 / (ba)",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x8005c810",
+      "name": "FUN_8005c810",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 10/14: walk/turn-direction handler; plays group-0 locomotion, direction-indexed slots 0..4 via zz_005f188_(-0x80)",
+      "evidence": "(u) slot10,14 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005c95c",
+      "name": "FUN_8005c95c",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 11/15: walk/turn sibling; group-0 slots 5..8 via zz_005f188_(-0x80)",
+      "evidence": "(u) slot11,15 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005ca80",
+      "name": "FUN_8005ca80",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 12/16/17: walk/turn sibling (distance-biased); group-0 slots 9..11",
+      "evidence": "(u) slot12,16,17 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005cc00",
+      "name": "zz_005cc00_",
+      "chunk": "chunk_0007.c",
+      "role": "state-table slot 18 handler: attack-startup / directional-turn-then-commit; plays group-1 attack anim via zz_005f188_(-0x7f)",
+      "evidence": "(b) / (u) slot18 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005ce14",
+      "name": "FUN_8005ce14",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 19: attack-commit follow-up (velocity atan2 turn); group-1 attack slots 9..11",
+      "evidence": "(u) slot19 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005d0a8",
+      "name": "FUN_8005d0a8",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 20: short attack action returning to slot 19; group-1 attack slot 13+dir",
+      "evidence": "(u) slot20 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005d224",
+      "name": "FUN_8005d224",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 21: slot-18 wrapper that re-grants 60.0 invincibility then tail-calls zz_005cc00_",
+      "evidence": "(u) slot21 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005d258",
+      "name": "FUN_8005d258",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 22: longer attack/special windup; subtable-2 anim (0x82, slot +0x1d0f); exits to slot 20",
+      "evidence": "(u) slot22 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005d494",
+      "name": "FUN_8005d494",
+      "chunk": "chunk_0007.c",
+      "role": "per-state handler: sets invincibility borg[0x720]=60.0 on entry AND re-arms it every frame; core melee-attack-active handler (state-table slot 23)",
+      "evidence": "(a) / (b) / (u) slot23 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005d9d8",
+      "name": "FUN_8005d9d8",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 24: attack-recovery/end-lag (velocity damping FLOAT_80437474); group-1 slot 0x11+dir",
+      "evidence": "(u) slot24 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005db44",
+      "name": "FUN_8005db44",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 25: hit-reaction/knockback entry (snaps facing away from +0x284); group-0 slot 13",
+      "evidence": "(u) slot25 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005dc24",
+      "name": "FUN_8005dc24",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 26: hit-reaction variant (restores +0x50 from per-borg table); group-0 slot 14",
+      "evidence": "(u) slot26 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005dd10",
+      "name": "FUN_8005dd10",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 27/28: hit-react recovery / knockdown-adjacent (+0x568 timer); group-1 slot 0x13/0x17",
+      "evidence": "(u) slot27,28 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005df2c",
+      "name": "FUN_8005df2c",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 29: hit-react sibling of slot 25; group-0 slot 13",
+      "evidence": "(u) slot29 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005dffc",
+      "name": "FUN_8005dffc",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 30: full knockdown/getting-up sequence (all +0x568/56c/570 arc fields); group-0 slot 15",
+      "evidence": "(u) slot30 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005e31c",
+      "name": "FUN_8005e31c",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 31: scripted per-borg-type landing/special-body sequence; default-group slots 0xe/0xf",
+      "evidence": "(u) slot31 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005e5a8",
+      "name": "FUN_8005e5a8",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 32: big-special/scripted handler (sets +0x7de=1, +0x550 countdown); transitions to walk family slot 14",
+      "evidence": "(u) slot32 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005e868",
+      "name": "FUN_8005e868",
+      "chunk": "chunk_0007.c",
+      "role": "state slot 33: scripted spawn/warp-entrance with matrix transform + arc Y-velocity (zz_0045204_/zz_0045238_)",
+      "evidence": "(u) slot33 / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005ec04",
+      "name": "zz_005ec04_",
+      "chunk": "chunk_0007.c",
+      "role": "state-transition primitive `enterState(borg,N)`: sets borg[0x6fe]=N and zeroes borg[0x544..0x547] local phase counter",
+      "evidence": "(u)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005f00c",
+      "name": "zz_005f00c_",
+      "chunk": "chunk_0007.c",
+      "role": "idle/movement decision handler: computes next +0x6fe movement sub-state from input/velocity; reads hit-timer +0x68c",
+      "evidence": "(s) / (u) / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8005f188",
+      "name": "zz_005f188_",
+      "chunk": "chunk_0007.c",
+      "role": "animation-request wrapper: play (group=groupSel&0x7f, slot) unless already playing; calls zz_004beb8_",
+      "evidence": "(c) / (ba)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80060b60",
+      "name": "FUN_80060b60",
+      "chunk": "chunk_0007.c",
+      "role": "respawn/ring-out reset helper: writes +0x720 = 30.0 (if +0x6cb==1) else 60.0; zeroes +0x272",
+      "evidence": "(s) / (af) / (as)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80066298",
+      "name": "zz_0066298_",
+      "chunk": "chunk_0008.c",
+      "role": "type-category lookup: normalizes object+1000 (family,variant) bytes through remap table 0x802f2e28 to a canonical 0-19 category",
+      "evidence": "(k) / (l) / (w)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80066ec0",
+      "name": "zz_0066ec0_",
+      "chunk": "chunk_0008.c",
+      "role": "turn-interpolation setup: borg[0x7e] = borg[0x5aa]/steps (per-tick turn increment)",
+      "evidence": "(c) / (r)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80066f1c",
+      "name": "zz_0066f1c_",
+      "chunk": "chunk_0008.c",
+      "role": "turn-interpolation apply: adds per-tick delta +0x7e to heading +0x72, decrements remaining +0x5aa, snap-clamps on completion",
+      "evidence": "(c) / (r)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x800670dc",
+      "name": "zz_00670dc_",
+      "chunk": "chunk_0008.c",
+      "role": "heading/turn function on +0x72/+0x5e0 with PSVEC/PSQUAT calls (facing role, not animation)",
+      "evidence": "(c) / (r)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x800677b0",
+      "name": "zz_00677b0_",
+      "chunk": "chunk_0008.c",
+      "role": "secondary borg helper returning bool (used by state slot 32)",
+      "evidence": "(c) / (u)",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x800680d4",
+      "name": "dispatch_slot_action_update",
+      "chunk": "chunk_0008.c",
+      "role": "slot-action update dispatch (final dispatch stage; trivial handler-table wiring)",
+      "evidence": "(q)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80069814",
+      "name": "FUN_80069814",
+      "chunk": "chunk_0009.c",
+      "role": "Power Burst arm gate: if (actor+0x5d4 & 0x200) sets +0x6fb=6 (arm window)",
+      "evidence": "(ai) / mechanic S",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x800699d8",
+      "name": "FUN_800699d8",
+      "chunk": "chunk_0009.c",
+      "role": "attack-command decision brain: tests transformed button word actor+0x5d4 in priority order, sets command type actor+0x585 in {1,2,3,5}",
+      "evidence": "(ai) / mechanic A",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006a104",
+      "name": "zz_006a104_",
+      "chunk": "chunk_0009.c",
+      "role": "command executor: looks up (type,subtype) through per-actor action table at +0x4ec and triggers the action",
+      "evidence": "mechanic A / mechanic C",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006a474",
+      "name": "zz_006a474_",
+      "chunk": "chunk_0009.c",
+      "role": "return-to-neutral trampoline (calls zz_006a750_ state transition)",
+      "evidence": "(ba) / (u)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006a8c0",
+      "name": "zz_006a8c0_",
+      "chunk": "chunk_0009.c",
+      "role": "command-struct copy on player-controlled path (actor+0x4b0 bytes -> +0x660/+0x661/+0x591)",
+      "evidence": "mechanic A",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006ab04",
+      "name": "start_forced_move_to_point",
+      "chunk": "chunk_0009.c",
+      "role": "forced-move: walks toward an already-computed world vector (magnet/pull consumer)",
+      "evidence": "(q) / (al)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006abd4",
+      "name": "react_to_slot_target_object",
+      "chunk": "chunk_0009.c",
+      "role": "hit-reactive alert/notice animation entry (reads last-hit slot target; NOT a scan-select lock-on)",
+      "evidence": "(q)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006ace8",
+      "name": "start_status_reaction_by_side",
+      "chunk": "chunk_0009.c",
+      "role": "side-variant reaction entry (enters status/action state, plays cue)",
+      "evidence": "(q)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006dbe0",
+      "name": "zz_006dbe0_",
+      "chunk": "chunk_0009.c",
+      "role": "ammo fire gate (actor, weaponIdx, cost, actuallyFire): blocks if cur<cost, decrements, dry-run mode; infinite when max==0",
+      "evidence": "(ai) / mechanic P",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006dcc0",
+      "name": "zz_006dcc0_",
+      "chunk": "chunk_0009.c",
+      "role": "per-frame ammo refill: rate float +0x768 (x burst multiplier when +0x6fc set); type 1 gradual, type<=0 all-at-once on timer expiry",
+      "evidence": "(ai) / (ax) / mechanic P",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8006de10",
+      "name": "zz_006de10_",
+      "chunk": "chunk_0009.c",
+      "role": "one-shot ammo grant (cur+=1 clamp max): deployed-object-return refill path",
+      "evidence": "(ai) / mechanic P",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8008a65c",
+      "name": "FUN_8008a65c",
+      "chunk": "chunk_0013.c",
+      "role": "object frame dispatch: rehit mechanism (record+0x16 reloads per-object counter +0x4e), actor-gated despawn (+0x10=2)",
+      "evidence": "mechanic O",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8008ab30",
+      "name": "zz_008ab30_",
+      "chunk": "chunk_0013.c",
+      "role": "hit-bin reader (remap A / body hurtboxes); container format confirmed, per-move binding open",
+      "evidence": "mechanic X",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x8008ac80",
+      "name": "zz_008ac80_",
+      "chunk": "chunk_0013.c",
+      "role": "hit-bin reader (remap B / 64 attack records, frame-windowed); container format confirmed, per-move binding open",
+      "evidence": "mechanic X",
+      "confidence": "INFERRED"
+    },
+    {
+      "address": "0x8008c440",
+      "name": "zz_008c440_",
+      "chunk": "chunk_0013.c",
+      "role": "installs a pre-built per-player view matrix onto the HSD camera object (battle viewports)",
+      "evidence": "(ab)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8008c88c",
+      "name": "zz_008c88c_",
+      "chunk": "chunk_0013.c",
+      "role": "builds fixed menu-camera view via C_MTXLookAt (static eye/interest vectors)",
+      "evidence": "(ab)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8008c9d4",
+      "name": "zz_008c9d4_",
+      "chunk": "chunk_0013.c",
+      "role": "builds fixed special/results-camera view via C_MTXLookAt",
+      "evidence": "(ab)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8008e7a0",
+      "name": "THPSimpleAudioStop",
+      "chunk": "chunk_0014.c",
+      "role": "THP video audio stop (engine)",
+      "evidence": "(g)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8010d880",
+      "name": "set_slot_action_handler",
+      "chunk": "chunk_0030.c",
+      "role": "slot-action handler installer (dispatch wiring)",
+      "evidence": "(q)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80195fbc",
+      "name": "FUN_80195fbc",
+      "chunk": "chunk_0048.c",
+      "role": "challenge state 0: init",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80196030",
+      "name": "FUN_80196030",
+      "chunk": "chunk_0048.c",
+      "role": "challenge state 1: menu poll",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80196188",
+      "name": "FUN_80196188",
+      "chunk": "chunk_0048.c",
+      "role": "challenge state 2: box-load",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x801962c4",
+      "name": "FUN_801962c4",
+      "chunk": "chunk_0048.c",
+      "role": "challenge state 3 / build_challenge_battle_setup: roster builder (enemy/ally team generation, slot roster-entry table writes)",
+      "evidence": "(ae) / (n)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8019688c",
+      "name": "FUN_8019688c",
+      "chunk": "chunk_0048.c",
+      "role": "challenge state 4: in-battle dispatcher",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x801968cc",
+      "name": "FUN_801968cc",
+      "chunk": "chunk_0048.c",
+      "role": "challenge in-battle sub: load-wait",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80196948",
+      "name": "FUN_80196948",
+      "chunk": "chunk_0048.c",
+      "role": "challenge in-battle sub: run",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x801969a0",
+      "name": "FUN_801969a0",
+      "chunk": "chunk_0048.c",
+      "role": "challenge post-battle branch: advance on (mask & 1<<playerSide) && mask<=2; draw/loss -> fail screen",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80196a9c",
+      "name": "FUN_80196a9c",
+      "chunk": "chunk_0048.c",
+      "role": "challenge state 5: clear",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80196cec",
+      "name": "FUN_80196cec",
+      "chunk": "chunk_0048.c",
+      "role": "challenge state 6: fail",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80196dac",
+      "name": "zz_0196dac_",
+      "chunk": "chunk_0048.c",
+      "role": "stage rotation: picks stage byte [0x1c] from 11-entry pool, re-rolls while equal to previous, sets variant [0x1d]/[0x1e]",
+      "evidence": "(ae)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80196eb8",
+      "name": "zz_0196eb8_",
+      "chunk": "chunk_0048.c",
+      "role": "spawn-pool picker: uniformly-random 16-bit spawn id from a -1-terminated pool array reached via PTR_DAT_80380804[group]",
+      "evidence": "(ae) / (n)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x801999c8",
+      "name": "zz_01999c8_",
+      "chunk": "chunk_0048.c",
+      "role": "spawn_challenge_menu_object_set: spawns banner/object rows, clears active-object counter",
+      "evidence": "(x)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80199da0",
+      "name": "zz_0199da0_",
+      "chunk": "chunk_0048.c",
+      "role": "is_global_menu_mode_5: hides challenge menu objects while global menu mode == 5",
+      "evidence": "(x)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80199dc0",
+      "name": "FUN_80199dc0",
+      "chunk": "chunk_0048.c",
+      "role": "challenge menu object-0 phase timings (10-frame)",
+      "evidence": "(x)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x80199ea8",
+      "name": "FUN_80199ea8",
+      "chunk": "chunk_0048.c",
+      "role": "challenge menu object-0 two-frame flicker on selected/banner settle",
+      "evidence": "(x)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8019a3f0",
+      "name": "FUN_8019a3f0",
+      "chunk": "chunk_0048.c",
+      "role": "challenge menu slot/card object init (15-frame entrance timer at +0x1c)",
+      "evidence": "(x)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x8019a8f0",
+      "name": "FUN_8019a8f0",
+      "chunk": "chunk_0048.c",
+      "role": "challenge menu slot/card object update",
+      "evidence": "(x)",
+      "confidence": "DERIVED_ROM"
+    },
+    {
+      "address": "0x801a7640",
+      "name": "nlQSort<20AnimAudioEventLookup>(AnimAudioEventLookup",
+      "chunk": "chunk_0050.c",
+      "role": "generic C++ sort-template instantiation (NOT a decoded audio-event table — confirmed dead end)",
+      "evidence": "(v) / (g)",
+      "confidence": "NAMED_ONLY",
+      "note": "prose alias: nlQSort<20AnimAudioEventLookup>"
+    },
+    {
+      "address": "0x801c7b68",
+      "name": "sndSeqContinue",
+      "chunk": "chunk_0055.c",
+      "role": "sequence-audio continue (engine audio entry point)",
+      "evidence": "(g)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8021379c",
+      "name": "zz_021379c_",
+      "chunk": "chunk_0065.c",
+      "role": "PADRead (controller input read; live breakpoint anchor)",
+      "evidence": "(ax)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8022caf8",
+      "name": "cPoseAccumulator::GetNodeMatrix(",
+      "chunk": "chunk_0067.c",
+      "role": "HSD pose-accumulator node-matrix getter (skeleton)",
+      "evidence": "(2)",
+      "confidence": "NAMED_ONLY",
+      "note": "prose alias: cPoseAccumulator::GetNodeMatrix"
+    },
+    {
+      "address": "0x80243b90",
+      "name": "gnt4-HSD_AObjReqAnim",
+      "chunk": "chunk_0070.c",
+      "role": "HSD animation request",
+      "evidence": "(d)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x80243bd0",
+      "name": "gnt4-HSD_AObjInterpretAnim",
+      "chunk": "chunk_0070.c",
+      "role": "HSD animation-object interpreter: advances an animation's frame and evaluates FObj tracks",
+      "evidence": "(d) / (g)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x802489f4",
+      "name": "gnt4-FObjLoadData",
+      "chunk": "chunk_0071.c",
+      "role": "HSD FObj keyframe data loader",
+      "evidence": "(d)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x80249ac4",
+      "name": "gnt4-HSD_FObjInterpretAnim-bl",
+      "chunk": "chunk_0071.c",
+      "role": "HSD FObj keyframe/curve track interpreter",
+      "evidence": "(d)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8024d224",
+      "name": "gnt4-HSD_JObjMakeMatrix",
+      "chunk": "chunk_0071.c",
+      "role": "HSD joint local-matrix builder",
+      "evidence": "(d)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8024ea64",
+      "name": "gnt4-HSD_JObjAnim",
+      "chunk": "chunk_0071.c",
+      "role": "HSD joint animation apply",
+      "evidence": "(d)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8024ebc8",
+      "name": "gnt4-JObjAnimAll",
+      "chunk": "chunk_0071.c",
+      "role": "HSD apply animation to whole joint tree",
+      "evidence": "(d)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8024f07c",
+      "name": "gnt4-HSD_JObjDispAll",
+      "chunk": "chunk_0071.c",
+      "role": "HSD joint-tree render/display",
+      "evidence": "(d)",
+      "confidence": "NAMED_ONLY"
+    },
+    {
+      "address": "0x8024f5c8",
+      "name": "gnt4-HSD_JObjSetupMatrix_",
+      "chunk": "chunk_0071.c",
+      "role": "HSD joint matrix setup",
+      "evidence": "(d)",
+      "confidence": "NAMED_ONLY"
+    }
+  ]
+}
