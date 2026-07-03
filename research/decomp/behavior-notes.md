@@ -2722,3 +2722,51 @@ labeled `special_s0` in the main tree (e.g. pl0000, pl0615: `anim_g04_s00_specia
 `PREFERRED_LABELS.down = /^down_s0$/` misses them and "down" falls back to a hit/guard clip
 (the exact bug main.ts:432-439 describes). Fixing it is an asset RE-BAKE/relabel (g4s0 ->
 `down_s0`), which is in-progress in a separate worktree — left to that pipeline, not touched here.
+
+### (bc) Movement physics DECODED as per-borg data-driven + knockback MAGNITUDE found (resolves T9, corrects §s "not findable") (2026-07-03)
+
+Corpus dig into the now-located physics functions (integrator FUN_80067310, gravity-snap
+zz_0068030_) overturns §s's "movement constants not findable" conclusion: they were not GLOBAL
+constants — **movement is per-borg data-driven**, seeded from each borg's `pl####data.bin`
+parameter page (actor+0x4ac indirect). Values below are read from the DOL SDA float pool and the
+data.bin files (all verified in-corpus; full table in
+`research/decomp/data/movement-physics-constants.json`).
+
+**KNOCKBACK MAGNITUDE — RESOLVED, resolves trace T9 statically (the port's oldest TUNED debt).**
+The port headers repeatedly said "knockback magnitude NOT FOUND — needs trace T9 / only direction
+is computed." That is now CORRECTED: magnitude is **strength-indexed linear tables**, verified in
+chunk_0007.c:
+- `+0x44 (h-speed) = fVar1 * DAT_802dd8a0[strength]` (chunk_0007.c:5568, launch fn zz_005ec20_).
+  `DAT_802dd8a0[0..15] = strength*7` = 0,7,14,…,105.
+- velocity magnitude `= DAT_802d3664[strength]` (chunk_0007.c:5630, FUN_8005ed38).
+  `DAT_802d3664[0..15] = (strength+1)*8` = 8,16,…,128.
+- strength byte = **actor+0x702** (clamped 0..15; read at chunk_0007.c:5555/5617).
+- launch vertical uses FLOAT_80437444=0.0 or global gravity FLOAT_80437470=-1.2 with h-decel
+  FLOAT_804374cc=-0.10, decel denominator FLOAT_80437490=20.0.
+So knockback = direction (mode-1, already ported) × a strength-scaled magnitude, NOT a flat
+scalar. DERIVED_ROM.
+
+**Global SDA physics constants (DOL floats, verified used in-corpus):**
+- **Max fall speed = -35.0** (`FLOAT_804375f0`, airborne vertical clamp chunk_0008.c:3823-3861).
+  Port's `JUMP.MAX_FALL = 8.0` (TUNED). NOTE the port is ~4× world-rescaled to its 22.0 ground
+  anchor, so raw ROM values must be applied IN THE PORT'S SCALE, not swapped 1:1.
+- Friction/decel blends: FLOAT_80437568=0.98 / _56c=0.02 (idle decay), _570=0.90 / _588=0.10
+  (approach-brake), _51c=0.80 (landing h-speed retention), h-speed floor _5d0=0.0.
+- Knockback gravity global FLOAT_80437470=-1.2.
+
+**Per-borg movement (pl####data.bin page):** gravity slots +0x68/+0x6c/+0x70 (fall gravity is
++0x6c, ≈ -0.5..-1.0; e.g. pl0615 G RED +0x6c=-1.0); jump impulse +0x48 (9.0..25.0; G RED=15.0);
+max ground speed +0x2c (2.6..12.0; G RED=12.0); speed-stat/min-turn-speed +0x50 (G RED=6.0,
+matching the "speed 6" attribution of the 22.0 anchor); ground accel +0x44 (G RED=0.80). Gravity
+is applied via FUN_80067310 as `+0x48 += timescale * (+0x50 * coeff)` where coeff = FLOAT_80437510=1.0
+(normal) or FLOAT_804374ec=0.0 (**flight = gravity disabled**, not a thrust model).
+
+**Honest negatives (unchanged):** DASH — re-confirmed NO dash/dodge state exists in the ROM (the
+port's DASH.* stays a TUNED port-ism). AIR-JUMP/boost — no dedicated thrust/fuel constant; flight
+is the gravity-coeff-0 toggle above, so BOOST_* stays TUNED. Stage floor plane DAT_8043625c+0x34
+is a runtime BSS pointer (per-stage, resolved at load).
+
+**Portability:** these are real DERIVED values but the port's ~4× rescale means a port change must
+reconcile scale first (raw 35.0 vs port 8.0 is ≈4.4×, consistent with the rescale — the port's 8.0
+may already be ~correct). The clean structural win to port is the knockback MAGNITUDE model
+(strength-indexed, not flat) — see the tracker's T9 row, now DERIVED not trace-blocked.

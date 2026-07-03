@@ -2,8 +2,8 @@
   "_meta": {
     "generated_note": "Consolidated source map of every Gotcha Force (GG4E/NTSC-U) game-logic function the project's decompilation research has assigned a concrete role. Built by cross-referencing behavior-notes.md sections (a)-(bb), attack-mechanics-findings.md / -ledger.json, and state-anim-dispatch-802d3570.json against ghidra-export/_index.tsv for canonical name+chunk. One entry per address (deduped). Only functions with an identifiable game-logic role are included; addresses cited only in passing (constants, data-table addresses, mid-function instruction PCs, engine calls named without a role) were skipped -- see cited_addresses_skipped_roleless.",
     "total_corpus_functions": 11972,
-    "identified_count": 213,
-    "coverage_percent": 1.78,
+    "identified_count": 242,
+    "coverage_percent": 2.02,
     "confidence_legend": {
       "DERIVED_ROM": "role read directly from decompiled C / raw-ROM data (matches the notebook's DERIVED tier)",
       "INFERRED": "role inferred from field reuse / call shape / handler routing / confirmed asset-container decode, not a direct gameplay-code read",
@@ -17,7 +17,7 @@
       "research/decomp/data/state-anim-dispatch-802d3570.json",
       "research/decomp/ghidra-export/_index.tsv"
     ],
-    "last_expanded": "2026-07-03: +80 via actor/ai/fx corpus-analysis clusters"
+    "last_expanded": "2026-07-03: menu/force/sound + physics clusters"
   },
   "functions": [
     {
@@ -1807,6 +1807,267 @@
       "evidence": "chunk_0003.c:8344 `if (*(char *)(param_2 + 0x2ae) == '\\0')` :8346 `*(undefined1 *)(param_2 + 0x2ae) = 4;` :8348-8357 speed-thresholded `uVar2 = uVar2 + 1;`",
       "confidence": "INFERRED",
       "source_pass": "fx-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80017918",
+      "name": "FUN_80017918",
+      "chunk": "chunk_0002.c:167",
+      "role": "MENU: top-level scene/mode controller (title -> main-menu). On first entry memsets the scene-state block PTR_DAT_8043393c (0x20 bytes) and calls set_global_menu_mode(0); every frame dispatches the current top scene via PTR_FUN_802c4a00[*PTR_DAT_8043393c].",
+      "evidence": "gnt4_memset(PTR_DAT_8043393c,0,0x20); ... set_global_menu_mode(0); ... uVar1 = (*(code *)(&PTR_FUN_802c4a00)[(char)*PTR_DAT_8043393c])();",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800179e8",
+      "name": "FUN_800179e8",
+      "chunk": "chunk_0002.c:201",
+      "role": "MENU: title/boot scene-0 poll -> on input (zz_01c7908_ != 0) advances top scene state PTR_DAT_80433930[0] to 2 and flags [1]=0xff (scene transition request).",
+      "evidence": "iVar1 = zz_01c7908_(); if (iVar1 != 0) { *PTR_DAT_80433930 = 2; PTR_DAT_80433930[1] = 0xff; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80017a28",
+      "name": "FUN_80017a28",
+      "chunk": "chunk_0002.c:218",
+      "role": "MENU: sub-scene dispatcher for scene-slot [1] (PTR_DAT_8043393c[1]) via label table PTR_LAB_802c4a0c. Second tier of the title/main-menu state machine.",
+      "evidence": "(*(code *)(&PTR_LAB_802c4a0c)[(char)PTR_DAT_8043393c[1]])();",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80017a78",
+      "name": "FUN_80017a78",
+      "chunk": "chunk_0002.c:228",
+      "role": "MENU: sub-scene dispatcher for scene-slot [2] (PTR_DAT_8043393c[2]) via table PTR_FUN_802c4a1c. Third tier of the title/main-menu state machine.",
+      "evidence": "(*(code *)(&PTR_FUN_802c4a1c)[(char)PTR_DAT_8043393c[2]])();",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8008c3a0",
+      "name": "set_global_menu_mode",
+      "chunk": "chunk_0013.c:2608",
+      "role": "MENU: global menu-mode setter. Writes PTR_DAT_80433930[0x3e] = mode. Called from every screen (chunks 0002/0003/0012/0014/0019/0043-0047/0053/0055/0058) with mode ids 0..9 to hand control between main/force/box/versus/challenge/results screens.",
+      "evidence": "void set_global_menu_mode(undefined1 menu_mode) { PTR_DAT_80433930[0x3e] = menu_mode; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8008c3ac",
+      "name": "dispatch_global_menu_mode",
+      "chunk": "chunk_0013.c:2617",
+      "role": "MENU: global menu-mode state machine driver. Reads mode PTR_DAT_80433930[0x3e] and dispatches the per-mode screen controller via PTR_FUN_802da780[mode]. Sibling to dispatch_challenge_flow_state; this is the top of the screen-level state tables.",
+      "evidence": "menu_mode = (char)PTR_DAT_80433930[0x3e]; (*(code *)(&PTR_FUN_802da780)[menu_mode])();",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8002821c",
+      "name": "FUN_8002821c",
+      "chunk": "chunk_0003.c:3516",
+      "role": "MENU: screen controller dispatched off PTR_DAT_80433930[0x32] via table PTR_FUN_802cfdc4. One of the sub-screen state routers wrapped by the render begin/end pair zz_008c098_/zz_0027ae8_.",
+      "evidence": "(*(code *)(&PTR_FUN_802cfdc4)[(char)PTR_DAT_80433930[0x32]])();",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80028264",
+      "name": "zz_0028264_",
+      "chunk": "chunk_0003.c:3529",
+      "role": "MENU/FORCE: force-and-box screen driver. Sets busy flag PTR_DAT_80433930[0x42]=1, dispatches the force/box screen state via PTR_FUN_802cfde0[*PTR_DAT_80433934] (PTR_DAT_80433934 is the force/box work block), and increments a per-screen frame counter at +0xa8.",
+      "evidence": "PTR_DAT_80433930[0x42] = 1; (*(code *)(&PTR_FUN_802cfde0)[(char)*PTR_DAT_80433934])(); *(int *)(PTR_DAT_80433934 + 0xa8) = *(int *)(PTR_DAT_80433934 + 0xa8) + 1;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8018f56c",
+      "name": "zz_018f56c_",
+      "chunk": "chunk_0047.c:1345",
+      "role": "FORCE-SELECT: force/box page dispatcher. Clears force-work busy flag PTR_DAT_80433934[0x45] and dispatches the current force-select page via PTR_FUN_8036ecb8[*(short*)PTR_DAT_80433944] (PTR_DAT_80433944[0] = current page index). This is the selection reader the challenge poll (0x80196030) calls to route the box screen.",
+      "evidence": "PTR_DAT_80433934[0x45] = 0; (*(code *)(&PTR_FUN_8036ecb8)[*(short *)PTR_DAT_80433944])();",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8018f620",
+      "name": "FUN_8018f620",
+      "chunk": "chunk_0047.c:1372",
+      "role": "FORCE-SELECT: secondary page dispatcher for sub-index PTR_DAT_80433944[2] via table PTR_FUN_804356b8. Parallel page pointer to the primary +0 index used by zz_018f56c_.",
+      "evidence": "(*(code *)(&PTR_FUN_804356b8)[*(short *)(PTR_DAT_80433944 + 2)])();",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8018f6c4",
+      "name": "FUN_8018f6c4",
+      "chunk": "chunk_0047.c:1414",
+      "role": "FORCE-SELECT: page-0 exit handler. On confirm (zz_000a3c4_==0) advances primary page index PTR_DAT_80433944[0], zeroes sub-index +2, and returns to menu mode 0 via set_global_menu_mode(0).",
+      "evidence": "*(short *)PTR_DAT_80433944 = *(short *)PTR_DAT_80433944 + 1; *(undefined2 *)(PTR_DAT_80433944 + 2) = 0; ... uVar6 = set_global_menu_mode(0);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8018f954",
+      "name": "FUN_8018f954",
+      "chunk": "chunk_0047.c:1524",
+      "role": "FORCE-SELECT: page advance with player-count branch. On confirm advances page index +2, resets +6, and sets sub-page +4 to 0 for 1-player (PTR_DAT_80433944[0x17]==0) or 3 for the 2-player/versus layout. [0x17] is the player-count/mode flag.",
+      "evidence": "*(short *)(PTR_DAT_80433944 + 2) = *(short *)(PTR_DAT_80433944 + 2) + 1; ... if (PTR_DAT_80433944[0x17] == '\\0') { *(undefined2 *)(PTR_DAT_80433944 + 4) = 0; } else { *(undefined2 *)(PTR_DAT_80433944 + 4) = 3; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8018f8bc",
+      "name": "FUN_8018f8bc",
+      "chunk": "chunk_0047.c:1498",
+      "role": "FORCE-SELECT: sub-page-4 initializer. Advances sub-index +4, sets a slot-count field +0x2c to 8 (1P) or 4 (2P) keyed on player-count flag [0x17], then registers menu quads from the -1-terminated layout table DAT_8036ec78 via zz_0191938_.",
+      "evidence": "if (PTR_DAT_80433944[0x17] == '\\0') { PTR_DAT_80433944[0x2c] = 8; } else { PTR_DAT_80433944[0x2c] = 4; } ... pcVar1 = &DAT_8036ec78; while(true){ if (*pcVar1 < '\\0') break; zz_0191938_((int)*pcVar1,pcVar1[1]); pcVar1 = pcVar1 + 2; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8018facc",
+      "name": "FUN_8018facc",
+      "chunk": "chunk_0047.c:1567",
+      "role": "FORCE-SELECT: slot cursor navigation + confirm/cancel handler. Reads controller flags from slot data (+slot*0x80+0x10e); moves the vertical cursor [0x15] within [0,2] and plays cursor SFX 0x77 on move; on confirm (flag 0x180) advances page +6 and plays SFX 0x7a; on cancel (flag 0x200) restores saved page/sub-page and plays SFX 0x7b. slot base = PTR_DAT_80433944 + slot*0x80 + 0x100.",
+      "evidence": "uVar1 = *(ushort *)(PTR_DAT_80433944 + (char)PTR_DAT_80433944[0x14] * 0x80 + 0x10e); ... if (iVar2 != (char)PTR_DAT_80433944[0x15]) { PTR_DAT_80433944[0x15] = (char)iVar2; zz_00f0468_(0,0x77,0); } ... if ((uVar1 & 0x180) != 0) { ... zz_00f0468_(0,0x7a,0); } else { ... zz_00f0468_(0,0x7b,0); }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8016e694",
+      "name": "zz_016e694_",
+      "chunk": "chunk_0043.c:5362",
+      "role": "FORCE-SELECT: per-slot borg-state loader. Writes slot species id (+0x3c), unpacks the slot's unlock/availability bitmask from the collection table DAT_803c727c/DAT_803c7291[slot*], then for each of 16 borg bits increments/clamps a per-borg use counter (cap 0x1f -> flag as maxed 0x1b) — the box collection availability decode for a force slot.",
+      "evidence": "*(char *)(param_1 + 0x3c) = (char)param_2; ... *(ushort *)(param_1 + 8) = (ushort)(&DAT_803c727c)[param_2 * 8] & 0xf7f; ... if (0x1f < *(byte *)(param_1 + iVar2 + 0x10)) { *(ushort *)(param_1 + 0xc) = ... ; *(undefined1 *)(param_1 + iVar2 + 0x10) = 0x1b; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800f0468",
+      "name": "zz_00f0468_",
+      "chunk": "chunk_0026.c:840",
+      "role": "SOUND: the game-side SFX trigger. zz_00f0468_(0, soundId, prio) plays a 2D/UI sound (fixed vol 0x7f, pan 0x40) via zz_00efb3c_; with a non-zero first arg it plays a 3D positional sound from the object's coords at obj+0x20. Called ~220 times across the corpus with literal ids (0x77 cursor, 0x7a confirm, 0x7b cancel, 0x7d, 0x79, 0xfd, 0x171). This is the trigger the menu/screen code uses, matching the port's confirm/back/edit menu SFX.",
+      "evidence": "if (param_1 == 0) { zz_00efb3c_(param_2,param_3,0x7f,0x40,0x2000); } else { zz_00f04b4_(param_2,(float *)(param_1 + 0x20),param_3); }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800efb3c",
+      "name": "zz_00efb3c_",
+      "chunk": "chunk_0026.c:435",
+      "role": "SOUND: sound-id -> bank/sample decode + voice start. Guards id < 0x180 (384-entry sound bank) and a global mute flag, then splits the id into bank = id>>7 and sample = id & 0x7f, scales the volume by a per-setting float table DAT_8031b430[PTR_DAT_8043394c[0x2d]], and starts a voice via zz_00f0f84_. This is the real sound-id dispatch the HANDOFF prompt sought; NOT the AnimAudioEventLookup red herring.",
+      "evidence": "if ((DAT_803d3e3c == '\\0') && ((int)param_1 < 0x180)) { ... zz_00f0f84_(((int)param_1 >> 7) + ..., ... - iVar1,param_2 << 3, (int)((float)(... - DOUBLE_80439048) * *(float *)(&DAT_8031b430 + (char)PTR_DAT_8043394c[0x2d] * 4)),param_4,param_5,'\\0'); }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800efc04",
+      "name": "zz_00efc04_",
+      "chunk": "chunk_0026.c:456",
+      "role": "SOUND: unmuted variant of zz_00efb3c_ (no DAT_803d3e3c mute check). Same id<0x180 guard and same bank=id>>7 / sample=id&0x7f decode into zz_00f0f84_; used for sounds that must play even when the general mute flag is set.",
+      "evidence": "if ((int)param_1 < 0x180) { ... zz_00f0f84_(((int)param_1 >> 7) + ..., ... ,param_2 << 3, ...); }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800f0f84",
+      "name": "zz_00f0f84_",
+      "chunk": "chunk_0026.c:1359",
+      "role": "SOUND: voice/channel allocator (bank/sample -> hardware voice). Indexes the per-bank voice pool DAT_803d3e44[bank*8] at sample*0x10 stride, builds a voice descriptor (base 0x7000000 | bank<<16 | sample<<8 | key) and keys it via zz_00ed684_. Lowest game-readable layer of the SFX path before MusyX middleware.",
+      "evidence": "uVar9 = (param_1 & 0x7f) << 0x10; ... pcVar8 = (char *)(*(int *)(&DAT_803d3e44 + param_1 * 8) + param_2 * 0x10); ... local_48 = uVar9 | (param_2 & 0x7f) << 8 | uVar3 << 7 | uVar4 | 0x7000000; ... iVar5 = zz_00ed684_(&local_48);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80066168",
+      "name": "zz_0066168_",
+      "chunk": "chunk_0008.c:2900",
+      "role": "FORCE-BUDGET: per-borg cost/energy lookup — the summand every force-budget total calls. Indexes the per-family cost table PTR_DAT_802dd3b4 by [family] then (variant + level*6), 16-bit entries. param_1[0]=family id, param_1[1]=variant, param_2=level.",
+      "evidence": "return (int)*(short *)((&PTR_DAT_802dd3b4)[*param_1] + (param_2 + (uint)(byte)param_1[1] * 6) * 2);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8000673c",
+      "name": "zz_000673c_",
+      "chunk": "chunk_0000.c:1091",
+      "role": "FORCE-BUDGET: per-side force-cost summation + roster iteration loop. Iterates one side's roster (count PTR_DAT_80433934[side+0x5a], entries at +0x1e8 stride 0x1c), sums each borg cost via zz_0066168_, and applies the floor(cost*2/3) enemy/CPU discount for AI sides (mask PTR_DAT_80433930[2]); returns the side's total energy cost.",
+      "evidence": "for (iVar3 = 0; iVar3 < (char)PTR_DAT_80433934[param_1 + 0x5a]; ...) { ... uVar2 = zz_0066168_(...+0x1e8...,+0x1ea); if ((PTR_DAT_80433930[2] & 1<<param_1)==0){ uVar2 = (uVar2*2)/3 + ...; } iVar4 = iVar4 + uVar2; } return iVar4;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x800064d4",
+      "name": "zz_00064d4_",
+      "chunk": "chunk_0000.c:1020",
+      "role": "FORCE-BUDGET: per-team force-total aggregator. Buckets the 6 slots into teams via the +0xcb team bytes, calls zz_000673c_ per active side, accumulates into per-team energy totals PTR_DAT_80433934[team*0x3c + 0x114], and mirrors to +0x118/+0x11c (display/reserve copies).",
+      "evidence": "iVar2 = zz_000673c_(iVar3); *(int *)(puVar1 + iVar6 + 0x114) = *(int *)(puVar1 + iVar6 + 0x114) + iVar2; ... *(undefined4 *)(puVar1 + iVar3 + 0x11c) = *(int*)(...+0x114);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x801910b4",
+      "name": "zz_01910b4_",
+      "chunk": "chunk_0047.c:2373",
+      "role": "FORCE-VALIDATION: full force generation/validation for all 6 slots enforcing BOTH the 30-borg cap and the budget cap. Budget read from PTR_DAT_80433934[0x120]; per slot loops iVar16 < 0x1e (max 30 borgs), scans the 200-entry box collection (+0x870, stride 0x20), and admits each borg only if running cost + borg cost <= budget; writes accepted entries into the roster at +0x1e8 (stride 0x1c) and bumps count +0x5a.",
+      "evidence": "iVar13 = *(int *)(PTR_DAT_80433934 + 0x120); ... for (iVar16 = 0; iVar16 < 0x1e; iVar16 = iVar16 + 1) { ... iVar6 = zz_0066168_(...+0x870...); if (iVar8 + iVar6 <= iVar13) {...admit...} }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8017354c",
+      "name": "zz_017354c_",
+      "chunk": "chunk_0044.c:35",
+      "role": "FORCE-VALIDATION: force generation/validation variant over the save-block box (PTR_DAT_80433944). Same 0x1e (30) borg outer cap and budget guard, scanning the 200-entry collection at +0x870 (id +0x870, variant +0x872), applying the floor(cost*2/3) enemy discount, admitting borgs while (budget - running - cost) >= 0.",
+      "evidence": "for (iVar18=0; iVar18<0x1e; iVar18++){ ... uVar8 = zz_0066168_(...(iVar19+0x870),...(iVar19+0x872)); if (cVar1<'\\0'){ uVar8 = (uVar8<<1)/3 + ...; } if (-1 < (int)((iVar6 - iVar16) - uVar8)) {...admit...} }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80186964",
+      "name": "zz_0186964_",
+      "chunk": "chunk_0046.c:1088",
+      "role": "FORCE-SETUP: story/preset battle setup. Builds a side's roster from a fixed table (PTR_DAT_8037f5d0), runs the force-budget summation into PTR_DAT_80433934+0x114 (roster loop) plus a second collection-cost sum into +0x150, and seeds active mask/count +0x15d9/+0x15da and battle timer +0x48/+0x4c.",
+      "evidence": "while (iVar6 < (char)PTR_DAT_80433934[unaff_r29+0x5a] && *(short*)(...+0x1e8)!=-1){ iVar8 = zz_0066168_(...+0x1e8..,+0x1ea); iVar4 += 0x1c; *(int*)(...+0x114) = *(int*)(...+0x114)+iVar8; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x8017fe18",
+      "name": "zz_017fe18_",
+      "chunk": "chunk_0045.c:3038",
+      "role": "FORCE-SETUP: single-slot roster builder under a budget cap. Fills side param_1's roster (PTR_DAT_80433934 + side*0x348 + 0x1e8) from a source list, computing each entry cost via zz_0066168_ and breaking when the running total would exceed budget iVar9; increments per-side count +0x5a and terminates the list with 0xffff.",
+      "evidence": "iVar4 = zz_0066168_((char *)local_38,(int)*(char *)(puVar6 + 1)); if (iVar9 < iVar8 + iVar4) break; iVar8 = iVar8 + iVar4; ... PTR_DAT_80433934[param_1 + 0x5a] = ...+ '\\x01';",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "menu-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80067524",
+      "name": "FUN_80067524",
+      "chunk": "chunk_0008.c:3878",
+      "role": "third velocity->position integrator variant (sibling of FUN_80067310): same +0x20/+0x24/+0x28 position advance by +0x44 through facing sin/cos, same +0x44 accel integration and 0.0 floor, but does NOT call the gravity ground-snap zz_0068030_ (used by states that manage their own vertical, e.g. scripted arcs).",
+      "evidence": "identical position/accel body to FUN_80067310 minus the zz_0068030_ call and the +0x48 gravity-integration block",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "physics-cluster-2026-07-03"
+    },
+    {
+      "address": "0x80062100-ish (FUN owning chunk_0008.c:280-395)",
+      "name": "walk/turn locomotion state handler (per-frame ground-move)",
+      "chunk": "chunk_0008.c:280-395",
+      "role": "ground locomotion state: seeds +0x4c ground-accel = data[+0x44]*sin(facing) and +0x50 vertical-accel = data[+0x44]*cos + data[+0x68], applies idle-speed decay (+0x44 *= 0.02*(1-dt)+0.98) when stationary, then calls FUN_80067310(param_1=FLOAT_80437510=1.0) or the clamped zz_0067458_ integrator. This is where the per-borg accel/gravity fields feed the integrator each frame.",
+      "evidence": "chunk_0008.c:376-391; +0x4c = data[+0x44]*sin; +0x50 = data[+0x44]*cos + data[+0x68]; FUN_80067310((double)FLOAT_80437510,...)",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "physics-cluster-2026-07-03"
+    },
+    {
+      "address": "DAT_802dd8a0 / DAT_802d3664 (data tables, chunk_0007.c consumers)",
+      "name": "knockback launch magnitude tables",
+      "chunk": "chunk_0007.c:5568 / 5630",
+      "role": "16-entry float tables indexed by knockback strength (actor+0x702, clamped 0..15). DAT_802dd8a0 = 7*strength (horizontal launch speed base), DAT_802d3664 = 8*(strength+1) (knockback velocity magnitude). These are the previously-missing knockback MAGNITUDE source.",
+      "evidence": "+0x44 = (+0x298/+0xc4) * DAT_802dd8a0[strength]; +0x44 = DAT_802d3664[strength]*cos, +0x48 = *sin",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "physics-cluster-2026-07-03"
     }
   ]
 }

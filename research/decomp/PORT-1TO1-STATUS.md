@@ -20,27 +20,30 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | Combat: damage formula | ~90% DERIVED | actor level-float init (+0xc4/+0xb4); guard /40 gate |
 | Combat: gauges/stagger | ~95% DERIVED | reaction lengths (animation-gated) |
 | Combat: knockback direction | DERIVED, ported (mode 1) | modes 0/2/3/4 need sub-object data |
-| Combat: knockback **magnitude** | TUNED | **not in code — needs trace T9** |
+| Combat: knockback **magnitude** | DERIVED (found, bc) — port pending | strength-indexed tables DAT_802dd8a0/DAT_802d3664; port needs scale reconcile |
 | Combat: B/X contextual resolver | schema only | **trace T1** (command→button map) |
 | Combat: ammo/refill | DONE (B cell-0 + X cell-1 wired) | — |
 | Combat: projectile penetration | wired OBSERVED_WIKI (borgs/total→persist) | trace T6 confirms engine gate; terrain-penetration + solidity still open |
 | Combat: vampire lifesteal | DONE (ported, ay) | — |
 | Combat: statuses / hyper / fusion | shells only | traces T3/T8 (nurse heal-write not in corpus) |
-| Physics: movement/jump/dash | TUNED constants | trace-fit from goldens |
+| Physics: movement/jump/dash | DERIVED values found (bc), port TUNED | per-borg data.bin values known — scale-reconcile to port, then swap |
 | UI: screens | ~9 real screens | 6 modes are dead menu entries |
 | UI: HUD | ~90% (charge✓ cursor✓ X-ammo✓ boost✓ jump✓) | burst meter only (fill data is T3-blocked) |
 | Challenge flow | PLAYABLE (verified) + ~85% DERIVED | deploy sub-phases (moot, 36f total already correct) |
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
 | Assets: animation playback | ~88% (dispatch mapped+reconciled, ba/bb) | asset re-bake: relabel g4s0 special_s0→down_s0 (worktree); death/deploy slots unresolved |
 | Audio: BGM/menu | ~90% | — |
-| Audio: combat/voice | ~40% (46 voice cues wired, az) | combat SFX still generic — SE-dispatch trace; voice cue-role TUNED |
+| Audio: combat/voice | ~45% (voice wired az; sound dispatch mapped bc) | combat SE ids need trace at call sites; voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
 | FX: particles/projectiles | ~70% | PTL/REF decode; 3D weapon meshes |
 
-**The three highest-value unblocks are all Dolphin traces** (T1 command mapping, T3 burst
-meter, T9 knockback magnitude) + the SE-dispatch audio trace. Corpus mapping is largely
-exhausted for these; they need a human at the controller or TAS-movie injection (see
-`attack-mechanics-trace-plan.md` "Proven launch procedure").
+**Trace status update (2026-07-03, (bc)):** T9 (knockback magnitude) is **no longer trace-blocked**
+— it was found statically in the DOL as strength-indexed tables (DAT_802dd8a0/DAT_802d3664), and
+movement physics turned out to be per-borg data-driven (pl####data.bin), not the "unfindable global
+constants" §s concluded. The remaining Dolphin-trace unblocks are **T1** command mapping, **T3**
+burst meter, **T8** status semantics, and the combat **SE-dispatch** (the menu sound path IS mapped
+now, (bc)/menu-cluster: zz_00f0468_ → zz_00efb3c_, id>>7 bank / id&0x7f sample). These need a human
+at the controller or TAS-movie injection (see `attack-mechanics-trace-plan.md`).
 
 **Challenge PLAYABILITY verified (2026-07-03):** `scripts/selfcheck-1p-challenge.mjs` (full 1P
 battle runs, energy drains, borgs fight), `scripts/selfcheck-challenge-stages.mjs` (all 11
@@ -65,7 +68,7 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Friendly fire ×0.25 | DONE | damageFormula sameTeam | step 18 (ah/o) | tests only (ATK-014 ✓) |
 | Gauge stagger (down/balance) | DONE | gauges.ts + applyHit | (ag)/(ah)/(s) | — |
 | Knockback **direction** | DONE (mode 1) | physics/knockback.ts | zz_00300bc_ (p) | modes 0/2/3/4 need muzzle/camera vectors |
-| Knockback **magnitude** | TUNED, BLOCKED | constants MELEE/SHOT KNOCKBACK | NOT FOUND (p/as/af0f5 hunt) | **trace T9** — seeded at reaction-state entry, not a record field |
+| Knockback **magnitude** | DERIVED (found, bc) | constants MELEE/SHOT KNOCKBACK (TUNED, port pending) | DAT_802dd8a0[str]=str*7, DAT_802d3664[str]=(str+1)*8, str=actor+0x702 (bc) | port strength-indexed magnitude (scale-reconcile) — T9 NO LONGER trace-blocked |
 | B/X contextual resolve | schema (ATK-001) | command.ts | FUN_800699d8 + testers (ai) | **trace T1** — +0x585/+0x586 ↔ button map |
 | Melee contexts (5-way) | schema | movementContextOf | subtype +0x586; wiki 5-context (av) | trace T2 |
 | Ammo/refill (3 weapon cells) | DONE (values extracted) | ammo.selftest, combat.ts | zz_006dbe0_/006dcc0_/006de10_ (ai/aw) | X-attack→cell-1 (survey UI #2); types 2/3 = dead (ax) |
@@ -87,11 +90,18 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 
 Port: `packages/physics/src/*`, `packages/combat/src/movement.ts`, `constants.ts`.
 
-- Movement anchor: ground speed 22.0 u/f DERIVED_TRACE (behavior-notes §ac); everything else
-  (jump velocity/gravity, dash speed/duration/iframes, accel/decel) is **TUNED** — audited
-  §s, not findable in the corpus. **Finish via golden-trace fitting**
-  (`scripts/trace-golden-record.mjs` → `trace-golden-analyze.mjs`), a human-driven capture.
-- Knockback direction ported (mode 1); magnitude TUNED (see §1).
+- Movement anchor: ground speed 22.0 u/f DERIVED_TRACE (behavior-notes §ac). **UPDATE (bc):**
+  §s's "not findable" was WRONG — movement is **per-borg DATA-DRIVEN** (pl####data.bin page at
+  actor+0x4ac), not global constants. Real DERIVED values now in
+  `research/decomp/data/movement-physics-constants.json`: per-borg gravity (+0x6c), jump impulse
+  (+0x48), max ground speed (+0x2c), speed stat (+0x50); global max-fall -35.0 (FLOAT_804375f0),
+  friction blends (0.98/0.02, 0.90/0.10, 0.80). The port's constants stay TUNED **pending a scale
+  reconcile** (the port is ~4× world-rescaled to its 22.0 anchor; raw ROM values ≈4.4× the port's,
+  so they can't be swapped 1:1). DASH re-confirmed absent from ROM (port-ism); flight = gravity-
+  coeff-0 (no thrust constant), so BOOST_* stays TUNED. Golden-trace fitting still validates scale.
+- Knockback direction ported (mode 1); **magnitude now DERIVED (bc)** — strength-indexed tables
+  DAT_802dd8a0[str]=str*7 / DAT_802d3664[str]=(str+1)*8 (str=actor+0x702), NO longer trace-blocked
+  (see §1). Port change pending scale reconcile.
 - Three flight models observed ((ap) W17): winged forward-locked / air-class permanent /
   boost — the port has one FLY_MULT; a fidelity gap for flyer/air borgs.
 - Stage collision: triangle mesh from STIH, present on 18/40 stages.
@@ -176,7 +186,7 @@ game-logic **role** to **213** functions — **1.78%** (213 / 11,972) — consol
 machine-readable source map `research/decomp/data/identified-functions.json` (one deduped entry
 per address; each traces to a `behavior-notes.md` section, an attack-mechanics findings mechanic,
 or a 2026-07-03 corpus-analysis cluster, with a confidence tier DERIVED_ROM / INFERRED /
-NAMED_ONLY). This supersedes the earlier ~1.2% / 143 estimate: **176 of the 213 are DERIVED_ROM**
+NAMED_ONLY). This supersedes the earlier ~1.2% / 143 estimate: **205 of the 242 are DERIVED_ROM**
 (role read directly from decompiled C or raw ROM data), 21 INFERRED, 16 NAMED_ONLY. The initial
 133 covered the load-bearing combat spine (hit resolution, damage formula, HP/ammo/gauge init,
 the 35-slot state-handler table, the animation setter, challenge flow + battle judge, camera

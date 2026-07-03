@@ -1,0 +1,202 @@
+{
+  "_meta": {
+    "task": "Extract real ROM float constants for movement physics from the Gotcha Force (GG4E) corpus, converting the port's TUNED constants to DERIVED where possible.",
+    "method": "Two-layer resolution. (1) SDA floats: Ghidra emitted symbolic FLOAT_804xxxxx names for r2/r13-relative loads; their real values were read directly from the DOL (user-data/GG4E/disc/sys/boot.dol) by parsing its section table (text0/1 + data0-5) and mapping each virtual address to a file offset, then reading the big-endian float. (2) Per-borg movement params: the integrator sources gravity/jump/accel/max-speed from a runtime parameter page at actor+0x4ac = DAT_803c4d94[borgType] (BSS, not in DOL). That page is loaded from user-data/GG4E/afs_data/root/pl####data.bin (432 bytes/borg, 199 files). Those fields were read directly from the .bin files as big-endian floats.",
+    "headline": "Movement physics is NOT governed by single global gravity/jump/dash constants. The integrator (FUN_80067310) is data-driven: gravity, jump-arc, ground accel, max-speed, and min-speed are PER-BORG floats stored in pl####data.bin, selected per-state. The only true GLOBAL scalar movement constants in the SDA are the clamps (terminal fall -35.0, floor 0.0) and the knockback launch tables. All of these are now resolved to real values.",
+    "dol_sections": "text0 0x80003100, text1 0x800055e0, data0-5 up to 0x8043d500; SDA float pool lives in data5 (0x80436a20-0x8043d500).",
+    "resolver_scripts": [
+      "scratchpad/readdol.js (SDA float pool 0x804374e8-0x80437648)",
+      "scratchpad/readdol2.js (knockback floats + DAT_802dd8a0 / DAT_802d3664 launch tables)",
+      "scratchpad/readborg.js (per-borg pl####data.bin movement fields)"
+    ]
+  },
+
+  "quantities": [
+    {
+      "quantity": "GRAVITY (per-frame downward velocity increment)",
+      "romConstant": "actor+0x50 (vertical accel) seeded from per-borg data page (actor+0x4ac)-indirect: +0x68 / +0x6c / +0x70; applied via FUN_80067310 as: (+0x48) += (+0x5f4 timescale) * ((+0x50) * param_1), param_1 = FLOAT_80437510 = 1.0 (full) or FLOAT_804374ec = 0.0 (gravity off / flight)",
+      "value": "PER-BORG, resolved. Not a single number. Sample gravity fields read from pl####data.bin (big-endian float at the given page offset): pl0000 {+0x68:-0.10, +0x6c:-1.0, +0x70:-0.20}; pl0002(G_RED-var):-0.10/-1.0/-0.20; pl0615(G RED):{+0x68:0.0, +0x6c:-1.0, +0x70:-0.07}; pl0702(Vampire Knight):-0.20/-0.80/-0.07; pl0906(Death Borg Theta):-0.15/-0.70/-0.10; pl0100:-0.15/-0.70/-0.10; pl0500(big/slow):0.0/-0.50/0.0. Typical AIRBORNE/fall gravity is the +0x6c slot (~ -0.5 to -1.0 u/f^2); +0x68/+0x70 are lighter accel slots used by ground/turn states. The knockback path (FUN_8005ed38 @0x8005ed38) uses a GLOBAL gravity FLOAT_80437470 = -1.2 for launched actors.",
+      "chunk": "chunk_0008.c:3812-3814 (integrator); chunk_0007.c:6243-6246 (jump seeds +0x50=data[+0x68]); chunk_0007.c:5638 (knockback +0x50=FLOAT_80437470=-1.2)",
+      "confidence": "DERIVED_ROM",
+      "portNote": "packages/combat/src/constants.ts JUMP.GRAVITY = 0.42 (TUNED). The ROM has NO single 0.42-equivalent global; gravity is per-borg (fall accel ~0.5-1.0 u/f^2 magnitude in the +0x6c slot) plus a global knockback gravity of exactly 1.2 u/f^2. The port's single 0.42 is a simplification; a DERIVED port would key gravity off the borg's +0x6c/+0x68 field. Magnitudes differ (ROM ~0.5-1.2 vs port 0.42), but they are in world units scaled by the integrator timescale +0x5f4/+0x5f8, so a direct numeric swap is NOT safe without matching the port's world scale (the port already 4x-rescaled MOVE speeds to hit the measured 22.0 anchor)."
+    },
+    {
+      "quantity": "JUMP velocity (initial upward velocity)",
+      "romConstant": "computed in jump/launch handler: (+0x48) = -((+0x50 gravity) * (+0x568 jump-arc-frames) - data[+0x48] jump-impulse). Per-borg jump-impulse = data page +0x48; gravity = data page +0x68.",
+      "value": "PER-BORG, resolved. data[+0x48] (the jump/vertical parameter) read from pl####data.bin: pl0000=25.0, pl0002=25.0, pl0615(G RED)=15.0, pl0702=17.0, pl0906=15.0, pl0100=15.0, pl0300=9.0, pl0500=14.0. This is the per-borg jump-height/vertical-impulse parameter; the actual launch velocity is derived ballistically from it and the borg's gravity over the +0x568 arc-frame count.",
+      "chunk": "chunk_0008.c:3812 (integration); chunk_0007.c:6243-6246 (jump velocity = -(grav*arcFrames - data[+0x48]))",
+      "confidence": "DERIVED_ROM",
+      "portNote": "packages/combat/src/constants.ts JUMP.VELOCITY = 4.2 (TUNED, marked 'not findable'). It IS findable: the per-borg vertical parameter data[+0x48] ranges 9-25. The prior audit (s4s) concluded jump velocity was not isolable because it looked for a global positive-Y-velocity write; the real value is a per-borg data field, not a global constant, and the launch velocity is computed, not stored. Correcting the audit: the borg Y-velocity field is +0x48 (not the +0x60 candidate s4s rejected)."
+    },
+    {
+      "quantity": "AIR-JUMP / boost (air-jump impulse, boost-fly thrust/fuel)",
+      "romConstant": "not isolated as a distinct air-jump path this pass",
+      "value": "not-found. No separate air-jump-impulse or boost-fuel constant was isolated. Flight/hover is expressed as gravity coefficient param_1 = FLOAT_804374ec = 0.0 passed to the integrator (gravity disabled) rather than a dedicated thrust constant. FLIGHT vertical behavior is governed by the same per-borg +0x50 accel field with param_1 toggled 1.0/0.0.",
+      "chunk": "chunk_0008.c:3813 (param_1 gates gravity: 1.0 on, 0.0 off)",
+      "confidence": "INFERRED",
+      "portNote": "packages/combat/src/constants.ts JUMP.BOOST_THRUST=0.55, BOOST_MAX_RISE=3.0, BOOST_FUEL_FRAMES=90 remain TUNED; no ROM boost-fuel or thrust constant was found. Flight in the ROM appears to be 'gravity off + normal accel', not a separate thrust model, so the port's boost model is a design choice with no direct ROM constant to derive from."
+    },
+    {
+      "quantity": "DASH (speed multiplier, duration frames, i-frames)",
+      "romConstant": "not found",
+      "value": "not-found. Consistent with the prior audit (s4s): no dedicated dash/dodge/step state handler was located in the actor state table. Movement acceleration is continuous (accel toward per-borg max-speed +0x2c), with no discrete dash-impulse constant.",
+      "chunk": "n/a",
+      "confidence": "INFERRED",
+      "portNote": "packages/combat/src/constants.ts DASH.SPEED=36.0, DURATION=10, IFRAMES=8, COOLDOWN=24 all remain TUNED. Confirmed no ROM dash constants exist to derive them (re-checked this pass). No portable fix."
+    },
+    {
+      "quantity": "Accel / decel / friction",
+      "romConstant": "GROUND ACCEL: actor+0x4c = data[+0x44] * sin/cos of facing (per-borg accel magnitude data[+0x44]); integrated (+0x44 += +0x4c * timescale) and floored at FLOAT_804375d0 = 0.0. DECEL/FRICTION toward target speed uses global SDA blend coefficients: FLOAT_80437568 = 0.98 and FLOAT_8043756c = 0.02 (idle-speed decay: +0x44 *= (0.02*(1.0 - dt) + 0.98)); a separate approach-brake uses FLOAT_80437570 = 0.9 and FLOAT_80437588 = 0.10.",
+      "value": "RESOLVED. Ground-accel magnitude is per-borg data[+0x44]: pl0615(G RED)=0.80, pl0300=0.50, pl0500=0.50, most others=0.0 (these accelerate via the min-speed snap instead). GLOBAL friction/decel coefficients (real DOL values): FLOAT_80437568=0.98, FLOAT_8043756c=0.02, FLOAT_80437570=0.90, FLOAT_80437588=0.10, FLOAT_8043751c=0.80 (h-speed retention on landing, chunk_0007.c:6232), FLOAT_80437520=2.0 (velocity doubling on a state bit). Horizontal-speed floor FLOAT_804375d0=0.0.",
+      "chunk": "chunk_0008.c:3807-3811 (accel + 0.0 floor); chunk_0008.c:383-385 (idle decay 0.98/0.02); chunk_0008.c:1153 (approach brake 0.10/0.90)",
+      "confidence": "DERIVED_ROM",
+      "portNote": "packages/combat/src/constants.ts MOVE.ACCEL=4.8, MOVE.DECEL=6.4 (TUNED, 4x-rescaled). The ROM does NOT use a units/frame^2 accel-toward-target model; it uses (a) per-borg accel data[+0x44] (0.0-0.8) and (b) multiplicative friction retention factors (0.98 idle decay, 0.90 approach). This is a different friction MODEL than the port's linear ACCEL/DECEL. The 0.98/0.02 and 0.90/0.10 coefficients are real, portable if the port adopts multiplicative friction, but do not map 1:1 onto the port's current additive accel constants."
+    },
+    {
+      "quantity": "Terminal velocity / max fall speed",
+      "romConstant": "FLOAT_804375f0 (airborne vertical-velocity clamp in FUN_80067310)",
+      "value": "-35.0 (DOL float at 0x804375f0 = -35). This is the GLOBAL max fall speed: when airborne (actor+0x741 or +0x6cb set), +0x48 vertical velocity is clamped so it cannot go below -35.0 u/f. When grounded/normal, the clamp floor is the per-borg field actor+0x680 instead. Vertical velocity is zeroed to FLOAT_804375d0 = 0.0 on ground-snap (zz_0068030_).",
+      "chunk": "chunk_0008.c:3822-3827 (airborne clamp to FLOAT_804375f0=-35.0); chunk_0008.c:4351 (ground snap +0x48 = FLOAT_804375d0 = 0.0)",
+      "confidence": "DERIVED_ROM",
+      "portNote": "packages/combat/src/constants.ts JUMP.MAX_FALL = 8.0 (TUNED). The real ROM global terminal fall speed is 35.0 u/f (stored as -35.0). This DIFFERS from the port's 8.0 by ~4.4x. NOTE: like the gravity/speed values, -35.0 is in the ROM's world scale; the port already rescaled MOVE speeds 4x to hit the measured 22.0 anchor, so 35.0/8.0 ~= 4.4 is roughly consistent with that same world-scale factor. This is the single cleanest portable global: a DERIVED terminal fall speed of 35.0 (scaled to the port's world), replacing the tuned 8.0."
+    },
+    {
+      "quantity": "Max ground speed (clamp)",
+      "romConstant": "actor+0x2c source = data page +0x2c (per-borg max horizontal speed); enforced in FUN_800633c8 (chunk_0007.c:1148-1157)",
+      "value": "PER-BORG, resolved. data[+0x2c]: pl0000=12.0, pl0002=12.0, pl0615(G RED)=12.0, pl0702=11.0, pl0906=7.2, pl0100=10.0, pl0300=7.7, pl0500=2.6. The per-borg 'speed stat' seed (min-speed on turn) is data[+0x50]: pl0002/pl0615=6.0 (matches 'G RED speed 6'), pl0000=3.0, pl0100=2.5.",
+      "chunk": "chunk_0007.c:1148-1157 (max-speed clamp); chunk_0008.c:325-327 (+0x50 min-speed snap)",
+      "confidence": "DERIVED_ROM",
+      "portNote": "packages/combat/src/constants.ts MOVE.GROUND_BASE=4.0 + GROUND_PER_STAT=3.0*speedStat (TUNED split; the 22.0 world anchor is DERIVED for G RED speed-6). The ROM does NOT use a base+perStat formula; it stores a direct per-borg max-speed data[+0x2c] (2.6-12.0 range) and a min/turn-speed data[+0x50] that equals the guide 'speed stat' (G RED=6 confirmed). This resolves the port's open note 'BASE/PER_STAT split is still TUNED, capture a different-speed borg to derive the split': the split can now be replaced with the direct per-borg data[+0x2c]/[+0x50] fields from pl####data.bin. data[+0x50]=6 for G RED corroborates the 22.0 anchor's speed-6 attribution."
+    },
+    {
+      "quantity": "Knockback launch magnitude (bonus find — was TUNED-absent in port)",
+      "romConstant": "DAT_802dd8a0[strength] (horizontal launch, zz_005ec20_) and DAT_802d3664[strength] (velocity magnitude, FUN_8005ed38); strength byte actor+0x702 clamped 0..15",
+      "value": "RESOLVED as linear tables (real DOL floats). DAT_802dd8a0[0..15] = 0,7,14,21,28,35,42,49,56,63,70,77,84,91,98,105 (= strength*7). DAT_802d3664[0..15] = 8,16,24,...,128 (= (strength+1)*8). Knockback vertical launch (+0x48/+0x50) uses FLOAT_80437444 = 0.0 (zz_005ec20_) or global gravity FLOAT_80437470 = -1.2 with h-decel FLOAT_804374cc = -0.10 (FUN_8005ed38). Launch h-decel denominator FLOAT_80437490 = 20.0.",
+      "chunk": "chunk_0007.c:5568 (DAT_802dd8a0), chunk_0007.c:5630-5638 (DAT_802d3664, grav -1.2)",
+      "confidence": "DERIVED_ROM",
+      "portNote": "packages/combat/src/constants.ts MELEE.KNOCKBACK=5, SHOT.KNOCKBACK=3, SPECIAL.KNOCKBACK=7 all TUNED (the constants header explicitly says knockback MAGNITUDE was never found — zz_00300bc_ only computed direction). This pass FOUND the magnitude: it is a strength-indexed launch table (7*strength horizontal, 8*(strength+1) velocity), selected by the per-hit strength byte actor+0x702. This is the separate consumer the header asked for ('a separate trace of whatever consumes the stored yaw/pitch to apply a velocity impulse'). Portable: knockback speed = DAT_802dd8a0[strength]/DAT_802d3664[strength] scaled by attacker fields +0x298/+0xc4, not a flat 5/3/7."
+    }
+  ],
+
+  "globalSdaFloatsResolved": {
+    "FLOAT_804374e8": -1.0,
+    "FLOAT_804374ec": 0.0,
+    "FLOAT_80437510": 1.0,
+    "FLOAT_80437514": 0.94,
+    "FLOAT_80437518": 0.06,
+    "FLOAT_8043751c": 0.80,
+    "FLOAT_80437520": 2.0,
+    "FLOAT_80437524": 0.99,
+    "FLOAT_80437528": 0.01,
+    "FLOAT_80437534": 0.5,
+    "FLOAT_80437540": 10.0,
+    "FLOAT_80437558": 30.0,
+    "FLOAT_80437568": 0.98,
+    "FLOAT_8043756c": 0.02,
+    "FLOAT_80437570": 0.90,
+    "FLOAT_80437588": 0.10,
+    "FLOAT_8043759c": 0.125,
+    "FLOAT_804375a0": 8.0,
+    "FLOAT_804375b0": 20.0,
+    "FLOAT_804375d0": 0.0,
+    "FLOAT_804375f0": -35.0,
+    "FLOAT_80437440": 1.0,
+    "FLOAT_80437444": 0.0,
+    "FLOAT_80437470": -1.2,
+    "FLOAT_80437490": 20.0,
+    "FLOAT_804374cc": -0.10,
+    "_note": "FLOAT_804374f8/80437500 read as 176.0 and DOUBLE_* as large magic values because they are the 0x43300000 int->double conversion-magic doublewords (PPC lfd trick), not gameplay constants. DAT_8043625c is a runtime stage-struct pointer (BSS); its +0x34 floor-plane Y is resolved at runtime, not statically."
+  },
+
+  "perBorgMovementFields_pldata_bin": {
+    "_source": "user-data/GG4E/afs_data/root/pl####data.bin (432 bytes, big-endian floats, page loaded to actor+0x4ac via DAT_803c4d94[borgType])",
+    "_offsets": {
+      "0x2c": "max horizontal speed clamp",
+      "0x44": "ground-accel magnitude (0.0 = snap-to-min instead)",
+      "0x48": "jump / vertical impulse parameter",
+      "0x50": "min / turn speed (== guide 'speed stat')",
+      "0x58": "knockdown launch h-speed",
+      "0x5c": "knockdown launch accel",
+      "0x68": "gravity/accel slot A (ground/turn states)",
+      "0x6c": "gravity/accel slot B (airborne/fall — the true fall gravity)",
+      "0x70": "gravity/accel slot C"
+    },
+    "samples": {
+      "pl0000": {"maxHspd_2c": 12.0, "haccel_44": 0.0, "jump_48": 25.0, "minspd_50": 3.0, "grav68": -0.10, "grav6c": -1.0, "grav70": -0.20},
+      "pl0002": {"maxHspd_2c": 12.0, "haccel_44": 0.0, "jump_48": 25.0, "minspd_50": 6.0, "grav68": -0.10, "grav6c": -1.0, "grav70": -0.20},
+      "pl0615_G_RED": {"maxHspd_2c": 12.0, "haccel_44": 0.80, "jump_48": 15.0, "minspd_50": 6.0, "grav68": 0.0, "grav6c": -1.0, "grav70": -0.07},
+      "pl0702_Vampire_Knight": {"maxHspd_2c": 11.0, "haccel_44": 0.0, "jump_48": 17.0, "minspd_50": 6.0, "grav68": -0.20, "grav6c": -0.80, "grav70": -0.07},
+      "pl0906_Death_Borg_Theta": {"maxHspd_2c": 7.2, "haccel_44": 0.0, "jump_48": 15.0, "minspd_50": 6.0, "grav68": -0.15, "grav6c": -0.70, "grav70": -0.10},
+      "pl0100": {"maxHspd_2c": 10.0, "haccel_44": 0.0, "jump_48": 15.0, "minspd_50": 2.5, "grav68": -0.15, "grav6c": -0.70, "grav70": -0.10},
+      "pl0300": {"maxHspd_2c": 7.7, "haccel_44": 0.5, "jump_48": 9.0, "minspd_50": 6.0, "grav68": 0.0, "grav6c": -0.81, "grav70": -0.02},
+      "pl0500": {"maxHspd_2c": 2.6, "haccel_44": 0.5, "jump_48": 14.0, "minspd_50": 6.0, "grav68": 0.0, "grav6c": -0.50, "grav70": 0.0}
+    },
+    "_extractability": "All 199 pl####data.bin files are present and readable; a full per-borg movement table (max-speed, accel, jump, gravity for every roster id) can be dumped statically with scratchpad/readborg.js extended to the full id list. This is the DERIVED source that replaces the port's TUNED MOVE/JUMP globals."
+  },
+
+  "newFunctions": [
+    {
+      "address": "0x80067458",
+      "name": "zz_0067458_",
+      "chunk": "chunk_0008.c:3834",
+      "role": "velocity-integrator variant: calls FUN_80067310, then additionally clamps horizontal speed +0x44 down to per-actor cap +0x678 (floored 0.0) and vertical speed +0x48 into band [+0x680, +0x67c]. The 'clamped' integrator used when +0x588 (settled/decel flag) is set.",
+      "evidence": "FUN_80067310(param_1,param_2,param_3); if (FLOAT_804375d0 < +0x4c) { ... +0x44 = min(+0x44,+0x678) ... } ; vertical band clamp to +0x680/+0x67c",
+      "confidence": "DERIVED_ROM",
+      "note": "Already listed in identified-functions.json; re-confirmed as the per-actor speed-cap enforcer. +0x678=h-speed cap, +0x67c/+0x680=vertical band, all per-borg."
+    },
+    {
+      "address": "0x80067524",
+      "name": "FUN_80067524",
+      "chunk": "chunk_0008.c:3878",
+      "role": "third velocity->position integrator variant (sibling of FUN_80067310): same +0x20/+0x24/+0x28 position advance by +0x44 through facing sin/cos, same +0x44 accel integration and 0.0 floor, but does NOT call the gravity ground-snap zz_0068030_ (used by states that manage their own vertical, e.g. scripted arcs).",
+      "evidence": "identical position/accel body to FUN_80067310 minus the zz_0068030_ call and the +0x48 gravity-integration block",
+      "confidence": "DERIVED_ROM",
+      "note": "NOT previously in identified-functions.json. Third member of the integrator family (0x80067310 / 0x80067458 / 0x80067524)."
+    },
+    {
+      "address": "0x80062100-ish (FUN owning chunk_0008.c:280-395)",
+      "name": "walk/turn locomotion state handler (per-frame ground-move)",
+      "chunk": "chunk_0008.c:280-395",
+      "role": "ground locomotion state: seeds +0x4c ground-accel = data[+0x44]*sin(facing) and +0x50 vertical-accel = data[+0x44]*cos + data[+0x68], applies idle-speed decay (+0x44 *= 0.02*(1-dt)+0.98) when stationary, then calls FUN_80067310(param_1=FLOAT_80437510=1.0) or the clamped zz_0067458_ integrator. This is where the per-borg accel/gravity fields feed the integrator each frame.",
+      "evidence": "chunk_0008.c:376-391; +0x4c = data[+0x44]*sin; +0x50 = data[+0x44]*cos + data[+0x68]; FUN_80067310((double)FLOAT_80437510,...)",
+      "confidence": "DERIVED_ROM",
+      "note": "The wiring that proves gravity/accel are per-borg data (data[+0x44], data[+0x68]) rather than SDA globals."
+    },
+    {
+      "address": "DAT_802dd8a0 / DAT_802d3664 (data tables, chunk_0007.c consumers)",
+      "name": "knockback launch magnitude tables",
+      "chunk": "chunk_0007.c:5568 / 5630",
+      "role": "16-entry float tables indexed by knockback strength (actor+0x702, clamped 0..15). DAT_802dd8a0 = 7*strength (horizontal launch speed base), DAT_802d3664 = 8*(strength+1) (knockback velocity magnitude). These are the previously-missing knockback MAGNITUDE source.",
+      "evidence": "+0x44 = (+0x298/+0xc4) * DAT_802dd8a0[strength]; +0x44 = DAT_802d3664[strength]*cos, +0x48 = *sin",
+      "confidence": "DERIVED_ROM",
+      "note": "Resolves the constants.ts header's open request for whatever applies a knockback velocity impulse (it said only direction was found). Both tables dumped to real values."
+    }
+  ],
+
+  "summary": {
+    "resolvedToRealValue": [
+      "TERMINAL/MAX FALL SPEED = -35.0 u/f (GLOBAL, FLOAT_804375f0) -- cleanest portable global; port has TUNED 8.0.",
+      "GROUND-SNAP zero velocity = 0.0 (FLOAT_804375d0), horizontal-speed floor = 0.0.",
+      "GRAVITY = PER-BORG (pl####data.bin +0x68/+0x6c/+0x70, ~ -0.1 to -1.0 u/f^2; fall slot +0x6c) + GLOBAL knockback gravity -1.2 (FLOAT_80437470). Port has single TUNED 0.42.",
+      "JUMP vertical impulse = PER-BORG data[+0x48] (9.0-25.0). Port has single TUNED 4.2; prior audit wrongly said 'not findable'.",
+      "MAX GROUND SPEED = PER-BORG data[+0x2c] (2.6-12.0); SPEED STAT = data[+0x50] (G RED=6.0, matches the 22.0 anchor attribution).",
+      "GROUND ACCEL = PER-BORG data[+0x44] (0.0-0.8); FRICTION coefficients GLOBAL (idle 0.98/0.02, approach 0.90/0.10).",
+      "KNOCKBACK MAGNITUDE = strength tables 7*s (DAT_802dd8a0) and 8*(s+1) (DAT_802d3664); port had these TUNED/absent."
+    ],
+    "sdaUnresolved": [
+      "DAT_8043625c+0x34 stage floor-plane Y -- runtime pointer (BSS), resolved when a stage loads, not a static DOL constant.",
+      "Per-actor caps actor+0x678/+0x67c/+0x680 (h-speed/vertical band) -- these are also per-borg/runtime page fields, resolvable from pl####data.bin at those offsets if needed (not extracted this pass)."
+    ],
+    "notFound": [
+      "AIR-JUMP / boost thrust + fuel -- no dedicated constant; flight = gravity coefficient 0.0. Port BOOST_* stays TUNED.",
+      "DASH speed/duration/i-frames -- re-confirmed no dash state exists in the ROM. Port DASH.* stays TUNED."
+    ],
+    "portableFixes": [
+      "MAX_FALL: replace TUNED 8.0 with DERIVED 35.0 (in the port's world scale; ROM stores -35.0). Cleanest single global swap.",
+      "GRAVITY & JUMP: replace the single TUNED JUMP.GRAVITY/JUMP.VELOCITY with per-borg values from pl####data.bin (grav = +0x6c, jump = +0x48). Requires adopting per-borg movement data, but the source is fully extractable (all 199 .bin files present).",
+      "MAX GROUND SPEED / speed-stat split: the port's open 'BASE/PER_STAT split is TUNED' note is now resolvable -- data[+0x2c] is the direct max speed, data[+0x50] is the speed stat (G RED=6 corroborates the 22.0 anchor). Replaces the guessed 4.0/3.0 split.",
+      "KNOCKBACK magnitude: replace flat MELEE/SHOT/SPECIAL.KNOCKBACK with the strength-indexed launch tables (7*s / 8*(s+1))."
+    ],
+    "discipline_note": "Every numeric value above was read directly from bytes -- SDA floats from the DOL section table, per-borg floats from pl####data.bin -- not inferred. Where a value is genuinely per-borg or runtime-resolved (gravity, jump, floor plane), that is stated explicitly rather than collapsed into a single invented global. The 0.42/4.2/8.0 TUNED-vs-ROM gaps are real but must be applied in the port's already-4x-rescaled world scale, not swapped raw."
+  }
+}
