@@ -229,6 +229,16 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
   // melee reach where present, else a documented TUNED fallback (MELEE.RANGE = 60 XZ units).
   const meleeRange = focusHasMeleeRangeTarget(battle, focus, actionProfile);
 
+  // X-ammo readout (behavior-notes (ao), CONFIRMED_MANUAL: weapon 1 = X-attack ammo, separate
+  // from weapon 0 = B-attack ammo). Sourced from the focus borg's weapon cell 1 (combat.ts
+  // wires the X/special attack to consume it). Only surfaced for borgs that actually have
+  // X-ammo (cell max > 0, DERIVED per-borg data); undefined leaves the HUD readout hidden and
+  // back-compatible, exactly like charge01/meleeRange.
+  const xCell = focus?.weaponCells?.[1];
+  const hasXAmmo = !!xCell && xCell.max > 0;
+  const xAmmo = hasXAmmo ? Math.max(0, Math.round(xCell.cur)) : undefined;
+  const xReload01 = hasXAmmo ? clamp01(xCell.cur / xCell.max) : undefined;
+
   return {
     allyEnergy: st.energy[0] ?? 0,
     allyMax,
@@ -251,6 +261,10 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
     boost01: focus ? clamp01((focus.cooldowns?.["boostFuel"] ?? BOOST_FUEL_FRAMES) / BOOST_FUEL_FRAMES) : 1,
     charge01,
     meleeRange,
+    // Conditional-spread so the keys are simply absent (not `undefined`) for borgs without
+    // X-ammo — required under exactOptionalPropertyTypes, and keeps the HUD readout hidden.
+    ...(xAmmo !== undefined ? { xAmmo } : {}),
+    ...(xReload01 !== undefined ? { xReload01 } : {}),
     timeRemainingFrames: st.timeRemainingFrames,
     alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= allyMax * 0.25,
   };

@@ -819,9 +819,40 @@ export function stepAttacks(
   }
 
   // --- Special (X) -------------------------------------------------------------------
+  // Input binding (CONFIRMED_MANUAL, behavior-notes.md (ao), the official NA instruction manual):
+  // B = contextual shot/melee (weapon 0), X = the SECOND weapon (weapon 1), Y = Power Burst. The
+  // port's `pressedSpecial` is the X button — types.ts documents the control scheme as
+  // "X=special" and this branch is the port's only X-driven attack — so per (ao) the X/special
+  // must consume weapon cell 1 ("X Bullets"), separate from B's weapon cell 0 ("B Bullets").
+  //
+  // Only borgs whose weapon-1 cell has max>0 (DERIVED per-borg data via
+  // weaponOneCellSourceForBorgId / borgSourceStats weaponSlots[1]) use X-ammo. For those, the
+  // X-attack additionally gates on cell-1 ammo (can't fire at 0) and decrements it by 1 per shot;
+  // the SAME stepAmmoRefill path that refills cell 0 already iterates every cell, so cell 1
+  // refills through it with no extra wiring. Borgs with max==0 on cell 1 (no weapon-1 row, or a
+  // melee-only weapon-1) keep the pre-existing cooldown-only behavior EXACTLY — the ammo gate and
+  // decrement below are both no-ops for them (the `xCell.max > 0` guards). The cooldown/ammo
+  // interplay (ammo gate stacked ON TOP of the existing `special` cooldown) is TUNED — the ROM's
+  // per-weapon command resolver that would sequence these is unread — but the B/X->cell binding
+  // itself is CONFIRMED_MANUAL per (ao).
   const canStartAction = b.state !== "attack" && b.state !== "special";
-  if (canStartAction && pressedSpecial && (b.cooldowns["special"] ?? 0) <= 0) {
+  const xCell = ensureWeaponCells(b, p)[1];
+  const xHasAmmo = !!xCell && xCell.max > 0;
+  const xCanFire = !xHasAmmo || (xCell as WeaponCell).cur >= 1; // infinite/unused cell always passes
+  if (canStartAction && pressedSpecial && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     const specialDef = actionProfile.special;
+    // Consume one X-bullet from weapon cell 1 (only when the borg actually has X-ammo; max==0
+    // cells stay untouched -> current cooldown-only behavior). Mirrors startShotAttack's cell-0
+    // decrement + all-at-once re-arm (see that function): decrement, then arm the refill timer
+    // the instant the cell empties for non-gradual (refillType!==1) cells; gradual cells refill
+    // fractionally each frame via stepWeaponCellRefill and don't use `timer`.
+    if (xHasAmmo) {
+      const cell = xCell as WeaponCell;
+      cell.cur = Math.max(0, cell.cur - 1);
+      if (cell.cur <= 0 && cell.refillType !== 1) {
+        cell.timer = cell.refillParam > 0 ? cell.refillParam : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES;
+      }
+    }
     b.cooldowns["special"] = specialDef.cooldown;
     b.cooldowns["attackLock"] = specialDef.duration;
     b.state = "special";

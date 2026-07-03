@@ -94,6 +94,17 @@ export interface HudState {
    * field just surfaces the same sim signal on the HudState. Defaults to false.
    */
   meleeRange?: boolean;
+  /**
+   * Optional X-attack ("X Bullets") ammo count, shown next to the X prompt. Per the NA
+   * instruction manual (behavior-notes (ao), CONFIRMED_MANUAL) the game keeps SEPARATE B and X
+   * ammo counters: weapon 0 = B-attack ammo (see `ammo`), weapon 1 = X-attack ammo. Sourced from
+   * the focus borg's weapon cell 1 (combat.ts consumes it on the X/special attack). Undefined =
+   * this borg has no X-ammo (cell max 0, cooldown-only special) -> the X-ammo readout stays
+   * hidden. Back-compatible/optional like charge01/meleeRange.
+   */
+  xAmmo?: number;
+  /** Optional X-ammo fill 0..1 (weapon cell 1 cur/max); paired with `xAmmo`. Undefined = hidden. */
+  xReload01?: number;
   /** Optional floating teammate plates ("CPU"/"ALLY" + mini HP bar). */
   teammates?: readonly TeammateMarker[];
 }
@@ -360,6 +371,24 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   root.appendChild(xLetter);
   setBitmapText(xLetter, "X", { bold: true, scale: 2, tint: TINT_BLACK });
 
+  // ===================== X-AMMO READOUT ("X Bullets") =========================
+  // Separate B/X ammo counters are OFFICIAL (behavior-notes (ao), CONFIRMED_MANUAL): weapon 0 =
+  // B-attack ammo (the reload pill + ammoNum above the B disc), weapon 1 = X-attack ammo. This is
+  // a small companion readout by the X disc — a short cyan fill pill + a digit — mirroring the
+  // B-ammo pill/digit style. Hidden (whole group) unless HudState.xAmmo is defined, i.e. only for
+  // borgs whose weapon cell 1 has ammo (max>0); cooldown-only specials show nothing here, keeping
+  // the HUD unchanged for them.
+  const xAmmoG = svgEl("g", { class: "gf-hidden" });
+  xAmmoG.appendChild(
+    svgEl("rect", { x: 626, y: 349, width: 48, height: 12, rx: 6, fill: "rgba(8,42,40,0.55)", stroke: "rgba(0,0,0,0.4)", "stroke-width": 1.5 }),
+  );
+  const X_RELOAD_W = 44;
+  const xReloadFill = svgEl("rect", { x: 628, y: 351, width: X_RELOAD_W, height: 8, rx: 4, fill: "#3fe8cf" });
+  xAmmoG.appendChild(xReloadFill);
+  svg.appendChild(xAmmoG);
+  const xAmmoNum = hudText("gf-xammo-num", 638, 322);
+  root.appendChild(xAmmoNum);
+
   // Dark-red arc swooshing under the B disc: from (487,448) to (585,420).
   svg.appendChild(
     svgEl("path", {
@@ -430,6 +459,7 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   let lastEnemy = Number.NaN;
   let lastHp = Number.NaN;
   let lastAmmo = Number.NaN;
+  let lastXAmmo = Number.NaN;
 
   function update(s: HudState): void {
     // GF-energy fills (value-proportional widths, anchored per the captures).
@@ -502,6 +532,22 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
       chargeHi.setAttribute("width", String(Math.max(0, cw - 4)));
       // At/near full the meter goes bright to cue the super release.
       chargeFill.setAttribute("fill", charge >= 1 ? "#fff2b0" : "#ffb02e");
+    }
+
+    // X-ammo readout (behavior-notes (ao): separate B/X counters). Shown only when the focus
+    // borg actually has X-ammo (HudState.xAmmo defined = weapon cell 1 max>0); hidden otherwise
+    // so cooldown-only specials keep the HUD unchanged.
+    const hasXAmmo = s.xAmmo !== undefined;
+    xAmmoG.classList.toggle("gf-hidden", !hasXAmmo);
+    xAmmoNum.classList.toggle("gf-hidden", !hasXAmmo);
+    if (hasXAmmo) {
+      const xrw = Math.round(X_RELOAD_W * clamp01(s.xReload01 ?? 0));
+      xReloadFill.setAttribute("width", String(Math.max(0, xrw)));
+      const xAmmoVal = Math.max(0, Math.round(s.xAmmo ?? 0));
+      if (xAmmoVal !== lastXAmmo) {
+        lastXAmmo = xAmmoVal;
+        setBitmapText(xAmmoNum, String(xAmmoVal), { bold: true, scale: 2, advance: 14, tint: TINT_DIGITS });
+      }
     }
 
     // Floating teammate plates.
