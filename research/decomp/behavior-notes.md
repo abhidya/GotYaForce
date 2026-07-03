@@ -912,7 +912,7 @@ decomp cross-reference table already identified as **high-confidence knockdown**
 prior human-labeled `down_candidate` anchor — see that file's "Decomp cross-reference" section).
 Because slot 0 sorts first, `apps/game/src/main.ts`'s `PREFERRED_LABELS` override for `pl0615`
 (and pl0008/pl000c/pl0105/pl0109) pointed their `special` slot at `special_s0` — i.e. **G Red's
-Y-button special attack was silently playing his own knockdown/down animation**, while the `down`
+X-button special attack was silently playing his own knockdown/down animation**, while the `down`
 combat state (`combat.ts`'s `enterDown()`/`b.anim = "down"`) had no real match at all in
 `SLOT_LABELS.down` and fell back to a hit-reaction or death clip instead. Fixed by: (1) relabeling
 group-4 slot-0 banks from `special_s0` to `down_s0` in the baker script (for future re-bakes) and
@@ -922,7 +922,7 @@ directly in all 101 already-baked `apps/game/public/models/*/anim_index.json` fi
 of a hit/death fallback, and (3) repointing the 5 borgs' `PREFERRED_LABELS.special` overrides
 (`pl0615`, `pl0008`, `pl000c`, `pl0105`, `pl0109`) at each borg's `special_s1` bank (confirmed
 present in each one's `anim_index.json`) instead of the mislabeled `special_s0`, plus explicit
-`down: ["down_s0"]` overrides for the same 5 borgs. Which of `special_s1..s4` is "the" Y-button
+`down: ["down_s0"]` overrides for the same 5 borgs. Which of `special_s1..s4` is "the" X-button
 special (vs. some other special-move variant) is **not** individually decomp-confirmed — that
 choice among the remaining `special_sN` banks stays TUNED, same status `borg-animation-banks.md`
 already documents for group-4 slots 1+ in general.
@@ -1427,14 +1427,15 @@ subset.
 
 ---
 
-### (g) Audio / music triggers (Confirmed library entry points)
+### (g) Audio / music triggers (Confirmed library entry points; cue IDs still UNKNOWN)
 Engine uses GC **AI/DSP streaming** + sequence audio: `AIInit`/`AIStartDMA`/`AISetStreamPlayState`
 /`AISetStreamVolLeft` (0x802146xx–0x80214xxx), `sndSeqContinue` @ 0x801c7b68,
 `THPSimpleAudioStop` @ 0x8008e7a0, `PlatAudio::IsSFXPlaying` @ 0x80018c58,
-`__OSInitAudioSystem`/`__OSStopAudioSystem`. `AnimAudioEventLookup` (`nlQSort<AnimAudioEventLookup>`
-@ 0x801a7640) shows **animations carry audio-event tables** (footstep/SFX keyed to anim frames).
-Gameplay SFX/music triggers route through `PlatAudio` and these AI/seq calls; the specific
-trigger sites are unnamed and not yet traced.
+`__OSInitAudioSystem`/`__OSStopAudioSystem`. These prove audio library entry points only.
+The older `AnimAudioEventLookup` lead is closed by s4v: its decompiled body is just a generic
+`nlQSort<T>` wrapper, not a decoded animation frame/sound-id table. Gameplay SFX/music triggers
+and exact per-action cue IDs are still untraced; do not map combat events to `se00_*` from this
+symbol alone.
 
 ---
 

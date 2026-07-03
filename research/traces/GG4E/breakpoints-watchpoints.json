@@ -142,6 +142,38 @@
       "status": "runtime_capture_required"
     },
     {
+      "id": "active-borg-command-current",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x5b4",
+      "dol_offset": null,
+      "size": 4,
+      "install_after": "Capture active_borg_base from r3 at player-input-bridge 0x80056900.",
+      "capture": [
+        "old/new current command word",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
+      "id": "active-borg-command-pressed",
+      "type": "read_write",
+      "address": "runtime:active_borg_base+0x5bc",
+      "dol_offset": null,
+      "size": 4,
+      "install_after": "Capture active_borg_base from r3 at player-input-bridge 0x80056900 after DAT_803c727c is normalized.",
+      "capture": [
+        "old/new edge-pressed command word",
+        "pc",
+        "lr",
+        "callstack",
+        "r0-r31"
+      ],
+      "status": "runtime_capture_required"
+    },
+    {
       "id": "active-borg-wakeup-invulnerability-timer",
       "type": "read_write",
       "address": "runtime:active_borg_base+0x720",
@@ -886,6 +918,665 @@
       ]
     },
     {
+      "name": "action-proof",
+      "event_window": "Run one short visible-Dolphin capture per action: close-range B, ranged B, X, and Z. The proof requires PAD hits and action/transition hits in the same labeled trace; audio and param-tier groups can be enabled alongside this group.",
+      "breakpoints": [
+        {
+          "id": "pad-read",
+          "type": "execute",
+          "address": "0x8021379c",
+          "dol_offset": "0x0021079c",
+          "section": "text1",
+          "symbol": "likely PADRead cluster",
+          "event": "Input sample for B/X/Z action proof.",
+          "capture": [
+            "r3 pad output pointer",
+            "0x30 bytes at r3 after step",
+            "lr caller",
+            "callstack"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "game-pad-normalization-cluster",
+          "type": "execute",
+          "address": "0x8010d450",
+          "dol_offset": "0x0010a450",
+          "section": "text1",
+          "symbol": "unnamed likely game-side PAD read/normalization cluster",
+          "event": "Game-side normalized PAD state for B/X/Z correlation.",
+          "capture": [
+            "raw and normalized PAD state",
+            "r0-r31",
+            "lr caller",
+            "candidate active player pointer",
+            "candidate active borg pointer"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "pad-post-read-normalization",
+          "type": "execute",
+          "address": "0x8010d4d0",
+          "dol_offset": "0x0010a4d0",
+          "section": "text1",
+          "symbol": "zz_010d450_ after PADRead before PADClampCircle",
+          "event": "Post-PADRead point where DAT_803c72fc can be sampled or injected before game-side normalization consumes it.",
+          "capture": [
+            "DAT_803c72fc PADStatus[4] raw bytes",
+            "r24 pad buffer pointer",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "disassembled from boot.dol"
+        },
+        {
+          "id": "pad-normalization-complete",
+          "type": "execute",
+          "address": "0x8010d86c",
+          "dol_offset": "0x0010a86c",
+          "section": "text1",
+          "symbol": "zz_010d450_ after DAT_803c727c slot copy",
+          "event": "Normalized PAD globals have been written: current at DAT_803c727c, press edge at DAT_803c7284, release edge at DAT_803c7288.",
+          "capture": [
+            "DAT_803c72fc PADStatus[4]",
+            "DAT_803c727c normalized slot records",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "disassembled from boot.dol"
+        },
+        {
+          "id": "normalized-pad-slot0-current-read",
+          "type": "read",
+          "address": "0x803c727c",
+          "dol_offset": null,
+          "section": "bss/runtime",
+          "size": 4,
+          "symbol": "DAT_803c727c slot0 normalized current input word",
+          "event": "Reader of slot-0 normalized input current word after zz_010d450_ copies PADStatus.",
+          "capture": [
+            "reader pc/lr",
+            "old/current word",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled normalized PAD buffer"
+        },
+        {
+          "id": "normalized-pad-slot0-pressed-read",
+          "type": "read",
+          "address": "0x803c7284",
+          "dol_offset": null,
+          "section": "bss/runtime",
+          "size": 4,
+          "symbol": "DAT_803c7284 slot0 normalized press-edge word",
+          "event": "Reader of slot-0 normalized input press-edge word.",
+          "capture": [
+            "reader pc/lr",
+            "old/current word",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled normalized PAD buffer"
+        },
+        {
+          "id": "borg-state-dispatch",
+          "type": "execute",
+          "address": "0x8005c694",
+          "dol_offset": "0x00059694",
+          "section": "text1",
+          "symbol": "zz_005c694_ / object+0x6fe per-frame state dispatch",
+          "event": "Primary action-state dispatch. r3 is actor; object+0x6fe selects PTR_FUN_802d35a4[index].",
+          "capture": [
+            "r3 actor",
+            "actor+0x540",
+            "actor+0x591",
+            "actor+0x6fe",
+            "actor+0x544..0x547",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "player-input-bridge",
+          "type": "execute",
+          "address": "0x80056900",
+          "dol_offset": "0x00053900",
+          "section": "text1",
+          "symbol": "FUN_80056900 / DAT_803c727c to actor command fields",
+          "event": "Copies normalized controller word into actor+0x5b4 and derives actor+0x5bc press-edge word.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 current command word",
+            "actor+0x5b8 previous command word",
+            "actor+0x5bc press-edge word",
+            "actor+0x5c0 release-edge word",
+            "DAT_803c727c slot word"
+          ],
+          "confidence": "confirmed decompiled input bridge"
+        },
+        {
+          "id": "player-input-update-simple",
+          "type": "execute",
+          "address": "0x80054cbc",
+          "dol_offset": "0x00051cbc",
+          "section": "text1",
+          "symbol": "FUN_80054cbc / actor update calls input bridge then FUN_80055568",
+          "event": "Caller path for FUN_80056900; if this misses, the active save path is not running this actor input/update route.",
+          "capture": [
+            "r3 actor",
+            "actor+0x3e4 port",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "actor-update-spawn-entry",
+          "type": "execute",
+          "address": "0x800547dc",
+          "dol_offset": "0x000517dc",
+          "section": "text1",
+          "symbol": "FUN_800547dc / actor spawn-entry update path calling FUN_80055568",
+          "event": "One of five known callers into common actor update FUN_80055568; does not call input bridge directly.",
+          "capture": [
+            "r3 actor",
+            "actor+0x19/+0x1a phase",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "actor-update-no-input-54c78",
+          "type": "execute",
+          "address": "0x80054c78",
+          "dol_offset": "0x00051c78",
+          "section": "text1",
+          "symbol": "FUN_80054c78 / actor update path calling FUN_80055568 without input bridge",
+          "event": "One of five known callers into common actor update FUN_80055568; useful liveness probe when player-input bridge misses.",
+          "capture": [
+            "r3 actor",
+            "actor+0x19 phase",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "player-input-update-with-69960",
+          "type": "execute",
+          "address": "0x80054cf0",
+          "dol_offset": "0x00051cf0",
+          "section": "text1",
+          "symbol": "FUN_80054cf0 / actor update calls FUN_80069960, input bridge, FUN_80055568",
+          "event": "Second caller path for FUN_80056900; also clears actor flags in mode 5 before update.",
+          "capture": [
+            "r3 actor",
+            "actor+0x3e4 port",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "actor-update-transition-entry",
+          "type": "execute",
+          "address": "0x80054d54",
+          "dol_offset": "0x00051d54",
+          "section": "text1",
+          "symbol": "FUN_80054d54 / actor transition update path calling FUN_80055568",
+          "event": "One of five known callers into common actor update FUN_80055568; does not call input bridge directly.",
+          "capture": [
+            "r3 actor",
+            "actor+0x19/+0x1a phase",
+            "actor+0x5b4 command current",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled caller"
+        },
+        {
+          "id": "actor-common-update",
+          "type": "execute",
+          "address": "0x80055568",
+          "dol_offset": "0x00052568",
+          "section": "text1",
+          "symbol": "FUN_80055568 / common actor update, calls zz_0059068_",
+          "event": "Common actor update reached by all five static caller paths; calls zz_0059068_ where FUN_8005a298 Z candidate runs.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 command current",
+            "actor+0x5bc command pressed",
+            "actor+0x578 update phase",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled update root"
+        },
+        {
+          "id": "input-command-mask-helper",
+          "type": "execute",
+          "address": "0x8008bbc0",
+          "dol_offset": "0x00088bc0",
+          "section": "text1",
+          "symbol": "zz_008bbc0_ / normalized PAD command mask helper",
+          "event": "Masks DAT_803c727c slot input before FUN_80056900 stores actor+0x5b4; mask 0x00ff1f7f preserves B 0x200, X 0x400, and Z 0x10.",
+          "capture": [
+            "r3 port",
+            "r4 normalized slot word",
+            "return command mask",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled input helper"
+        },
+        {
+          "id": "state-transition-primitive",
+          "type": "execute",
+          "address": "0x8005ec04",
+          "dol_offset": "0x0005bc04",
+          "section": "text1",
+          "symbol": "zz_005ec04_ / writes object+0x6fe and clears +0x544..0x547",
+          "event": "Action-state transition. r3 is actor, r4/new byte is the new +0x6fe state.",
+          "capture": [
+            "r3 actor",
+            "r4 new_state",
+            "actor+0x6fe before/after",
+            "actor+0x591 command selector",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "active-action-handler-invuln",
+          "type": "execute",
+          "address": "0x8005d494",
+          "dol_offset": "0x0005a494",
+          "section": "text1",
+          "symbol": "FUN_8005d494 / likely active attack handler, re-arms actor+0x720",
+          "event": "Likely attack-active handler. Needs PAD correlation before labeling as B melee/special.",
+          "capture": [
+            "r3 actor",
+            "actor+0x591",
+            "actor+0x6fe",
+            "actor+0x720",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed mechanism, likely gameplay label"
+        },
+        {
+          "id": "action-helper-cluster",
+          "type": "execute",
+          "address": "0x800660b8",
+          "dol_offset": "0x000630b8",
+          "section": "text1",
+          "range_end": "0x80068004",
+          "range_end_dol_offset": "0x00065004",
+          "symbol": "zz_00660b8_ / action helper cluster",
+          "event": "Projectile/action helper path after a B/X transition.",
+          "capture": [
+            "r0-r31",
+            "f0-f13",
+            "lr caller",
+            "active_borg_base",
+            "candidate projectile/action pointer"
+          ],
+          "confidence": "playbook_lead"
+        },
+        {
+          "id": "battle-frame-target-action-dispatch",
+          "type": "execute",
+          "address": "0x8002bb14",
+          "dol_offset": "0x00028b14",
+          "section": "text1",
+          "symbol": "battle_frame_target_action_dispatch",
+          "event": "Per-frame target/effect dispatch; known caller path for param-tier delta.",
+          "capture": [
+            "r0-r31",
+            "lr caller",
+            "candidate actor/target pointers",
+            "DAT_8043612c slot inputs if in registers"
+          ],
+          "confidence": "confirmed function, side-effect labels still traced live"
+        },
+        {
+          "id": "z-command-state-candidate",
+          "type": "execute",
+          "address": "0x8005a298",
+          "dol_offset": "0x00057298",
+          "section": "text1",
+          "symbol": "FUN_8005a298 / exact Z current-bit consumer candidate",
+          "event": "Checks actor+0x5b4 bit 0x10 and writes actor+0x73c; not enough alone to label ally charge or power-up.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 current command word",
+            "actor+0x5d4 state flags",
+            "actor+0x73c before/after",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled bit check, gameplay label unproven"
+        },
+        {
+          "id": "post-input-actor-command-update",
+          "type": "execute",
+          "address": "0x80059068",
+          "dol_offset": "0x00056068",
+          "section": "text1",
+          "symbol": "zz_0059068_ / post-input actor command update path",
+          "event": "Called from FUN_80055568 after input bridge callers; always calls FUN_8005a298 Z command candidate near tail.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 command current",
+            "actor+0x5bc command pressed",
+            "actor+0x5e4 dispatch index",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled update path"
+        },
+        {
+          "id": "x-table-dispatch-803188e8",
+          "type": "execute",
+          "address": "0x800e6048",
+          "dol_offset": "0x000e3048",
+          "section": "text1",
+          "symbol": "zz_00e6048_ / dispatch PTR_FUN_803188e8[actor+0x540]",
+          "event": "Borg-specific command/action dispatch table; raw DOL table entry +2 is FUN_800e622c, the X pressed-edge transition candidate.",
+          "capture": [
+            "r3 actor",
+            "actor+0x540 table index",
+            "actor+0x5bc press-edge word",
+            "actor+0x3e8 borg id",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled dispatch, gameplay label unproven"
+        },
+        {
+          "id": "x-pressed-action-transition-candidate",
+          "type": "execute",
+          "address": "0x800e622c",
+          "dol_offset": "0x000e322c",
+          "section": "text1",
+          "symbol": "FUN_800e622c / X pressed-edge transition candidate",
+          "event": "Contains actor+0x5bc bit 0x400 branch leading to action helper call; needs live borg/action correlation.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5bc press-edge word",
+            "actor+0x540",
+            "actor+0x55c",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled bit check, gameplay label unproven"
+        },
+        {
+          "id": "bx-pressed-borg-action-candidate",
+          "type": "execute",
+          "address": "0x801304b8",
+          "dol_offset": "0x0012d4b8",
+          "section": "text1",
+          "symbol": "FUN_801304b8 / B/X pressed-edge borg-specific action candidate",
+          "event": "Contains B 0x200 and X 0x400 press-edge branches gated by borg ids/cooldowns; needs live action correlation.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5bc press-edge word",
+            "actor+0x3e8 borg id",
+            "actor+0x540",
+            "actor+0x694 cooldown",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled bit checks, gameplay label unproven"
+        },
+        {
+          "id": "bx-table-dispatch-803448b0",
+          "type": "execute",
+          "address": "0x8015ae1c",
+          "dol_offset": "0x00157e1c",
+          "section": "text1",
+          "symbol": "FUN_8015ae1c / dispatch PTR_FUN_803448b0[actor+0x540]",
+          "event": "Borg-specific command/action dispatch table; raw DOL table entry +2 is FUN_8015b0b4, the B/X current-bit conditional candidate.",
+          "capture": [
+            "r3 actor",
+            "actor+0x540 table index",
+            "actor+0x5b4 current command word",
+            "actor+0x3e8 borg id",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled dispatch, gameplay label unproven"
+        },
+        {
+          "id": "bx-borg-conditional-action-061e",
+          "type": "execute",
+          "address": "0x8015b0b4",
+          "dol_offset": "0x001580b4",
+          "section": "text1",
+          "symbol": "FUN_8015b0b4 / borg 0x061e X-vs-B command branch",
+          "event": "Uses X current bit for borg 0x061e and B current bit for other borgs before advancing actor+0x54c/action fields; proves B/X consumers are borg/action-specific.",
+          "capture": [
+            "r3 actor",
+            "actor+0x5b4 current command word",
+            "actor+0x3e8 borg id",
+            "actor+0x54c",
+            "actor+0x540",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled bit checks, gameplay label unproven"
+        }
+      ],
+      "watchpoints": [
+        "active-borg-action-state",
+        "active-borg-flags",
+        "active-borg-action-index",
+        "active-borg-wakeup-invulnerability-timer"
+      ]
+    },
+    {
+      "name": "power-up/param-tier",
+      "event_window": "Press Z with a visible ally and separately trigger any power-up pickup. This proves whether Z calls the recovered actor+0x74a/+0x74e/+0x750 param-tier system.",
+      "breakpoints": [
+        {
+          "id": "param-tier-reset",
+          "type": "execute",
+          "address": "0x80068138",
+          "dol_offset": "0x00065138",
+          "section": "text1",
+          "symbol": "reset_actor_param_tier",
+          "event": "Initializes actor+0x74a/+0x74e/+0x750 and refreshes param table.",
+          "capture": [
+            "r3 actor",
+            "actor+0x74a/+0x74e/+0x750",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "param-tier-delta-127",
+          "type": "execute",
+          "address": "0x8006817c",
+          "dol_offset": "0x0006517c",
+          "section": "text1",
+          "symbol": "apply_actor_param_tier_delta_127",
+          "event": "Applies signed delta clamped to [-0x7f,0x7f].",
+          "capture": [
+            "r3 actor",
+            "r4 signed_delta",
+            "actor+0x74a/+0x74b/+0x74e/+0x750 before/after",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "param-tier-delta-63",
+          "type": "execute",
+          "address": "0x800681e4",
+          "dol_offset": "0x000651e4",
+          "section": "text1",
+          "symbol": "apply_actor_param_tier_delta_63",
+          "event": "Battle-side tier delta; known decomp note says caller passes DAT_8043612c[slot].",
+          "capture": [
+            "r3 actor",
+            "r4 signed_delta",
+            "actor+0x74a/+0x74e/+0x750 before/after",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "id": "param-tier-refresh",
+          "type": "execute",
+          "address": "0x8006826c",
+          "dol_offset": "0x0006526c",
+          "section": "text1",
+          "symbol": "refresh_actor_param_tier_table",
+          "event": "Writes table-backed actor params into actor+0xb8/+0x1dd0/+0x5f8.",
+          "capture": [
+            "r3 actor",
+            "actor+0x74a/+0x74b/+0x74c/+0x74d",
+            "actor+0xb8/+0x1dd0/+0x5f8",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "watchpoints": [
+        "active-borg-action-index"
+      ]
+    },
+    {
+      "name": "audio-proof",
+      "event_window": "Enable with an action-proof run. Exact cue IDs require audio hits in the same labeled B/X/Z trace plus argument/handle inspection; counts alone are not enough.",
+      "breakpoints": [
+        {
+          "id": "audio-sfx-request-wrapper",
+          "type": "execute",
+          "address": "0x800f036c",
+          "dol_offset": "0x000ed36c",
+          "section": "text1",
+          "symbol": "zz_00f036c_ / actor positional SFX request wrapper",
+          "event": "Routes actor+cue requests to positional SFX playback; capture r3 actor and r4 cue id, then inspect lr caller.",
+          "capture": [
+            "r3 actor or null",
+            "r4 cue id",
+            "actor+0x3e8 borg id",
+            "actor+0x540 action dispatch index",
+            "actor+0x5b4 command current",
+            "actor+0x5bc command pressed",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed decompiled audio wrapper"
+        },
+        {
+          "id": "audio-sfx-playing",
+          "type": "execute",
+          "address": "0x80018c58",
+          "dol_offset": "0x00015c58",
+          "section": "text1",
+          "symbol": "PlatAudio::IsSFXPlaying(unsigned)",
+          "event": "Named SFX query entry point; capture argument register as candidate cue/handle.",
+          "capture": [
+            "r3 candidate cue/handle",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "audio-thp-stop",
+          "type": "execute",
+          "address": "0x8008e7a0",
+          "dol_offset": "0x0008b7a0",
+          "section": "text1",
+          "symbol": "THPSimpleAudioStop",
+          "event": "Movie/audio stop boundary; useful negative control for non-combat audio.",
+          "capture": [
+            "r0-r31",
+            "lr caller"
+          ],
+          "confidence": "symbol_named"
+        },
+        {
+          "id": "audio-object-callback",
+          "type": "execute",
+          "address": "0x801c58bc",
+          "dol_offset": "0x001c28bc",
+          "section": "text1",
+          "symbol": "FUN_801c58bc audio object callback dispatcher",
+          "event": "Audio object callback dispatches by param+0x18 through PTR_FUN_80385638.",
+          "capture": [
+            "r3 audio object",
+            "object+0x18 dispatch index",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed function, cue semantics unknown"
+        },
+        {
+          "id": "audio-sfx-init",
+          "type": "execute",
+          "address": "0x801c5998",
+          "dol_offset": "0x001c2998",
+          "section": "text1",
+          "symbol": "zz_01c5998_",
+          "event": "Audio object initialization/update lead in the 0x801c58xx cluster.",
+          "capture": [
+            "r3 audio object",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "symbol_named cluster lead"
+        },
+        {
+          "id": "audio-sfx-update",
+          "type": "execute",
+          "address": "0x801c5cd8",
+          "dol_offset": "0x001c2cd8",
+          "section": "text1",
+          "symbol": "FUN_801c5cd8 audio object update callback",
+          "event": "Second callback installed by zz_01c5824_; inspect args/owner.",
+          "capture": [
+            "r3 audio object",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "confirmed function, cue semantics unknown"
+        },
+        {
+          "id": "audio-seq-continue",
+          "type": "execute",
+          "address": "0x801c7b68",
+          "dol_offset": "0x001c4b68",
+          "section": "text1",
+          "symbol": "sndSeqContinue",
+          "event": "Sequence audio continuation entry point.",
+          "capture": [
+            "r3/r4 candidate sequence args",
+            "param_9 sequence object if in register/stack",
+            "lr caller",
+            "r0-r31"
+          ],
+          "confidence": "symbol_named"
+        }
+      ],
+      "watchpoints": []
+    },
+    {
       "name": "MAIN_MENU_E2E",
       "event_window": "Load D:\\GotYaForce\\main menu gotchaforce.sav, then manually navigate main menu -> mode select -> Adventure/Story -> load path. Keep this trace focused on file/save/load and battle-entry anchors; PAD breakpoints are intentionally excluded because they fill traces before the load path.",
       "breakpoints": [
@@ -1147,6 +1838,9 @@
     "HP field offset, damage formula, defense scaling, hitstun, and knockdown thresholds.",
     "Death-to-next-borg timing, force active index location, and GF-energy decrement source.",
     "Jump/fly velocity fields, grounded/airborne flags, boost drain, and per-borg air-jump counts.",
+    "B/X action mapping to object+0x6fe/+0x591 state transitions.",
+    "Z ally-lock link, if any, to actor+0x74a/+0x74e/+0x750 param-tier power-up fields.",
+    "Per-action audio cue IDs and their caller path.",
     "CPU AI decision state, target choice, approach/retreat thresholds, and attack selection."
   ]
 }

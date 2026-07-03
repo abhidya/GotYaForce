@@ -64,6 +64,37 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
     `research/decomp/index/function-evidence-index.md:56-57`,
     `research/decomp/ghidra-export/chunk_0076.c:3819-3821`,
     `research/decomp/ghidra-export/chunk_0076.c:4844-4897`.
+- Ignored Dolphin traces under `user-data/dolphin-trace/traces/` now prove the GDB/PAD
+  capture path and the corrected post-PADRead injection path through `zz_010d450_`
+  normalization: B -> normalized current/pressed `0x00000200`, X -> `0x00000400`,
+  Z -> `0x00000010` (`research/traces/GG4E/dolphin-gdb-trace-results.md`). These
+  are `gdb-pad-injection` traces, not physical controller captures.
+- Static decomp proves `FUN_80056900` copies normalized `DAT_803c727c[port]` through
+  `zz_008bbc0_` into `actor+0x5b4`, then derives `actor+0x5bc` pressed edges. The
+  `zz_008bbc0_` mask is `0x00ff1f7f`, so it preserves B `0x00000200`, X
+  `0x00000400`, and Z `0x00000010`
+  (`research/decomp/ghidra-export/chunk_0007.c:228-270`,
+  `research/decomp/ghidra-export/chunk_0013.c:2197-2202`).
+- Static decomp also found candidate B/X/Z consumers, but not a complete gameplay rule:
+  `FUN_8015b0b4` routes X for borg `0x061e` and B for others, `FUN_800e622c` has an
+  X pressed-edge transition path, `FUN_801304b8` has borg-gated B and X pressed-edge
+  paths, and `FUN_8005a298` is the only focused-pass exact Z `0x10` consumer found so
+  far (`research/traces/GG4E/dolphin-gdb-trace-results.md`).
+- Direct `boot.dol` pointer-table reads refine two B/X candidates: `zz_00e6048_`
+  dispatches `PTR_FUN_803188e8[actor+0x540]`, whose entry 2 is `FUN_800e622c`;
+  `FUN_8015ae1c` dispatches `PTR_FUN_803448b0[actor+0x540]`, whose entry 2 is
+  `FUN_8015b0b4`. A raw pointer at `0x80335c84` points to `FUN_801304b8`, but the
+  dispatch reference for that table is not identified yet.
+- Static C also proves two cue arguments inside the `FUN_801304b8` B pressed-edge
+  candidate: borg id `0x0106` calls `zz_00f036c_(actor, 0xeb)` and borg id `0x0107`
+  calls `zz_00f036c_(actor, 0xaa)`. `zz_00f036c_` is an SFX request wrapper, but
+  those cue IDs are not browser gameplay rules until a live trace ties them to PAD,
+  action dispatch, and LR caller.
+- The same traces still contain no action-state/param-tier/audio correlation for B/X/Z.
+  Fresh action traces from `dolphin/right before hit.sav` either filled on hot
+  `audio-seq-continue` or timed out with zero input/action hits. Therefore exact B/X
+  action-index mapping, Z charge/power-up side effects, and per-action audio cue IDs
+  remain unproven.
 
 ## GC Battle Control Checklist
 
@@ -72,10 +103,10 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
 | Control Stick | Move | WASD/arrows; gamepad left stick axes 0/1 | `moveX/moveZ` feed `stepMovement()`; while locked, forward/back moves toward/away from target and diagonals circle-strafe | `CONFIRMED-ASSET` input, `CONFIRMED-CODE` web, movement semantics partly `TUNED` | Texture proves "move". Lock-relative movement is current code (`movement.ts:8-11`, `217-244`) and trace notes support default lock-relative play (`research/decomp/behavior-notes.md:1491-1508`). Still trace exact original stick vector handling. |
 | Fast stick snap | Step/dodge in pushed direction | ShiftLeft/ShiftRight; gamepad buttons 5 or 7; pure left/right stick while locked auto-dodges | Sets `dashActive`, `dash`, and i-frames; dashes in resolved stick direction | `CONFIRMED-ASSET` input, `TUNED` mechanics | Texture text says to snap/quickly move stick for step/dodge. Current code is `movement.ts:86-104` and pure-lateral auto-dodge is `movement.ts:237-244`. Constants are tuned (`constants.ts:156-174`). Decomp audit found no dash/step/dodge state (`behavior-notes.md:982-991`). Next: trace left/right dodge-dash position and `object+0x6fe`. |
 | A | Jump | Space or J; gamepad button 0 | Rising edge sets vertical velocity; air-jumps use `airJumps`; flyer holding jump spends boost fuel and enters fly | `CONFIRMED-ASSET` input, `TUNED` velocity/boost values | Texture proves A jump. Current mapping is `adapter.ts:139` and `:153`; mechanics are `movement.ts:126-198`; constants are `constants.ts:134-153`. Trace notes say tap A = jump and hold A = fly/boost (`behavior-notes.md:1500`). Exact original vertical field/velocity remains unknown (`behavior-notes.md:995-1000`, `1677-1684`). |
-| B | Attack | K or B; gamepad button 1 | B resolves per-borg primary action: melee if melee-primary/available, shot if shot-primary/available; shot consumes ammo/reload and may home to lock target | `CONFIRMED-ASSET` input, action semantics `TUNED` | Texture proves B attack. Current mapping is `adapter.ts`; attack code is `combat.ts`, melee start, projectile spawn. Per-borg action profiles are asset-backed but tuned, not decoded hit-bin semantics (`packages/combat/src/data/actionProfiles.json`, `packages/combat/src/actionProfiles.ts`). Next: one close B and one ranged B Dolphin trace. |
-| X | Special attack | L or X; gamepad button 2 | Starts special if cooldown is clear; current generic implementation is radial/AoE burst with cooldown and action lock | `CONFIRMED-ASSET` input, `TUNED` mechanic | Texture and in-battle HUD capture both show X special. Current mapping is `adapter.ts`; special path is `combat.ts`; constants are `constants.ts`. |
+| B | Attack | K or B; gamepad button 1 | B resolves per-borg primary action: melee if melee-primary/available, shot if shot-primary/available; shot consumes ammo/reload and may home to lock target | `CONFIRMED-ASSET` input, B bit bridge `DERIVED`, action semantics `TUNED` | Texture proves B attack. GDB injection plus decomp prove B `0x00000200` reaches normalized PAD and survives the command mask into `actor+0x5b4` when the input bridge runs. Current mapping is `adapter.ts`; attack code is `combat.ts`, melee start, projectile spawn. Per-borg action profiles are asset-backed but tuned, not decoded hit-bin semantics (`packages/combat/src/data/actionProfiles.json`, `packages/combat/src/actionProfiles.ts`). Next: one close B and one ranged B Dolphin trace. |
+| X | Special attack | L or X; gamepad button 2 | Starts special if cooldown is clear; current generic implementation is radial/AoE burst with cooldown and action lock | `CONFIRMED-ASSET` input, X bit bridge `DERIVED`, `TUNED` mechanic | Texture and in-battle HUD capture both show X special. GDB injection plus decomp prove X `0x00000400` reaches normalized PAD and survives the command mask into `actor+0x5b4` when the input bridge runs. Current mapping is `adapter.ts`; special path is `combat.ts`; constants are `constants.ts`. |
 | R | Lock-on switch (texture label: `ロックオン きりかえ`) | R or Tab; gamepad buttons 5 or 7 stand in for GC R | Human borgs auto-acquire locks; each R PRESS (edge-triggered) cycles to the next enemy by distance — never dead borgs, never self, never allies. The locked enemy is marked with a continuously spinning red ring reticle | Original input `CONFIRMED-ASSET`; current binding + enemy-only spinning reticle `CONFIRMED-CODE`; cycle algorithm `TUNED` | Texture shows R is switch-lock, not generic lock-on. Current code keeps Start/button 9 for pause and binds switch-lock to R-like buttons (`adapter.ts:147-148`, `:163`); the press latch lives in `battle.ts:242-262` and cycling in `combat.ts:142-153`. The reticle renders only over the local human's `lockTarget` and follows borg switches/deaths (`battleScene.ts:283-318`, `:542-`). Decomp search concluded no manual scan-select enemy-lock system exists (`behavior-notes.md:781-856`), so browser lock range/cone are tuned (`constants.ts:322-335`). Next: trace R in original battle to refine cycling order and camera behavior. |
-| Z | Ally lock-on (texture label: `みかた ロックオン`) | Z; gamepad left shoulder (button 4) stand-in | Each Z PRESS (edge-triggered) acquires the nearest same-team ally, or cycles allies if one is already locked; records a separate `allyLockTarget`, marked with a GREEN overhead arrow (different shape + color from the red enemy reticle); does not redirect attacks or trigger ally charge/power-up yet | `CONFIRMED-ASSET` input; current binding + distinct ally marker `CONFIRMED-CODE`; target selection `TUNED`; charge behavior `UNKNOWN` | Texture proves Z ally-lock exists as a command label. Current code carries this separately from enemy lock (`adapter.ts:149`, `:165`, `battle.ts:248-267`, `combat.ts:155-183`) so future charge/camera work has state to attach to; the ally marker is the extracted `arrow_mdl` geometry tinted green (`battleScene.ts:649-`). Next: trace Z with ally visible to identify original target choice, camera behavior, and charge/power-up side effects. |
+| Z | Ally lock-on (texture label: `みかた ロックオン`) | Z; gamepad left shoulder (button 4) stand-in | Each Z PRESS (edge-triggered) acquires the nearest same-team ally, or cycles allies if one is already locked; records a separate `allyLockTarget`, marked with a GREEN overhead arrow (different shape + color from the red enemy reticle); does not redirect attacks or trigger ally charge/power-up yet | `CONFIRMED-ASSET` input; Z bit bridge `DERIVED`; current binding + distinct ally marker `CONFIRMED-CODE`; target selection `TUNED`; charge behavior `UNKNOWN` | Texture proves Z ally-lock exists as a command label. GDB injection plus decomp prove Z `0x00000010` reaches normalized PAD and survives the command mask into `actor+0x5b4` when the input bridge runs. Current code carries this separately from enemy lock (`adapter.ts:149`, `:165`, `battle.ts:248-267`, `combat.ts:155-183`) so future charge/camera work has state to attach to; the ally marker is the extracted `arrow_mdl` geometry tinted green (`battleScene.ts:649-`). Next: trace Z with ally visible to identify original target choice, camera behavior, and charge/power-up side effects. |
 | Start | Pause / advance / skip, depending screen | Battle pause: Escape, Enter, gamepad button 9; Load Box skip currently S | Battle pause opens `PauseMenu`; menus use screen-specific handlers | Original battle binding `UNKNOWN`; current `CONFIRMED-CODE` | UI notes prove Start advances boot/title and Load Box has START=SKIP (`UI-FIDELITY-SPEC.md:59`, `:67-68`). Current pause poll is `main.ts:1345-1351`; Load Box keyboard skip is `LoadBoxData.ts:52-59`. Next: capture original pause/control screen for battle Start semantics. |
 | Manual borg switch | Unknown / not on control texture | none | Inactive; active borg changes only through death/auto-deploy | Current `CONFIRMED-CODE`, original manual input `UNKNOWN` | The browser E-key retirement/requeue path was removed because the texture shows no manual switch and decomp has death/swap timer anchors, not a proven manual switch button (`function-evidence-index.md:56-57`, `chunk_0076.c:3819-3821`, `:4844-4897`). Next: trace `0x802807ac`/`0x80281c38` while pressing candidate buttons and while a borg dies. |
 
@@ -187,6 +218,19 @@ Known mismatches:
   `research/decomp/behavior-notes.md:1106-1223`). It also proves `FUN_8005d494` re-arms
   invincibility at `object+0x720` each call (`chunk_0007.c:4676-4688`), but the exact
   B/X action mapping to state indices still requires live input correlation.
+- New static candidates for the next live trace:
+  - `FUN_8015b0b4` chooses X current bit for borg `0x061e`, otherwise B current bit,
+    before advancing local action fields. This proves B/X consumers are borg/action
+    specific, not one global "B always primary, X always special" table.
+  - `FUN_800e622c` has an X pressed-edge branch into an action helper path.
+  - `FUN_801304b8` has B and X pressed-edge branches gated by borg id/cooldown.
+  These are trace targets, not browser rules yet.
+- Static table context: `FUN_800e622c` and `FUN_8015b0b4` are both entry 2 in their
+  borg-specific `actor+0x540` dispatch tables. This proves where to break for live
+  correlation; it still does not prove which visible move the browser should perform.
+- Static sound context: the `FUN_801304b8` B pressed-edge branch has exact
+  `zz_00f036c_` cue args `0xeb` and `0xaa` for two borg ids. Treat them as trace
+  targets only; browser per-action cue IDs stay `UNKNOWN`.
 
 ### Manual Borg Switch
 
@@ -206,6 +250,13 @@ Known mismatches:
   system (`packages/combat/src/combat.ts:333-366`).
 - No exact C proof currently ties Z ally-lock directly to charge attacks. Z target selection and
   the param-tier power system must stay separate until a trace links them.
+- `FUN_8005a298` is the focused-pass exact Z `0x10` consumer found so far: it tests
+  `actor+0x5b4 & 0x10` and writes `actor+0x73c`. That proves a Z command branch exists,
+  but not ally target choice, charge, power-up, or camera behavior.
+- Its caller path is now identified statically: input bridge callers
+  `FUN_80054cbc`/`FUN_80054cf0` call `FUN_80055568`, which calls `zz_0059068_`;
+  `zz_0059068_` always calls `FUN_8005a298` near its tail. The fresh Dolphin liveness
+  capture still missed this whole actor-update route, so this remains static proof only.
 - The recovered C proves a tiered actor parameter system, but not enough browser-safe mapping
   yet: `reset_actor_param_tier` at `0x80068138` initializes `actor+0x74a`, `+0x74e`,
   and `+0x750`; `apply_actor_param_tier_delta_63` clamps deltas, accumulates `+0x74e`,
@@ -247,7 +298,9 @@ Known mismatches:
 3. Dash/step trace: full-stick left/right under lock. Capture position deltas and state index;
    treat left/right as dash events per `research/traces/GG4E/golden-trace-runbook.md:41-57`.
 4. B/X trace: one close-range B, one ranged B, one X. Correlate PAD bits to `object+0x6fe`,
-   `FUN_8005d494`, projectile spawn, cooldown/ammo fields, and animation request helper calls.
+   `FUN_8005d494`, projectile spawn, cooldown/ammo fields, animation request helper calls, and
+   audio trigger wrappers. Do not promote any B/X state mapping or sound cue until this trace
+   shows the original action transition and cue path.
 5. Manual borg switch trace: press candidate buttons and separately let a borg die while
    watching `0x802807ac` / `0x80281c38` plus active borg slot/player state. Until then,
    manual switch stays inactive in the browser battle core.
