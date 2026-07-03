@@ -65,11 +65,11 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Hyper / Power Burst | shell (ATK-011) | burst.ts | +0x6fb/+0x6fc, zz_005b2b8_ (aj/S) | **trace T3** — meter+duration |
 | Fusion | data + shell (ATK-018) | fusion-pairs JSON | pair table 0x802d352c (aj) | trace T3 (co-op control split) |
 | Statuses (id/timer/immunity) | shell (ATK-010) | status.ts | +0x71a/+0x71c/+0x5a0 (Q/aw effects) | trace T8 per-id semantics |
-| Vampire lifesteal | data (ids) | ATK-019 shell | chunk_0003.c:6318 ids 0x702/0x70a (an) | HP-drain loop dig |
-| Nurse heal | table located | ATK-019 shell | table 0x802d1130 (ax) | dig zz_0088e50_ for HP-write + amount |
+| Vampire lifesteal | **DECODED (ay)** | ATK-019 shell | steal chunk_0003.c:7982/apply 6318/bleed chunk_0006.c:7900 | port steal=dmg/2, cap@maxHP, 1HP/30f bleed |
+| Nurse heal | **HP-write ABSENT (ay)** | ATK-019 shell | table 0x802d1130 (ax); no +0x1c6 write reachable | Dolphin-trace +0x1c6 on healed ally |
 | Mash extra hits | shell (ATK-017) | constants MASH | +0x550 cap 4 (T/ax) | trace consumer |
 | Contact damage | scaffold (ATK-006) | disabled | per-borg authored (am/av) | trace T2 stomp |
-| Levels | DONE (row select) | sourceBorgStats.ts | +0x3ec, DAT_804339e8 (ak); row=lvl+1 (av) | wire EXP thresholds from saves; fix level-aware row index (see §7) |
+| Levels | DONE (row=byte+2, ay) | sourceBorgStats.ts | +0x3ec; row=levelByte+2 (av/aw, 200/203) | wire EXP thresholds from saves; 3 non-normal-schedule outliers open |
 | Lock-on | CHECKED_CLOSED | combat.ts TUNED heuristic | no ROM system exists (q) | — |
 
 ---
@@ -108,7 +108,8 @@ SelectForce, ForceBuilder, BattleIntro, Results, PauseMenu.
 | Boost gauge | DONE (fixed 2026-07-03) | now driven by boostFuel |
 | B ammo | PARTIAL | single pool |
 | **X ammo (separate)** | MISSING | X is cooldown-only; needs weapon-cell 1 (survey #2) |
-| Charge gauge | MISSING | chargeFrames tracked but no meter — computable now |
+| Charge gauge | DONE (5010cc64) | orange meter above reload pill; flares at full |
+| Target reticle color | DONE (5010cc64) | yellow→red at melee range (meleeRange field) |
 | **Power Burst meter** | MISSING | BLOCKED trace T3 |
 | Jump gauge | MISSING | multi-level jump readout |
 | Target cursor yellow→red | MISSING | no meleeMode field; computable from lock+distance |
@@ -177,22 +178,27 @@ down like `tuned-burndown.md`.
 ## 7. Ranked roadmap to 1:1
 
 **Tier A — cheap, DERIVED-safe, no trace needed (do next):**
-1. Charge-gauge HUD element + yellow→red target-cursor color (both computable from tracked
-   state: chargeFrames, lock+distance) — closes 2 visible HUD gaps.
+1. ✅ DONE (commit 5010cc64) — Charge-gauge HUD element + yellow→red target-cursor color
+   (charge01 + meleeRange HudState fields; reticle tint plumbed through battleScene.sync).
 2. X-attack → weapon-cell-1 ammo consumption + separate X-ammo HUD (ammo model already has
    cell 1; (ao) confirms separate counters).
 3. 3-phase deploy timing (20/1/15f, ally cue 8) — values DERIVED in (af); replaces flat 45f.
+   NOTE: SPAWN_DURATION is already 36; verify whether the 3-phase split changes observable
+   behavior before investing (may be a doc-only refinement).
 4. Winner-mask judge: port the per-side count/energy/rule-flag equality model (ae) into
    battle.ts evaluateResult.
-5. Fix the level-aware row-index path in sourceBorgStats.ts: the empirical rule is
-   row = displayLevel + 1 (av, 200/203 validated), but rowOffsetForLevel currently returns
-   DAT_804339e8[level] which is only part of the index (default level-0 path is correct and is
-   all that's used today, so low-risk — but wrong if levels ever drive it).
+5. ✅ DONE (commit fcb9c2bc) — level-aware row-index CORRECTED to row = levelByte + 2 (the
+   old DAT_804339e8[level] was non-monotonic and wrong; retained for reference only).
+   levelRows.selftest rewritten, 42/42. Outliers pl0400/pl0507/pl0d01 remain open.
 6. Wire the 46 extracted voice cues to deploy/KO/win events (real assets, currently unused).
 
 **Tier B — corpus digs (agent-runnable):**
-7. Nurse heal HP-write + amount (dig zz_0088e50_ behind table 0x802d1130, (ax)).
-8. Vampire HP-drain loop (grep with the 0x702/0x70a path as anchor).
+7. ⛔ DEAD-END (ay) — Nurse heal HP-write NOT in corpus. Re-traced table 0x802d1130 + Death
+   Borg Theta 0x6a path; no +0x1c6 heal write reachable. Heal amount is inlined/table-indexed
+   or truncated. Re-tagged as a Dolphin-trace candidate (watch +0x1c6 on a nurse-healed ally).
+8. ✅ DONE (ay) — Vampire lifesteal FULLY decoded: steal = damage/2 banked
+   (chunk_0003.c:7982), applied+capped to own HP (6318), passive 1 HP / 30-frame bleed
+   (chunk_0006.c:7900). Ready for a faithful ATK-019 port.
 9. state→(group,slot) animation dispatch (trace zz_004beb8_ callers / 35-slot table) — converts
    heuristic anim labels to source-proven.
 10. Annotate the 150 understood functions into the index (coverage burn-down).
