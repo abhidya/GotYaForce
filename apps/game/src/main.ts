@@ -126,60 +126,90 @@ const DEFAULT_FORCE_SLOTS: ForceSlot[] = [
 // Exported ADX->OGG cues from poq_adx_usa.afs. Exact Challenge cue semantics
 // still need DOL trace confirmation, so these are conservative asset-backed
 // defaults rather than claimed final music IDs.
+//
+// Menu SFX note (2026-07-02): the earlier decision to mute confirm/back/edit was based on the
+// se00_* exports being 3-12s clips. That turned out to be an EXPORT BUG, not a property of the
+// source audio: the ADX headers in poq_adx_usa.afs give 0.47-1.86s for AFS members 33..37, and
+// the re-exported OGGs match. With genuinely short one-shot cues available, menu SFX are wired
+// again — still TUNED (which SE plays for which menu event is not ROM-traced), but no longer
+// wrong-length. See research/game-design/AUDIO-PORT-STATUS.md for the full event->file map.
 const AUDIO_CUES = {
   menuBgm: "bgm00",
   battleBgm: "bgm01",
-  confirm: null,
-  back: null,
-  edit: null,
+  confirm: "se00_03",
+  back: "se00_04",
+  edit: "se00_04",
 } as const;
-const ENABLE_TUNED_COMBAT_SFX = new URLSearchParams(window.location.search).has("tunedCombatSfx");
+// Combat SFX default ON since the export-duration fix; ?noCombatSfx=1 is the debugging opt-out
+// (replaces the old opt-in ?tunedCombatSfx=1 gate, whose rationale — 12s clips — is gone).
+const DISABLE_COMBAT_SFX = new URLSearchParams(window.location.search).has("noCombatSfx");
 
-// Combat SFX-per-animation-slot mapping. TUNED, NOT DERIVED: behavior-notes.md (t) confirms
-// there is no recovered ROM per-action audio-event table to port (AnimAudioEventLookup @
-// 0x801a7640 is a generic nlQSort<T> instantiation name, not a decoded frame/sound-id table;
-// hit.bin/comhit.bin's 0xF4-byte records have no identified sound-id field either). Only 5
-// generic exported SFX samples exist (audio/manifest.json), and only two (se00_01 @ ~3.0s,
-// se00_04 @ ~3.0s) are short enough to work as one-shot hit/impact stingers — the other three
-// (se00_00/02/03, all exactly 12.0s) are clearly loops/jingles, not hit-length one-shots, so
-// they're deliberately NOT reused here for combat hits. Until real per-move SFX IDs are
-// recovered from the ROM, every borg's melee/shot/special/hit/down/death events would share these
-// same two generic stingers rather than inventing fake per-borg specificity. They are opt-in only
-// via ?tunedCombatSfx=1 because the default path should not play known-wrong combat audio.
-const COMBAT_SFX: Partial<Record<AnimSlot, string>> = {
-  melee: "se00_04",
-  melee_alt: "se00_04",
+// Battle event -> SFX cue mapping. TUNED, NOT DERIVED: behavior-notes.md (v) confirms there is
+// no recovered ROM per-action audio-event table to port (AnimAudioEventLookup @ 0x801a7640 is a
+// generic nlQSort<T> instantiation name, not a decoded frame/sound-id table; hit.bin/comhit.bin's
+// 0xF4-byte records have no identified sound-id field either). Only 5 exported SE cues exist
+// (poq_adx_usa.afs members 33..37); their real durations are 0.47-1.86s (the old 3-12s manifest
+// durations were a broken export, since fixed). Assignments below are guided by waveform analysis
+// of the decoded PCM (documented in AUDIO-PORT-STATUS.md), not by traced sound IDs:
+//   se00_00 1.35s hard-attack multi-burst -> knockdown / dash
+//   se00_01 1.86s two-part long burst     -> death / explosion
+//   se00_02 1.07s slow build then burst   -> special / charge release / low-energy alert
+//   se00_03 0.47s instant-attack impact   -> melee swing / damage taken / menu confirm
+//   se00_04 0.64s short tonal burst       -> shot / lock-on switch / menu back-edit
+// jump and land stay deliberately unmapped: no plausible short jump/land sample exists in the
+// exported set, and reusing an impact cue there would reintroduce the "wrong asset" bug class.
+type BattleEventCue = AnimSlot | "lockon" | "charge_release" | "alert";
+
+const COMBAT_SFX: Partial<Record<BattleEventCue, string>> = {
+  melee: "se00_03",
+  melee_alt: "se00_03",
   shoot: "se00_04",
-  special: "se00_01",
-  hit: "se00_01",
-  down: "se00_01",
+  special: "se00_02",
+  charge_release: "se00_02",
+  hit: "se00_03",
+  down: "se00_00",
   death: "se00_01",
+  dash: "se00_00",
+  dash_fwd: "se00_00",
+  dash_back: "se00_00",
+  dash_left: "se00_00",
+  dash_right: "se00_00",
+  lockon: "se00_04",
+  alert: "se00_02",
 };
 
-const COMBAT_SFX_MIN_GAP_MS: Partial<Record<AnimSlot, number>> = {
+// Rate limits are keyed by EVENT (not by file), so e.g. a damage-taken cue is not swallowed by a
+// just-played melee swing that happens to share the same sample.
+const COMBAT_SFX_MIN_GAP_MS: Partial<Record<BattleEventCue, number>> = {
   melee: 220,
   melee_alt: 220,
   shoot: 180,
   special: 450,
+  charge_release: 450,
   hit: 180,
   down: 450,
   death: 700,
+  dash: 400,
+  dash_fwd: 400,
+  dash_back: 400,
+  dash_left: 400,
+  dash_right: 400,
+  lockon: 150,
+  alert: 1500,
 };
 const lastCombatSfxAt = new Map<string, number>();
 
-function playCombatSfx(slot: AnimSlot): void {
-  if (!ENABLE_TUNED_COMBAT_SFX) return;
-  const key = COMBAT_SFX[slot];
+function playCombatSfx(cue: BattleEventCue): void {
+  if (DISABLE_COMBAT_SFX) return;
+  const key = COMBAT_SFX[cue];
   if (!key) return;
   const now = performance.now();
-  const minGap = COMBAT_SFX_MIN_GAP_MS[slot] ?? 250;
-  const last = lastCombatSfxAt.get(key) ?? -Infinity;
+  const minGap = COMBAT_SFX_MIN_GAP_MS[cue] ?? 250;
+  const last = lastCombatSfxAt.get(cue) ?? -Infinity;
   if (now - last < minGap) return;
-  lastCombatSfxAt.set(key, now);
+  lastCombatSfxAt.set(cue, now);
   playSfx(key);
 }
-
-type BattleEventCue = AnimSlot;
 
 function playBattleEventSfx(cue: BattleEventCue): void {
   playCombatSfx(cue);
@@ -255,7 +285,6 @@ type StageResources = {
   collision: StageCollision | undefined;
 };
 
-type StageVector = [number, number, number];
 type StageColorRecord = { rgbHex?: string };
 type ExtractedStageLight = {
   role?: string;
@@ -306,11 +335,14 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.target.set(0, 80, 0);
 
-const stageAmbient = new THREE.AmbientLight(DEFAULT_RENDER_STATE.ambientColor, 1);
-scene.add(stageAmbient);
-const stageLight = new THREE.DirectionalLight(DEFAULT_RENDER_STATE.lightColor, 1);
-stageLight.position.copy(DEFAULT_RENDER_STATE.lightPosition);
-scene.add(stageLight);
+import {
+  createStageLightingRig,
+  applyStageRenderStateLighting,
+  type StageRenderState as LightingStageRenderState,
+} from "./stages/lighting";
+// Real per-stage lighting rig (supports N directionals — stff carries 2); replaces the old
+// single ambient+directional pair. Values/validation: research/game-design/STAGE-LIGHTING-PORT.md.
+const stageLighting = createStageLightingRig(scene);
 
 const stageRoot = new THREE.Group();
 scene.add(stageRoot);
@@ -737,6 +769,10 @@ async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.Animation
 const battleScene = new BattleScene(battleRoot, {
   loadModel: loadBorgModel,
   loadClip: loadBorgClip,
+  // Audio glue: edge-triggered per-slot cue for every actor (dash/melee/hit/down/death/...).
+  // Overlaps with the sim-level edges in emitBattleAudioEdges by design; the per-event
+  // min-gap map in playCombatSfx dedupes the two sources.
+  onSlotEnter: (_borgId, slot) => playCombatSfx(slot),
 });
 const battleCamera = new BattleCamera({ camera, controlsTarget: controls.target });
 const fallbackStageBounds: RectStageBounds = {
@@ -750,68 +786,15 @@ const fallbackStageBounds: RectStageBounds = {
 // Stage loading (preserved)
 // ------------------------------------------------------------------------------------------
 
-function parseHexColor(value: string | undefined, fallback: number): number {
-  if (!value || !/^#[0-9a-f]{6}$/i.test(value)) return fallback;
-  return Number.parseInt(value.slice(1), 16);
-}
-
-function stageVector(value: number[] | undefined): StageVector | undefined {
-  if (!value || value.length < 3) return undefined;
-  const [x, y, z] = value;
-  if (x === undefined || y === undefined || z === undefined) return undefined;
-  return Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z) ? [x, y, z] : undefined;
-}
-
-function extractedLights(rs: StageRenderState | null): ExtractedStageLight[] {
-  return Array.isArray(rs?.lights) ? rs.lights : [];
-}
-
-function legacyLights(rs: StageRenderState | null): LegacyStageLights {
-  return rs?.lights && !Array.isArray(rs.lights) ? rs.lights : {};
-}
-
-function resolveAmbientLight(rs: StageRenderState | null): { color: string | undefined; intensity: number | undefined } {
-  const legacy = legacyLights(rs).ambient;
-  const extracted =
-    extractedLights(rs).find((light) => /ambient|global/i.test(light.role ?? "")) ??
-    extractedLights(rs).find((light) => !stageVector(light.position?.position));
-  return {
-    color: legacy?.colorRgbHex ?? extracted?.color?.rgbHex,
-    intensity: legacy?.intensity ?? extracted?.intensity,
-  };
-}
-
-function resolveDirectionalLight(
-  rs: StageRenderState | null,
-): { color: string | undefined; intensity: number | undefined; position: StageVector | undefined } {
-  const legacy = legacyLights(rs).directional;
-  const extracted =
-    extractedLights(rs).find((light) => stageVector(light.position?.position)) ??
-    extractedLights(rs).find((light) => /positioned|diffuse|specular/i.test(light.role ?? ""));
-  return {
-    color: legacy?.colorRgbHex ?? extracted?.color?.rgbHex,
-    intensity: legacy?.intensity ?? extracted?.intensity,
-    position: stageVector(legacy?.position) ?? stageVector(extracted?.position?.position),
-  };
-}
-
 function applyStageRenderState(rs: StageRenderState | null): void {
-  const fogColor = parseHexColor(rs?.fog?.color?.rgbHex ?? rs?.fog?.colorRgbHex, DEFAULT_RENDER_STATE.fogColor);
-  const ambient = resolveAmbientLight(rs);
-  const directional = resolveDirectionalLight(rs);
-  scene.background = new THREE.Color(fogColor);
-  scene.fog = new THREE.Fog(fogColor, rs?.fog?.start ?? DEFAULT_RENDER_STATE.fogNear, rs?.fog?.end ?? DEFAULT_RENDER_STATE.fogFar);
-  camera.fov = rs?.camera?.fovDegrees ?? DEFAULT_RENDER_STATE.fov;
-  camera.near = rs?.camera?.near ?? DEFAULT_RENDER_STATE.near;
-  camera.far = rs?.camera?.far ?? DEFAULT_RENDER_STATE.far;
+  // Delegates to the canonical module (validated 40/40 against on-disk render-state.json;
+  // identical output for 39 stages, stff additionally gains its second directional). The
+  // local StageRenderState type is a looser shape of the module's; same on-disk data.
+  const resolved = applyStageRenderStateLighting(scene, stageLighting, rs as LightingStageRenderState | null);
+  camera.fov = resolved.camera.fovDegrees;
+  camera.near = resolved.camera.near;
+  camera.far = resolved.camera.far;
   camera.updateProjectionMatrix();
-  stageAmbient.color.setHex(parseHexColor(ambient.color, DEFAULT_RENDER_STATE.ambientColor));
-  stageAmbient.intensity = ambient.intensity ?? 1;
-  stageLight.color.setHex(parseHexColor(directional.color, DEFAULT_RENDER_STATE.lightColor));
-  stageLight.intensity = directional.intensity ?? 1;
-  const lp = directional.position;
-  if (lp) stageLight.position.set(lp[0], lp[1], lp[2]);
-  else stageLight.position.copy(DEFAULT_RENDER_STATE.lightPosition);
 }
 
 let loadedStageId: string | null = null;
@@ -1319,11 +1302,15 @@ interface BattleAudioBorgSnapshot {
   anim: string;
   lockTarget: string | null;
   allyLockTarget: string | null;
+  /** Hold-to-charge accumulator (cooldowns["chargeFrames"]); >0 means a charge is being held. */
+  chargeFrames: number;
 }
 
 interface BattleAudioSnapshot {
   borgs: Map<string, BattleAudioBorgSnapshot>;
   localActiveUid: string | null;
+  /** Mirrors the HUD low-energy alert condition (updateHud) so the audio edge matches the visual. */
+  allyAlert: boolean;
 }
 
 let session: BattleSession | null = null;
@@ -1449,11 +1436,14 @@ function snapshotBattleAudio(battle: Battle, localPlayerId: string): BattleAudio
       anim: b.anim,
       lockTarget: b.lockTarget,
       allyLockTarget: b.allyLockTarget,
+      chargeFrames: b.cooldowns?.["chargeFrames"] ?? 0,
     });
   }
+  const allyEnergy = battle.state.energy[0] ?? 0;
   return {
     borgs,
     localActiveUid: battle.state.activeUidByPlayer[localPlayerId] ?? null,
+    allyAlert: session ? allyEnergy > 0 && allyEnergy <= session.allyMax * 0.25 : false,
   };
 }
 
@@ -1477,7 +1467,9 @@ function emitBattleAudioEdges(before: BattleAudioSnapshot, after: BattleAudioSna
       localNext.anim === "shoot" &&
       (localPrev.state !== "attack" || localPrev.anim !== "shoot")
     ) {
-      emit("shoot");
+      // A shot fired on the same step the charge accumulator drains is a charge-shot release
+      // (combat.ts fires chargeable shots on attack RELEASE after accumulating chargeFrames).
+      emit(localPrev.chargeFrames > 0 && localNext.chargeFrames === 0 ? "charge_release" : "shoot");
     } else if (
       localNext.state === "attack" &&
       localNext.anim === "melee" &&
@@ -1487,7 +1479,15 @@ function emitBattleAudioEdges(before: BattleAudioSnapshot, after: BattleAudioSna
     } else if (localNext.hp < localPrev.hp) {
       emit("hit");
     }
+
+    // Lock-on switch beep: fires when the local borg acquires a (new) enemy lock target.
+    // Deliberately not fired on lock LOSS (target death already plays its own cue).
+    if (localNext.lockTarget && localNext.lockTarget !== localPrev.lockTarget) emit("lockon");
   }
+
+  // HUD low-energy alert edge: one cue when the ally energy gauge first crosses into the
+  // alert band (same condition the HUD's visual alert uses in updateHud).
+  if (after.allyAlert && !before.allyAlert) emit("alert");
 
   const localTargetUid = localNext?.lockTarget ?? null;
   for (const [uid, next] of after.borgs) {

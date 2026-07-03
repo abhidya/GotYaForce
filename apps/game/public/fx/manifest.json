@@ -5,6 +5,7 @@
     "user-data/GG4E/afs_data/root/ptcl00.txg",
     "user-data/GG4E/afs_data/root/efct00.tpl"
   ],
+  "runtimeUsage": "As of the ptcl00 canonical export (apps/game/public/ui/txg/ptcl00/image_*.png, decoder HSDRaw GXImageConverter), battleScene.ts loads the /ui/txg/ptcl00 exports as the PRIMARY battle-FX textures and uses the PNGs in this directory only as fallbacks (plus efct00_atlas.png, still primary for impact puffs/ring/smoke). Cell identifications: research/asset-inventory/ptcl00-cell-map.md.",
   "notes": "The disc has NO efct.txg. The real particle-image container is ptcl00.txg ('particle image container'), an 8-entry GameCube texture group (offset table at 0x0, each entry a 32-byte header: imageCount, GXTexFmt, unk, width, height, unk, dataOffset, paletteWord). All ptcl00 entries are non-paletted (I4 / I8 / RGB565) soft particle billboards. RGB565 sprites have no alpha and are meant for additive blending (black = transparent); I4/I8 sprites are intensity masks used as the alpha channel. efct00.tpl is one RGB5A3 atlas of soft blob/ring puffs (has real alpha). efct.pzz, efct00_mdl.arc, efct01_mdl.arc are the effect billboard MESHES that reference these textures (the .arc HSD models contain no embedded textures; efct.pzz is PZZ-compressed and not unpacked by current tooling).",
   "images": [
     { "file": "spark_star.png",   "w": 32, "h": 32, "format": "I4",      "source": "ptcl00.txg#0", "blend": "additive/mask", "guessLabel": "spark / wispy star burst (white, intensity mask)" },

@@ -78,6 +78,8 @@ interface Actor {
   /** True once the (async) model has been attached. */
   ready: boolean;
   isPlaceholder: boolean;
+  /** Charge-shot aura sprite (ptcl00.txg#7), lazily created while chargeFrames > 0. */
+  chargeGlow: { sprite: THREE.Sprite; material: THREE.SpriteMaterial } | null;
 }
 
 interface ProjectileActor {
@@ -92,17 +94,72 @@ interface ImpactActor {
   ttl: number;
   startScale: THREE.Vector2;
   endScale: THREE.Vector2;
+  /** Opacity at age 0 (fades linearly to 0 over ttl). */
+  startOpacity: number;
+  /** Optional flipbook: material.map steps through these frames over the lifetime. */
+  flipbookFrames?: readonly THREE.Texture[] | undefined;
 }
 
 /** Team-tinted placeholder material colors. */
 const TEAM_COLORS: Record<number, number> = { 0: 0x4cc7ff, 1: 0xff5a4d };
-const PROJECTILE_TEXTURE_URLS: Record<ProjectileVisualKind, string> = {
-  energy: "/fx/energy_dot.png", // ptcl00.txg#5, exported original particle.
-  flame: "/fx/flame_core.png", // ptcl00.txg#1, exported flame/explosion core.
-  muzzle: "/fx/muzzle_flash.png", // ptcl00.txg#6, exported muzzle flare.
-};
-const IMPACT_ATLAS_URL = "/fx/efct00_atlas.png"; // efct00.tpl#0, exported alpha puff/ring atlas.
-const HIT_SPARK_URL = "/fx/hit_spark.png"; // ptcl00.txg#2, exported hit spark / ember particle.
+
+// ---------------------------------------------------------------------------
+// Battle FX textures — the game's REAL particle art.
+//
+// Primary sources are the canonical HSDRaw/GXImageConverter exports of the disc's
+// shared particle container ptcl00.txg (apps/game/public/ui/txg/ptcl00/image_*.png,
+// see research/asset-inventory/ptcl00-txg-export-results.json) plus the efct00.tpl
+// blob/ring atlas. Cell identification is documented in
+// research/asset-inventory/ptcl00-cell-map.md; no ROM-side effect->texture usage
+// table has been decoded (ptcl00.ptl/.ref are unparsed), so each effect->cell
+// assignment below is TUNED-visual (matched by eye against battle captures), while
+// the pixels themselves are real extracted assets.
+//
+// RGB565 cells have no alpha channel (black = transparent -> additive blending).
+// Cells #2/#5/#6 are mirror-wrap QUADRANTS: the bright corner is the sprite centre
+// and the full radial sprite is reconstructed with MirroredRepeatWrapping +
+// repeat(2,2) (the GX WRAP_MIRROR sampling the original renderer used).
+// The older hand-extracted /fx PNGs (same cells, earlier decode) stay as fallbacks.
+// ---------------------------------------------------------------------------
+interface FxTextureSource {
+  /** Canonical ptcl00.txg export. */
+  url: string;
+  /** Older hand-extracted copy of the same cell, swapped in if the export 404s. */
+  fallback: string;
+  /** True when the cell is a mirror-wrap quadrant (bright corner = sprite centre). */
+  quadrant: boolean;
+}
+
+const FX_SOURCES = {
+  /** ptcl00.txg#5 — blue-violet energy glow quadrant (energy shots). */
+  energy: { url: "/ui/txg/ptcl00/image_05_RGB565.png", fallback: "/fx/energy_dot.png", quadrant: true },
+  /** ptcl00.txg#1 — orange fireball core (flame shots + death-explosion core). */
+  flame: { url: "/ui/txg/ptcl00/image_01_RGB565.png", fallback: "/fx/flame_core.png", quadrant: false },
+  /** ptcl00.txg#6 — orange ray-burst quadrant (muzzle flash). */
+  muzzle: { url: "/ui/txg/ptcl00/image_06_RGB565.png", fallback: "/fx/muzzle_flash.png", quadrant: true },
+  /** ptcl00.txg#2 — white-hot ember gradient quadrant (hit-spark core). */
+  hitSpark: { url: "/ui/txg/ptcl00/image_02_RGB565.png", fallback: "/fx/hit_spark.png", quadrant: true },
+  /** ptcl00.txg#0 — wispy white star burst (dash/boost burst: the white star in captures). TUNED-visual. */
+  dashStar: { url: "/ui/txg/ptcl00/image_00_I4.png", fallback: "/fx/spark_star.png", quadrant: false },
+  /** ptcl00.txg#7 — magenta spiral aura (charge-shot glow). TUNED-visual. */
+  chargeGlow: { url: "/ui/txg/ptcl00/image_07_RGB565.png", fallback: "/fx/aura_glow.png", quadrant: false },
+} as const satisfies Record<string, FxTextureSource>;
+
+/** efct00.tpl#0 atlas (256x64 RGB5A3, real alpha): ring / puff / smoke cells. */
+const IMPACT_ATLAS_URL = "/fx/efct00_atlas.png";
+/** 2x2 block of 16x16 white puff cells at (64,0)-(96,32) in efct00_atlas, read as a
+ *  4-frame dissipating-puff sequence and flipbooked on projectile impacts. TUNED-visual. */
+const IMPACT_PUFF_CELLS: ReadonlyArray<readonly [number, number]> = [
+  [64, 0],
+  [80, 0],
+  [64, 16],
+  [80, 16],
+];
+const IMPACT_PUFF_CELL_SIZE = 16;
+/** White shockwave ring cell at (0,0,32,32) in efct00_atlas. */
+const RING_CELL = { x: 0, y: 0, w: 32, h: 32 } as const;
+/** Soft dark smoke ball at (160,0,64,64) in efct00_atlas (black RGB + alpha). */
+const SMOKE_CELL = { x: 160, y: 0, w: 64, h: 64 } as const;
 const PROJECTILE_COLORS: Record<ProjectileVisualKind, { ally: number; enemy: number }> = {
   energy: { ally: 0x91eaff, enemy: 0xff7a4d },
   flame: { ally: 0xffd36a, enemy: 0xff5a2e },
@@ -115,8 +172,12 @@ export class BattleScene {
   private impactActors: ImpactActor[] = [];
   private pending = new Set<string>();
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
-  private impactTexture: THREE.Texture;
+  private impactPuffFrames: THREE.Texture[];
+  private ringTexture: THREE.Texture;
+  private smokeTexture: THREE.Texture;
   private hitSparkTexture: THREE.Texture;
+  private dashStarTexture: THREE.Texture;
+  private chargeGlowTexture: THREE.Texture;
   /** Enemy lock-on reticle (spinning ring), shown ONLY over the local player's enemy lockTarget. */
   private enemyReticle: THREE.Group;
   private enemyReticleRing: THREE.SpriteMaterial;
@@ -127,14 +188,18 @@ export class BattleScene {
     private readonly root: THREE.Group,
     private readonly assets: BorgAssets,
   ) {
-    for (const kind of Object.keys(PROJECTILE_TEXTURE_URLS) as ProjectileVisualKind[]) {
-      const texture = new THREE.TextureLoader().load(PROJECTILE_TEXTURE_URLS[kind]);
-      texture.colorSpace = THREE.SRGBColorSpace;
-      this.projectileTextures.set(kind, texture);
+    const projectileKinds: ProjectileVisualKind[] = ["energy", "flame", "muzzle"];
+    for (const kind of projectileKinds) {
+      this.projectileTextures.set(kind, loadFxTexture(FX_SOURCES[kind]));
     }
-    this.impactTexture = makeAtlasTexture(IMPACT_ATLAS_URL, 0, 0, 64, 32);
-    this.hitSparkTexture = new THREE.TextureLoader().load(HIT_SPARK_URL);
-    this.hitSparkTexture.colorSpace = THREE.SRGBColorSpace;
+    this.hitSparkTexture = loadFxTexture(FX_SOURCES.hitSpark);
+    this.dashStarTexture = loadFxTexture(FX_SOURCES.dashStar);
+    this.chargeGlowTexture = loadFxTexture(FX_SOURCES.chargeGlow);
+    this.impactPuffFrames = IMPACT_PUFF_CELLS.map(([x, y]) =>
+      makeAtlasTexture(IMPACT_ATLAS_URL, x, y, IMPACT_PUFF_CELL_SIZE, IMPACT_PUFF_CELL_SIZE),
+    );
+    this.ringTexture = makeAtlasTexture(IMPACT_ATLAS_URL, RING_CELL.x, RING_CELL.y, RING_CELL.w, RING_CELL.h);
+    this.smokeTexture = makeAtlasTexture(IMPACT_ATLAS_URL, SMOKE_CELL.x, SMOKE_CELL.y, SMOKE_CELL.w, SMOKE_CELL.h);
     const reticle = makeEnemyReticle();
     this.enemyReticle = reticle.group;
     this.enemyReticleRing = reticle.ringMaterial;
@@ -195,6 +260,11 @@ export class BattleScene {
       }
       const slotChanged = actor.lastSeenSlot !== slot;
       if (slot === "hit" && slotChanged) this.spawnHitSpark(actor.group.position);
+      // Edge-triggered battle FX (same pattern as the hit spark above).
+      if (slot === "death" && slotChanged) this.spawnDeathExplosion(actor.group.position);
+      if (slotChanged && slot.startsWith("dash")) this.spawnDashBurst(actor.group.position);
+      if (slot === "shoot" && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY);
+      this.syncChargeGlow(actor, b);
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid);
       actor.lastSeenSlot = slot;
       if (actor.ready) this.playSlot(actor, slot);
@@ -204,6 +274,7 @@ export class BattleScene {
     // Despawn actors whose borg is gone.
     for (const [uid, actor] of this.actors) {
       if (!live.has(uid)) {
+        actor.chargeGlow?.material.dispose();
         this.root.remove(actor.group);
         this.actors.delete(uid);
       }
@@ -214,7 +285,13 @@ export class BattleScene {
 
   /** Advance all per-actor animation mixers. */
   update(dt: number): void {
-    for (const actor of this.actors.values()) actor.mixer?.update(dt);
+    for (const actor of this.actors.values()) {
+      actor.mixer?.update(dt);
+      // Spin the charge aura spiral in the view plane so the swirl reads as building energy.
+      if (actor.chargeGlow?.sprite.visible) {
+        actor.chargeGlow.material.rotation += dt * CHARGE_GLOW_SPIN_RAD_PER_S;
+      }
+    }
     if (this.enemyReticle.visible) {
       // Continuous screen-plane spin, matching the original's rotating lock ring
       // (reference/captures/challenge-8-in-battle-hud.png). Sprite rotation = view-plane roll.
@@ -228,7 +305,10 @@ export class BattleScene {
 
   /** Remove every actor (call when leaving a battle). */
   clear(): void {
-    for (const actor of this.actors.values()) this.root.remove(actor.group);
+    for (const actor of this.actors.values()) {
+      actor.chargeGlow?.material.dispose();
+      this.root.remove(actor.group);
+    }
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
     for (const actor of this.impactActors) this.disposeImpactActor(actor);
     this.actors.clear();
@@ -263,6 +343,7 @@ export class BattleScene {
       meleeParity: true, // first melee entry flips this to false => plain "melee" first
       ready: false,
       isPlaceholder: true,
+      chargeGlow: null,
     };
     void this.attachModel(b.uid, actor, b.borgId, placeholder);
     return actor;
@@ -426,49 +507,165 @@ export class BattleScene {
     actor.material.dispose();
   }
 
-  private spawnImpact(position: THREE.Vector3): void {
+  /** Shared short-lived FX sprite: expands from startScale to endScale while fading out. */
+  private spawnBurstSprite(
+    map: THREE.Texture | null,
+    position: THREE.Vector3,
+    opts: {
+      ttl: number;
+      startScale: number;
+      endScale: number;
+      opacity: number;
+      blending?: THREE.Blending;
+      color?: number;
+      flipbookFrames?: readonly THREE.Texture[];
+    },
+  ): void {
+    if (!map) return;
     const material = new THREE.SpriteMaterial({
-      map: this.impactTexture,
-      color: 0xffffff,
+      map,
+      color: opts.color ?? 0xffffff,
       transparent: true,
-      opacity: 0.9,
+      opacity: opts.opacity,
+      blending: opts.blending ?? THREE.NormalBlending,
       depthWrite: false,
     });
     const sprite = new THREE.Sprite(material);
     sprite.position.copy(position);
-    sprite.scale.set(72, 36, 1);
+    sprite.scale.set(opts.startScale, opts.startScale, 1);
     this.root.add(sprite);
     this.impactActors.push({
       sprite,
       material,
       age: 0,
-      ttl: 0.22,
-      startScale: new THREE.Vector2(72, 36),
-      endScale: new THREE.Vector2(130, 65),
+      ttl: opts.ttl,
+      startScale: new THREE.Vector2(opts.startScale, opts.startScale),
+      endScale: new THREE.Vector2(opts.endScale, opts.endScale),
+      startOpacity: opts.opacity,
+      flipbookFrames: opts.flipbookFrames,
     });
   }
 
+  /** Projectile impact: efct00_atlas white puff, flipbooked over its 4-cell sequence. */
+  private spawnImpact(position: THREE.Vector3): void {
+    this.spawnBurstSprite(this.impactPuffFrames[0] ?? null, position, {
+      ttl: 0.28,
+      startScale: 54,
+      endScale: 110,
+      opacity: 0.9,
+      flipbookFrames: this.impactPuffFrames,
+    });
+  }
+
+  /** Hit spark: ptcl00.txg#2 white-hot ember quadrant, mirror-wrapped to a radial flash. */
   private spawnHitSpark(position: THREE.Vector3): void {
-    const material = new THREE.SpriteMaterial({
-      map: this.hitSparkTexture,
-      color: 0xffffff,
-      transparent: true,
+    this.spawnBurstSprite(this.hitSparkTexture, new THREE.Vector3(position.x, position.y + 82, position.z), {
+      ttl: 0.16,
+      startScale: 34,
+      endScale: 58,
       opacity: 1,
       blending: THREE.AdditiveBlending,
-      depthWrite: false,
     });
-    const sprite = new THREE.Sprite(material);
-    sprite.position.set(position.x, position.y + 82, position.z);
-    sprite.scale.set(34, 34, 1);
-    this.root.add(sprite);
-    this.impactActors.push({
-      sprite,
-      material,
-      age: 0,
-      ttl: 0.16,
-      startScale: new THREE.Vector2(34, 34),
-      endScale: new THREE.Vector2(58, 58),
+  }
+
+  /**
+   * Death explosion: ptcl00.txg#1 fireball core + efct00_atlas white shockwave ring and
+   * dark smoke ball. Composition/timing TUNED-visual (matched by eye against captures);
+   * the textures are the real extracted sheets.
+   */
+  private spawnDeathExplosion(position: THREE.Vector3): void {
+    const at = new THREE.Vector3(position.x, position.y + 70, position.z);
+    this.spawnBurstSprite(this.projectileTextures.get("flame") ?? null, at, {
+      ttl: 0.5,
+      startScale: 80,
+      endScale: 200,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
     });
+    this.spawnBurstSprite(this.ringTexture, at, {
+      ttl: 0.4,
+      startScale: 60,
+      endScale: 270,
+      opacity: 0.85,
+    });
+    this.spawnBurstSprite(this.smokeTexture, new THREE.Vector3(at.x, at.y + 24, at.z), {
+      ttl: 0.7,
+      startScale: 90,
+      endScale: 170,
+      opacity: 0.8,
+    });
+  }
+
+  /** Dash/boost burst: ptcl00.txg#0 wispy white star, edge-triggered on dash entry. */
+  private spawnDashBurst(position: THREE.Vector3): void {
+    this.spawnBurstSprite(this.dashStarTexture, new THREE.Vector3(position.x, position.y + 55, position.z), {
+      ttl: 0.26,
+      startScale: 62,
+      endScale: 132,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+    });
+  }
+
+  /**
+   * Muzzle flash: ptcl00.txg#6 ray-burst quadrant at the borg's gun height, offset along
+   * facing. No per-borg muzzle node is decoded yet, so the offset is TUNED (forward =
+   * (sin rotY, cos rotY), same convention as dashSlotForBorg).
+   */
+  private spawnMuzzleFlash(position: THREE.Vector3, rotY: number): void {
+    const at = new THREE.Vector3(
+      position.x + Math.sin(rotY) * 46,
+      position.y + 86,
+      position.z + Math.cos(rotY) * 46,
+    );
+    this.spawnBurstSprite(this.projectileTextures.get("muzzle") ?? null, at, {
+      ttl: 0.12,
+      startScale: 46,
+      endScale: 76,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+    });
+  }
+
+  /**
+   * Charge-shot glow: chargeable shooters accumulate cooldowns["chargeFrames"] while the
+   * attack button is held (packages/combat combat.ts stepAttacks) and fire on release.
+   * The glow is the real ptcl00.txg#7 magenta spiral aura ramped by charge progress.
+   * Tier thresholds mirror the actionProfiles defaults (chargeTier1Frames 30 /
+   * chargeTier2Frames 90) — presentation-only TUNED values; per-profile overrides are
+   * not visible from BorgRuntime (read-only cooldowns is all the sim exposes).
+   */
+  private syncChargeGlow(actor: Actor, b: BorgRuntime): void {
+    const frames = b.cooldowns["chargeFrames"] ?? 0;
+    if (frames <= 0 || !b.alive) {
+      if (actor.chargeGlow) actor.chargeGlow.sprite.visible = false;
+      return;
+    }
+    if (!actor.chargeGlow) {
+      const material = new THREE.SpriteMaterial({
+        map: this.chargeGlowTexture,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const sprite = new THREE.Sprite(material);
+      sprite.position.set(0, 82, 0); // torso height, rides the actor group
+      sprite.renderOrder = 20;
+      actor.group.add(sprite);
+      actor.chargeGlow = { sprite, material };
+    }
+    const glow = actor.chargeGlow;
+    const t = Math.min(1, frames / CHARGE_GLOW_TIER2_FRAMES);
+    glow.sprite.visible = true;
+    glow.material.opacity = 0.35 + 0.6 * t;
+    const size = 55 + 90 * t;
+    glow.sprite.scale.set(size, size, 1);
+    // Tint shifts toward white-hot as tiers are reached (multiplies the magenta sheet).
+    glow.material.color.setHex(
+      frames >= CHARGE_GLOW_TIER2_FRAMES ? 0xffffff : frames >= CHARGE_GLOW_TIER1_FRAMES ? 0xffd9f5 : 0xdda8ff,
+    );
   }
 
   private updateImpacts(dt: number): void {
@@ -477,12 +674,18 @@ export class BattleScene {
       if (!actor) continue;
       actor.age += dt;
       const t = Math.min(1, actor.age / actor.ttl);
-      actor.material.opacity = 0.9 * (1 - t);
+      actor.material.opacity = actor.startOpacity * (1 - t);
       actor.sprite.scale.set(
         THREE.MathUtils.lerp(actor.startScale.x, actor.endScale.x, t),
         THREE.MathUtils.lerp(actor.startScale.y, actor.endScale.y, t),
         1,
       );
+      // Sprite-sheet flipbook: step the material through the atlas frames over the lifetime.
+      if (actor.flipbookFrames && actor.flipbookFrames.length > 0) {
+        const idx = Math.min(actor.flipbookFrames.length - 1, Math.floor(t * actor.flipbookFrames.length));
+        const frame = actor.flipbookFrames[idx];
+        if (frame && actor.material.map !== frame) actor.material.map = frame;
+      }
       if (t >= 1) {
         this.disposeImpactActor(actor);
         this.impactActors.splice(i, 1);
@@ -697,3 +900,33 @@ function makeAtlasTexture(url: string, x: number, y: number, w: number, h: numbe
   texture.offset.set(x / 256, 1 - (y + h) / 64);
   return texture;
 }
+
+/**
+ * Load a battle-FX sprite texture: prefers the canonical ptcl00.txg export and swaps in
+ * the older hand-extracted /fx PNG of the same cell if the export fails to load.
+ * Quadrant cells are mirror-wrapped (MirroredRepeatWrapping + repeat 2x2) so the bright
+ * corner of the stored quadrant lands at the sprite centre, reconstructing the full
+ * radial sprite exactly as the GameCube's GX WRAP_MIRROR sampling did.
+ */
+function loadFxTexture(source: FxTextureSource): THREE.Texture {
+  const texture = new THREE.TextureLoader().load(source.url, undefined, undefined, () => {
+    new THREE.ImageLoader().load(source.fallback, (image) => {
+      texture.image = image;
+      texture.needsUpdate = true;
+    });
+  });
+  texture.colorSpace = THREE.SRGBColorSpace;
+  if (source.quadrant) {
+    texture.wrapS = THREE.MirroredRepeatWrapping;
+    texture.wrapT = THREE.MirroredRepeatWrapping;
+    texture.repeat.set(2, 2);
+  }
+  return texture;
+}
+
+/** Charge-glow tier thresholds (frames). Mirrors actionProfiles.ts defaults
+ *  (chargeTier1Frames 30 / chargeTier2Frames 90); presentation-only. */
+const CHARGE_GLOW_TIER1_FRAMES = 30;
+const CHARGE_GLOW_TIER2_FRAMES = 90;
+/** View-plane spin of the charge aura spiral (rad/s). TUNED-visual. */
+const CHARGE_GLOW_SPIN_RAD_PER_S = 5.2;

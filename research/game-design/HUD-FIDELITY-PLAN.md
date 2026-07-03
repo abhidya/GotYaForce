@@ -91,3 +91,16 @@ button, now corrected to X.
 - `node <repo>/node_modules/typescript/lib/tsc.js --noEmit -p apps/game/tsconfig.json` — clean.
 - Visual: enter a Challenge battle and compare against `challenge-8`/`challenge-9`
   captures at the same aspect; the HUD stage scales to the container 1:1.
+
+## Addendum (2026-07-02, export round 2 — supersedes stale export-needed rows above)
+
+- `mini_t.tpl`: EXPORTED — it is the mini title logo, NOT the chunky digit font (hypothesis
+  refuted by inspection). The capture's chunky digits have no decodable on-disc sprite; the
+  tinted bold ascii.tpl rendering stands as the closest real asset.
+- `comhit.bin`: NOT a HUD layout schema — it is a common combat hit table (83 x 0xF4 records,
+  same family as pl####hit.bin; see research/format-specs/comhit-bin-notes.md). Dropped from
+  the HUD export list; capture measurements remain the layout truth.
+- `fmg00_mdl.arc`: FULLY EXPORTED (torn-zigzag/V-marker shapes + face roundel textures under
+  apps/game/public/ui/hsd/fmg00_mdl/).
+- `arrow_mdl.arc`: confirmed vertex-colored geometry only (no textures to decode); covered by
+  arrowMdlGeometry.generated.ts.
