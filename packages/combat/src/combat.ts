@@ -47,6 +47,7 @@ import {
   type SwordBeamDef,
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
+import { shotPenetrationForBorgId } from "./moveProperties.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import type {
@@ -1141,11 +1142,25 @@ function spawnProjectile(
     hitRadius: shotDef.hitRadius * tier.radius,
     visualKind: shotDef.visualKind ?? projectileVisualKindForProfile(p),
     ...(shotDef.bulletDrop > 0 ? { drop: shotDef.bulletDrop } : {}),
+    // OBSERVED_WIKI (moveProperties, ATK-008 consume-vs-persist): a shot whose cataloged move
+    // penetrates borgs ("borgs" or "total") passes THROUGH borg hits instead of despawning on the
+    // first — set consumeOnHit=false so stepProjectiles paces re-hits via rehitCounter. Default
+    // (penetration "none"/null) keeps the structural despawn-on-hit, bit-for-bit. Terrain
+    // penetration (the finer "total"-also-ignores-stage-geometry gate) is NOT modeled here and
+    // stays subject to the play-area despawn; trace T6 remains the arbiter of the engine mechanism.
+    ...(isPenetratingShot(p.id, chargeTier) ? { consumeOnHit: false } : {}),
     // DERIVED mapping (gauges.ts): normal shots are the light-hit archetype (record 0);
     // charged releases hit like the charge/special archetype (record 2).
     damageRecordIndex:
       chargeTier >= 1 ? DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL : DAMAGE_RECORD_INDEX.SHOT,
   };
+}
+
+/** OBSERVED_WIKI: whether a borg's primary shot (B Shot, or B Charge when chargeTier>=1) is
+ *  cataloged as penetrating borgs ("borgs"/"total"). Drives spawnProjectile's consumeOnHit. */
+function isPenetratingShot(borgId: string, chargeTier: number): boolean {
+  const pen = shotPenetrationForBorgId(borgId, chargeTier >= 1);
+  return pen === "borgs" || pen === "total";
 }
 
 /** Combo-finisher sword beam: fast, short-lived projectile using charge/special record damage.

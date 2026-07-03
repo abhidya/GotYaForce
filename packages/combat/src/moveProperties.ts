@@ -64,6 +64,18 @@ export function moveByButton(id: string, buttonPrefix: string): BorgMove | null 
   return profile.moves.find((m) => (m.button ?? "").toLowerCase().startsWith(buttonPrefix.toLowerCase())) ?? null;
 }
 
+/**
+ * OBSERVED_WIKI penetration for a borg's primary ranged shot: the "B Charge" move when `charged`,
+ * else the "B Shot" move. Returns the penetration enum ("none" | "borgs" | "total") or null when
+ * the wiki had no matching move. Drives ATK-008's projectile consume-vs-persist policy (this is
+ * the consumer the module header names). Traces T5/T6 remain the arbiter of the engine mechanism
+ * — treat as best-known, not ROM-confirmed.
+ */
+export function shotPenetrationForBorgId(id: string, charged: boolean): Penetration | null {
+  const move = moveByButton(id, charged ? "B Charge" : "B Shot");
+  return move?.penetration ?? null;
+}
+
 /** Number of roster borgs with cataloged move data (coverage metric). */
 export function moveDataCoverage(): { borgs: number; moves: number } {
   const borgs = Object.keys(DATA.borgs).length;

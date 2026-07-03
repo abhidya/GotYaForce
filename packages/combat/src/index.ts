@@ -95,6 +95,7 @@ export { stepAI } from "./ai.js";
 export {
   moveProfileForBorgId,
   moveByButton,
+  shotPenetrationForBorgId,
   moveDataCoverage,
   moveCrossValidation,
   type BorgMove,
