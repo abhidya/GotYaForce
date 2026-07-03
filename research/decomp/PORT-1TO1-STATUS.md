@@ -85,7 +85,7 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Nurse heal | **HP-write ABSENT (ay)** | ATK-019 shell | table 0x802d1130 (ax); no +0x1c6 write reachable | Dolphin-trace +0x1c6 on healed ally |
 | Mash extra hits | shell (ATK-017) | constants MASH | +0x550 cap 4 (T/ax) | trace consumer |
 | Contact damage | scaffold (ATK-006) | disabled | per-borg authored (am/av) | trace T2 stomp |
-| Levels | DONE (row=byte+2, ay) | sourceBorgStats.ts | +0x3ec; row=levelByte+2 (av/aw, 200/203) | wire EXP thresholds from saves; 3 non-normal-schedule outliers open |
+| Levels | DONE (row=byte+2, ay) | sourceBorgStats.ts | row=levelByte+2 (av/aw, 200/203) | NO in-battle EXP system exists (be) — level is save-stored, actor+0x3ec is size/scale class (0-4), CONFLICTS (ak)'s "+0x3ec=level" — reconcile which byte; 3 non-normal outliers open |
 | Lock-on | CHECKED_CLOSED | combat.ts TUNED heuristic | no ROM system exists (q) | — |
 
 ---
@@ -186,12 +186,15 @@ Detail in the asset survey (session 2026-07-03) + `research/format-specs/*`, `re
 ## 6. The port's C-code disambiguation coverage
 
 Of 11,972 decompiled functions (`_index.tsv`): the research has now assigned a concrete
-game-logic **role** to **213** functions — **1.78%** (213 / 11,972) — consolidated into the
+game-logic **role** to **300** functions — **2.51%** (300 / 11,972) — consolidated into the
 machine-readable source map `research/decomp/data/identified-functions.json` (one deduped entry
 per address; each traces to a `behavior-notes.md` section, an attack-mechanics findings mechanic,
 or a 2026-07-03 corpus-analysis cluster, with a confidence tier DERIVED_ROM / INFERRED /
-NAMED_ONLY). This supersedes the earlier ~1.2% / 143 estimate: **223 of the 262 are DERIVED_ROM**
-(role read directly from decompiled C or raw ROM data), 21 INFERRED, 16 NAMED_ONLY. The initial
+NAMED_ONLY). This supersedes the earlier ~1.2% / 143 estimate: **261 of the 300 are DERIVED_ROM**
+(role read directly from decompiled C or raw ROM data), 23 INFERRED, 16 NAMED_ONLY. The 2026-07-03
+clusters mapped: actor/AI/FX, menu/sound, physics, SE-dispatch, command resolver, and finally the
+fusion pipeline (state machine + co-op sync + pair-table consumer), burst/guard state plumbing,
+camera cue→policy, results-stat gathering, and the box/collection acquisition writer. The initial
 133 covered the load-bearing combat spine (hit resolution, damage formula, HP/ammo/gauge init,
 the 35-slot state-handler table, the animation setter, challenge flow + battle judge, camera
 policy, command/ammo/burst). The 2026-07-03 expansion added 80 more across three clusters:

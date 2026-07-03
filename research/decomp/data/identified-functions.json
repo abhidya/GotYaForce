@@ -2,8 +2,8 @@
   "_meta": {
     "generated_note": "Consolidated source map of every Gotcha Force (GG4E/NTSC-U) game-logic function the project's decompilation research has assigned a concrete role. Built by cross-referencing behavior-notes.md sections (a)-(bb), attack-mechanics-findings.md / -ledger.json, and state-anim-dispatch-802d3570.json against ghidra-export/_index.tsv for canonical name+chunk. One entry per address (deduped). Only functions with an identifiable game-logic role are included; addresses cited only in passing (constants, data-table addresses, mid-function instruction PCs, engine calls named without a role) were skipped -- see cited_addresses_skipped_roleless.",
     "total_corpus_functions": 11972,
-    "identified_count": 262,
-    "coverage_percent": 2.19,
+    "identified_count": 300,
+    "coverage_percent": 2.51,
     "confidence_legend": {
       "DERIVED_ROM": "role read directly from decompiled C / raw-ROM data (matches the notebook's DERIVED tier)",
       "INFERRED": "role inferred from field reuse / call shape / handler routing / confirmed asset-container decode, not a direct gameplay-code read",
@@ -2075,7 +2075,7 @@
       "chunk": "chunk_0026.c:790",
       "role": "PRIMARY combat play wrapper: zz_00f036c_(actor, soundId). actor==0 -> global 2D via zz_00efb3c_(id,0,0x7f,0x40,0x2000); else 3D-positioned via zz_00f04b4_(id, actor+0x20, actor.channel[+0x96]). Most literal combat sound calls go through this.",
       "evidence": "if(param_1==0) zz_00efb3c_(param_2,0,0x7f,0x40,0x2000); else zz_00f04b4_(param_2,(float*)(param_1+0x20),*(char*)(param_1+0x96));",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "se-dispatch-2026-07-03"
     },
     {
@@ -2084,7 +2084,7 @@
       "chunk": "chunk_0026.c:854",
       "role": "3D-positional play core: zz_00f04b4_(soundId, pos_float*, channel). Computes volume via zz_00f0a74_(pos,0x7f) and pan via zz_00f0c24_(pos), then zz_00efb3c_(id,ch,vol,pan,0x2000). Used directly by zz_002fcbc_ (collision bump 0x26).",
       "evidence": "uVar1=zz_00f0a74_(param_2,0x7f); uVar2=zz_00f0c24_(param_2); zz_00efb3c_(param_1,param_3,uVar1,uVar2,0x2000);",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "se-dispatch-2026-07-03"
     },
     {
@@ -2093,7 +2093,7 @@
       "chunk": "chunk_0026.c:806",
       "role": "alt play wrapper (routes through the zz_00efc04_ dispatcher instead of zz_00efb3c_ — a second voice/SFX bus). Used for global cue 0x176. actor==0 -> zz_00efc04_(id,0,0x7f,0x40,0x2000).",
       "evidence": "if(param_1==0) zz_00efc04_(param_2,0,0x7f,0x40,0x2000); else zz_00f052c_(...);",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "se-dispatch-2026-07-03"
     },
     {
@@ -2102,7 +2102,7 @@
       "chunk": "chunk_0026.c:822",
       "role": "third play wrapper routing to zz_00efcb8_ -> zz_00f1238_ (a distinct mixer path, DAT_803d3b36-gated / used by the delayed-event scheduler zz_00eff30_).",
       "evidence": "if(param_1==0) zz_00efcb8_(param_2,0,0x7f,0x40,0x2000); else zz_00f05a4_(...);",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "se-dispatch-2026-07-03"
     },
     {
@@ -2111,7 +2111,7 @@
       "chunk": "chunk_0026.c (~886+)",
       "role": "PITCHED one-shot play variant: zz_00f061c_(pitchFloat, actor, soundId). Used for knockdown thud (0xdd) and scripted kind>=2 anim events; takes a float pitch/rate scalar as first arg.",
       "evidence": "zz_00f061c_((double)FLOAT_80437484,param_1,0xdd) at chunk_0007.c:5111; also in zz_005b98c_ kind branch",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "se-dispatch-2026-07-03"
     },
     {
@@ -2120,7 +2120,7 @@
       "chunk": "chunk_0003.c:8368",
       "role": "ACTOR-VS-ACTOR collision bump SFX: plays positional id 0x26 when +0x2ae cooldown==0 and velocity +0x7fc over threshold; gated so projectiles (+0x83) branch differently. New: this is the physics body-contact sound.",
       "evidence": "if(*(char*)(param_2+0x2ae)=='0'){ *(param_2+0x2ae)=4; ... zz_00f04b4_(0x26,param_3,*(char*)(param_2+0x96)); }",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "se-dispatch-2026-07-03"
     },
     {
@@ -2129,7 +2129,7 @@
       "chunk": "chunk_0007.c (~2900)",
       "role": "KNOCKBACK-VS-TERRAIN impact handler: when actor has knockback flag (+0x5e0 & 0x2000000) and hits ground/wall, reflects velocity, spawns dust (FUN_80092ecc), and plays crash id 0x13 (heavy borg families 4/6/0xc/0xd/0xe) or 0x10 (others).",
       "evidence": "6 paired call sites lines 2946-3120: family-branch zz_00f036c_(param_1,0x13)/0x10",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "se-dispatch-2026-07-03"
     },
     {
@@ -2138,7 +2138,7 @@
       "chunk": "chunk_0007.c (~7100)",
       "role": "LAUNCH/JUMP state: sets arc velocities (+0x44/+0x48/+0x50), runs anim zz_004beb8_(..,2,0,10,..), plays id 0x25. Likely hop/jump or dash-launch.",
       "evidence": "zz_0066ec0_(...); zz_004beb8_(...); zz_00f036c_(param_1,0x25);",
-      "confidence": "medium",
+      "confidence": "INFERRED",
       "source_pass": "se-dispatch-2026-07-03"
     },
     {
@@ -2147,7 +2147,7 @@
       "chunk": "chunk_0007.c:2881",
       "role": "HITSTUN/FREEZE TIMER TICK (per-frame): decrements +0x71c; while nonzero forces the actor's anim/physics rate fields (+0x5f4,+0x1dc8) to a frozen constant and early-returns (stun-lock); on reaching 0 restores the normal +0x768-derived rate. This is the per-frame 'status tick' the tracker was looking for -- but it is ID-AGNOSTIC (does not read +0x71a).",
       "evidence": "if (*(char *)(param_1 + 0x71c) != '\\0') { cVar4 = *(char *)(param_1 + 0x71c) + -1; *(char *)(param_1 + 0x71c) = cVar4; ... if (cVar4 != '\\0') { *(float *)(param_1 + 0x5f4) = FLOAT_804373dc; ... return; } }",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "status-t8-2026-07-03"
     },
     {
@@ -2156,7 +2156,7 @@
       "chunk": "chunk_0008.c:3045",
       "role": "BONE-INDEXED EFFECT PLACEMENT: takes a bone index (frequently the status id +0x71a) and applies a coordinate transform from the actor's 0x30-byte joint array (+0x8d4) to place an impact/spark effect. This is why +0x71a is read in the collision-response paths -- for VISUAL attach-point, not behavior. Negative index falls back to a default bone.",
       "evidence": "if (param_2 < 0) { param_2 = (int)*(char *)(*(int *)(param_1 + 0x4b0) + 0x10); } zz_004516c_((float *)(param_1 + param_2 * 0x30 + 0x8d4),param_3,param_4);",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "status-t8-2026-07-03"
     },
     {
@@ -2165,7 +2165,7 @@
       "chunk": "chunk_0000.c:862",
       "role": "ON-HIT EFFECT TRIGGER (thin wrapper -> zz_00061f0_ 0x800061f0): installs a timed effect descriptor from a PTR table (&PTR_DAT_802c3770)[type] into the actor's effect slot (+0x7ec/+0x7e4). Called by the APPLY fn when not immune. Selects effect by the hardcoded arg (1), NOT by +0x71a -- so the on-hit spark is fixed, not per-status-id.",
       "evidence": "*(undefined **)(iVar2 + 0x7ec) = (&PTR_DAT_802c3770)[param_2]; ... param_2 passed as literal 1 from FUN_800061a8",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "status-t8-2026-07-03"
     },
     {
@@ -2174,7 +2174,7 @@
       "chunk": "chunk_0009.c:267-291",
       "role": "command tester: +0x5d4&0x20 -> +0x585=1 (contextual via +0x748/+0x58e)",
       "evidence": "*(undefined1 *)(param_1 + 0x585) = 1; / = 0; under (*(uint *)(param_1 + 0x5d4) & 0x20)",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
     },
     {
@@ -2183,7 +2183,7 @@
       "chunk": "chunk_0009.c:297-322",
       "role": "command tester: +0x5d4&0x40 -> +0x585=1 (gated by +0x748/+0x58e/+0x7d2)",
       "evidence": "*(undefined1 *)(param_1 + 0x585) = 1; under (*(uint *)(param_1 + 0x5d4) & 0x40)",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
     },
     {
@@ -2192,7 +2192,7 @@
       "chunk": "chunk_0009.c:328-347",
       "role": "command tester: +0x5d4&0x80 -> +0x585=2",
       "evidence": "*(undefined1 *)(param_1 + 0x585) = 2; under (*(uint *)(param_1 + 0x5d4) & 0x80)",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
     },
     {
@@ -2201,7 +2201,7 @@
       "chunk": "chunk_0009.c:353-373",
       "role": "command tester: +0x5d4&0x400 -> +0x585=3, +0x595=1 (RESOLVES Unmapped3)",
       "evidence": "*(undefined1 *)(param_1 + 0x585) = 3; *(undefined1 *)(param_1 + 0x595) = 1; under (*(uint *)(param_1 + 0x5d4) & 0x400)",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
     },
     {
@@ -2210,7 +2210,7 @@
       "chunk": "chunk_0009.c:379-399",
       "role": "command tester: +0x5d4&0x1000 -> +0x585=5, +0x595=1",
       "evidence": "*(undefined1 *)(param_1 + 0x585) = 5; under (*(uint *)(param_1 + 0x5d4) & 0x1000)",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
     },
     {
@@ -2219,7 +2219,7 @@
       "chunk": "chunk_0009.c:405-450",
       "role": "command tester: +0x5d4&0x1000 -> +0x585=5 (live-target-lock variant, mirrors to partner +0x4a4)",
       "evidence": "requires actor+0x4a0 live; *(undefined1 *)(param_1 + 0x585) = 5; and partner *(undefined1 *)(iVar2 + 0x585) = 5;",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
     },
     {
@@ -2228,7 +2228,7 @@
       "chunk": "chunk_0009.c:456-485",
       "role": "command-issue dispatcher: reads command-descriptor byte at (*(actor+0x4b0) + type + 0xb8); ==1 -> melee path zz_0069ea4_, negative -> ranged path zz_0069fe0_; also handles the +0x5e0&3 dual-actor/combo gate via +0x57a mask",
       "evidence": "cVar1 = *(char *)(*(int *)(param_1 + 0x4b0) + (int)*(char *)(param_1 + 0x585) + 0xb8); if (cVar1 == '\\x01') { uVar2 = zz_0069ea4_(param_1); } else if ((cVar1 < 1) && (-1 < cVar1)) { uVar2 = zz_0069fe0_(param_1); }",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
     },
     {
@@ -2237,7 +2237,7 @@
       "chunk": "chunk_0009.c:491-542",
       "role": "melee subtype selector: writes +0x586 (0-5) from +0x5e0 state flags and +0x7cc; then final move lookup via zz_006a104_",
       "evidence": "*(undefined1 *)(param_1 + 0x586) = 0..5 branches on *(uint *)(param_1 + 0x5e0)",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
     },
     {
@@ -2246,8 +2246,350 @@
       "chunk": "chunk_0009.c:548-599",
       "role": "ranged subtype selector: writes +0x586; subtype 5 = charged (0.0 < +0x6a4), 4 = air (+0x5e0&0x80); final move lookup via zz_006a104_",
       "evidence": "if (FLOAT_8043762c < *(float *)(param_1 + 0x6a4)) { *(undefined1 *)(param_1 + 0x586) = 5; } ... *(undefined1 *)(param_1 + 0x586) = 4/2/1/3/0",
-      "confidence": "high",
+      "confidence": "DERIVED_ROM",
       "source_pass": "command-t1-2026-07-03"
+    },
+    {
+      "address": "0x8005ace8",
+      "name": "FUN_8005ace8",
+      "chunk": "chunk_0007.c:3138",
+      "role": "FUSION STATE-MACHINE ADVANCER / FUSED-BORG SPAWN. Per-frame sweep of all 6 actor slots (pcVar10 += 0x1e00, iVar11 < 6). Advances the fusion handshake stored in +0x4a1 between an actor and its partner (+0x4a4): 5->6, and 2->3 which computes the shared meet state (averages both partners' facing +0x72 into +0x5a8/+0x5ac, averages positions +0x20/+0x28 into the spawn point +0x7a4/+0x7ac, sets +0x6fa burst-active latch on both), then 7->commit which promotes the staged fused type (+0x4a0 = +0x4a9), clears +0x4a1, and enters the fused animation via zz_006a868_ on both partners. The else-branch (+0x4a0 != 0) is the already-fused maintenance/teardown path calling FUN_8006a980.",
+      "evidence": "line 3264 'pcVar10[0x4a0] = pcVar10[0x4a9];' + 3263 'pcVar10[0x4a1] = 0;' + 3268-3269 same on partner iVar8=*(param+0x4a4); 3182-3183 'pcVar10[0x6fa]=1; pcVar7[0x6fa]=1;'; loop 'iVar11 < 6' at 3292",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x8005b140",
+      "name": "zz_005b140_",
+      "chunk": "chunk_0007.c:3298",
+      "role": "FUSED-BORG CO-OP STATE SYNC (both players / partner mirror). Per-frame sweep of the 6 actor slots; for any actor whose fusion-active flag +0x4a0 == 2, copies live state FROM its pair partner (+0x4a4): position/velocity (+0x20/+0x24/+0x28), rotation (+0x70/+0x74), HP/param fields (+0x736/+0x738), side (+0x87), and merged control-flags word +0x5e0, then re-derives param tier. When +0x18==3 and id==5 it writes the partner's transform back. This is the co-op control split that keeps the two fused partner actors' bodies in lockstep.",
+      "evidence": "line 3312 'pcVar4[0x4a0] == 0x02'; 3314 'iVar3 = *(int *)(pcVar4 + 0x4a4)'; 3317-3319 copies +0x20/+0x24/+0x28 from iVar3; 3326 merges +0x5e0; loop 'iVar5 < 6' line 3346",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x8005b678",
+      "name": "zz_005b678_",
+      "chunk": "chunk_0007.c:3498",
+      "role": "FUSION PAIR-TABLE LOOKUP CONSUMER + PAIR-LINK SETUP. Given a candidate list of burst-armed actors, for each actor reads its borg-id (+1000/0x3e8) into the fusion pair table &DAT_802d352c[id*4], then the sub-table indexed by variant +0x3e9, and scans that short-list (terminated by -1) for a second actor whose id matches an allowed partner. On a match it cross-links the pair (each +0x4a4 = the other), assigns the fused role/order fields (+0x4a8/+0x4a9, +0x48c anim base, +0x48e), so the pair can begin the fusion handshake. Called by the burst-consume pass zz_005b2b8_.",
+      "evidence": "line 3520 '*(int *)(&DAT_802d352c + param_3[1000] * 4) != 0' and 3522 '+ (byte)param_3[0x3e9]*4'; 3528 'for(param_5=psVar5; *param_5 != -1; param_5+=2)'; 3542-3543 '*(param_3+0x4a4)=param_4; *(param_4+0x4a4)=param_3;'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80062c7c",
+      "name": "FUN_80062c7c",
+      "chunk": "chunk_0008.c:820",
+      "role": "FUSION MOVE-STATE HANDLER (request/startup, variant A). Per-frame action handler for the fusion move. Sub-phase counter at +0x544 drives the +0x4a1 handshake: phase0 arms the request (+0x4a1=1, sets guard/lock flags +0x272=0xc3, 60-frame timer +0x550=0x3c, plays the fusion charge effect via zz_004beb8_(...,0xf,...)), later phases set +0x4a1=2 (ready-to-pair) once zz_004cd24_ animation gate passes, and +0x4a1=3 branch commits. Idle when +0x4a1==0 (falls through to normal locomotion zz_006a474_/zz_006a5a4_).",
+      "evidence": "line 853 '+0x4a1) = 1' with 852 '+0x272)=0xc3' and 854 '+0x550)=0x3c'; line 845 '+0x4a1) = 2'; 881 'cVar1 < 4 && +0x4a1 == 3'; effect call 858 'zz_004beb8_(...,param_1,0xf,...)'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80062e44",
+      "name": "FUN_80062e44",
+      "chunk": "chunk_0008.c:891",
+      "role": "FUSION FLY-TOGETHER / MERGE-MOTION HANDLER (variant A). Drives the partners physically toward the shared meet-point (+0x7a4/+0x7ac computed by FUN_8005ace8). Phase0 sets +0x4a1=4 and launch velocity from the partner's speed field +0x668; interpolates position each frame; when square-distance to +0x7a4 drops below FLOAT_80437598 it snaps position onto the meet-point and sets +0x4a1=5 (arrived); a later phase sets +0x4a1=7 (ready to commit, consumed by FUN_8005ace8's 7->commit). Role-dependent branch on +0x4a8 (1 vs 2) picks which partner leads.",
+      "evidence": "line 933 '+0x4a1)=4'; 978-984 'if(dist <= FLOAT_80437598){ ... +0x4a1)=5; +0x20=+0x7a4 ...}'; 1000 '+0x4a1)=7'; role split 910 '+0x4a8) == 1'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x800655cc",
+      "name": "FUN_800655cc",
+      "chunk": "chunk_0008.c:2398",
+      "role": "FUSION MOVE-STATE HANDLER (request/startup, variant B). Second borg-type's copy of the fusion startup handler: identical +0x544 sub-phase structure and +0x4a1 handshake writes (0->1 arms request with +0x272=0xc3 and effect zz_004beb8_(...,0xf,...); ->2 ready; ->3 commit branch) as FUN_80062c7c but with variant timing (+0x550=0x28/0x3c). Idle path when +0x4a1==0.",
+      "evidence": "line 2431 '+0x4a1)=1' with 2430 '+0x272)=0xc3'; 2423 '+0x4a1)=2'; 2460 'cVar1 < 4 && +0x4a1 == 3'; 2436 'zz_004beb8_(...,0xf,...)'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80065780",
+      "name": "FUN_80065780",
+      "chunk": "chunk_0008.c:2470",
+      "role": "FUSION FLY-TOGETHER / MERGE-MOTION HANDLER (variant B). Second borg-type's copy of the merge-motion handler: advances +0x4a1 to 5 (arrived at meet-point, snaps +0x20 onto +0x7a4) and to 7 (ready to commit); mirror of FUN_80062e44.",
+      "evidence": "line 2555 '+0x4a1)=5' preceded by position snap to +0x7a4; 2571 '+0x4a1)=7'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80062c14",
+      "name": "FUN_80062c14",
+      "chunk": "chunk_0008.c:799",
+      "role": "FUSED-BORG ACTIVE per-frame move handler (post-fusion control tick). Runs while the fused borg is active: updates locomotion (zz_0061160_) and facing toward target (+0x5ae via zz_00670dc_), and OR's control-mode bits +0x5e0 |= 0x840 (the flag pair FUN_8006abb8 tests as the fused/controllable mask). On a trigger (+0x1d0e) it latches +0x590 and resets meter field +0x690.",
+      "evidence": "line 814 '*(uint *)(param_1 + 0x5e0) | 0x840'; 807 'zz_00670dc_(param_1, +0x5ae)'; FUN_8006abb8 masks +0x5e0 & 0x91001000 (0x840 subset) at chunk_0009.c:1109",
+      "confidence": "INFERRED",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80069788",
+      "name": "FUN_80069788",
+      "chunk": "chunk_0009.c:71",
+      "role": "SPECIAL-MOVE INPUT->ACTION gate. If the actor is in an eligible ground state (+0x661 in {2,5}), the special-input latch +0x588 is set, no lock (+0x5e0 & 3 == 0), and it has ammo/HP (+0x736 > 0), enters action 0x22 via zz_006a750_. One of the family of input-word->action-state dispatchers feeding the hit/burst state machine.",
+      "evidence": "line 84 'uVar1 = zz_006a750_(param_1,0x22)' gated on 78 '+0x661 == 2 || == 5', 79 '+0x588', 82 '+0x5e0 & 3 == 0', 83 '+0x736 < 1'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80069860",
+      "name": "FUN_80069860",
+      "chunk": "chunk_0009.c:119",
+      "role": "SPECIAL/BOOST INPUT->ACTION gate. When not locked (+0x5e0 & 2 == 0), the boost input bit is present (+0x5d4 & 2), and ammo/HP remains (+0x736 > 0), enters action 0x1c via zz_006a750_. Sibling of FUN_80069788 in the input->action dispatch family.",
+      "evidence": "line 134 'zz_006a750_(param_1,0x1c)' gated 126 '+0x5e0 & 2 == 0', 127 '+0x5d4 & 2', 130 '+0x736 < 1'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x800698c0",
+      "name": "FUN_800698c0",
+      "chunk": "chunk_0009.c:145",
+      "role": "SPECIAL INPUT->ACTION gate (action 0x1b). If the special latch +0x588 is set and either ammo/HP is depleted (+0x736 < 1) or the hold bit (+0x5b4 & 0x100) is clear, enters action 0x1b via zz_006a750_. Sibling input->action dispatcher.",
+      "evidence": "line 156 'zz_006a750_(param_1,0x1b)' gated 152 '+0x588', 155 '+0x736 < 1 || (+0x5b4 & 0x100)==0'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80069918",
+      "name": "FUN_80069918",
+      "chunk": "chunk_0009.c:166",
+      "role": "DIRECTIONAL/DASH INPUT->ACTION gate (action 0x1f). If no directional-hold bits are set (+0x5b4 & 0xf0000 == 0) and the confirm bit (+0x5b4 & 0x100) is clear, enters action 0x1f via zz_006a750_. Sibling input->action dispatcher.",
+      "evidence": "line 175 'zz_006a750_(param_1,0x1f)' gated 173 '+0x5b4 & 0xf0000 == 0', 174 '+0x5b4 & 0x100 == 0'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x8006a750",
+      "name": "zz_006a750_",
+      "chunk": "chunk_0009.c:857",
+      "role": "ACTION-STATE ENTRY PRIMITIVE (set current move/anim + reset combo state). Given (actor, actionId), reads the actor's move table (+0x4f0)[actionId*2+1]; if -1 the action is invalid (returns 0). Otherwise saves the previous action id to +0x7ce, writes the new action id to +0x5e4 and its anim index to +0x5db, and zeroes the combo/timer/hit-tracking fields (+0x544..+0x547, +0x588, +0x754, +0x1db3). This is the shared transition primitive the burst/fusion/guard handlers call (e.g. burst-consume enters 0x19 on both fused partners; input gates enter 0x1b/0x1c/0x1f/0x22).",
+      "evidence": "line 864 'cVar1 = *(char *)(*(int *)(param_1+0x4f0) + param_2*2 + 1)'; 865 'if(cVar1==-1) return 0'; 869 '+0x5e4 = param_2'; 871 '+0x5db = cVar1'; 872-878 zero combo/timer fields",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80067f54",
+      "name": "zz_0067f54_",
+      "chunk": "chunk_0008.c:4275",
+      "role": "PER-PLAYER FUSION/PAIR STATUS WRITE (HUD/team state). Writes a 2-byte status pair (param_2,param_3) into the per-player team-state table PTR_DAT_80433934[playerSlot*0x3c + 0x100/0x101]. Called by the burst/fusion commit (zz_005b2b8_) with mode 1 on successful pair-up and mode 2 on the solo-burst fallback to record the fusion/burst outcome for that side.",
+      "evidence": "lines 4280-4281 'PTR_DAT_80433934[param_1*0x3c + 0x100] = param_2; [+0x101] = param_3;'; called at chunk_0007.c:3458 'zz_0067f54_(pcVar3[0x88],1,bVar1)' and :3446 with mode 2",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x800ea2c8",
+      "name": "zz_00ea2c8_",
+      "chunk": "chunk_0025.c:1819",
+      "role": "GUARD/ACTION EFFECT-TRIGGER (thin wrapper -> zz_00ea2ec_(actor, effectId, -1)). The guard/block-entry state handlers (FUN_8005c5d0, FUN_8005c638, FUN_8005c5ac, zz_005c694_, start_status_reaction_by_side) all call this with effectId 4 to fire the guard reaction/effect. zz_00ea2ec_ resolves the effect via table &DAT_80319d99 and dispatches zz_00ea170_/zz_00dbf04_. Not guard-specific by itself, but it is the concrete effect primitive the whole guard cluster routes through.",
+      "evidence": "line 1824 'zz_00ea2ec_(param_1,param_2,-1)'; callers: chunk_0007.c:4128 FUN_8005c5d0 'zz_00ea2c8_(param_1,4)', :4148 FUN_8005c638 'zz_00ea2c8_(param_1,4)', :4174 zz_005c694_; chunk_0009.c:1213 start_status_reaction_by_side 'zz_00ea2c8_(actor,4)'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x8008b480",
+      "name": "zz_008b480_",
+      "chunk": "chunk_0013.c:1769",
+      "role": "GLOBAL FUSION/BURST-ACTIVE GATE (getter). Returns the global match-state byte PTR_DAT_80433934[0xeb]. Used as a predicate throughout the fusion/burst logic: the burst-consume pass (zz_005b2b8_) and the fused-borg sync gate its per-actor work on '(zz_008b480_()==0 || (PTR_DAT_80433934[0xeb] & actor+0x3e5)!=0)', i.e. this side is not globally suppressed. It is the single global flag that enables/masks pairing and burst per team bit.",
+      "evidence": "line 1774 'return PTR_DAT_80433934[0xeb];'; consumers chunk_0007.c:3416 'cVar4 = zz_008b480_(), cVar4 == 0 || (PTR_DAT_80433934[0xeb] & pcVar3[0x3e5])!=0'; chunk_0003.c:1985 and chunk_0002.c:7376 gate combat on '+0x6fc==0 && zz_008b480_()==0'",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "fusion-guard-burst-2026-07-03"
+    },
+    {
+      "address": "0x80029164",
+      "name": "zz_0029164_",
+      "chunk": "chunk_0003.c:4177",
+      "role": "RESULTS: battle-outcome driver / round-result propagation. Calls the win/lose judge zz_00297c8_(); on a decisive result (iVar1!=0) plays the result-camera (zz_008b514_) and advances the round/match counter *PTR_DAT_80433934 += 1 and resets sub-state [1]=0. Increments frame counter +0xac each tick.",
+      "evidence": "iVar1 = zz_00297c8_(); if (iVar1 != 0) { ... *PTR_DAT_80433934 = *PTR_DAT_80433934 + '\\x01'; PTR_DAT_80433934[1] = 0; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x80029bd0",
+      "name": "zz_0029bd0_",
+      "chunk": "chunk_0003.c:4646",
+      "role": "RESULTS: special/perfect-win detector. When result flag +0x1f == 1 (side-0 win) and a live-target ptr +0xbc is set, invokes zz_01d6ff4_ and consumes a one-shot event flag +0x1834, returning 1 (special result triggered) else 0.",
+      "evidence": "else if (PTR_DAT_80433934[0x1f] == '\\x01') { zz_01d6ff4_(); if (PTR_DAT_80433934[0x1834] ...) { uVar1 = 1; PTR_DAT_80433934[0x1834] = 0; } }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x800d1d24",
+      "name": "zz_00d1d24_",
+      "chunk": "chunk_0022.c:995",
+      "role": "RESULTS/SCORING: per-borg post-battle stat gatherer (feeds the results screen). For each participating borg copies the tally fields into a display struct: kills +0x434, damage-dealt total +0x420, self/friendly-hit count +0x435, damage-taken +0x424, friendly-fire dmg +0x430, ally-kill count +0x437, and computes HP-remaining ratio from +0x404/+0x408; then maps each to a rank/grade string via table lookups zz_00d1cbc_(&DAT_8030e318,...).",
+      "evidence": "param_1[9]=(uint)*(byte*)(param_2+0x434); param_1[10]=*(param_2+0x420); param_1[0xb]=(byte)(param_2+0x435); param_1[0xc]=*(param_2+0x424); param_1[0x10]=*(param_2+0x430); param_1[0xf]=(byte)(param_2+0x437);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x8000d46c",
+      "name": "zz_000d46c_",
+      "chunk": "chunk_0001.c:1275",
+      "role": "CAMERA: per-camera event/reaction handler. Gated on target actor's camera-cue flag +0x43d and battle-not-ended (+0x1f==0); clears cam sub-state bytes +0x18..+0x1b, dispatches the current camera-event sub-routine via table PTR_FUN_804335b0[cam+0x18], and runs corrective FUN_8000c314 while the cue is active.",
+      "evidence": "(*(code *)(&PTR_FUN_804335b0)[(char)param_1[0x18]])(param_1,param_2); if (*(char *)(param_2 + 0x43d) != '\\0') { FUN_8000c314((int)param_1); }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x8000d560",
+      "name": "FUN_8000d560",
+      "chunk": "chunk_0001.c:1313",
+      "role": "CAMERA: cue-code to policy-mode mapper. Reads the target's camera-cue code +0x43d (switch 1..9) and writes the resulting camera policy selector cam+0x2e6 (0=default follow variants chosen by target-state flags +0x5e0/+0x4a1, 1..7 = cinematic/lock modes), then dispatches the chosen policy via zz_000d658_.",
+      "evidence": "switch(*(undefined1 *)(param_2 + 0x43d)) { case 1: case 2: ... *(param_1 + 0x2e6)=...; case 3: *(param_1+0x2e6)=1; ... } zz_000d658_(param_1);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x8000d658",
+      "name": "zz_000d658_",
+      "chunk": "chunk_0001.c:1367",
+      "role": "CAMERA: per-mode policy dispatcher. Indirect-calls the camera-policy body for the current selector via function table DAT_802c3900[cam+0x2e6*4] (the per-mode camera handlers: follow / lock / cinematic bodies).",
+      "evidence": "(**(code **)(&DAT_802c3900 + *(char *)(param_1 + 0x2e6) * 4))();",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x8000fe60",
+      "name": "FUN_8000fe60",
+      "chunk": "chunk_0001.c:2844",
+      "role": "CAMERA: goal-eye distance placement / interpolation setup. Builds the camera's desired eye offset toward the target position (+0x50c) using matrix helpers FUN_800450e0/FUN_8004503c and per-target distance bands (+0x8a4/+0x8a8), clamping the goal distance into the band and returning 1 when a re-clamp occurred (sibling of the mapped shared goal-eye math FUN_8000fc2c).",
+      "evidence": "FUN_8004503c((double)FLOAT_80436b6c,(float*)(param_1+0x394),(float*)(param_2+0x50c),&local_3c); if (dVar6 <= dVar8) {...} else { local_44 = (float)(dVar6 - dVar8); uVar5 = 1; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x80095064",
+      "name": "zz_0095064_",
+      "chunk": "chunk_0014.c:4059",
+      "role": "BOX/COLLECTION: primary-box sorted-index builder. Reads box base DAT_804362d4 (+0x870, stride 0x20, 200 entries), builds an index list of valid entries (entry short >= 0) up to box-count +0x2172, then qsort()s that index using comparator FUN_80094f9c to order the collection list.",
+      "evidence": "psVar4 = (short *)(DAT_804362d4 + 0x870); iVar1 = 200; ... if (-1 < *psVar4) {...} psVar4 = psVar4 + 0x10; ... qsort(...,__nmemb,2,FUN_80094f9c);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x80094f9c",
+      "name": "FUN_80094f9c",
+      "chunk": "chunk_0014.c:4023",
+      "role": "BOX/COLLECTION: primary-box sort comparator. For two box entries (base +0x870, stride 0x20) formats a sort key from the entry's borg id (+0, via id-lookup zz_0066270_), level (+1 as 6-lvl), value (+3 as 100-x) and count (+8), then compares with gnt4_strcmp — defines collection sort order.",
+      "evidence": "local_a4[0] = DAT_804362d4 + *param_1 * 0x20 + 0x870; ... sprintf(__s,...,uVar1,6 - *(char*)(puVar3+1),100 - *(char*)((int)puVar3+3),*(undefined4*)(puVar3+8)); gnt4_strcmp(...)",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x800951d8",
+      "name": "zz_00951d8_",
+      "chunk": "chunk_0014.c:4134",
+      "role": "BOX/COLLECTION: overflow-box sorted-index builder. Same as zz_0095064_ but over the 2000-entry overflow box (base +0x1c ptr, stride 0x10, count at [22000]); builds valid-entry index and qsort()s via comparator FUN_8009510c.",
+      "evidence": "psVar3 = *(short **)((&DAT_804362d8)[param_1] + 0x1c); __nmemb = psVar3[22000]; ... psVar3 = psVar3 + 8; ... qsort(...,__nmemb,2,FUN_8009510c);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x8009510c",
+      "name": "FUN_8009510c",
+      "chunk": "chunk_0014.c:4099",
+      "role": "BOX/COLLECTION: overflow-box sort comparator (stride 0x10). Formats a sort key from entry id (+0), level (+1 as 6-x), value (+3 as 100-x) and compares via gnt4_strcmp; paired with zz_00951d8_.",
+      "evidence": "local_a4[0] = DAT_804362d0 + *param_1 * 0x10; ... sprintf(__s,&DAT_80437cd4,uVar1,6 - *(char*)(puVar4+1),100 - *(char*)((int)puVar4+3)); gnt4_strcmp(...)",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x80095358",
+      "name": "zz_0095358_",
+      "chunk": "chunk_0014.c:4208",
+      "role": "BOX/COLLECTION: force-list sorted-index builder. Third collection view over the saved-force list (base +0x1c +32000, stride 0xc, 1000 entries, count at +0xabe2); builds valid-entry index and qsort()s via comparator FUN_80095284.",
+      "evidence": "__nmemb = *(short *)(DAT_804362d0 + 0xabe2); ... psVar6 = (short *)(...+0x1c) + 32000); ... psVar6 = psVar6 + 6; ... qsort(...,__nmemb,2,FUN_80095284);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x80095408",
+      "name": "zz_0095408_",
+      "chunk": "chunk_0014.c:4248",
+      "role": "BOX/COLLECTION: collection sort-mode dispatcher. Reads current sort/view mode byte +0x10ca and routes to the matching sorted-index builder: 0=primary box zz_0095064_, 1=overflow box zz_00951d8_, 2=force list zz_0095358_.",
+      "evidence": "cVar1 = *(char *)((&DAT_804362d8)[param_1] + 0x10ca); if (cVar1 == '\\x01') zz_00951d8_; else if (-1 < cVar1) zz_0095064_; else if (cVar1 < '\\x03') zz_0095358_;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x80095470",
+      "name": "zz_0095470_",
+      "chunk": "chunk_0014.c:4272",
+      "role": "BOX/COLLECTION: box-entry to list-row reader (primary box). Reads box entry index param_3 (base +0x870, stride 0x20) and populates a UI list row: id +0x870 into +0x1024, level byte +0x872 (entry+1) into +0x10ab, an 'owned/special' 2-bit flag (id==0x615/0x629 or count +8!=0) into +0x1036, and a display value into +0x10b4.",
+      "evidence": "psVar4 = (short *)(*(int *)((&DAT_804362d8)[param_1] + 0x18) + param_3 * 0x20 + 0x870); if (((*psVar4 == 0x615)||(*psVar4 == 0x629))||(*(int*)(psVar4+8)!=0)) iVar3=1; *(short*)(...+0x1024)=*psVar4;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x80095588",
+      "name": "zz_0095588_",
+      "chunk": "chunk_0014.c:4307",
+      "role": "BOX/COLLECTION: overflow-box entry to list-row reader (stride 0x10). Sibling of zz_0095470_ reading the 2000-entry overflow box (base +0x1c, stride 0x10) into the same UI list-row fields (+0x1024/+0x1036/+0x10ab); special-id check id==0x615/0x629.",
+      "evidence": "psVar4 = (short *)(*(int *)((&DAT_804362d8)[param_1] + 0x1c) + param_3 * 0x10); if ((*psVar4 == 0x615) || (*psVar4 == 0x629)) iVar3 = 1;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x801cae04",
+      "name": "zz_01cae04_",
+      "chunk": "chunk_0055.c:4562",
+      "role": "BOX/COLLECTION: initial box population (new-game / default borg set). Iterates a source id list (*PTR_PTR_8035b158, terminated by negative id), writing each into the box (entry +0x870 stride 0x20): id at +0x870, zeroes level/count bytes +0x872/+0x873, assigns a unique sequential handle +0x874 from owner+0x50, sets owned flag +0x87c=1 for non-0x615 ids, and increments box count +0x2172. Also accumulates starting force cost via cost primitive zz_0066168_.",
+      "evidence": "*(short *)(pcVar5 + 0x870) = *psVar4; pcVar5[0x872]='\\0'; *(int*)(pcVar5+0x874)=iVar1; if (*(short*)(pcVar5+0x870) != 0x615) pcVar5[0x87c]='\\x01'; *(short*)(param_2+0x2172) += 1; pcVar5 = pcVar5 + 0x20;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x801caf80",
+      "name": "zz_01caf80_",
+      "chunk": "chunk_0055.c:4630",
+      "role": "BOX/COLLECTION: single-borg ACQUISITION (add-to-box). Scans the 200-entry box for a free slot (entry short < 0), writes id at +0x870, level byte +0x872=param_5, +0x873=0, unique handle +0x874, owned flag +0x87c=1, +0x880=0, increments count +0x2172; if the primary box is full and the overflow box (<2000) has room, adds there instead (stride 0x10). Called by the post-battle borg-award flow.",
+      "evidence": "if (*(short *)(iVar4 + 0x870) < 0) { *(short*)(iVar4+0x870)=local_24[0]; *(char*)(iVar4+0x872)=(char)param_5; *(char*)(iVar4+0x87c)=1; *(short*)(param_3+0x2172) += 1; }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x801cebe0",
+      "name": "zz_01cebe0_",
+      "chunk": "chunk_0056.c:1961",
+      "role": "BOX/COLLECTION: post-battle borg/force AWARD state machine. On award-kind +0x34: kind 0 = give a single borg via zz_01caf80_ (returns -1 if both primary(+0x2172>=200) and overflow(+44000>=2000) boxes are full); kind 2 = give a whole force via zz_01cf03c_; other kinds handle force-slot capacity (+0xabe2). Award payload id at DAT_80436390+0x20, level +0x22.",
+      "evidence": "if (cVar1=='\\0') { if ((199 < *(short*)(...+0x2172)) && (1999 < *(short*)(...+44000))) return 0xffffffff; ... zz_01caf80_(...); } else if (cVar1=='\\x02') zz_01cf03c_(...);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x801cf03c",
+      "name": "zz_01cf03c_",
+      "chunk": "chunk_0056.c:2194",
+      "role": "BOX/COLLECTION: whole-force AWARD. Verifies all 8 force member slots (DAT_803d5de8..df6) are populated (matching expected member count zz_01cee00_), then adds the force via zz_01caf80_ and registers each member id into the collection via zz_01cbe14_.",
+      "evidence": "iVar2 = zz_01cee00_((int)*param_4); ... if (iVar4 == iVar2) { uVar3 = zz_01caf80_(...); while (*psVar1 >= 0) { zz_01cbe14_((int)param_2,(int)*psVar1); psVar1++; } }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x801cf16c",
+      "name": "zz_01cf16c_",
+      "chunk": "chunk_0056.c:2233",
+      "role": "BOX/COLLECTION: borg UNLOCK/transform. Scans box (+0x870, stride 0x20 then overflow 0x10) for a locked/placeholder entry id==0x615 and converts it to id 0x629 (unlocked), resetting its handle/level fields and unlocking each owned ability via bitmask +0x8 -> zz_01ccd94_; returns which box it modified.",
+      "evidence": "if (*psVar1 == 0x615) { *psVar1 = 0x629; ... do { if ((*(uint*)(psVar1+8) & 1 << iVar2) != 0) zz_01ccd94_(param_3,iVar2); iVar2++; } while (iVar2 < 0x14); }",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x801ccd94",
+      "name": "zz_01ccd94_",
+      "chunk": "chunk_0056.c:641",
+      "role": "BOX/COLLECTION: force-cost recompute. For a force's 30 member slots (base + slot*0x6c, member box-indices at +0x30 stride 2) reads each referenced box entry's borg id (+0x870) and level (+0x872), sums per-member cost via cost primitive zz_0066168_, and stores the force total at force+0x2c. Prunes members whose box entry became invalid (id<0 -> slot=0xffff).",
+      "evidence": "iVar1 = param_1 + *(short *)(iVar5 + 0x30) * 0x20; local_28[0] = *(short *)(iVar1 + 0x870); ... iVar1 = zz_0066168_((char *)local_28,(int)*(char *)(iVar1 + 0x872)); iVar2 += iVar1; *(int *)(iVar4 + 0x2c) = iVar2;",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
+    },
+    {
+      "address": "0x80066270",
+      "name": "zz_0066270_",
+      "chunk": "chunk_0008.c:2966",
+      "role": "BOX/COLLECTION: borg id -> data/name pointer lookup. Indexes the per-category table array PTR_PTR_803510d8 by the id's high byte (category) and offsets by the low byte (index)*4 to fetch the borg's data/name record. Used by the collection sort comparators and list rows.",
+      "evidence": "return *(undefined4 *)((&PTR_PTR_803510d8)[*param_1] + (uint)(byte)param_1[1] * 4);",
+      "confidence": "DERIVED_ROM",
+      "source_pass": "camera-scoring-box-2026-07-03"
     }
   ]
 }

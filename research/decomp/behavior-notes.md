@@ -2823,3 +2823,36 @@ the i-frame window (+0x5a0=0xffffffff on spawn/wake), and the id-agnostic hitstu
 
 Net: SE + T1 moved from "trace-blocked" to "mostly static" (SE portable-pending-assets, T1 resolver
 fillable); T8 confirmed genuinely trace-blocked. Source map +20 → 262. See the three data JSONs.
+
+### (be) Fusion pipeline mapped; NO in-battle EXP system (corrects "+0x3ec=level"); source map → 300 (2026-07-03)
+
+Two more corpus-analysis clusters (research/decomp/data/identified-functions.json, +38 → 300
+functions / 2.51%):
+
+**FUSION pipeline DERIVED end-to-end** via the +0x4a1 handshake: FUN_8005ace8 (state-machine
+advancer / fused-borg spawn — averages both partners' spawn point at phase 2→3, commits
++0x4a0=+0x4a9 at phase 7), zz_005b140_ (co-op body sync — copies pos/vel/rot/HP from partner
++0x4a4 into any actor with +0x4a0==2, keeping the fused pair in lockstep), zz_005b678_ (the
+0x802d352c pair-table lookup consumer), and the fusion move-state handlers FUN_80062c7c/e44 +
+mirror FUN_800655cc/80065780. Burst state plumbing: the input→move-state dispatch family
+FUN_80069788/860/8c0/918 + shared action-entry primitive zz_006a750_. The **burst DAMAGE
+effect** is readable (chunk_0003.c:7546: `+0x6fc != 0` negates & rescales damage in
+resolve_hitbox_target_effects_and_damage). Still trace-gated: the burst-meter FILL source, and
++0x6fa (burst-active latch) has no readers in the readable chunks. Guard: entry/effect routes
+through zz_00ea2c8_ (effectId 4); the guard /40 damage divisor isn't a literal in the resolver
+(not cleanly isolable).
+
+**NO in-battle EXP / level-up system — corrects the (ak) "+0x3ec = level byte" reading.** The
+box/collection acquisition writer zz_01caf80_ (post-battle "you won a borg": writes id+0x870,
+level+0x872, handle+0x874, owned+0x87c, count+0x2172; overflow to the 2000-entry box) stores a
+"level" byte that is only ever 0 or copied from an award payload — there is NO accumulation or
+threshold-check anywhere. And the actor **+0x3ec is the SIZE/SCALE class (0-4, 4=boss)** used for
+cost/damage scaling, NOT experience. Gotcha Force borgs have FIXED cost, so there is genuinely no
+EXP curve to port. OPEN DISCREPANCY: (ak)/(av) read +0x3ec as the level byte and the row=byte+2
+rule validated 200/203 against the wiki — but if +0x3ec is size/scale, the "levelByte" driving the
+stat-row must be a DIFFERENT field (or +0x3ec is dual-purpose). The level-row PORT is unaffected
+(it's validated against the wiki and the level-aware path is unused), but the byte IDENTITY needs
+reconciliation — flagged, not resolved. Results screen: zz_00d1d24_ gathers per-borg
+kills/damage-dealt/taken/friendly-fire/ally-kills (+0x434/+0x420/+0x424/+0x430/+0x437) → rank
+strings. Camera: FUN_8000d560 maps the target's camera-cue +0x43d (1..9) to the policy selector
+cam+0x2e6.
