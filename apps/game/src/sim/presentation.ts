@@ -297,6 +297,15 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
   const xAmmo = hasXAmmo ? Math.max(0, Math.round(xCell.cur)) : undefined;
   const xReload01 = hasXAmmo ? clamp01(xCell.cur / xCell.max) : undefined;
 
+  // Jump Gauge (behavior-notes (ao), CONFIRMED_MANUAL: "a Jump Gauge showing multi-level jumps").
+  // Discrete mid-air jumps remaining out of the borg's max (airJumpLevel). Surfaced only for borgs
+  // that actually have air jumps (airJumpLevel >= 1); flyers (sustained flight) are covered by the
+  // boost gauge instead, so they're excluded here. Optional/back-compatible like the other gauges.
+  const jumpMax = actionProfile && !actionProfile.flyer ? actionProfile.airJumpLevel : 0;
+  const jumpsMax = jumpMax >= 1 ? jumpMax : undefined;
+  const jumpsRemaining =
+    jumpsMax !== undefined && focus ? Math.max(0, Math.min(jumpsMax, Math.round(focus.airJumps))) : undefined;
+
   return {
     allyEnergy: st.energy[0] ?? 0,
     allyMax,
@@ -323,6 +332,8 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
     // X-ammo — required under exactOptionalPropertyTypes, and keeps the HUD readout hidden.
     ...(xAmmo !== undefined ? { xAmmo } : {}),
     ...(xReload01 !== undefined ? { xReload01 } : {}),
+    ...(jumpsMax !== undefined ? { jumpsMax } : {}),
+    ...(jumpsRemaining !== undefined ? { jumpsRemaining } : {}),
     timeRemainingFrames: st.timeRemainingFrames,
     alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= allyMax * 0.25,
   };

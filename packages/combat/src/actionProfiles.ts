@@ -86,6 +86,11 @@ export interface BorgActionProfile {
   melee: MeleeActionDef | null;
   shot: ShotActionDef | null;
   special: SpecialActionDef;
+  /** Max mid-air jumps ("Air jump level N"; flyers 3) — mirrors BorgProfile.airJumpLevel, exposed
+   *  so the HUD's Jump Gauge (CONFIRMED_MANUAL, behavior-notes (ao)) can show remaining/max. */
+  airJumpLevel: number;
+  /** Sustained-flight flyer flag (mirrors BorgProfile.flyer). */
+  flyer: boolean;
 }
 
 type RawActionProfile = {
@@ -183,6 +188,8 @@ function resolveActionProfile(profile: BorgProfile): BorgActionProfile {
     melee,
     shot,
     special: { ...DEFAULT_SPECIAL, ...(raw?.special ?? {}) },
+    airJumpLevel: profile.airJumpLevel,
+    flyer: profile.flyer,
   };
 }
 

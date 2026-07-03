@@ -105,6 +105,14 @@ export interface HudState {
   xAmmo?: number;
   /** Optional X-ammo fill 0..1 (weapon cell 1 cur/max); paired with `xAmmo`. Undefined = hidden. */
   xReload01?: number;
+  /**
+   * Optional Jump Gauge: max mid-air jumps for the focus borg (CONFIRMED_MANUAL, behavior-notes
+   * (ao): "a Jump Gauge showing multi-level jumps"). Undefined = borg has no air jumps or is a
+   * sustained-flight flyer (covered by the boost gauge) -> the pips stay hidden. Back-compatible.
+   */
+  jumpsMax?: number;
+  /** Optional mid-air jumps REMAINING (0..jumpsMax); paired with `jumpsMax`. Undefined = hidden. */
+  jumpsRemaining?: number;
   /** Optional floating teammate plates ("CPU"/"ALLY" + mini HP bar). */
   teammates?: readonly TeammateMarker[];
 }
@@ -276,6 +284,29 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
     transform: "rotate(-90 483 48)",
   });
   svg.appendChild(boostArc);
+
+  // ===================== JUMP GAUGE (multi-level jump pips) ===================
+  // CONFIRMED_MANUAL (behavior-notes (ao)): "a Jump Gauge showing multi-level jumps". A short row
+  // of pips under the boost gear — one per max air jump (airJumpLevel), lit for jumps remaining,
+  // dim for spent. Whole group hidden unless HudState.jumpsMax is defined (air-jumpers only;
+  // sustained-flight flyers use the boost gauge). Capped at MAX_JUMP_PIPS so the row never
+  // overflows; a borg with more levels than that still reads "full" at the cap.
+  const MAX_JUMP_PIPS = 4;
+  const JUMP_PIP_R = 3.2;
+  const JUMP_PIP_GAP = 10;
+  const jumpG = svgEl("g", { class: "gf-hidden" });
+  const jumpPips: SVGElement[] = [];
+  for (let i = 0; i < MAX_JUMP_PIPS; i++) {
+    const pip = svgEl("circle", {
+      cx: 483 - ((MAX_JUMP_PIPS - 1) * JUMP_PIP_GAP) / 2 + i * JUMP_PIP_GAP,
+      cy: 74,
+      r: JUMP_PIP_R,
+      fill: "#3fe8c4",
+    });
+    jumpPips.push(pip);
+    jumpG.appendChild(pip);
+  }
+  svg.appendChild(jumpG);
 
   // ===================== optional real bn<code> name banner ===================
   let bannerImg: HTMLImageElement | null = null;
@@ -547,6 +578,25 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
       if (xAmmoVal !== lastXAmmo) {
         lastXAmmo = xAmmoVal;
         setBitmapText(xAmmoNum, String(xAmmoVal), { bold: true, scale: 2, advance: 14, tint: TINT_DIGITS });
+      }
+    }
+
+    // Jump Gauge pips (behavior-notes (ao)). Shown only for air-jumper borgs (jumpsMax defined);
+    // the first `jumpsMax` pips are visible, lit for jumps remaining, dim for spent.
+    const hasJump = s.jumpsMax !== undefined && s.jumpsMax >= 1;
+    jumpG.classList.toggle("gf-hidden", !hasJump);
+    if (hasJump) {
+      const shown = Math.min(MAX_JUMP_PIPS, Math.max(0, Math.round(s.jumpsMax ?? 0)));
+      const lit = Math.min(shown, Math.max(0, Math.round(s.jumpsRemaining ?? 0)));
+      for (let i = 0; i < MAX_JUMP_PIPS; i++) {
+        const pip = jumpPips[i];
+        if (!pip) continue;
+        if (i >= shown) {
+          pip.setAttribute("opacity", "0");
+        } else {
+          pip.setAttribute("opacity", "1");
+          pip.setAttribute("fill", i < lit ? "#3fe8c4" : "#22403c");
+        }
       }
     }
 
