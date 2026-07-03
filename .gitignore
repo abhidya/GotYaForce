@@ -57,8 +57,11 @@ research/decomp/organized/
 # Live Dolphin capture scratch output.
 hp_log.csv
 
-# User save files (local)
+# Dolphin savestates stay local: they embed the emulated RAM image (boot.dol code +
+# loaded disc assets), i.e. ROM-derived bytes — see the never-commit rule.
 *.sav
+# Memory-card saves (.gci) are pure progress data (no game code) and ARE tracked —
+# they're the standard starting saves for research/decomp/attack-mechanics-trace-plan.md.
 
 # Local extraction/build scratch.
 .tmp/
