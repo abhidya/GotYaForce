@@ -137,3 +137,23 @@ export {
   vectorToKnockbackAngle,
   type KnockbackAngle,
 } from "./knockback.js";
+
+export {
+  bestFloorFromCandidates,
+  candidateTriangles,
+  candidateTrianglesForSegment,
+  floorSurfaceYAt,
+  isFiniteVec,
+  normalizeStageBounds,
+  stageCollisionFromHitGrids,
+  yAtTriangleXZ,
+  type RectStageBounds,
+  type StageBounds,
+  type StageCollision,
+  type StageCollisionCell,
+  type StageCollisionLayer,
+  type StageCollisionResources,
+  type StageCollisionTriangle,
+  type StageHitGridLike,
+  type SymmetricStageBounds,
+} from "./collision.js";

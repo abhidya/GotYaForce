@@ -281,6 +281,7 @@ function inspectStages() {
   const adapter = readText("apps/game/src/sim/adapter.ts");
   const stageCatalog = readText("apps/game/src/stages/catalog.generated.ts");
   const main = readText("apps/game/src/main.ts");
+  const missionCombatConfig = readText("packages/missions/src/combat-config.ts");
   const challengeReference = readText("packages/missions/src/challenge-reference.ts");
   const challengeRuntime = readText("packages/missions/src/challenge.ts");
   const challengeSpawnPools = readText("packages/missions/src/challenge-spawn-pools.generated.ts");
@@ -328,7 +329,7 @@ function inspectStages() {
         ref: `apps/game/src/stages/catalog.generated.ts:${lineOf(stageCatalog, "EXPORTED_STAGE_CATALOG")}`,
       },
       acceptsHexStageIds: adapter.includes("^st[0-9a-f]{2}$"),
-      acceptsExportedStageCatalog: adapter.includes("isExportedStageId"),
+      acceptsExportedStageCatalog: adapter.includes("EXPORTED_STAGE_CATALOG_ADAPTER"),
       challengeStageSelector: {
         dolStageBytes: challengeReference.includes("CHALLENGE_STAGE_BYTES"),
         preservesSelectorMeta:
@@ -336,12 +337,12 @@ function inspectStages() {
           challengeRuntime.includes("stageSubtable") &&
           challengeRuntime.includes("stageVariant"),
         resolvesSubtableFamilies:
-          adapter.includes("stageIdForBattleConfig") &&
-          adapter.includes("stageSubtable") &&
-          adapter.includes("* 0x20") &&
-          main.includes("stageIdForBattleConfig(config)"),
+          missionCombatConfig.includes("stageIdForBattleConfig") &&
+          missionCombatConfig.includes("stageSubtable") &&
+          missionCombatConfig.includes("* 0x20") &&
+          main.includes("stageIdForBattleConfig(config, EXPORTED_STAGE_CATALOG_ADAPTER)"),
         baseStageIds: [...new Set([...challengeReference.matchAll(/0x([0-9a-f]{2})/gi)].map((match) => `st${match[1].toLowerCase()}`))],
-        adapterRef: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "stageIdForBattleConfig")}`,
+        adapterRef: `packages/missions/src/combat-config.ts:${lineOf(missionCombatConfig, "stageIdForBattleConfig")}`,
         challengeRef: `packages/missions/src/challenge-reference.ts:${lineOf(challengeReference, "CHALLENGE_STAGE_BYTES")}`,
       },
       challengeSpawnPools: {
@@ -358,8 +359,8 @@ function inspectStages() {
       },
       adapterRefs: {
         defaultArenaStage: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "DEFAULT_ARENA_STAGE")}`,
-        catalogGate: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "isExportedStageId")}`,
-        fallback: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "return DEFAULT_ARENA_STAGE")}`,
+        catalogGate: `apps/game/src/sim/adapter.ts:${lineOf(adapter, "EXPORTED_STAGE_CATALOG_ADAPTER")}`,
+        fallback: `packages/missions/src/combat-config.ts:${lineOf(missionCombatConfig, "return catalog.defaultStageId")}`,
       },
       mainRefs: {
         loadStage: `apps/game/src/main.ts:${lineOf(main, "async function loadStage(stageId")}`,
@@ -371,16 +372,16 @@ function inspectStages() {
       },
       collisionBounds: {
         usesStageHitParser: main.includes("hitBin.parseStageHitGrid"),
-        passesBoundsToCombat: main.includes("convertBattleConfig(config, stageId, stageBounds"),
-        passesTrianglesToCombat: main.includes("stageResources.collision") && main.includes("convertBattleConfig(config, stageId, stageBounds, stageResources.collision)"),
+        passesBoundsToCombat: main.includes("toCombatBattleConfig(config") && main.includes("bounds: stageBounds"),
+        passesTrianglesToCombat: main.includes("stageResources.collision") && main.includes("collision: stageResources.collision"),
         movementUsesTriangleWalls: readText("packages/combat/src/movement.ts").includes("resolveLateralCollision"),
         movementUsesTriangleCeilings: readText("packages/combat/src/movement.ts").includes("resolveCeilingCollision"),
         parserPackage: main.includes("@gf/formats") ? "@gf/formats" : null,
       },
       assessment:
-        publicStages.length > 1 && adapter.includes("stageIdForBattleConfig")
+        publicStages.length > 1 && missionCombatConfig.includes("stageIdForBattleConfig")
           ? "Runtime authorizes literal exported st## ids, uses DOL-backed Challenge selector metadata to route exported stage subtable families when present, and builds CPU rosters from the recovered Challenge spawn-pool table; unverified Adventure/human arena names still fall back to st00."
-          : publicStages.length > 1 && adapter.includes("isExportedStageId")
+          : publicStages.length > 1 && adapter.includes("EXPORTED_STAGE_CATALOG_ADAPTER")
             ? "Runtime authorizes literal exported st## ids through the generated stage catalog; arena-name to st## routing still falls back to st00 until traced."
             : publicStages.length > 1
               ? "Exports cover many real stages, but arena-name to st## routing still falls back to st00 unless cfg.arena is already a literal st## id."

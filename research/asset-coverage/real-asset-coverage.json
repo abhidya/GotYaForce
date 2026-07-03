@@ -1,12 +1,12 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-02T06:11:03.813Z",
+  "generatedAt": "2026-07-03T04:51:35.437Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
     "screensUsingAnyRealExportedAsset": 10,
-    "screensWithHandcodedSurfaceSignals": 9,
+    "screensWithHandcodedSurfaceSignals": 8,
     "screensWithRealSceneModel": 8,
     "publicUiTextureExportedImages": 831,
     "requestedUiSceneModelsExported": 13,
@@ -23,17 +23,17 @@
     "runtimeStageWallCollision": true,
     "runtimeStageCeilingCollision": true,
     "runtimeProjectileFxFromExportedTextures": true,
-    "runtimeBattleHudUsesAvailableFontAndRoundel": true,
+    "runtimeBattleHudUsesAvailableFontAndRoundel": false,
     "runtimeBattleHudUsesAsIcon": false,
-    "runtimeLockTargetUsesArrowGeometry": true,
+    "runtimeLockTargetUsesArrowGeometry": false,
     "commonBattleArchiveInventoried": true,
     "commonBattleDataExactMatches": 2,
     "runtimeActorDataBoundToCombat": true,
     "runtimeTypeDamageMatrixFromDol": true,
     "runtimeKnockbackDirectionFromDol": true,
-    "runtimeCameraMode1BlendFromDol": true,
-    "runtimeBorgAnimationDirectMatches": 1402,
-    "runtimeBorgAnimationFallbacks": 2,
+    "runtimeCameraMode1BlendFromDol": false,
+    "runtimeBorgAnimationDirectMatches": 2372,
+    "runtimeBorgAnimationFallbacks": 33,
     "runtimeBorgAnimationMissing": 0,
     "runtimeBoostFlyUsesExportedBoostClip": true,
     "runtimeItemsOrPowerupsModeled": false,
@@ -125,7 +125,7 @@
       ],
       "nextReplacement": "Use the original Challenge select scene textures/models for the three GF-energy pads and cursor.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:43",
+      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:46",
       "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
@@ -138,27 +138,27 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 54
+          "line": 60
         },
         {
           "kind": "css-gradient-surface",
           "pattern": "linear-gradient",
-          "line": 25
+          "line": 28
         },
         {
           "kind": "css-menu-gear",
           "pattern": "gf-menu-gear",
-          "line": 77
+          "line": 83
         },
         {
           "kind": "css-option-pad",
           "pattern": "gf-pad",
-          "line": 76
+          "line": 82
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 57
+          "line": 63
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -347,7 +347,7 @@
       ],
       "nextReplacement": "Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:39",
+      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:123",
       "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
@@ -369,10 +369,9 @@
           "exists": "per-borg"
         },
         {
-          "kind": "borg-ui-helper",
-          "symbol": "borgFacePath",
-          "publicPathPattern": "/ui/hsd/face<borgUiCode>_mdl/texture_000_CI8.png",
-          "exists": "per-borg"
+          "kind": "literal-public-path",
+          "publicPath": "/models/library/manifest.json",
+          "exists": true
         },
         {
           "kind": "literal-public-path",
@@ -389,17 +388,17 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 52
+          "line": 140
         },
         {
           "kind": "css-force-platform",
           "pattern": "gf-select-platform",
-          "line": 60
+          "line": 148
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 55
+          "line": 143
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -515,7 +514,7 @@
         {
           "kind": "handcoded-force-slot",
           "pattern": "gf-slot",
-          "line": 174
+          "line": 177
         },
         {
           "kind": "runtime-text-layout",
@@ -671,15 +670,9 @@
       ],
       "nextReplacement": "Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:104",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:138",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
-        {
-          "kind": "named-texture",
-          "symbol": "ASSETS.faceMarkerRoundel",
-          "publicPath": "/ui/hsd/fmg00_mdl/texture_001_CI8.png",
-          "exists": true
-        },
         {
           "kind": "borg-ui-helper",
           "symbol": "borgBannerPath",
@@ -693,23 +686,7 @@
           "exists": true
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "svg-hud-gauge",
-          "pattern": "ringGauge",
-          "line": 76
-        },
-        {
-          "kind": "css-lockon-reticle",
-          "pattern": "gf-reticle",
-          "line": 146
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 126
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
@@ -738,7 +715,7 @@
       ],
       "nextReplacement": "Export and mount the real result/podium scenes instead of CSS rows and sky backdrop.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/Results.ts:61",
+      "fileRef": "apps/game/src/ui/screens/Results.ts:70",
       "coverageLevel": "real-scene-partial-layout",
       "realExportedAssetsUsed": [
         {
@@ -780,12 +757,12 @@
         {
           "kind": "css-results-row",
           "pattern": "gf-result-pill",
-          "line": 113
+          "line": 122
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 113
+          "line": 122
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -935,13 +912,7 @@
     },
     "runtimeUse": {
       "defaultStage": "st00",
-      "literalStageIdsInAdapter": [
-        "stea",
-        "st00",
-        "st20",
-        "st40",
-        "stab"
-      ],
+      "literalStageIdsInAdapter": [],
       "generatedStageCatalog": {
         "path": "apps/game/src/stages/catalog.generated.ts",
         "parses": true,
@@ -1013,7 +984,7 @@
           "st0c",
           "st0e"
         ],
-        "adapterRef": "apps/game/src/sim/adapter.ts:59",
+        "adapterRef": "packages/missions/src/combat-config.ts:31",
         "challengeRef": "packages/missions/src/challenge-reference.ts:32"
       },
       "challengeSpawnPools": {
@@ -1027,17 +998,17 @@
         "runtimeRef": "packages/missions/src/challenge.ts:364"
       },
       "adapterRefs": {
-        "defaultArenaStage": "apps/game/src/sim/adapter.ts:22",
-        "catalogGate": "apps/game/src/sim/adapter.ts:25",
-        "fallback": "apps/game/src/sim/adapter.ts:41"
+        "defaultArenaStage": "apps/game/src/sim/adapter.ts:6",
+        "catalogGate": "apps/game/src/sim/adapter.ts:15",
+        "fallback": "packages/missions/src/combat-config.ts:27"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:881",
-        "fetchStageManifest": "apps/game/src/main.ts:886",
-        "loadStageCollision": "apps/game/src/main.ts:793",
-        "parseStageHitGrid": "apps/game/src/main.ts:805",
-        "loadDefaultArena": "apps/game/src/main.ts:926",
-        "loadConvertedStage": "apps/game/src/main.ts:1264"
+        "loadStage": "apps/game/src/main.ts:842",
+        "fetchStageManifest": "apps/game/src/main.ts:null",
+        "loadStageCollision": "apps/game/src/main.ts:797",
+        "parseStageHitGrid": "apps/game/src/main.ts:816",
+        "loadDefaultArena": "apps/game/src/main.ts:883",
+        "loadConvertedStage": "apps/game/src/main.ts:1220"
       },
       "collisionBounds": {
         "usesStageHitParser": true,
@@ -2099,7 +2070,7 @@
         "format": "CI8",
         "confidence": "medium",
         "role": "Circular Borg face icon/roundel used as an in-battle character marker, plus a small icon strip (see faceIconStrip).",
-        "usedInBattleHud": true
+        "usedInBattleHud": false
       },
       {
         "key": "faceIconStrip",
@@ -2173,7 +2144,7 @@
     "asIconPublicPath": "/ui/tpl/as_icon/image_00_CI8.png",
     "asIconExists": true,
     "battleHudUsesFontAscii": true,
-    "battleHudUsesFaceRoundel": true,
+    "battleHudUsesFaceRoundel": false,
     "battleHudUsesAsIcon": false,
     "arrowGeometry": {
       "sourceArchive": "user-data/GG4E/afs_data/root/arrow_mdl.arc",
@@ -2185,7 +2156,7 @@
       "generatedFromArchive": true,
       "vertexCount": 84,
       "triangleCount": 72,
-      "battleSceneUsesGeometry": true
+      "battleSceneUsesGeometry": false
     }
   },
   "commonBattleArchiveEvidence": {
@@ -2543,7 +2514,7 @@
     "mappedBorgIds": 208,
     "sourceRef": "packages/combat/src/typeDamage.generated.ts:720",
     "runtimeRef": "packages/combat/src/typeDamage.ts:11",
-    "pipelineRef": "packages/combat/src/combat.ts:88"
+    "pipelineRef": "packages/combat/src/combat.ts:122"
   },
   "knockbackEvidence": {
     "generatedModule": "packages/physics/src/knockback.generated.ts",
@@ -2555,128 +2526,128 @@
     "degenerateThreshold": 0.009999999776482582,
     "sourceRef": "packages/physics/src/knockback.generated.ts:7",
     "runtimeRef": "packages/physics/src/knockback.ts:58",
-    "pipelineRef": "packages/combat/src/combat.ts:12"
+    "pipelineRef": "packages/combat/src/combat.ts:13"
   },
   "cameraEvidence": {
     "generatedModule": "apps/game/src/sim/camera.generated.ts",
     "generatedFromBootDol": true,
     "runtimeImportsGeneratedConstants": true,
-    "runtimeUsesMode1Blend": true,
+    "runtimeUsesMode1Blend": false,
     "previousEyeWeight": 4,
     "eyeBlendDenominator": 5,
     "halfBlend": 0.5,
     "sourceRef": "apps/game/src/sim/camera.generated.ts:6",
-    "runtimeRef": "apps/game/src/sim/camera.ts:40"
+    "runtimeRef": "apps/game/src/sim/camera.ts:60"
   },
   "borgAnimationCoverage": {
     "path": "research/asset-inventory/borg-animation-action-gaps.md",
     "exists": true,
-    "indexesFound": 108,
-    "indexesParsed": 108,
-    "exportedBanks": 4894,
-    "canonicalSlotChecks": 1404,
-    "directRuntimeMatches": 1402,
-    "runtimeFallbacks": 2,
+    "indexesFound": 185,
+    "indexesParsed": 185,
+    "exportedBanks": 8242,
+    "canonicalSlotChecks": 2405,
+    "directRuntimeMatches": 2372,
+    "runtimeFallbacks": 33,
     "missingRuntimeMatches": 0,
     "parseErrors": 0,
     "slotRows": [
       {
         "slot": "idle",
-        "direct": 108,
+        "direct": 185,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "move",
-        "direct": 108,
-        "fallback": 0,
+        "direct": 184,
+        "fallback": 1,
         "missing": 0,
-        "notes": "none"
+        "notes": "idle -> idle x1"
       },
       {
         "slot": "dash_fwd",
-        "direct": 108,
-        "fallback": 0,
+        "direct": 184,
+        "fallback": 1,
         "missing": 0,
-        "notes": "none"
+        "notes": "idle -> idle x1"
       },
       {
         "slot": "dash_back",
-        "direct": 108,
-        "fallback": 0,
+        "direct": 184,
+        "fallback": 1,
         "missing": 0,
-        "notes": "none"
+        "notes": "idle -> idle x1"
       },
       {
         "slot": "dash_left",
-        "direct": 108,
-        "fallback": 0,
+        "direct": 183,
+        "fallback": 2,
         "missing": 0,
-        "notes": "none"
+        "notes": "idle -> idle x1; dash -> dash_fwd x1"
       },
       {
         "slot": "dash_right",
-        "direct": 108,
-        "fallback": 0,
+        "direct": 176,
+        "fallback": 9,
         "missing": 0,
-        "notes": "none"
+        "notes": "dash -> dash_fwd x8; idle -> idle x1"
       },
       {
         "slot": "jump",
-        "direct": 108,
-        "fallback": 0,
+        "direct": 184,
+        "fallback": 1,
         "missing": 0,
-        "notes": "none"
+        "notes": "idle -> idle x1"
       },
       {
         "slot": "fly",
-        "direct": 108,
-        "fallback": 0,
+        "direct": 184,
+        "fallback": 1,
         "missing": 0,
-        "notes": "none"
+        "notes": "idle -> idle x1"
       },
       {
         "slot": "shoot",
-        "direct": 108,
+        "direct": 185,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "melee",
-        "direct": 108,
-        "fallback": 0,
-        "missing": 0,
-        "notes": "none"
-      },
-      {
-        "slot": "special",
-        "direct": 108,
-        "fallback": 0,
-        "missing": 0,
-        "notes": "none"
-      },
-      {
-        "slot": "hit",
-        "direct": 106,
+        "direct": 183,
         "fallback": 2,
         "missing": 0,
         "notes": "idle -> idle x2"
       },
       {
+        "slot": "special",
+        "direct": 180,
+        "fallback": 5,
+        "missing": 0,
+        "notes": "attack -> attack_s4 x2; attack -> attack_s0 x3"
+      },
+      {
+        "slot": "hit",
+        "direct": 175,
+        "fallback": 10,
+        "missing": 0,
+        "notes": "idle -> idle x10"
+      },
+      {
         "slot": "death",
-        "direct": 108,
+        "direct": 185,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       }
     ],
     "runtimeResolverRefs": {
-      "slotLabels": "apps/game/src/main.ts:384",
-      "slotFallbacks": "apps/game/src/main.ts:423",
-      "pickAnimBank": "apps/game/src/main.ts:635",
-      "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:140"
+      "slotLabels": "apps/game/src/main.ts:438",
+      "slotFallbacks": "apps/game/src/main.ts:477",
+      "pickAnimBank": "apps/game/src/main.ts:689",
+      "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:212"
     },
     "boostFlyMapped": true
   },
@@ -2684,9 +2655,9 @@
     "battleStateHasItems": false,
     "battleRuntimeSpawnsDrops": false,
     "evidenceRefs": {
-      "battleState": "packages/combat/src/types.ts:181",
-      "deployNextBorg": "packages/combat/src/battle.ts:126",
-      "deathProcessing": "packages/combat/src/battle.ts:253",
+      "battleState": "packages/combat/src/types.ts:170",
+      "deployNextBorg": "packages/combat/src/battle.ts:148",
+      "deathProcessing": "packages/combat/src/battle.ts:294",
       "particleInventory": "research/asset-inventory/particle-effect-inventory.json",
       "hudInventory": "research/asset-inventory/ui-hud-assets.md"
     },
@@ -2732,7 +2703,7 @@
           "exists": true
         }
       ],
-      "notes": "Voices are a representative sample (first 2 clips per character pl00-pl12) out of ~2075 total. bgm tracks <5s are jingles/stingers (loop=false)."
+      "notes": "BGM/SFX names follow poq_adx_usa.afs index mapping. Voice cues are generic/sample keys until a traced in-game voice table is available. AFS 2113..2114 are MPEG/Sofdec-like members and are excluded."
     }
   },
   "formatParserCoverage": {

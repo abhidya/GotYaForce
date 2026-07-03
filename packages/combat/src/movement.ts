@@ -16,7 +16,10 @@
 import {
   add,
   clamp,
+  candidateTrianglesForSegment,
   forwardFromYaw,
+  floorSurfaceYAt,
+  isFiniteVec,
   normalize,
   turnToward,
   yawFromXZ,
@@ -278,68 +281,6 @@ function keepOnStageFloor(
   velocity.z = 0;
 }
 
-function floorSurfaceYAt(
-  collision: StageCollision | null,
-  x: number,
-  z: number,
-  maxSurfaceY: number,
-): number | null {
-  if (!collision || collision.triangles.length === 0) return null;
-  let best: number | null = null;
-  const primary = candidateTriangles(collision, x, z);
-  best = bestFloorFromCandidates(primary, x, z, maxSurfaceY);
-  if (best != null || primary.length === collision.triangles.length) return best;
-  return bestFloorFromCandidates(collision.triangles, x, z, maxSurfaceY);
-}
-
-function candidateTriangles(collision: StageCollision, x: number, z: number): StageCollisionTriangle[] {
-  const grid = collision.grid;
-  if (!grid) return collision.triangles;
-  const cx = Math.floor((x - grid.origin.x) / grid.cellSize.x);
-  const cz = Math.floor((z - grid.origin.z) / grid.cellSize.z);
-  if (cx < 0 || cz < 0 || cx >= grid.gridCells.x || cz >= grid.gridCells.z) return [];
-  const cell = grid.cells[cz * grid.gridCells.x + cx];
-  if (!cell || cell.triangleIndices.length === 0) return [];
-  const out: StageCollisionTriangle[] = [];
-  for (const index of cell.triangleIndices) {
-    const tri = collision.triangles[index];
-    if (tri) out.push(tri);
-  }
-  return out;
-}
-
-function candidateTrianglesForSegment(collision: StageCollision, a: Vec3, b: Vec3): StageCollisionTriangle[] {
-  const grid = collision.grid;
-  if (!grid) return collision.triangles;
-  const indices = new Set<number>();
-  addNeighborCellTriangles(indices, collision, a.x, a.z);
-  addNeighborCellTriangles(indices, collision, b.x, b.z);
-  if (indices.size === 0) return collision.triangles;
-  const out: StageCollisionTriangle[] = [];
-  for (const index of indices) {
-    const tri = collision.triangles[index];
-    if (tri) out.push(tri);
-  }
-  return out;
-}
-
-function addNeighborCellTriangles(out: Set<number>, collision: StageCollision, x: number, z: number): void {
-  const grid = collision.grid;
-  if (!grid) return;
-  const cx = Math.floor((x - grid.origin.x) / grid.cellSize.x);
-  const cz = Math.floor((z - grid.origin.z) / grid.cellSize.z);
-  for (let dz = -1; dz <= 1; dz += 1) {
-    for (let dx = -1; dx <= 1; dx += 1) {
-      const nx = cx + dx;
-      const nz = cz + dz;
-      if (nx < 0 || nz < 0 || nx >= grid.gridCells.x || nz >= grid.gridCells.z) continue;
-      const cell = grid.cells[nz * grid.gridCells.x + nx];
-      if (!cell) continue;
-      for (const index of cell.triangleIndices) out.add(index);
-    }
-  }
-}
-
 function resolveLateralCollision(
   collision: StageCollision | null,
   previous: Vec3,
@@ -446,37 +387,6 @@ function segmentTriangleCeilingHit(
   return { point, t };
 }
 
-function bestFloorFromCandidates(
-  triangles: readonly StageCollisionTriangle[],
-  x: number,
-  z: number,
-  maxSurfaceY: number,
-): number | null {
-  let best: number | null = null;
-  for (const tri of triangles) {
-    if (tri.marker !== 0xcccccccc) continue;
-    if (!isFiniteVec(tri.normal)) continue;
-    if (tri.normal.y < 0.5) continue;
-    if (!tri.vertices.every(isFiniteVec)) continue;
-    if (x < tri.bounds2d.minX || x > tri.bounds2d.maxX || z < tri.bounds2d.minZ || z > tri.bounds2d.maxZ) continue;
-    const y = yAtTriangleXZ(tri, x, z);
-    if (y == null || y > maxSurfaceY) continue;
-    if (best == null || y > best) best = y;
-  }
-  return best;
-}
-
-function yAtTriangleXZ(tri: StageCollisionTriangle, x: number, z: number): number | null {
-  const [a, b, c] = tri.vertices;
-  const denom = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
-  if (Math.abs(denom) < 1e-5) return null;
-  const wa = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denom;
-  const wb = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denom;
-  const wc = 1 - wa - wb;
-  if (wa < -1e-4 || wb < -1e-4 || wc < -1e-4) return null;
-  return wa * a.y + wb * b.y + wc * c.y;
-}
-
 function signedDistanceToPlane(point: Vec3, planePoint: Vec3, normal: Vec3): number {
   return (
     (point.x - planePoint.x) * normal.x +
@@ -510,10 +420,6 @@ function horizontalNormal(normal: Vec3): { x: number; z: number } | null {
 
 function dot(a: Vec3, b: Vec3): number {
   return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-function isFiniteVec(v: Vec3): boolean {
-  return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
 }
 
 // re-export for combat.ts convenience

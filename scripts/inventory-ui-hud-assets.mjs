@@ -11,7 +11,7 @@ const mdOut = path.join(outputDir, "ui-hud-assets.md");
 const paths = {
   afsRoot: "user-data/GG4E/afs_data/root",
   gameMain: "apps/game/src/main.ts",
-  uiPackage: "packages/ui/src/index.ts",
+  uiPackage: "apps/game/src/ui/index.ts",
   tplFormat: "packages/formats/src/tpl.ts",
   mdtFormat: "packages/formats/src/mdt.ts",
   arcSpec: "research/format-specs/arc-hsd-format.md",

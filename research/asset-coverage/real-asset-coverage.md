@@ -1,12 +1,12 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-02T06:11:03.813Z
+Generated: 2026-07-03T04:51:35.437Z
 
 ## Summary
 
 - Runtime screens audited: 10
 - Screens using at least one real exported UI asset: 10
-- Screens with handcoded/CSS/SVG surface signals: 9
+- Screens with handcoded/CSS/SVG surface signals: 8
 - Screens mounting a real exported UI scene model: 8
 - UI texture export: 831 images from apps/game/public/ui/manifest.json
 - Requested UI scene models exported: 13 from apps/game/public/ui/scenes/manifest.json
@@ -17,17 +17,17 @@ Generated: 2026-07-02T06:11:03.813Z
 - Runtime lateral wall collision from STIH: yes
 - Runtime upward ceiling collision from STIH: yes
 - Runtime projectile FX from exported textures: yes
-- Runtime battle HUD uses exported font/roundel: yes
+- Runtime battle HUD uses exported font/roundel: no
 - Runtime battle HUD uses as_icon: no (manifest marks as_icon low-confidence for battle HUD)
-- Runtime lock target uses arrow_mdl geometry: yes
+- Runtime lock target uses arrow_mdl geometry: no
 - Common battle archive inventoried: yes
 - Common battle data exact actor matches: 2
 - Runtime actor-data bytes bound to combat formulas: yes
 - Runtime type damage matrix from DOL tables: yes
 - Runtime knockback direction from DOL function: yes
-- Runtime battle camera mode-1 blend from DOL constants: yes
-- Runtime borg animation direct matches: 1402/1404
-- Runtime borg animation fallbacks/missing: 2/0
+- Runtime battle camera mode-1 blend from DOL constants: no
+- Runtime borg animation direct matches: 2372/2405
+- Runtime borg animation fallbacks/missing: 33/0
 - Runtime fly uses exported boost clip: yes
 - Runtime items/powerups modeled: no
 - Runtime audio from exported cues: yes
@@ -53,14 +53,14 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 | Screen | Coverage | Real exported assets used | Handcoded signals | Next replacement |
 | --- | --- | --- | --- | --- |
 | main-menu | real-scene-partial-layout | ASSETS.mainMenuOption<br>/ui/scenes/tl00/model_00.dae<br>/ui/scenes/optn00/model_00.dae | none | Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels. |
-| select-difficulty | real-scene-partial-layout | /ui/scenes/vsel00/model_00.dae | css-grid-backdrop:54<br>css-gradient-surface:25<br>css-menu-gear:77<br>css-option-pad:76<br>runtime-text-layout:57 | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
+| select-difficulty | real-scene-partial-layout | /ui/scenes/vsel00/model_00.dae | css-grid-backdrop:60<br>css-gradient-surface:28<br>css-menu-gear:83<br>css-option-pad:82<br>runtime-text-layout:63 | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
 | select-players | real-scene-partial-layout | /ui/scenes/vsel01/model_00.dae | css-grid-backdrop:48<br>css-option-pad:74<br>css-label-pill:75<br>handcoded-player-silhouette:28<br>runtime-text-layout:32 | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
 | load-box-data | real-scene-partial-layout | /ui/scenes/box00/model_00.dae | css-grid-backdrop:27<br>runtime-text-layout:28 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
-| select-force | real-scene-partial-layout | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>borgFacePath<br>/models/pl0615/model_00.dae<br>/ui/scenes/entry00/model_00.dae | css-grid-backdrop:52<br>css-force-platform:60<br>runtime-text-layout:55 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
-| force-builder | real-scene-partial-layout | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath<br>/ui/scenes/unitall/model_00.dae | handcoded-force-grid:93<br>handcoded-force-ring:105<br>handcoded-force-slot:174<br>runtime-text-layout:88 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
+| select-force | real-scene-partial-layout | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>/models/library/manifest.json<br>/models/pl0615/model_00.dae<br>/ui/scenes/entry00/model_00.dae | css-grid-backdrop:140<br>css-force-platform:148<br>runtime-text-layout:143 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
+| force-builder | real-scene-partial-layout | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath<br>/ui/scenes/unitall/model_00.dae | handcoded-force-grid:93<br>handcoded-force-ring:105<br>handcoded-force-slot:177<br>runtime-text-layout:88 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
 | battle-intro | real-scene-partial-layout | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:52 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
-| battle-hud | mixed-real-assets-handcoded-surface | ASSETS.faceMarkerRoundel<br>borgBannerPath<br>ASSETS.fontAscii | svg-hud-gauge:76<br>css-lockon-reticle:146<br>runtime-text-layout:126 | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
-| results | real-scene-partial-layout | ASSETS.resultsWin<br>ASSETS.resultsLose<br>ASSETS.resultsStartPrompt<br>ASSETS.resultsGameOver<br>/ui/scenes/rpot20/model_00.dae<br>/ui/scenes/rpot23/model_00.dae | css-results-row:113<br>runtime-text-layout:113 | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |
+| battle-hud | real-assets-only | borgBannerPath<br>ASSETS.fontAscii | none | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
+| results | real-scene-partial-layout | ASSETS.resultsWin<br>ASSETS.resultsLose<br>ASSETS.resultsStartPrompt<br>ASSETS.resultsGameOver<br>/ui/scenes/rpot20/model_00.dae<br>/ui/scenes/rpot23/model_00.dae | css-results-row:122<br>runtime-text-layout:122 | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |
 | pause-menu | mixed-real-assets-handcoded-surface | ASSETS.fontAscii | css-pause-box:33 | Find the original pause menu data/assets; current overlay is entirely recreated CSS/text. |
 
 ## UI Scene Export Coverage
@@ -85,11 +85,11 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 18 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:881, apps/game/src/main.ts:886, apps/game/src/main.ts:793, apps/game/src/main.ts:805, apps/game/src/main.ts:926, apps/game/src/main.ts:1264
+Runtime loader refs: apps/game/src/main.ts:842, apps/game/src/main.ts:null, apps/game/src/main.ts:797, apps/game/src/main.ts:816, apps/game/src/main.ts:883, apps/game/src/main.ts:1220
 
 Runtime collision parser: @gf/formats (bounds wired, triangles wired, walls wired, ceilings wired)
 
-Challenge stage selector: DOL selector bytes wired to exported runtime stage routing (packages/missions/src/challenge-reference.ts:32; apps/game/src/sim/adapter.ts:59).
+Challenge stage selector: DOL selector bytes wired to exported runtime stage routing (packages/missions/src/challenge-reference.ts:32; packages/missions/src/combat-config.ts:31).
 Challenge CPU spawn pools: generated from recovered 0x80380804 table (22 groups, 145 borg ids; packages/missions/src/challenge-spawn-pools.generated.ts:32; packages/missions/src/challenge.ts:364).
 
 Runtime authorizes literal exported st## ids, uses DOL-backed Challenge selector metadata to route exported stage subtable families when present, and builds CPU rosters from the recovered Challenge spawn-pool table; unverified Adventure/human arena names still fall back to st00.
@@ -122,12 +122,12 @@ Gotcha Force does NOT ship its in-battle HUD overlay (the green/red energy meter
 | fontAscii | user-data/GG4E/afs_data/root/ascii.tpl | 128x128 | high | yes | Monospaced ASCII glyph atlas (0-9, A-Z, a-z, punctuation). This is the source for HUD numerals -> hit/combo digits, timers, counts. Composite digits by blitting cells from this atlas. |
 | fontJp | user-data/GG4E/afs_data/root/font_00.tpl | 256x320 | high | no | Main game font atlas (Japanese kana + Latin + digits + symbols). Source glyphs for any on-screen HUD/menu text labels. |
 | asIcon | user-data/GG4E/afs_data/root/as_icon.tpl | 64x64 | low | no | Small circular icon/badge (adventure-select / status icon). Possible HUD status badge; role not definitively a battle-HUD element. |
-| faceIconRoundel | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_001) | unknown | medium | yes | Circular Borg face icon/roundel used as an in-battle character marker, plus a small icon strip (see faceIconStrip). |
+| faceIconRoundel | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_001) | unknown | medium | no | Circular Borg face icon/roundel used as an in-battle character marker, plus a small icon strip (see faceIconStrip). |
 | faceIconStrip | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_000) | unknown | low | no | Small icon strip from the face-marker model atlas. |
 
 as_icon public export: /ui/tpl/as_icon/image_00_CI8.png (exists). It remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.
 
-arrow_mdl geometry binding: source archive exists, HSDRaw OBJ exists, generated module exists, runtime scene uses geometry yes (84 verts, 72 tris).
+arrow_mdl geometry binding: source archive exists, HSDRaw OBJ exists, generated module exists, runtime scene uses geometry no (84 verts, 72 tris).
 
 Original HUD elements not available as discrete sprites:
 | Element | Evidence |
@@ -198,51 +198,51 @@ Runtime combat profiles now bind defense/shot/attack/speed to original pl####dat
 Type damage matrix:
 - Generated from DOL tables: yes (packages/combat/src/typeDamage.generated.ts:720)
 - Runtime imports generated tables: yes (packages/combat/src/typeDamage.ts:11)
-- Damage pipeline uses multiplier: yes (packages/combat/src/combat.ts:88)
+- Damage pipeline uses multiplier: yes (packages/combat/src/combat.ts:122)
 - Shape: remap 16 rows; matrix 20x20; mapped borg ids 208.
 - Selfcheck covers sample multiplier: yes.
 
 Knockback direction:
 - Generated from DOL function evidence: yes (packages/physics/src/knockback.generated.ts:7)
 - Runtime imports generated constants: yes (packages/physics/src/knockback.ts:58)
-- Combat pipeline uses direction helper: yes (packages/combat/src/combat.ts:12)
+- Combat pipeline uses direction helper: yes (packages/combat/src/combat.ts:13)
 - Shape/constants: 5 modes; BAM16/radian 10430.3779296875; degenerate threshold 0.009999999776482582.
 
 Battle camera mode-1 blend:
 - Generated from boot.dol/decomp: yes (apps/game/src/sim/camera.generated.ts:6)
-- Runtime imports generated constants: yes (apps/game/src/sim/camera.ts:40)
-- Runtime uses mode-1 blend: yes.
+- Runtime imports generated constants: yes (apps/game/src/sim/camera.ts:60)
+- Runtime uses mode-1 blend: no.
 - Shape/constants: eye previous weight 4; denominator 5; half blend 0.5.
 
 ## Borg Animation Coverage
 
 Validator report: research/asset-inventory/borg-animation-action-gaps.md
-Runtime resolver refs: apps/game/src/main.ts:384, apps/game/src/main.ts:423, apps/game/src/main.ts:635, apps/game/src/sim/battleScene.ts:140
-Animation indexes parsed: 108/108; exported banks: 4894; canonical slot checks: 1404.
-Direct matches: 1402; fallbacks: 2; missing: 0; parse errors: 0.
+Runtime resolver refs: apps/game/src/main.ts:438, apps/game/src/main.ts:477, apps/game/src/main.ts:689, apps/game/src/sim/battleScene.ts:212
+Animation indexes parsed: 185/185; exported banks: 8242; canonical slot checks: 2405.
+Direct matches: 2372; fallbacks: 33; missing: 0; parse errors: 0.
 Fly/boost mapping: fly state resolves through exported boost labels.
 
 | Slot | Direct | Fallback | Missing | Notes |
 | --- | --- | --- | --- | --- |
-| idle | 108 | 0 | 0 | none |
-| move | 108 | 0 | 0 | none |
-| dash_fwd | 108 | 0 | 0 | none |
-| dash_back | 108 | 0 | 0 | none |
-| dash_left | 108 | 0 | 0 | none |
-| dash_right | 108 | 0 | 0 | none |
-| jump | 108 | 0 | 0 | none |
-| fly | 108 | 0 | 0 | none |
-| shoot | 108 | 0 | 0 | none |
-| melee | 108 | 0 | 0 | none |
-| special | 108 | 0 | 0 | none |
-| hit | 106 | 2 | 0 | idle -> idle x2 |
-| death | 108 | 0 | 0 | none |
+| idle | 185 | 0 | 0 | none |
+| move | 184 | 1 | 0 | idle -> idle x1 |
+| dash_fwd | 184 | 1 | 0 | idle -> idle x1 |
+| dash_back | 184 | 1 | 0 | idle -> idle x1 |
+| dash_left | 183 | 2 | 0 | idle -> idle x1; dash -> dash_fwd x1 |
+| dash_right | 176 | 9 | 0 | dash -> dash_fwd x8; idle -> idle x1 |
+| jump | 184 | 1 | 0 | idle -> idle x1 |
+| fly | 184 | 1 | 0 | idle -> idle x1 |
+| shoot | 185 | 0 | 0 | none |
+| melee | 183 | 2 | 0 | idle -> idle x2 |
+| special | 180 | 5 | 0 | attack -> attack_s4 x2; attack -> attack_s0 x3 |
+| hit | 175 | 10 | 0 | idle -> idle x10 |
+| death | 185 | 0 | 0 | none |
 
 ## Powerup / Item Runtime Gap
 
 Items/powerups in BattleState: no
 Runtime spawns item/drop/pickup entities: no
-Evidence refs: packages/combat/src/types.ts:181, packages/combat/src/battle.ts:126, packages/combat/src/battle.ts:253, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
+Evidence refs: packages/combat/src/types.ts:170, packages/combat/src/battle.ts:148, packages/combat/src/battle.ts:294, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
 Asset leads: item model ARZ count 90, as_icon documented yes, comhit documented yes.
 Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory.
 

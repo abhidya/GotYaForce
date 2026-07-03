@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T10:12:36.156Z",
+  "generatedAt": "2026-07-03T04:51:35.352Z",
   "generatedBy": "scripts/inventory-challenge-flow-evidence.mjs",
   "sourceIndex": "research/decomp/index/function-evidence-index.json",
   "principle": "Do not replace player-facing Challenge flow with fake menus/stages/mechanics. Each step below must be driven by original functions, data tables, asset opens, traces, or behavior.",
@@ -10,9 +10,9 @@
       "anchors": [
         {
           "address": "0x80195fbc",
-          "currentFunctionName": "FUN_80195fbc",
-          "inferredName": "challenge-menu-flow_candidate_80195fbc",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:127",
+          "currentFunctionName": "init_challenge_flow_state",
+          "inferredName": "init_challenge_flow_state",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:130",
           "callers": [],
           "callees": [
             {
@@ -29,17 +29,14 @@
             }
           ],
           "globalReferences": [
-            "DAT_80436378",
-            "PTR_DAT_80433934",
-            "PTR_DAT_80433944"
-          ],
-          "globalAccesses": [
-            "DAT_80436378",
             "PTR_DAT_80433934",
             "PTR_DAT_80433944",
-            "PTR_DAT_80433934[0x1c]",
-            "PTR_DAT_80433934 + 0x15c",
-            "PTR_DAT_80433934 + 0x120"
+            "DAT_80436378"
+          ],
+          "globalAccesses": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433944",
+            "DAT_80436378"
           ],
           "constants": [
             "1",
@@ -68,9 +65,9 @@
         },
         {
           "address": "0x801962c4",
-          "currentFunctionName": "FUN_801962c4",
-          "inferredName": "challenge-menu-flow_candidate_801962c4",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:226",
+          "currentFunctionName": "build_challenge_battle_setup",
+          "inferredName": "challenge_force_slot_team_setup",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:234",
           "callers": [],
           "callees": [
             {
@@ -103,9 +100,9 @@
             }
           ],
           "globalReferences": [
-            "DAT_80436378",
             "PTR_DAT_80433934",
             "PTR_DAT_80433930",
+            "DAT_80436378",
             "PTR_DAT_8036f40c",
             "PTR_DAT_8036f4b8",
             "PTR_DAT_8036f434",
@@ -117,10 +114,11 @@
             "DAT_804356e4"
           ],
           "globalAccesses": [
+            "PTR_DAT_80433934",
+            "PTR_DAT_80433930[2]",
             "DAT_80436378",
             "PTR_DAT_80433934[0x15d9]",
             "PTR_DAT_80433934[0x15da]",
-            "PTR_DAT_80433930[2]",
             "PTR_DAT_80433934[iVar4 + 0xcb]",
             "PTR_DAT_80433934[iVar4 + 0xcc]",
             "DAT_80436378 + 0x13",
@@ -133,22 +131,23 @@
             "PTR_DAT_80433934[iVar9 + 0x1654]",
             "PTR_DAT_8036f360",
             "PTR_DAT_8036f3e4",
-            "PTR_DAT_80433934",
             "PTR_DAT_80433934[iVar8 + (char)PTR_DAT_80433934[iVar4 + 0x5a]",
             "PTR_DAT_80433934[iVar4 + 0x20]",
             "PTR_DAT_80433934[iVar4 + 0x3e]"
           ],
           "constants": [
+            "0xcb",
+            "0xcc",
             "2",
-            "4",
-            "0",
+            "0x1e8",
             "0x15d9",
             "0x15da",
+            "0x88",
+            "4",
+            "0",
             "3",
             "1",
-            "0xcb",
             "0xff",
-            "0xcc",
             "0x13",
             "8",
             "0x5a",
@@ -157,7 +156,6 @@
             "0x7fffffff",
             "0x1e",
             "0x1c",
-            "0x1e8",
             "0x1ea",
             "0x1eb",
             "0x10",
@@ -167,8 +165,7 @@
             "0x29",
             "0x348",
             "0x32",
-            "0x54",
-            "0xa0"
+            "0x54"
           ],
           "strings": [],
           "assets": [],
@@ -192,13 +189,13 @@
         },
         {
           "address": "0x80199da0",
-          "currentFunctionName": "zz_0199da0_",
-          "inferredName": "challenge-menu-flow_candidate_80199da0",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:2797",
+          "currentFunctionName": "is_global_menu_mode_5",
+          "inferredName": "is_global_menu_mode_5",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:2812",
           "callers": [
             {
               "address": "0x8019a064",
-              "name": "FUN_8019a064"
+              "name": "draw_challenge_menu_object_0"
             },
             {
               "address": "0x8019a330",
@@ -253,7 +250,7 @@
           "address": "0x801969a0",
           "currentFunctionName": "FUN_801969a0",
           "inferredName": "challenge-menu-flow_candidate_801969a0",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:451",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:466",
           "callers": [],
           "callees": [
             {
@@ -317,7 +314,7 @@
           "address": "0x80196188",
           "currentFunctionName": "FUN_80196188",
           "inferredName": "challenge-menu-flow_candidate_80196188",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:191",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:199",
           "callers": [],
           "callees": [
             {
@@ -390,8 +387,8 @@
         },
         {
           "address": "0x80195f2c",
-          "currentFunctionName": "FUN_80195f2c",
-          "inferredName": "challenge-menu-flow_candidate_80195f2c",
+          "currentFunctionName": "dispatch_challenge_flow_state",
+          "inferredName": "dispatch_challenge_flow_state",
           "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:109",
           "callers": [],
           "callees": [
@@ -413,8 +410,7 @@
           "globalAccesses": [
             "DAT_80436378",
             "DAT_803d4960",
-            "PTR_DAT_80433930[1]",
-            "PTR_DAT_80433930[0x40]",
+            "PTR_DAT_80433930",
             "PTR_FUN_8036f560"
           ],
           "constants": [
@@ -436,9 +432,9 @@
         },
         {
           "address": "0x80196030",
-          "currentFunctionName": "FUN_80196030",
-          "inferredName": "challenge-menu-flow_candidate_80196030",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:145",
+          "currentFunctionName": "poll_challenge_menu_selection",
+          "inferredName": "poll_challenge_menu_selection",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:153",
           "callers": [],
           "callees": [
             {
@@ -511,7 +507,7 @@
           "address": "0x80196a9c",
           "currentFunctionName": "FUN_80196a9c",
           "inferredName": "challenge-menu-flow_candidate_80196a9c",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:495",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:510",
           "callers": [],
           "callees": [
             {
@@ -558,7 +554,7 @@
           "address": "0x80196cec",
           "currentFunctionName": "FUN_80196cec",
           "inferredName": "challenge-menu-flow_candidate_80196cec",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:603",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:618",
           "callers": [],
           "callees": [
             {
@@ -987,8 +983,8 @@
       "topicFallbacks": [
         {
           "address": "0x8002bb14",
-          "currentFunctionName": "FUN_8002bb14",
-          "inferredName": "challenge-menu-flow_candidate_8002bb14",
+          "currentFunctionName": "battle_frame_target_action_dispatch",
+          "inferredName": "battle_frame_target_action_dispatch",
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
           "callers": [
             {
@@ -1011,7 +1007,7 @@
             },
             {
               "address": "0x8002cb20",
-              "name": "zz_002cb20_"
+              "name": "mutual_actor_contact_mask_update"
             },
             {
               "address": "0x8002cc78",
@@ -1043,14 +1039,18 @@
             },
             {
               "address": "0x8002d7c4",
-              "name": "zz_002d7c4_"
+              "name": "collision_hit_pair_pass_active_vs_borgs"
             },
             {
               "address": "0x8002db58",
-              "name": "zz_002db58_"
+              "name": "collision_hit_pair_pass_active_vs_secondary"
             }
           ],
           "globalReferences": [
+            "DAT_803c4e84",
+            "DAT_803b06a8",
+            "DAT_8043612c",
+            "DAT_80436134",
             "DAT_803b068c",
             "PTR_DAT_80433934",
             "DAT_80436154",
@@ -1059,20 +1059,20 @@
             "DAT_803b0694",
             "DAT_803b0698",
             "DAT_80436128",
-            "DAT_803c4e84",
             "DAT_8043614c",
             "FLOAT_80436f68",
             "FLOAT_80436f6c",
             "DAT_80436144",
-            "DAT_803b06a8",
             "DAT_8043613c",
-            "DAT_80436134",
             "DAT_803b0644",
-            "DAT_8043612c",
             "DAT_803b0638",
             "DAT_803b0708"
           ],
           "globalAccesses": [
+            "DAT_803c4e84",
+            "DAT_803b06a8",
+            "DAT_8043612c",
+            "DAT_80436134",
             "DAT_803b068c",
             "PTR_DAT_80433934 + 0x118",
             "DAT_80436154",
@@ -1084,17 +1084,19 @@
             "DAT_803b0698",
             "PTR_DAT_80433934 + 0x1cc",
             "DAT_80436128",
-            "DAT_803c4e84",
             "DAT_8043614c",
             "FLOAT_80436f68",
             "FLOAT_80436f6c",
             "DAT_80436144",
-            "DAT_803b06a8",
-            "DAT_8043613c",
-            "DAT_80436134",
-            "DAT_803b0644"
+            "DAT_8043613c"
           ],
           "constants": [
+            "0x1e00",
+            "44",
+            "0x3e4",
+            "0x88",
+            "2000",
+            "0x7d1",
             "0x8002c978",
             "0x8002c970",
             "0x8002c968",
@@ -1107,10 +1109,7 @@
             "0x154",
             "400",
             "0x1cc",
-            "0x7d1",
-            "2000",
             "1",
-            "0x3e4",
             "0x1c6",
             "0x436",
             "0x4fc",
@@ -1121,10 +1120,7 @@
             "0x4f6",
             "0x4fa",
             "0x4f7",
-            "0x6fd",
-            "0x70c",
-            "0x70d",
-            "0x7d4"
+            "0x6fd"
           ],
           "strings": [],
           "assets": [],
@@ -1134,7 +1130,8 @@
             "battle-initialization",
             "damage",
             "knockback-targeting",
-            "movement-physics"
+            "movement-physics",
+            "stage-load-collision"
           ],
           "relatedWebModules": [
             "apps/game/src/main.ts",
@@ -1148,7 +1145,8 @@
             "packages/combat/src/stats.ts",
             "packages/physics/src/index.ts",
             "apps/game/src/sim/battleScene.ts",
-            "packages/combat/src/movement.ts"
+            "packages/combat/src/movement.ts",
+            "packages/formats/src/hit-bin.ts"
           ]
         },
         {
@@ -1298,21 +1296,21 @@
         },
         {
           "address": "0x8002e2a8",
-          "currentFunctionName": "zz_002e2a8_",
-          "inferredName": "per_borg_update_damage_dispatch",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7457",
+          "currentFunctionName": "resolve_hitbox_target_effects_and_damage",
+          "inferredName": "resolve_hitbox_target_effects_and_damage",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7473",
           "callers": [
             {
               "address": "0x8002d7c4",
-              "name": "zz_002d7c4_"
+              "name": "collision_hit_pair_pass_active_vs_borgs"
             },
             {
               "address": "0x8002db58",
-              "name": "zz_002db58_"
+              "name": "collision_hit_pair_pass_active_vs_secondary"
             },
             {
               "address": "0x8002df08",
-              "name": "zz_002df08_"
+              "name": "collision_hit_pair_pass_object_lists"
             }
           ],
           "callees": [
@@ -1366,6 +1364,8 @@
             }
           ],
           "globalReferences": [
+            "DAT_803b06a8",
+            "DAT_8043612c",
             "FLOAT_80436fa0",
             "DOUBLE_80436fb0",
             "FLOAT_80436f7c",
@@ -1380,14 +1380,14 @@
             "DAT_803b06c0",
             "DAT_803b06c4",
             "DAT_803b06c8",
-            "DAT_803b06a8",
             "DAT_80436134",
             "DAT_8043613c",
-            "DAT_8043612c",
             "DAT_80436128",
             "DAT_802c7ca0"
           ],
           "globalAccesses": [
+            "DAT_803b06a8",
+            "DAT_8043612c",
             "FLOAT_80436fa0",
             "DOUBLE_80436fb0",
             "FLOAT_80436f7c",
@@ -1402,20 +1402,25 @@
             "DAT_803b06c0",
             "DAT_803b06c4",
             "DAT_803b06c8",
-            "DAT_803b06a8",
             "DAT_80436134",
             "DAT_8043613c",
-            "DAT_8043612c",
             "DAT_80436128",
             "DAT_802c7ca0"
           ],
           "constants": [
+            "0x2c",
+            "0x18",
+            "0x290",
+            "2000",
+            "0x7d1",
+            "15",
+            "0x418",
+            "0x42c",
+            "0x41c",
             "2",
             "0x20",
             "0x24",
-            "0x2c",
             "0x11",
-            "0x18",
             "0x28",
             "0",
             "0x83",
@@ -1432,14 +1437,7 @@
             "9",
             "0x10",
             "0x88",
-            "0x43300000",
-            "0xc4",
-            "0x6fc",
-            "0x80000000",
-            "0x12",
-            "0x40",
-            "0xb1",
-            "0xbc"
+            "0x43300000"
           ],
           "strings": [],
           "assets": [],
@@ -2140,7 +2138,7 @@
         {
           "file": "apps/game/src/ui/screens/SelectForce.ts",
           "needle": "SELECT A FORCE",
-          "sourceRef": "apps/game/src/ui/screens/SelectForce.ts:49"
+          "sourceRef": "apps/game/src/ui/screens/SelectForce.ts:143"
         },
         {
           "file": "apps/game/src/ui/screens/ForceBuilder.ts",
@@ -2152,7 +2150,582 @@
     {
       "id": "stage-load-flow",
       "label": "force setup -> stage/load flow",
-      "anchors": [],
+      "anchors": [
+        {
+          "address": "0x8002bb14",
+          "currentFunctionName": "battle_frame_target_action_dispatch",
+          "inferredName": "battle_frame_target_action_dispatch",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
+          "callers": [
+            {
+              "address": "0x80029434",
+              "name": "zz_0029434_"
+            },
+            {
+              "address": "0x80029708",
+              "name": "zz_0029708_"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8002c994",
+              "name": "zz_002c994_"
+            },
+            {
+              "address": "0x8002caa8",
+              "name": "zz_002caa8_"
+            },
+            {
+              "address": "0x8002cb20",
+              "name": "mutual_actor_contact_mask_update"
+            },
+            {
+              "address": "0x8002cc78",
+              "name": "zz_002cc78_"
+            },
+            {
+              "address": "0x8002cda4",
+              "name": "zz_002cda4_"
+            },
+            {
+              "address": "0x8002ce44",
+              "name": "zz_002ce44_"
+            },
+            {
+              "address": "0x8002cf80",
+              "name": "zz_002cf80_"
+            },
+            {
+              "address": "0x8002d198",
+              "name": "zz_002d198_"
+            },
+            {
+              "address": "0x8002d35c",
+              "name": "zz_002d35c_"
+            },
+            {
+              "address": "0x8002d58c",
+              "name": "zz_002d58c_"
+            },
+            {
+              "address": "0x8002d7c4",
+              "name": "collision_hit_pair_pass_active_vs_borgs"
+            },
+            {
+              "address": "0x8002db58",
+              "name": "collision_hit_pair_pass_active_vs_secondary"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803c4e84",
+            "DAT_803b06a8",
+            "DAT_8043612c",
+            "DAT_80436134",
+            "DAT_803b068c",
+            "PTR_DAT_80433934",
+            "DAT_80436154",
+            "DAT_803b069c",
+            "DAT_803b0690",
+            "DAT_803b0694",
+            "DAT_803b0698",
+            "DAT_80436128",
+            "DAT_8043614c",
+            "FLOAT_80436f68",
+            "FLOAT_80436f6c",
+            "DAT_80436144",
+            "DAT_8043613c",
+            "DAT_803b0644",
+            "DAT_803b0638",
+            "DAT_803b0708"
+          ],
+          "globalAccesses": [
+            "DAT_803c4e84",
+            "DAT_803b06a8",
+            "DAT_8043612c",
+            "DAT_80436134",
+            "DAT_803b068c",
+            "PTR_DAT_80433934 + 0x118",
+            "DAT_80436154",
+            "DAT_803b069c",
+            "DAT_803b0690",
+            "PTR_DAT_80433934 + 0x154",
+            "DAT_803b0694",
+            "PTR_DAT_80433934 + 400",
+            "DAT_803b0698",
+            "PTR_DAT_80433934 + 0x1cc",
+            "DAT_80436128",
+            "DAT_8043614c",
+            "FLOAT_80436f68",
+            "FLOAT_80436f6c",
+            "DAT_80436144",
+            "DAT_8043613c"
+          ],
+          "constants": [
+            "0x1e00",
+            "44",
+            "0x3e4",
+            "0x88",
+            "2000",
+            "0x7d1",
+            "0x8002c978",
+            "0x8002c970",
+            "0x8002c968",
+            "0x8002bb34",
+            "0x8002bb2c",
+            "0x8002bb24",
+            "7",
+            "0x118",
+            "0",
+            "0x154",
+            "400",
+            "0x1cc",
+            "1",
+            "0x1c6",
+            "0x436",
+            "0x4fc",
+            "0x4f4",
+            "0x4f8",
+            "0x4f5",
+            "0x4fe",
+            "0x4f6",
+            "0x4fa",
+            "0x4f7",
+            "0x6fd"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "challenge-menu-flow",
+            "force-setup",
+            "battle-initialization",
+            "damage",
+            "knockback-targeting",
+            "movement-physics",
+            "stage-load-collision"
+          ],
+          "relatedWebModules": [
+            "apps/game/src/main.ts",
+            "apps/game/src/ui/screens",
+            "packages/missions/src/challenge.ts",
+            "packages/combat/src/battle.ts",
+            "apps/game/src/ui/screens/SelectForce.ts",
+            "apps/game/src/sim/adapter.ts",
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts",
+            "packages/formats/src/hit-bin.ts"
+          ]
+        },
+        {
+          "address": "0x8002d7c4",
+          "currentFunctionName": "collision_hit_pair_pass_active_vs_borgs",
+          "inferredName": "collision_hit_pair_pass_active_vs_borgs",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7026",
+          "callers": [
+            {
+              "address": "0x8002bb14",
+              "name": "battle_frame_target_action_dispatch"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8002e2a8",
+              "name": "resolve_hitbox_target_effects_and_damage"
+            },
+            {
+              "address": "0x8002fd7c",
+              "name": "zz_002fd7c_"
+            },
+            {
+              "address": "0x80030348",
+              "name": "zz_0030348_"
+            },
+            {
+              "address": "0x80030490",
+              "name": "zz_0030490_"
+            },
+            {
+              "address": "0x80039f6c",
+              "name": "zz_0039f6c_"
+            },
+            {
+              "address": "0x8020ba54",
+              "name": "gnt4_PSVECAdd_bl"
+            },
+            {
+              "address": "0x8020ba78",
+              "name": "gnt4_PSVECSubtract_bl"
+            },
+            {
+              "address": "0x8020ba9c",
+              "name": "gnt4_PSQUATScale_bl"
+            },
+            {
+              "address": "0x8020bafc",
+              "name": "gnt4_PSVECSquareMag_bl"
+            },
+            {
+              "address": "0x8020bc88",
+              "name": "gnt4_PSVECSquareDistance_bl"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803c477c",
+            "DAT_80436250",
+            "FLOAT_80436f98",
+            "DAT_803c2f7c",
+            "DAT_80436248",
+            "DAT_803b0364",
+            "DAT_803b04d0",
+            "DAT_803b0368",
+            "DAT_803b0374",
+            "DAT_803b0504",
+            "DAT_803b0720",
+            "DAT_803b0724",
+            "DAT_803b0728",
+            "FLOAT_80436f68",
+            "FLOAT_80436f7c"
+          ],
+          "globalAccesses": [
+            "DAT_803c477c",
+            "DAT_80436250",
+            "FLOAT_80436f98",
+            "DAT_803c2f7c",
+            "DAT_80436248",
+            "DAT_803b0364",
+            "DAT_803b04d0",
+            "DAT_803b0368",
+            "DAT_803b0374",
+            "DAT_803b0504",
+            "DAT_803b0720",
+            "DAT_803b0724",
+            "DAT_803b0728",
+            "FLOAT_80436f68",
+            "FLOAT_80436f7c"
+          ],
+          "constants": [
+            "0x8002db3c",
+            "0x8002d7d4",
+            "3",
+            "0",
+            "1",
+            "0x20",
+            "0x2c",
+            "0x11",
+            "0x18",
+            "0x10",
+            "0x800",
+            "0x58",
+            "2",
+            "0x28",
+            "0x4000",
+            "0x2000",
+            "0x40",
+            "0x24",
+            "0x83",
+            "0x88",
+            "0x1db",
+            "1000",
+            "0x1e4",
+            "0x12",
+            "0x54",
+            "0x803b04cc",
+            "0x2d",
+            "0x98",
+            "100",
+            "0x100"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "damage",
+            "knockback-targeting",
+            "movement-physics",
+            "stage-load-collision"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts",
+            "apps/game/src/sim/adapter.ts",
+            "apps/game/src/main.ts",
+            "packages/formats/src/hit-bin.ts"
+          ]
+        },
+        {
+          "address": "0x8002db58",
+          "currentFunctionName": "collision_hit_pair_pass_active_vs_secondary",
+          "inferredName": "collision_hit_pair_pass_active_vs_secondary",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7168",
+          "callers": [
+            {
+              "address": "0x8002bb14",
+              "name": "battle_frame_target_action_dispatch"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8002e2a8",
+              "name": "resolve_hitbox_target_effects_and_damage"
+            },
+            {
+              "address": "0x8002fd7c",
+              "name": "zz_002fd7c_"
+            },
+            {
+              "address": "0x80030348",
+              "name": "zz_0030348_"
+            },
+            {
+              "address": "0x80030490",
+              "name": "zz_0030490_"
+            },
+            {
+              "address": "0x80039f6c",
+              "name": "zz_0039f6c_"
+            },
+            {
+              "address": "0x8020ba54",
+              "name": "gnt4_PSVECAdd_bl"
+            },
+            {
+              "address": "0x8020ba78",
+              "name": "gnt4_PSVECSubtract_bl"
+            },
+            {
+              "address": "0x8020ba9c",
+              "name": "gnt4_PSQUATScale_bl"
+            },
+            {
+              "address": "0x8020bafc",
+              "name": "gnt4_PSVECSquareMag_bl"
+            },
+            {
+              "address": "0x8020bc88",
+              "name": "gnt4_PSVECSquareDistance_bl"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803c477c",
+            "DAT_80436250",
+            "FLOAT_80436f98",
+            "DAT_803c417c",
+            "DAT_8043624e",
+            "DAT_803b0364",
+            "DAT_803b04d0",
+            "DAT_803b0368",
+            "DAT_803b0374",
+            "DAT_803b0504",
+            "DAT_803b0720",
+            "DAT_803b0724",
+            "DAT_803b0728",
+            "FLOAT_80436f68",
+            "FLOAT_80436f7c"
+          ],
+          "globalAccesses": [
+            "DAT_803c477c",
+            "DAT_80436250",
+            "FLOAT_80436f98",
+            "DAT_803c417c",
+            "DAT_8043624e",
+            "DAT_803b0364",
+            "DAT_803b04d0",
+            "DAT_803b0368",
+            "DAT_803b0374",
+            "DAT_803b0504",
+            "DAT_803b0720",
+            "DAT_803b0724",
+            "DAT_803b0728",
+            "FLOAT_80436f68",
+            "FLOAT_80436f7c"
+          ],
+          "constants": [
+            "0x8002deec",
+            "0x8002db68",
+            "3",
+            "0",
+            "1",
+            "0x2c",
+            "0x11",
+            "0x18",
+            "0x58",
+            "2",
+            "0x10",
+            "0x28",
+            "0x800",
+            "0x12",
+            "0x1000",
+            "0x2000",
+            "0x4000",
+            "0x20",
+            "0x1da",
+            "0x24",
+            "0x83",
+            "0x88",
+            "0x1db",
+            "1000",
+            "0x1e4",
+            "0x54",
+            "0x803b04cc",
+            "0x2d",
+            "0x3c0",
+            "0x98"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "damage",
+            "knockback-targeting",
+            "movement-physics",
+            "stage-load-collision"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts",
+            "apps/game/src/sim/adapter.ts",
+            "apps/game/src/main.ts",
+            "packages/formats/src/hit-bin.ts"
+          ]
+        },
+        {
+          "address": "0x8002df08",
+          "currentFunctionName": "collision_hit_pair_pass_object_lists",
+          "inferredName": "collision_hit_pair_pass_object_lists",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7310",
+          "callers": [
+            {
+              "address": "0x8002bb14",
+              "name": "battle_frame_target_action_dispatch"
+            }
+          ],
+          "callees": [
+            {
+              "address": "0x8002e2a8",
+              "name": "resolve_hitbox_target_effects_and_damage"
+            },
+            {
+              "address": "0x8002fd7c",
+              "name": "zz_002fd7c_"
+            },
+            {
+              "address": "0x80030348",
+              "name": "zz_0030348_"
+            },
+            {
+              "address": "0x80030490",
+              "name": "zz_0030490_"
+            },
+            {
+              "address": "0x80039f6c",
+              "name": "zz_0039f6c_"
+            },
+            {
+              "address": "0x8020ba54",
+              "name": "gnt4_PSVECAdd_bl"
+            },
+            {
+              "address": "0x8020ba78",
+              "name": "gnt4_PSVECSubtract_bl"
+            },
+            {
+              "address": "0x8020ba9c",
+              "name": "gnt4_PSQUATScale_bl"
+            },
+            {
+              "address": "0x8020bafc",
+              "name": "gnt4_PSVECSquareMag_bl"
+            },
+            {
+              "address": "0x8020bc88",
+              "name": "gnt4_PSVECSquareDistance_bl"
+            }
+          ],
+          "globalReferences": [
+            "DAT_803c177c",
+            "DAT_80436240",
+            "FLOAT_80436f98",
+            "DAT_803c117c",
+            "DAT_8043623e",
+            "DAT_803b0364",
+            "DAT_803b04d0",
+            "DAT_803b0368",
+            "DAT_803b0374",
+            "DAT_803b0504",
+            "DAT_803b0720",
+            "DAT_803b0724",
+            "DAT_803b0728",
+            "FLOAT_80436f68",
+            "FLOAT_80436f7c"
+          ],
+          "globalAccesses": [
+            "DAT_803c177c",
+            "DAT_80436240",
+            "FLOAT_80436f98",
+            "DAT_803c117c",
+            "DAT_8043623e",
+            "DAT_803b0364",
+            "DAT_803b04d0",
+            "DAT_803b0368",
+            "DAT_803b0374",
+            "DAT_803b0504",
+            "DAT_803b0720",
+            "DAT_803b0724",
+            "DAT_803b0728",
+            "FLOAT_80436f68",
+            "FLOAT_80436f7c"
+          ],
+          "constants": [
+            "0x8002e1ac",
+            "0x8002df18",
+            "3",
+            "0",
+            "1",
+            "0x58",
+            "2",
+            "0x2c",
+            "0x11",
+            "0x18",
+            "0x10",
+            "0x54",
+            "0x803b04cc",
+            "0x2d",
+            "0x98",
+            "0x20",
+            "100",
+            "0x100",
+            "0x0"
+          ],
+          "strings": [],
+          "assets": [],
+          "topics": [
+            "damage",
+            "knockback-targeting",
+            "movement-physics",
+            "stage-load-collision"
+          ],
+          "relatedWebModules": [
+            "packages/combat/src/combat.ts",
+            "packages/combat/src/constants.ts",
+            "packages/combat/src/stats.ts",
+            "packages/physics/src/index.ts",
+            "apps/game/src/sim/battleScene.ts",
+            "packages/combat/src/movement.ts",
+            "apps/game/src/sim/adapter.ts",
+            "apps/game/src/main.ts",
+            "packages/formats/src/hit-bin.ts"
+          ]
+        }
+      ],
       "topicFallbacks": [],
       "supportingArtifacts": [
         {
@@ -2184,17 +2757,17 @@
         {
           "file": "apps/game/src/sim/adapter.ts",
           "needle": "DEFAULT_ARENA_STAGE",
-          "sourceRef": "apps/game/src/sim/adapter.ts:23"
+          "sourceRef": "apps/game/src/sim/adapter.ts:6"
         },
         {
           "file": "apps/game/src/sim/adapter.ts",
           "needle": "normalized === \"challenge\"",
-          "sourceRef": "apps/game/src/sim/adapter.ts:35"
+          "sourceRef": null
         },
         {
           "file": "apps/game/src/main.ts",
           "needle": "async function loadStage",
-          "sourceRef": "apps/game/src/main.ts:559"
+          "sourceRef": "apps/game/src/main.ts:797"
         }
       ]
     },
@@ -2445,21 +3018,21 @@
         },
         {
           "address": "0x8002e2a8",
-          "currentFunctionName": "zz_002e2a8_",
-          "inferredName": "per_borg_update_damage_dispatch",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7457",
+          "currentFunctionName": "resolve_hitbox_target_effects_and_damage",
+          "inferredName": "resolve_hitbox_target_effects_and_damage",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7473",
           "callers": [
             {
               "address": "0x8002d7c4",
-              "name": "zz_002d7c4_"
+              "name": "collision_hit_pair_pass_active_vs_borgs"
             },
             {
               "address": "0x8002db58",
-              "name": "zz_002db58_"
+              "name": "collision_hit_pair_pass_active_vs_secondary"
             },
             {
               "address": "0x8002df08",
-              "name": "zz_002df08_"
+              "name": "collision_hit_pair_pass_object_lists"
             }
           ],
           "callees": [
@@ -2513,6 +3086,8 @@
             }
           ],
           "globalReferences": [
+            "DAT_803b06a8",
+            "DAT_8043612c",
             "FLOAT_80436fa0",
             "DOUBLE_80436fb0",
             "FLOAT_80436f7c",
@@ -2527,14 +3102,14 @@
             "DAT_803b06c0",
             "DAT_803b06c4",
             "DAT_803b06c8",
-            "DAT_803b06a8",
             "DAT_80436134",
             "DAT_8043613c",
-            "DAT_8043612c",
             "DAT_80436128",
             "DAT_802c7ca0"
           ],
           "globalAccesses": [
+            "DAT_803b06a8",
+            "DAT_8043612c",
             "FLOAT_80436fa0",
             "DOUBLE_80436fb0",
             "FLOAT_80436f7c",
@@ -2549,20 +3124,25 @@
             "DAT_803b06c0",
             "DAT_803b06c4",
             "DAT_803b06c8",
-            "DAT_803b06a8",
             "DAT_80436134",
             "DAT_8043613c",
-            "DAT_8043612c",
             "DAT_80436128",
             "DAT_802c7ca0"
           ],
           "constants": [
+            "0x2c",
+            "0x18",
+            "0x290",
+            "2000",
+            "0x7d1",
+            "15",
+            "0x418",
+            "0x42c",
+            "0x41c",
             "2",
             "0x20",
             "0x24",
-            "0x2c",
             "0x11",
-            "0x18",
             "0x28",
             "0",
             "0x83",
@@ -2579,14 +3159,7 @@
             "9",
             "0x10",
             "0x88",
-            "0x43300000",
-            "0xc4",
-            "0x6fc",
-            "0x80000000",
-            "0x12",
-            "0x40",
-            "0xb1",
-            "0xbc"
+            "0x43300000"
           ],
           "strings": [],
           "assets": [],
@@ -2861,8 +3434,8 @@
         },
         {
           "address": "0x8002bb14",
-          "currentFunctionName": "FUN_8002bb14",
-          "inferredName": "challenge-menu-flow_candidate_8002bb14",
+          "currentFunctionName": "battle_frame_target_action_dispatch",
+          "inferredName": "battle_frame_target_action_dispatch",
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
           "callers": [
             {
@@ -2885,7 +3458,7 @@
             },
             {
               "address": "0x8002cb20",
-              "name": "zz_002cb20_"
+              "name": "mutual_actor_contact_mask_update"
             },
             {
               "address": "0x8002cc78",
@@ -2917,14 +3490,18 @@
             },
             {
               "address": "0x8002d7c4",
-              "name": "zz_002d7c4_"
+              "name": "collision_hit_pair_pass_active_vs_borgs"
             },
             {
               "address": "0x8002db58",
-              "name": "zz_002db58_"
+              "name": "collision_hit_pair_pass_active_vs_secondary"
             }
           ],
           "globalReferences": [
+            "DAT_803c4e84",
+            "DAT_803b06a8",
+            "DAT_8043612c",
+            "DAT_80436134",
             "DAT_803b068c",
             "PTR_DAT_80433934",
             "DAT_80436154",
@@ -2933,20 +3510,20 @@
             "DAT_803b0694",
             "DAT_803b0698",
             "DAT_80436128",
-            "DAT_803c4e84",
             "DAT_8043614c",
             "FLOAT_80436f68",
             "FLOAT_80436f6c",
             "DAT_80436144",
-            "DAT_803b06a8",
             "DAT_8043613c",
-            "DAT_80436134",
             "DAT_803b0644",
-            "DAT_8043612c",
             "DAT_803b0638",
             "DAT_803b0708"
           ],
           "globalAccesses": [
+            "DAT_803c4e84",
+            "DAT_803b06a8",
+            "DAT_8043612c",
+            "DAT_80436134",
             "DAT_803b068c",
             "PTR_DAT_80433934 + 0x118",
             "DAT_80436154",
@@ -2958,17 +3535,19 @@
             "DAT_803b0698",
             "PTR_DAT_80433934 + 0x1cc",
             "DAT_80436128",
-            "DAT_803c4e84",
             "DAT_8043614c",
             "FLOAT_80436f68",
             "FLOAT_80436f6c",
             "DAT_80436144",
-            "DAT_803b06a8",
-            "DAT_8043613c",
-            "DAT_80436134",
-            "DAT_803b0644"
+            "DAT_8043613c"
           ],
           "constants": [
+            "0x1e00",
+            "44",
+            "0x3e4",
+            "0x88",
+            "2000",
+            "0x7d1",
             "0x8002c978",
             "0x8002c970",
             "0x8002c968",
@@ -2981,10 +3560,7 @@
             "0x154",
             "400",
             "0x1cc",
-            "0x7d1",
-            "2000",
             "1",
-            "0x3e4",
             "0x1c6",
             "0x436",
             "0x4fc",
@@ -2995,10 +3571,7 @@
             "0x4f6",
             "0x4fa",
             "0x4f7",
-            "0x6fd",
-            "0x70c",
-            "0x70d",
-            "0x7d4"
+            "0x6fd"
           ],
           "strings": [],
           "assets": [],
@@ -3008,7 +3581,8 @@
             "battle-initialization",
             "damage",
             "knockback-targeting",
-            "movement-physics"
+            "movement-physics",
+            "stage-load-collision"
           ],
           "relatedWebModules": [
             "apps/game/src/main.ts",
@@ -3022,7 +3596,8 @@
             "packages/combat/src/stats.ts",
             "packages/physics/src/index.ts",
             "apps/game/src/sim/battleScene.ts",
-            "packages/combat/src/movement.ts"
+            "packages/combat/src/movement.ts",
+            "packages/formats/src/hit-bin.ts"
           ]
         },
         {
@@ -3575,17 +4150,17 @@
         {
           "file": "packages/combat/src/battle.ts",
           "needle": "export function createBattle",
-          "sourceRef": "packages/combat/src/battle.ts:326"
+          "sourceRef": "packages/combat/src/battle.ts:492"
         },
         {
-          "file": "apps/game/src/sim/adapter.ts",
-          "needle": "convertBattleConfig",
-          "sourceRef": "apps/game/src/sim/adapter.ts:10"
+          "file": "packages/missions/src/combat-config.ts",
+          "needle": "toCombatBattleConfig",
+          "sourceRef": "packages/missions/src/combat-config.ts:47"
         },
         {
           "file": "apps/game/src/main.ts",
           "needle": "const battle = createBattle",
-          "sourceRef": "apps/game/src/main.ts:1028"
+          "sourceRef": "apps/game/src/main.ts:1228"
         }
       ]
     },
@@ -3601,7 +4176,7 @@
           "callers": [
             {
               "address": "0x8002e2a8",
-              "name": "zz_002e2a8_"
+              "name": "resolve_hitbox_target_effects_and_damage"
             }
           ],
           "callees": [],
@@ -3648,7 +4223,7 @@
           "callers": [
             {
               "address": "0x8002e2a8",
-              "name": "zz_002e2a8_"
+              "name": "resolve_hitbox_target_effects_and_damage"
             }
           ],
           "callees": [
@@ -3807,11 +4382,11 @@
           "address": "0x800300bc",
           "currentFunctionName": "zz_00300bc_",
           "inferredName": "compute_knockback_launch_direction",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:8515",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:8540",
           "callers": [
             {
               "address": "0x8002e2a8",
-              "name": "zz_002e2a8_"
+              "name": "resolve_hitbox_target_effects_and_damage"
             }
           ],
           "callees": [
@@ -3886,8 +4461,8 @@
       "topicFallbacks": [
         {
           "address": "0x8002bb14",
-          "currentFunctionName": "FUN_8002bb14",
-          "inferredName": "challenge-menu-flow_candidate_8002bb14",
+          "currentFunctionName": "battle_frame_target_action_dispatch",
+          "inferredName": "battle_frame_target_action_dispatch",
           "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
           "callers": [
             {
@@ -3910,7 +4485,7 @@
             },
             {
               "address": "0x8002cb20",
-              "name": "zz_002cb20_"
+              "name": "mutual_actor_contact_mask_update"
             },
             {
               "address": "0x8002cc78",
@@ -3942,14 +4517,18 @@
             },
             {
               "address": "0x8002d7c4",
-              "name": "zz_002d7c4_"
+              "name": "collision_hit_pair_pass_active_vs_borgs"
             },
             {
               "address": "0x8002db58",
-              "name": "zz_002db58_"
+              "name": "collision_hit_pair_pass_active_vs_secondary"
             }
           ],
           "globalReferences": [
+            "DAT_803c4e84",
+            "DAT_803b06a8",
+            "DAT_8043612c",
+            "DAT_80436134",
             "DAT_803b068c",
             "PTR_DAT_80433934",
             "DAT_80436154",
@@ -3958,20 +4537,20 @@
             "DAT_803b0694",
             "DAT_803b0698",
             "DAT_80436128",
-            "DAT_803c4e84",
             "DAT_8043614c",
             "FLOAT_80436f68",
             "FLOAT_80436f6c",
             "DAT_80436144",
-            "DAT_803b06a8",
             "DAT_8043613c",
-            "DAT_80436134",
             "DAT_803b0644",
-            "DAT_8043612c",
             "DAT_803b0638",
             "DAT_803b0708"
           ],
           "globalAccesses": [
+            "DAT_803c4e84",
+            "DAT_803b06a8",
+            "DAT_8043612c",
+            "DAT_80436134",
             "DAT_803b068c",
             "PTR_DAT_80433934 + 0x118",
             "DAT_80436154",
@@ -3983,17 +4562,19 @@
             "DAT_803b0698",
             "PTR_DAT_80433934 + 0x1cc",
             "DAT_80436128",
-            "DAT_803c4e84",
             "DAT_8043614c",
             "FLOAT_80436f68",
             "FLOAT_80436f6c",
             "DAT_80436144",
-            "DAT_803b06a8",
-            "DAT_8043613c",
-            "DAT_80436134",
-            "DAT_803b0644"
+            "DAT_8043613c"
           ],
           "constants": [
+            "0x1e00",
+            "44",
+            "0x3e4",
+            "0x88",
+            "2000",
+            "0x7d1",
             "0x8002c978",
             "0x8002c970",
             "0x8002c968",
@@ -4006,10 +4587,7 @@
             "0x154",
             "400",
             "0x1cc",
-            "0x7d1",
-            "2000",
             "1",
-            "0x3e4",
             "0x1c6",
             "0x436",
             "0x4fc",
@@ -4020,10 +4598,7 @@
             "0x4f6",
             "0x4fa",
             "0x4f7",
-            "0x6fd",
-            "0x70c",
-            "0x70d",
-            "0x7d4"
+            "0x6fd"
           ],
           "strings": [],
           "assets": [],
@@ -4033,7 +4608,8 @@
             "battle-initialization",
             "damage",
             "knockback-targeting",
-            "movement-physics"
+            "movement-physics",
+            "stage-load-collision"
           ],
           "relatedWebModules": [
             "apps/game/src/main.ts",
@@ -4047,7 +4623,8 @@
             "packages/combat/src/stats.ts",
             "packages/physics/src/index.ts",
             "apps/game/src/sim/battleScene.ts",
-            "packages/combat/src/movement.ts"
+            "packages/combat/src/movement.ts",
+            "packages/formats/src/hit-bin.ts"
           ]
         },
         {
@@ -4158,21 +4735,21 @@
         },
         {
           "address": "0x8002e2a8",
-          "currentFunctionName": "zz_002e2a8_",
-          "inferredName": "per_borg_update_damage_dispatch",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7457",
+          "currentFunctionName": "resolve_hitbox_target_effects_and_damage",
+          "inferredName": "resolve_hitbox_target_effects_and_damage",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:7473",
           "callers": [
             {
               "address": "0x8002d7c4",
-              "name": "zz_002d7c4_"
+              "name": "collision_hit_pair_pass_active_vs_borgs"
             },
             {
               "address": "0x8002db58",
-              "name": "zz_002db58_"
+              "name": "collision_hit_pair_pass_active_vs_secondary"
             },
             {
               "address": "0x8002df08",
-              "name": "zz_002df08_"
+              "name": "collision_hit_pair_pass_object_lists"
             }
           ],
           "callees": [
@@ -4226,6 +4803,8 @@
             }
           ],
           "globalReferences": [
+            "DAT_803b06a8",
+            "DAT_8043612c",
             "FLOAT_80436fa0",
             "DOUBLE_80436fb0",
             "FLOAT_80436f7c",
@@ -4240,14 +4819,14 @@
             "DAT_803b06c0",
             "DAT_803b06c4",
             "DAT_803b06c8",
-            "DAT_803b06a8",
             "DAT_80436134",
             "DAT_8043613c",
-            "DAT_8043612c",
             "DAT_80436128",
             "DAT_802c7ca0"
           ],
           "globalAccesses": [
+            "DAT_803b06a8",
+            "DAT_8043612c",
             "FLOAT_80436fa0",
             "DOUBLE_80436fb0",
             "FLOAT_80436f7c",
@@ -4262,20 +4841,25 @@
             "DAT_803b06c0",
             "DAT_803b06c4",
             "DAT_803b06c8",
-            "DAT_803b06a8",
             "DAT_80436134",
             "DAT_8043613c",
-            "DAT_8043612c",
             "DAT_80436128",
             "DAT_802c7ca0"
           ],
           "constants": [
+            "0x2c",
+            "0x18",
+            "0x290",
+            "2000",
+            "0x7d1",
+            "15",
+            "0x418",
+            "0x42c",
+            "0x41c",
             "2",
             "0x20",
             "0x24",
-            "0x2c",
             "0x11",
-            "0x18",
             "0x28",
             "0",
             "0x83",
@@ -4292,14 +4876,7 @@
             "9",
             "0x10",
             "0x88",
-            "0x43300000",
-            "0xc4",
-            "0x6fc",
-            "0x80000000",
-            "0x12",
-            "0x40",
-            "0xb1",
-            "0xbc"
+            "0x43300000"
           ],
           "strings": [],
           "assets": [],
@@ -5405,7 +5982,7 @@
           "address": "0x8006d144",
           "currentFunctionName": "zz_006d144_",
           "inferredName": "force-setup_candidate_8006d144",
-          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:2475",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:2495",
           "callers": [
             {
               "address": "0x800707b8",
@@ -5514,7 +6091,7 @@
         {
           "file": "packages/combat/src/combat.ts",
           "needle": "function applyHit",
-          "sourceRef": "packages/combat/src/combat.ts:114"
+          "sourceRef": "packages/combat/src/combat.ts:209"
         },
         {
           "file": "packages/combat/src/constants.ts",
@@ -5638,12 +6215,12 @@
         {
           "file": "packages/missions/src/challenge.ts",
           "needle": "next(result: BattleResults)",
-          "sourceRef": "packages/missions/src/challenge.ts:111"
+          "sourceRef": "packages/missions/src/challenge.ts:131"
         },
         {
           "file": "apps/game/src/main.ts",
           "needle": "function advanceRun",
-          "sourceRef": "apps/game/src/main.ts:1269"
+          "sourceRef": "apps/game/src/main.ts:1502"
         },
         {
           "file": "apps/game/src/ui/screens/Results.ts",

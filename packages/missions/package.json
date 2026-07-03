@@ -9,5 +9,8 @@
     "build": "tsc -b",
     "typecheck": "tsc -b --noEmit"
   },
+  "dependencies": {
+    "@gf/combat": "workspace:*"
+  },
   "module": "src/index.ts"
 }

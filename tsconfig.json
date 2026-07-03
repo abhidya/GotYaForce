@@ -14,7 +14,6 @@
     { "path": "packages/render" },
     { "path": "packages/save" },
     { "path": "packages/test-fixtures" },
-    { "path": "packages/tools" },
-    { "path": "packages/ui" }
+    { "path": "packages/tools" }
   ]
 }

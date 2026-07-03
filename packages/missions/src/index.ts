@@ -15,6 +15,16 @@ export type {
   BattleConfig,
   BattleMeta,
 } from "./battle-config.js";
+export {
+  playerIdFor,
+  stageIdForArena,
+  stageIdForBattleConfig,
+  toCombatBattleConfig,
+} from "./combat-config.js";
+export type {
+  CombatBattleConfigOptions,
+  CombatStageCatalog,
+} from "./combat-config.js";
 
 // --- Borg roster + enemy-force assembler ---
 export {

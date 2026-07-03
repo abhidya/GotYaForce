@@ -85,7 +85,7 @@ const flowSteps = [
     ],
     currentWebEvidence: refsFor([
       ["packages/combat/src/battle.ts", "export function createBattle"],
-      ["apps/game/src/sim/adapter.ts", "convertBattleConfig"],
+      ["packages/missions/src/combat-config.ts", "toCombatBattleConfig"],
       ["apps/game/src/main.ts", "const battle = createBattle"],
     ]),
   },

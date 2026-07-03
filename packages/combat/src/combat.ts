@@ -8,6 +8,7 @@
 import {
   add,
   distXZ,
+  floorSurfaceYAt,
   forwardFromYaw,
   knockbackDirectionFromPositions,
   normalize,
@@ -40,7 +41,6 @@ import type {
   ProjectileVisualKind,
   RectStageBounds,
   StageCollision,
-  StageCollisionTriangle,
 } from "./types.js";
 import projectileVisualFamilies from "./data/projectileVisualFamilies.json" with { type: "json" };
 
@@ -789,65 +789,3 @@ function projectileInPlayArea(projectile: Projectile, ctx: ProjectileContext): b
   return floorSurfaceYAt(ctx.collision, pos.x, pos.z, pos.y) != null;
 }
 
-function floorSurfaceYAt(
-  collision: StageCollision,
-  x: number,
-  z: number,
-  maxSurfaceY: number,
-): number | null {
-  const primary = candidateTriangles(collision, x, z);
-  const primaryBest = bestFloorFromCandidates(primary, x, z, maxSurfaceY);
-  if (primaryBest != null || primary.length === collision.triangles.length) return primaryBest;
-  return bestFloorFromCandidates(collision.triangles, x, z, maxSurfaceY);
-}
-
-function candidateTriangles(collision: StageCollision, x: number, z: number): StageCollisionTriangle[] {
-  const grid = collision.grid;
-  if (!grid) return collision.triangles;
-  const cx = Math.floor((x - grid.origin.x) / grid.cellSize.x);
-  const cz = Math.floor((z - grid.origin.z) / grid.cellSize.z);
-  if (cx < 0 || cz < 0 || cx >= grid.gridCells.x || cz >= grid.gridCells.z) return [];
-  const cell = grid.cells[cz * grid.gridCells.x + cx];
-  if (!cell || cell.triangleIndices.length === 0) return [];
-  const out: StageCollisionTriangle[] = [];
-  for (const index of cell.triangleIndices) {
-    const tri = collision.triangles[index];
-    if (tri) out.push(tri);
-  }
-  return out;
-}
-
-function bestFloorFromCandidates(
-  triangles: readonly StageCollisionTriangle[],
-  x: number,
-  z: number,
-  maxSurfaceY: number,
-): number | null {
-  let best: number | null = null;
-  for (const tri of triangles) {
-    if (tri.marker !== 0xcccccccc) continue;
-    if (!isFiniteVec(tri.normal)) continue;
-    if (tri.normal.y < 0.5) continue;
-    if (!tri.vertices.every(isFiniteVec)) continue;
-    if (x < tri.bounds2d.minX || x > tri.bounds2d.maxX || z < tri.bounds2d.minZ || z > tri.bounds2d.maxZ) continue;
-    const y = yAtTriangleXZ(tri, x, z);
-    if (y == null || y > maxSurfaceY) continue;
-    if (best == null || y > best) best = y;
-  }
-  return best;
-}
-
-function yAtTriangleXZ(tri: StageCollisionTriangle, x: number, z: number): number | null {
-  const [a, b, c] = tri.vertices;
-  const denom = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
-  if (Math.abs(denom) < 1e-5) return null;
-  const wa = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denom;
-  const wb = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denom;
-  const wc = 1 - wa - wb;
-  if (wa < -1e-4 || wb < -1e-4 || wc < -1e-4) return null;
-  return wa * a.y + wb * b.y + wc * c.y;
-}
-
-function isFiniteVec(v: Vec3): boolean {
-  return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
-}

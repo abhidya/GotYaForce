@@ -18,11 +18,19 @@
 
 import * as THREE from "three";
 import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader.js";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
 import borgs from "../../../packages/assets/data/borgs.json";
 
+import {
+  createPublicAssetCatalog,
+  readBorgRoster,
+  type BorgAssetEntry,
+  type ModelManifestEntry,
+  type StageManifest,
+} from "@gf/assets";
+import { createScreenHost, startFixedStepLoop, startRenderLoop } from "@gf/core";
+import { createThreeViewport } from "@gf/render";
 import {
   setBorgStats,
   actionProfileForProfile,
@@ -30,19 +38,22 @@ import {
   createBattle,
   DEFAULT_BOUNDS,
   emptyInput,
+  stageCollisionFromHitGrids,
   type Battle,
   type BorgStats,
   type BorgRuntime,
   type PlayerInput,
   type RectStageBounds,
   type StageCollision,
-  type StageCollisionTriangle,
 } from "@gf/combat";
 import { createAudioManager, type GotchaAudioManager } from "@gf/audio";
 import { hitBin } from "@gf/formats";
 import {
   createChallengeRun,
   computeResults,
+  playerIdFor,
+  stageIdForBattleConfig,
+  toCombatBattleConfig,
   type ChallengeRun,
   type BattleConfig as MissionBattleConfig,
   type BattleOutcome,
@@ -68,36 +79,26 @@ import {
 } from "./ui/index.js";
 
 import {
-  convertBattleConfig,
+  EXPORTED_STAGE_CATALOG_ADAPTER,
   inputFromKeys,
-  playerIdFor,
   DEFAULT_ARENA_STAGE,
   EXPORTED_STAGE_CATALOG,
   isExportedStageId,
-  stageIdForBattleConfig,
 } from "./sim/adapter.js";
 import { BattleScene, type AnimSlot } from "./sim/battleScene.js";
 import { BattleCamera } from "./sim/camera.js";
+import {
+  battleAudioEvents,
+  battleHudState,
+  snapshotBattleAudio,
+  type BattleEventCue,
+} from "./sim/presentation.js";
 
 // ------------------------------------------------------------------------------------------
 // Data
 // ------------------------------------------------------------------------------------------
 
-type BorgEntry = {
-  id: string;
-  name: string;
-  energy: number;
-  speed?: number;
-  tribe?: string;
-  type?: string;
-  hp?: string;
-  defense?: number;
-  shot?: number;
-  attack?: number;
-  jump?: string;
-};
-
-const allBorgs = (borgs as { borgs: BorgEntry[] }).borgs.filter((b) => b.id && b.name);
+const allBorgs = readBorgRoster(borgs as { borgs: BorgAssetEntry[] });
 
 // Register the per-borg stat table with the sim once.
 setBorgStats(allBorgs as unknown as BorgStats[]);
@@ -158,8 +159,6 @@ const DISABLE_COMBAT_SFX = new URLSearchParams(window.location.search).has("noCo
 //   se00_04 0.64s short tonal burst       -> shot / lock-on switch / menu back-edit
 // jump and land stay deliberately unmapped: no plausible short jump/land sample exists in the
 // exported set, and reusing an impact cue there would reintroduce the "wrong asset" bug class.
-type BattleEventCue = AnimSlot | "lockon" | "charge_release" | "alert";
-
 const COMBAT_SFX: Partial<Record<BattleEventCue, string>> = {
   melee: "se00_03",
   melee_alt: "se00_03",
@@ -270,16 +269,6 @@ const DEFAULT_RENDER_STATE = {
   lightPosition: new THREE.Vector3(-385.512512, 956.0448, -377.986603),
 };
 
-type StageManifest = {
-  id: string;
-  models?: Array<{ path: string; bytes?: number }>;
-  collision?: Array<{ path: string; bytes?: number }>;
-  visual?: {
-    daeCount?: number;
-    expectedDaeIndices?: number[];
-  };
-};
-
 type StageResources = {
   bounds: RectStageBounds | undefined;
   collision: StageCollision | undefined;
@@ -303,37 +292,28 @@ type StageRenderState = {
   lights?: ExtractedStageLight[] | LegacyStageLights;
 };
 
-type ModelManifestEntry = { id: string; name: string; dae: string };
-
 const uiElement = document.getElementById("ui");
 const canvas = document.getElementById("app") as HTMLCanvasElement;
 if (!uiElement) throw new Error("Missing #ui");
 const ui = uiElement;
+const screenHost = createScreenHost(ui);
 ui.style.pointerEvents = "auto"; // the UI component library uses real buttons.
 const ENABLE_BATTLE_DEBUG_DATASET = new URLSearchParams(window.location.search).has("debugBattle");
 
 // preserveDrawingBuffer lets us snapshot the canvas via toDataURL for headless
 // verification (the preview tab is backgrounded so rAF render is throttled).
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(DEFAULT_RENDER_STATE.fogColor);
+const viewport = createThreeViewport(canvas, {
+  preserveDrawingBuffer: true,
+  clearColor: DEFAULT_RENDER_STATE.fogColor,
+  camera: {
+    fov: DEFAULT_RENDER_STATE.fov,
+    near: DEFAULT_RENDER_STATE.near,
+    far: DEFAULT_RENDER_STATE.far,
+    position: [950, 520, 1320],
+  },
+});
+const { scene, camera, controls } = viewport;
 scene.fog = new THREE.Fog(DEFAULT_RENDER_STATE.fogColor, DEFAULT_RENDER_STATE.fogNear, DEFAULT_RENDER_STATE.fogFar);
-
-const camera = new THREE.PerspectiveCamera(
-  DEFAULT_RENDER_STATE.fov,
-  window.innerWidth / window.innerHeight,
-  DEFAULT_RENDER_STATE.near,
-  DEFAULT_RENDER_STATE.far,
-);
-camera.position.set(950, 520, 1320);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.target.set(0, 80, 0);
 
 import {
   createStageLightingRig,
@@ -352,6 +332,7 @@ const battleRoot = new THREE.Group();
 scene.add(battleRoot);
 
 let modelManifest: ModelManifestEntry[] = [];
+const assetCatalog = createPublicAssetCatalog();
 
 // --- model + clip caches (reused by the BattleScene via the asset hooks) ---
 const sourceModels = new Map<string, Promise<THREE.Object3D | null>>();
@@ -818,7 +799,7 @@ async function loadStageCollision(stageId: string, manifest: StageManifest): Pro
   if (collisionFiles.length === 0) {
     const fallbackId = baseCollisionStageId(stageId);
     if (fallbackId && fallbackId !== stageId && isExportedStageId(fallbackId)) {
-      const fallbackManifest = await fetch(`/stages/${fallbackId}/manifest.json`).then((r) => r.json() as Promise<StageManifest>);
+      const fallbackManifest = await assetCatalog.loadStageManifest(fallbackId);
       return loadStageCollision(fallbackId, fallbackManifest);
     }
     return { bounds: undefined, collision: undefined };
@@ -827,7 +808,7 @@ async function loadStageCollision(stageId: string, manifest: StageManifest): Pro
   try {
     const parsed = [];
     for (const file of collisionFiles) {
-      const response = await fetch(`/stages/${stageId}/${file.path}`);
+      const response = await fetch(assetCatalog.stageAssetUrl(stageId, file.path));
       if (!response.ok) continue;
       parsed.push({
         path: file.path,
@@ -835,57 +816,8 @@ async function loadStageCollision(stageId: string, manifest: StageManifest): Pro
         grid: hitBin.parseStageHitGrid(await response.arrayBuffer()),
       });
     }
-    const first = parsed[0]?.grid;
-    if (!first) return { bounds: undefined, collision: undefined };
-
-    const triangles: StageCollisionTriangle[] = [];
-    const mergedCells = Array.from({ length: first.header.gridCells.total }, (_, index) => ({
-      index,
-      triangleIndices: [] as number[],
-    }));
-    let canMergeCells = true;
-
-    for (const entry of parsed) {
-      const base = triangles.length;
-      for (const tri of entry.grid.triangles) {
-        triangles.push({
-          index: triangles.length,
-          layerIndex: entry.layerIndex,
-          marker: tri.marker,
-          vertices: tri.vertices,
-          normal: tri.normal,
-          planeD: tri.planeD,
-          bounds2d: tri.bounds2d,
-        });
-      }
-
-      if (!sameHitGridHeader(first, entry.grid)) {
-        canMergeCells = false;
-        continue;
-      }
-      for (const cell of entry.grid.cells) {
-        const target = mergedCells[cell.index];
-        if (!target) continue;
-        target.triangleIndices.push(...cell.recordIndices.map((recordIndex) => base + recordIndex));
-      }
-    }
-
-    return {
-      bounds: hitBin.stageBoundsFromHitGrid(first),
-      collision: {
-        triangles,
-        ...(canMergeCells
-          ? {
-              grid: {
-                origin: first.header.origin,
-                cellSize: first.header.cellSize,
-                gridCells: first.header.gridCells,
-                cells: mergedCells,
-              },
-            }
-          : {}),
-      },
-    };
+    const resources = stageCollisionFromHitGrids(parsed);
+    return resources ?? { bounds: undefined, collision: undefined };
   } catch (error) {
     console.warn(`Failed to parse stage collision for ${stageId}`, error);
     return { bounds: undefined, collision: undefined };
@@ -907,31 +839,18 @@ function baseCollisionStageId(stageId: string): string | null {
   return `st${(byte & 0x1f).toString(16).padStart(2, "0")}`;
 }
 
-function sameHitGridHeader(a: ReturnType<typeof hitBin.parseStageHitGrid>, b: ReturnType<typeof hitBin.parseStageHitGrid>): boolean {
-  return (
-    a.header.cellSize.x === b.header.cellSize.x &&
-    a.header.cellSize.z === b.header.cellSize.z &&
-    a.header.gridCells.x === b.header.gridCells.x &&
-    a.header.gridCells.z === b.header.gridCells.z &&
-    a.header.origin.x === b.header.origin.x &&
-    a.header.origin.z === b.header.origin.z
-  );
-}
-
 async function loadStage(stageId: string): Promise<StageResources> {
   if (!isExportedStageId(stageId)) throw new Error(`Stage is not exported: ${stageId}`);
   if (loadedStageId === stageId) return loadedStageResources;
   stageRoot.clear();
   const [manifest, renderState] = await Promise.all([
-    fetch(`/stages/${stageId}/manifest.json`).then((r) => r.json() as Promise<StageManifest>),
-    fetch(`/stages/${stageId}/render-state.json`)
-      .then((r) => (r.ok ? (r.json() as Promise<StageRenderState>) : null))
-      .catch(() => null),
+    assetCatalog.loadStageManifest(stageId),
+    assetCatalog.loadStageRenderState<StageRenderState>(stageId),
   ]);
   applyStageRenderState(renderState);
   const resources = await loadStageCollision(stageId, manifest);
   const loader = new ColladaLoader();
-  const urls = stageModelPaths(manifest).map((path) => `/stages/${stageId}/${path}`);
+  const urls = stageModelPaths(manifest).map((path) => assetCatalog.stageAssetUrl(stageId, path));
   const results = await Promise.allSettled(urls.map((u) => loader.loadAsync(u)));
   let loaded = 0;
   for (const result of results) {
@@ -957,9 +876,7 @@ async function loadStage(stageId: string): Promise<StageResources> {
 }
 
 async function loadInitialAssets(): Promise<void> {
-  const manifest = await fetch("/models/library/manifest.json")
-    .then((r) => r.json() as Promise<ModelManifestEntry[]>)
-    .catch(() => [] as ModelManifestEntry[]);
+  const manifest = await assetCatalog.loadModelManifest();
   modelManifest = manifest;
   for (const e of manifest) LIBRARY_IDS.add(e.id);
   LIBRARY_IDS.add(DEFAULT_LEAD);
@@ -1099,13 +1016,8 @@ const flow: Flow = {
   run: null,
 };
 
-// Active screen-component handle (so we can destroy it on transition).
-let activeHandle: { destroy(): void } | null = null;
-
 function mountScreen(build: (root: HTMLElement) => { destroy(): void }): void {
-  activeHandle?.destroy();
-  ui.replaceChildren();
-  activeHandle = build(ui);
+  screenHost.mount(build);
 }
 
 function showMenu(initial: MainMenuMode = "challenge"): void {
@@ -1295,24 +1207,6 @@ interface BattleSession {
   resolved: boolean;
 }
 
-interface BattleAudioBorgSnapshot {
-  hp: number;
-  alive: boolean;
-  state: BorgRuntime["state"];
-  anim: string;
-  lockTarget: string | null;
-  allyLockTarget: string | null;
-  /** Hold-to-charge accumulator (cooldowns["chargeFrames"]); >0 means a charge is being held. */
-  chargeFrames: number;
-}
-
-interface BattleAudioSnapshot {
-  borgs: Map<string, BattleAudioBorgSnapshot>;
-  localActiveUid: string | null;
-  /** Mirrors the HUD low-energy alert condition (updateHud) so the audio edge matches the visual. */
-  allyAlert: boolean;
-}
-
 let session: BattleSession | null = null;
 let simAccumulator = 0;
 const SIM_DT = 1 / 60;
@@ -1320,15 +1214,17 @@ const SIM_DT = 1 / 60;
 async function enterBattle(config: MissionBattleConfig): Promise<void> {
   flow.screen = "loading";
   queueBgm(AUDIO_CUES.battleBgm);
-  activeHandle?.destroy();
-  activeHandle = null;
-  ui.replaceChildren();
+  screenHost.clear();
 
-  const stageId = stageIdForBattleConfig(config);
+  const stageId = stageIdForBattleConfig(config, EXPORTED_STAGE_CATALOG_ADAPTER);
   const stageResources = await loadStage(stageId);
   const stageBounds = stageResources.bounds ?? fallbackStageBounds;
 
-  const combatCfg = convertBattleConfig(config, stageId, stageBounds, stageResources.collision);
+  const combatCfg = toCombatBattleConfig(config, {
+    stageId,
+    bounds: stageBounds,
+    ...(stageResources.collision ? { collision: stageResources.collision } : {}),
+  });
   const battle = createBattle(combatCfg);
 
   const localPlayerId = playerIdFor(0);
@@ -1399,112 +1295,19 @@ function localFocusBorg(): BorgRuntime | null {
 
 function updateHud(): void {
   if (!session) return;
-  const st = session.battle.state;
   const focus = localFocusBorg();
   const profile = focus ? BORG_PROFILES.get(focus.borgId) ?? null : null;
   const actionProfile = profile ? actionProfileForProfile(profile) : null;
-  const ammoMax = actionProfile?.shot?.ammoMax ?? 0;
-  const specialCooldownMax = actionProfile?.special.cooldown ?? 90;
-  session.hud.update({
-    allyEnergy: st.energy[0] ?? 0,
-    allyMax: session.allyMax,
-    enemyEnergy: st.energy[1] ?? 0,
-    enemyMax: session.enemyMax,
-    hp: focus?.hp ?? 0,
-    maxHp: focus?.maxHp ?? 1,
-    ammo: focus?.ammo ?? 0,
-    reload01: focus && ammoMax > 0 ? clamp01((focus.ammo ?? 0) / ammoMax) : 0,
-    cooldown01: focus
-      ? focus.cooldowns?.["special"]
-        ? clamp01(1 - focus.cooldowns["special"] / specialCooldownMax)
-        : 1
-      : 1,
-    borgId: focus?.borgId ?? DEFAULT_LEAD,
-    lockOn: Boolean(focus?.lockTarget),
-    timeRemainingFrames: st.timeRemainingFrames,
-    alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= session.allyMax * 0.25,
-  });
-}
-
-function snapshotBattleAudio(battle: Battle, localPlayerId: string): BattleAudioSnapshot {
-  const borgs = new Map<string, BattleAudioBorgSnapshot>();
-  for (const b of battle.state.borgs) {
-    borgs.set(b.uid, {
-      hp: b.hp,
-      alive: b.alive,
-      state: b.state,
-      anim: b.anim,
-      lockTarget: b.lockTarget,
-      allyLockTarget: b.allyLockTarget,
-      chargeFrames: b.cooldowns?.["chargeFrames"] ?? 0,
-    });
-  }
-  const allyEnergy = battle.state.energy[0] ?? 0;
-  return {
-    borgs,
-    localActiveUid: battle.state.activeUidByPlayer[localPlayerId] ?? null,
-    allyAlert: session ? allyEnergy > 0 && allyEnergy <= session.allyMax * 0.25 : false,
-  };
-}
-
-function emitBattleAudioEdges(before: BattleAudioSnapshot, after: BattleAudioSnapshot): void {
-  const emitted = new Set<BattleEventCue>();
-  const emit = (cue: BattleEventCue): void => {
-    if (emitted.has(cue)) return;
-    emitted.add(cue);
-    playBattleEventSfx(cue);
-  };
-
-  const localNext = after.localActiveUid ? after.borgs.get(after.localActiveUid) ?? null : null;
-  const localPrev = after.localActiveUid ? before.borgs.get(after.localActiveUid) ?? null : null;
-  if (localNext && localPrev) {
-    if (localNext.state === "death" && localPrev.state !== "death") emit("death");
-    else if (localNext.state === "down" && localPrev.state !== "down") emit("down");
-    else if (localNext.state === "hit" && (localPrev.state !== "hit" || localNext.hp < localPrev.hp)) emit("hit");
-    else if (localNext.state === "special" && localPrev.state !== "special") emit("special");
-    else if (
-      localNext.state === "attack" &&
-      localNext.anim === "shoot" &&
-      (localPrev.state !== "attack" || localPrev.anim !== "shoot")
-    ) {
-      // A shot fired on the same step the charge accumulator drains is a charge-shot release
-      // (combat.ts fires chargeable shots on attack RELEASE after accumulating chargeFrames).
-      emit(localPrev.chargeFrames > 0 && localNext.chargeFrames === 0 ? "charge_release" : "shoot");
-    } else if (
-      localNext.state === "attack" &&
-      localNext.anim === "melee" &&
-      (localPrev.state !== "attack" || localPrev.anim !== "melee")
-    ) {
-      emit("melee");
-    } else if (localNext.hp < localPrev.hp) {
-      emit("hit");
-    }
-
-    // Lock-on switch beep: fires when the local borg acquires a (new) enemy lock target.
-    // Deliberately not fired on lock LOSS (target death already plays its own cue).
-    if (localNext.lockTarget && localNext.lockTarget !== localPrev.lockTarget) emit("lockon");
-  }
-
-  // HUD low-energy alert edge: one cue when the ally energy gauge first crosses into the
-  // alert band (same condition the HUD's visual alert uses in updateHud).
-  if (after.allyAlert && !before.allyAlert) emit("alert");
-
-  const localTargetUid = localNext?.lockTarget ?? null;
-  for (const [uid, next] of after.borgs) {
-    const prev = before.borgs.get(uid);
-    if (uid !== localTargetUid || uid === after.localActiveUid) continue;
-    if (!prev) continue;
-    if (next.hp >= prev.hp && next.state === prev.state) continue;
-
-    if (next.state === "death" && prev.state !== "death") emit("death");
-    else if (next.state === "down" && prev.state !== "down") emit("down");
-    else if (next.state === "hit" && (prev.state !== "hit" || next.hp < prev.hp)) emit("hit");
-    else if (next.hp < prev.hp) emit("hit");
-  }
-}
-
-function clamp01(v: number): number {
-  return v < 0 ? 0 : v > 1 ? 1 : v;
+  session.hud.update(
+    battleHudState({
+      battle: session.battle,
+      focus,
+      actionProfile,
+      allyMax: session.allyMax,
+      enemyMax: session.enemyMax,
+      defaultBorgId: DEFAULT_LEAD,
+    }),
+  );
 }
 
 // Pause handling (Start/Esc).
@@ -1568,9 +1371,11 @@ function stepBattle(dt: number): void {
 
   let steps = 0;
   while (simAccumulator >= SIM_DT && steps < 15) {
-    const audioBefore = snapshotBattleAudio(battle, session.localPlayerId);
+    const audioBefore = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax);
     battle.step(SIM_DT, inputs);
-    emitBattleAudioEdges(audioBefore, snapshotBattleAudio(battle, session.localPlayerId));
+    for (const cue of battleAudioEvents(audioBefore, snapshotBattleAudio(battle, session.localPlayerId, session.allyMax))) {
+      playBattleEventSfx(cue);
+    }
     simAccumulator -= SIM_DT;
     steps += 1;
     if (battle.state.result !== "ongoing") break;
@@ -1691,7 +1496,7 @@ function showResults(
     },
   });
   handle.render(result, stats);
-  activeHandle = handle;
+  screenHost.set(handle);
 }
 
 function advanceRun(lastResult: BattleResults): void {
@@ -1727,27 +1532,22 @@ function tick(): void {
   }
   updateBattleDebugDataset();
   controls.update();
-  renderer.render(scene, camera);
-  requestAnimationFrame(tick);
+  viewport.render();
 }
 
 // Sim loop (setInterval): fixed-cadence wall-clock stepping, runs even when the
 // tab is hidden. ~60 Hz target.
-let lastSimTime = performance.now();
-setInterval(() => {
-  const now = performance.now();
-  const dt = (now - lastSimTime) / 1000;
-  lastSimTime = now;
-  if (flow.screen === "battle") {
-    pollPauseToggle();
-    stepBattle(dt);
-  }
-}, 1000 / 60);
+startFixedStepLoop({
+  step(dt) {
+    if (flow.screen === "battle") {
+      pollPauseToggle();
+      stepBattle(dt);
+    }
+  },
+});
 
 window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  viewport.resize();
 });
 
 // ------------------------------------------------------------------------------------------
@@ -1765,13 +1565,11 @@ void loadInitialAssets()
     showLoadingMessage(`Asset load failed: ${error instanceof Error ? error.message : String(error)}`);
   });
 
-tick();
+startRenderLoop({ frame: tick });
 
 function showLoadingMessage(text: string): void {
   flow.screen = "loading";
-  activeHandle?.destroy();
-  activeHandle = null;
-  ui.replaceChildren();
+  screenHost.clear();
   const box = document.createElement("div");
   box.style.cssText =
     "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#bfeeff;font:600 16px 'Trebuchet MS',system-ui,sans-serif;text-align:center;text-shadow:0 1px 3px #000;";
@@ -1794,12 +1592,12 @@ function showLoadingMessage(text: string): void {
     const normalized = stageId.trim().toLowerCase();
     if (!isExportedStageId(normalized)) throw new Error(`Stage is not exported: ${stageId}`);
     await loadStage(normalized);
-    renderer.render(scene, camera);
+    viewport.render();
     return normalized;
   },
   startChallenge: () => showDifficulty(),
   renderNow: () => {
-    renderer.render(scene, camera);
+    viewport.render();
     return canvas.toDataURL("image/png");
   },
   forceBattle: (force: string[] = [DEFAULT_LEAD]) => {

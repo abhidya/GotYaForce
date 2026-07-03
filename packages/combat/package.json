@@ -9,5 +9,8 @@
     "build": "tsc -b",
     "typecheck": "tsc -b --noEmit"
   },
+  "dependencies": {
+    "@gf/physics": "workspace:*"
+  },
   "module": "src/index.ts"
 }

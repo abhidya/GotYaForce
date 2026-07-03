@@ -15,7 +15,13 @@ import type { BorgStats } from "./stats.js";
 import type { Battle, BattleConfig } from "./types.js";
 
 // --- Re-exports (the public API surface) ------------------------------------------------
-export type { Vec3 } from "@gf/physics";
+export {
+  stageCollisionFromHitGrids,
+  floorSurfaceYAt,
+  isFiniteVec,
+  yAtTriangleXZ,
+  type Vec3,
+} from "@gf/physics";
 export * from "./types.js";
 export {
   buildProfile,

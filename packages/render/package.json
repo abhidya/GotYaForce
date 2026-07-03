@@ -8,5 +8,11 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.169.0"
   }
 }

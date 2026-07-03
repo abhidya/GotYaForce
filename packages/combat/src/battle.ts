@@ -10,7 +10,7 @@
 // For the multi-team result we report from the perspective of the lowest team id that still
 // has a human owner; "win"/"lose"/"draw"/"ongoing".
 
-import type { Vec3 } from "@gf/physics";
+import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
 import {
   acquireAllyLock,
@@ -484,23 +484,8 @@ function isSpawnFloorTriangle(
   );
 }
 
-function yAtTriangleXZ(tri: { vertices: [Vec3, Vec3, Vec3] }, x: number, z: number): number | null {
-  const [a, b, c] = tri.vertices;
-  const denom = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
-  if (Math.abs(denom) < 1e-5) return null;
-  const wa = ((b.z - c.z) * (x - c.x) + (c.x - b.x) * (z - c.z)) / denom;
-  const wb = ((c.z - a.z) * (x - c.x) + (a.x - c.x) * (z - c.z)) / denom;
-  const wc = 1 - wa - wb;
-  if (wa < -1e-4 || wb < -1e-4 || wc < -1e-4) return null;
-  return wa * a.y + wb * b.y + wc * c.y;
-}
-
 function clamp(v: number, lo: number, hi: number): number {
   return v < lo ? lo : v > hi ? hi : v;
-}
-
-function isFiniteVec(v: Vec3): boolean {
-  return Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z);
 }
 
 /** Build a battle from config. `borgStats` is the full per-borg table (borgs.json). */

@@ -5,7 +5,16 @@
 //   stick=move in the target-relative frame while locked. Pure left/right is a dodge step
 //   (surfaced as `dash`); forward+left/right is circle-strafe.
 
-import type { Vec3 } from "@gf/physics";
+import type { StageBounds, StageCollision, Vec3 } from "@gf/physics";
+export {
+  normalizeStageBounds,
+  type RectStageBounds,
+  type StageBounds,
+  type StageCollision,
+  type StageCollisionCell,
+  type StageCollisionTriangle,
+  type SymmetricStageBounds,
+} from "@gf/physics";
 import type { BorgProfile } from "./stats.js";
 
 /** One frame of intent for a single controlled borg (player OR resolved by AI). */
@@ -116,57 +125,6 @@ export interface ForceConfig {
   team: number;
   ownerPlayer: string | null;
   borgIds: string[];
-}
-
-/** Legacy tuned half-extents from origin. Kept for existing callers/selfchecks. */
-export interface SymmetricStageBounds {
-  x: number;
-  z: number;
-}
-
-/** Real stage-space X/Z rectangle decoded from STIH hit bins. */
-export interface RectStageBounds {
-  minX: number;
-  maxX: number;
-  minZ: number;
-  maxZ: number;
-}
-
-export type StageBounds = SymmetricStageBounds | RectStageBounds;
-
-export function normalizeStageBounds(bounds: StageBounds): RectStageBounds {
-  if ("minX" in bounds) return bounds;
-  return {
-    minX: -bounds.x,
-    maxX: bounds.x,
-    minZ: -bounds.z,
-    maxZ: bounds.z,
-  };
-}
-
-export interface StageCollisionCell {
-  index: number;
-  triangleIndices: number[];
-}
-
-export interface StageCollisionTriangle {
-  index: number;
-  layerIndex: number | null;
-  marker: number;
-  vertices: [Vec3, Vec3, Vec3];
-  normal: Vec3;
-  planeD: number;
-  bounds2d: RectStageBounds;
-}
-
-export interface StageCollision {
-  triangles: StageCollisionTriangle[];
-  grid?: {
-    origin: { x: number; z: number };
-    cellSize: { x: number; z: number };
-    gridCells: { x: number; z: number; total: number };
-    cells: StageCollisionCell[];
-  };
 }
 
 export interface SpawnPoint {

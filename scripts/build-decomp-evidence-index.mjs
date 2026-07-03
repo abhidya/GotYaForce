@@ -87,7 +87,7 @@ const topicRules = [
   },
   {
     topic: "ui-hud",
-    modules: ["apps/game/src/ui", "apps/game/src/ui/hud/BattleHud.ts", "packages/ui/src/index.ts"],
+    modules: ["apps/game/src/ui/index.ts", "apps/game/src/ui/hud/BattleHud.ts", "apps/game/src/ui/screens"],
     patterns: [/HUD/i, /font/i, /face/i, /bn[0-9a-f]{4}/i, /0x803b069c/, /0x805f3850/],
   },
   {

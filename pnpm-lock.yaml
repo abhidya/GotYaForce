@@ -58,25 +58,39 @@ importers:
 
   packages/audio: {}
 
-  packages/combat: {}
+  packages/combat:
+    dependencies:
+      '@gf/physics':
+        specifier: workspace:*
+        version: link:../physics
 
   packages/core: {}
 
   packages/formats: {}
 
-  packages/missions: {}
+  packages/missions:
+    dependencies:
+      '@gf/combat':
+        specifier: workspace:*
+        version: link:../combat
 
   packages/physics: {}
 
-  packages/render: {}
+  packages/render:
+    dependencies:
+      three:
+        specifier: ^0.169.0
+        version: 0.169.0
+    devDependencies:
+      '@types/three':
+        specifier: ^0.169.0
+        version: 0.169.0
 
   packages/save: {}
 
   packages/test-fixtures: {}
 
   packages/tools: {}
-
-  packages/ui: {}
 
 packages:
 
