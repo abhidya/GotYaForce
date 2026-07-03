@@ -17,7 +17,7 @@ import {
   weaponOneCellSourceForBorgId,
 } from "./actionProfiles.js";
 import type { BorgRuntime } from "./types.js";
-import type { BorgProfile } from "./stats.js";
+import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 
 // --- Test scaffolding --------------------------------------------------------------------
 
@@ -104,6 +104,17 @@ function makeBorg(overrides: Partial<BorgRuntime> = {}): BorgRuntime {
   };
 }
 
+const G_RED: BorgStats = {
+  id: "pl0615",
+  name: "G RED",
+  energy: 300,
+  hp: "200/290",
+  defense: 3,
+  shot: 4,
+  attack: 4,
+  speed: 6,
+};
+
 // --- G RED live-verified anchor (ATK-009 required behavior) ------------------------------
 
 function testGRedAnchorAmmoFive(): void {
@@ -119,6 +130,20 @@ function testGRedAnchorAmmoFive(): void {
   // cross-check row [200, 5,5, 0,180, 0,0, 1,180].
   assertEqual(shot?.refillType, 0, "G RED weapon-0 refillType === 0 (all-at-once, (am) cross-check)");
   assertEqual(shot?.refillParam, 180, "G RED weapon-0 refillParam === 180 ((am) cross-check)");
+}
+
+function testGRedLevelAwareActionProfileAmmo(): void {
+  const level0 = buildProfile(G_RED, 0);
+  const level9 = buildProfile(G_RED, 9);
+  const level0Shot = actionProfileForProfile(level0).shot;
+  const level9Shot = actionProfileForProfile(level9).shot;
+
+  assertTrue(level0Shot !== null, "G RED level byte 0 resolves a shot action def");
+  assertTrue(level9Shot !== null, "G RED level byte 9 resolves a shot action def");
+  assertEqual(level0Shot?.ammoMax, 5, "G RED (pl0615) level byte 0 action-profile ammoMax === 5");
+  assertEqual(level9Shot?.ammoMax, 8, "G RED (pl0615) level byte 9 action-profile ammoMax === 8");
+  assertEqual(startingAmmoForProfile(level0), 5, "startingAmmoForProfile(pl0615 level byte 0) === 5");
+  assertEqual(startingAmmoForProfile(level9), 8, "startingAmmoForProfile(pl0615 level byte 9) === 8");
 }
 
 // --- behavior-notes.md (am) cross-checked row anchors (weapon-0 AND weapon-1) --------------
@@ -147,6 +172,17 @@ function testCyberDeathDragonWeaponOneAnchor(): void {
   assertTrue(weapon1 !== null, "Cyber Death Dragon resolves a weapon-1 cell source");
   assertEqual(weapon1?.max, 8, "Cyber Death Dragon weapon-1 max === 8 ((am) cross-check, guide 'X ammo 8')");
   assertEqual(weapon1?.refillType, 0, "Cyber Death Dragon weapon-1 refillType === 0 (all-at-once, (am) cross-check)");
+}
+
+function testWeaponOneLevelAwareSource(): void {
+  // pl0e05 has level-varying weapon-1 ammo in borgSourceStats.json:
+  // level byte 0 -> row 2 -> max 20; level byte 9 -> row 11 -> max 23.
+  const level0 = weaponOneCellSourceForBorgId("pl0e05", 0);
+  const level9 = weaponOneCellSourceForBorgId("pl0e05", 9);
+  assertTrue(level0 !== null, "pl0e05 level byte 0 resolves a weapon-1 cell source");
+  assertTrue(level9 !== null, "pl0e05 level byte 9 resolves a weapon-1 cell source");
+  assertEqual(level0?.max, 20, "pl0e05 level byte 0 weapon-1 max === 20");
+  assertEqual(level9?.max, 23, "pl0e05 level byte 9 weapon-1 max === 23");
 }
 
 function testDeathHeadWeaponZeroAnchor(): void {
@@ -373,8 +409,10 @@ export function runSelfTest(): number {
   checks = 0;
 
   testGRedAnchorAmmoFive();
+  testGRedLevelAwareActionProfileAmmo();
   testFlameDragonGradualAnchor();
   testCyberDeathDragonWeaponOneAnchor();
+  testWeaponOneLevelAwareSource();
   testDeathHeadWeaponZeroAnchor();
   testGradualRefillStepwise();
   testAllAtOnceStaysEmptyThenJumps();

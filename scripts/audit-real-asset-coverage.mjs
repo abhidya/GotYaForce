@@ -529,8 +529,9 @@ function inspectHudAssetEvidence() {
       triangleCount: numberFromText(arrowGeometry, /triangleCount:\s*(\d+)/),
       battleSceneUsesGeometry:
         battleScene.includes("ARROW_MDL_POSITIONS") &&
-        battleScene.includes("makeLockMarker") &&
-        battleScene.includes("lockTarget"),
+        battleScene.includes("makeArrowMdlMarker") &&
+        battleScene.includes("lockTarget") &&
+        battleScene.includes("allyLockTarget"),
     },
   };
 }
@@ -665,7 +666,12 @@ function inspectCameraEvidence() {
     runtimeUsesMode1Blend:
       camera.includes("CAMERA_MODE1_PREVIOUS_EYE_WEIGHT") &&
       camera.includes("CAMERA_MODE1_EYE_BLEND_DENOMINATOR") &&
-      camera.includes("mode1BlendEye("),
+      camera.includes("CAMERA_MODE1_PREVIOUS_EYE_Y_WEIGHT") &&
+      camera.includes("CAMERA_MODE1_EYE_Y_BLEND_DENOMINATOR") &&
+      camera.includes("MODE1_EYE_PREV_WEIGHT_DERIVED * this.goalEye.x") &&
+      camera.includes("MODE1_EYE_Y_PREV_WEIGHT_DERIVED * this.goalEye.y") &&
+      camera.includes("MODE1_EYE_Y_BLEND_DENOMINATOR_DERIVED") &&
+      camera.includes("mode1InterestTarget("),
     previousEyeWeight: floatConst("CAMERA_MODE1_PREVIOUS_EYE_WEIGHT"),
     eyeBlendDenominator: floatConst("CAMERA_MODE1_EYE_BLEND_DENOMINATOR"),
     halfBlend: floatConst("CAMERA_MODE1_HALF_BLEND"),
@@ -976,7 +982,7 @@ function renderMarkdown(report) {
   add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses exported font/roundel: ${report.summary.runtimeBattleHudUsesAvailableFontAndRoundel ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses as_icon: ${report.summary.runtimeBattleHudUsesAsIcon ? "yes" : "no"} (manifest marks as_icon low-confidence for battle HUD)`);
-  add(`- Runtime lock target uses arrow_mdl geometry: ${report.summary.runtimeLockTargetUsesArrowGeometry ? "yes" : "no"}`);
+  add(`- Runtime lock targets use arrow_mdl geometry: ${report.summary.runtimeLockTargetUsesArrowGeometry ? "yes" : "no"}`);
   add(`- Common battle archive inventoried: ${report.summary.commonBattleArchiveInventoried ? "yes" : "no"}`);
   add(`- Common battle data exact actor matches: ${report.summary.commonBattleDataExactMatches}`);
   add(`- Runtime actor-data bytes bound to combat formulas: ${report.summary.runtimeActorDataBoundToCombat ? "yes" : "no"}`);
@@ -1082,7 +1088,7 @@ function renderMarkdown(report) {
   add(`as_icon public export: ${report.hudAssetEvidence.asIconPublicPath} (${report.hudAssetEvidence.asIconExists ? "exists" : "missing"}). It remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.`);
   add();
   const arrow = report.hudAssetEvidence.arrowGeometry;
-  add(`arrow_mdl geometry binding: source archive ${arrow.sourceArchiveExists ? "exists" : "missing"}, HSDRaw OBJ ${arrow.sourceObjExists ? "exists" : "missing"}, generated module ${arrow.generatedModuleExists ? "exists" : "missing"}, runtime scene uses geometry ${arrow.battleSceneUsesGeometry ? "yes" : "no"} (${arrow.vertexCount ?? "unknown"} verts, ${arrow.triangleCount ?? "unknown"} tris).`);
+  add(`arrow_mdl geometry binding: source archive ${arrow.sourceArchiveExists ? "exists" : "missing"}, HSDRaw OBJ ${arrow.sourceObjExists ? "exists" : "missing"}, generated module ${arrow.generatedModuleExists ? "exists" : "missing"}, runtime enemy/ally lock markers use geometry ${arrow.battleSceneUsesGeometry ? "yes" : "no"} (${arrow.vertexCount ?? "unknown"} verts, ${arrow.triangleCount ?? "unknown"} tris). Original GX/material colors remain trace-pending, so runtime tints are still used.`);
   add();
   add("Original HUD elements not available as discrete sprites:");
   add(

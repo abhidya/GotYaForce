@@ -42,12 +42,13 @@ import {
 import {
   actionProfileForProfile,
   weaponOneCellSourceForBorgId,
+  type BorgActionProfile,
   type MeleeActionDef,
   type ShotActionDef,
   type SwordBeamDef,
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
-import { shotPenetrationForBorgId } from "./moveProperties.js";
+import { runtimeShotPenetrationForBorgId, usesContextualBResolver } from "./moveRuntime.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import type {
@@ -148,7 +149,7 @@ function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
     refillParam,
     timer: refillType === 1 ? 0 : refillParam,
   };
-  const weapon1Source = weaponOneCellSourceForBorgId(p.id);
+  const weapon1Source = weaponOneCellSourceForBorgId(p.id, p.level);
   const weapon1: WeaponCell = weapon1Source
     ? {
         cur: weapon1Source.max, // weapon 1 is never fired by the port yet; start full like spawn init does.
@@ -721,6 +722,7 @@ export interface AttackResult {
 }
 
 let projCounter = 0;
+const CONTEXTUAL_B_CACHE = new Map<string, boolean>();
 export function resetProjectileCounter(): void {
   projCounter = 0;
 }
@@ -752,6 +754,62 @@ export function projectileVisualKindForProfile(p: BorgProfile): ProjectileVisual
   if (/(beam|laser|plasma|satellite|bit)/.test(text)) return "energy";
   if (/(gun|gatling|revolver|rifle|cannon|tank|machine|bullet|missile|launcher)/.test(text)) return "muzzle";
   return "energy";
+}
+
+type BActionKind = "melee" | "shot";
+
+function primaryBActionOrder(actionProfile: BorgActionProfile): readonly BActionKind[] {
+  return actionProfile.primary === "shot" ? (["shot", "melee"] as const) : (["melee", "shot"] as const);
+}
+
+function usesContextualBMoveProfile(borgId: string): boolean {
+  const key = borgId.toLowerCase();
+  const cached = CONTEXTUAL_B_CACHE.get(key);
+  if (cached !== undefined) return cached;
+  const value = usesContextualBResolver(key);
+  CONTEXTUAL_B_CACHE.set(key, value);
+  return value;
+}
+
+function contextualBTarget(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null {
+  if (self.lockTarget) {
+    const locked = all.find((o) => o.uid === self.lockTarget) ?? null;
+    if (locked && isEnemyAlive(self, locked)) return locked;
+  }
+
+  let best: BorgRuntime | null = null;
+  let bestDist = Infinity;
+  for (const other of all) {
+    if (!isEnemyAlive(self, other)) continue;
+    const d = distXZ(self.pos, other.pos);
+    if (d >= bestDist) continue;
+    bestDist = d;
+    best = other;
+  }
+  return best;
+}
+
+function targetWithinMeleeContext(self: BorgRuntime, target: BorgRuntime, meleeDef: MeleeActionDef): boolean {
+  return distXZ(self.pos, target.pos) <= meleeDef.range && Math.abs(target.pos.y - self.pos.y) <= meleeDef.yTolerance;
+}
+
+function resolveBActionOrder(
+  b: BorgRuntime,
+  p: BorgProfile,
+  actionProfile: BorgActionProfile,
+  meleeDef: MeleeActionDef | null,
+  shotDef: ShotActionDef | null,
+  all: BorgRuntime[],
+): readonly BActionKind[] {
+  const fallback = primaryBActionOrder(actionProfile);
+  if (!meleeDef || !shotDef) return fallback;
+  if (!usesContextualBMoveProfile(p.id)) return fallback;
+  // Once a charge is already being held, keep the shot path first so release semantics stay stable.
+  if ((b.cooldowns["chargeFrames"] ?? 0) > 0) return fallback;
+
+  const target = contextualBTarget(b, all);
+  if (target && targetWithinMeleeContext(b, target, meleeDef)) return ["melee", "shot"];
+  return ["shot", "melee"];
 }
 
 /**
@@ -895,10 +953,7 @@ export function stepAttacks(
 
   // --- Attack (B): asset-backed per-borg primary action, generic fallback-safe -------
   if (canStartAction && (attackHeld || releasedAttack)) {
-    const order =
-      actionProfile.primary === "shot"
-        ? (["shot", "melee"] as const)
-        : (["melee", "shot"] as const);
+    const order = resolveBActionOrder(b, p, actionProfile, meleeDef, shotDef, all);
     for (const kind of order) {
       if (kind === "melee" && meleeDef && attackHeld) {
         const window = b.cooldowns["comboWindow"] ?? 0;
@@ -1159,7 +1214,7 @@ function spawnProjectile(
 /** OBSERVED_WIKI: whether a borg's primary shot (B Shot, or B Charge when chargeTier>=1) is
  *  cataloged as penetrating borgs ("borgs"/"total"). Drives spawnProjectile's consumeOnHit. */
 function isPenetratingShot(borgId: string, chargeTier: number): boolean {
-  const pen = shotPenetrationForBorgId(borgId, chargeTier >= 1);
+  const pen = runtimeShotPenetrationForBorgId(borgId, chargeTier >= 1);
   return pen === "borgs" || pen === "total";
 }
 

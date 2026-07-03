@@ -8,8 +8,8 @@
 //     persist policy; traces T5/T6 remain the arbiter of the engine mechanism.
 //   - `refill` maps to the ROM weapon-cell type (all_at_once -> type 0, gradual -> type 1;
 //     ROM types 2/3 are dead per (ax)); the DERIVED per-borg values live in sourceBorgStats.
-// Nothing here drives gameplay yet; it is exposed for the resolver work (ATK-003/005/008),
-// the debug overlay, and validation. Do not treat these values as ROM-confirmed.
+// Gameplay consumes this through moveRuntime.ts for roster-wide B contextual routing and
+// shot-penetration policy. Do not treat these values as ROM-confirmed.
 
 import moveData from "./data/borgMoveProperties.json" with { type: "json" };
 

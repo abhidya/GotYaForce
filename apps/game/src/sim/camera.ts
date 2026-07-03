@@ -157,7 +157,8 @@ export interface BattleCameraOptions {
  * header) seeded through the ported mode-2 approach (FUN_8000c988) when the camera starts far
  * from the target. Multi-actor widen-to-fit and the arena wall-guard remain TUNED overlays on
  * the DERIVED skeleton. Set `legacyApproximation` to fall back to the old heading-locked
- * 2-sample approximation.
+ * 2-sample approximation. The default path stays on the recovered single-focus distance band;
+ * the old multi-actor widen overlay is kept only inside `legacyApproximation`.
  */
 export class BattleCamera {
   private initialized = false;
@@ -218,20 +219,11 @@ export class BattleCamera {
       return;
     }
 
-    // TUNED spread metric feeding the TUNED widen-to-fit overlay.
-    const spread = computeSpreadXZ(allActorPositions, primary.pos);
-    const extraDistance = Math.min(
-      MULTI_ACTOR_ZOOM_TUNED.maxExtraDistance,
-      spread * MULTI_ACTOR_ZOOM_TUNED.spreadToDistanceGain,
-    );
-    const extraHeight = Math.min(
-      MULTI_ACTOR_ZOOM_TUNED.maxExtraHeight,
-      spread * MULTI_ACTOR_ZOOM_TUNED.spreadToHeightGain,
-    );
+    const extraHeight = 0;
     // DERIVED structure (FUN_8000fc2c): distance clamps to a [min, max] band. Band values are
-    // the two ram-trace samples (per-borg ROM data not extracted); TUNED widen shifts the band.
-    const followMin = CAMERA_FOLLOW_MIN_DISTANCE_TRACE + extraDistance;
-    const followMax = CAMERA_FOLLOW_MAX_DISTANCE_TRACE + extraDistance;
+    // the two ram-trace samples (per-borg ROM data not extracted).
+    const followMin = CAMERA_FOLLOW_MIN_DISTANCE_TRACE;
+    const followMax = CAMERA_FOLLOW_MAX_DISTANCE_TRACE;
 
     if (!this.initialized) {
       this.initialized = true;

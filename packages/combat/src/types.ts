@@ -241,6 +241,8 @@ export interface ForceConfig {
   team: number;
   ownerPlayer: string | null;
   borgIds: string[];
+  /** Optional raw level byte per `borgIds` slot (0 = display level 1, 9 = display level 10). */
+  borgLevels?: readonly (number | null | undefined)[];
 }
 
 export interface SpawnPoint {

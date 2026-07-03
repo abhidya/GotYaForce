@@ -34,7 +34,7 @@
  * Lock-on is a world-space marker owned by battleScene (not drawn here).
  */
 
-import { borgBannerPath } from "../assets.js";
+import { ASSETS, borgBannerPath } from "../assets.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { el, clamp01 } from "../dom.js";
 
@@ -622,10 +622,14 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
 function syncTeammates(layer: HTMLElement, mates: readonly TeammateMarker[]): void {
   while (layer.childElementCount > mates.length) layer.lastElementChild?.remove();
   while (layer.childElementCount < mates.length) {
+    const roundel = el("img", {
+      class: "gf-mate-roundel",
+      attrs: { src: ASSETS.faceMarkerRoundel, alt: "", "aria-hidden": "true" },
+    });
     const label = bitmapText("gf-mate-label");
     const fill = el("div", { class: "gf-mate-fill" });
     const bar = el("div", { class: "gf-mate-bar" }, [fill]);
-    layer.appendChild(el("div", { class: "gf-mate" }, [label, bar]));
+    layer.appendChild(el("div", { class: "gf-mate" }, [roundel, label, bar]));
   }
   mates.forEach((mate, i) => {
     const plate = layer.children[i] as HTMLElement;

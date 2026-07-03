@@ -100,10 +100,12 @@ class BattleImpl implements Battle {
 
     let cpuIdx = 0;
     cfg.forces.forEach((f, fi) => {
-      const queue: DeployEntry[] = f.borgIds.map((id) => {
+      const queue: DeployEntry[] = f.borgIds.map((id, slotIdx) => {
         const s = this.statsById.get(id);
         if (!s) throw new RangeError(`Unknown borg id in force: ${id}`);
-        return { borgId: id, profile: buildProfile(s) };
+        const rawLevel = f.borgLevels?.[slotIdx];
+        const level = typeof rawLevel === "number" && Number.isFinite(rawLevel) ? rawLevel : undefined;
+        return { borgId: id, profile: buildProfile(s, level) };
       });
       const controlKey = f.ownerPlayer ?? `cpu:${fi}:${cpuIdx++}`;
       this.forces.push({

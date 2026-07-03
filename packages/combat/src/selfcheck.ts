@@ -709,6 +709,21 @@ function assertActionProfilesDrivePrimaryAttacks(borgs: BorgStats[]): void {
     throw new Error("[selfcheck] action profile did not make mixed G RED charge-and-release as its primary B attack");
   }
 
+  const closeGRedRuntime = fakeRuntime("gred_close", 0, 0);
+  closeGRedRuntime.borgId = gRed.id;
+  closeGRedRuntime.ammo = startingAmmoForProfile(gRed);
+  const closeGRedEnemy = fakeRuntime("gred_close_enemy", 1, 42);
+  const closeGRedProfiles = new Map([
+    [closeGRedRuntime.uid, gRed],
+    [closeGRedEnemy.uid, enemyProfile],
+  ]);
+  const closeResult = pumpAttackFrame(closeGRedRuntime, gRed, true, [closeGRedRuntime, closeGRedEnemy], closeGRedProfiles);
+  if (closeGRedRuntime.anim !== "melee" || closeResult.length !== 0) {
+    throw new Error(
+      `[selfcheck] contextual B resolver did not route close G RED B press to B Attack: anim=${closeGRedRuntime.anim}, projectiles=${closeResult.length}`,
+    );
+  }
+
   const swordRuntime = fakeRuntime("sword", 0, 0);
   swordRuntime.borgId = swordKnight.id;
   swordRuntime.ammo = startingAmmoForProfile(swordKnight);

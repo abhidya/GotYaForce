@@ -175,7 +175,7 @@ function resolveActionProfile(profile: BorgProfile): BorgActionProfile {
   const raw = RAW_PROFILES[profile.id];
   const melee = profile.hasMelee ? { ...DEFAULT_MELEE, ...(raw?.melee ?? {}) } : null;
   const shot = profile.hasShot
-    ? { ...DEFAULT_SHOT, ...(raw?.shot ?? {}), ...weaponZeroRowOverrides(profile.id) }
+    ? { ...DEFAULT_SHOT, ...(raw?.shot ?? {}), ...weaponZeroRowOverrides(profile.id, profile.level) }
     : null;
 
   let primary = raw?.primary ?? chooseFallbackPrimary(profile);
@@ -215,8 +215,8 @@ function resolveActionProfile(profile: BorgProfile): BorgActionProfile {
  * borgs that HAVE a shot action per profile.hasShot), keep the actionProfiles.json/DEFAULT_SHOT
  * fallback untouched (labeled TUNED_EXISTING there).
  */
-function weaponZeroRowOverrides(borgId: string): Partial<ShotActionDef> {
-  const weapon0 = sourceStatsForBorgId(borgId)?.weaponSlots[0];
+function weaponZeroRowOverrides(borgId: string, level?: number): Partial<ShotActionDef> {
+  const weapon0 = sourceStatsForBorgId(borgId, level)?.weaponSlots[0];
   if (!weapon0 || weapon0.ammoCount <= 0) return {};
   return {
     ammoMax: weapon0.ammoCount,
@@ -240,8 +240,8 @@ export interface WeaponOneCellSource {
   refillParam: number;
 }
 
-export function weaponOneCellSourceForBorgId(borgId: string): WeaponOneCellSource | null {
-  const weapon1 = sourceStatsForBorgId(borgId)?.weaponSlots[1];
+export function weaponOneCellSourceForBorgId(borgId: string, level?: number): WeaponOneCellSource | null {
+  const weapon1 = sourceStatsForBorgId(borgId, level)?.weaponSlots[1];
   if (!weapon1 || weapon1.ammoCount <= 0) return null;
   return {
     max: weapon1.ammoCount,

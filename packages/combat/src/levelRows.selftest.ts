@@ -12,6 +12,7 @@
 // main()/runSelfTest() return an exit code (0 = pass).
 
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
+import { createBattle } from "./battle.js";
 import { LEVEL_ROW_OFFSETS_804339E8, sourceStatsForBorgId } from "./sourceBorgStats.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex } from "./gauges.js";
@@ -47,6 +48,17 @@ const G_RED: BorgStats = {
   shot: 4,
   attack: 4,
   speed: 6,
+};
+
+const DEATH_BORG_ALPHA: BorgStats = {
+  id: "pl0008",
+  name: "Death Borg Alpha",
+  energy: 100,
+  hp: 100,
+  defense: 0,
+  shot: 0,
+  attack: 2,
+  speed: 3,
 };
 
 function makeProfile(overrides: Partial<BorgProfile> = {}): BorgProfile {
@@ -190,6 +202,24 @@ function testDifferentLevelSelectsDifferentRow(): void {
   assertEqual(profileLevel5.level, 5, "buildProfile(G_RED, 5).level === 5");
 }
 
+function testBattleForceLevelsThreadIntoDeploy(): void {
+  const battle = createBattle(
+    {
+      stageId: "level-test",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"], borgLevels: [9] },
+        { team: 1, ownerPlayer: null, borgIds: ["pl0008"] },
+      ],
+    },
+    [G_RED, DEATH_BORG_ALPHA],
+  );
+  const gRed = battle.state.borgs.find((b) => b.borgId === "pl0615");
+  assertTrue(gRed !== undefined, "battle deploys G RED");
+  assertEqual(gRed?.maxHp, 290, "battle deploy reads borgLevels[0]=9 as G RED lv10 maxHp 290");
+  assertEqual(gRed?.hp, 290, "battle deploy starts G RED at lv10 HP");
+  assertEqual(gRed?.ammo, 8, "battle deploy starts G RED with lv10 weapon-0 ammo 8");
+}
+
 function testBorgsWithoutMultiLevelDataFallBackToDefaultRow(): void {
   // Fallback per ticket: "Borgs without multi-level row data: keep default row (labeled)."
   // An unknown id has no source stats at any level -> both calls return null (same as today).
@@ -260,6 +290,7 @@ export function runSelfTest(): number {
   testMonotonicLevelProgression();
   testLevelClampsToRowBounds();
   testDifferentLevelSelectsDifferentRow();
+  testBattleForceLevelsThreadIntoDeploy();
   testBorgsWithoutMultiLevelDataFallBackToDefaultRow();
   testDamageFormulaUnchangedByLevel();
 

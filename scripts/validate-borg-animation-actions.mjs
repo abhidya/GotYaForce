@@ -147,6 +147,19 @@ const PREFERRED_LABELS = {
     hit: ["g2_s32"],
     death: ["g2_s15"],
   },
+  pl0625: {
+    move: ["g2_s1"],
+    dash_fwd: ["g2_s4"],
+    dash_back: ["g2_s5"],
+    dash_left: ["g2_s7"],
+    dash_right: ["g2_s7"],
+    jump: ["g2_s16"],
+    fly: ["g2_s16"],
+    shoot: ["g2_s30"],
+    melee: ["g2_s31"],
+    hit: ["g2_s32"],
+    death: ["g2_s15"],
+  },
   pl0628: {
     move: ["g2_s2"],
     dash_fwd: ["g2_s4"],
@@ -171,12 +184,21 @@ const PREFERRED_LABELS = {
   pl0405: { dash_right: ["dash_left"] },
   pl0406: { dash_right: ["dash_left"] },
   pl0407: { dash_right: ["dash_left"] },
+  pl0408: { dash_right: ["dash_left"] },
+  pl0409: { dash_right: ["dash_left"] },
+  pl040a: { dash_right: ["dash_left"] },
   pl040b: { dash_right: ["dash_left"] },
+  pl040c: { dash_right: ["dash_left"] },
+  pl040d: { dash_right: ["dash_left"] },
   pl0602: { dash_right: ["dash_left"] },
-  // pl0c00-pl0c05 fortress family: attacks/flinches in unlabeled group 7.
+  pl060a: { dash_right: ["dash_left"] },
+  pl060c: { dash_right: ["dash_left"] },
+  pl060e: { dash_right: ["dash_left"] },
+  // pl0c00-pl0c06 fortress family: attacks/flinches in unlabeled group 7.
   pl0c00: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
   pl0c01: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
   pl0c02: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c06: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
   pl0c05: { dash_left: ["dash_right"], melee: ["g7_s0"], shoot: ["g7_s1"], hit: ["g7_s5"], special: ["g8_s2"] },
   pl0c04: {
     dash_fwd: ["boost"],
@@ -184,20 +206,34 @@ const PREFERRED_LABELS = {
     dash_left: ["boost"],
     dash_right: ["boost"],
     melee: ["g7_s0"],
+    // No g3/g7 flinch exists in this export; pose_short is the shortest explicit pose state.
+    hit: ["pose_short"],
   },
   // No group-3 reacts: short group-4 launch flinches used as hit.
   pl0604: { hit: ["special_s2"] },
   pl0610: { hit: ["special_s1"] },
   pl0613: { hit: ["special_s2"] },
+  pl0618: { hit: ["special_s2"] },
+  pl061e: { hit: ["special_s1"] },
+  pl0620: { hit: ["special_s1"] },
+  pl0621: { hit: ["special_s1"] },
+  pl0623: { hit: ["special_s1"] },
+  pl0627: { hit: ["special_s2"] },
   // Only group-4 bank is down_s0: longest lunge/attack as special.
   pl0301: { special: ["attack_lunge_s10"] },
   pl0800: { special: ["attack_lunge_s18"] },
   pl0805: { special: ["attack_lunge_s2"] },
   pl0807: { special: ["attack_lunge_s13"] },
-  pl0808: { special: ["attack_lunge_s12"] },
+  // Cyber Hero exports no g3 hit-react bank; jump_land is the only short recovery clip.
+  pl0808: { hit: ["jump_land"], special: ["attack_lunge_s12"] },
+  pl080d: { special: ["attack_lunge_s2"] },
+  pl080e: { special: ["attack_lunge_s2"] },
   pl0a00: { special: ["attack_s7"] },
   pl0a01: { special: ["attack_s7"] },
   pl0a02: { special: ["attack_s7"] },
+  pl0a05: { special: ["attack_s7"] },
+  pl0a07: { special: ["attack_s7"] },
+  pl0a0a: { special: ["attack_s7"] },
 };
 
 const args = new Set(process.argv.slice(2));

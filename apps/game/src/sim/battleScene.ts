@@ -177,9 +177,9 @@ export class BattleScene {
   private hitSparkTexture: THREE.Texture;
   private dashStarTexture: THREE.Texture;
   private chargeGlowTexture: THREE.Texture;
-  /** Enemy lock-on reticle (spinning ring), shown ONLY over the local player's enemy lockTarget. */
+  /** Enemy lock-on marker, shown ONLY over the local player's enemy lockTarget. */
   private enemyReticle: THREE.Group;
-  private enemyReticleRing: THREE.SpriteMaterial;
+  private enemyReticleFill: THREE.MeshBasicMaterial;
   /** Ally lock-on marker (green arrow) — deliberately a different shape+color than the enemy reticle. */
   private allyMarker: THREE.Group;
 
@@ -199,11 +199,23 @@ export class BattleScene {
     );
     this.ringTexture = makeAtlasTexture(IMPACT_ATLAS_URL, RING_CELL.x, RING_CELL.y, RING_CELL.w, RING_CELL.h);
     this.smokeTexture = makeAtlasTexture(IMPACT_ATLAS_URL, SMOKE_CELL.x, SMOKE_CELL.y, SMOKE_CELL.w, SMOKE_CELL.h);
-    const reticle = makeEnemyReticle();
+    const reticle = makeArrowMdlMarker({
+      fillColor: RETICLE_RANGED_COLOR,
+      edgeColor: 0xffffff,
+      opacity: 0.78,
+      scale: ENEMY_ARROW_MARKER_SCALE,
+      renderOrder: 30,
+    });
     this.enemyReticle = reticle.group;
-    this.enemyReticleRing = reticle.ringMaterial;
+    this.enemyReticleFill = reticle.fillMaterial;
     this.root.add(this.enemyReticle);
-    this.allyMarker = makeAllyMarker();
+    this.allyMarker = makeArrowMdlMarker({
+      fillColor: 0x35d977,
+      edgeColor: 0xeafff2,
+      opacity: 0.74,
+      scale: ALLY_ARROW_MARKER_SCALE,
+      renderOrder: 25,
+    }).group;
     this.root.add(this.allyMarker);
   }
 
@@ -293,9 +305,7 @@ export class BattleScene {
       }
     }
     if (this.enemyReticle.visible) {
-      // Continuous screen-plane spin, matching the original's rotating lock ring
-      // (reference/captures/challenge-8-in-battle-hud.png). Sprite rotation = view-plane roll.
-      this.enemyReticleRing.rotation -= dt * ENEMY_RETICLE_SPIN_RAD_PER_S;
+      this.enemyReticle.rotation.y -= dt * ENEMY_RETICLE_SPIN_RAD_PER_S;
     }
     if (this.allyMarker.visible) {
       this.allyMarker.rotation.y += dt * ALLY_MARKER_SPIN_RAD_PER_S;
@@ -385,9 +395,9 @@ export class BattleScene {
       // Centered on the target's torso like the original ring, not floating above the head.
       this.enemyReticle.position.set(enemy.pos.x, enemy.pos.y + 80, enemy.pos.z);
       // Reticle color = "battle mode" cue (behavior-notes (ao), NA manual): the cursor is yellow
-      // at ranged distance and flips RED when the locked enemy is within melee reach. The base
-      // ring texture is drawn near-white so this material tint controls the actual hue.
-      this.enemyReticleRing.color.set(meleeMode ? RETICLE_MELEE_COLOR : RETICLE_RANGED_COLOR);
+      // at ranged distance and flips RED when the locked enemy is within melee reach. The exported
+      // arrow mesh is tinted at runtime until the original GX material block is traced.
+      this.enemyReticleFill.color.set(meleeMode ? RETICLE_MELEE_COLOR : RETICLE_RANGED_COLOR);
     }
 
     const ally = self?.allyLockTarget ? borgs.find((b) => b.uid === self.allyLockTarget) : undefined;
@@ -736,140 +746,35 @@ function disposeMesh(obj: THREE.Object3D): void {
   });
 }
 
-/** Spin speed of the enemy lock ring (view-plane, rad/s). TUNED to read like the original's
- *  steadily rotating ring in reference/captures/challenge-8-in-battle-hud.png. */
+/** Spin speed of the enemy lock marker (yaw, rad/s). TUNED, presentation only. */
 const ENEMY_RETICLE_SPIN_RAD_PER_S = 2.6;
 /** Slow yaw spin of the green ally arrow (rad/s). TUNED, presentation only. */
 const ALLY_MARKER_SPIN_RAD_PER_S = 2.2;
-/** World size of the enemy reticle sprites (borgs are ~120-150 units tall). */
-const ENEMY_RETICLE_WORLD_SIZE = 210;
+const ENEMY_ARROW_MARKER_SCALE = 68;
+const ALLY_ARROW_MARKER_SCALE = 44;
 
 // Reticle "battle mode" tints (behavior-notes (ao), NA instruction manual): the target cursor is
 // yellow at ranged distance and flips RED when the locked enemy is within melee reach. Applied as
-// a SpriteMaterial.color tint over a near-white base ring texture. TUNED hues matched to the
-// challenge-8 capture's red-orange lock ring; the exact melee threshold that drives the flip is
-// trace-T1-blocked (FLOAT_8043762c, behavior-notes (ai)/(av)) and computed in presentation.ts.
+// a runtime tint over exported arrow_mdl geometry until the original GX material block is traced.
 const RETICLE_RANGED_COLOR = 0xffd21e; // yellow (default lock)
 const RETICLE_MELEE_COLOR = 0xff3c14; // red-orange (battle/melee mode)
 
-/**
- * Enemy lock-on reticle: a camera-facing red-orange ring with four lugs (drawn on the spinning
- * sprite) plus four static inward-pointing blue triangles, reproducing the original battle
- * reticle in reference/captures/challenge-8-in-battle-hud.png. No extracted texture/model for
- * the original reticle exists in the exported assets yet (ui/manifest.json has no lock/reticle
- * entry), so the two canvas textures are a TUNED visual stand-in transcribed from that capture.
- * ENEMY-ONLY by contract: syncLockMarkers never positions this over a same-team borg.
- */
-function makeEnemyReticle(): { group: THREE.Group; ringMaterial: THREE.SpriteMaterial } {
-  const group = new THREE.Group();
-  group.visible = false;
-
-  const ringMaterial = new THREE.SpriteMaterial({
-    map: drawReticleRingTexture(),
-    transparent: true,
-    depthTest: false, // the original ring reads as a HUD overlay: never hidden by stage geometry
-    depthWrite: false,
-  });
-  const ring = new THREE.Sprite(ringMaterial);
-  ring.scale.setScalar(ENEMY_RETICLE_WORLD_SIZE);
-  ring.renderOrder = 30;
-  group.add(ring);
-
-  const trianglesMaterial = new THREE.SpriteMaterial({
-    map: drawReticleTrianglesTexture(),
-    transparent: true,
-    depthTest: false,
-    depthWrite: false,
-  });
-  const triangles = new THREE.Sprite(trianglesMaterial);
-  triangles.scale.setScalar(ENEMY_RETICLE_WORLD_SIZE);
-  triangles.renderOrder = 31;
-  group.add(triangles);
-
-  return { group, ringMaterial };
-}
-
-/** Red-orange ring + 4 lugs with a white outline (the spinning layer of the reticle). */
-function drawReticleRingTexture(): THREE.CanvasTexture {
-  const size = 256;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    const c = size / 2;
-    const radius = 88;
-    // Bright underlay ring, then a near-white core ring on top -> white outline on both edges.
-    // The core is drawn near-white (not red) so the SpriteMaterial.color tint (yellow ranged /
-    // red melee, see RETICLE_*_COLOR) actually controls the ring's hue at runtime.
-    ctx.beginPath();
-    ctx.arc(c, c, radius, 0, Math.PI * 2);
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 30;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(c, c, radius, 0, Math.PI * 2);
-    ctx.strokeStyle = "#fff4e0";
-    ctx.lineWidth = 18;
-    ctx.stroke();
-    // Four lugs riding the ring (their off-axis placement makes the spin visible).
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * Math.PI * 2 + Math.PI / 12;
-      const x = c + Math.cos(a) * radius;
-      const y = c + Math.sin(a) * radius;
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(a);
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(-17, -17, 34, 34);
-      ctx.fillStyle = "#fff4e0";
-      ctx.fillRect(-12, -12, 24, 24);
-      ctx.restore();
-    }
-  }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
-
-/** Four static blue triangles pointing inward at the locked enemy. */
-function drawReticleTrianglesTexture(): THREE.CanvasTexture {
-  const size = 256;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    const c = size / 2;
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
-      ctx.save();
-      ctx.translate(c + Math.cos(a) * 56, c + Math.sin(a) * 56);
-      ctx.rotate(a + Math.PI / 2); // tip toward the center
-      ctx.beginPath();
-      ctx.moveTo(0, -18);
-      ctx.lineTo(14, 12);
-      ctx.lineTo(-14, 12);
-      ctx.closePath();
-      ctx.fillStyle = "#2f6bff";
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 4;
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-    }
-  }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
+interface ArrowMdlMarker {
+  group: THREE.Group;
+  fillMaterial: THREE.MeshBasicMaterial;
 }
 
 /**
- * Ally lock-on (Z) marker: the extracted arrow_mdl geometry tinted GREEN, floating overhead.
- * Deliberately a different shape (3D arrow vs billboard ring) AND color (green vs red) than
- * the enemy reticle so the two lock indicators can never be mistaken for each other.
+ * Lock-on marker backed by exported arrow_mdl geometry. The original GX material block is not
+ * decoded yet, so fill/edge colors remain runtime tints over source geometry.
  */
-function makeAllyMarker(): THREE.Group {
+function makeArrowMdlMarker(options: {
+  fillColor: number;
+  edgeColor: number;
+  opacity: number;
+  scale: number;
+  renderOrder: number;
+}): ArrowMdlMarker {
   const group = new THREE.Group();
   group.visible = false;
   group.userData = {
@@ -884,33 +789,31 @@ function makeAllyMarker(): THREE.Group {
   geometry.translate(-ARROW_MDL_BOUNDS.center[0], -ARROW_MDL_BOUNDS.center[1], -ARROW_MDL_BOUNDS.center[2]);
   geometry.computeVertexNormals();
 
-  // arrow_mdl.arc has geometry but no decoded texture; colors are a tuned stand-in
-  // for the original runtime vertex colors until the GX material block is decoded.
-  const fill = new THREE.MeshBasicMaterial({
-    color: 0x35d977,
+  const fillMaterial = new THREE.MeshBasicMaterial({
+    color: options.fillColor,
     transparent: true,
-    opacity: 0.74,
+    opacity: options.opacity,
     side: THREE.DoubleSide,
     depthWrite: false,
   });
-  const mesh = new THREE.Mesh(geometry, fill);
-  mesh.renderOrder = 25;
-  mesh.scale.setScalar(44);
+  const mesh = new THREE.Mesh(geometry, fillMaterial);
+  mesh.renderOrder = options.renderOrder;
+  mesh.scale.setScalar(options.scale);
   group.add(mesh);
 
   const edgeGeometry = new THREE.EdgesGeometry(geometry, 24);
   const edgeMaterial = new THREE.LineBasicMaterial({
-    color: 0xeafff2,
+    color: options.edgeColor,
     transparent: true,
     opacity: 0.9,
     depthWrite: false,
   });
   const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
-  edges.renderOrder = 26;
+  edges.renderOrder = options.renderOrder + 1;
   edges.scale.copy(mesh.scale);
   group.add(edges);
 
-  return group;
+  return { group, fillMaterial };
 }
 
 function makeAtlasTexture(url: string, x: number, y: number, w: number, h: number): THREE.Texture {

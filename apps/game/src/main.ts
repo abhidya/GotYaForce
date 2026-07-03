@@ -63,6 +63,7 @@ import {
   type ForceSlot,
   type BattleHudHandle,
   type DebugOverlayHandle,
+  type TeammateMarker,
 } from "./ui/index.js";
 
 import {
@@ -560,6 +561,21 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     hit: ["g2_s32"], // 13f flinch
     death: ["g2_s15"], // 76f knockdown-pose stand-in; its labeled down_s0 is only 15f
   },
+  pl0625: {
+    // VICTORY MACHINE is the same alt-mode group-2 bank family as pl061f (frames/slots match
+    // one-for-one in anim_index.json); only g0s0 is labeled, so use the family Rosetta here too.
+    move: ["g2_s1"],
+    dash_fwd: ["g2_s4"],
+    dash_back: ["g2_s5"],
+    dash_left: ["g2_s7"],
+    dash_right: ["g2_s7"],
+    jump: ["g2_s16"],
+    fly: ["g2_s16"],
+    shoot: ["g2_s30"],
+    melee: ["g2_s31"],
+    hit: ["g2_s32"],
+    death: ["g2_s15"],
+  },
   pl0628: {
     move: ["g2_s2"], // 31f family walk convention (its g2_s1 is a 12f stub)
     dash_fwd: ["g2_s4"], // 31f rootZ 500
@@ -585,15 +601,24 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
   pl0405: { dash_right: ["dash_left"] },
   pl0406: { dash_right: ["dash_left"] },
   pl0407: { dash_right: ["dash_left"] },
+  pl0408: { dash_right: ["dash_left"] },
+  pl0409: { dash_right: ["dash_left"] },
+  pl040a: { dash_right: ["dash_left"] },
   pl040b: { dash_right: ["dash_left"] },
+  pl040c: { dash_right: ["dash_left"] },
+  pl040d: { dash_right: ["dash_left"] },
   pl0602: { dash_right: ["dash_left"] },
-  // ---- pl0c00-pl0c05 fortress family: attacks/flinches live in unlabeled group 7 -------
+  pl060a: { dash_right: ["dash_left"] },
+  pl060c: { dash_right: ["dash_left"] },
+  pl060e: { dash_right: ["dash_left"] },
+  // ---- pl0c00-pl0c06 fortress family: attacks/flinches live in unlabeled group 7 -------
   // No group-1 attacks or group-3 reacts are exported; g7 carries 37f attack-length and
   // 13f flinch-length banks (verified in each borg's anim_index.json — same Rosetta as
   // the pl0619 comment above). melee/hit previously fell back to idle.
   pl0c00: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
   pl0c01: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
   pl0c02: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
+  pl0c06: { dash_left: ["dash_right"], melee: ["g7_s0"], hit: ["g7_s5"] },
   pl0c05: {
     dash_left: ["dash_right"],
     melee: ["g7_s0"], // 37f
@@ -609,14 +634,23 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     dash_left: ["boost"],
     dash_right: ["boost"],
     melee: ["g7_s0"], // 61f; only attack-plausible bank (no g1/g3 exported)
+    // No g3/g7 flinch exists for Ultimate Cannon. Use the only non-idle short source pose
+    // (g0s14, 11f) as an explicit low-confidence hit stand-in instead of silent idle fallback.
+    hit: ["pose_short"],
   },
   // ---- Borgs with no group-3 hit reacts: short group-4 launch flinches instead ---------
-  // pl0604/pl0610/pl0613 export no hit_react/guard banks; their g4 sets carry 10-15f
-  // clips with pure vertical root motion (rootY 161/215/182 per anim_index.json) — the
-  // launch/knock-up flinch. Previously hit fell back to idle (no reaction at all).
+  // These export no hit_react/guard banks; their g4 sets carry 10-15f clips with pure
+  // vertical root motion (rootY 161/215/182/215 per anim_index.json) — the launch/knock-up
+  // flinch. Previously hit fell back to idle (no reaction at all).
   pl0604: { hit: ["special_s2"] }, // 11f rootY 161
   pl0610: { hit: ["special_s1"] }, // 15f rootY 215
   pl0613: { hit: ["special_s2"] }, // 10f rootY 182
+  pl0618: { hit: ["special_s2"] }, // 11f rootY 161
+  pl061e: { hit: ["special_s1"] }, // 15f rootY 215
+  pl0620: { hit: ["special_s1"] }, // 15f rootY 215
+  pl0621: { hit: ["special_s1"] }, // 15f rootY 215
+  pl0623: { hit: ["special_s1"] }, // 15f rootY 215
+  pl0627: { hit: ["special_s2"] }, // 10f rootY 182
   // ---- Borgs whose only group-4 bank is the knockdown pose (down_s0) -------------------
   // After the g4s0 relabel (behavior-notes.md s4r) these have no special_s* left, so
   // "special" fell back through attack to attack_s0 — a 2-frame placeholder on several.
@@ -626,10 +660,17 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
   pl0800: { special: ["attack_lunge_s18"] }, // 50f
   pl0805: { special: ["attack_lunge_s2"] }, // 71f
   pl0807: { special: ["attack_lunge_s13"] }, // 51f
-  pl0808: { special: ["attack_lunge_s12"] }, // 50f
+  // Cyber Hero exports no g3 hit-react bank; its 12f jump_land is the only short recovery pose.
+  // Low-confidence stand-in, but source-backed and visibly reactive unlike idle.
+  pl0808: { hit: ["jump_land"], special: ["attack_lunge_s12"] }, // special 50f
+  pl080d: { special: ["attack_lunge_s2"] }, // 71f
+  pl080e: { special: ["attack_lunge_s2"] }, // 71f
   pl0a00: { special: ["attack_s7"] }, // 71f
   pl0a01: { special: ["attack_s7"] }, // 51f
   pl0a02: { special: ["attack_s7"] }, // 56f
+  pl0a05: { special: ["attack_s7"] }, // 71f
+  pl0a07: { special: ["attack_s7"] }, // 56f
+  pl0a0a: { special: ["attack_s7"] }, // 71f
 };
 
 async function loadAnimIndex(id: string): Promise<AnimIndex | null> {
@@ -1177,7 +1218,51 @@ function currentBattlePresentation(): ReturnType<typeof battlePresentationState>
 function updateHud(): void {
   if (!session) return;
   const presentation = currentBattlePresentation();
-  if (presentation) session.hud.update(presentation.hud);
+  if (presentation) {
+    const teammates = projectedTeammateMarkers(session.battle, presentation.focus);
+    session.hud.update(teammates.length > 0 ? { ...presentation.hud, teammates } : presentation.hud);
+  }
+}
+
+const TEAMMATE_MARKER_LIMIT = 3;
+const TEAMMATE_MARKER_Y_OFFSET = 125;
+const TEAMMATE_MARKER_SCREEN_MARGIN = 0.04;
+const _hudProject = new THREE.Vector3();
+
+function projectedTeammateMarkers(battle: Battle, focus: BorgRuntime | null): TeammateMarker[] {
+  if (!focus) return [];
+  const markers: TeammateMarker[] = [];
+  for (const b of battle.state.borgs) {
+    if (!b.alive || b.uid === focus.uid || b.team !== focus.team) continue;
+    const scenePos = battleScene.positionOf(b.uid);
+    _hudProject
+      .set(
+        scenePos?.x ?? b.pos.x,
+        (scenePos?.y ?? b.pos.y) + TEAMMATE_MARKER_Y_OFFSET,
+        scenePos?.z ?? b.pos.z,
+      )
+      .project(camera);
+    const x01 = (_hudProject.x + 1) * 0.5;
+    const y01 = (1 - _hudProject.y) * 0.5;
+    if (
+      _hudProject.z < -1 ||
+      _hudProject.z > 1 ||
+      x01 < -TEAMMATE_MARKER_SCREEN_MARGIN ||
+      x01 > 1 + TEAMMATE_MARKER_SCREEN_MARGIN ||
+      y01 < -TEAMMATE_MARKER_SCREEN_MARGIN ||
+      y01 > 1 + TEAMMATE_MARKER_SCREEN_MARGIN
+    ) {
+      continue;
+    }
+    markers.push({
+      label: b.ownerPlayer === null ? "CPU" : "ALLY",
+      hp01: Math.max(0, Math.min(1, b.hp / Math.max(1, b.maxHp))),
+      x01: Math.max(0, Math.min(1, x01)),
+      y01: Math.max(0, Math.min(1, y01)),
+    });
+    if (markers.length >= TEAMMATE_MARKER_LIMIT) break;
+  }
+  return markers;
 }
 
 // Pause handling (Start/Esc).
@@ -1266,7 +1351,7 @@ function stepBattle(dt: number): void {
   const presentation = currentBattlePresentation();
   const sceneState = battleSceneState(battle, presentation?.focus ?? localFocusBorg());
   battleScene.sync(sceneState.borgs, sceneState.projectiles, sceneState.focusUid, Boolean(presentation?.hud.meleeRange));
-  if (presentation) session.hud.update(presentation.hud);
+  updateHud();
 
   if (battle.state.result !== "ongoing") resolveBattle();
 }

@@ -6,6 +6,13 @@ import {
   moveDataCoverage,
   type Penetration,
 } from "./moveProperties.js";
+import {
+  runtimeMoveBindingsForProfile,
+  runtimeMoveCoverage,
+  runtimeShotPenetrationForBorgId,
+  usesContextualBResolver,
+} from "./moveRuntime.js";
+import { buildProfile, type BorgStats } from "./stats.js";
 
 let checks = 0;
 let failures = 0;
@@ -47,6 +54,38 @@ if (gg) {
 // moveByButton accessor.
 const bshot = moveByButton("pl0615", "B Shot");
 ok(bshot?.name === "Beam Gun", `moveByButton pl0615 "B Shot" -> Beam Gun (got ${bshot?.name})`);
+
+const G_RED_STATS: BorgStats = {
+  id: "pl0615",
+  name: "G RED",
+  energy: 300,
+  hp: "200/290",
+  defense: 3,
+  shot: 4,
+  attack: 4,
+  speed: 6,
+};
+
+const gRedRuntimeMoves = runtimeMoveBindingsForProfile(buildProfile(G_RED_STATS, 9));
+const gRedButtons = new Set(gRedRuntimeMoves.map((move) => move.button));
+ok(gRedButtons.has("B Shot"), "runtime move overlay includes G RED B Shot");
+ok(gRedButtons.has("B Attack"), "runtime move overlay includes G RED B Attack");
+ok(gRedButtons.has("B Charge"), "runtime move overlay includes G RED B Charge");
+ok(gRedButtons.has("X"), "runtime move overlay includes G RED X");
+const gRedBShot = gRedRuntimeMoves.find((move) => move.button === "B Shot");
+ok(gRedBShot?.ammo.lv1 === 5 && gRedBShot.ammo.lv10 === 8 && gRedBShot.ammo.current === 8, `runtime G RED B Shot ammo lv1/lv10/current = 5/8/8 (got ${JSON.stringify(gRedBShot?.ammo)})`);
+ok(gRedBShot?.commandStatus === "contextual-b", `runtime G RED B Shot commandStatus contextual-b (got ${gRedBShot?.commandStatus})`);
+ok(gRedBShot?.hitboxStatus === "projectile-radius", `runtime G RED B Shot hitbox projectile-radius (got ${gRedBShot?.hitboxStatus})`);
+const gRedX = gRedRuntimeMoves.find((move) => move.button === "X");
+ok(gRedX?.hitboxStatus === "generic-special-aoe", `runtime G RED X hitbox remains explicit generic-special-aoe blocker (got ${gRedX?.hitboxStatus})`);
+ok(usesContextualBResolver("pl0615"), "G RED participates in roster-wide contextual B resolver");
+ok(runtimeShotPenetrationForBorgId("pl0615", false) === "borgs", "runtime shot penetration reads G RED B Shot");
+ok(runtimeShotPenetrationForBorgId("pl0615", true) === "total", "runtime shot penetration reads G RED B Charge");
+
+const runtimeCoverage = runtimeMoveCoverage();
+ok(runtimeCoverage.borgsWithMoves >= 160, `runtime coverage borgs >= 160 (got ${runtimeCoverage.borgsWithMoves})`);
+ok(runtimeCoverage.moves >= 440, `runtime coverage moves >= 440 (got ${runtimeCoverage.moves})`);
+ok(runtimeCoverage.contextualBProfiles >= 90, `runtime contextual B profiles >= 90 (got ${runtimeCoverage.contextualBProfiles})`);
 
 // Penetration values are all within the enum (no stray labels leaked through).
 const validPen = new Set<Penetration | null>(["none", "borgs", "total", null]);

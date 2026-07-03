@@ -79,11 +79,17 @@ export {
   type ActorDataCombatStats,
 } from "./actorDataStats.js";
 export {
+  LEVEL_ROW_OFFSETS_804339E8,
   borgSourceStatsSummary,
   sourceStatsForBorgId,
   type BorgSourceStats,
   type BorgSourceWeaponSlot,
 } from "./sourceBorgStats.js";
+export {
+  challengeSideRanksForMode,
+  damageFormulaSummary,
+  type ChallengeDamageMode,
+} from "./damageFormula.js";
 export {
   actionProfileForProfile,
   startingAmmoForProfile,
@@ -115,6 +121,19 @@ export {
   type MoveSolidity,
   type Penetration,
 } from "./moveProperties.js";
+export {
+  runtimeMoveBindingForBorgId,
+  runtimeMoveBindingsForProfile,
+  runtimeMoveCoverage,
+  runtimeShotPenetrationForBorgId,
+  usesContextualBResolver,
+  type RuntimeMoveAction,
+  type RuntimeMoveAmmo,
+  type RuntimeMoveBinding,
+  type RuntimeMoveButton,
+  type RuntimeMoveCommandStatus,
+  type RuntimeMoveHitboxStatus,
+} from "./moveRuntime.js";
 
 // --- Borg-stats registry ----------------------------------------------------------------
 // The brief's createBattle signature is `createBattle(cfg): Battle`, but the sim needs the
