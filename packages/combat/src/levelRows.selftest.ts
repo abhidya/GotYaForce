@@ -116,7 +116,7 @@ function makeBorg(overrides: Partial<BorgRuntime> = {}): BorgRuntime {
 // --- G RED anchor at default level (ticket's mandated anchor) ------------------------------
 
 function testGRedAnchorDefaultLevel(): void {
-  // No level passed -> default row (DAT_804339e8[0]=2) -> HP 200 / ammo 5, EXACTLY reproducing
+  // No level passed -> default row (byte 0 -> row 2) -> HP 200 / ammo 5, EXACTLY reproducing
   // today's (pre-ATK-020) extracted values (behavior-notes.md ag live-verified anchor).
   const profile = buildProfile(G_RED);
   assertEqual(profile.maxHp, 200, "G RED (pl0615) default-level maxHp === 200 (live-verified anchor)");
@@ -126,64 +126,68 @@ function testGRedAnchorDefaultLevel(): void {
   assertEqual(sourceStats?.maxHp, 200, "sourceStatsForBorgId('pl0615') with no level === 200 (unchanged)");
   assertEqual(sourceStats?.weaponSlots[0].ammoCount, 5, "sourceStatsForBorgId('pl0615') weapon-0 ammoCount === 5 (unchanged)");
 
-  // Explicitly passing level 0 must reproduce the exact same row (DAT_804339e8[0] === 2).
+  // Explicitly passing level BYTE 0 (= display level 1) must reproduce the exact same default
+  // row (byte 0 + 2 === row 2), so the default and explicit-level-0 paths agree.
   const explicitLevel0 = buildProfile(G_RED, 0);
-  assertEqual(explicitLevel0.maxHp, 200, "buildProfile(G_RED, 0) maxHp === 200 (level 0 === default row)");
+  assertEqual(explicitLevel0.maxHp, 200, "buildProfile(G_RED, 0) maxHp === 200 (byte 0 -> row 2 === default)");
   assertEqual(explicitLevel0.level, 0, "buildProfile(G_RED, 0) sets BorgProfile.level === 0");
 }
 
-// --- Table-driven row-selection vs the verified JSON ---------------------------------------
+// --- Corrected level->row rule (row = levelByte + 2) vs the wiki's lv1/lv10 anchors ---------
 
-function testLevelTableDrivenRowSelection(): void {
-  // Cross-check every table entry against the verified level-row-offsets JSON baked into
-  // borgSourceStats.json (scripts/gen-level-row-offsets.mjs, citing behavior-notes.md ak).
-  assertEqual(LEVEL_ROW_OFFSETS_804339E8.length, 32, "DAT_804339e8 table has 32 entries");
-  assertEqual(LEVEL_ROW_OFFSETS_804339E8[0], 2, "DAT_804339e8[0] === 2 (ag/ak anchor)");
+function testMonotonicLevelProgression(): void {
+  // CORRECTED rule (behavior-notes (av)/(aw)): rowIndex = levelByte + 2 (display level + 1). The
+  // wiki's per-borg lv1/lv10 HP map to row[2]/row[11]; the curve is monotonic +10 HP/level for
+  // G RED (row[N] = 180 + N*10; research/decomp/data/borg-hp-stat-rows-802f2988.json
+  // tables.06.variants.15). This REPLACES the old DAT_804339e8[level] indexing, whose
+  // non-monotonic values ([2,2,8,6,0,...]) cannot be a level curve (HP would fall as you level).
+  //
+  // Sanity-check the retained table is still the non-monotonic raw dump (NOT used for rows now):
+  assertEqual(LEVEL_ROW_OFFSETS_804339E8[0], 2, "DAT_804339e8[0] === 2 (raw dump retained for reference)");
+  assertEqual(LEVEL_ROW_OFFSETS_804339E8[2], 8, "DAT_804339e8[2] === 8 (raw dump; NOT the row offset)");
 
-  // For every level in the table, sourceStatsForBorgId(id, level) must return the SAME row as
-  // directly indexing the borg's row table with that level's resolved offset.
-  for (let level = 0; level < LEVEL_ROW_OFFSETS_804339E8.length; level++) {
-    const expectedOffset = LEVEL_ROW_OFFSETS_804339E8[level] ?? 0;
-    const viaLevel = sourceStatsForBorgId("pl0615", level);
-    assertTrue(viaLevel !== null, `pl0615 resolves stats at level ${level}`);
-    // Cross-check against the level-0 default row scaled by known deltas: G RED's rows step by
-    // +10 HP per row offset starting at row[0]=180 (row[N] = 180 + N*10; see
-    // research/decomp/data/borg-hp-stat-rows-802f2988.json tables.06.variants.15).
-    const expectedHp = 180 + expectedOffset * 10;
-    assertEqual(viaLevel?.maxHp, expectedHp, `pl0615 level ${level} (offset ${expectedOffset}) maxHp === ${expectedHp}`);
+  // Wiki anchors: byte 0 (display lv1) -> row 2 -> HP 200; byte 9 (display lv10) -> row 11 -> 290.
+  assertEqual(sourceStatsForBorgId("pl0615", 0)?.maxHp, 200, "pl0615 byte 0 (lv1) -> row 2 -> HP 200 (wiki L1)");
+  assertEqual(sourceStatsForBorgId("pl0615", 9)?.maxHp, 290, "pl0615 byte 9 (lv10) -> row 11 -> HP 290 (wiki L10)");
+
+  // Full monotonic sweep across the 10 display levels (bytes 0..9): HP = 180 + (byte+2)*10.
+  let prev = -Infinity;
+  for (let levelByte = 0; levelByte <= 9; levelByte++) {
+    const expectedHp = 180 + (levelByte + 2) * 10;
+    const hp = sourceStatsForBorgId("pl0615", levelByte)?.maxHp ?? -1;
+    assertEqual(hp, expectedHp, `pl0615 byte ${levelByte} (row ${levelByte + 2}) maxHp === ${expectedHp}`);
+    assertTrue(hp > prev, `pl0615 byte ${levelByte} HP (${hp}) strictly greater than previous (${prev}) — monotonic`);
+    prev = hp;
   }
 }
 
-function testLevelClampsToTableBounds(): void {
-  // "clamped to the table's 32 entries" (ticket's Required behavior). A level far beyond the
-  // table must not throw and must clamp to the last entry (index 31 -> offset 1, per the
-  // verified table) rather than reading out of bounds.
-  const lastOffset = LEVEL_ROW_OFFSETS_804339E8[LEVEL_ROW_OFFSETS_804339E8.length - 1] ?? 0;
+function testLevelClampsToRowBounds(): void {
+  // Clamp to the borg's available rows (G RED has 20: rows 0..19). A level byte far beyond the
+  // rows must not throw and must clamp to the last row (index 19 -> HP 370) rather than reading
+  // out of bounds. (an) s6: out-of-range levels read neighbouring rows; clamping is the safe
+  // port choice, not a ROM-read claim.
   const clampedHigh = sourceStatsForBorgId("pl0615", 255);
-  const atLastIndex = sourceStatsForBorgId("pl0615", LEVEL_ROW_OFFSETS_804339E8.length - 1);
-  assertTrue(clampedHigh !== null, "level 255 (out of table bounds) does not throw / returns a value");
-  assertEqual(clampedHigh?.maxHp, atLastIndex?.maxHp, "level 255 clamps to the same row as the last table index");
-  assertEqual(clampedHigh?.maxHp, 180 + lastOffset * 10, "level 255 clamps to offset " + lastOffset);
+  assertTrue(clampedHigh !== null, "byte 255 (past the row table) does not throw / returns a value");
+  assertEqual(clampedHigh?.maxHp, 370, "byte 255 clamps to the last row (index 19, HP 370)");
 
-  // Negative levels clamp to index 0 (the default row) rather than wrapping/throwing.
+  // Negative bytes (nonsensical for an unsigned level) clamp to row 0 (the minimum stat row).
   const negativeLevel = sourceStatsForBorgId("pl0615", -5);
-  assertEqual(negativeLevel?.maxHp, 200, "negative level clamps to index 0 (offset 2, HP 200)");
+  assertEqual(negativeLevel?.maxHp, 180, "negative byte clamps to row 0 (HP 180)");
 }
 
 function testDifferentLevelSelectsDifferentRow(): void {
-  // A level whose table entry differs from level 0's must select a genuinely different row.
-  // Level 2 -> DAT_804339e8[2] === 8 (verified table), a different offset than level 0's 2.
-  assertEqual(LEVEL_ROW_OFFSETS_804339E8[2], 8, "DAT_804339e8[2] === 8 (precondition for this test)");
+  // Different level bytes must select genuinely different rows under the corrected rule.
+  // byte 0 -> row 2 -> HP 200; byte 5 (display lv6) -> row 7 -> HP 250.
   const level0 = sourceStatsForBorgId("pl0615", 0);
-  const level2 = sourceStatsForBorgId("pl0615", 2);
-  assertTrue(level0 !== null && level2 !== null, "both level 0 and level 2 resolve");
-  assertTrue(level0?.maxHp !== level2?.maxHp, "level 2 selects a different HP row than level 0 (offsets 2 vs 8 differ)");
-  assertEqual(level2?.maxHp, 180 + 8 * 10, "level 2 maxHp === row offset 8's HP (260)");
+  const level5 = sourceStatsForBorgId("pl0615", 5);
+  assertTrue(level0 !== null && level5 !== null, "both byte 0 and byte 5 resolve");
+  assertTrue(level0?.maxHp !== level5?.maxHp, "byte 5 selects a different HP row than byte 0 (rows 2 vs 7)");
+  assertEqual(level5?.maxHp, 180 + 7 * 10, "byte 5 maxHp === row 7's HP (250)");
 
   // buildProfile threads the same selection through BorgProfile.maxHp.
-  const profileLevel2 = buildProfile(G_RED, 2);
-  assertEqual(profileLevel2.maxHp, 260, "buildProfile(G_RED, 2).maxHp === 260 (offset 8 row)");
-  assertEqual(profileLevel2.level, 2, "buildProfile(G_RED, 2).level === 2");
+  const profileLevel5 = buildProfile(G_RED, 5);
+  assertEqual(profileLevel5.maxHp, 250, "buildProfile(G_RED, 5).maxHp === 250 (row 7)");
+  assertEqual(profileLevel5.level, 5, "buildProfile(G_RED, 5).level === 5");
 }
 
 function testBorgsWithoutMultiLevelDataFallBackToDefaultRow(): void {
@@ -253,8 +257,8 @@ export function runSelfTest(): number {
   checks = 0;
 
   testGRedAnchorDefaultLevel();
-  testLevelTableDrivenRowSelection();
-  testLevelClampsToTableBounds();
+  testMonotonicLevelProgression();
+  testLevelClampsToRowBounds();
   testDifferentLevelSelectsDifferentRow();
   testBorgsWithoutMultiLevelDataFallBackToDefaultRow();
   testDamageFormulaUnchangedByLevel();

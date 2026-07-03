@@ -2499,3 +2499,54 @@ confirms the plan's tagging of T1-T10 as human/Dolphin-in-the-loop tasks. To fin
 autonomously would require TAS-movie input injection (a separate tooling ticket); with a
 human at the controller the harness is ready as-is. Proven launch procedure appended to
 the trace plan.
+
+### (ay) Vampire lifesteal FULLY DECODED + level->row rule ported (row = levelByte + 2); nurse HP-write still absent from corpus (2026-07-03)
+
+**VAMPIRE LIFESTEAL (Vampire Knight 0x702, Vlad 0x70a) — complete three-part mechanic,
+DERIVED from corpus with the exact damage->HP path shown end to end:**
+
+1. **Accumulate on hit** — chunk_0003.c:7982-7986. When a borg whose id (obj+1000/0x3e8)
+   is 0x702 or 0x70a deals damage and its +0x83 gate byte is 0, the game does
+   `DAT_803b0638[slot*2] += (short)(damage/2)` where `slot = obj[0x3e4]` (the actor's
+   per-fighter slot index) and `damage` is the just-computed hit amount (uVar10). So a
+   vampire banks HALF of every damage point it inflicts into a per-slot accumulator.
+2. **Apply to own HP** — chunk_0003.c:6318-6323 (inside the per-actor loop 6296-6336).
+   For the same ids: `HP(+0x1c6) += DAT_803b0638[slot*2]`, then clamp
+   `if (maxHP(+0x1c4) <= HP) HP = maxHP`. The banked steal is drained into the vampire's
+   own HP each pass and capped at max — this is the visible lifesteal heal.
+3. **Passive self-drain** — chunk_0006.c:7900-7912. Gated on state bytes +0x18==1 &&
+   +0x19==2: a counter at +0x6ba decrements each frame; every 30th frame (0x1e) it does
+   `if (HP > 1) HP(+0x1c6) -= 1` (floor at 1 HP, never self-kills), and when the counter
+   reaches <1 it clears flag bit 0x4 at +0x8c4. This is the vampire's HP bleed while the
+   drain state is active — independent of the steal, so net HP is (steal - bleed).
+
+No standalone "is-vampire" flag exists; every branch keys off the id compare (0x702/0x70a)
+plus state bytes. `DAT_803b0638` is a per-slot short array (stride 2, indexed by obj[0x3e4]).
+Confidence DERIVED (exact id-gated arithmetic quoted; magnitudes are ROM constants:
+steal = damage/2, bleed = 1 HP / 30 frames). This closes the vampire half of the (ax)
+heal/drain dig.
+
+**NURSE heal HP-write — still NOT in corpus (negative result reaffirmed).** Re-traced the
+0x802d1130 dispatch (ax) and the Death Borg Theta 0x6a path through zz_0082824_
+(chunk_0012.c:2205, stores 0x6a=106 at skill+0x14) and FUN_80082ab8/zz_0088e50_
+(chunk_0012.c:6544, loops up to 8 targets at obj+0x99 calling zz_0006d80_) — but
+zz_0006d80_ (chunk_0000.c:1372) only releases graphics objects; no `+0x1c6 +=` heal write
+is reachable from the nurse path. The ONLY positive +0x1c6 writes in the whole corpus are
+the two vampire sites above (6320 steal, 7906 the -1 bleed). So the nurse heal amount is
+either in a truncated/inlined function or applied via a data-table-indexed dynamic pointer
+the decompiler didn't resolve. Nurse heal magnitude remains an OPEN item (Dolphin-trace
+candidate: watch +0x1c6 on a nurse-healed ally). Corrects nothing in (ax); confirms its
+"heal application not located" caveat.
+
+**LEVEL->ROW MAPPING ported + row-index bug fixed (packages/combat).** The (av)/(aw)
+empirical rule row = displayLevel+1 = **levelByte+2** (levelByte is 0-based, actor+0x3ec;
+200/203 roster validated vs wiki L1/L10) is now the implementation in
+sourceBorgStats.ts `rowOffsetForLevel`. This CORRECTS the earlier ATK-020 code that used
+`DAT_804339e8[level]` as the row offset: that table is [2,2,8,6,0,4,...] — non-monotonic,
+so it cannot be a level curve (HP would fall as a borg levels up). DAT_804339e8's true role
+is unconfirmed; it's retained/exported for reference only, NOT used for row selection. The
+level-aware path is UNUSED by live gameplay (all callers omit `level` -> default row 2), so
+this is zero-runtime-risk and makes the dormant path correct. levelRows.selftest rewritten:
+byte 0 (lv1) -> row 2 -> HP 200, byte 9 (lv10) -> row 11 -> HP 290, full monotonic sweep +
+clamp-to-rows; 42/42 pass. The 3 outliers pl0400/pl0507/pl0d01 (wiki non-"Normal Level-up
+Schedule" borgs) still deviate — per-borg schedules remain an OPEN item.

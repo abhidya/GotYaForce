@@ -59,9 +59,10 @@ export interface BorgProfile {
   hasMelee: boolean;
   rangePref: RangePref;
   /**
-   * ATK-020: the borg's level BYTE (behavior-notes.md ak: actor+0x3ec), when known. Selects the
-   * stat row via row = subIdx + variant*0x14 + DAT_804339e8[level] (ag). Undefined means "use
-   * the default row" (level 0, DAT_804339e8[0]=2) -- the SAME row every pre-ATK-020 profile was
+   * ATK-020: the borg's level BYTE (behavior-notes.md ak: actor+0x3ec, 0-based), when known.
+   * Selects the stat row via the CORRECTED empirical rule row = levelByte + 2 (behavior-notes
+   * (av)/(aw), 200/203 validated: display-1 -> row 2, display-10 -> row 11; monotonic). Undefined
+   * means "use the default row" (byte 0 -> row 2) -- the SAME row every pre-ATK-020 profile was
    * already built from, so omitting this field reproduces today's extracted values exactly
    * (G RED (pl0615) default row -> HP 200 / ammo 5, the live-verified anchor).
    * Stored value packing (colorVariant<<8 | level) is OBSERVED_GUIDE context from (an) section
@@ -128,12 +129,12 @@ function rangePrefOf(
 /**
  * Build the resolved per-borg profile consumed by movement/combat/AI.
  *
- * `level` (ATK-020, optional): the borg's level BYTE (behavior-notes.md ak, actor+0x3ec).
+ * `level` (ATK-020, optional): the borg's level BYTE (behavior-notes.md ak, actor+0x3ec, 0-based).
  * Omitting it (the default) reproduces every pre-ATK-020 caller's behavior EXACTLY -- it
- * resolves to the same default row (DAT_804339e8[0]=2) that sourceStatsForBorgId(id) already
- * returned with no level argument. Passing a level re-selects the stat row per (ag)'s
- * arithmetic (row = subIdx + variant*0x14 + DAT_804339e8[level]), clamped to the table's 32
- * entries by sourceStatsForBorgId itself.
+ * resolves to the same default row (byte 0 -> row 2) that sourceStatsForBorgId(id) already
+ * returned with no level argument. Passing a level re-selects the stat row per the CORRECTED
+ * empirical rule row = levelByte + 2 (behavior-notes (av)/(aw), 200/203 validated), clamped to
+ * the borg's available rows by sourceStatsForBorgId itself.
  */
 export function buildProfile(s: BorgStats, level?: number): BorgProfile {
   const { airJumpLevel, flyer } = parseJump(s.jump);

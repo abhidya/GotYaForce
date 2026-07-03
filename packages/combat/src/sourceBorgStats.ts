@@ -45,37 +45,44 @@ const DATA = borgSourceStatsData as unknown as BorgSourceStatsFile;
 
 export const borgSourceStatsSummary = DATA.verification;
 
-/** Re-verified DAT_804339e8 (level byte -> stat-row offset), baked in at generation time from
- *  research/decomp/data/level-row-offsets-804339e8.json (scripts/gen-level-row-offsets.mjs,
- *  citing behavior-notes.md (ak)) by scripts/gen-borg-source-stats.mjs. Exported so
- *  callers/tests can validate row selection against the SAME table this module uses, rather
- *  than a re-typed copy that could drift. */
+/** Raw DAT_804339e8 dump, baked from research/decomp/data/level-row-offsets-804339e8.json
+ *  (scripts/gen-level-row-offsets.mjs). Exported for reference/validation ONLY. NOTE: this
+ *  table's true role is UNCONFIRMED and it is NOT used for stat-row selection -- see the
+ *  correction on rowOffsetForLevel(). Its values ([2,2,8,6,0,4,...]) are non-monotonic, so it
+ *  cannot be the per-level row offset (that would make HP fall as a borg levels up). The (ag)
+ *  reading that treated it as the row offset conflated something; retained here so the true
+ *  role can be re-derived later without re-reading the ROM. */
 export const LEVEL_ROW_OFFSETS_804339E8: readonly number[] = DATA.levelRowOffsets.table;
 
 /**
- * Clamp a level byte's table lookup to the table's bounds (32 entries; ticket's "Required
- * behavior": "clamped to the table's 32 entries"). Levels beyond the authored range clamp to
- * the last entry rather than reading out of bounds -- matches (an) section 6's observation that
- * "levels beyond the authored row range read neighboring rows" (i.e. the ROM does not bounds-
- * check either; clamping here is the safe port-side choice, not a ROM-read claim).
+ * Map a level BYTE (actor+0x3ec, 0-based: a freshly-obtained "level 1" borg is byte 0, per the
+ * (ag) live anchor DAT_804339e8[0] and the save-format decode (au)) to a stat-row index.
+ *
+ * EMPIRICAL RULE (behavior-notes (av)/(aw), CORRECTED from the (ag)-era DAT_804339e8 reading):
+ *   rowIndex = levelByte + 2   (i.e. display level + 1: display-1 -> row 2, display-10 -> row 11)
+ * Validated 200/203 across the roster by cross-checking the wiki's lv1/lv10 HP against the
+ * extracted rows (row[2]=lv1 HP, row[11]=lv10 HP), and monotonic (G RED: 200,210,...,290). The 3
+ * outliers (pl0400/pl0507/pl0d01) are the wiki's non-"Normal Level-up Schedule" borgs -- their
+ * per-borg schedules are an open item; this function applies the normal-schedule rule to all.
+ * Clamped to the borg's available rows (glitch/out-of-range levels read neighbouring rows per
+ * (an) s6; clamping is the safe port choice, not a ROM-read claim).
  */
-function rowOffsetForLevel(level: number): number {
-  const table = LEVEL_ROW_OFFSETS_804339E8;
-  const idx = Math.max(0, Math.min(table.length - 1, Math.trunc(level)));
-  return table[idx] ?? 0;
+function rowOffsetForLevel(level: number, rowCount: number): number {
+  const idx = Math.trunc(level) + 2;
+  return Math.max(0, Math.min(rowCount - 1, idx));
 }
 
 /**
- * Look up a borg's source stats, level-aware (ATK-020). `level` is the raw level BYTE
- * (behavior-notes.md ak: actor+0x3ec), NOT a row offset -- this function performs the
- * DAT_804339e8[level] indirection itself via rowOffsetForLevel(). Omitting `level` (or passing
- * undefined) preserves the EXACT pre-ATK-020 behavior: the baked level-0 / row-offset-2 default
- * row (BorgProfile's default-level anchor, e.g. G RED (pl0615) -> HP 200 / ammo 5).
+ * Look up a borg's source stats, level-aware (ATK-020, row-index CORRECTED). `level` is the raw
+ * level BYTE (behavior-notes ak: actor+0x3ec, 0-based). Omitting `level` (or passing undefined)
+ * preserves the EXACT pre-ATK-020 default: the baked level-0 default row (row offset 2, e.g.
+ * G RED (pl0615) -> HP 200 / ammo 5). Passing level 0 resolves the same row (byte 0 -> row 2),
+ * so the default and explicit-level-0 paths agree.
  */
 export function sourceStatsForBorgId(id: string, level?: number): BorgSourceStats | null {
   const profile = DATA.profiles[id.toLowerCase()];
   if (!profile) return null;
   if (level === undefined) return profile;
-  const rowOffset = rowOffsetForLevel(level);
+  const rowOffset = rowOffsetForLevel(level, profile.rows.length);
   return profile.rows[rowOffset] ?? profile;
 }
