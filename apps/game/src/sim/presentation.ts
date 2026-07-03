@@ -1,5 +1,8 @@
 import type { Battle, BorgActionProfile, BorgRuntime, Projectile } from "@gf/combat";
+import { JUMP } from "@gf/combat";
 import type { BattleOutcome } from "@gf/missions";
+
+const BOOST_FUEL_FRAMES = JUMP.BOOST_FUEL_FRAMES;
 import type { AnimSlot } from "./battleScene.js";
 import type { HudState } from "../ui/index.js";
 
@@ -228,6 +231,10 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
       : 1,
     borgId: focus?.borgId ?? defaultBorgId,
     lockOn: Boolean(focus?.lockTarget),
+    // Boost gauge from the tracked boostFuel cooldown (movement.ts drains it while boost-
+    // flying, refills on land). Absent key = full fuel. BOOST_FUEL_FRAMES=90 is the drain
+    // budget; TUNED, so the gauge faithfully reads the sim rather than a ROM-timed value.
+    boost01: focus ? clamp01((focus.cooldowns?.["boostFuel"] ?? BOOST_FUEL_FRAMES) / BOOST_FUEL_FRAMES) : 1,
     timeRemainingFrames: st.timeRemainingFrames,
     alert: (st.energy[0] ?? 0) > 0 && (st.energy[0] ?? 0) <= allyMax * 0.25,
   };
