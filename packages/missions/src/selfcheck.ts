@@ -14,6 +14,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
 import { createChallengeRun, CHALLENGE_DIFFICULTIES, enemyTargetForBattle } from "./challenge.js";
+import { stageIdForBattleConfig, type CombatStageCatalog } from "./combat-config.js";
 import {
   CHALLENGE_ALLY_BUDGETS,
   CHALLENGE_ALLY_GROUP_CODES,
@@ -30,6 +31,7 @@ import {
   type ChallengeMode,
 } from "./challenge-reference.js";
 import { createAdventureCampaign } from "./adventure.js";
+import type { BattleConfig } from "./battle-config.js";
 import { computeResults, type BattleOutcome } from "./scoring.js";
 import { readBorgs, type BorgData } from "./borg-data.js";
 import type { StagesData } from "./adventure.js";
@@ -112,6 +114,42 @@ function assertChallengeReferenceInvariants(): void {
   assert(
     (CHALLENGE_GROUP_ROSTERS[50] as readonly string[]).includes("pl020a"),
     "group 50 must contain the CPU ally borg (pl020a) observed in the battle-1 RAM trace",
+  );
+}
+
+function assertChallengeStageFamilyResolution(): void {
+  const catalog = (ids: readonly string[]): CombatStageCatalog => {
+    const available = new Set(ids);
+    return {
+      defaultStageId: "st00",
+      hasStageCollision(stageId: string): boolean {
+        return available.has(stageId);
+      },
+    };
+  };
+  const cfg = (stageByte: number, stageSubtable: number): BattleConfig => ({
+    arena: "challenge",
+    forces: [],
+    meta: {
+      mode: "challenge",
+      index: 0,
+      stageByte,
+      stageSubtable,
+      stageVariant: 0,
+    },
+  });
+
+  assert(
+    stageIdForBattleConfig(cfg(0x0a, 1), catalog(["st0a", "st2a"])) === "st2a",
+    "Challenge stage selector must prefer exported subtable-family stages when present",
+  );
+  assert(
+    stageIdForBattleConfig(cfg(0x0b, 2), catalog(["st0b"])) === "st0b",
+    "Challenge stage selector must fall back to the base stage when a family stage is unavailable",
+  );
+  assert(
+    stageIdForBattleConfig({ arena: "challenge", forces: [] }, catalog(["st05"])) === "st00",
+    "Challenge arena without raw selector bytes should use the catalog default",
   );
 }
 
@@ -239,6 +277,7 @@ function loadData(): { borgs: BorgData; stages: StagesData } {
 export function main(): void {
   const { borgs, stages } = loadData();
   assertChallengeReferenceInvariants();
+  assertChallengeStageFamilyResolution();
   auditChallengeRunAgainstReference(borgs);
 
   console.log("=".repeat(70));

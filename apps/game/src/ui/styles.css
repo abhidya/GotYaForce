@@ -847,6 +847,14 @@
   paint-order: stroke fill;
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
 }
+.gf-load-memory-icon {
+  display: block;
+  width: clamp(42px, 7.8vw, 64px);
+  height: auto;
+  margin: 0 auto 10px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.28));
+}
 .gf-inline-a {
   display: inline-grid;
   place-items: center;

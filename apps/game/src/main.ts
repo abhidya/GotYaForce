@@ -429,15 +429,15 @@ const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
   melee_alt: [],
   shoot: [/^attack_s\d+$/, /^special_s\d+$/],
   special: [/^special_s\d+$/],
-  hit: [/^hit_react_s\d+$/, /^guard_s\d+$/],
-  // g4s0 ("down_s0") is the real knockdown/getting-up pose, DERIVED from the decomp
-  // cross-reference in research/format-specs/borg-animation-banks.md (high-confidence
-  // knockdown=g4s0, matching the prior human-labeled `down_candidate` anchor) and
-  // behavior-notes.md s4r. Previously this slot had no real match at all (the bake
-  // script mislabeled g4s0 as a generic `special_s0`, so "down" silently fell back to
-  // a hit/guard/death clip). hit_react/guard/death stay as TUNED fallbacks for borgs
-  // whose g4s0 bank is missing or not yet re-baked with the corrected label.
-  down: [/^down_s0$/, /^hit_react_s\d+$/, /^guard_s\d+$/, /^death$/],
+  // DERIVED_ROM: state dispatch `zz_004beb8_` plays hit-react through group0 slot 13/14
+  // (see research/decomp/data/state-anim-dispatch-802d3570.json). The bake labels g0s14 as
+  // pose_short; older g3 hit_react/guard banks stay as fallbacks for borgs where exported DAT
+  // remaps make them the only non-placeholder reaction.
+  hit: [/^pose_short$/, /^hit_react_s\d+$/, /^guard_s\d+$/],
+  // DERIVED_ROM: knockdown/down handler plays group0 slot 15. The exporter labels that slot
+  // move_s15; down_s0 remains a fallback for the old high-confidence g4s0 convention when it
+  // is the only non-placeholder exported down pose.
+  down: [/^move_s15$/, /^down_s0$/, /^hit_react_s\d+$/, /^guard_s\d+$/, /^death$/],
   // down_s0 (the knockdown/fall-down pose, high-confidence per borg-animation-banks.md)
   // is a TUNED last-resort death stand-in for borgs with no death/win_or_death bank at
   // all (e.g. pl0500/pl0503/pl0504 flame dragons, pl0c00-pl0c05 fortresses) — previously

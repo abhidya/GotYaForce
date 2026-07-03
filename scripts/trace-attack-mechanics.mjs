@@ -52,6 +52,7 @@
 //
 // Options: --preset T1..T10 (required unless --summarize <file> is given directly),
 //          --frames N (default 1800), --host/--port (default 127.0.0.1:5555),
+//          --tick-addr 0xADDR (default 0x8010d450, proven game-side per-frame input tick),
 //          --borg plXXXX, --scenario "text", --note "text", --out <file> (override output
 //          path), --base 0x… (skip base resolution).
 
@@ -386,6 +387,7 @@ async function connectWithRetry(gdb, attempts = 24, delayMs = 5000) {
   }
 }
 
+const DEFAULT_TICK_ADDR = 0x8010d450;
 const PAD_READ = 0x8021379c;
 // Battle/slot-table chain (behavior-notes.md §z, code-confirmed). Single-player fast path
 // reads *(u32*)0x803C4E84 directly; we use the full chain so this also works when the
@@ -420,6 +422,12 @@ async function readField(gdb, base, field) {
   return readerFor(field.type)(buf);
 }
 
+function parseAddress(raw, label) {
+  const value = Number.parseInt(raw, raw?.startsWith("0x") ? 16 : 10);
+  if (!Number.isInteger(value)) throw new Error(`${label} must be an address`);
+  return value >>> 0;
+}
+
 async function runCapture(argv) {
   const presetId = argv.get("preset");
   if (!presetId) throw new Error("--preset T1..T10 is required for a real capture");
@@ -428,6 +436,7 @@ async function runCapture(argv) {
   const frames = Number.parseInt(argv.get("frames") ?? "1800", 10);
   const host = argv.get("host") ?? "127.0.0.1";
   const port = Number.parseInt(argv.get("port") ?? "5555", 10);
+  const tickAddr = parseAddress(argv.get("tick-addr") ?? `0x${DEFAULT_TICK_ADDR.toString(16)}`, "--tick-addr");
   const borg = argv.get("borg") ?? "unknown";
   const scenario = argv.get("scenario") ?? "";
   const note = argv.get("note") ?? "";
@@ -461,8 +470,13 @@ async function runCapture(argv) {
     note,
     borgBase: `0x${base.toString(16)}`,
     borgBaseVia: via,
+    tickAddr: `0x${tickAddr.toString(16)}`,
+    tickKind: tickAddr === DEFAULT_TICK_ADDR ? "game-pad-normalization-cluster" : tickAddr === PAD_READ ? "pad-read" : "custom",
     padReadAddr: `0x${PAD_READ.toString(16)}`,
-    pairing: "pad buffer at PADRead entry = PREVIOUS frame's input; fields = state after that frame",
+    pairing:
+      tickAddr === PAD_READ
+        ? "pad buffer at PADRead entry = PREVIOUS frame's input; fields = state after that frame"
+        : "fields sampled on the proven game-side per-frame input/normalization tick at 0x8010d450",
     watchList: buildWatchList(preset),
     chase: preset.chase ?? null,
     limitations:
@@ -475,8 +489,24 @@ async function runCapture(argv) {
   out.write(JSON.stringify(meta) + "\n");
 
   const watchList = buildWatchList(preset);
-  const kind = await gdb.setBreak(PAD_READ);
-  console.log(`recording ${frames} frames for ${presetId} (${preset.title}) — perform the input recipe now`);
+  const kind = await gdb.setBreak(tickAddr);
+  let cleanedUp = false;
+  const cleanup = async () => {
+    if (cleanedUp) return;
+    cleanedUp = true;
+    await gdb.clearBreak(tickAddr, kind).catch(() => {});
+    await gdb.send("c").catch(() => {});
+    out.end();
+    gdb.close();
+  };
+  const onSignal = () => {
+    cleanup().finally(() => process.exit(130));
+  };
+  process.once("SIGINT", onSignal);
+  process.once("SIGTERM", onSignal);
+  console.log(
+    `recording ${frames} frames for ${presetId} (${preset.title}) at tick 0x${tickAddr.toString(16)} - perform the input recipe now`,
+  );
   let recorded = 0;
   let quietStreak = 0;
   try {
@@ -487,11 +517,11 @@ async function runCapture(argv) {
         quietStreak = 0;
       } catch {
         quietStreak += 1;
-        console.log(`  no frames for 30s (game paused/menus?) — ${recorded} recorded so far`);
-        if (quietStreak >= 6) throw new Error("no PADRead hits for 3 minutes; stopping with what we have");
+        console.log(`  no tick hits for 30s (game paused/menus?) - ${recorded} recorded so far`);
+        if (quietStreak >= 6) throw new Error("no tick hits for 3 minutes; stopping with what we have");
         continue;
       }
-      if (stop.pc !== PAD_READ) continue;
+      if (stop.pc !== tickAddr) continue;
 
       const fields = {};
       for (const field of watchList) {
@@ -512,10 +542,9 @@ async function runCapture(argv) {
       if (recorded % 300 === 0) console.log(`  ${recorded}/${frames} frames`);
     }
   } finally {
-    await gdb.clearBreak(PAD_READ, kind);
-    await gdb.send("c").catch(() => {});
-    out.end();
-    gdb.close();
+    process.removeListener("SIGINT", onSignal);
+    process.removeListener("SIGTERM", onSignal);
+    await cleanup();
   }
   console.log(`wrote ${recorded} frames to ${outPath}`);
   console.log(`next: node scripts/trace-attack-mechanics.mjs --summarize ${outPath}`);

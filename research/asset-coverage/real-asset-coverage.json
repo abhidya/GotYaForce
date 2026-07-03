@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-03T20:31:50.530Z",
+  "generatedAt": "2026-07-03T21:03:39.030Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -16,7 +16,7 @@
     "runtimeStageFallback": "st00",
     "runtimeAcceptsHexStageIds": false,
     "runtimeAcceptsExportedStageCatalog": true,
-    "runtimeChallengeStageSelector": false,
+    "runtimeChallengeStageSelector": true,
     "runtimeChallengeSpawnPools": true,
     "runtimeStageCollisionBounds": false,
     "runtimeStageTriangleCollision": false,
@@ -25,6 +25,7 @@
     "runtimeProjectileFxFromExportedTextures": true,
     "runtimeBattleHudUsesAvailableFontAndRoundel": true,
     "runtimeBattleHudUsesAsIcon": false,
+    "runtimeLoadBoxUsesAsIcon": true,
     "runtimeLockTargetUsesArrowGeometry": true,
     "commonBattleArchiveInventoried": true,
     "commonBattleDataExactMatches": 2,
@@ -243,15 +244,25 @@
           "exists": true
         },
         {
+          "path": "user-data/GG4E/afs_data/root/as_icon.tpl",
+          "exists": true
+        },
+        {
           "path": "user-data/GG4E/afs_data/root/font_00.tpl",
           "exists": true
         }
       ],
       "nextReplacement": "Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/LoadBoxData.ts:22",
+      "fileRef": "apps/game/src/ui/screens/LoadBoxData.ts:23",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
+        {
+          "kind": "named-texture",
+          "symbol": "ASSETS.memoryCardSlot",
+          "publicPath": "/ui/tpl/as_icon/image_00_CI8.png",
+          "exists": true
+        },
         {
           "kind": "mounted-ui-scene",
           "publicPath": "/ui/scenes/box00/model_00.dae",
@@ -262,12 +273,12 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 27
+          "line": 28
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 28
+          "line": 29
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -977,7 +988,7 @@
       "challengeStageSelector": {
         "dolStageBytes": true,
         "preservesSelectorMeta": true,
-        "resolvesSubtableFamilies": false,
+        "resolvesSubtableFamilies": true,
         "baseStageIds": [
           "st80",
           "st1c",
@@ -996,6 +1007,7 @@
           "st0e"
         ],
         "adapterRef": "packages/missions/src/combat-config.ts:31",
+        "bootstrapRef": "apps/game/src/sim/battleBootstrap.ts:11",
         "challengeRef": "packages/missions/src/challenge-reference.ts:32"
       },
       "challengeSpawnPools": {

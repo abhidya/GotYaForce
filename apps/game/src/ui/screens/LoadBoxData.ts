@@ -6,6 +6,7 @@
  * next Challenge state while preserving the native UX step.
  */
 
+import { ASSETS } from "../assets.js";
 import { el, legendItem } from "../dom.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
@@ -29,6 +30,10 @@ export function createLoadBoxData(
   root.appendChild(el("div", { class: "gf-load-rule" }));
   root.appendChild(
     el("div", { class: "gf-load-copy" }, [
+      el("img", {
+        class: "gf-load-memory-icon",
+        attrs: { src: ASSETS.memoryCardSlot, alt: "", "aria-hidden": "true" },
+      }),
       el("div", { text: "Insert Memory Card into Slot A" }),
       el("div", {}, ["and press the ", el("span", { class: "gf-inline-a", text: "A" }), " Button."]),
     ]),

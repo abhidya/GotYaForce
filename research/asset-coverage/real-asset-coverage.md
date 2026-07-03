@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-03T20:31:50.530Z
+Generated: 2026-07-03T21:03:39.030Z
 
 ## Summary
 
@@ -19,6 +19,7 @@ Generated: 2026-07-03T20:31:50.530Z
 - Runtime projectile FX from exported textures: yes
 - Runtime battle HUD uses exported font/roundel: yes
 - Runtime battle HUD uses as_icon: no (manifest marks as_icon low-confidence for battle HUD)
+- Runtime Load Box Data uses as_icon memory-card asset: yes
 - Runtime lock targets use arrow_mdl geometry: yes
 - Common battle archive inventoried: yes
 - Common battle data exact actor matches: 2
@@ -55,7 +56,7 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 | main-menu | real-assets-only | ASSETS.mainMenuOption<br>/ui/scenes/tl00/model_00.dae<br>/ui/scenes/optn00/model_00.dae | none | Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels. |
 | select-difficulty | mixed-real-assets-handcoded-surface | /ui/scenes/vsel00/model_00.dae | css-grid-backdrop:60<br>css-gradient-surface:28<br>css-menu-gear:83<br>css-option-pad:82<br>runtime-text-layout:63 | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
 | select-players | mixed-real-assets-handcoded-surface | /ui/scenes/vsel01/model_00.dae | css-grid-backdrop:48<br>css-option-pad:74<br>css-label-pill:75<br>handcoded-player-silhouette:28<br>runtime-text-layout:32 | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
-| load-box-data | mixed-real-assets-handcoded-surface | /ui/scenes/box00/model_00.dae | css-grid-backdrop:27<br>runtime-text-layout:28 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
+| load-box-data | mixed-real-assets-handcoded-surface | ASSETS.memoryCardSlot<br>/ui/scenes/box00/model_00.dae | css-grid-backdrop:28<br>runtime-text-layout:29 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
 | select-force | mixed-real-assets-handcoded-surface | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>/models/pl0615/model_00.glb<br>/ui/scenes/entry00/model_00.dae | css-grid-backdrop:132<br>css-force-platform:140<br>runtime-text-layout:135 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
 | force-builder | mixed-real-assets-handcoded-surface | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath<br>/ui/scenes/unitall/model_00.dae | handcoded-force-grid:93<br>handcoded-force-ring:105<br>handcoded-force-slot:182<br>runtime-text-layout:88 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
 | battle-intro | mixed-real-assets-handcoded-surface | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:52 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
@@ -89,7 +90,7 @@ Runtime loader refs: apps/game/src/main.ts:791, apps/game/src/main.ts:null, apps
 
 Runtime collision parser: none (bounds not wired, triangles not wired, walls wired, ceilings wired)
 
-Challenge stage selector: not fully wired (packages/missions/src/challenge-reference.ts:32; packages/missions/src/combat-config.ts:31).
+Challenge stage selector: DOL selector bytes wired to exported runtime stage routing (packages/missions/src/challenge-reference.ts:32; packages/missions/src/combat-config.ts:31).
 Challenge CPU spawn pools: generated from recovered 0x80380804 table (22 groups, 145 borg ids; packages/missions/src/challenge-spawn-pools.generated.ts:32; packages/missions/src/challenge.ts:379).
 
 Runtime authorizes literal exported st## ids, uses DOL-backed Challenge selector metadata to route exported stage subtable families when present, and builds CPU rosters from the recovered Challenge spawn-pool table; unverified Adventure/human arena names still fall back to st00.
@@ -125,7 +126,7 @@ Gotcha Force does NOT ship its in-battle HUD overlay (the green/red energy meter
 | faceIconRoundel | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_001) | unknown | medium | yes | Circular Borg face icon/roundel used as an in-battle character marker, plus a small icon strip (see faceIconStrip). |
 | faceIconStrip | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_000) | unknown | low | no | Small icon strip from the face-marker model atlas. |
 
-as_icon public export: /ui/tpl/as_icon/image_00_CI8.png (exists). It remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.
+as_icon public export: /ui/tpl/as_icon/image_00_CI8.png (exists). It is wired on Load Box Data as a memory-card/Slot-A icon; it remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.
 
 arrow_mdl geometry binding: source archive exists, HSDRaw OBJ exists, generated module exists, runtime enemy/ally lock markers use geometry yes (84 verts, 72 tris). Original GX/material colors remain trace-pending, so runtime tints are still used.
 

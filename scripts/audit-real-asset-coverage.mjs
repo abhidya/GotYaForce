@@ -43,7 +43,7 @@ const screenDefs = [
     file: "apps/game/src/ui/screens/LoadBoxData.ts",
     exportName: "createLoadBoxData",
     originalMode: "Challenge",
-    expectedSourceArchives: ["box00_mdl.arc", "firstld.pzz", "font_00.tpl"],
+    expectedSourceArchives: ["box00_mdl.arc", "firstld.pzz", "as_icon.tpl", "font_00.tpl"],
     nextReplacement: "Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets.",
   },
   {
@@ -111,6 +111,7 @@ const assetConstants = {
     gotchaBoxButton: "/ui/hsd/box00_mdl/texture_003_CMP.png",
     getStrip: "/ui/hsd/gets00_mdl/texture_000_CI4.png",
     entryControls: "/ui/hsd/entry00_mdl/texture_002_CI8.png",
+    memoryCardSlot: "/ui/tpl/as_icon/image_00_CI8.png",
     unitAllAtlas: "/ui/hsd/unitall_mdl/texture_008_CI8.png",
     briefingVs: "/ui/hsd/brif00_mdl/texture_000_IA4.png",
     briefingNames: "/ui/hsd/brif00_mdl/texture_001_CI4.png",
@@ -279,6 +280,7 @@ function inspectStages() {
   const plan = readJson("research/asset-inventory/stage-export-plan.json");
   const stageCodeEvidence = readJson("research/asset-inventory/stage-code-evidence.json");
   const adapter = readText("apps/game/src/sim/adapter.ts");
+  const battleBootstrap = readText("apps/game/src/sim/battleBootstrap.ts");
   const stageCatalog = readText("apps/game/src/stages/catalog.generated.ts");
   const main = readText("apps/game/src/main.ts");
   const missionCombatConfig = readText("packages/missions/src/combat-config.ts");
@@ -340,9 +342,11 @@ function inspectStages() {
           missionCombatConfig.includes("stageIdForBattleConfig") &&
           missionCombatConfig.includes("stageSubtable") &&
           missionCombatConfig.includes("* 0x20") &&
-          main.includes("stageIdForBattleConfig(config, EXPORTED_STAGE_CATALOG_ADAPTER)"),
+          battleBootstrap.includes("stageIdForBattleConfig(options.config, options.stageCatalog)") &&
+          main.includes("stageCatalog: EXPORTED_STAGE_CATALOG_ADAPTER"),
         baseStageIds: [...new Set([...challengeReference.matchAll(/0x([0-9a-f]{2})/gi)].map((match) => `st${match[1].toLowerCase()}`))],
         adapterRef: `packages/missions/src/combat-config.ts:${lineOf(missionCombatConfig, "stageIdForBattleConfig")}`,
+        bootstrapRef: `apps/game/src/sim/battleBootstrap.ts:${lineOf(battleBootstrap, "stageIdForBattleConfig")}`,
         challengeRef: `packages/missions/src/challenge-reference.ts:${lineOf(challengeReference, "CHALLENGE_STAGE_BYTES")}`,
       },
       challengeSpawnPools: {
@@ -872,6 +876,11 @@ function buildReport() {
     runtimeBattleHudUsesAvailableFontAndRoundel:
       hudAssetEvidence.battleHudUsesFontAscii && hudAssetEvidence.battleHudUsesFaceRoundel,
     runtimeBattleHudUsesAsIcon: hudAssetEvidence.battleHudUsesAsIcon,
+    runtimeLoadBoxUsesAsIcon: screens.some(
+      (screen) =>
+        screen.id === "load-box-data" &&
+        screen.realExportedAssetsUsed.some((asset) => asset.symbol === "ASSETS.memoryCardSlot"),
+    ),
     runtimeLockTargetUsesArrowGeometry:
       hudAssetEvidence.arrowGeometry.generatedFromArchive &&
       hudAssetEvidence.arrowGeometry.battleSceneUsesGeometry,
@@ -982,6 +991,7 @@ function renderMarkdown(report) {
   add(`- Runtime projectile FX from exported textures: ${report.summary.runtimeProjectileFxFromExportedTextures ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses exported font/roundel: ${report.summary.runtimeBattleHudUsesAvailableFontAndRoundel ? "yes" : "no"}`);
   add(`- Runtime battle HUD uses as_icon: ${report.summary.runtimeBattleHudUsesAsIcon ? "yes" : "no"} (manifest marks as_icon low-confidence for battle HUD)`);
+  add(`- Runtime Load Box Data uses as_icon memory-card asset: ${report.summary.runtimeLoadBoxUsesAsIcon ? "yes" : "no"}`);
   add(`- Runtime lock targets use arrow_mdl geometry: ${report.summary.runtimeLockTargetUsesArrowGeometry ? "yes" : "no"}`);
   add(`- Common battle archive inventoried: ${report.summary.commonBattleArchiveInventoried ? "yes" : "no"}`);
   add(`- Common battle data exact actor matches: ${report.summary.commonBattleDataExactMatches}`);
@@ -1085,7 +1095,7 @@ function renderMarkdown(report) {
     ]),
   );
   add();
-  add(`as_icon public export: ${report.hudAssetEvidence.asIconPublicPath} (${report.hudAssetEvidence.asIconExists ? "exists" : "missing"}). It remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.`);
+  add(`as_icon public export: ${report.hudAssetEvidence.asIconPublicPath} (${report.hudAssetEvidence.asIconExists ? "exists" : "missing"}). It is wired on Load Box Data as a memory-card/Slot-A icon; it remains unwired in BattleHud because the HUD manifest classifies its battle-HUD role as low-confidence.`);
   add();
   const arrow = report.hudAssetEvidence.arrowGeometry;
   add(`arrow_mdl geometry binding: source archive ${arrow.sourceArchiveExists ? "exists" : "missing"}, HSDRaw OBJ ${arrow.sourceObjExists ? "exists" : "missing"}, generated module ${arrow.generatedModuleExists ? "exists" : "missing"}, runtime enemy/ally lock markers use geometry ${arrow.battleSceneUsesGeometry ? "yes" : "no"} (${arrow.vertexCount ?? "unknown"} verts, ${arrow.triangleCount ?? "unknown"} tris). Original GX/material colors remain trace-pending, so runtime tints are still used.`);
