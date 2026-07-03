@@ -28,7 +28,7 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 | Combat: statuses / hyper / fusion | shells only | traces T3/T8 (nurse heal-write not in corpus) |
 | Physics: movement/jump/dash | TUNED constants | trace-fit from goldens |
 | UI: screens | ~9 real screens | 6 modes are dead menu entries |
-| UI: HUD | ~75% (charge✓, cursor✓) | X-ammo (in progress), burst, jump gauges |
+| UI: HUD | ~90% (charge✓ cursor✓ X-ammo✓ boost✓ jump✓) | burst meter only (fill data is T3-blocked) |
 | Challenge flow | ~85% DERIVED (winner-mask✓) | 3-phase deploy (mostly moot) |
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
 | Assets: animation playback | ~85% (dispatch mapped, ba) | verify GLB banks vs ROM group7bit, then rewire hit/down |
@@ -108,13 +108,13 @@ SelectForce, ForceBuilder, BattleIntro, Results, PauseMenu.
 |---|---|---|
 | GF energy bars, HP, alert roundel | DONE | — |
 | Boost gauge | DONE (fixed 2026-07-03) | now driven by boostFuel |
-| B ammo | PARTIAL | single pool |
-| **X ammo (separate)** | MISSING | X is cooldown-only; needs weapon-cell 1 (survey #2) |
+| B ammo | DONE | weapon cell 0 |
+| X ammo (separate) | DONE (3b72ee06) | weapon cell 1 + cyan pill/digit readout |
 | Charge gauge | DONE (5010cc64) | orange meter above reload pill; flares at full |
 | Target reticle color | DONE (5010cc64) | yellow→red at melee range (meleeRange field) |
-| **Power Burst meter** | MISSING | BLOCKED trace T3 |
-| Jump gauge | MISSING | multi-level jump readout |
-| Target cursor yellow→red | MISSING | no meleeMode field; computable from lock+distance |
+| **Power Burst meter** | MISSING | BLOCKED trace T3 (damage-fill data not in port) |
+| Jump gauge | DONE (32ca8c4a) | multi-level air-jump pips under boost gear |
+| Target cursor yellow→red | DONE (5010cc64) | meleeRange field drives reticle tint |
 
 **Controls (adapter.ts):** A/B/X/Y/dash/lock all bound. Gaps vs (ao): L-button target-switch
 (R only), Z hold-lock (modeled as press-cycle), double-tap evade (Shift stand-in), air recovery
