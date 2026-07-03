@@ -20,9 +20,11 @@
  * ROM command type byte (actor+0x591 dispatch value; also observed written at actor+0x585
  * by the decision testers under `FUN_800699d8`, chunk_0009.c:220+).
  *
- * Numeric values mirror the ROM byte range 0-7 exactly (do not renumber). Only values 1, 2,
- * 4, 5, 6 have DERIVED_ROM meaning below; 0, 3, and 7 are BLOCKED (never observed set by a
- * decision tester in the corpus read, or observed but not classified into a dispatch family).
+ * Numeric values mirror the ROM byte range 0-7 exactly (do not renumber). UPDATE (behavior-notes
+ * (bd)): the decision testers under `FUN_800699d8` write actor+0x585 ∈ {0,1,2,3,5} — value 3 is
+ * now DERIVED (the CHARGED type, tester zz_0069bf0_ from input bit 0x400). Types 4 and 6 are NOT
+ * tester-written; they arise later at the +0x591 dispatch stage (so the older "testers write
+ * 4/5/6" note was imprecise). Values 0 and 7 remain BLOCKED (never observed set).
  */
 export enum AttackCommandType {
   /** BLOCKED: never observed written by a decision tester in the corpus read (this audit).
@@ -43,10 +45,11 @@ export enum AttackCommandType {
    * did not establish what differentiates them (e.g. combo step vs. a separate melee move).
    */
   Melee2 = 2,
-  /** BLOCKED: attested as a settable command type (task brief / ticket ATK-001 lists {1,2,3,5}
-   *  as the observed set at actor+0x585), but this audit's corpus read did not independently
-   *  find the tester that writes 3, nor its dispatch-family classification (not 1/2 melee, not
-   *  4/5/6 ranged per `FUN_8005d494`). Do not invent a meaning. */
+  /** CHARGED command type. DERIVED_ROM (behavior-notes (bd)): written to actor+0x585 by tester
+   *  `zz_0069bf0_` from bit 0x400 of the transformed input word actor+0x5d4, and it sets the
+   *  charged flag at actor+0x595. So type 3 is the "charged/forced" command variant (kept named
+   *  Unmapped3 only to preserve the ROM byte value; its meaning is now known). Its dispatch
+   *  family at +0x591 is resolved later at the +0x591 stage rather than by `FUN_8005d494`. */
   Unmapped3 = 3,
   /**
    * Ranged family. DERIVED_ROM: consumed as a ranged-family value (actor+0x591 == 4) by the
@@ -115,11 +118,12 @@ export enum AttackCommandSubtype {
    * citation from the ticket evidence — cited, not invented.
    */
   AirElevated4 = 4,
-  /** BLOCKED: charged-ranged is the SUSPECTED meaning (subtype 5 is set alongside a gate on
-   *  `FLOAT_8043762c < actor+0x6a4`, chunk_0009.c:555-556, in the same tester family that also
-   *  writes AirElevated4), but the numeric threshold (`FLOAT_8043762c`) is undumped and the
-   *  correspondence between +0x586 values and +0x591 dispatch is not confirmed (mechanic A
-   *  unknowns). Do not treat as confirmed "charged ranged" — reserved slot only. */
+  /** CHARGED-RANGED subtype. DERIVED_ROM (behavior-notes (bd)): subtype 5 is set at actor+0x586
+   *  by `zz_0069fe0_` (ranged path) when the charge timer is positive (`0.0 < actor+0x6a4`),
+   *  confirming the charged-ranged meaning the earlier read only SUSPECTED. CORRECTION (bd): the
+   *  gate constant `FLOAT_8043762c` = 0.0 (DOL-read, anchor-validated) — it is a positive-timer
+   *  gate (`0.0 < timer`), NOT a distance/melee threshold. (Named Unmapped5 only to preserve the
+   *  ROM byte value.) */
   Unmapped5 = 5,
 }
 
