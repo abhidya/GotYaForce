@@ -8,7 +8,14 @@
 //   node scripts/run-attack-schema-tests.mjs
 // main()/runSelfTest() return an exit code (0 = pass).
 
-import { AttackCommandSubtype, AttackCommandType, COMMAND_FAMILY } from "./command.js";
+import {
+  AttackCommandSubtype,
+  AttackCommandType,
+  COMMAND_FAMILY,
+  COMMAND_INPUT_BITS,
+  inputRequestsBurst,
+  resolveCommandType,
+} from "./command.js";
 import { stepCooldowns } from "./combat.js";
 import { DASH, JUMP, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
 import { movementContextOf } from "./movement.js";
@@ -155,6 +162,43 @@ function testAttackCommandShape(): void {
   assertEqual(cmd.subtype, 4, "AttackCommand.subtype literal matches enum value");
 }
 
+function testResolveCommandType(): void {
+  // Single-bit selection (behavior-notes (bd), verified chunk_0009.c tester bits).
+  assertEqual(resolveCommandType(COMMAND_INPUT_BITS.RANGED), AttackCommandType.Ranged5, "bit 0x1000 -> Ranged5");
+  assertEqual(resolveCommandType(COMMAND_INPUT_BITS.CHARGED), AttackCommandType.Unmapped3, "bit 0x400 -> charged type 3");
+  assertEqual(resolveCommandType(COMMAND_INPUT_BITS.SECONDARY), AttackCommandType.Melee2, "bit 0x80 -> type 2 (X)");
+  assertEqual(resolveCommandType(COMMAND_INPUT_BITS.MELEE_A), AttackCommandType.Melee1, "bit 0x20 -> Melee1");
+  assertEqual(resolveCommandType(COMMAND_INPUT_BITS.MELEE_B), AttackCommandType.Melee1, "bit 0x40 -> Melee1");
+  assertEqual(resolveCommandType(0), null, "no attack bit -> null");
+  assertEqual(resolveCommandType(COMMAND_INPUT_BITS.BURST), null, "only Y-burst bit -> null (not a +0x585 type)");
+
+  // Tester PRIORITY (FUN_800699d8:228-238, first non-zero wins): RANGED > CHARGED > SECONDARY > MELEE.
+  assertEqual(
+    resolveCommandType(COMMAND_INPUT_BITS.RANGED | COMMAND_INPUT_BITS.MELEE_A),
+    AttackCommandType.Ranged5,
+    "ranged+melee -> Ranged5 (ranged tester wins)",
+  );
+  assertEqual(
+    resolveCommandType(COMMAND_INPUT_BITS.CHARGED | COMMAND_INPUT_BITS.SECONDARY | COMMAND_INPUT_BITS.MELEE_B),
+    AttackCommandType.Unmapped3,
+    "charged+secondary+melee -> charged (charged beats secondary/melee)",
+  );
+  assertEqual(
+    resolveCommandType(COMMAND_INPUT_BITS.SECONDARY | COMMAND_INPUT_BITS.MELEE_A),
+    AttackCommandType.Melee2,
+    "secondary+melee -> type 2 (secondary beats melee)",
+  );
+
+  // Burst is a separate path, and coexists with an attack type.
+  assertEqual(inputRequestsBurst(COMMAND_INPUT_BITS.BURST), true, "Y bit -> burst requested");
+  assertEqual(inputRequestsBurst(COMMAND_INPUT_BITS.RANGED), false, "ranged bit alone -> no burst");
+  assertEqual(
+    resolveCommandType(COMMAND_INPUT_BITS.BURST | COMMAND_INPUT_BITS.MELEE_A),
+    AttackCommandType.Melee1,
+    "burst+melee -> Melee1 type still resolves (burst is separate)",
+  );
+}
+
 // --- ATK-004: movement-context tests -------------------------------------------------------
 
 function testStandingContext(): void {
@@ -281,6 +325,7 @@ export function runSelfTest(): number {
   testCommandFamilyTable();
   testCommandEnumValuesMatchRom();
   testAttackCommandShape();
+  testResolveCommandType();
 
   testStandingContext();
   testGroundDashContext();

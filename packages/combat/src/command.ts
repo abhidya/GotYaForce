@@ -128,9 +128,59 @@ export enum AttackCommandSubtype {
 }
 
 /** A single resolved attack command: (type, subtype) pair, mirroring the ROM's
- *  actor+0x591/+0x586 command state. Schema only — nothing in the sim constructs one of
- *  these yet (that is ATK-003, blocked on trace T1). */
+ *  actor+0x591/+0x586 command state. The TYPE resolver below is now implemented from
+ *  behavior-notes (bd) (T1 type-stage no longer trace-blocked); the SUBTYPE stage is
+ *  state-dependent and still schema-only. Not yet consumed by stepAttacks (that wiring is the
+ *  ATK-003 refactor). */
 export interface AttackCommand {
   type: AttackCommandType;
   subtype: AttackCommandSubtype;
+}
+
+/**
+ * Transformed-input-word (actor+0x5d4) bits that the ROM's decision testers map to command
+ * types (behavior-notes (bd), verified chunk_0009.c). Each constant is one tester's bit.
+ */
+export const COMMAND_INPUT_BITS = {
+  /** bit 0x20 → type 1 melee (zz_0069a88_, contextual via +0x748 proximity / +0x58e). */
+  MELEE_A: 0x20,
+  /** bit 0x40 → type 1 melee (zz_0069b10_, gated by +0x748/+0x58e/+0x7d2). */
+  MELEE_B: 0x40,
+  /** bit 0x80 → type 2 (zz_0069b98_) — X / secondary weapon. */
+  SECONDARY: 0x80,
+  /** bit 0x400 → type 3 charged (zz_0069bf0_, sets the +0x595 charged flag). */
+  CHARGED: 0x400,
+  /** bit 0x1000 → type 5 ranged (zz_0069c50_; zz_0069cb0_ is the live-target-gated variant). */
+  RANGED: 0x1000,
+  /** bit 0x200 (Y) → Power Burst (FUN_80069814, +0x6fb=6) — NOT a +0x585 command type. */
+  BURST: 0x200,
+} as const;
+
+/**
+ * Resolve the command TYPE (actor+0x585) from the transformed input word, mirroring the ROM's
+ * tester PRIORITY under FUN_800699d8 (chunk_0009.c:228-238, first non-zero tester wins):
+ *   zz_0069cb0_ (ranged, live-target) → zz_0069c50_ (ranged) → zz_0069bf0_ (charged) →
+ *   zz_0069b98_ (secondary) → zz_0069b10_ (melee) → zz_0069a88_ (melee).
+ * So RANGED > CHARGED > SECONDARY > MELEE when multiple bits are set. Returns null when no attack
+ * bit is set (or only the Y-burst bit 0x200, handled separately, not as a +0x585 type).
+ *
+ * NOTE: the two ranged testers and the two melee testers additionally gate on actor STATE
+ * (cb0 needs a live target actor+0x4a0; a88/b10 gate on proximity +0x748), which the input word
+ * alone does not carry — this resolver returns the type the input bits SELECT; a caller with the
+ * actor state applies the live-target/proximity refinement (the ranged live-target split and the
+ * B near/far melee/shot contextual rule from (ao)). The SUBTYPE (+0x586) is a separate
+ * state-dependent stage (zz_0069ea4_ melee / zz_0069fe0_ charged-ranged) — not resolved here.
+ */
+export function resolveCommandType(inputWord: number): AttackCommandType | null {
+  if (inputWord & COMMAND_INPUT_BITS.RANGED) return AttackCommandType.Ranged5;
+  if (inputWord & COMMAND_INPUT_BITS.CHARGED) return AttackCommandType.Unmapped3; // charged type 3
+  if (inputWord & COMMAND_INPUT_BITS.SECONDARY) return AttackCommandType.Melee2; // type 2 (X/secondary)
+  if (inputWord & (COMMAND_INPUT_BITS.MELEE_A | COMMAND_INPUT_BITS.MELEE_B)) return AttackCommandType.Melee1;
+  return null;
+}
+
+/** True when the input word requests a Power Burst (Y, bit 0x200) — a separate path from the
+ *  attack-command types (FUN_80069814, behavior-notes (aj)/(bd)). */
+export function inputRequestsBurst(inputWord: number): boolean {
+  return (inputWord & COMMAND_INPUT_BITS.BURST) !== 0;
 }

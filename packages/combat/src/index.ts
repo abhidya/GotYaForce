@@ -23,7 +23,15 @@ export {
   type Vec3,
 } from "@gf/physics";
 export * from "./types.js";
-export { AttackCommandType, AttackCommandSubtype, COMMAND_FAMILY, type AttackCommand } from "./command.js";
+export {
+  AttackCommandType,
+  AttackCommandSubtype,
+  COMMAND_FAMILY,
+  COMMAND_INPUT_BITS,
+  resolveCommandType,
+  inputRequestsBurst,
+  type AttackCommand,
+} from "./command.js";
 export { movementContextOf, type MovementContext } from "./movement.js";
 export {
   buildProfile,
