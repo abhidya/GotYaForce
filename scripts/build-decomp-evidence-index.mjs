@@ -11,6 +11,7 @@ const outJson = path.join(outDir, "function-evidence-index.json");
 const outMd = path.join(outDir, "function-evidence-index.md");
 
 const knownInferredNames = new Map([
+  ["8000a004", "dispatch_pending_io_request"],
   ["8002bb14", "battle_frame_target_action_dispatch"],
   ["8002cb20", "mutual_actor_contact_mask_update"],
   ["8002d7c4", "collision_hit_pair_pass_active_vs_borgs"],
@@ -27,11 +28,52 @@ const knownInferredNames = new Map([
   ["8006817c", "apply_actor_param_tier_delta_127"],
   ["800681e4", "apply_actor_param_tier_delta_63"],
   ["8006826c", "refresh_actor_param_tier_table"],
+  ["8008c3a0", "set_global_menu_mode"],
+  ["8008c3ac", "dispatch_global_menu_mode"],
+  ["8008cb64", "global_menu_mode_00_render"],
+  ["8008cec8", "global_menu_mode_01_render"],
+  ["8008cf20", "global_menu_mode_02_render"],
+  ["8008d050", "global_menu_mode_03_render"],
+  ["8008d1c4", "global_menu_mode_04_render"],
+  ["8008d2e8", "global_menu_mode_05_render"],
+  ["8008d35c", "global_menu_mode_06_render"],
+  ["8008d468", "global_menu_mode_07_render"],
+  ["8008d524", "global_menu_mode_08_render"],
+  ["8008d5d0", "global_menu_mode_09_title_menu_render"],
+  ["8008d64c", "global_menu_mode_10_frontend_transition_render"],
+  ["800e8f84", "resource_transition_begin_job"],
+  ["800e8fe0", "resource_transition_attach_scene_job"],
+  ["800e90ac", "resource_transition_reset_slot_job"],
+  ["800e9138", "resource_transition_set_slot_phase_job"],
+  ["800e91d4", "enqueue_resource_transition_job"],
+  ["800e9340", "process_resource_transition_queue"],
+  ["800e95a4", "update_resource_transition_progress"],
+  ["800e99c8", "queue_resource_scene_transition"],
   ["80066298", "lookup_type_category_table"],
   ["8006ab04", "start_forced_move_to_point"],
   ["8006abd4", "react_to_slot_target_object"],
   ["8006ace8", "start_status_reaction_by_side"],
   ["8010d880", "set_slot_action_handler"],
+  ["800527d8", "run_main_game_loop"],
+  ["801dca30", "title_main_menu_scene_enter"],
+  ["801dcf7c", "title_main_menu_scene_tick"],
+  ["801dcfa0", "title_main_menu_scene_update_draw"],
+  ["801dd3e8", "title_menu_refresh_borg_status_slots"],
+  ["801dd60c", "title_menu_refresh_selected_borg_state"],
+  ["801dd63c", "title_menu_reset_camera"],
+  ["801dd6b0", "title_menu_update_orbit_camera"],
+  ["801dd7d4", "title_menu_spawn_base_widgets"],
+  ["801dd820", "title_menu_spawn_base_widget"],
+  ["801dd8d8", "title_menu_widget_update_dispatch"],
+  ["801de6e8", "title_menu_widget_draw_text"],
+  ["801de9e0", "title_menu_widget_draw"],
+  ["801eee28", "title_menu_spawn_extra_widgets"],
+  ["801eee6c", "title_menu_spawn_extra_widget"],
+  ["801eeef4", "title_menu_extra_widget_update_dispatch"],
+  ["801ef1c8", "title_menu_extra_widget_draw"],
+  ["801f5bd4", "frontend_menu_branch_load_transition"],
+  ["801f6024", "frontend_menu_resource_load_callback"],
+  ["801f60d0", "frontend_menu_spawn_widgets"],
   ["801962c4", "challenge_force_slot_team_setup"],
   ["802807ac", "player_clear_swap_controller_timer"],
   ["80281c38", "death_swap_flow_candidate"],
@@ -39,7 +81,64 @@ const knownInferredNames = new Map([
   ["802a3938", "team_get_player"],
 ]);
 
+const knownTopicOverrides = new Map([
+  [
+    "8008c3a0",
+    ["global-menu-mode"],
+  ],
+  [
+    "8008c3ac",
+    ["global-menu-mode"],
+  ],
+  ...[
+    "8008cb64",
+    "8008cec8",
+    "8008cf20",
+    "8008d050",
+    "8008d1c4",
+    "8008d2e8",
+    "8008d35c",
+    "8008d468",
+    "8008d524",
+    "8008d5d0",
+    "8008d64c",
+  ].map((address) => [address, ["global-menu-mode"]]),
+]);
+
 const topicRules = [
+  {
+    topic: "global-menu-mode",
+    modules: [
+      "research/decomp/index/title-main-menu-flow.md",
+      "research/decomp/index/start-code-flow.md",
+      "apps/game/UI-FIDELITY-SPEC.md",
+      "apps/game/src/ui/screens/MainMenu.ts",
+    ],
+    patterns: [/^dispatch_global_menu_mode$/m, /^set_global_menu_mode$/m, /PTR_FUN_802da780/],
+  },
+  {
+    topic: "front-end-menu",
+    modules: [
+      "research/decomp/index/title-main-menu-flow.md",
+      "apps/game/UI-FIDELITY-SPEC.md",
+      "apps/game/src/ui/screens/MainMenu.ts",
+      "apps/game/src/ui/sceneModel.ts",
+      "apps/game/public/ui/scenes/manifest.json",
+    ],
+    patterns: [
+      /DAT_80436398/,
+      /DAT_804363a0/,
+      /DAT_804363b0/,
+      /DAT_80390ad0/,
+      /DAT_80435b88/,
+      /PTR_FUN_8039131c/,
+      /PTR_FUN_803a13b8/,
+      /PTR_FUN_803a2600/,
+      /PTR_FUN_803a10a0/,
+      /set_global_menu_mode\(9\)/,
+      /set_global_menu_mode\(10\)/,
+    ],
+  },
   {
     topic: "challenge-menu-flow",
     modules: ["apps/game/src/main.ts", "apps/game/src/ui/screens", "packages/missions/src/challenge.ts"],
@@ -126,9 +225,10 @@ for (const entry of functionEntries.values()) {
 const enriched = [];
 for (const entry of [...functionEntries.values()].sort((a, b) => a.address.localeCompare(b.address))) {
   const body = entry.body ?? "";
-  const topics = topicRules
+  const matchedTopics = topicRules
     .filter((rule) => rule.patterns.some((pattern) => pattern.test(`${entry.currentName ?? ""}\n${body}`)))
     .map((rule) => rule.topic);
+  const topics = unique([...(knownTopicOverrides.get(entry.address) ?? []), ...matchedTopics]);
   const modules = unique(
     topicRules
       .filter((rule) => topics.includes(rule.topic))

@@ -1,12 +1,9 @@
 import * as THREE from "three";
-import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader.js";
+import { createPublicAssetCatalog } from "@gf/assets";
+import { createThreeAssetLoader, prepareImportedModel } from "@gf/render";
 
-type UiSceneManifest = {
-  assets?: Array<{
-    id?: string;
-    modelFiles?: Array<{ publicPath?: string }>;
-  }>;
-};
+const assetCatalog = createPublicAssetCatalog();
+const sceneAssets = createThreeAssetLoader({ enableFileCache: true });
 
 export interface UiSceneModelOptions {
   sceneId?: string;
@@ -71,19 +68,19 @@ export function mountUiSceneModels(host: HTMLElement, opts: UiSceneModelOptions)
   resize();
 
   void loadSceneModelPaths(opts)
-    .then((paths) => Promise.allSettled(paths.map((path) => new ColladaLoader().loadAsync(path))))
-    .then((results) => {
+    .then((paths) => Promise.all(paths.map((path) => sceneAssets.loadGlbScene(path))))
+    .then((models) => {
       if (disposed) return;
-      for (const result of results) {
-        if (result.status !== "fulfilled") continue;
-        prepareModel(result.value.scene);
-        root.add(result.value.scene);
+      for (const model of models) {
+        prepareModel(model);
+        root.add(model);
       }
       if (root.children.length > 0) fitModel(root, opts.fitSize ?? 360);
-      host.dataset["gfModelStatus"] = root.children.length > 0 ? "loaded" : "empty";
+      host.dataset["gfModelStatus"] = "loaded";
     })
-    .catch(() => {
+    .catch((error) => {
       host.dataset["gfModelStatus"] = "failed";
+      throw error;
     });
 
   const render = (): void => {
@@ -104,32 +101,28 @@ export function mountUiSceneModels(host: HTMLElement, opts: UiSceneModelOptions)
 }
 
 async function loadSceneModelPaths(opts: UiSceneModelOptions): Promise<string[]> {
-  if (opts.modelPaths?.length) return opts.modelPaths;
+  if (opts.modelPaths?.length) return assertGlbModelPaths(opts.modelPaths, "explicit UI scene model paths");
   const sceneId = opts.sceneId;
-  if (!sceneId) return [];
-  const manifest = await fetch("/ui/scenes/manifest.json")
-    .then((r) => (r.ok ? (r.json() as Promise<UiSceneManifest>) : null))
-    .catch(() => null);
-  const paths =
-    manifest?.assets
-      ?.find((asset) => asset.id === sceneId)
-      ?.modelFiles?.map((file) => file.publicPath)
-      .filter((path): path is string => Boolean(path)) ?? [];
-  const limited = opts.maxModels === undefined ? paths : paths.slice(0, opts.maxModels);
-  return limited.length > 0 ? limited : [`/ui/scenes/${sceneId}/model_00.dae`];
+  if (!sceneId) throw new Error("UI scene model host requires sceneId or modelPaths");
+  const paths = await assetCatalog.loadUiSceneModelPaths(
+    sceneId,
+    opts.maxModels === undefined ? {} : { maxModels: opts.maxModels },
+  );
+  return assertGlbModelPaths(paths, `UI scene ${sceneId}`);
 }
 
 function prepareModel(model: THREE.Object3D): void {
-  model.traverse((object) => {
-    if (object instanceof THREE.Mesh || object instanceof THREE.SkinnedMesh) {
-      object.frustumCulled = false;
-      const materials = Array.isArray(object.material) ? object.material : [object.material];
-      for (const material of materials) {
-        material.side = THREE.DoubleSide;
-        if ("metalness" in material) (material as THREE.MeshStandardMaterial).metalness = 0;
-      }
-    }
+  prepareImportedModel(model, {
+    materialSide: THREE.DoubleSide,
+    metalness: 0,
+    culling: "disabled",
   });
+}
+
+function assertGlbModelPaths(paths: readonly string[], label: string): string[] {
+  const nonGlb = paths.find((modelPath) => !/\.glb(?:[?#].*)?$/i.test(modelPath));
+  if (nonGlb) throw new Error(`${label} must use GLB, got ${nonGlb}`);
+  return [...paths];
 }
 
 function fitModel(model: THREE.Object3D, targetSize: number): void {

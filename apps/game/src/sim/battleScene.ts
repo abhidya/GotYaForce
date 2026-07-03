@@ -7,9 +7,8 @@
 //   - advance per-borg AnimationMixers.
 //
 // Models + baked clips are provided by main.ts via the BorgAssets interface so we
-// reuse the existing Collada loader, model normalization, and clip cache instead
-// of duplicating them. Borgs without a model fall back to a simple colored capsule
-// so every combatant in the sim is visible.
+// reuse the shared GLB loader, model normalization, and clip cache instead of
+// duplicating them. A capsule is shown only while the production model is loading.
 
 import * as THREE from "three";
 import type { BorgRuntime, Projectile, ProjectileVisualKind } from "@gf/combat";
@@ -22,8 +21,8 @@ import {
 
 /** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
 export interface BorgAssets {
-  /** Resolve a cloneable source model for a borg id (cached upstream). Null if unavailable. */
-  loadModel(borgId: string): Promise<THREE.Object3D | null>;
+  /** Resolve a cloneable source model for a borg id (cached upstream). */
+  loadModel(borgId: string): Promise<THREE.Object3D>;
   /** Resolve a baked AnimationClip for (borgId, slot). Null if unavailable. */
   loadClip(borgId: string, slot: AnimSlot): Promise<THREE.AnimationClip | null>;
   /**
@@ -328,8 +327,8 @@ export class BattleScene {
     const group = new THREE.Group();
     group.position.set(b.pos.x, b.pos.y, b.pos.z);
     group.rotation.y = b.rotY;
-    // Start with a placeholder so the borg is visible immediately; swap in the
-    // real model when it finishes loading.
+    // Start with a temporary placeholder so the borg is visible immediately;
+    // production GLB load failures are allowed to reject loudly.
     const placeholder = this.makePlaceholder(b.team);
     group.add(placeholder);
     this.root.add(group);
@@ -345,7 +344,11 @@ export class BattleScene {
       isPlaceholder: true,
       chargeGlow: null,
     };
-    void this.attachModel(b.uid, actor, b.borgId, placeholder);
+    void this.attachModel(b.uid, actor, b.borgId, placeholder).catch((error: unknown) => {
+      this.root.remove(group);
+      this.actors.delete(b.uid);
+      throw error;
+    });
     return actor;
   }
 
@@ -400,17 +403,15 @@ export class BattleScene {
     borgId: string,
     placeholder: THREE.Object3D,
   ): Promise<void> {
-    const model = await this.assets.loadModel(borgId).catch(() => null);
+    const model = await this.assets.loadModel(borgId);
     // The actor may have been despawned while loading.
     if (!this.actors.has(uid)) return;
-    if (model) {
-      actor.group.remove(placeholder);
-      disposeMesh(placeholder);
-      actor.group.add(model);
-      actor.mixer = new THREE.AnimationMixer(model);
-      actor.current = null;
-      actor.isPlaceholder = false;
-    }
+    actor.group.remove(placeholder);
+    disposeMesh(placeholder);
+    actor.group.add(model);
+    actor.mixer = new THREE.AnimationMixer(model);
+    actor.current = null;
+    actor.isPlaceholder = false;
     actor.ready = true;
   }
 

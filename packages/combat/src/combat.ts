@@ -41,7 +41,7 @@ import {
   type SwordBeamDef,
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
-import { typeDamageMultiplier } from "./typeDamage.js";
+import { computeSourceDamage } from "./damageFormula.js";
 import type {
   BorgRuntime,
   Projectile,
@@ -108,26 +108,19 @@ export function stepCooldowns(b: BorgRuntime): void {
 // not a guess standing in for a known-but-undecoded formula. Do not re-derive without new leads.
 // ---------------------------------------------------------------------------------------
 function isEnemyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
-  return o.alive && o.team !== self.team && o.uid !== self.uid;
+  return isTargetable(o) && o.team !== self.team && o.uid !== self.uid;
 }
 
 function isAllyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
-  return o.alive && o.team === self.team && o.uid !== self.uid;
+  return isTargetable(o) && o.team === self.team && o.uid !== self.uid;
 }
 
 function canReceiveHit(self: BorgRuntime, o: BorgRuntime): boolean {
-  return o.alive && o.uid !== self.uid;
+  return isTargetable(o) && o.uid !== self.uid;
 }
 
-function rawDamageForTarget(
-  rawDamage: number,
-  attackerTeam: number,
-  targetTeam: number,
-  attackerBorgId: string | undefined,
-  defenderBorgId: string | undefined,
-): number {
-  const typeAdjusted = rawDamage * typeDamageMultiplier(attackerBorgId, defenderBorgId);
-  return attackerTeam === targetTeam ? typeAdjusted / DAMAGE.SAME_TEAM_HIT_DIVISOR : typeAdjusted;
+function isTargetable(b: BorgRuntime): boolean {
+  return b.alive && b.hp > 0 && b.state !== "death";
 }
 
 /** Acquire the nearest enemy that is in front (within the lock cone) and in range. */
@@ -198,15 +191,27 @@ export function cycleAllyLock(self: BorgRuntime, all: BorgRuntime[]): string | n
 
 // ---------------------------------------------------------------------------------------
 // Damage application.
-// mitigate(): DEF_PER_STAT/MIN_MULT are TUNED FROM STATS (no ROM formula recoverable yet).
-// The subtract-then-clamp-at-0 shape below (victim.hp -= dmg; ...; victim.hp = 0) is DERIVED
-// from the live trace at object+0x1C6 (behavior-notes.md s4h).
-// Ghidra export re-read (behavior-notes.md s4m) shows object+0x88 is a match slot/team byte,
-// not borgs.json's display type, so display type is intentionally not part of mitigation here.
+// Runtime combat callers use the decoded zz_003cd5c_ formula in damageFormula.ts. The legacy
+// mitigate() path stays only for direct helper/test callers that do not provide an attacker
+// context. The subtract-then-clamp-at-0 shape below remains DERIVED from the live HP write trace
+// at object+0x1c6 (behavior-notes.md s4h).
 // ---------------------------------------------------------------------------------------
 function mitigate(raw: number, defenderDef: number): number {
   const mult = Math.max(DAMAGE.MIN_MULT, 1 - defenderDef * DAMAGE.DEF_PER_STAT);
   return Math.max(1, Math.round(raw * mult));
+}
+
+export interface HitSourceContext {
+  attacker: BorgRuntime;
+  attackerProfile: BorgProfile;
+  /** Multiplier for still-unmapped hitbox/action variants. Source exact value is 1. */
+  damageScale?: number | undefined;
+  attackerSideRank?: number | undefined;
+  defenderSideRank?: number | undefined;
+}
+
+export interface DamageRuntimeContext {
+  sideRankForTeam?: ((team: number) => number | undefined) | undefined;
 }
 
 /**
@@ -227,10 +232,22 @@ export function applyHit(
   forceKnockdown = false,
   // Default = melee archetype so legacy callers keep the old always-interrupt behavior.
   record: DamageRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
+  source?: HitSourceContext,
 ): number {
-  if (!victim.alive || isInvincible(victim)) return 0;
+  if (!isTargetable(victim) || isInvincible(victim)) return 0;
 
-  const dmg = mitigate(rawDamage, victimProfile.defense);
+  const dmg = source
+    ? computeSourceDamage({
+        attacker: source.attacker,
+        attackerProfile: source.attackerProfile,
+        victim,
+        victimProfile,
+        record,
+        damageScale: source.damageScale ?? 1,
+        attackerSideRank: source.attackerSideRank,
+        defenderSideRank: source.defenderSideRank,
+      })
+    : mitigate(rawDamage, victimProfile.defense);
   victim.hp -= dmg;
 
   // Knockback DIRECTION — ROM-accurate port of zz_00300bc_ (0x800300bc), mode 1 ("attacker to
@@ -495,7 +512,7 @@ export function projectileVisualKindForProfile(p: BorgProfile): ProjectileVisual
  *     (capped at chargeTier2Frames) and fire on RELEASE, scaled by the reached tier.
  *     Non-chargeable shooters keep the fire-while-held autofire behavior.
  *   - Sword beams: borgs with melee.swordBeam emit a fast short-lived projectile on the
- *     combo finisher's first active frame, damage scaled from the MELEE formula.
+ *     combo finisher's first active frame, using the charge/special damage-record bridge.
  */
 export function stepAttacks(
   b: BorgRuntime,
@@ -504,9 +521,10 @@ export function stepAttacks(
   pressedSpecial: boolean,
   all: BorgRuntime[],
   profiles: Map<string, BorgProfile>,
+  damageContext: DamageRuntimeContext = {},
 ): AttackResult {
   const out: Projectile[] = [];
-  if (isBusy(b) || !b.alive) return { projectiles: out };
+  if (isBusy(b) || !isTargetable(b)) return { projectiles: out };
   const actionProfile = actionProfileForProfile(p);
   const meleeDef = actionProfile.melee;
   const shotDef = actionProfile.shot;
@@ -536,10 +554,9 @@ export function stepAttacks(
     b.state = "special";
     b.stateTime = 0;
     b.anim = "special";
-    // AoE burst around the borg.
-    const baseDmg =
-      (p.hasMelee ? MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT : SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT) *
-      specialDef.damageMultiplier;
+    // AoE burst around the borg. HP damage comes from record 2 via damageFormula.ts; the
+    // special multiplier remains a port-side bridge until per-special hitbox records are mapped.
+    const specialRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
     for (const o of all) {
       if (!canReceiveHit(b, o)) continue;
       if (distXZ(b.pos, o.pos) <= specialDef.radius) {
@@ -550,13 +567,20 @@ export function stepAttacks(
           applyHit(
             o,
             op,
-            rawDamageForTarget(baseDmg, b.team, o.team, p.id, op.id),
+            0,
             SPECIAL.KNOCKBACK * specialDef.knockbackMultiplier,
             { x: 0, y: 0, z: 0 },
             b.pos,
             true,
             // Specials -> record 2 (DERIVED mapping, gauges.ts DAMAGE_RECORD_INDEX).
-            damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL),
+            specialRecord,
+            {
+              attacker: b,
+              attackerProfile: p,
+              damageScale: specialDef.damageMultiplier,
+              attackerSideRank: damageContext.sideRankForTeam?.(b.team),
+              defenderSideRank: damageContext.sideRankForTeam?.(o.team),
+            },
           );
         }
       }
@@ -621,7 +645,7 @@ export function stepAttacks(
     // Sword beam: the combo finisher's FIRST active frame emits a fast short-lived projectile
     // with melee-scaled damage (TUNED design; see actionProfiles.ts SwordBeamDef).
     if (meleeDef.swordBeam && isFinisher && meleeActive === meleeDef.active) {
-      out.push(spawnSwordBeam(b, p, meleeDef, meleeDef.swordBeam));
+      out.push(spawnSwordBeam(b, meleeDef, meleeDef.swordBeam));
     }
     // Only the active window (after startup) deals damage; one hit per swing per target.
     const fwd = forwardFromYaw(b.rotY);
@@ -640,22 +664,29 @@ export function stepAttacks(
       if (fwd.x * to.x + fwd.z * to.z < 0) continue; // behind us
       const op = profiles.get(o.uid);
       if (!op) continue;
-      const raw = (MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT) * meleeDef.damageMultiplier * stepMult;
       const knockbackMult =
         meleeDef.knockbackMultiplier * (isFinisher && meleeDef.comboHits > 1 ? COMBO.FINISHER_KNOCKBACK_MULT : 1);
+      const meleeRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
       // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
       // instead of the attacker's facing vector (`fwd`) used here previously.
       const dealt = applyHit(
         o,
         op,
-        rawDamageForTarget(raw, b.team, o.team, p.id, op.id),
+        0,
         MELEE.KNOCKBACK * knockbackMult,
         { x: 0, y: 0, z: 0 },
         b.pos,
         // A multi-hit chain's finisher launches: forced knockdown (TUNED game-feel choice).
         isFinisher && meleeDef.comboHits > 1,
         // Melee -> record 1 (reactionFlags 2 -> always staggers; DERIVED mapping, gauges.ts).
-        damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
+        meleeRecord,
+        {
+          attacker: b,
+          attackerProfile: p,
+          damageScale: meleeDef.damageMultiplier * stepMult,
+          attackerSideRank: damageContext.sideRankForTeam?.(b.team),
+          defenderSideRank: damageContext.sideRankForTeam?.(o.team),
+        },
       );
       if (dealt > 0) (b.meleeHitUids ??= []).push(o.uid);
     }
@@ -769,7 +800,6 @@ function spawnProjectile(
   const yaw = b.rotY + yawOffset;
   const fwd = { x: Math.sin(yaw), y: 0, z: Math.cos(yaw) };
   const tier = chargeScaling(shotDef, chargeTier);
-  const raw = (SHOT.DMG_BASE + p.shot * SHOT.DMG_PER_STAT) * shotDef.damageMultiplier * tier.damage;
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
@@ -780,7 +810,7 @@ function spawnProjectile(
       z: b.pos.z + fwd.z * shotDef.muzzleForwardOffset,
     },
     vel: scale(fwd, shotDef.speed * tier.speed),
-    damage: raw,
+    damage: shotDef.damageMultiplier * tier.damage,
     hitstun: Math.max(1, Math.round(SHOT.HITSTUN * shotDef.hitstunMultiplier * tier.hitstun)),
     knockback: SHOT.KNOCKBACK * shotDef.knockbackMultiplier * tier.knockback,
     homingTurn: shotDef.homingTurn,
@@ -796,16 +826,14 @@ function spawnProjectile(
   };
 }
 
-/** Combo-finisher sword beam: fast, short-lived, damage scaled off the MELEE damage formula
- *  (attack stat), not the shot stat — this is the sword swing "extending", not a gun. */
+/** Combo-finisher sword beam: fast, short-lived projectile using charge/special record damage.
+ *  The multiplier remains a port-side bridge until the real hitbox record is mapped. */
 function spawnSwordBeam(
   b: BorgRuntime,
-  p: BorgProfile,
   meleeDef: MeleeActionDef,
   beam: SwordBeamDef,
 ): Projectile {
   const fwd = forwardFromYaw(b.rotY);
-  const raw = (MELEE.DMG_BASE + p.attack * MELEE.DMG_PER_STAT) * meleeDef.damageMultiplier * beam.damageMultiplier;
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
@@ -816,7 +844,7 @@ function spawnSwordBeam(
       z: b.pos.z + fwd.z * 40,
     },
     vel: scale(fwd, beam.speed),
-    damage: raw,
+    damage: meleeDef.damageMultiplier * beam.damageMultiplier,
     hitstun: SHOT.HITSTUN,
     knockback: SHOT.KNOCKBACK * meleeDef.knockbackMultiplier,
     homingTurn: beam.homingTurn,
@@ -840,6 +868,7 @@ export function stepProjectiles(
   profiles: Map<string, BorgProfile>,
   byUid: Map<string, BorgRuntime>,
   ctx?: ProjectileContext,
+  damageContext: DamageRuntimeContext = {},
 ): Projectile[] {
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
@@ -849,7 +878,7 @@ export function stepProjectiles(
     // Homing toward the locked target.
     if (pr.homingTarget) {
       const tgt = byUid.get(pr.homingTarget);
-      if (tgt && tgt.alive) {
+      if (tgt && isTargetable(tgt)) {
         const desired = yawFromXZ(tgt.pos.x - pr.pos.x, tgt.pos.z - pr.pos.z);
         const cur = yawFromXZ(pr.vel.x, pr.vel.z);
         let d = desired - cur;
@@ -871,7 +900,7 @@ export function stepProjectiles(
     // Hit test against any non-owner borg. Same-team hits use the derived 0.25x reducer.
     let consumed = false;
     for (const o of all) {
-      if (!o.alive || o.uid === pr.ownerUid) continue;
+      if (!isTargetable(o) || o.uid === pr.ownerUid) continue;
       if (isInvincible(o)) continue;
       if (distXZ(pr.pos, o.pos) <= pr.hitRadius && Math.abs(pr.pos.y - o.pos.y) <= 60) {
         const op = profiles.get(o.uid);
@@ -882,17 +911,27 @@ export function stepProjectiles(
           // origin. Neither is a ROM-confirmed mode for the projectile case specifically (the
           // ROM caller always passes the same hit-context wrapper regardless of melee/shot), so
           // this remains a TUNED choice between two reasonable direction sources.
+          const attacker = byUid.get(pr.ownerUid);
           const attackerProfile = profiles.get(pr.ownerUid);
           applyHit(
             o,
             op,
-            rawDamageForTarget(pr.damage, pr.team, o.team, attackerProfile?.id, op.id),
+            pr.damage,
             pr.knockback,
             pr.vel as Vec3,
             pr.pos,
             false,
             // Per-projectile record (charge/special = 2, normal shot = 0; gauges.ts).
             damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT),
+            attacker && attackerProfile
+              ? {
+                  attacker,
+                  attackerProfile,
+                  damageScale: pr.damage,
+                  attackerSideRank: damageContext.sideRankForTeam?.(attacker.team),
+                  defenderSideRank: damageContext.sideRankForTeam?.(o.team),
+                }
+              : undefined,
           );
         }
         consumed = true;

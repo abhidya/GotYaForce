@@ -21,22 +21,22 @@
     ]
   },
   "visual": {
-    "hasDaePieces": true,
-    "hasContiguousDaeSequence": true,
-    "hasCompleteDaeExport": true,
-    "daeCount": 4,
-    "nonEmptyDaeCount": 4,
+    "hasGlbPieces": true,
+    "hasContiguousGlbSequence": true,
+    "hasCompleteGlbExport": true,
+    "glbCount": 4,
+    "nonEmptyGlbCount": 4,
     "maxModelIndex": 3,
     "missingModelIndices": [],
-    "expectedDaeIndices": [
+    "expectedGlbIndices": [
       0,
       1,
       2,
       3
     ],
-    "missingExpectedDaeIndices": [],
-    "unexpectedDaeIndices": [],
-    "zeroByteDaeFiles": [],
+    "missingExpectedGlbIndices": [],
+    "unexpectedGlbIndices": [],
+    "zeroByteGlbFiles": [],
     "textureCount": 7,
     "exportSummary": {
       "path": "model/export-summary.json",
@@ -45,7 +45,7 @@
       "error": null,
       "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
       "expectedSlotCount": 4,
-      "expectedDaeCount": 4,
+      "expectedGlbCount": 4,
       "exportedModelCount": 4,
       "failedModelIndices": [],
       "skippedNullRootJointIndices": [],
@@ -85,25 +85,25 @@
   },
   "notes": [
     "Verified by comparing source stage assets against the browser public stage folder.",
-    "Visual DAE pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
+    "Visual GLB pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
   ],
   "modelCount": 4,
   "models": [
     {
-      "path": "model/model_00.dae",
-      "bytes": 127254
+      "path": "model/model_00.glb",
+      "bytes": 190520
     },
     {
-      "path": "model/model_01.dae",
-      "bytes": 22604
+      "path": "model/model_01.glb",
+      "bytes": 27816
     },
     {
-      "path": "model/model_02.dae",
-      "bytes": 50990
+      "path": "model/model_02.glb",
+      "bytes": 47948
     },
     {
-      "path": "model/model_03.dae",
-      "bytes": 877
+      "path": "model/model_03.glb",
+      "bytes": 208
     }
   ],
   "textures": [
@@ -154,5 +154,5 @@
       "bytes": 65536
     }
   ],
-  "renderStatus": "dae-complete"
+  "renderStatus": "glb-complete"
 }

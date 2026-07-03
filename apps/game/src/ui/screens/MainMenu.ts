@@ -2,7 +2,7 @@
  * MainMenu - the mode hub, per reference `challenge-1-main-menu.png`.
  *
  * The real game renders this as a 3D desk diorama where each mode is a physical
- * object on the desk. `tl00_mdl.arc` and `optn00_mdl.arc` are exported as DAE
+ * object on the desk. `tl00_mdl.arc` and `optn00_mdl.arc` are exported as GLB
  * pieces, while the captured native frames remain the exact visual keyframes for
  * STORY and CHALLENGE. Ghidra shows the menu-mode byte dispatch and 10-frame
  * object tween; this component mirrors that UX with source-backed scene layers

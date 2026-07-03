@@ -2,7 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@gf/formats": ["../formats/dist/index.d.ts"],
+      "@gf/physics": ["../physics/dist/index.d.ts"]
+    }
   },
+  "references": [{ "path": "../formats" }, { "path": "../physics" }],
   "include": ["src"]
 }

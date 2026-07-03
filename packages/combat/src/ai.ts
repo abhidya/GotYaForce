@@ -9,7 +9,7 @@ import type { BorgProfile } from "./stats.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
 
 function isEnemy(self: BorgRuntime, other: BorgRuntime): boolean {
-  return other.alive && other.team !== self.team && other.uid !== self.uid;
+  return other.alive && other.hp > 0 && other.state !== "death" && other.team !== self.team && other.uid !== self.uid;
 }
 
 function currentLockedEnemy(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null {

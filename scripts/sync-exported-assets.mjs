@@ -4,6 +4,7 @@
 import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
+import { spawnSync } from "node:child_process";
 
 const REGIONS = new Set(["GG4E", "GG4J", "GG4P"]);
 const [region] = process.argv.slice(2);
@@ -54,18 +55,19 @@ function readExistingManifest(manifestPath) {
 function buildRecord(dir, existingRecords) {
   const id = path.basename(dir);
   const files = fs.readdirSync(dir).sort();
-  const dae = files.find((name) => name.toLowerCase().endsWith(".dae"));
-  if (!dae) fail(`missing .dae in copied model directory: ${dir}`);
+  const glb = files.find((name) => name.toLowerCase().endsWith(".glb"));
+  if (!glb) fail(`missing .glb in copied model directory: ${dir}`);
 
   const textures = files.filter((name) => /\.(png|jpg|jpeg|webp)$/i.test(name));
+  const runtimeFiles = files.filter((name) => !/\.dae$/i.test(name));
   const existing = existingRecords.get(id) ?? {};
   return {
     ...existing,
     id,
     name: existing.name ?? id,
-    dae,
+    glb,
     textures,
-    files: files.map((name) => ({
+    files: runtimeFiles.map((name) => ({
       name,
       bytes: fs.statSync(path.join(dir, name)).size,
       sha1: sha1File(path.join(dir, name)),
@@ -75,6 +77,28 @@ function buildRecord(dir, existingRecords) {
 
 function firstExistingDir(candidates) {
   return candidates.find((candidate) => fs.existsSync(candidate) && fs.statSync(candidate).isDirectory());
+}
+
+function convertRuntimeModels(root) {
+  const relRoot = path.relative(repoRoot, root);
+  const result = spawnSync(process.execPath, ["scripts/convert-runtime-models-to-glb.mjs", relRoot], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+  if (result.status !== 0) fail(`GLB conversion failed for ${relRoot}`);
+}
+
+function removePublicSourceModels(root) {
+  const resolvedRoot = path.resolve(root);
+  const resolvedPublicModels = path.resolve(repoRoot, "apps", "game", "public", "models");
+  if (resolvedRoot !== resolvedPublicModels && !resolvedRoot.startsWith(`${resolvedPublicModels}${path.sep}`)) {
+    fail(`refusing to remove source models outside ${path.relative(repoRoot, resolvedPublicModels)}: ${resolvedRoot}`);
+  }
+  for (const entry of sortedEntries(resolvedRoot, { withFileTypes: true })) {
+    const file = path.join(resolvedRoot, entry.name);
+    if (entry.isDirectory()) removePublicSourceModels(file);
+    else if (entry.isFile() && entry.name.toLowerCase().endsWith(".dae")) fs.rmSync(file);
+  }
 }
 
 if (!region) usage();
@@ -98,14 +122,6 @@ for (const entry of sortedEntries(sourceRoot, { withFileTypes: true })) {
   copiedDirs += 1;
 }
 
-const modelDirs = sortedEntries(libraryRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => path.join(libraryRoot, entry.name));
-
-const manifest = modelDirs.map((dir) => buildRecord(dir, existingRecords));
-fs.writeFileSync(`${manifestPath}.tmp`, `${JSON.stringify(manifest, null, 2)}\n`);
-fs.renameSync(`${manifestPath}.tmp`, manifestPath);
-
 const pl0615Source = firstExistingDir([
   path.join(repoRoot, "user-data", region, "pl0615"),
   path.join(repoRoot, "user-data", region, "anim-test", "pl0615"),
@@ -116,7 +132,7 @@ let animationSummary = "not found";
 if (pl0615Source) {
   const animationFiles = fs
     .readdirSync(pl0615Source)
-    .filter((name) => /^anim_.*\.json$/i.test(name) || name === "model_00.dae" || /\.(png|jpg|jpeg|webp)$/i.test(name))
+    .filter((name) => /^anim_.*\.json$/i.test(name) || /^model_00\.(dae|glb)$/i.test(name) || /\.(png|jpg|jpeg|webp)$/i.test(name))
     .sort();
   if (animationFiles.length > 0) {
     const animationDest = path.join(repoRoot, "apps", "game", "public", "models", "pl0615");
@@ -127,6 +143,17 @@ if (pl0615Source) {
     animationSummary = `${animationFiles.length} files from ${path.relative(repoRoot, pl0615Source)}`;
   }
 }
+
+convertRuntimeModels(path.join(repoRoot, "apps", "game", "public", "models"));
+removePublicSourceModels(path.join(repoRoot, "apps", "game", "public", "models"));
+
+const modelDirs = sortedEntries(libraryRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => path.join(libraryRoot, entry.name));
+
+const manifest = modelDirs.map((dir) => buildRecord(dir, existingRecords));
+fs.writeFileSync(`${manifestPath}.tmp`, `${JSON.stringify(manifest, null, 2)}\n`);
+fs.renameSync(`${manifestPath}.tmp`, manifestPath);
 
 console.log(`region: ${region}`);
 console.log(`models: copied ${copiedDirs} dirs / ${copiedFiles} files`);

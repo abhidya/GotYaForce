@@ -1,0 +1,3557 @@
+{
+  "schema": "gotyaforce.borgSourceStats.v1",
+  "generatedAt": "2026-07-03T06:51:30.813Z",
+  "generatedBy": "scripts/gen-borg-source-stats.mjs",
+  "source": {
+    "path": "research/decomp/data/borg-hp-stat-rows-802f2988.json",
+    "hpReader": "zz_0055f90_ @0x80055f90",
+    "weaponSlotReader": "FUN_800562b8 @0x800562b8",
+    "levelCode": 0,
+    "levelOffset": 2,
+    "rowFields": "u16[0]=max HP; slot0 u16[1]/[2]=ammo type/count and u16[3]/[4]=charge pair; slot1 u16[5]/[6]=ammo type/count and u16[7]/[8]=charge pair."
+  },
+  "verification": {
+    "borgsJsonRows": 208,
+    "runtimeProfiles": 208,
+    "missingRows": [],
+    "hpMismatches": []
+  },
+  "profiles": {
+    "pl0000": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0001": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 30,
+          "ammoCount": 30,
+          "chargeType": 0,
+          "chargeCount": 480
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0002": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0003": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0004": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0005": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0006": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 240
+        }
+      ]
+    },
+    "pl0007": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0008": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0009": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl000a": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl000b": {
+      "maxHp": 210,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl000c": {
+      "maxHp": 60,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0100": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0101": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl0102": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 100,
+          "ammoCount": 100,
+          "chargeType": 0,
+          "chargeCount": 480
+        },
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0103": {
+      "maxHp": 220,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 2,
+          "chargeCount": 480
+        }
+      ]
+    },
+    "pl0104": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0105": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl0106": {
+      "maxHp": 220,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 2,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0107": {
+      "maxHp": 220,
+      "weaponSlots": [
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 2,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 1,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0108": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl0109": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl010a": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0200": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0201": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0202": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0203": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0204": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0205": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0206": {
+      "maxHp": 80,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0207": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 1,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0208": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 1,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0209": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl020a": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl020b": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 1,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl020c": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl020d": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl020e": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl020f": {
+      "maxHp": 80,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0300": {
+      "maxHp": 130,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0301": {
+      "maxHp": 140,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0302": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 600
+        }
+      ]
+    },
+    "pl0303": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 6,
+          "ammoCount": 6,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0304": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0305": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 150
+        },
+        {
+          "ammoType": 6,
+          "ammoCount": 6,
+          "chargeType": 1,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl0306": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0307": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0308": {
+      "maxHp": 100,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0309": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 1,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl030a": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 0,
+          "chargeCount": 240
+        },
+        {
+          "ammoType": 12,
+          "ammoCount": 12,
+          "chargeType": 1,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl030b": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl030c": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl030d": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0400": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0401": {
+      "maxHp": 350,
+      "weaponSlots": [
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0402": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0403": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0404": {
+      "maxHp": 350,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0405": {
+      "maxHp": 350,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0406": {
+      "maxHp": 100,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0407": {
+      "maxHp": 350,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 1800
+        }
+      ]
+    },
+    "pl0408": {
+      "maxHp": 350,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0409": {
+      "maxHp": 350,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl040a": {
+      "maxHp": 330,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl040b": {
+      "maxHp": 100,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl040c": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl040d": {
+      "maxHp": 100,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0500": {
+      "maxHp": 1000,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0501": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 2,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0502": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 15,
+          "ammoCount": 15,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0503": {
+      "maxHp": 2500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0504": {
+      "maxHp": 1300,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0505": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0506": {
+      "maxHp": 2000,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0507": {
+      "maxHp": 2500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0509": {
+      "maxHp": 1000,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl050a": {
+      "maxHp": 1000,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl050b": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl050c": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl050d": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 2,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl050e": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 15,
+          "ammoCount": 15,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl050f": {
+      "maxHp": 1250,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0510": {
+      "maxHp": 650,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0511": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0512": {
+      "maxHp": 1000,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0513": {
+      "maxHp": 1250,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0515": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0516": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0517": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0600": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0601": {
+      "maxHp": 550,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0602": {
+      "maxHp": 1050,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0604": {
+      "maxHp": 450,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0606": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0608": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0609": {
+      "maxHp": 550,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl060a": {
+      "maxHp": 1050,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl060c": {
+      "maxHp": 1050,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl060e": {
+      "maxHp": 1050,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0610": {
+      "maxHp": 450,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0613": {
+      "maxHp": 450,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0615": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0616": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0617": {
+      "maxHp": 550,
+      "weaponSlots": [
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0618": {
+      "maxHp": 420,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0619": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl061a": {
+      "maxHp": 380,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 450
+        }
+      ]
+    },
+    "pl061b": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl061c": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl061d": {
+      "maxHp": 550,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl061e": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl061f": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0620": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0621": {
+      "maxHp": 420,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0623": {
+      "maxHp": 380,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0625": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0627": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0628": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0629": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl062a": {
+      "maxHp": 350,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 180
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0700": {
+      "maxHp": 220,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0701": {
+      "maxHp": 220,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0702": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0703": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0704": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0705": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0706": {
+      "maxHp": 350,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0707": {
+      "maxHp": 220,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0708": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0709": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl070a": {
+      "maxHp": 280,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl070b": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl070c": {
+      "maxHp": 60,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 3,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl070d": {
+      "maxHp": 60,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0800": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0801": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 2,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0802": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 600
+        }
+      ]
+    },
+    "pl0804": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0805": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 1200
+        }
+      ]
+    },
+    "pl0806": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0807": {
+      "maxHp": 60,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0808": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0809": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl080a": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl080c": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl080d": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 1200
+        }
+      ]
+    },
+    "pl080e": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 1200
+        }
+      ]
+    },
+    "pl080f": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0900": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0901": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0902": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0903": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0904": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0906": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0907": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0908": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0909": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl090a": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl090b": {
+      "maxHp": 70,
+      "weaponSlots": [
+        {
+          "ammoType": 100,
+          "ammoCount": 100,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl090c": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl090d": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0a00": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a01": {
+      "maxHp": 160,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a02": {
+      "maxHp": 210,
+      "weaponSlots": [
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a03": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a04": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 9,
+          "ammoCount": 9,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a05": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a06": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a07": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a08": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 9,
+          "ammoCount": 9,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a09": {
+      "maxHp": 450,
+      "weaponSlots": [
+        {
+          "ammoType": 9,
+          "ammoCount": 9,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0a0a": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0b00": {
+      "maxHp": 120,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0b01": {
+      "maxHp": 120,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0b02": {
+      "maxHp": 130,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0b03": {
+      "maxHp": 130,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0b04": {
+      "maxHp": 180,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0b05": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0b06": {
+      "maxHp": 120,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0b07": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 90
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0c00": {
+      "maxHp": 300,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 6,
+          "ammoCount": 6,
+          "chargeType": 0,
+          "chargeCount": 240
+        }
+      ]
+    },
+    "pl0c01": {
+      "maxHp": 320,
+      "weaponSlots": [
+        {
+          "ammoType": 50,
+          "ammoCount": 50,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl0c02": {
+      "maxHp": 400,
+      "weaponSlots": [
+        {
+          "ammoType": 50,
+          "ammoCount": 50,
+          "chargeType": 0,
+          "chargeCount": 240
+        },
+        {
+          "ammoType": 3,
+          "ammoCount": 3,
+          "chargeType": 0,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0c04": {
+      "maxHp": 500,
+      "weaponSlots": [
+        {
+          "ammoType": 200,
+          "ammoCount": 200,
+          "chargeType": 0,
+          "chargeCount": 240
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl0c05": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 600
+        }
+      ]
+    },
+    "pl0c06": {
+      "maxHp": 330,
+      "weaponSlots": [
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 0,
+          "chargeCount": 60
+        },
+        {
+          "ammoType": 6,
+          "ammoCount": 6,
+          "chargeType": 0,
+          "chargeCount": 240
+        }
+      ]
+    },
+    "pl0d00": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 40,
+          "ammoCount": 40,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 4,
+          "ammoCount": 4,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0d01": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0d02": {
+      "maxHp": 200,
+      "weaponSlots": [
+        {
+          "ammoType": 40,
+          "ammoCount": 40,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 120
+        }
+      ]
+    },
+    "pl0d03": {
+      "maxHp": 250,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 240
+        }
+      ]
+    },
+    "pl0d04": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 40,
+          "ammoCount": 40,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 2,
+          "ammoCount": 2,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0d05": {
+      "maxHp": 150,
+      "weaponSlots": [
+        {
+          "ammoType": 40,
+          "ammoCount": 40,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0d06": {
+      "maxHp": 100,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 0
+        }
+      ]
+    },
+    "pl0d07": {
+      "maxHp": 30,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0e00": {
+      "maxHp": 2000,
+      "weaponSlots": [
+        {
+          "ammoType": 30,
+          "ammoCount": 30,
+          "chargeType": 1,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0e01": {
+      "maxHp": 1000,
+      "weaponSlots": [
+        {
+          "ammoType": 8,
+          "ammoCount": 8,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 900
+        }
+      ]
+    },
+    "pl0e02": {
+      "maxHp": 2000,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 1,
+          "chargeCount": 360
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 1,
+          "chargeType": 0,
+          "chargeCount": 900
+        }
+      ]
+    },
+    "pl0e03": {
+      "maxHp": 2000,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 2,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0e04": {
+      "maxHp": 2000,
+      "weaponSlots": [
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 1,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0e05": {
+      "maxHp": 2000,
+      "weaponSlots": [
+        {
+          "ammoType": 30,
+          "ammoCount": 30,
+          "chargeType": 1,
+          "chargeCount": 120
+        },
+        {
+          "ammoType": 20,
+          "ammoCount": 20,
+          "chargeType": 1,
+          "chargeCount": 180
+        }
+      ]
+    },
+    "pl0f00": {
+      "maxHp": 20,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 280
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0f01": {
+      "maxHp": 30,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 280
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0f02": {
+      "maxHp": 40,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 1,
+          "chargeCount": 280
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0f03": {
+      "maxHp": 50,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 1,
+          "chargeCount": 230
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0f04": {
+      "maxHp": 40,
+      "weaponSlots": [
+        {
+          "ammoType": 10,
+          "ammoCount": 10,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0f05": {
+      "maxHp": 60,
+      "weaponSlots": [
+        {
+          "ammoType": 1,
+          "ammoCount": 1,
+          "chargeType": 2,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    },
+    "pl0f06": {
+      "maxHp": 30,
+      "weaponSlots": [
+        {
+          "ammoType": 5,
+          "ammoCount": 5,
+          "chargeType": 0,
+          "chargeCount": 300
+        },
+        {
+          "ammoType": 0,
+          "ammoCount": 0,
+          "chargeType": 0,
+          "chargeCount": 300
+        }
+      ]
+    }
+  }
+}

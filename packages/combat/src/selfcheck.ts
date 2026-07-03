@@ -13,6 +13,7 @@ import { dirname, resolve } from "node:path";
 import { isFiniteVec, yAtTriangleXZ } from "@gf/physics";
 
 import { actorDataCombatStatsForBorgId, actorDataCombatStatsSummary } from "./actorDataStats.js";
+import { borgSourceStatsSummary, sourceStatsForBorgId } from "./sourceBorgStats.js";
 import { createBattle } from "./battle.js";
 import { stepAI } from "./ai.js";
 import { actionProfileForProfile, startingAmmoForProfile } from "./actionProfiles.js";
@@ -24,7 +25,7 @@ import {
   stepGaugeWindows,
   stepProjectiles,
 } from "./combat.js";
-import { DASH, JUMP, MELEE, STAGGER, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
+import { DASH, JUMP, MELEE, STAGGER, STATE, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId } from "./gauges.js";
 import { stepMovement } from "./movement.js";
 import {
@@ -502,13 +503,17 @@ function assertActorDataStatsBound(borgs: BorgStats[]): void {
 
   const spoofedRosterStats: BorgStats = {
     ...gRed,
+    hp: 1,
     defense: 0,
     shot: 0,
     attack: 0,
     speed: 0,
   };
   const profile = buildProfile(spoofedRosterStats);
+  const sourceStats = sourceStatsForBorgId(gRed.id);
+  if (!sourceStats) throw new Error("[selfcheck] missing source stat row for pl0615");
   if (
+    profile.maxHp !== sourceStats.maxHp ||
     profile.defense !== actorStats.defense ||
     profile.shot !== actorStats.shot ||
     profile.attack !== actorStats.attack ||
@@ -519,8 +524,15 @@ function assertActorDataStatsBound(borgs: BorgStats[]): void {
     );
   }
   console.log(
-    `[selfcheck] actor-data stat bytes bound: ${expected} exact rows; pl0615 def/shot/atk/spd=${profile.defense}/${profile.shot}/${profile.attack}/${profile.speed}`,
+    `[selfcheck] source stats bound: hp=${profile.maxHp}; actor-data exact rows=${expected}; pl0615 def/shot/atk/spd=${profile.defense}/${profile.shot}/${profile.attack}/${profile.speed}`,
   );
+
+  if (
+    borgSourceStatsSummary.missingRows.length > 0 ||
+    borgSourceStatsSummary.hpMismatches.length > 0
+  ) {
+    throw new Error("[selfcheck] source borg stat verification has missing rows or HP mismatches");
+  }
 }
 
 function assertLockRelativeControls(borgs: BorgStats[]): void {
@@ -606,7 +618,7 @@ function assertProjectileVisualKinds(borgs: BorgStats[]): void {
     },
     borgs,
   );
-  for (let f = 0; f < 25; f += 1) {
+  for (let f = 0; f < STATE.SPAWN_DURATION; f += 1) {
     battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
     assertSane(battle.state.borgs, f);
   }
@@ -1058,6 +1070,120 @@ function assertFrozenBattleTimerNeverExpires(borgs: BorgStats[]): void {
   );
 }
 
+function assertSpawnDeployLockDuration(borgs: BorgStats[]): void {
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: null, borgIds: ["pl0008"] },
+      ],
+      bounds: { x: 4000, z: 4000 },
+      spawnPoints: [
+        { pos: { x: -3500, y: 10, z: -3500 } },
+        { pos: { x: 3500, y: 10, z: 3500 } },
+      ],
+    },
+    borgs,
+  );
+  const activeUid = battle.state.activeUidByPlayer["p1"];
+  const activeNow = () => battle.state.borgs.find((b) => b.uid === activeUid);
+  if (!activeNow()) throw new Error("[selfcheck] spawn duration test lost p1 borg");
+  const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
+
+  for (let f = 0; f < STATE.SPAWN_DURATION - 1; f += 1) battle.step(1 / 60, idleInputs);
+  if (activeNow()?.state !== "spawn") {
+    throw new Error(`[selfcheck] spawn lock ended early at frame ${STATE.SPAWN_DURATION - 1}`);
+  }
+  battle.step(1 / 60, idleInputs);
+  const after = activeNow();
+  if (after?.state !== "idle") {
+    throw new Error(`[selfcheck] spawn lock did not end at ${STATE.SPAWN_DURATION} frames: ${after?.state}`);
+  }
+  console.log(`[selfcheck] spawn deploy lock matched source total ${STATE.SPAWN_DURATION} frames`);
+}
+
+function assertDeathAccountingAtKillEvent(borgs: BorgStats[]): void {
+  // DERIVED - kill-event accounting is immediate in zz_002f8dc_
+  // (chunk_0003.c:8212-8330), while borg_death_entry/animation is a separate path
+  // (zz_005bbc0_, chunk_0007.c:3716-3751). Team force energy should drop as soon as
+  // HP reaches 0, but the next queued borg should still wait for the death timer.
+  const firstEnemyId = "pl0008";
+  const nextEnemyId = "pl000c";
+  const firstEnemyProfile = buildProfile(borgById(borgs, firstEnemyId));
+  const nextEnemyProfile = buildProfile(borgById(borgs, nextEnemyId));
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: null, borgIds: [firstEnemyId, nextEnemyId] },
+      ],
+      bounds: { x: 4000, z: 4000 },
+      spawnPoints: [
+        { pos: { x: -3500, y: 10, z: -3500 } },
+        { pos: { x: 3500, y: 10, z: 3500 } },
+      ],
+    },
+    borgs,
+  );
+  const enemy = battle.state.borgs.find((b) => b.team === 1 && b.borgId === firstEnemyId);
+  if (!enemy) throw new Error("[selfcheck] death accounting test lost first enemy");
+  const startEnergy = battle.state.energy[1] ?? 0;
+  const expectedStart = firstEnemyProfile.energy + nextEnemyProfile.energy;
+  if (startEnergy !== expectedStart) {
+    throw new Error(`[selfcheck] unexpected starting enemy energy: ${startEnergy}, want ${expectedStart}`);
+  }
+
+  enemy.hp = 1;
+  enemy.invincTimer = 0;
+  enemy.state = "idle";
+  const dealt = applyHit(
+    enemy,
+    firstEnemyProfile,
+    9999,
+    0,
+    { x: 0, y: 0, z: 0 },
+    { x: enemy.pos.x, y: enemy.pos.y, z: enemy.pos.z - 10 },
+  );
+  const enemyStateAfterHit = enemy.state as BorgRuntime["state"];
+  if (dealt <= 0 || enemy.hp !== 0 || enemyStateAfterHit !== "death") {
+    throw new Error(`[selfcheck] lethal hit did not enter death state: dealt=${dealt}, hp=${enemy.hp}, state=${enemy.state}`);
+  }
+
+  const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
+  battle.step(1 / 60, idleInputs);
+  if ((battle.state.defeated[1] ?? 0) !== 1 || (battle.state.defeatedEnergy[1] ?? 0) !== firstEnemyProfile.energy) {
+    throw new Error(
+      `[selfcheck] kill-event defeated counters wrong: defeated=${battle.state.defeated[1]}, energy=${battle.state.defeatedEnergy[1]}`,
+    );
+  }
+  if ((battle.state.energy[1] ?? 0) !== nextEnemyProfile.energy) {
+    throw new Error(
+      `[selfcheck] enemy force energy did not drop at kill event: got ${battle.state.energy[1]}, want queued ${nextEnemyProfile.energy}`,
+    );
+  }
+  const enemyStateAfterAccounting = enemy.state as BorgRuntime["state"];
+  if (!enemy.alive || !enemy.defeatAccounted || enemyStateAfterAccounting !== "death") {
+    throw new Error("[selfcheck] death visual state should remain alive-but-accounted until removal");
+  }
+  if (battle.state.borgs.some((b) => b.team === 1 && b.borgId === nextEnemyId)) {
+    throw new Error("[selfcheck] next enemy deployed before death-state removal");
+  }
+
+  let deployed = false;
+  for (let f = 0; f < STATE.DEATH_DURATION + 2; f += 1) {
+    battle.step(1 / 60, idleInputs);
+    deployed = battle.state.borgs.some((b) => b.team === 1 && b.borgId === nextEnemyId);
+    if (deployed) break;
+  }
+  if (!deployed) throw new Error("[selfcheck] queued enemy did not deploy after death timer");
+  if ((battle.state.defeated[1] ?? 0) !== 1 || (battle.state.defeatedEnergy[1] ?? 0) !== firstEnemyProfile.energy) {
+    throw new Error("[selfcheck] death timer double-counted defeated energy");
+  }
+  console.log("[selfcheck] kill-event force accounting is immediate; queued deploy still waits for death timer");
+}
+
 function assertActorParamTierMatchesCClamp(): void {
   const state = resetActorParamTier();
   expectParamTierState(state, PARAM_TIER_RESET, 0, 0, "reset");
@@ -1218,11 +1344,12 @@ function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
     comboAccum: 0,
     comboRank: 0,
     paramTier: resetActorParamTier(),
-    lockTarget: null,
-    allyLockTarget: null,
-    alive: true,
-  };
-}
+      lockTarget: null,
+      allyLockTarget: null,
+      defeatAccounted: false,
+      alive: true,
+    };
+  }
 
 function fakeProjectile(uid: string, pos: Projectile["pos"], vel: Projectile["vel"]): Projectile {
   return {
@@ -1271,6 +1398,8 @@ export function main(): number {
   assertMeleeRefreshesInvincibility(borgs);
   assertAiKeepsLockedTarget(borgs);
   assertFrozenBattleTimerNeverExpires(borgs);
+  assertSpawnDeployLockDuration(borgs);
+  assertDeathAccountingAtKillEvent(borgs);
   assertActorParamTierMatchesCClamp();
   assertGaugeStaggerModel(borgs);
 

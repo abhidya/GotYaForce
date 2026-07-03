@@ -2,7 +2,7 @@
 //
 // The JSON fields we consume (see borgs.json):
 //   energy  -> deploy cost AND the win/lose energy pool contribution
-//   hp      -> "L1/L10" string, e.g. "200/290"; we use the L1 (first) value as battle HP
+//   hp      -> fallback only; runtime prefers the decompiled 0x802f2988 stat row
 //   defense -> fallback only; runtime prefers pl####data.bin byte 0x1a4
 //   shot    -> fallback only; runtime prefers pl####data.bin byte 0x1a5
 //   attack  -> fallback only; runtime prefers pl####data.bin byte 0x1a6
@@ -11,13 +11,12 @@
 //   type    -> fallback only; runtime prefers pl####data.bin byte 0x1a0 (type enum)
 //   tribe   -> cosmetic / grouping, unused by the sim
 //
-// Confidence note: the HP field (object+0x1C6) and subtract-and-clamp application are now
-// DERIVED from a live disassembly trace (behavior-notes.md s4h); the exact attack/defense ->
-// raw-damage coefficients are still TUNED FROM THE STAT TABLE, not ported from the ROM
-// (`zz_003cd5c_` is known to be a table-driven formula, but not yet fully ported).
-// Clearly flagged in packages/combat/src/constants.ts.
+// Confidence note: max HP now comes from the decompiled 0x802f2988 row read by zz_0055f90_
+// (behavior-notes.md ag), while defense/shot/attack/speed come from pl####data.bin bytes.
+// Runtime HP damage is computed separately from damage records in damageFormula.ts.
 
 import { actorDataCombatStatsForBorgId } from "./actorDataStats.js";
+import { sourceStatsForBorgId } from "./sourceBorgStats.js";
 
 /**
  * Raw borg stats as they appear in borgs.json. Kept structurally compatible with the
@@ -124,13 +123,14 @@ export function buildProfile(s: BorgStats): BorgProfile {
   const shot = actorStats?.shot ?? s.shot;
   const attack = actorStats?.attack ?? s.attack;
   const speed = actorStats?.speed ?? s.speed;
+  const sourceStats = sourceStatsForBorgId(s.id);
   const hasShot = shot > 0;
   const hasMelee = attack > 0;
   return {
     id: s.id,
     name: s.name,
     energy: s.energy,
-    maxHp: parseHp(s.hp),
+    maxHp: sourceStats?.maxHp ?? parseHp(s.hp),
     defense,
     shot,
     attack,

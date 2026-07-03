@@ -140,6 +140,8 @@ export interface BorgRuntime {
    *  Transient bookkeeping, reset on every swing start; optional so external constructors
    *  (tests/fakes) don't need to provide it. */
   meleeHitUids?: string[];
+  /** True once the HP-zero kill event has already removed this borg's force cost. */
+  defeatAccounted: boolean;
   alive: boolean;
 }
 
@@ -175,6 +177,8 @@ export interface BattleConfig {
    * Versus with a selected limit writes seconds*60 and [0x50]=0 (chunk_0044.c:366-373).
    */
   timerFrozen?: boolean;
+  /** Original Challenge mode for damage side-rank bytes: 0=NORMAL, 1=TUFF, 2=INSANE. */
+  challengeMode?: 0 | 1 | 2;
 }
 
 export type BattleResult = "ongoing" | "win" | "lose" | "draw";
@@ -188,6 +192,7 @@ export interface Projectile {
   team: number;
   pos: Vec3;
   vel: Vec3;
+  /** Source damage scale for real combat callers; legacy direct callers may still treat it as raw damage. */
   damage: number;
   hitstun: number;
   knockback: number;
@@ -206,7 +211,7 @@ export interface Projectile {
 export interface BattleState {
   borgs: BorgRuntime[];
   projectiles: Projectile[];
-  /** Remaining energy per team = sum of (alive + not-yet-deployed) borg energy. */
+  /** Remaining energy per team = sum of not-yet-defeated on-field + not-yet-deployed borg energy. */
   energy: Record<number, number>;
   /** Whole borgs defeated per team, counted at the source death event before auto-deploy. */
   defeated: Record<number, number>;

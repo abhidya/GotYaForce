@@ -14,6 +14,8 @@ Generated: 2026-06-30
 
 ## Trace Files
 
+- Correction, 2026-07-03: older runs that used `D:\GotYaForce\dolphin\soon we fight mirror b.sav` are not valid GG4E gameplay-state evidence. That file was a different-game save state and has been deleted. If Dolphin appeared to accept the path but landed at the fresh menu, treat that run as a failed state-load/fallback-to-boot run, not as a trace from the intended gameplay state.
+- Avoid this error in new runs: launch Dolphin visibly with `--batch 0`, do not pass a save state by default, and start tracing only after the screen/state has been visually confirmed.
 - `user-data/dolphin-trace/traces/gdb-trace-2026-06-30T08-10-54-261Z.json`
   - Broad proof trace.
   - 120 hits, no errors.
@@ -25,7 +27,8 @@ Generated: 2026-06-30
 - `user-data/dolphin-trace/traces/gdb-trace-2026-06-30T08-19-13-228Z.json`
   - Narrow action/death/AI pass from `dolphin/soon we fight mirror b.sav`.
   - Only one unmapped boot/core hit, then timeout.
-  - Evidence says this save-state launch did not enter the active gameplay/action path under the current headless batch launch.
+  - Invalid for GG4E gameplay evidence: the referenced save state was for a different game and was later deleted.
+  - Evidence says this launch did not enter the active gameplay/action path; likely state-load failure/fresh boot rather than a useful negative result.
 - `user-data/dolphin-trace/traces/damage-next/gdb-trace-2026-06-30T21-25-14-937Z.json`
   - First pass after `scripts/dolphin-gdb-trace.mjs` gained derived active-borg watchpoints.
   - Damage breakpoints installed and six runtime watchpoint templates parsed, but no wake/damage breakpoint fired.
@@ -33,6 +36,7 @@ Generated: 2026-06-30
 - `user-data/dolphin-trace/traces/camera-next/gdb-trace-2026-06-30T21-28-19-435Z.json`
   - Focused camera pass from `dolphin/soon we fight mirror b.sav`.
   - 120 hits, no errors.
+  - Because the referenced state path was invalid, this proves the GDB/camera capture path only. It must not be used as proof that the intended gameplay save state loaded.
   - Caller distribution: startup/control `0x80005424` x1, `0x80005a44` x1, early camera `0x8000bd08` x13, later camera callers `0x8008c93c` x35 and `0x8008ca90` x70.
   - Decoded `C_MTXLookAt` vectors were stable setup values in this capture:
     - `0x8008c93c`: eye `[0, 0, 100]`, up `[0, 1, 0]`, interest `[0, 0, -100]`.
@@ -40,6 +44,8 @@ Generated: 2026-06-30
   - Result: proves camera callsite/capture path, but not enough to replace the browser gameplay follow camera formula yet.
 
 ## Commands
+
+Historical commands below that reference `soon we fight mirror b.sav` are retained only to explain old trace files. Do not rerun them for new evidence.
 
 ```bash
 rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --save-state "D:\GotYaForce\dolphin\soon we fight mirror b.sav"
@@ -67,10 +73,10 @@ Do not implement lock-on, projectile spawn, melee contact, jump/fly velocity, de
 
 ## Next Trace
 
-Use visible Dolphin or a verified gameplay save-state boot path, then run one short trace per action. Start with camera and one manual jump/shot:
+Use visible Dolphin and a visually verified gameplay state, then run one short trace per action. Start with camera and one manual jump/shot:
 
 ```bash
-rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0 --save-state "D:\GotYaForce\dolphin\soon we fight mirror b.sav"
+rtk .\tools\node\node.exe scripts\launch-dolphin-gdb.mjs --batch 0
 rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --groups camera --max-hits 30 --timeout-ms 30000
 rtk .\tools\node\node.exe scripts\dolphin-gdb-trace.mjs --only-ids action-state-entry,action-helper-cluster,movement-helper-cluster --max-hits 40 --timeout-ms 60000
 ```

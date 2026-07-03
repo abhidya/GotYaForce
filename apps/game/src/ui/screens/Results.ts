@@ -53,12 +53,12 @@ interface RowDef {
 const RESULT_SCENES = {
   win: {
     sceneId: "rpot20",
-    modelPath: "/ui/scenes/rpot20/model_00.dae",
+    modelPath: "/ui/scenes/rpot20/model_00.glb",
     layout: UI_SCENE_LAYOUTS.rpot20.semantics.results,
   },
   lose: {
     sceneId: "rpot23",
-    modelPath: "/ui/scenes/rpot23/model_00.dae",
+    modelPath: "/ui/scenes/rpot23/model_00.glb",
     layout: UI_SCENE_LAYOUTS.rpot23.semantics.results,
   },
 } as const;

@@ -1,0 +1,3788 @@
+{
+  "generatedAt": "2026-07-03T07:31:46.638Z",
+  "generatedBy": "scripts/build-decomp-navigation-indexes.mjs",
+  "summary": {
+    "scannedFiles": 24,
+    "totalReferences": 192,
+    "exactFunctionStarts": 9,
+    "nonFunctionReferences": 183,
+    "exactFunctionPct": "4.69%",
+    "byKind": {
+      "function-interior": 173,
+      "function-start": 9,
+      "extracted-data-anchor": 7,
+      "data-or-global": 3
+    }
+  },
+  "resolutions": [
+    {
+      "address": "0x80010024",
+      "kind": "function-interior",
+      "displayName": "challenge-menu-flow_candidate_8000fffc",
+      "functionAddress": "0x8000fffc",
+      "functionPath": "game/modes/challenge/8000fffc_challenge-menu-flow_candidate_8000fffc.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0001.c:2922",
+      "offsetFromFunctionStart": 40,
+      "nextFunctionAddress": "0x800101c8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8002bbe8",
+      "kind": "function-interior",
+      "displayName": "battle_frame_target_action_dispatch",
+      "functionAddress": "0x8002bb14",
+      "functionPath": "game/modes/challenge/8002bb14_battle_frame_target_action_dispatch.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
+      "offsetFromFunctionStart": 212,
+      "nextFunctionAddress": "0x8002c994",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8002bbec",
+      "kind": "function-interior",
+      "displayName": "battle_frame_target_action_dispatch",
+      "functionAddress": "0x8002bb14",
+      "functionPath": "game/modes/challenge/8002bb14_battle_frame_target_action_dispatch.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:5844",
+      "offsetFromFunctionStart": 216,
+      "nextFunctionAddress": "0x8002c994",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x800300bc",
+      "kind": "function-start",
+      "displayName": "compute_knockback_launch_direction",
+      "functionAddress": "0x800300bc",
+      "functionPath": "game/combat/knockback/800300bc_compute_knockback_launch_direction.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0003.c:8540",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [
+        "research/decomp/data/knockback-direction-800300bc.json"
+      ],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/damage-records-802d46e0.json",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/knockback-direction-800300bc.json",
+          "sourceKinds": [
+            "filename"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d37c",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 56,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d380",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 60,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d384",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 64,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d388",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 68,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d38c",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 72,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d390",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 76,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d394",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 80,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d398",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 84,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d39c",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 88,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d3a0",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 92,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d3a4",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 96,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d3a8",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 100,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d3ac",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 104,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8003d3b0",
+      "kind": "function-interior",
+      "displayName": "apply_hp_damage_subtract_clamp",
+      "functionAddress": "0x8003d344",
+      "functionPath": "game/modes/challenge/8003d344_apply_hp_damage_subtract_clamp.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0004.c:6832",
+      "offsetFromFunctionStart": 108,
+      "nextFunctionAddress": "0x8003d3e8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055be8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1372,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055bec",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1376,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055bf0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1380,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055bf4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1384,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055bf8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1388,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055bfc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1392,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c00",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1396,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c04",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1400,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c08",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1404,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c0c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1408,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c10",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1412,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c14",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1416,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c18",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1420,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c1c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1424,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c20",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1428,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80055c24",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005568c",
+      "functionAddress": "0x8005568c",
+      "functionPath": "game/battle/force-setup/8005568c_force-setup_candidate_8005568c.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:7813",
+      "offsetFromFunctionStart": 1432,
+      "nextFunctionAddress": "0x80055dcc",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc00",
+      "kind": "function-start",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/borg-struct-offsets.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc04",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 4,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc08",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 8,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc0c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 12,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc10",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 16,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc14",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 20,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc18",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 24,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc1c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 28,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc20",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 32,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc24",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 36,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc28",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 40,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc2c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 44,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc30",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 48,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc34",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 52,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc38",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 56,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc3c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 60,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc40",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 64,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc44",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 68,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc48",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 72,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc4c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 76,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc50",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 80,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc54",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 84,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc58",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 88,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc5c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 92,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc60",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 96,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc64",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 100,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc68",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 104,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc6c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 108,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc70",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 112,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc74",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 116,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc78",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 120,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc7c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 124,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc80",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 128,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc84",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 132,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc88",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 136,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc8c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 140,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc90",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 144,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc94",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 148,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc98",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 152,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cc9c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 156,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cca0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 160,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cca4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 164,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cca8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 168,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccac",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 172,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccb0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 176,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccb4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 180,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccb8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 184,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccbc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 188,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccc0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 192,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccc4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 196,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccc8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 200,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cccc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 204,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccd0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 208,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccd4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 212,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccd8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 216,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccdc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 220,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cce0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 224,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cce4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 228,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cce8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 232,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccec",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 236,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccf0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 240,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccf4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 244,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccf8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 248,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ccfc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 252,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd00",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 256,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd04",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 260,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd08",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 264,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd0c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 268,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd10",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 272,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd14",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 276,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd18",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 280,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd1c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 284,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd20",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 288,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd24",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 292,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd28",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 296,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd2c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 300,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd30",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 304,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd34",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 308,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd38",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 312,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd3c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 316,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd40",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 320,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd44",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 324,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd48",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 328,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd4c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 332,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd50",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 336,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd54",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 340,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd58",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 344,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd5c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 348,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd60",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 352,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd64",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 356,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd68",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 360,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd6c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 364,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd70",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 368,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd74",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 372,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd78",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 376,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd7c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 380,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd80",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 384,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd84",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 388,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd88",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 392,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd8c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 396,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd90",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 400,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd94",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 404,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd98",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 408,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cd9c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 412,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cda0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 416,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cda4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 420,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cda8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 424,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdac",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 428,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdb0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 432,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdb4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 436,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdb8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 440,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdbc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 444,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdc0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 448,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdc4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 452,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdc8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 456,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdcc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 460,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdd0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 464,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdd4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 468,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdd8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 472,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cddc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 476,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cde0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 480,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cde4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 484,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cde8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 488,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdec",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 492,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdf0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 496,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdf4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 500,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdf8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 504,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005cdfc",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 508,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ce00",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 512,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ce04",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 516,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ce08",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 520,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ce0c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 524,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ce10",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005cc00",
+      "functionAddress": "0x8005cc00",
+      "functionPath": "game/battle/force-setup/8005cc00_force-setup_candidate_8005cc00.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4371",
+      "offsetFromFunctionStart": 528,
+      "nextFunctionAddress": "0x8005ce14",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005d494",
+      "kind": "function-start",
+      "displayName": "force-setup_candidate_8005d494",
+      "functionAddress": "0x8005d494",
+      "functionPath": "game/battle/force-setup/8005d494_force-setup_candidate_8005d494.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4676",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005d498",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005d494",
+      "functionAddress": "0x8005d494",
+      "functionPath": "game/battle/force-setup/8005d494_force-setup_candidate_8005d494.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4676",
+      "offsetFromFunctionStart": 4,
+      "nextFunctionAddress": "0x8005d9d8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005d49c",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005d494",
+      "functionAddress": "0x8005d494",
+      "functionPath": "game/battle/force-setup/8005d494_force-setup_candidate_8005d494.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4676",
+      "offsetFromFunctionStart": 8,
+      "nextFunctionAddress": "0x8005d9d8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005d4a0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005d494",
+      "functionAddress": "0x8005d494",
+      "functionPath": "game/battle/force-setup/8005d494_force-setup_candidate_8005d494.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4676",
+      "offsetFromFunctionStart": 12,
+      "nextFunctionAddress": "0x8005d9d8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005d4a4",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005d494",
+      "functionAddress": "0x8005d494",
+      "functionPath": "game/battle/force-setup/8005d494_force-setup_candidate_8005d494.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4676",
+      "offsetFromFunctionStart": 16,
+      "nextFunctionAddress": "0x8005d9d8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005d4a8",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005d494",
+      "functionAddress": "0x8005d494",
+      "functionPath": "game/battle/force-setup/8005d494_force-setup_candidate_8005d494.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4676",
+      "offsetFromFunctionStart": 20,
+      "nextFunctionAddress": "0x8005d9d8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005d4ac",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005d494",
+      "functionAddress": "0x8005d494",
+      "functionPath": "game/battle/force-setup/8005d494_force-setup_candidate_8005d494.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4676",
+      "offsetFromFunctionStart": 24,
+      "nextFunctionAddress": "0x8005d9d8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005d4b0",
+      "kind": "function-interior",
+      "displayName": "force-setup_candidate_8005d494",
+      "functionAddress": "0x8005d494",
+      "functionPath": "game/battle/force-setup/8005d494_force-setup_candidate_8005d494.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:4676",
+      "offsetFromFunctionStart": 28,
+      "nextFunctionAddress": "0x8005d9d8",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/invincibility-disasm.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8005ec04",
+      "kind": "function-start",
+      "displayName": "zz_005ec04_",
+      "functionAddress": "0x8005ec04",
+      "functionPath": "game/battle/8005ec04_zz_005ec04.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0007.c:5529",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-struct-offsets.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80066298",
+      "kind": "function-start",
+      "displayName": "lookup_type_category_table",
+      "functionAddress": "0x80066298",
+      "functionPath": "game/combat/damage/80066298_lookup_type_category_table.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0008.c:2976",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.json",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80069814",
+      "kind": "function-start",
+      "displayName": "challenge-menu-flow_candidate_80069814",
+      "functionAddress": "0x80069814",
+      "functionPath": "game/modes/challenge/80069814_challenge-menu-flow_candidate_80069814.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0009.c:102",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.json",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80083714",
+      "kind": "function-start",
+      "displayName": "challenge-menu-flow_candidate_80083714",
+      "functionAddress": "0x80083714",
+      "functionPath": "game/modes/challenge/80083714_challenge-menu-flow_candidate_80083714.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0012.c:2829",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.json",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80196030",
+      "kind": "function-start",
+      "displayName": "poll_challenge_menu_selection",
+      "functionAddress": "0x80196030",
+      "functionPath": "game/modes/challenge/80196030_poll_challenge_menu_selection.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:153",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.json",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80196188",
+      "kind": "function-start",
+      "displayName": "challenge-menu-flow_candidate_80196188",
+      "functionAddress": "0x80196188",
+      "functionPath": "game/modes/challenge/80196188_challenge-menu-flow_candidate_80196188.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0048.c:199",
+      "offsetFromFunctionStart": 0,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.json",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x801e05e0",
+      "kind": "function-interior",
+      "displayName": "zz_01e05dc_",
+      "functionAddress": "0x801e05dc",
+      "functionPath": "game/ui/801e05dc_zz_01e05dc.c",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0058.c:3812",
+      "offsetFromFunctionStart": 4,
+      "nextFunctionAddress": "0x801e0650",
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/borg-statemachine-head.txt",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x802c5d60",
+      "kind": "extracted-data-anchor",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [
+        "research/decomp/data/type-multiplier-matrix-802c5d60.json"
+      ],
+      "sources": [
+        {
+          "path": "research/decomp/HANDOFF-PROMPT.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/type-multiplier-matrix-802c5d60.json",
+          "sourceKinds": [
+            "filename"
+          ]
+        },
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.json",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x802d46e0",
+      "kind": "extracted-data-anchor",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [
+        "research/decomp/data/damage-records-802d46e0.json"
+      ],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/damage-records-802d46e0.json",
+          "sourceKinds": [
+            "filename"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x802f2988",
+      "kind": "extracted-data-anchor",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [
+        "research/decomp/data/borg-hp-stat-rows-802f2988.json"
+      ],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/borg-hp-stat-rows-802f2988.json",
+          "sourceKinds": [
+            "filename"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x802f2e28",
+      "kind": "extracted-data-anchor",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [
+        "research/decomp/data/type-category-remap-802f2e28.json"
+      ],
+      "sources": [
+        {
+          "path": "research/decomp/HANDOFF-PROMPT.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/spawn-pools-80380804.json",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/type-category-remap-802f2e28.json",
+          "sourceKinds": [
+            "filename"
+          ]
+        },
+        {
+          "path": "research/decomp/data/type-multiplier-matrix-802c5d60.json",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.json",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/index/challenge-flow-evidence.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8036f360",
+      "kind": "extracted-data-anchor",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [
+        "research/decomp/data/challenge-battle-tables-8036f360.json"
+      ],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/challenge-battle-tables-8036f360.json",
+          "sourceKinds": [
+            "filename"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8036f4b8",
+      "kind": "data-or-global",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x8036f53c",
+      "kind": "data-or-global",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80380804",
+      "kind": "extracted-data-anchor",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [
+        "research/decomp/data/spawn-pools-80380804.json"
+      ],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/spawn-pools-80380804.json",
+          "sourceKinds": [
+            "filename"
+          ]
+        },
+        {
+          "path": "research/decomp/data/type-category-remap-802f2e28.json",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x804335e0",
+      "kind": "extracted-data-anchor",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [
+        "research/decomp/data/damage-formula-tables-804335e0.json"
+      ],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        },
+        {
+          "path": "research/decomp/data/damage-formula-tables-804335e0.json",
+          "sourceKinds": [
+            "filename"
+          ]
+        }
+      ]
+    },
+    {
+      "address": "0x80433930",
+      "kind": "data-or-global",
+      "displayName": null,
+      "functionAddress": null,
+      "functionPath": null,
+      "sourceRef": null,
+      "offsetFromFunctionStart": null,
+      "nextFunctionAddress": null,
+      "dataFiles": [],
+      "sources": [
+        {
+          "path": "research/decomp/behavior-notes.md",
+          "sourceKinds": [
+            "content"
+          ]
+        }
+      ]
+    }
+  ]
+}

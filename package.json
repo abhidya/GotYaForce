@@ -17,17 +17,26 @@
     "clean": "pnpm -r exec rimraf dist tsconfig.tsbuildinfo",
     "extract": "node scripts/extract-user-disc.mjs",
     "sync:assets": "node scripts/sync-exported-assets.mjs",
+    "convert:glb": "node scripts/convert-runtime-models-to-glb.mjs",
+    "manifest:model-library": "node scripts/build-model-library-manifest.mjs",
     "export:borg-anim": "node scripts/export-borg-animation-hsd.mjs",
     "index:decomp": "node scripts/build-decomp-evidence-index.mjs",
     "inventory:challenge-flow": "node scripts/inventory-challenge-flow-evidence.mjs",
     "inventory:archive-load": "node scripts/inventory-archive-load-xrefs.mjs",
     "inventory:challenge-memory": "python scripts/inventory-challenge-memory-evidence.py",
     "manifest:stages": "node scripts/build-stage-manifests.mjs && node scripts/build-stage-catalog-module.mjs",
+    "manifest:stage-render-state": "node scripts/export-stage-render-state.mjs --all",
     "manifest:stage-catalog": "node scripts/build-stage-catalog-module.mjs",
+    "manifest:ui-scenes": "node scripts/generate-ui-scene-layouts.mjs",
+    "runtime:assets": "pnpm convert:glb && pnpm manifest:model-library && pnpm manifest:stages && pnpm manifest:stage-render-state && pnpm manifest:ui-scenes",
     "convert": "node scripts/asset-convert.mjs",
     "manifest": "node scripts/build-manifest.mjs"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^1.0.2",
+    "@xmldom/xmldom": "^0.9.10",
+    "gltf-validator": "2.0.0-dev.3.10",
+    "three": "^0.169.0",
     "typescript": "^5.6.0"
   }
 }

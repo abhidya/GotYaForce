@@ -18,8 +18,8 @@
 //         fog #371a3d 2000..40000, fov 38.03
 //   stff: ambient #988cb2, TWO gray #808080 directionals @ (-3,2,1)/(1,2,-1)
 // The per-stage values are read from render-state.json at stage mount; the
-// constants below are only the st00-derived fallback for stages whose JSON
-// fails to load.
+// constants below are only the initial st00-derived values used before the
+// first stage applies its exported state.
 
 import * as THREE from "three";
 
@@ -90,7 +90,7 @@ export type ResolvedStageLighting = {
 
 // TUNED: single global calibration factor applied to ambient + directional
 // intensities. The HSD LObj descriptors carry colors but no scalar intensity
-// (GX light contribution is color * channel math), and the exported DAE
+// (GX light contribution is color * channel math), and the exported GLB
 // materials were authored against that model. With three.js r169 defaults
 // (physically-based light intensities off for Ambient/Directional color
 // multipliers) intensity 1.0 reproduces a readable image across all 40
@@ -102,8 +102,8 @@ export const STAGE_LIGHT_CALIBRATION = 1.0;
 // stage-lighting-render-state.md): CObj @0x75278 (fov 43.191872, near 10,
 // far 80000), LObj0 @0x75234 ambient #d8d0c2, LObj1 @0x75218 #fff0e6 at
 // (-385.512512, 956.0448, -377.986603), FogDesc @0x752b0 type 2 start 900
-// end 40000 color #fff6e5. Used only when a stage's render-state.json is
-// missing or unparseable.
+// end 40000 color #fff6e5. Used only to seed the light objects before a
+// stage render-state is loaded.
 export const DEFAULT_STAGE_LIGHTING: ResolvedStageLighting = {
   background: 0xfff6e5,
   fog: { color: 0xfff6e5, near: 900, far: 40000 },
@@ -122,87 +122,92 @@ export const DEFAULT_STAGE_LIGHTING: ResolvedStageLighting = {
 // Resolution: exported JSON -> renderer-ready values (pure; no three.js objects touched).
 // ------------------------------------------------------------------------------------------
 
-function parseHexColor(value: string | undefined, fallback: number): number {
-  if (!value || !/^#[0-9a-f]{6}$/i.test(value)) return fallback;
+function parseHexColor(value: string | undefined, label: string): number {
+  if (!value || !/^#[0-9a-f]{6}$/i.test(value)) {
+    throw new Error(`Invalid stage render-state color at ${label}`);
+  }
   return Number.parseInt(value.slice(1), 16);
 }
 
-function finiteVec3(value: number[] | undefined | null): StageVec3 | undefined {
-  if (!value || value.length < 3) return undefined;
-  const [x, y, z] = value;
-  if (x === undefined || y === undefined || z === undefined) return undefined;
-  return Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z) ? [x, y, z] : undefined;
+function requiredNumber(value: number | undefined, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`Invalid stage render-state number at ${label}`);
+  }
+  return value;
 }
 
-function lightPosition(light: StageRenderStateLight): StageVec3 | undefined {
-  return finiteVec3(light.position?.position);
+function requiredVec3(value: number[] | undefined | null, label: string): StageVec3 {
+  if (!value || value.length < 3) throw new Error(`Invalid stage render-state vector at ${label}`);
+  const [x, y, z] = value;
+  if (x === undefined || y === undefined || z === undefined) throw new Error(`Invalid stage render-state vector at ${label}`);
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
+    throw new Error(`Invalid stage render-state vector at ${label}`);
+  }
+  return [x, y, z];
 }
 
 /**
  * Resolve a stage's exported render state into renderer-ready lighting values.
- * Falls back field-by-field to the st00-derived defaults, so a partial or
- * missing render-state.json still yields a fully populated result.
  */
-export function resolveStageLighting(rs: StageRenderState | null | undefined): ResolvedStageLighting {
-  const lights = Array.isArray(rs?.lights) ? rs.lights : [];
+export function resolveStageLighting(rs: StageRenderState): ResolvedStageLighting {
+  if (!rs) throw new Error("Missing stage render-state");
+  const lights = Array.isArray(rs.lights) ? rs.lights : [];
+  if (lights.length === 0) throw new Error(`Stage render-state has no lights for ${rs.stageId ?? "unknown stage"}`);
 
   // Ambient = the LObj without a world position (flags 0x40000 in every
   // scanned stage); role text is a secondary hint for older exports.
   const ambient =
-    lights.find((light) => !lightPosition(light)) ??
+    lights.find((light) => light.position == null) ??
     lights.find((light) => /ambient|global/i.test(light.role ?? ""));
+  if (!ambient) throw new Error(`Stage render-state has no ambient light for ${rs.stageId ?? "unknown stage"}`);
 
   // Directionals = every positioned LObj. HSD points these lights at their
   // interest (0,0,0 in all scanned stages), which matches a three.js
   // DirectionalLight at `position` with its default origin target.
   const directionals = lights
-    .map((light) => ({ light, position: lightPosition(light) }))
-    .filter((entry): entry is { light: StageRenderStateLight; position: StageVec3 } => entry.position !== undefined)
+    .filter((light) => light.position != null)
+    .map((light) => ({ light, position: requiredVec3(light.position?.position, `lights[${light.index ?? "?"}].position`) }))
     .map(({ light, position }) => ({
-      color: parseHexColor(light.color?.rgbHex, DEFAULT_STAGE_LIGHTING.directionals[0]?.color ?? 0xffffff),
+      color: parseHexColor(light.color?.rgbHex, `lights[${light.index ?? "?"}].color.rgbHex`),
       intensity: STAGE_LIGHT_CALIBRATION,
       position,
     }));
+  if (directionals.length === 0) {
+    throw new Error(`Stage render-state has no directional lights for ${rs.stageId ?? "unknown stage"}`);
+  }
 
-  const fogColor = parseHexColor(
-    rs?.fog?.color?.rgbHex ?? rs?.fog?.colorRgbHex,
-    DEFAULT_STAGE_LIGHTING.fog?.color ?? 0xfff6e5,
-  );
+  const fogColor = parseHexColor(rs.fog?.color?.rgbHex ?? rs.fog?.colorRgbHex, "fog.color.rgbHex");
   // HSD fog type 0 = GX_FOG_NONE. Every exported stage uses type 2
   // (GX_FOG_LIN); any other nonzero exponential type is approximated linearly.
-  const fogEnabled = rs?.fog === undefined || (rs.fog.type ?? 2) !== 0;
+  const fogEnabled = (rs.fog?.type ?? 2) !== 0;
 
   return {
     background: fogColor,
     fog: fogEnabled
       ? {
           color: fogColor,
-          near: rs?.fog?.start ?? DEFAULT_STAGE_LIGHTING.fog?.near ?? 900,
-          far: rs?.fog?.end ?? DEFAULT_STAGE_LIGHTING.fog?.far ?? 40000,
+          near: requiredNumber(rs.fog?.start, "fog.start"),
+          far: requiredNumber(rs.fog?.end, "fog.end"),
         }
       : null,
     camera: {
-      fovDegrees: rs?.camera?.fovDegrees ?? DEFAULT_STAGE_LIGHTING.camera.fovDegrees,
-      near: rs?.camera?.near ?? DEFAULT_STAGE_LIGHTING.camera.near,
-      far: rs?.camera?.far ?? DEFAULT_STAGE_LIGHTING.camera.far,
+      fovDegrees: requiredNumber(rs.camera?.fovDegrees, "camera.fovDegrees"),
+      near: requiredNumber(rs.camera?.near, "camera.near"),
+      far: requiredNumber(rs.camera?.far, "camera.far"),
     },
     ambient: {
-      color: parseHexColor(ambient?.color?.rgbHex, DEFAULT_STAGE_LIGHTING.ambient.color),
+      color: parseHexColor(ambient.color?.rgbHex, `lights[${ambient.index ?? "?"}].color.rgbHex`),
       intensity: STAGE_LIGHT_CALIBRATION,
     },
-    directionals: directionals.length > 0 ? directionals : DEFAULT_STAGE_LIGHTING.directionals.map((d) => ({ ...d })),
+    directionals,
   };
 }
 
-/** Fetch a stage's exported render state; null when absent (fallback lighting applies). */
-export async function fetchStageRenderState(stageId: string): Promise<StageRenderState | null> {
-  try {
-    const response = await fetch(`/stages/${stageId}/render-state.json`);
-    if (!response.ok) return null;
-    return (await response.json()) as StageRenderState;
-  } catch {
-    return null;
-  }
+/** Fetch a stage's exported render state. */
+export async function fetchStageRenderState(stageId: string): Promise<StageRenderState> {
+  const response = await fetch(`/stages/${stageId}/render-state.json`);
+  if (!response.ok) throw new Error(`Failed to load stage render-state ${stageId}: ${response.status}`);
+  return (await response.json()) as StageRenderState;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -215,7 +220,7 @@ export type StageLightingRig = {
   readonly directionals: THREE.DirectionalLight[];
 };
 
-/** Create the stage light objects (st00 fallback values) and attach them to the scene. */
+/** Create the stage light objects with initial st00 values and attach them to the scene. */
 export function createStageLightingRig(scene: THREE.Scene): StageLightingRig {
   const rig: StageLightingRig = {
     ambient: new THREE.AmbientLight(DEFAULT_STAGE_LIGHTING.ambient.color, DEFAULT_STAGE_LIGHTING.ambient.intensity),
@@ -266,7 +271,7 @@ export function applyResolvedStageLighting(
 export function applyStageRenderStateLighting(
   scene: THREE.Scene,
   rig: StageLightingRig,
-  rs: StageRenderState | null | undefined,
+  rs: StageRenderState,
 ): ResolvedStageLighting {
   const resolved = resolveStageLighting(rs);
   applyResolvedStageLighting(scene, rig, resolved);

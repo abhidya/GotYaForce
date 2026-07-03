@@ -4,7 +4,7 @@
 export const UI_SCENE_LAYOUTS = {
   "box00": {
     "sceneId": "box00",
-    "sourceArchive": "user-data/GG4E/afs_data/root/box00_mdl.arc",
+    "sourceArchive": "box00_mdl.arc",
     "modelCount": 1,
     "bounds": {
       "minX": -420.579,
@@ -17,8 +17,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/box00/model_00.dae",
-        "publicPath": "/ui/scenes/box00/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/box00/model_00.glb",
+        "publicPath": "/ui/scenes/box00/model_00.glb",
         "bounds": {
           "minX": -420.579,
           "maxX": 467.263,
@@ -49,7 +49,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "brif00": {
     "sceneId": "brif00",
-    "sourceArchive": "user-data/GG4E/afs_data/root/brif00_mdl.arc",
+    "sourceArchive": "brif00_mdl.arc",
     "modelCount": 27,
     "bounds": {
       "minX": -1606.391,
@@ -62,8 +62,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_00.dae",
-        "publicPath": "/ui/scenes/brif00/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_00.glb",
+        "publicPath": "/ui/scenes/brif00/model_00.glb",
         "bounds": {
           "minX": -143.894,
           "maxX": -71.39,
@@ -91,8 +91,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_01.dae",
-        "publicPath": "/ui/scenes/brif00/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_01.glb",
+        "publicPath": "/ui/scenes/brif00/model_01.glb",
         "bounds": {
           "minX": -104.409,
           "maxX": -88.859,
@@ -120,8 +120,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_02.dae",
-        "publicPath": "/ui/scenes/brif00/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_02.glb",
+        "publicPath": "/ui/scenes/brif00/model_02.glb",
         "bounds": {
           "minX": -40.033,
           "maxX": 49.083,
@@ -149,8 +149,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_03.dae",
-        "publicPath": "/ui/scenes/brif00/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_03.glb",
+        "publicPath": "/ui/scenes/brif00/model_03.glb",
         "bounds": {
           "minX": -48,
           "maxX": 48,
@@ -178,8 +178,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_04.dae",
-        "publicPath": "/ui/scenes/brif00/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_04.glb",
+        "publicPath": "/ui/scenes/brif00/model_04.glb",
         "bounds": {
           "minX": -140.686,
           "maxX": -114.296,
@@ -207,8 +207,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_05.dae",
-        "publicPath": "/ui/scenes/brif00/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_05.glb",
+        "publicPath": "/ui/scenes/brif00/model_05.glb",
         "bounds": {
           "minX": 83.266,
           "maxX": 109.657,
@@ -236,8 +236,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_06.dae",
-        "publicPath": "/ui/scenes/brif00/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_06.glb",
+        "publicPath": "/ui/scenes/brif00/model_06.glb",
         "bounds": {
           "minX": 114.296,
           "maxX": 140.686,
@@ -265,8 +265,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_07.dae",
-        "publicPath": "/ui/scenes/brif00/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_07.glb",
+        "publicPath": "/ui/scenes/brif00/model_07.glb",
         "bounds": {
           "minX": -109.657,
           "maxX": -83.266,
@@ -294,8 +294,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_08.dae",
-        "publicPath": "/ui/scenes/brif00/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_08.glb",
+        "publicPath": "/ui/scenes/brif00/model_08.glb",
         "bounds": {
           "minX": -9.3,
           "maxX": 9.3,
@@ -323,8 +323,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_09.dae",
-        "publicPath": "/ui/scenes/brif00/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_09.glb",
+        "publicPath": "/ui/scenes/brif00/model_09.glb",
         "bounds": {
           "minX": -9.3,
           "maxX": 9.3,
@@ -352,8 +352,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_10.dae",
-        "publicPath": "/ui/scenes/brif00/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_10.glb",
+        "publicPath": "/ui/scenes/brif00/model_10.glb",
         "bounds": {
           "minX": -9.3,
           "maxX": 9.3,
@@ -381,8 +381,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_11.dae",
-        "publicPath": "/ui/scenes/brif00/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_11.glb",
+        "publicPath": "/ui/scenes/brif00/model_11.glb",
         "bounds": {
           "minX": -9.3,
           "maxX": 9.3,
@@ -410,8 +410,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_12.dae",
-        "publicPath": "/ui/scenes/brif00/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_12.glb",
+        "publicPath": "/ui/scenes/brif00/model_12.glb",
         "bounds": {
           "minX": -9.9,
           "maxX": 9.9,
@@ -439,8 +439,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_13.dae",
-        "publicPath": "/ui/scenes/brif00/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_13.glb",
+        "publicPath": "/ui/scenes/brif00/model_13.glb",
         "bounds": {
           "minX": -17.213,
           "maxX": 17.213,
@@ -468,8 +468,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_14.dae",
-        "publicPath": "/ui/scenes/brif00/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_14.glb",
+        "publicPath": "/ui/scenes/brif00/model_14.glb",
         "bounds": {
           "minX": -199.601,
           "maxX": 14.497,
@@ -497,8 +497,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_15.dae",
-        "publicPath": "/ui/scenes/brif00/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_15.glb",
+        "publicPath": "/ui/scenes/brif00/model_15.glb",
         "bounds": {
           "minX": -110.474,
           "maxX": -82.25,
@@ -526,8 +526,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_16.dae",
-        "publicPath": "/ui/scenes/brif00/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_16.glb",
+        "publicPath": "/ui/scenes/brif00/model_16.glb",
         "bounds": {
           "minX": -200,
           "maxX": 200,
@@ -555,8 +555,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_17.dae",
-        "publicPath": "/ui/scenes/brif00/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_17.glb",
+        "publicPath": "/ui/scenes/brif00/model_17.glb",
         "bounds": {
           "minX": -200.2,
           "maxX": 200.2,
@@ -584,8 +584,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_18.dae",
-        "publicPath": "/ui/scenes/brif00/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_18.glb",
+        "publicPath": "/ui/scenes/brif00/model_18.glb",
         "bounds": {
           "minX": -1606.391,
           "maxX": 1606.391,
@@ -613,8 +613,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_19.dae",
-        "publicPath": "/ui/scenes/brif00/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_19.glb",
+        "publicPath": "/ui/scenes/brif00/model_19.glb",
         "bounds": {
           "minX": -24,
           "maxX": 24,
@@ -642,8 +642,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_20.dae",
-        "publicPath": "/ui/scenes/brif00/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_20.glb",
+        "publicPath": "/ui/scenes/brif00/model_20.glb",
         "bounds": {
           "minX": 0,
           "maxX": 367.014,
@@ -671,8 +671,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_21",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_21.dae",
-        "publicPath": "/ui/scenes/brif00/model_21.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_21.glb",
+        "publicPath": "/ui/scenes/brif00/model_21.glb",
         "bounds": {
           "minX": -115.998,
           "maxX": 106.132,
@@ -700,8 +700,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_22",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_22.dae",
-        "publicPath": "/ui/scenes/brif00/model_22.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_22.glb",
+        "publicPath": "/ui/scenes/brif00/model_22.glb",
         "bounds": {
           "minX": -139.897,
           "maxX": -19.897,
@@ -729,8 +729,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_23",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_23.dae",
-        "publicPath": "/ui/scenes/brif00/model_23.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_23.glb",
+        "publicPath": "/ui/scenes/brif00/model_23.glb",
         "bounds": {
           "minX": 49.01,
           "maxX": 169.01,
@@ -758,8 +758,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_24",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_24.dae",
-        "publicPath": "/ui/scenes/brif00/model_24.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_24.glb",
+        "publicPath": "/ui/scenes/brif00/model_24.glb",
         "bounds": {
           "minX": -133.712,
           "maxX": -87.272,
@@ -787,8 +787,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_25",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_25.dae",
-        "publicPath": "/ui/scenes/brif00/model_25.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_25.glb",
+        "publicPath": "/ui/scenes/brif00/model_25.glb",
         "bounds": {
           "minX": 55.441,
           "maxX": 101.881,
@@ -816,8 +816,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_26",
-        "modelPath": "apps/game/public/ui/scenes/brif00/model_26.dae",
-        "publicPath": "/ui/scenes/brif00/model_26.dae",
+        "modelPath": "apps/game/public/ui/scenes/brif00/model_26.glb",
+        "publicPath": "/ui/scenes/brif00/model_26.glb",
         "bounds": {
           "minX": 94.28,
           "maxX": 137.78,
@@ -848,7 +848,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "entry00": {
     "sceneId": "entry00",
-    "sourceArchive": "user-data/GG4E/afs_data/root/entry00_mdl.arc",
+    "sourceArchive": "entry00_mdl.arc",
     "modelCount": 29,
     "bounds": {
       "minX": -840,
@@ -861,8 +861,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_00.dae",
-        "publicPath": "/ui/scenes/entry00/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_00.glb",
+        "publicPath": "/ui/scenes/entry00/model_00.glb",
         "bounds": {
           "minX": -840,
           "maxX": 840,
@@ -890,8 +890,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_01.dae",
-        "publicPath": "/ui/scenes/entry00/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_01.glb",
+        "publicPath": "/ui/scenes/entry00/model_01.glb",
         "bounds": {
           "minX": -806.875,
           "maxX": -713.125,
@@ -919,8 +919,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_02.dae",
-        "publicPath": "/ui/scenes/entry00/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_02.glb",
+        "publicPath": "/ui/scenes/entry00/model_02.glb",
         "bounds": {
           "minX": -264,
           "maxX": 264,
@@ -948,8 +948,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_03.dae",
-        "publicPath": "/ui/scenes/entry00/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_03.glb",
+        "publicPath": "/ui/scenes/entry00/model_03.glb",
         "bounds": {
           "minX": -565.391,
           "maxX": 565.391,
@@ -977,8 +977,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_04.dae",
-        "publicPath": "/ui/scenes/entry00/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_04.glb",
+        "publicPath": "/ui/scenes/entry00/model_04.glb",
         "bounds": {
           "minX": -526.317,
           "maxX": 524.222,
@@ -1006,8 +1006,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_05.dae",
-        "publicPath": "/ui/scenes/entry00/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_05.glb",
+        "publicPath": "/ui/scenes/entry00/model_05.glb",
         "bounds": {
           "minX": -681.208,
           "maxX": 680.042,
@@ -1035,8 +1035,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_06.dae",
-        "publicPath": "/ui/scenes/entry00/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_06.glb",
+        "publicPath": "/ui/scenes/entry00/model_06.glb",
         "bounds": {
           "minX": -709.708,
           "maxX": -581.458,
@@ -1064,8 +1064,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_07.dae",
-        "publicPath": "/ui/scenes/entry00/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_07.glb",
+        "publicPath": "/ui/scenes/entry00/model_07.glb",
         "bounds": {
           "minX": -515.625,
           "maxX": 515.625,
@@ -1093,8 +1093,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_08.dae",
-        "publicPath": "/ui/scenes/entry00/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_08.glb",
+        "publicPath": "/ui/scenes/entry00/model_08.glb",
         "bounds": {
           "minX": -368.875,
           "maxX": 487.875,
@@ -1122,8 +1122,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_09.dae",
-        "publicPath": "/ui/scenes/entry00/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_09.glb",
+        "publicPath": "/ui/scenes/entry00/model_09.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1151,8 +1151,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_10.dae",
-        "publicPath": "/ui/scenes/entry00/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_10.glb",
+        "publicPath": "/ui/scenes/entry00/model_10.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1180,8 +1180,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_11.dae",
-        "publicPath": "/ui/scenes/entry00/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_11.glb",
+        "publicPath": "/ui/scenes/entry00/model_11.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1209,8 +1209,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_12.dae",
-        "publicPath": "/ui/scenes/entry00/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_12.glb",
+        "publicPath": "/ui/scenes/entry00/model_12.glb",
         "bounds": {
           "minX": -485.375,
           "maxX": -395.375,
@@ -1238,8 +1238,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_13.dae",
-        "publicPath": "/ui/scenes/entry00/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_13.glb",
+        "publicPath": "/ui/scenes/entry00/model_13.glb",
         "bounds": {
           "minX": -458.875,
           "maxX": -368.875,
@@ -1267,8 +1267,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_14.dae",
-        "publicPath": "/ui/scenes/entry00/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_14.glb",
+        "publicPath": "/ui/scenes/entry00/model_14.glb",
         "bounds": {
           "minX": -223.125,
           "maxX": -139.125,
@@ -1296,8 +1296,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_15.dae",
-        "publicPath": "/ui/scenes/entry00/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_15.glb",
+        "publicPath": "/ui/scenes/entry00/model_15.glb",
         "bounds": {
           "minX": -223.125,
           "maxX": -139.125,
@@ -1325,8 +1325,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_16.dae",
-        "publicPath": "/ui/scenes/entry00/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_16.glb",
+        "publicPath": "/ui/scenes/entry00/model_16.glb",
         "bounds": {
           "minX": -15.875,
           "maxX": 68.125,
@@ -1354,8 +1354,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_17.dae",
-        "publicPath": "/ui/scenes/entry00/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_17.glb",
+        "publicPath": "/ui/scenes/entry00/model_17.glb",
         "bounds": {
           "minX": -15.875,
           "maxX": 68.125,
@@ -1383,8 +1383,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_18.dae",
-        "publicPath": "/ui/scenes/entry00/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_18.glb",
+        "publicPath": "/ui/scenes/entry00/model_18.glb",
         "bounds": {
           "minX": 221.375,
           "maxX": 305.375,
@@ -1412,8 +1412,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_19.dae",
-        "publicPath": "/ui/scenes/entry00/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_19.glb",
+        "publicPath": "/ui/scenes/entry00/model_19.glb",
         "bounds": {
           "minX": 221.375,
           "maxX": 305.375,
@@ -1441,8 +1441,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_20.dae",
-        "publicPath": "/ui/scenes/entry00/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_20.glb",
+        "publicPath": "/ui/scenes/entry00/model_20.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1470,8 +1470,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_21",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_21.dae",
-        "publicPath": "/ui/scenes/entry00/model_21.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_21.glb",
+        "publicPath": "/ui/scenes/entry00/model_21.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1499,8 +1499,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_22",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_22.dae",
-        "publicPath": "/ui/scenes/entry00/model_22.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_22.glb",
+        "publicPath": "/ui/scenes/entry00/model_22.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1528,8 +1528,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_23",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_23.dae",
-        "publicPath": "/ui/scenes/entry00/model_23.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_23.glb",
+        "publicPath": "/ui/scenes/entry00/model_23.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1557,8 +1557,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_24",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_24.dae",
-        "publicPath": "/ui/scenes/entry00/model_24.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_24.glb",
+        "publicPath": "/ui/scenes/entry00/model_24.glb",
         "bounds": {
           "minX": -681.208,
           "maxX": 680.042,
@@ -1586,8 +1586,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_25",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_25.dae",
-        "publicPath": "/ui/scenes/entry00/model_25.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_25.glb",
+        "publicPath": "/ui/scenes/entry00/model_25.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1615,8 +1615,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_26",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_26.dae",
-        "publicPath": "/ui/scenes/entry00/model_26.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_26.glb",
+        "publicPath": "/ui/scenes/entry00/model_26.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -1644,8 +1644,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_27",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_27.dae",
-        "publicPath": "/ui/scenes/entry00/model_27.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_27.glb",
+        "publicPath": "/ui/scenes/entry00/model_27.glb",
         "bounds": {
           "minX": -365.391,
           "maxX": 365.391,
@@ -1673,8 +1673,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_28",
-        "modelPath": "apps/game/public/ui/scenes/entry00/model_28.dae",
-        "publicPath": "/ui/scenes/entry00/model_28.dae",
+        "modelPath": "apps/game/public/ui/scenes/entry00/model_28.glb",
+        "publicPath": "/ui/scenes/entry00/model_28.glb",
         "bounds": {
           "minX": -315.565,
           "maxX": 315.565,
@@ -1703,7 +1703,7 @@ export const UI_SCENE_LAYOUTS = {
     ],
     "semantics": {
       "selectForce": {
-        "caveat": "Semantic names are inferred from entry00 model file roles; DAE nodes are generic JOBJ/model labels.",
+        "caveat": "Semantic names are inferred from entry00 model file roles; exported source nodes are generic JOBJ/model labels.",
         "platform": {
           "left": 49.965,
           "top": 54.736,
@@ -1727,7 +1727,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "optn00": {
     "sceneId": "optn00",
-    "sourceArchive": "user-data/GG4E/afs_data/root/optn00_mdl.arc",
+    "sourceArchive": "optn00_mdl.arc",
     "modelCount": 23,
     "bounds": {
       "minX": 641.331,
@@ -1740,8 +1740,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_00.dae",
-        "publicPath": "/ui/scenes/optn00/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_00.glb",
+        "publicPath": "/ui/scenes/optn00/model_00.glb",
         "bounds": {
           "minX": 645.991,
           "maxX": 1116.556,
@@ -1769,8 +1769,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_01.dae",
-        "publicPath": "/ui/scenes/optn00/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_01.glb",
+        "publicPath": "/ui/scenes/optn00/model_01.glb",
         "bounds": {
           "minX": 641.331,
           "maxX": 689.135,
@@ -1798,8 +1798,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_02.dae",
-        "publicPath": "/ui/scenes/optn00/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_02.glb",
+        "publicPath": "/ui/scenes/optn00/model_02.glb",
         "bounds": {
           "minX": 641.331,
           "maxX": 689.135,
@@ -1827,8 +1827,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_03.dae",
-        "publicPath": "/ui/scenes/optn00/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_03.glb",
+        "publicPath": "/ui/scenes/optn00/model_03.glb",
         "bounds": {
           "minX": 686.671,
           "maxX": 918.658,
@@ -1856,8 +1856,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_04.dae",
-        "publicPath": "/ui/scenes/optn00/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_04.glb",
+        "publicPath": "/ui/scenes/optn00/model_04.glb",
         "bounds": {
           "minX": 686.671,
           "maxX": 918.658,
@@ -1885,8 +1885,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_05.dae",
-        "publicPath": "/ui/scenes/optn00/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_05.glb",
+        "publicPath": "/ui/scenes/optn00/model_05.glb",
         "bounds": {
           "minX": 686.671,
           "maxX": 918.658,
@@ -1914,8 +1914,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_06.dae",
-        "publicPath": "/ui/scenes/optn00/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_06.glb",
+        "publicPath": "/ui/scenes/optn00/model_06.glb",
         "bounds": {
           "minX": 686.671,
           "maxX": 918.658,
@@ -1943,8 +1943,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_07.dae",
-        "publicPath": "/ui/scenes/optn00/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_07.glb",
+        "publicPath": "/ui/scenes/optn00/model_07.glb",
         "bounds": {
           "minX": 686.671,
           "maxX": 1011.199,
@@ -1972,8 +1972,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_08.dae",
-        "publicPath": "/ui/scenes/optn00/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_08.glb",
+        "publicPath": "/ui/scenes/optn00/model_08.glb",
         "bounds": {
           "minX": 910.629,
           "maxX": 991.761,
@@ -2001,8 +2001,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_09.dae",
-        "publicPath": "/ui/scenes/optn00/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_09.glb",
+        "publicPath": "/ui/scenes/optn00/model_09.glb",
         "bounds": {
           "minX": 1025.566,
           "maxX": 1106.698,
@@ -2030,8 +2030,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_10.dae",
-        "publicPath": "/ui/scenes/optn00/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_10.glb",
+        "publicPath": "/ui/scenes/optn00/model_10.glb",
         "bounds": {
           "minX": 995.987,
           "maxX": 1023.031,
@@ -2059,8 +2059,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_11.dae",
-        "publicPath": "/ui/scenes/optn00/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_11.glb",
+        "publicPath": "/ui/scenes/optn00/model_11.glb",
         "bounds": {
           "minX": 910.629,
           "maxX": 991.761,
@@ -2088,8 +2088,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_12.dae",
-        "publicPath": "/ui/scenes/optn00/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_12.glb",
+        "publicPath": "/ui/scenes/optn00/model_12.glb",
         "bounds": {
           "minX": 910.629,
           "maxX": 991.761,
@@ -2117,8 +2117,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_13.dae",
-        "publicPath": "/ui/scenes/optn00/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_13.glb",
+        "publicPath": "/ui/scenes/optn00/model_13.glb",
         "bounds": {
           "minX": 910.629,
           "maxX": 991.761,
@@ -2146,8 +2146,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_14.dae",
-        "publicPath": "/ui/scenes/optn00/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_14.glb",
+        "publicPath": "/ui/scenes/optn00/model_14.glb",
         "bounds": {
           "minX": 908.939,
           "maxX": 956.266,
@@ -2175,8 +2175,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_15.dae",
-        "publicPath": "/ui/scenes/optn00/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_15.glb",
+        "publicPath": "/ui/scenes/optn00/model_15.glb",
         "bounds": {
           "minX": 908.939,
           "maxX": 956.266,
@@ -2204,8 +2204,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_16.dae",
-        "publicPath": "/ui/scenes/optn00/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_16.glb",
+        "publicPath": "/ui/scenes/optn00/model_16.glb",
         "bounds": {
           "minX": 908.939,
           "maxX": 956.266,
@@ -2233,8 +2233,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_17.dae",
-        "publicPath": "/ui/scenes/optn00/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_17.glb",
+        "publicPath": "/ui/scenes/optn00/model_17.glb",
         "bounds": {
           "minX": 908.939,
           "maxX": 956.266,
@@ -2262,8 +2262,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_18.dae",
-        "publicPath": "/ui/scenes/optn00/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_18.glb",
+        "publicPath": "/ui/scenes/optn00/model_18.glb",
         "bounds": {
           "minX": 998.945,
           "maxX": 1086.838,
@@ -2291,8 +2291,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_19.dae",
-        "publicPath": "/ui/scenes/optn00/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_19.glb",
+        "publicPath": "/ui/scenes/optn00/model_19.glb",
         "bounds": {
           "minX": 971.478,
           "maxX": 1025.566,
@@ -2320,8 +2320,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_20.dae",
-        "publicPath": "/ui/scenes/optn00/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_20.glb",
+        "publicPath": "/ui/scenes/optn00/model_20.glb",
         "bounds": {
           "minX": 1052.61,
           "maxX": 1106.698,
@@ -2349,8 +2349,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_21",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_21.dae",
-        "publicPath": "/ui/scenes/optn00/model_21.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_21.glb",
+        "publicPath": "/ui/scenes/optn00/model_21.glb",
         "bounds": {
           "minX": 645.645,
           "maxX": 1148.673,
@@ -2378,8 +2378,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_22",
-        "modelPath": "apps/game/public/ui/scenes/optn00/model_22.dae",
-        "publicPath": "/ui/scenes/optn00/model_22.dae",
+        "modelPath": "apps/game/public/ui/scenes/optn00/model_22.glb",
+        "publicPath": "/ui/scenes/optn00/model_22.glb",
         "bounds": {
           "minX": 645.11,
           "maxX": 1148.138,
@@ -2410,7 +2410,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "rpot20": {
     "sceneId": "rpot20",
-    "sourceArchive": "user-data/GG4E/afs_data/root/rpot20_mdl.arc",
+    "sourceArchive": "rpot20_mdl.arc",
     "modelCount": 21,
     "bounds": {
       "minX": -320,
@@ -2423,8 +2423,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_00.dae",
-        "publicPath": "/ui/scenes/rpot20/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_00.glb",
+        "publicPath": "/ui/scenes/rpot20/model_00.glb",
         "bounds": {
           "minX": -320,
           "maxX": 320,
@@ -2452,8 +2452,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_01.dae",
-        "publicPath": "/ui/scenes/rpot20/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_01.glb",
+        "publicPath": "/ui/scenes/rpot20/model_01.glb",
         "bounds": {
           "minX": -320,
           "maxX": 320,
@@ -2481,8 +2481,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_02.dae",
-        "publicPath": "/ui/scenes/rpot20/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_02.glb",
+        "publicPath": "/ui/scenes/rpot20/model_02.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -2510,8 +2510,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_03.dae",
-        "publicPath": "/ui/scenes/rpot20/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_03.glb",
+        "publicPath": "/ui/scenes/rpot20/model_03.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -2539,8 +2539,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_04.dae",
-        "publicPath": "/ui/scenes/rpot20/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_04.glb",
+        "publicPath": "/ui/scenes/rpot20/model_04.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -2568,8 +2568,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_05.dae",
-        "publicPath": "/ui/scenes/rpot20/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_05.glb",
+        "publicPath": "/ui/scenes/rpot20/model_05.glb",
         "bounds": {
           "minX": 51.266,
           "maxX": 130.266,
@@ -2597,8 +2597,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_06.dae",
-        "publicPath": "/ui/scenes/rpot20/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_06.glb",
+        "publicPath": "/ui/scenes/rpot20/model_06.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -2626,8 +2626,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_07.dae",
-        "publicPath": "/ui/scenes/rpot20/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_07.glb",
+        "publicPath": "/ui/scenes/rpot20/model_07.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -2655,8 +2655,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_08.dae",
-        "publicPath": "/ui/scenes/rpot20/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_08.glb",
+        "publicPath": "/ui/scenes/rpot20/model_08.glb",
         "bounds": {
           "minX": 66.862,
           "maxX": 111.862,
@@ -2684,8 +2684,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_09.dae",
-        "publicPath": "/ui/scenes/rpot20/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_09.glb",
+        "publicPath": "/ui/scenes/rpot20/model_09.glb",
         "bounds": {
           "minX": 151.23,
           "maxX": 194.23,
@@ -2713,8 +2713,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_10.dae",
-        "publicPath": "/ui/scenes/rpot20/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_10.glb",
+        "publicPath": "/ui/scenes/rpot20/model_10.glb",
         "bounds": {
           "minX": -9.22,
           "maxX": 28.78,
@@ -2742,8 +2742,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_11.dae",
-        "publicPath": "/ui/scenes/rpot20/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_11.glb",
+        "publicPath": "/ui/scenes/rpot20/model_11.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -2771,8 +2771,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_12.dae",
-        "publicPath": "/ui/scenes/rpot20/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_12.glb",
+        "publicPath": "/ui/scenes/rpot20/model_12.glb",
         "bounds": {
           "minX": 27.019,
           "maxX": 58.019,
@@ -2800,8 +2800,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_13.dae",
-        "publicPath": "/ui/scenes/rpot20/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_13.glb",
+        "publicPath": "/ui/scenes/rpot20/model_13.glb",
         "bounds": {
           "minX": 126.686,
           "maxX": 149.686,
@@ -2829,8 +2829,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_14.dae",
-        "publicPath": "/ui/scenes/rpot20/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_14.glb",
+        "publicPath": "/ui/scenes/rpot20/model_14.glb",
         "bounds": {
           "minX": -11.625,
           "maxX": 11.625,
@@ -2858,8 +2858,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_15.dae",
-        "publicPath": "/ui/scenes/rpot20/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_15.glb",
+        "publicPath": "/ui/scenes/rpot20/model_15.glb",
         "bounds": {
           "minX": -319.967,
           "maxX": 319.967,
@@ -2887,8 +2887,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_16.dae",
-        "publicPath": "/ui/scenes/rpot20/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_16.glb",
+        "publicPath": "/ui/scenes/rpot20/model_16.glb",
         "bounds": {
           "minX": 172.804,
           "maxX": 203.824,
@@ -2916,8 +2916,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_17.dae",
-        "publicPath": "/ui/scenes/rpot20/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_17.glb",
+        "publicPath": "/ui/scenes/rpot20/model_17.glb",
         "bounds": {
           "minX": 172.804,
           "maxX": 203.824,
@@ -2945,8 +2945,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_18.dae",
-        "publicPath": "/ui/scenes/rpot20/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_18.glb",
+        "publicPath": "/ui/scenes/rpot20/model_18.glb",
         "bounds": {
           "minX": 180.724,
           "maxX": 195.904,
@@ -2974,8 +2974,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_19.dae",
-        "publicPath": "/ui/scenes/rpot20/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_19.glb",
+        "publicPath": "/ui/scenes/rpot20/model_19.glb",
         "bounds": {
           "minX": 180.724,
           "maxX": 195.904,
@@ -3003,8 +3003,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/rpot20/model_20.dae",
-        "publicPath": "/ui/scenes/rpot20/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot20/model_20.glb",
+        "publicPath": "/ui/scenes/rpot20/model_20.glb",
         "bounds": {
           "minX": 504.681,
           "maxX": 951.681,
@@ -3053,7 +3053,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "rpot21": {
     "sceneId": "rpot21",
-    "sourceArchive": "user-data/GG4E/afs_data/root/rpot21_mdl.arc",
+    "sourceArchive": "rpot21_mdl.arc",
     "modelCount": 21,
     "bounds": {
       "minX": -320,
@@ -3066,8 +3066,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_00.dae",
-        "publicPath": "/ui/scenes/rpot21/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_00.glb",
+        "publicPath": "/ui/scenes/rpot21/model_00.glb",
         "bounds": {
           "minX": -320,
           "maxX": 320,
@@ -3095,8 +3095,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_01.dae",
-        "publicPath": "/ui/scenes/rpot21/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_01.glb",
+        "publicPath": "/ui/scenes/rpot21/model_01.glb",
         "bounds": {
           "minX": -320,
           "maxX": 320,
@@ -3124,8 +3124,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_02.dae",
-        "publicPath": "/ui/scenes/rpot21/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_02.glb",
+        "publicPath": "/ui/scenes/rpot21/model_02.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -3153,8 +3153,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_03.dae",
-        "publicPath": "/ui/scenes/rpot21/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_03.glb",
+        "publicPath": "/ui/scenes/rpot21/model_03.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -3182,8 +3182,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_04.dae",
-        "publicPath": "/ui/scenes/rpot21/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_04.glb",
+        "publicPath": "/ui/scenes/rpot21/model_04.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -3211,8 +3211,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_05.dae",
-        "publicPath": "/ui/scenes/rpot21/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_05.glb",
+        "publicPath": "/ui/scenes/rpot21/model_05.glb",
         "bounds": {
           "minX": 51.266,
           "maxX": 130.266,
@@ -3240,8 +3240,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_06.dae",
-        "publicPath": "/ui/scenes/rpot21/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_06.glb",
+        "publicPath": "/ui/scenes/rpot21/model_06.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -3269,8 +3269,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_07.dae",
-        "publicPath": "/ui/scenes/rpot21/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_07.glb",
+        "publicPath": "/ui/scenes/rpot21/model_07.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -3298,8 +3298,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_08.dae",
-        "publicPath": "/ui/scenes/rpot21/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_08.glb",
+        "publicPath": "/ui/scenes/rpot21/model_08.glb",
         "bounds": {
           "minX": 66.862,
           "maxX": 111.862,
@@ -3327,8 +3327,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_09.dae",
-        "publicPath": "/ui/scenes/rpot21/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_09.glb",
+        "publicPath": "/ui/scenes/rpot21/model_09.glb",
         "bounds": {
           "minX": 151.23,
           "maxX": 194.23,
@@ -3356,8 +3356,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_10.dae",
-        "publicPath": "/ui/scenes/rpot21/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_10.glb",
+        "publicPath": "/ui/scenes/rpot21/model_10.glb",
         "bounds": {
           "minX": -9.22,
           "maxX": 28.78,
@@ -3385,8 +3385,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_11.dae",
-        "publicPath": "/ui/scenes/rpot21/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_11.glb",
+        "publicPath": "/ui/scenes/rpot21/model_11.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -3414,8 +3414,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_12.dae",
-        "publicPath": "/ui/scenes/rpot21/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_12.glb",
+        "publicPath": "/ui/scenes/rpot21/model_12.glb",
         "bounds": {
           "minX": 27.019,
           "maxX": 58.019,
@@ -3443,8 +3443,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_13.dae",
-        "publicPath": "/ui/scenes/rpot21/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_13.glb",
+        "publicPath": "/ui/scenes/rpot21/model_13.glb",
         "bounds": {
           "minX": 126.686,
           "maxX": 149.686,
@@ -3472,8 +3472,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_14.dae",
-        "publicPath": "/ui/scenes/rpot21/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_14.glb",
+        "publicPath": "/ui/scenes/rpot21/model_14.glb",
         "bounds": {
           "minX": -11.625,
           "maxX": 11.625,
@@ -3501,8 +3501,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_15.dae",
-        "publicPath": "/ui/scenes/rpot21/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_15.glb",
+        "publicPath": "/ui/scenes/rpot21/model_15.glb",
         "bounds": {
           "minX": -319.967,
           "maxX": 319.967,
@@ -3530,8 +3530,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_16.dae",
-        "publicPath": "/ui/scenes/rpot21/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_16.glb",
+        "publicPath": "/ui/scenes/rpot21/model_16.glb",
         "bounds": {
           "minX": 172.804,
           "maxX": 203.824,
@@ -3559,8 +3559,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_17.dae",
-        "publicPath": "/ui/scenes/rpot21/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_17.glb",
+        "publicPath": "/ui/scenes/rpot21/model_17.glb",
         "bounds": {
           "minX": 172.804,
           "maxX": 203.824,
@@ -3588,8 +3588,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_18.dae",
-        "publicPath": "/ui/scenes/rpot21/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_18.glb",
+        "publicPath": "/ui/scenes/rpot21/model_18.glb",
         "bounds": {
           "minX": 180.724,
           "maxX": 195.904,
@@ -3617,8 +3617,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_19.dae",
-        "publicPath": "/ui/scenes/rpot21/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_19.glb",
+        "publicPath": "/ui/scenes/rpot21/model_19.glb",
         "bounds": {
           "minX": 180.724,
           "maxX": 195.904,
@@ -3646,8 +3646,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/rpot21/model_20.dae",
-        "publicPath": "/ui/scenes/rpot21/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot21/model_20.glb",
+        "publicPath": "/ui/scenes/rpot21/model_20.glb",
         "bounds": {
           "minX": 400,
           "maxX": 847,
@@ -3696,7 +3696,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "rpot22": {
     "sceneId": "rpot22",
-    "sourceArchive": "user-data/GG4E/afs_data/root/rpot22_mdl.arc",
+    "sourceArchive": "rpot22_mdl.arc",
     "modelCount": 21,
     "bounds": {
       "minX": -320,
@@ -3709,8 +3709,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_00.dae",
-        "publicPath": "/ui/scenes/rpot22/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_00.glb",
+        "publicPath": "/ui/scenes/rpot22/model_00.glb",
         "bounds": {
           "minX": -320,
           "maxX": 320,
@@ -3738,8 +3738,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_01.dae",
-        "publicPath": "/ui/scenes/rpot22/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_01.glb",
+        "publicPath": "/ui/scenes/rpot22/model_01.glb",
         "bounds": {
           "minX": -320,
           "maxX": 320,
@@ -3767,8 +3767,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_02.dae",
-        "publicPath": "/ui/scenes/rpot22/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_02.glb",
+        "publicPath": "/ui/scenes/rpot22/model_02.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -3796,8 +3796,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_03.dae",
-        "publicPath": "/ui/scenes/rpot22/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_03.glb",
+        "publicPath": "/ui/scenes/rpot22/model_03.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -3825,8 +3825,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_04.dae",
-        "publicPath": "/ui/scenes/rpot22/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_04.glb",
+        "publicPath": "/ui/scenes/rpot22/model_04.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -3854,8 +3854,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_05.dae",
-        "publicPath": "/ui/scenes/rpot22/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_05.glb",
+        "publicPath": "/ui/scenes/rpot22/model_05.glb",
         "bounds": {
           "minX": 51.266,
           "maxX": 130.266,
@@ -3883,8 +3883,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_06.dae",
-        "publicPath": "/ui/scenes/rpot22/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_06.glb",
+        "publicPath": "/ui/scenes/rpot22/model_06.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -3912,8 +3912,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_07.dae",
-        "publicPath": "/ui/scenes/rpot22/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_07.glb",
+        "publicPath": "/ui/scenes/rpot22/model_07.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -3941,8 +3941,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_08.dae",
-        "publicPath": "/ui/scenes/rpot22/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_08.glb",
+        "publicPath": "/ui/scenes/rpot22/model_08.glb",
         "bounds": {
           "minX": 66.862,
           "maxX": 111.862,
@@ -3970,8 +3970,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_09.dae",
-        "publicPath": "/ui/scenes/rpot22/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_09.glb",
+        "publicPath": "/ui/scenes/rpot22/model_09.glb",
         "bounds": {
           "minX": 151.23,
           "maxX": 194.23,
@@ -3999,8 +3999,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_10.dae",
-        "publicPath": "/ui/scenes/rpot22/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_10.glb",
+        "publicPath": "/ui/scenes/rpot22/model_10.glb",
         "bounds": {
           "minX": -9.22,
           "maxX": 28.78,
@@ -4028,8 +4028,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_11.dae",
-        "publicPath": "/ui/scenes/rpot22/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_11.glb",
+        "publicPath": "/ui/scenes/rpot22/model_11.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -4057,8 +4057,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_12.dae",
-        "publicPath": "/ui/scenes/rpot22/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_12.glb",
+        "publicPath": "/ui/scenes/rpot22/model_12.glb",
         "bounds": {
           "minX": 27.019,
           "maxX": 58.019,
@@ -4086,8 +4086,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_13.dae",
-        "publicPath": "/ui/scenes/rpot22/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_13.glb",
+        "publicPath": "/ui/scenes/rpot22/model_13.glb",
         "bounds": {
           "minX": 126.686,
           "maxX": 149.686,
@@ -4115,8 +4115,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_14.dae",
-        "publicPath": "/ui/scenes/rpot22/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_14.glb",
+        "publicPath": "/ui/scenes/rpot22/model_14.glb",
         "bounds": {
           "minX": -11.625,
           "maxX": 11.625,
@@ -4144,8 +4144,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_15.dae",
-        "publicPath": "/ui/scenes/rpot22/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_15.glb",
+        "publicPath": "/ui/scenes/rpot22/model_15.glb",
         "bounds": {
           "minX": -319.967,
           "maxX": 319.967,
@@ -4173,8 +4173,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_16.dae",
-        "publicPath": "/ui/scenes/rpot22/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_16.glb",
+        "publicPath": "/ui/scenes/rpot22/model_16.glb",
         "bounds": {
           "minX": 172.804,
           "maxX": 203.824,
@@ -4202,8 +4202,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_17.dae",
-        "publicPath": "/ui/scenes/rpot22/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_17.glb",
+        "publicPath": "/ui/scenes/rpot22/model_17.glb",
         "bounds": {
           "minX": 172.804,
           "maxX": 203.824,
@@ -4231,8 +4231,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_18.dae",
-        "publicPath": "/ui/scenes/rpot22/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_18.glb",
+        "publicPath": "/ui/scenes/rpot22/model_18.glb",
         "bounds": {
           "minX": 180.724,
           "maxX": 195.904,
@@ -4260,8 +4260,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_19.dae",
-        "publicPath": "/ui/scenes/rpot22/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_19.glb",
+        "publicPath": "/ui/scenes/rpot22/model_19.glb",
         "bounds": {
           "minX": 180.724,
           "maxX": 195.904,
@@ -4289,8 +4289,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/rpot22/model_20.dae",
-        "publicPath": "/ui/scenes/rpot22/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot22/model_20.glb",
+        "publicPath": "/ui/scenes/rpot22/model_20.glb",
         "bounds": {
           "minX": 452.34,
           "maxX": 899.34,
@@ -4339,7 +4339,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "rpot23": {
     "sceneId": "rpot23",
-    "sourceArchive": "user-data/GG4E/afs_data/root/rpot23_mdl.arc",
+    "sourceArchive": "rpot23_mdl.arc",
     "modelCount": 21,
     "bounds": {
       "minX": -320,
@@ -4352,8 +4352,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_00.dae",
-        "publicPath": "/ui/scenes/rpot23/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_00.glb",
+        "publicPath": "/ui/scenes/rpot23/model_00.glb",
         "bounds": {
           "minX": -320,
           "maxX": 320,
@@ -4381,8 +4381,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_01.dae",
-        "publicPath": "/ui/scenes/rpot23/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_01.glb",
+        "publicPath": "/ui/scenes/rpot23/model_01.glb",
         "bounds": {
           "minX": -320,
           "maxX": 320,
@@ -4410,8 +4410,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_02.dae",
-        "publicPath": "/ui/scenes/rpot23/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_02.glb",
+        "publicPath": "/ui/scenes/rpot23/model_02.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -4439,8 +4439,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_03.dae",
-        "publicPath": "/ui/scenes/rpot23/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_03.glb",
+        "publicPath": "/ui/scenes/rpot23/model_03.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -4468,8 +4468,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_04.dae",
-        "publicPath": "/ui/scenes/rpot23/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_04.glb",
+        "publicPath": "/ui/scenes/rpot23/model_04.glb",
         "bounds": {
           "minX": -205.182,
           "maxX": 205.182,
@@ -4497,8 +4497,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_05.dae",
-        "publicPath": "/ui/scenes/rpot23/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_05.glb",
+        "publicPath": "/ui/scenes/rpot23/model_05.glb",
         "bounds": {
           "minX": 51.266,
           "maxX": 130.266,
@@ -4526,8 +4526,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_06.dae",
-        "publicPath": "/ui/scenes/rpot23/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_06.glb",
+        "publicPath": "/ui/scenes/rpot23/model_06.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -4555,8 +4555,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_07.dae",
-        "publicPath": "/ui/scenes/rpot23/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_07.glb",
+        "publicPath": "/ui/scenes/rpot23/model_07.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -4584,8 +4584,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_08.dae",
-        "publicPath": "/ui/scenes/rpot23/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_08.glb",
+        "publicPath": "/ui/scenes/rpot23/model_08.glb",
         "bounds": {
           "minX": 66.862,
           "maxX": 111.862,
@@ -4613,8 +4613,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_09.dae",
-        "publicPath": "/ui/scenes/rpot23/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_09.glb",
+        "publicPath": "/ui/scenes/rpot23/model_09.glb",
         "bounds": {
           "minX": 151.23,
           "maxX": 194.23,
@@ -4642,8 +4642,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_10.dae",
-        "publicPath": "/ui/scenes/rpot23/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_10.glb",
+        "publicPath": "/ui/scenes/rpot23/model_10.glb",
         "bounds": {
           "minX": -9.22,
           "maxX": 28.78,
@@ -4671,8 +4671,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_11.dae",
-        "publicPath": "/ui/scenes/rpot23/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_11.glb",
+        "publicPath": "/ui/scenes/rpot23/model_11.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -4700,8 +4700,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_12.dae",
-        "publicPath": "/ui/scenes/rpot23/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_12.glb",
+        "publicPath": "/ui/scenes/rpot23/model_12.glb",
         "bounds": {
           "minX": 27.019,
           "maxX": 58.019,
@@ -4729,8 +4729,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_13.dae",
-        "publicPath": "/ui/scenes/rpot23/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_13.glb",
+        "publicPath": "/ui/scenes/rpot23/model_13.glb",
         "bounds": {
           "minX": 126.686,
           "maxX": 149.686,
@@ -4758,8 +4758,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_14.dae",
-        "publicPath": "/ui/scenes/rpot23/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_14.glb",
+        "publicPath": "/ui/scenes/rpot23/model_14.glb",
         "bounds": {
           "minX": -11.625,
           "maxX": 11.625,
@@ -4787,8 +4787,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_15.dae",
-        "publicPath": "/ui/scenes/rpot23/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_15.glb",
+        "publicPath": "/ui/scenes/rpot23/model_15.glb",
         "bounds": {
           "minX": -319.967,
           "maxX": 319.967,
@@ -4816,8 +4816,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_16.dae",
-        "publicPath": "/ui/scenes/rpot23/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_16.glb",
+        "publicPath": "/ui/scenes/rpot23/model_16.glb",
         "bounds": {
           "minX": 172.804,
           "maxX": 203.824,
@@ -4845,8 +4845,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_17.dae",
-        "publicPath": "/ui/scenes/rpot23/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_17.glb",
+        "publicPath": "/ui/scenes/rpot23/model_17.glb",
         "bounds": {
           "minX": 172.804,
           "maxX": 203.824,
@@ -4874,8 +4874,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_18.dae",
-        "publicPath": "/ui/scenes/rpot23/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_18.glb",
+        "publicPath": "/ui/scenes/rpot23/model_18.glb",
         "bounds": {
           "minX": 180.724,
           "maxX": 195.904,
@@ -4903,8 +4903,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_19.dae",
-        "publicPath": "/ui/scenes/rpot23/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_19.glb",
+        "publicPath": "/ui/scenes/rpot23/model_19.glb",
         "bounds": {
           "minX": 180.724,
           "maxX": 195.904,
@@ -4932,8 +4932,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/rpot23/model_20.dae",
-        "publicPath": "/ui/scenes/rpot23/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/rpot23/model_20.glb",
+        "publicPath": "/ui/scenes/rpot23/model_20.glb",
         "bounds": {
           "minX": -223.5,
           "maxX": 223.5,
@@ -4982,7 +4982,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "staff00": {
     "sceneId": "staff00",
-    "sourceArchive": "user-data/GG4E/afs_data/root/staff00_mdl.arc",
+    "sourceArchive": "staff00_mdl.arc",
     "modelCount": 80,
     "bounds": {
       "minX": 396.768,
@@ -4995,8 +4995,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_00.dae",
-        "publicPath": "/ui/scenes/staff00/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_00.glb",
+        "publicPath": "/ui/scenes/staff00/model_00.glb",
         "bounds": {
           "minX": 396.768,
           "maxX": 1362.237,
@@ -5024,8 +5024,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_01.dae",
-        "publicPath": "/ui/scenes/staff00/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_01.glb",
+        "publicPath": "/ui/scenes/staff00/model_01.glb",
         "bounds": {
           "minX": 645.093,
           "maxX": 671.292,
@@ -5053,8 +5053,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_02.dae",
-        "publicPath": "/ui/scenes/staff00/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_02.glb",
+        "publicPath": "/ui/scenes/staff00/model_02.glb",
         "bounds": {
           "minX": 663.686,
           "maxX": 689.885,
@@ -5082,8 +5082,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_03.dae",
-        "publicPath": "/ui/scenes/staff00/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_03.glb",
+        "publicPath": "/ui/scenes/staff00/model_03.glb",
         "bounds": {
           "minX": 682.279,
           "maxX": 708.478,
@@ -5111,8 +5111,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_04.dae",
-        "publicPath": "/ui/scenes/staff00/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_04.glb",
+        "publicPath": "/ui/scenes/staff00/model_04.glb",
         "bounds": {
           "minX": 700.872,
           "maxX": 727.07,
@@ -5140,8 +5140,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_05.dae",
-        "publicPath": "/ui/scenes/staff00/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_05.glb",
+        "publicPath": "/ui/scenes/staff00/model_05.glb",
         "bounds": {
           "minX": 719.464,
           "maxX": 745.663,
@@ -5169,8 +5169,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_06.dae",
-        "publicPath": "/ui/scenes/staff00/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_06.glb",
+        "publicPath": "/ui/scenes/staff00/model_06.glb",
         "bounds": {
           "minX": 738.057,
           "maxX": 764.256,
@@ -5198,8 +5198,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_07.dae",
-        "publicPath": "/ui/scenes/staff00/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_07.glb",
+        "publicPath": "/ui/scenes/staff00/model_07.glb",
         "bounds": {
           "minX": 756.65,
           "maxX": 782.849,
@@ -5227,8 +5227,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_08.dae",
-        "publicPath": "/ui/scenes/staff00/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_08.glb",
+        "publicPath": "/ui/scenes/staff00/model_08.glb",
         "bounds": {
           "minX": 775.242,
           "maxX": 801.441,
@@ -5256,8 +5256,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_09.dae",
-        "publicPath": "/ui/scenes/staff00/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_09.glb",
+        "publicPath": "/ui/scenes/staff00/model_09.glb",
         "bounds": {
           "minX": 793.835,
           "maxX": 820.034,
@@ -5285,8 +5285,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_10.dae",
-        "publicPath": "/ui/scenes/staff00/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_10.glb",
+        "publicPath": "/ui/scenes/staff00/model_10.glb",
         "bounds": {
           "minX": 812.428,
           "maxX": 838.627,
@@ -5314,8 +5314,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_11.dae",
-        "publicPath": "/ui/scenes/staff00/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_11.glb",
+        "publicPath": "/ui/scenes/staff00/model_11.glb",
         "bounds": {
           "minX": 831.021,
           "maxX": 857.22,
@@ -5343,8 +5343,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_12.dae",
-        "publicPath": "/ui/scenes/staff00/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_12.glb",
+        "publicPath": "/ui/scenes/staff00/model_12.glb",
         "bounds": {
           "minX": 849.613,
           "maxX": 875.812,
@@ -5372,8 +5372,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_13.dae",
-        "publicPath": "/ui/scenes/staff00/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_13.glb",
+        "publicPath": "/ui/scenes/staff00/model_13.glb",
         "bounds": {
           "minX": 868.206,
           "maxX": 894.405,
@@ -5401,8 +5401,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_14.dae",
-        "publicPath": "/ui/scenes/staff00/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_14.glb",
+        "publicPath": "/ui/scenes/staff00/model_14.glb",
         "bounds": {
           "minX": 886.799,
           "maxX": 912.998,
@@ -5430,8 +5430,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_15.dae",
-        "publicPath": "/ui/scenes/staff00/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_15.glb",
+        "publicPath": "/ui/scenes/staff00/model_15.glb",
         "bounds": {
           "minX": 905.392,
           "maxX": 931.591,
@@ -5459,8 +5459,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_16.dae",
-        "publicPath": "/ui/scenes/staff00/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_16.glb",
+        "publicPath": "/ui/scenes/staff00/model_16.glb",
         "bounds": {
           "minX": 923.984,
           "maxX": 950.183,
@@ -5488,8 +5488,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_17.dae",
-        "publicPath": "/ui/scenes/staff00/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_17.glb",
+        "publicPath": "/ui/scenes/staff00/model_17.glb",
         "bounds": {
           "minX": 942.577,
           "maxX": 968.776,
@@ -5517,8 +5517,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_18.dae",
-        "publicPath": "/ui/scenes/staff00/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_18.glb",
+        "publicPath": "/ui/scenes/staff00/model_18.glb",
         "bounds": {
           "minX": 961.17,
           "maxX": 987.369,
@@ -5546,8 +5546,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_19.dae",
-        "publicPath": "/ui/scenes/staff00/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_19.glb",
+        "publicPath": "/ui/scenes/staff00/model_19.glb",
         "bounds": {
           "minX": 979.763,
           "maxX": 1005.961,
@@ -5575,8 +5575,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_20.dae",
-        "publicPath": "/ui/scenes/staff00/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_20.glb",
+        "publicPath": "/ui/scenes/staff00/model_20.glb",
         "bounds": {
           "minX": 998.356,
           "maxX": 1024.555,
@@ -5604,8 +5604,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_21",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_21.dae",
-        "publicPath": "/ui/scenes/staff00/model_21.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_21.glb",
+        "publicPath": "/ui/scenes/staff00/model_21.glb",
         "bounds": {
           "minX": 1016.948,
           "maxX": 1043.147,
@@ -5633,8 +5633,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_22",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_22.dae",
-        "publicPath": "/ui/scenes/staff00/model_22.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_22.glb",
+        "publicPath": "/ui/scenes/staff00/model_22.glb",
         "bounds": {
           "minX": 1035.541,
           "maxX": 1061.74,
@@ -5662,8 +5662,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_23",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_23.dae",
-        "publicPath": "/ui/scenes/staff00/model_23.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_23.glb",
+        "publicPath": "/ui/scenes/staff00/model_23.glb",
         "bounds": {
           "minX": 1054.134,
           "maxX": 1080.332,
@@ -5691,8 +5691,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_24",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_24.dae",
-        "publicPath": "/ui/scenes/staff00/model_24.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_24.glb",
+        "publicPath": "/ui/scenes/staff00/model_24.glb",
         "bounds": {
           "minX": 1072.726,
           "maxX": 1098.924,
@@ -5720,8 +5720,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_25",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_25.dae",
-        "publicPath": "/ui/scenes/staff00/model_25.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_25.glb",
+        "publicPath": "/ui/scenes/staff00/model_25.glb",
         "bounds": {
           "minX": 1089.222,
           "maxX": 1115.42,
@@ -5749,8 +5749,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_26",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_26.dae",
-        "publicPath": "/ui/scenes/staff00/model_26.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_26.glb",
+        "publicPath": "/ui/scenes/staff00/model_26.glb",
         "bounds": {
           "minX": 645.093,
           "maxX": 671.292,
@@ -5778,8 +5778,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_27",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_27.dae",
-        "publicPath": "/ui/scenes/staff00/model_27.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_27.glb",
+        "publicPath": "/ui/scenes/staff00/model_27.glb",
         "bounds": {
           "minX": 645.093,
           "maxX": 671.292,
@@ -5807,8 +5807,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_28",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_28.dae",
-        "publicPath": "/ui/scenes/staff00/model_28.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_28.glb",
+        "publicPath": "/ui/scenes/staff00/model_28.glb",
         "bounds": {
           "minX": 663.686,
           "maxX": 689.885,
@@ -5836,8 +5836,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_29",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_29.dae",
-        "publicPath": "/ui/scenes/staff00/model_29.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_29.glb",
+        "publicPath": "/ui/scenes/staff00/model_29.glb",
         "bounds": {
           "minX": 682.279,
           "maxX": 708.478,
@@ -5865,8 +5865,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_30",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_30.dae",
-        "publicPath": "/ui/scenes/staff00/model_30.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_30.glb",
+        "publicPath": "/ui/scenes/staff00/model_30.glb",
         "bounds": {
           "minX": 700.872,
           "maxX": 727.071,
@@ -5894,8 +5894,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_31",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_31.dae",
-        "publicPath": "/ui/scenes/staff00/model_31.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_31.glb",
+        "publicPath": "/ui/scenes/staff00/model_31.glb",
         "bounds": {
           "minX": 719.464,
           "maxX": 745.663,
@@ -5923,8 +5923,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_32",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_32.dae",
-        "publicPath": "/ui/scenes/staff00/model_32.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_32.glb",
+        "publicPath": "/ui/scenes/staff00/model_32.glb",
         "bounds": {
           "minX": 738.057,
           "maxX": 764.256,
@@ -5952,8 +5952,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_33",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_33.dae",
-        "publicPath": "/ui/scenes/staff00/model_33.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_33.glb",
+        "publicPath": "/ui/scenes/staff00/model_33.glb",
         "bounds": {
           "minX": 756.65,
           "maxX": 782.849,
@@ -5981,8 +5981,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_34",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_34.dae",
-        "publicPath": "/ui/scenes/staff00/model_34.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_34.glb",
+        "publicPath": "/ui/scenes/staff00/model_34.glb",
         "bounds": {
           "minX": 775.242,
           "maxX": 801.441,
@@ -6010,8 +6010,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_35",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_35.dae",
-        "publicPath": "/ui/scenes/staff00/model_35.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_35.glb",
+        "publicPath": "/ui/scenes/staff00/model_35.glb",
         "bounds": {
           "minX": 793.835,
           "maxX": 820.034,
@@ -6039,8 +6039,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_36",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_36.dae",
-        "publicPath": "/ui/scenes/staff00/model_36.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_36.glb",
+        "publicPath": "/ui/scenes/staff00/model_36.glb",
         "bounds": {
           "minX": 812.428,
           "maxX": 838.627,
@@ -6068,8 +6068,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_37",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_37.dae",
-        "publicPath": "/ui/scenes/staff00/model_37.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_37.glb",
+        "publicPath": "/ui/scenes/staff00/model_37.glb",
         "bounds": {
           "minX": 831.021,
           "maxX": 857.22,
@@ -6097,8 +6097,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_38",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_38.dae",
-        "publicPath": "/ui/scenes/staff00/model_38.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_38.glb",
+        "publicPath": "/ui/scenes/staff00/model_38.glb",
         "bounds": {
           "minX": 849.613,
           "maxX": 875.812,
@@ -6126,8 +6126,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_39",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_39.dae",
-        "publicPath": "/ui/scenes/staff00/model_39.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_39.glb",
+        "publicPath": "/ui/scenes/staff00/model_39.glb",
         "bounds": {
           "minX": 868.206,
           "maxX": 894.405,
@@ -6155,8 +6155,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_40",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_40.dae",
-        "publicPath": "/ui/scenes/staff00/model_40.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_40.glb",
+        "publicPath": "/ui/scenes/staff00/model_40.glb",
         "bounds": {
           "minX": 886.799,
           "maxX": 912.998,
@@ -6184,8 +6184,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_41",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_41.dae",
-        "publicPath": "/ui/scenes/staff00/model_41.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_41.glb",
+        "publicPath": "/ui/scenes/staff00/model_41.glb",
         "bounds": {
           "minX": 905.392,
           "maxX": 931.591,
@@ -6213,8 +6213,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_42",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_42.dae",
-        "publicPath": "/ui/scenes/staff00/model_42.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_42.glb",
+        "publicPath": "/ui/scenes/staff00/model_42.glb",
         "bounds": {
           "minX": 923.984,
           "maxX": 950.183,
@@ -6242,8 +6242,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_43",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_43.dae",
-        "publicPath": "/ui/scenes/staff00/model_43.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_43.glb",
+        "publicPath": "/ui/scenes/staff00/model_43.glb",
         "bounds": {
           "minX": 937.506,
           "maxX": 963.705,
@@ -6271,8 +6271,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_44",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_44.dae",
-        "publicPath": "/ui/scenes/staff00/model_44.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_44.glb",
+        "publicPath": "/ui/scenes/staff00/model_44.glb",
         "bounds": {
           "minX": 956.099,
           "maxX": 982.298,
@@ -6300,8 +6300,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_45",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_45.dae",
-        "publicPath": "/ui/scenes/staff00/model_45.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_45.glb",
+        "publicPath": "/ui/scenes/staff00/model_45.glb",
         "bounds": {
           "minX": 974.692,
           "maxX": 1000.891,
@@ -6329,8 +6329,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_46",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_46.dae",
-        "publicPath": "/ui/scenes/staff00/model_46.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_46.glb",
+        "publicPath": "/ui/scenes/staff00/model_46.glb",
         "bounds": {
           "minX": 993.285,
           "maxX": 1019.483,
@@ -6358,8 +6358,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_47",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_47.dae",
-        "publicPath": "/ui/scenes/staff00/model_47.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_47.glb",
+        "publicPath": "/ui/scenes/staff00/model_47.glb",
         "bounds": {
           "minX": 1011.878,
           "maxX": 1038.076,
@@ -6387,8 +6387,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_48",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_48.dae",
-        "publicPath": "/ui/scenes/staff00/model_48.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_48.glb",
+        "publicPath": "/ui/scenes/staff00/model_48.glb",
         "bounds": {
           "minX": 1030.47,
           "maxX": 1056.668,
@@ -6416,8 +6416,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_49",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_49.dae",
-        "publicPath": "/ui/scenes/staff00/model_49.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_49.glb",
+        "publicPath": "/ui/scenes/staff00/model_49.glb",
         "bounds": {
           "minX": 1049.063,
           "maxX": 1075.262,
@@ -6445,8 +6445,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_50",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_50.dae",
-        "publicPath": "/ui/scenes/staff00/model_50.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_50.glb",
+        "publicPath": "/ui/scenes/staff00/model_50.glb",
         "bounds": {
           "minX": 1067.656,
           "maxX": 1093.854,
@@ -6474,8 +6474,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_51",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_51.dae",
-        "publicPath": "/ui/scenes/staff00/model_51.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_51.glb",
+        "publicPath": "/ui/scenes/staff00/model_51.glb",
         "bounds": {
           "minX": 1086.686,
           "maxX": 1112.884,
@@ -6503,8 +6503,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_52",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_52.dae",
-        "publicPath": "/ui/scenes/staff00/model_52.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_52.glb",
+        "publicPath": "/ui/scenes/staff00/model_52.glb",
         "bounds": {
           "minX": 645.093,
           "maxX": 671.292,
@@ -6532,8 +6532,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_53",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_53.dae",
-        "publicPath": "/ui/scenes/staff00/model_53.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_53.glb",
+        "publicPath": "/ui/scenes/staff00/model_53.glb",
         "bounds": {
           "minX": 645.093,
           "maxX": 671.292,
@@ -6561,8 +6561,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_54",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_54.dae",
-        "publicPath": "/ui/scenes/staff00/model_54.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_54.glb",
+        "publicPath": "/ui/scenes/staff00/model_54.glb",
         "bounds": {
           "minX": 663.686,
           "maxX": 689.885,
@@ -6590,8 +6590,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_55",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_55.dae",
-        "publicPath": "/ui/scenes/staff00/model_55.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_55.glb",
+        "publicPath": "/ui/scenes/staff00/model_55.glb",
         "bounds": {
           "minX": 682.279,
           "maxX": 708.478,
@@ -6619,8 +6619,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_56",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_56.dae",
-        "publicPath": "/ui/scenes/staff00/model_56.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_56.glb",
+        "publicPath": "/ui/scenes/staff00/model_56.glb",
         "bounds": {
           "minX": 700.872,
           "maxX": 727.071,
@@ -6648,8 +6648,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_57",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_57.dae",
-        "publicPath": "/ui/scenes/staff00/model_57.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_57.glb",
+        "publicPath": "/ui/scenes/staff00/model_57.glb",
         "bounds": {
           "minX": 719.464,
           "maxX": 745.663,
@@ -6677,8 +6677,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_58",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_58.dae",
-        "publicPath": "/ui/scenes/staff00/model_58.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_58.glb",
+        "publicPath": "/ui/scenes/staff00/model_58.glb",
         "bounds": {
           "minX": 738.057,
           "maxX": 764.256,
@@ -6706,8 +6706,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_59",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_59.dae",
-        "publicPath": "/ui/scenes/staff00/model_59.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_59.glb",
+        "publicPath": "/ui/scenes/staff00/model_59.glb",
         "bounds": {
           "minX": 756.65,
           "maxX": 782.849,
@@ -6735,8 +6735,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_60",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_60.dae",
-        "publicPath": "/ui/scenes/staff00/model_60.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_60.glb",
+        "publicPath": "/ui/scenes/staff00/model_60.glb",
         "bounds": {
           "minX": 775.242,
           "maxX": 801.441,
@@ -6764,8 +6764,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_61",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_61.dae",
-        "publicPath": "/ui/scenes/staff00/model_61.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_61.glb",
+        "publicPath": "/ui/scenes/staff00/model_61.glb",
         "bounds": {
           "minX": 793.835,
           "maxX": 820.034,
@@ -6793,8 +6793,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_62",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_62.dae",
-        "publicPath": "/ui/scenes/staff00/model_62.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_62.glb",
+        "publicPath": "/ui/scenes/staff00/model_62.glb",
         "bounds": {
           "minX": 812.428,
           "maxX": 838.627,
@@ -6822,8 +6822,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_63",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_63.dae",
-        "publicPath": "/ui/scenes/staff00/model_63.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_63.glb",
+        "publicPath": "/ui/scenes/staff00/model_63.glb",
         "bounds": {
           "minX": 645.093,
           "maxX": 671.292,
@@ -6851,8 +6851,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_64",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_64.dae",
-        "publicPath": "/ui/scenes/staff00/model_64.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_64.glb",
+        "publicPath": "/ui/scenes/staff00/model_64.glb",
         "bounds": {
           "minX": 663.686,
           "maxX": 689.885,
@@ -6880,8 +6880,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_65",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_65.dae",
-        "publicPath": "/ui/scenes/staff00/model_65.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_65.glb",
+        "publicPath": "/ui/scenes/staff00/model_65.glb",
         "bounds": {
           "minX": 682.279,
           "maxX": 708.478,
@@ -6909,8 +6909,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_66",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_66.dae",
-        "publicPath": "/ui/scenes/staff00/model_66.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_66.glb",
+        "publicPath": "/ui/scenes/staff00/model_66.glb",
         "bounds": {
           "minX": 700.872,
           "maxX": 727.071,
@@ -6938,8 +6938,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_67",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_67.dae",
-        "publicPath": "/ui/scenes/staff00/model_67.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_67.glb",
+        "publicPath": "/ui/scenes/staff00/model_67.glb",
         "bounds": {
           "minX": 719.464,
           "maxX": 745.663,
@@ -6967,8 +6967,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_68",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_68.dae",
-        "publicPath": "/ui/scenes/staff00/model_68.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_68.glb",
+        "publicPath": "/ui/scenes/staff00/model_68.glb",
         "bounds": {
           "minX": 738.057,
           "maxX": 764.256,
@@ -6996,8 +6996,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_69",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_69.dae",
-        "publicPath": "/ui/scenes/staff00/model_69.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_69.glb",
+        "publicPath": "/ui/scenes/staff00/model_69.glb",
         "bounds": {
           "minX": 756.65,
           "maxX": 782.849,
@@ -7025,8 +7025,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_70",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_70.dae",
-        "publicPath": "/ui/scenes/staff00/model_70.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_70.glb",
+        "publicPath": "/ui/scenes/staff00/model_70.glb",
         "bounds": {
           "minX": 775.242,
           "maxX": 801.441,
@@ -7054,8 +7054,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_71",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_71.dae",
-        "publicPath": "/ui/scenes/staff00/model_71.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_71.glb",
+        "publicPath": "/ui/scenes/staff00/model_71.glb",
         "bounds": {
           "minX": 793.835,
           "maxX": 820.034,
@@ -7083,8 +7083,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_72",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_72.dae",
-        "publicPath": "/ui/scenes/staff00/model_72.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_72.glb",
+        "publicPath": "/ui/scenes/staff00/model_72.glb",
         "bounds": {
           "minX": 812.428,
           "maxX": 838.627,
@@ -7112,8 +7112,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_73",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_73.dae",
-        "publicPath": "/ui/scenes/staff00/model_73.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_73.glb",
+        "publicPath": "/ui/scenes/staff00/model_73.glb",
         "bounds": {
           "minX": 831.021,
           "maxX": 857.22,
@@ -7141,8 +7141,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_74",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_74.dae",
-        "publicPath": "/ui/scenes/staff00/model_74.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_74.glb",
+        "publicPath": "/ui/scenes/staff00/model_74.glb",
         "bounds": {
           "minX": 849.613,
           "maxX": 875.812,
@@ -7170,8 +7170,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_75",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_75.dae",
-        "publicPath": "/ui/scenes/staff00/model_75.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_75.glb",
+        "publicPath": "/ui/scenes/staff00/model_75.glb",
         "bounds": {
           "minX": 818.346,
           "maxX": 937.984,
@@ -7199,8 +7199,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_76",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_76.dae",
-        "publicPath": "/ui/scenes/staff00/model_76.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_76.glb",
+        "publicPath": "/ui/scenes/staff00/model_76.glb",
         "bounds": {
           "minX": 711.253,
           "maxX": 1045.077,
@@ -7228,8 +7228,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_77",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_77.dae",
-        "publicPath": "/ui/scenes/staff00/model_77.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_77.glb",
+        "publicPath": "/ui/scenes/staff00/model_77.glb",
         "bounds": {
           "minX": 849.614,
           "maxX": 875.812,
@@ -7257,8 +7257,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_78",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_78.dae",
-        "publicPath": "/ui/scenes/staff00/model_78.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_78.glb",
+        "publicPath": "/ui/scenes/staff00/model_78.glb",
         "bounds": {
           "minX": 787.314,
           "maxX": 969.016,
@@ -7286,8 +7286,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_79",
-        "modelPath": "apps/game/public/ui/scenes/staff00/model_79.dae",
-        "publicPath": "/ui/scenes/staff00/model_79.dae",
+        "modelPath": "apps/game/public/ui/scenes/staff00/model_79.glb",
+        "publicPath": "/ui/scenes/staff00/model_79.glb",
         "bounds": {
           "minX": 726.043,
           "maxX": 1030.287,
@@ -7318,7 +7318,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "tl00": {
     "sceneId": "tl00",
-    "sourceArchive": "user-data/GG4E/afs_data/root/tl00_mdl.arc",
+    "sourceArchive": "tl00_mdl.arc",
     "modelCount": 37,
     "bounds": {
       "minX": -4994.669,
@@ -7331,8 +7331,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_00.dae",
-        "publicPath": "/ui/scenes/tl00/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_00.glb",
+        "publicPath": "/ui/scenes/tl00/model_00.glb",
         "bounds": {
           "minX": -542.682,
           "maxX": 710.516,
@@ -7360,8 +7360,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_01.dae",
-        "publicPath": "/ui/scenes/tl00/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_01.glb",
+        "publicPath": "/ui/scenes/tl00/model_01.glb",
         "bounds": {
           "minX": -370.055,
           "maxX": 499.946,
@@ -7389,8 +7389,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_02.dae",
-        "publicPath": "/ui/scenes/tl00/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_02.glb",
+        "publicPath": "/ui/scenes/tl00/model_02.glb",
         "bounds": {
           "minX": -311.4,
           "maxX": 478.083,
@@ -7418,8 +7418,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_03.dae",
-        "publicPath": "/ui/scenes/tl00/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_03.glb",
+        "publicPath": "/ui/scenes/tl00/model_03.glb",
         "bounds": {
           "minX": 159.957,
           "maxX": 476.571,
@@ -7447,8 +7447,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_04.dae",
-        "publicPath": "/ui/scenes/tl00/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_04.glb",
+        "publicPath": "/ui/scenes/tl00/model_04.glb",
         "bounds": {
           "minX": -158.307,
           "maxX": 158.307,
@@ -7476,8 +7476,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_05.dae",
-        "publicPath": "/ui/scenes/tl00/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_05.glb",
+        "publicPath": "/ui/scenes/tl00/model_05.glb",
         "bounds": {
           "minX": -4941.236,
           "maxX": -3969.22,
@@ -7505,8 +7505,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_06.dae",
-        "publicPath": "/ui/scenes/tl00/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_06.glb",
+        "publicPath": "/ui/scenes/tl00/model_06.glb",
         "bounds": {
           "minX": -4975.887,
           "maxX": -3954.797,
@@ -7534,8 +7534,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_07.dae",
-        "publicPath": "/ui/scenes/tl00/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_07.glb",
+        "publicPath": "/ui/scenes/tl00/model_07.glb",
         "bounds": {
           "minX": -4970.393,
           "maxX": -4200.223,
@@ -7563,8 +7563,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_08.dae",
-        "publicPath": "/ui/scenes/tl00/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_08.glb",
+        "publicPath": "/ui/scenes/tl00/model_08.glb",
         "bounds": {
           "minX": -4702.118,
           "maxX": -3905.167,
@@ -7592,8 +7592,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_09.dae",
-        "publicPath": "/ui/scenes/tl00/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_09.glb",
+        "publicPath": "/ui/scenes/tl00/model_09.glb",
         "bounds": {
           "minX": -1852.66,
           "maxX": 1799.456,
@@ -7621,8 +7621,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_10.dae",
-        "publicPath": "/ui/scenes/tl00/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_10.glb",
+        "publicPath": "/ui/scenes/tl00/model_10.glb",
         "bounds": {
           "minX": -4559.474,
           "maxX": -4040.325,
@@ -7650,8 +7650,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_11.dae",
-        "publicPath": "/ui/scenes/tl00/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_11.glb",
+        "publicPath": "/ui/scenes/tl00/model_11.glb",
         "bounds": {
           "minX": -4559.474,
           "maxX": -4040.325,
@@ -7679,8 +7679,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_12.dae",
-        "publicPath": "/ui/scenes/tl00/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_12.glb",
+        "publicPath": "/ui/scenes/tl00/model_12.glb",
         "bounds": {
           "minX": -4559.474,
           "maxX": -4040.325,
@@ -7708,8 +7708,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_13.dae",
-        "publicPath": "/ui/scenes/tl00/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_13.glb",
+        "publicPath": "/ui/scenes/tl00/model_13.glb",
         "bounds": {
           "minX": -4691.892,
           "maxX": -4010.51,
@@ -7737,8 +7737,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_14.dae",
-        "publicPath": "/ui/scenes/tl00/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_14.glb",
+        "publicPath": "/ui/scenes/tl00/model_14.glb",
         "bounds": {
           "minX": -4559.474,
           "maxX": -4040.325,
@@ -7766,8 +7766,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_15.dae",
-        "publicPath": "/ui/scenes/tl00/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_15.glb",
+        "publicPath": "/ui/scenes/tl00/model_15.glb",
         "bounds": {
           "minX": -271.403,
           "maxX": 443.051,
@@ -7795,8 +7795,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_16.dae",
-        "publicPath": "/ui/scenes/tl00/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_16.glb",
+        "publicPath": "/ui/scenes/tl00/model_16.glb",
         "bounds": {
           "minX": 543.078,
           "maxX": 652.522,
@@ -7824,8 +7824,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_17.dae",
-        "publicPath": "/ui/scenes/tl00/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_17.glb",
+        "publicPath": "/ui/scenes/tl00/model_17.glb",
         "bounds": {
           "minX": 3051.939,
           "maxX": 5162.673,
@@ -7853,8 +7853,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_18.dae",
-        "publicPath": "/ui/scenes/tl00/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_18.glb",
+        "publicPath": "/ui/scenes/tl00/model_18.glb",
         "bounds": {
           "minX": 3830.962,
           "maxX": 5157.211,
@@ -7882,8 +7882,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_19.dae",
-        "publicPath": "/ui/scenes/tl00/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_19.glb",
+        "publicPath": "/ui/scenes/tl00/model_19.glb",
         "bounds": {
           "minX": -4991.544,
           "maxX": -3630.12,
@@ -7911,8 +7911,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_20.dae",
-        "publicPath": "/ui/scenes/tl00/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_20.glb",
+        "publicPath": "/ui/scenes/tl00/model_20.glb",
         "bounds": {
           "minX": -4867.634,
           "maxX": -4276.327,
@@ -7940,8 +7940,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_21",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_21.dae",
-        "publicPath": "/ui/scenes/tl00/model_21.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_21.glb",
+        "publicPath": "/ui/scenes/tl00/model_21.glb",
         "bounds": {
           "minX": -4874.083,
           "maxX": -4322.951,
@@ -7969,8 +7969,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_22",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_22.dae",
-        "publicPath": "/ui/scenes/tl00/model_22.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_22.glb",
+        "publicPath": "/ui/scenes/tl00/model_22.glb",
         "bounds": {
           "minX": -4874.706,
           "maxX": -4116.405,
@@ -7998,8 +7998,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_23",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_23.dae",
-        "publicPath": "/ui/scenes/tl00/model_23.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_23.glb",
+        "publicPath": "/ui/scenes/tl00/model_23.glb",
         "bounds": {
           "minX": -3783.611,
           "maxX": -2865.275,
@@ -8027,8 +8027,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_24",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_24.dae",
-        "publicPath": "/ui/scenes/tl00/model_24.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_24.glb",
+        "publicPath": "/ui/scenes/tl00/model_24.glb",
         "bounds": {
           "minX": -327.704,
           "maxX": -123.307,
@@ -8056,8 +8056,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_25",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_25.dae",
-        "publicPath": "/ui/scenes/tl00/model_25.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_25.glb",
+        "publicPath": "/ui/scenes/tl00/model_25.glb",
         "bounds": {
           "minX": 4134.532,
           "maxX": 5155.6,
@@ -8085,8 +8085,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_26",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_26.dae",
-        "publicPath": "/ui/scenes/tl00/model_26.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_26.glb",
+        "publicPath": "/ui/scenes/tl00/model_26.glb",
         "bounds": {
           "minX": -4942.769,
           "maxX": -3627.908,
@@ -8114,8 +8114,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_27",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_27.dae",
-        "publicPath": "/ui/scenes/tl00/model_27.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_27.glb",
+        "publicPath": "/ui/scenes/tl00/model_27.glb",
         "bounds": {
           "minX": -2080.918,
           "maxX": 1608.776,
@@ -8143,8 +8143,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_28",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_28.dae",
-        "publicPath": "/ui/scenes/tl00/model_28.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_28.glb",
+        "publicPath": "/ui/scenes/tl00/model_28.glb",
         "bounds": {
           "minX": -798.996,
           "maxX": 663.226,
@@ -8172,8 +8172,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_29",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_29.dae",
-        "publicPath": "/ui/scenes/tl00/model_29.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_29.glb",
+        "publicPath": "/ui/scenes/tl00/model_29.glb",
         "bounds": {
           "minX": -4993.793,
           "maxX": -2864.245,
@@ -8201,8 +8201,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_30",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_30.dae",
-        "publicPath": "/ui/scenes/tl00/model_30.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_30.glb",
+        "publicPath": "/ui/scenes/tl00/model_30.glb",
         "bounds": {
           "minX": -4994.669,
           "maxX": -3630.123,
@@ -8230,8 +8230,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_31",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_31.dae",
-        "publicPath": "/ui/scenes/tl00/model_31.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_31.glb",
+        "publicPath": "/ui/scenes/tl00/model_31.glb",
         "bounds": {
           "minX": 3185.159,
           "maxX": 5162.681,
@@ -8259,8 +8259,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_32",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_32.dae",
-        "publicPath": "/ui/scenes/tl00/model_32.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_32.glb",
+        "publicPath": "/ui/scenes/tl00/model_32.glb",
         "bounds": {
           "minX": 2464.881,
           "maxX": 5162.109,
@@ -8288,8 +8288,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_33",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_33.dae",
-        "publicPath": "/ui/scenes/tl00/model_33.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_33.glb",
+        "publicPath": "/ui/scenes/tl00/model_33.glb",
         "bounds": {
           "minX": -4993.79,
           "maxX": -4993.79,
@@ -8317,8 +8317,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_34",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_34.dae",
-        "publicPath": "/ui/scenes/tl00/model_34.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_34.glb",
+        "publicPath": "/ui/scenes/tl00/model_34.glb",
         "bounds": {
           "minX": -4993.79,
           "maxX": -4993.79,
@@ -8346,8 +8346,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_35",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_35.dae",
-        "publicPath": "/ui/scenes/tl00/model_35.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_35.glb",
+        "publicPath": "/ui/scenes/tl00/model_35.glb",
         "bounds": {
           "minX": -4975.463,
           "maxX": -3954.772,
@@ -8375,8 +8375,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_36",
-        "modelPath": "apps/game/public/ui/scenes/tl00/model_36.dae",
-        "publicPath": "/ui/scenes/tl00/model_36.dae",
+        "modelPath": "apps/game/public/ui/scenes/tl00/model_36.glb",
+        "publicPath": "/ui/scenes/tl00/model_36.glb",
         "bounds": {
           "minX": -4975.463,
           "maxX": -3987.325,
@@ -8407,7 +8407,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "unitall": {
     "sceneId": "unitall",
-    "sourceArchive": "user-data/GG4E/afs_data/root/unitall_mdl.arc",
+    "sourceArchive": "unitall_mdl.arc",
     "modelCount": 202,
     "bounds": {
       "minX": -346.585,
@@ -8420,8 +8420,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_00.dae",
-        "publicPath": "/ui/scenes/unitall/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_00.glb",
+        "publicPath": "/ui/scenes/unitall/model_00.glb",
         "bounds": {
           "minX": -146.781,
           "maxX": -75.781,
@@ -8449,8 +8449,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_01.dae",
-        "publicPath": "/ui/scenes/unitall/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_01.glb",
+        "publicPath": "/ui/scenes/unitall/model_01.glb",
         "bounds": {
           "minX": 60.863,
           "maxX": 187.863,
@@ -8478,8 +8478,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_02.dae",
-        "publicPath": "/ui/scenes/unitall/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_02.glb",
+        "publicPath": "/ui/scenes/unitall/model_02.glb",
         "bounds": {
           "minX": 14.713,
           "maxX": 85.713,
@@ -8507,8 +8507,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_03.dae",
-        "publicPath": "/ui/scenes/unitall/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_03.glb",
+        "publicPath": "/ui/scenes/unitall/model_03.glb",
         "bounds": {
           "minX": 277.326,
           "maxX": 348.326,
@@ -8536,8 +8536,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_04.dae",
-        "publicPath": "/ui/scenes/unitall/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_04.glb",
+        "publicPath": "/ui/scenes/unitall/model_04.glb",
         "bounds": {
           "minX": 666.279,
           "maxX": 737.279,
@@ -8565,8 +8565,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_05.dae",
-        "publicPath": "/ui/scenes/unitall/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_05.glb",
+        "publicPath": "/ui/scenes/unitall/model_05.glb",
         "bounds": {
           "minX": 556.45,
           "maxX": 683.45,
@@ -8594,8 +8594,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_06.dae",
-        "publicPath": "/ui/scenes/unitall/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_06.glb",
+        "publicPath": "/ui/scenes/unitall/model_06.glb",
         "bounds": {
           "minX": 375.485,
           "maxX": 446.485,
@@ -8623,8 +8623,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_07.dae",
-        "publicPath": "/ui/scenes/unitall/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_07.glb",
+        "publicPath": "/ui/scenes/unitall/model_07.glb",
         "bounds": {
           "minX": 815.699,
           "maxX": 942.699,
@@ -8652,8 +8652,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_08.dae",
-        "publicPath": "/ui/scenes/unitall/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_08.glb",
+        "publicPath": "/ui/scenes/unitall/model_08.glb",
         "bounds": {
           "minX": -102.411,
           "maxX": -35.94,
@@ -8681,8 +8681,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_09.dae",
-        "publicPath": "/ui/scenes/unitall/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_09.glb",
+        "publicPath": "/ui/scenes/unitall/model_09.glb",
         "bounds": {
           "minX": 1058.868,
           "maxX": 1185.868,
@@ -8710,8 +8710,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_10.dae",
-        "publicPath": "/ui/scenes/unitall/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_10.glb",
+        "publicPath": "/ui/scenes/unitall/model_10.glb",
         "bounds": {
           "minX": -74.595,
           "maxX": -3.595,
@@ -8739,8 +8739,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_100.dae",
-        "publicPath": "/ui/scenes/unitall/model_100.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_100.glb",
+        "publicPath": "/ui/scenes/unitall/model_100.glb",
         "bounds": {
           "minX": 67.855,
           "maxX": 194.855,
@@ -8768,8 +8768,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_101.dae",
-        "publicPath": "/ui/scenes/unitall/model_101.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_101.glb",
+        "publicPath": "/ui/scenes/unitall/model_101.glb",
         "bounds": {
           "minX": 213.522,
           "maxX": 308.522,
@@ -8797,8 +8797,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_102.dae",
-        "publicPath": "/ui/scenes/unitall/model_102.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_102.glb",
+        "publicPath": "/ui/scenes/unitall/model_102.glb",
         "bounds": {
           "minX": 321.808,
           "maxX": 448.808,
@@ -8826,8 +8826,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_103.dae",
-        "publicPath": "/ui/scenes/unitall/model_103.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_103.glb",
+        "publicPath": "/ui/scenes/unitall/model_103.glb",
         "bounds": {
           "minX": 470.511,
           "maxX": 565.511,
@@ -8855,8 +8855,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_104.dae",
-        "publicPath": "/ui/scenes/unitall/model_104.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_104.glb",
+        "publicPath": "/ui/scenes/unitall/model_104.glb",
         "bounds": {
           "minX": 590.349,
           "maxX": 685.349,
@@ -8884,8 +8884,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_105.dae",
-        "publicPath": "/ui/scenes/unitall/model_105.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_105.glb",
+        "publicPath": "/ui/scenes/unitall/model_105.glb",
         "bounds": {
           "minX": 727.012,
           "maxX": 822.012,
@@ -8913,8 +8913,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_106.dae",
-        "publicPath": "/ui/scenes/unitall/model_106.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_106.glb",
+        "publicPath": "/ui/scenes/unitall/model_106.glb",
         "bounds": {
           "minX": 836.277,
           "maxX": 963.277,
@@ -8942,8 +8942,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_107.dae",
-        "publicPath": "/ui/scenes/unitall/model_107.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_107.glb",
+        "publicPath": "/ui/scenes/unitall/model_107.glb",
         "bounds": {
           "minX": 978.226,
           "maxX": 1105.226,
@@ -8971,8 +8971,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_108.dae",
-        "publicPath": "/ui/scenes/unitall/model_108.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_108.glb",
+        "publicPath": "/ui/scenes/unitall/model_108.glb",
         "bounds": {
           "minX": 1138.378,
           "maxX": 1233.378,
@@ -9000,8 +9000,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_109.dae",
-        "publicPath": "/ui/scenes/unitall/model_109.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_109.glb",
+        "publicPath": "/ui/scenes/unitall/model_109.glb",
         "bounds": {
           "minX": 1282.773,
           "maxX": 1377.773,
@@ -9029,8 +9029,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_21",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_11.dae",
-        "publicPath": "/ui/scenes/unitall/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_11.glb",
+        "publicPath": "/ui/scenes/unitall/model_11.glb",
         "bounds": {
           "minX": 85.733,
           "maxX": 156.733,
@@ -9058,8 +9058,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_22",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_110.dae",
-        "publicPath": "/ui/scenes/unitall/model_110.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_110.glb",
+        "publicPath": "/ui/scenes/unitall/model_110.glb",
         "bounds": {
           "minX": 1414.708,
           "maxX": 1541.708,
@@ -9087,8 +9087,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_23",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_111.dae",
-        "publicPath": "/ui/scenes/unitall/model_111.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_111.glb",
+        "publicPath": "/ui/scenes/unitall/model_111.glb",
         "bounds": {
           "minX": 1572.197,
           "maxX": 1667.197,
@@ -9116,8 +9116,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_24",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_112.dae",
-        "publicPath": "/ui/scenes/unitall/model_112.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_112.glb",
+        "publicPath": "/ui/scenes/unitall/model_112.glb",
         "bounds": {
           "minX": 1692.469,
           "maxX": 1819.469,
@@ -9145,8 +9145,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_25",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_113.dae",
-        "publicPath": "/ui/scenes/unitall/model_113.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_113.glb",
+        "publicPath": "/ui/scenes/unitall/model_113.glb",
         "bounds": {
           "minX": 2059.727,
           "maxX": 2154.727,
@@ -9174,8 +9174,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_26",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_114.dae",
-        "publicPath": "/ui/scenes/unitall/model_114.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_114.glb",
+        "publicPath": "/ui/scenes/unitall/model_114.glb",
         "bounds": {
           "minX": 1963.13,
           "maxX": 2058.13,
@@ -9203,8 +9203,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_27",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_115.dae",
-        "publicPath": "/ui/scenes/unitall/model_115.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_115.glb",
+        "publicPath": "/ui/scenes/unitall/model_115.glb",
         "bounds": {
           "minX": -79.084,
           "maxX": 47.916,
@@ -9232,8 +9232,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_28",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_116.dae",
-        "publicPath": "/ui/scenes/unitall/model_116.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_116.glb",
+        "publicPath": "/ui/scenes/unitall/model_116.glb",
         "bounds": {
           "minX": -11.144,
           "maxX": 168.398,
@@ -9261,8 +9261,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_29",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_117.dae",
-        "publicPath": "/ui/scenes/unitall/model_117.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_117.glb",
+        "publicPath": "/ui/scenes/unitall/model_117.glb",
         "bounds": {
           "minX": 184.321,
           "maxX": 311.321,
@@ -9290,8 +9290,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_30",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_118.dae",
-        "publicPath": "/ui/scenes/unitall/model_118.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_118.glb",
+        "publicPath": "/ui/scenes/unitall/model_118.glb",
         "bounds": {
           "minX": 315.26,
           "maxX": 442.26,
@@ -9319,8 +9319,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_31",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_119.dae",
-        "publicPath": "/ui/scenes/unitall/model_119.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_119.glb",
+        "publicPath": "/ui/scenes/unitall/model_119.glb",
         "bounds": {
           "minX": 445.072,
           "maxX": 595.816,
@@ -9348,8 +9348,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_32",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_12.dae",
-        "publicPath": "/ui/scenes/unitall/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_12.glb",
+        "publicPath": "/ui/scenes/unitall/model_12.glb",
         "bounds": {
           "minX": -104.605,
           "maxX": -35.94,
@@ -9377,8 +9377,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_33",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_120.dae",
-        "publicPath": "/ui/scenes/unitall/model_120.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_120.glb",
+        "publicPath": "/ui/scenes/unitall/model_120.glb",
         "bounds": {
           "minX": -59.734,
           "maxX": 26.949,
@@ -9406,8 +9406,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_34",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_121.dae",
-        "publicPath": "/ui/scenes/unitall/model_121.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_121.glb",
+        "publicPath": "/ui/scenes/unitall/model_121.glb",
         "bounds": {
           "minX": 588.42,
           "maxX": 778.438,
@@ -9435,8 +9435,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_35",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_122.dae",
-        "publicPath": "/ui/scenes/unitall/model_122.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_122.glb",
+        "publicPath": "/ui/scenes/unitall/model_122.glb",
         "bounds": {
           "minX": 816.494,
           "maxX": 943.494,
@@ -9464,8 +9464,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_36",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_123.dae",
-        "publicPath": "/ui/scenes/unitall/model_123.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_123.glb",
+        "publicPath": "/ui/scenes/unitall/model_123.glb",
         "bounds": {
           "minX": 903.179,
           "maxX": 1073.484,
@@ -9493,8 +9493,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_37",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_124.dae",
-        "publicPath": "/ui/scenes/unitall/model_124.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_124.glb",
+        "publicPath": "/ui/scenes/unitall/model_124.glb",
         "bounds": {
           "minX": 1084.217,
           "maxX": 1211.217,
@@ -9522,8 +9522,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_38",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_125.dae",
-        "publicPath": "/ui/scenes/unitall/model_125.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_125.glb",
+        "publicPath": "/ui/scenes/unitall/model_125.glb",
         "bounds": {
           "minX": 1215.967,
           "maxX": 1350.418,
@@ -9551,8 +9551,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_39",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_126.dae",
-        "publicPath": "/ui/scenes/unitall/model_126.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_126.glb",
+        "publicPath": "/ui/scenes/unitall/model_126.glb",
         "bounds": {
           "minX": -59.734,
           "maxX": 26.949,
@@ -9580,8 +9580,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_40",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_127.dae",
-        "publicPath": "/ui/scenes/unitall/model_127.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_127.glb",
+        "publicPath": "/ui/scenes/unitall/model_127.glb",
         "bounds": {
           "minX": -60.523,
           "maxX": 48.044,
@@ -9609,8 +9609,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_41",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_128.dae",
-        "publicPath": "/ui/scenes/unitall/model_128.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_128.glb",
+        "publicPath": "/ui/scenes/unitall/model_128.glb",
         "bounds": {
           "minX": -57.391,
           "maxX": 47.954,
@@ -9638,8 +9638,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_42",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_129.dae",
-        "publicPath": "/ui/scenes/unitall/model_129.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_129.glb",
+        "publicPath": "/ui/scenes/unitall/model_129.glb",
         "bounds": {
           "minX": -220.411,
           "maxX": -149.411,
@@ -9667,8 +9667,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_43",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_13.dae",
-        "publicPath": "/ui/scenes/unitall/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_13.glb",
+        "publicPath": "/ui/scenes/unitall/model_13.glb",
         "bounds": {
           "minX": -111.372,
           "maxX": -40.372,
@@ -9696,8 +9696,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_44",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_130.dae",
-        "publicPath": "/ui/scenes/unitall/model_130.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_130.glb",
+        "publicPath": "/ui/scenes/unitall/model_130.glb",
         "bounds": {
           "minX": 64.209,
           "maxX": 191.209,
@@ -9725,8 +9725,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_45",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_131.dae",
-        "publicPath": "/ui/scenes/unitall/model_131.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_131.glb",
+        "publicPath": "/ui/scenes/unitall/model_131.glb",
         "bounds": {
           "minX": 385.551,
           "maxX": 456.551,
@@ -9754,8 +9754,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_46",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_132.dae",
-        "publicPath": "/ui/scenes/unitall/model_132.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_132.glb",
+        "publicPath": "/ui/scenes/unitall/model_132.glb",
         "bounds": {
           "minX": 257.292,
           "maxX": 328.292,
@@ -9783,8 +9783,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_47",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_133.dae",
-        "publicPath": "/ui/scenes/unitall/model_133.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_133.glb",
+        "publicPath": "/ui/scenes/unitall/model_133.glb",
         "bounds": {
           "minX": 588.62,
           "maxX": 715.62,
@@ -9812,8 +9812,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_48",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_134.dae",
-        "publicPath": "/ui/scenes/unitall/model_134.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_134.glb",
+        "publicPath": "/ui/scenes/unitall/model_134.glb",
         "bounds": {
           "minX": 491.842,
           "maxX": 562.842,
@@ -9841,8 +9841,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_49",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_135.dae",
-        "publicPath": "/ui/scenes/unitall/model_135.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_135.glb",
+        "publicPath": "/ui/scenes/unitall/model_135.glb",
         "bounds": {
           "minX": -188.829,
           "maxX": -125.136,
@@ -9870,8 +9870,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_50",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_136.dae",
-        "publicPath": "/ui/scenes/unitall/model_136.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_136.glb",
+        "publicPath": "/ui/scenes/unitall/model_136.glb",
         "bounds": {
           "minX": 801.511,
           "maxX": 872.511,
@@ -9899,8 +9899,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_51",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_137.dae",
-        "publicPath": "/ui/scenes/unitall/model_137.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_137.glb",
+        "publicPath": "/ui/scenes/unitall/model_137.glb",
         "bounds": {
           "minX": 922.448,
           "maxX": 993.448,
@@ -9928,8 +9928,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_52",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_138.dae",
-        "publicPath": "/ui/scenes/unitall/model_138.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_138.glb",
+        "publicPath": "/ui/scenes/unitall/model_138.glb",
         "bounds": {
           "minX": 1037.339,
           "maxX": 1108.339,
@@ -9957,8 +9957,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_53",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_139.dae",
-        "publicPath": "/ui/scenes/unitall/model_139.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_139.glb",
+        "publicPath": "/ui/scenes/unitall/model_139.glb",
         "bounds": {
           "minX": 1164.323,
           "maxX": 1235.323,
@@ -9986,8 +9986,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_54",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_14.dae",
-        "publicPath": "/ui/scenes/unitall/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_14.glb",
+        "publicPath": "/ui/scenes/unitall/model_14.glb",
         "bounds": {
           "minX": 211.993,
           "maxX": 282.993,
@@ -10015,8 +10015,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_55",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_140.dae",
-        "publicPath": "/ui/scenes/unitall/model_140.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_140.glb",
+        "publicPath": "/ui/scenes/unitall/model_140.glb",
         "bounds": {
           "minX": 1460.342,
           "maxX": 1587.342,
@@ -10044,8 +10044,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_56",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_141.dae",
-        "publicPath": "/ui/scenes/unitall/model_141.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_141.glb",
+        "publicPath": "/ui/scenes/unitall/model_141.glb",
         "bounds": {
           "minX": 1594.45,
           "maxX": 1721.45,
@@ -10073,8 +10073,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_57",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_142.dae",
-        "publicPath": "/ui/scenes/unitall/model_142.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_142.glb",
+        "publicPath": "/ui/scenes/unitall/model_142.glb",
         "bounds": {
           "minX": -200.172,
           "maxX": -97.662,
@@ -10102,8 +10102,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_58",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_143.dae",
-        "publicPath": "/ui/scenes/unitall/model_143.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_143.glb",
+        "publicPath": "/ui/scenes/unitall/model_143.glb",
         "bounds": {
           "minX": -69.309,
           "maxX": 25.691,
@@ -10131,8 +10131,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_59",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_144.dae",
-        "publicPath": "/ui/scenes/unitall/model_144.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_144.glb",
+        "publicPath": "/ui/scenes/unitall/model_144.glb",
         "bounds": {
           "minX": 58.328,
           "maxX": 153.328,
@@ -10160,8 +10160,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_60",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_145.dae",
-        "publicPath": "/ui/scenes/unitall/model_145.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_145.glb",
+        "publicPath": "/ui/scenes/unitall/model_145.glb",
         "bounds": {
           "minX": 177.885,
           "maxX": 304.885,
@@ -10189,8 +10189,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_61",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_146.dae",
-        "publicPath": "/ui/scenes/unitall/model_146.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_146.glb",
+        "publicPath": "/ui/scenes/unitall/model_146.glb",
         "bounds": {
           "minX": 311.5,
           "maxX": 438.5,
@@ -10218,8 +10218,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_62",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_147.dae",
-        "publicPath": "/ui/scenes/unitall/model_147.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_147.glb",
+        "publicPath": "/ui/scenes/unitall/model_147.glb",
         "bounds": {
           "minX": 436.5,
           "maxX": 563.5,
@@ -10247,8 +10247,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_63",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_148.dae",
-        "publicPath": "/ui/scenes/unitall/model_148.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_148.glb",
+        "publicPath": "/ui/scenes/unitall/model_148.glb",
         "bounds": {
           "minX": -116.4,
           "maxX": -50.465,
@@ -10276,8 +10276,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_64",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_149.dae",
-        "publicPath": "/ui/scenes/unitall/model_149.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_149.glb",
+        "publicPath": "/ui/scenes/unitall/model_149.glb",
         "bounds": {
           "minX": 686.5,
           "maxX": 813.5,
@@ -10305,8 +10305,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_65",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_15.dae",
-        "publicPath": "/ui/scenes/unitall/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_15.glb",
+        "publicPath": "/ui/scenes/unitall/model_15.glb",
         "bounds": {
           "minX": 125.02,
           "maxX": 196.02,
@@ -10334,8 +10334,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_66",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_150.dae",
-        "publicPath": "/ui/scenes/unitall/model_150.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_150.glb",
+        "publicPath": "/ui/scenes/unitall/model_150.glb",
         "bounds": {
           "minX": 835.356,
           "maxX": 930.356,
@@ -10363,8 +10363,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_67",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_151.dae",
-        "publicPath": "/ui/scenes/unitall/model_151.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_151.glb",
+        "publicPath": "/ui/scenes/unitall/model_151.glb",
         "bounds": {
           "minX": 942.054,
           "maxX": 1069.054,
@@ -10392,8 +10392,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_68",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_152.dae",
-        "publicPath": "/ui/scenes/unitall/model_152.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_152.glb",
+        "publicPath": "/ui/scenes/unitall/model_152.glb",
         "bounds": {
           "minX": 1071.989,
           "maxX": 1198.989,
@@ -10421,8 +10421,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_69",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_153.dae",
-        "publicPath": "/ui/scenes/unitall/model_153.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_153.glb",
+        "publicPath": "/ui/scenes/unitall/model_153.glb",
         "bounds": {
           "minX": -118.74,
           "maxX": -36.267,
@@ -10450,8 +10450,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_70",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_154.dae",
-        "publicPath": "/ui/scenes/unitall/model_154.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_154.glb",
+        "publicPath": "/ui/scenes/unitall/model_154.glb",
         "bounds": {
           "minX": 1326.937,
           "maxX": 1453.937,
@@ -10479,8 +10479,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_71",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_155.dae",
-        "publicPath": "/ui/scenes/unitall/model_155.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_155.glb",
+        "publicPath": "/ui/scenes/unitall/model_155.glb",
         "bounds": {
           "minX": 1447.543,
           "maxX": 1542.543,
@@ -10508,8 +10508,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_72",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_156.dae",
-        "publicPath": "/ui/scenes/unitall/model_156.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_156.glb",
+        "publicPath": "/ui/scenes/unitall/model_156.glb",
         "bounds": {
           "minX": -63.5,
           "maxX": 63.5,
@@ -10537,8 +10537,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_73",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_157.dae",
-        "publicPath": "/ui/scenes/unitall/model_157.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_157.glb",
+        "publicPath": "/ui/scenes/unitall/model_157.glb",
         "bounds": {
           "minX": 30.815,
           "maxX": 196.818,
@@ -10566,8 +10566,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_74",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_158.dae",
-        "publicPath": "/ui/scenes/unitall/model_158.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_158.glb",
+        "publicPath": "/ui/scenes/unitall/model_158.glb",
         "bounds": {
           "minX": 198.587,
           "maxX": 355.366,
@@ -10595,8 +10595,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_75",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_159.dae",
-        "publicPath": "/ui/scenes/unitall/model_159.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_159.glb",
+        "publicPath": "/ui/scenes/unitall/model_159.glb",
         "bounds": {
           "minX": 315.094,
           "maxX": 464.066,
@@ -10624,8 +10624,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_76",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_16.dae",
-        "publicPath": "/ui/scenes/unitall/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_16.glb",
+        "publicPath": "/ui/scenes/unitall/model_16.glb",
         "bounds": {
           "minX": 309.123,
           "maxX": 436.123,
@@ -10653,8 +10653,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_77",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_160.dae",
-        "publicPath": "/ui/scenes/unitall/model_160.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_160.glb",
+        "publicPath": "/ui/scenes/unitall/model_160.glb",
         "bounds": {
           "minX": 419.82,
           "maxX": 570.345,
@@ -10682,8 +10682,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_78",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_161.dae",
-        "publicPath": "/ui/scenes/unitall/model_161.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_161.glb",
+        "publicPath": "/ui/scenes/unitall/model_161.glb",
         "bounds": {
           "minX": 56.425,
           "maxX": 157.936,
@@ -10711,8 +10711,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_79",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_162.dae",
-        "publicPath": "/ui/scenes/unitall/model_162.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_162.glb",
+        "publicPath": "/ui/scenes/unitall/model_162.glb",
         "bounds": {
           "minX": 987.189,
           "maxX": 1148.449,
@@ -10740,8 +10740,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_80",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_163.dae",
-        "publicPath": "/ui/scenes/unitall/model_163.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_163.glb",
+        "publicPath": "/ui/scenes/unitall/model_163.glb",
         "bounds": {
           "minX": 859.889,
           "maxX": 1036.269,
@@ -10769,8 +10769,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_81",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_164.dae",
-        "publicPath": "/ui/scenes/unitall/model_164.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_164.glb",
+        "publicPath": "/ui/scenes/unitall/model_164.glb",
         "bounds": {
           "minX": 527.993,
           "maxX": 677.567,
@@ -10798,8 +10798,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_82",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_165.dae",
-        "publicPath": "/ui/scenes/unitall/model_165.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_165.glb",
+        "publicPath": "/ui/scenes/unitall/model_165.glb",
         "bounds": {
           "minX": 619.113,
           "maxX": 774.327,
@@ -10827,8 +10827,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_83",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_166.dae",
-        "publicPath": "/ui/scenes/unitall/model_166.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_166.glb",
+        "publicPath": "/ui/scenes/unitall/model_166.glb",
         "bounds": {
           "minX": 56.425,
           "maxX": 157.936,
@@ -10856,8 +10856,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_84",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_167.dae",
-        "publicPath": "/ui/scenes/unitall/model_167.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_167.glb",
+        "publicPath": "/ui/scenes/unitall/model_167.glb",
         "bounds": {
           "minX": -84.652,
           "maxX": 42.348,
@@ -10885,8 +10885,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_85",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_168.dae",
-        "publicPath": "/ui/scenes/unitall/model_168.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_168.glb",
+        "publicPath": "/ui/scenes/unitall/model_168.glb",
         "bounds": {
           "minX": 56.45,
           "maxX": 183.45,
@@ -10914,8 +10914,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_86",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_169.dae",
-        "publicPath": "/ui/scenes/unitall/model_169.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_169.glb",
+        "publicPath": "/ui/scenes/unitall/model_169.glb",
         "bounds": {
           "minX": 189.709,
           "maxX": 316.709,
@@ -10943,8 +10943,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_87",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_17.dae",
-        "publicPath": "/ui/scenes/unitall/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_17.glb",
+        "publicPath": "/ui/scenes/unitall/model_17.glb",
         "bounds": {
           "minX": 436.5,
           "maxX": 563.5,
@@ -10972,8 +10972,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_88",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_170.dae",
-        "publicPath": "/ui/scenes/unitall/model_170.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_170.glb",
+        "publicPath": "/ui/scenes/unitall/model_170.glb",
         "bounds": {
           "minX": 335.051,
           "maxX": 462.051,
@@ -11001,8 +11001,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_89",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_171.dae",
-        "publicPath": "/ui/scenes/unitall/model_171.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_171.glb",
+        "publicPath": "/ui/scenes/unitall/model_171.glb",
         "bounds": {
           "minX": 463.307,
           "maxX": 590.307,
@@ -11030,8 +11030,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_90",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_172.dae",
-        "publicPath": "/ui/scenes/unitall/model_172.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_172.glb",
+        "publicPath": "/ui/scenes/unitall/model_172.glb",
         "bounds": {
           "minX": 243.224,
           "maxX": 337.147,
@@ -11059,8 +11059,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_91",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_173.dae",
-        "publicPath": "/ui/scenes/unitall/model_173.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_173.glb",
+        "publicPath": "/ui/scenes/unitall/model_173.glb",
         "bounds": {
           "minX": 718.227,
           "maxX": 845.227,
@@ -11088,8 +11088,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_92",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_174.dae",
-        "publicPath": "/ui/scenes/unitall/model_174.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_174.glb",
+        "publicPath": "/ui/scenes/unitall/model_174.glb",
         "bounds": {
           "minX": 150.157,
           "maxX": 244.08,
@@ -11117,8 +11117,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_93",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_175.dae",
-        "publicPath": "/ui/scenes/unitall/model_175.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_175.glb",
+        "publicPath": "/ui/scenes/unitall/model_175.glb",
         "bounds": {
           "minX": -201.968,
           "maxX": -130.968,
@@ -11146,8 +11146,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_94",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_176.dae",
-        "publicPath": "/ui/scenes/unitall/model_176.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_176.glb",
+        "publicPath": "/ui/scenes/unitall/model_176.glb",
         "bounds": {
           "minX": -82.079,
           "maxX": -11.079,
@@ -11175,8 +11175,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_95",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_177.dae",
-        "publicPath": "/ui/scenes/unitall/model_177.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_177.glb",
+        "publicPath": "/ui/scenes/unitall/model_177.glb",
         "bounds": {
           "minX": 24.176,
           "maxX": 120.176,
@@ -11204,8 +11204,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_96",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_178.dae",
-        "publicPath": "/ui/scenes/unitall/model_178.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_178.glb",
+        "publicPath": "/ui/scenes/unitall/model_178.glb",
         "bounds": {
           "minX": 159.21,
           "maxX": 273.736,
@@ -11233,8 +11233,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_97",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_179.dae",
-        "publicPath": "/ui/scenes/unitall/model_179.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_179.glb",
+        "publicPath": "/ui/scenes/unitall/model_179.glb",
         "bounds": {
           "minX": 285.921,
           "maxX": 412.921,
@@ -11262,8 +11262,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_98",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_18.dae",
-        "publicPath": "/ui/scenes/unitall/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_18.glb",
+        "publicPath": "/ui/scenes/unitall/model_18.glb",
         "bounds": {
           "minX": -1.935,
           "maxX": 67.773,
@@ -11291,8 +11291,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_99",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_180.dae",
-        "publicPath": "/ui/scenes/unitall/model_180.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_180.glb",
+        "publicPath": "/ui/scenes/unitall/model_180.glb",
         "bounds": {
           "minX": -202.516,
           "maxX": -131.516,
@@ -11320,8 +11320,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_100",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_181.dae",
-        "publicPath": "/ui/scenes/unitall/model_181.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_181.glb",
+        "publicPath": "/ui/scenes/unitall/model_181.glb",
         "bounds": {
           "minX": -63.5,
           "maxX": 63.5,
@@ -11349,8 +11349,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_101",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_182.dae",
-        "publicPath": "/ui/scenes/unitall/model_182.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_182.glb",
+        "publicPath": "/ui/scenes/unitall/model_182.glb",
         "bounds": {
           "minX": 435.843,
           "maxX": 562.843,
@@ -11378,8 +11378,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_102",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_183.dae",
-        "publicPath": "/ui/scenes/unitall/model_183.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_183.glb",
+        "publicPath": "/ui/scenes/unitall/model_183.glb",
         "bounds": {
           "minX": 192.41,
           "maxX": 319.41,
@@ -11407,8 +11407,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_103",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_184.dae",
-        "publicPath": "/ui/scenes/unitall/model_184.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_184.glb",
+        "publicPath": "/ui/scenes/unitall/model_184.glb",
         "bounds": {
           "minX": 311.5,
           "maxX": 438.5,
@@ -11436,8 +11436,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_104",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_185.dae",
-        "publicPath": "/ui/scenes/unitall/model_185.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_185.glb",
+        "publicPath": "/ui/scenes/unitall/model_185.glb",
         "bounds": {
           "minX": 436.5,
           "maxX": 563.5,
@@ -11465,8 +11465,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_105",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_186.dae",
-        "publicPath": "/ui/scenes/unitall/model_186.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_186.glb",
+        "publicPath": "/ui/scenes/unitall/model_186.glb",
         "bounds": {
           "minX": 561.5,
           "maxX": 688.5,
@@ -11494,8 +11494,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_106",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_187.dae",
-        "publicPath": "/ui/scenes/unitall/model_187.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_187.glb",
+        "publicPath": "/ui/scenes/unitall/model_187.glb",
         "bounds": {
           "minX": 704.789,
           "maxX": 800.789,
@@ -11523,8 +11523,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_107",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_188.dae",
-        "publicPath": "/ui/scenes/unitall/model_188.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_188.glb",
+        "publicPath": "/ui/scenes/unitall/model_188.glb",
         "bounds": {
           "minX": 811.5,
           "maxX": 938.5,
@@ -11552,8 +11552,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_108",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_189.dae",
-        "publicPath": "/ui/scenes/unitall/model_189.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_189.glb",
+        "publicPath": "/ui/scenes/unitall/model_189.glb",
         "bounds": {
           "minX": -136.243,
           "maxX": 42.021,
@@ -11581,8 +11581,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_109",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_19.dae",
-        "publicPath": "/ui/scenes/unitall/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_19.glb",
+        "publicPath": "/ui/scenes/unitall/model_19.glb",
         "bounds": {
           "minX": 686.54,
           "maxX": 813.54,
@@ -11610,8 +11610,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_110",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_190.dae",
-        "publicPath": "/ui/scenes/unitall/model_190.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_190.glb",
+        "publicPath": "/ui/scenes/unitall/model_190.glb",
         "bounds": {
           "minX": 51.508,
           "maxX": 249.596,
@@ -11639,8 +11639,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_111",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_191.dae",
-        "publicPath": "/ui/scenes/unitall/model_191.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_191.glb",
+        "publicPath": "/ui/scenes/unitall/model_191.glb",
         "bounds": {
           "minX": 186.5,
           "maxX": 313.5,
@@ -11668,8 +11668,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_112",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_192.dae",
-        "publicPath": "/ui/scenes/unitall/model_192.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_192.glb",
+        "publicPath": "/ui/scenes/unitall/model_192.glb",
         "bounds": {
           "minX": 278.166,
           "maxX": 423.775,
@@ -11697,8 +11697,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_113",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_193.dae",
-        "publicPath": "/ui/scenes/unitall/model_193.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_193.glb",
+        "publicPath": "/ui/scenes/unitall/model_193.glb",
         "bounds": {
           "minX": 436.5,
           "maxX": 590.286,
@@ -11726,8 +11726,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_114",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_194.dae",
-        "publicPath": "/ui/scenes/unitall/model_194.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_194.glb",
+        "publicPath": "/ui/scenes/unitall/model_194.glb",
         "bounds": {
           "minX": 574.46,
           "maxX": 766.036,
@@ -11755,8 +11755,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_115",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_195.dae",
-        "publicPath": "/ui/scenes/unitall/model_195.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_195.glb",
+        "publicPath": "/ui/scenes/unitall/model_195.glb",
         "bounds": {
           "minX": 104.954,
           "maxX": 199.5,
@@ -11784,8 +11784,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_116",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_196.dae",
-        "publicPath": "/ui/scenes/unitall/model_196.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_196.glb",
+        "publicPath": "/ui/scenes/unitall/model_196.glb",
         "bounds": {
           "minX": -346.585,
           "maxX": -299.534,
@@ -11813,8 +11813,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_117",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_197.dae",
-        "publicPath": "/ui/scenes/unitall/model_197.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_197.glb",
+        "publicPath": "/ui/scenes/unitall/model_197.glb",
         "bounds": {
           "minX": -286.711,
           "maxX": -231.361,
@@ -11842,8 +11842,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_118",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_198.dae",
-        "publicPath": "/ui/scenes/unitall/model_198.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_198.glb",
+        "publicPath": "/ui/scenes/unitall/model_198.glb",
         "bounds": {
           "minX": -241.696,
           "maxX": -165.878,
@@ -11871,8 +11871,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_119",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_199.dae",
-        "publicPath": "/ui/scenes/unitall/model_199.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_199.glb",
+        "publicPath": "/ui/scenes/unitall/model_199.glb",
         "bounds": {
           "minX": 122.382,
           "maxX": 199.624,
@@ -11900,8 +11900,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_120",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_20.dae",
-        "publicPath": "/ui/scenes/unitall/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_20.glb",
+        "publicPath": "/ui/scenes/unitall/model_20.glb",
         "bounds": {
           "minX": 50.416,
           "maxX": 121.416,
@@ -11929,8 +11929,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_121",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_200.dae",
-        "publicPath": "/ui/scenes/unitall/model_200.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_200.glb",
+        "publicPath": "/ui/scenes/unitall/model_200.glb",
         "bounds": {
           "minX": 780.26,
           "maxX": 907.26,
@@ -11958,8 +11958,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_122",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_201.dae",
-        "publicPath": "/ui/scenes/unitall/model_201.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_201.glb",
+        "publicPath": "/ui/scenes/unitall/model_201.glb",
         "bounds": {
           "minX": 147.668,
           "maxX": 199.5,
@@ -11987,8 +11987,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_123",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_21.dae",
-        "publicPath": "/ui/scenes/unitall/model_21.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_21.glb",
+        "publicPath": "/ui/scenes/unitall/model_21.glb",
         "bounds": {
           "minX": 543.439,
           "maxX": 614.439,
@@ -12016,8 +12016,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_124",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_22.dae",
-        "publicPath": "/ui/scenes/unitall/model_22.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_22.glb",
+        "publicPath": "/ui/scenes/unitall/model_22.glb",
         "bounds": {
           "minX": 50.523,
           "maxX": 113.026,
@@ -12045,8 +12045,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_125",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_23.dae",
-        "publicPath": "/ui/scenes/unitall/model_23.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_23.glb",
+        "publicPath": "/ui/scenes/unitall/model_23.glb",
         "bounds": {
           "minX": -94.558,
           "maxX": 1.949,
@@ -12074,8 +12074,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_126",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_24.dae",
-        "publicPath": "/ui/scenes/unitall/model_24.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_24.glb",
+        "publicPath": "/ui/scenes/unitall/model_24.glb",
         "bounds": {
           "minX": -57.215,
           "maxX": 37.785,
@@ -12103,8 +12103,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_127",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_25.dae",
-        "publicPath": "/ui/scenes/unitall/model_25.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_25.glb",
+        "publicPath": "/ui/scenes/unitall/model_25.glb",
         "bounds": {
           "minX": 15.848,
           "maxX": 172.191,
@@ -12132,8 +12132,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_128",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_26.dae",
-        "publicPath": "/ui/scenes/unitall/model_26.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_26.glb",
+        "publicPath": "/ui/scenes/unitall/model_26.glb",
         "bounds": {
           "minX": 178.529,
           "maxX": 273.529,
@@ -12161,8 +12161,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_129",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_27.dae",
-        "publicPath": "/ui/scenes/unitall/model_27.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_27.glb",
+        "publicPath": "/ui/scenes/unitall/model_27.glb",
         "bounds": {
           "minX": 299.618,
           "maxX": 424.527,
@@ -12190,8 +12190,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_130",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_28.dae",
-        "publicPath": "/ui/scenes/unitall/model_28.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_28.glb",
+        "publicPath": "/ui/scenes/unitall/model_28.glb",
         "bounds": {
           "minX": 1507.349,
           "maxX": 1617.3,
@@ -12219,8 +12219,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_131",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_29.dae",
-        "publicPath": "/ui/scenes/unitall/model_29.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_29.glb",
+        "publicPath": "/ui/scenes/unitall/model_29.glb",
         "bounds": {
           "minX": 543.379,
           "maxX": 670.379,
@@ -12248,8 +12248,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_132",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_30.dae",
-        "publicPath": "/ui/scenes/unitall/model_30.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_30.glb",
+        "publicPath": "/ui/scenes/unitall/model_30.glb",
         "bounds": {
           "minX": -133.782,
           "maxX": -42.122,
@@ -12277,8 +12277,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_133",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_31.dae",
-        "publicPath": "/ui/scenes/unitall/model_31.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_31.glb",
+        "publicPath": "/ui/scenes/unitall/model_31.glb",
         "bounds": {
           "minX": 774.291,
           "maxX": 845.291,
@@ -12306,8 +12306,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_134",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_32.dae",
-        "publicPath": "/ui/scenes/unitall/model_32.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_32.glb",
+        "publicPath": "/ui/scenes/unitall/model_32.glb",
         "bounds": {
           "minX": 1960.756,
           "maxX": 2098.483,
@@ -12335,8 +12335,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_135",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_33.dae",
-        "publicPath": "/ui/scenes/unitall/model_33.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_33.glb",
+        "publicPath": "/ui/scenes/unitall/model_33.glb",
         "bounds": {
           "minX": 544.729,
           "maxX": 671.729,
@@ -12364,8 +12364,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_136",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_34.dae",
-        "publicPath": "/ui/scenes/unitall/model_34.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_34.glb",
+        "publicPath": "/ui/scenes/unitall/model_34.glb",
         "bounds": {
           "minX": 1197.05,
           "maxX": 1324.829,
@@ -12393,8 +12393,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_137",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_35.dae",
-        "publicPath": "/ui/scenes/unitall/model_35.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_35.glb",
+        "publicPath": "/ui/scenes/unitall/model_35.glb",
         "bounds": {
           "minX": 1334.542,
           "maxX": 1429.542,
@@ -12422,8 +12422,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_138",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_36.dae",
-        "publicPath": "/ui/scenes/unitall/model_36.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_36.glb",
+        "publicPath": "/ui/scenes/unitall/model_36.glb",
         "bounds": {
           "minX": 1454.469,
           "maxX": 1581.719,
@@ -12451,8 +12451,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_139",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_37.dae",
-        "publicPath": "/ui/scenes/unitall/model_37.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_37.glb",
+        "publicPath": "/ui/scenes/unitall/model_37.glb",
         "bounds": {
           "minX": 1640.871,
           "maxX": 1755.099,
@@ -12480,8 +12480,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_140",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_38.dae",
-        "publicPath": "/ui/scenes/unitall/model_38.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_38.glb",
+        "publicPath": "/ui/scenes/unitall/model_38.glb",
         "bounds": {
           "minX": 1821.482,
           "maxX": 1971.913,
@@ -12509,8 +12509,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_141",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_39.dae",
-        "publicPath": "/ui/scenes/unitall/model_39.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_39.glb",
+        "publicPath": "/ui/scenes/unitall/model_39.glb",
         "bounds": {
           "minX": 68.815,
           "maxX": 170.435,
@@ -12538,8 +12538,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_142",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_40.dae",
-        "publicPath": "/ui/scenes/unitall/model_40.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_40.glb",
+        "publicPath": "/ui/scenes/unitall/model_40.glb",
         "bounds": {
           "minX": -157.013,
           "maxX": -86.013,
@@ -12567,8 +12567,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_143",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_41.dae",
-        "publicPath": "/ui/scenes/unitall/model_41.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_41.glb",
+        "publicPath": "/ui/scenes/unitall/model_41.glb",
         "bounds": {
           "minX": 62.248,
           "maxX": 189.248,
@@ -12596,8 +12596,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_144",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_42.dae",
-        "publicPath": "/ui/scenes/unitall/model_42.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_42.glb",
+        "publicPath": "/ui/scenes/unitall/model_42.glb",
         "bounds": {
           "minX": -48.957,
           "maxX": 22.043,
@@ -12625,8 +12625,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_145",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_43.dae",
-        "publicPath": "/ui/scenes/unitall/model_43.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_43.glb",
+        "publicPath": "/ui/scenes/unitall/model_43.glb",
         "bounds": {
           "minX": -39.43,
           "maxX": 7.479,
@@ -12654,8 +12654,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_146",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_44.dae",
-        "publicPath": "/ui/scenes/unitall/model_44.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_44.glb",
+        "publicPath": "/ui/scenes/unitall/model_44.glb",
         "bounds": {
           "minX": 292.531,
           "maxX": 363.531,
@@ -12683,8 +12683,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_147",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_45.dae",
-        "publicPath": "/ui/scenes/unitall/model_45.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_45.glb",
+        "publicPath": "/ui/scenes/unitall/model_45.glb",
         "bounds": {
           "minX": 419.473,
           "maxX": 490.473,
@@ -12712,8 +12712,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_148",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_46.dae",
-        "publicPath": "/ui/scenes/unitall/model_46.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_46.glb",
+        "publicPath": "/ui/scenes/unitall/model_46.glb",
         "bounds": {
           "minX": 165.975,
           "maxX": 236.975,
@@ -12741,8 +12741,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_149",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_47.dae",
-        "publicPath": "/ui/scenes/unitall/model_47.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_47.glb",
+        "publicPath": "/ui/scenes/unitall/model_47.glb",
         "bounds": {
           "minX": 706.359,
           "maxX": 777.359,
@@ -12770,8 +12770,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_150",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_48.dae",
-        "publicPath": "/ui/scenes/unitall/model_48.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_48.glb",
+        "publicPath": "/ui/scenes/unitall/model_48.glb",
         "bounds": {
           "minX": 480.034,
           "maxX": 551.034,
@@ -12799,8 +12799,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_151",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_49.dae",
-        "publicPath": "/ui/scenes/unitall/model_49.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_49.glb",
+        "publicPath": "/ui/scenes/unitall/model_49.glb",
         "bounds": {
           "minX": 579.016,
           "maxX": 650.016,
@@ -12828,8 +12828,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_152",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_50.dae",
-        "publicPath": "/ui/scenes/unitall/model_50.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_50.glb",
+        "publicPath": "/ui/scenes/unitall/model_50.glb",
         "bounds": {
           "minX": 833.817,
           "maxX": 904.817,
@@ -12857,8 +12857,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_153",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_51.dae",
-        "publicPath": "/ui/scenes/unitall/model_51.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_51.glb",
+        "publicPath": "/ui/scenes/unitall/model_51.glb",
         "bounds": {
           "minX": 938.876,
           "maxX": 1009.876,
@@ -12886,8 +12886,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_154",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_52.dae",
-        "publicPath": "/ui/scenes/unitall/model_52.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_52.glb",
+        "publicPath": "/ui/scenes/unitall/model_52.glb",
         "bounds": {
           "minX": 11.118,
           "maxX": 69.349,
@@ -12915,8 +12915,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_155",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_53.dae",
-        "publicPath": "/ui/scenes/unitall/model_53.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_53.glb",
+        "publicPath": "/ui/scenes/unitall/model_53.glb",
         "bounds": {
           "minX": 60.268,
           "maxX": 123.533,
@@ -12944,8 +12944,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_156",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_54.dae",
-        "publicPath": "/ui/scenes/unitall/model_54.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_54.glb",
+        "publicPath": "/ui/scenes/unitall/model_54.glb",
         "bounds": {
           "minX": -65.129,
           "maxX": 61.871,
@@ -12973,8 +12973,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_157",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_55.dae",
-        "publicPath": "/ui/scenes/unitall/model_55.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_55.glb",
+        "publicPath": "/ui/scenes/unitall/model_55.glb",
         "bounds": {
           "minX": 48.57,
           "maxX": 165.999,
@@ -13002,8 +13002,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_158",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_56.dae",
-        "publicPath": "/ui/scenes/unitall/model_56.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_56.glb",
+        "publicPath": "/ui/scenes/unitall/model_56.glb",
         "bounds": {
           "minX": 189.554,
           "maxX": 284.554,
@@ -13031,8 +13031,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_159",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_57.dae",
-        "publicPath": "/ui/scenes/unitall/model_57.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_57.glb",
+        "publicPath": "/ui/scenes/unitall/model_57.glb",
         "bounds": {
           "minX": 296.056,
           "maxX": 455.954,
@@ -13060,8 +13060,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_160",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_58.dae",
-        "publicPath": "/ui/scenes/unitall/model_58.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_58.glb",
+        "publicPath": "/ui/scenes/unitall/model_58.glb",
         "bounds": {
           "minX": 458.938,
           "maxX": 553.938,
@@ -13089,8 +13089,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_161",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_59.dae",
-        "publicPath": "/ui/scenes/unitall/model_59.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_59.glb",
+        "publicPath": "/ui/scenes/unitall/model_59.glb",
         "bounds": {
           "minX": 565.722,
           "maxX": 692.722,
@@ -13118,8 +13118,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_162",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_60.dae",
-        "publicPath": "/ui/scenes/unitall/model_60.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_60.glb",
+        "publicPath": "/ui/scenes/unitall/model_60.glb",
         "bounds": {
           "minX": -3.737,
           "maxX": 75.784,
@@ -13147,8 +13147,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_163",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_61.dae",
-        "publicPath": "/ui/scenes/unitall/model_61.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_61.glb",
+        "publicPath": "/ui/scenes/unitall/model_61.glb",
         "bounds": {
           "minX": 851.106,
           "maxX": 946.106,
@@ -13176,8 +13176,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_164",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_62.dae",
-        "publicPath": "/ui/scenes/unitall/model_62.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_62.glb",
+        "publicPath": "/ui/scenes/unitall/model_62.glb",
         "bounds": {
           "minX": 992.957,
           "maxX": 1087.957,
@@ -13205,8 +13205,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_165",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_63.dae",
-        "publicPath": "/ui/scenes/unitall/model_63.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_63.glb",
+        "publicPath": "/ui/scenes/unitall/model_63.glb",
         "bounds": {
           "minX": 1104.565,
           "maxX": 1231.565,
@@ -13234,8 +13234,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_166",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_64.dae",
-        "publicPath": "/ui/scenes/unitall/model_64.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_64.glb",
+        "publicPath": "/ui/scenes/unitall/model_64.glb",
         "bounds": {
           "minX": 1237.322,
           "maxX": 1364.322,
@@ -13263,8 +13263,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_167",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_65.dae",
-        "publicPath": "/ui/scenes/unitall/model_65.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_65.glb",
+        "publicPath": "/ui/scenes/unitall/model_65.glb",
         "bounds": {
           "minX": -211.366,
           "maxX": -115.681,
@@ -13292,8 +13292,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_168",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_66.dae",
-        "publicPath": "/ui/scenes/unitall/model_66.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_66.glb",
+        "publicPath": "/ui/scenes/unitall/model_66.glb",
         "bounds": {
           "minX": -4.404,
           "maxX": 78.174,
@@ -13321,8 +13321,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_169",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_67.dae",
-        "publicPath": "/ui/scenes/unitall/model_67.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_67.glb",
+        "publicPath": "/ui/scenes/unitall/model_67.glb",
         "bounds": {
           "minX": -15.44,
           "maxX": 83.255,
@@ -13350,8 +13350,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_170",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_68.dae",
-        "publicPath": "/ui/scenes/unitall/model_68.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_68.glb",
+        "publicPath": "/ui/scenes/unitall/model_68.glb",
         "bounds": {
           "minX": -48.663,
           "maxX": 116.67,
@@ -13379,8 +13379,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_171",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_69.dae",
-        "publicPath": "/ui/scenes/unitall/model_69.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_69.glb",
+        "publicPath": "/ui/scenes/unitall/model_69.glb",
         "bounds": {
           "minX": 1242.55,
           "maxX": 1382.568,
@@ -13408,8 +13408,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_172",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_70.dae",
-        "publicPath": "/ui/scenes/unitall/model_70.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_70.glb",
+        "publicPath": "/ui/scenes/unitall/model_70.glb",
         "bounds": {
           "minX": 188.76,
           "maxX": 380.959,
@@ -13437,8 +13437,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_173",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_71.dae",
-        "publicPath": "/ui/scenes/unitall/model_71.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_71.glb",
+        "publicPath": "/ui/scenes/unitall/model_71.glb",
         "bounds": {
           "minX": 308.689,
           "maxX": 448.732,
@@ -13466,8 +13466,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_174",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_72.dae",
-        "publicPath": "/ui/scenes/unitall/model_72.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_72.glb",
+        "publicPath": "/ui/scenes/unitall/model_72.glb",
         "bounds": {
           "minX": 391.697,
           "maxX": 539.191,
@@ -13495,8 +13495,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_175",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_73.dae",
-        "publicPath": "/ui/scenes/unitall/model_73.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_73.glb",
+        "publicPath": "/ui/scenes/unitall/model_73.glb",
         "bounds": {
           "minX": 535.356,
           "maxX": 675.373,
@@ -13524,8 +13524,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_176",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_74.dae",
-        "publicPath": "/ui/scenes/unitall/model_74.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_74.glb",
+        "publicPath": "/ui/scenes/unitall/model_74.glb",
         "bounds": {
           "minX": 689.353,
           "maxX": 835.514,
@@ -13553,8 +13553,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_177",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_75.dae",
-        "publicPath": "/ui/scenes/unitall/model_75.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_75.glb",
+        "publicPath": "/ui/scenes/unitall/model_75.glb",
         "bounds": {
           "minX": 835.276,
           "maxX": 997.091,
@@ -13582,8 +13582,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_178",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_76.dae",
-        "publicPath": "/ui/scenes/unitall/model_76.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_76.glb",
+        "publicPath": "/ui/scenes/unitall/model_76.glb",
         "bounds": {
           "minX": 977.162,
           "maxX": 1132.022,
@@ -13611,8 +13611,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_179",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_77.dae",
-        "publicPath": "/ui/scenes/unitall/model_77.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_77.glb",
+        "publicPath": "/ui/scenes/unitall/model_77.glb",
         "bounds": {
           "minX": 1097.05,
           "maxX": 1237.067,
@@ -13640,8 +13640,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_180",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_78.dae",
-        "publicPath": "/ui/scenes/unitall/model_78.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_78.glb",
+        "publicPath": "/ui/scenes/unitall/model_78.glb",
         "bounds": {
           "minX": -36.044,
           "maxX": 83.925,
@@ -13669,8 +13669,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_181",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_79.dae",
-        "publicPath": "/ui/scenes/unitall/model_79.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_79.glb",
+        "publicPath": "/ui/scenes/unitall/model_79.glb",
         "bounds": {
           "minX": 1263.216,
           "maxX": 1364.816,
@@ -13698,8 +13698,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_182",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_80.dae",
-        "publicPath": "/ui/scenes/unitall/model_80.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_80.glb",
+        "publicPath": "/ui/scenes/unitall/model_80.glb",
         "bounds": {
           "minX": 204.838,
           "maxX": 344.302,
@@ -13727,8 +13727,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_183",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_81.dae",
-        "publicPath": "/ui/scenes/unitall/model_81.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_81.glb",
+        "publicPath": "/ui/scenes/unitall/model_81.glb",
         "bounds": {
           "minX": 322.663,
           "maxX": 424.282,
@@ -13756,8 +13756,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_184",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_82.dae",
-        "publicPath": "/ui/scenes/unitall/model_82.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_82.glb",
+        "publicPath": "/ui/scenes/unitall/model_82.glb",
         "bounds": {
           "minX": 408.538,
           "maxX": 515.563,
@@ -13785,8 +13785,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_185",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_83.dae",
-        "publicPath": "/ui/scenes/unitall/model_83.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_83.glb",
+        "publicPath": "/ui/scenes/unitall/model_83.glb",
         "bounds": {
           "minX": 556.858,
           "maxX": 658.458,
@@ -13814,8 +13814,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_186",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_84.dae",
-        "publicPath": "/ui/scenes/unitall/model_84.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_84.glb",
+        "publicPath": "/ui/scenes/unitall/model_84.glb",
         "bounds": {
           "minX": 700.611,
           "maxX": 806.669,
@@ -13843,8 +13843,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_187",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_85.dae",
-        "publicPath": "/ui/scenes/unitall/model_85.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_85.glb",
+        "publicPath": "/ui/scenes/unitall/model_85.glb",
         "bounds": {
           "minX": 847.186,
           "maxX": 964.602,
@@ -13872,8 +13872,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_188",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_86.dae",
-        "publicPath": "/ui/scenes/unitall/model_86.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_86.glb",
+        "publicPath": "/ui/scenes/unitall/model_86.glb",
         "bounds": {
           "minX": 985.937,
           "maxX": 1098.307,
@@ -13901,8 +13901,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_189",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_87.dae",
-        "publicPath": "/ui/scenes/unitall/model_87.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_87.glb",
+        "publicPath": "/ui/scenes/unitall/model_87.glb",
         "bounds": {
           "minX": 1117.867,
           "maxX": 1219.467,
@@ -13930,8 +13930,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_190",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_88.dae",
-        "publicPath": "/ui/scenes/unitall/model_88.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_88.glb",
+        "publicPath": "/ui/scenes/unitall/model_88.glb",
         "bounds": {
           "minX": -48.822,
           "maxX": 46.178,
@@ -13959,8 +13959,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_191",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_89.dae",
-        "publicPath": "/ui/scenes/unitall/model_89.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_89.glb",
+        "publicPath": "/ui/scenes/unitall/model_89.glb",
         "bounds": {
           "minX": 81.923,
           "maxX": 176.923,
@@ -13988,8 +13988,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_192",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_90.dae",
-        "publicPath": "/ui/scenes/unitall/model_90.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_90.glb",
+        "publicPath": "/ui/scenes/unitall/model_90.glb",
         "bounds": {
           "minX": 312.036,
           "maxX": 439.036,
@@ -14017,8 +14017,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_193",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_91.dae",
-        "publicPath": "/ui/scenes/unitall/model_91.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_91.glb",
+        "publicPath": "/ui/scenes/unitall/model_91.glb",
         "bounds": {
           "minX": 454.822,
           "maxX": 549.822,
@@ -14046,8 +14046,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_194",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_92.dae",
-        "publicPath": "/ui/scenes/unitall/model_92.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_92.glb",
+        "publicPath": "/ui/scenes/unitall/model_92.glb",
         "bounds": {
           "minX": 536.003,
           "maxX": 631.003,
@@ -14075,8 +14075,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_195",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_93.dae",
-        "publicPath": "/ui/scenes/unitall/model_93.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_93.glb",
+        "publicPath": "/ui/scenes/unitall/model_93.glb",
         "bounds": {
           "minX": 726.165,
           "maxX": 821.165,
@@ -14104,8 +14104,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_196",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_94.dae",
-        "publicPath": "/ui/scenes/unitall/model_94.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_94.glb",
+        "publicPath": "/ui/scenes/unitall/model_94.glb",
         "bounds": {
           "minX": 1237.946,
           "maxX": 1364.946,
@@ -14133,8 +14133,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_197",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_95.dae",
-        "publicPath": "/ui/scenes/unitall/model_95.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_95.glb",
+        "publicPath": "/ui/scenes/unitall/model_95.glb",
         "bounds": {
           "minX": 1407.424,
           "maxX": 1502.424,
@@ -14162,8 +14162,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_198",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_96.dae",
-        "publicPath": "/ui/scenes/unitall/model_96.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_96.glb",
+        "publicPath": "/ui/scenes/unitall/model_96.glb",
         "bounds": {
           "minX": 2153.703,
           "maxX": 2248.703,
@@ -14191,8 +14191,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_199",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_97.dae",
-        "publicPath": "/ui/scenes/unitall/model_97.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_97.glb",
+        "publicPath": "/ui/scenes/unitall/model_97.glb",
         "bounds": {
           "minX": 1697.578,
           "maxX": 1792.578,
@@ -14220,8 +14220,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_200",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_98.dae",
-        "publicPath": "/ui/scenes/unitall/model_98.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_98.glb",
+        "publicPath": "/ui/scenes/unitall/model_98.glb",
         "bounds": {
           "minX": 1846.969,
           "maxX": 1941.969,
@@ -14249,8 +14249,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_201",
-        "modelPath": "apps/game/public/ui/scenes/unitall/model_99.dae",
-        "publicPath": "/ui/scenes/unitall/model_99.dae",
+        "modelPath": "apps/game/public/ui/scenes/unitall/model_99.glb",
+        "publicPath": "/ui/scenes/unitall/model_99.glb",
         "bounds": {
           "minX": -48.196,
           "maxX": 46.804,
@@ -14281,7 +14281,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "vsel00": {
     "sceneId": "vsel00",
-    "sourceArchive": "user-data/GG4E/afs_data/root/vsel00_mdl.arc",
+    "sourceArchive": "vsel00_mdl.arc",
     "modelCount": 165,
     "bounds": {
       "minX": -3324.882,
@@ -14294,8 +14294,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_00.dae",
-        "publicPath": "/ui/scenes/vsel00/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_00.glb",
+        "publicPath": "/ui/scenes/vsel00/model_00.glb",
         "bounds": {
           "minX": -3000,
           "maxX": 3000,
@@ -14323,8 +14323,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_01.dae",
-        "publicPath": "/ui/scenes/vsel00/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_01.glb",
+        "publicPath": "/ui/scenes/vsel00/model_01.glb",
         "bounds": {
           "minX": -368.254,
           "maxX": 368.254,
@@ -14352,8 +14352,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_02.dae",
-        "publicPath": "/ui/scenes/vsel00/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_02.glb",
+        "publicPath": "/ui/scenes/vsel00/model_02.glb",
         "bounds": {
           "minX": -82.562,
           "maxX": 82.562,
@@ -14381,8 +14381,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_03.dae",
-        "publicPath": "/ui/scenes/vsel00/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_03.glb",
+        "publicPath": "/ui/scenes/vsel00/model_03.glb",
         "bounds": {
           "minX": 70.295,
           "maxX": 145.648,
@@ -14410,8 +14410,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_04.dae",
-        "publicPath": "/ui/scenes/vsel00/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_04.glb",
+        "publicPath": "/ui/scenes/vsel00/model_04.glb",
         "bounds": {
           "minX": 66.721,
           "maxX": 149.221,
@@ -14439,8 +14439,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_05.dae",
-        "publicPath": "/ui/scenes/vsel00/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_05.glb",
+        "publicPath": "/ui/scenes/vsel00/model_05.glb",
         "bounds": {
           "minX": -208.573,
           "maxX": -122.24,
@@ -14468,8 +14468,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_06.dae",
-        "publicPath": "/ui/scenes/vsel00/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_06.glb",
+        "publicPath": "/ui/scenes/vsel00/model_06.glb",
         "bounds": {
           "minX": -158.835,
           "maxX": 158.834,
@@ -14497,8 +14497,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_07.dae",
-        "publicPath": "/ui/scenes/vsel00/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_07.glb",
+        "publicPath": "/ui/scenes/vsel00/model_07.glb",
         "bounds": {
           "minX": -195.933,
           "maxX": -78.055,
@@ -14526,8 +14526,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_08.dae",
-        "publicPath": "/ui/scenes/vsel00/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_08.glb",
+        "publicPath": "/ui/scenes/vsel00/model_08.glb",
         "bounds": {
           "minX": -106.048,
           "maxX": -83.43,
@@ -14555,8 +14555,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_09.dae",
-        "publicPath": "/ui/scenes/vsel00/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_09.glb",
+        "publicPath": "/ui/scenes/vsel00/model_09.glb",
         "bounds": {
           "minX": -84.105,
           "maxX": 197.898,
@@ -14584,8 +14584,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_10.dae",
-        "publicPath": "/ui/scenes/vsel00/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_10.glb",
+        "publicPath": "/ui/scenes/vsel00/model_10.glb",
         "bounds": {
           "minX": -1470.913,
           "maxX": 1470.913,
@@ -14613,8 +14613,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_100.dae",
-        "publicPath": "/ui/scenes/vsel00/model_100.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_100.glb",
+        "publicPath": "/ui/scenes/vsel00/model_100.glb",
         "bounds": {
           "minX": -137.5,
           "maxX": -60.5,
@@ -14642,8 +14642,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_101.dae",
-        "publicPath": "/ui/scenes/vsel00/model_101.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_101.glb",
+        "publicPath": "/ui/scenes/vsel00/model_101.glb",
         "bounds": {
           "minX": -137.5,
           "maxX": -60.5,
@@ -14671,8 +14671,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_102.dae",
-        "publicPath": "/ui/scenes/vsel00/model_102.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_102.glb",
+        "publicPath": "/ui/scenes/vsel00/model_102.glb",
         "bounds": {
           "minX": -137.5,
           "maxX": -60.5,
@@ -14700,8 +14700,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_103.dae",
-        "publicPath": "/ui/scenes/vsel00/model_103.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_103.glb",
+        "publicPath": "/ui/scenes/vsel00/model_103.glb",
         "bounds": {
           "minX": -160,
           "maxX": 160,
@@ -14729,8 +14729,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_104.dae",
-        "publicPath": "/ui/scenes/vsel00/model_104.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_104.glb",
+        "publicPath": "/ui/scenes/vsel00/model_104.glb",
         "bounds": {
           "minX": 9.385,
           "maxX": 275.12,
@@ -14758,8 +14758,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_105.dae",
-        "publicPath": "/ui/scenes/vsel00/model_105.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_105.glb",
+        "publicPath": "/ui/scenes/vsel00/model_105.glb",
         "bounds": {
           "minX": -50.547,
           "maxX": 65.095,
@@ -14787,8 +14787,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_106.dae",
-        "publicPath": "/ui/scenes/vsel00/model_106.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_106.glb",
+        "publicPath": "/ui/scenes/vsel00/model_106.glb",
         "bounds": {
           "minX": -25.292,
           "maxX": 75.828,
@@ -14816,8 +14816,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_107.dae",
-        "publicPath": "/ui/scenes/vsel00/model_107.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_107.glb",
+        "publicPath": "/ui/scenes/vsel00/model_107.glb",
         "bounds": {
           "minX": -215.157,
           "maxX": 215.156,
@@ -14845,8 +14845,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_108.dae",
-        "publicPath": "/ui/scenes/vsel00/model_108.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_108.glb",
+        "publicPath": "/ui/scenes/vsel00/model_108.glb",
         "bounds": {
           "minX": -230.486,
           "maxX": 230.485,
@@ -14874,8 +14874,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_109.dae",
-        "publicPath": "/ui/scenes/vsel00/model_109.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_109.glb",
+        "publicPath": "/ui/scenes/vsel00/model_109.glb",
         "bounds": {
           "minX": -237.559,
           "maxX": 237.558,
@@ -14903,8 +14903,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_21",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_11.dae",
-        "publicPath": "/ui/scenes/vsel00/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_11.glb",
+        "publicPath": "/ui/scenes/vsel00/model_11.glb",
         "bounds": {
           "minX": -1934.331,
           "maxX": 1934.331,
@@ -14932,8 +14932,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_22",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_110.dae",
-        "publicPath": "/ui/scenes/vsel00/model_110.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_110.glb",
+        "publicPath": "/ui/scenes/vsel00/model_110.glb",
         "bounds": {
           "minX": -15.455,
           "maxX": 15.455,
@@ -14961,8 +14961,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_23",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_111.dae",
-        "publicPath": "/ui/scenes/vsel00/model_111.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_111.glb",
+        "publicPath": "/ui/scenes/vsel00/model_111.glb",
         "bounds": {
           "minX": -114.8,
           "maxX": 114.8,
@@ -14990,8 +14990,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_24",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_112.dae",
-        "publicPath": "/ui/scenes/vsel00/model_112.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_112.glb",
+        "publicPath": "/ui/scenes/vsel00/model_112.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15019,8 +15019,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_25",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_113.dae",
-        "publicPath": "/ui/scenes/vsel00/model_113.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_113.glb",
+        "publicPath": "/ui/scenes/vsel00/model_113.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15048,8 +15048,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_26",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_114.dae",
-        "publicPath": "/ui/scenes/vsel00/model_114.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_114.glb",
+        "publicPath": "/ui/scenes/vsel00/model_114.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15077,8 +15077,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_27",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_115.dae",
-        "publicPath": "/ui/scenes/vsel00/model_115.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_115.glb",
+        "publicPath": "/ui/scenes/vsel00/model_115.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15106,8 +15106,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_28",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_116.dae",
-        "publicPath": "/ui/scenes/vsel00/model_116.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_116.glb",
+        "publicPath": "/ui/scenes/vsel00/model_116.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15135,8 +15135,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_29",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_117.dae",
-        "publicPath": "/ui/scenes/vsel00/model_117.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_117.glb",
+        "publicPath": "/ui/scenes/vsel00/model_117.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15164,8 +15164,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_30",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_118.dae",
-        "publicPath": "/ui/scenes/vsel00/model_118.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_118.glb",
+        "publicPath": "/ui/scenes/vsel00/model_118.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15193,8 +15193,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_31",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_119.dae",
-        "publicPath": "/ui/scenes/vsel00/model_119.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_119.glb",
+        "publicPath": "/ui/scenes/vsel00/model_119.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15222,8 +15222,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_32",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_12.dae",
-        "publicPath": "/ui/scenes/vsel00/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_12.glb",
+        "publicPath": "/ui/scenes/vsel00/model_12.glb",
         "bounds": {
           "minX": -1470.913,
           "maxX": 1470.913,
@@ -15251,8 +15251,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_33",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_120.dae",
-        "publicPath": "/ui/scenes/vsel00/model_120.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_120.glb",
+        "publicPath": "/ui/scenes/vsel00/model_120.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15280,8 +15280,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_34",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_121.dae",
-        "publicPath": "/ui/scenes/vsel00/model_121.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_121.glb",
+        "publicPath": "/ui/scenes/vsel00/model_121.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15309,8 +15309,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_35",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_122.dae",
-        "publicPath": "/ui/scenes/vsel00/model_122.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_122.glb",
+        "publicPath": "/ui/scenes/vsel00/model_122.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15338,8 +15338,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_36",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_123.dae",
-        "publicPath": "/ui/scenes/vsel00/model_123.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_123.glb",
+        "publicPath": "/ui/scenes/vsel00/model_123.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15367,8 +15367,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_37",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_124.dae",
-        "publicPath": "/ui/scenes/vsel00/model_124.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_124.glb",
+        "publicPath": "/ui/scenes/vsel00/model_124.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15396,8 +15396,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_38",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_125.dae",
-        "publicPath": "/ui/scenes/vsel00/model_125.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_125.glb",
+        "publicPath": "/ui/scenes/vsel00/model_125.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15425,8 +15425,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_39",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_126.dae",
-        "publicPath": "/ui/scenes/vsel00/model_126.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_126.glb",
+        "publicPath": "/ui/scenes/vsel00/model_126.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15454,8 +15454,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_40",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_127.dae",
-        "publicPath": "/ui/scenes/vsel00/model_127.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_127.glb",
+        "publicPath": "/ui/scenes/vsel00/model_127.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15483,8 +15483,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_41",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_128.dae",
-        "publicPath": "/ui/scenes/vsel00/model_128.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_128.glb",
+        "publicPath": "/ui/scenes/vsel00/model_128.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15512,8 +15512,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_42",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_129.dae",
-        "publicPath": "/ui/scenes/vsel00/model_129.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_129.glb",
+        "publicPath": "/ui/scenes/vsel00/model_129.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -15541,8 +15541,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_43",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_13.dae",
-        "publicPath": "/ui/scenes/vsel00/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_13.glb",
+        "publicPath": "/ui/scenes/vsel00/model_13.glb",
         "bounds": {
           "minX": -3324.882,
           "maxX": 27.951,
@@ -15570,8 +15570,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_44",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_130.dae",
-        "publicPath": "/ui/scenes/vsel00/model_130.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_130.glb",
+        "publicPath": "/ui/scenes/vsel00/model_130.glb",
         "bounds": {
           "minX": -124.461,
           "maxX": 124.461,
@@ -15599,8 +15599,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_45",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_131.dae",
-        "publicPath": "/ui/scenes/vsel00/model_131.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_131.glb",
+        "publicPath": "/ui/scenes/vsel00/model_131.glb",
         "bounds": {
           "minX": -109.192,
           "maxX": 113.837,
@@ -15628,8 +15628,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_46",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_132.dae",
-        "publicPath": "/ui/scenes/vsel00/model_132.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_132.glb",
+        "publicPath": "/ui/scenes/vsel00/model_132.glb",
         "bounds": {
           "minX": -91.272,
           "maxX": 0.228,
@@ -15657,8 +15657,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_47",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_133.dae",
-        "publicPath": "/ui/scenes/vsel00/model_133.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_133.glb",
+        "publicPath": "/ui/scenes/vsel00/model_133.glb",
         "bounds": {
           "minX": -91.272,
           "maxX": -43.772,
@@ -15686,8 +15686,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_48",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_134.dae",
-        "publicPath": "/ui/scenes/vsel00/model_134.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_134.glb",
+        "publicPath": "/ui/scenes/vsel00/model_134.glb",
         "bounds": {
           "minX": -26.433,
           "maxX": 37.887,
@@ -15715,8 +15715,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_49",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_135.dae",
-        "publicPath": "/ui/scenes/vsel00/model_135.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_135.glb",
+        "publicPath": "/ui/scenes/vsel00/model_135.glb",
         "bounds": {
           "minX": -29.426,
           "maxX": 28.372,
@@ -15744,8 +15744,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_50",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_136.dae",
-        "publicPath": "/ui/scenes/vsel00/model_136.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_136.glb",
+        "publicPath": "/ui/scenes/vsel00/model_136.glb",
         "bounds": {
           "minX": -8.112,
           "maxX": 14.175,
@@ -15773,8 +15773,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_51",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_137.dae",
-        "publicPath": "/ui/scenes/vsel00/model_137.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_137.glb",
+        "publicPath": "/ui/scenes/vsel00/model_137.glb",
         "bounds": {
           "minX": 43.824,
           "maxX": 104.576,
@@ -15802,8 +15802,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_52",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_138.dae",
-        "publicPath": "/ui/scenes/vsel00/model_138.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_138.glb",
+        "publicPath": "/ui/scenes/vsel00/model_138.glb",
         "bounds": {
           "minX": 43.824,
           "maxX": 104.576,
@@ -15831,8 +15831,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_53",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_139.dae",
-        "publicPath": "/ui/scenes/vsel00/model_139.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_139.glb",
+        "publicPath": "/ui/scenes/vsel00/model_139.glb",
         "bounds": {
           "minX": -32.781,
           "maxX": 3.648,
@@ -15860,8 +15860,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_54",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_14.dae",
-        "publicPath": "/ui/scenes/vsel00/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_14.glb",
+        "publicPath": "/ui/scenes/vsel00/model_14.glb",
         "bounds": {
           "minX": -87.488,
           "maxX": -59.993,
@@ -15889,8 +15889,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_55",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_140.dae",
-        "publicPath": "/ui/scenes/vsel00/model_140.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_140.glb",
+        "publicPath": "/ui/scenes/vsel00/model_140.glb",
         "bounds": {
           "minX": 37.095,
           "maxX": 111.305,
@@ -15918,8 +15918,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_56",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_141.dae",
-        "publicPath": "/ui/scenes/vsel00/model_141.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_141.glb",
+        "publicPath": "/ui/scenes/vsel00/model_141.glb",
         "bounds": {
           "minX": -39.516,
           "maxX": 10.383,
@@ -15947,8 +15947,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_57",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_142.dae",
-        "publicPath": "/ui/scenes/vsel00/model_142.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_142.glb",
+        "publicPath": "/ui/scenes/vsel00/model_142.glb",
         "bounds": {
           "minX": -25.877,
           "maxX": -3.257,
@@ -15976,8 +15976,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_58",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_143.dae",
-        "publicPath": "/ui/scenes/vsel00/model_143.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_143.glb",
+        "publicPath": "/ui/scenes/vsel00/model_143.glb",
         "bounds": {
           "minX": -116.961,
           "maxX": 116.961,
@@ -16005,8 +16005,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_59",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_144.dae",
-        "publicPath": "/ui/scenes/vsel00/model_144.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_144.glb",
+        "publicPath": "/ui/scenes/vsel00/model_144.glb",
         "bounds": {
           "minX": -29.161,
           "maxX": 29.161,
@@ -16034,8 +16034,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_60",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_145.dae",
-        "publicPath": "/ui/scenes/vsel00/model_145.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_145.glb",
+        "publicPath": "/ui/scenes/vsel00/model_145.glb",
         "bounds": {
           "minX": -58.75,
           "maxX": 58.75,
@@ -16063,8 +16063,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_61",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_146.dae",
-        "publicPath": "/ui/scenes/vsel00/model_146.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_146.glb",
+        "publicPath": "/ui/scenes/vsel00/model_146.glb",
         "bounds": {
           "minX": -181.869,
           "maxX": -153.597,
@@ -16092,8 +16092,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_62",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_147.dae",
-        "publicPath": "/ui/scenes/vsel00/model_147.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_147.glb",
+        "publicPath": "/ui/scenes/vsel00/model_147.glb",
         "bounds": {
           "minX": -82.721,
           "maxX": 82.721,
@@ -16121,8 +16121,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_63",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_148.dae",
-        "publicPath": "/ui/scenes/vsel00/model_148.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_148.glb",
+        "publicPath": "/ui/scenes/vsel00/model_148.glb",
         "bounds": {
           "minX": -54.664,
           "maxX": -9.559,
@@ -16150,8 +16150,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_64",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_149.dae",
-        "publicPath": "/ui/scenes/vsel00/model_149.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_149.glb",
+        "publicPath": "/ui/scenes/vsel00/model_149.glb",
         "bounds": {
           "minX": -59.092,
           "maxX": -42.51,
@@ -16179,8 +16179,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_65",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_15.dae",
-        "publicPath": "/ui/scenes/vsel00/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_15.glb",
+        "publicPath": "/ui/scenes/vsel00/model_15.glb",
         "bounds": {
           "minX": -143.941,
           "maxX": -3.54,
@@ -16208,8 +16208,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_66",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_150.dae",
-        "publicPath": "/ui/scenes/vsel00/model_150.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_150.glb",
+        "publicPath": "/ui/scenes/vsel00/model_150.glb",
         "bounds": {
           "minX": 178.869,
           "maxX": 209.869,
@@ -16237,8 +16237,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_67",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_151.dae",
-        "publicPath": "/ui/scenes/vsel00/model_151.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_151.glb",
+        "publicPath": "/ui/scenes/vsel00/model_151.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -16266,8 +16266,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_68",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_152.dae",
-        "publicPath": "/ui/scenes/vsel00/model_152.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_152.glb",
+        "publicPath": "/ui/scenes/vsel00/model_152.glb",
         "bounds": {
           "minX": -45.728,
           "maxX": 48.162,
@@ -16295,8 +16295,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_69",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_153.dae",
-        "publicPath": "/ui/scenes/vsel00/model_153.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_153.glb",
+        "publicPath": "/ui/scenes/vsel00/model_153.glb",
         "bounds": {
           "minX": -0.112,
           "maxX": 0.112,
@@ -16324,8 +16324,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_70",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_154.dae",
-        "publicPath": "/ui/scenes/vsel00/model_154.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_154.glb",
+        "publicPath": "/ui/scenes/vsel00/model_154.glb",
         "bounds": {
           "minX": -56.231,
           "maxX": 8.81,
@@ -16353,8 +16353,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_71",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_155.dae",
-        "publicPath": "/ui/scenes/vsel00/model_155.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_155.glb",
+        "publicPath": "/ui/scenes/vsel00/model_155.glb",
         "bounds": {
           "minX": -100.231,
           "maxX": -49.201,
@@ -16382,8 +16382,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_72",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_156.dae",
-        "publicPath": "/ui/scenes/vsel00/model_156.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_156.glb",
+        "publicPath": "/ui/scenes/vsel00/model_156.glb",
         "bounds": {
           "minX": -15.345,
           "maxX": 15.345,
@@ -16411,8 +16411,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_73",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_157.dae",
-        "publicPath": "/ui/scenes/vsel00/model_157.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_157.glb",
+        "publicPath": "/ui/scenes/vsel00/model_157.glb",
         "bounds": {
           "minX": -26.977,
           "maxX": -9.877,
@@ -16440,8 +16440,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_74",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_158.dae",
-        "publicPath": "/ui/scenes/vsel00/model_158.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_158.glb",
+        "publicPath": "/ui/scenes/vsel00/model_158.glb",
         "bounds": {
           "minX": -40.04,
           "maxX": -22.94,
@@ -16469,8 +16469,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_75",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_159.dae",
-        "publicPath": "/ui/scenes/vsel00/model_159.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_159.glb",
+        "publicPath": "/ui/scenes/vsel00/model_159.glb",
         "bounds": {
           "minX": -59.26,
           "maxX": 11.84,
@@ -16498,8 +16498,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_76",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_16.dae",
-        "publicPath": "/ui/scenes/vsel00/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_16.glb",
+        "publicPath": "/ui/scenes/vsel00/model_16.glb",
         "bounds": {
           "minX": -111.649,
           "maxX": -72.549,
@@ -16527,8 +16527,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_77",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_160.dae",
-        "publicPath": "/ui/scenes/vsel00/model_160.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_160.glb",
+        "publicPath": "/ui/scenes/vsel00/model_160.glb",
         "bounds": {
           "minX": -151.731,
           "maxX": 28.269,
@@ -16556,8 +16556,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_78",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_161.dae",
-        "publicPath": "/ui/scenes/vsel00/model_161.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_161.glb",
+        "publicPath": "/ui/scenes/vsel00/model_161.glb",
         "bounds": {
           "minX": -2.215,
           "maxX": 51.843,
@@ -16585,8 +16585,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_79",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_162.dae",
-        "publicPath": "/ui/scenes/vsel00/model_162.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_162.glb",
+        "publicPath": "/ui/scenes/vsel00/model_162.glb",
         "bounds": {
           "minX": -74.168,
           "maxX": 74.168,
@@ -16614,8 +16614,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_80",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_163.dae",
-        "publicPath": "/ui/scenes/vsel00/model_163.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_163.glb",
+        "publicPath": "/ui/scenes/vsel00/model_163.glb",
         "bounds": {
           "minX": -42.553,
           "maxX": -13.258,
@@ -16643,8 +16643,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_81",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_164.dae",
-        "publicPath": "/ui/scenes/vsel00/model_164.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_164.glb",
+        "publicPath": "/ui/scenes/vsel00/model_164.glb",
         "bounds": {
           "minX": 13.258,
           "maxX": 42.553,
@@ -16672,8 +16672,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_82",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_165.dae",
-        "publicPath": "/ui/scenes/vsel00/model_165.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_165.glb",
+        "publicPath": "/ui/scenes/vsel00/model_165.glb",
         "bounds": {
           "minX": -23.232,
           "maxX": 39.968,
@@ -16701,8 +16701,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_83",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_17.dae",
-        "publicPath": "/ui/scenes/vsel00/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_17.glb",
+        "publicPath": "/ui/scenes/vsel00/model_17.glb",
         "bounds": {
           "minX": -214.08,
           "maxX": 231.381,
@@ -16730,8 +16730,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_84",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_18.dae",
-        "publicPath": "/ui/scenes/vsel00/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_18.glb",
+        "publicPath": "/ui/scenes/vsel00/model_18.glb",
         "bounds": {
           "minX": -1509.603,
           "maxX": 1509.603,
@@ -16759,8 +16759,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_85",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_19.dae",
-        "publicPath": "/ui/scenes/vsel00/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_19.glb",
+        "publicPath": "/ui/scenes/vsel00/model_19.glb",
         "bounds": {
           "minX": -1509.603,
           "maxX": 1509.603,
@@ -16788,8 +16788,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_86",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_20.dae",
-        "publicPath": "/ui/scenes/vsel00/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_20.glb",
+        "publicPath": "/ui/scenes/vsel00/model_20.glb",
         "bounds": {
           "minX": -1081.681,
           "maxX": 1081.681,
@@ -16817,8 +16817,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_87",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_21.dae",
-        "publicPath": "/ui/scenes/vsel00/model_21.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_21.glb",
+        "publicPath": "/ui/scenes/vsel00/model_21.glb",
         "bounds": {
           "minX": -304.208,
           "maxX": 304.208,
@@ -16846,8 +16846,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_88",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_22.dae",
-        "publicPath": "/ui/scenes/vsel00/model_22.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_22.glb",
+        "publicPath": "/ui/scenes/vsel00/model_22.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -16875,8 +16875,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_89",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_23.dae",
-        "publicPath": "/ui/scenes/vsel00/model_23.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_23.glb",
+        "publicPath": "/ui/scenes/vsel00/model_23.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -16904,8 +16904,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_90",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_24.dae",
-        "publicPath": "/ui/scenes/vsel00/model_24.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_24.glb",
+        "publicPath": "/ui/scenes/vsel00/model_24.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -16933,8 +16933,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_91",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_25.dae",
-        "publicPath": "/ui/scenes/vsel00/model_25.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_25.glb",
+        "publicPath": "/ui/scenes/vsel00/model_25.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -16962,8 +16962,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_92",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_26.dae",
-        "publicPath": "/ui/scenes/vsel00/model_26.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_26.glb",
+        "publicPath": "/ui/scenes/vsel00/model_26.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -16991,8 +16991,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_93",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_27.dae",
-        "publicPath": "/ui/scenes/vsel00/model_27.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_27.glb",
+        "publicPath": "/ui/scenes/vsel00/model_27.glb",
         "bounds": {
           "minX": -114.8,
           "maxX": 114.8,
@@ -17020,8 +17020,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_94",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_28.dae",
-        "publicPath": "/ui/scenes/vsel00/model_28.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_28.glb",
+        "publicPath": "/ui/scenes/vsel00/model_28.glb",
         "bounds": {
           "minX": -114.8,
           "maxX": 114.8,
@@ -17049,8 +17049,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_95",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_29.dae",
-        "publicPath": "/ui/scenes/vsel00/model_29.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_29.glb",
+        "publicPath": "/ui/scenes/vsel00/model_29.glb",
         "bounds": {
           "minX": -114.8,
           "maxX": 114.8,
@@ -17078,8 +17078,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_96",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_30.dae",
-        "publicPath": "/ui/scenes/vsel00/model_30.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_30.glb",
+        "publicPath": "/ui/scenes/vsel00/model_30.glb",
         "bounds": {
           "minX": -114.8,
           "maxX": 114.8,
@@ -17107,8 +17107,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_97",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_31.dae",
-        "publicPath": "/ui/scenes/vsel00/model_31.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_31.glb",
+        "publicPath": "/ui/scenes/vsel00/model_31.glb",
         "bounds": {
           "minX": -1229.279,
           "maxX": -167.958,
@@ -17136,8 +17136,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_98",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_32.dae",
-        "publicPath": "/ui/scenes/vsel00/model_32.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_32.glb",
+        "publicPath": "/ui/scenes/vsel00/model_32.glb",
         "bounds": {
           "minX": 203.958,
           "maxX": 1265.278,
@@ -17165,8 +17165,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_99",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_33.dae",
-        "publicPath": "/ui/scenes/vsel00/model_33.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_33.glb",
+        "publicPath": "/ui/scenes/vsel00/model_33.glb",
         "bounds": {
           "minX": -1229.279,
           "maxX": -167.958,
@@ -17194,8 +17194,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_100",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_34.dae",
-        "publicPath": "/ui/scenes/vsel00/model_34.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_34.glb",
+        "publicPath": "/ui/scenes/vsel00/model_34.glb",
         "bounds": {
           "minX": 203.958,
           "maxX": 1265.278,
@@ -17223,8 +17223,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_101",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_35.dae",
-        "publicPath": "/ui/scenes/vsel00/model_35.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_35.glb",
+        "publicPath": "/ui/scenes/vsel00/model_35.glb",
         "bounds": {
           "minX": -363.4,
           "maxX": 363.4,
@@ -17252,8 +17252,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_102",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_36.dae",
-        "publicPath": "/ui/scenes/vsel00/model_36.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_36.glb",
+        "publicPath": "/ui/scenes/vsel00/model_36.glb",
         "bounds": {
           "minX": -510.6,
           "maxX": 510.6,
@@ -17281,8 +17281,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_103",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_37.dae",
-        "publicPath": "/ui/scenes/vsel00/model_37.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_37.glb",
+        "publicPath": "/ui/scenes/vsel00/model_37.glb",
         "bounds": {
           "minX": -52.963,
           "maxX": 49.372,
@@ -17310,8 +17310,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_104",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_38.dae",
-        "publicPath": "/ui/scenes/vsel00/model_38.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_38.glb",
+        "publicPath": "/ui/scenes/vsel00/model_38.glb",
         "bounds": {
           "minX": -70.494,
           "maxX": -33.294,
@@ -17339,8 +17339,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_105",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_39.dae",
-        "publicPath": "/ui/scenes/vsel00/model_39.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_39.glb",
+        "publicPath": "/ui/scenes/vsel00/model_39.glb",
         "bounds": {
           "minX": -42.649,
           "maxX": -24.649,
@@ -17368,8 +17368,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_106",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_40.dae",
-        "publicPath": "/ui/scenes/vsel00/model_40.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_40.glb",
+        "publicPath": "/ui/scenes/vsel00/model_40.glb",
         "bounds": {
           "minX": -159.309,
           "maxX": 159.309,
@@ -17397,8 +17397,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_107",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_41.dae",
-        "publicPath": "/ui/scenes/vsel00/model_41.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_41.glb",
+        "publicPath": "/ui/scenes/vsel00/model_41.glb",
         "bounds": {
           "minX": -92.877,
           "maxX": -21.267,
@@ -17426,8 +17426,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_108",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_42.dae",
-        "publicPath": "/ui/scenes/vsel00/model_42.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_42.glb",
+        "publicPath": "/ui/scenes/vsel00/model_42.glb",
         "bounds": {
           "minX": -123.405,
           "maxX": 140.412,
@@ -17455,8 +17455,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_109",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_43.dae",
-        "publicPath": "/ui/scenes/vsel00/model_43.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_43.glb",
+        "publicPath": "/ui/scenes/vsel00/model_43.glb",
         "bounds": {
           "minX": -303.332,
           "maxX": -20.668,
@@ -17484,8 +17484,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_110",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_44.dae",
-        "publicPath": "/ui/scenes/vsel00/model_44.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_44.glb",
+        "publicPath": "/ui/scenes/vsel00/model_44.glb",
         "bounds": {
           "minX": -97.771,
           "maxX": -70.411,
@@ -17513,8 +17513,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_111",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_45.dae",
-        "publicPath": "/ui/scenes/vsel00/model_45.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_45.glb",
+        "publicPath": "/ui/scenes/vsel00/model_45.glb",
         "bounds": {
           "minX": -432.314,
           "maxX": -424.714,
@@ -17542,8 +17542,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_112",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_47.dae",
-        "publicPath": "/ui/scenes/vsel00/model_47.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_47.glb",
+        "publicPath": "/ui/scenes/vsel00/model_47.glb",
         "bounds": {
           "minX": -463.675,
           "maxX": -375.788,
@@ -17571,8 +17571,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_113",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_48.dae",
-        "publicPath": "/ui/scenes/vsel00/model_48.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_48.glb",
+        "publicPath": "/ui/scenes/vsel00/model_48.glb",
         "bounds": {
           "minX": -45.271,
           "maxX": 98.513,
@@ -17600,8 +17600,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_114",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_49.dae",
-        "publicPath": "/ui/scenes/vsel00/model_49.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_49.glb",
+        "publicPath": "/ui/scenes/vsel00/model_49.glb",
         "bounds": {
           "minX": -44.26,
           "maxX": 52.782,
@@ -17629,8 +17629,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_115",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_50.dae",
-        "publicPath": "/ui/scenes/vsel00/model_50.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_50.glb",
+        "publicPath": "/ui/scenes/vsel00/model_50.glb",
         "bounds": {
           "minX": -44.26,
           "maxX": 52.782,
@@ -17658,8 +17658,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_116",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_51.dae",
-        "publicPath": "/ui/scenes/vsel00/model_51.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_51.glb",
+        "publicPath": "/ui/scenes/vsel00/model_51.glb",
         "bounds": {
           "minX": -44.26,
           "maxX": 52.782,
@@ -17687,8 +17687,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_117",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_52.dae",
-        "publicPath": "/ui/scenes/vsel00/model_52.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_52.glb",
+        "publicPath": "/ui/scenes/vsel00/model_52.glb",
         "bounds": {
           "minX": -44.26,
           "maxX": 52.782,
@@ -17716,8 +17716,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_118",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_53.dae",
-        "publicPath": "/ui/scenes/vsel00/model_53.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_53.glb",
+        "publicPath": "/ui/scenes/vsel00/model_53.glb",
         "bounds": {
           "minX": -70.56,
           "maxX": 70.56,
@@ -17745,8 +17745,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_119",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_54.dae",
-        "publicPath": "/ui/scenes/vsel00/model_54.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_54.glb",
+        "publicPath": "/ui/scenes/vsel00/model_54.glb",
         "bounds": {
           "minX": -82.388,
           "maxX": -67.188,
@@ -17774,8 +17774,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_120",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_55.dae",
-        "publicPath": "/ui/scenes/vsel00/model_55.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_55.glb",
+        "publicPath": "/ui/scenes/vsel00/model_55.glb",
         "bounds": {
           "minX": -79.388,
           "maxX": -70.188,
@@ -17803,8 +17803,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_121",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_56.dae",
-        "publicPath": "/ui/scenes/vsel00/model_56.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_56.glb",
+        "publicPath": "/ui/scenes/vsel00/model_56.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -17832,8 +17832,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_122",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_57.dae",
-        "publicPath": "/ui/scenes/vsel00/model_57.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_57.glb",
+        "publicPath": "/ui/scenes/vsel00/model_57.glb",
         "bounds": {
           "minX": -22.571,
           "maxX": -11.771,
@@ -17861,8 +17861,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_123",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_58.dae",
-        "publicPath": "/ui/scenes/vsel00/model_58.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_58.glb",
+        "publicPath": "/ui/scenes/vsel00/model_58.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -17890,8 +17890,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_124",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_59.dae",
-        "publicPath": "/ui/scenes/vsel00/model_59.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_59.glb",
+        "publicPath": "/ui/scenes/vsel00/model_59.glb",
         "bounds": {
           "minX": 13.479,
           "maxX": 26.979,
@@ -17919,8 +17919,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_125",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_60.dae",
-        "publicPath": "/ui/scenes/vsel00/model_60.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_60.glb",
+        "publicPath": "/ui/scenes/vsel00/model_60.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -17948,8 +17948,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_126",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_61.dae",
-        "publicPath": "/ui/scenes/vsel00/model_61.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_61.glb",
+        "publicPath": "/ui/scenes/vsel00/model_61.glb",
         "bounds": {
           "minX": 35.046,
           "maxX": 45.846,
@@ -17977,8 +17977,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_127",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_62.dae",
-        "publicPath": "/ui/scenes/vsel00/model_62.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_62.glb",
+        "publicPath": "/ui/scenes/vsel00/model_62.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -18006,8 +18006,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_128",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_63.dae",
-        "publicPath": "/ui/scenes/vsel00/model_63.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_63.glb",
+        "publicPath": "/ui/scenes/vsel00/model_63.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -18035,8 +18035,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_129",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_64.dae",
-        "publicPath": "/ui/scenes/vsel00/model_64.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_64.glb",
+        "publicPath": "/ui/scenes/vsel00/model_64.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -18064,8 +18064,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_130",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_65.dae",
-        "publicPath": "/ui/scenes/vsel00/model_65.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_65.glb",
+        "publicPath": "/ui/scenes/vsel00/model_65.glb",
         "bounds": {
           "minX": -187.651,
           "maxX": -156.651,
@@ -18093,8 +18093,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_131",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_66.dae",
-        "publicPath": "/ui/scenes/vsel00/model_66.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_66.glb",
+        "publicPath": "/ui/scenes/vsel00/model_66.glb",
         "bounds": {
           "minX": -175.651,
           "maxX": -144.651,
@@ -18122,8 +18122,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_132",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_67.dae",
-        "publicPath": "/ui/scenes/vsel00/model_67.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_67.glb",
+        "publicPath": "/ui/scenes/vsel00/model_67.glb",
         "bounds": {
           "minX": -84.188,
           "maxX": -65.388,
@@ -18151,8 +18151,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_133",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_68.dae",
-        "publicPath": "/ui/scenes/vsel00/model_68.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_68.glb",
+        "publicPath": "/ui/scenes/vsel00/model_68.glb",
         "bounds": {
           "minX": -21.771,
           "maxX": -12.571,
@@ -18180,8 +18180,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_134",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_69.dae",
-        "publicPath": "/ui/scenes/vsel00/model_69.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_69.glb",
+        "publicPath": "/ui/scenes/vsel00/model_69.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -18209,8 +18209,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_135",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_70.dae",
-        "publicPath": "/ui/scenes/vsel00/model_70.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_70.glb",
+        "publicPath": "/ui/scenes/vsel00/model_70.glb",
         "bounds": {
           "minX": 35.846,
           "maxX": 45.046,
@@ -18238,8 +18238,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_136",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_71.dae",
-        "publicPath": "/ui/scenes/vsel00/model_71.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_71.glb",
+        "publicPath": "/ui/scenes/vsel00/model_71.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -18267,8 +18267,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_137",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_72.dae",
-        "publicPath": "/ui/scenes/vsel00/model_72.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_72.glb",
+        "publicPath": "/ui/scenes/vsel00/model_72.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -18296,8 +18296,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_138",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_73.dae",
-        "publicPath": "/ui/scenes/vsel00/model_73.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_73.glb",
+        "publicPath": "/ui/scenes/vsel00/model_73.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -18325,8 +18325,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_139",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_74.dae",
-        "publicPath": "/ui/scenes/vsel00/model_74.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_74.glb",
+        "publicPath": "/ui/scenes/vsel00/model_74.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -18354,8 +18354,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_140",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_75.dae",
-        "publicPath": "/ui/scenes/vsel00/model_75.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_75.glb",
+        "publicPath": "/ui/scenes/vsel00/model_75.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -18383,8 +18383,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_141",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_76.dae",
-        "publicPath": "/ui/scenes/vsel00/model_76.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_76.glb",
+        "publicPath": "/ui/scenes/vsel00/model_76.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -18412,8 +18412,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_142",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_77.dae",
-        "publicPath": "/ui/scenes/vsel00/model_77.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_77.glb",
+        "publicPath": "/ui/scenes/vsel00/model_77.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -18441,8 +18441,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_143",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_78.dae",
-        "publicPath": "/ui/scenes/vsel00/model_78.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_78.glb",
+        "publicPath": "/ui/scenes/vsel00/model_78.glb",
         "bounds": {
           "minX": -181.651,
           "maxX": -150.651,
@@ -18470,8 +18470,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_144",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_79.dae",
-        "publicPath": "/ui/scenes/vsel00/model_79.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_79.glb",
+        "publicPath": "/ui/scenes/vsel00/model_79.glb",
         "bounds": {
           "minX": -181.651,
           "maxX": -150.651,
@@ -18499,8 +18499,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_145",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_80.dae",
-        "publicPath": "/ui/scenes/vsel00/model_80.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_80.glb",
+        "publicPath": "/ui/scenes/vsel00/model_80.glb",
         "bounds": {
           "minX": -67.366,
           "maxX": -27.866,
@@ -18528,8 +18528,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_146",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_81.dae",
-        "publicPath": "/ui/scenes/vsel00/model_81.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_81.glb",
+        "publicPath": "/ui/scenes/vsel00/model_81.glb",
         "bounds": {
           "minX": -9.75,
           "maxX": 29.75,
@@ -18557,8 +18557,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_147",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_82.dae",
-        "publicPath": "/ui/scenes/vsel00/model_82.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_82.glb",
+        "publicPath": "/ui/scenes/vsel00/model_82.glb",
         "bounds": {
           "minX": 47.867,
           "maxX": 87.367,
@@ -18586,8 +18586,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_148",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_83.dae",
-        "publicPath": "/ui/scenes/vsel00/model_83.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_83.glb",
+        "publicPath": "/ui/scenes/vsel00/model_83.glb",
         "bounds": {
           "minX": 122.377,
           "maxX": 161.877,
@@ -18615,8 +18615,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_149",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_84.dae",
-        "publicPath": "/ui/scenes/vsel00/model_84.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_84.glb",
+        "publicPath": "/ui/scenes/vsel00/model_84.glb",
         "bounds": {
           "minX": -159.124,
           "maxX": -119.624,
@@ -18644,8 +18644,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_150",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_85.dae",
-        "publicPath": "/ui/scenes/vsel00/model_85.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_85.glb",
+        "publicPath": "/ui/scenes/vsel00/model_85.glb",
         "bounds": {
           "minX": 49.977,
           "maxX": 89.477,
@@ -18673,8 +18673,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_151",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_86.dae",
-        "publicPath": "/ui/scenes/vsel00/model_86.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_86.glb",
+        "publicPath": "/ui/scenes/vsel00/model_86.glb",
         "bounds": {
           "minX": 72.518,
           "maxX": 135.718,
@@ -18702,8 +18702,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_152",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_87.dae",
-        "publicPath": "/ui/scenes/vsel00/model_87.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_87.glb",
+        "publicPath": "/ui/scenes/vsel00/model_87.glb",
         "bounds": {
           "minX": -23.232,
           "maxX": 39.968,
@@ -18731,8 +18731,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_153",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_88.dae",
-        "publicPath": "/ui/scenes/vsel00/model_88.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_88.glb",
+        "publicPath": "/ui/scenes/vsel00/model_88.glb",
         "bounds": {
           "minX": -23.232,
           "maxX": 39.968,
@@ -18760,8 +18760,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_154",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_89.dae",
-        "publicPath": "/ui/scenes/vsel00/model_89.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_89.glb",
+        "publicPath": "/ui/scenes/vsel00/model_89.glb",
         "bounds": {
           "minX": -23.232,
           "maxX": 39.968,
@@ -18789,8 +18789,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_155",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_90.dae",
-        "publicPath": "/ui/scenes/vsel00/model_90.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_90.glb",
+        "publicPath": "/ui/scenes/vsel00/model_90.glb",
         "bounds": {
           "minX": -23.232,
           "maxX": 39.968,
@@ -18818,8 +18818,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_156",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_91.dae",
-        "publicPath": "/ui/scenes/vsel00/model_91.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_91.glb",
+        "publicPath": "/ui/scenes/vsel00/model_91.glb",
         "bounds": {
           "minX": -106.473,
           "maxX": 106.473,
@@ -18847,8 +18847,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_157",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_92.dae",
-        "publicPath": "/ui/scenes/vsel00/model_92.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_92.glb",
+        "publicPath": "/ui/scenes/vsel00/model_92.glb",
         "bounds": {
           "minX": -144.83,
           "maxX": -44.83,
@@ -18876,8 +18876,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_158",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_93.dae",
-        "publicPath": "/ui/scenes/vsel00/model_93.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_93.glb",
+        "publicPath": "/ui/scenes/vsel00/model_93.glb",
         "bounds": {
           "minX": -128.7,
           "maxX": -81.7,
@@ -18905,8 +18905,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_159",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_94.dae",
-        "publicPath": "/ui/scenes/vsel00/model_94.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_94.glb",
+        "publicPath": "/ui/scenes/vsel00/model_94.glb",
         "bounds": {
           "minX": -120.65,
           "maxX": 120.65,
@@ -18934,8 +18934,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_160",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_95.dae",
-        "publicPath": "/ui/scenes/vsel00/model_95.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_95.glb",
+        "publicPath": "/ui/scenes/vsel00/model_95.glb",
         "bounds": {
           "minX": -128.853,
           "maxX": 128.853,
@@ -18963,8 +18963,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_161",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_96.dae",
-        "publicPath": "/ui/scenes/vsel00/model_96.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_96.glb",
+        "publicPath": "/ui/scenes/vsel00/model_96.glb",
         "bounds": {
           "minX": -107.39,
           "maxX": 107.39,
@@ -18992,8 +18992,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_162",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_97.dae",
-        "publicPath": "/ui/scenes/vsel00/model_97.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_97.glb",
+        "publicPath": "/ui/scenes/vsel00/model_97.glb",
         "bounds": {
           "minX": -85.725,
           "maxX": 85.725,
@@ -19021,8 +19021,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_163",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_98.dae",
-        "publicPath": "/ui/scenes/vsel00/model_98.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_98.glb",
+        "publicPath": "/ui/scenes/vsel00/model_98.glb",
         "bounds": {
           "minX": -717.75,
           "maxX": 717.75,
@@ -19050,8 +19050,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_164",
-        "modelPath": "apps/game/public/ui/scenes/vsel00/model_99.dae",
-        "publicPath": "/ui/scenes/vsel00/model_99.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel00/model_99.glb",
+        "publicPath": "/ui/scenes/vsel00/model_99.glb",
         "bounds": {
           "minX": -188.5,
           "maxX": 188.5,
@@ -19097,7 +19097,7 @@ export const UI_SCENE_LAYOUTS = {
   },
   "vsel01": {
     "sceneId": "vsel01",
-    "sourceArchive": "user-data/GG4E/afs_data/root/vsel01_mdl.arc",
+    "sourceArchive": "vsel01_mdl.arc",
     "modelCount": 165,
     "bounds": {
       "minX": -1509.603,
@@ -19110,8 +19110,8 @@ export const UI_SCENE_LAYOUTS = {
     "elements": [
       {
         "key": "model_00",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_00.dae",
-        "publicPath": "/ui/scenes/vsel01/model_00.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_00.glb",
+        "publicPath": "/ui/scenes/vsel01/model_00.glb",
         "bounds": {
           "minX": -130.925,
           "maxX": -113.813,
@@ -19139,8 +19139,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_01",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_01.dae",
-        "publicPath": "/ui/scenes/vsel01/model_01.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_01.glb",
+        "publicPath": "/ui/scenes/vsel01/model_01.glb",
         "bounds": {
           "minX": -182.62,
           "maxX": -41.38,
@@ -19168,8 +19168,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_02",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_02.dae",
-        "publicPath": "/ui/scenes/vsel01/model_02.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_02.glb",
+        "publicPath": "/ui/scenes/vsel01/model_02.glb",
         "bounds": {
           "minX": -82.562,
           "maxX": 82.562,
@@ -19197,8 +19197,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_03",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_03.dae",
-        "publicPath": "/ui/scenes/vsel01/model_03.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_03.glb",
+        "publicPath": "/ui/scenes/vsel01/model_03.glb",
         "bounds": {
           "minX": -36.872,
           "maxX": -23.072,
@@ -19226,8 +19226,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_04",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_04.dae",
-        "publicPath": "/ui/scenes/vsel01/model_04.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_04.glb",
+        "publicPath": "/ui/scenes/vsel01/model_04.glb",
         "bounds": {
           "minX": -23.006,
           "maxX": -4.406,
@@ -19255,8 +19255,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_05",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_05.dae",
-        "publicPath": "/ui/scenes/vsel01/model_05.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_05.glb",
+        "publicPath": "/ui/scenes/vsel01/model_05.glb",
         "bounds": {
           "minX": -208.573,
           "maxX": -122.24,
@@ -19284,8 +19284,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_06",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_06.dae",
-        "publicPath": "/ui/scenes/vsel01/model_06.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_06.glb",
+        "publicPath": "/ui/scenes/vsel01/model_06.glb",
         "bounds": {
           "minX": -155.72,
           "maxX": 155.719,
@@ -19313,8 +19313,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_07",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_07.dae",
-        "publicPath": "/ui/scenes/vsel01/model_07.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_07.glb",
+        "publicPath": "/ui/scenes/vsel01/model_07.glb",
         "bounds": {
           "minX": -191.116,
           "maxX": -82.873,
@@ -19342,8 +19342,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_08",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_08.dae",
-        "publicPath": "/ui/scenes/vsel01/model_08.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_08.glb",
+        "publicPath": "/ui/scenes/vsel01/model_08.glb",
         "bounds": {
           "minX": -156.39,
           "maxX": -132.93,
@@ -19371,8 +19371,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_09",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_09.dae",
-        "publicPath": "/ui/scenes/vsel01/model_09.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_09.glb",
+        "publicPath": "/ui/scenes/vsel01/model_09.glb",
         "bounds": {
           "minX": -84.105,
           "maxX": 197.898,
@@ -19400,8 +19400,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_10",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_10.dae",
-        "publicPath": "/ui/scenes/vsel01/model_10.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_10.glb",
+        "publicPath": "/ui/scenes/vsel01/model_10.glb",
         "bounds": {
           "minX": -1470.913,
           "maxX": 1470.913,
@@ -19429,8 +19429,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_11",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_100.dae",
-        "publicPath": "/ui/scenes/vsel01/model_100.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_100.glb",
+        "publicPath": "/ui/scenes/vsel01/model_100.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19458,8 +19458,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_12",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_101.dae",
-        "publicPath": "/ui/scenes/vsel01/model_101.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_101.glb",
+        "publicPath": "/ui/scenes/vsel01/model_101.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19487,8 +19487,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_13",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_102.dae",
-        "publicPath": "/ui/scenes/vsel01/model_102.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_102.glb",
+        "publicPath": "/ui/scenes/vsel01/model_102.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19516,8 +19516,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_14",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_103.dae",
-        "publicPath": "/ui/scenes/vsel01/model_103.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_103.glb",
+        "publicPath": "/ui/scenes/vsel01/model_103.glb",
         "bounds": {
           "minX": -160,
           "maxX": 160,
@@ -19545,8 +19545,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_15",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_104.dae",
-        "publicPath": "/ui/scenes/vsel01/model_104.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_104.glb",
+        "publicPath": "/ui/scenes/vsel01/model_104.glb",
         "bounds": {
           "minX": 9.385,
           "maxX": 275.12,
@@ -19574,8 +19574,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_16",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_105.dae",
-        "publicPath": "/ui/scenes/vsel01/model_105.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_105.glb",
+        "publicPath": "/ui/scenes/vsel01/model_105.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19603,8 +19603,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_17",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_106.dae",
-        "publicPath": "/ui/scenes/vsel01/model_106.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_106.glb",
+        "publicPath": "/ui/scenes/vsel01/model_106.glb",
         "bounds": {
           "minX": -25.292,
           "maxX": 75.828,
@@ -19632,8 +19632,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_18",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_107.dae",
-        "publicPath": "/ui/scenes/vsel01/model_107.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_107.glb",
+        "publicPath": "/ui/scenes/vsel01/model_107.glb",
         "bounds": {
           "minX": -215.157,
           "maxX": 215.156,
@@ -19661,8 +19661,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_19",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_108.dae",
-        "publicPath": "/ui/scenes/vsel01/model_108.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_108.glb",
+        "publicPath": "/ui/scenes/vsel01/model_108.glb",
         "bounds": {
           "minX": -230.486,
           "maxX": 230.485,
@@ -19690,8 +19690,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_20",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_109.dae",
-        "publicPath": "/ui/scenes/vsel01/model_109.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_109.glb",
+        "publicPath": "/ui/scenes/vsel01/model_109.glb",
         "bounds": {
           "minX": -237.559,
           "maxX": 237.558,
@@ -19719,8 +19719,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_21",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_11.dae",
-        "publicPath": "/ui/scenes/vsel01/model_11.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_11.glb",
+        "publicPath": "/ui/scenes/vsel01/model_11.glb",
         "bounds": {
           "minX": -118.827,
           "maxX": -67.173,
@@ -19748,8 +19748,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_22",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_110.dae",
-        "publicPath": "/ui/scenes/vsel01/model_110.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_110.glb",
+        "publicPath": "/ui/scenes/vsel01/model_110.glb",
         "bounds": {
           "minX": -15.455,
           "maxX": 15.455,
@@ -19777,8 +19777,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_23",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_111.dae",
-        "publicPath": "/ui/scenes/vsel01/model_111.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_111.glb",
+        "publicPath": "/ui/scenes/vsel01/model_111.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19806,8 +19806,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_24",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_112.dae",
-        "publicPath": "/ui/scenes/vsel01/model_112.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_112.glb",
+        "publicPath": "/ui/scenes/vsel01/model_112.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19835,8 +19835,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_25",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_113.dae",
-        "publicPath": "/ui/scenes/vsel01/model_113.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_113.glb",
+        "publicPath": "/ui/scenes/vsel01/model_113.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19864,8 +19864,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_26",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_114.dae",
-        "publicPath": "/ui/scenes/vsel01/model_114.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_114.glb",
+        "publicPath": "/ui/scenes/vsel01/model_114.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19893,8 +19893,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_27",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_115.dae",
-        "publicPath": "/ui/scenes/vsel01/model_115.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_115.glb",
+        "publicPath": "/ui/scenes/vsel01/model_115.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19922,8 +19922,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_28",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_116.dae",
-        "publicPath": "/ui/scenes/vsel01/model_116.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_116.glb",
+        "publicPath": "/ui/scenes/vsel01/model_116.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19951,8 +19951,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_29",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_117.dae",
-        "publicPath": "/ui/scenes/vsel01/model_117.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_117.glb",
+        "publicPath": "/ui/scenes/vsel01/model_117.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -19980,8 +19980,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_30",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_118.dae",
-        "publicPath": "/ui/scenes/vsel01/model_118.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_118.glb",
+        "publicPath": "/ui/scenes/vsel01/model_118.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20009,8 +20009,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_31",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_119.dae",
-        "publicPath": "/ui/scenes/vsel01/model_119.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_119.glb",
+        "publicPath": "/ui/scenes/vsel01/model_119.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20038,8 +20038,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_32",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_12.dae",
-        "publicPath": "/ui/scenes/vsel01/model_12.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_12.glb",
+        "publicPath": "/ui/scenes/vsel01/model_12.glb",
         "bounds": {
           "minX": -29.238,
           "maxX": 29.238,
@@ -20067,8 +20067,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_33",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_120.dae",
-        "publicPath": "/ui/scenes/vsel01/model_120.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_120.glb",
+        "publicPath": "/ui/scenes/vsel01/model_120.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20096,8 +20096,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_34",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_121.dae",
-        "publicPath": "/ui/scenes/vsel01/model_121.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_121.glb",
+        "publicPath": "/ui/scenes/vsel01/model_121.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20125,8 +20125,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_35",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_122.dae",
-        "publicPath": "/ui/scenes/vsel01/model_122.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_122.glb",
+        "publicPath": "/ui/scenes/vsel01/model_122.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20154,8 +20154,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_36",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_123.dae",
-        "publicPath": "/ui/scenes/vsel01/model_123.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_123.glb",
+        "publicPath": "/ui/scenes/vsel01/model_123.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20183,8 +20183,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_37",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_124.dae",
-        "publicPath": "/ui/scenes/vsel01/model_124.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_124.glb",
+        "publicPath": "/ui/scenes/vsel01/model_124.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20212,8 +20212,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_38",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_125.dae",
-        "publicPath": "/ui/scenes/vsel01/model_125.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_125.glb",
+        "publicPath": "/ui/scenes/vsel01/model_125.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20241,8 +20241,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_39",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_126.dae",
-        "publicPath": "/ui/scenes/vsel01/model_126.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_126.glb",
+        "publicPath": "/ui/scenes/vsel01/model_126.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20270,8 +20270,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_40",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_127.dae",
-        "publicPath": "/ui/scenes/vsel01/model_127.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_127.glb",
+        "publicPath": "/ui/scenes/vsel01/model_127.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20299,8 +20299,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_41",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_128.dae",
-        "publicPath": "/ui/scenes/vsel01/model_128.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_128.glb",
+        "publicPath": "/ui/scenes/vsel01/model_128.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20328,8 +20328,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_42",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_129.dae",
-        "publicPath": "/ui/scenes/vsel01/model_129.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_129.glb",
+        "publicPath": "/ui/scenes/vsel01/model_129.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20357,8 +20357,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_43",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_13.dae",
-        "publicPath": "/ui/scenes/vsel01/model_13.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_13.glb",
+        "publicPath": "/ui/scenes/vsel01/model_13.glb",
         "bounds": {
           "minX": 61.857,
           "maxX": 124.143,
@@ -20386,8 +20386,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_44",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_130.dae",
-        "publicPath": "/ui/scenes/vsel01/model_130.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_130.glb",
+        "publicPath": "/ui/scenes/vsel01/model_130.glb",
         "bounds": {
           "minX": -124.461,
           "maxX": 124.461,
@@ -20415,8 +20415,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_45",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_131.dae",
-        "publicPath": "/ui/scenes/vsel01/model_131.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_131.glb",
+        "publicPath": "/ui/scenes/vsel01/model_131.glb",
         "bounds": {
           "minX": -109.192,
           "maxX": 113.837,
@@ -20444,8 +20444,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_46",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_132.dae",
-        "publicPath": "/ui/scenes/vsel01/model_132.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_132.glb",
+        "publicPath": "/ui/scenes/vsel01/model_132.glb",
         "bounds": {
           "minX": -107.881,
           "maxX": -44.381,
@@ -20473,8 +20473,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_47",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_133.dae",
-        "publicPath": "/ui/scenes/vsel01/model_133.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_133.glb",
+        "publicPath": "/ui/scenes/vsel01/model_133.glb",
         "bounds": {
           "minX": -17.981,
           "maxX": 45.519,
@@ -20502,8 +20502,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_48",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_134.dae",
-        "publicPath": "/ui/scenes/vsel01/model_134.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_134.glb",
+        "publicPath": "/ui/scenes/vsel01/model_134.glb",
         "bounds": {
           "minX": 62.019,
           "maxX": 125.519,
@@ -20531,8 +20531,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_49",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_135.dae",
-        "publicPath": "/ui/scenes/vsel01/model_135.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_135.glb",
+        "publicPath": "/ui/scenes/vsel01/model_135.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20560,8 +20560,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_50",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_136.dae",
-        "publicPath": "/ui/scenes/vsel01/model_136.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_136.glb",
+        "publicPath": "/ui/scenes/vsel01/model_136.glb",
         "bounds": {
           "minX": -63.144,
           "maxX": -40.857,
@@ -20589,8 +20589,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_51",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_137.dae",
-        "publicPath": "/ui/scenes/vsel01/model_137.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_137.glb",
+        "publicPath": "/ui/scenes/vsel01/model_137.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20618,8 +20618,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_52",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_138.dae",
-        "publicPath": "/ui/scenes/vsel01/model_138.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_138.glb",
+        "publicPath": "/ui/scenes/vsel01/model_138.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -20647,8 +20647,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_53",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_139.dae",
-        "publicPath": "/ui/scenes/vsel01/model_139.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_139.glb",
+        "publicPath": "/ui/scenes/vsel01/model_139.glb",
         "bounds": {
           "minX": -32.781,
           "maxX": 3.648,
@@ -20676,8 +20676,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_54",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_14.dae",
-        "publicPath": "/ui/scenes/vsel01/model_14.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_14.glb",
+        "publicPath": "/ui/scenes/vsel01/model_14.glb",
         "bounds": {
           "minX": -151.15,
           "maxX": -60.85,
@@ -20705,8 +20705,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_55",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_140.dae",
-        "publicPath": "/ui/scenes/vsel01/model_140.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_140.glb",
+        "publicPath": "/ui/scenes/vsel01/model_140.glb",
         "bounds": {
           "minX": 37.095,
           "maxX": 111.305,
@@ -20734,8 +20734,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_56",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_141.dae",
-        "publicPath": "/ui/scenes/vsel01/model_141.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_141.glb",
+        "publicPath": "/ui/scenes/vsel01/model_141.glb",
         "bounds": {
           "minX": -39.516,
           "maxX": 10.383,
@@ -20763,8 +20763,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_57",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_142.dae",
-        "publicPath": "/ui/scenes/vsel01/model_142.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_142.glb",
+        "publicPath": "/ui/scenes/vsel01/model_142.glb",
         "bounds": {
           "minX": -25.877,
           "maxX": -3.257,
@@ -20792,8 +20792,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_58",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_143.dae",
-        "publicPath": "/ui/scenes/vsel01/model_143.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_143.glb",
+        "publicPath": "/ui/scenes/vsel01/model_143.glb",
         "bounds": {
           "minX": -116.961,
           "maxX": 116.961,
@@ -20821,8 +20821,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_59",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_144.dae",
-        "publicPath": "/ui/scenes/vsel01/model_144.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_144.glb",
+        "publicPath": "/ui/scenes/vsel01/model_144.glb",
         "bounds": {
           "minX": -29.161,
           "maxX": 29.161,
@@ -20850,8 +20850,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_60",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_145.dae",
-        "publicPath": "/ui/scenes/vsel01/model_145.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_145.glb",
+        "publicPath": "/ui/scenes/vsel01/model_145.glb",
         "bounds": {
           "minX": -58.75,
           "maxX": 58.75,
@@ -20879,8 +20879,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_61",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_146.dae",
-        "publicPath": "/ui/scenes/vsel01/model_146.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_146.glb",
+        "publicPath": "/ui/scenes/vsel01/model_146.glb",
         "bounds": {
           "minX": -181.869,
           "maxX": -153.597,
@@ -20908,8 +20908,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_62",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_147.dae",
-        "publicPath": "/ui/scenes/vsel01/model_147.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_147.glb",
+        "publicPath": "/ui/scenes/vsel01/model_147.glb",
         "bounds": {
           "minX": -82.711,
           "maxX": 82.711,
@@ -20937,8 +20937,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_63",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_148.dae",
-        "publicPath": "/ui/scenes/vsel01/model_148.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_148.glb",
+        "publicPath": "/ui/scenes/vsel01/model_148.glb",
         "bounds": {
           "minX": -54.661,
           "maxX": -9.562,
@@ -20966,8 +20966,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_64",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_149.dae",
-        "publicPath": "/ui/scenes/vsel01/model_149.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_149.glb",
+        "publicPath": "/ui/scenes/vsel01/model_149.glb",
         "bounds": {
           "minX": -59.092,
           "maxX": -42.51,
@@ -20995,8 +20995,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_65",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_15.dae",
-        "publicPath": "/ui/scenes/vsel01/model_15.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_15.glb",
+        "publicPath": "/ui/scenes/vsel01/model_15.glb",
         "bounds": {
           "minX": 60.85,
           "maxX": 151.15,
@@ -21024,8 +21024,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_66",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_150.dae",
-        "publicPath": "/ui/scenes/vsel01/model_150.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_150.glb",
+        "publicPath": "/ui/scenes/vsel01/model_150.glb",
         "bounds": {
           "minX": 178.869,
           "maxX": 209.869,
@@ -21053,8 +21053,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_67",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_151.dae",
-        "publicPath": "/ui/scenes/vsel01/model_151.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_151.glb",
+        "publicPath": "/ui/scenes/vsel01/model_151.glb",
         "bounds": {
           "minX": -0.116,
           "maxX": 0.136,
@@ -21082,8 +21082,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_68",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_152.dae",
-        "publicPath": "/ui/scenes/vsel01/model_152.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_152.glb",
+        "publicPath": "/ui/scenes/vsel01/model_152.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21111,8 +21111,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_69",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_153.dae",
-        "publicPath": "/ui/scenes/vsel01/model_153.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_153.glb",
+        "publicPath": "/ui/scenes/vsel01/model_153.glb",
         "bounds": {
           "minX": -0.127,
           "maxX": 0.127,
@@ -21140,8 +21140,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_70",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_154.dae",
-        "publicPath": "/ui/scenes/vsel01/model_154.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_154.glb",
+        "publicPath": "/ui/scenes/vsel01/model_154.glb",
         "bounds": {
           "minX": -56.231,
           "maxX": 8.81,
@@ -21169,8 +21169,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_71",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_155.dae",
-        "publicPath": "/ui/scenes/vsel01/model_155.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_155.glb",
+        "publicPath": "/ui/scenes/vsel01/model_155.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21198,8 +21198,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_72",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_156.dae",
-        "publicPath": "/ui/scenes/vsel01/model_156.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_156.glb",
+        "publicPath": "/ui/scenes/vsel01/model_156.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21227,8 +21227,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_73",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_157.dae",
-        "publicPath": "/ui/scenes/vsel01/model_157.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_157.glb",
+        "publicPath": "/ui/scenes/vsel01/model_157.glb",
         "bounds": {
           "minX": -26.707,
           "maxX": -10.147,
@@ -21256,8 +21256,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_74",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_158.dae",
-        "publicPath": "/ui/scenes/vsel01/model_158.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_158.glb",
+        "publicPath": "/ui/scenes/vsel01/model_158.glb",
         "bounds": {
           "minX": -39.77,
           "maxX": -23.21,
@@ -21285,8 +21285,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_75",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_159.dae",
-        "publicPath": "/ui/scenes/vsel01/model_159.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_159.glb",
+        "publicPath": "/ui/scenes/vsel01/model_159.glb",
         "bounds": {
           "minX": -63.211,
           "maxX": 15.789,
@@ -21314,8 +21314,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_76",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_16.dae",
-        "publicPath": "/ui/scenes/vsel01/model_16.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_16.glb",
+        "publicPath": "/ui/scenes/vsel01/model_16.glb",
         "bounds": {
           "minX": -111.649,
           "maxX": -72.549,
@@ -21343,8 +21343,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_77",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_160.dae",
-        "publicPath": "/ui/scenes/vsel01/model_160.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_160.glb",
+        "publicPath": "/ui/scenes/vsel01/model_160.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21372,8 +21372,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_78",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_161.dae",
-        "publicPath": "/ui/scenes/vsel01/model_161.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_161.glb",
+        "publicPath": "/ui/scenes/vsel01/model_161.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21401,8 +21401,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_79",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_162.dae",
-        "publicPath": "/ui/scenes/vsel01/model_162.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_162.glb",
+        "publicPath": "/ui/scenes/vsel01/model_162.glb",
         "bounds": {
           "minX": -74.168,
           "maxX": 74.168,
@@ -21430,8 +21430,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_80",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_163.dae",
-        "publicPath": "/ui/scenes/vsel01/model_163.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_163.glb",
+        "publicPath": "/ui/scenes/vsel01/model_163.glb",
         "bounds": {
           "minX": -42.553,
           "maxX": -13.258,
@@ -21459,8 +21459,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_81",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_164.dae",
-        "publicPath": "/ui/scenes/vsel01/model_164.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_164.glb",
+        "publicPath": "/ui/scenes/vsel01/model_164.glb",
         "bounds": {
           "minX": 13.258,
           "maxX": 42.553,
@@ -21488,8 +21488,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_82",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_17.dae",
-        "publicPath": "/ui/scenes/vsel01/model_17.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_17.glb",
+        "publicPath": "/ui/scenes/vsel01/model_17.glb",
         "bounds": {
           "minX": -214.08,
           "maxX": 231.381,
@@ -21517,8 +21517,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_83",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_18.dae",
-        "publicPath": "/ui/scenes/vsel01/model_18.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_18.glb",
+        "publicPath": "/ui/scenes/vsel01/model_18.glb",
         "bounds": {
           "minX": -1509.603,
           "maxX": 1509.603,
@@ -21546,8 +21546,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_84",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_19.dae",
-        "publicPath": "/ui/scenes/vsel01/model_19.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_19.glb",
+        "publicPath": "/ui/scenes/vsel01/model_19.glb",
         "bounds": {
           "minX": -1509.603,
           "maxX": 1509.603,
@@ -21575,8 +21575,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_85",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_20.dae",
-        "publicPath": "/ui/scenes/vsel01/model_20.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_20.glb",
+        "publicPath": "/ui/scenes/vsel01/model_20.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21604,8 +21604,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_86",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_21.dae",
-        "publicPath": "/ui/scenes/vsel01/model_21.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_21.glb",
+        "publicPath": "/ui/scenes/vsel01/model_21.glb",
         "bounds": {
           "minX": -45.15,
           "maxX": 45.15,
@@ -21633,8 +21633,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_87",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_22.dae",
-        "publicPath": "/ui/scenes/vsel01/model_22.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_22.glb",
+        "publicPath": "/ui/scenes/vsel01/model_22.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -21662,8 +21662,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_88",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_23.dae",
-        "publicPath": "/ui/scenes/vsel01/model_23.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_23.glb",
+        "publicPath": "/ui/scenes/vsel01/model_23.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -21691,8 +21691,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_89",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_24.dae",
-        "publicPath": "/ui/scenes/vsel01/model_24.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_24.glb",
+        "publicPath": "/ui/scenes/vsel01/model_24.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -21720,8 +21720,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_90",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_25.dae",
-        "publicPath": "/ui/scenes/vsel01/model_25.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_25.glb",
+        "publicPath": "/ui/scenes/vsel01/model_25.glb",
         "bounds": {
           "minX": -111.75,
           "maxX": 111.75,
@@ -21749,8 +21749,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_91",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_26.dae",
-        "publicPath": "/ui/scenes/vsel01/model_26.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_26.glb",
+        "publicPath": "/ui/scenes/vsel01/model_26.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21778,8 +21778,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_92",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_27.dae",
-        "publicPath": "/ui/scenes/vsel01/model_27.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_27.glb",
+        "publicPath": "/ui/scenes/vsel01/model_27.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21807,8 +21807,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_93",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_28.dae",
-        "publicPath": "/ui/scenes/vsel01/model_28.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_28.glb",
+        "publicPath": "/ui/scenes/vsel01/model_28.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21836,8 +21836,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_94",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_29.dae",
-        "publicPath": "/ui/scenes/vsel01/model_29.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_29.glb",
+        "publicPath": "/ui/scenes/vsel01/model_29.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21865,8 +21865,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_95",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_30.dae",
-        "publicPath": "/ui/scenes/vsel01/model_30.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_30.glb",
+        "publicPath": "/ui/scenes/vsel01/model_30.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21894,8 +21894,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_96",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_31.dae",
-        "publicPath": "/ui/scenes/vsel01/model_31.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_31.glb",
+        "publicPath": "/ui/scenes/vsel01/model_31.glb",
         "bounds": {
           "minX": -185.649,
           "maxX": -114.144,
@@ -21923,8 +21923,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_97",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_32.dae",
-        "publicPath": "/ui/scenes/vsel01/model_32.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_32.glb",
+        "publicPath": "/ui/scenes/vsel01/model_32.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -21952,8 +21952,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_98",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_33.dae",
-        "publicPath": "/ui/scenes/vsel01/model_33.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_33.glb",
+        "publicPath": "/ui/scenes/vsel01/model_33.glb",
         "bounds": {
           "minX": -153.462,
           "maxX": -70.538,
@@ -21981,8 +21981,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_99",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_34.dae",
-        "publicPath": "/ui/scenes/vsel01/model_34.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_34.glb",
+        "publicPath": "/ui/scenes/vsel01/model_34.glb",
         "bounds": {
           "minX": 37.049,
           "maxX": 186.951,
@@ -22010,8 +22010,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_100",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_35.dae",
-        "publicPath": "/ui/scenes/vsel01/model_35.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_35.glb",
+        "publicPath": "/ui/scenes/vsel01/model_35.glb",
         "bounds": {
           "minX": -177.752,
           "maxX": -46.249,
@@ -22039,8 +22039,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_101",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_36.dae",
-        "publicPath": "/ui/scenes/vsel01/model_36.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_36.glb",
+        "publicPath": "/ui/scenes/vsel01/model_36.glb",
         "bounds": {
           "minX": 36.248,
           "maxX": 187.752,
@@ -22068,8 +22068,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_102",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_37.dae",
-        "publicPath": "/ui/scenes/vsel01/model_37.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_37.glb",
+        "publicPath": "/ui/scenes/vsel01/model_37.glb",
         "bounds": {
           "minX": -60.858,
           "maxX": 60.858,
@@ -22097,8 +22097,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_103",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_38.dae",
-        "publicPath": "/ui/scenes/vsel01/model_38.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_38.glb",
+        "publicPath": "/ui/scenes/vsel01/model_38.glb",
         "bounds": {
           "minX": -70.494,
           "maxX": -33.294,
@@ -22126,8 +22126,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_104",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_39.dae",
-        "publicPath": "/ui/scenes/vsel01/model_39.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_39.glb",
+        "publicPath": "/ui/scenes/vsel01/model_39.glb",
         "bounds": {
           "minX": -42.131,
           "maxX": -25.168,
@@ -22155,8 +22155,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_105",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_40.dae",
-        "publicPath": "/ui/scenes/vsel01/model_40.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_40.glb",
+        "publicPath": "/ui/scenes/vsel01/model_40.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -22184,8 +22184,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_106",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_41.dae",
-        "publicPath": "/ui/scenes/vsel01/model_41.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_41.glb",
+        "publicPath": "/ui/scenes/vsel01/model_41.glb",
         "bounds": {
           "minX": -92.877,
           "maxX": -21.267,
@@ -22213,8 +22213,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_107",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_42.dae",
-        "publicPath": "/ui/scenes/vsel01/model_42.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_42.glb",
+        "publicPath": "/ui/scenes/vsel01/model_42.glb",
         "bounds": {
           "minX": -123.405,
           "maxX": 140.412,
@@ -22242,8 +22242,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_108",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_43.dae",
-        "publicPath": "/ui/scenes/vsel01/model_43.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_43.glb",
+        "publicPath": "/ui/scenes/vsel01/model_43.glb",
         "bounds": {
           "minX": -140.267,
           "maxX": -83.734,
@@ -22271,8 +22271,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_109",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_44.dae",
-        "publicPath": "/ui/scenes/vsel01/model_44.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_44.glb",
+        "publicPath": "/ui/scenes/vsel01/model_44.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -22300,8 +22300,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_110",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_45.dae",
-        "publicPath": "/ui/scenes/vsel01/model_45.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_45.glb",
+        "publicPath": "/ui/scenes/vsel01/model_45.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -22329,8 +22329,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_111",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_46.dae",
-        "publicPath": "/ui/scenes/vsel01/model_46.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_46.glb",
+        "publicPath": "/ui/scenes/vsel01/model_46.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -22358,8 +22358,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_112",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_47.dae",
-        "publicPath": "/ui/scenes/vsel01/model_47.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_47.glb",
+        "publicPath": "/ui/scenes/vsel01/model_47.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -22387,8 +22387,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_113",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_48.dae",
-        "publicPath": "/ui/scenes/vsel01/model_48.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_48.glb",
+        "publicPath": "/ui/scenes/vsel01/model_48.glb",
         "bounds": {
           "minX": -11.318,
           "maxX": 24.628,
@@ -22416,8 +22416,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_114",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_49.dae",
-        "publicPath": "/ui/scenes/vsel01/model_49.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_49.glb",
+        "publicPath": "/ui/scenes/vsel01/model_49.glb",
         "bounds": {
           "minX": -183.833,
           "maxX": -159.573,
@@ -22445,8 +22445,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_115",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_50.dae",
-        "publicPath": "/ui/scenes/vsel01/model_50.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_50.glb",
+        "publicPath": "/ui/scenes/vsel01/model_50.glb",
         "bounds": {
           "minX": -140.101,
           "maxX": -115.841,
@@ -22474,8 +22474,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_116",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_51.dae",
-        "publicPath": "/ui/scenes/vsel01/model_51.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_51.glb",
+        "publicPath": "/ui/scenes/vsel01/model_51.glb",
         "bounds": {
           "minX": -140.101,
           "maxX": -115.841,
@@ -22503,8 +22503,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_117",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_52.dae",
-        "publicPath": "/ui/scenes/vsel01/model_52.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_52.glb",
+        "publicPath": "/ui/scenes/vsel01/model_52.glb",
         "bounds": {
           "minX": -140.101,
           "maxX": -115.841,
@@ -22532,8 +22532,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_118",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_53.dae",
-        "publicPath": "/ui/scenes/vsel01/model_53.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_53.glb",
+        "publicPath": "/ui/scenes/vsel01/model_53.glb",
         "bounds": {
           "minX": -70.56,
           "maxX": 70.56,
@@ -22561,8 +22561,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_119",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_54.dae",
-        "publicPath": "/ui/scenes/vsel01/model_54.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_54.glb",
+        "publicPath": "/ui/scenes/vsel01/model_54.glb",
         "bounds": {
           "minX": -58.857,
           "maxX": -43.657,
@@ -22590,8 +22590,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_120",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_55.dae",
-        "publicPath": "/ui/scenes/vsel01/model_55.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_55.glb",
+        "publicPath": "/ui/scenes/vsel01/model_55.glb",
         "bounds": {
           "minX": -55.857,
           "maxX": -46.657,
@@ -22619,8 +22619,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_121",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_56.dae",
-        "publicPath": "/ui/scenes/vsel01/model_56.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_56.glb",
+        "publicPath": "/ui/scenes/vsel01/model_56.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -22648,8 +22648,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_122",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_57.dae",
-        "publicPath": "/ui/scenes/vsel01/model_57.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_57.glb",
+        "publicPath": "/ui/scenes/vsel01/model_57.glb",
         "bounds": {
           "minX": -22.571,
           "maxX": -11.771,
@@ -22677,8 +22677,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_123",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_58.dae",
-        "publicPath": "/ui/scenes/vsel01/model_58.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_58.glb",
+        "publicPath": "/ui/scenes/vsel01/model_58.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -22706,8 +22706,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_124",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_59.dae",
-        "publicPath": "/ui/scenes/vsel01/model_59.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_59.glb",
+        "publicPath": "/ui/scenes/vsel01/model_59.glb",
         "bounds": {
           "minX": 13.479,
           "maxX": 26.979,
@@ -22735,8 +22735,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_125",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_60.dae",
-        "publicPath": "/ui/scenes/vsel01/model_60.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_60.glb",
+        "publicPath": "/ui/scenes/vsel01/model_60.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -22764,8 +22764,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_126",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_61.dae",
-        "publicPath": "/ui/scenes/vsel01/model_61.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_61.glb",
+        "publicPath": "/ui/scenes/vsel01/model_61.glb",
         "bounds": {
           "minX": 35.046,
           "maxX": 45.846,
@@ -22793,8 +22793,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_127",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_62.dae",
-        "publicPath": "/ui/scenes/vsel01/model_62.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_62.glb",
+        "publicPath": "/ui/scenes/vsel01/model_62.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -22822,8 +22822,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_128",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_63.dae",
-        "publicPath": "/ui/scenes/vsel01/model_63.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_63.glb",
+        "publicPath": "/ui/scenes/vsel01/model_63.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -22851,8 +22851,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_129",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_64.dae",
-        "publicPath": "/ui/scenes/vsel01/model_64.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_64.glb",
+        "publicPath": "/ui/scenes/vsel01/model_64.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -22880,8 +22880,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_130",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_65.dae",
-        "publicPath": "/ui/scenes/vsel01/model_65.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_65.glb",
+        "publicPath": "/ui/scenes/vsel01/model_65.glb",
         "bounds": {
           "minX": -187.651,
           "maxX": -156.651,
@@ -22909,8 +22909,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_131",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_66.dae",
-        "publicPath": "/ui/scenes/vsel01/model_66.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_66.glb",
+        "publicPath": "/ui/scenes/vsel01/model_66.glb",
         "bounds": {
           "minX": -175.651,
           "maxX": -144.651,
@@ -22938,8 +22938,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_132",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_67.dae",
-        "publicPath": "/ui/scenes/vsel01/model_67.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_67.glb",
+        "publicPath": "/ui/scenes/vsel01/model_67.glb",
         "bounds": {
           "minX": -60.657,
           "maxX": -41.857,
@@ -22967,8 +22967,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_133",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_68.dae",
-        "publicPath": "/ui/scenes/vsel01/model_68.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_68.glb",
+        "publicPath": "/ui/scenes/vsel01/model_68.glb",
         "bounds": {
           "minX": -21.771,
           "maxX": -12.571,
@@ -22996,8 +22996,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_134",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_69.dae",
-        "publicPath": "/ui/scenes/vsel01/model_69.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_69.glb",
+        "publicPath": "/ui/scenes/vsel01/model_69.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -23025,8 +23025,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_135",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_70.dae",
-        "publicPath": "/ui/scenes/vsel01/model_70.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_70.glb",
+        "publicPath": "/ui/scenes/vsel01/model_70.glb",
         "bounds": {
           "minX": 35.846,
           "maxX": 45.046,
@@ -23054,8 +23054,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_136",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_71.dae",
-        "publicPath": "/ui/scenes/vsel01/model_71.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_71.glb",
+        "publicPath": "/ui/scenes/vsel01/model_71.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -23083,8 +23083,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_137",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_72.dae",
-        "publicPath": "/ui/scenes/vsel01/model_72.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_72.glb",
+        "publicPath": "/ui/scenes/vsel01/model_72.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -23112,8 +23112,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_138",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_73.dae",
-        "publicPath": "/ui/scenes/vsel01/model_73.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_73.glb",
+        "publicPath": "/ui/scenes/vsel01/model_73.glb",
         "bounds": {
           "minX": -177.651,
           "maxX": -154.651,
@@ -23141,8 +23141,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_139",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_74.dae",
-        "publicPath": "/ui/scenes/vsel01/model_74.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_74.glb",
+        "publicPath": "/ui/scenes/vsel01/model_74.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -23170,8 +23170,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_140",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_75.dae",
-        "publicPath": "/ui/scenes/vsel01/model_75.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_75.glb",
+        "publicPath": "/ui/scenes/vsel01/model_75.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -23199,8 +23199,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_141",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_76.dae",
-        "publicPath": "/ui/scenes/vsel01/model_76.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_76.glb",
+        "publicPath": "/ui/scenes/vsel01/model_76.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -23228,8 +23228,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_142",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_77.dae",
-        "publicPath": "/ui/scenes/vsel01/model_77.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_77.glb",
+        "publicPath": "/ui/scenes/vsel01/model_77.glb",
         "bounds": {
           "minX": -179.651,
           "maxX": -152.651,
@@ -23257,8 +23257,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_143",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_78.dae",
-        "publicPath": "/ui/scenes/vsel01/model_78.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_78.glb",
+        "publicPath": "/ui/scenes/vsel01/model_78.glb",
         "bounds": {
           "minX": -181.651,
           "maxX": -150.651,
@@ -23286,8 +23286,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_144",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_79.dae",
-        "publicPath": "/ui/scenes/vsel01/model_79.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_79.glb",
+        "publicPath": "/ui/scenes/vsel01/model_79.glb",
         "bounds": {
           "minX": -181.651,
           "maxX": -150.651,
@@ -23315,8 +23315,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_145",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_80.dae",
-        "publicPath": "/ui/scenes/vsel01/model_80.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_80.glb",
+        "publicPath": "/ui/scenes/vsel01/model_80.glb",
         "bounds": {
           "minX": -67.366,
           "maxX": -27.866,
@@ -23344,8 +23344,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_146",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_81.dae",
-        "publicPath": "/ui/scenes/vsel01/model_81.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_81.glb",
+        "publicPath": "/ui/scenes/vsel01/model_81.glb",
         "bounds": {
           "minX": -9.75,
           "maxX": 29.75,
@@ -23373,8 +23373,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_147",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_82.dae",
-        "publicPath": "/ui/scenes/vsel01/model_82.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_82.glb",
+        "publicPath": "/ui/scenes/vsel01/model_82.glb",
         "bounds": {
           "minX": -43.835,
           "maxX": -4.335,
@@ -23402,8 +23402,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_148",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_83.dae",
-        "publicPath": "/ui/scenes/vsel01/model_83.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_83.glb",
+        "publicPath": "/ui/scenes/vsel01/model_83.glb",
         "bounds": {
           "minX": 26.374,
           "maxX": 65.874,
@@ -23431,8 +23431,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_149",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_84.dae",
-        "publicPath": "/ui/scenes/vsel01/model_84.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_84.glb",
+        "publicPath": "/ui/scenes/vsel01/model_84.glb",
         "bounds": {
           "minX": 6.786,
           "maxX": 46.286,
@@ -23460,8 +23460,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_150",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_85.dae",
-        "publicPath": "/ui/scenes/vsel01/model_85.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_85.glb",
+        "publicPath": "/ui/scenes/vsel01/model_85.glb",
         "bounds": {
           "minX": 49.977,
           "maxX": 89.477,
@@ -23489,8 +23489,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_151",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_86.dae",
-        "publicPath": "/ui/scenes/vsel01/model_86.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_86.glb",
+        "publicPath": "/ui/scenes/vsel01/model_86.glb",
         "bounds": {
           "minX": 72.519,
           "maxX": 112.018,
@@ -23518,8 +23518,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_152",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_87.dae",
-        "publicPath": "/ui/scenes/vsel01/model_87.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_87.glb",
+        "publicPath": "/ui/scenes/vsel01/model_87.glb",
         "bounds": {
           "minX": -23.232,
           "maxX": 40.268,
@@ -23547,8 +23547,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_153",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_88.dae",
-        "publicPath": "/ui/scenes/vsel01/model_88.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_88.glb",
+        "publicPath": "/ui/scenes/vsel01/model_88.glb",
         "bounds": {
           "minX": -23.232,
           "maxX": 16.268,
@@ -23576,8 +23576,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_154",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_89.dae",
-        "publicPath": "/ui/scenes/vsel01/model_89.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_89.glb",
+        "publicPath": "/ui/scenes/vsel01/model_89.glb",
         "bounds": {
           "minX": 10.425,
           "maxX": 49.925,
@@ -23605,8 +23605,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_155",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_90.dae",
-        "publicPath": "/ui/scenes/vsel01/model_90.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_90.glb",
+        "publicPath": "/ui/scenes/vsel01/model_90.glb",
         "bounds": {
           "minX": -23.232,
           "maxX": 16.268,
@@ -23634,8 +23634,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_156",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_91.dae",
-        "publicPath": "/ui/scenes/vsel01/model_91.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_91.glb",
+        "publicPath": "/ui/scenes/vsel01/model_91.glb",
         "bounds": {
           "minX": -127.767,
           "maxX": 127.767,
@@ -23663,8 +23663,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_157",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_92.dae",
-        "publicPath": "/ui/scenes/vsel01/model_92.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_92.glb",
+        "publicPath": "/ui/scenes/vsel01/model_92.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -23692,8 +23692,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_158",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_93.dae",
-        "publicPath": "/ui/scenes/vsel01/model_93.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_93.glb",
+        "publicPath": "/ui/scenes/vsel01/model_93.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -23721,8 +23721,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_159",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_94.dae",
-        "publicPath": "/ui/scenes/vsel01/model_94.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_94.glb",
+        "publicPath": "/ui/scenes/vsel01/model_94.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -23750,8 +23750,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_160",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_95.dae",
-        "publicPath": "/ui/scenes/vsel01/model_95.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_95.glb",
+        "publicPath": "/ui/scenes/vsel01/model_95.glb",
         "bounds": {
           "minX": -128.853,
           "maxX": 128.853,
@@ -23779,8 +23779,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_161",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_96.dae",
-        "publicPath": "/ui/scenes/vsel01/model_96.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_96.glb",
+        "publicPath": "/ui/scenes/vsel01/model_96.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,
@@ -23808,8 +23808,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_162",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_97.dae",
-        "publicPath": "/ui/scenes/vsel01/model_97.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_97.glb",
+        "publicPath": "/ui/scenes/vsel01/model_97.glb",
         "bounds": {
           "minX": -85.725,
           "maxX": 85.725,
@@ -23837,8 +23837,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_163",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_98.dae",
-        "publicPath": "/ui/scenes/vsel01/model_98.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_98.glb",
+        "publicPath": "/ui/scenes/vsel01/model_98.glb",
         "bounds": {
           "minX": -921.628,
           "maxX": 921.628,
@@ -23866,8 +23866,8 @@ export const UI_SCENE_LAYOUTS = {
       },
       {
         "key": "model_164",
-        "modelPath": "apps/game/public/ui/scenes/vsel01/model_99.dae",
-        "publicPath": "/ui/scenes/vsel01/model_99.dae",
+        "modelPath": "apps/game/public/ui/scenes/vsel01/model_99.glb",
+        "publicPath": "/ui/scenes/vsel01/model_99.glb",
         "bounds": {
           "minX": 0,
           "maxX": 1,

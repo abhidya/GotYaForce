@@ -54,11 +54,11 @@ function finalizeBounds(bounds) {
   return Object.fromEntries(Object.entries(bounds).map(([key, value]) => [key, round(value)]));
 }
 
-function parsePositionBounds(daeText) {
+function parsePositionBounds(modelText) {
   const bounds = emptyBounds();
   const regex = /<float_array\b[^>]*id="[^"]*POSITION-array"[^>]*>([\s\S]*?)<\/float_array>/g;
   let match;
-  while ((match = regex.exec(daeText))) {
+  while ((match = regex.exec(modelText))) {
     const values = match[1].trim().split(/\s+/).map(Number);
     for (let i = 0; i + 2 < values.length; i += 3) {
       const x = values[i];
@@ -109,7 +109,7 @@ function inflateRect(rect, scaleX, scaleY = scaleX) {
 function makeVselDifficultyAnchors(elements) {
   // The vsel00 export stacks every pad/gear object at the scene X-center: the
   // per-difficulty placement lives on empty JOBJ joint nodes whose transforms the
-  // DAE geometry nodes never reference, so three distinct pad positions do NOT
+  // geometry nodes never reference, so three distinct pad positions do NOT
   // exist in the extracted geometry. The only defensible anchor is the option
   // stage (the large pad ellipse) that the difficulty tiles sit on: the biggest
   // foreground element (near-depth, below the header billboard band).
@@ -188,15 +188,15 @@ function makeResultsAnchors(elements) {
 
 function makeEntrySelectForceAnchors(elements) {
   const byModel = new Map(elements.map((element) => [path.basename(element.modelPath), element]));
-  const platformSource = byModel.get("model_05.dae") ?? byModel.get("model_24.dae");
-  const titleSource = byModel.get("model_03.dae");
+  const platformSource = byModel.get("model_05.glb") ?? byModel.get("model_24.glb");
+  const titleSource = byModel.get("model_03.glb");
   if (!platformSource) return null;
 
   const platformRect = platformSource.rectXY;
   const titleRect = titleSource?.rectXY ?? null;
   return {
     caveat:
-      "Semantic names are inferred from entry00 model file roles; DAE nodes are generic JOBJ/model labels.",
+      "Semantic names are inferred from entry00 model file roles; exported source nodes are generic JOBJ/model labels.",
     platform: {
       left: platformRect.centerX,
       top: platformRect.centerY,
@@ -208,13 +208,16 @@ function makeEntrySelectForceAnchors(elements) {
   };
 }
 
-async function buildScene(asset) {
+async function buildScene(asset, manifest) {
   const modelFiles = asset.modelFiles ?? [];
   const sceneBounds = emptyBounds();
   const rawElements = [];
+  const region = manifest.region ?? "GG4E";
+  const sourceDir = path.join("user-data", region, "gltf-export", asset.id);
 
   for (const [index, model] of modelFiles.entries()) {
-    const file = abs(model.path);
+    const sourceName = path.basename(model.path).replace(/\.glb$/i, ".dae");
+    const file = abs(path.join(sourceDir, sourceName));
     const text = await fs.readFile(file, "utf8");
     const bounds = parsePositionBounds(text);
     includeBounds(sceneBounds, bounds);
@@ -249,7 +252,7 @@ async function buildScene(asset) {
 
   return {
     sceneId: asset.id,
-    sourceArchive: asset.sourceArchive?.sourcePath ?? null,
+    sourceArchive: asset.sourceArchive?.sourceName ?? null,
     modelCount: elements.length,
     bounds: finalSceneBounds,
     elements,
@@ -267,7 +270,7 @@ async function main() {
   const exported = (manifest.assets ?? []).filter((asset) => asset.status === "exported" && asset.kind === "ui-scene-model");
   const layouts = {};
   for (const asset of exported) {
-    layouts[asset.id] = await buildScene(asset);
+    layouts[asset.id] = await buildScene(asset, manifest);
   }
   await fs.writeFile(abs(paths.output), renderModule(layouts), "utf8");
   console.log(`wrote ${paths.output}`);

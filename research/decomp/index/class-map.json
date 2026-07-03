@@ -1,0 +1,325 @@
+{
+  "generatedAt": "2026-07-03T07:31:46.615Z",
+  "generatedBy": "scripts/build-decomp-navigation-indexes.mjs",
+  "summary": {
+    "classCount": 14,
+    "methodCount": 14,
+    "reachableMethodCount": 0,
+    "note": "This maps C++-style symbols present in the Ghidra/map export. It does not yet recover anonymous C structs or vtables."
+  },
+  "classes": [
+    {
+      "className": "AsyncImage",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x801bfd7c",
+          "originalName": "AsyncImage::FreeLoadBuffer(void)",
+          "displayName": "AsyncImage::FreeLoadBuffer(void)",
+          "path": "classes/AsyncImage/801bfd7c_FreeLoadBuffer_void.c",
+          "sourceChunk": "chunk_0054.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0054.c:2487",
+          "topics": [],
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80197ad8",
+              "name": "zz_0197ad8_"
+            }
+          ],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "Bowser",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x8027c0b8",
+          "originalName": "Bowser::DrawShadow(cPoseAccumulator",
+          "displayName": "Bowser::DrawShadow(cPoseAccumulator",
+          "path": "classes/Bowser/8027c0b8_DrawShadow_cPoseAccumulator.c",
+          "sourceChunk": "chunk_0076.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0076.c:62",
+          "topics": [],
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8027c0dc",
+              "name": "FUN_8027c0dc"
+            }
+          ],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "cCameraManager",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x80008998",
+          "originalName": "cCameraManager::HasCamera(cBaseCamera",
+          "displayName": "cCameraManager::HasCamera(cBaseCamera",
+          "path": "classes/cCameraManager/80008998_HasCamera_cBaseCamera.c",
+          "sourceChunk": "chunk_0000.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:3176",
+          "topics": [
+            "camera",
+            "assets-animation"
+          ],
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8024712c",
+              "name": "gnt4_HSD_CObjGetInterest_bl"
+            }
+          ],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "cCharacter",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x802aa124",
+          "originalName": "cCharacter::UpdateBlinking(float)",
+          "displayName": "cCharacter::UpdateBlinking(float)",
+          "path": "classes/cCharacter/802aa124_UpdateBlinking_float.c",
+          "sourceChunk": "chunk_0079.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0079.c:600",
+          "topics": [
+            "movement-physics"
+          ],
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80275c14",
+              "name": "zz_0275c14_"
+            }
+          ],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "cPlayer",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x802807ac",
+          "originalName": "cPlayer::ClearSwapControllerTimer(void)",
+          "displayName": "player_clear_swap_controller_timer",
+          "path": "classes/cPlayer/802807ac_ClearSwapControllerTimer_void.c",
+          "sourceChunk": "chunk_0076.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0076.c:3819",
+          "topics": [
+            "force-setup"
+          ],
+          "callers": [],
+          "callees": [],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "cPoseAccumulator",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x8022caf8",
+          "originalName": "cPoseAccumulator::GetNodeMatrix(",
+          "displayName": "cPoseAccumulator::GetNodeMatrix(",
+          "path": "classes/cPoseAccumulator/8022caf8_GetNodeMatrix.c",
+          "sourceChunk": "chunk_0067.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0067.c:4091",
+          "topics": [],
+          "callers": [],
+          "callees": [],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "cTeam",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x802a3938",
+          "originalName": "cTeam::GetPlayer(int)",
+          "displayName": "team_get_player",
+          "path": "classes/cTeam/802a3938_GetPlayer_int.c",
+          "sourceChunk": "chunk_0078.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0078.c:2079",
+          "topics": [
+            "force-setup"
+          ],
+          "callers": [],
+          "callees": [],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "DrawableCharacter",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x802a0bcc",
+          "originalName": "DrawableCharacter::GetAnimController(",
+          "displayName": "DrawableCharacter::GetAnimController(",
+          "path": "classes/DrawableCharacter/802a0bcc_GetAnimController.c",
+          "sourceChunk": "chunk_0077.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0077.c:6995",
+          "topics": [
+            "assets-animation"
+          ],
+          "callers": [],
+          "callees": [],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "GameInfoManager",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x802a0bc0",
+          "originalName": "GameInfoManager::SetUserSelectedCupSidekick(eSidekickID)",
+          "displayName": "GameInfoManager::SetUserSelectedCupSidekick(eSidekickID)",
+          "path": "classes/GameInfoManager/802a0bc0_SetUserSelectedCupSidekick_eSidekickID.c",
+          "sourceChunk": "chunk_0077.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0077.c:6984",
+          "topics": [],
+          "callers": [],
+          "callees": [],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "LooseBallAnims",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x80087f24",
+          "originalName": "LooseBallAnims::GetDesperationInfo(unsigned",
+          "displayName": "LooseBallAnims::GetDesperationInfo(unsigned",
+          "path": "classes/LooseBallAnims/80087f24_GetDesperationInfo_unsigned.c",
+          "sourceChunk": "chunk_0012.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0012.c:5775",
+          "topics": [
+            "assets-animation"
+          ],
+          "callers": [],
+          "callees": [],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "PlatAudio",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x80018c58",
+          "originalName": "PlatAudio::IsSFXPlaying(unsigned",
+          "displayName": "PlatAudio::IsSFXPlaying(unsigned",
+          "path": "classes/PlatAudio/80018c58_IsSFXPlaying_unsigned.c",
+          "sourceChunk": "chunk_0002.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0002.c:1091",
+          "topics": [
+            "audio"
+          ],
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x8020fc7c",
+              "name": "gnt4_DVDCheckDisk_bl"
+            }
+          ],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "SaveLoad",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x80231c70",
+          "originalName": "SaveLoad::DidGameIDChange(void)",
+          "displayName": "SaveLoad::DidGameIDChange(void)",
+          "path": "classes/SaveLoad/80231c70_DidGameIDChange_void.c",
+          "sourceChunk": "chunk_0068.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0068.c:3039",
+          "topics": [],
+          "callers": [],
+          "callees": [],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "SidelineExplodableManager",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x80008a70",
+          "originalName": "SidelineExplodableManager::GetNumExplodables(void)",
+          "displayName": "SidelineExplodableManager::GetNumExplodables(void)",
+          "path": "classes/SidelineExplodableManager/80008a70_GetNumExplodables_void.c",
+          "sourceChunk": "chunk_0000.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:3239",
+          "topics": [
+            "assets-animation"
+          ],
+          "callers": [],
+          "callees": [
+            {
+              "address": "0x80248058",
+              "name": "gnt4_HSD_CObjGetFov_bl"
+            }
+          ],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    },
+    {
+      "className": "Wiper",
+      "methodCount": 1,
+      "methods": [
+        {
+          "address": "0x80052da8",
+          "originalName": "Wiper::CutHasOccured(",
+          "displayName": "Wiper::CutHasOccured(",
+          "path": "classes/Wiper/80052da8_CutHasOccured.c",
+          "sourceChunk": "chunk_0006.c",
+          "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:6075",
+          "topics": [],
+          "callers": [],
+          "callees": [],
+          "reachableFromStart": false,
+          "shortestPathFromStart": []
+        }
+      ]
+    }
+  ]
+}

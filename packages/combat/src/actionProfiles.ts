@@ -6,7 +6,7 @@ import actionProfileData from "./data/actionProfiles.json" with { type: "json" }
 export type PrimaryAttackKind = "melee" | "shot";
 
 /** Sword-beam finisher projectile (TUNED design: emitted by the LAST hit of a melee combo
- *  chain; damage scales off the borg's MELEE damage, not its shot stat). */
+ *  chain; HP damage uses the charge/special damage record plus this multiplier bridge). */
 export interface SwordBeamDef {
   speed: number;
   lifetime: number;

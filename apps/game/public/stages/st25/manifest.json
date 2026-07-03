@@ -12,14 +12,14 @@
     "setArcs": []
   },
   "visual": {
-    "hasDaePieces": true,
-    "hasContiguousDaeSequence": true,
-    "hasCompleteDaeExport": true,
-    "daeCount": 28,
-    "nonEmptyDaeCount": 28,
+    "hasGlbPieces": true,
+    "hasContiguousGlbSequence": true,
+    "hasCompleteGlbExport": true,
+    "glbCount": 28,
+    "nonEmptyGlbCount": 28,
     "maxModelIndex": 27,
     "missingModelIndices": [],
-    "expectedDaeIndices": [
+    "expectedGlbIndices": [
       0,
       1,
       2,
@@ -49,9 +49,9 @@
       26,
       27
     ],
-    "missingExpectedDaeIndices": [],
-    "unexpectedDaeIndices": [],
-    "zeroByteDaeFiles": [],
+    "missingExpectedGlbIndices": [],
+    "unexpectedGlbIndices": [],
+    "zeroByteGlbFiles": [],
     "textureCount": 47,
     "exportSummary": {
       "path": "model/export-summary.json",
@@ -60,7 +60,7 @@
       "error": null,
       "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
       "expectedSlotCount": 28,
-      "expectedDaeCount": 28,
+      "expectedGlbCount": 28,
       "exportedModelCount": 28,
       "failedModelIndices": [],
       "skippedNullRootJointIndices": [],
@@ -82,121 +82,121 @@
   },
   "notes": [
     "Verified by comparing source stage assets against the browser public stage folder.",
-    "Visual DAE pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
+    "Visual GLB pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
   ],
   "modelCount": 28,
   "models": [
     {
-      "path": "model/model_00.dae",
-      "bytes": 252767
+      "path": "model/model_00.glb",
+      "bytes": 368632
     },
     {
-      "path": "model/model_01.dae",
-      "bytes": 22632
+      "path": "model/model_01.glb",
+      "bytes": 27768
     },
     {
-      "path": "model/model_02.dae",
-      "bytes": 29544
+      "path": "model/model_02.glb",
+      "bytes": 23192
     },
     {
-      "path": "model/model_03.dae",
-      "bytes": 15039
+      "path": "model/model_03.glb",
+      "bytes": 18184
     },
     {
-      "path": "model/model_04.dae",
-      "bytes": 10440
+      "path": "model/model_04.glb",
+      "bytes": 7892
     },
     {
-      "path": "model/model_05.dae",
-      "bytes": 10625
+      "path": "model/model_05.glb",
+      "bytes": 7280
     },
     {
-      "path": "model/model_06.dae",
-      "bytes": 9651
+      "path": "model/model_06.glb",
+      "bytes": 6120
     },
     {
-      "path": "model/model_07.dae",
-      "bytes": 24062
+      "path": "model/model_07.glb",
+      "bytes": 30976
     },
     {
-      "path": "model/model_08.dae",
-      "bytes": 54619
+      "path": "model/model_08.glb",
+      "bytes": 38176
     },
     {
-      "path": "model/model_09.dae",
-      "bytes": 19070
+      "path": "model/model_09.glb",
+      "bytes": 23752
     },
     {
-      "path": "model/model_10.dae",
-      "bytes": 8504
+      "path": "model/model_10.glb",
+      "bytes": 4560
     },
     {
-      "path": "model/model_11.dae",
-      "bytes": 32574
+      "path": "model/model_11.glb",
+      "bytes": 26568
     },
     {
-      "path": "model/model_12.dae",
-      "bytes": 8127
+      "path": "model/model_12.glb",
+      "bytes": 4380
     },
     {
-      "path": "model/model_13.dae",
-      "bytes": 92711
+      "path": "model/model_13.glb",
+      "bytes": 95596
     },
     {
-      "path": "model/model_14.dae",
-      "bytes": 93360
+      "path": "model/model_14.glb",
+      "bytes": 95592
     },
     {
-      "path": "model/model_15.dae",
-      "bytes": 43562
+      "path": "model/model_15.glb",
+      "bytes": 60408
     },
     {
-      "path": "model/model_16.dae",
-      "bytes": 877
+      "path": "model/model_16.glb",
+      "bytes": 208
     },
     {
-      "path": "model/model_17.dae",
-      "bytes": 9675
+      "path": "model/model_17.glb",
+      "bytes": 10084
     },
     {
-      "path": "model/model_18.dae",
-      "bytes": 10458
+      "path": "model/model_18.glb",
+      "bytes": 11088
     },
     {
-      "path": "model/model_19.dae",
-      "bytes": 9024
+      "path": "model/model_19.glb",
+      "bytes": 8068
     },
     {
-      "path": "model/model_20.dae",
-      "bytes": 8754
+      "path": "model/model_20.glb",
+      "bytes": 6332
     },
     {
-      "path": "model/model_21.dae",
-      "bytes": 8162
+      "path": "model/model_21.glb",
+      "bytes": 4164
     },
     {
-      "path": "model/model_22.dae",
-      "bytes": 9311
+      "path": "model/model_22.glb",
+      "bytes": 8636
     },
     {
-      "path": "model/model_23.dae",
-      "bytes": 8722
+      "path": "model/model_23.glb",
+      "bytes": 6328
     },
     {
-      "path": "model/model_24.dae",
-      "bytes": 8678
+      "path": "model/model_24.glb",
+      "bytes": 6064
     },
     {
-      "path": "model/model_25.dae",
-      "bytes": 8400
+      "path": "model/model_25.glb",
+      "bytes": 5192
     },
     {
-      "path": "model/model_26.dae",
-      "bytes": 9983
+      "path": "model/model_26.glb",
+      "bytes": 8792
     },
     {
-      "path": "model/model_27.dae",
-      "bytes": 14122
+      "path": "model/model_27.glb",
+      "bytes": 22800
     }
   ],
   "textures": [
@@ -390,5 +390,5 @@
     }
   ],
   "setArcs": [],
-  "renderStatus": "dae-complete"
+  "renderStatus": "glb-complete"
 }

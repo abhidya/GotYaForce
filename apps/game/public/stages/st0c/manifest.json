@@ -21,14 +21,14 @@
     ]
   },
   "visual": {
-    "hasDaePieces": true,
-    "hasContiguousDaeSequence": true,
-    "hasCompleteDaeExport": true,
-    "daeCount": 20,
-    "nonEmptyDaeCount": 20,
+    "hasGlbPieces": true,
+    "hasContiguousGlbSequence": true,
+    "hasCompleteGlbExport": true,
+    "glbCount": 20,
+    "nonEmptyGlbCount": 20,
     "maxModelIndex": 19,
     "missingModelIndices": [],
-    "expectedDaeIndices": [
+    "expectedGlbIndices": [
       0,
       1,
       2,
@@ -50,9 +50,9 @@
       18,
       19
     ],
-    "missingExpectedDaeIndices": [],
-    "unexpectedDaeIndices": [],
-    "zeroByteDaeFiles": [],
+    "missingExpectedGlbIndices": [],
+    "unexpectedGlbIndices": [],
+    "zeroByteGlbFiles": [],
     "textureCount": 38,
     "exportSummary": {
       "path": "model/export-summary.json",
@@ -61,7 +61,7 @@
       "error": null,
       "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
       "expectedSlotCount": 20,
-      "expectedDaeCount": 20,
+      "expectedGlbCount": 20,
       "exportedModelCount": 20,
       "failedModelIndices": [],
       "skippedNullRootJointIndices": [],
@@ -101,89 +101,89 @@
   },
   "notes": [
     "Verified by comparing source stage assets against the browser public stage folder.",
-    "Visual DAE pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
+    "Visual GLB pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
   ],
   "modelCount": 20,
   "models": [
     {
-      "path": "model/model_00.dae",
-      "bytes": 206507
+      "path": "model/model_00.glb",
+      "bytes": 278652
     },
     {
-      "path": "model/model_01.dae",
-      "bytes": 22632
+      "path": "model/model_01.glb",
+      "bytes": 27768
     },
     {
-      "path": "model/model_02.dae",
-      "bytes": 43198
+      "path": "model/model_02.glb",
+      "bytes": 25304
     },
     {
-      "path": "model/model_03.dae",
-      "bytes": 8058
+      "path": "model/model_03.glb",
+      "bytes": 3296
     },
     {
-      "path": "model/model_04.dae",
-      "bytes": 61890
+      "path": "model/model_04.glb",
+      "bytes": 71728
     },
     {
-      "path": "model/model_05.dae",
-      "bytes": 43303
+      "path": "model/model_05.glb",
+      "bytes": 49036
     },
     {
-      "path": "model/model_06.dae",
-      "bytes": 50719
+      "path": "model/model_06.glb",
+      "bytes": 88556
     },
     {
-      "path": "model/model_07.dae",
-      "bytes": 51787
+      "path": "model/model_07.glb",
+      "bytes": 54112
     },
     {
-      "path": "model/model_08.dae",
-      "bytes": 34735
+      "path": "model/model_08.glb",
+      "bytes": 35376
     },
     {
-      "path": "model/model_09.dae",
-      "bytes": 21780
+      "path": "model/model_09.glb",
+      "bytes": 14356
     },
     {
-      "path": "model/model_10.dae",
-      "bytes": 153715
+      "path": "model/model_10.glb",
+      "bytes": 140380
     },
     {
-      "path": "model/model_11.dae",
-      "bytes": 7632
+      "path": "model/model_11.glb",
+      "bytes": 2440
     },
     {
-      "path": "model/model_12.dae",
-      "bytes": 8932
+      "path": "model/model_12.glb",
+      "bytes": 4716
     },
     {
-      "path": "model/model_13.dae",
-      "bytes": 8066
+      "path": "model/model_13.glb",
+      "bytes": 4460
     },
     {
-      "path": "model/model_14.dae",
-      "bytes": 9381
+      "path": "model/model_14.glb",
+      "bytes": 6388
     },
     {
-      "path": "model/model_15.dae",
-      "bytes": 7875
+      "path": "model/model_15.glb",
+      "bytes": 2864
     },
     {
-      "path": "model/model_16.dae",
-      "bytes": 18242
+      "path": "model/model_16.glb",
+      "bytes": 32068
     },
     {
-      "path": "model/model_17.dae",
-      "bytes": 8203
+      "path": "model/model_17.glb",
+      "bytes": 3136
     },
     {
-      "path": "model/model_18.dae",
-      "bytes": 20842
+      "path": "model/model_18.glb",
+      "bytes": 33944
     },
     {
-      "path": "model/model_19.dae",
-      "bytes": 9756
+      "path": "model/model_19.glb",
+      "bytes": 10520
     }
   ],
   "textures": [
@@ -358,5 +358,5 @@
       "bytes": 116736
     }
   ],
-  "renderStatus": "dae-complete"
+  "renderStatus": "glb-complete"
 }

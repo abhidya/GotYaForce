@@ -1,4 +1,5 @@
-import type { Battle, BorgActionProfile, BorgRuntime } from "@gf/combat";
+import type { Battle, BorgActionProfile, BorgRuntime, Projectile } from "@gf/combat";
+import type { BattleOutcome } from "@gf/missions";
 import type { AnimSlot } from "./battleScene.js";
 import type { HudState } from "../ui/index.js";
 
@@ -101,6 +102,109 @@ export interface BattleHudPresentationInput {
   allyMax: number;
   enemyMax: number;
   defaultBorgId: string;
+}
+
+export interface BattlePresentationInput {
+  battle: Battle;
+  localPlayerId: string;
+  allyMax: number;
+  enemyMax: number;
+  defaultBorgId: string;
+  actionProfileFor(borgId: string): BorgActionProfile | null;
+}
+
+export interface BattlePresentationState {
+  activeUid: string | null;
+  focus: BorgRuntime | null;
+  hud: HudState;
+}
+
+export interface BattleEnergyMaxima {
+  allyMax: number;
+  enemyMax: number;
+}
+
+export function battleEnergyMaxima(battle: Battle): BattleEnergyMaxima {
+  return {
+    allyMax: battle.state.energy[0] ?? 0,
+    enemyMax: battle.state.energy[1] ?? 0,
+  };
+}
+
+export function activeBorgForPlayer(battle: Battle, playerId: string): BorgRuntime | null {
+  const uid = battle.state.activeUidByPlayer[playerId] ?? null;
+  return uid ? battle.state.borgs.find((b) => b.uid === uid) ?? null : null;
+}
+
+export function battleSceneState(battle: Battle, focus: BorgRuntime | null): {
+  borgs: readonly BorgRuntime[];
+  projectiles: readonly Projectile[];
+  focusUid: string | null;
+} {
+  return {
+    borgs: battle.state.borgs,
+    projectiles: battle.state.projectiles,
+    focusUid: focus?.uid ?? null,
+  };
+}
+
+export function liveActorPositions<T>(battle: Battle, positionOf: (uid: string) => T | null): T[] {
+  return battle.state.borgs
+    .filter((b) => b.alive)
+    .map((b) => positionOf(b.uid))
+    .filter((p): p is T => p !== null);
+}
+
+export function battleOutcomeFromState(battle: Battle): BattleOutcome {
+  const st = battle.state;
+  const win = st.result === "win";
+  const enemyDefeated = st.defeated[1] ?? 0;
+  const playerDefeated = st.defeated[0] ?? 0;
+  const costWon = st.defeatedEnergy[1] ?? 0;
+  const costLost = st.defeatedEnergy[0] ?? 0;
+  return {
+    win,
+    attack: Math.round(costWon),
+    hits: enemyDefeated,
+    attempts: Math.max(1, enemyDefeated + 2),
+    dodges: 0,
+    incoming: 1,
+    enemyBorgsDefeated: enemyDefeated,
+    playerBorgsDefeated: playerDefeated,
+    allyBorgsDefeated: 0,
+    costWon,
+    costLost,
+  };
+}
+
+export function battlePresentationState(input: BattlePresentationInput): BattlePresentationState {
+  const activeUid = input.battle.state.activeUidByPlayer[input.localPlayerId] ?? null;
+  const active = activeUid ? input.battle.state.borgs.find((b) => b.uid === activeUid) ?? null : null;
+  const focus = focusBorg(input.battle, active);
+  return {
+    activeUid,
+    focus,
+    hud: battleHudState({
+      battle: input.battle,
+      focus,
+      actionProfile: focus ? input.actionProfileFor(focus.borgId) : null,
+      allyMax: input.allyMax,
+      enemyMax: input.enemyMax,
+      defaultBorgId: input.defaultBorgId,
+    }),
+  };
+}
+
+function focusBorg(battle: Battle, active: BorgRuntime | null): BorgRuntime | null {
+  if (active?.alive) return active;
+
+  // FIGHT ALONE can leave the player slot empty while a CPU ally is still alive.
+  const fallbackTeam = active?.team ?? 0;
+  return (
+    battle.state.borgs.find((b) => b.alive && b.team === fallbackTeam) ??
+    battle.state.borgs.find((b) => b.alive) ??
+    null
+  );
 }
 
 export function battleHudState(input: BattleHudPresentationInput): HudState {

@@ -3,6 +3,7 @@ import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs
 import { existsSync } from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -138,9 +139,9 @@ async function makeCandidate(sceneName, rawByScene) {
   const caveats = [];
 
   if (status === "copy-ready") {
-    caveats.push("Using existing HSDRawViewer DAE export output; this script does not infer runtime menu layout.");
+    caveats.push("Using existing HSDRawViewer model export output; this script does not infer runtime menu layout.");
   } else if (raw) {
-    caveats.push("Raw UI HSD archive found, but no validated DAE/glTF export output exists yet.");
+    caveats.push("Raw UI HSD archive found, but no validated model export output exists yet.");
   } else {
     caveats.push(`Expected ${archiveNameFor(sceneName)} was not found under ${sourceRootRel}.`);
   }
@@ -168,13 +169,15 @@ async function makeManifest(candidates, writeResults = new Map()) {
       kind: candidate.kind,
       requested: candidate.requested,
       status: written?.status ?? (exportMode ? "not-exported" : candidate.status),
-      sourceArchive: candidate.rawSource,
+      sourceArchive: candidate.rawSource
+        ? {
+            sourceName: candidate.rawSource.sourceName,
+            sourceBytes: candidate.rawSource.sourceBytes,
+          }
+        : null,
       existingExport: {
-        sourceDir: candidate.existingExport.sourceDir,
         modelCount: candidate.existingExport.models.length,
         textureCount: candidate.existingExport.textures.length,
-        models: candidate.existingExport.models,
-        textures: candidate.existingExport.textures,
       },
       outputDir: candidate.outputDir,
       modelFiles: written?.modelFiles ?? [],
@@ -192,9 +195,6 @@ async function makeManifest(candidates, writeResults = new Map()) {
     generatedAt: new Date().toISOString(),
     region,
     mode: exportMode ? "export" : "dry-run",
-    sourceRoot: sourceRootRel,
-    existingExportRoot: existingExportRootRel,
-    publicScenesRoot: publicScenesRootRel,
     counts: {
       candidates: assets.length,
       requestedCandidates: assets.filter((asset) => asset.requested).length,
@@ -206,7 +206,7 @@ async function makeManifest(candidates, writeResults = new Map()) {
     },
     caveats: [
       "Asset plumbing only: no runtime UI replacement, menu layout reconstruction, camera setup, or UI behavior is generated here.",
-      "Archives without existing validated DAE/glTF output are listed for follow-up instead of guessed or hand-built.",
+      "Archives without existing validated model output are listed for follow-up instead of guessed or hand-built.",
     ],
     assets,
   };
@@ -242,7 +242,6 @@ async function copyCandidate(candidate) {
       publicPath: publicPath(target),
       bytes: (await stat(target)).size,
       sha1: await sha1File(target),
-      sourcePath: model.sourcePath,
     });
   }
 
@@ -256,7 +255,6 @@ async function copyCandidate(candidate) {
       publicPath: publicPath(target),
       bytes: (await stat(target)).size,
       sha1: await sha1File(target),
-      sourcePath: texture.sourcePath,
     });
   }
 
@@ -264,8 +262,42 @@ async function copyCandidate(candidate) {
     status: "exported",
     modelFiles,
     textureFiles,
-    caveats: ["Copied real extracted DAE/PNG assets from existing local HSDRawViewer export output."],
+    caveats: ["Copied real extracted model/PNG assets from existing local HSDRawViewer export output."],
   };
+}
+
+function convertRuntimeModels(rootRel) {
+  const result = spawnSync(process.execPath, ["scripts/convert-runtime-models-to-glb.mjs", rootRel], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+  if (result.status !== 0) throw new Error(`GLB conversion failed for ${rootRel}`);
+}
+
+async function collectPublicGlbModels(candidate) {
+  const outputDir = abs(candidate.outputDir);
+  const files = (await listFilesRecursive(outputDir)).filter((file) => path.extname(file).toLowerCase() === ".glb");
+  return Promise.all(
+    files.map(async (file) => {
+      return {
+        path: rel(file),
+        publicPath: publicPath(file),
+        bytes: (await stat(file)).size,
+        sha1: await sha1File(file),
+      };
+    }),
+  );
+}
+
+async function removePublicSourceModels(root) {
+  if (!existsSync(root)) return;
+  const resolvedRoot = path.resolve(root);
+  const resolvedPublicScenes = path.resolve(publicScenesRoot);
+  if (resolvedRoot !== resolvedPublicScenes && !resolvedRoot.startsWith(`${resolvedPublicScenes}${path.sep}`)) {
+    throw new Error(`refusing to remove source models outside ${publicScenesRootRel}: ${resolvedRoot}`);
+  }
+  const files = await listFilesRecursive(root);
+  await Promise.all(files.filter((file) => path.extname(file).toLowerCase() === ".dae").map((file) => rm(file)));
 }
 
 function printSummary(manifest) {
@@ -274,7 +306,7 @@ function printSummary(manifest) {
   console.log(`ui scene export ${manifest.mode}`);
   console.log(`region: ${manifest.region}`);
   console.log(`candidates: ${manifest.counts.candidates} (${manifest.counts.requestedCandidates} requested, ${manifest.counts.faceCandidates} face models)`);
-  console.log(`copy-ready existing DAE exports: ${ready.length}`);
+  console.log(`copy-ready existing model exports: ${ready.length}`);
   console.log(`exported models: ${manifest.counts.modelFiles}`);
   console.log(`exported textures: ${manifest.counts.textureFiles}`);
   if (ready.length > 0) console.log(`ready: ${ready.map((asset) => asset.id).join(", ")}`);
@@ -298,6 +330,17 @@ async function main() {
     await mkdir(publicScenesRoot, { recursive: true });
     for (const candidate of candidates) {
       writeResults.set(candidate.id, await copyCandidate(candidate));
+    }
+    convertRuntimeModels(publicScenesRootRel);
+    await removePublicSourceModels(publicScenesRoot);
+    for (const candidate of candidates) {
+      const result = writeResults.get(candidate.id);
+      if (!result || result.status !== "exported") continue;
+      result.modelFiles = await collectPublicGlbModels(candidate);
+      result.caveats = [
+        ...result.caveats,
+        "Generated production GLB model files; runtime manifests point at GLB.",
+      ];
     }
   }
 

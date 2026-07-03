@@ -26,6 +26,7 @@ import {
   stepInvincibility,
   stepProjectiles,
 } from "./combat.js";
+import { challengeSideRanksForMode } from "./damageFormula.js";
 import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { DEFAULT_BOUNDS, JUMP, SIM, SPAWN_INVINCIBILITY_FRAMES } from "./constants.js";
@@ -75,6 +76,7 @@ class BattleImpl implements Battle {
   private readonly spawnPoints: readonly SpawnPoint[];
   private readonly timeLimitFrames: number | null;
   private readonly timerFrozen: boolean;
+  private readonly sideRanks: readonly [number, number];
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
@@ -88,6 +90,7 @@ class BattleImpl implements Battle {
     this.spawnPoints = cfg.spawnPoints ?? [];
     this.timeLimitFrames = cfg.timeLimitFrames !== undefined ? Math.max(0, Math.floor(cfg.timeLimitFrames)) : null;
     this.timerFrozen = cfg.timerFrozen ?? false;
+    this.sideRanks = challengeSideRanksForMode(cfg.challengeMode ?? 0);
     resetProjectileCounter();
 
     let cpuIdx = 0;
@@ -193,6 +196,7 @@ class BattleImpl implements Battle {
       paramTier: resetActorParamTier(),
       lockTarget: null,
       allyLockTarget: null,
+      defeatAccounted: false,
       alive: true,
     };
     this.state.borgs.push(b);
@@ -202,15 +206,17 @@ class BattleImpl implements Battle {
     this.state.activeUidByPlayer[force.controlKey] = uid;
   }
 
-  /** energy[team] = sum of (alive on field + queued) borg energy. */
+  /** energy[team] = sum of not-yet-defeated on-field borgs + queued borgs. */
   private recomputeEnergy(): void {
     const energy: Record<number, number> = {};
     for (const force of this.forces) {
       energy[force.team] = energy[force.team] ?? 0;
     }
-    // On-field, alive borgs.
+    // On-field borgs whose HP-zero kill event has not already removed their force cost.
     for (const b of this.state.borgs) {
-      if (b.alive) energy[b.team] = (energy[b.team] ?? 0) + (this.profiles.get(b.uid)?.energy ?? 0);
+      if (b.alive && !b.defeatAccounted) {
+        energy[b.team] = (energy[b.team] ?? 0) + (this.profiles.get(b.uid)?.energy ?? 0);
+      }
     }
     // Queued (not-yet-deployed) borgs.
     for (const force of this.forces) {
@@ -296,7 +302,9 @@ class BattleImpl implements Battle {
 
       // Attacks (no-op while busy/hit/down/death/spawn).
       if (!isBusy(b)) {
-        const res = stepAttacks(b, prof, input.attack, input.special, all, profiles);
+        const res = stepAttacks(b, prof, input.attack, input.special, all, profiles, {
+          sideRankForTeam: (team) => this.sideRankForTeam(team),
+        });
         if (res.projectiles.length) this.state.projectiles.push(...res.projectiles);
       }
 
@@ -304,17 +312,26 @@ class BattleImpl implements Battle {
       b.stateTime += 1;
       const r = stepActionState(b);
       if (r.died) {
-        this.state.defeated[b.team] = (this.state.defeated[b.team] ?? 0) + 1;
-        this.state.defeatedEnergy[b.team] = (this.state.defeatedEnergy[b.team] ?? 0) + prof.energy;
         this.spawnPlanned.add(this.forceIndexOfUid(b.uid));
       }
     }
+    this.accountPendingDefeats();
 
     // 3) Projectiles.
-    this.state.projectiles = stepProjectiles(this.state.projectiles, all, profiles, this.byUid, {
-      bounds: this.bounds,
-      collision: this.collision,
-    });
+    this.state.projectiles = stepProjectiles(
+      this.state.projectiles,
+      all,
+      profiles,
+      this.byUid,
+      {
+        bounds: this.bounds,
+        collision: this.collision,
+      },
+      {
+        sideRankForTeam: (team) => this.sideRankForTeam(team),
+      },
+    );
+    this.accountPendingDefeats();
 
     // 4) Process any deaths -> auto-deploy next from that force.
     if (this.spawnPlanned.size > 0) {
@@ -363,20 +380,35 @@ class BattleImpl implements Battle {
     if (remaining <= 0) this.state.result = "draw";
   }
 
+  private sideRankForTeam(team: number): number {
+    return team === 0 ? this.sideRanks[0] : this.sideRanks[1];
+  }
+
   private lockStillValid(b: BorgRuntime): boolean {
     if (!b.lockTarget) return false;
     const t = this.byUid.get(b.lockTarget);
-    return !!t && t.alive && t.team !== b.team;
+    return !!t && t.alive && t.hp > 0 && t.state !== "death" && t.team !== b.team;
   }
 
   private allyLockStillValid(b: BorgRuntime): boolean {
     if (!b.allyLockTarget) return false;
     const t = this.byUid.get(b.allyLockTarget);
-    return !!t && t.alive && t.team === b.team && t.uid !== b.uid;
+    return !!t && t.alive && t.hp > 0 && t.state !== "death" && t.team === b.team && t.uid !== b.uid;
   }
 
   private forceIndexOfUid(uid: string): number {
     return this.forces.findIndex((f) => f.activeUid === uid);
+  }
+
+  private accountPendingDefeats(): void {
+    for (const b of this.state.borgs) {
+      if (b.defeatAccounted || b.hp > 0 || (b.alive && b.state !== "death")) continue;
+      const prof = this.profiles.get(b.uid);
+      if (!prof) continue;
+      b.defeatAccounted = true;
+      this.state.defeated[b.team] = (this.state.defeated[b.team] ?? 0) + 1;
+      this.state.defeatedEnergy[b.team] = (this.state.defeatedEnergy[b.team] ?? 0) + prof.energy;
+    }
   }
 
   private evaluateResult(): void {

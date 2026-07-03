@@ -66,6 +66,12 @@ export {
   type ActorDataCombatStats,
 } from "./actorDataStats.js";
 export {
+  borgSourceStatsSummary,
+  sourceStatsForBorgId,
+  type BorgSourceStats,
+  type BorgSourceWeaponSlot,
+} from "./sourceBorgStats.js";
+export {
   actionProfileForProfile,
   startingAmmoForProfile,
   type BorgActionProfile,

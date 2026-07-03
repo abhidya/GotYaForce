@@ -16,14 +16,14 @@
     "setArcs": []
   },
   "visual": {
-    "hasDaePieces": true,
-    "hasContiguousDaeSequence": true,
-    "hasCompleteDaeExport": true,
-    "daeCount": 7,
-    "nonEmptyDaeCount": 7,
+    "hasGlbPieces": true,
+    "hasContiguousGlbSequence": true,
+    "hasCompleteGlbExport": true,
+    "glbCount": 7,
+    "nonEmptyGlbCount": 7,
     "maxModelIndex": 6,
     "missingModelIndices": [],
-    "expectedDaeIndices": [
+    "expectedGlbIndices": [
       0,
       1,
       2,
@@ -32,9 +32,9 @@
       5,
       6
     ],
-    "missingExpectedDaeIndices": [],
-    "unexpectedDaeIndices": [],
-    "zeroByteDaeFiles": [],
+    "missingExpectedGlbIndices": [],
+    "unexpectedGlbIndices": [],
+    "zeroByteGlbFiles": [],
     "textureCount": 11,
     "exportSummary": {
       "path": "model/export-summary.json",
@@ -43,7 +43,7 @@
       "error": null,
       "exporter": "scripts/export-all-stages.mjs stage-batch-exporter",
       "expectedSlotCount": 7,
-      "expectedDaeCount": 7,
+      "expectedGlbCount": 7,
       "exportedModelCount": 7,
       "failedModelIndices": [],
       "skippedNullRootJointIndices": [],
@@ -78,37 +78,37 @@
   },
   "notes": [
     "Verified by comparing source stage assets against the browser public stage folder.",
-    "Visual DAE pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
+    "Visual GLB pieces are imported render assets; collision hit*.bin files are copied but not decoded here."
   ],
   "modelCount": 7,
   "models": [
     {
-      "path": "model/model_00.dae",
-      "bytes": 609627
+      "path": "model/model_00.glb",
+      "bytes": 1343728
     },
     {
-      "path": "model/model_01.dae",
-      "bytes": 22604
+      "path": "model/model_01.glb",
+      "bytes": 27816
     },
     {
-      "path": "model/model_02.dae",
-      "bytes": 34312
+      "path": "model/model_02.glb",
+      "bytes": 44836
     },
     {
-      "path": "model/model_03.dae",
-      "bytes": 28729
+      "path": "model/model_03.glb",
+      "bytes": 41572
     },
     {
-      "path": "model/model_04.dae",
-      "bytes": 12116
+      "path": "model/model_04.glb",
+      "bytes": 11388
     },
     {
-      "path": "model/model_05.dae",
-      "bytes": 12119
+      "path": "model/model_05.glb",
+      "bytes": 11364
     },
     {
-      "path": "model/model_06.dae",
-      "bytes": 877
+      "path": "model/model_06.glb",
+      "bytes": 208
     }
   ],
   "textures": [
@@ -158,5 +158,5 @@
     }
   ],
   "setArcs": [],
-  "renderStatus": "dae-complete"
+  "renderStatus": "glb-complete"
 }

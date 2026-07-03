@@ -7,6 +7,7 @@
  * force mutation.
  */
 
+import { createPublicAssetCatalog } from "@gf/assets";
 import { ASSETS, borgBannerPath, borgMiniPath } from "../assets.js";
 import { clear, el, legendItem } from "../dom.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
@@ -14,6 +15,7 @@ import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
 const SELECT_FORCE_LAYOUT = UI_SCENE_LAYOUTS.entry00.semantics.selectForce;
+const assetCatalog = createPublicAssetCatalog();
 
 export interface ForceSlot {
   no: number;
@@ -86,21 +88,11 @@ function syncForceSlots(slots: ForceSlot[]): void {
 // its real model on the platform (not just the pl0615 special path).
 // ---------------------------------------------------------------------------
 
-type ModelManifestEntry = { id?: string; dae?: string };
 let modelManifestPromise: Promise<ReadonlyMap<string, string>> | null = null;
 
 function libraryModelPaths(): Promise<ReadonlyMap<string, string>> {
   if (!modelManifestPromise) {
-    modelManifestPromise = fetch("/models/library/manifest.json")
-      .then((r) => (r.ok ? (r.json() as Promise<ModelManifestEntry[]>) : []))
-      .then((entries) => {
-        const byId = new Map<string, string>();
-        for (const entry of Array.isArray(entries) ? entries : []) {
-          if (entry.id) byId.set(entry.id, `/models/library/${entry.id}/${entry.dae ?? `${entry.id}.dae`}`);
-        }
-        return byId as ReadonlyMap<string, string>;
-      })
-      .catch(() => new Map<string, string>() as ReadonlyMap<string, string>);
+    modelManifestPromise = assetCatalog.loadModelLibraryPaths();
   }
   return modelManifestPromise;
 }
@@ -204,7 +196,7 @@ export function createSelectForce(
     const token = leadModelToken;
     clear(platform);
     if (lead === "pl0615") {
-      mountLeadModel("/models/pl0615/model_00.dae");
+      mountLeadModel("/models/pl0615/model_00.glb");
     } else if (lead) {
       // Any lead with an exported library model renders as its real 3D model;
       // otherwise fall back to the extracted name plate, then plain text, so a

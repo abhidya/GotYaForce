@@ -7,10 +7,9 @@
 //   - SIM_HZ = 60: DERIVED. GameCube ran at 60 fps; the "60 frames ~= 1s" note confirms it.
 //   - Ground plane Y and "forward = +Z": DERIVED. ram-trace-analysis.md s3.1 (Y=10 grounded,
 //     holding FORWARD produced +Z movement). GROUND_Y default 10 to match the trace.
-//   - Everything else (gravity, damage scale, ranges, cooldowns): TUNED to feel like
-//     a fast 3D arena fighter. RELATIVE speed/attack/shot/defense stats now come from
-//     original pl####data.bin actor-data bytes when present; the ABSOLUTE scale is still
-//     a tuning choice.
+//   - Movement gravity/ranges/cooldowns and knockback magnitudes remain TUNED. Combat HP
+//     damage now uses the decoded zz_003cd5c_ formula via damageFormula.ts for runtime hits;
+//     MELEE/SHOT damage constants below remain only as legacy/direct-helper fallbacks.
 //
 //   - HP field: DERIVED (2026-07-01). Confirmed live — a 16-bit uint mirrored at 5 fixed
 //     addresses (0x803b069c, 0x805dbf86, 0x805f3850/58/5c) tracks the on-screen HP gauge;
@@ -25,14 +24,13 @@
 //     Ghidra export re-read (behavior-notes.md s4m) shows +0x88 is copied from match slot/team
 //     state (`PTR_DAT_80433934[slot+0xcb]`) in the active spawn paths. Wired in combat.ts for
 //     melee, special, and projectile hits.
-//   - The exact attack/defense-to-raw-damage coefficients (DEF_PER_STAT/MIN_MULT/DMG_BASE/
-//     DMG_PER_STAT below) remain TUNED. Ghidra located and substantially decoded the real formula
-//     function (`zz_003cd5c_`, behavior-notes.md s4j/s4o) — it's a multi-stage multiplicative
-//     formula keyed off a per-move data pointer (`power * (1 + k*(atkStat - baseline))`, plus
-//     HP-ratio "comeback" scaling, a defender/attacker-category type matrix, and a rank/handicap
-//     table that appears to be keyed by team-slot, NOT by borgs.json's 0-10 attack/shot stat.
-//     The category matrix piece is now DERIVED and wired in typeDamage.ts (s4w). The rest of the
-//     formula still blocks replacing these tuned linear coefficients with a derived formula.
+//   - Runtime HP damage formula: DERIVED (2026-07-03, behavior-notes.md ag/ah). combat.ts
+//     now calls damageFormula.ts for real attacker-context hits: record.hpDamage, type matrix,
+//     same-team 0.25x, Challenge side ranks, HP-ratio curves, defense curve selectors, handicap
+//     defaults, and combo falloff are table-backed from the decomp. Remaining formula context
+//     not yet modeled: hero flag (+0x3e6), pair-attack flag (+0x6fc), force-gauge ratio, guard/
+//     reflect state, and actor level/handicap init sites. MELEE/SHOT DMG_BASE/DMG_PER_STAT below
+//     are retained for legacy direct applyHit callers and should not be treated as runtime truth.
 //   - Knockback DIRECTION: DERIVED (2026-07-01, behavior-notes.md s4p). `zz_00300bc_` (0x800300bc)
 //     computes launch direction (yaw/pitch as BAM16 shorts) from one of 5 vector-source modes
 //     selected by a per-move byte, plus a per-move angular trim. Mode 1 (attacker->target
@@ -189,9 +187,7 @@ export const MELEE = {
    *  0x8005cc00/0x8005d494 state dispatch's per-case semantics (which +0x544 number is "melee
    *  attack") remain unmapped, so no attack-specific cooldown constant is isolable yet. */
   COOLDOWN: 10,
-  /** damage = BASE + attack_stat * PER_STAT, before defense mitigation. TUNED — see constants.ts
-   *  header + behavior-notes.md s4o: the real formula's per-object stat is a float on a linked
-   *  sub-object at +0xc4, not confirmed to correspond to borgs.json's 0-10 int `attack` at all. */
+  /** Legacy direct-helper fallback only. Runtime hits use damageFormula.ts record.hpDamage. */
   DMG_BASE: 6,
   DMG_PER_STAT: 4,
   /**
@@ -228,9 +224,7 @@ export const SHOT = {
   AMMO_MAX: 6,
   /** Reload time (frames) when ammo hits 0. */
   RELOAD_FRAMES: 60,
-  /** damage = BASE + shot_stat * PER_STAT, before defense. TUNED — same caveat as MELEE.DMG_BASE
-   *  (behavior-notes.md s4o): the real per-attacker stat term is not confirmed to be borgs.json's
-   *  0-10 `shot` int. */
+  /** Legacy direct-helper fallback only. Runtime shots use damageFormula.ts record.hpDamage. */
   DMG_BASE: 4,
   DMG_PER_STAT: 3,
   /** Reaction LENGTH after a confirmed shot stagger (frames). Still TUNED (animation-gated in
@@ -322,14 +316,9 @@ export const STAGGER = {
 
 export const DAMAGE = {
   /**
-   * Defense mitigation: incoming damage is multiplied by (1 - defense*DEF_PER_STAT),
-   * floored at MIN_MULT so high-defense borgs still take chip damage. defense 0..10.
-   * TUNED, and now confirmed to be a deliberately-simplified stand-in rather than a missing
-   * lookup: behavior-notes.md s4k/s4o traced the real base-damage formula (`zz_003cd5c_`) and
-   * found the ROM has no single "defense percentage" at all. One table-driven piece, the
-   * attacker/defender type-category multiplier, is now ported separately in typeDamage.ts (s4w).
-   * The remaining rank/handicap/HP-ratio pieces are still not a flat percentage, so this
-   * percentage-based defense model stays an explicit simplification.
+   * Legacy direct-helper fallback only. Runtime attacker-context hits use the decoded formula in
+   * damageFormula.ts; this percentage model remains for tests/tools that call applyHit without a
+   * source attacker context.
    */
   DEF_PER_STAT: 0.06,
   MIN_MULT: 0.25,
@@ -342,8 +331,8 @@ export const DAMAGE = {
    * raw float read), and +0x88 is the match slot/team byte (s4m), not a type category. Formerly
    * named TYPE_MISMATCH_DIVISOR — that name was wrong on both counts (it's a match, not a
    * mismatch; and it's team, not type). Kept as a divisor (4 = 1/0.25) for call-site continuity.
-   * Wired in combat.ts for melee, special, and projectile hits: same-team targets can be hit,
-   * with raw damage divided by this value before normal defense mitigation.
+   * Runtime formula applies the original 0.25x multiplier directly in damageFormula.ts.
+   * Kept as a divisor for legacy direct-helper fallback continuity.
    */
   SAME_TEAM_HIT_DIVISOR: 4,
   /**
@@ -378,10 +367,9 @@ export const STATE = {
   /** Death state duration before the borg is removed / next deploys (frames). TUNED — see
    *  DOWN_DURATION note; same "which handler, but no fixed duration constant" situation per s4u. */
   DEATH_DURATION: 30,
-  /** Spawn (deploy) animation lock (frames). TUNED — s4u identifies table slots 0-2
-   *  (0x8005be08/bec8/bf6c, dispatched via +0x540 0-2) as the Likely spawn drop-in sequence, but
-   *  its phase transitions are timer-driven from computed/per-borg fields, not one fixed constant. */
-  SPAWN_DURATION: 20,
+  /** Spawn (deploy) controllable lock: 20f descent + 1f phase setup + 15f pose. DERIVED from
+   *  behavior-notes.md (af), table slots 0-2 at 0x8005be08/0x8005bec8/0x8005bf6c. */
+  SPAWN_DURATION: 36,
 } as const;
 
 export const LOCK = {

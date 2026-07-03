@@ -32,7 +32,7 @@ type GaugeInitFile = {
  */
 export interface DamageRecord {
   index: number;
-  /** u16 +0x00 — HP damage. NOT consumed by the port's HP formula yet (kept TUNED there). */
+  /** u16 +0x00 — HP damage consumed by damageFormula.ts / zz_003cd5c_ port. */
   hpDamage: number;
   /** u16 +0x02 — down-gauge damage, scaled x(1+0.5*(attackerLevel-1)); level 0/1 -> x1. */
   downGaugeDamage: number;
@@ -40,8 +40,16 @@ export interface DamageRecord {
   balanceGaugeDamage: number;
   /** u8 +0x05 — combo score added to the victim's combo accumulator (+0x6c8, clamped 0-99). */
   comboScoreValue: number;
+  /** u8 +0x06 — attacker HP-ratio curve selector. */
+  attackerHpCurveIndex: number;
+  /** u8 +0x07 — attacker force-gauge curve selector. */
+  forceGaugeCurveIndex: number;
   /** u8 +0x0b — reaction flags; bits 2|0x80 force a stagger regardless of gauges. */
   reactionFlags: number;
+  /** u16 +0x10 — formula/guard flags. */
+  flagsA: number;
+  /** u16 +0x12 — formula/guard flags. */
+  flagsB: number;
   /** s8 +0x16 — re-hit interval frames (chunk_0013.c:1173). Not consumed by the port yet. */
   rehitIntervalFrames: number;
 }

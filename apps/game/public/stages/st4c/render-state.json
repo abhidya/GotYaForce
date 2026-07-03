@@ -7,7 +7,7 @@
     "inventoryScanner": "scripts/inventory-stage-lighting.mjs",
     "stageManifest": "apps/game/public/stages/st4c/manifest.json",
     "stageManifestId": "st4c",
-    "stageRenderStatus": "dae-complete",
+    "stageRenderStatus": "glb-complete",
     "archiveName": "st4c_mdl.arc",
     "sourcePath": "user-data/GG4E/afs_data/root/st4c_mdl.arc"
   },

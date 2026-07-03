@@ -16,7 +16,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st00",
     "status": "verified-visual-and-collision",
     "modelCount": 40,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -25,7 +25,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st01",
     "status": "verified-visual-and-collision",
     "modelCount": 78,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -34,7 +34,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st02",
     "status": "verified-visual-and-collision",
     "modelCount": 51,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -43,7 +43,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st03",
     "status": "verified-visual-and-collision",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -52,7 +52,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st04",
     "status": "verified-visual-and-collision",
     "modelCount": 52,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -61,7 +61,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st05",
     "status": "verified-visual-and-collision",
     "modelCount": 28,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -70,7 +70,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st06",
     "status": "verified-visual-and-collision",
     "modelCount": 4,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -79,7 +79,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st07",
     "status": "verified-visual-and-collision",
     "modelCount": 4,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -88,7 +88,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st08",
     "status": "verified-visual-and-collision",
     "modelCount": 52,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -97,7 +97,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st09",
     "status": "verified-visual-and-collision",
     "modelCount": 9,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 1
@@ -106,7 +106,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st0a",
     "status": "verified-visual-and-collision",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -115,7 +115,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st0b",
     "status": "verified-visual-and-collision",
     "modelCount": 28,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -124,7 +124,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st0c",
     "status": "verified-visual-and-collision",
     "modelCount": 20,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -133,7 +133,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st0d",
     "status": "verified-visual-and-collision",
     "modelCount": 17,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -142,7 +142,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st0e",
     "status": "verified-visual-and-collision",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -151,7 +151,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st0f",
     "status": "verified-visual-and-collision",
     "modelCount": 13,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 4
@@ -160,7 +160,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st10",
     "status": "verified-visual-and-collision",
     "modelCount": 7,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 0
@@ -169,7 +169,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st20",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 40,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -178,7 +178,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st21",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 78,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -187,7 +187,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st22",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 51,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -196,7 +196,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st23",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -205,7 +205,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st24",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 52,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -214,7 +214,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st25",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 28,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -223,7 +223,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st29",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 9,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -232,7 +232,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st2a",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -241,7 +241,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st2b",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 28,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -250,7 +250,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st2c",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 20,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -259,7 +259,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st2e",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -268,7 +268,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st40",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 40,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -277,7 +277,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st41",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 78,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -286,7 +286,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st42",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 51,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -295,7 +295,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st43",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -304,7 +304,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st44",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 52,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -313,7 +313,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st45",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 28,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -322,7 +322,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st49",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 9,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -331,7 +331,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st4a",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -340,7 +340,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st4b",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 28,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -349,7 +349,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st4c",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 20,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -358,7 +358,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "st4e",
     "status": "visual-exported-no-source-hit-files",
     "modelCount": 43,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 0,
     "setArcCount": 0
@@ -367,7 +367,7 @@ export const EXPORTED_STAGE_CATALOG = [
     "id": "stff",
     "status": "verified-visual-and-collision",
     "modelCount": 83,
-    "renderStatus": "dae-complete",
+    "renderStatus": "glb-complete",
     "visualComplete": true,
     "collisionCount": 3,
     "setArcCount": 0

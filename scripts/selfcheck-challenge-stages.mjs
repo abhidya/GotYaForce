@@ -7,25 +7,23 @@ import {
   createBattle,
   emptyInput,
   floorSurfaceYAt,
-  isFiniteVec,
   JUMP,
-  stageCollisionFromHitGrids,
-  yAtTriangleXZ,
 } from "../packages/combat/dist/index.js";
-import { hitBin } from "../packages/formats/dist/index.js";
 import { CHALLENGE_STAGE_BYTES } from "../packages/missions/dist/index.js";
+import { createNodePublicAssetCatalog, readPublicStageCatalog } from "./lib/node-public-assets.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const assetCatalog = createNodePublicAssetCatalog(repoRoot);
 const FRAMES_PER_STAGE = 1200;
 const GROUND_SNAP_UP = 35;
 
 const borgs = readJson("packages/assets/data/borgs.json").borgs;
-const stageCatalog = readJson("apps/game/public/stages/manifest.json");
+const stageCatalog = readPublicStageCatalog(repoRoot);
 const officialChallengeStageIds = [...new Set(CHALLENGE_STAGE_BYTES.map((byte) => `st${byte.toString(16).padStart(2, "0")}`))];
 
 const summaries = [];
 for (const stageId of officialChallengeStageIds) {
-  const stage = loadStageResources(stageId);
+  const stage = await loadStageResources(stageId);
   const battle = createBattle(
     {
       stageId,
@@ -117,24 +115,14 @@ function assertSaneStage(stageId, stage, battle, frame) {
   }
 }
 
-function loadStageResources(stageId) {
+async function loadStageResources(stageId) {
   const exportedStage = stageCatalog.stages.find((stage) => stage.id === stageId);
   if (!exportedStage) throw new Error(`stage ${stageId} is not in public stage catalog`);
   if (exportedStage.collisionCount <= 0) throw new Error(`stage ${stageId} has no cataloged collision bins`);
-
-  const manifest = readJson(`apps/game/public/stages/${stageId}/manifest.json`);
-  const collisionFiles = [...(manifest.collision ?? [])].sort((a, b) => a.path.localeCompare(b.path));
-  if (collisionFiles.length === 0) throw new Error(`stage ${stageId} manifest has no collision files`);
-
-  const parsed = collisionFiles.map((file) => {
-    const bytes = readFileSync(resolveRepo(`apps/game/public/stages/${stageId}/${file.path}`));
-    return hitBin.parseStageHitGrid(new Uint8Array(bytes));
-  });
-  const first = parsed[0];
-  if (!first) throw new Error(`stage ${stageId} collision parser returned no grids`);
-
-  const resources = stageCollisionFromHitGrids(parsed.map((grid, layerIndex) => ({ grid, layerIndex })));
-  if (!resources) throw new Error(`stage ${stageId} collision assembly returned no resources`);
+  const resources = await assetCatalog.loadStageAssets(stageId);
+  if (!resources.bounds || !resources.collision) {
+    throw new Error(`stage ${stageId} collision assembly returned no resources`);
+  }
   return resources;
 }
 

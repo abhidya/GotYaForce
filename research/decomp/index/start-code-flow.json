@@ -1,0 +1,684 @@
+{
+  "generatedAt": "2026-07-03T07:31:46.612Z",
+  "generatedBy": "scripts/build-decomp-navigation-indexes.mjs",
+  "root": {
+    "address": "0x80003154",
+    "displayName": "start",
+    "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:41",
+    "path": "game/unsorted/80003154_start.c"
+  },
+  "summary": {
+    "totalFunctions": 11972,
+    "reachableFunctions": 876,
+    "reachablePct": "7.32%",
+    "directCallees": 13,
+    "reachableKnownAnchors": 7,
+    "reachableClassMethods": 0,
+    "indirectCallSitesSampled": 3
+  },
+  "directCallees": [
+    {
+      "address": "0x800032b0",
+      "callName": "__init_registers",
+      "displayName": "__init_registers",
+      "route": "sdk/libc",
+      "topics": [],
+      "reachableFunctionsBelow": 1,
+      "path": "sdk/libc/800032b0_init_registers.c"
+    },
+    {
+      "address": "0x80003400",
+      "callName": "gnt4___init_hardware_bl",
+      "displayName": "gnt4-__init_hardware-bl",
+      "route": "sdk/libc",
+      "topics": [],
+      "reachableFunctionsBelow": 21,
+      "path": "sdk/libc/80003400_gnt4-_init_hardware-bl.c"
+    },
+    {
+      "address": "0x80003340",
+      "callName": "zz_0003340_",
+      "displayName": "zz_0003340_",
+      "route": "game/unsorted",
+      "topics": [],
+      "reachableFunctionsBelow": 5,
+      "path": "game/unsorted/80003340_zz_0003340.c"
+    },
+    {
+      "address": "0x80231370",
+      "callName": "FUN_80231370",
+      "displayName": "knockback-targeting_candidate_80231370",
+      "route": "game/combat/knockback",
+      "topics": [
+        "knockback-targeting"
+      ],
+      "reachableFunctionsBelow": 261,
+      "path": "game/combat/knockback/80231370_knockback-targeting_candidate_80231370.c"
+    },
+    {
+      "address": "0x80003140",
+      "callName": "__set_debug_bba",
+      "displayName": "__set_debug_bba",
+      "route": "sdk/libc",
+      "topics": [],
+      "reachableFunctionsBelow": 1,
+      "path": "sdk/libc/80003140_set_debug_bba.c"
+    },
+    {
+      "address": "0x8020ae10",
+      "callName": "zz_020ae10_",
+      "displayName": "zz_020ae10_",
+      "route": "game/ui",
+      "topics": [],
+      "reachableFunctionsBelow": 1,
+      "path": "game/ui/8020ae10_zz_020ae10.c"
+    },
+    {
+      "address": "0x801feda4",
+      "callName": "zz_01feda4_",
+      "displayName": "audio_candidate_801feda4",
+      "route": "game/audio",
+      "topics": [
+        "audio"
+      ],
+      "reachableFunctionsBelow": 173,
+      "path": "game/audio/801feda4_audio_candidate_801feda4.c"
+    },
+    {
+      "address": "0x80003100",
+      "callName": "__check_pad3",
+      "displayName": "__check_pad3",
+      "route": "sdk/libc",
+      "topics": [],
+      "reachableFunctionsBelow": 153,
+      "path": "sdk/libc/80003100_check_pad3.c"
+    },
+    {
+      "address": "0x8000314c",
+      "callName": "zz_000314c_",
+      "displayName": "zz_000314c_",
+      "route": "game/unsorted",
+      "topics": [],
+      "reachableFunctionsBelow": 1,
+      "path": "game/unsorted/8000314c_zz_000314c.c"
+    },
+    {
+      "address": "0x80231408",
+      "callName": "InitMetroTRK_BBA",
+      "displayName": "InitMetroTRK_BBA",
+      "route": "game/combat/knockback",
+      "topics": [
+        "knockback-targeting"
+      ],
+      "reachableFunctionsBelow": 261,
+      "path": "game/combat/knockback/80231408_InitMetroTRK_BBA.c"
+    },
+    {
+      "address": "0x80207464",
+      "callName": "gnt4___init_user_bl",
+      "displayName": "gnt4-__init_user-bl",
+      "route": "sdk/libc",
+      "topics": [],
+      "reachableFunctionsBelow": 2,
+      "path": "sdk/libc/80207464_gnt4-_init_user-bl.c"
+    },
+    {
+      "address": "0x800527d8",
+      "callName": "zz_00527d8_",
+      "displayName": "run_main_game_loop",
+      "route": "game/battle",
+      "topics": [],
+      "reachableFunctionsBelow": 674,
+      "path": "game/battle/800527d8_run_main_game_loop.c"
+    },
+    {
+      "address": "0x802331c4",
+      "callName": "FUN_802331c4",
+      "displayName": "FUN_802331c4",
+      "route": "game/unsorted",
+      "topics": [],
+      "reachableFunctionsBelow": 7,
+      "path": "game/unsorted/802331c4_FUN_802331c4.c"
+    }
+  ],
+  "mainLoop": {
+    "title": "Main game loop",
+    "address": "0x800527d8",
+    "displayName": "run_main_game_loop",
+    "path": "game/battle/800527d8_run_main_game_loop.c",
+    "sourceRef": "research/decomp/ghidra-export/chunk_0006.c:5790",
+    "callees": [
+      {
+        "index": 1,
+        "phase": "pre-loop init",
+        "address": "0x8002a3e4",
+        "callName": "zz_002a3e4_",
+        "displayName": "assets-animation_candidate_8002a3e4",
+        "route": "game/assets/animation",
+        "topics": [
+          "assets-animation"
+        ],
+        "reachableFunctionsBelow": 313,
+        "path": "game/assets/animation/8002a3e4_assets-animation_candidate_8002a3e4.c",
+        "note": ""
+      },
+      {
+        "index": 2,
+        "phase": "pre-loop init",
+        "address": "0x8002a638",
+        "callName": "zz_002a638_",
+        "displayName": "challenge-menu-flow_candidate_8002a638",
+        "route": "game/modes/challenge",
+        "topics": [
+          "challenge-menu-flow",
+          "assets-animation"
+        ],
+        "reachableFunctionsBelow": 243,
+        "path": "game/modes/challenge/8002a638_challenge-menu-flow_candidate_8002a638.c",
+        "note": ""
+      },
+      {
+        "index": 3,
+        "phase": "per-frame loop",
+        "address": "0x8010d450",
+        "callName": "zz_010d450_",
+        "displayName": "zz_010d450_",
+        "route": "game/unsorted",
+        "topics": [],
+        "reachableFunctionsBelow": 57,
+        "path": "game/unsorted/8010d450_zz_010d450.c",
+        "note": ""
+      },
+      {
+        "index": 4,
+        "phase": "per-frame loop",
+        "address": "0x8008c088",
+        "callName": "zz_008c088_",
+        "displayName": "zz_008c088_",
+        "route": "game/systems",
+        "topics": [],
+        "reachableFunctionsBelow": 1,
+        "path": "game/systems/8008c088_zz_008c088.c",
+        "note": ""
+      },
+      {
+        "index": 5,
+        "phase": "per-frame loop",
+        "address": "0x80080278",
+        "callName": "zz_0080278_",
+        "displayName": "zz_0080278_",
+        "route": "game/systems",
+        "topics": [],
+        "reachableFunctionsBelow": 1,
+        "path": "game/systems/80080278_zz_0080278.c",
+        "note": ""
+      },
+      {
+        "index": 6,
+        "phase": "per-frame loop",
+        "address": "0x80052838",
+        "callName": "zz_0052838_",
+        "displayName": "challenge-menu-flow_candidate_80052838",
+        "route": "game/modes/challenge",
+        "topics": [
+          "challenge-menu-flow"
+        ],
+        "reachableFunctionsBelow": 4,
+        "path": "game/modes/challenge/80052838_challenge-menu-flow_candidate_80052838.c",
+        "note": ""
+      },
+      {
+        "index": 7,
+        "phase": "per-frame loop",
+        "address": "0x800e9994",
+        "callName": "zz_00e9994_",
+        "displayName": "zz_00e9994_",
+        "route": "game/unsorted",
+        "topics": [],
+        "reachableFunctionsBelow": 50,
+        "path": "game/unsorted/800e9994_zz_00e9994.c",
+        "note": ""
+      },
+      {
+        "index": 8,
+        "phase": "per-frame loop",
+        "address": "0x8008dbe0",
+        "callName": "zz_008dbe0_",
+        "displayName": "zz_008dbe0_",
+        "route": "game/systems",
+        "topics": [],
+        "reachableFunctionsBelow": 37,
+        "path": "game/systems/8008dbe0_zz_008dbe0.c",
+        "note": ""
+      },
+      {
+        "index": 9,
+        "phase": "per-frame loop",
+        "address": "0x8000a004",
+        "callName": "zz_000a004_",
+        "displayName": "dispatch_pending_io_request",
+        "route": "game/unsorted",
+        "topics": [],
+        "reachableFunctionsBelow": 1,
+        "path": "game/unsorted/8000a004_dispatch_pending_io_request.c",
+        "note": "Dispatches current pending I/O/load request via `PTR_FUN_802c3818`."
+      },
+      {
+        "index": 10,
+        "phase": "per-frame loop",
+        "address": "0x80018b10",
+        "callName": "zz_0018b10_",
+        "displayName": "challenge-menu-flow_candidate_80018b10",
+        "route": "game/modes/challenge",
+        "topics": [
+          "challenge-menu-flow"
+        ],
+        "reachableFunctionsBelow": 21,
+        "path": "game/modes/challenge/80018b10_challenge-menu-flow_candidate_80018b10.c",
+        "note": ""
+      },
+      {
+        "index": 11,
+        "phase": "per-frame loop",
+        "address": "0x800efda8",
+        "callName": "zz_00efda8_",
+        "displayName": "zz_00efda8_",
+        "route": "game/unsorted",
+        "topics": [],
+        "reachableFunctionsBelow": 69,
+        "path": "game/unsorted/800efda8_zz_00efda8.c",
+        "note": ""
+      },
+      {
+        "index": 12,
+        "phase": "per-frame loop",
+        "address": "0x8002a4b0",
+        "callName": "zz_002a4b0_",
+        "displayName": "assets-animation_candidate_8002a4b0",
+        "route": "game/assets/animation",
+        "topics": [
+          "assets-animation"
+        ],
+        "reachableFunctionsBelow": 7,
+        "path": "game/assets/animation/8002a4b0_assets-animation_candidate_8002a4b0.c",
+        "note": ""
+      },
+      {
+        "index": 13,
+        "phase": "per-frame loop",
+        "address": "0x8008c3ac",
+        "callName": "dispatch_global_menu_mode",
+        "displayName": "dispatch_global_menu_mode",
+        "route": "game/modes/global-menu",
+        "topics": [
+          "global-menu-mode",
+          "challenge-menu-flow"
+        ],
+        "reachableFunctionsBelow": 44,
+        "path": "game/modes/global-menu/8008c3ac_dispatch_global_menu_mode.c",
+        "note": "Dispatches current menu/game mode via `PTR_FUN_802da780`."
+      },
+      {
+        "index": 14,
+        "phase": "per-frame loop",
+        "address": "0x800528b4",
+        "callName": "zz_00528b4_",
+        "displayName": "zz_00528b4_",
+        "route": "game/battle",
+        "topics": [],
+        "reachableFunctionsBelow": 109,
+        "path": "game/battle/800528b4_zz_00528b4.c",
+        "note": ""
+      },
+      {
+        "index": 15,
+        "phase": "per-frame loop",
+        "address": "0x800802a8",
+        "callName": "zz_00802a8_",
+        "displayName": "knockback-targeting_candidate_800802a8",
+        "route": "game/combat/knockback",
+        "topics": [
+          "knockback-targeting",
+          "movement-physics"
+        ],
+        "reachableFunctionsBelow": 42,
+        "path": "game/combat/knockback/800802a8_knockback-targeting_candidate_800802a8.c",
+        "note": ""
+      },
+      {
+        "index": 16,
+        "phase": "per-frame loop",
+        "address": "0x8008c2dc",
+        "callName": "zz_008c2dc_",
+        "displayName": "zz_008c2dc_",
+        "route": "game/systems",
+        "topics": [],
+        "reachableFunctionsBelow": 36,
+        "path": "game/systems/8008c2dc_zz_008c2dc.c",
+        "note": ""
+      },
+      {
+        "index": 17,
+        "phase": "per-frame loop",
+        "address": "0x8008c344",
+        "callName": "zz_008c344_",
+        "displayName": "zz_008c344_",
+        "route": "game/systems",
+        "topics": [],
+        "reachableFunctionsBelow": 36,
+        "path": "game/systems/8008c344_zz_008c344.c",
+        "note": ""
+      },
+      {
+        "index": 18,
+        "phase": "per-frame loop",
+        "address": "0x80027c34",
+        "callName": "zz_0027c34_",
+        "displayName": "challenge-menu-flow_candidate_80027c34",
+        "route": "game/modes/challenge",
+        "topics": [
+          "challenge-menu-flow",
+          "knockback-targeting",
+          "movement-physics"
+        ],
+        "reachableFunctionsBelow": 27,
+        "path": "game/modes/challenge/80027c34_challenge-menu-flow_candidate_80027c34.c",
+        "note": ""
+      },
+      {
+        "index": 19,
+        "phase": "per-frame loop",
+        "address": "0x8002a4d4",
+        "callName": "zz_002a4d4_",
+        "displayName": "assets-animation_candidate_8002a4d4",
+        "route": "game/assets/animation",
+        "topics": [
+          "assets-animation"
+        ],
+        "reachableFunctionsBelow": 87,
+        "path": "game/assets/animation/8002a4d4_assets-animation_candidate_8002a4d4.c",
+        "note": ""
+      }
+    ]
+  },
+  "routeCounts": {
+    "sdk/os": 159,
+    "game/ui": 139,
+    "game/unsorted": 132,
+    "game/combat/knockback": 100,
+    "sdk/libc": 90,
+    "sdk/gx": 75,
+    "game/assets/animation": 41,
+    "game/battle/force-setup": 34,
+    "game/physics/movement": 34,
+    "engine/shared": 19,
+    "game/systems": 14,
+    "game/battle": 9,
+    "game/audio": 8,
+    "sdk/audio": 7,
+    "game/modes/challenge": 5,
+    "game/combat": 4,
+    "game/combat/damage": 2,
+    "sdk/math": 2,
+    "game/modes/global-menu": 1,
+    "sdk/hsd": 1
+  },
+  "topicCounts": {
+    "knockback-targeting": 120,
+    "movement-physics": 53,
+    "assets-animation": 44,
+    "force-setup": 34,
+    "audio": 11,
+    "challenge-menu-flow": 6,
+    "damage": 5,
+    "global-menu-mode": 1
+  },
+  "nameSourceCounts": {
+    "symbol": 527,
+    "generated": 274,
+    "evidence-index": 69,
+    "known-anchor": 6
+  },
+  "depthCounts": {
+    "0": 1,
+    "1": 13,
+    "2": 72,
+    "3": 153,
+    "4": 181,
+    "5": 201,
+    "6": 135,
+    "7": 63,
+    "8": 35,
+    "9": 15,
+    "10": 7
+  },
+  "knownAnchors": [
+    {
+      "address": "0x8000a004",
+      "displayName": "dispatch_pending_io_request",
+      "route": "game/unsorted",
+      "topics": [],
+      "path": "game/unsorted/8000a004_dispatch_pending_io_request.c",
+      "shortestPath": [
+        {
+          "address": "0x80003154",
+          "displayName": "start",
+          "path": "game/unsorted/80003154_start.c"
+        },
+        {
+          "address": "0x800527d8",
+          "displayName": "run_main_game_loop",
+          "path": "game/battle/800527d8_run_main_game_loop.c"
+        },
+        {
+          "address": "0x8000a004",
+          "displayName": "dispatch_pending_io_request",
+          "path": "game/unsorted/8000a004_dispatch_pending_io_request.c"
+        }
+      ]
+    },
+    {
+      "address": "0x800527d8",
+      "displayName": "run_main_game_loop",
+      "route": "game/battle",
+      "topics": [],
+      "path": "game/battle/800527d8_run_main_game_loop.c",
+      "shortestPath": [
+        {
+          "address": "0x80003154",
+          "displayName": "start",
+          "path": "game/unsorted/80003154_start.c"
+        },
+        {
+          "address": "0x800527d8",
+          "displayName": "run_main_game_loop",
+          "path": "game/battle/800527d8_run_main_game_loop.c"
+        }
+      ]
+    },
+    {
+      "address": "0x8008c3ac",
+      "displayName": "dispatch_global_menu_mode",
+      "route": "game/modes/global-menu",
+      "topics": [
+        "global-menu-mode",
+        "challenge-menu-flow"
+      ],
+      "path": "game/modes/global-menu/8008c3ac_dispatch_global_menu_mode.c",
+      "shortestPath": [
+        {
+          "address": "0x80003154",
+          "displayName": "start",
+          "path": "game/unsorted/80003154_start.c"
+        },
+        {
+          "address": "0x800527d8",
+          "displayName": "run_main_game_loop",
+          "path": "game/battle/800527d8_run_main_game_loop.c"
+        },
+        {
+          "address": "0x8008c3ac",
+          "displayName": "dispatch_global_menu_mode",
+          "path": "game/modes/global-menu/8008c3ac_dispatch_global_menu_mode.c"
+        }
+      ]
+    },
+    {
+      "address": "0x800e91d4",
+      "displayName": "enqueue_resource_transition_job",
+      "route": "game/unsorted",
+      "topics": [],
+      "path": "game/unsorted/800e91d4_enqueue_resource_transition_job.c",
+      "shortestPath": [
+        {
+          "address": "0x80003154",
+          "displayName": "start",
+          "path": "game/unsorted/80003154_start.c"
+        },
+        {
+          "address": "0x800527d8",
+          "displayName": "run_main_game_loop",
+          "path": "game/battle/800527d8_run_main_game_loop.c"
+        },
+        {
+          "address": "0x80018b10",
+          "displayName": "challenge-menu-flow_candidate_80018b10",
+          "path": "game/modes/challenge/80018b10_challenge-menu-flow_candidate_80018b10.c"
+        },
+        {
+          "address": "0x800e9b08",
+          "displayName": "zz_00e9b08_",
+          "path": "game/unsorted/800e9b08_zz_00e9b08.c"
+        },
+        {
+          "address": "0x800e91d4",
+          "displayName": "enqueue_resource_transition_job",
+          "path": "game/unsorted/800e91d4_enqueue_resource_transition_job.c"
+        }
+      ]
+    },
+    {
+      "address": "0x800e9340",
+      "displayName": "process_resource_transition_queue",
+      "route": "game/unsorted",
+      "topics": [],
+      "path": "game/unsorted/800e9340_process_resource_transition_queue.c",
+      "shortestPath": [
+        {
+          "address": "0x80003154",
+          "displayName": "start",
+          "path": "game/unsorted/80003154_start.c"
+        },
+        {
+          "address": "0x800527d8",
+          "displayName": "run_main_game_loop",
+          "path": "game/battle/800527d8_run_main_game_loop.c"
+        },
+        {
+          "address": "0x800e9994",
+          "displayName": "zz_00e9994_",
+          "path": "game/unsorted/800e9994_zz_00e9994.c"
+        },
+        {
+          "address": "0x800e9340",
+          "displayName": "process_resource_transition_queue",
+          "path": "game/unsorted/800e9340_process_resource_transition_queue.c"
+        }
+      ]
+    },
+    {
+      "address": "0x800e95a4",
+      "displayName": "update_resource_transition_progress",
+      "route": "game/unsorted",
+      "topics": [],
+      "path": "game/unsorted/800e95a4_update_resource_transition_progress.c",
+      "shortestPath": [
+        {
+          "address": "0x80003154",
+          "displayName": "start",
+          "path": "game/unsorted/80003154_start.c"
+        },
+        {
+          "address": "0x800527d8",
+          "displayName": "run_main_game_loop",
+          "path": "game/battle/800527d8_run_main_game_loop.c"
+        },
+        {
+          "address": "0x800e9994",
+          "displayName": "zz_00e9994_",
+          "path": "game/unsorted/800e9994_zz_00e9994.c"
+        },
+        {
+          "address": "0x800e9654",
+          "displayName": "knockback-targeting_candidate_800e9654",
+          "path": "game/combat/knockback/800e9654_knockback-targeting_candidate_800e9654.c"
+        },
+        {
+          "address": "0x800e95a4",
+          "displayName": "update_resource_transition_progress",
+          "path": "game/unsorted/800e95a4_update_resource_transition_progress.c"
+        }
+      ]
+    },
+    {
+      "address": "0x800e99c8",
+      "displayName": "queue_resource_scene_transition",
+      "route": "game/physics/movement",
+      "topics": [
+        "movement-physics"
+      ],
+      "path": "game/physics/movement/800e99c8_queue_resource_scene_transition.c",
+      "shortestPath": [
+        {
+          "address": "0x80003154",
+          "displayName": "start",
+          "path": "game/unsorted/80003154_start.c"
+        },
+        {
+          "address": "0x800527d8",
+          "displayName": "run_main_game_loop",
+          "path": "game/battle/800527d8_run_main_game_loop.c"
+        },
+        {
+          "address": "0x800e9994",
+          "displayName": "zz_00e9994_",
+          "path": "game/unsorted/800e9994_zz_00e9994.c"
+        },
+        {
+          "address": "0x800e9654",
+          "displayName": "knockback-targeting_candidate_800e9654",
+          "path": "game/combat/knockback/800e9654_knockback-targeting_candidate_800e9654.c"
+        },
+        {
+          "address": "0x800e99c8",
+          "displayName": "queue_resource_scene_transition",
+          "path": "game/physics/movement/800e99c8_queue_resource_scene_transition.c"
+        }
+      ]
+    }
+  ],
+  "classMethods": [],
+  "indirectCallSites": [
+    {
+      "address": "0x8000a004",
+      "displayName": "dispatch_pending_io_request",
+      "route": "game/unsorted",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0000.c:4560",
+      "path": "game/unsorted/8000a004_dispatch_pending_io_request.c"
+    },
+    {
+      "address": "0x8008c3ac",
+      "displayName": "dispatch_global_menu_mode",
+      "route": "game/modes/global-menu",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0013.c:2617",
+      "path": "game/modes/global-menu/8008c3ac_dispatch_global_menu_mode.c"
+    },
+    {
+      "address": "0x800e9340",
+      "displayName": "process_resource_transition_queue",
+      "route": "game/unsorted",
+      "sourceRef": "research/decomp/ghidra-export/chunk_0025.c:1015",
+      "path": "game/unsorted/800e9340_process_resource_transition_queue.c"
+    }
+  ]
+}

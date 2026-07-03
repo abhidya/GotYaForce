@@ -1,0 +1,198 @@
+{
+  "schema": "gotyaforce.assetRuntimeCapturePlan.v1",
+  "generated": "2026-07-03",
+  "region": "GG4E / USA",
+  "authority": [
+    "research/symbols/GG4E-CSM-20220412.map",
+    "research/decomp/organized/_map.tsv",
+    "research/decomp/ghidra-export/_index.tsv",
+    "research/decomp/organized/game/unsorted/800f036c_zz_00f036c.c",
+    "research/decomp/ghidra-export/chunk_0079.c",
+    "research/decomp/ghidra-export/chunk_0055.c",
+    "research/decomp/ghidra-export/chunk_0048.c"
+  ],
+  "notes": [
+    "Use this plan with scripts/dolphin-gdb-trace.mjs --plan. It intentionally separates state, archive, high-level audio cue, and low-level AFS sinks.",
+    "High confidence requires a short capture window plus LR/caller correlation; do not infer semantic asset use from a lone low-level sink hit."
+  ],
+  "groups": [
+    {
+      "name": "asset-challenge-state",
+      "event_window": "Run from main-menu Challenge selection through one battle and result transition. This identifies which original state function owns the visible frontend screen.",
+      "breakpoints": [
+        {
+          "id": "challenge-dispatch-state-table",
+          "type": "execute",
+          "address": "0x80195f2c",
+          "symbol": "dispatch_challenge_flow_state",
+          "event": "Challenge state-table dispatch; capture current LR/caller cadence around screen transitions."
+        },
+        {
+          "id": "challenge-poll-menu-selection",
+          "type": "execute",
+          "address": "0x80196030",
+          "symbol": "poll_challenge_menu_selection",
+          "event": "Challenge menu selection polling."
+        },
+        {
+          "id": "challenge-load-box-state",
+          "type": "execute",
+          "address": "0x80196188",
+          "symbol": "challenge-menu-flow_candidate_80196188",
+          "event": "Load Box state."
+        },
+        {
+          "id": "challenge-build-battle-setup",
+          "type": "execute",
+          "address": "0x801962c4",
+          "symbol": "build_challenge_battle_setup / challenge_force_slot_team_setup",
+          "event": "Force/team/stage battle setup before battle entry."
+        },
+        {
+          "id": "challenge-battle-load-wait",
+          "type": "execute",
+          "address": "0x801968cc",
+          "symbol": "challenge-menu-flow_candidate_801968cc",
+          "event": "Battle load/wait state."
+        },
+        {
+          "id": "challenge-battle-run",
+          "type": "execute",
+          "address": "0x80196948",
+          "symbol": "challenge-menu-flow_candidate_80196948",
+          "event": "Battle running state."
+        },
+        {
+          "id": "challenge-post-battle",
+          "type": "execute",
+          "address": "0x801969a0",
+          "symbol": "challenge-menu-flow_candidate_801969a0",
+          "event": "Post-battle result transition."
+        },
+        {
+          "id": "challenge-clear-branch",
+          "type": "execute",
+          "address": "0x80196a9c",
+          "symbol": "challenge-menu-flow_candidate_80196a9c",
+          "event": "Challenge clear branch."
+        },
+        {
+          "id": "challenge-fail-branch",
+          "type": "execute",
+          "address": "0x80196cec",
+          "symbol": "challenge-menu-flow_candidate_80196cec",
+          "event": "Challenge fail branch."
+        },
+        {
+          "id": "challenge-select-stage",
+          "type": "execute",
+          "address": "0x80196dac",
+          "symbol": "challenge-menu-flow_candidate_80196dac",
+          "event": "Challenge stage byte/subtable/variant selection."
+        }
+      ]
+    },
+    {
+      "name": "asset-archive-flow",
+      "event_window": "Run only while entering a screen or stage whose UI/HSD assets need proof. Keep max-hits low and trigger one transition per capture.",
+      "breakpoints": [
+        {
+          "id": "dvd-open",
+          "type": "execute",
+          "address": "0x8020d1ec",
+          "symbol": "gnt4-DVDOpen-bl",
+          "event": "Disc file open; r3 is expected to point at a path/name."
+        },
+        {
+          "id": "dvd-read-async-prio",
+          "type": "execute",
+          "address": "0x8020d4fc",
+          "symbol": "gnt4-DVDReadAsyncPrio-bl",
+          "event": "Async disc read after a file has opened."
+        },
+        {
+          "id": "fst-load",
+          "type": "execute",
+          "address": "0x8021051c",
+          "symbol": "gnt4-__fstLoad-bl",
+          "event": "Filesystem table/name load boundary."
+        },
+        {
+          "id": "hsd-archive-parse-wrapper-primary",
+          "type": "execute",
+          "address": "0x80006c88",
+          "symbol": "zz_0006c88_ / HSD archive parse-public wrapper",
+          "event": "Game wrapper around HSD archive parse/public address lookup."
+        },
+        {
+          "id": "hsd-archive-parse-wrapper-secondary",
+          "type": "execute",
+          "address": "0x8004d548",
+          "symbol": "zz_004d548_ / secondary HSD archive parse wrapper",
+          "event": "Secondary game wrapper around HSD archive parse."
+        },
+        {
+          "id": "hsd-archive-parse",
+          "type": "execute",
+          "address": "0x8025b00c",
+          "symbol": "gnt4-HSD_ArchiveParse-bl",
+          "event": "Raw HSD archive parse import."
+        },
+        {
+          "id": "hsd-archive-public-address",
+          "type": "execute",
+          "address": "0x8025b1b0",
+          "symbol": "gnt4-HSD_ArchiveGetPublicAddress-bl",
+          "event": "Raw HSD public symbol lookup; r4 often points at the public name."
+        }
+      ]
+    },
+    {
+      "name": "asset-audio-high",
+      "event_window": "Use during a single action/menu/event to map original cue id requests and their LR callers. This is the first audio pass.",
+      "breakpoints": [
+        {
+          "id": "positional-sfx-request",
+          "type": "execute",
+          "address": "0x800f036c",
+          "symbol": "zz_00f036c_ / positional SFX request wrapper",
+          "event": "High-level SFX request; r3 is actor or 0, r4 is cue id."
+        },
+        {
+          "id": "sequence-audio-continue",
+          "type": "execute",
+          "address": "0x801c7b68",
+          "symbol": "sndSeqContinue",
+          "event": "Sequence/audio continuation path. Noisy; use low max-hits."
+        }
+      ]
+    },
+    {
+      "name": "asset-audio-afs-sinks",
+      "event_window": "Use after asset-audio-high identifies an event. This resolves low-level AFS member/range arguments from regs and stack.",
+      "breakpoints": [
+        {
+          "id": "mwply-start-afs-loop-entry",
+          "type": "execute",
+          "address": "0x802aa17c",
+          "symbol": "zz_02aa17c_ / mwPlyStartAfsLp + mwPlyEntryAfs path",
+          "event": "Low-level looped AFS start or AFS entry path; inspect regs and stack words for handle/index/range."
+        },
+        {
+          "id": "mwply-start-afs",
+          "type": "execute",
+          "address": "0x802ae1e0",
+          "symbol": "zz_02ae1e0_ / mwPlyStartAfs + ADXF_GetFnameRangeEx path",
+          "event": "Low-level AFS start path; inspect regs and stack words for AFS index/range."
+        },
+        {
+          "id": "mwply-set-audio-switch",
+          "type": "execute",
+          "address": "0x802af560",
+          "symbol": "zz_02af560_ / mwPlySetAudioSw path",
+          "event": "Audio switch/state path; useful for correlating handle state, not member identity alone."
+        }
+      ]
+    }
+  ]
+}

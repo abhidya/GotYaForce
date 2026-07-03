@@ -34,7 +34,7 @@ for (const entry of sortedDirEntries(stagesRoot)) {
   const rawManifestPath = path.join(stageDir, "manifest.json");
   const rawManifest = readJsonIfExists(rawManifestPath).value ?? {};
   const models = sortedDirEntries(modelDir)
-    .filter((modelEntry) => modelEntry.isFile() && /^model_\d+\.dae$/i.test(modelEntry.name))
+    .filter((modelEntry) => modelEntry.isFile() && /^model_\d+\.glb$/i.test(modelEntry.name))
     .map((modelEntry) => fileRecord(path.join(modelDir, modelEntry.name), stageDir));
   const textures = sortedDirEntries(modelDir)
     .filter((textureEntry) => textureEntry.isFile() && /\.(png|tpl)$/i.test(textureEntry.name))
@@ -49,26 +49,26 @@ for (const entry of sortedDirEntries(stagesRoot)) {
   const exportSummaryPath = path.join(modelDir, VISUAL_EXPORT_SUMMARY);
   const exportSummary = readJsonIfExists(exportSummaryPath);
   const modelIndices = models
-    .map((model) => path.basename(model.path).match(/^model_([0-9]+)\.dae$/i))
+    .map((model) => path.basename(model.path).match(/^model_([0-9]+)\.glb$/i))
     .filter(Boolean)
     .map((match) => Number(match[1]))
     .sort((a, b) => a - b);
   const maxModelIndex = modelIndices.length > 0 ? modelIndices.at(-1) : null;
   const missingModelIndices =
     maxModelIndex == null ? [] : range(0, maxModelIndex).filter((index) => !modelIndices.includes(index));
-  const zeroByteDaeFiles = models.filter((model) => model.bytes === 0).map((model) => model.path);
-  const expectedDaeIndices = expectedDaeIndicesFromSummary(exportSummary.value, modelIndices);
-  const missingExpectedDaeIndices = expectedDaeIndices.filter((index) => !modelIndices.includes(index));
-  const unexpectedDaeIndices = modelIndices.filter(
-    (index) => expectedDaeIndices.length > 0 && !expectedDaeIndices.includes(index),
+  const zeroByteGlbFiles = models.filter((model) => model.bytes === 0).map((model) => model.path);
+  const expectedGlbIndices = expectedGlbIndicesFromSummary(exportSummary.value, modelIndices);
+  const missingExpectedGlbIndices = expectedGlbIndices.filter((index) => !modelIndices.includes(index));
+  const unexpectedGlbIndices = modelIndices.filter(
+    (index) => expectedGlbIndices.length > 0 && !expectedGlbIndices.includes(index),
   );
   const failedModelIndices = numericArray(exportSummary.value?.failedModelIndices);
   const skippedNullRootJointIndices = numericArray(exportSummary.value?.skippedNullRootJointIndices);
-  const hasCompleteDaeExport =
+  const hasCompleteGlbExport =
     models.length > 0 &&
-    zeroByteDaeFiles.length === 0 &&
-    missingExpectedDaeIndices.length === 0 &&
-    unexpectedDaeIndices.length === 0 &&
+    zeroByteGlbFiles.length === 0 &&
+    missingExpectedGlbIndices.length === 0 &&
+    unexpectedGlbIndices.length === 0 &&
     exportSummary.ok &&
     exportSummary.value?.complete === true &&
     failedModelIndices.length === 0;
@@ -84,17 +84,17 @@ for (const entry of sortedDirEntries(stagesRoot)) {
     (file) => !collision.some((exported) => path.basename(exported.path).toLowerCase() === file.toLowerCase()),
   );
   const visual = {
-    hasDaePieces: models.length > 0 && zeroByteDaeFiles.length === 0,
-    hasContiguousDaeSequence: models.length > 0 && zeroByteDaeFiles.length === 0 && missingModelIndices.length === 0,
-    hasCompleteDaeExport,
-    daeCount: models.length,
-    nonEmptyDaeCount: models.filter((model) => model.bytes > 0).length,
+    hasGlbPieces: models.length > 0 && zeroByteGlbFiles.length === 0,
+    hasContiguousGlbSequence: models.length > 0 && zeroByteGlbFiles.length === 0 && missingModelIndices.length === 0,
+    hasCompleteGlbExport,
+    glbCount: models.length,
+    nonEmptyGlbCount: models.filter((model) => model.bytes > 0).length,
     maxModelIndex,
     missingModelIndices,
-    expectedDaeIndices,
-    missingExpectedDaeIndices,
-    unexpectedDaeIndices,
-    zeroByteDaeFiles,
+    expectedGlbIndices,
+    missingExpectedGlbIndices,
+    unexpectedGlbIndices,
+    zeroByteGlbFiles,
     textureCount: textures.length,
     exportSummary: {
       path: path.relative(stageDir, exportSummaryPath).replaceAll("\\", "/"),
@@ -103,7 +103,7 @@ for (const entry of sortedDirEntries(stagesRoot)) {
       error: exportSummary.error,
       exporter: exportSummary.value?.exporter ?? null,
       expectedSlotCount: exportSummary.value?.expectedSlotCount ?? null,
-      expectedDaeCount: exportSummary.value?.expectedDaeCount ?? expectedDaeIndices.length,
+      expectedGlbCount: exportSummary.value?.expectedDaeCount ?? expectedGlbIndices.length,
       exportedModelCount: exportSummary.value?.exportedModelCount ?? null,
       failedModelIndices,
       skippedNullRootJointIndices,
@@ -121,8 +121,9 @@ for (const entry of sortedDirEntries(stagesRoot)) {
       missingSourceHitFiles,
     },
   });
-  const renderStatus = hasCompleteDaeExport ? "dae-complete" : models.length > 0 ? "dae-partial" : "raw-only";
+  const renderStatus = hasCompleteGlbExport ? "glb-complete" : models.length > 0 ? "glb-partial" : "raw-only";
 
+  const notes = sanitizeRuntimeNotes(rawManifest.notes);
   const manifest = {
     ...rawManifest,
     region,
@@ -137,6 +138,7 @@ for (const entry of sortedDirEntries(stagesRoot)) {
     collision,
     setArcs,
     renderStatus,
+    ...(notes.length > 0 ? { notes } : {}),
   };
   fs.writeFileSync(path.join(stageDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
   stages.push({
@@ -144,7 +146,7 @@ for (const entry of sortedDirEntries(stagesRoot)) {
     status,
     modelCount: models.length,
     renderStatus,
-    visualComplete: hasCompleteDaeExport,
+    visualComplete: hasCompleteGlbExport,
     collisionCount: collision.length,
     setArcCount: setArcs.length,
   });
@@ -177,13 +179,13 @@ function inspectSource(code) {
 }
 
 function verifiedStatus(record) {
-  if (!record.visual.hasDaePieces) return "missing-visual-dae";
-  if (record.visual.zeroByteDaeFiles.length > 0) return "partial-visual-zero-byte-dae";
+  if (!record.visual.hasGlbPieces) return "missing-visual-glb";
+  if (record.visual.zeroByteGlbFiles.length > 0) return "partial-visual-zero-byte-glb";
   if (!record.visual.exportSummary.exists) return "partial-visual-export-unverified";
   if (record.visual.exportSummary.exists && record.visual.exportSummary.failedModelIndices.length > 0) {
     return "partial-visual-export-failed";
   }
-  if (!record.visual.hasCompleteDaeExport) return "partial-visual-dae-missing-slots";
+  if (!record.visual.hasCompleteGlbExport) return "partial-visual-glb-missing-slots";
   if (
     (record.source.hasStageArc && !record.raw.stageArcMatchesSource) ||
     (record.source.hasStagePzz && !record.raw.stagePzzMatchesSource)
@@ -221,7 +223,7 @@ function readJsonIfExists(file) {
   }
 }
 
-function expectedDaeIndicesFromSummary(summary, modelIndices) {
+function expectedGlbIndicesFromSummary(summary, modelIndices) {
   const expected = numericArray(summary?.expectedDaeIndices);
   if (expected.length > 0) return expected;
   const maxModelIndex = modelIndices.length > 0 ? modelIndices.at(-1) : null;
@@ -236,4 +238,13 @@ function numericArray(value) {
 
 function range(start, endInclusive) {
   return Array.from({ length: endInclusive - start + 1 }, (_, index) => start + index);
+}
+
+function sanitizeRuntimeNotes(notes) {
+  if (!Array.isArray(notes)) return [];
+  return notes.map((note) =>
+    typeof note === "string"
+      ? note.replace("Visual DAE pieces are imported render assets", "Visual GLB pieces are imported render assets")
+      : note,
+  );
 }

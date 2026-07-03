@@ -12,51 +12,37 @@
 //   MainMenu -> (edit-force) -> ForceBuilder -> back to menu
 //   PauseMenu overlays the battle on Start/Esc.
 //
-// The existing three.js scene, stage rendering, lighting, camera, the Collada
-// model loader, and the baked-clip builder are REUSED. The netcode `ws` hooks are
+// The existing three.js scene, stage rendering, lighting, camera, the centralized
+// render asset loader, and the baked-clip builder are REUSED. The netcode `ws` hooks are
 // preserved (defined but dormant) so multiplayer can be wired next.
 
 import * as THREE from "three";
-import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader.js";
-import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
-
-import borgs from "../../../packages/assets/data/borgs.json";
 
 import {
   createPublicAssetCatalog,
-  readBorgRoster,
-  type BorgAssetEntry,
   type ModelManifestEntry,
-  type StageManifest,
+  type StageAssets,
 } from "@gf/assets";
 import { createScreenHost, startFixedStepLoop, startRenderLoop } from "@gf/core";
-import { createThreeViewport } from "@gf/render";
 import {
-  setBorgStats,
-  actionProfileForProfile,
-  buildProfile,
-  createBattle,
-  DEFAULT_BOUNDS,
+  createThreeAssetLoader,
+  createThreeViewport,
+  prepareImportedModel,
+} from "@gf/render";
+import {
   emptyInput,
-  stageCollisionFromHitGrids,
   type Battle,
-  type BorgStats,
   type BorgRuntime,
   type PlayerInput,
   type RectStageBounds,
-  type StageCollision,
 } from "@gf/combat";
 import { createAudioManager, type GotchaAudioManager } from "@gf/audio";
-import { hitBin } from "@gf/formats";
 import {
   createChallengeRun,
   computeResults,
   playerIdFor,
-  stageIdForBattleConfig,
-  toCombatBattleConfig,
   type ChallengeRun,
   type BattleConfig as MissionBattleConfig,
-  type BattleOutcome,
   type BattleResults,
 } from "@gf/missions";
 
@@ -73,7 +59,6 @@ import {
   createPauseMenu,
   createBattleHud,
   type MainMenuMode,
-  type ForceBorg,
   type ForceSlot,
   type BattleHudHandle,
 } from "./ui/index.js";
@@ -85,11 +70,18 @@ import {
   EXPORTED_STAGE_CATALOG,
   isExportedStageId,
 } from "./sim/adapter.js";
+import { createBattleBootstrap } from "./sim/battleBootstrap.js";
 import { BattleScene, type AnimSlot } from "./sim/battleScene.js";
+import { BORG_CATALOG, DEFAULT_LEAD } from "./sim/borgCatalog.js";
 import { BattleCamera } from "./sim/camera.js";
 import {
+  activeBorgForPlayer,
+  battleEnergyMaxima,
+  battleOutcomeFromState,
+  battlePresentationState,
+  battleSceneState,
   battleAudioEvents,
-  battleHudState,
+  liveActorPositions as battleLiveActorPositions,
   snapshotBattleAudio,
   type BattleEventCue,
 } from "./sim/presentation.js";
@@ -98,31 +90,7 @@ import {
 // Data
 // ------------------------------------------------------------------------------------------
 
-const allBorgs = readBorgRoster(borgs as { borgs: BorgAssetEntry[] });
-
-// Register the per-borg stat table with the sim once.
-setBorgStats(allBorgs as unknown as BorgStats[]);
-const BORG_PROFILES = new Map(
-  (allBorgs as unknown as BorgStats[]).map((borg) => [borg.id, buildProfile(borg)] as const),
-);
-
-// The force-builder catalog (id, name, energy), grouped by tribe then cost.
-const FORCE_CATALOG: ForceBorg[] = [...allBorgs]
-  .sort(
-    (a, b) =>
-      (a.tribe ?? "").localeCompare(b.tribe ?? "") ||
-      a.energy - b.energy ||
-      a.name.localeCompare(b.name),
-  )
-  .map((b) => ({ id: b.id, name: b.name, energy: b.energy }));
-
-const DEFAULT_LEAD = "pl0615"; // G Red — fully animated, used as a sensible default.
-const FORCE_BY_ID = new Map(FORCE_CATALOG.map((entry) => [entry.id, entry] as const));
-const DEFAULT_FORCE_SLOTS: ForceSlot[] = [
-  { no: 1, name: "G RED FORCE", borgIds: [DEFAULT_LEAD] },
-  { no: 2, name: "DEATH BORG FORCE", borgIds: ["pl0008", "pl000c"] },
-  { no: 3, name: "GUN BORG FORCE", borgIds: ["pl0102", "pl0104"] },
-];
+const FORCE_CATALOG = BORG_CATALOG.forceCatalog;
 
 // Exported ADX->OGG cues from poq_adx_usa.afs. Exact Challenge cue semantics
 // still need DOL trace confirmation, so these are conservative asset-backed
@@ -219,12 +187,11 @@ function selectedForce(): string[] {
 }
 
 function forceFromSlot(slot: ForceSlot): string[] {
-  const valid = slot.borgIds.filter((id) => FORCE_BY_ID.has(id));
-  return valid.length > 0 ? valid : [DEFAULT_LEAD];
+  return BORG_CATALOG.forceFromSlot(slot);
 }
 
 function selectedForceSlot(): ForceSlot {
-  return flow.forceSlots[flow.selectedForceSlot] ?? flow.forceSlots[0] ?? DEFAULT_FORCE_SLOTS[0]!;
+  return flow.forceSlots[flow.selectedForceSlot] ?? flow.forceSlots[0] ?? BORG_CATALOG.defaultForceSlots[0]!;
 }
 
 function forceSlotForPlayer(playerIndex: number): ForceSlot {
@@ -236,14 +203,14 @@ function forceSlotForPlayer(playerIndex: number): ForceSlot {
 
 function updateSelectedForceSlot(borgIds: readonly string[]): void {
   const slot = selectedForceSlot();
-  const valid = borgIds.filter((id) => FORCE_BY_ID.has(id));
+  const valid = borgIds.filter((id) => BORG_CATALOG.forceById.has(id));
   flow.forceSlots[flow.selectedForceSlot] = {
     ...slot,
     borgIds: valid.length > 0 ? [...valid] : [DEFAULT_LEAD],
   };
 }
 
-// Borgs that have a verified Collada model in the library (or the pl0615 special path).
+// Borgs that have a verified GLB model in the library (or the pl0615 special path).
 const LIBRARY_IDS = new Set<string>();
 // Filled from the manifest at load time.
 
@@ -254,8 +221,8 @@ const LIBRARY_IDS = new Set<string>();
 // DERIVED: fov/near/far/fog/ambient/light values below are read directly from st00_mdl.arc's
 // scene CObj/LObj/Fog tables (research/asset-inventory/stage-lighting-render-state.md — Camera
 // section: eye/interest/near=10/far=80000/fov=43.191872; Fog section: start=900/end=40000).
-// Per-stage overrides (StageRenderState.camera) may replace fov/near/far at runtime; this object
-// is only the fallback default. Camera *position* (as opposed to fov/near/far) is NOT derived
+// Per-stage render-state replaces fov/near/far at runtime; this object only seeds the scene
+// before the first stage finishes loading. Camera *position* (as opposed to fov/near/far) is NOT derived
 // from this table — that's the separate follow-camera logic in sim/camera.ts.
 const DEFAULT_RENDER_STATE = {
   fogColor: 0xfff6e5,
@@ -267,11 +234,6 @@ const DEFAULT_RENDER_STATE = {
   ambientColor: 0xd8d0c2,
   lightColor: 0xfff0e6,
   lightPosition: new THREE.Vector3(-385.512512, 956.0448, -377.986603),
-};
-
-type StageResources = {
-  bounds: RectStageBounds | undefined;
-  collision: StageCollision | undefined;
 };
 
 type StageColorRecord = { rgbHex?: string };
@@ -298,12 +260,12 @@ if (!uiElement) throw new Error("Missing #ui");
 const ui = uiElement;
 const screenHost = createScreenHost(ui);
 ui.style.pointerEvents = "auto"; // the UI component library uses real buttons.
-const ENABLE_BATTLE_DEBUG_DATASET = new URLSearchParams(window.location.search).has("debugBattle");
+const urlParams = new URLSearchParams(window.location.search);
+const ENABLE_BATTLE_DEBUG_DATASET = urlParams.has("debugBattle");
+const ENABLE_RENDER_DEBUG = urlParams.has("debugRender") || urlParams.has("capture");
 
-// preserveDrawingBuffer lets us snapshot the canvas via toDataURL for headless
-// verification (the preview tab is backgrounded so rAF render is throttled).
 const viewport = createThreeViewport(canvas, {
-  preserveDrawingBuffer: true,
+  debugCapture: ENABLE_RENDER_DEBUG,
   clearColor: DEFAULT_RENDER_STATE.fogColor,
   camera: {
     fov: DEFAULT_RENDER_STATE.fov,
@@ -313,6 +275,9 @@ const viewport = createThreeViewport(canvas, {
   },
 });
 const { scene, camera, controls } = viewport;
+const renderAssets = createThreeAssetLoader({
+  enableFileCache: true,
+});
 scene.fog = new THREE.Fog(DEFAULT_RENDER_STATE.fogColor, DEFAULT_RENDER_STATE.fogNear, DEFAULT_RENDER_STATE.fogFar);
 
 import {
@@ -335,7 +300,7 @@ let modelManifest: ModelManifestEntry[] = [];
 const assetCatalog = createPublicAssetCatalog();
 
 // --- model + clip caches (reused by the BattleScene via the asset hooks) ---
-const sourceModels = new Map<string, Promise<THREE.Object3D | null>>();
+const sourceModels = new Map<string, Promise<THREE.Object3D>>();
 const clipCache = new Map<string, Promise<THREE.AnimationClip | null>>();
 
 type BakedClip = {
@@ -384,53 +349,35 @@ function buildClip(json: BakedClip): THREE.AnimationClip {
   return new THREE.AnimationClip(json.name ?? "mot", json.frameCount / fps, tracks);
 }
 
-function normalizeModel(model: THREE.Object3D): void {
-  model.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(model);
-  const center = new THREE.Vector3();
-  box.getCenter(center);
-  model.position.x -= center.x;
-  model.position.z -= center.z;
-  model.position.y -= box.min.y;
-  model.traverse((object) => {
-    if (object instanceof THREE.Mesh || object instanceof THREE.SkinnedMesh) {
-      object.frustumCulled = false;
-      const materials = Array.isArray(object.material) ? object.material : [object.material];
-      for (const material of materials) {
-        material.side = THREE.DoubleSide;
-        if ("metalness" in material) (material as THREE.MeshStandardMaterial).metalness = 0;
-      }
-    }
-  });
-}
-
-/** Resolve the .dae url for a borg id (pl0615 has a special path; others come from the library). */
-function modelUrlFor(id: string): string | null {
-  if (id === DEFAULT_LEAD) return "/models/pl0615/model_00.dae";
-  if (!LIBRARY_IDS.has(id)) return null;
+/** Resolve the production model url for a borg id (pl0615 has a special path; others come from the library). */
+function modelUrlFor(id: string): string {
+  if (id === DEFAULT_LEAD) return "/models/pl0615/model_00.glb";
+  if (!LIBRARY_IDS.has(id)) throw new Error(`No production model is registered for ${id}`);
   const entry = modelManifest.find((e) => e.id === id);
-  return `/models/library/${id}/${entry?.dae ?? `${id}.dae`}`;
+  if (!entry) throw new Error(`No production model manifest entry for ${id}`);
+  if (!entry.glb) throw new Error(`No production GLB model file for ${id}`);
+  return `/models/library/${id}/${entry.glb}`;
 }
 
 /** Load (and cache) a cloneable SOURCE model for a borg id. Returns a fresh clone per call. */
-async function loadBorgModel(id: string): Promise<THREE.Object3D | null> {
+async function loadBorgModel(id: string): Promise<THREE.Object3D> {
   let sourceP = sourceModels.get(id);
   if (!sourceP) {
     const url = modelUrlFor(id);
-    sourceP = url
-      ? new ColladaLoader()
-          .loadAsync(url)
-          .then((c) => {
-            normalizeModel(c.scene);
-            return c.scene as THREE.Object3D;
-          })
-          .catch(() => null)
-      : Promise.resolve(null);
+    sourceP = renderAssets.loadGlbScene(url).then((model) => {
+      prepareImportedModel(model, {
+        centerXZ: true,
+        groundY: true,
+        materialSide: THREE.DoubleSide,
+        metalness: 0,
+        culling: "skinned-disabled",
+      });
+      return model;
+    });
     sourceModels.set(id, sourceP);
   }
   const source = await sourceP;
-  if (!source) return null;
-  return clone(source);
+  return renderAssets.cloneModel(source);
 }
 
 const animIndexCache = new Map<string, Promise<AnimIndex | null>>();
@@ -756,22 +703,16 @@ const battleScene = new BattleScene(battleRoot, {
   onSlotEnter: (_borgId, slot) => playCombatSfx(slot),
 });
 const battleCamera = new BattleCamera({ camera, controlsTarget: controls.target });
-const fallbackStageBounds: RectStageBounds = {
-  minX: -DEFAULT_BOUNDS.x,
-  maxX: DEFAULT_BOUNDS.x,
-  minZ: -DEFAULT_BOUNDS.z,
-  maxZ: DEFAULT_BOUNDS.z,
-};
 
 // ------------------------------------------------------------------------------------------
 // Stage loading (preserved)
 // ------------------------------------------------------------------------------------------
 
-function applyStageRenderState(rs: StageRenderState | null): void {
+function applyStageRenderState(rs: StageRenderState): void {
   // Delegates to the canonical module (validated 40/40 against on-disk render-state.json;
   // identical output for 39 stages, stff additionally gains its second directional). The
   // local StageRenderState type is a looser shape of the module's; same on-disk data.
-  const resolved = applyStageRenderStateLighting(scene, stageLighting, rs as LightingStageRenderState | null);
+  const resolved = applyStageRenderStateLighting(scene, stageLighting, rs as LightingStageRenderState);
   camera.fov = resolved.camera.fovDegrees;
   camera.near = resolved.camera.near;
   camera.far = resolved.camera.far;
@@ -779,100 +720,26 @@ function applyStageRenderState(rs: StageRenderState | null): void {
 }
 
 let loadedStageId: string | null = null;
-let loadedStageResources: StageResources = { bounds: undefined, collision: undefined };
-function stageModelPaths(manifest: StageManifest): string[] {
-  if (Array.isArray(manifest.models) && manifest.models.length > 0) {
-    return manifest.models.map((m) => m.path);
-  }
+let loadedStageAssets: StageAssets<StageRenderState> | null = null;
 
-  const indices = manifest.visual?.expectedDaeIndices;
-  if (indices && indices.length > 0) {
-    return indices.map((i) => `model/model_${String(i).padStart(2, "0")}.dae`);
-  }
-
-  const count = manifest.visual?.daeCount ?? 0;
-  return Array.from({ length: count }, (_, i) => `model/model_${String(i).padStart(2, "0")}.dae`);
-}
-
-async function loadStageCollision(stageId: string, manifest: StageManifest): Promise<StageResources> {
-  const collisionFiles = [...(manifest.collision ?? [])].sort((a, b) => a.path.localeCompare(b.path));
-  if (collisionFiles.length === 0) {
-    const fallbackId = baseCollisionStageId(stageId);
-    if (fallbackId && fallbackId !== stageId && isExportedStageId(fallbackId)) {
-      const fallbackManifest = await assetCatalog.loadStageManifest(fallbackId);
-      return loadStageCollision(fallbackId, fallbackManifest);
-    }
-    return { bounds: undefined, collision: undefined };
-  }
-
-  try {
-    const parsed = [];
-    for (const file of collisionFiles) {
-      const response = await fetch(assetCatalog.stageAssetUrl(stageId, file.path));
-      if (!response.ok) continue;
-      parsed.push({
-        path: file.path,
-        layerIndex: layerIndexFromCollisionPath(file.path),
-        grid: hitBin.parseStageHitGrid(await response.arrayBuffer()),
-      });
-    }
-    const resources = stageCollisionFromHitGrids(parsed);
-    return resources ?? { bounds: undefined, collision: undefined };
-  } catch (error) {
-    console.warn(`Failed to parse stage collision for ${stageId}`, error);
-    return { bounds: undefined, collision: undefined };
-  }
-}
-
-function layerIndexFromCollisionPath(path: string): number | null {
-  const match = /hit[0-9a-f]{2}([0-2])\.bin$/i.exec(path);
-  return match ? Number(match[1]) : null;
-}
-
-function baseCollisionStageId(stageId: string): string | null {
-  const match = /^st([0-9a-f]{2})$/i.exec(stageId);
-  if (!match) return null;
-  const byteHex = match[1];
-  if (!byteHex) return null;
-  const byte = Number.parseInt(byteHex, 16);
-  if (!Number.isFinite(byte) || byte < 0x20 || byte >= 0x60) return null;
-  return `st${(byte & 0x1f).toString(16).padStart(2, "0")}`;
-}
-
-async function loadStage(stageId: string): Promise<StageResources> {
+async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>> {
   if (!isExportedStageId(stageId)) throw new Error(`Stage is not exported: ${stageId}`);
-  if (loadedStageId === stageId) return loadedStageResources;
+  if (loadedStageId === stageId && loadedStageAssets) return loadedStageAssets;
   stageRoot.clear();
-  const [manifest, renderState] = await Promise.all([
-    assetCatalog.loadStageManifest(stageId),
-    assetCatalog.loadStageRenderState<StageRenderState>(stageId),
-  ]);
-  applyStageRenderState(renderState);
-  const resources = await loadStageCollision(stageId, manifest);
-  const loader = new ColladaLoader();
-  const urls = stageModelPaths(manifest).map((path) => assetCatalog.stageAssetUrl(stageId, path));
-  const results = await Promise.allSettled(urls.map((u) => loader.loadAsync(u)));
-  let loaded = 0;
-  for (const result of results) {
-    if (result.status !== "fulfilled") continue;
-    const model = result.value.scene;
-    model.traverse((object) => {
-      if (object instanceof THREE.Mesh || object instanceof THREE.SkinnedMesh) {
-        object.frustumCulled = false;
-        const materials = Array.isArray(object.material) ? object.material : [object.material];
-        for (const material of materials) {
-          material.side = THREE.FrontSide;
-          if ("metalness" in material) (material as THREE.MeshStandardMaterial).metalness = 0;
-        }
-      }
+  const assets = await assetCatalog.loadStageAssets<StageRenderState>(stageId);
+  applyStageRenderState(assets.renderState);
+  const models = await Promise.all(assets.modelUrls.map((u) => renderAssets.loadGlbScene(u)));
+  for (const model of models) {
+    prepareImportedModel(model, {
+      materialSide: THREE.FrontSide,
+      metalness: 0,
+      culling: "auto",
     });
     stageRoot.add(model);
-    loaded += 1;
   }
-  if (loaded === 0) throw new Error(`No exported stage pieces loaded for ${stageId}`);
   loadedStageId = stageId;
-  loadedStageResources = resources;
-  return loadedStageResources;
+  loadedStageAssets = assets;
+  return loadedStageAssets;
 }
 
 async function loadInitialAssets(): Promise<void> {
@@ -1018,7 +885,7 @@ const flow: Flow = {
   budget: 2000,
   playerCount: 1,
   selectedForceSlot: 0,
-  forceSlots: DEFAULT_FORCE_SLOTS.map((slot) => ({ ...slot, borgIds: [...slot.borgIds] })),
+  forceSlots: BORG_CATALOG.defaultForceSlots.map((slot) => ({ ...slot, borgIds: [...slot.borgIds] })),
   run: null,
 };
 
@@ -1164,7 +1031,7 @@ function startRun(): void {
     budget: flow.budget,
     playerCount: humanPlayerCount,
     playerForces,
-    borgs: borgs as unknown as Parameters<typeof createChallengeRun>[0]["borgs"],
+    borgs: BORG_CATALOG.roster as Parameters<typeof createChallengeRun>[0]["borgs"],
   });
   const battle = flow.run.getCurrentBattle();
   if (!battle) {
@@ -1220,25 +1087,17 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   queueBgm(AUDIO_CUES.battleBgm);
   screenHost.clear();
 
-  const stageId = stageIdForBattleConfig(config, EXPORTED_STAGE_CATALOG_ADAPTER);
-  const stageResources = await loadStage(stageId);
-  const stageBounds = stageResources.bounds ?? fallbackStageBounds;
-
-  const combatCfg = toCombatBattleConfig(config, {
-    stageId,
-    bounds: stageBounds,
-    ...(stageResources.collision ? { collision: stageResources.collision } : {}),
+  const boot = await createBattleBootstrap({
+    config,
+    playerCount: flow.playerCount,
+    stageCatalog: EXPORTED_STAGE_CATALOG_ADAPTER,
+    borgStats: BORG_CATALOG.combatStats,
+    loadStageAssets: loadStage,
   });
-  const battle = createBattle(combatCfg);
-
-  const localPlayerIds = Array.from({ length: Math.max(1, Math.min(flow.playerCount, 2)) }, (_, player) =>
-    playerIdFor(player),
-  );
-  const localPlayerId = localPlayerIds[0] ?? playerIdFor(0);
+  const { battle, localPlayerId, localPlayerIds, stageBounds } = boot;
 
   // Energy maxima for the HUD meters (team 0 = ally, team 1 = enemy).
-  const allyMax = battle.state.energy[0] ?? 0;
-  const enemyMax = battle.state.energy[1] ?? 0;
+  const { allyMax, enemyMax } = battleEnergyMaxima(battle);
 
   // Mount the HUD.
   const hud = createBattleHud(ui, { showBanner: false });
@@ -1260,8 +1119,8 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   battleScene.clear();
   flow.screen = "battle";
   // Prime the scene + HUD on frame 0.
-  const focusUid = localFocusBorg()?.uid ?? null;
-  battleScene.sync(battle.state.borgs, battle.state.projectiles, focusUid);
+  const initialScene = battleSceneState(battle, localFocusBorg());
+  battleScene.sync(initialScene.borgs, initialScene.projectiles, initialScene.focusUid);
   const focus = localFocusBorg();
   const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
   battleCamera.snapTo(focus && focusPos ? { pos: focusPos, rotY: focus.rotY } : null);
@@ -1269,47 +1128,29 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
 }
 
 function localActiveUid(): string | null {
-  if (!session) return null;
-  return session.battle.state.activeUidByPlayer[session.localPlayerId] ?? null;
-}
-
-function localActiveBorg(): BorgRuntime | null {
-  if (!session) return null;
-  const uid = localActiveUid();
-  if (!uid) return null;
-  return session.battle.state.borgs.find((b) => b.uid === uid) ?? null;
+  return currentBattlePresentation()?.activeUid ?? null;
 }
 
 function localFocusBorg(): BorgRuntime | null {
-  if (!session) return null;
-  const active = localActiveBorg();
-  if (active?.alive) return active;
+  return currentBattlePresentation()?.focus ?? null;
+}
 
-  // TUNED: FIGHT ALONE can leave the player slot empty while a CPU ally is still
-  // alive. Keep presentation on the local team instead of drifting to stage center.
-  const fallbackTeam = active?.team ?? 0;
-  return (
-    session.battle.state.borgs.find((b) => b.alive && b.team === fallbackTeam) ??
-    session.battle.state.borgs.find((b) => b.alive) ??
-    null
-  );
+function currentBattlePresentation(): ReturnType<typeof battlePresentationState> | null {
+  if (!session) return null;
+  return battlePresentationState({
+    battle: session.battle,
+    localPlayerId: session.localPlayerId,
+    allyMax: session.allyMax,
+    enemyMax: session.enemyMax,
+    defaultBorgId: DEFAULT_LEAD,
+    actionProfileFor: (borgId) => BORG_CATALOG.actionProfileFor(borgId),
+  });
 }
 
 function updateHud(): void {
   if (!session) return;
-  const focus = localFocusBorg();
-  const profile = focus ? BORG_PROFILES.get(focus.borgId) ?? null : null;
-  const actionProfile = profile ? actionProfileForProfile(profile) : null;
-  session.hud.update(
-    battleHudState({
-      battle: session.battle,
-      focus,
-      actionProfile,
-      allyMax: session.allyMax,
-      enemyMax: session.enemyMax,
-      defaultBorgId: DEFAULT_LEAD,
-    }),
-  );
+  const presentation = currentBattlePresentation();
+  if (presentation) session.hud.update(presentation.hud);
 }
 
 // Pause handling (Start/Esc).
@@ -1370,8 +1211,7 @@ function stepBattle(dt: number): void {
   const inputs: Record<string, PlayerInput> = {};
   for (let playerIndex = 0; playerIndex < session.localPlayerIds.length; playerIndex += 1) {
     const playerId = session.localPlayerIds[playerIndex] ?? playerIdFor(playerIndex);
-    const uid = battle.state.activeUidByPlayer[playerId] ?? null;
-    const active = uid ? battle.state.borgs.find((b) => b.uid === uid) ?? null : null;
+    const active = activeBorgForPlayer(battle, playerId);
     const keySource = playerIndex === 0 ? keys : NO_KEYS;
     const pad = activeGamepad(playerIndex, session.localPlayerIds.length === 1 && playerIndex === 0);
     inputs[playerId] = active ? inputFromKeys(keySource, pad) : emptyInput();
@@ -1389,11 +1229,8 @@ function stepBattle(dt: number): void {
     if (battle.state.result !== "ongoing") break;
   }
 
-  battleScene.sync(
-    battle.state.borgs,
-    battle.state.projectiles,
-    localFocusBorg()?.uid ?? null,
-  );
+  const sceneState = battleSceneState(battle, localFocusBorg());
+  battleScene.sync(sceneState.borgs, sceneState.projectiles, sceneState.focusUid);
   updateHud();
 
   if (battle.state.result !== "ongoing") resolveBattle();
@@ -1407,11 +1244,8 @@ function followCamera(): void {
   const focus = localFocusBorg();
   const target = focus ? battleScene.positionOf(focus.uid) : null;
   const primary = focus && target ? { pos: target, rotY: focus.rotY } : null;
-  const liveActorPositions = session.battle.state.borgs
-    .filter((b) => b.alive)
-    .map((b) => battleScene.positionOf(b.uid))
-    .filter((p): p is THREE.Vector3 => p !== null);
-  battleCamera.update(primary, liveActorPositions, session.stageBounds);
+  const positions = battleLiveActorPositions(session.battle, (uid) => battleScene.positionOf(uid));
+  battleCamera.update(primary, positions, session.stageBounds);
 }
 
 function updateBattleDebugDataset(): void {
@@ -1447,39 +1281,17 @@ function updateBattleDebugDataset(): void {
 function resolveBattle(): void {
   if (!session || session.resolved) return;
   session.resolved = true;
-  const st = session.battle.state;
-  const win = st.result === "win";
-
-  // Death counts/costs come from the combat death event before auto-deploy, matching force queues.
-  // Attack/hit/dodge ratios remain a tuned results model until the original scoring branch is traced.
-  const enemyDefeated = st.defeated[1] ?? 0;
-  const playerDefeated = st.defeated[0] ?? 0;
-  const costWon = st.defeatedEnergy[1] ?? 0;
-  const costLost = st.defeatedEnergy[0] ?? 0;
-
-  const outcome: BattleOutcome = {
-    win,
-    attack: Math.round(costWon),
-    hits: enemyDefeated,
-    attempts: Math.max(1, enemyDefeated + 2),
-    dodges: 0,
-    incoming: 1,
-    enemyBorgsDefeated: enemyDefeated,
-    playerBorgsDefeated: playerDefeated,
-    allyBorgsDefeated: 0,
-    costWon,
-    costLost,
-  };
+  const outcome = battleOutcomeFromState(session.battle);
   const results = computeResults(outcome);
 
-  showResults(win ? "win" : "lose", {
+  showResults(outcome.win ? "win" : "lose", {
     attack: results.attack,
     hitRatio: results.hitRatio * 100,
     dodgeRatio: results.dodgeRatio * 100,
     enemyBorgsDefeated: results.enemyBorgsDefeated,
-    enemyTotalCost: Math.round(costWon),
+    enemyTotalCost: Math.round(outcome.costWon),
     playerBorgsDefeated: results.playerBorgsDefeated,
-    playerTotalCost: Math.round(costLost),
+    playerTotalCost: Math.round(outcome.costLost),
     allyBorgsDefeated: results.allyBorgsDefeated,
     grandTotal: results.grandTotal,
   }, results);
@@ -1602,9 +1414,9 @@ function showLoadingMessage(text: string): void {
     return normalized;
   },
   startChallenge: () => showDifficulty(),
+  renderDiagnostics: () => viewport.diagnostics(),
   renderNow: () => {
-    viewport.render();
-    return canvas.toDataURL("image/png");
+    return viewport.captureFrame();
   },
   forceBattle: (force: string[] = [DEFAULT_LEAD]) => {
     flow.budget = 2000;
