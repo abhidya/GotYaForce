@@ -31,6 +31,7 @@ import {
   HEAL,
   HEAL_VAMPIRE_BORG_IDS,
   HOMING,
+  KNOCKBACK,
   MASH,
   MELEE,
   MUZZLE_OFFSET,
@@ -44,6 +45,7 @@ import {
   DAMAGE_RECORD_INDEX,
   REACTION_FORCE_STAGGER_MASK,
   damageRecordByIndex,
+  knockbackVelocityForRecord,
   type DamageRecord,
 } from "./gauges.js";
 import {
@@ -537,7 +539,10 @@ export function applyHit(
   victim: BorgRuntime,
   victimProfile: BorgProfile,
   rawDamage: number,
-  knockback: number,
+  // Per-move knockback MULTIPLIER (1 = the record's derived magnitude; 0 = no knockback).
+  // The BASE magnitude is derived from the hit record's strength byte — see the knockback
+  // block below. Callers must NOT pre-multiply a flat base constant in (double-counting).
+  knockbackMult: number,
   knockDir: Vec3,
   fromPos: Vec3,
   forceKnockdown = false,
@@ -596,14 +601,20 @@ export function applyHit(
   // `knockDir` lets a caller override with a more specific vector (e.g. a projectile's travel
   // direction) when the "attacker position" isn't the right source (fromPos is still passed as
   // the attacker-position input to the mode-1 calc either way).
-  // Knockback MAGNITUDE remains a flat TUNED scalar (`knockback` param) — the ROM function only
-  // ever computes/stores direction, never a speed/force value; see constants.ts MELEE/SHOT/SPECIAL.
+  // Knockback MAGNITUDE — DERIVED strength-indexed model (behavior-notes (bc), T9 resolved
+  // statically): the record's +0x0d strength byte indexes DAT_802d3664[s]=(s+1)*8 (gauges.ts
+  // knockbackVelocityForRecord), scaled by the single TUNED PORT_SCALE anchor and the caller's
+  // per-move multiplier. Replaces the old flat MELEE/SHOT/SPECIAL.KNOCKBACK scalars — the
+  // relative push of melee(56) > shot(40) > charge/special(24) is now ROM data.
+  const knockback = knockbackVelocityForRecord(record) * KNOCKBACK.PORT_SCALE * knockbackMult;
   const dir =
     knockDir.x === 0 && knockDir.z === 0
       ? knockbackDirectionFromPositions(fromPos, victim.pos)
       : normalize(knockDir);
   victim.vel.x = dir.x * knockback;
   victim.vel.z = dir.z * knockback;
+  // Vertical pop stays TUNED (the ROM's launch vertical is a separate gravity/zero model —
+  // FLOAT_80437444/FLOAT_80437470 — not yet ported; keep the port's 0.4 lift factor).
   if (knockback > 0) victim.vel.y = Math.max(victim.vel.y, knockback * 0.4);
 
   if (victim.hp <= 0) {
@@ -1345,7 +1356,8 @@ export function stepAttacks(
         o,
         op,
         0,
-        MELEE.KNOCKBACK * knockbackMult,
+        // Multiplier only — applyHit derives the base from record 1's strength byte.
+        knockbackMult,
         { x: 0, y: 0, z: 0 },
         b.pos,
         // A multi-hit chain's finisher launches: forced knockdown (TUNED game-feel choice).
@@ -1489,7 +1501,8 @@ function startSpecialAttack(
           o,
           op,
           0,
-          SPECIAL.KNOCKBACK * specialDef.knockbackMultiplier * tier.knockback,
+          // Multiplier only — applyHit derives the base from record 2's strength byte.
+          specialDef.knockbackMultiplier * tier.knockback,
           { x: 0, y: 0, z: 0 },
           b.pos,
           true,
@@ -1553,7 +1566,8 @@ function spawnSpecialProjectiles(
       // damageScale, so both special archetypes hit with identical record-2 strength.
       damage: specialDef.damageMultiplier * tier.damage,
       hitstun: Math.max(1, Math.round(SPECIAL.HITSTUN * tier.hitstun)),
-      knockback: SPECIAL.KNOCKBACK * specialDef.knockbackMultiplier * tier.knockback,
+      // Per-move MULTIPLIER (applyHit derives the base from the projectile's damage record).
+      knockback: specialDef.knockbackMultiplier * tier.knockback,
       homingTurn: SHOT.HOMING_TURN,
       // Same spawn-time aim-cone gate as gun projectiles (FUN_8006c334, chunk_0009.c:1995/3841).
       homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
@@ -1713,7 +1727,8 @@ function spawnProjectile(
     vel: scale(fwd, shotDef.speed * tier.speed),
     damage: shotDef.damageMultiplier * tier.damage,
     hitstun: Math.max(1, Math.round(SHOT.HITSTUN * shotDef.hitstunMultiplier * tier.hitstun)),
-    knockback: SHOT.KNOCKBACK * shotDef.knockbackMultiplier * tier.knockback,
+    // Per-move MULTIPLIER (applyHit derives the base from the projectile's damage record).
+    knockback: shotDef.knockbackMultiplier * tier.knockback,
     homingTurn: shotDef.homingTurn,
     // Spawn-time aim-cone gate (FUN_8006c334) — no longer unconditional.
     homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
@@ -1773,7 +1788,8 @@ function spawnSwordBeam(
     vel: scale(fwd, beam.speed),
     damage: meleeDef.damageMultiplier * beam.damageMultiplier,
     hitstun: SHOT.HITSTUN,
-    knockback: SHOT.KNOCKBACK * meleeDef.knockbackMultiplier,
+    // Per-move MULTIPLIER (applyHit derives the base from the beam's damage record).
+    knockback: meleeDef.knockbackMultiplier,
     homingTurn: beam.homingTurn,
     // Same spawn-time aim-cone gate as gun projectiles (FUN_8006c334, chunk_0009.c:1995/3841).
     homingTarget: homingTargetForSpawn(b, all, spawnPos, fwd),

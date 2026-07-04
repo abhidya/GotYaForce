@@ -56,6 +56,12 @@ export {
 } from "./commandDispatch.js";
 export { movementContextOf, type MovementContext } from "./movement.js";
 export {
+  fallGravityForBorgId,
+  jumpVelocityForBorgId,
+  movementPhysicsForBorgId,
+  type BorgMovementPhysics,
+} from "./movementData.js";
+export {
   buildProfile,
   forceEnergy,
   parseHp,

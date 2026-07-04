@@ -211,9 +211,10 @@ export const MELEE = {
    * 60-frame trio is the balance-refill / down-reset / combo-window timers (see STAGGER).
    */
   HITSTUN: 14,
-  /** Knockback speed imparted (units/frame). TUNED — s4p derived knockback DIRECTION fully
-   *  (wired via packages/physics/src/knockback.ts), but never found a magnitude/speed value;
-   *  zz_00300bc_ only ever writes angle fields, never a force/velocity. Magnitude stays TUNED. */
+  /** RETIRED as the applied magnitude (2026-07-04): applyHit now derives knockback from the
+   *  hit record's DERIVED strength byte via gauges.ts knockbackVelocityForRecord × the
+   *  KNOCKBACK.PORT_SCALE anchor below. Kept only as the historical tuned melee base that
+   *  PORT_SCALE is anchored to (5 u/f at melee strength 6). */
   KNOCKBACK: 5,
   /**
    * Contextual-B melee ENGAGE window (XZ units): the SELECTION distance within which a B
@@ -300,9 +301,29 @@ export const SHOT = {
    *  no forced stagger), so a shot only interrupts once it depletes a gauge — a lone shot no
    *  longer flinches the victim at all. */
   HITSTUN: 10,
-  /** Knockback imparted (units/frame). TUNED — see MELEE.KNOCKBACK note; direction is DERIVED
-   *  (s4p), magnitude is not. */
+  /** RETIRED as the applied magnitude (2026-07-04) — see MELEE.KNOCKBACK note; applyHit now
+   *  derives shot knockback from record 0's strength byte (4 -> 40 ROM u/f) × PORT_SCALE
+   *  ≈ 3.6 u/f, close to this old tuned 3. Kept for historical reference only. */
   KNOCKBACK: 3,
+} as const;
+
+/**
+ * Knockback magnitude model (behavior-notes (bc), T9 resolved statically): the ROM's knockback
+ * speed is STRENGTH-INDEXED, not flat — the hit record's +0x0d severity byte is copied to the
+ * victim's actor+0x702 and indexes DAT_802d3664[s]=(s+1)*8 (velocity, FUN_8005ed38; see
+ * gauges.ts KNOCKBACK_STRENGTH_TABLE / knockbackVelocityForRecord). applyHit applies
+ *   magnitude = knockbackVelocityForRecord(record) × PORT_SCALE × perMoveMultiplier.
+ */
+export const KNOCKBACK = {
+  /**
+   * TUNED single anchor reconciling the DERIVED ROM velocities (u/f in ROM world scale, with the
+   * ROM's own linear-decel model) to the port's velocity/MOVE.DECEL model. Anchored so the melee
+   * record (strength 6 -> 56 ROM u/f) reproduces the port's previous tuned melee base of 5 u/f
+   * (= MELEE.KNOCKBACK). The RELATIVE magnitudes across records are DERIVED (melee 56 > shot 40 >
+   * charge/special 24); only this one scalar stays TUNED pending the world-scale/decel reconcile
+   * (movement-physics slice). Do not add per-record tuning here — that would re-hide the model.
+   */
+  PORT_SCALE: 5 / 56,
 } as const;
 
 /**
@@ -427,7 +448,10 @@ export const SPECIAL = {
   RADIUS: 110,
   /** Special-state duration (frames). */
   DURATION: 26,
-  /** Knockback (units/frame). */
+  /** RETIRED as the applied magnitude (2026-07-04) — applyHit derives special knockback from
+   *  record 2's strength byte (2 -> 24 ROM u/f) × KNOCKBACK.PORT_SCALE ≈ 2.1 u/f. The ROM says
+   *  specials push LESS than melee/shots (they pressure via down-gauge instead); the old tuned
+   *  7 overshot. Kept for historical reference only. */
   KNOCKBACK: 7,
   /** Reaction LENGTH after a confirmed special-hit stagger (frames). Still TUNED (animation-
    *  gated in ROM — see MELEE.HITSTUN note); the stagger TRIGGER is now DERIVED via the gauge

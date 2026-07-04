@@ -50,6 +50,24 @@ dispatch for pl0615/pl0405/pl0409/pl0900/pl0e01); moveProperties 57/57; 1P chall
 PASS. Remaining ATK-003 work: consuming record identity for animation/HIT selection
 (record bytes cueId/stateMode/actionIndex semantics still undecoded).
 
+**B2. Knockback magnitude PORTED (T9 closed).** applyHit now derives its magnitude as
+single-base × strength: gauges.ts `knockbackVelocityForRecord` reads the hit record's +0x0d
+strength byte into DAT_802d3664[s]=(s+1)*8 (melee 56 > shot 40 > charge/special 24, all
+DERIVED), scaled by ONE tuned anchor (constants.ts KNOCKBACK.PORT_SCALE = 5/56, preserving
+the old melee base) × the caller's per-move multiplier. The flat MELEE/SHOT/SPECIAL.KNOCKBACK
+scalars are retired (kept as historical anchors). No double-counting: call sites now pass
+multipliers only. §1's knockback-magnitude row and §7 Tier-B item 3 are DONE.
+
+**B3. Per-borg movement physics adapter LANDED (scale-reconciled).**
+`scripts/gen-movement-physics.mjs` dumps all 208 borgs' pl####data.bin movement pages →
+`packages/combat/src/data/movementPhysics.json`; `movementData.ts` applies RATIO-ANCHORED
+values (anchor = pl0615, the live-traced borg): jumpImpulse(+0x48)/15 scales JUMP.VELOCITY,
+|gravityFall(+0x6c)|/1.0 scales JUMP.GRAVITY (pl0d/pl0e satellite families float at -0.1 —
+source data). G RED is bit-identical to before; every other borg's relative jump/fall is now
+DERIVED. NOT yet mapped: maxHSpeed(+0x2c) — its relation to the +0x50 speed stat (already
+the port's profile.speed input) is unresolved (pl0000 has G RED's 12.0 clamp but stat 3), so
+ground speed keeps the stat formula; knockdownLaunch+groundAccel exported as data only.
+
 **C. Stale audit detectors fixed:** `audit-real-asset-coverage.mjs` claimed STIH
 bounds/triangles were "not wired" — they moved into packages/assets + battleBootstrap in the
 app-flow refactor and ARE fully wired (parse → StageAssets → BattleConfig → walls/ceilings/

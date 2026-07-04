@@ -26,6 +26,7 @@ import {
   type Vec3,
 } from "@gf/physics";
 import { BURST, DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
+import { fallGravityForBorgId, jumpVelocityForBorgId } from "./movementData.js";
 import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
 
@@ -169,7 +170,7 @@ export function stepMovement(
 
   // --- Vertical: jump / air-jump / boost flight / gravity -----------------------------
   if (input.jump && free) {
-    handleJump(b);
+    handleJump(b, jumpVelocityForBorgId(b.borgId));
   }
   // Boost flight: flyer holding jump in the air gets sustained lift while fuel remains.
   const boostFuel = b.cooldowns["boostFuel"] ?? JUMP.BOOST_FUEL_FRAMES;
@@ -181,8 +182,11 @@ export function stepMovement(
     }
   }
 
-  // Gravity (always, even in combat states, so knockback arcs fall).
-  b.vel.y = Math.max(b.vel.y - JUMP.GRAVITY, -JUMP.MAX_FALL);
+  // Gravity (always, even in combat states, so knockback arcs fall). Per-borg DERIVED-ratio
+  // fall gravity (pl####data.bin +0x6c anchored at G RED — movementData.ts): heavies drop
+  // faster, the pl0d/pl0e satellite/air families float (-0.1 in source data). MAX_FALL stays
+  // the global tuned terminal cap (ROM's global -35.0 needs the world-scale reconcile).
+  b.vel.y = Math.max(b.vel.y - fallGravityForBorgId(b.borgId), -JUMP.MAX_FALL);
 
   // --- Integrate ----------------------------------------------------------------------
   const prevPos = { ...b.pos };
@@ -220,18 +224,20 @@ export function stepMovement(
   }
 }
 
-function handleJump(b: BorgRuntime): void {
+function handleJump(b: BorgRuntime, jumpVelocity: number = JUMP.VELOCITY): void {
   // Edge-detect jump via a per-borg "jumpHeld" latch in cooldowns (0 = released).
   const held = (b.cooldowns["jumpHeld"] ?? 0) > 0;
   b.cooldowns["jumpHeld"] = 1; // mark held this frame; cleared in clearJumpLatch when released
   if (held) return; // only act on the rising edge
 
+  // `jumpVelocity` is the per-borg DERIVED-ratio takeoff speed (pl####data.bin +0x48 anchored
+  // at G RED's 15.0 — movementData.ts); the default keeps legacy/direct callers global-tuned.
   if (b.grounded) {
-    b.vel.y = JUMP.VELOCITY;
+    b.vel.y = jumpVelocity;
     b.grounded = false;
     setState(b, "jump");
   } else if (b.airJumps > 0) {
-    b.vel.y = JUMP.VELOCITY;
+    b.vel.y = jumpVelocity;
     b.airJumps -= 1;
     setState(b, "jump");
   }

@@ -359,6 +359,8 @@ export interface Projectile {
   /** Source damage scale for real combat callers; legacy direct callers may still treat it as raw damage. */
   damage: number;
   hitstun: number;
+  /** Per-move knockback MULTIPLIER (applyHit derives the base magnitude from the hit's
+   *  damage record strength byte — see gauges.ts knockbackVelocityForRecord). */
   knockback: number;
   homingTurn: number;
   homingTarget: string | null;

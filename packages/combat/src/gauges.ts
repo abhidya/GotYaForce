@@ -80,10 +80,10 @@ export const DAMAGE_RECORDS: readonly DamageRecord[] = DAMAGE_RECORDS_FILE.recor
  * to actor+0x702 and clamped 0..15):
  *   - HORIZONTAL[s] = DAT_802dd8a0[s] = s*7   (launch h-speed factor, zz_005ec20_)
  *   - VELOCITY[s]   = DAT_802d3664[s] = (s+1)*8 (velocity magnitude, FUN_8005ed38)
- * These are the real ROM values (T9 resolved statically). NOT yet wired into applyHit — the port
- * keeps its anchored-TUNED flat knockback until the model is restructured to single-base × strength
- * with a scale reconciled to the port's ~4× world rescale (see the knockback-port task / §1). This
- * export makes the DERIVED model available to that port and to tests without changing gameplay.
+ * These are the real ROM values (T9 resolved statically). WIRED (2026-07-04): applyHit now derives
+ * its magnitude as single-base × strength — knockbackVelocityForRecord(record) × KNOCKBACK.PORT_SCALE
+ * × the caller's per-move multiplier — replacing the old flat MELEE/SHOT/SPECIAL.KNOCKBACK scalars.
+ * Only PORT_SCALE (one anchor preserving the old melee base) remains TUNED; see constants.ts.
  */
 export const KNOCKBACK_STRENGTH_TABLE = {
   /** DAT_802dd8a0[s] = s*7, s∈0..15 — horizontal launch factor. */
@@ -96,6 +96,17 @@ export const KNOCKBACK_STRENGTH_TABLE = {
 export function knockbackStrengthClamp(strength: number): number {
   const s = Math.trunc(strength);
   return s < 0 ? 0 : s > 15 ? 15 : s;
+}
+
+/**
+ * DERIVED knockback velocity magnitude for a hit record (ROM u/f): the record's +0x0d severity
+ * byte (`reactionAnimVariant`) is copied to the victim's actor+0x702 (chunk_0003.c:8047) and
+ * FUN_8005ed38 reads the velocity from DAT_802d3664[s]=(s+1)*8. Yields melee(rec 1, s=6)=56 >
+ * shot(rec 0, s=4)=40 > charge/special(rec 2, s=2)=24. Consumed by combat.ts applyHit as the
+ * single base, scaled by KNOCKBACK.PORT_SCALE (constants.ts) × the caller's per-move multiplier.
+ */
+export function knockbackVelocityForRecord(record: DamageRecord): number {
+  return KNOCKBACK_STRENGTH_TABLE.VELOCITY[knockbackStrengthClamp(record.reactionAnimVariant)] ?? 8;
 }
 
 /**
