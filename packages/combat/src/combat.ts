@@ -472,9 +472,20 @@ function applySourceTarget(
   }
 
   const targetUid = entry.borg.uid;
+  // Camera transition state (4) models a retarget WITHIN one lock family (R re-cycling
+  // enemies, or Z re-cycling allies) — it must be compared against that family's own
+  // previously-retained target (+0x508 is shared, but +0x73d/+0x73e are per-family index
+  // bytes, per types.ts SourceTargetLockState). Comparing against state.activeTargetUid
+  // (whichever family was active last, enemy OR ally) wrongly fired a transition on the
+  // FIRST-EVER acquisition of the other family (e.g. pressing Z for the first time while an
+  // enemy was already R-locked): the stale enemy uid in activeTargetUid never equals the new
+  // ally uid, so it always looked like a "different" target. A same-family retarget is a real
+  // ROM camera transition; a family switch is a fresh lock-on (camera state 3), matching
+  // sourceInitialEnemyLock's fresh-acquisition behavior above.
+  const previousSameFamily = mode === "enemy" ? self.lockTarget : self.allyLockTarget;
   state.mode = mode;
   state.sourceState = 1;
-  state.cameraState = previousActive && previousActive !== targetUid ? 4 : cameraStateForValidTarget;
+  state.cameraState = previousSameFamily && previousSameFamily !== targetUid ? 4 : cameraStateForValidTarget;
   state.activeTargetUid = targetUid;
   if (mode === "enemy") {
     self.lockTarget = targetUid;
