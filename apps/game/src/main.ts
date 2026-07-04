@@ -975,7 +975,7 @@ function followCamera(): void {
           pos: target,
           rotY: focus.rotY,
           lockTargetPos,
-          lockCameraState: focus.targetLockState?.cameraState,
+          lockCameraState: focus.targetLockState?.cameraState ?? 2,
         }
       : null;
   const positions = battleLiveActorPositions(session.battle, (uid) => battleScene.positionOf(uid));
@@ -1008,6 +1008,15 @@ function updateBattleDebugDataset(): void {
       vel: [rounded(b.vel.x), rounded(b.vel.y), rounded(b.vel.z)],
       lockTarget: b.lockTarget,
       allyLockTarget: b.allyLockTarget,
+      targetPointerUid: b.targetLockState?.activeTargetUid ?? null,
+      targetListIndex:
+        b.targetLockState?.mode === "ally" ? b.targetLockState.allyIndex : b.targetLockState?.enemyIndex ?? -1,
+      lockMode: b.targetLockState?.mode ?? "enemy",
+      sourceTargetState: b.targetLockState?.sourceState ?? 0,
+      lockCameraState: b.targetLockState?.cameraState ?? 2,
+      movementFrame: b.targetLockState?.activeTargetUid
+        ? `${b.targetLockState.mode}:${b.targetLockState.activeTargetUid}`
+        : "no-lock",
     })),
   });
 }
