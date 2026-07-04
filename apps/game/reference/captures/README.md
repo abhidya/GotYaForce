@@ -17,4 +17,4 @@ originals (timestamped); the `challenge-N-*` files are the same frames renamed i
 - `GG4E08_..._14-44-*.png` — main-menu navigation frames.
 
 ## Controls (mapped in Dolphin for capture)
-A=J, B=K, X=L, Y=I, Start=Enter, D-Pad=arrows, Stick=WASD. (In-game: A=jump, B=attack, Y=special, R=lock-on, Z=switch lock-on.)
+A=J, B=K, X=L, Y=I, Start=Enter, D-Pad=arrows, Stick=WASD. (In-game: A=jump, B=attack, X=special, R=switch lock-on, Z=ally lock-on.)
