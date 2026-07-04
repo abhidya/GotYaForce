@@ -57,6 +57,7 @@ export {
 export { movementContextOf, type MovementContext } from "./movement.js";
 export {
   cameraParamsForBorgId,
+  defaultCameraSlotForBorgId,
   fallGravityForBorgId,
   jumpVelocityForBorgId,
   movementPhysicsForBorgId,

@@ -1767,8 +1767,10 @@ actor+0x50c target state; FUN_8000c988 ported as the battle-entry approach repla
 snap (consumes 80/0.9/0x200/+4; exit-at-band is TUNED — ROM exit unknown). Per-borg camera
 target-height/follow-distance slots (+0x88c/+0x890, +0x894..+0x8A0) are now read from
 pl####data.bin +0xb8..+0xcc through `cameraParamsForBorgId` and consumed by the browser
-camera. Still TUNED/unported: dynamic actor height/size terms (+0x6D0, +0x668, camera+0x354
-actor scale), multi-actor widen, wall-guard; correctives FUN_800101c8/FUN_8000fffc unported. Helpers:
+camera. Static `actor+0x582` camera slot default is ported from `FUN_8006f7c0`
+(`pl0003` -> slot 1, otherwise slot 0); dynamic special-state slot rewrites remain unported.
+Still TUNED/unported: dynamic actor height/size terms (+0x6D0, +0x668, camera+0x354 actor
+scale), multi-actor widen, wall-guard; correctives FUN_800101c8/FUN_8000fffc unported. Helpers:
 `zz_0045204_`/`zz_0045238_` @ 0x80045204/0x80045238 = sin/cos(BAM16); DOUBLE_80436ab0/ab8
 (0.5/3.0) are just the PPC frsqrte Newton iteration, not tunables.
 

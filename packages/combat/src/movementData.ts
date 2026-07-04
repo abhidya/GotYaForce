@@ -141,9 +141,18 @@ export interface BorgCameraParams {
   followMax: number;
 }
 
+/** DERIVED static default for actor+0x582 (FUN_8006f7c0, chunk_0009.c:4093-4101):
+ *  source writes slot 1 only for borg id word 0x0003, otherwise slot 0. Later special-state
+ *  handlers can rewrite actor+0x582 dynamically; those state-specific writers are not ported
+ *  here. */
+export function defaultCameraSlotForBorgId(id: string): 0 | 1 {
+  const numericId = Number.parseInt(id.replace(/^pl/i, ""), 16);
+  return numericId === 0x0003 ? 1 : 0;
+}
+
 /** DERIVED gameplay camera params (pl####data.bin +0xb8..+0xcc -> actor+0x88c..+0x8a0).
  *  Returns null only for synthetic ids without a data page; the shipped roster has rows. */
-export function cameraParamsForBorgId(id: string, slot: 0 | 1 = 0): BorgCameraParams | null {
+export function cameraParamsForBorgId(id: string, slot: 0 | 1 = defaultCameraSlotForBorgId(id)): BorgCameraParams | null {
   const data = movementPhysicsForBorgId(id);
   if (!data) return null;
   const targetHeight = slot === 0 ? data.cameraHeightSlot0 : data.cameraHeightSlot1;

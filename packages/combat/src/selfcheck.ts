@@ -59,7 +59,12 @@ import {
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, type DamageRecord } from "./gauges.js";
-import { cameraParamsForBorgId, dashPhysicsForBorgId, statusImmunityMasksForBorgId } from "./movementData.js";
+import {
+  cameraParamsForBorgId,
+  defaultCameraSlotForBorgId,
+  dashPhysicsForBorgId,
+  statusImmunityMasksForBorgId,
+} from "./movementData.js";
 import { actorVelocityScale, isFrozen, tierVelocityScale } from "./timescale.js";
 import { stepMovement } from "./movement.js";
 import {
@@ -737,7 +742,14 @@ function assertSourceCameraParamsBound(): void {
   if (!gRedSlot1 || gRedSlot1.slot !== 1 || gRedSlot1.targetHeight !== 180 || gRedSlot1.followMin !== 500 || gRedSlot1.followMax !== 600) {
     throw new Error(`[selfcheck] camera slot1 params mismatch for pl0615: ${JSON.stringify(gRedSlot1)}`);
   }
-  console.log("[selfcheck] source camera params bound from pl####data.bin +0xb8..+0xcc");
+  if (defaultCameraSlotForBorgId("pl0003") !== 1 || defaultCameraSlotForBorgId("pl0615") !== 0) {
+    throw new Error("[selfcheck] actor+0x582 default camera slot mapping changed");
+  }
+  const pl0003Default = cameraParamsForBorgId("pl0003");
+  if (!pl0003Default || pl0003Default.slot !== 1) {
+    throw new Error(`[selfcheck] pl0003 default camera slot did not use actor+0x582 slot1: ${JSON.stringify(pl0003Default)}`);
+  }
+  console.log("[selfcheck] source camera params bound from pl####data.bin +0xb8..+0xcc and actor+0x582 default slot");
 }
 
 function assertLockRelativeControls(borgs: BorgStats[]): void {

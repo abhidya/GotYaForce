@@ -118,3 +118,6 @@ fields, and `FUN_8000fc2c` consumes the copied camera fields in gameplay camera 
 - `scripts/gen-movement-physics.mjs` emits the decomp-proven camera block
   (`0x0b8..0x0cc`) into `movementPhysics.json`, and `apps/game/src/sim/camera.ts`
   consumes it through `cameraParamsForBorgId` for target height and follow-distance bands.
+  `defaultCameraSlotForBorgId` mirrors the static `actor+0x582` default writer
+  (`FUN_8006f7c0`: slot 1 only for borg id `pl0003`, else slot 0); dynamic special-state
+  rewrites of `actor+0x582` are still unported.
