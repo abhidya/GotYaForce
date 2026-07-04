@@ -365,12 +365,13 @@ function commandCoverage(commandMoveTables, id, button) {
 
   const assignment = commandMoveTables?.borgs?.[id] ?? null;
   if (!assignment) {
-    return { text: "no constructor map", exact: false, gaps: ["exact ROM command table missing"] };
+    return { text: "no constructor map", exact: false, assigned: false, gaps: ["exact ROM command table missing"] };
   }
   if (!assignment.tableId) {
     return {
       text: `ctor ${assignment.constructorAddress}; no +0x4ec table`,
       exact: false,
+      assigned: false,
       gaps: ["exact ROM command table missing"],
     };
   }
@@ -378,14 +379,19 @@ function commandCoverage(commandMoveTables, id, button) {
   const tableEntry = commandMoveTables?.tables?.[assignment.tableId] ?? null;
   const typeEntry = tableEntry?.types?.find((entry) => entry.type === spec.type) ?? null;
   if (!tableEntry || !typeEntry) {
-    return { text: `t${spec.type} missing`, exact: false, gaps: ["exact ROM command type missing"] };
+    return { text: `t${spec.type} missing`, exact: false, assigned: true, gaps: ["exact ROM command type missing"] };
   }
   const records = (typeEntry.records ?? []).filter((record) => !record.disabled);
   if (records.length === 0) {
     return {
       text: `t${spec.type} ${typeEntry.modeName}; no active records`,
       exact: false,
-      gaps: ["exact ROM command records missing"],
+      assigned: true,
+      gaps: [
+        typeEntry.modeName === "disabled"
+          ? "exact ROM command type disabled"
+          : "exact ROM command records inactive",
+      ],
     };
   }
 
@@ -394,6 +400,7 @@ function commandCoverage(commandMoveTables, id, button) {
   return {
     text: `${spec.context}; t${spec.type} ${typeEntry.modeName} ${records.length} recs a[${actionIndexes}] v[${variants}]`,
     exact: true,
+    assigned: true,
     gaps: [],
     tableId: assignment.tableId,
     records,
@@ -462,7 +469,9 @@ function auditBorg(borg, data) {
       if ((button === "B Shot" || button === "B Attack") && hasBShot && hasBAttack && !command.exact) {
         gaps.push(
           data.runtimeFlags.contextualBResolver
-            ? "B Shot/B Attack context resolver exists, but exact ROM command table is not assigned"
+            ? command.assigned
+              ? "B Shot/B Attack context resolver exists, but this command type has no active ROM records"
+              : "B Shot/B Attack context resolver exists, but exact ROM command table is not assigned"
             : `B Shot/B Attack resolver is primary-order only (${actionProfile?.primary ?? "fallback"})`,
         );
       }
@@ -633,7 +642,7 @@ function renderSummary(audits, data, top) {
     { category: "wiki move missing", count: sum(audits, (audit) => audit.gapCounts.missingWiki) },
     { category: "source ammo/stat gap", count: sum(audits, (audit) => audit.gapCounts.missingSource) },
     { category: "action profile gap", count: sum(audits, (audit) => audit.gapCounts.missingAction) },
-    { category: "exact command table missing", count: sum(audits, (audit) => audit.gapCounts.missingExactCommand) },
+    { category: "exact command record/type gap", count: sum(audits, (audit) => audit.gapCounts.missingExactCommand) },
     { category: "penetration missing", count: sum(audits, (audit) => audit.gapCounts.missingPenetration) },
     { category: "missing exact anim map", count: sum(audits, (audit) => audit.gapCounts.missingExactAnimMap) },
     { category: "missing X hitbox", count: sum(audits, (audit) => audit.gapCounts.missingXHitbox) },
@@ -676,7 +685,7 @@ function renderSummary(audits, data, top) {
 }
 
 function topCategoryLabel(key) {
-  if (key === "missingExactCommand") return "exactCommand";
+  if (key === "missingExactCommand") return "commandRows";
   if (key === "missingXHitbox") return "xHitbox";
   if (key === "missingExactAnimMap") return "exactAnim";
   if (key === "missingPenetration") return "penetration";

@@ -120,7 +120,7 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Mash extra hits | shell (ATK-017) | constants MASH | +0x550 cap 4 (T/ax) | trace consumer |
 | Contact damage | scaffold (ATK-006) | disabled | per-borg authored (am/av) | trace T2 stomp |
 | Levels | DONE (row=byte+2, ay) | sourceBorgStats.ts | row=levelByte+2 (av/aw, 200/203) | NO in-battle EXP system exists (be) — level is save-stored, actor+0x3ec is size/scale class (0-4), CONFLICTS (ak)'s "+0x3ec=level" — reconcile which byte; 3 non-normal outliers open |
-| Lock-on | CHECKED_CLOSED | combat.ts TUNED heuristic | no ROM system exists (q) | — |
+| Lock-on target state | PORTED (source-shaped) | combat.ts refresh/sourceSwitch*, battle.ts activeSourceTargetUid | zz_006b450_, FUN_8006b850/FUN_8006ba60, actor +0x502/+0x508/+0x73d/+0x73e | trace still useful for exact 2P initial pairing / ally-support consumers |
 
 ---
 

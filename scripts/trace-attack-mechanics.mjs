@@ -245,6 +245,31 @@ const PRESETS = {
       { name: "burstActive", off: 0x6fc, type: "u8" },
     ],
   },
+  T11: {
+    slug: "jump-fly-animation-state",
+    title: "Jump/fly animation + movement state",
+    fields: [
+      { name: "stateSlotA", off: 0x6fe, type: "s32" },
+      { name: "stateSlotB", off: 0x540, type: "s32" },
+      { name: "localPhase", off: 0x544, type: "s32" },
+      { name: "cmd", off: 0x591, type: "u8" },
+      { name: "commandCurrent", off: 0x5b4, type: "u32" },
+      { name: "commandPressed", off: 0x5bc, type: "u32" },
+      { name: "transformedButtonWord", off: 0x5d4, type: "u32" },
+      { name: "buttonWordCompanion", off: 0x5e0, type: "u32" },
+      { name: "animFrame", off: 0x1cdc, type: "s32" },
+      { name: "variantSelector", off: 0x1d0f, type: "u8" },
+      { name: "posX20", off: 0x20, type: "f32" },
+      { name: "posY24", off: 0x24, type: "f32" },
+      { name: "posZ28", off: 0x28, type: "f32" },
+      { name: "posX44", off: 0x44, type: "f32" },
+      { name: "posY48", off: 0x48, type: "f32" },
+      { name: "posZ4c", off: 0x4c, type: "f32" },
+      { name: "velX", off: 0x58, type: "f32" },
+      { name: "velY", off: 0x5c, type: "f32" },
+      { name: "velZ", off: 0x60, type: "f32" },
+    ],
+  },
 };
 
 function parseArgs(argv) {
@@ -426,7 +451,21 @@ const PAD_READ = 0x8021379c;
 // tick does NOT work (verified live): PADRead refreshes the buffer between d450 and d4d0,
 // clobbering the write. So injection takes a second breakpoint at d4d0.
 const PAD_STATUS_SIZE = 12;
-const PAD_BUTTON_Y = 0x0800;
+const PAD_BUTTON_BITS = {
+  dLeft: 0x0001,
+  dRight: 0x0002,
+  dDown: 0x0004,
+  dUp: 0x0008,
+  Z: 0x0010,
+  R: 0x0020,
+  L: 0x0040,
+  A: 0x0100,
+  B: 0x0200,
+  X: 0x0400,
+  Y: 0x0800,
+  Start: 0x1000,
+};
+const PAD_BUTTON_Y = PAD_BUTTON_BITS.Y;
 const PAD_INJECT_ADDR = 0x8010d4d0;
 // Battle/slot-table chain (behavior-notes.md §z, code-confirmed). Single-player fast path
 // reads *(u32*)0x803C4E84 directly; we use the full chain so this also works when the
@@ -477,9 +516,23 @@ function parseAddress(raw, label) {
   return value >>> 0;
 }
 
+function parseButtonList(raw) {
+  return (raw ?? "")
+    .split(/[,+|]/)
+    .map((button) => button.trim())
+    .filter(Boolean);
+}
+
+function parseNonNegativeInt(raw, label, fallback) {
+  if (raw === undefined || raw === null) return fallback;
+  const value = Number.parseInt(raw, 10);
+  if (!Number.isInteger(value) || value < 0) throw new Error(`${label} must be a non-negative integer`);
+  return value;
+}
+
 async function runCapture(argv) {
   const presetId = argv.get("preset");
-  if (!presetId) throw new Error("--preset T1..T10 is required for a real capture");
+  if (!presetId) throw new Error("--preset T1..T11 is required for a real capture");
   const preset = resolvePreset(presetId);
 
   const frames = Number.parseInt(argv.get("frames") ?? "1800", 10);
@@ -494,13 +547,19 @@ async function runCapture(argv) {
   // starting at that recorded frame; --inject-stick <frame> holds main-stick DOWN (stickY=-100,
   // the pure-translation back-walk per behavior-notes (y) — same input as the 22.0 u/f ground
   // baseline) from that frame until the capture ends. --inject-port selects the PADStatus slot.
+  const genericButtons = parseButtonList(argv.get("inject-buttons"));
+  const unknownButtons = genericButtons.filter((button) => PAD_BUTTON_BITS[button] == null);
+  if (unknownButtons.length) throw new Error(`unknown --inject-buttons value(s): ${unknownButtons.join(", ")}`);
+  const genericButtonMask = genericButtons.reduce((mask, button) => mask | PAD_BUTTON_BITS[button], 0);
+  const genericInjectFrame = parseNonNegativeInt(argv.get("inject-frame"), "--inject-frame", 0);
+  const genericInjectDuration = parseNonNegativeInt(argv.get("inject-duration"), "--inject-duration", 10);
   const injectY = argv.has("inject-y") ? Number.parseInt(argv.get("inject-y"), 10) : null;
   const injectStick = argv.has("inject-stick") ? Number.parseInt(argv.get("inject-stick"), 10) : null;
   // --inject-start <frame>: hold Start (pad bit 0x1000) for 5 frames — unpauses a save state
   // that was captured at the pause menu (the pause menu polls the same PADStatus buffer).
   const injectStart = argv.has("inject-start") ? Number.parseInt(argv.get("inject-start"), 10) : null;
   const injectPort = Number.parseInt(argv.get("inject-port") ?? "0", 10);
-  const wantsInjection = injectY !== null || injectStick !== null || injectStart !== null;
+  const wantsInjection = genericButtonMask !== 0 || injectY !== null || injectStick !== null || injectStart !== null;
   const outPath =
     argv.get("out") ??
     path.join(repoRoot, "user-data", "dolphin-trace", "attack-mechanics", `${presetId}-${preset.slug}.jsonl`);
@@ -546,13 +605,16 @@ async function runCapture(argv) {
   const injectPad = async (frame) => {
     if (padPtr === null) return;
     const yActive = injectY !== null && frame >= injectY && frame < injectY + 10;
+    const genericActive =
+      genericButtonMask !== 0 && frame >= genericInjectFrame && frame < genericInjectFrame + genericInjectDuration;
     const stickActive = injectStick !== null && frame >= injectStick;
     const startActive = injectStart !== null && frame >= injectStart && frame < injectStart + 5;
-    if (!yActive && !stickActive && !startActive) return;
+    if (!genericActive && !yActive && !stickActive && !startActive) return;
     const address = (padPtr + injectPort * PAD_STATUS_SIZE) >>> 0;
     const cur = (await gdb.readMem(address, PAD_STATUS_SIZE)) ?? Buffer.alloc(PAD_STATUS_SIZE);
     const bytes = Buffer.alloc(PAD_STATUS_SIZE);
     cur.copy(bytes, 0, 0, Math.min(cur.length, PAD_STATUS_SIZE));
+    if (genericActive) bytes.writeUInt16BE(bytes.readUInt16BE(0) | genericButtonMask, 0);
     if (yActive) bytes.writeUInt16BE(bytes.readUInt16BE(0) | PAD_BUTTON_Y, 0);
     if (startActive) bytes.writeUInt16BE(bytes.readUInt16BE(0) | 0x1000, 0); // Start
     if (stickActive) bytes.writeInt8(-100, 3); // stickY down = back-walk (behavior-notes (y))
@@ -656,6 +718,18 @@ async function runCapture(argv) {
               : "fields sampled on the proven game-side per-frame input/normalization tick at 0x8010d450",
           watchList: buildWatchList(preset),
           chase: preset.chase ?? null,
+          injection: wantsInjection
+            ? {
+                genericButtons,
+                genericButtonMask: `0x${genericButtonMask.toString(16).padStart(4, "0")}`,
+                genericInjectFrame,
+                genericInjectDuration,
+                injectY,
+                injectStick,
+                injectStart,
+                injectPort,
+              }
+            : null,
           limitations:
             presetId === "T1"
               ? "cmdStructBytes is chased via two sequential (non-atomic) GDB-stub reads per frame " +
@@ -719,7 +793,7 @@ async function main() {
 
   if (dryRun) {
     const presetId = flags.get("preset");
-    if (!presetId) throw new Error("--dry-run requires --preset T1..T10");
+    if (!presetId) throw new Error("--dry-run requires --preset T1..T11");
     runDryRun(presetId);
     return;
   }

@@ -7,8 +7,8 @@
 //
 // Controls: A=jump -> ground jump, then air-jumps up to the borg's jump level, then (flyers)
 // hold A for boost flight. While locked, stick input is target-relative: forward/back move
-// toward/away from the target, pure left/right triggers a dodge step, and forward+left/right
-// circle-strafes while heading remains slaved to the lock vector.
+// toward/away from the target, left/right strafe in the same lock frame, and heading remains
+// slaved to the lock vector.
 //
 // Tuning constants live in constants.ts (single CONST block). Relative feel comes from the
 // borg's `speed`/jump stats; absolute scale is tuned.
@@ -131,7 +131,7 @@ export function stepMovement(
   // --- Dash / step --------------------------------------------------------------------
   // A dash overrides horizontal velocity for its duration and grants brief i-frames.
   const dashCd = b.cooldowns["dash"] ?? 0;
-  if (free && (input.dash || horizontal.autoDodge) && dashCd <= 0 && (b.cooldowns["dashActive"] ?? 0) <= 0) {
+  if (free && input.dash && dashCd <= 0 && (b.cooldowns["dashActive"] ?? 0) <= 0) {
     // Dash in resolved stick direction, or forward if no stick.
     let dx = horizontal.dashX;
     let dz = horizontal.dashZ;
@@ -264,21 +264,20 @@ interface HorizontalIntent {
   walkZ: number;
   dashX: number;
   dashZ: number;
-  autoDodge: boolean;
 }
 
 function resolveHorizontalIntent(b: BorgRuntime, input: PlayerInput, lockTargetPos: Vec3 | null): HorizontalIntent {
   const stickX = Math.abs(input.moveX) < STICK_EPS ? 0 : input.moveX;
   const stickZ = Math.abs(input.moveZ) < STICK_EPS ? 0 : input.moveZ;
   if (!lockTargetPos) {
-    return { walkX: stickX, walkZ: stickZ, dashX: stickX, dashZ: stickZ, autoDodge: false };
+    return { walkX: stickX, walkZ: stickZ, dashX: stickX, dashZ: stickZ };
   }
 
   const toTargetX = lockTargetPos.x - b.pos.x;
   const toTargetZ = lockTargetPos.z - b.pos.z;
   const toTargetLen = Math.hypot(toTargetX, toTargetZ);
   if (toTargetLen < STICK_EPS) {
-    return { walkX: stickX, walkZ: stickZ, dashX: stickX, dashZ: stickZ, autoDodge: false };
+    return { walkX: stickX, walkZ: stickZ, dashX: stickX, dashZ: stickZ };
   }
 
   const towardX = toTargetX / toTargetLen;
@@ -287,14 +286,12 @@ function resolveHorizontalIntent(b: BorgRuntime, input: PlayerInput, lockTargetP
   const rightZ = -towardX;
   const resolvedX = rightX * stickX + towardX * stickZ;
   const resolvedZ = rightZ * stickX + towardZ * stickZ;
-  const pureLateral = stickX !== 0 && stickZ === 0;
 
   return {
-    walkX: pureLateral ? 0 : resolvedX,
-    walkZ: pureLateral ? 0 : resolvedZ,
+    walkX: resolvedX,
+    walkZ: resolvedZ,
     dashX: resolvedX,
     dashZ: resolvedZ,
-    autoDodge: pureLateral,
   };
 }
 

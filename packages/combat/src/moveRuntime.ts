@@ -65,8 +65,8 @@ export function usesContextualBResolver(id: string): boolean {
   // write actor+0x585 = 1 (vs the B-far type-0 path writing 0). A live type-1 record IS the
   // ROM's per-borg battle-mode-melee selection, so such borgs use the contextual resolver even
   // when the wiki catalog lacks a separate "B Attack" row. See commandMoveTables.ts
-  // BUTTON_COMMAND_TYPES and data/commandMoveTables.json (25 borgs / 17 decoded tables,
-  // 21 with live type-1 melee records).
+  // BUTTON_COMMAND_TYPES and data/commandMoveTables.json (direct +0x4ec writes plus
+  // constructor-vector copies, with live type-1 melee records).
   return commandMoveRecordsForBorgButton(id, "B Attack").length > 0;
 }
 

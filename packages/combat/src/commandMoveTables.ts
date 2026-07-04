@@ -6,6 +6,8 @@ export interface CommandMoveTableCoverage {
   rosterBorgs: number;
   exactCommandTableBorgs: number;
   decodedTables: number;
+  directCommandTableSources?: number;
+  derivedConstructorVectorSources?: number;
 }
 
 export interface CommandMoveTableAssignment {
@@ -18,6 +20,10 @@ export interface CommandMoveTableAssignment {
   constructorAddress: string;
   tableId: string | null;
   exactCommandTable: boolean;
+  commandTableResolution?: string | null;
+  commandTableEvidence?: string | null;
+  pointerLabelAddress?: string | null;
+  commandStructAddress?: string | null;
 }
 
 export interface CommandMoveRecord {

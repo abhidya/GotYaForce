@@ -52,8 +52,8 @@ Sources (player-facing taxonomy only):
 - **Decomp lead**: the damage formula cannot produce healing (returns 0 for non-positive
   damage), so healing must be a separate HP-increase path — agent is sweeping all +0x1c6
   writers. Recharge is plausibly the weapon-cell ammo system already decoded (ATK-009).
-- **Port note**: the port's `cycleAllyLock` exists but "downstream behavior unknown"
-  (combat.ts:162-190) — healing is likely that downstream behavior.
+- **Port note**: ally target selection is now source-shaped through `SourceTargetLockState` /
+  `sourceSwitchAllyLock`; healing/support consumption of that ally target remains the gap.
 - **Queued**: research in flight; ticket after results (candidate: ATK-019).
 
 ## W4. Self-damage (owner-hit rules) — DONE (negative) → (al): owner exclusion is unconditional
@@ -199,6 +199,7 @@ Sources (player-facing taxonomy only):
 - GF Energy cost/budget system — already ported (challenge tables, energy accounting (ae)/(af)).
 - Type effectiveness — ported (type matrix, (l)/(w)).
 - Hidden resistance/falloff — resolved as comboRankScale_802c7ca0 (findings mechanic U).
-- Manual lock-on algorithm — CHECKED_CLOSED, no ROM system exists ((q)).
+- Manual lock-on algorithm — superseded: source target-entry state is ported; ally-support
+  consumers still need follow-up ((q)).
 - Story-mode transformations on data recovery (e.g. the hero borg's upgraded form) —
   roster/unlock data, not a combat mechanic; out of scope for the attack port.

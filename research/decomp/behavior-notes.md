@@ -778,12 +778,23 @@ ever writes angle fields (`+0x284`/`+0x282`), never a speed/force value. `MELEE.
 flat-vector TUNED behavior using this decode; the **magnitude** stays TUNED until a separate trace
 finds what consumes `+0x284`/`+0x282` to produce an actual velocity impulse.
 
-### (q) Manual "lock-on" / enemy-targeting — searched thoroughly, CONCLUSION: no such system exists (2026-07-01)
+### (q) Manual "lock-on" / enemy-targeting — superseded by source target-state resolution (2026-07-04)
+
+**2026-07-04 supersession:** the 2026-07-01 scan below correctly disproved the old
+`acquireLock()`/`cycleLock()` nearest-in-cone heuristic, but its stronger "no ROM system" conclusion
+was too broad. The real system was later resolved in `zz_006b450_`, `FUN_8006b850`,
+`FUN_8006ba60`, `zz_006bc74_`, and `zz_006bcf4_`: actor fields `+0x502/+0x503/+0x504/+0x508`,
+target position `+0x50c/+0x510/+0x514`, and list-index bytes `+0x73d/+0x73e` retain source target
+state over the `DAT_803c1d7c` / `DAT_80436242` target-entry list. Browser runtime ports that shape
+as `SourceTargetLockState` and source-order R/Z cycling in `packages/combat/src/combat.ts`.
+
+Historical audit retained below: it remains evidence that the removed forward-cone/distance-sorted
+selector was not the source algorithm.
 
 Goal (per `HANDOFF-PROMPT.md`): find the real algorithm behind `packages/combat/src/combat.ts`'s
-`acquireLock()`/`cycleLock()` (currently TUNED — nearest enemy in a forward view-cone, scored by
+`acquireLock()`/`cycleLock()` (the former TUNED nearest enemy in a forward view-cone, scored by
 `distance*(1+angle)`) and either port the real thing or, if genuinely absent, say so and leave the
-heuristic as-is. Conclusion after an exhaustive pass: **there is no button-triggered scan-and-select
+heuristic as-is. Historical conclusion after that pass: **there is no button-triggered scan-and-select
 enemy-lock mechanic anywhere in the decompiled corpus.** Every "target" field in the ROM is
 hit-*reactive* (records who last hit whom, for reaction animations/cues), never scan-*selective*.
 This confirms and closes out the three concrete leads `HANDOFF-PROMPT.md` listed.
@@ -843,17 +854,11 @@ conclusion: *"Do not implement CPU AI as nearest-enemy-only long term... current
 shared target/effect/action dispatch used by CPU and player-controlled actors"* — i.e. no dedicated
 selection brain has ever been isolated in this corpus, by any pass.
 
-**Conclusion, and what this means for the port:** Gotcha Force's "targeting" is entirely
-*hit-reactive* bookkeeping (a slot remembers "what/who last hit me" for exactly one reaction
-animation), not a player-driven view-cone scan-and-lock-and-cycle system. There is no ROM algorithm
-to port in place of `acquireLock()`/`cycleLock()`. **Action item:** `packages/combat/src/combat.ts`'s
-lock-on remains explicitly TUNED — not because it wasn't investigated, but because the confirmed
-answer is "the real game doesn't have this as a discrete system to derive a formula from." Updated
-the header comments in `combat.ts` and `constants.ts`'s `LOCK` block to record this as a checked,
-closed question (cite this section) rather than an open TODO, so nobody re-derives it later
-believing it's still unknown. If projectile *homing* target selection (as opposed to manual
-lock-on) is investigated in a future session, that is a separate question — this section only
-covers manual player lock-on/cycle, per the original ask.
+**Superseded conclusion for the port:** this pass ruled out the old forward-cone/distance-sorted
+selector, but the source target state was later found elsewhere. Do not restore
+`acquireLock()`/`cycleLock()` or `LOCK.RANGE/CONE`; use the retained target-entry state resolved in
+`zz_006b450_` / `FUN_8006b850` / `FUN_8006ba60` and consumed by the lock camera states instead.
+Projectile *homing* target gating remains a separate question.
 
 ### (r) Animation-selection helpers `0x80066ec0`/`0x80066f1c`/`0x800670dc` are heading/turn
 interpolation, NOT animation request/apply — correcting §5 item 3 (2026-07-01)
@@ -1008,11 +1013,9 @@ reasons (so future sessions don't re-grep the same dead ends):**
   actual blocker (see §5 item 2, already prioritized above this audit).
 - **`STATE.DOWN_DURATION`/`DEATH_DURATION`/`SPAWN_DURATION`**: same blocker — these are specific
   `+0x544` state durations, and state-number semantics remain unmapped. Stays TUNED.
-- **`LOCK.RANGE`/`LOCK.CONE`**: already fully closed out by §(q) — exhaustively searched and
-  confirmed **there is no manual lock-on/targeting system in the ROM to derive a range or cone
-  from at all** (every target-shaped field is hit-reactive bookkeeping, not scan-and-select). Not
-  re-investigated here; §(q)'s conclusion stands. Stays TUNED, correctly documented as a closed
-  question rather than an open one.
+- **Former `LOCK.RANGE`/`LOCK.CONE`**: superseded by §(q)'s 2026-07-04 update. The forward-cone
+  heuristic was removed; lock target state now comes from source target-entry fields
+  `+0x502/+0x508/+0x73d/+0x73e`.
 - **`AI.MELEE_RANGE`/`RANGED_RANGE`/`RANGE_SLACK`/`RETARGET_FRAMES`**: no `packages/ai` code exists
   (see above) and no CPU-controlled "decide when to retarget" cadence was found; consistent with
   `research/decomp/index/cpu-ai-evidence.md`'s own prior conclusion (quoted in §q) that CPU and
@@ -1489,21 +1492,25 @@ explains why several movement constants (esp. DASH, TURN) never fit a world/came
 model. To be verified against a golden trace (record the locked enemy's position alongside the
 player's; decompose motion into toward/away/around the enemy).
 
+**2026-07-04 runtime note:** because this testimony is not ROM/source-proven, the browser runtime
+does not auto-trigger dash on pure left/right. Locked left/right is a lock-frame strafe unless the
+explicit dash input is pressed. Re-enable auto-step only after a trace/source path proves it.
+
 The player is normally **auto-locked onto an enemy**, and stick input is interpreted relative to
 that enemy, not the camera or world:
 - **Up/forward** = approach the locked enemy AND rotates facing toward them (heading is slaved to
   the lock vector — heading @ +0x72 is NOT a free DOF while locked).
 - **Down/back** = retreat directly away. This is the ONLY pure translation with no turn coupling,
   so it is the correct input for isolating raw ground-walk speed (`MOVE.GROUND_*`).
-- **Left/Right** = a **dodge dash / step** (not a lateral walk). These are the DASH samples; the
-  analyzer must treat left/right as dash events, not steady-speed runs.
+- **Left/Right** = testimony says **dodge dash / step** (not a lateral walk), but this remains
+  unverified; trace analyzers should classify it from observed dash-state/velocity, not assume it.
 - **Forward + Left/Right** = circle-strafe around the enemy.
 - **Jump: tap A = jump; hold A = fly/boost** (matches JUMP.VELOCITY vs BOOST_THRUST split).
 
 Consequences for the trace harness:
 1. `scripts/trace-golden-analyze.mjs` currently infers "steady ground speed" from full-stick runs
-   — valid only for the BACK-walk segment. Left/right full-stick = dash, not walk. Recipe and
-   analyzer phase-detection updated accordingly (see golden-trace-runbook.md).
+   — valid only for the BACK-walk segment unless the trace proves lateral steady-state movement.
+   Recipe and analyzer phase-detection should detect dash/step frames rather than assume them.
 2. Golden capture should also record the locked enemy's struct (position) so motion can be
    decomposed in the lock frame; world-space deltas alone conflate approach/turn/strafe.
 3. This corroborates the standing "lock-on is central; no manual scan-select mechanic" finding

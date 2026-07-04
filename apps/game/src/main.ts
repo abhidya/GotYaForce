@@ -377,7 +377,11 @@ async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>
   const models = await Promise.all(assets.modelUrls.map((u) => renderAssets.loadGlbScene(u)));
   for (const model of models) {
     prepareImportedModel(model, {
-      materialSide: THREE.FrontSide,
+      // HSD stage exports include large single-sided planes/inside-facing pieces, but the
+      // runtime GLB pipeline does not preserve per-material cull-mode flags yet. Render stages
+      // double-sided like the borg/UI HSD imports so arena surfaces stay readable from the
+      // battle camera instead of disappearing or blacking out at gameplay angles.
+      materialSide: THREE.DoubleSide,
       metalness: 0,
       culling: "auto",
     });

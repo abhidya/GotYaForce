@@ -596,15 +596,21 @@ function assertLockRelativeControls(borgs: BorgStats[]): void {
 
   const lateral = makeLocked();
   stepMovement(lateral, profile, { ...emptyInput(), moveX: 1 }, ctx);
-  if ((lateral.cooldowns["dashActive"] ?? 0) !== DASH.DURATION || Math.abs(lateral.vel.x) < DASH.SPEED * 0.9) {
-    throw new Error(`[selfcheck] lock-relative pure lateral should dodge dash: vel=${JSON.stringify(lateral.vel)}`);
+  if ((lateral.cooldowns["dashActive"] ?? 0) > 0 || !(lateral.vel.x < -0.1 && Math.abs(lateral.vel.z) < 0.001)) {
+    throw new Error(`[selfcheck] lock-relative pure lateral should strafe: vel=${JSON.stringify(lateral.vel)}`);
   }
 
-  const lateralOnCooldown = makeLocked();
-  lateralOnCooldown.cooldowns["dash"] = DASH.COOLDOWN;
-  stepMovement(lateralOnCooldown, profile, { ...emptyInput(), moveX: 1 }, ctx);
-  if ((lateralOnCooldown.cooldowns["dashActive"] ?? 0) > 0 || Math.hypot(lateralOnCooldown.vel.x, lateralOnCooldown.vel.z) > 0.001) {
-    throw new Error(`[selfcheck] lock-relative pure lateral should not become steady walk on dash cooldown: vel=${JSON.stringify(lateralOnCooldown.vel)}`);
+  const lateralDash = makeLocked();
+  stepMovement(lateralDash, profile, { ...emptyInput(), moveX: 1, dash: true }, ctx);
+  if ((lateralDash.cooldowns["dashActive"] ?? 0) !== DASH.DURATION || lateralDash.vel.x > -DASH.SPEED * 0.9) {
+    throw new Error(`[selfcheck] explicit lateral dash should use lock-relative direction: vel=${JSON.stringify(lateralDash.vel)}`);
+  }
+
+  const lateralDashOnCooldown = makeLocked();
+  lateralDashOnCooldown.cooldowns["dash"] = DASH.COOLDOWN;
+  stepMovement(lateralDashOnCooldown, profile, { ...emptyInput(), moveX: 1, dash: true }, ctx);
+  if ((lateralDashOnCooldown.cooldowns["dashActive"] ?? 0) > 0 || !(lateralDashOnCooldown.vel.x < -0.1)) {
+    throw new Error(`[selfcheck] dash cooldown should fall back to lock-relative strafe: vel=${JSON.stringify(lateralDashOnCooldown.vel)}`);
   }
 
   const diagonal = makeLocked();
@@ -613,7 +619,7 @@ function assertLockRelativeControls(borgs: BorgStats[]): void {
     throw new Error(`[selfcheck] lock-relative forward+lateral should circle-strafe, not dodge: vel=${JSON.stringify(diagonal.vel)}`);
   }
 
-  console.log("[selfcheck] lock-relative controls: forward approach, back retreat, lateral dodge, diagonal circle-strafe");
+  console.log("[selfcheck] lock-relative controls: forward approach, back retreat, lateral strafe, explicit dash");
 }
 
 function borgById(borgs: BorgStats[], id: string): BorgStats {

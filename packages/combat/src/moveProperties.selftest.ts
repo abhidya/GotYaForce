@@ -102,8 +102,24 @@ ok(commandMoveTableAssignmentForBorgId("pl0615")?.constructorAddress === "0x8018
 ok(commandMoveRecordsForBorgButton("pl0615", "B Shot").length === 24, "G RED B Shot far/default command table exposes 24 directional records");
 
 const commandCoverage = commandMoveTableCoverage();
-ok(commandCoverage.decodedTables >= 17, `command table coverage decoded tables >= 17 (got ${commandCoverage.decodedTables})`);
-ok(commandCoverage.exactCommandTableBorgs >= 25, `command table exact borgs >= 25 (got ${commandCoverage.exactCommandTableBorgs})`);
+ok(commandCoverage.decodedTables >= 120, `command table coverage decoded tables >= 120 (got ${commandCoverage.decodedTables})`);
+ok(
+  commandCoverage.exactCommandTableBorgs === commandCoverage.rosterBorgs,
+  `command table exact borgs cover roster (${commandCoverage.exactCommandTableBorgs}/${commandCoverage.rosterBorgs})`,
+);
+ok(
+  (commandCoverage.derivedConstructorVectorSources ?? 0) >= 100,
+  `command table coverage includes constructor-vector sources (got ${commandCoverage.derivedConstructorVectorSources ?? 0})`,
+);
+for (const id of ["pl0500", "pl0405", "pl0900", "pl0e01"]) {
+  ok(hasExactCommandMoveTableForBorgId(id), `${id} has source-derived constructor command table assignment`);
+  ok(
+    commandMoveTableAssignmentForBorgId(id)?.commandTableResolution === "constructor-vector",
+    `${id} command table comes from constructor-vector extraction`,
+  );
+  ok(commandMoveRecordsForBorgButton(id, "B Shot").length > 0, `${id} B Shot has exact ROM command records`);
+  ok(commandMoveRecordsForBorgButton(id, "X").length > 0, `${id} X has exact ROM command records`);
+}
 
 const runtimeCoverage = runtimeMoveCoverage();
 ok(runtimeCoverage.borgsWithMoves >= 160, `runtime coverage borgs >= 160 (got ${runtimeCoverage.borgsWithMoves})`);

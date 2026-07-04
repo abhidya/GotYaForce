@@ -46,10 +46,9 @@
 //     never a speed/force value or hitstun duration. Do not read the direction fix as license to
 //     upgrade these magnitude/hitstun constants; they need a separate trace of whatever consumes
 //     the stored yaw/pitch to actually apply a velocity impulse.
-//   - LOCK.RANGE/CONE (manual lock-on acquisition): TUNED, CHECKED CLOSED (2026-07-01,
-//     behavior-notes.md s4q) — a thorough search found no manual scan-and-select enemy-lock
-//     system anywhere in the ROM; every "target" field in the decomp is hit-reactive bookkeeping,
-//     not a player-driven lock/cycle mechanic. This is a confirmed absence, not an unsolved lead.
+//   - Lock-on target state is source-shaped in combat.ts/types.ts. The old manual
+//     LOCK.RANGE/CONE view-cone heuristic was removed after resolving zz_006b450_,
+//     FUN_8006b850/FUN_8006ba60, and the actor +0x502/+0x508/+0x73d/+0x73e state.
 //   - Full TUNED-constants audit (2026-07-01, behavior-notes.md s4s): every remaining TUNED field
 //     below (MOVE/JUMP/DASH/MELEE/SHOT/SPECIAL/STATE/AI blocks) was checked against the corpus and
 //     could NOT be honestly upgraded this pass — see s4s for the per-field reasoning and dead-end
@@ -170,7 +169,7 @@ export const DASH = {
   /**
    * TUNED-rescaled 4x (2026-07-01) alongside the DERIVED ground-speed anchor in MOVE — a
    * dash must clearly outpace the measured 22.0 u/f walk. Absolute value still TUNED;
-   * capture left/right dodge-dashes on the +0x20 chain to derive it.
+   * capture explicit dash input on the +0x20 chain to derive it.
    */
   SPEED: 36.0,
   /** Dash duration (frames). TUNED — see SPEED note; no dash state found to time. */
@@ -516,22 +515,6 @@ export const STATE = {
   /** Spawn (deploy) controllable lock: 20f descent + 1f phase setup + 15f pose. DERIVED from
    *  behavior-notes.md (af), table slots 0-2 at 0x8005be08/0x8005bec8/0x8005bf6c. */
   SPAWN_DURATION: 36,
-} as const;
-
-export const LOCK = {
-  /**
-   * TUNED — and CHECKED CLOSED, not an open TODO (2026-07-01, behavior-notes.md s4q). A
-   * thorough corpus search (borg state-machine dispatch 0x8005cc00/0x8005d494, every writer of
-   * the "last enemy" globals DAT_803b06a8/object+2000/+0x7d1, every loop over the 6-actor table
-   * DAT_803c4e84, every PSVEC distance-check call site, PAD/SI input symbols) found no
-   * button-triggered scan-and-select enemy-lock mechanic in the ROM at all — every "target" field
-   * that exists is hit-REACTIVE bookkeeping (who last hit whom, for a one-shot reaction
-   * animation), never a scan-selective player lock system. RANGE/CONE below are an honest design
-   * choice with no ROM formula to replace them; do not re-derive without new leads.
-   */
-  RANGE: 1200,
-  /** Lock-on cone half-angle (radians) — must be "in front" to acquire. TUNED (see note above). */
-  CONE: Math.PI * 0.55,
 } as const;
 
 export const AI = {
