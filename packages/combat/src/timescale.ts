@@ -13,9 +13,10 @@
 //   ×1.5 (FLOAT_804373d8 — the port's BURST.SPEED_MULTIPLIER, applied in movement.ts's
 //   existing burstMult, NOT here, to avoid double-count); haste table ×{0.1,1.25,1.5,1.75}
 //   (levels +0x70d/+0x70f); slow table ×{0,0.7,0.4,0.2} (levels +0x70c/+0x70e, hit-inflicted
-//   chunk_0003.c:7673/8105/8143); freeze ×0.03 while +0x71c counts down. The slow/haste
-//   LEVEL fields and their hit-record writers are not yet modeled on BorgRuntime — the
-//   accessors below consume them when present so the writers can land incrementally.
+//   chunk_0003.c:7673/8105/8143); freeze ×0.03 while +0x71c counts down. WIRED (2026-07-04,
+//   research/decomp/status-effects-decode-2026-07-04.md): combat.ts's applyHit writes the
+//   slowHitLevel/hasteHitLevel/slowAuraLevel/hasteAuraLevel/freezeFrames fields on BorgRuntime
+//   from a hit's DamageRecord flagsA/flagsB, and this module's statusTimescale() consumes them.
 
 import paramTierTablesData from "./data/paramTierTables.json" with { type: "json" };
 import type { BorgRuntime } from "./types.js";
@@ -50,17 +51,29 @@ function tierRow(tier: number): TierRow | null {
   return TIER_TABLE[clamped] ?? null;
 }
 
-/** DERIVED tier velocity multiplier (+0x5f8 model): table row at paramTier.tier. ×1.0 at the
- *  default tier 16, so behavior is unchanged until a special writes a tier delta. */
+/**
+ * Effective tier row index: paramTier.tier (mutated directly by the hero X buff's ±4 `_127`
+ * delta, combat.ts/paramTier.ts) PLUS the hit-inflicted grow/shrink accumulator (`sizeTierDelta`,
+ * kept as its own field per status-effects-decode-2026-07-04.md so combat.ts can revert exactly
+ * that contribution independent of the hero buff's own timer). Both are contributions to the
+ * SAME ROM byte (actor+0x74a) in the original — the port just tracks their revert timers
+ * separately since they run on different clocks (900f vs 1200f).
+ */
+function effectiveTier(b: BorgRuntime): number {
+  return (b.paramTier?.tier ?? PARAM_TIER_DEFAULT) + (b.sizeTierDelta ?? 0);
+}
+
+/** DERIVED tier velocity multiplier (+0x5f8 model): table row at the borg's effective tier.
+ *  ×1.0 at the default tier 16, so behavior is unchanged until a special writes a tier delta. */
 export function tierVelocityScale(b: BorgRuntime): number {
-  const row = tierRow(b.paramTier?.tier ?? PARAM_TIER_DEFAULT);
+  const row = tierRow(effectiveTier(b));
   return row && row.velocityScale > 0 ? row.velocityScale : 1;
 }
 
 /** DERIVED tier size multiplier (+0xb8 target; the ROM lerps ±0.05/frame — consumers may
  *  apply directly until the lerp is modeled). */
 export function tierSizeScale(b: BorgRuntime): number {
-  const row = tierRow(b.paramTier?.tier ?? PARAM_TIER_DEFAULT);
+  const row = tierRow(effectiveTier(b));
   return row && row.sizeScale > 0 ? row.sizeScale : 1;
 }
 
@@ -70,15 +83,42 @@ export interface StatusSpeedLevels {
   hasteLevel?: number;
 }
 
+/**
+ * True while `b.freezeFrames` is counting down (ROM +0x71c > 0) — the status timescale
+ * override to ×0.03 takes priority over every other multiplier (status-effects-decode-
+ * 2026-07-04.md §A "Consumption").
+ */
+export function isFrozen(b: BorgRuntime): boolean {
+  return (b.freezeFrames ?? 0) > 0;
+}
+
 /** DERIVED status timescale (+0x5f4 model) WITHOUT the burst ×1.5 term (movement.ts applies
- *  that via BURST.SPEED_MULTIPLIER — same FLOAT_804373d8 value, now DERIVED). Freeze is not
- *  yet modeled (statusId↔freeze mapping is T8-blocked). */
+ *  that via BURST.SPEED_MULTIPLIER — same FLOAT_804373d8 value, now DERIVED). Rebuilds the
+ *  full FUN_8005a378 product (chunk_0007.c:2817-2898):
+ *    1.0 × haste[hasteHitLevel] × haste[hasteAuraLevel? fixed ×1.25 row] ×
+ *    slow[slowHitLevel] × slow[slowAuraLevel] (slow terms skipped for burst actors — the
+ *    ROM's +0x6fc/+0x4a0/flag-0x1000000 burst/fusion gate), overridden to ×0.03 while
+ *    freezeFrames > 0. Callers pass the FULL BorgRuntime; the legacy slowLevel/hasteLevel
+ *    (StatusSpeedLevels) params remain supported for any pre-existing direct caller. */
 export function statusTimescale(b: BorgRuntime & StatusSpeedLevels): number {
+  if (isFrozen(b)) return DATA.statusTimescale.freezeMultiplier_804373dc || 0.03;
+
   let scale = DATA.statusTimescale.base_804373c8 || 1;
-  const haste = b.hasteLevel ?? 0;
-  if (haste > 0) scale *= DATA.statusTimescale.haste_802dd58c[Math.min(3, haste)] ?? 1;
-  const slow = b.slowLevel ?? 0;
-  if (slow > 0) scale *= DATA.statusTimescale.slow_802dd57c[Math.min(3, slow)] ?? 1;
+
+  // Haste terms apply even to burst actors (report: "applies even to burst targets").
+  const hasteHit = b.hasteHitLevel ?? b.hasteLevel ?? 0;
+  if (hasteHit > 0) scale *= DATA.statusTimescale.haste_802dd58c[Math.min(3, hasteHit)] ?? 1;
+  const hasteAura = b.hasteAuraLevel ?? 0;
+  if (hasteAura > 0) scale *= DATA.statusTimescale.haste_802dd58c[Math.min(3, hasteAura)] ?? 1;
+
+  // Slow terms are SKIPPED for burst actors (report: "slow skipped for burst/fused actors").
+  if (!b.burstActive) {
+    const slowHit = b.slowHitLevel ?? b.slowLevel ?? 0;
+    if (slowHit > 0) scale *= DATA.statusTimescale.slow_802dd57c[Math.min(3, slowHit)] ?? 1;
+    const slowAura = b.slowAuraLevel ?? 0;
+    if (slowAura > 0) scale *= DATA.statusTimescale.slow_802dd57c[Math.min(3, slowAura)] ?? 1;
+  }
+
   return scale;
 }
 

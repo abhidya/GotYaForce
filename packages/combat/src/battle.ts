@@ -33,6 +33,7 @@ import {
   stepContactDamage,
   stepCooldowns,
   stepGaugeWindows,
+  stepHitStatus,
   stepInvincibility,
   stepProjectiles,
   stepVampireDrain,
@@ -296,6 +297,18 @@ class BattleImpl implements Battle {
       fusionState: 0,
       defeatAccounted: false,
       alive: true,
+      // Hit-inflicted status effects (status-effects-decode-2026-07-04.md) — all start
+      // inactive; aura levels are cleared every frame regardless (stepHitStatus).
+      slowHitLevel: 0,
+      slowHitTimer: 0,
+      hasteHitLevel: 0,
+      hasteHitTimer: 0,
+      slowAuraLevel: 0,
+      hasteAuraLevel: 0,
+      freezeFrames: 0,
+      sizeTierDelta: 0,
+      sizeTierTimer: 0,
+      heroTierBuffFrames: 0,
     };
     this.state.borgs.push(b);
     this.byUid.set(uid, b);
@@ -426,6 +439,10 @@ class BattleImpl implements Battle {
       stepStatus(b);
       stepInvincibility(b);
       stepGaugeWindows(b);
+      // Hit-inflicted status decay (status-effects-decode-2026-07-04.md): UNCONDITIONAL,
+      // unlike stepGaugeWindows — clears aura levels for re-application this frame and ticks
+      // the discrete slow/haste/freeze/size-tier/hero-buff timers regardless of hit reaction.
+      stepHitStatus(b);
 
       // Source lock-on is continuous for active borgs; R (switch-lock) and Z (ally-lock) are
       // EDGE-TRIGGERED via 0/1 press latches stored in

@@ -808,3 +808,42 @@ export const BURST = {
    */
   SPEED_MULTIPLIER: 1.5,
 } as const;
+
+/**
+ * Hit-inflicted status effects — DERIVED, research/decomp/status-effects-decode-2026-07-04.md.
+ * All writers live in resolve_hitbox_target_effects_and_damage @0x8002e2a8; magnitudes/timers
+ * below are the exact ROM constants (chunk_0003.c:7621-8157), not tuned anchors.
+ */
+export const HIT_STATUS = {
+  /** Discrete slow/haste-on-hit timer seed (ROM +0x710/+0x712 s16), chunk_0003.c:8103/8141. */
+  DISCRETE_TIMER_FRAMES: 900,
+  /** Discrete slow/haste-on-hit level (ROM +0x70e/+0x70f), both always write level 2. */
+  DISCRETE_LEVEL: 2,
+  /** Contact-haste AURA fixed level (ROM +0x70d, flagsB&0x0800), chunk_0003.c:7681. */
+  AURA_HASTE_LEVEL: 1,
+  /** Grow/shrink accumulator clamp (the `_63` tier-delta path's ±0x3f range). */
+  SIZE_TIER_CLAMP: 0x3f,
+  /** Grow/shrink 900f auto-revert timer (ROM +0x750, chunk_0008.c:4475). */
+  SIZE_TIER_TIMER_FRAMES: 900,
+  /**
+   * Diver borg ids hard-coded EXEMPT from receiving the contact-slow aura they themselves
+   * project (chunk_0003.c:7665-7669 id-compare): pl0805 JELLY DIVER (lvl1, ×0.7), pl080e
+   * JACK (lvl2, ×0.4), pl080d TAR DIVER (lvl3, ×0.2).
+   */
+  SLOW_AURA_EXEMPT_BORG_IDS: ["pl0805", "pl080d", "pl080e"] as readonly string[],
+  /** Shared immunity bit (immunityB) that blocks BOTH aura types at once (chunk_0003.c:7654). */
+  AURA_SHARED_IMMUNITY_BIT: 0x400,
+} as const;
+
+/**
+ * STAR HERO (pl0804) / PLANET HERO (pl080c) X-special ramming-dash self-buff — DERIVED,
+ * status-effects-decode-2026-07-04.md §A (zz_011230c_ chunk_0031.c:576-617, revert
+ * FUN_8010f790 chunk_0030.c:4004-4026). On a connecting dash hit, if not already buffed, the
+ * ATTACKER gains +4 param tiers (tier 16->20, velocity ×2.366 via timescale.ts's tier table)
+ * for 1200 frames, then reverts.
+ */
+export const HERO_X_BUFF = {
+  BORG_IDS: ["pl0804", "pl080c"] as readonly string[],
+  TIER_DELTA: 4,
+  DURATION_FRAMES: 1200,
+} as const;

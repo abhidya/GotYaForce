@@ -44,6 +44,14 @@ export interface DamageRecord {
   attackerHpCurveIndex: number;
   /** u8 +0x07 — attacker force-gauge curve selector. */
   forceGaugeCurveIndex: number;
+  /**
+   * u8 +0x08 — hit-strength byte (status-effects-decode-2026-07-04.md §A/report field
+   * "hitStrength"; NOT the knockback-strength byte, see reactionAnimVariant +0x0d below for
+   * that one). On a normal-reaction hit ((flagsB & 0xfc0) === 0), this is the freeze/hitstop
+   * frame count max-merged onto BOTH attacker and victim's `freezeFrames` (chunk_0003.c:
+   * 7621-7625, 7633-7640).
+   */
+  hitStrength: number;
   /** u8 +0x0b — reaction flags; bits 2|0x80 force a stagger regardless of gauges. */
   reactionFlags: number;
   /**

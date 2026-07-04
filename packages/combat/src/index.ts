@@ -59,6 +59,7 @@ export {
   fallGravityForBorgId,
   jumpVelocityForBorgId,
   movementPhysicsForBorgId,
+  statusImmunityMasksForBorgId,
   type BorgMovementPhysics,
 } from "./movementData.js";
 export {
@@ -75,6 +76,7 @@ export { familyDamageRecordCountForBorg, familyDamageRecordForBorg } from "./fam
 export { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
 export {
   actorVelocityScale,
+  isFrozen,
   statusTimescale,
   tierSizeScale,
   tierVelocityScale,
@@ -99,6 +101,8 @@ export {
   DASH,
   DAMAGE,
   DEFAULT_BOUNDS,
+  HERO_X_BUFF,
+  HIT_STATUS,
   JUMP,
   MELEE,
   MOVE,

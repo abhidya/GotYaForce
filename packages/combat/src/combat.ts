@@ -30,6 +30,8 @@ import {
   DAMAGE,
   HEAL,
   HEAL_VAMPIRE_BORG_IDS,
+  HERO_X_BUFF,
+  HIT_STATUS,
   HOMING,
   KNOCKBACK,
   MASH,
@@ -71,6 +73,8 @@ import { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js"
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
+import { statusImmunityMasksForBorgId } from "./movementData.js";
+import { applyActorParamTierDelta127 } from "./paramTier.js";
 import type {
   BorgRuntime,
   BurstMeterState,
@@ -541,6 +545,115 @@ export interface DamageRuntimeContext {
   burstMeters?: Record<string, BurstMeterState> | undefined;
 }
 
+// ---------------------------------------------------------------------------------------
+// Hit-inflicted status effects — DERIVED, research/decomp/status-effects-decode-2026-07-04.md.
+// All writers below port resolve_hitbox_target_effects_and_damage @0x8002e2a8's status/freeze
+// block (chunk_0003.c:7621-8157) from the resolved DamageRecord's flagsA/flagsB, applied on
+// every hit connection (melee + projectile, via applyHit below).
+// ---------------------------------------------------------------------------------------
+
+/** flagsB bit — discrete slow-on-hit (chunk_0003.c:8099-8107). */
+const FLAGS_B_SLOW_HIT = 0x0004;
+/** flagsB bit — discrete haste-on-hit (chunk_0003.c:8138-8145). */
+const FLAGS_B_HASTE_HIT = 0x0008;
+/** flagsB bit — contact-slow aura, reapplied per contact frame (chunk_0003.c:7653-7677). */
+const FLAGS_B_SLOW_AURA = 0x0400;
+/** flagsB bit — contact-haste aura (chunk_0003.c:7679-7684). */
+const FLAGS_B_HASTE_AURA = 0x0800;
+/** flagsB mask — normal-reaction gate for the freeze/hitstop write (chunk_0003.c:7621-7625). */
+const FLAGS_B_NON_NORMAL_REACTION_MASK = 0xfc0;
+/** flagsA bit — grow (chunk_0003.c:7772-7776). */
+const FLAGS_A_GROW = 0x0004;
+/** flagsA bit — shrink, only when the grow bit is clear (chunk_0003.c:7758-7770). */
+const FLAGS_A_SHRINK = 0x0008;
+
+/**
+ * Sanity filter (report's honest caveat): many high-index familyDamageRecords rows are
+ * table-extent overshoot (contradictory grow+shrink+slow+haste combos, magnitudes 128/147/255)
+ * — not real design data. A record with BOTH flagsA grow (0x4) and shrink (0x8) bits set is
+ * one of these corrupt rows; skip ALL status application for it (trust low-index/clean cases).
+ */
+function isSaneStatusRecord(record: DamageRecord): boolean {
+  return (record.flagsA & (FLAGS_A_GROW | FLAGS_A_SHRINK)) !== (FLAGS_A_GROW | FLAGS_A_SHRINK);
+}
+
+/** Divers are hard-coded exempt from receiving the contact-slow aura (they project it, not
+ *  receive it) — chunk_0003.c:7665-7669 id-compare. */
+function isSlowAuraExempt(borgId: string): boolean {
+  return (HIT_STATUS.SLOW_AURA_EXEMPT_BORG_IDS as readonly string[]).includes(borgId.toLowerCase());
+}
+
+/**
+ * Apply the hit-inflicted status writes from `record`'s flagsA/flagsB to `victim` (and, for
+ * freeze only, to `attacker` too). Called once per hit CONNECTION from applyHit, mirroring the
+ * ROM's per-connection status block. `victimIsBurst` gates the slow-on-hit/grow-shrink guards
+ * (the report's "skip if victim is burst"); haste and freeze apply regardless of burst state.
+ */
+function applyHitInflictedStatus(
+  victim: BorgRuntime,
+  record: DamageRecord,
+  attacker: BorgRuntime | undefined,
+): void {
+  if (!isSaneStatusRecord(record)) return;
+
+  const { immunityA, immunityB } = statusImmunityMasksForBorgId(victim.borgId);
+  const victimIsBurst = victim.burstActive === true;
+
+  // --- Discrete slow-on-hit (flagsB & 0x0004) — skip for burst victims. ------------------
+  if (
+    (record.flagsB & FLAGS_B_SLOW_HIT) !== 0 &&
+    !victimIsBurst &&
+    (immunityB & FLAGS_B_SLOW_HIT) === 0
+  ) {
+    victim.slowHitLevel = HIT_STATUS.DISCRETE_LEVEL;
+    victim.slowHitTimer = HIT_STATUS.DISCRETE_TIMER_FRAMES;
+  }
+
+  // --- Discrete haste-on-hit (flagsB & 0x0008) — applies even to burst victims. ----------
+  if ((record.flagsB & FLAGS_B_HASTE_HIT) !== 0 && (immunityB & FLAGS_B_HASTE_HIT) === 0) {
+    victim.hasteHitLevel = HIT_STATUS.DISCRETE_LEVEL;
+    victim.hasteHitTimer = HIT_STATUS.DISCRETE_TIMER_FRAMES;
+  }
+
+  // --- Contact-slow aura (flagsB & 0x0400) — per-contact-frame max-merge, no timer. ------
+  // The shared bit 0x400 of immunityB blocks BOTH aura types.
+  const auraBlocked = (immunityB & HIT_STATUS.AURA_SHARED_IMMUNITY_BIT) !== 0;
+  if (
+    (record.flagsB & FLAGS_B_SLOW_AURA) !== 0 &&
+    !auraBlocked &&
+    !isSlowAuraExempt(victim.borgId)
+  ) {
+    victim.slowAuraLevel = Math.max(victim.slowAuraLevel ?? 0, record.comboScoreValue);
+  }
+
+  // --- Contact-haste aura (flagsB & 0x0800) — fixed level 1. -----------------------------
+  if ((record.flagsB & FLAGS_B_HASTE_AURA) !== 0 && !auraBlocked) {
+    victim.hasteAuraLevel = HIT_STATUS.AURA_HASTE_LEVEL;
+  }
+
+  // --- Grow/shrink (flagsA & 0x0004 / 0x0008) — shrink only when grow bit is clear. ------
+  if (!victimIsBurst) {
+    const grow = (record.flagsA & FLAGS_A_GROW) !== 0;
+    const shrink = !grow && (record.flagsA & FLAGS_A_SHRINK) !== 0;
+    if ((grow && (immunityA & FLAGS_A_GROW) === 0) || (shrink && (immunityA & FLAGS_A_SHRINK) === 0)) {
+      const signed = grow ? record.comboScoreValue : -record.comboScoreValue;
+      const clamp = HIT_STATUS.SIZE_TIER_CLAMP;
+      const next = Math.max(-clamp, Math.min(clamp, (victim.sizeTierDelta ?? 0) + signed));
+      victim.sizeTierDelta = next;
+      victim.sizeTierTimer = HIT_STATUS.SIZE_TIER_TIMER_FRAMES;
+    }
+  }
+
+  // --- Freeze/hitstop (record.hitStrength, u8 +0x08) — normal-reaction hits only, BOTH parties.
+  if ((record.flagsB & FLAGS_B_NON_NORMAL_REACTION_MASK) === 0) {
+    const freezeFrames = record.hitStrength;
+    if (freezeFrames > 0) {
+      victim.freezeFrames = Math.max(victim.freezeFrames ?? 0, freezeFrames);
+      if (attacker) attacker.freezeFrames = Math.max(attacker.freezeFrames ?? 0, freezeFrames);
+    }
+  }
+}
+
 /**
  * Apply a hit to `victim`. Respects invincibility. HP damage and knockback velocity always
  * land, but whether the victim is INTERRUPTED is decided by the DERIVED gauge-based stagger
@@ -607,6 +720,14 @@ export function applyHit(
   if (source && damageContext?.burstMeters) {
     creditBurstFill(damageContext.burstMeters, source.attacker.ownerPlayer);
   }
+
+  // Hit-inflicted status effects (DERIVED, status-effects-decode-2026-07-04.md; see the
+  // applyHitInflictedStatus block above applyHit): slow/haste (discrete + aura), grow/shrink,
+  // and freeze all resolve off THIS record's flagsA/flagsB on every hit connection, including
+  // the killing blow (freeze applies to the ATTACKER too, and a dead victim's fields are
+  // harmless to write). Runs before the lethal early-return below so attacker-side freeze
+  // always lands.
+  applyHitInflictedStatus(victim, record, source?.attacker);
 
   // Knockback DIRECTION — ROM-accurate port of zz_00300bc_ (0x800300bc), mode 1 ("attacker to
   // target" relative-position vector -> atan2 -> BAM16 yaw), the only one of the ROM's 5 vector-
@@ -801,6 +922,63 @@ export function stepGaugeWindows(b: BorgRuntime): void {
       b.comboWindow = 0;
       b.comboAccum = 0;
       b.comboRank = 0;
+    }
+  }
+}
+
+/**
+ * Per-frame decay pass for the hit-inflicted status fields (DERIVED, status-effects-decode-
+ * 2026-07-04.md §A/§B). UNCONDITIONAL — unlike stepGaugeWindows above, none of these timers
+ * freeze while the borg is in a hit reaction (FUN_8005a378/the timer decrements chunk_0007.c:
+ * 2839-2893 have no state gate). Call once per frame per borg, BEFORE that frame's hits are
+ * applied, so aura levels (which carry no timer — they're re-applied per contact frame) start
+ * this frame at 0 and only read as "active" if a hitbox still overlaps this frame.
+ */
+export function stepHitStatus(b: BorgRuntime): void {
+  // Aura levels: cleared every frame (chunk_0003.c:5949-5950); applyHitInflictedStatus
+  // re-raises them later this same frame for anyone still overlapping an aura hitbox.
+  b.slowAuraLevel = 0;
+  b.hasteAuraLevel = 0;
+
+  // Discrete slow/haste-on-hit: 900f timers, clear the level at 0 (chunk_0007.c:2839-2851).
+  if ((b.slowHitTimer ?? 0) > 0) {
+    b.slowHitTimer = (b.slowHitTimer ?? 0) - 1;
+    if (b.slowHitTimer <= 0) {
+      b.slowHitTimer = 0;
+      b.slowHitLevel = 0;
+    }
+  }
+  if ((b.hasteHitTimer ?? 0) > 0) {
+    b.hasteHitTimer = (b.hasteHitTimer ?? 0) - 1;
+    if (b.hasteHitTimer <= 0) {
+      b.hasteHitTimer = 0;
+      b.hasteHitLevel = 0;
+    }
+  }
+
+  // Freeze/hitstop: u8 countdown, no clear-on-expiry field beyond reaching 0 (chunk_0007.c:
+  // 2881-2893).
+  if ((b.freezeFrames ?? 0) > 0) {
+    b.freezeFrames = Math.max(0, (b.freezeFrames ?? 0) - 1);
+  }
+
+  // Grow/shrink 900f auto-revert (the `_63` caller's +0x750 timer, chunk_0008.c:4475): at
+  // expiry the accumulated delta reverts to 0 (chunk_0007.c:3684).
+  if ((b.sizeTierTimer ?? 0) > 0) {
+    b.sizeTierTimer = (b.sizeTierTimer ?? 0) - 1;
+    if (b.sizeTierTimer <= 0) {
+      b.sizeTierTimer = 0;
+      b.sizeTierDelta = 0;
+    }
+  }
+
+  // STAR HERO / PLANET HERO X-special self-buff (ROM +0x144): 1200f timer; at expiry revert
+  // the +4 tier delta (FUN_8010f790, chunk_0030.c:4004-4026).
+  if ((b.heroTierBuffFrames ?? 0) > 0) {
+    b.heroTierBuffFrames = (b.heroTierBuffFrames ?? 0) - 1;
+    if (b.heroTierBuffFrames <= 0) {
+      b.heroTierBuffFrames = 0;
+      applyActorParamTierDelta127(b.paramTier, -HERO_X_BUFF.TIER_DELTA);
     }
   }
 }
@@ -1544,7 +1722,7 @@ function startSpecialAttack(
       if (op) {
         // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target,
         // via the ported zz_00300bc_ atan2/BAM16 calc) instead of this raw un-ported subtract.
-        applyHit(
+        const dealt = applyHit(
           o,
           op,
           0,
@@ -1564,9 +1742,31 @@ function startSpecialAttack(
           },
           damageContext,
         );
+        // STAR HERO (pl0804) / PLANET HERO (pl080c) X-special self-buff (DERIVED,
+        // status-effects-decode-2026-07-04.md §A, zz_011230c_ chunk_0031.c:576-617): their X
+        // is a ramming dash — on a connecting hit, if not already buffed, gain +4 param tiers
+        // for 1200f. Only the FIRST connection of this X starts the buff (guarded by
+        // heroTierBuffFrames <= 0, mirroring the ROM's "+0x144 <= 0" check); a hit while
+        // already buffed just connects normally with no re-buff/refresh.
+        if (dealt > 0 && applyHeroXBuff(b)) break;
       }
     }
   }
+}
+
+/**
+ * Apply the STAR HERO / PLANET HERO X ramming-dash self-buff to the attacker on a connecting
+ * hit: +4 param tiers (velocity ×2.366) for HERO_X_BUFF.DURATION_FRAMES, reverted by
+ * stepHitStatus when the timer expires. No-op (returns false) for every other borg id or when
+ * already buffed (ROM "+0x144 <= 0" gate — chunk_0031.c:583). Returns true when the buff
+ * (newly) applied, so the caller can stop after the dash's first connection.
+ */
+function applyHeroXBuff(b: BorgRuntime): boolean {
+  if (!(HERO_X_BUFF.BORG_IDS as readonly string[]).includes(b.borgId.toLowerCase())) return false;
+  if ((b.heroTierBuffFrames ?? 0) > 0) return false;
+  b.heroTierBuffFrames = HERO_X_BUFF.DURATION_FRAMES;
+  applyActorParamTierDelta127(b.paramTier, HERO_X_BUFF.TIER_DELTA);
+  return true;
 }
 
 /** TUNED spread between the muzzles of a multi-projectile special (radians between adjacent

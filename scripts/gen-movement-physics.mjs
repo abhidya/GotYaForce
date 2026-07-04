@@ -13,6 +13,12 @@
 // 0 / -1 / -0.07). Files come loose from afs_data/root or from the borg's .pzz (member
 // resolved via the pzz extraction manifest, same convention as bake-all-borg-anims.mjs).
 //
+// Also reads two u16 status-immunity masks (DERIVED, research/decomp/status-effects-decode-
+// 2026-07-04.md §B): +0xa8 statusImmunityA (checked vs a hit record's flagsA) and +0xaa
+// statusImmunityB (checked vs flagsB) — static per-borg masks copied to actor+0x59c/+0x59e
+// (chunk_0007.c:24-25). A matching bit blocks that status write; the shared bit 0x400 of
+// immunityB blocks BOTH aura types (contact-slow and contact-haste).
+//
 // Output: packages/combat/src/data/movementPhysics.json — consumed by
 // packages/combat/src/movementData.ts (the scale-reconciled runtime adapter).
 
@@ -38,6 +44,13 @@ const FIELDS = [
   ["gravityGround", 0x68],
   ["gravityFall", 0x6c],
   ["gravityC", 0x70],
+];
+
+// u16 status-immunity masks — read separately from FIELDS (those are f32 read via
+// readFloatBE; these are u16 read via readUInt16BE).
+const U16_FIELDS = [
+  ["statusImmunityA", 0xa8],
+  ["statusImmunityB", 0xaa],
 ];
 
 const borgsFile = JSON.parse(fs.readFileSync(borgsPath, "utf8"));
@@ -85,6 +98,12 @@ for (const id of ids) {
     // Round to 6 decimals: the source floats are exact f32; this only trims JSON noise.
     entry[name] = Math.round(data.buf.readFloatBE(offset) * 1e6) / 1e6;
   }
+  // Immunity masks live further into the page (+0xa8/+0xaa); guard separately so a page
+  // shorter than 0xac (shouldn't happen at the real 432-byte size, but keep it honest)
+  // degrades to 0 (no immunity) instead of throwing.
+  for (const [name, offset] of U16_FIELDS) {
+    entry[name] = data.buf.length >= offset + 2 ? data.buf.readUInt16BE(offset) : 0;
+  }
   out[id] = entry;
 }
 
@@ -93,8 +112,10 @@ const payload = {
     source: "user-data/<region>/afs_data/root/pl####data.bin (+ .pzz members via extraction manifest)",
     generator: "scripts/gen-movement-physics.mjs",
     evidence:
-      "research/decomp/behavior-notes.md (bc); research/decomp/data/movement-physics-constants.json perBorgMovementFields_pldata_bin",
-    fieldOffsets: Object.fromEntries(FIELDS.map(([name, offset]) => [name, `0x${offset.toString(16)}`])),
+      "research/decomp/behavior-notes.md (bc); research/decomp/data/movement-physics-constants.json perBorgMovementFields_pldata_bin; research/decomp/status-effects-decode-2026-07-04.md §B (statusImmunityA/B)",
+    fieldOffsets: Object.fromEntries(
+      [...FIELDS, ...U16_FIELDS].map(([name, offset]) => [name, `0x${offset.toString(16)}`]),
+    ),
     region,
     borgs: Object.keys(out).length,
     missing,

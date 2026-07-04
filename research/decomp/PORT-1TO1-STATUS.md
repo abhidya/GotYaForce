@@ -130,6 +130,24 @@ shot kind selection.
   BURST.SPEED_MULTIPLIER to DERIVED). ×1.0 for everyone until the special-move tier/status
   WRITERS are attributed (the Acceleration archetype = +4 tiers/1200f awaits its family
   dispatch link).
+- **Slice 8 WRITERS + hero X tier-buff DONE (2026-07-04, status-effects-decode-2026-07-04.md)**:
+  all hit-inflicted status writers from resolve_hitbox_target_effects_and_damage @0x8002e2a8
+  are now wired in combat.ts's `applyHitInflictedStatus` (called from `applyHit` on every melee/
+  projectile/special connection): discrete slow/haste-on-hit (flagsB&4/8, 900f, level 2),
+  contact slow/haste AURAS (flagsB&0x400/0x800, cleared+re-applied every frame, divers
+  pl0805/pl080d/pl080e exempt from receiving the slow aura), hit-inflicted grow/shrink
+  (flagsA&4/8, ±63 clamp via the new `sizeTierDelta`/`sizeTierTimer` fields, 900f auto-revert),
+  and freeze/hitstop (record.hitStrength, normal-reaction hits only, max-merged on BOTH
+  attacker and victim, timescale ×0.03). Per-borg immunity masks (data.bin +0xa8/+0xaa)
+  extracted into movementPhysics.json (`statusImmunityA/B`) and gate every write; the "the
+  Acceleration archetype" attribution above is now REFUTED — the +4/1200f self-buff belongs to
+  **STAR HERO (pl0804) / PLANET HERO (pl080c)**'s X ramming-dash special (zz_011230c_
+  chunk_0031.c:576-617), wired in combat.ts's `startSpecialAttack`/`applyHeroXBuff`: a
+  connecting dash hit grants +4 param tiers (×2.366 velocity) for 1200f if not already buffed,
+  reverted by the new `stepHitStatus` per-frame decay pass (battle.ts). Sanity filter applied
+  per the report's honest caveat: records with both flagsA grow+shrink bits set (table-extent
+  overshoot rows) skip all status application. selfcheck.ts covers slow/haste/freeze/immunity/
+  hero-buff with dedicated asserts.
 - **Slice 9**: existing captures re-used headless — T11 jump capture shows takeoff deltas of
   EXACTLY 15.0 u/f, live-validating the raw-scale migration; T1 held-B shows the command
   byte stepping 1→2 (tester-order corroboration). New injection presets remain
@@ -254,6 +272,8 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Hyper / Power Burst | shell (ATK-011) | burst.ts | +0x6fb/+0x6fc, zz_005b2b8_ (aj/S) | **trace T3** — meter+duration |
 | Fusion | data + shell (ATK-018) | fusion-pairs JSON | pair table 0x802d352c (aj) | trace T3 (co-op control split) |
 | Statuses (id/timer/immunity) | framework DERIVED (bd), catalog T8-blocked | status.ts | +0x71a=immunity-idx+bone-idx (NOT behavior-selector); tick FUN_8005a378 id-agnostic (bd) | port isImmune/i-frames/hitstun; per-id wiki behaviors genuinely need T8 trace |
+| Hit-inflicted status (slow/haste/freeze/grow-shrink) | **DONE (2026-07-04)** | combat.ts applyHitInflictedStatus/stepHitStatus, timescale.ts statusTimescale | resolve_hitbox_target_effects_and_damage @0x8002e2a8 (chunk_0003.c:7621-8157) | — (separate mechanism from the +0x71a statusId shell above) |
+| Hero X tier-buff (STAR/PLANET HERO ramming dash) | **DONE (2026-07-04)** | combat.ts applyHeroXBuff/startSpecialAttack | zz_011230c_/FUN_8010f790 (chunk_0031.c:576-617/chunk_0030.c:4004-4026) | — |
 | Vampire lifesteal | **PORTED (aef234f1)** | combat.ts steal+bleed, wired | steal chunk_0003.c:7982/apply 6318/bleed chunk_0006.c:7900 | done: steal=dmg/2 cap@maxHP + 1HP/30f bleed, 47/47 test |
 | Nurse heal | **HP-write ABSENT (ay)** | ATK-019 shell | table 0x802d1130 (ax); no +0x1c6 write reachable | Dolphin-trace +0x1c6 on healed ally |
 | Mash extra hits | shell (ATK-017) | constants MASH | +0x550 cap 4 (T/ax) | trace consumer |

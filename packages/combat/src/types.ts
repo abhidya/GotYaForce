@@ -265,6 +265,49 @@ export interface BorgRuntime {
    *  and the exact ROM command record where one is decoded. Set by stepAttacks each frame it
    *  runs (null-cleared when no attack bit is held); optional so external fakes self-heal. */
   command?: ResolvedCommandState | null;
+
+  // --- Hit-inflicted status effects (research/decomp/status-effects-decode-2026-07-04.md) ---
+  // resolve_hitbox_target_effects_and_damage @0x8002e2a8 writers; consumed by timescale.ts's
+  // statusTimescale() rebuild (FUN_8005a378, chunk_0007.c:2817-2898). All optional so existing
+  // fakeRuntime()/constructors that predate this ticket keep compiling (self-heal to 0/absent).
+
+  /** Slow-on-hit level (ROM +0x70e; discrete, flagsB&0x0004): 0 = none, else indexes the
+   *  DERIVED slow table {0,0.7,0.4,0.2} in timescale.ts. Skipped for burst victims. */
+  slowHitLevel?: number;
+  /** Slow-on-hit s16 timer (ROM +0x710), 900f seed; decrements 1/frame, clears the level at 0. */
+  slowHitTimer?: number;
+  /** Haste-on-hit level (ROM +0x70f; discrete, flagsB&0x0008): 0 = none, else indexes the
+   *  DERIVED haste table {0.1,1.25,1.5,1.75}. Applies even to burst victims. */
+  hasteHitLevel?: number;
+  /** Haste-on-hit s16 timer (ROM +0x712), 900f seed; decrements 1/frame, clears the level at 0. */
+  hasteHitTimer?: number;
+  /** Contact-slow AURA level (ROM +0x70c, flagsB&0x0400): max-merged per contact frame from
+   *  the record's comboScoreValue; NO timer — cleared to 0 at the START of every frame and
+   *  re-applied only while a slow-aura hitbox still overlaps. Divers (pl0805/pl080d/pl080e)
+   *  are hard-coded exempt from receiving it. */
+  slowAuraLevel?: number;
+  /** Contact-haste AURA level (ROM +0x70d, flagsB&0x0800): fixed at 1 (×1.25) while overlapping;
+   *  cleared every frame like slowAuraLevel. */
+  hasteAuraLevel?: number;
+  /** Freeze/hitstop frames (ROM +0x71c, u8): max-merged from a normal-reaction hit's
+   *  `hitStrength` on BOTH attacker and victim; decrements 1/frame; overrides statusTimescale
+   *  to ×0.03 (freeze table) while > 0. */
+  freezeFrames?: number;
+  /** Hit-inflicted grow/shrink accumulator (ROM DAT_8043612c slot, flagsA&0x0004/0x0008):
+   *  ±rec.comboScoreValue per contact frame, clamped to ±63 (the `_63` tier-delta path,
+   *  paramTier.ts applyActorParamTierDelta63 semantics) — kept as its OWN delta (not folded
+   *  into paramTier.deltaAccum) so combat.ts can revert exactly this contribution independent
+   *  of any other tier-delta source (e.g. the hero X buff below, item 4). */
+  sizeTierDelta?: number;
+  /** 900f auto-revert timer for sizeTierDelta (ROM +0x750 via the `_63` caller,
+   *  chunk_0003.c:6248/chunk_0008.c:4475); reverts sizeTierDelta to 0 at expiry. */
+  sizeTierTimer?: number;
+  /** STAR HERO (pl0804) / PLANET HERO (pl080c) X-special self-buff (ROM actor+0x144,
+   *  zz_011230c_/FUN_8010f790, chunk_0031.c:576-617 / chunk_0030.c:4004-4026): +4 param
+   *  tiers (velocity ×2.366 via timescale.ts's tier table) applied directly via
+   *  applyActorParamTierDelta127 (NOT the ±63 accumulator — this is its own flat +4/-4 with
+   *  its own 1200f timer) on a connecting ramming-dash hit, reverted when the timer expires. */
+  heroTierBuffFrames?: number;
 }
 
 /** Live-resolved ROM attack command (see commandDispatch.ts for the resolution pipeline). */

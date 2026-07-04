@@ -47,6 +47,14 @@ export interface BorgMovementPhysics {
   gravityFall: number;
   /** +0x70 — gravity slot C. */
   gravityC: number;
+  /** +0xa8 — status-immunity mask A (u16), checked against a hit record's flagsA. A matching
+   *  bit blocks that flagsA status write (grow/shrink). DERIVED, status-effects-decode-
+   *  2026-07-04.md §B (chunk_0007.c:24-25). */
+  statusImmunityA: number;
+  /** +0xaa — status-immunity mask B (u16), checked against a hit record's flagsB. A matching
+   *  bit blocks that flagsB status write (slow/haste, discrete or aura). Bit 0x400 is SHARED
+   *  by both aura types (contact-slow and contact-haste). */
+  statusImmunityB: number;
 }
 
 type MovementPhysicsFile = {
@@ -79,4 +87,11 @@ export function fallGravityForBorgId(id: string): number {
   const data = movementPhysicsForBorgId(id);
   const mag = data ? Math.abs(data.gravityFall) : 0;
   return mag > 0 ? mag : JUMP.GRAVITY;
+}
+
+/** DERIVED per-borg status-immunity masks (RAW page+0xa8/+0xaa u16), or all-zero (no
+ *  immunity) for ids without a data page. See status-effects-decode-2026-07-04.md §B. */
+export function statusImmunityMasksForBorgId(id: string): { immunityA: number; immunityB: number } {
+  const data = movementPhysicsForBorgId(id);
+  return { immunityA: data?.statusImmunityA ?? 0, immunityB: data?.statusImmunityB ?? 0 };
 }

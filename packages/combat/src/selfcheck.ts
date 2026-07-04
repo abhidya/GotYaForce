@@ -24,14 +24,26 @@ import {
   stepAttacks,
   stepCooldowns,
   stepGaugeWindows,
+  stepHitStatus,
   stepProjectiles,
 } from "./combat.js";
 import { createBurstMeter } from "./burst.js";
 import { exactMeleeForBorgId } from "./meleeExactData.js";
 import { moveByButton } from "./moveProperties.js";
 import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
-import { BURST, DASH, JUMP, MELEE, STAGGER, STATE, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
+import {
+  BURST,
+  DASH,
+  HERO_X_BUFF,
+  JUMP,
+  MELEE,
+  STAGGER,
+  STATE,
+  WAKE_UP_INVINCIBILITY_FRAMES,
+} from "./constants.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, type DamageRecord } from "./gauges.js";
+import { statusImmunityMasksForBorgId } from "./movementData.js";
+import { actorVelocityScale, isFrozen, tierVelocityScale } from "./timescale.js";
 import { stepMovement } from "./movement.js";
 import {
   PARAM_TIER_RESET,
@@ -2463,6 +2475,240 @@ function assertXChargeAccumulatesAndReleases(borgs: BorgStats[]): void {
   );
 }
 
+/** Build a synthetic DamageRecord for the hit-inflicted status asserts below: clones the
+ *  melee archetype record (nonzero hp/gauge damage so applyHit's stagger/gauge paths still
+ *  exercise normally) and overrides only the flagsA/flagsB/hitStrength/comboScoreValue fields
+ *  under test. `hitStrength` defaults to 0 (no freeze) so slow/haste/grow-shrink asserts stay
+ *  isolated from the freeze path — tests exercising freeze pass hitStrength explicitly. */
+function fakeStatusRecord(overrides: Partial<DamageRecord>): DamageRecord {
+  return { ...damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE), flagsA: 0, flagsB: 0, hitStrength: 0, ...overrides };
+}
+
+/**
+ * (a) A hit with a flagsB&0x0004 record slows the victim's effective movement for 900 frames,
+ * then recovers. Status-effects-decode-2026-07-04.md: slowHitLevel=2 (×0.4), timer 900f.
+ */
+function assertHitInflictedSlowRecoversAfter900Frames(borgs: BorgStats[]): void {
+  const attacker = fakeRuntime("slow_atk", 0, 0);
+  const victim = fakeRuntime("slow_victim", 1, 20);
+  const victimProfile = buildProfile(borgById(borgs, "pl0615"));
+  const slowRecord = fakeStatusRecord({ flagsB: 0x0004 });
+  const noDir = { x: 0, y: 0, z: 0 };
+  const from = { x: 0, y: 0, z: 10 };
+
+  applyHit(victim, victimProfile, 0, 0, noDir, from, false, slowRecord, {
+    attacker,
+    attackerProfile: victimProfile,
+  });
+
+  const levelAfterHit: number = victim.slowHitLevel ?? -1;
+  const timerAfterHit: number = victim.slowHitTimer ?? -1;
+  if (levelAfterHit !== 2 || timerAfterHit !== 900) {
+    throw new Error(`[selfcheck] slow-on-hit write wrong: level=${levelAfterHit}, timer=${timerAfterHit}`);
+  }
+  const slowedScale = actorVelocityScale(victim);
+  if (Math.abs(slowedScale - 0.4) > 1e-9) {
+    throw new Error(`[selfcheck] slow-on-hit timescale wrong: ${slowedScale}, want 0.4`);
+  }
+
+  // Tick the full 900f timer via stepHitStatus (the unconditional per-frame decay pass).
+  for (let i = 0; i < 900; i += 1) stepHitStatus(victim);
+  const levelAfterDecay: number = victim.slowHitLevel ?? -1;
+  const timerAfterDecay: number = victim.slowHitTimer ?? -1;
+  if (levelAfterDecay !== 0 || timerAfterDecay !== 0) {
+    throw new Error(
+      `[selfcheck] slow-on-hit did not clear after 900f: level=${levelAfterDecay}, timer=${timerAfterDecay}`,
+    );
+  }
+  const recoveredScale = actorVelocityScale(victim);
+  if (Math.abs(recoveredScale - 1) > 1e-9) {
+    throw new Error(`[selfcheck] slow-on-hit did not recover to x1.0 timescale: ${recoveredScale}`);
+  }
+  console.log(
+    `[selfcheck] hit-inflicted slow (flagsB&4): level=2/timer=900 -> x0.4 timescale, recovers to x1.0 after 900f`,
+  );
+}
+
+/** (b) A haste record speeds the victim up (discrete haste-on-hit, level 2 -> x1.5). */
+function assertHitInflictedHasteSpeedsUpVictim(borgs: BorgStats[]): void {
+  const attacker = fakeRuntime("haste_atk", 0, 0);
+  const victim = fakeRuntime("haste_victim", 1, 20);
+  const victimProfile = buildProfile(borgById(borgs, "pl0615"));
+  const hasteRecord = fakeStatusRecord({ flagsB: 0x0008 });
+  const noDir = { x: 0, y: 0, z: 0 };
+  const from = { x: 0, y: 0, z: 10 };
+
+  applyHit(victim, victimProfile, 0, 0, noDir, from, false, hasteRecord, {
+    attacker,
+    attackerProfile: victimProfile,
+  });
+
+  if (victim.hasteHitLevel !== 2 || victim.hasteHitTimer !== 900) {
+    throw new Error(
+      `[selfcheck] haste-on-hit write wrong: level=${victim.hasteHitLevel}, timer=${victim.hasteHitTimer}`,
+    );
+  }
+  const hastedScale = actorVelocityScale(victim);
+  if (Math.abs(hastedScale - 1.5) > 1e-9) {
+    throw new Error(`[selfcheck] haste-on-hit timescale wrong: ${hastedScale}, want 1.5`);
+  }
+
+  // Applies even to burst victims (per the report) — same write while burstActive.
+  const burstVictim = fakeRuntime("haste_burst_victim", 1, 40);
+  burstVictim.burstActive = true;
+  applyHit(burstVictim, victimProfile, 0, 0, noDir, from, false, hasteRecord, {
+    attacker,
+    attackerProfile: victimProfile,
+  });
+  if (burstVictim.hasteHitLevel !== 2) {
+    throw new Error(`[selfcheck] haste-on-hit should apply even to burst victims: level=${burstVictim.hasteHitLevel}`);
+  }
+  console.log(`[selfcheck] hit-inflicted haste (flagsB&8): level=2/timer=900 -> x1.5 timescale (applies to burst too)`);
+}
+
+/**
+ * (c) Freeze halts both parties ~hitStrength frames (timescale 0.03). Uses the melee
+ * archetype's real hitStrength (4) since it's already a normal-reaction record (flagsB=0).
+ */
+function assertFreezeHaltsBothPartiesForHitStrengthFrames(borgs: BorgStats[]): void {
+  const attacker = fakeRuntime("freeze_atk", 0, 0);
+  const victim = fakeRuntime("freeze_victim", 1, 20);
+  const victimProfile = buildProfile(borgById(borgs, "pl0615"));
+  const meleeRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE); // flagsB=0 -> normal reaction
+  const noDir = { x: 0, y: 0, z: 0 };
+  const from = { x: 0, y: 0, z: 10 };
+
+  applyHit(victim, victimProfile, 0, 0, noDir, from, false, meleeRecord, {
+    attacker,
+    attackerProfile: victimProfile,
+  });
+
+  if (victim.freezeFrames !== meleeRecord.hitStrength || attacker.freezeFrames !== meleeRecord.hitStrength) {
+    throw new Error(
+      `[selfcheck] freeze should max-merge hitStrength (${meleeRecord.hitStrength}) onto BOTH parties: victim=${victim.freezeFrames}, attacker=${attacker.freezeFrames}`,
+    );
+  }
+  if (!isFrozen(victim) || !isFrozen(attacker)) {
+    throw new Error(`[selfcheck] isFrozen() should be true for both parties while freezeFrames>0`);
+  }
+  const frozenScale = actorVelocityScale(victim);
+  if (Math.abs(frozenScale - 0.03) > 1e-9) {
+    throw new Error(`[selfcheck] freeze timescale wrong: ${frozenScale}, want 0.03`);
+  }
+
+  // Tick down exactly hitStrength frames -> both recover.
+  for (let i = 0; i < meleeRecord.hitStrength; i += 1) {
+    stepHitStatus(victim);
+    stepHitStatus(attacker);
+  }
+  if (victim.freezeFrames !== 0 || attacker.freezeFrames !== 0 || isFrozen(victim) || isFrozen(attacker)) {
+    throw new Error(
+      `[selfcheck] freeze did not clear after ${meleeRecord.hitStrength}f: victim=${victim.freezeFrames}, attacker=${attacker.freezeFrames}`,
+    );
+  }
+  console.log(
+    `[selfcheck] freeze (record.hitStrength=${meleeRecord.hitStrength}) halts BOTH parties to x0.03 timescale, recovers after ${meleeRecord.hitStrength}f`,
+  );
+}
+
+/**
+ * (d) Immunity mask blocks the write. A borg whose statusImmunityB has the slow-on-hit bit
+ * (0x0004) set must NOT receive slowHitLevel/timer from an otherwise-identical hit.
+ */
+function assertStatusImmunityMaskBlocksWrite(borgs: BorgStats[]): void {
+  // Find a real borg id with a nonzero statusImmunityB bit somewhere in the 0..15 low bits so
+  // we can target a real mask shape; fall back to a synthetic check via the mask helper if
+  // none carries the exact 0x0004 bit (honest: assert the MECHANISM using whatever real mask
+  // bit is available, defaulting to a direct field override otherwise).
+  const attacker = fakeRuntime("immune_atk", 0, 0);
+  const victim = fakeRuntime("immune_victim", 1, 20);
+  victim.borgId = "pl0503"; // statusImmunityB=0x3c2c per movementPhysics.json (gen-movement-physics.mjs) — carries bit 0x4
+  const { immunityB } = statusImmunityMasksForBorgId(victim.borgId);
+  if ((immunityB & 0x0004) === 0) {
+    throw new Error(
+      `[selfcheck] test fixture assumption stale: pl0503 statusImmunityB should carry the 0x0004 slow-on-hit bit (got 0x${immunityB.toString(16)})`,
+    );
+  }
+  const victimProfile = buildProfile(borgById(borgs, "pl0615"));
+  const slowRecord = fakeStatusRecord({ flagsB: 0x0004 });
+  const noDir = { x: 0, y: 0, z: 0 };
+  const from = { x: 0, y: 0, z: 10 };
+
+  applyHit(victim, victimProfile, 0, 0, noDir, from, false, slowRecord, {
+    attacker,
+    attackerProfile: victimProfile,
+  });
+
+  if ((victim.slowHitLevel ?? 0) !== 0 || (victim.slowHitTimer ?? 0) !== 0) {
+    throw new Error(
+      `[selfcheck] immunity mask should have blocked the slow-on-hit write: level=${victim.slowHitLevel}, timer=${victim.slowHitTimer}`,
+    );
+  }
+  console.log(
+    `[selfcheck] status immunity: pl0503 statusImmunityB=0x${immunityB.toString(16)} blocked the flagsB&4 slow-on-hit write`,
+  );
+}
+
+/**
+ * (e) The STAR/PLANET HERO X buff applies ×2.366 speed for 1200f after a connecting ram and
+ * reverts. Drives it through startSpecialAttack's real AoE hit loop (stepAttacks -> X press),
+ * not a synthetic direct call, so the borg-id gate/cooldown/state wiring is exercised too.
+ */
+function assertHeroXBuffAppliesTierScaleAndReverts(borgs: BorgStats[]): void {
+  const heroProfile = buildProfile(borgById(borgs, "pl0804")); // STAR HERO
+  const hero = fakeRuntime("hero", 0, 0);
+  hero.borgId = heroProfile.id;
+  const enemy = fakeRuntime("hero_enemy", 1, 20); // inside the special's AoE radius
+  const enemyProfile = buildProfile(borgById(borgs, "pl0008"));
+  const profiles = new Map([
+    [hero.uid, heroProfile],
+    [enemy.uid, enemyProfile],
+  ]);
+
+  if (tierVelocityScale(hero) !== 1) {
+    throw new Error(`[selfcheck] hero should start at the default tier (x1.0): got ${tierVelocityScale(hero)}`);
+  }
+
+  // Press X (edge) then hold released -> fires on the press edge like assertSpecialFiresOncePerPressEdge.
+  stepCooldowns(hero);
+  stepAttacks(hero, heroProfile, false, true, [hero, enemy], profiles);
+
+  if ((hero.heroTierBuffFrames ?? 0) !== HERO_X_BUFF.DURATION_FRAMES) {
+    throw new Error(
+      `[selfcheck] hero X buff should arm a ${HERO_X_BUFF.DURATION_FRAMES}f timer on a connecting ram: got ${hero.heroTierBuffFrames}`,
+    );
+  }
+  const buffedScale = tierVelocityScale(hero);
+  const wantScale = 2.366;
+  if (Math.abs(buffedScale - wantScale) > 1e-6) {
+    throw new Error(`[selfcheck] hero X buff should scale velocity x${wantScale}: got ${buffedScale}`);
+  }
+
+  // A second connecting press while already buffed must NOT re-buff/refresh (ROM "+0x144<=0" gate).
+  hero.cooldowns["special"] = 0;
+  hero.state = "idle";
+  stepCooldowns(hero);
+  stepAttacks(hero, heroProfile, false, true, [hero, enemy], profiles);
+  if ((hero.heroTierBuffFrames ?? 0) !== HERO_X_BUFF.DURATION_FRAMES) {
+    throw new Error(
+      `[selfcheck] a second connecting X while already buffed must not refresh the timer: got ${hero.heroTierBuffFrames}`,
+    );
+  }
+
+  // Tick the full 1200f timer -> reverts to the default tier.
+  for (let i = 0; i < HERO_X_BUFF.DURATION_FRAMES; i += 1) stepHitStatus(hero);
+  if ((hero.heroTierBuffFrames ?? 0) !== 0) {
+    throw new Error(`[selfcheck] hero X buff timer should reach 0: got ${hero.heroTierBuffFrames}`);
+  }
+  const revertedScale = tierVelocityScale(hero);
+  if (Math.abs(revertedScale - 1) > 1e-9) {
+    throw new Error(`[selfcheck] hero X buff should revert to x1.0 velocity scale: got ${revertedScale}`);
+  }
+  console.log(
+    `[selfcheck] STAR/PLANET HERO X ramming-dash buff: connecting hit -> x${wantScale} velocity for ${HERO_X_BUFF.DURATION_FRAMES}f (no re-buff while active), reverts to x1.0 after expiry`,
+  );
+}
+
 function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
   return {
     uid,
@@ -2578,6 +2824,11 @@ export function main(): number {
   assertSpecialFiresOncePerPressEdge(borgs);
   assertProjectileArchetypeSpecialFiresThroughPipeline(borgs);
   assertXChargeAccumulatesAndReleases(borgs);
+  assertHitInflictedSlowRecoversAfter900Frames(borgs);
+  assertHitInflictedHasteSpeedsUpVictim(borgs);
+  assertFreezeHaltsBothPartiesForHitStrengthFrames(borgs);
+  assertStatusImmunityMaskBlocksWrite(borgs);
+  assertHeroXBuffAppliesTierScaleAndReverts(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the
