@@ -1159,7 +1159,9 @@ function updateBattleDebugDataset(): void {
 function resolveBattle(): void {
   if (!session || session.resolved) return;
   session.resolved = true;
-  const outcome = battleOutcomeFromState(session.battle);
+  // DERIVED results (results-scoring-decode-2026-07-04.md): outcome = the local player's
+  // slot counters; computeResults applies the decoded ROM rows/grand-total formula.
+  const outcome = battleOutcomeFromState(session.battle, session.localPlayerId);
   const results = computeResults(outcome);
 
   showResults(outcome.win ? "win" : "lose", {
@@ -1167,9 +1169,9 @@ function resolveBattle(): void {
     hitRatio: results.hitRatio * 100,
     dodgeRatio: results.dodgeRatio * 100,
     enemyBorgsDefeated: results.enemyBorgsDefeated,
-    enemyTotalCost: Math.round(outcome.costWon),
+    enemyTotalCost: results.costWon,
     playerBorgsDefeated: results.playerBorgsDefeated,
-    playerTotalCost: Math.round(outcome.costLost),
+    playerTotalCost: results.costLost,
     allyBorgsDefeated: results.allyBorgsDefeated,
     grandTotal: results.grandTotal,
   }, results);

@@ -255,6 +255,10 @@ export interface BorgRuntime {
    *  particle texture by the ATTACKER's player index — FUN_80019a14 chunk_0002.c:1750-1758
    *  reads spawner+0x88, copied from the attacker actor in zz_001959c_). Renderer-facing. */
   lastHitAttackerTeam?: number | undefined;
+  /** Owning player id of the most recent hit's attacker (null = CPU attacker). Kill
+   *  attribution for the results counters mirrors the ROM's kill event (zz_002f8dc_
+   *  @0x8002f8dc): the LAST damager gets the kill/costWon credit. */
+  lastHitAttackerOwner?: string | null | undefined;
   /** Power Burst arm window (ROM +0x6fb), frames remaining. Y press edge sets this to
    *  BURST.ARM_WINDOW_FRAMES (6, DERIVED — `FUN_80069814` chunk_0009.c:113); decrements to 0
    *  per frame (mirrors `zz_005b2b8_` chunk_0007.c:3473-3490); a re-press re-arms it. NOTE
@@ -443,6 +447,11 @@ export interface Projectile {
   damageRecord?: import("./gauges.js").DamageRecord;
   homingTurn: number;
   homingTarget: string | null;
+  /** The shooter's active lock target at spawn — the ROM attack object's target pointer
+   *  (+0xcc), which drives the results DODGE counters (aimed-at-victim vs stray hits;
+   *  zz_008a5d0_ chunk_0013.c:1115, resolver chunk_0003.c:7887-7894). Independent of
+   *  `homingTarget` (a straight shot is still "aimed" at the lock target). */
+  aimedTargetUid?: string | null;
   life: number;
   hitRadius: number;
   visualKind: ProjectileVisualKind;
@@ -529,16 +538,30 @@ export interface BattleState {
    */
   burstMeterByPlayer: Record<string, BurstMeterState>;
   /**
-   * Per-team battle telemetry feeding the Results screen (real accounting replacing the
-   * old synthesized ratios): damage dealt on hit connection (applyHit, same point that
-   * credits burst fill), hits = connections, attempts = attack initiations (new melee
-   * swings + projectiles spawned, counted by the battle step loop). Optional so
-   * pre-existing state constructors stay valid.
+   * Battle telemetry feeding the Results screen. Two layers:
+   *
+   *  - Team aggregates (damage/hits/attempts) — kept for debug/HUD use; damage is credited
+   *    on hit connection (applyHit, same point that credits burst fill).
+   *  - `slots` — DERIVED per-player-slot counters mirroring the ROM's per-actor stat block
+   *    (actor struct +0x404..+0x437, results-scoring-decode-2026-07-04.md). The ROM keeps
+   *    these on the persistent player-slot actor (they survive borg swaps within the
+   *    battle), so the port keys them by player id (ForceConfig.ownerPlayer). CPU-owned
+   *    forces get no slot (their stats are never displayed).
+   *
+   * Optional so pre-existing state constructors stay valid.
    */
   telemetry?: {
     damageByTeam: Record<number, number>;
     hitsByTeam: Record<number, number>;
     attemptsByTeam: Record<number, number>;
+    slots?: Record<string, SlotTelemetry>;
+    /**
+     * First-strike claim (ROM DAT_80436128 gate + attacker+0x436, chunk_0003.c:7882-7885):
+     * the FIRST cross-team hit connection of the battle stamps its attacker here.
+     * `undefined` = not yet claimed; `null` = claimed by a CPU-owned attacker; a string =
+     * claimed by that player id. Worth 5000 (DAT_80433b58) on the results screen.
+     */
+    firstStrikeBy?: string | null;
   };
   /** Team-0 defeat split for the Results screen: player-owned vs CPU-ally borgs. */
   defeatedPlayerBorgs?: number;
@@ -554,6 +577,36 @@ export interface BattleState {
    * pre-existing state constructors stay valid; absent === 0 (ongoing).
    */
   winnerMask?: number;
+}
+
+/**
+ * DERIVED per-player-slot results counters — 1:1 with the ROM per-actor stat block
+ * (research/decomp/results-scoring-decode-2026-07-04.md; increment sites: zz_008a5d0_
+ * @0x8008a5d0 chunk_0013.c:1085-1122, hit resolver chunk_0003.c:7834-7898, kill event
+ * zz_002f8dc_ @0x8002f8dc chunk_0003.c:8287-8312).
+ */
+export interface SlotTelemetry {
+  /** ROM +0x404 — attacks initiated (one per attack-object activation; rehits excluded).
+   *  This IS the results screen's "ATTACK" number, and the HIT RATIO denominator. */
+  attempts: number;
+  /** ROM +0x408 — cross-team hit connections, once per (attack event, victim). */
+  hits: number;
+  /** ROM +0x40c — enemy attacks AIMED at this slot's borg at activation (the attack
+   *  object's target pointer +0xcc == us), whether or not they later connect. */
+  incomingAimed: number;
+  /** ROM +0x410 — hits taken from attacks that were aimed at us; clamped to incomingAimed
+   *  at increment (chunk_0003.c:7888-7891). DODGE RATIO numerator = incomingAimed − this. */
+  hitsTakenAimed: number;
+  /** ROM +0x414 — hits taken that were NOT aimed at us (stray/AoE, untracked-record and
+   *  same-team hits). DODGE RATIO denominator = incomingAimed + this. */
+  hitsTakenOther: number;
+  /** ROM +0x434 (byte) — enemy borgs this slot's borgs finished off. */
+  kills: number;
+  /** ROM +0x420 — summed cost of those victims ("TOTAL COST" under ENEMY BORGS DEFEATED). */
+  costWon: number;
+  /** ROM +0x424 — summed cost of this slot's OWN defeated borgs (ally losses excluded —
+   *  those are +0x430/+0x437 and never enter the grand total). */
+  costLost: number;
 }
 
 /** The driver object returned by createBattle. */

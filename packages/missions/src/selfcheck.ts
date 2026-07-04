@@ -336,18 +336,24 @@ export function main(): void {
 
   // Drive the progression: win the first 2, then lose.
   console.log("\n  progression demo (win, win, lose):");
+  // DERIVED outcome shape (ROM slot counters +0x404..+0x437). Expected grand totals per
+  // the decoded formula (scoring.ts): wins -> costWon 1800 in [1701,1800] -> 18000,
+  // costLost 0 -> +1000 (flawless bonus), first strike +5000 = 24000.
+  // loss -> costWon 600 in [501,600] -> 6000, costLost 900 in [801,1000] -> −1000, no
+  // first strike = 5000 — POSITIVE even on a LOSS (the ROM formula has no win/lose flip).
   const wins: BattleOutcome = {
     win: true,
-    attack: 4200,
-    hits: 80,
     attempts: 100,
-    dodges: 30,
-    incoming: 40,
+    hits: 80,
+    incomingAimed: 40,
+    hitsTakenAimed: 10,
+    hitsTakenOther: 5,
     enemyBorgsDefeated: 8,
     playerBorgsDefeated: 0,
     allyBorgsDefeated: 1,
     costWon: 1800,
     costLost: 0,
+    firstStrike: true,
   };
   const loss: BattleOutcome = {
     ...wins,
@@ -356,6 +362,7 @@ export function main(): void {
     playerBorgsDefeated: 3,
     costWon: 600,
     costLost: 900,
+    firstStrike: false,
   };
   for (const outcome of [wins, wins, loss]) {
     const results = computeResults(outcome);

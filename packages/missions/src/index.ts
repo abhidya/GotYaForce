@@ -43,16 +43,18 @@ export type {
   EnemyForceOptions,
 } from "./borg-data.js";
 
-// --- Scoring / results ---
+// --- Scoring / results (DERIVED ROM formula — see scoring.ts header) ---
 export {
   computeResults,
   accumulateScore,
-  DEFAULT_SCORE_WEIGHTS,
+  tierScore,
+  COST_WON_SCORE_TABLE,
+  COST_LOST_SCORE_TABLE,
+  FIRST_STRIKE_BONUS,
 } from "./scoring.js";
 export type {
   BattleOutcome,
   BattleResults,
-  ScoreWeights,
 } from "./scoring.js";
 
 // --- Challenge mode ---

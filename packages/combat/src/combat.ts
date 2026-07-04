@@ -94,6 +94,7 @@ import type {
   Projectile,
   ProjectileVisualKind,
   RectStageBounds,
+  SlotTelemetry,
   SourceTargetLockMode,
   StageCollision,
   WeaponCell,
@@ -548,6 +549,11 @@ export interface HitSourceContext {
   damageScale?: number | undefined;
   attackerSideRank?: number | undefined;
   defenderSideRank?: number | undefined;
+  /** The attack's aimed target (ROM attack object +0xcc): projectiles bind it at spawn
+   *  (Projectile.aimedTargetUid), melee/specials pass the attacker's live lock. Drives the
+   *  DODGE RATIO split — hit-while-aimed (+0x410) vs stray hit (+0x414). `undefined` lets
+   *  applyHit fall back to the attacker's current lock; `null` = explicitly unaimed. */
+  aimedTargetUid?: string | null | undefined;
 }
 
 export interface DamageRuntimeContext {
@@ -561,15 +567,40 @@ export interface DamageRuntimeContext {
    */
   burstMeters?: Record<string, BurstMeterState> | undefined;
   /** Battle-level Results telemetry sink (BattleState.telemetry). Hit connections credit
-   *  the attacker team's damage/hits here; optional so legacy callers never count. */
+   *  the attacker team's damage/hits here plus the DERIVED per-slot ROM counters (see
+   *  SlotTelemetry, types.ts); optional so legacy callers never count. */
   telemetry?:
     | {
         damageByTeam: Record<number, number>;
         hitsByTeam: Record<number, number>;
         attemptsByTeam: Record<number, number>;
+        slots?: Record<string, SlotTelemetry>;
+        firstStrikeBy?: string | null;
       }
     | undefined;
 }
+
+/** Lazily materialize a player slot's results counters (ROM actor +0x404 block). */
+export function slotTelemetryFor(
+  slots: Record<string, SlotTelemetry>,
+  playerId: string,
+): SlotTelemetry {
+  return (slots[playerId] ??= {
+    attempts: 0,
+    hits: 0,
+    incomingAimed: 0,
+    hitsTakenAimed: 0,
+    hitsTakenOther: 0,
+    kills: 0,
+    costWon: 0,
+    costLost: 0,
+  });
+}
+
+/** ROM damage-record flagsA bit 0x20 — "untracked" attacks: excluded from the attempt
+ *  count (FUN_8008a65c chunk_0013.c:1219-1224) and from the attacker's hit count; their
+ *  connections land in the victim's stray bucket +0x414 (chunk_0003.c:7894-7898). */
+const FLAGS_A_STAT_UNTRACKED = 0x20;
 
 // ---------------------------------------------------------------------------------------
 // Hit-inflicted status effects — DERIVED, research/decomp/status-effects-decode-2026-07-04.md.
@@ -714,6 +745,7 @@ export function applyHit(
   // every connection; the renderer maps id -> effect style (battleScene.ts spawnHitFx).
   victim.lastHitImpactEffectId = record.impactEffectId;
   victim.lastHitAttackerTeam = source?.attacker.team;
+  victim.lastHitAttackerOwner = source ? source.attacker.ownerPlayer : victim.lastHitAttackerOwner;
 
   const dmg = source
     ? computeSourceDamage({
@@ -762,6 +794,43 @@ export function applyHit(
     const team = source.attacker.team;
     t.damageByTeam[team] = (t.damageByTeam[team] ?? 0) + dmg;
     t.hitsByTeam[team] = (t.hitsByTeam[team] ?? 0) + 1;
+
+    // DERIVED per-slot results counters — hit-resolver accounting, resolve_hitbox_target_
+    // effects_and_damage @0x8002e2a8 (chunk_0003.c:7834-7898), decoded in
+    // research/decomp/results-scoring-decode-2026-07-04.md:
+    //  - cross-team + tracked record  -> attacker hits (+0x408); victim splits into
+    //    hit-while-aimed (+0x410, the attack's target was the victim) vs stray (+0x414).
+    //  - untracked record (flagsA 0x20) or same-team -> victim stray bucket only.
+    //  - first cross-team hit of the battle stamps the attacker's first-strike flag
+    //    (+0x436 / DAT_80436128) worth 5000 on the results screen.
+    // Port deviation (documented): the ROM counts one hit per (attack event, victim) via a
+    // per-event victim bitmask (+0x2ad); the port counts connections. Today's callers only
+    // diverge for persisting rehit beams (consumeOnHit === false), which no gameplay caller
+    // sets yet.
+    if (t.slots) {
+      const crossTeam = victim.team !== source.attacker.team;
+      const tracked = (record.flagsA & FLAGS_A_STAT_UNTRACKED) === 0;
+      // First strike is claimed on ANY cross-team connection — the ROM's gate
+      // (chunk_0003.c:7883-7886) sits BEFORE the tracked/dedup split.
+      if (crossTeam && t.firstStrikeBy === undefined) {
+        t.firstStrikeBy = source.attacker.ownerPlayer;
+      }
+      if (crossTeam && tracked && source.attacker.ownerPlayer !== null) {
+        slotTelemetryFor(t.slots, source.attacker.ownerPlayer).hits += 1;
+      }
+      if (victim.ownerPlayer !== null) {
+        const vs = slotTelemetryFor(t.slots, victim.ownerPlayer);
+        const aimedUid =
+          source.aimedTargetUid !== undefined
+            ? source.aimedTargetUid
+            : activeSourceTargetUid(source.attacker);
+        if (crossTeam && tracked && aimedUid === victim.uid) {
+          vs.hitsTakenAimed = Math.min(vs.hitsTakenAimed + 1, vs.incomingAimed);
+        } else {
+          vs.hitsTakenOther += 1;
+        }
+      }
+    }
   }
 
   // Hit-inflicted status effects (DERIVED, status-effects-decode-2026-07-04.md; see the
@@ -1985,6 +2054,8 @@ function spawnSpecialProjectiles(
       homingTurn: SHOT.HOMING_TURN,
       // Same spawn-time aim-cone gate as gun projectiles (FUN_8006c334, chunk_0009.c:1995/3841).
       homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
+      // ROM attack-object target +0xcc for the results DODGE counters (aimed vs stray).
+      aimedTargetUid: activeSourceTargetUid(b),
       life: SHOT.LIFETIME,
       hitRadius: (specialDef.projectileHitRadius ?? SHOT.HIT_RADIUS) * tier.radius,
       // TUNED-visual from the OBSERVED_WIKI X move name (actionProfiles generator), falling
@@ -2171,6 +2242,8 @@ function spawnProjectile(
     homingTurn: shotDef.homingTurn,
     // Spawn-time aim-cone gate (FUN_8006c334) — no longer unconditional.
     homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
+    // ROM attack-object target +0xcc for the results DODGE counters (aimed vs stray).
+    aimedTargetUid: activeSourceTargetUid(b),
     life: shotDef.lifetime,
     // DERIVED where present: the borg's B-shot HIT kind resolves via shotKindForBorgId — the
     // guarded fire-site attribution (shotVariantKinds.json borgShotKinds) when the borg's fire
@@ -2293,6 +2366,8 @@ function spawnSwordBeam(
     homingTurn: beam.homingTurn,
     // Same spawn-time aim-cone gate as gun projectiles (FUN_8006c334, chunk_0009.c:1995/3841).
     homingTarget: homingTargetForSpawn(b, all, spawnPos, fwd),
+    // ROM attack-object target +0xcc for the results DODGE counters (aimed vs stray).
+    aimedTargetUid: activeSourceTargetUid(b),
     life: beam.lifetime,
     hitRadius: beam.hitRadius,
     visualKind: beam.visualKind,
@@ -2422,6 +2497,9 @@ export function stepProjectiles(
                     damageScale: pr.damage,
                     attackerSideRank: damageContext.sideRankForTeam?.(attacker.team),
                     defenderSideRank: damageContext.sideRankForTeam?.(o.team),
+                    // The spawn-time aim (ROM attack object +0xcc), NOT the attacker's
+                    // current lock — the shooter may have re-locked mid-flight.
+                    aimedTargetUid: pr.aimedTargetUid ?? null,
                   }
                 : undefined,
               damageContext,

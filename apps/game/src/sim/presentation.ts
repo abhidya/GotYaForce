@@ -290,36 +290,64 @@ export function liveActorPositions<T>(battle: Battle, positionOf: (uid: string) 
     .filter((p): p is T => p !== null);
 }
 
-export function battleOutcomeFromState(battle: Battle): BattleOutcome {
+/**
+ * Build the results-screen outcome for one player. DERIVED
+ * (research/decomp/results-scoring-decode-2026-07-04.md): every field maps 1:1 to the
+ * ROM's per-player-slot actor counters (+0x404..+0x437 — SlotTelemetry in @gf/combat),
+ * gathered exactly like the results row builder FUN_800d3260 @0x800d3260 /
+ * zz_00d1d24_ @0x800d1d24 read them. Replaces the old TUNED reading (team-aggregate
+ * damage as "ATTACK", enemy attempts as the dodge denominator).
+ *
+ * `localPlayerId` selects the slot; when the battle predates slot telemetry the
+ * team-aggregate fallbacks keep the screen non-degenerate (documented approximation).
+ */
+export function battleOutcomeFromState(battle: Battle, localPlayerId?: string): BattleOutcome {
   const st = battle.state;
   const win = st.result === "win";
-  const enemyDefeated = st.defeated[1] ?? 0;
-  const playerDefeated = st.defeated[0] ?? 0;
-  const costWon = st.defeatedEnergy[1] ?? 0;
-  const costLost = st.defeatedEnergy[0] ?? 0;
-  // Real battle telemetry (BattleState.telemetry): damage/hits credited per team at hit
-  // connection (combat.ts applyHit, same point as the burst fill), attempts counted at
-  // attack initiation by the battle step loop. DODGE RATIO definition is a TUNED reading
-  // (the ROM's exact ratio source is undecoded): incoming = enemy attack attempts,
-  // dodges = the ones that never connected.
   const t = st.telemetry;
+  const playerId =
+    localPlayerId ?? Object.keys(t?.slots ?? {})[0] ?? Object.keys(st.activeUidByPlayer)[0];
+  const slot = playerId !== undefined ? t?.slots?.[playerId] : undefined;
+
+  if (slot) {
+    return {
+      win,
+      attempts: slot.attempts,
+      hits: slot.hits,
+      incomingAimed: slot.incomingAimed,
+      hitsTakenAimed: slot.hitsTakenAimed,
+      hitsTakenOther: slot.hitsTakenOther,
+      // ROM +0x434/+0x420: only the PLAYER'S OWN finishing blows count here — CPU-ally
+      // kills credit the ally's slot, exactly like the ROM's kill event.
+      enemyBorgsDefeated: slot.kills,
+      playerBorgsDefeated: st.defeatedPlayerBorgs ?? st.defeated[0] ?? 0,
+      allyBorgsDefeated: st.defeatedAllyBorgs ?? 0,
+      costWon: slot.costWon,
+      // ROM +0x424: own borgs' cost only — ally losses are excluded from the tier score
+      // (validated by the WIN capture: 1 ally lost, cost row 0, +1000 tier granted).
+      costLost: slot.costLost,
+      firstStrike: t?.firstStrikeBy === playerId && playerId !== undefined,
+    };
+  }
+
+  // Fallback for battles without slot telemetry: team aggregates (pre-slot behavior).
   const hits = t?.hitsByTeam[0] ?? 0;
   const attempts = Math.max(t?.attemptsByTeam[0] ?? 0, hits);
   const enemyHits = t?.hitsByTeam[1] ?? 0;
   const incoming = Math.max(t?.attemptsByTeam[1] ?? 0, enemyHits);
-  const dodges = Math.max(0, incoming - enemyHits);
   return {
     win,
-    attack: Math.round(t?.damageByTeam[0] ?? 0),
+    attempts,
     hits,
-    attempts: Math.max(1, attempts),
-    dodges,
-    incoming: Math.max(1, incoming),
-    enemyBorgsDefeated: enemyDefeated,
-    playerBorgsDefeated: st.defeatedPlayerBorgs ?? playerDefeated,
+    incomingAimed: incoming,
+    hitsTakenAimed: Math.min(enemyHits, incoming),
+    hitsTakenOther: Math.max(0, enemyHits - incoming),
+    enemyBorgsDefeated: st.defeated[1] ?? 0,
+    playerBorgsDefeated: st.defeatedPlayerBorgs ?? st.defeated[0] ?? 0,
     allyBorgsDefeated: st.defeatedAllyBorgs ?? 0,
-    costWon,
-    costLost,
+    costWon: st.defeatedEnergy[1] ?? 0,
+    costLost: st.defeatedEnergy[0] ?? 0,
+    firstStrike: false,
   };
 }
 

@@ -649,8 +649,9 @@ Port: `packages/missions/src/challenge*.ts`. ROM: (ae)/(af), challenge-flow-evid
 | Timer frozen (18000, [0x50]=1) | DONE | — |
 | Win/lose/draw judge (zz_00297c8_ mask) | PARTIAL | battle.ts uses "which team has energy" + first-human view, NOT the per-side count/energy/rule-flag + equality mask model (ae:1763-1787) |
 | 3-phase deploy (~36f) | PARTIAL/MISSING | port = single spawn + flat 45f TUNED iframes vs ROM 20/1/15f phases + ally cue 8 (af) |
-| Kill accounting (zz_002f8dc_) | PARTIAL | energy/count credited; attacker-kill/victim-loss/+100 score counters missing → allyBorgsDefeated hardcoded 0 |
-| Results ratios | PARTIAL | HIT/DODGE ratios fabricated from synthetic attempts/dodges (scoring TUNED) |
+| Kill accounting (zz_002f8dc_) | DONE (2026-07-04) | per-slot kills/costWon credited to the LAST DAMAGER + costLost on the victim's slot (ally cost EXCLUDED — capture-validated); battle.ts accountPendingDefeats. The flat +100/kill feeds only the in-battle team score DAT_80436154, NOT results |
+| Results ratios + counters | DERIVED (2026-07-04) | full decode: results-scoring-decode-2026-07-04.md. ATTACK = attack COUNT (+0x404 via zz_008a5d0_), HIT RATIO = +0x408/+0x404, DODGE RATIO = (+0x40c−+0x410)/(+0x40c++0x414). Port telemetry re-keyed to per-player SLOTS (SlotTelemetry, @gf/combat) with ROM increment semantics (aimed-vs-stray split from the attack object's target +0xcc) |
+| GRAND TOTAL formula (FUN_800d3260 / zz_00d1d24_) | DERIVED (2026-07-04) | = tier(costWon, DAT_8030e4b8) + tier(costLost, DAT_8030e6a8) + firstStrike×5000 (DAT_80433b58). NO win/lose sign flip. Tables verbatim in scoring.ts (incl. the ROM's 4901→40000 data quirk); WIN-capture validated (6000+1000+0=7000). Run total = Σ grand totals (+0x17e0, can go negative) = accumulateScore |
 
 ---
 

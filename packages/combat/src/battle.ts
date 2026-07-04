@@ -27,6 +27,7 @@ import {
   resetProjectileCounter,
   sourceSwitchAllyLock,
   sourceSwitchEnemyLock,
+  slotTelemetryFor,
   stepActionState,
   stepAmmoRefill,
   stepAttacks,
@@ -179,7 +180,7 @@ class BattleImpl implements Battle {
       defeatedEnergy: {},
       activeUidByPlayer: {},
       burstMeterByPlayer,
-      telemetry: { damageByTeam: {}, hitsByTeam: {}, attemptsByTeam: {} },
+      telemetry: { damageByTeam: {}, hitsByTeam: {}, attemptsByTeam: {}, slots: {} },
       defeatedPlayerBorgs: 0,
       defeatedAllyBorgs: 0,
       frame: 0,
@@ -487,14 +488,31 @@ class BattleImpl implements Battle {
         // Results telemetry ATTEMPTS: each attack initiation counts once — a new melee
         // swing (meleeActive grew this frame), each projectile spawned, or a special fire
         // (its cooldown was re-armed this frame). One AoE attempt can connect with several
-        // victims, so hits may legitimately exceed attempts.
+        // victims, so hits may legitimately exceed attempts. DERIVED semantics
+        // (results-scoring-decode-2026-07-04.md, zz_008a5d0_ @0x8008a5d0 via FUN_8008a65c
+        // chunk_0013.c:1219-1224): the ROM counts one attempt per attack-object ACTIVATION
+        // (rehits excluded) — per-slot attempts are the results screen's "ATTACK" number.
+        // The SAME activation also counts INCOMING on the attack's aimed target when it is
+        // an enemy (target +0xcc, chunk_0013.c:1110-1121) — whether or not it ever hits;
+        // that is the DODGE RATIO's +0x40c counter.
         const t = this.state.telemetry;
         if (t) {
           const meleeActiveAfter = b.cooldowns["meleeActive"] ?? 0;
           const specialFired = (b.cooldowns["special"] ?? 0) > specialCdBefore ? 1 : 0;
           const started =
             (meleeActiveAfter > meleeActiveBefore ? 1 : 0) + res.projectiles.length + specialFired;
-          if (started > 0) t.attemptsByTeam[b.team] = (t.attemptsByTeam[b.team] ?? 0) + started;
+          if (started > 0) {
+            t.attemptsByTeam[b.team] = (t.attemptsByTeam[b.team] ?? 0) + started;
+            if (t.slots) {
+              if (b.ownerPlayer !== null) {
+                slotTelemetryFor(t.slots, b.ownerPlayer).attempts += started;
+              }
+              const aimed = activeTargetUid ? this.byUid.get(activeTargetUid) : undefined;
+              if (aimed && aimed.team !== b.team && aimed.ownerPlayer !== null) {
+                slotTelemetryFor(t.slots, aimed.ownerPlayer).incomingAimed += started;
+              }
+            }
+          }
         }
       }
 
@@ -626,6 +644,29 @@ class BattleImpl implements Battle {
       if (b.team === 0) {
         if (b.ownerPlayer !== null) this.state.defeatedPlayerBorgs = (this.state.defeatedPlayerBorgs ?? 0) + 1;
         else this.state.defeatedAllyBorgs = (this.state.defeatedAllyBorgs ?? 0) + 1;
+      }
+      // DERIVED per-slot kill/cost accounting — ROM kill event zz_002f8dc_ @0x8002f8dc
+      // (chunk_0003.c:8287-8312, results-scoring-decode-2026-07-04.md): the LAST damager,
+      // if cross-team, gets kills(+0x434) and the victim's cost into costWon(+0x420); the
+      // victim's own slot books the cost into costLost(+0x424). Ally losses stay OUT of
+      // costLost (they are +0x430/+0x437 — validated by the WIN capture: 1 ally lost,
+      // player TOTAL COST still 0 and the no-loss +1000 tier still granted).
+      const slots = this.state.telemetry?.slots;
+      if (slots) {
+        const killerOwner = b.lastHitAttackerOwner;
+        if (
+          killerOwner !== undefined &&
+          killerOwner !== null &&
+          b.lastHitAttackerTeam !== undefined &&
+          b.lastHitAttackerTeam !== b.team
+        ) {
+          const ks = slotTelemetryFor(slots, killerOwner);
+          ks.kills += 1;
+          ks.costWon += prof.energy;
+        }
+        if (b.ownerPlayer !== null) {
+          slotTelemetryFor(slots, b.ownerPlayer).costLost += prof.energy;
+        }
       }
     }
   }
