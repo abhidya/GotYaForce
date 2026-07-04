@@ -1,0 +1,87 @@
+diff --git a/HSDRawViewer/IO/ModelExporter.cs b/HSDRawViewer/IO/ModelExporter.cs
+index b0e9bab..a3d9a6e 100644
+--- a/HSDRawViewer/IO/ModelExporter.cs
++++ b/HSDRawViewer/IO/ModelExporter.cs
+@@ -264,6 +264,22 @@ namespace HSDRawViewer.Converters
+         /// 
+         /// </summary>
+         /// <returns></returns>
++        /// <summary>
++        /// FNV-1a over raw image bytes; used for stable content-addressed texture names.
++        /// </summary>
++        private static uint HashImageBytes(byte[] data)
++        {
++            const uint FNV_OFFSET_BASIS = 0x811C9DC5;
++            const uint FNV_PRIME = 0x01000193;
++            uint hash = FNV_OFFSET_BASIS;
++            foreach (byte b in data)
++            {
++                hash ^= b;
++                hash *= FNV_PRIME;
++            }
++            return hash;
++        }
++
+         public uint GenerateHash32(HSDStruct str)
+         {
+             const uint FNV_OFFSET_BASIS = 0x811C9DC5;
+@@ -347,27 +363,40 @@ namespace HSDRawViewer.Converters
+                             {
+                                 foreach (HSD_TOBJ t in dobj.Mobj.Textures.List)
+                                 {
+-                                    if (t.ImageData != null && t.ImageData.ImageData != null && !imageToName.ContainsKey(t.ImageData.ImageData))
++                                    if (t.ImageData == null || t.ImageData.ImageData == null)
++                                        continue;
++
++                                    // Name textures by CONTENT HASH. The old Texture_{count}
++                                    // scheme restarted at 0 for every sub-model exported into a
++                                    // shared directory, so later sub-models overwrote earlier
++                                    // PNG files with different image content (G RED's red body
++                                    // texture was clobbered by a detail sheet, rendering the
++                                    // whole borg black). Content-hash names are stable and
++                                    // dedupe identical images across every export.
++                                    if (!imageToName.TryGetValue(t.ImageData.ImageData, out string texName))
+                                     {
+-                                        string name = $"Texture_{imageToName.Count}_{t.ImageData.Format}";
++                                        texName = $"Texture_{HashImageBytes(t.ImageData.ImageData):X8}_{t.ImageData.Format}";
+ 
+                                         if (GXImageConverter.IsPalettedFormat(t.ImageData.Format))
+-                                            name += $"_{t.TlutData.Format}";
++                                            texName += $"_{t.TlutData.Format}";
+ 
+-                                        if (_settings.ExportTextures)
++                                        if (_settings.ExportTextures && !File.Exists(_settings.Directory + texName + ".png"))
+                                         {
+-                                            t.SaveImagePNG(_settings.Directory + name + ".png");
++                                            t.SaveImagePNG(_settings.Directory + texName + ".png");
+                                         }
+ 
+-                                        imageToName.Add(t.ImageData.ImageData, name);
++                                        imageToName.Add(t.ImageData.ImageData, texName);
+                                     }
+ 
++                                    // Bind the CURRENT tobj's image. The old code always read
++                                    // the texture-LIST-HEAD image (dobj.Mobj.Textures.ImageData)
++                                    // for every entry, mis-binding every multi-texture material.
+                                     if (t.DiffuseLightmap)
+                                     {
+                                         m.DiffuseMap = new IOTexture()
+                                         {
+-                                            Name = System.IO.Path.GetFileNameWithoutExtension(imageToName[dobj.Mobj.Textures.ImageData.ImageData]),
+-                                            FilePath = imageToName[dobj.Mobj.Textures.ImageData.ImageData] + ".png"
++                                            Name = texName,
++                                            FilePath = texName + ".png"
+                                         };
+                                     }
+ 
+@@ -375,8 +404,8 @@ namespace HSDRawViewer.Converters
+                                     {
+                                         m.SpecularMap = new IOTexture()
+                                         {
+-                                            Name = System.IO.Path.GetFileNameWithoutExtension(imageToName[dobj.Mobj.Textures.ImageData.ImageData]),
+-                                            FilePath = imageToName[dobj.Mobj.Textures.ImageData.ImageData] + ".png"
++                                            Name = texName,
++                                            FilePath = texName + ".png"
+                                         };
+                                     }
+                                 }

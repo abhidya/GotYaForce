@@ -4,7 +4,7 @@
   "source": "user-data/GG4E/afs_data/root",
   "status": "verified-visual-and-collision",
   "verifiedBy": "scripts/export-all-stages.mjs",
-  "verifiedAt": "2026-06-30T21:08:40.972Z",
+  "verifiedAt": "2026-07-04T05:55:33.125Z",
   "copied": {
     "stageArc": "st02/raw/st02_mdl.arc",
     "stagePzz": "st02/raw/st02.pzz",
@@ -138,39 +138,39 @@
   "models": [
     {
       "path": "model/model_00.glb",
-      "bytes": 272612
+      "bytes": 449996
     },
     {
       "path": "model/model_01.glb",
-      "bytes": 27844
+      "bytes": 27820
     },
     {
       "path": "model/model_02.glb",
-      "bytes": 113756
+      "bytes": 254752
     },
     {
       "path": "model/model_03.glb",
-      "bytes": 31328
+      "bytes": 55204
     },
     {
       "path": "model/model_04.glb",
-      "bytes": 9272
+      "bytes": 9252
     },
     {
       "path": "model/model_05.glb",
-      "bytes": 40796
+      "bytes": 64672
     },
     {
       "path": "model/model_06.glb",
-      "bytes": 16156
+      "bytes": 40032
     },
     {
       "path": "model/model_07.glb",
-      "bytes": 40512
+      "bytes": 64388
     },
     {
       "path": "model/model_08.glb",
-      "bytes": 26972
+      "bytes": 50848
     },
     {
       "path": "model/model_09.glb",
@@ -186,392 +186,392 @@
     },
     {
       "path": "model/model_12.glb",
-      "bytes": 137360
+      "bytes": 137340
     },
     {
       "path": "model/model_13.glb",
-      "bytes": 29676
+      "bytes": 29656
     },
     {
       "path": "model/model_14.glb",
-      "bytes": 14292
+      "bytes": 31232
     },
     {
       "path": "model/model_15.glb",
-      "bytes": 27120
+      "bytes": 74916
     },
     {
       "path": "model/model_16.glb",
-      "bytes": 252
+      "bytes": 232
     },
     {
       "path": "model/model_17.glb",
-      "bytes": 123872
+      "bytes": 188772
     },
     {
       "path": "model/model_18.glb",
-      "bytes": 252
+      "bytes": 232
     },
     {
       "path": "model/model_19.glb",
-      "bytes": 230192
+      "bytes": 297040
     },
     {
       "path": "model/model_20.glb",
-      "bytes": 239668
+      "bytes": 306520
     },
     {
       "path": "model/model_21.glb",
-      "bytes": 2136
+      "bytes": 5752
     },
     {
       "path": "model/model_22.glb",
-      "bytes": 2132
+      "bytes": 5748
     },
     {
       "path": "model/model_23.glb",
-      "bytes": 16160
+      "bytes": 40036
     },
     {
       "path": "model/model_24.glb",
-      "bytes": 145376
+      "bytes": 166632
     },
     {
       "path": "model/model_25.glb",
-      "bytes": 9272
+      "bytes": 9252
     },
     {
       "path": "model/model_26.glb",
-      "bytes": 252
+      "bytes": 232
     },
     {
       "path": "model/model_27.glb",
-      "bytes": 3028
+      "bytes": 3008
     },
     {
       "path": "model/model_28.glb",
-      "bytes": 5880
+      "bytes": 21504
     },
     {
       "path": "model/model_29.glb",
-      "bytes": 5760
+      "bytes": 21384
     },
     {
       "path": "model/model_30.glb",
-      "bytes": 5880
+      "bytes": 21508
     },
     {
       "path": "model/model_31.glb",
-      "bytes": 5876
+      "bytes": 21500
     },
     {
       "path": "model/model_32.glb",
-      "bytes": 11260
+      "bytes": 49696
     },
     {
       "path": "model/model_33.glb",
-      "bytes": 252
+      "bytes": 232
     },
     {
       "path": "model/model_34.glb",
-      "bytes": 17376
+      "bytes": 18236
     },
     {
       "path": "model/model_35.glb",
-      "bytes": 4964
+      "bytes": 5824
     },
     {
       "path": "model/model_36.glb",
-      "bytes": 9892
+      "bytes": 10752
     },
     {
       "path": "model/model_37.glb",
-      "bytes": 7452
+      "bytes": 8312
     },
     {
       "path": "model/model_38.glb",
-      "bytes": 17544
+      "bytes": 18404
     },
     {
       "path": "model/model_39.glb",
-      "bytes": 41448
+      "bytes": 42308
     },
     {
       "path": "model/model_40.glb",
-      "bytes": 4940
+      "bytes": 5800
     },
     {
       "path": "model/model_41.glb",
-      "bytes": 4948
+      "bytes": 5808
     },
     {
       "path": "model/model_42.glb",
-      "bytes": 4944
+      "bytes": 5804
     },
     {
       "path": "model/model_43.glb",
-      "bytes": 5668
+      "bytes": 6528
     },
     {
       "path": "model/model_44.glb",
-      "bytes": 4936
+      "bytes": 5796
     },
     {
       "path": "model/model_45.glb",
-      "bytes": 4944
+      "bytes": 5804
     },
     {
       "path": "model/model_46.glb",
-      "bytes": 4940
+      "bytes": 5800
     },
     {
       "path": "model/model_47.glb",
-      "bytes": 4940
+      "bytes": 5800
     },
     {
       "path": "model/model_48.glb",
-      "bytes": 4932
+      "bytes": 5792
     },
     {
       "path": "model/model_49.glb",
-      "bytes": 4928
+      "bytes": 5788
     },
     {
       "path": "model/model_50.glb",
-      "bytes": 2628
+      "bytes": 3488
     }
   ],
   "textures": [
     {
-      "path": "model/model_00_Texture_0_CMP.png",
-      "bytes": 34104
-    },
-    {
-      "path": "model/model_00_Texture_1_CMP.png",
-      "bytes": 24453
-    },
-    {
-      "path": "model/model_00_Texture_2_CMP.png",
-      "bytes": 21838
-    },
-    {
-      "path": "model/model_00_Texture_3_CMP.png",
-      "bytes": 19300
-    },
-    {
-      "path": "model/model_00_Texture_4_CMP.png",
+      "path": "model/model_00_Texture_131E3B53_CMP.png",
       "bytes": 25875
     },
     {
-      "path": "model/model_00_Texture_5_CMP.png",
-      "bytes": 26208
-    },
-    {
-      "path": "model/model_00_Texture_6_CMP.png",
-      "bytes": 25937
-    },
-    {
-      "path": "model/model_01_Texture_0_CMP.png",
-      "bytes": 48850
-    },
-    {
-      "path": "model/model_02_Texture_0_CMP.png",
+      "path": "model/model_00_Texture_179E3C97_CMP.png",
       "bytes": 34104
     },
     {
-      "path": "model/model_02_Texture_1_CMP.png",
-      "bytes": 27385
+      "path": "model/model_00_Texture_2DBB8540_CMP.png",
+      "bytes": 25937
     },
     {
-      "path": "model/model_02_Texture_2_CMP.png",
+      "path": "model/model_00_Texture_5C0656E5_CMP.png",
+      "bytes": 26208
+    },
+    {
+      "path": "model/model_00_Texture_6CEE1CF1_CMP.png",
       "bytes": 19300
     },
     {
-      "path": "model/model_02_Texture_3_CMP.png",
-      "bytes": 40742
+      "path": "model/model_00_Texture_BB6149E7_CMP.png",
+      "bytes": 24453
     },
     {
-      "path": "model/model_03_Texture_0_CMP.png",
-      "bytes": 16091
-    },
-    {
-      "path": "model/model_03_Texture_1_CMP.png",
-      "bytes": 24044
-    },
-    {
-      "path": "model/model_04_Texture_0_CMP.png",
-      "bytes": 16091
-    },
-    {
-      "path": "model/model_05_Texture_0_CMP.png",
-      "bytes": 24044
-    },
-    {
-      "path": "model/model_06_Texture_0_CMP.png",
-      "bytes": 24044
-    },
-    {
-      "path": "model/model_07_Texture_0_CMP.png",
-      "bytes": 24044
-    },
-    {
-      "path": "model/model_08_Texture_0_CMP.png",
-      "bytes": 24044
-    },
-    {
-      "path": "model/model_13_Texture_0_CMP.png",
-      "bytes": 16091
-    },
-    {
-      "path": "model/model_14_Texture_0_CMP.png",
-      "bytes": 16091
-    },
-    {
-      "path": "model/model_15_Texture_0_CMP.png",
-      "bytes": 24044
-    },
-    {
-      "path": "model/model_17_Texture_0_CMP.png",
-      "bytes": 17633
-    },
-    {
-      "path": "model/model_17_Texture_1_CMP.png",
-      "bytes": 25126
-    },
-    {
-      "path": "model/model_17_Texture_2_CMP.png",
-      "bytes": 24044
-    },
-    {
-      "path": "model/model_19_Texture_0_CMP.png",
-      "bytes": 27385
-    },
-    {
-      "path": "model/model_19_Texture_1_RGB5A3.png",
-      "bytes": 20828
-    },
-    {
-      "path": "model/model_19_Texture_2_RGB5A3.png",
-      "bytes": 4481
-    },
-    {
-      "path": "model/model_20_Texture_0_CMP.png",
-      "bytes": 27385
-    },
-    {
-      "path": "model/model_20_Texture_1_RGB5A3.png",
-      "bytes": 20828
-    },
-    {
-      "path": "model/model_20_Texture_2_RGB5A3.png",
-      "bytes": 4481
-    },
-    {
-      "path": "model/model_21_Texture_0_RGB5A3.png",
-      "bytes": 4314
-    },
-    {
-      "path": "model/model_22_Texture_0_RGB5A3.png",
-      "bytes": 4314
-    },
-    {
-      "path": "model/model_23_Texture_0_CMP.png",
-      "bytes": 24044
-    },
-    {
-      "path": "model/model_24_Texture_0_CMP.png",
+      "path": "model/model_00_Texture_FB5790E9_CMP.png",
       "bytes": 21838
     },
     {
-      "path": "model/model_25_Texture_0_CMP.png",
-      "bytes": 16091
+      "path": "model/model_01_Texture_617FCA7B_CMP.png",
+      "bytes": 48850
     },
     {
-      "path": "model/model_28_Texture_0_CMP.png",
-      "bytes": 15753
+      "path": "model/model_02_Texture_179E3C97_CMP.png",
+      "bytes": 34104
     },
     {
-      "path": "model/model_29_Texture_0_CMP.png",
-      "bytes": 15753
+      "path": "model/model_02_Texture_5B07C0C6_CMP.png",
+      "bytes": 27385
     },
     {
-      "path": "model/model_30_Texture_0_CMP.png",
-      "bytes": 15753
+      "path": "model/model_02_Texture_6CEE1CF1_CMP.png",
+      "bytes": 19300
     },
     {
-      "path": "model/model_31_Texture_0_CMP.png",
-      "bytes": 15753
-    },
-    {
-      "path": "model/model_32_Texture_0_CMP.png",
+      "path": "model/model_02_Texture_C23BD348_CMP.png",
       "bytes": 40742
     },
     {
-      "path": "model/model_34_Texture_0_I4.png",
+      "path": "model/model_03_Texture_60E24EC2_CMP.png",
+      "bytes": 16091
+    },
+    {
+      "path": "model/model_03_Texture_AEEE0DC1_CMP.png",
+      "bytes": 24044
+    },
+    {
+      "path": "model/model_04_Texture_60E24EC2_CMP.png",
+      "bytes": 16091
+    },
+    {
+      "path": "model/model_05_Texture_AEEE0DC1_CMP.png",
+      "bytes": 24044
+    },
+    {
+      "path": "model/model_06_Texture_AEEE0DC1_CMP.png",
+      "bytes": 24044
+    },
+    {
+      "path": "model/model_07_Texture_AEEE0DC1_CMP.png",
+      "bytes": 24044
+    },
+    {
+      "path": "model/model_08_Texture_AEEE0DC1_CMP.png",
+      "bytes": 24044
+    },
+    {
+      "path": "model/model_13_Texture_60E24EC2_CMP.png",
+      "bytes": 16091
+    },
+    {
+      "path": "model/model_14_Texture_60E24EC2_CMP.png",
+      "bytes": 16091
+    },
+    {
+      "path": "model/model_15_Texture_AEEE0DC1_CMP.png",
+      "bytes": 24044
+    },
+    {
+      "path": "model/model_17_Texture_3BF9971C_CMP.png",
+      "bytes": 25126
+    },
+    {
+      "path": "model/model_17_Texture_AA3ED56B_CMP.png",
+      "bytes": 17633
+    },
+    {
+      "path": "model/model_17_Texture_AEEE0DC1_CMP.png",
+      "bytes": 24044
+    },
+    {
+      "path": "model/model_19_Texture_5B07C0C6_CMP.png",
+      "bytes": 27385
+    },
+    {
+      "path": "model/model_19_Texture_7EE94BAB_RGB5A3.png",
+      "bytes": 4481
+    },
+    {
+      "path": "model/model_19_Texture_82534353_RGB5A3.png",
+      "bytes": 20828
+    },
+    {
+      "path": "model/model_20_Texture_5B07C0C6_CMP.png",
+      "bytes": 27385
+    },
+    {
+      "path": "model/model_20_Texture_7EE94BAB_RGB5A3.png",
+      "bytes": 4481
+    },
+    {
+      "path": "model/model_20_Texture_82534353_RGB5A3.png",
+      "bytes": 20828
+    },
+    {
+      "path": "model/model_21_Texture_194C4C97_RGB5A3.png",
+      "bytes": 4314
+    },
+    {
+      "path": "model/model_22_Texture_194C4C97_RGB5A3.png",
+      "bytes": 4314
+    },
+    {
+      "path": "model/model_23_Texture_AEEE0DC1_CMP.png",
+      "bytes": 24044
+    },
+    {
+      "path": "model/model_24_Texture_FB5790E9_CMP.png",
+      "bytes": 21838
+    },
+    {
+      "path": "model/model_25_Texture_60E24EC2_CMP.png",
+      "bytes": 16091
+    },
+    {
+      "path": "model/model_28_Texture_DD4A8813_CMP.png",
+      "bytes": 15753
+    },
+    {
+      "path": "model/model_29_Texture_DD4A8813_CMP.png",
+      "bytes": 15753
+    },
+    {
+      "path": "model/model_30_Texture_DD4A8813_CMP.png",
+      "bytes": 15753
+    },
+    {
+      "path": "model/model_31_Texture_DD4A8813_CMP.png",
+      "bytes": 15753
+    },
+    {
+      "path": "model/model_32_Texture_C23BD348_CMP.png",
+      "bytes": 40742
+    },
+    {
+      "path": "model/model_34_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_35_Texture_0_I4.png",
+      "path": "model/model_35_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_36_Texture_0_I4.png",
+      "path": "model/model_36_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_37_Texture_0_I4.png",
+      "path": "model/model_37_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_38_Texture_0_I4.png",
+      "path": "model/model_38_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_39_Texture_0_I4.png",
+      "path": "model/model_39_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_40_Texture_0_I4.png",
+      "path": "model/model_40_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_41_Texture_0_I4.png",
+      "path": "model/model_41_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_42_Texture_0_I4.png",
+      "path": "model/model_42_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_43_Texture_0_I4.png",
+      "path": "model/model_43_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_44_Texture_0_I4.png",
+      "path": "model/model_44_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_45_Texture_0_I4.png",
+      "path": "model/model_45_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_46_Texture_0_I4.png",
+      "path": "model/model_46_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_47_Texture_0_I4.png",
+      "path": "model/model_47_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_48_Texture_0_I4.png",
+      "path": "model/model_48_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_49_Texture_0_I4.png",
+      "path": "model/model_49_Texture_3047DB1D_I4.png",
       "bytes": 662
     },
     {
-      "path": "model/model_50_Texture_0_I4.png",
+      "path": "model/model_50_Texture_3047DB1D_I4.png",
       "bytes": 662
     }
   ],

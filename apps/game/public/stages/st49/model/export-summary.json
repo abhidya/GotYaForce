@@ -26,9 +26,9 @@
       "status": "exported",
       "daeFile": "model_00.dae",
       "textureFiles": [
-        "model_00_Texture_0_CMP.png",
-        "model_00_Texture_1_CMP.png",
-        "model_00_Texture_2_CMP.png"
+        "model_00_Texture_0CF3155A_CMP.png",
+        "model_00_Texture_1CB463E8_CMP.png",
+        "model_00_Texture_6A2ECB48_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -38,7 +38,7 @@
       "status": "exported",
       "daeFile": "model_01.dae",
       "textureFiles": [
-        "model_01_Texture_0_CMP.png"
+        "model_01_Texture_4BFC57F8_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -48,7 +48,7 @@
       "status": "exported",
       "daeFile": "model_02.dae",
       "textureFiles": [
-        "model_02_Texture_0_CMP.png"
+        "model_02_Texture_D3F0B4B9_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -58,8 +58,8 @@
       "status": "exported",
       "daeFile": "model_03.dae",
       "textureFiles": [
-        "model_03_Texture_0_CMP.png",
-        "model_03_Texture_1_CMP.png"
+        "model_03_Texture_0E01BDFB_CMP.png",
+        "model_03_Texture_C6F38F10_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -69,8 +69,8 @@
       "status": "exported",
       "daeFile": "model_04.dae",
       "textureFiles": [
-        "model_04_Texture_0_CMP.png",
-        "model_04_Texture_1_I4.png"
+        "model_04_Texture_11C481A1_I4.png",
+        "model_04_Texture_A1236ABB_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -80,7 +80,7 @@
       "status": "exported",
       "daeFile": "model_05.dae",
       "textureFiles": [
-        "model_05_Texture_0_CMP.png"
+        "model_05_Texture_0E01BDFB_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -90,7 +90,7 @@
       "status": "exported",
       "daeFile": "model_06.dae",
       "textureFiles": [
-        "model_06_Texture_0_CMP.png"
+        "model_06_Texture_0E01BDFB_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 15
@@ -100,7 +100,7 @@
       "status": "exported",
       "daeFile": "model_07.dae",
       "textureFiles": [
-        "model_07_Texture_0_CMP.png"
+        "model_07_Texture_0E01BDFB_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 47
@@ -110,7 +110,7 @@
       "status": "exported",
       "daeFile": "model_08.dae",
       "textureFiles": [
-        "model_08_Texture_0_I4.png"
+        "model_08_Texture_6C19B10D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0

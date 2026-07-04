@@ -449,13 +449,18 @@ function installNodeDomForThree() {
 
     set src(value) {
       try {
+        // @napi-rs/canvas decodes ASYNCHRONOUSLY after src is assigned; dispatch "load" only
+        // from its native onload. The previous queueMicrotask dispatch fired before the decode
+        // finished, so GLTFExporter drew every texture from an un-decoded (blank) image — every
+        // runtime GLB shipped with solid-black embedded textures.
+        this.onload = () => this.dispatch("load");
+        this.onerror = (error) => this.dispatch("error", error ?? new Error("image decode failed"));
         if (String(value).startsWith("data:")) {
           super.src = value;
         } else {
           const filePath = String(value).startsWith("file:") ? fileURLToPath(String(value)) : String(value);
           super.src = fs.readFileSync(filePath);
         }
-        queueMicrotask(() => this.dispatch("load"));
       } catch (error) {
         queueMicrotask(() => this.dispatch("error", error));
       }

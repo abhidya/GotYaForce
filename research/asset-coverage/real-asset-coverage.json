@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-04T03:49:53.778Z",
+  "generatedAt": "2026-07-04T05:56:45.474Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -18,8 +18,8 @@
     "runtimeAcceptsExportedStageCatalog": true,
     "runtimeChallengeStageSelector": true,
     "runtimeChallengeSpawnPools": true,
-    "runtimeStageCollisionBounds": false,
-    "runtimeStageTriangleCollision": false,
+    "runtimeStageCollisionBounds": true,
+    "runtimeStageTriangleCollision": true,
     "runtimeStageWallCollision": true,
     "runtimeStageCeilingCollision": true,
     "runtimeProjectileFxFromExportedTextures": true,
@@ -1027,19 +1027,19 @@
       },
       "mainRefs": {
         "loadStage": "apps/game/src/main.ts:371",
-        "fetchStageManifest": "apps/game/src/main.ts:null",
-        "loadStageCollision": "apps/game/src/main.ts:null",
-        "parseStageHitGrid": "apps/game/src/main.ts:null",
-        "loadDefaultArena": "apps/game/src/main.ts:394",
+        "fetchStageManifest": "packages/assets/src/index.ts:186",
+        "loadStageCollision": "packages/assets/src/index.ts:296",
+        "parseStageHitGrid": "packages/assets/src/index.ts:308",
+        "loadDefaultArena": "apps/game/src/main.ts:402",
         "loadConvertedStage": "apps/game/src/main.ts:null"
       },
       "collisionBounds": {
-        "usesStageHitParser": false,
-        "passesBoundsToCombat": false,
-        "passesTrianglesToCombat": false,
+        "usesStageHitParser": true,
+        "passesBoundsToCombat": true,
+        "passesTrianglesToCombat": true,
         "movementUsesTriangleWalls": true,
         "movementUsesTriangleCeilings": true,
-        "parserPackage": null
+        "parserPackage": "@gf/formats"
       },
       "assessment": "Runtime authorizes literal exported st## ids, uses DOL-backed Challenge selector metadata to route exported stage subtable families when present, and builds CPU rosters from the recovered Challenge spawn-pool table; unverified Adventure/human arena names still fall back to st00."
     },
@@ -2678,7 +2678,7 @@
     "battleStateHasItems": false,
     "battleRuntimeSpawnsDrops": false,
     "evidenceRefs": {
-      "battleState": "packages/combat/src/types.ts:404",
+      "battleState": "packages/combat/src/types.ts:425",
       "deployNextBorg": "packages/combat/src/battle.ts:234",
       "deathProcessing": "packages/combat/src/battle.ts:505",
       "particleInventory": "research/asset-inventory/particle-effect-inventory.json",

@@ -16,6 +16,13 @@ import {
   inputRequestsBurst,
   resolveCommandType,
 } from "./command.js";
+import {
+  commandInputWord,
+  contextualBGatesForBorgId,
+  resolveLiveCommand,
+  selectCommandRecord,
+} from "./commandDispatch.js";
+import { commandMoveRecordsForBorgButton } from "./commandMoveTables.js";
 import { stepCooldowns } from "./combat.js";
 import { DASH, JUMP, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
 import { movementContextOf } from "./movement.js";
@@ -316,6 +323,62 @@ function testDashContextsViaStepMovement(): void {
   assertEqual(movementContextOf(airborne), "air_dash", "dash while airborne -> air_dash");
 }
 
+// --- ATK-003: live command dispatch (commandDispatch.ts) -----------------------------------
+
+function testCommandInputWord(): void {
+  assertEqual(commandInputWord({ attackHeld: true, specialHeld: false, chargeRelease: false, xChargeRelease: false }), COMMAND_INPUT_BITS.MELEE_A, "B held -> MELEE_A bit");
+  assertEqual(commandInputWord({ attackHeld: false, specialHeld: true, chargeRelease: false, xChargeRelease: false }), COMMAND_INPUT_BITS.SECONDARY, "X held -> SECONDARY bit");
+  assertEqual(commandInputWord({ attackHeld: false, specialHeld: false, chargeRelease: true, xChargeRelease: false }), COMMAND_INPUT_BITS.CHARGED, "B charge release -> CHARGED bit");
+  assertEqual(commandInputWord({ attackHeld: false, specialHeld: false, chargeRelease: false, xChargeRelease: true }), COMMAND_INPUT_BITS.RANGED, "X charge release -> RANGED bit");
+}
+
+function testLiveCommandDispatch(): void {
+  // G RED (pl0615): exact decoded records for B Shot, B Attack, B Charge, and X.
+  const ground = { meleeEngaged: false, airborne: false };
+  const close = { meleeEngaged: true, airborne: false };
+  const bFar = resolveLiveCommand("pl0615", { attackHeld: true, specialHeld: false, chargeRelease: false, xChargeRelease: false }, ground);
+  assertEqual(bFar?.button ?? null, "B Shot", "G RED B far -> B Shot row");
+  assertTrue(bFar?.exact === true, "G RED B Shot resolves an exact ROM record");
+  const bClose = resolveLiveCommand("pl0615", { attackHeld: true, specialHeld: false, chargeRelease: false, xChargeRelease: false }, close);
+  assertEqual(bClose?.button ?? null, "B Attack", "G RED B close -> B Attack row");
+  assertTrue(bClose?.exact === true, "G RED B Attack resolves an exact ROM record");
+  const bCharge = resolveLiveCommand("pl0615", { attackHeld: false, specialHeld: false, chargeRelease: true, xChargeRelease: false }, ground);
+  assertEqual(bCharge?.type ?? null, AttackCommandType.Unmapped3, "G RED charge release -> type 3");
+  assertEqual(bCharge?.button ?? null, "B Charge", "G RED charge release -> B Charge row");
+  assertTrue(bCharge?.exact === true, "G RED B Charge resolves an exact ROM record");
+  const x = resolveLiveCommand("pl0615", { attackHeld: false, specialHeld: true, chargeRelease: false, xChargeRelease: false }, ground);
+  assertEqual(x?.type ?? null, AttackCommandType.Melee2, "G RED X -> type 2");
+  assertEqual(x?.button ?? null, "X", "G RED X -> X row");
+  assertTrue(x?.exact === true, "G RED X resolves an exact ROM record");
+
+  // ROM priority on combined input: charge release + X held -> charged (type 3) wins.
+  const chargedOverX = resolveLiveCommand("pl0615", { attackHeld: false, specialHeld: true, chargeRelease: true, xChargeRelease: false }, ground);
+  assertEqual(chargedOverX?.type ?? null, AttackCommandType.Unmapped3, "charge release preempts X (type 3 > type 2)");
+
+  // Magnet Robot (+/-), Angel Nurse, Beam Satellite: exact records for their main B/X rows.
+  for (const id of ["pl0405", "pl0409", "pl0900", "pl0e01"]) {
+    const far = resolveLiveCommand(id, { attackHeld: true, specialHeld: false, chargeRelease: false, xChargeRelease: false }, ground);
+    assertTrue(far?.exact === true, `${id} B Shot resolves an exact ROM record`);
+    const xRow = resolveLiveCommand(id, { attackHeld: false, specialHeld: true, chargeRelease: false, xChargeRelease: false }, ground);
+    assertTrue(xRow?.exact === true, `${id} X resolves an exact ROM record`);
+  }
+
+  // Contextual-B gates: G RED has both rows live; unknown ids have no decoded table.
+  const gredGates = contextualBGatesForBorgId("pl0615");
+  assertTrue(gredGates?.melee === true && gredGates?.shot === true, "G RED gates: both B rows live");
+  assertEqual(contextualBGatesForBorgId("plzzzz"), null, "unknown borg -> no gates (compat path)");
+
+  // Airborne record selection prefers the DERIVED air/elevated subtype-4 row where present.
+  const records = commandMoveRecordsForBorgButton("pl0615", "B Shot");
+  const hasAir = records.some((record) => record.subtype === 4);
+  const airPick = selectCommandRecord(records, { meleeEngaged: false, airborne: true });
+  if (hasAir) {
+    assertEqual(airPick?.subtype ?? null, 4, "airborne selection picks the subtype-4 row");
+  } else {
+    assertTrue(airPick !== null, "airborne selection still returns a record without a subtype-4 row");
+  }
+}
+
 // --- Runner ---------------------------------------------------------------------------------
 
 export function runSelfTest(): number {
@@ -326,6 +389,8 @@ export function runSelfTest(): number {
   testCommandEnumValuesMatchRom();
   testAttackCommandShape();
   testResolveCommandType();
+  testCommandInputWord();
+  testLiveCommandDispatch();
 
   testStandingContext();
   testGroundDashContext();

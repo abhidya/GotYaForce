@@ -260,6 +260,27 @@ export interface BorgRuntime {
   /** True once the HP-zero kill event has already removed this borg's force cost. */
   defeatAccounted: boolean;
   alive: boolean;
+  /** Live-resolved ROM attack command for this frame (commandDispatch.ts): the transformed
+   *  input word, tester command type (actor+0x585 model), the +0x4ec table row it selected,
+   *  and the exact ROM command record where one is decoded. Set by stepAttacks each frame it
+   *  runs (null-cleared when no attack bit is held); optional so external fakes self-heal. */
+  command?: ResolvedCommandState | null;
+}
+
+/** Live-resolved ROM attack command (see commandDispatch.ts for the resolution pipeline). */
+export interface ResolvedCommandState {
+  /** Transformed-input-word (actor+0x5d4 model) built from this frame's buttons. */
+  word: number;
+  /** ROM tester command type written to actor+0x585 (command.ts AttackCommandType value). */
+  type: number;
+  /** +0x4ec command-table button row the type+context resolved to, or null for unmapped types. */
+  button: string | null;
+  /** Selected exact ROM command record address (data/commandMoveTables.json), or null. */
+  recordAddress: string | null;
+  /** Selected record's subtype (+0x586 model), or null. */
+  subtype: number | null;
+  /** True when an exact decoded ROM record backs this command. */
+  exact: boolean;
 }
 
 /** A force = an ordered list of borgs a team/player deploys one at a time. */

@@ -283,6 +283,7 @@ function inspectStages() {
   const battleBootstrap = readText("apps/game/src/sim/battleBootstrap.ts");
   const stageCatalog = readText("apps/game/src/stages/catalog.generated.ts");
   const main = readText("apps/game/src/main.ts");
+  const assetsIndex = readText("packages/assets/src/index.ts");
   const missionCombatConfig = readText("packages/missions/src/combat-config.ts");
   const challengeReference = readText("packages/missions/src/challenge-reference.ts");
   const challengeRuntime = readText("packages/missions/src/challenge.ts");
@@ -368,19 +369,22 @@ function inspectStages() {
       },
       mainRefs: {
         loadStage: `apps/game/src/main.ts:${lineOf(main, "async function loadStage(stageId")}`,
-        fetchStageManifest: `apps/game/src/main.ts:${lineOf(main, "fetch(`/stages/${stageId}/manifest.json`)")}`,
-        loadStageCollision: `apps/game/src/main.ts:${lineOf(main, "async function loadStageCollision")}`,
-        parseStageHitGrid: `apps/game/src/main.ts:${lineOf(main, "parseStageHitGrid")}`,
+        fetchStageManifest: `packages/assets/src/index.ts:${lineOf(assetsIndex, "manifest.json")}`,
+        loadStageCollision: `packages/assets/src/index.ts:${lineOf(assetsIndex, "async function loadStageCollision")}`,
+        parseStageHitGrid: `packages/assets/src/index.ts:${lineOf(assetsIndex, "parseStageHitGrid")}`,
         loadDefaultArena: `apps/game/src/main.ts:${lineOf(main, "loadStage(DEFAULT_ARENA_STAGE)")}`,
         loadConvertedStage: `apps/game/src/main.ts:${lineOf(main, "await loadStage(stageId)")}`,
       },
       collisionBounds: {
-        usesStageHitParser: main.includes("hitBin.parseStageHitGrid"),
-        passesBoundsToCombat: main.includes("toCombatBattleConfig(config") && main.includes("bounds: stageBounds"),
-        passesTrianglesToCombat: main.includes("stageResources.collision") && main.includes("collision: stageResources.collision"),
+        // Post-refactor path (commit 71a4597d-era app-flow split): STIH parsing lives in
+        // packages/assets loadStageCollision, and bounds/collision flow to combat through
+        // battleBootstrap's toCombatBattleConfig call — not through main.ts anymore.
+        usesStageHitParser: assetsIndex.includes("hitBin.parseStageHitGrid") && main.includes("assetCatalog.loadStageAssets"),
+        passesBoundsToCombat: battleBootstrap.includes("toCombatBattleConfig(options.config") && battleBootstrap.includes("bounds: stageBounds"),
+        passesTrianglesToCombat: battleBootstrap.includes("collision: stageAssets.collision"),
         movementUsesTriangleWalls: readText("packages/combat/src/movement.ts").includes("resolveLateralCollision"),
         movementUsesTriangleCeilings: readText("packages/combat/src/movement.ts").includes("resolveCeilingCollision"),
-        parserPackage: main.includes("@gf/formats") ? "@gf/formats" : null,
+        parserPackage: assetsIndex.includes("@gf/formats") ? "@gf/formats" : null,
       },
       assessment:
         publicStages.length > 1 && missionCombatConfig.includes("stageIdForBattleConfig")

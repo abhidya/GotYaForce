@@ -66,8 +66,11 @@ export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeVie
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, options.pixelRatioLimit ?? 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  // GX (GameCube) has NO tone mapping: TEV output goes to the framebuffer directly, so the
+  // exported HSD light/fog/vertex colors were authored against a linear->sRGB pipeline with no
+  // filmic curve. The previous ACESFilmicToneMapping was a port-ism that compressed/darkened
+  // every stage and actor material below its authored color (the "dark/flat arena" defect).
+  renderer.toneMapping = THREE.NoToneMapping;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(options.clearColor ?? 0x101820);
@@ -152,6 +155,11 @@ export interface ImportedModelOptions {
   materialSide?: THREE.Side;
   metalness?: number;
   culling?: MeshCullingPolicy;
+  /** Alpha-discard threshold applied to BLEND-mode (transparent) materials only. GLTF BLEND
+   *  materials keep depthWrite on by default, so fully-invisible texels of alpha-textured
+   *  props (flags/fences/foliage planes) still write depth and cut rectangular holes into
+   *  whatever renders behind them. A small alphaTest discards those texels. */
+  transparentAlphaTest?: number;
 }
 
 export function prepareImportedModel(model: THREE.Object3D, options: ImportedModelOptions = {}): void {
@@ -177,6 +185,10 @@ export function prepareImportedModel(model: THREE.Object3D, options: ImportedMod
       if (options.materialSide !== undefined) material.side = options.materialSide;
       if (options.metalness !== undefined && "metalness" in material) {
         (material as THREE.MeshStandardMaterial).metalness = options.metalness;
+      }
+      if (options.transparentAlphaTest !== undefined && material.transparent) {
+        material.alphaTest = options.transparentAlphaTest;
+        material.needsUpdate = true;
       }
     }
   });

@@ -4,7 +4,7 @@
   "source": "user-data/GG4E/afs_data/root",
   "status": "verified-visual-and-collision",
   "verifiedBy": "scripts/export-all-stages.mjs",
-  "verifiedAt": "2026-06-30T21:54:11.686Z",
+  "verifiedAt": "2026-07-04T05:55:33.202Z",
   "copied": {
     "stageArc": "st10/raw/st10_mdl.arc",
     "stagePzz": "st10/raw/st10.pzz",
@@ -84,27 +84,27 @@
   "models": [
     {
       "path": "model/model_00.glb",
-      "bytes": 1343728
+      "bytes": 1385740
     },
     {
       "path": "model/model_01.glb",
-      "bytes": 27816
+      "bytes": 27788
     },
     {
       "path": "model/model_02.glb",
-      "bytes": 44836
+      "bytes": 97056
     },
     {
       "path": "model/model_03.glb",
-      "bytes": 41572
+      "bytes": 42596
     },
     {
       "path": "model/model_04.glb",
-      "bytes": 11388
+      "bytes": 11420
     },
     {
       "path": "model/model_05.glb",
-      "bytes": 11364
+      "bytes": 11400
     },
     {
       "path": "model/model_06.glb",
@@ -113,47 +113,47 @@
   ],
   "textures": [
     {
-      "path": "model/model_00_Texture_0_CMP.png",
+      "path": "model/model_00_Texture_4C3DCB1B_CMP.png",
       "bytes": 11192
     },
     {
-      "path": "model/model_00_Texture_1_CMP.png",
+      "path": "model/model_00_Texture_8AEDD420_CMP.png",
       "bytes": 28582
     },
     {
-      "path": "model/model_01_Texture_0_CMP.png",
+      "path": "model/model_01_Texture_ACAF76E4_CMP.png",
       "bytes": 77061
     },
     {
-      "path": "model/model_02_Texture_0_CMP.png",
+      "path": "model/model_02_Texture_8AEDD420_CMP.png",
       "bytes": 28582
     },
     {
-      "path": "model/model_02_Texture_1_CMP.png",
+      "path": "model/model_02_Texture_9438E66C_CMP.png",
       "bytes": 21478
     },
     {
-      "path": "model/model_03_Texture_0_I4.png",
-      "bytes": 782
-    },
-    {
-      "path": "model/model_03_Texture_1_CMP.png",
+      "path": "model/model_03_Texture_8FB52BC3_CMP.png",
       "bytes": 1262
     },
     {
-      "path": "model/model_04_Texture_0_I4.png",
+      "path": "model/model_03_Texture_EE74BA90_I4.png",
+      "bytes": 782
+    },
+    {
+      "path": "model/model_04_Texture_D3192D5F_I4.png",
       "bytes": 30399
     },
     {
-      "path": "model/model_04_Texture_1_CMP.png",
+      "path": "model/model_04_Texture_D71955C5_CMP.png",
       "bytes": 391
     },
     {
-      "path": "model/model_05_Texture_0_I4.png",
+      "path": "model/model_05_Texture_C54D19CD_I4.png",
       "bytes": 16284
     },
     {
-      "path": "model/model_05_Texture_1_CMP.png",
+      "path": "model/model_05_Texture_D71955C5_CMP.png",
       "bytes": 391
     }
   ],

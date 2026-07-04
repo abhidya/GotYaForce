@@ -69,13 +69,13 @@
       "status": "exported",
       "daeFile": "model_00.dae",
       "textureFiles": [
-        "model_00_Texture_0_CMP.png",
-        "model_00_Texture_1_CMP.png",
-        "model_00_Texture_2_CMP.png",
-        "model_00_Texture_3_CMP.png",
-        "model_00_Texture_4_CMP.png",
-        "model_00_Texture_5_CMP.png",
-        "model_00_Texture_6_CMP.png"
+        "model_00_Texture_0DD91C5C_CMP.png",
+        "model_00_Texture_1547B266_CMP.png",
+        "model_00_Texture_190CDC1B_CMP.png",
+        "model_00_Texture_45FB3C8D_CMP.png",
+        "model_00_Texture_6F272A9A_CMP.png",
+        "model_00_Texture_94573650_CMP.png",
+        "model_00_Texture_C040CAE8_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -85,7 +85,7 @@
       "status": "exported",
       "daeFile": "model_01.dae",
       "textureFiles": [
-        "model_01_Texture_0_CMP.png"
+        "model_01_Texture_55774695_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -95,9 +95,9 @@
       "status": "exported",
       "daeFile": "model_02.dae",
       "textureFiles": [
-        "model_02_Texture_0_CMP.png",
-        "model_02_Texture_1_CMP.png",
-        "model_02_Texture_2_CMP.png"
+        "model_02_Texture_1547B266_CMP.png",
+        "model_02_Texture_6F272A9A_CMP.png",
+        "model_02_Texture_9F408B8E_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -107,7 +107,7 @@
       "status": "exported",
       "daeFile": "model_03.dae",
       "textureFiles": [
-        "model_03_Texture_0_CMP.png"
+        "model_03_Texture_C03DD11F_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -117,7 +117,7 @@
       "status": "exported",
       "daeFile": "model_04.dae",
       "textureFiles": [
-        "model_04_Texture_0_CMP.png"
+        "model_04_Texture_0DD91C5C_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -127,9 +127,9 @@
       "status": "exported",
       "daeFile": "model_05.dae",
       "textureFiles": [
-        "model_05_Texture_0_CMP.png",
-        "model_05_Texture_1_CMP.png",
-        "model_05_Texture_2_CMP.png"
+        "model_05_Texture_0DD91C5C_CMP.png",
+        "model_05_Texture_45FB3C8D_CMP.png",
+        "model_05_Texture_D1776631_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -171,7 +171,7 @@
       "status": "exported",
       "daeFile": "model_10.dae",
       "textureFiles": [
-        "model_10_Texture_0_CMP.png"
+        "model_10_Texture_2BAC23BE_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -181,7 +181,7 @@
       "status": "exported",
       "daeFile": "model_11.dae",
       "textureFiles": [
-        "model_11_Texture_0_CMP.png"
+        "model_11_Texture_F4309D94_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -191,7 +191,7 @@
       "status": "exported",
       "daeFile": "model_12.dae",
       "textureFiles": [
-        "model_12_Texture_0_CMP.png"
+        "model_12_Texture_0DD91C5C_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -201,7 +201,7 @@
       "status": "exported",
       "daeFile": "model_13.dae",
       "textureFiles": [
-        "model_13_Texture_0_CMP.png"
+        "model_13_Texture_D1776631_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -211,11 +211,11 @@
       "status": "exported",
       "daeFile": "model_14.dae",
       "textureFiles": [
-        "model_14_Texture_0_CMP.png",
-        "model_14_Texture_1_CMP.png",
-        "model_14_Texture_2_CMP.png",
-        "model_14_Texture_3_CMP.png",
-        "model_14_Texture_4_CMP.png"
+        "model_14_Texture_0DD91C5C_CMP.png",
+        "model_14_Texture_259D8D80_CMP.png",
+        "model_14_Texture_A7C336A3_CMP.png",
+        "model_14_Texture_D1776631_CMP.png",
+        "model_14_Texture_F4309D94_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -225,8 +225,8 @@
       "status": "exported",
       "daeFile": "model_15.dae",
       "textureFiles": [
-        "model_15_Texture_0_CMP.png",
-        "model_15_Texture_1_CMP.png"
+        "model_15_Texture_346D9963_CMP.png",
+        "model_15_Texture_82EE6B49_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -236,7 +236,7 @@
       "status": "exported",
       "daeFile": "model_16.dae",
       "textureFiles": [
-        "model_16_Texture_0_CMP.png"
+        "model_16_Texture_D1776631_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -246,8 +246,8 @@
       "status": "exported",
       "daeFile": "model_17.dae",
       "textureFiles": [
-        "model_17_Texture_0_CMP.png",
-        "model_17_Texture_1_CMP.png"
+        "model_17_Texture_346D9963_CMP.png",
+        "model_17_Texture_82EE6B49_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -265,7 +265,7 @@
       "status": "exported",
       "daeFile": "model_19.dae",
       "textureFiles": [
-        "model_19_Texture_0_CMP.png"
+        "model_19_Texture_D1776631_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -283,7 +283,7 @@
       "status": "exported",
       "daeFile": "model_21.dae",
       "textureFiles": [
-        "model_21_Texture_0_CMP.png"
+        "model_21_Texture_A7C336A3_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -301,7 +301,7 @@
       "status": "exported",
       "daeFile": "model_23.dae",
       "textureFiles": [
-        "model_23_Texture_0_CMP.png"
+        "model_23_Texture_A7C336A3_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -311,9 +311,9 @@
       "status": "exported",
       "daeFile": "model_24.dae",
       "textureFiles": [
-        "model_24_Texture_0_CMP.png",
-        "model_24_Texture_1_CMP.png",
-        "model_24_Texture_2_CMP.png"
+        "model_24_Texture_0DD91C5C_CMP.png",
+        "model_24_Texture_346D9963_CMP.png",
+        "model_24_Texture_F4309D94_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -323,7 +323,7 @@
       "status": "exported",
       "daeFile": "model_25.dae",
       "textureFiles": [
-        "model_25_Texture_0_CMP.png"
+        "model_25_Texture_2BAC23BE_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -333,9 +333,9 @@
       "status": "exported",
       "daeFile": "model_26.dae",
       "textureFiles": [
-        "model_26_Texture_0_CMP.png",
-        "model_26_Texture_1_RGB5A3.png",
-        "model_26_Texture_2_RGB5A3.png"
+        "model_26_Texture_1E71DEBB_RGB5A3.png",
+        "model_26_Texture_385837FA_CMP.png",
+        "model_26_Texture_494E821C_RGB5A3.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -345,9 +345,9 @@
       "status": "exported",
       "daeFile": "model_27.dae",
       "textureFiles": [
-        "model_27_Texture_0_CMP.png",
-        "model_27_Texture_1_RGB5A3.png",
-        "model_27_Texture_2_RGB5A3.png"
+        "model_27_Texture_1E71DEBB_RGB5A3.png",
+        "model_27_Texture_385837FA_CMP.png",
+        "model_27_Texture_494E821C_RGB5A3.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -357,7 +357,7 @@
       "status": "exported",
       "daeFile": "model_28.dae",
       "textureFiles": [
-        "model_28_Texture_0_CMP.png"
+        "model_28_Texture_6F272A9A_CMP.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -367,7 +367,7 @@
       "status": "exported",
       "daeFile": "model_29.dae",
       "textureFiles": [
-        "model_29_Texture_0_I4.png"
+        "model_29_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -377,7 +377,7 @@
       "status": "exported",
       "daeFile": "model_30.dae",
       "textureFiles": [
-        "model_30_Texture_0_I4.png"
+        "model_30_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -387,7 +387,7 @@
       "status": "exported",
       "daeFile": "model_31.dae",
       "textureFiles": [
-        "model_31_Texture_0_I4.png"
+        "model_31_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -397,7 +397,7 @@
       "status": "exported",
       "daeFile": "model_32.dae",
       "textureFiles": [
-        "model_32_Texture_0_I4.png"
+        "model_32_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -407,7 +407,7 @@
       "status": "exported",
       "daeFile": "model_33.dae",
       "textureFiles": [
-        "model_33_Texture_0_I4.png"
+        "model_33_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -417,7 +417,7 @@
       "status": "exported",
       "daeFile": "model_34.dae",
       "textureFiles": [
-        "model_34_Texture_0_I4.png"
+        "model_34_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -427,7 +427,7 @@
       "status": "exported",
       "daeFile": "model_35.dae",
       "textureFiles": [
-        "model_35_Texture_0_I4.png"
+        "model_35_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -437,7 +437,7 @@
       "status": "exported",
       "daeFile": "model_36.dae",
       "textureFiles": [
-        "model_36_Texture_0_I4.png"
+        "model_36_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -447,7 +447,7 @@
       "status": "exported",
       "daeFile": "model_37.dae",
       "textureFiles": [
-        "model_37_Texture_0_I4.png"
+        "model_37_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -457,7 +457,7 @@
       "status": "exported",
       "daeFile": "model_38.dae",
       "textureFiles": [
-        "model_38_Texture_0_I4.png"
+        "model_38_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -467,7 +467,7 @@
       "status": "exported",
       "daeFile": "model_39.dae",
       "textureFiles": [
-        "model_39_Texture_0_I4.png"
+        "model_39_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -477,7 +477,7 @@
       "status": "exported",
       "daeFile": "model_40.dae",
       "textureFiles": [
-        "model_40_Texture_0_I4.png"
+        "model_40_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -487,7 +487,7 @@
       "status": "exported",
       "daeFile": "model_41.dae",
       "textureFiles": [
-        "model_41_Texture_0_I4.png"
+        "model_41_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -497,7 +497,7 @@
       "status": "exported",
       "daeFile": "model_42.dae",
       "textureFiles": [
-        "model_42_Texture_0_I4.png"
+        "model_42_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -507,7 +507,7 @@
       "status": "exported",
       "daeFile": "model_43.dae",
       "textureFiles": [
-        "model_43_Texture_0_I4.png"
+        "model_43_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -517,7 +517,7 @@
       "status": "exported",
       "daeFile": "model_44.dae",
       "textureFiles": [
-        "model_44_Texture_0_I4.png"
+        "model_44_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -527,7 +527,7 @@
       "status": "exported",
       "daeFile": "model_45.dae",
       "textureFiles": [
-        "model_45_Texture_0_I4.png"
+        "model_45_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -537,7 +537,7 @@
       "status": "exported",
       "daeFile": "model_46.dae",
       "textureFiles": [
-        "model_46_Texture_0_I4.png"
+        "model_46_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -547,7 +547,7 @@
       "status": "exported",
       "daeFile": "model_47.dae",
       "textureFiles": [
-        "model_47_Texture_0_I4.png"
+        "model_47_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -557,7 +557,7 @@
       "status": "exported",
       "daeFile": "model_48.dae",
       "textureFiles": [
-        "model_48_Texture_0_I4.png"
+        "model_48_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -567,7 +567,7 @@
       "status": "exported",
       "daeFile": "model_49.dae",
       "textureFiles": [
-        "model_49_Texture_0_I4.png"
+        "model_49_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -577,7 +577,7 @@
       "status": "exported",
       "daeFile": "model_50.dae",
       "textureFiles": [
-        "model_50_Texture_0_I4.png"
+        "model_50_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0
@@ -587,7 +587,7 @@
       "status": "exported",
       "daeFile": "model_51.dae",
       "textureFiles": [
-        "model_51_Texture_0_I4.png"
+        "model_51_Texture_3047DB1D_I4.png"
       ],
       "error": null,
       "normalizedInstanceJointCount": 0

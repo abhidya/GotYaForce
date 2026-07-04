@@ -384,6 +384,10 @@ async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>
       materialSide: THREE.DoubleSide,
       metalness: 0,
       culling: "auto",
+      // TUNED threshold (HSD PEDesc alpha-compare state is undecoded): discard near-invisible
+      // texels of BLEND-mode stage props so their invisible quad corners stop writing depth
+      // and punching holes into geometry behind them.
+      transparentAlphaTest: 0.1,
     });
     stageRoot.add(model);
   }
@@ -1165,6 +1169,50 @@ function showLoadingMessage(text: string): void {
   },
   startChallenge: () => showDifficulty(),
   renderDiagnostics: () => viewport.diagnostics(),
+  // Read-only scene readout for preview debugging: current stage, lights, and a per-material
+  // summary (color/map/side/transparent) of everything under the stage and battle roots.
+  sceneInfo: () => {
+    const summarize = (root: THREE.Object3D, label: string) => {
+      const mats: Record<string, unknown>[] = [];
+      root.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        for (const m of list) {
+          const std = m as THREE.MeshStandardMaterial;
+          mats.push({
+            label,
+            mesh: mesh.name || "(unnamed)",
+            type: m.type,
+            color: std.color ? `#${std.color.getHexString()}` : null,
+            map: !!std.map,
+            metalness: std.metalness,
+            roughness: std.roughness,
+            transparent: m.transparent,
+            opacity: m.opacity,
+            visible: mesh.visible,
+          });
+        }
+      });
+      return mats;
+    };
+    return {
+      stageId: loadedStageId,
+      background: scene.background instanceof THREE.Color ? `#${scene.background.getHexString()}` : String(scene.background),
+      fog: scene.fog ? { color: `#${(scene.fog as THREE.Fog).color.getHexString()}`, near: (scene.fog as THREE.Fog).near, far: (scene.fog as THREE.Fog).far } : null,
+      lights: [stageLighting.ambient, ...stageLighting.directionals].map((l) => ({
+        type: l.type,
+        color: `#${l.color.getHexString()}`,
+        intensity: l.intensity,
+        visible: l.visible,
+      })),
+      toneMapping: viewport.renderer.toneMapping,
+      stageMaterials: summarize(stageRoot, "stage"),
+      battleMaterials: summarize(battleRoot, "battle"),
+    };
+  },
+  // Raw three.js handles for interactive preview debugging only.
+  three: { scene, stageRoot, battleRoot, camera, viewport },
   renderNow: () => {
     return viewport.captureFrame();
   },

@@ -13,6 +13,51 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 
 ---
 
+## ★ 2026-07-04 session: asset-pipeline root cause + command dispatch landed
+
+**A. Every shipped runtime GLB had BLANK embedded textures (root cause of "the game looks
+broken").** Two pipeline bugs, both fixed and the full fleet re-exported:
+1. `tools/HSDLib/HSDRawViewer/IO/ModelExporter.cs` — texture PNGs were named
+   `Texture_{count}` PER SUB-MODEL into a shared directory (later sub-models overwrote
+   earlier files with different content), and the diffuse/specular map binding always read
+   the texture-LIST-HEAD image instead of the current TObj (mis-texturing every
+   multi-texture material). Fixed: content-hash texture names (`Texture_{FNV1a:X8}_{fmt}`)
+   + per-TObj binding. pl0615's arc has 4 distinct images; the old export shipped 3 with a
+   collision.
+2. `scripts/convert-runtime-models-to-glb.mjs` — the Node Image polyfill dispatched "load"
+   via queueMicrotask, but @napi-rs/canvas decodes images ASYNCHRONOUSLY after `src=`, so
+   GLTFExporter drew every texture from an un-decoded image → every GLB embedded 172/364-byte
+   solid-black PNGs (stages, borgs, everything). Fixed: dispatch from the native onload.
+   Verified: G RED renders fully red in live battle; st0a embeds real 5–52 KB textures.
+   Re-exported: 40/40 stages, 208/208 borg model_00.glb (batch harness:
+   `user-data/GG4E/gltf-export/Program.cs` BATCH_DIR mode). UI scenes still pending
+   (they shipped with no embedded images at all — separate follow-up).
+Also render-side: `ACESFilmicToneMapping` removed (GX has no tone mapping — it compressed
+every authored HSD color; now `NoToneMapping`), and BLEND-mode stage props get
+`alphaTest 0.1` so invisible texels stop punching depth holes (`prepareImportedModel`).
+
+**B. Command dispatch (ATK-003 dispatch stage) is LIVE.** `packages/combat/src/commandDispatch.ts`:
+stepAttacks now builds the transformed-input-word from the frame's buttons
+(COMMAND_INPUT_BITS), resolves the type via `resolveCommandType()` (ROM tester priority),
+refines B into the +0x4ec type-0/type-1 row from live proximity, selects the borg's exact
+decoded command record (subtype 4 preferred airborne, 5 on charge releases), and stores the
+result on `BorgRuntime.command`. ROM record gating applied ONLY to the contextual-B
+melee/shot split (decoded tables whose type-1/type-0 rows are empty gate that side off);
+X/charge rows attach records but are never negatively gated (the type-2↔X mapping mismatches
+the wiki catalog for 52/208 borgs — do NOT gate X on it). A same-frame B-charge release now
+preempts X per tester priority (type 3 > 2). Selftests: commandSchema 53/53 (incl. live
+dispatch for pl0615/pl0405/pl0409/pl0900/pl0e01); moveProperties 57/57; 1P challenge smoke
+PASS. Remaining ATK-003 work: consuming record identity for animation/HIT selection
+(record bytes cueId/stateMode/actionIndex semantics still undecoded).
+
+**C. Stale audit detectors fixed:** `audit-real-asset-coverage.mjs` claimed STIH
+bounds/triangles were "not wired" — they moved into packages/assets + battleBootstrap in the
+app-flow refactor and ARE fully wired (parse → StageAssets → BattleConfig → walls/ceilings/
+floor height/spawn placement). Detectors now point at the real path. The true collision gap
+is 22/40 stages missing source hit bins, not runtime wiring.
+
+---
+
 ## ★ Finish-line handoff (what's left, prioritized) — 2026-07-03
 
 The port is **playable end-to-end** (challenge verified) with every cleanly-derivable mechanic

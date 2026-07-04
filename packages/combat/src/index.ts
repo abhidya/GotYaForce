@@ -44,6 +44,16 @@ export {
   type CommandMoveTableCoverage,
   type RuntimeCommandMoveButton,
 } from "./commandMoveTables.js";
+export {
+  commandButtonForType,
+  commandInputWord,
+  contextualBGatesForBorgId,
+  resolveLiveCommand,
+  selectCommandRecord,
+  type CommandActorContext,
+  type CommandButtonState,
+  type ContextualBGates,
+} from "./commandDispatch.js";
 export { movementContextOf, type MovementContext } from "./movement.js";
 export {
   buildProfile,

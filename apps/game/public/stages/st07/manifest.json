@@ -4,7 +4,7 @@
   "source": "user-data/GG4E/afs_data/root",
   "status": "verified-visual-and-collision",
   "verifiedBy": "scripts/export-all-stages.mjs",
-  "verifiedAt": "2026-06-30T21:37:20.145Z",
+  "verifiedAt": "2026-07-04T05:55:33.165Z",
   "copied": {
     "stageArc": "st07/raw/st07_mdl.arc",
     "stagePzz": "st07/raw/st07.pzz",
@@ -91,15 +91,15 @@
   "models": [
     {
       "path": "model/model_00.glb",
-      "bytes": 190520
+      "bytes": 254572
     },
     {
       "path": "model/model_01.glb",
-      "bytes": 27816
+      "bytes": 27788
     },
     {
       "path": "model/model_02.glb",
-      "bytes": 47948
+      "bytes": 91364
     },
     {
       "path": "model/model_03.glb",
@@ -108,32 +108,32 @@
   ],
   "textures": [
     {
-      "path": "model/model_00_Texture_0_CMP.png",
+      "path": "model/model_00_Texture_50E63EAB_CMP.png",
       "bytes": 64168
     },
     {
-      "path": "model/model_00_Texture_1_CMP.png",
-      "bytes": 14545
-    },
-    {
-      "path": "model/model_00_Texture_2_RGBA8.png",
+      "path": "model/model_00_Texture_A8D2EE71_RGBA8.png",
       "bytes": 2489
     },
     {
-      "path": "model/model_01_Texture_0_CMP.png",
+      "path": "model/model_00_Texture_EFB3CF82_CMP.png",
+      "bytes": 14545
+    },
+    {
+      "path": "model/model_01_Texture_03429848_CMP.png",
       "bytes": 49634
     },
     {
-      "path": "model/model_02_Texture_0_CMP.png",
+      "path": "model/model_02_Texture_8ECB4D91_CMP.png",
       "bytes": 26428
     },
     {
-      "path": "model/model_02_Texture_1_CMP.png",
-      "bytes": 14545
+      "path": "model/model_02_Texture_A8D2EE71_RGBA8.png",
+      "bytes": 2489
     },
     {
-      "path": "model/model_02_Texture_2_RGBA8.png",
-      "bytes": 2489
+      "path": "model/model_02_Texture_EFB3CF82_CMP.png",
+      "bytes": 14545
     }
   ],
   "setArcs": [

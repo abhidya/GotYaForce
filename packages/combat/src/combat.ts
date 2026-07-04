@@ -57,6 +57,12 @@ import {
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
 import { runtimeShotPenetrationForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
+import { AttackCommandType } from "./command.js";
+import {
+  contextualBGatesForBorgId,
+  resolveLiveCommand,
+  type ContextualBGates,
+} from "./commandDispatch.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
@@ -1040,9 +1046,21 @@ function resolveBActionOrder(
   meleeDef: MeleeActionDef | null,
   shotDef: ShotActionDef | null,
   meleeEngaged: boolean,
+  romGates: ContextualBGates | null,
 ): readonly BActionKind[] {
   const fallback = primaryBActionOrder(actionProfile);
   if (!meleeDef || !shotDef) return fallback;
+  // ROM +0x4ec record gating (decoded exact tables only, commandDispatch.ts): a table whose
+  // B-close (type 1) row has no active records means the ROM's own per-borg command data says
+  // there is NO battle attack — B selects the shot even inside the engage window. Conversely
+  // a table with no active B-far (type 0) records has no far command — B out of the window
+  // selects melee only (the whiff gate downstream keeps hybrids from air-swinging at range,
+  // which for a shot-primary borg makes far-B a ROM-shaped no-op). Borgs without a decoded
+  // table (romGates null) and single-action borgs keep the profile-driven behavior above.
+  if (romGates) {
+    if (meleeEngaged && !romGates.melee) return ["shot"] as const;
+    if (!meleeEngaged && !romGates.shot) return ["melee"] as const;
+  }
   // A held charge keeps the shot path first (stable release semantics) ONLY while no
   // melee-context target is in the engage window.
   if ((b.cooldowns["chargeFrames"] ?? 0) > 0 && !meleeEngaged) return fallback;
@@ -1126,6 +1144,28 @@ export function stepAttacks(
     ensureWeaponCells(b, p);
   }
 
+  // --- Live ROM command resolution (the ATK-003 dispatch stage) -----------------------
+  // Contextual-B target + engage window, computed once per frame: drives the ROM command
+  // refinement (B close/far → table type 1/0), the melee-vs-shot SELECTION below, the whiff
+  // gate, and the lunge target/drive.
+  const contextTarget = meleeDef ? contextualBTarget(b, all) : null;
+  const meleeEngaged =
+    meleeDef !== null && contextTarget !== null && targetWithinMeleeEngage(b.pos, contextTarget.pos, meleeDef);
+  // Charge-release edges feed the CHARGED/RANGED bits of the transformed input word — the
+  // ROM's type-3 (B charge) and type-5 (X charge / ranged-forced) commands fire on release.
+  const chargeRelease =
+    releasedAttack && (b.cooldowns["chargeFrames"] ?? 0) > 0 && shotDef?.chargeable === true;
+  const xChargeRelease =
+    releasedSpecial && (b.cooldowns["xChargeFrames"] ?? 0) > 0 && xChargeMoveForBorgId(b.borgId) !== null;
+  // Resolve this frame's command through the ROM tester priority (RANGED > CHARGED >
+  // SECONDARY > MELEE) and attach the borg's exact +0x4ec command record where decoded.
+  // Stored on the runtime for overlays/audits and the downstream HIT/animation wiring.
+  b.command = resolveLiveCommand(
+    b.borgId,
+    { attackHeld, specialHeld, chargeRelease, xChargeRelease },
+    { meleeEngaged, airborne: !b.grounded },
+  );
+
   // --- Special (X) -------------------------------------------------------------------
   // Input binding (CONFIRMED_MANUAL, behavior-notes.md (ao), the official NA instruction manual):
   // B = contextual shot/melee (weapon 0), X = the SECOND weapon (weapon 1), Y = Power Burst. The
@@ -1148,7 +1188,11 @@ export function stepAttacks(
   const xCell = ensureWeaponCells(b, p)[1];
   const xHasAmmo = !!xCell && xCell.max > 0;
   const xCanFire = !xHasAmmo || (xCell as WeaponCell).cur >= 1; // infinite/unused cell always passes
-  if (canStartAction && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+  // ROM tester priority: a same-frame B-charge release resolves to command type 3, which
+  // outranks the X/secondary type 2 (FUN_800699d8 order) — the charge release below wins the
+  // frame and the X press is not consumed.
+  const commandPreemptsX = b.command?.type === AttackCommandType.Unmapped3;
+  if (canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
       // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
@@ -1178,13 +1222,16 @@ export function stepAttacks(
   }
 
   // --- Attack (B): asset-backed per-borg primary action, generic fallback-safe -------
-  // Contextual-B target + engage window, computed once per frame: drives the melee-vs-shot
-  // SELECTION (resolveBActionOrder), the whiff gate below, and the lunge target/drive.
-  const contextTarget = meleeDef ? contextualBTarget(b, all) : null;
-  const meleeEngaged =
-    meleeDef !== null && contextTarget !== null && targetWithinMeleeEngage(b.pos, contextTarget.pos, meleeDef);
+  // contextTarget/meleeEngaged were computed above (they also feed the command resolution).
   if (canStartAction && (attackHeld || releasedAttack)) {
-    const order = resolveBActionOrder(b, actionProfile, meleeDef, shotDef, meleeEngaged);
+    const order = resolveBActionOrder(
+      b,
+      actionProfile,
+      meleeDef,
+      shotDef,
+      meleeEngaged,
+      contextualBGatesForBorgId(b.borgId),
+    );
     for (const kind of order) {
       if (kind === "melee" && meleeDef && attackHeld) {
         // Whiff gate: a hybrid that fell through to melee (e.g. empty magazine on the shot

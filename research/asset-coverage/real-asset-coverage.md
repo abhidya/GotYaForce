@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-04T03:49:53.778Z
+Generated: 2026-07-04T05:56:45.474Z
 
 ## Summary
 
@@ -12,8 +12,8 @@ Generated: 2026-07-04T03:49:53.778Z
 - Requested UI scene models exported: 13 from apps/game/public/ui/scenes/manifest.json
 - Stage exports complete visually: 40/40
 - Stage render-state exports: 40/40
-- Runtime stage collision bounds from STIH: no
-- Runtime stage triangle collision from STIH: no
+- Runtime stage collision bounds from STIH: yes
+- Runtime stage triangle collision from STIH: yes
 - Runtime lateral wall collision from STIH: yes
 - Runtime upward ceiling collision from STIH: yes
 - Runtime projectile FX from exported textures: yes
@@ -86,9 +86,9 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 18 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:371, apps/game/src/main.ts:null, apps/game/src/main.ts:null, apps/game/src/main.ts:null, apps/game/src/main.ts:394, apps/game/src/main.ts:null
+Runtime loader refs: apps/game/src/main.ts:371, packages/assets/src/index.ts:186, packages/assets/src/index.ts:296, packages/assets/src/index.ts:308, apps/game/src/main.ts:402, apps/game/src/main.ts:null
 
-Runtime collision parser: none (bounds not wired, triangles not wired, walls wired, ceilings wired)
+Runtime collision parser: @gf/formats (bounds wired, triangles wired, walls wired, ceilings wired)
 
 Challenge stage selector: DOL selector bytes wired to exported runtime stage routing (packages/missions/src/challenge-reference.ts:32; packages/missions/src/combat-config.ts:31).
 Challenge CPU spawn pools: generated from recovered 0x80380804 table (22 groups, 145 borg ids; packages/missions/src/challenge-spawn-pools.generated.ts:32; packages/missions/src/challenge.ts:379).
@@ -243,7 +243,7 @@ Fly/boost mapping: fly state resolves through exported boost labels.
 
 Items/powerups in BattleState: no
 Runtime spawns item/drop/pickup entities: no
-Evidence refs: packages/combat/src/types.ts:404, packages/combat/src/battle.ts:234, packages/combat/src/battle.ts:505, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
+Evidence refs: packages/combat/src/types.ts:425, packages/combat/src/battle.ts:234, packages/combat/src/battle.ts:505, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
 Asset leads: item model ARZ count 90, as_icon documented yes, comhit documented yes.
 Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory.
 
