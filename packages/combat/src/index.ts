@@ -62,6 +62,16 @@ export {
   type BorgMovementPhysics,
 } from "./movementData.js";
 export {
+  attackHitActiveWindowForKind,
+  attackHitMaxReachForKind,
+  attackHitRecordsForKind,
+  attackHitTableForBorgId,
+  shotHitRadiusForBorgId,
+  type AttackHitRecord,
+  type BorgAttackHitTable,
+} from "./attackHitData.js";
+export { groundRunSpeedForBorgId } from "./movementData.js";
+export {
   buildProfile,
   forceEnergy,
   parseHp,

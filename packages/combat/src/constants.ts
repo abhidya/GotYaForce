@@ -109,50 +109,56 @@ export const MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES = 6;
 
 export const MOVE = {
   /**
-   * Ground move speed (units/frame) = BASE + speed_stat * PER_STAT.
+   * FALLBACK ground speed formula (units/frame) = BASE + speed_stat * PER_STAT — used ONLY
+   * for ids without a pl####data.bin page (synthetic test borgs). Real borgs get their
+   * DERIVED run speed from movementData.ts groundRunSpeedForBorgId (page+0x2c RAW).
    *
-   * DERIVED-provisional anchor (2026-07-01, behavior-notes §ac): live per-frame trace of
-   * G RED (speed 6) walking in 4P versus measured a constant 22.0 world-units/frame
-   * (golden: user-data/dolphin-trace/golden/recipe-pos20-pl0615-chain.jsonl; position read
-   * from the confirmed actor chain *(u32*)0x803C4E84 → +0x20 vec3; per-frame deltas exactly
-   * (-16.9, -14.1)). BASE/PER_STAT are the old TUNED values scaled 4x so speed-6 hits the
-   * measured 22.0 while preserving the TUNED stat spread — the BASE/PER_STAT split itself is
-   * still TUNED (one data point can't pin two constants; capture a different-speed borg to
-   * derive the split). Single capture: reproduce before treating the anchor as fully DERIVED.
-   * Note: measured on the BACKWARD walk — the only pure translation under lock-relative
-   * controls (behavior-notes §y); forward/strafe may differ.
+   * RAW-SCALE MIGRATION (2026-07-04, research/decomp/movement-hit-decode-2026-07-04.md):
+   * the full run-speed chain is now DERIVED — run start SNAPS actor+0x44 to page+0x2c
+   * (zz_005f578_ chunk_0007.c:5973) and worldDelta = +0x44 × timescale(+0x5f4) ×
+   * tierVelScale(+0x5f8), both ×1.0 at baseline — so ROM world units are 1:1 with the
+   * port's stage geometry and G RED runs 12.0 u/f RAW. The old 22.0 backward-walk trace
+   * anchor could not be reconciled with any code path (no ×1.833 exists) and is retired
+   * as a mis-sample. Fallback constants rescaled so a speed-6 synthetic hits 12.0.
    */
-  GROUND_BASE: 4.0,
-  GROUND_PER_STAT: 3.0,
-  /** Flight horizontal speed is a touch faster than ground. */
+  GROUND_BASE: 2.4,
+  GROUND_PER_STAT: 1.6,
+  /** Flight horizontal speed is a touch faster than ground. TUNED (ROM flight = gravity
+   *  coeff 0, no distinct h-speed constant found). */
   FLY_MULT: 1.15,
   /**
-   * Acceleration toward target velocity (units/frame^2). TUNED-rescaled 4x alongside the
-   * DERIVED ground-speed anchor so spin-up time (frames to reach max) keeps its tuned feel.
+   * Acceleration toward target velocity (units/frame^2). TUNED stand-in for the ROM's
+   * run-start SNAP (speed jumps straight to page+0x2c) — sized to reach a 12 u/f run in
+   * a few frames so it reads as the snap.
    */
-  ACCEL: 4.8,
-  /** Deceleration when no input (units/frame^2). TUNED-rescaled 4x (see ACCEL). */
-  DECEL: 6.4,
+  ACCEL: 2.6,
+  /** Deceleration when no input (units/frame^2). TUNED stand-in for the ROM's ×0.98/frame
+   *  idle decay (chunk_0008.c:383-385), rescaled with the raw migration. */
+  DECEL: 3.5,
   /** Yaw turn rate toward facing target (radians/frame). */
   TURN_RATE: 0.35,
 } as const;
 
 export const JUMP = {
   /**
-   * Initial upward velocity of a jump (units/frame). TUNED — audited 2026-07-01 (s4s), not
-   * findable: no one-time positive-Y-velocity write gated on a "jump" state was isolated; the
-   * borg struct's gameplay Y-velocity field itself isn't confirmed (candidate +0x60 collides
-   * with an unrelated object type in the one decrement pattern found — see s4s).
+   * FALLBACK jump takeoff velocity (units/frame) for ids without a data page. DERIVED raw
+   * scale (2026-07-04): the launch state writes +0x48 = page[+0x48] (FUN_80061f50
+   * chunk_0008.c:329); G RED's page value is 15.0 and world units are 1:1 (see MOVE).
+   * Real borgs read their own page via movementData.ts jumpVelocityForBorgId.
    */
-  VELOCITY: 4.2,
-  /** Gravity pulling Y down (units/frame^2). TUNED — audited 2026-07-01 (s4s), not findable. */
-  GRAVITY: 0.42,
-  /** Terminal fall speed (units/frame). */
-  MAX_FALL: 8.0,
-  /** Hold-jump-in-air boost flight: upward thrust while held (units/frame^2). Flyers only. */
-  BOOST_THRUST: 0.55,
-  /** Max upward speed under boost flight (units/frame). */
-  BOOST_MAX_RISE: 3.0,
+  VELOCITY: 15.0,
+  /** FALLBACK fall gravity (units/frame^2). DERIVED raw scale: the airborne fall slot is
+   *  page+0x6c (G RED -1.0); real borgs read their own via fallGravityForBorgId. */
+  GRAVITY: 1.0,
+  /** Terminal fall speed (units/frame). DERIVED: global FLOAT_804375f0 = -35.0 (airborne
+   *  vertical clamp, chunk_0008.c:3823-3861) — raw scale. */
+  MAX_FALL: 35.0,
+  /** Hold-jump-in-air boost flight: upward thrust while held (units/frame^2). Flyers only.
+   *  TUNED (ROM flight = gravity-coeff-0, no thrust constant exists); rescaled with the
+   *  raw migration to out-pull typical fall gravity. */
+  BOOST_THRUST: 1.3,
+  /** Max upward speed under boost flight (units/frame). TUNED, rescaled with the migration. */
+  BOOST_MAX_RISE: 8.0,
   /** Boost flight drains over time; thrust is gated by remaining fuel (frames of boost). */
   BOOST_FUEL_FRAMES: 90,
   /** Ground Y level (RAM trace: ~10 when grounded). DERIVED. */
@@ -167,11 +173,10 @@ export const DASH = {
    * is a dash/step state. No dash/dodge state was found anywhere in the corpus this pass.
    */
   /**
-   * TUNED-rescaled 4x (2026-07-01) alongside the DERIVED ground-speed anchor in MOVE — a
-   * dash must clearly outpace the measured 22.0 u/f walk. Absolute value still TUNED;
-   * capture explicit dash input on the +0x20 chain to derive it.
+   * TUNED port-ism (no dash state exists in the ROM), rescaled with the 2026-07-04 raw
+   * migration to keep its ~1.65x-over-run-speed feel against the DERIVED 12 u/f run.
    */
-  SPEED: 36.0,
+  SPEED: 20.0,
   /** Dash duration (frames). TUNED — see SPEED note; no dash state found to time. */
   DURATION: 10,
   /** Invincibility frames granted by a dash/step (dodge). TUNED — see SPEED note. */
@@ -316,14 +321,14 @@ export const SHOT = {
  */
 export const KNOCKBACK = {
   /**
-   * TUNED single anchor reconciling the DERIVED ROM velocities (u/f in ROM world scale, with the
-   * ROM's own linear-decel model) to the port's velocity/MOVE.DECEL model. Anchored so the melee
-   * record (strength 6 -> 56 ROM u/f) reproduces the port's previous tuned melee base of 5 u/f
-   * (= MELEE.KNOCKBACK). The RELATIVE magnitudes across records are DERIVED (melee 56 > shot 40 >
-   * charge/special 24); only this one scalar stays TUNED pending the world-scale/decel reconcile
-   * (movement-physics slice). Do not add per-record tuning here — that would re-hide the model.
+   * DERIVED = 1.0 since the 2026-07-04 raw-scale migration (research/decomp/
+   * movement-hit-decode-2026-07-04.md): the port's velocities are ROM world units 1:1, so
+   * the strength-indexed table velocities (melee 56 > shot 40 > charge/special 24 u/f)
+   * apply RAW. The port's MOVE.DECEL stands in for the ROM's knockdown decel model
+   * (h-decel -0.10 / denom 20.0, FLOAT_804374cc/_490 — unported); tune decay THERE, never
+   * this scale, and do not add per-record tuning here.
    */
-  PORT_SCALE: 5 / 56,
+  PORT_SCALE: 1.0,
 } as const;
 
 /**

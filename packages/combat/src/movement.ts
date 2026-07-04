@@ -26,7 +26,7 @@ import {
   type Vec3,
 } from "@gf/physics";
 import { BURST, DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
-import { fallGravityForBorgId, jumpVelocityForBorgId } from "./movementData.js";
+import { fallGravityForBorgId, groundRunSpeedForBorgId, jumpVelocityForBorgId } from "./movementData.js";
 import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
 
@@ -97,9 +97,11 @@ function canMove(b: BorgRuntime): boolean {
   );
 }
 
-/** Ground horizontal speed (units/frame) for this profile. */
+/** Ground horizontal speed (units/frame) for this profile: the DERIVED raw run speed
+ *  (pl####data.bin page+0x2c — run-start states snap actor+0x44 to it, see
+ *  movementData.ts), with the MOVE fallback formula for synthetic ids without a page. */
 export function groundSpeed(p: BorgProfile): number {
-  return MOVE.GROUND_BASE + p.speed * MOVE.GROUND_PER_STAT;
+  return groundRunSpeedForBorgId(p.id) ?? MOVE.GROUND_BASE + p.speed * MOVE.GROUND_PER_STAT;
 }
 
 /**
@@ -182,10 +184,10 @@ export function stepMovement(
     }
   }
 
-  // Gravity (always, even in combat states, so knockback arcs fall). Per-borg DERIVED-ratio
-  // fall gravity (pl####data.bin +0x6c anchored at G RED — movementData.ts): heavies drop
-  // faster, the pl0d/pl0e satellite/air families float (-0.1 in source data). MAX_FALL stays
-  // the global tuned terminal cap (ROM's global -35.0 needs the world-scale reconcile).
+  // Gravity (always, even in combat states, so knockback arcs fall). Per-borg DERIVED raw
+  // fall gravity (pl####data.bin +0x6c — movementData.ts): heavies drop faster, the
+  // pl0d/pl0e satellite/air families float (-0.1 in source data). MAX_FALL is the DERIVED
+  // global terminal clamp (FLOAT_804375f0 = -35.0).
   b.vel.y = Math.max(b.vel.y - fallGravityForBorgId(b.borgId), -JUMP.MAX_FALL);
 
   // --- Integrate ----------------------------------------------------------------------
@@ -230,8 +232,8 @@ function handleJump(b: BorgRuntime, jumpVelocity: number = JUMP.VELOCITY): void 
   b.cooldowns["jumpHeld"] = 1; // mark held this frame; cleared in clearJumpLatch when released
   if (held) return; // only act on the rising edge
 
-  // `jumpVelocity` is the per-borg DERIVED-ratio takeoff speed (pl####data.bin +0x48 anchored
-  // at G RED's 15.0 — movementData.ts); the default keeps legacy/direct callers global-tuned.
+  // `jumpVelocity` is the per-borg DERIVED raw takeoff speed (pl####data.bin +0x48, applied
+  // 1:1 — movementData.ts); the default keeps legacy/direct callers on the global fallback.
   if (b.grounded) {
     b.vel.y = jumpVelocity;
     b.grounded = false;

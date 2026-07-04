@@ -65,6 +65,7 @@ import {
   resolveLiveCommand,
   type ContextualBGates,
 } from "./commandDispatch.js";
+import { shotHitRadiusForBorgId } from "./attackHitData.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
@@ -1733,7 +1734,11 @@ function spawnProjectile(
     // Spawn-time aim-cone gate (FUN_8006c334) — no longer unconditional.
     homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
     life: shotDef.lifetime,
-    hitRadius: shotDef.hitRadius * tier.radius,
+    // DERIVED where present: the ROM's generic shot-child init arms HIT kind 0
+    // (FUN_80099bb4 chunk_0015.c:1263 etc. — movement-hit-decode-2026-07-04.md), so the
+    // borg's kind-0 hit.bin record carries the authored projectile hit volume; its largest
+    // extent/radius replaces the TUNED per-profile hitRadius 1:1 (raw world units).
+    hitRadius: (shotHitRadiusForBorgId(b.borgId) ?? shotDef.hitRadius) * tier.radius,
     // Charged releases (tier>=1) switch to the profile's distinct charged visual family when
     // one is sourced (ShotActionDef.chargedVisualKind, TUNED-visual from the OBSERVED_WIKI
     // "B Charge" move name — the renderer already draws per-visualKind, so no render change

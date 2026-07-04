@@ -68,6 +68,34 @@ DERIVED. NOT yet mapped: maxHSpeed(+0x2c) — its relation to the +0x50 speed st
 the port's profile.speed input) is unresolved (pl0000 has G RED's 12.0 clamp but stat 3), so
 ground speed keeps the stat formula; knockdownLaunch+groundAccel exported as data only.
 
+**B4. RAW-SCALE MOVEMENT MIGRATION + speed chain DERIVED (2026-07-04 second pass).** Full
+decode in research/decomp/movement-hit-decode-2026-07-04.md: run speed IS page+0x2c (run
+start SNAPS actor+0x44 to it), the "speed stat" (+0x50) is only a launch/landing floor, and
+worldDelta = +0x44 × statusTimescale(+0x5f4) × tierVelScale(+0x5f8) with both ×1.0 baseline —
+so ROM units are 1:1 and the 22.0 trace anchor is RETIRED (unreconcilable; mis-sample).
+Port migrated to raw: ground speed = page+0x2c via movementData.ts (G RED 12.0 u/f), jump =
+page+0x48 raw (15.0), fall gravity = |page+0x6c| raw, MAX_FALL = 35.0 (FLOAT_804375f0,
+DERIVED), KNOCKBACK.PORT_SCALE = 1.0 (table velocities apply raw), DASH/ACCEL/DECEL/BOOST
+rescaled as marked TUNED stand-ins. The haste/slow status tables and the param-tier velocity
+table (0x802dd5a0; tier+4 self-buff ×2.366 for 1200f = the "acceleration" archetype) are
+decoded but their WRITERS (special moves) are not yet wired — that's the Acceleration-Ninja
+speed mechanism.
+
+**B5. HIT pipeline decoded end-to-end + first wiring (Slice 3, partial).** zz_008ac80_ fully
+read; melee kinds live per-ANIMATION in the mot event stream (FUN_8004c6b4 reads event
+byte[1]); shot/special kinds come from per-family DOL variant tables indexed by the command
+record's variant byte; 11 literal call sites mapped (generic shot child = kind 0). Extraction
+landed: scripts/gen-attack-hit-tables.mjs → data/attackHitTables.json (208/208 borgs, 4434
+remap entries, 4258 records: shape/bone/damage-index/frame-window/offset/extent/radius) +
+runtime adapter attackHitData.ts. First consumer: B-shot projectiles use the borg's kind-0
+hit volume as hitRadius (plausibility-gated ≤150 — kind 0 is also some deployables' slot).
+Damage-table bindings SOLVED: every family binds its own 0x18-stride table at actor+0x27c
+(112 tables, G RED = 36 records at DAT_80365ec0; DAT_802d46e0 is only family 01's) —
+scanners scripts/scan-damage-table-bindings.mjs / scan-damage-table-extents.mjs. REMAINING:
+per-borg family damage-record extractor (recipe in the decode note) → per-hit record
+selection; mot event-track extraction → melee kind/frame wiring; per-family variant tables →
+shot kind selection.
+
 **C. Stale audit detectors fixed:** `audit-real-asset-coverage.mjs` claimed STIH
 bounds/triangles were "not wired" — they moved into packages/assets + battleBootstrap in the
 app-flow refactor and ARE fully wired (parse → StageAssets → BattleConfig → walls/ceilings/

@@ -214,8 +214,11 @@ function testBurstSpeedMultiplierAffectsMovement(): void {
     stepMovement(burst, profile, input, { lockTargetPos: null, bounds, collision: null });
   }
 
-  assertEqual(Math.hypot(normal.vel.x, normal.vel.z), 22, "speed-6 baseline reaches 22 u/f");
-  assertEqual(Math.hypot(burst.vel.x, burst.vel.z), 33, "active burst applies x1.5 movement speed");
+  // 2026-07-04 raw migration: pl0615's DERIVED run speed is its page+0x2c = 12.0 u/f raw
+  // (movementData.ts groundRunSpeedForBorgId; the old 22.0 anchor is retired — see
+  // research/decomp/movement-hit-decode-2026-07-04.md §1). Burst x1.5 is unchanged.
+  assertEqual(Math.hypot(normal.vel.x, normal.vel.z), 12, "pl0615 baseline reaches its DERIVED 12 u/f run speed");
+  assertEqual(Math.hypot(burst.vel.x, burst.vel.z), 18, "active burst applies x1.5 movement speed");
 }
 
 function testBattleStepActivatesAndDrainsBurst(): void {
@@ -266,7 +269,8 @@ function testBattleStepActivatesAndDrainsBurst(): void {
   assertEqual(player.burstPaired, false, "single-human battle activation is solo, not paired");
   assertEqual(meter.meter, BURST.METER_MAX - BURST.DRAIN_PER_FRAME * 10, "Battle.step drains active burst each frame");
   assertEqual(meter.charged, false, "Battle.step clears charged during active burst");
-  assertEqual(Math.hypot(player.vel.x, player.vel.z), 33, "Battle.step movement sees active burst speed");
+  // 12 u/f DERIVED run speed (raw migration, see testBurstSpeedMultiplierAffectsMovement) x1.5.
+  assertEqual(Math.hypot(player.vel.x, player.vel.z), 18, "Battle.step movement sees active burst speed");
 }
 
 // --- Per-player burst METER tests (Q4 RESOLVED 2026-07-03 — open-questions Q4 lines 51-79,

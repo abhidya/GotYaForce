@@ -1,41 +1,41 @@
-// Per-borg movement physics adapter (scale-reconciled) — behavior-notes (bc).
+// Per-borg movement physics adapter — RAW ROM scale (2026-07-04 migration).
 //
 // Source: data/movementPhysics.json (scripts/gen-movement-physics.mjs), the per-borg
-// pl####data.bin parameter page (DERIVED — big-endian floats at documented offsets, loaded to
-// actor+0x4ac in the ROM). Raw ROM values CANNOT be swapped into the port 1:1: the port's
-// world/velocity model is anchored to the DERIVED 22.0 u/f G RED ground trace with its own
-// TUNED accel/decel/gravity, and (bc) shows the raw values live in a different scale
-// (e.g. global max-fall -35.0 vs the port's 8.0).
+// pl####data.bin parameter page (DERIVED — big-endian floats, loaded to actor+0x4ac).
+// Evidence for the runtime formulas: research/decomp/movement-hit-decode-2026-07-04.md —
+// the full ground-speed chain is DERIVED:
+//   worldDelta/frame = speed(+0x44) × statusTimescale(+0x5f4) × tierVelScale(+0x5f8)
+// with BOTH multipliers ×1.0 at baseline, so ROM world units are 1:1 with the port's stage
+// geometry and page values apply RAW (the old 22.0 trace anchor and the ratio-anchored v1 of
+// this adapter are retired — no code path produces 22.0; the trace was a mis-sample).
 //
-// Reconciliation model: RATIO-ANCHORED at pl0615 (G RED) — the one borg with a live movement
-// trace. Each per-borg value is applied as (borgValue / gRedValue) × the port's tuned G RED
-// constant, so G RED's playable feel is bit-identical to before while every other borg's
-// RELATIVE physics (jump height, fall weight) becomes DERIVED data instead of one global
-// profile. Wired fields:
-//   - jumpImpulse (+0x48, G RED 15.0)  → scales JUMP.VELOCITY
-//   - gravityFall (+0x6c, G RED -1.0)  → scales JUMP.GRAVITY (the airborne fall slot; the
-//     pl0d/pl0e satellite/air families carry -0.1 → genuinely floaty, source behavior)
+// Wired fields (RAW):
+//   - maxHSpeed (+0x2c): THE ground run speed — run-start states SNAP actor+0x44 to it
+//     (zz_005f578_ chunk_0007.c:5973). The guide "speed stat" (+0x50 minTurnSpeed) is only
+//     a launch/landing floor, NOT run speed.
+//   - jumpImpulse (+0x48): the launch state writes +0x48 = page[+0x48] (chunk_0008.c:329).
+//   - gravityFall (+0x6c): the airborne fall gravity slot (pl0d/pl0e satellite families
+//     carry -0.1 → genuinely floaty; applied as-is).
 // NOT yet wired (exported as data only):
-//   - maxHSpeed (+0x2c): the ROM's h-speed CLAMP, whose relation to the guide speed stat
-//     (+0x50 minTurnSpeed — already the port's per-borg `profile.speed` input) is unresolved:
-//     pl0000 carries the same 12.0 clamp as G RED but speed stat 3, so mapping ground speed
-//     from the clamp would flatten stat differences the port already models. Needs the
-//     runtime speed chain read before it can replace groundSpeed().
-//   - knockdownLaunch* (+0x58/+0x5c): for the future knockback launch path.
-//   - groundAccel (+0x44): 0.0 means "snap-to-min" in the ROM (semantics undecoded); the
-//     port keeps its global MOVE.ACCEL approach model.
+//   - minTurnSpeed launch-floor / 0.5× landing-seed semantics (FLOAT_80437460=0.5);
+//   - the +0x74/+0x78/+0x7c accel-clamp triplet (actor+0x678, only active while +0x4c>0);
+//   - status timescale (+0x5f4: haste {1.25,1.5,1.75} / slow {0.7,0.4,0.2} / freeze 0.03)
+//     and the param-tier velocity table (0x802dd5a0: tier 16=×1.0 … 20=×2.366 — the
+//     "acceleration"-style self-buff is +4 tiers for 1200f) — the tier/status WRITERS are
+//     special-move wiring, a separate slice; BorgRuntime.paramTier already carries state.
+//   - knockdownLaunch* (+0x58/+0x5c) for the knockback launch path.
 
 import movementPhysicsData from "./data/movementPhysics.json" with { type: "json" };
 import { JUMP } from "./constants.js";
 
 export interface BorgMovementPhysics {
-  /** +0x2c — max horizontal speed clamp (ROM scale). */
+  /** +0x2c — ground RUN speed (run start snaps actor+0x44 to this; RAW u/f). */
   maxHSpeed: number;
-  /** +0x44 — ground-accel magnitude; 0.0 = snap-to-min (ROM semantics undecoded). */
+  /** +0x44 — ground-accel magnitude; 0.0 leaves speed wherever the state entry snapped it. */
   groundAccel: number;
-  /** +0x48 — jump / vertical impulse (ROM scale; G RED 15.0). */
+  /** +0x48 — jump / vertical impulse (RAW u/f; G RED 15.0). */
   jumpImpulse: number;
-  /** +0x50 — min/turn speed; equals the guide "speed stat" feeding profile.speed. */
+  /** +0x50 — min/turn speed = the guide "speed stat"; launch floor + 0.5× landing seed. */
   minTurnSpeed: number;
   /** +0x58 — knockdown launch h-speed (future launch-path input). */
   knockdownLaunchHSpeed: number;
@@ -43,7 +43,7 @@ export interface BorgMovementPhysics {
   knockdownLaunchAccel: number;
   /** +0x68 — gravity slot A (ground/turn states). */
   gravityGround: number;
-  /** +0x6c — gravity slot B: the true airborne fall gravity (G RED -1.0). */
+  /** +0x6c — gravity slot B: the true airborne fall gravity (RAW u/f²; G RED -1.0). */
   gravityFall: number;
   /** +0x70 — gravity slot C. */
   gravityC: number;
@@ -56,33 +56,27 @@ type MovementPhysicsFile = {
 
 const DATA = movementPhysicsData as MovementPhysicsFile;
 
-/** The ratio anchor: G RED, the only borg with a live-trace-calibrated port profile. */
-const ANCHOR_ID = "pl0615";
-const ANCHOR = DATA.borgs[ANCHOR_ID] ?? { jumpImpulse: 15, gravityFall: -1 };
-
 /** Raw DERIVED movement page for a borg, or null for ids without a pl####data.bin. */
 export function movementPhysicsForBorgId(id: string): BorgMovementPhysics | null {
   return DATA.borgs[id.toLowerCase()] ?? null;
 }
 
-/**
- * Port-scale jump takeoff velocity for a borg: JUMP.VELOCITY × (jumpImpulse / G RED's 15.0).
- * DERIVED ratio × TUNED anchor; ids without data keep the global tuned value.
- */
-export function jumpVelocityForBorgId(id: string): number {
+/** DERIVED ground run speed (RAW page+0x2c), or null for ids without a data page —
+ *  callers fall back to the MOVE fallback formula for synthetic borgs. */
+export function groundRunSpeedForBorgId(id: string): number | null {
   const data = movementPhysicsForBorgId(id);
-  if (!data || !(ANCHOR.jumpImpulse > 0) || !(data.jumpImpulse > 0)) return JUMP.VELOCITY;
-  return JUMP.VELOCITY * (data.jumpImpulse / ANCHOR.jumpImpulse);
+  return data && data.maxHSpeed > 0 ? data.maxHSpeed : null;
 }
 
-/**
- * Port-scale fall gravity for a borg: JUMP.GRAVITY × (|gravityFall| / G RED's 1.0).
- * The pl0d/pl0e satellite/air families carry -0.1 (≈float) — source behavior, applied as-is.
- */
+/** DERIVED jump takeoff velocity (RAW page+0x48); global fallback for ids without data. */
+export function jumpVelocityForBorgId(id: string): number {
+  const data = movementPhysicsForBorgId(id);
+  return data && data.jumpImpulse > 0 ? data.jumpImpulse : JUMP.VELOCITY;
+}
+
+/** DERIVED fall gravity magnitude (RAW |page+0x6c|); global fallback for ids without data. */
 export function fallGravityForBorgId(id: string): number {
   const data = movementPhysicsForBorgId(id);
-  const anchorMag = Math.abs(ANCHOR.gravityFall);
   const mag = data ? Math.abs(data.gravityFall) : 0;
-  if (!data || !(anchorMag > 0) || !(mag > 0)) return JUMP.GRAVITY;
-  return JUMP.GRAVITY * (mag / anchorMag);
+  return mag > 0 ? mag : JUMP.GRAVITY;
 }
