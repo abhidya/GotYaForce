@@ -82,13 +82,13 @@ terminated by frame == -1, linear interpolation between keys.
 
 ### 1d. Honest unknowns
 
-1. **texId → pixel cell.** All variants draw via `zz_0006fb4_(..., DAT_803bb374, jobjSlot,
-   texId, ...)`; `DAT_803bb374 = zz_0197a0c_(1)` (chunk_0005.c:155) is the shared particle
-   bank. texIds reach 146 while ptcl00.txg holds only 8 images, so texId indexes the
-   **particle-definition table (ptcl00.ptl entries)**, each of which references a txg cell +
-   blend/animation params. ptcl00.ptl/.ref remain unparsed → every texId→cell/color statement
-   is unproven. (Suggestive but NOT proof: variant 1's texIds 2/3 and ptcl00.txg cell #2 being
-   the visually-identified "hit spark ember" may be a 1:1 coincidence of numbering.)
+1. **texId → pixel cell.** ~~unproven~~ **RESOLVED (later on 2026-07-04) — and the guess
+   here was WRONG**: texId does NOT index ptcl00.ptl. `zz_0006fb4_` resolves texId as an
+   index into the scene_data **JOBJDesc array of efct00_mdl.arc** (157 entries; bank buffer
+   = efct.pzz member 1), and the entries are **untextured vertex-colored GX meshes** — there
+   is no pixel cell at all. Full chain, entry format, per-texId validation (21, 2/3,
+   144/145/146, 53/54) and port wiring: research/decomp/ptl-format-notes-2026-07-04.md.
+   (The texId 2/3 ↔ txg cell #2 numbering similarity was indeed a coincidence.)
 2. **subVariant byte (b2, ids 2..7).** Stored at effect+0x12 (`zz_001959c_`,
    chunk_0002.c:1534) but no reader of that field was located in the effect family's
    init/update/draw handlers — plausibly consumed inside the shared draw path for
