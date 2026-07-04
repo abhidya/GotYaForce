@@ -687,6 +687,342 @@ for (const table of [...tables.values()].sort((a, b) => a.rowBase - b.rowBase)) 
   };
 }
 
+// ---------------------------------------------- fire-fn shot-id resolution
+// For every spawner call site (the FIRE FN layer), prove the constant shot
+// id/variant it passes, so each table row gains provenance: which fire fn
+// (and, where a call-site borg-id guard exists, which borg) fires that row.
+// Ground truth chain (G RED): zz_018dcb0_ guards `*(short*)(actor+1000) ==
+// 0x615` around `zz_00c3be0_(actor, 0x2b)` -> registry 0x80303138 row 0x2b ->
+// kind 0. Conservative: only constants provable from the decompiled corpus
+// (literals, unique-constant local assignments, single-param affine spawner
+// transforms). Everything else lands in unresolvedFireSites with a reason.
+
+const chunkByFile = new Map(chunks.map((c) => [c.file, c]));
+
+function siteContext(chunkLine) {
+  const idx = chunkLine.lastIndexOf(":");
+  const file = chunkLine.slice(0, idx);
+  const lineIdx = parseInt(chunkLine.slice(idx + 1), 10) - 1;
+  const chunk = chunkByFile.get(file);
+  if (!chunk) return null;
+  const mk = fnAt(chunk, lineIdx);
+  if (!mk) return null;
+  const mi = chunk.markers.indexOf(mk);
+  const endLine = mi + 1 < chunk.markers.length ? chunk.markers[mi + 1].line : chunk.lines.length;
+  let offset = 0;
+  for (let i = mk.line; i < lineIdx; i += 1) offset += chunk.lines[i].length + 1;
+  return { body: chunk.lines.slice(mk.line, endLine).join("\n"), offset, fnName: mk.name };
+}
+
+function parseConst(text) {
+  const t = text.trim();
+  let m;
+  if ((m = t.match(/^0x[0-9a-f]+$/i))) return parseInt(t, 16);
+  if ((m = t.match(/^\d+$/))) return parseInt(t, 10);
+  if ((m = t.match(/^'\\x([0-9a-fA-F]{1,2})'$/))) return parseInt(m[1], 16);
+  if ((m = t.match(/^'([ -~])'$/))) return m[1].charCodeAt(0);
+  return null;
+}
+
+function stripOuterParens(text) {
+  let t = text.trim();
+  while (t.startsWith("(") && t.endsWith(")")) {
+    let depth = 0;
+    let wraps = true;
+    for (let i = 0; i < t.length; i += 1) {
+      if (t[i] === "(") depth += 1;
+      else if (t[i] === ")") {
+        depth -= 1;
+        if (depth === 0 && i < t.length - 1) {
+          wraps = false;
+          break;
+        }
+      }
+    }
+    if (!wraps) break;
+    t = t.slice(1, -1).trim();
+  }
+  return t;
+}
+
+const CONST_RHS = /(0x[0-9a-f]+|\d+|'\\x[0-9a-fA-F]{1,2}'|'[ -~]')$/;
+
+// Resolve a call-site argument expression to the set of constant values it can
+// provably take. null = not provable.
+function resolveArgValues(body, expr, depth = 3) {
+  if (depth < 0) return null;
+  const e = stripOuterParens(stripCasts(expr));
+  const c = parseConst(e);
+  if (c !== null) return [c];
+  let m;
+  if ((m = e.match(new RegExp(`^(.+) (\\+|-|>>|<<|&|\\*) ${CONST_RHS.source}`)))) {
+    const inner = resolveArgValues(body, m[1], depth - 1);
+    const k = parseConst(m[3]);
+    if (inner === null || k === null) return null;
+    const apply = { "+": (v) => v + k, "-": (v) => v - k, ">>": (v) => v >> k, "<<": (v) => v << k, "&": (v) => v & k, "*": (v) => v * k }[m[2]];
+    return [...new Set(inner.map(apply))];
+  }
+  if (/^[A-Za-z_]\w*$/.test(e)) {
+    // every assignment to the variable must resolve to a constant; the union of
+    // those constants is the provable value set (any of them can flow here).
+    const values = new Set();
+    let any = false;
+    for (const am of body.matchAll(new RegExp(`\\b${e} = ([^;]+);`, "g"))) {
+      any = true;
+      const inner = resolveArgValues(body, am[1], depth - 1);
+      if (inner === null) return null;
+      for (const v of inner) values.add(v);
+    }
+    return any ? [...values] : null;
+  }
+  return null;
+}
+
+// Spawner-side transform: how the spawner's variant-byte write maps its own
+// parameter to the stored variant. Only single-param affine forms are proven.
+function parseSpawnerTransform(writeExpr) {
+  if (writeExpr === undefined) return null;
+  const e = stripOuterParens(stripCasts(writeExpr));
+  const lit = parseConst(e);
+  if (lit !== null) return { literal: lit };
+  let m;
+  if ((m = e.match(/^param_(\d+)$/))) return { paramIndex: parseInt(m[1], 10) - 1, apply: (v) => v };
+  if ((m = e.match(new RegExp(`^param_(\\d+) (\\+|-|>>|<<|&|\\*) ${CONST_RHS.source}`)))) {
+    const k = parseConst(m[3]);
+    if (k === null) return null;
+    const op = { "+": (v) => v + k, "-": (v) => v - k, ">>": (v) => v >> k, "<<": (v) => v << k, "&": (v) => v & k, "*": (v) => v * k }[m[2]];
+    return { paramIndex: parseInt(m[1], 10) - 1, apply: op };
+  }
+  return null;
+}
+
+// Brace-scope analysis: which borg-id equality guards enclose a char offset.
+function computeBlocks(body) {
+  const blocks = [];
+  const stack = [];
+  for (let i = 0; i < body.length; i += 1) {
+    if (body[i] === "{") stack.push(i);
+    else if (body[i] === "}") {
+      const start = stack.pop();
+      if (start !== undefined) blocks.push({ start, end: i });
+    }
+  }
+  for (const b of blocks) {
+    const from = Math.max(
+      body.lastIndexOf(";", b.start),
+      body.lastIndexOf("}", b.start - 1),
+      body.lastIndexOf("{", b.start - 1),
+    );
+    b.header = body.slice(from + 1, b.start);
+  }
+  return blocks;
+}
+
+function borgGuardsAt(body, blocks, offset) {
+  const borgVars = new Set();
+  for (const m of body.matchAll(/(\w+) = \*\(short \*\)\(\w+ \+ 1000\);/g)) borgVars.add(m[1]);
+  const ids = new Set();
+  for (const b of blocks) {
+    if (!(b.start < offset && offset < b.end)) continue;
+    if (!/\bif\s*\(/.test(b.header)) continue;
+    for (const m of b.header.matchAll(/(\*\(short \*\)\(\w+ \+ 1000\)|[A-Za-z_]\w*) == (0x[0-9a-f]+|\d+)/g)) {
+      const lhs = m[1];
+      if (lhs.includes("+ 1000)") || borgVars.has(lhs)) {
+        ids.add(m[2].startsWith("0x") ? parseInt(m[2], 16) : parseInt(m[2], 10));
+      }
+    }
+  }
+  return [...ids];
+}
+
+const guardCache = new Map(); // fnName -> {body, blocks}
+function callerAnalysis(chunkLine) {
+  const ctx = siteContext(chunkLine);
+  if (!ctx) return null;
+  if (!guardCache.has(ctx.fnName)) {
+    guardCache.set(ctx.fnName, { body: ctx.body, blocks: computeBlocks(ctx.body) });
+  }
+  const cached = guardCache.get(ctx.fnName);
+  return { ...cached, offset: ctx.offset, fnName: ctx.fnName };
+}
+
+function classifyUnresolved(arg) {
+  if (arg === undefined || arg === null) return "call-site argument unavailable (parse fail)";
+  if (/&DAT_[0-9a-f]{8}/.test(arg)) return "shot id from DOL sub-table lookup (index not proven)";
+  if (/\*\(/.test(arg)) return "shot id from runtime field";
+  return "variable without provable constant assignment chain";
+}
+
+const fireSiteResolutions = [];
+const unresolvedFireSites = [];
+const seenResolutions = new Set();
+const seenUnresolved = new Set();
+
+for (const [tableAddr, table] of Object.entries(outTables)) {
+  for (const consumer of table.consumers) {
+    const childOff = consumer.variantSource.childOffset;
+    const mask = consumer.variantSource.mask ? parseInt(consumer.variantSource.mask, 16) : null;
+    for (const spawner of consumer.spawners) {
+      const transform = parseSpawnerTransform(spawner.childWrites[childOff]);
+      if (transform === null) {
+        const key = `${tableAddr}|${spawner.fn}|no-transform`;
+        if (!seenUnresolved.has(key)) {
+          seenUnresolved.add(key);
+          unresolvedFireSites.push({
+            table: tableAddr,
+            spawner: spawner.fn,
+            chunkLine: spawner.chunkLine,
+            reason: `spawner variant write at ${childOff} not a provable single-param form: ${spawner.childWrites[childOff] ?? "(missing)"}`,
+            callSites: spawner.callSites.length,
+          });
+        }
+        continue;
+      }
+      for (const call of spawner.callSites) {
+        const siteKey = `${tableAddr}|${call.caller}|${call.chunkLine}`;
+        let values = null;
+        let rawArg;
+        if (transform.literal !== undefined) {
+          values = [transform.literal];
+        } else {
+          rawArg = call.args?.[transform.paramIndex];
+          const analysis = callerAnalysis(call.chunkLine);
+          const argValues =
+            rawArg !== undefined && analysis ? resolveArgValues(analysis.body, rawArg) : null;
+          if (argValues !== null) values = argValues.map((v) => transform.apply(v));
+        }
+        if (values === null) {
+          if (!seenUnresolved.has(siteKey)) {
+            seenUnresolved.add(siteKey);
+            unresolvedFireSites.push({
+              table: tableAddr,
+              fireFn: call.caller,
+              chunkLine: call.chunkLine,
+              spawner: spawner.fn,
+              arg: rawArg ?? null,
+              reason: classifyUnresolved(rawArg),
+            });
+          }
+          continue;
+        }
+        const analysis = callerAnalysis(call.chunkLine);
+        const guards = analysis ? borgGuardsAt(analysis.body, analysis.blocks, analysis.offset) : [];
+        for (const rawValue of values) {
+          const variant = mask !== null ? rawValue & mask : rawValue;
+          const resKey = `${tableAddr}|${variant}|${call.caller}|${call.chunkLine}`;
+          if (seenResolutions.has(resKey)) continue;
+          seenResolutions.add(resKey);
+          const row = variant >= 0 && variant < table.rows.length ? table.rows[variant] : null;
+          const resolution = {
+            table: tableAddr,
+            variant,
+            kind: row ? row.kind : null,
+            inExtractedRows: row !== null,
+            fireFn: call.caller,
+            chunkLine: call.chunkLine,
+            viaSpawner: spawner.fn,
+            ...(transform.literal !== undefined
+              ? { evidence: `spawner writes literal variant ${transform.literal}` }
+              : { evidence: `arg ${JSON.stringify(rawArg)} -> ${rawValue}` }),
+            borgIds: guards.map((b) => `0x${b.toString(16)}`),
+            borgEvidence:
+              guards.length > 0
+                ? "call-site borg-id guard"
+                : call.callerBorgIdCompares.length > 0
+                  ? "caller-wide borg-id compares (unscoped)"
+                  : "none",
+            ...(guards.length === 0 && call.callerBorgIdCompares.length > 0
+              ? { callerBorgIdCompares: call.callerBorgIdCompares }
+              : {}),
+          };
+          fireSiteResolutions.push(resolution);
+          if (row) {
+            if (!row.firedBy) row.firedBy = [];
+            if (!row.firedBy.some((f) => f.fn === resolution.fireFn && f.chunkLine === resolution.chunkLine)) {
+              row.firedBy.push({
+                fn: resolution.fireFn,
+                chunkLine: resolution.chunkLine,
+                ...(resolution.borgIds.length > 0 ? { borgIds: resolution.borgIds } : {}),
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Guarded borg -> shot kind map (only call-site-scoped guards are attributed;
+// caller-wide compares stay evidence-only). Joined against the borg's own
+// hit.bin remap (attackHitTables.json) to confirm the kind actually exists.
+const attackHitTablesPath = path.join(repoRoot, "packages/combat/src/data/attackHitTables.json");
+const attackHitTables = fs.existsSync(attackHitTablesPath)
+  ? JSON.parse(fs.readFileSync(attackHitTablesPath, "utf8"))
+  : null;
+
+const borgShotKinds = {};
+for (const res of fireSiteResolutions) {
+  if (res.borgEvidence !== "call-site borg-id guard" || res.kind === null) continue;
+  for (const borgHex of res.borgIds) {
+    const plId = `pl${parseInt(borgHex, 16).toString(16).padStart(4, "0")}`;
+    const remapKinds = attackHitTables?.borgs?.[plId]?.kinds ?? null;
+    const entry = {
+      kind: res.kind,
+      table: res.table,
+      id: res.variant,
+      fireFn: res.fireFn,
+      chunkLine: res.chunkLine,
+      ...(remapKinds !== null
+        ? { remapHasKind: res.kind >= 0 && Object.prototype.hasOwnProperty.call(remapKinds, String(res.kind)) }
+        : {}),
+    };
+    if (!borgShotKinds[borgHex]) borgShotKinds[borgHex] = [];
+    if (!borgShotKinds[borgHex].some((e) => e.table === entry.table && e.id === entry.id && e.fireFn === entry.fireFn)) {
+      borgShotKinds[borgHex].push(entry);
+    }
+  }
+}
+
+const rowsTotal = Object.values(outTables).reduce((n, t) => n + t.rows.length, 0);
+const rowsWithProvenance = Object.values(outTables).reduce(
+  (n, t) => n + t.rows.filter((r) => r.firedBy && r.firedBy.length > 0).length,
+  0,
+);
+const rowsWithProvenanceKind0 = Object.values(outTables).reduce(
+  (n, t) => n + t.rows.filter((r) => r.firedBy && r.firedBy.length > 0 && r.kind === 0).length,
+  0,
+);
+const kind0Rows = Object.values(outTables).reduce(
+  (n, t) => n + t.rows.filter((r) => r.kind === 0).length,
+  0,
+);
+const joinChecked = Object.values(borgShotKinds).flat().filter((e) => e.remapHasKind !== undefined);
+const joinOk = joinChecked.filter((e) => e.remapHasKind).length;
+
+// ---------------------------------------------------- G RED ground truth gate
+// The proven end-to-end chain must survive every regeneration: G RED (0x615)
+// fire fn zz_018dcb0_ -> registry 0x80303138 id 0x2b -> kind 0 (all 5 of his
+// shot variants converge on zz_018dcb0_ — movement-hit-decode-2026-07-04.md §2).
+{
+  const registry = outTables["0x80303138"];
+  if (!registry) fail("G RED gate: global shot registry table 0x80303138 missing");
+  const row = registry.rows[0x2b];
+  if (!row || row.kind !== 0) {
+    fail(`G RED gate: registry row 0x2b kind must be 0, got ${row ? row.kind : "missing"}`);
+  }
+  const gred = fireSiteResolutions.find(
+    (r) =>
+      r.table === "0x80303138" &&
+      r.variant === 0x2b &&
+      r.fireFn === "zz_018dcb0_" &&
+      r.borgIds.includes("0x615") &&
+      r.borgEvidence === "call-site borg-id guard",
+  );
+  if (!gred) fail("G RED gate: zz_018dcb0_ must resolve id 0x2b under a 0x615 call-site guard");
+  const mapped = (borgShotKinds["0x615"] ?? []).find((e) => e.id === 0x2b && e.kind === 0);
+  if (!mapped) fail("G RED gate: borgShotKinds[0x615] must include id 0x2b -> kind 0");
+}
+
 // ------------------------------------------------------- excluded site report
 const excluded = sites
   .filter((s) => s.shape !== "table")
@@ -716,6 +1052,8 @@ const output = {
         "init fn addr found in a PTR_ state-dispatch table in the DOL; dispatcher fn (indexes it by child+0x18) is stored at child+0xc by the spawner (fire fn), which writes the variant byte; call sites of the spawner name the firing borg module",
       rowCount:
         "bounded by next corpus-referenced DOL symbol at/after rowBase+stride (row-0 field symbols live inside the first row), refined by max literal variant at spawner call sites; kind semantics: negative kind = no hitbox (spawn skipped)",
+      fireFnResolution:
+        "each spawner call site (fire fn) is constant-folded to the shot id/variant it passes (literals, unique-constant local assignments, single-param affine spawner transforms only); rows gain firedBy provenance; a call-site borg-id guard (`*(short*)(actor+1000) == id` scoped by brace analysis) attributes the row's kind to a borg in borgShotKinds, joined vs the borg's hit.bin remap (attackHitTables.json). Ground truth gate: G RED 0x615 -> zz_018dcb0_ -> registry 0x80303138 id 0x2b -> kind 0 (script hard-fails if broken). Non-provable sites are listed in unresolvedFireSites with reasons.",
     },
     counts: {
       totalCallSites: sites.length,
@@ -724,9 +1062,22 @@ const output = {
       consumersWithResolvedSpawner: spawnersResolved,
       consumersTotal,
       excludedSites: excluded.length,
+      rowsTotal,
+      kind0Rows,
+      rowsWithFireFnProvenance: rowsWithProvenance,
+      rowsWithFireFnProvenanceKind0: rowsWithProvenanceKind0,
+      rowsWithFireFnProvenanceNonZeroKind: rowsWithProvenance - rowsWithProvenanceKind0,
+      fireSitesResolved: fireSiteResolutions.length,
+      fireSitesUnresolved: unresolvedFireSites.length,
+      borgsWithGuardedShotKinds: Object.keys(borgShotKinds).length,
+      guardedShotKindsJoinOk: joinOk,
+      guardedShotKindsJoinChecked: joinChecked.length,
     },
   },
   tables: outTables,
+  borgShotKinds,
+  fireSiteResolutions,
+  unresolvedFireSites,
   excludedSites: excluded,
 };
 
@@ -736,4 +1087,11 @@ console.log(
   `wrote ${path.relative(repoRoot, outPath)} (${Object.keys(outTables).length} tables, ` +
     `${tableSites.length} static sites, ${spawnersResolved}/${consumersTotal} spawner-linked, ` +
     `${excluded.length} excluded)`,
+);
+console.log(
+  `fire-fn provenance: ${rowsWithProvenance}/${rowsTotal} rows resolved ` +
+    `(${rowsWithProvenanceKind0} kind-0, ${rowsWithProvenance - rowsWithProvenanceKind0} non-zero; ` +
+    `kind-0 rows total ${kind0Rows}); ${fireSiteResolutions.length} sites resolved, ` +
+    `${unresolvedFireSites.length} unresolved; borgShotKinds: ${Object.keys(borgShotKinds).length} borgs ` +
+    `(remap join ${joinOk}/${joinChecked.length}); G RED 0x615 -> id 0x2b -> kind 0 gate PASSED`,
 );

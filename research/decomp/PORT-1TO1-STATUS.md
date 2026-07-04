@@ -118,7 +118,21 @@ shot kind selection.
   end-to-end: all 5 variants converge on zz_018dcb0_ → global registry id 0x2b → kind 0 —
   the port's kind-0 heuristic is EXACT for G RED. General wiring needs each fire-fn's shot
   id read (only 277/662 rows are kind 0); doc corrections: chunk_0036:2328 + chunk_0039:2358
-  are static, not dynamic.
+  are static, not dynamic. **FIRE-FN SHOT-ID RESOLUTION LANDED (2026-07-04 follow-up)**:
+  the generator now constant-folds every spawner call site (literal ids, unique-constant
+  local assignments like `uVar4 = 0x27|0x29` unions, single-param affine spawner transforms
+  like `+0x11 = param_2 >> 1`) and scopes borg-id guards (`*(short*)(actor+1000) == id`)
+  by brace analysis — **417/662 rows now carry proven fire-fn provenance** (188 kind-0 +
+  229 non-zero-kind; was 277 heuristic-only), 498 call sites resolved / 41 honestly
+  unresolved (reasons: 15 runtime-field ids, 14 non-constant variables, 9 DOL sub-table
+  lookups with unproven index, 3 non-affine spawner writes). New JSON sections:
+  `fireSiteResolutions`, `unresolvedFireSites`, per-row `firedBy`, and `borgShotKinds` —
+  **130 borgs with call-site-guarded borg→kind attributions, all 267 join their own
+  hit.bin remap (attackHitTables.json) cleanly (267/267)**. G RED ground truth is a
+  hard-fail gate in the script (0x615 → zz_018dcb0_ → id 0x2b → kind 0). Spot-verified
+  vs corpus: zz_0070558_ borg-3 guard variants 0/2; zz_0166bbc_ uVar4 union ids 39-42.
+  Runtime wiring of non-zero kinds (replace the kind-0-only lookup in attackHitData.ts
+  with borgShotKinds) is the follow-up pass — data-only this pass.
 - **Slice 6 title/desk intro LANDED**: TitleIntro.ts mounts the real tl00 scene + G-Red
   playing the recovered desk sequence (anim ids 0,1,6,3,4,7 = g0 slots idle/move/jump_takeoff/
   dash_back/dash_left/jump_land), press-start → menu (set_global_menu_mode(9) model); slot-1
