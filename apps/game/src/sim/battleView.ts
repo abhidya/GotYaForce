@@ -32,6 +32,12 @@ export interface BattleActorView {
   /** Attacker team of that hit (the ROM's variant-1 hit burst picks its particle texture by
    *  the ATTACKER's player index — FUN_80019a14, chunk_0002.c:1750-1758). */
   lastHitAttackerTeam: BorgRuntime["lastHitAttackerTeam"];
+  /** Slow-on-hit s16 timer (ROM +0x710, 900f seed — @gf/combat types.ts). While > 0 the
+   *  renderer shows the DERIVED zz_013f300_(t,0) status aura (blue pulsing clock), exactly
+   *  the window the ROM's FX object lives for (FUN_8013f548 dies when the timer hits 0). */
+  slowHitTimer: number;
+  /** Haste-on-hit s16 timer (ROM +0x712) — zz_013f300_(t,1) aura (orange pulsing clock). */
+  hasteHitTimer: number;
 }
 
 export function battleActorView(borg: BorgRuntime): BattleActorView {
@@ -54,5 +60,7 @@ export function battleActorView(borg: BorgRuntime): BattleActorView {
     meleeSounds: borg.meleeSounds,
     lastHitImpactEffectId: borg.lastHitImpactEffectId,
     lastHitAttackerTeam: borg.lastHitAttackerTeam,
+    slowHitTimer: borg.slowHitTimer ?? 0,
+    hasteHitTimer: borg.hasteHitTimer ?? 0,
   };
 }

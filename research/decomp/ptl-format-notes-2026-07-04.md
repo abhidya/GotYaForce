@@ -138,6 +138,9 @@ research/asset-inventory/ptcl00-cell-map.md for the updated role of the txg cell
 `scripts/selfcheck-1p-challenge.mjs` ✓, `scripts/selfcheck-challenge-stages.mjs` ✓,
 generator self-asserts (§1e) ✓.
 
-**Next steps (if ever needed):** decode the matAnim AOBJ color tracks (per-entry tinting
-over life); resolve the other zz_0006fb4_ call sites' texIds (projectiles, trails,
-status FX) onto bank entries; locate the ptcl00.ptl loader to decode the emitter bank.
+**Next steps (if ever needed):** ~~decode the matAnim AOBJ color tracks~~ ~~resolve the
+other zz_0006fb4_ call sites' texIds (projectiles, trails, status FX)~~ — BOTH DONE later
+on 2026-07-04, see research/decomp/efct-consumers-decode-2026-07-04.md (muzzle/launch FX
+family zz_00aedc0_, projectile visual rows FUN_8007dd84, slow/haste status clock
+zz_013f300_, matAnim extraction + wiring). Remaining: locate the ptcl00.ptl loader to
+decode the emitter bank.

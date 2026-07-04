@@ -526,7 +526,7 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Audio: BGM/menu | ~90% | — |
 | Audio: combat/voice | ~85% (voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04; **PATH-B per-anim swing audio DECODED+WIRED 2026-07-04**) | real bank samples exported (scripts/export-combat-se.py, 23 files) + wired (shoot/hit/down/dash/jump/spawn/land DERIVED); melee/charge swings now play their ROM-AUTHORED per-anim sounds (actor+0x4e8 sound-event table joined via the anim-descriptor banks — anim-sound-op-decode-2026-07-04.md; 103/103 resolved ladders + 18 air / 2 charge leaves covered, TUNED fallback kept for the rest); death stays TUNED (op-0x0f voice is per-borg table-driven, tables undecoded); voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
-| FX: particles/projectiles | ~80% (hit-impact chain decoded end-to-end 2026-07-04 INCLUDING the texId hop: texId = efct00_mdl.arc scene_data JOBJDesc index, entries are untextured vertex-colored meshes — parsed to efctBankMeshes.json and rendered as real THREE meshes, ptl-format-notes-2026-07-04.md) | resolve remaining zz_0006fb4_ texId call sites (projectiles/trails/status FX); matAnim color tracks; ptcl00.ptl emitter bank loader; 3D weapon meshes |
+| FX: particles/projectiles | ~85% (hit-impact chain decoded end-to-end 2026-07-04 incl. the texId hop — ptl-format-notes-2026-07-04.md; PLUS muzzle/launch FX family, projectile-row visual fields, slow/haste status FX and the matAnim color tracks decoded+wired — efct-consumers-decode-2026-07-04.md) | per-borg projectile flight texIds (mechanical join over shotVariantKinds.json rawBytes); melee hand-flash id 7; DAT_803bb384/470 bank identities; ptcl00.ptl emitter bank loader; 3D weapon meshes |
 
 **Trace status update (2026-07-03, (bc)):** T9 (knockback magnitude) is **no longer trace-blocked**
 — it was found statically in the DOL as strength-indexed tables (DAT_802dd8a0/DAT_802d3664), and
@@ -680,9 +680,21 @@ Detail in the asset survey (session 2026-07-03) + `research/format-specs/*`, `re
   parsed (scripts/gen-ptl-cell-map.mjs → efctBankMeshes.json, all 157 entries) and rendered
   as real THREE meshes (spawnBankFx), incl. the id-1 burst's real blue/pink per-player rim
   colors (texIds 2/3). Ex-hypothesis "texId→ptcl00.ptl cell" REFUTED
-  (ptl-format-notes-2026-07-04.md). Still TUNED: the other effects' sprite-cell mapping
-  (muzzle/death/dash/charge/puffs), curve linearization, burst scatter, orientation yaw;
-  projectiles are 2D billboards, not the 3D it####_mdl.arz weapon meshes.
+  (ptl-format-notes-2026-07-04.md). NEW (2026-07-04, efct-consumers-decode-2026-07-04.md):
+  the OTHER zz_0006fb4_ consumers decoded — launch/muzzle FX family zz_00aedc0_ (9 ids,
+  layer table 0x802faef8 + fences 0x802fafd0, all texIds/lifetimes/tracks dumped), the
+  projectile-row visual fields of table 0x802d6d68 (+0x00 texId|bank-flags, +0x34 launch-FX
+  id; format generalizes to all ~80 shot tables in shotVariantKinds.json), and the
+  slow/haste status FX zz_013f300_ (texIds 48/48/49/50 @DAT_80434670 — an animated clock
+  with billboard hands + tumbling star ring, pulse 0x222/0x444). The archive's matAnim
+  color tracks are now EXTRACTED (89 dobjs; gen-ptl-cell-map.mjs → efctBankMeshes.json
+  `anim`) and wired where the ROM consumes them: the muzzle flash is DERIVED (bank texId 35
+  + exact id-0 keys + team-frame matAnim tint blue/red) and slow/haste show the DERIVED
+  aura for the sim's 900f timers with the pulse-sampled white↔orange / white↔blue matAnim
+  colors. Still TUNED: muzzle position/trigger heuristic + remaining sprite-cell effects
+  (death/dash/charge/puffs), curve linearization, burst scatter, orientation yaw, aura
+  scale (+0x7fc undecoded); projectiles are 2D billboards, not the per-variant bank/weapon
+  meshes (texIds documented, not wired).
 
 ---
 

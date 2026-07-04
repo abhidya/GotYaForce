@@ -30,7 +30,26 @@
 //   { _meta, entries: { [texId]: { jobjs: [...], hasMatAnim } } }
 // Each jobj: { parent, flags, t/r/s (only when non-identity), dobjs: [...] }
 // Each dobj: { dif: [r,g,b,a] u8, alpha: float, blend: "add"|"alpha", renderFlags,
-//              mesh: { positions: [...xyz], colors: [...rgba u8] | null, indices } }
+//              mesh: { positions: [...xyz], colors: [...rgba u8] | null, indices },
+//              anim?: { end, r/g/b/a: [[frame, value, interpCode], ...] } }
+//
+// anim = the entry's HSD MatAnim (material-animation) color tracks, decoded from the
+// JOBJDesc's matAnim bank (desc word2 -> MatAnimJoint tree parallel to the JOBJ tree,
+// per-JOBJ MatAnim list parallel to its DOBJ list -> AOBJ -> FObj packed keyframes).
+// Kept track types (HSDRaw MatTrackType): DIFFUSE_R/G/B (4/5/6) -> r/g/b and ALPHA (10)
+// -> a. Values are 0..1; the HSD alpha track stores TRANSPARENCY, so `a` is emitted
+// already converted to OPACITY (1 - raw) to match the renderer. interpCode = the HSD
+// FObj opcode (1 CON/step, 2 LIN, 3 SPL0, 4 SPL, 6 KEY); the port evaluates CON as a
+// step and everything else linearly (spline tangents dropped — documented TUNED
+// approximation, same policy as the boot.dol keyframe tracks).
+//
+// PROVEN matAnim consumers (research/decomp/efct-consumers-decode-2026-07-04.md):
+// zz_00086b8_ @800086b8 / zz_000726c_ @8000726c attach desc->matAnim to the loaded JOBJ
+// tree at a caller-chosen frame: the slow/haste status FX zz_013f300_ re-sets the frame
+// every tick to its pulse value (+2 for slow), and the launch/muzzle FX family
+// zz_00aedc0_ + projectile visuals FUN_8007dd84 set it to a team/player index. The
+// impact-effect handlers (zz_0019550_ family) do NOT attach matAnim — their alpha comes
+// from the boot.dol tracks, so the port must not apply `anim` to those spawns.
 //
 // Validation baked in (fails loudly):
 //   - entry count >= 147 (max impact texId 146 must resolve)
@@ -193,12 +212,132 @@ function decodePobj(pobj) {
   return { positions, colors, indices };
 }
 
+// ---- HSD MatAnim (material color animation) decode --------------------------
+// Structures (tools/HSDLib HSDRaw reference, offsets verified against the ROM readers
+// zz_00086b8_ @800086b8 / zz_0008744_ @80008744):
+//   JOBJDesc+8 -> NULL-terminated ARRAY of MatAnimJoint ptrs (the ROM only uses [0]).
+//   MatAnimJoint { child 0, next 4, MatAnim* 8 } — tree parallel to the JOBJ tree.
+//   MatAnim     { next 0, AOBJ* 4, TexAnim* 8, renderAnim 0xC } — list parallel to DOBJs.
+//   AOBJ        { flags 0, endFrame f32 4, FObjDesc* 8, objId 0xC }.
+//   FObjDesc    { next 0, dataLen 4, startFrame f32 8, trackType u8 0xC, valueFlag 0xD,
+//                 tanFlag 0xE, buffer* 0x10 } — packed keyframe stream (values LE!).
+const MAT_TRACK = { 4: "r", 5: "g", 6: "b", 10: "a" };
+const unknownMatTracks = new Map(); // trackType -> count (census, reported in _meta)
+
+/** HSD packed varint (7-bit little-endian continuation). */
+function readPacked(view) {
+  let result = 0;
+  let shift = 0;
+  let b;
+  do {
+    b = view.next();
+    result |= (b & 0x7f) << shift;
+    shift += 7;
+  } while (b & 0x80);
+  return result;
+}
+
+/** Decode one FObj packed keyframe buffer -> [[frame, value, interpCode], ...]. */
+function decodeFobjKeys(bufOff, bufLen, valueFlag, tanFlag) {
+  let p = DATA + bufOff;
+  const end = p + bufLen;
+  const view = { next: () => buf[p++] };
+  const readValue = (flag) => {
+    const fmt = flag & 0xe0;
+    const scale = 1 << (flag & 0x1f);
+    let v;
+    // FObj key data is LITTLE-endian (HSDRaw FOBJFrameDecoder sets BigEndian=false).
+    if (fmt === 0x00) {
+      v = dv.getFloat32(p, true);
+      p += 4;
+    } else if (fmt === 0x20) {
+      v = dv.getInt16(p, true) / scale;
+      p += 2;
+    } else if (fmt === 0x40) {
+      v = dv.getUint16(p, true) / scale;
+      p += 2;
+    } else if (fmt === 0x60) {
+      v = ((buf[p] << 24) >> 24) / scale;
+      p += 1;
+    } else if (fmt === 0x80) {
+      v = buf[p] / scale;
+      p += 1;
+    } else {
+      throw new Error(`unknown FObj value format 0x${fmt.toString(16)}`);
+    }
+    return v;
+  };
+  const keys = [];
+  let clock = 0;
+  while (p < end) {
+    const op = readPacked(view);
+    const interp = op & 0x0f;
+    if (interp === 0) break; // HSD_A_OP_NONE terminator/padding
+    const n = (op >> 4) + 1;
+    for (let i = 0; i < n; i++) {
+      let value = 0;
+      let time = 0;
+      let emit = true;
+      if (interp === 1 || interp === 2 || interp === 3) {
+        // CON / LIN / SPL0: value + packed frame delta.
+        value = readValue(valueFlag);
+        time = readPacked(view);
+      } else if (interp === 4) {
+        // SPL: value + tangent + packed frame delta (tangent dropped — linear approx).
+        value = readValue(valueFlag);
+        readValue(tanFlag);
+        time = readPacked(view);
+      } else if (interp === 5) {
+        // SLP: tangent-only modifier for the neighboring key — dropped (linear approx).
+        readValue(tanFlag);
+        emit = false;
+      } else if (interp === 6) {
+        // KEY: value at the current clock, no time advance.
+        value = readValue(valueFlag);
+      } else {
+        throw new Error(`unknown FObj interpolation ${interp}`);
+      }
+      if (emit) keys.push([clock, Math.round(value * 10000) / 10000, interp]);
+      clock += time;
+    }
+  }
+  return keys;
+}
+
+/** Decode one MatAnim node -> { end, r?, g?, b?, a? } or null when it has no color keys. */
+function decodeMatAnim(matAnim) {
+  const aobj = PP(matAnim + 4);
+  if (!aobj) return null;
+  const out = { end: Math.round(f32(DATA + aobj + 4) * 100) / 100 };
+  let fobj = PP(aobj + 8);
+  let got = false;
+  let guard = 0;
+  while (fobj && guard++ < 64) {
+    const trackType = u8(DATA + fobj + 0xc);
+    const chan = MAT_TRACK[trackType];
+    if (chan) {
+      const keys = decodeFobjKeys(PP(fobj + 0x10), P(fobj + 4), u8(DATA + fobj + 0xd), u8(DATA + fobj + 0xe));
+      // HSD's material ALPHA track stores TRANSPARENCY (LiveMaterial.cs: alpha = 1 - v);
+      // emit opacity directly so the renderer multiplies it straight in.
+      out[chan] = chan === "a" ? keys.map(([f, v, i]) => [f, Math.round((1 - v) * 10000) / 10000, i]) : keys;
+      got = true;
+    } else {
+      unknownMatTracks.set(trackType, (unknownMatTracks.get(trackType) ?? 0) + 1);
+    }
+    fobj = PP(fobj);
+  }
+  return got ? out : null;
+}
+
 // ---- JOBJ / DOBJ / MOBJ walk ------------------------------------------------
 const JOBJ_PTCL = 0x20;
 const JOBJ_SPLINE = 0x4000;
-function decodeDobjs(jobj) {
+function decodeDobjs(jobj, matAnimJoint) {
   const dobjs = [];
   let dobj = PP(jobj + 0x10);
+  // MatAnim list runs parallel to the DOBJ list (HSD convention; null-safe when the
+  // matAnim tree is shallower than the JOBJ tree).
+  let matAnim = matAnimJoint ? PP(matAnimJoint + 8) : 0;
   let guard = 0;
   while (dobj && guard++ < 64) {
     const mobj = PP(dobj + 8);
@@ -242,14 +381,16 @@ function decodeDobjs(jobj) {
       }
       merged.indices.push(...m.indices.map((i) => i + base));
     }
-    dobjs.push({ ...material, mesh: merged });
+    const anim = matAnim ? decodeMatAnim(matAnim) : null;
+    dobjs.push({ ...material, mesh: merged, ...(anim ? { anim } : {}) });
     dobj = PP(dobj + 4);
+    matAnim = matAnim ? PP(matAnim) : 0;
   }
   return dobjs;
 }
-function decodeJobjTree(rootJobj) {
+function decodeJobjTree(rootJobj, rootMatAnimJoint) {
   const out = [];
-  const visit = (jobj, parent, depth) => {
+  const visit = (jobj, maj, parent, depth) => {
     if (!jobj || depth > 16 || out.length > 64) return;
     const flags = P(jobj + 4);
     const node = { parent, flags };
@@ -260,24 +401,35 @@ function decodeJobjTree(rootJobj) {
     if (s.some((v) => v !== 1)) node.s = s.map(round);
     if (t.some((v) => v !== 0)) node.t = t.map(round);
     // PTCL/SPLINE jobjs reinterpret +0x10; none appear in this bank but guard anyway.
-    node.dobjs = flags & (JOBJ_PTCL | JOBJ_SPLINE) ? [] : decodeDobjs(jobj);
+    node.dobjs = flags & (JOBJ_PTCL | JOBJ_SPLINE) ? [] : decodeDobjs(jobj, maj);
     const self = out.length;
     out.push(node);
     const child = PP(jobj + 8);
     const next = PP(jobj + 0xc);
-    if (child) visit(child, self, depth + 1);
-    if (next && depth > 0) visit(next, parent, depth);
+    // The MatAnimJoint tree mirrors the JOBJ tree; step it in lockstep, tolerating nulls.
+    if (child) visit(child, maj ? PP(maj) : 0, self, depth + 1);
+    if (next && depth > 0) visit(next, maj ? PP(maj + 4) : 0, parent, depth);
   };
-  visit(rootJobj, -1, 0);
+  visit(rootJobj, rootMatAnimJoint, -1, 0);
   return out;
 }
 
 const entries = {};
 let totalTris = 0;
+let dobjsWithAnim = 0;
 for (const [texId, desc] of descs.entries()) {
-  const jobjs = decodeJobjTree(PP(desc));
-  const hasMatAnim = PP(desc + 8) !== 0;
-  for (const j of jobjs) for (const d of j.dobjs) totalTris += d.mesh.indices.length / 3;
+  // JOBJDesc+8 = ptr to a NULL-terminated MatAnimJoint* ARRAY; the ROM's matAnim
+  // attach (zz_00086b8_ @800086b8) only ever dereferences element [0].
+  const matAnimArr = PP(desc + 8);
+  const rootMatAnimJoint = matAnimArr ? PP(matAnimArr) : 0;
+  const jobjs = decodeJobjTree(PP(desc), rootMatAnimJoint);
+  const hasMatAnim = matAnimArr !== 0;
+  for (const j of jobjs) {
+    for (const d of j.dobjs) {
+      totalTris += d.mesh.indices.length / 3;
+      if (d.anim) dobjsWithAnim++;
+    }
+  }
   entries[texId] = { jobjs, ...(hasMatAnim ? { hasMatAnim } : {}) };
 }
 
@@ -320,6 +472,20 @@ function firstMesh(texId) {
     maxZ = Math.max(maxZ, Math.abs(m146.positions[i + 2]));
   }
   if (maxZ > maxXY * 0.001) throw new Error(`texId 146 not flat (maxZ ${maxZ} vs extent ${maxXY})`);
+  // matAnim color tracks — the two PROVEN consumers must have decodable tracks:
+  //  - texIds 48/48/49/50 = slow/haste status FX zz_013f300_ (s16 texId table DAT_80434670);
+  //    its matAnim frame is the 0..1 pulse (+2 for slow), so tracks must cover frame >= 3.
+  //  - texId 35 = launch/muzzle FX family zz_00aedc0_ id 0 (layer table 0x802faef8 row 0);
+  //    its matAnim frame is the attacker player/team index (0/1).
+  for (const texId of [35, 48, 49, 50]) {
+    const anim = entries[texId].jobjs.flatMap((j) => j.dobjs).find((d) => d.anim)?.anim;
+    if (!anim) throw new Error(`texId ${texId} expected matAnim color tracks (proven consumer)`);
+    if (!(anim.r || anim.g || anim.b || anim.a)) throw new Error(`texId ${texId} matAnim has no color channel`);
+  }
+  for (const texId of [48, 49, 50]) {
+    const anim = entries[texId].jobjs.flatMap((j) => j.dobjs).find((d) => d.anim).anim;
+    if (anim.end < 3) throw new Error(`texId ${texId} matAnim end ${anim.end} < 3 (slow pulse samples frames 2..3)`);
+  }
 }
 
 const out = {
@@ -345,10 +511,20 @@ const out = {
       jobjs: "flattened JOBJ tree; parent=-1 is the root; r/s/t omitted when identity",
       dobjs: "dif = material diffuse RGBA (u8), alpha = material alpha float, blend = add|alpha (PE desc), renderFlags = raw MOBJ u32",
       mesh: "positions xyz f32 (rounded 0.01), colors RGBA u8 per vertex or null, indices = triangles",
-      hasMatAnim: "entry carries an HSD material-animation bank (color/alpha AOBJ tracks; NOT decoded — the boot.dol per-layer keyframe tracks drive the port's scale/alpha instead)",
+      hasMatAnim: "entry carries an HSD material-animation bank (MatAnimJoint array at JOBJDesc+8)",
+      anim:
+        "per-dobj decoded MatAnim color tracks: { end: AOBJ endFrame, r/g/b/a: [[frame, value 0..1, interpCode], ...] }. " +
+        "a = OPACITY (HSD stores transparency; converted here). interpCode: 1 CON(step) 2 LIN 3 SPL0 4 SPL 6 KEY; " +
+        "spline tangents dropped (linear approximation, TUNED). Consumers sample at a caller-chosen frame: " +
+        "slow/haste status FX at pulse(+2 when slow), muzzle/launch FX + projectile visuals at a team/player index " +
+        "(research/decomp/efct-consumers-decode-2026-07-04.md). Impact effects do NOT attach matAnim.",
     },
     totalTriangles: totalTris,
-    validation: "texId 21 POS-only radial flash; texIds 2/3 same disc, blue vs pink rim; texId 146 flat XY ring; count>=147",
+    dobjsWithColorTracks: dobjsWithAnim,
+    unknownMatTrackTypes: Object.fromEntries([...unknownMatTracks.entries()].map(([k, v]) => [k, v])),
+    validation:
+      "texId 21 POS-only radial flash; texIds 2/3 same disc, blue vs pink rim; texId 146 flat XY ring; count>=147; " +
+      "texIds 35/48/49/50 carry matAnim color tracks (48-50 spanning frame>=3 for the slow pulse)",
   },
   entries,
 };

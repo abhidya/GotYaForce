@@ -442,6 +442,8 @@ const battleScene = new BattleScene(battleRoot, {
     playCombatSfx(slot);
   },
 });
+// Billboard basis for the status-aura clock hands (ROM FUN_8013f790 camera-facing draw path).
+battleScene.setCamera(camera);
 const battleCamera = new BattleCamera({ camera, controlsTarget: controls.target });
 
 // ------------------------------------------------------------------------------------------

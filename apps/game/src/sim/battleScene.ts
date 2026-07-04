@@ -106,7 +106,69 @@ interface Actor {
   isPlaceholder: boolean;
   /** Charge-shot aura sprite (ptcl00.txg#7), lazily created while chargeFrames > 0. */
   chargeGlow: { sprite: THREE.Sprite; material: THREE.SpriteMaterial } | null;
+  /** Slow/haste status auras (ROM zz_013f300_), keyed by kind; live while the timer runs. */
+  statusFx: { slow: StatusAura | null; haste: StatusAura | null };
 }
+
+/**
+ * One live slow/haste status aura — the ROM's zz_013f300_(target, 0|1) effect object
+ * (chunk_0037.c:421; decode: research/decomp/efct-consumers-decode-2026-07-04.md).
+ *
+ * DERIVED structure: FOUR bank-mesh parts, texIds [48, 48, 49, 50] (s16 table
+ * DAT_80434670 indexed by clamped slot [0,0,1,2]):
+ *  - slot 0 x2 (texId 48, a flat 113-radius star ring): world-oriented, tumbling — random
+ *    initial z/x phases (rand<<8), speeds x = +/-1024*t, z = +/-1024*(1-t) s16-angle units
+ *    per frame with t = (rand&0x3f)/63 and random signs (FUN_8013f84c);
+ *  - slot 1 (texId 49, a 108-long clock hand): CAMERA-FACING (draw path FUN_8013f790 builds
+ *    a billboard basis), spinning in the view plane at -2184 units/f (~-12deg/f, a full turn
+ *    every 30f);
+ *  - slot 2 (texId 50, the short 75-long hand): billboard, -182 units/f (~-1deg/f).
+ * SLOW halves every spin speed (FUN_8013f84c +0x34/+0x36 /2). Together they read as an
+ * animated clock: fast hand + slow hand + orbiting sparkles.
+ *
+ * Color: the parts' matAnim frame is re-set EVERY tick to the pulse
+ * s = clamp(sin(phase)*0.5+0.5, 0, 1) with phase += 0x222/f (slow) or 0x444/f (haste)
+ * (FUN_8013f548/zz_013fa70_ -> zz_00086b8_), PLUS 2 when slow — and the extracted tracks
+ * confirm the ranges: frames 0..1 pulse white<->ORANGE (haste), frames 2..3 white<->BLUE
+ * (slow). Lifetime: while the sim's 900f status timer runs (FUN_8013f548 kills the object
+ * when target +0x710/+0x712 hits 0).
+ *
+ * TUNED: the overall scale (the ROM multiplies actor scale by the undecoded per-borg float
+ * +0x7fc; the port uses 1.0), the anchor height (ROM uses the actor matrix translation),
+ * and the 24f-period tick SFX (zz_00f036c_ id 0x19) is not played.
+ */
+interface StatusAuraPart {
+  node: THREE.Group;
+  materials: THREE.MeshBasicMaterial[];
+  layers: BankFxLayer[];
+  /** True for the clock hands (texIds 49/50) — camera-facing draw path. */
+  billboard: boolean;
+  /** Spin phases/speeds in s16-angle units (0x10000 = full turn), advanced per 60fps frame.
+   *  World parts use phaseX/phaseZ (rot z then x, FUN_8013f698); billboards spin in the
+   *  view plane by phaseZ only. */
+  phaseX: number;
+  phaseZ: number;
+  spinX: number;
+  spinZ: number;
+}
+interface StatusAura {
+  group: THREE.Group;
+  parts: StatusAuraPart[];
+  kind: "slow" | "haste";
+  /** Pulse phase in s16-angle units (FUN_8013f548 +0x1e). */
+  pulsePhase: number;
+}
+
+/** DERIVED zz_013f300_ constants (see StatusAura doc). */
+const STATUS_FX_TEXIDS: ReadonlyArray<{ texId: number; slot: 0 | 1 | 2 }> = [
+  { texId: 48, slot: 0 },
+  { texId: 48, slot: 0 },
+  { texId: 49, slot: 1 },
+  { texId: 50, slot: 2 },
+];
+const STATUS_FX_PULSE_STEP = { slow: 0x222, haste: 0x444 } as const;
+const STATUS_FX_HAND_SPIN = { 1: -2184, 2: -182 } as const; // s16 units/frame (0xf778/0xff4a)
+const S16_TO_RAD = (Math.PI * 2) / 0x10000;
 
 interface ProjectileActor {
   /** Scene node: a camera-facing Sprite for billboard kinds, or the crossed-plane beam rig
@@ -162,12 +224,28 @@ interface EfctBankMeshJson {
   colors: number[] | null;
   indices: number[];
 }
+/**
+ * Decoded HSD MatAnim color tracks of one DOBJ (generator: scripts/gen-ptl-cell-map.mjs).
+ * Keys are [frame, value 0..1, interpCode]; `a` is already converted to OPACITY. The ROM
+ * samples these at a caller-chosen frame (zz_00086b8_/zz_000726c_ attach + set frame):
+ * team/player index for muzzle/launch FX and projectile visuals, the 0..1 pulse (+2 when
+ * slow) for the slow/haste status FX. Impact effects do NOT attach matAnim — do not apply
+ * these to spawnHitFx layers.
+ */
+interface EfctBankAnimJson {
+  end: number;
+  r?: number[][];
+  g?: number[][];
+  b?: number[][];
+  a?: number[][];
+}
 interface EfctBankDobjJson {
   dif: number[];
   alpha: number;
   blend: string;
   renderFlags: number;
   mesh: EfctBankMeshJson;
+  anim?: EfctBankAnimJson;
 }
 interface EfctBankJobjJson {
   parent: number;
@@ -192,6 +270,83 @@ interface BankFxLayer {
   /** True for the ROM's srcAlpha+ONE PE blend (the dominant bank mode). */
   additive: boolean;
   vertexColors: boolean;
+  /** Decoded MatAnim color tracks (replace the material diffuse when sampled). */
+  anim?: EfctBankAnimJson | undefined;
+}
+
+/**
+ * Evaluate one MatAnim track at `frame`. interpCode 1 (HSD_A_OP_CON) holds the left key's
+ * value (step); every other code is evaluated linearly (spline tangents were dropped by the
+ * generator — documented TUNED approximation). Out-of-range frames clamp to the end keys.
+ */
+function evalBankTrack(keys: number[][] | undefined, frame: number, rest: number): number {
+  if (!keys || keys.length === 0) return rest;
+  const first = keys[0];
+  if (!first || frame <= (first[0] ?? 0)) return first?.[1] ?? rest;
+  for (let i = 0; i + 1 < keys.length; i++) {
+    const k0 = keys[i];
+    const k1 = keys[i + 1];
+    if (!k0 || !k1) break;
+    const f0 = k0[0] ?? 0;
+    const f1 = k1[0] ?? 0;
+    if (frame < f1) {
+      if ((k0[2] ?? 2) === 1 || f1 <= f0) return k0[1] ?? rest; // CON = step
+      const t = (frame - f0) / (f1 - f0);
+      return (k0[1] ?? 0) + ((k1[1] ?? 0) - (k0[1] ?? 0)) * t;
+    }
+  }
+  return keys[keys.length - 1]?.[1] ?? rest;
+}
+
+/**
+ * Sample a layer's MatAnim color at `frame` into (color, opacity). The ROM's matAnim tracks
+ * REPLACE the material diffuse/alpha (HSD AOBJ writes the MObj channels), so channels with a
+ * track ignore the rest value; trackless channels keep it.
+ */
+function sampleBankAnim(
+  layer: BankFxLayer,
+  frame: number,
+  outColor: THREE.Color,
+): { opacity: number } {
+  const anim = layer.anim;
+  if (!anim) {
+    outColor.copy(layer.color);
+    return { opacity: layer.baseOpacity };
+  }
+  outColor.setRGB(
+    evalBankTrack(anim.r, frame, layer.color.r),
+    evalBankTrack(anim.g, frame, layer.color.g),
+    evalBankTrack(anim.b, frame, layer.color.b),
+  );
+  return { opacity: evalBankTrack(anim.a, frame, layer.baseOpacity) };
+}
+
+/**
+ * Evaluate the boot.dol effect-layer keyframe tracks (scale {frame,x,y,z} / alpha {frame,a},
+ * -1-terminated in ROM, linear interpolation — the same evaluators zz_0018fd8_/zz_0019370_
+ * the impact chain uses). Frames are 60fps ROM frames.
+ */
+function evalRomKeys(keys: ReadonlyArray<readonly number[]>, frame: number, out: number[]): void {
+  const first = keys[0];
+  const last = keys[keys.length - 1];
+  if (!first || !last) return;
+  const src = frame <= (first[0] ?? 0) ? first : frame >= (last[0] ?? 0) ? last : null;
+  if (src) {
+    for (let c = 1; c < src.length; c++) out[c - 1] = src[c] ?? 0;
+    return;
+  }
+  for (let i = 0; i + 1 < keys.length; i++) {
+    const k0 = keys[i];
+    const k1 = keys[i + 1];
+    if (!k0 || !k1) break;
+    const f0 = k0[0] ?? 0;
+    const f1 = k1[0] ?? 0;
+    if (frame < f1) {
+      const t = f1 > f0 ? (frame - f0) / (f1 - f0) : 0;
+      for (let c = 1; c < k0.length; c++) out[c - 1] = (k0[c] ?? 0) + ((k1[c] ?? 0) - (k0[c] ?? 0)) * t;
+      return;
+    }
+  }
 }
 /** Shared geometry cache: texId -> drawable layers (null = entry has no drawable mesh). */
 const bankFxTemplates = new Map<number, BankFxLayer[] | null>();
@@ -228,6 +383,7 @@ function buildBankFxTemplate(texId: number): BankFxLayer[] | null {
         baseOpacity: ((dif[3] ?? 255) / 255) * dobj.alpha,
         additive: dobj.blend === "add",
         vertexColors: dobj.mesh.colors !== null,
+        anim: dobj.anim,
       });
     }
   }
@@ -257,6 +413,11 @@ interface BankFxActor {
   endScale: THREE.Vector3;
   /** Whole-effect opacity multiplier at age `delay` (fades linearly to 0 over ttl). */
   startOpacity: number;
+  /** ROM scale keyframes {frame,x,y,z} (60fps frames). When set they REPLACE the
+   *  startScale->endScale lerp with the exact multi-key piecewise-linear curve. */
+  scaleKeys?: ReadonlyArray<readonly number[]> | undefined;
+  /** ROM alpha keyframes {frame,a}. When set they REPLACE the linear 1->0 fade. */
+  alphaKeys?: ReadonlyArray<readonly number[]> | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -360,6 +521,37 @@ const BEAM_REST_AXIS = new THREE.Vector3(0, 1, 0);
  *  allocation-free (same convention as the rest of the per-frame sync code). */
 const BEAM_DIR_SCRATCH = new THREE.Vector3();
 
+/** Scratch output for evalRomKeys in the per-frame FX loop (allocation-free). */
+const BANK_KEY_SCRATCH: number[] = [0, 0, 0];
+
+// ---------------------------------------------------------------------------
+// Launch/muzzle FX family zz_00aedc0_ @0x800aedc0 — DERIVED
+// (research/decomp/efct-consumers-decode-2026-07-04.md).
+//
+// The generic shot muzzle flash is family id 0: FUN_80072218 (chunk_0010.c:174) builds a
+// basis from the gun joint matrix (+0xa24 block, forward negated by FLOAT_80437780 = -1.0,
+// unit scale) and calls zz_00aedc0_(actor, basis, 0, teamByte) plus SFX 6. Id 0 resolves
+// through the fence table 0x802fafd0 to ONE layer (row 0 of the 0xc-stride def table
+// 0x802faef8): texId 35, life 4f, with the boot.dol keyframe tracks below. The layer loads
+// from the SAME efct00_mdl.arc bank as the impacts and attaches the entry's matAnim at
+// frame = player/team index (zz_000726c_) — entry 35's decoded tracks make that blue for
+// index 0 and red-pink for index 1.
+// ---------------------------------------------------------------------------
+/** texId 35 scale keys {frame,x,y,z} @0x802faa08 (z = shot direction in the ROM basis). */
+const MUZZLE_FLASH_SCALE_KEYS: ReadonlyArray<readonly number[]> = [
+  [0, 1, 1, 1],
+  [1, 0.25, 0.25, 0.25],
+  [4, 0, 0, 0.25],
+];
+/** texId 35 alpha keys {frame,a} @0x802faa48. */
+const MUZZLE_FLASH_ALPHA_KEYS: ReadonlyArray<readonly number[]> = [
+  [0, 1],
+  [1, 1],
+  [4, 0],
+];
+/** texId 35 lifetime, frames (layer-def row 0 @0x802faef8). */
+const MUZZLE_FLASH_LIFE_FRAMES = 4;
+
 export class BattleScene {
   private actors = new Map<string, Actor>();
   private projectileActors = new Map<string, ProjectileActor>();
@@ -373,6 +565,10 @@ export class BattleScene {
   private hitSparkTexture: THREE.Texture;
   private dashStarTexture: THREE.Texture;
   private chargeGlowTexture: THREE.Texture;
+  /** Render camera, provided by main.ts (setCamera) — used by the status-aura clock-hand
+   *  billboards (the ROM's FUN_8013f790 draw path builds a camera-facing basis). Null-safe:
+   *  without it the hands spin in the world XY plane instead of the view plane. */
+  private camera: THREE.Camera | null = null;
   /** Enemy lock-on marker, shown ONLY over the local player's enemy lockTarget. */
   private enemyReticle: THREE.Group;
   private enemyReticleFill: THREE.MeshBasicMaterial;
@@ -413,6 +609,11 @@ export class BattleScene {
       renderOrder: 25,
     }).group;
     this.root.add(this.allyMarker);
+  }
+
+  /** Provide the render camera (billboard basis for the status-aura clock hands). */
+  setCamera(camera: THREE.Camera): void {
+    this.camera = camera;
   }
 
   /** Map a sim state/action to one of the exported game animation groups. */
@@ -484,8 +685,9 @@ export class BattleScene {
       if (slot === "death" && slotChanged) this.spawnDeathExplosion(actor.group.position);
       if (slotChanged && slot.startsWith("dash")) this.spawnDashBurst(actor.group.position);
       if (slot === "special" && slotChanged) this.spawnSpecialBurst(actor.group.position);
-      if ((slot === "shoot" || slot === "charge_shot") && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY);
+      if ((slot === "shoot" || slot === "charge_shot") && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY, b.team);
       this.syncChargeGlow(actor, b);
+      this.syncStatusFx(actor, b);
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid, b.meleeSounds);
       actor.lastSeenSlot = slot;
       if (actor.ready) this.playSlot(actor, slot, b.meleeAnimStream);
@@ -496,6 +698,7 @@ export class BattleScene {
     for (const [uid, actor] of this.actors) {
       if (!live.has(uid)) {
         actor.chargeGlow?.material.dispose();
+        this.disposeActorStatusFx(actor);
         this.root.remove(actor.group);
         this.actors.delete(uid);
       }
@@ -519,6 +722,7 @@ export class BattleScene {
     if (this.allyMarker.visible) {
       this.allyMarker.rotation.y += dt * ALLY_MARKER_SPIN_RAD_PER_S;
     }
+    this.updateStatusAuras(dt);
     this.updateImpacts(dt);
   }
 
@@ -526,6 +730,7 @@ export class BattleScene {
   clear(): void {
     for (const actor of this.actors.values()) {
       actor.chargeGlow?.material.dispose();
+      this.disposeActorStatusFx(actor);
       this.root.remove(actor.group);
     }
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
@@ -567,6 +772,7 @@ export class BattleScene {
       ready: false,
       isPlaceholder: true,
       chargeGlow: null,
+      statusFx: { slow: null, haste: null },
     };
     void this.attachModel(b.uid, actor, b.borgId, placeholder).catch((error: unknown) => {
       this.root.remove(group);
@@ -917,6 +1123,14 @@ export class BattleScene {
       opacity: number;
       delay?: number;
       yaw?: number;
+      /** ROM scale keyframes {frame,x,y,z}: exact multi-key curve (overrides start/end lerp). */
+      scaleKeys?: ReadonlyArray<readonly number[]>;
+      /** ROM alpha keyframes {frame,a}: exact fade curve (overrides the linear 1->0 fade). */
+      alphaKeys?: ReadonlyArray<readonly number[]>;
+      /** Static MatAnim sample frame (the ROM's team/player-index color select — zz_00086b8_/
+       *  zz_000726c_ attach the entry's matAnim at this frame). Layers without tracks keep
+       *  their material diffuse. */
+      matAnimFrame?: number;
     },
   ): boolean {
     const layers = bankFxTemplate(texId);
@@ -926,12 +1140,19 @@ export class BattleScene {
     const node = new THREE.Group();
     const materials: THREE.MeshBasicMaterial[] = [];
     const layerOpacity: number[] = [];
+    const animColor = new THREE.Color();
     for (const layer of layers) {
+      let color = layer.color;
+      let restOpacity = layer.baseOpacity;
+      if (opts.matAnimFrame !== undefined && layer.anim) {
+        restOpacity = sampleBankAnim(layer, opts.matAnimFrame, animColor).opacity;
+        color = animColor.clone();
+      }
       const material = new THREE.MeshBasicMaterial({
-        color: layer.color,
+        color,
         vertexColors: layer.vertexColors,
         transparent: true,
-        opacity: layer.baseOpacity * opts.opacity,
+        opacity: restOpacity * opts.opacity,
         blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
         depthWrite: false,
         side: THREE.DoubleSide,
@@ -939,7 +1160,7 @@ export class BattleScene {
       const mesh = new THREE.Mesh(layer.geometry, material);
       node.add(mesh);
       materials.push(material);
-      layerOpacity.push(layer.baseOpacity);
+      layerOpacity.push(restOpacity);
     }
     node.position.copy(position);
     if (opts.yaw !== undefined) node.rotation.y = opts.yaw;
@@ -956,6 +1177,8 @@ export class BattleScene {
       startScale: new THREE.Vector3(start.x, start.y, start.z),
       endScale: new THREE.Vector3(end.x, end.y, end.z),
       startOpacity: opts.opacity,
+      scaleKeys: opts.scaleKeys,
+      alphaKeys: opts.alphaKeys,
     });
     return true;
   }
@@ -1229,23 +1452,45 @@ export class BattleScene {
   }
 
   /**
-   * Muzzle flash: ptcl00.txg#6 ray-burst quadrant at the borg's gun height, offset along
-   * facing (forward = (sin rotY, cos rotY), same convention as dashSlotForBorg). The offset
-   * is the SHARED sim/render MUZZLE_OFFSET constant (packages/combat constants.ts) that
-   * combat.ts spawnProjectile also uses, so the bullet materializes inside its own flash
-   * (the old renderer-only forward 46 / up 86 sat ~66 units away from the sim spawn point).
-   * TUNED — the ROM's real per-muzzle position lives in the undumped weapon-param table
-   * DAT_802d39dc read by the spawn function zz_006ee14_ (0x8006ee14, chunk_0009.c:3769).
-   * Per-borg TUNED overrides in data/actionProfiles.json (muzzleForwardOffset/muzzleYOffset)
-   * can shift the sim spawn slightly off this shared default; the flash is a 0.12s burst, so
-   * the shared constant is accepted as close enough until profiles are plumbed here.
+   * Muzzle flash — DERIVED visual: the ROM's generic shot-launch flash is launch-FX family
+   * id 0 (FUN_80072218 chunk_0010.c:174 -> zz_00aedc0_(actor, gunBasis, 0, team) + SFX 6):
+   * ONE bank mesh, texId 35 (efct00_mdl.arc JOBJDesc[35], a z-elongated flash cone), life
+   * 4f, ROM scale keys (1,1,1) -> (0.25,0.25,0.25)@f1 -> (0,0,0.25)@f4 and alpha 1/1@f1/0@f4
+   * (tables 0x802faef8/0x802faa08/0x802faa48 — research/decomp/
+   * efct-consumers-decode-2026-07-04.md). The entry's matAnim is attached at frame =
+   * player/team index (zz_000726c_), tinting it BLUE for index 0 / RED-PINK for index 1 —
+   * the port passes the attacker team (closest available fact, same mapping as the id-1
+   * hit burst).
+   *
+   * TUNED here: the spawn POSITION (the ROM anchors the flash to the gun joint matrix
+   * +0xa24; the port has no per-borg joint transforms at FX level, so it keeps the shared
+   * sim/render MUZZLE_OFFSET used by combat.ts spawnProjectile), the yaw-only stand-in for
+   * the ROM's full launch-direction basis (zz_0045ef4_ mode 5; the mesh z-axis is the shot
+   * axis, so yaw covers the grounded-fire case), the trigger heuristic (every shoot/
+   * charge_shot slot entry — the ROM triggers per fire function; most projectile-table rows
+   * carry launch-FX id -1 = none, but the generic gun path DOES flash via FUN_80072218),
+   * and the sprite fallback when the bank entry is missing.
    */
-  private spawnMuzzleFlash(position: THREE.Vector3, rotY: number): void {
+  private spawnMuzzleFlash(position: THREE.Vector3, rotY: number, team: number | undefined): void {
     const at = new THREE.Vector3(
       position.x + Math.sin(rotY) * MUZZLE_OFFSET.forward,
       position.y + MUZZLE_OFFSET.up,
       position.z + Math.cos(rotY) * MUZZLE_OFFSET.forward,
     );
+    if (
+      this.spawnBankFx(35, at, {
+        ttl: MUZZLE_FLASH_LIFE_FRAMES / 60,
+        startScale: 1,
+        endScale: 0,
+        opacity: 1,
+        yaw: rotY,
+        scaleKeys: MUZZLE_FLASH_SCALE_KEYS,
+        alphaKeys: MUZZLE_FLASH_ALPHA_KEYS,
+        matAnimFrame: team === 1 ? 1 : 0,
+      })
+    ) {
+      return;
+    }
     this.spawnBurstSprite(this.projectileTextures.get("muzzle") ?? null, at, {
       ttl: 0.12,
       startScale: 46,
@@ -1296,6 +1541,147 @@ export class BattleScene {
     );
   }
 
+  /**
+   * Slow/haste status auras — DERIVED from the ROM's zz_013f300_ status-FX object (see the
+   * StatusAura interface doc for the full decode + TUNED ledger). Created while the sim's
+   * slow/haste 900f timer runs (the ROM's object also lives exactly while target +0x710/
+   * +0x712 is nonzero), destroyed at 0; both kinds can coexist (the ROM spawns independent
+   * objects). Anchored to the borg position, parented to the scene root so the clock-hand
+   * billboards can copy the camera quaternion without inheriting the actor's yaw.
+   */
+  private syncStatusFx(actor: Actor, b: BattleActorView): void {
+    const wants: ReadonlyArray<["slow" | "haste", boolean]> = [
+      ["slow", b.alive && (b.slowHitTimer ?? 0) > 0],
+      ["haste", b.alive && (b.hasteHitTimer ?? 0) > 0],
+    ];
+    for (const [kind, active] of wants) {
+      let aura = actor.statusFx[kind];
+      if (!active) {
+        if (aura) {
+          this.disposeStatusAura(aura);
+          actor.statusFx[kind] = null;
+        }
+        continue;
+      }
+      if (!aura) {
+        aura = this.buildStatusAura(kind);
+        actor.statusFx[kind] = aura;
+      }
+      if (aura) aura.group.position.set(b.pos.x, b.pos.y, b.pos.z);
+    }
+  }
+
+  /** Build one zz_013f300_ aura: 4 bank-mesh parts (texIds 48/48/49/50) with the ROM's
+   *  random spin seeding (FUN_8013f84c). Returns null if the bank entries are missing. */
+  private buildStatusAura(kind: "slow" | "haste"): StatusAura | null {
+    const group = new THREE.Group();
+    const parts: StatusAuraPart[] = [];
+    for (const def of STATUS_FX_TEXIDS) {
+      const layers = bankFxTemplate(def.texId);
+      if (!layers) continue;
+      const node = new THREE.Group();
+      const materials: THREE.MeshBasicMaterial[] = [];
+      for (const layer of layers) {
+        const material = new THREE.MeshBasicMaterial({
+          color: layer.color,
+          vertexColors: layer.vertexColors,
+          transparent: true,
+          opacity: layer.baseOpacity,
+          blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+        });
+        node.add(new THREE.Mesh(layer.geometry, material));
+        materials.push(material);
+      }
+      // FUN_8013f84c seeding: slot 0 gets random phases + random +/- speeds split by
+      // t = (rand&0x3f)/63 across x/z; slots 1/2 (the clock hands) start at phase 0 with
+      // the fixed hand speeds. SLOW halves every speed.
+      const slowDiv = kind === "slow" ? 2 : 1;
+      let part: StatusAuraPart;
+      if (def.slot === 0) {
+        const t = Math.random();
+        part = {
+          node,
+          materials,
+          layers,
+          billboard: false,
+          phaseX: Math.random() * 0x10000,
+          phaseZ: Math.random() * 0x10000,
+          spinX: ((Math.random() < 0.5 ? -1 : 1) * 1024 * t) / slowDiv,
+          spinZ: ((Math.random() < 0.5 ? -1 : 1) * 1024 * (1 - t)) / slowDiv,
+        };
+      } else {
+        part = {
+          node,
+          materials,
+          layers,
+          billboard: true,
+          phaseX: 0,
+          phaseZ: 0,
+          spinX: 0,
+          spinZ: STATUS_FX_HAND_SPIN[def.slot] / slowDiv,
+        };
+      }
+      parts.push(part);
+      group.add(node);
+    }
+    if (parts.length === 0) return null;
+    this.root.add(group);
+    return { group, parts, kind, pulsePhase: 0 };
+  }
+
+  private disposeStatusAura(aura: StatusAura): void {
+    this.root.remove(aura.group);
+    for (const part of aura.parts) for (const material of part.materials) material.dispose();
+  }
+
+  private disposeActorStatusFx(actor: Actor): void {
+    for (const kind of ["slow", "haste"] as const) {
+      const aura = actor.statusFx[kind];
+      if (aura) {
+        this.disposeStatusAura(aura);
+        actor.statusFx[kind] = null;
+      }
+    }
+  }
+
+  /** Per-render advance of the status auras: spins, pulse phase and the pulse-driven
+   *  matAnim color sample (frame = pulse, +2 when slow — zz_013fa70_/zz_00086b8_). */
+  private updateStatusAuras(dt: number): void {
+    const frames = dt * 60; // ROM ticks these per 60fps frame
+    const camQ = this.camera?.quaternion ?? null;
+    for (const actor of this.actors.values()) {
+      for (const kind of ["slow", "haste"] as const) {
+        const aura = actor.statusFx[kind];
+        if (!aura) continue;
+        aura.pulsePhase = (aura.pulsePhase + STATUS_FX_PULSE_STEP[kind] * frames) % 0x10000;
+        const pulse = Math.min(1, Math.max(0, Math.sin(aura.pulsePhase * S16_TO_RAD) * 0.5 + 0.5));
+        const animFrame = pulse + (kind === "slow" ? 2 : 0);
+        for (const part of aura.parts) {
+          part.phaseX += part.spinX * frames;
+          part.phaseZ += part.spinZ * frames;
+          if (part.billboard) {
+            // Clock hands: camera-facing basis (FUN_8013f790), spun in the view plane.
+            if (camQ) part.node.quaternion.copy(camQ);
+            else part.node.quaternion.identity();
+            part.node.rotateZ(part.phaseZ * S16_TO_RAD);
+          } else {
+            // Star ring: world rot z first then x (FUN_8013f698 zz_00457d4_ order) —
+            // three.js Euler "XYZ" composes Rx*Ry*Rz, i.e. z applied first in world space.
+            part.node.rotation.set(part.phaseX * S16_TO_RAD, 0, part.phaseZ * S16_TO_RAD, "XYZ");
+          }
+          for (let m = 0; m < part.materials.length; m++) {
+            const material = part.materials[m];
+            const layer = part.layers[m];
+            if (!material || !layer) continue;
+            material.opacity = sampleBankAnim(layer, animFrame, material.color).opacity;
+          }
+        }
+      }
+    }
+  }
+
   private updateImpacts(dt: number): void {
     for (let i = this.impactActors.length - 1; i >= 0; i--) {
       const actor = this.impactActors[i];
@@ -1341,16 +1727,32 @@ export class BattleScene {
       }
       actor.node.visible = true;
       const t = Math.min(1, (actor.age - delay) / actor.ttl);
-      const fade = actor.startOpacity * (1 - t);
+      // ROM keyframe tracks (60fps frames) take precedence over the legacy linear lerp/fade
+      // when the spawner provided them (currently the muzzle-flash family — DERIVED curves).
+      const frame = (actor.age - delay) * 60;
+      let fade = actor.startOpacity * (1 - t);
+      if (actor.alphaKeys) {
+        evalRomKeys(actor.alphaKeys, frame, BANK_KEY_SCRATCH);
+        fade = actor.startOpacity * (BANK_KEY_SCRATCH[0] ?? 0);
+      }
       for (let m = 0; m < actor.materials.length; m++) {
         const material = actor.materials[m];
         if (material) material.opacity = (actor.layerOpacity[m] ?? 1) * fade;
       }
-      actor.node.scale.set(
-        Math.max(THREE.MathUtils.lerp(actor.startScale.x, actor.endScale.x, t), 1e-4),
-        Math.max(THREE.MathUtils.lerp(actor.startScale.y, actor.endScale.y, t), 1e-4),
-        Math.max(THREE.MathUtils.lerp(actor.startScale.z, actor.endScale.z, t), 1e-4),
-      );
+      if (actor.scaleKeys) {
+        evalRomKeys(actor.scaleKeys, frame, BANK_KEY_SCRATCH);
+        actor.node.scale.set(
+          Math.max(BANK_KEY_SCRATCH[0] ?? 0, 1e-4),
+          Math.max(BANK_KEY_SCRATCH[1] ?? 0, 1e-4),
+          Math.max(BANK_KEY_SCRATCH[2] ?? 0, 1e-4),
+        );
+      } else {
+        actor.node.scale.set(
+          Math.max(THREE.MathUtils.lerp(actor.startScale.x, actor.endScale.x, t), 1e-4),
+          Math.max(THREE.MathUtils.lerp(actor.startScale.y, actor.endScale.y, t), 1e-4),
+          Math.max(THREE.MathUtils.lerp(actor.startScale.z, actor.endScale.z, t), 1e-4),
+        );
+      }
       if (t >= 1) {
         this.disposeBankFxActor(actor);
         this.bankFxActors.splice(i, 1);
