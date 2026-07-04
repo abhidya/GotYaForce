@@ -33,7 +33,6 @@ import {
   HOMING,
   MASH,
   MELEE,
-  LOCK,
   MUZZLE_OFFSET,
   SHOT,
   SPECIAL,
@@ -67,6 +66,7 @@ import type {
   Projectile,
   ProjectileVisualKind,
   RectStageBounds,
+  SourceTargetLockMode,
   StageCollision,
   WeaponCell,
 } from "./types.js";
@@ -259,18 +259,14 @@ export function grantAmmo(b: BorgRuntime, weaponIdx: number, p: BorgProfile): vo
 }
 
 // ---------------------------------------------------------------------------------------
-// Enemy lock-on (R switch-lock) and ally lock-on (Z).
+// Source target lock state (R switch-lock, Z ally-lock).
 //
-// TUNED, and CHECKED CLOSED (2026-07-01, behavior-notes.md s4q): this is not a partially-derived
-// stand-in awaiting a future decode — a thorough corpus search (borg state-machine dispatch,
-// every writer of the 6-actor-table "last enemy" globals DAT_803b06a8/object+2000/+0x7d1,
-// every loop over DAT_803c4e84, every PSVEC distance-check call site, PAD/SI input symbols) found
-// no button-triggered scan-and-select enemy-lock mechanic anywhere in the ROM. Every "target"
-// field the decomp has is hit-REACTIVE bookkeeping (remembers who last hit whom, for a one-shot
-// reaction animation via react_to_slot_target_object/start_status_reaction_by_side), never a
-// scan-selective player lock system. So there is no real algorithm to port here — this heuristic
-// (nearest enemy in a forward view-cone, scored by distance*angle) is an honest design choice,
-// not a guess standing in for a known-but-undecoded formula. Do not re-derive without new leads.
+// Port target: zz_006b450_, FUN_8006b850, FUN_8006ba60, zz_006bc74_, zz_006bcf4_
+// (research/decomp/ghidra-export/chunk_0009.c). Raw source pointers are represented as uids:
+// actor+0x504 = target entry, +0x508 = target actor, +0x50c/+0x510/+0x514 = target position.
+// DAT_803c1d7c/DAT_80436242 target-entry order is represented by BattleState.borgs order.
+// Initial source acquisition picks nearest from that ordered list; R/Z cycling advances
+// through the retained source list index instead of re-sorting by distance or camera cone.
 // ---------------------------------------------------------------------------------------
 function isEnemyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
   return isTargetable(o) && o.team !== self.team && o.uid !== self.uid;
@@ -288,71 +284,207 @@ function isTargetable(b: BorgRuntime): boolean {
   return b.alive && b.hp > 0 && b.state !== "death";
 }
 
-/** Acquire the nearest enemy that is in front (within the lock cone) and in range. */
-export function acquireLock(self: BorgRuntime, all: BorgRuntime[]): string | null {
-  const fwd = forwardFromYaw(self.rotY);
-  let best: string | null = null;
-  let bestScore = Infinity;
-  for (const o of all) {
-    if (!isEnemyAlive(self, o)) continue;
-    const d = distXZ(self.pos, o.pos);
-    if (d > LOCK.RANGE) continue;
-    const to = normalize({ x: o.pos.x - self.pos.x, y: 0, z: o.pos.z - self.pos.z });
-    const dot = fwd.x * to.x + fwd.z * to.z;
-    const ang = Math.acos(Math.max(-1, Math.min(1, dot)));
-    if (ang > LOCK.CONE) continue;
-    // Prefer closer + more-centered targets.
-    const score = d * (1 + ang);
-    if (score < bestScore) {
-      bestScore = score;
-      best = o.uid;
+interface SourceTargetEntry {
+  borg: BorgRuntime;
+  listIndex: number;
+}
+
+export interface SourceTargetSelection {
+  mode: SourceTargetLockMode;
+  targetUid: string | null;
+  targetIndex: number;
+  sourceState: 0 | 1 | 2;
+  cameraState: 2 | 3 | 4;
+  changed: boolean;
+}
+
+export type SourceTargetCycleDirection = "next" | "prev";
+
+export function ensureSourceTargetLockState(b: BorgRuntime): NonNullable<BorgRuntime["targetLockState"]> {
+  if (!b.targetLockState) {
+    b.targetLockState = {
+      mode: "enemy",
+      sourceState: b.lockTarget ? 1 : 0,
+      cameraState: b.lockTarget ? 3 : 2,
+      enemyIndex: -1,
+      allyIndex: -1,
+      activeTargetUid: b.lockTarget,
+    };
+  }
+  return b.targetLockState;
+}
+
+export function activeSourceTargetUid(b: BorgRuntime): string | null {
+  return b.targetLockState?.activeTargetUid ?? b.lockTarget ?? null;
+}
+
+export function refreshSourceTargetLock(self: BorgRuntime, all: BorgRuntime[]): SourceTargetSelection {
+  const state = ensureSourceTargetLockState(self);
+  if (state.mode === "ally" && targetUidStillValid(self, all, "ally", self.allyLockTarget)) {
+    const entry = sourceTargetEntries(self, all, "ally").find((candidate) => candidate.borg.uid === self.allyLockTarget);
+    return applySourceTarget(self, all, "ally", entry ?? null, 3);
+  }
+
+  state.mode = "enemy";
+  if (targetUidStillValid(self, all, "enemy", self.lockTarget)) {
+    const entry = sourceTargetEntries(self, all, "enemy").find((candidate) => candidate.borg.uid === self.lockTarget);
+    return applySourceTarget(self, all, "enemy", entry ?? null, 3);
+  }
+
+  return sourceInitialEnemyLock(self, all);
+}
+
+export function sourceInitialEnemyLock(self: BorgRuntime, all: BorgRuntime[]): SourceTargetSelection {
+  const entries = sourceTargetEntries(self, all, "enemy");
+  return applySourceTarget(self, all, "enemy", chooseNearestSourceEntry(self, entries), 3);
+}
+
+export function sourceSwitchEnemyLock(
+  self: BorgRuntime,
+  all: BorgRuntime[],
+  direction: SourceTargetCycleDirection = "next",
+): SourceTargetSelection {
+  return cycleSourceTarget(self, all, "enemy", direction);
+}
+
+export function sourceSwitchAllyLock(self: BorgRuntime, all: BorgRuntime[]): SourceTargetSelection {
+  return cycleSourceTarget(self, all, "ally", "next");
+}
+
+function sourceTargetEntries(
+  self: BorgRuntime,
+  all: BorgRuntime[],
+  mode: SourceTargetLockMode,
+): SourceTargetEntry[] {
+  const entries: SourceTargetEntry[] = [];
+  for (let listIndex = 0; listIndex < all.length; listIndex += 1) {
+    const candidate = all[listIndex];
+    if (!candidate) continue;
+    if (mode === "enemy" ? isEnemyAlive(self, candidate) : isAllyAlive(self, candidate)) {
+      entries.push({ borg: candidate, listIndex });
     }
   }
-  return best;
+  return entries;
 }
 
-/** Cycle to the next enemy by distance (R = switch lock-on target). Enemy-only by
- * construction (isEnemyAlive filters dead borgs, self, and same-team allies); the caller
- * (battle.ts) edge-triggers this so holding R does not re-cycle every frame. */
-export function cycleLock(self: BorgRuntime, all: BorgRuntime[]): string | null {
-  const enemies = all
-    .filter((o) => isEnemyAlive(self, o) && distXZ(self.pos, o.pos) <= LOCK.RANGE)
-    .sort((a, b) => distXZ(self.pos, a.pos) - distXZ(self.pos, b.pos));
-  if (enemies.length === 0) return null;
-  const curIdx = enemies.findIndex((o) => o.uid === self.lockTarget);
-  const next = enemies[(curIdx + 1) % enemies.length];
-  return next ? next.uid : null;
-}
-
-/** Z ally-lock target selection. CONFIRMED-ASSET input, TUNED nearest-ally selection.
- * The original ally charge/power-up behavior is not decoded yet, so this only records a
- * same-team target for HUD/debug/future mechanics and never redirects enemy attacks. */
-export function acquireAllyLock(self: BorgRuntime, all: BorgRuntime[]): string | null {
-  let best: string | null = null;
+function chooseNearestSourceEntry(self: BorgRuntime, entries: readonly SourceTargetEntry[]): SourceTargetEntry | null {
+  let best: SourceTargetEntry | null = null;
   let bestDist = Infinity;
-  for (const o of all) {
-    if (!isAllyAlive(self, o)) continue;
-    const d = distXZ(self.pos, o.pos);
-    if (d > LOCK.RANGE || d >= bestDist) continue;
+  for (const entry of entries) {
+    const d = distXZ(self.pos, entry.borg.pos);
+    if (d >= bestDist) continue;
+    best = entry;
     bestDist = d;
-    best = o.uid;
   }
   return best;
 }
 
-/** Cycle to the next same-team ally by distance (repeated Z presses). Ally-only by
- * construction (isAllyAlive filters dead borgs, self, and enemies). With no current
- * ally lock this selects the nearest ally, matching acquireAllyLock. TUNED — the
- * original per-press Z semantics are untraced; edge-triggering lives in battle.ts. */
-export function cycleAllyLock(self: BorgRuntime, all: BorgRuntime[]): string | null {
-  const allies = all
-    .filter((o) => isAllyAlive(self, o) && distXZ(self.pos, o.pos) <= LOCK.RANGE)
-    .sort((a, b) => distXZ(self.pos, a.pos) - distXZ(self.pos, b.pos));
-  if (allies.length === 0) return null;
-  const curIdx = allies.findIndex((o) => o.uid === self.allyLockTarget);
-  const next = allies[(curIdx + 1) % allies.length];
-  return next ? next.uid : null;
+function cycleSourceTarget(
+  self: BorgRuntime,
+  all: BorgRuntime[],
+  mode: SourceTargetLockMode,
+  direction: SourceTargetCycleDirection,
+): SourceTargetSelection {
+  const entries = sourceTargetEntries(self, all, mode);
+  if (entries.length === 0) return applySourceTarget(self, all, mode, null, 4);
+
+  const currentUid = mode === "enemy" ? self.lockTarget : self.allyLockTarget;
+  const currentEntryIndex = entries.findIndex((entry) => entry.borg.uid === currentUid);
+  if (currentEntryIndex < 0) {
+    return applySourceTarget(self, all, mode, chooseNearestSourceEntry(self, entries), 3);
+  }
+
+  const step = direction === "prev" ? -1 : 1;
+  const nextIndex = (currentEntryIndex + step + entries.length) % entries.length;
+  return applySourceTarget(self, all, mode, entries[nextIndex] ?? null, 4);
 }
+
+function targetUidStillValid(
+  self: BorgRuntime,
+  all: readonly BorgRuntime[],
+  mode: SourceTargetLockMode,
+  uid: string | null,
+): boolean {
+  if (!uid) return false;
+  const target = all.find((candidate) => candidate.uid === uid);
+  if (!target) return false;
+  return mode === "enemy" ? isEnemyAlive(self, target) : isAllyAlive(self, target);
+}
+
+function applySourceTarget(
+  self: BorgRuntime,
+  all: BorgRuntime[],
+  mode: SourceTargetLockMode,
+  entry: SourceTargetEntry | null,
+  cameraStateForValidTarget: 2 | 3 | 4,
+): SourceTargetSelection {
+  const state = ensureSourceTargetLockState(self);
+  const previousActive = state.activeTargetUid;
+
+  if (!entry) {
+    if (mode === "enemy") {
+      self.lockTarget = null;
+      state.enemyIndex = -1;
+    } else {
+      self.allyLockTarget = null;
+      state.allyIndex = -1;
+    }
+
+    const enemyStillValid = targetUidStillValid(self, all, "enemy", self.lockTarget);
+    if (mode === "ally" && enemyStillValid) {
+      state.mode = "enemy";
+      state.sourceState = 1;
+      state.cameraState = 3;
+      state.activeTargetUid = self.lockTarget;
+      return {
+        mode: state.mode,
+        targetUid: state.activeTargetUid,
+        targetIndex: state.enemyIndex,
+        sourceState: state.sourceState,
+        cameraState: state.cameraState,
+        changed: previousActive !== state.activeTargetUid,
+      };
+    }
+
+    state.mode = mode;
+    state.sourceState = 0;
+    state.cameraState = previousActive ? 4 : 2;
+    state.activeTargetUid = null;
+    return {
+      mode: state.mode,
+      targetUid: state.activeTargetUid,
+      targetIndex: state.mode === "ally" ? state.allyIndex : state.enemyIndex,
+      sourceState: state.sourceState,
+      cameraState: state.cameraState,
+      changed: previousActive !== state.activeTargetUid,
+    };
+  }
+
+  const targetUid = entry.borg.uid;
+  state.mode = mode;
+  state.sourceState = 1;
+  state.cameraState = previousActive && previousActive !== targetUid ? 4 : cameraStateForValidTarget;
+  state.activeTargetUid = targetUid;
+  if (mode === "enemy") {
+    self.lockTarget = targetUid;
+    state.enemyIndex = entry.listIndex;
+  } else {
+    self.allyLockTarget = targetUid;
+    state.allyIndex = entry.listIndex;
+  }
+  return {
+    mode,
+    targetUid,
+    targetIndex: entry.listIndex,
+    sourceState: state.sourceState,
+    cameraState: state.cameraState,
+    changed: previousActive !== targetUid,
+  };
+}
+
+
+
+
 
 // ---------------------------------------------------------------------------------------
 // Damage application.
@@ -857,21 +989,9 @@ function primaryBActionOrder(actionProfile: BorgActionProfile): readonly BAction
 }
 
 function contextualBTarget(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null {
-  if (self.lockTarget) {
-    const locked = all.find((o) => o.uid === self.lockTarget) ?? null;
-    if (locked && isEnemyAlive(self, locked)) return locked;
-  }
-
-  let best: BorgRuntime | null = null;
-  let bestDist = Infinity;
-  for (const other of all) {
-    if (!isEnemyAlive(self, other)) continue;
-    const d = distXZ(self.pos, other.pos);
-    if (d >= bestDist) continue;
-    bestDist = d;
-    best = other;
-  }
-  return best;
+  if (!self.lockTarget) return null;
+  const locked = all.find((o) => o.uid === self.lockTarget) ?? null;
+  return locked && isEnemyAlive(self, locked) ? locked : null;
 }
 
 /**

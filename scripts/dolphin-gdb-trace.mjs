@@ -20,6 +20,8 @@ const groupsFilter = csvSet(argsByName.get("groups") ?? process.env.TRACE_GROUPS
 const skipIds = csvSet(argsByName.get("skip-ids") ?? process.env.TRACE_SKIP_IDS);
 const onlyIds = csvSet(argsByName.get("only-ids") ?? process.env.TRACE_ONLY_IDS);
 const dryRun = argsByName.has("dry-run") || process.env.TRACE_DRY_RUN === "1";
+const noRuntimeWatchpoints = argsByName.has("no-runtime-watchpoints") || process.env.TRACE_NO_RUNTIME_WATCHPOINTS === "1";
+const noActiveStructDump = argsByName.has("no-active-struct-dump") || process.env.TRACE_NO_ACTIVE_STRUCT_DUMP === "1";
 
 const PAD_STATUS_SIZE = 12;
 const PAD_BUTTON_BITS = {
@@ -181,6 +183,7 @@ function loadStaticWatchpoints() {
 }
 
 function loadRuntimeWatchpoints() {
+  if (noRuntimeWatchpoints) return [];
   const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
   const templates = (plan.runtime_field_watchpoints ?? [])
     .filter((wp) => typeof wp.address === "string" && wp.address.startsWith("runtime:active_borg_base+"))
@@ -578,6 +581,8 @@ async function main() {
       skipIds: [...skipIds],
       maxHits,
       timeoutMs,
+      noRuntimeWatchpoints,
+      noActiveStructDump,
     },
     padInjection: padInjection
       ? {
@@ -693,7 +698,7 @@ async function main() {
       // successive knockdowns) can be diffed offset-by-offset to spot which field dropped by
       // a plausible damage amount.
       let activeBaseStruct = null;
-      if (isMem1(activeBase)) {
+      if (isMem1(activeBase) && !noActiveStructDump) {
         activeBaseStruct = { base: hex32(activeBase), size: 0x1e00, bytes: await readMem(gdb, activeBase, 0x1e00) };
       }
 

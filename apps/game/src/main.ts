@@ -961,7 +961,23 @@ function followCamera(): void {
   if (!session) return;
   const focus = localFocusBorg();
   const target = focus ? battleScene.positionOf(focus.uid) : null;
-  const primary = focus && target ? { pos: target, rotY: focus.rotY } : null;
+  const activeTargetUid = focus?.targetLockState?.activeTargetUid ?? focus?.lockTarget ?? null;
+  const activeTargetScenePos = activeTargetUid ? battleScene.positionOf(activeTargetUid) : null;
+  const activeTargetSim = activeTargetUid
+    ? session.battle.state.borgs.find((b) => b.uid === activeTargetUid) ?? null
+    : null;
+  const lockTargetPos =
+    activeTargetScenePos ??
+    (activeTargetSim ? new THREE.Vector3(activeTargetSim.pos.x, activeTargetSim.pos.y, activeTargetSim.pos.z) : null);
+  const primary =
+    focus && target
+      ? {
+          pos: target,
+          rotY: focus.rotY,
+          lockTargetPos,
+          lockCameraState: focus.targetLockState?.cameraState,
+        }
+      : null;
   const positions = battleLiveActorPositions(session.battle, (uid) => battleScene.positionOf(uid));
   battleCamera.update(primary, positions, session.stageBounds);
 }

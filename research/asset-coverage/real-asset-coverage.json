@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-04T03:29:36.731Z",
+  "generatedAt": "2026-07-04T03:49:53.778Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -30,10 +30,10 @@
     "commonBattleArchiveInventoried": true,
     "commonBattleDataExactMatches": 2,
     "runtimeActorDataBoundToCombat": true,
-    "runtimeTypeDamageMatrixFromDol": false,
+    "runtimeTypeDamageMatrixFromDol": true,
     "runtimeKnockbackDirectionFromDol": true,
     "runtimeCameraMode1BlendFromDol": true,
-    "runtimeBorgAnimationDirectMatches": 2405,
+    "runtimeBorgAnimationDirectMatches": 2704,
     "runtimeBorgAnimationFallbacks": 0,
     "runtimeBorgAnimationMissing": 0,
     "runtimeBoostFlyUsesExportedBoostClip": true,
@@ -2529,7 +2529,7 @@
     "generatedModule": "packages/combat/src/typeDamage.generated.ts",
     "generatedFromDolTables": true,
     "runtimeImportsGeneratedTables": true,
-    "runtimeDamagePipelineUsesTypeMultiplier": false,
+    "runtimeDamagePipelineUsesTypeMultiplier": true,
     "selfcheckCoversMatrixSample": true,
     "remapRows": 16,
     "matrixRows": 20,
@@ -2537,7 +2537,7 @@
     "mappedBorgIds": 208,
     "sourceRef": "packages/combat/src/typeDamage.generated.ts:720",
     "runtimeRef": "packages/combat/src/typeDamage.ts:11",
-    "pipelineRef": "packages/combat/src/combat.ts:null"
+    "pipelineRef": "packages/combat/src/damageFormula.ts:129"
   },
   "knockbackEvidence": {
     "generatedModule": "packages/physics/src/knockback.generated.ts",
@@ -2565,102 +2565,102 @@
   "borgAnimationCoverage": {
     "path": "research/asset-inventory/borg-animation-action-gaps.md",
     "exists": true,
-    "indexesFound": 185,
-    "indexesParsed": 185,
-    "exportedBanks": 8242,
-    "canonicalSlotChecks": 2405,
-    "directRuntimeMatches": 2405,
+    "indexesFound": 208,
+    "indexesParsed": 208,
+    "exportedBanks": 8633,
+    "canonicalSlotChecks": 2704,
+    "directRuntimeMatches": 2704,
     "runtimeFallbacks": 0,
     "missingRuntimeMatches": 0,
     "parseErrors": 0,
     "slotRows": [
       {
         "slot": "idle",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "move",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "dash_fwd",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "dash_back",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "dash_left",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "dash_right",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "jump",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "fly",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "shoot",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "melee",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "special",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "hit",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
       },
       {
         "slot": "death",
-        "direct": 185,
+        "direct": 208,
         "fallback": 0,
         "missing": 0,
         "notes": "none"
@@ -2678,8 +2678,8 @@
     "battleStateHasItems": false,
     "battleRuntimeSpawnsDrops": false,
     "evidenceRefs": {
-      "battleState": "packages/combat/src/types.ts:382",
-      "deployNextBorg": "packages/combat/src/battle.ts:233",
+      "battleState": "packages/combat/src/types.ts:404",
+      "deployNextBorg": "packages/combat/src/battle.ts:234",
       "deathProcessing": "packages/combat/src/battle.ts:505",
       "particleInventory": "research/asset-inventory/particle-effect-inventory.json",
       "hudInventory": "research/asset-inventory/ui-hud-assets.md"

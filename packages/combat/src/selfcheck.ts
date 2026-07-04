@@ -461,6 +461,17 @@ function assertPlayersAutoLockByDefault(borgs: BorgStats[]): void {
   if (!target || target.team === active.team) {
     throw new Error("[selfcheck] human-controlled borg auto-locked an invalid target");
   }
+  if (
+    active.targetLockState?.mode !== "enemy" ||
+    active.targetLockState.sourceState !== 1 ||
+    active.targetLockState.cameraState !== 3 ||
+    active.targetLockState.activeTargetUid !== active.lockTarget ||
+    active.targetLockState.enemyIndex < 0
+  ) {
+    throw new Error(
+      `[selfcheck] source-shaped enemy lock state was not retained: ${JSON.stringify(active.targetLockState)}`,
+    );
+  }
   console.log(`[selfcheck] human-controlled borg auto-locked enemy ${active.lockTarget} by default`);
 }
 
@@ -488,6 +499,18 @@ function assertAllyLockTargetsTeammate(borgs: BorgStats[]): void {
   }
   if (!enemy || enemy.team === active.team) {
     throw new Error(`[selfcheck] Z ally-lock corrupted enemy lock target: ${active.lockTarget}`);
+  }
+  if (
+    active.targetLockState?.mode !== "ally" ||
+    active.targetLockState.sourceState !== 1 ||
+    active.targetLockState.cameraState !== 3 ||
+    active.targetLockState.activeTargetUid !== active.allyLockTarget ||
+    active.targetLockState.allyIndex < 0 ||
+    active.targetLockState.enemyIndex < 0
+  ) {
+    throw new Error(
+      `[selfcheck] source-shaped ally lock state was not retained: ${JSON.stringify(active.targetLockState)}`,
+    );
   }
   console.log(`[selfcheck] Z ally-lock selected teammate ${active.allyLockTarget} without changing enemy lock`);
 }

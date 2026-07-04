@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-04T03:29:36.731Z
+Generated: 2026-07-04T03:49:53.778Z
 
 ## Summary
 
@@ -24,10 +24,10 @@ Generated: 2026-07-04T03:29:36.731Z
 - Common battle archive inventoried: yes
 - Common battle data exact actor matches: 2
 - Runtime actor-data bytes bound to combat formulas: yes
-- Runtime type damage matrix from DOL tables: no
+- Runtime type damage matrix from DOL tables: yes
 - Runtime knockback direction from DOL function: yes
 - Runtime battle camera mode-1 blend from DOL constants: yes
-- Runtime borg animation direct matches: 2405/2405
+- Runtime borg animation direct matches: 2704/2704
 - Runtime borg animation fallbacks/missing: 0/0
 - Runtime fly uses exported boost clip: yes
 - Runtime items/powerups modeled: no
@@ -199,7 +199,7 @@ Runtime combat profiles now bind defense/shot/attack/speed to original pl####dat
 Type damage matrix:
 - Generated from DOL tables: yes (packages/combat/src/typeDamage.generated.ts:720)
 - Runtime imports generated tables: yes (packages/combat/src/typeDamage.ts:11)
-- Damage pipeline uses multiplier: no (packages/combat/src/combat.ts:null)
+- Damage pipeline uses multiplier: yes (packages/combat/src/damageFormula.ts:129)
 - Shape: remap 16 rows; matrix 20x20; mapped borg ids 208.
 - Selfcheck covers sample multiplier: yes.
 
@@ -219,31 +219,31 @@ Battle camera mode-1 blend:
 
 Validator report: research/asset-inventory/borg-animation-action-gaps.md
 Runtime resolver refs: apps/game/src/sim/borgPresentationAssets.ts:112, apps/game/src/sim/borgPresentationAssets.ts:158, apps/game/src/sim/borgPresentationAssets.ts:426, apps/game/src/sim/battleScene.ts:270
-Animation indexes parsed: 185/185; exported banks: 8242; canonical slot checks: 2405.
-Direct matches: 2405; fallbacks: 0; missing: 0; parse errors: 0.
+Animation indexes parsed: 208/208; exported banks: 8633; canonical slot checks: 2704.
+Direct matches: 2704; fallbacks: 0; missing: 0; parse errors: 0.
 Fly/boost mapping: fly state resolves through exported boost labels.
 
 | Slot | Direct | Fallback | Missing | Notes |
 | --- | --- | --- | --- | --- |
-| idle | 185 | 0 | 0 | none |
-| move | 185 | 0 | 0 | none |
-| dash_fwd | 185 | 0 | 0 | none |
-| dash_back | 185 | 0 | 0 | none |
-| dash_left | 185 | 0 | 0 | none |
-| dash_right | 185 | 0 | 0 | none |
-| jump | 185 | 0 | 0 | none |
-| fly | 185 | 0 | 0 | none |
-| shoot | 185 | 0 | 0 | none |
-| melee | 185 | 0 | 0 | none |
-| special | 185 | 0 | 0 | none |
-| hit | 185 | 0 | 0 | none |
-| death | 185 | 0 | 0 | none |
+| idle | 208 | 0 | 0 | none |
+| move | 208 | 0 | 0 | none |
+| dash_fwd | 208 | 0 | 0 | none |
+| dash_back | 208 | 0 | 0 | none |
+| dash_left | 208 | 0 | 0 | none |
+| dash_right | 208 | 0 | 0 | none |
+| jump | 208 | 0 | 0 | none |
+| fly | 208 | 0 | 0 | none |
+| shoot | 208 | 0 | 0 | none |
+| melee | 208 | 0 | 0 | none |
+| special | 208 | 0 | 0 | none |
+| hit | 208 | 0 | 0 | none |
+| death | 208 | 0 | 0 | none |
 
 ## Powerup / Item Runtime Gap
 
 Items/powerups in BattleState: no
 Runtime spawns item/drop/pickup entities: no
-Evidence refs: packages/combat/src/types.ts:382, packages/combat/src/battle.ts:233, packages/combat/src/battle.ts:505, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
+Evidence refs: packages/combat/src/types.ts:404, packages/combat/src/battle.ts:234, packages/combat/src/battle.ts:505, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
 Asset leads: item model ARZ count 90, as_icon documented yes, comhit documented yes.
 Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory.
 

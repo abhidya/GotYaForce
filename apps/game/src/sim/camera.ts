@@ -36,12 +36,12 @@
 // - Per-borg camera data is not extracted: min/max follow distances (actor +0x894/+0x898),
 //   height offsets (+0x88c/+0x6d0), and the mode-2 height cap (10 * actor+0x668). The port
 //   substitutes the ram-trace band/offset (§3.1) for those values.
-// - Lock-on states 3/4 (`FUN_8000cf28`/`FUN_8000d11c`) are documented in §ad but not ported;
-//   the web port has no lock-on targeting yet.
+// - Lock-on states 3/4 (`FUN_8000cf28`/`FUN_8000d11c`) are ported when the sim provides
+//   actor+0x50c lock target state.
 // - The corrective pitch clamp / distance re-clamp passes (`FUN_800101c8` @ 0x800101c8,
 //   `FUN_8000fffc` @ 0x8000fffc) are not ported (secondary safety nets).
 // - Multi-actor widen-to-fit and the arena wall-guard are design choices with no ROM
-//   evidence (an exhaustive corpus search found none) — both stay TUNED.
+//   evidence; both are kept only inside the explicit legacy approximation path.
 // - The ROM's mode-2 exit condition was not located; the approach hands off to the follow
 //   policy once its distance decays into the follow band (TUNED exit).
 
@@ -66,6 +66,10 @@ export interface CameraFollowTarget {
    * FUN_800452e4 rebuilds the trail from a BAM16 heading; mode-0 init (FUN_8000c660) seats
    * the camera behind the actor at heading - 0x8000. */
   rotY: number;
+  /** Runtime actor+0x50c target position used by lock-on camera states 3/4. */
+  lockTargetPos?: THREE.Vector3 | null;
+  /** camera+0x2e6 state: 2 no-lock, 3 lock follow, 4 lock/unlock transition. */
+  lockCameraState?: 2 | 3 | 4;
 }
 
 export interface StageBoundsLike {
@@ -108,6 +112,18 @@ const MODE1_INTEREST_Y_BLEND_DERIVED = CAMERA_MODE1_HALF_BLEND;
 /** DERIVED: FUN_800452e4 degenerate-direction epsilon (0x80436ad8). */
 const MODE1_TRAIL_EPSILON_DERIVED = CAMERA_MODE1_TRAIL_EPSILON;
 
+/** DERIVED: FUN_8000cf28 rotates camera+0x33c toward actor+0x50c by <= FLOAT_80436af4. */
+const MODE1_LOCK_TRAIL_MAX_RADIANS_DERIVED = 0.5890486240386963;
+/** DERIVED: FUN_8000cf28 goal-eye blend weights (FLOAT_80436af8/FLOAT_80436afc). */
+const MODE1_LOCK_PREV_WEIGHT_DERIVED = 0.666700005531311;
+const MODE1_LOCK_NEW_WEIGHT_DERIVED = 0.33329999446868896;
+/** DERIVED: FUN_8000d11c distance-scaled new-weight constants (FLOAT_80436b00..b10). */
+const MODE1_TRANSITION_NEW_WEIGHT_FLOOR_DERIVED = 0.03999999910593033;
+const MODE1_TRANSITION_DISTANCE_HIGH_DERIVED = 3000;
+const MODE1_TRANSITION_DISTANCE_LOW_DERIVED = 1000;
+const MODE1_TRANSITION_NEW_WEIGHT_CAP_DERIVED = 0.25;
+const MODE1_TRANSITION_NEW_WEIGHT_SLOPE_DERIVED = -0.00010500000644242391;
+
 /** DERIVED: FUN_8000c988 approach constants — distance floor 80 (0x80436ae0), per-frame decay
  * ×0.9 (0x80436ae4), yaw step 0x200 BAM (instruction immediate), eye-Y rise 4/frame
  * (0x80436acc reused as an addend). */
@@ -145,20 +161,18 @@ export interface BattleCameraOptions {
   camera: THREE.PerspectiveCamera;
   /** OrbitControls (or any object with a `.target` Vector3) whose target we also drive. */
   controlsTarget: THREE.Vector3;
-  /** Explicit fallback: run the pre-§ad heading-locked approximation (fixed distance 485
-   * behind the borg's facing) instead of the ported FUN_8000cdc0 goal-eye policy. */
+  /** Explicit legacy switch: run the pre-section-ad heading-locked approximation. */
   legacyApproximation?: boolean;
 }
 
 /**
  * Per-frame battle camera update.
  *
- * Default policy is the ported ROM mode-1 state-2 follow (FUN_8000cdc0 chain, see module
- * header) seeded through the ported mode-2 approach (FUN_8000c988) when the camera starts far
- * from the target. Multi-actor widen-to-fit and the arena wall-guard remain TUNED overlays on
- * the DERIVED skeleton. Set `legacyApproximation` to fall back to the old heading-locked
- * 2-sample approximation. The default path stays on the recovered single-focus distance band;
- * the old multi-actor widen overlay is kept only inside `legacyApproximation`.
+ * Default policy is the ported ROM mode-1 state machine: state 2 no-lock follow
+ * (FUN_8000cdc0), state 3 lock follow (FUN_8000cf28), and state 4 lock/unlock transition
+ * (FUN_8000d11c), seeded through the ported mode-2 approach (FUN_8000c988). The old
+ * heading-locked 2-sample approximation, multi-actor widen, and wall-guard are kept only
+ * inside `legacyApproximation`.
  */
 export class BattleCamera {
   private initialized = false;
@@ -255,6 +269,16 @@ export class BattleCamera {
     const horizontalDist = Math.hypot(this.goalEye.x - focusBase.x, this.goalEye.z - focusBase.z);
     const distance = Math.min(followMax, Math.max(followMin, horizontalDist));
 
+    const lockCameraState = primary.lockCameraState ?? (primary.lockTargetPos ? 3 : 2);
+    if (lockCameraState === 3 && primary.lockTargetPos) {
+      this.updateLockFollow(camera.position, interest, primary.lockTargetPos, distance, extraHeight);
+      return;
+    }
+    if (lockCameraState === 4) {
+      this.updateLockTransition(camera.position, interest, primary.lockTargetPos ?? null, distance, extraHeight);
+      return;
+    }
+
     // DERIVED: desired eye = interest + trail * distance, height = distance * tan(0x600 BAM).
     // TUNED: extraHeight widen overlay.
     _desired.set(
@@ -262,27 +286,6 @@ export class BattleCamera {
       interest.y + distance * CAMERA_PITCH_TAN_DERIVED + extraHeight,
       interest.z + _trail.z * distance,
     );
-
-    // TUNED wall-guard: steer the desired eye toward the arena center when the normal trailing
-    // point would sit outside the exported arena shell. No ROM camera-collision data has been
-    // traced; under the DERIVED re-projection this now only redirects the trail (distance and
-    // height stay policy-controlled).
-    const centerX = (stageBounds.minX + stageBounds.maxX) * 0.5;
-    const centerZ = (stageBounds.minZ + stageBounds.maxZ) * 0.5;
-    const currentRadius = Math.hypot(focusBase.x - centerX, focusBase.z - centerZ);
-    const desiredRadius = Math.hypot(_desired.x - centerX, _desired.z - centerZ);
-    const shellGuardRadius =
-      Math.min(stageBounds.maxX - stageBounds.minX, stageBounds.maxZ - stageBounds.minZ) * 0.25;
-    if (currentRadius > shellGuardRadius && desiredRadius > currentRadius + 80) {
-      _inward.set(centerX - focusBase.x, 0, centerZ - focusBase.z);
-      if (_inward.lengthSq() < 0.0001) _inward.set(-Math.sin(primary.rotY), 0, -Math.cos(primary.rotY));
-      _inward.normalize();
-      _desired.set(
-        interest.x + _inward.x * distance,
-        interest.y + distance * CAMERA_PITCH_TAN_DERIVED + extraHeight + 120, // TUNED extra lift.
-        interest.z + _inward.z * distance,
-      );
-    }
 
     // DERIVED: goal-eye blend, XZ (4*prev + desired)/5 and Y (9*prev + desired)/10.
     this.goalEye.set(
@@ -299,6 +302,44 @@ export class BattleCamera {
     } else {
       camera.position.copy(this.goalEye);
     }
+  }
+
+  /** Ported FUN_8000cf28 (camera state 3): rotate trail toward actor+0x50c lock target,
+   * blend goal-eye by FLOAT_80436af8/afc, then re-project to the source distance band. */
+  private updateLockFollow(
+    eyeOut: THREE.Vector3,
+    interest: THREE.Vector3,
+    lockTarget: THREE.Vector3,
+    distance: number,
+    extraHeight: number,
+  ): void {
+    _trail.set(this.goalEye.x - interest.x, 0, this.goalEye.z - interest.z);
+    _eyeGoal.set(interest.x - lockTarget.x, 0, interest.z - lockTarget.z);
+    rotateTrailTowardXZ(_trail, _eyeGoal, MODE1_LOCK_TRAIL_MAX_RADIANS_DERIVED);
+    desiredFromTrail(_desired, interest, _trail, distance, extraHeight);
+    blendGoalEye(this.goalEye, _desired, MODE1_LOCK_PREV_WEIGHT_DERIVED, MODE1_LOCK_NEW_WEIGHT_DERIVED);
+    reprojectGoalEye(eyeOut, this.goalEye, interest, distance);
+  }
+
+  /** Ported FUN_8000d11c (camera state 4): lock/unlock transition. With no target it trails
+   * from the current goal eye; with a target it points directly at actor+0x50c. */
+  private updateLockTransition(
+    eyeOut: THREE.Vector3,
+    interest: THREE.Vector3,
+    lockTarget: THREE.Vector3 | null,
+    distance: number,
+    extraHeight: number,
+  ): void {
+    if (lockTarget) {
+      _trail.set(interest.x - lockTarget.x, 0, interest.z - lockTarget.z);
+    } else {
+      _trail.set(this.goalEye.x - interest.x, 0, this.goalEye.z - interest.z);
+    }
+    normalizeTrailOrDefault(_trail);
+    desiredFromTrail(_desired, interest, _trail, distance, extraHeight);
+    const newWeight = lockTarget ? transitionNewWeight(distance) : MODE1_TRANSITION_NEW_WEIGHT_FLOOR_DERIVED;
+    blendGoalEye(this.goalEye, _desired, 1 - newWeight, newWeight);
+    reprojectGoalEye(eyeOut, this.goalEye, interest, distance);
   }
 
   /** Seed the follow/approach state from wherever the renderer left the camera. Mirrors the
@@ -456,6 +497,78 @@ export class BattleCamera {
 }
 
 /** DERIVED: FUN_8000fc2c interest — X/Z track the target, Y half-blends (FLOAT_80436ac4). */
+function desiredFromTrail(
+  out: THREE.Vector3,
+  interest: THREE.Vector3,
+  trail: THREE.Vector3,
+  distance: number,
+  extraHeight: number,
+): THREE.Vector3 {
+  return out.set(
+    interest.x + trail.x * distance,
+    interest.y + distance * CAMERA_PITCH_TAN_DERIVED + extraHeight,
+    interest.z + trail.z * distance,
+  );
+}
+
+function blendGoalEye(goalEye: THREE.Vector3, desired: THREE.Vector3, prevWeight: number, newWeight: number): void {
+  goalEye.set(
+    goalEye.x * prevWeight + desired.x * newWeight,
+    goalEye.y * prevWeight + desired.y * newWeight,
+    goalEye.z * prevWeight + desired.z * newWeight,
+  );
+}
+
+function reprojectGoalEye(
+  eyeOut: THREE.Vector3,
+  goalEye: THREE.Vector3,
+  interest: THREE.Vector3,
+  distance: number,
+): void {
+  _eye.copy(goalEye).sub(interest);
+  if (_eye.lengthSq() > MODE1_TRAIL_EPSILON_DERIVED * MODE1_TRAIL_EPSILON_DERIVED) {
+    _eye.normalize().multiplyScalar(distance).add(interest);
+    eyeOut.copy(_eye);
+  } else {
+    eyeOut.copy(goalEye);
+  }
+}
+
+function normalizeTrailOrDefault(trail: THREE.Vector3): void {
+  if (trail.lengthSq() <= MODE1_TRAIL_EPSILON_DERIVED * MODE1_TRAIL_EPSILON_DERIVED) {
+    trail.set(0, 0, -1);
+  } else {
+    trail.normalize();
+  }
+}
+
+function rotateTrailTowardXZ(current: THREE.Vector3, target: THREE.Vector3, maxRadians: number): void {
+  normalizeTrailOrDefault(current);
+  normalizeTrailOrDefault(target);
+  const currentYaw = Math.atan2(current.x, current.z);
+  const targetYaw = Math.atan2(target.x, target.z);
+  const delta = wrapRadians(targetYaw - currentYaw);
+  const step = Math.max(-maxRadians, Math.min(maxRadians, delta));
+  const yaw = currentYaw + step;
+  current.set(Math.sin(yaw), 0, Math.cos(yaw));
+}
+
+function transitionNewWeight(distance: number): number {
+  if (distance >= MODE1_TRANSITION_DISTANCE_HIGH_DERIVED) return MODE1_TRANSITION_NEW_WEIGHT_FLOOR_DERIVED;
+  if (distance <= MODE1_TRANSITION_DISTANCE_LOW_DERIVED) return MODE1_TRANSITION_NEW_WEIGHT_CAP_DERIVED;
+  return (
+    MODE1_TRANSITION_NEW_WEIGHT_SLOPE_DERIVED * (distance - MODE1_TRANSITION_DISTANCE_LOW_DERIVED) +
+    MODE1_TRANSITION_NEW_WEIGHT_CAP_DERIVED
+  );
+}
+
+function wrapRadians(radians: number): number {
+  let wrapped = radians;
+  while (wrapped > Math.PI) wrapped -= Math.PI * 2;
+  while (wrapped < -Math.PI) wrapped += Math.PI * 2;
+  return wrapped;
+}
+
 function mode1InterestTarget(current: THREE.Vector3, target: THREE.Vector3): THREE.Vector3 {
   return _goal.set(
     target.x,

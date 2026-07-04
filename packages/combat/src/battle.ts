@@ -21,12 +21,12 @@ import {
   tryActivateBurst,
 } from "./burst.js";
 import {
-  acquireAllyLock,
-  acquireLock,
-  cycleAllyLock,
-  cycleLock,
+  activeSourceTargetUid,
   isBusy,
+  refreshSourceTargetLock,
   resetProjectileCounter,
+  sourceSwitchAllyLock,
+  sourceSwitchEnemyLock,
   stepActionState,
   stepAmmoRefill,
   stepAttacks,
@@ -185,6 +185,7 @@ class BattleImpl implements Battle {
 
     // Deploy each force's first borg.
     this.forces.forEach((force, fi) => this.deployNext(force, this.spawnPosFor(fi)));
+    this.refreshSourceLocks();
     this.recomputeEnergy();
   }
 
@@ -280,6 +281,14 @@ class BattleImpl implements Battle {
       statusImmunityMask: 0,
       lockTarget: null,
       allyLockTarget: null,
+      targetLockState: {
+        mode: "enemy",
+        sourceState: 0,
+        cameraState: 2,
+        enemyIndex: -1,
+        allyIndex: -1,
+        activeTargetUid: null,
+      },
       burstArmFrames: 0,
       burstActive: false,
       burstPaired: false,
@@ -418,8 +427,8 @@ class BattleImpl implements Battle {
       stepInvincibility(b);
       stepGaugeWindows(b);
 
-      // Lock-on is the default player movement frame; `lockOn` also lets AI/future callers opt in.
-      // R (switch-lock) and Z (ally-lock) are EDGE-TRIGGERED via 0/1 press latches stored in
+      // Source lock-on is continuous for active borgs; R (switch-lock) and Z (ally-lock) are
+      // EDGE-TRIGGERED via 0/1 press latches stored in
       // cooldowns (same pattern as movement's jumpHeld; stepCooldowns skips them): holding the
       // button must cycle exactly once per press, not re-cycle at 60 Hz.
       const switchLockPressed = input.switchLock && (b.cooldowns["switchLockHeld"] ?? 0) === 0;
@@ -428,24 +437,15 @@ class BattleImpl implements Battle {
       b.cooldowns["allyLockHeld"] = input.allyLock ? 1 : 0;
 
       if (switchLockPressed) {
-        b.lockTarget = cycleLock(b, all);
-      } else if (input.lockOn || b.ownerPlayer !== null) {
-        if (b.lockTarget === null || !this.lockStillValid(b)) {
-          b.lockTarget = acquireLock(b, all);
-        }
+        sourceSwitchEnemyLock(b, all, "next");
+      } else if (allyLockPressed) {
+        sourceSwitchAllyLock(b, all);
       } else {
-        b.lockTarget = null;
+        refreshSourceTargetLock(b, all);
       }
-      // Drop dead/invalid locks (cycleLock/acquireLock are enemy-only, so lockTarget can
-      // never be self or a same-team ally; this also drops targets that died this frame).
-      if (b.lockTarget && !this.lockStillValid(b)) b.lockTarget = null;
-      // Z ally-lock: acquire the nearest ally on first press, cycle allies on later presses.
-      if (allyLockPressed) {
-        b.allyLockTarget = this.allyLockStillValid(b) ? cycleAllyLock(b, all) : acquireAllyLock(b, all);
-      }
-      if (b.allyLockTarget && !this.allyLockStillValid(b)) b.allyLockTarget = null;
 
-      const lockPos = b.lockTarget ? this.byUid.get(b.lockTarget)?.pos ?? null : null;
+      const activeTargetUid = activeSourceTargetUid(b);
+      const lockPos = activeTargetUid ? this.byUid.get(activeTargetUid)?.pos ?? null : null;
       const ctx: MoveContext = { lockTargetPos: lockPos, bounds: this.bounds, collision: this.collision };
 
       // Movement (skips horizontal control while busy, but still applies gravity).
@@ -511,6 +511,7 @@ class BattleImpl implements Battle {
         }
       }
       this.spawnPlanned.clear();
+      this.refreshSourceLocks();
     }
     // 5) Energy + win/lose.
     this.recomputeEnergy();
@@ -561,16 +562,11 @@ class BattleImpl implements Battle {
     return team === 0 ? this.sideRanks[0] : this.sideRanks[1];
   }
 
-  private lockStillValid(b: BorgRuntime): boolean {
-    if (!b.lockTarget) return false;
-    const t = this.byUid.get(b.lockTarget);
-    return !!t && t.alive && t.hp > 0 && t.state !== "death" && t.team !== b.team;
-  }
-
-  private allyLockStillValid(b: BorgRuntime): boolean {
-    if (!b.allyLockTarget) return false;
-    const t = this.byUid.get(b.allyLockTarget);
-    return !!t && t.alive && t.hp > 0 && t.state !== "death" && t.team === b.team && t.uid !== b.uid;
+  private refreshSourceLocks(): void {
+    for (const b of this.state.borgs) {
+      if (!b.alive) continue;
+      refreshSourceTargetLock(b, this.state.borgs);
+    }
   }
 
   private forceIndexOfUid(uid: string): number {

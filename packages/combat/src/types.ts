@@ -115,6 +115,26 @@ export interface WeaponCell {
   timer: number;
 }
 
+export type SourceTargetLockMode = "enemy" | "ally";
+export type SourceCameraState = 2 | 3 | 4;
+
+/** Source-shaped target state: actor +0x502/+0x503/+0x504/+0x508 plus index bytes
+ * +0x73d/+0x73e, represented by runtime uids instead of raw target-entry pointers. */
+export interface SourceTargetLockState {
+  /** Active lock family. R selects enemies, Z selects allies. */
+  mode: SourceTargetLockMode;
+  /** actor+0x502 style state: 0=no target, 1=valid target, 2=invalidating target. */
+  sourceState: 0 | 1 | 2;
+  /** camera+0x2e6 state: 2=no-lock, 3=lock follow, 4=lock/unlock transition. */
+  cameraState: SourceCameraState;
+  /** Source target-list index byte for enemy cycling (+0x73d). */
+  enemyIndex: number;
+  /** Source target-list index byte for ally cycling (+0x73e). */
+  allyIndex: number;
+  /** Runtime equivalent of actor+0x508 for the currently active lock family. */
+  activeTargetUid: string | null;
+}
+
 export interface BorgRuntime {
   uid: string;
   borgId: string;
@@ -197,6 +217,8 @@ export interface BorgRuntime {
   lockTarget: string | null;
   /** Current ally lock-on target uid, or null. Z control is asset-confirmed; downstream behavior is unknown. */
   allyLockTarget: string | null;
+  /** Source-shaped retained lock state. Optional so external fakes self-heal on first lock step. */
+  targetLockState?: SourceTargetLockState;
   /** Uids already struck by the CURRENT melee swing (enforces one hit per swing per target).
    *  Transient bookkeeping, reset on every swing start; optional so external constructors
    *  (tests/fakes) don't need to provide it. */

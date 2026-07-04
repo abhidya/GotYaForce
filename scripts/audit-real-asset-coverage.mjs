@@ -609,7 +609,7 @@ function inspectCommonBattleDataEvidence() {
 function inspectTypeDamageEvidence() {
   const generated = readText("packages/combat/src/typeDamage.generated.ts");
   const typeDamage = readText("packages/combat/src/typeDamage.ts");
-  const combat = readText("packages/combat/src/combat.ts");
+  const damageFormula = readText("packages/combat/src/damageFormula.ts");
   const selfcheck = readText("packages/combat/src/selfcheck.ts");
   const numberField = (field) => Number.parseInt(new RegExp(`${field}:\\s*(\\d+)`).exec(generated)?.[1] ?? "0", 10);
   return {
@@ -620,7 +620,8 @@ function inspectTypeDamageEvidence() {
       generated.includes('remapAddress: "0x802f2e28"') &&
       generated.includes('matrixAddress: "0x802c5d60"'),
     runtimeImportsGeneratedTables: typeDamage.includes("typeDamage.generated.js"),
-    runtimeDamagePipelineUsesTypeMultiplier: combat.includes("typeDamageMultiplier(") && combat.includes("rawDamageForTarget"),
+    runtimeDamagePipelineUsesTypeMultiplier:
+      damageFormula.includes("typeDamageMultiplier(") && damageFormula.includes("ctx.attackerProfile.id"),
     selfcheckCoversMatrixSample: selfcheck.includes('typeDamageMultiplier("pl0b00", "pl0701")'),
     remapRows: numberField("remapRows"),
     matrixRows: numberField("matrixRows"),
@@ -628,7 +629,7 @@ function inspectTypeDamageEvidence() {
     mappedBorgIds: numberField("mappedBorgIds"),
     sourceRef: `packages/combat/src/typeDamage.generated.ts:${lineOf(generated, "remapSourcePath")}`,
     runtimeRef: `packages/combat/src/typeDamage.ts:${lineOf(typeDamage, "typeDamage.generated.js")}`,
-    pipelineRef: `packages/combat/src/combat.ts:${lineOf(combat, "typeDamageMultiplier(")}`,
+    pipelineRef: `packages/combat/src/damageFormula.ts:${lineOf(damageFormula, "typeDamageMultiplier(")}`,
   };
 }
 
