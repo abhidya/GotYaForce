@@ -1554,7 +1554,7 @@ export function stepAttacks(
   // ROM tester priority: a same-frame B-charge release resolves to command type 3, which
   // outranks the X/secondary type 2 (FUN_800699d8 order) — the charge release below wins the
   // frame and the X press is not consumed.
-  const commandPreemptsX = b.command?.type === AttackCommandType.Unmapped3;
+  const commandPreemptsX = b.command?.type === AttackCommandType.Charged3;
   if (canStartAction && !commandPreemptsX && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
     if (xChargeMoveForBorgId(b.borgId) !== null) {
       // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;

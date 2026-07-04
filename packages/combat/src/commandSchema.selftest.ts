@@ -133,14 +133,14 @@ function testCommandFamilyTable(): void {
   assertEqual(COMMAND_FAMILY[AttackCommandType.Melee1], "melee", "COMMAND_FAMILY[1] === melee");
   assertEqual(COMMAND_FAMILY[AttackCommandType.Ranged5], "ranged", "COMMAND_FAMILY[5] === ranged");
 
-  // Full table per the ROM dispatch evidence (chunk_0007.c:4750-4782): 1/2 melee, 4/5/6 ranged.
+  // Full table: 1/2 melee, 3 charged, 4/5/6 ranged.
   assertEqual(COMMAND_FAMILY[AttackCommandType.Melee2], "melee", "COMMAND_FAMILY[2] === melee");
+  assertEqual(COMMAND_FAMILY[AttackCommandType.Charged3], "charged", "COMMAND_FAMILY[3] === charged");
   assertEqual(COMMAND_FAMILY[AttackCommandType.Ranged4], "ranged", "COMMAND_FAMILY[4] === ranged");
   assertEqual(COMMAND_FAMILY[AttackCommandType.Ranged6], "ranged", "COMMAND_FAMILY[6] === ranged");
 
   // Unmapped values must stay unmapped — no invented family assignments.
   assertEqual(COMMAND_FAMILY[AttackCommandType.Unmapped0], "unmapped", "COMMAND_FAMILY[0] === unmapped");
-  assertEqual(COMMAND_FAMILY[AttackCommandType.Unmapped3], "unmapped", "COMMAND_FAMILY[3] === unmapped");
   assertEqual(COMMAND_FAMILY[AttackCommandType.Unmapped7], "unmapped", "COMMAND_FAMILY[7] === unmapped");
 }
 
@@ -149,7 +149,8 @@ function testCommandEnumValuesMatchRom(): void {
   assertEqual(AttackCommandType.Unmapped0, 0, "AttackCommandType.Unmapped0 === 0");
   assertEqual(AttackCommandType.Melee1, 1, "AttackCommandType.Melee1 === 1");
   assertEqual(AttackCommandType.Melee2, 2, "AttackCommandType.Melee2 === 2");
-  assertEqual(AttackCommandType.Unmapped3, 3, "AttackCommandType.Unmapped3 === 3");
+  assertEqual(AttackCommandType.Charged3, 3, "AttackCommandType.Charged3 === 3");
+  assertEqual(AttackCommandType.Unmapped3, AttackCommandType.Charged3, "AttackCommandType.Unmapped3 alias === Charged3");
   assertEqual(AttackCommandType.Ranged4, 4, "AttackCommandType.Ranged4 === 4");
   assertEqual(AttackCommandType.Ranged5, 5, "AttackCommandType.Ranged5 === 5");
   assertEqual(AttackCommandType.Ranged6, 6, "AttackCommandType.Ranged6 === 6");
@@ -158,7 +159,12 @@ function testCommandEnumValuesMatchRom(): void {
   // Subtype range 0-5 (actor+0x586, chunk_0009.c:500-587).
   assertEqual(AttackCommandSubtype.Unmapped0, 0, "AttackCommandSubtype.Unmapped0 === 0");
   assertEqual(AttackCommandSubtype.AirElevated4, 4, "AttackCommandSubtype.AirElevated4 === 4");
-  assertEqual(AttackCommandSubtype.Unmapped5, 5, "AttackCommandSubtype.Unmapped5 === 5");
+  assertEqual(AttackCommandSubtype.ChargedRanged5, 5, "AttackCommandSubtype.ChargedRanged5 === 5");
+  assertEqual(
+    AttackCommandSubtype.Unmapped5,
+    AttackCommandSubtype.ChargedRanged5,
+    "AttackCommandSubtype.Unmapped5 alias === ChargedRanged5",
+  );
 }
 
 function testAttackCommandShape(): void {
@@ -172,7 +178,7 @@ function testAttackCommandShape(): void {
 function testResolveCommandType(): void {
   // Single-bit selection (behavior-notes (bd), verified chunk_0009.c tester bits).
   assertEqual(resolveCommandType(COMMAND_INPUT_BITS.RANGED), AttackCommandType.Ranged5, "bit 0x1000 -> Ranged5");
-  assertEqual(resolveCommandType(COMMAND_INPUT_BITS.CHARGED), AttackCommandType.Unmapped3, "bit 0x400 -> charged type 3");
+  assertEqual(resolveCommandType(COMMAND_INPUT_BITS.CHARGED), AttackCommandType.Charged3, "bit 0x400 -> charged type 3");
   assertEqual(resolveCommandType(COMMAND_INPUT_BITS.SECONDARY), AttackCommandType.Melee2, "bit 0x80 -> type 2 (X)");
   assertEqual(resolveCommandType(COMMAND_INPUT_BITS.MELEE_A), AttackCommandType.Melee1, "bit 0x20 -> Melee1");
   assertEqual(resolveCommandType(COMMAND_INPUT_BITS.MELEE_B), AttackCommandType.Melee1, "bit 0x40 -> Melee1");
@@ -187,7 +193,7 @@ function testResolveCommandType(): void {
   );
   assertEqual(
     resolveCommandType(COMMAND_INPUT_BITS.CHARGED | COMMAND_INPUT_BITS.SECONDARY | COMMAND_INPUT_BITS.MELEE_B),
-    AttackCommandType.Unmapped3,
+    AttackCommandType.Charged3,
     "charged+secondary+melee -> charged (charged beats secondary/melee)",
   );
   assertEqual(
@@ -343,7 +349,7 @@ function testLiveCommandDispatch(): void {
   assertEqual(bClose?.button ?? null, "B Attack", "G RED B close -> B Attack row");
   assertTrue(bClose?.exact === true, "G RED B Attack resolves an exact ROM record");
   const bCharge = resolveLiveCommand("pl0615", { attackHeld: false, specialHeld: false, chargeRelease: true, xChargeRelease: false }, ground);
-  assertEqual(bCharge?.type ?? null, AttackCommandType.Unmapped3, "G RED charge release -> type 3");
+  assertEqual(bCharge?.type ?? null, AttackCommandType.Charged3, "G RED charge release -> type 3");
   assertEqual(bCharge?.button ?? null, "B Charge", "G RED charge release -> B Charge row");
   assertTrue(bCharge?.exact === true, "G RED B Charge resolves an exact ROM record");
   const x = resolveLiveCommand("pl0615", { attackHeld: false, specialHeld: true, chargeRelease: false, xChargeRelease: false }, ground);
@@ -353,7 +359,7 @@ function testLiveCommandDispatch(): void {
 
   // ROM priority on combined input: charge release + X held -> charged (type 3) wins.
   const chargedOverX = resolveLiveCommand("pl0615", { attackHeld: false, specialHeld: true, chargeRelease: true, xChargeRelease: false }, ground);
-  assertEqual(chargedOverX?.type ?? null, AttackCommandType.Unmapped3, "charge release preempts X (type 3 > type 2)");
+  assertEqual(chargedOverX?.type ?? null, AttackCommandType.Charged3, "charge release preempts X (type 3 > type 2)");
 
   // Magnet Robot (+/-), Angel Nurse, Beam Satellite: exact records for their main B/X rows.
   for (const id of ["pl0405", "pl0409", "pl0900", "pl0e01"]) {

@@ -82,7 +82,7 @@ export function commandButtonForType(
       return ctx.meleeEngaged ? "B Attack" : "B Shot";
     case AttackCommandType.Melee2:
       return "X"; // type 2 — zz_0069b98_, the secondary/X row
-    case AttackCommandType.Unmapped3:
+    case AttackCommandType.Charged3:
       return "B Charge"; // type 3 — zz_0069bf0_, the charged row
     case AttackCommandType.Ranged5:
       return "X Charge"; // type 5 — zz_0069c50_/zz_0069cb0_, the ranged/forced row

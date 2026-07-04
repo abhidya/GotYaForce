@@ -45,12 +45,13 @@ export enum AttackCommandType {
    * did not establish what differentiates them (e.g. combo step vs. a separate melee move).
    */
   Melee2 = 2,
+  /** @deprecated Use Charged3. Kept as an API alias for older overlay/test code. */
+  Unmapped3 = 3,
   /** CHARGED command type. DERIVED_ROM (behavior-notes (bd)): written to actor+0x585 by tester
    *  `zz_0069bf0_` from bit 0x400 of the transformed input word actor+0x5d4, and it sets the
-   *  charged flag at actor+0x595. So type 3 is the "charged/forced" command variant (kept named
-   *  Unmapped3 only to preserve the ROM byte value; its meaning is now known). Its dispatch
+   *  charged flag at actor+0x595. So type 3 is the charged/forced command variant. Its dispatch
    *  family at +0x591 is resolved later at the +0x591 stage rather than by `FUN_8005d494`. */
-  Unmapped3 = 3,
+  Charged3 = 3,
   /**
    * Ranged family. DERIVED_ROM: consumed as a ranged-family value (actor+0x591 == 4) by the
    * attack-active dispatch `FUN_8005d494` (chunk_0007.c:4750-4782). Which decision tester
@@ -81,15 +82,15 @@ export enum AttackCommandType {
 
 /**
  * Human-readable dispatch family for each {@link AttackCommandType}, keyed by the ROM's
- * numeric command-type byte. DERIVED_ROM for 1/2 (melee) and 4/5/6 (ranged) — see
- * `FUN_8005d494` (chunk_0007.c:4750-4782). Types 0/3/7 are `"unmapped"` — BLOCKED, no dispatch
- * evidence found; do not infer a family for them.
+ * numeric command-type byte. DERIVED_ROM for 1/2 (melee), 3 (charged/forced), and 4/5/6
+ * (ranged). See `FUN_8005d494` (chunk_0007.c:4750-4782) for the melee/ranged dispatch
+ * family and behavior-notes (bd) for type 3's tester write. Types 0/7 remain `"unmapped"`.
  */
-export const COMMAND_FAMILY: Readonly<Record<AttackCommandType, "melee" | "ranged" | "unmapped">> = {
+export const COMMAND_FAMILY: Readonly<Record<AttackCommandType, "melee" | "charged" | "ranged" | "unmapped">> = {
   [AttackCommandType.Unmapped0]: "unmapped",
   [AttackCommandType.Melee1]: "melee",
   [AttackCommandType.Melee2]: "melee",
-  [AttackCommandType.Unmapped3]: "unmapped",
+  [AttackCommandType.Charged3]: "charged",
   [AttackCommandType.Ranged4]: "ranged",
   [AttackCommandType.Ranged5]: "ranged",
   [AttackCommandType.Ranged6]: "ranged",
@@ -118,13 +119,14 @@ export enum AttackCommandSubtype {
    * citation from the ticket evidence — cited, not invented.
    */
   AirElevated4 = 4,
+  /** @deprecated Use ChargedRanged5. Kept as an API alias for older overlay/test code. */
+  Unmapped5 = 5,
   /** CHARGED-RANGED subtype. DERIVED_ROM (behavior-notes (bd)): subtype 5 is set at actor+0x586
    *  by `zz_0069fe0_` (ranged path) when the charge timer is positive (`0.0 < actor+0x6a4`),
    *  confirming the charged-ranged meaning the earlier read only SUSPECTED. CORRECTION (bd): the
    *  gate constant `FLOAT_8043762c` = 0.0 (DOL-read, anchor-validated) — it is a positive-timer
-   *  gate (`0.0 < timer`), NOT a distance/melee threshold. (Named Unmapped5 only to preserve the
-   *  ROM byte value.) */
-  Unmapped5 = 5,
+   *  gate (`0.0 < timer`), NOT a distance/melee threshold. */
+  ChargedRanged5 = 5,
 }
 
 /** A single resolved attack command: (type, subtype) pair, mirroring the ROM's
@@ -173,7 +175,7 @@ export const COMMAND_INPUT_BITS = {
  */
 export function resolveCommandType(inputWord: number): AttackCommandType | null {
   if (inputWord & COMMAND_INPUT_BITS.RANGED) return AttackCommandType.Ranged5;
-  if (inputWord & COMMAND_INPUT_BITS.CHARGED) return AttackCommandType.Unmapped3; // charged type 3
+  if (inputWord & COMMAND_INPUT_BITS.CHARGED) return AttackCommandType.Charged3;
   if (inputWord & COMMAND_INPUT_BITS.SECONDARY) return AttackCommandType.Melee2; // type 2 (X/secondary)
   if (inputWord & (COMMAND_INPUT_BITS.MELEE_A | COMMAND_INPUT_BITS.MELEE_B)) return AttackCommandType.Melee1;
   return null;
