@@ -1357,7 +1357,10 @@ export function stepAttacks(
     const isFinisher = comboStep >= meleeDef.comboHits - 1;
     // Sword beam: the combo finisher's FIRST active frame emits a fast short-lived projectile
     // with melee-scaled damage (TUNED design; see actionProfiles.ts SwordBeamDef).
-    if (meleeDef.swordBeam && isFinisher && meleeActive === meleeDef.active) {
+    // meleeActive counts down from startup+activeLen, so the first active frame equals the
+    // resolved window length — meleeActiveLen, not the TUNED meleeDef.active, which diverges
+    // once exact HIT-record windows drive the swing.
+    if (meleeDef.swordBeam && isFinisher && meleeActive === meleeActiveLen) {
       out.push(spawnSwordBeam(b, meleeDef, meleeDef.swordBeam, all));
     }
     // Only the active window (after startup) deals damage; one hit per swing per target.

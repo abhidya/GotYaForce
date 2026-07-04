@@ -27,6 +27,7 @@ import {
   stepProjectiles,
 } from "./combat.js";
 import { createBurstMeter } from "./burst.js";
+import { exactMeleeForBorgId } from "./meleeExactData.js";
 import { moveByButton } from "./moveProperties.js";
 import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
 import { BURST, DASH, JUMP, MELEE, STAGGER, STATE, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
@@ -713,6 +714,24 @@ function pumpAttackFrame(
   all: BorgRuntime[],
   profiles: Map<string, BorgProfile>,
 ): Projectile[] {
+  // The battle loop keeps every borg auto-locked to a living enemy each frame
+  // (battle.ts refreshSourceTargetLock), and the contextual-B resolver depends on that
+  // lock like the ROM's live-target gates (+0x4a0 / +0x748). Reproduce the invariant so
+  // direct stepAttacks harnesses see battle-shaped state.
+  const lockAlive = all.some((o) => o.uid === b.lockTarget && o.team !== b.team && o.hp > 0);
+  if (!lockAlive) {
+    let nearest: BorgRuntime | null = null;
+    let nearestD = Infinity;
+    for (const o of all) {
+      if (o.team === b.team || o.hp <= 0) continue;
+      const d = Math.hypot(o.pos.x - b.pos.x, o.pos.z - b.pos.z);
+      if (d < nearestD) {
+        nearestD = d;
+        nearest = o;
+      }
+    }
+    b.lockTarget = nearest ? nearest.uid : null;
+  }
   stepCooldowns(b);
   return stepAttacks(b, p, attackHeld, false, all, profiles).projectiles;
 }
@@ -746,6 +765,12 @@ function assertActionProfilesDrivePrimaryAttacks(borgs: BorgStats[]): void {
   closeGRedRuntime.borgId = gRed.id;
   closeGRedRuntime.ammo = startingAmmoForProfile(gRed);
   const closeGRedEnemy = fakeRuntime("gred_close_enemy", 1, 42);
+  // The battle loop keeps human borgs continuously auto-locked (battle.ts
+  // refreshSourceTargetLock), and the contextual-B target requires that lock — the ROM's
+  // melee/ranged testers gate on a live target (+0x4a0 / +0x748 proximity state). A direct
+  // stepAttacks harness must reproduce that invariant or close-B falls through to the
+  // charge-hold path (idle anim) instead of the battle attack.
+  closeGRedRuntime.lockTarget = closeGRedEnemy.uid;
   const closeGRedProfiles = new Map([
     [closeGRedRuntime.uid, gRed],
     [closeGRedEnemy.uid, enemyProfile],
@@ -761,6 +786,9 @@ function assertActionProfilesDrivePrimaryAttacks(borgs: BorgStats[]): void {
   swordRuntime.borgId = swordKnight.id;
   swordRuntime.ammo = startingAmmoForProfile(swordKnight);
   const swordEnemy = fakeRuntime("sword_enemy", 1, 42);
+  // Same auto-lock invariant as the close-G-RED case above: the contextual-B resolver needs
+  // the live lock the battle loop maintains, or a hybrid melee-primary falls to its gun.
+  swordRuntime.lockTarget = swordEnemy.uid;
   const swordProfiles = new Map([
     [swordRuntime.uid, swordKnight],
     [swordEnemy.uid, enemyProfile],
@@ -828,9 +856,13 @@ function assertMeleeHitsOncePerSwing(borgs: BorgStats[]): void {
 
   const meleeDef = actionProfileForProfile(profile).melee;
   if (!meleeDef) throw new Error("[selfcheck] one-hit-per-swing test needs a melee profile");
-  // One press -> one swing; run through the whole active window.
+  // One press -> one swing; run through the whole active window. The runtime prefers the
+  // exact HIT-record frame window (meleeExactData) over the TUNED profile timing, so the
+  // pumped span must cover whichever is later.
+  const exact = exactMeleeForBorgId(profile.id);
+  const swingFrames = Math.max(meleeDef.startup + meleeDef.active, exact ? exact.activeEnd : 0) + 2;
   pumpAttackFrame(attacker, profile, true, [attacker, enemy], profiles);
-  for (let f = 0; f < meleeDef.startup + meleeDef.active + 2; f += 1) {
+  for (let f = 0; f < swingFrames; f += 1) {
     pumpAttackFrame(attacker, profile, false, [attacker, enemy], profiles);
   }
   const damage = enemy.maxHp - enemy.hp;
@@ -1351,15 +1383,28 @@ function assertFriendlyFireMeleeSimLevel(borgs: BorgStats[]): void {
     attacker.borgId = profile.id;
     const victim = fakeRuntime("ff_melee_victim", victimTeam, 20);
     victim.hp = victim.maxHp = 5000;
+    const all = [attacker, victim];
     const profiles = new Map([
       [attacker.uid, profile],
       [victim.uid, victimTeam === 0 ? profile : enemyProfile],
     ]);
-    pumpAttackFrame(attacker, profile, true, [attacker, victim], profiles);
+    if (victimTeam === 0) {
+      // The contextual-B resolver only routes a hybrid to melee when locked onto an engaged
+      // enemy (battle invariant), so the teammate run needs a live enemy in swing range to
+      // trigger the swing that clips the teammate.
+      const lockBait = fakeRuntime("ff_melee_lockbait", 1, 20);
+      lockBait.hp = lockBait.maxHp = 5000;
+      all.push(lockBait);
+      profiles.set(lockBait.uid, enemyProfile);
+    }
+    pumpAttackFrame(attacker, profile, true, all, profiles);
     const meleeDef = actionProfileForProfile(profile).melee;
     if (!meleeDef) throw new Error("[selfcheck] friendly fire melee sim test needs a melee profile");
-    for (let f = 0; f < meleeDef.startup + meleeDef.active + 2; f += 1) {
-      pumpAttackFrame(attacker, profile, false, [attacker, victim], profiles);
+    // Cover the exact HIT-record window when it runs longer than the TUNED profile timing.
+    const exact = exactMeleeForBorgId(profile.id);
+    const swingFrames = Math.max(meleeDef.startup + meleeDef.active, exact ? exact.activeEnd : 0) + 2;
+    for (let f = 0; f < swingFrames; f += 1) {
+      pumpAttackFrame(attacker, profile, false, all, profiles);
     }
     return victim.maxHp - victim.hp;
   };
@@ -2067,6 +2112,9 @@ function assertMeleeLungeClosesDistance(borgs: BorgStats[]): void {
     attacker.ammo = startingAmmoForProfile(gRed);
     const victim = fakeRuntime("lunge_victim", 1, startDist);
     victim.hp = victim.maxHp = 5000;
+    // Direct stepAttacks harness: reproduce the battle loop's standing auto-lock, which the
+    // contextual-B melee (and its lunge) requires.
+    attacker.lockTarget = victim.uid;
     const profiles = new Map([
       [attacker.uid, gRed],
       [victim.uid, enemyProfile],
