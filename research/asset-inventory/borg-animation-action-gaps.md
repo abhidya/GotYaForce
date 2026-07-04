@@ -62,3 +62,21 @@ None.
 rtk node scripts/validate-borg-animation-actions.mjs
 rtk node scripts/validate-borg-animation-actions.mjs --strict
 ```
+
+
+## Session findings toward resolving the fallbacks (2026-07-03)
+
+- `pl0625` (VICTORY MACHINE, `anim: null` in borgs.json) is a layout anomaly, not an export
+  miss: its export contains ONLY `idle` in group 0; all locomotion-shaped banks live in
+  group 2 (`g2_s16/s17/s19` carry dash-length root spans ~100-224 units, `g2_s21` a
+  224-unit forward translation). The bake heuristic (scripts/bake-all-borg-anims.mjs
+  `label()`) only labels group-0 slots, so every canonical slot falls back to idle.
+  Do NOT relabel by span heuristics — that is exactly the "generic labels" failure mode.
+- Source-accurate path found: the original state handlers select animation banks through
+  `zz_004beb8_(speed, actor, bank, 0, slotExpr, -1, -1)` — e.g. the knockdown entry
+  `zz_0060c94_` @0x80060c94 plays (2, `+0x57c` + 0x1b) and `zz_0060be8_` plays
+  (0xd, `+0x57c` + 0x1b) (chunk_0007.c:6810-6871). Tracing every `zz_004beb8_` call site
+  per state handler (35-slot table at 0x802d3570, extracted in behavior-notes (af)) yields
+  the authored action -> (bank, slot) mapping per state, including whatever alternate
+  layout large/boss borgs like pl0625 use. That trace is the prerequisite for resolving
+  the 33 fallbacks with source proof; until then the runtime fallbacks stay as-is.
