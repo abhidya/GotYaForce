@@ -216,14 +216,73 @@ export const MELEE = {
    *  (wired via packages/physics/src/knockback.ts), but never found a magnitude/speed value;
    *  zz_00300bc_ only ever writes angle fields, never a force/velocity. Magnitude stays TUNED. */
   KNOCKBACK: 5,
+  /**
+   * Contextual-B melee ENGAGE window (XZ units): the SELECTION distance within which a B
+   * press resolves to the battle-mode melee (combat.ts resolveBActionOrder /
+   * targetWithinMeleeEngage) — the DAMAGE check keeps the per-borg meleeDef.range untouched.
+   * The app-layer reticle (presentation.ts focusHasMeleeRangeTarget) should consume this same
+   * window so the yellow->red cursor flip and the sim's melee selection agree.
+   * TUNED — do NOT promote to DERIVED: the ROM threshold FLOAT_8043762c that flips the cursor
+   * red and selects battle-mode melee is identified but UNDUMPED/untraced (behavior-notes.md
+   * (ai)/(av), T1-blocked). The MECHANISM (close = battle attack, with a HUD-observable
+   * yellow->red threshold) is CONFIRMED_MANUAL per behavior-notes.md (ao) (official NA
+   * instruction manual); only the numeric value here is tuned. Sized so the lunge below can
+   * carry the attacker from the selection edge into meleeDef.range (~60-86) within a swing's
+   * startup+active frames, and to cover the old AI whiff band (64-110).
+   */
+  ENGAGE_RANGE: 180,
+  /**
+   * Vertical tolerance of the ENGAGE window (units). TUNED — intentionally wider than the
+   * per-hit Y_TOLERANCE (50) so slightly-airborne/jumping targets still flip the contextual B
+   * to melee (the old 50 blocked vertical engagements outright); the damage check keeps the
+   * per-borg meleeDef.yTolerance.
+   */
+  ENGAGE_Y_TOLERANCE: 100,
+  /**
+   * Melee lunge (approach dash) speed, units/frame, applied by combat.ts's lunge drive during
+   * a swing's startup+active frames (cooldowns["meleeLunge"] window). TUNED — the ROM carries
+   * the lunge in the attack_lunge_s* animation banks' bone-0 ROOT MOTION (rootZ spans
+   * ~100-389 units, documented in apps/game/src/main.ts PREFERRED_LABELS comments), which the
+   * renderer strips (main.ts buildClip zeroes bone-0 XZ for all clips), so the sim drives the
+   * translation instead; FLOAT_8043762c (the engage threshold that would pin the ROM's
+   * lunge-trigger distance) remains T1-blocked (behavior-notes.md (ai)/(av)). Note the
+   * EFFECTIVE per-frame advance is LUNGE_SPEED - MOVE.DECEL (~29.6) because stepMovement
+   * decays combat-state velocity toward 0 before integrating each frame.
+   */
+  LUNGE_SPEED: 36,
+  /**
+   * Max distance a single swing's lunge may cover (units), enforced by clamping the lunge
+   * window to floor(LUNGE_MAX_DIST / LUNGE_SPEED) frames. TUNED, asset-anchored: the exported
+   * attack_lunge_s* rootZ spans run ~100-389 units (apps/game/src/main.ts PREFERRED_LABELS
+   * comments), so a full-length lunge of ~300 sits inside the authored envelope.
+   */
+  LUNGE_MAX_DIST: 300,
+  /**
+   * The lunge stops driving once within this fraction of meleeDef.range of the target, so
+   * the attacker closes into reach without overrunning through the target. TUNED.
+   */
+  LUNGE_STOP_FRACTION: 0.75,
 } as const;
 
 export const SHOT = {
-  /** Projectile speed (units/frame). TUNED. */
+  /** Projectile speed (units/frame). TUNED — the ROM's per-muzzle speed comes from the weapon-
+   *  param table DAT_802d39dc scaled by DAT_802d39c0 (spawn zz_006ee14_ 0x8006ee14,
+   *  chunk_0009.c:3769 + init FUN_8006f11c chunk_0009.c:3907); both tables are identified but
+   *  UNDUMPED, and raw ROM speeds would not transfer anyway across the port's ~4x world rescale
+   *  (behavior-notes.md section (bc)). */
   SPEED: 22,
-  /** Projectile lifetime (frames) -> max range ~= SPEED*LIFETIME. */
-  LIFETIME: 40,
-  /** Homing turn rate toward lockTarget (radians/frame); 0 = straight. */
+  /** Projectile lifetime (frames). DERIVED_ROM — projectile init FUN_8006f11c seeds the life
+   *  counter to 600 frames (chunk_0009.c:3907). Frame counts transfer 1:1 across the port's
+   *  ~4x world rescale (behavior-notes.md (bc)), unlike speeds/gravity. Raised from the old
+   *  TUNED 40 together with the owner-liveness despawn (zz_00840b8_, chunk_0012.c:3216) and
+   *  the terrain/wall impact despawn (zz_0083244_/zz_0083714_ via zz_006f268_,
+   *  chunk_0009.c:3956) so long-lived shots still die on geometry/bounds/owner death instead
+   *  of flooding the arena. NOTE: per-borg shot lifetimes in data/actionProfiles.json are
+   *  separate TUNED values owned by that dataset; this constant is the default/fallback. */
+  LIFETIME: 600,
+  /** Homing turn rate toward lockTarget (radians/frame); 0 = straight. TUNED magnitude — the
+   *  MECHANISM (per-frame angle-clamped 3D steer) is the ROM's FUN_8006c1c8
+   *  (chunk_0009.c:1947); the per-projectile clamp value comes from undumped params. */
   HOMING_TURN: 0.08,
   /** Hit radius (XZ units) for projectile-vs-borg. */
   HIT_RADIUS: 35,
@@ -245,6 +304,47 @@ export const SHOT = {
   /** Knockback imparted (units/frame). TUNED — see MELEE.KNOCKBACK note; direction is DERIVED
    *  (s4p), magnitude is not. */
   KNOCKBACK: 3,
+} as const;
+
+/**
+ * Projectile homing (fx-cluster-2026-07-03, research/decomp/data/identified-functions.json).
+ * The ROM's homing trio:
+ *   - FUN_8006c334 (chunk_0009.c:1995), called from the spawn path at chunk_0009.c:3841 —
+ *     spawn-time aim-cone gate: the homing lock is granted ONLY when the locked target lies
+ *     inside a cone around the projectile's initial flight direction; otherwise it flies
+ *     straight.
+ *   - FUN_8006c1c8 (chunk_0009.c:1947) — per-frame angle-clamped 3D axis-angle steer of the
+ *     FULL velocity vector (not yaw-only).
+ *   - zz_006c440_ (chunk_0009.c:2033) — steer + advance by normalized(vel) * speed (+0x44).
+ */
+export const HOMING = {
+  /** Aim-cone half-angle (radians) for the spawn-time lock gate (FUN_8006c334). The ROM
+   *  compares against FLOAT_8043768c — address identified, value UNDUMPED — so this stays
+   *  TUNED (30 degrees) until that float is dumped. */
+  AIM_CONE_HALF_ANGLE_RAD: Math.PI / 6,
+  /** Speed floor below which the per-frame steer is skipped entirely. TUNED epsilon — replaces
+   *  the old `|| SHOT.SPEED` fallback that silently re-accelerated stalled projectiles with no
+   *  ROM basis (the ROM keeps speed in a separate +0x44 field and never re-seeds it in the
+   *  steer, zz_006c440_ chunk_0009.c:2033). */
+  MIN_STEER_SPEED: 1e-4,
+} as const;
+
+/**
+ * Shared sim/render muzzle offset (world units, relative to the borg origin along its facing).
+ * ONE constant used by BOTH combat.ts spawnProjectile (sim spawn point) and the renderer's
+ * muzzle flash so the projectile appears where the flash renders (they previously disagreed:
+ * sim forward 30 / up 20 vs renderer forward 46 / up 86).
+ *
+ * TUNED — the ROM's real muzzle world position comes from the per-muzzle weapon-param table
+ * DAT_802d39dc read by the spawn function zz_006ee14_ (0x8006ee14, chunk_0009.c:3769); the
+ * table is identified but its values are UNDUMPED, so these numbers remain tuned defaults.
+ * Per-borg TUNED overrides in data/actionProfiles.json (muzzleForwardOffset/muzzleYOffset)
+ * take precedence in the sim; renderers should prefer the projectile's actual spawn position
+ * (or the borg's shot def) when available and fall back to this constant.
+ */
+export const MUZZLE_OFFSET = {
+  forward: 30,
+  up: 20,
 } as const;
 
 export const AMMO = {
@@ -443,6 +543,13 @@ export const AI = {
    * actors share the same low-level dispatch, no separate AI brain function identified).
    */
   MELEE_RANGE: 50,
+  /**
+   * NOTE (melee workstream): ai.ts no longer reads MELEE_RANGE — melee/mixed AI now uses the
+   * borg's actual per-borg meleeDef.range for its desired distance and the shared
+   * MELEE.ENGAGE_RANGE window (combat.ts meleeEngageRangeFor) for its attack gate, fixing the
+   * 64-110 whiff band the flat 50+RANGE_SLACK window produced. Kept (still TUNED, still NOT
+   * promotable to DERIVED — FLOAT_8043762c is T1-blocked) for any legacy/debug readers.
+   */
   /** AI desired engage distance for ranged borgs. TUNED — see MELEE_RANGE note. */
   RANGED_RANGE: 600,
   /** Slack around the desired range before AI stops advancing. TUNED — see MELEE_RANGE note. */
@@ -582,18 +689,42 @@ export const BURST = {
    */
   ARM_WINDOW_FRAMES: 6,
   /**
-   * BLOCKED-until-T3. Real activation (ROM +0x6fc = 1) preconditions beyond "armed" are
-   * UNKNOWN — no meter/resource model exists in the port yet (see ATK-011/ATK-012). Keeping
-   * this false makes the whole burst shell inert in real battles: burstArmFrames/burstActive/
-   * burstPaired are tracked but never change gameplay output until this flips (and ATK-012
-   * wires real effects) after trace T3 lands.
+   * BLOCKED-until-ATK-012. Keeping this false makes the per-BORG burst shell inert in real
+   * battles: burstArmFrames/burstActive/burstPaired are tracked but never change gameplay
+   * output until ATK-012 wires real effects.
    * Per (ao) (official NA instruction manual, CONFIRMED_MANUAL): activation's real precondition
    * is "press when the burst gauge is at max" — a full Power Burst meter, officially named in
-   * the manual and corroborated by StrategyWiki's interface page, which also documents the
-   * meter's fill direction: it "fills as the player inflicts and receives damage." That meter
-   * is still unlocated in RAM, so this stays false until it's found and a real fill/consume
-   * model backs it (future ATK-012 work) — the manual only tells us WHAT gates activation, not
-   * HOW to compute it yet.
+   * the manual and corroborated by StrategyWiki's interface page.
+   * UPDATE (Q4 RESOLVED 2026-07-03 — research/decomp/attack-mechanics-open-questions.md Q4
+   * lines 51-79, attack-mechanics-findings.md §S): the meter is now LOCATED (per-PLAYER, player
+   * struct +i*0x3c: +0x126 clamped u16 / +0x124 max / +0x12a unclamped / +0x103 charged) and
+   * its fill model is PORTED (METER_MAX / FILL_PER_HIT below; state in
+   * BattleState.burstMeterByPlayer, fill in combat.ts applyHit, charged sweep in battle.ts).
+   * This still stays false because the gauge is DISPLAY-ONLY until ATK-012 lands real burst
+   * gameplay effects — Q5 (the burst speed boost's code location) is still open, so flipping
+   * this would activate the effect-free shell, not the real mechanic.
    */
   ENABLED: false,
+  /**
+   * DERIVED — Q4 RESOLVED (2026-07-03): the per-player burst meter's max, player struct
+   * +0x124 = 3000 (save-state diff scripts/diff-actor-block.mjs; research/decomp/
+   * attack-mechanics-open-questions.md Q4 lines 53-58, attack-mechanics-findings.md §S).
+   * The clamped meter +0x126 (u16) caps here while the +0x12a accumulator keeps counting
+   * (live: 2929 -> 3079 -> 3129).
+   */
+  METER_MAX: 3000,
+  /**
+   * DERIVED — T3 live traces (2026-07-03, research/decomp/attack-mechanics-open-questions.md
+   * Q4 lines 59-74): the meter fills +50 per hit CONNECTION, ATTACKER only, flat/damage-
+   * independent — B shot 16 HP dmg -> +50 (reproduced 3x); Plasma Knuckle melee 25 HP dmg ->
+   * +50; one penetrating beam through a dead borg husk -> +150 = 3 hit connections x 50 (dead
+   * borgs still register hits). Victim side: NONE of the other three players' meters moved on
+   * any hit taken — taking damage does NOT fill the victim's meter.
+   * CAVEAT (mandatory, Q4): 50 is confirmed for two different G Red moves (shot + melee), but
+   * a per-move or per-damage-record override elsewhere cannot be fully excluded yet. NOTE the
+   * damage-record field `forceGaugeCurveIndex` is NOT this — that keys a damage multiplier to
+   * the TEAM GF-energy gauge (+0x114), a separate gauge; the damage pipeline
+   * (chunk_0004.c:6672-6828) never writes +0x126.
+   */
+  FILL_PER_HIT: 50,
 } as const;

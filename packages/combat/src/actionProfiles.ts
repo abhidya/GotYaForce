@@ -61,6 +61,12 @@ export interface ShotActionDef {
   chargeTier2DamageMult: number;
   /** Ballistic drop applied to the projectile's Y velocity each frame (0 = none). TUNED. */
   bulletDrop: number;
+  /** Visual family for tier>=1 charged releases (TUNED-visual). Sourced by the generator from
+   *  the OBSERVED_WIKI "B Charge" move name in borgMoveProperties.json (e.g. G Buster's Laser
+   *  flair -> energy beam) with projectileVisualFamilies.json as the fallback. Optional and
+   *  data-only this wave: absent (or for non-chargeable shots) the runtime keeps using
+   *  visualKind; combat.ts consumption lands in a later wave. */
+  chargedVisualKind?: ProjectileVisualKind;
   /** Weapon-0 refill type (ATK-009, WeaponRefillType). DERIVED per-borg where the extracted
    *  stat row has data (research/decomp/data/borg-hp-stat-rows-802f2988.json via
    *  sourceBorgStats.json weaponSlots[0].chargeType); TUNED_EXISTING fallback (all-at-once)
@@ -72,12 +78,30 @@ export interface ShotActionDef {
   refillParam: number;
 }
 
+/** X-special archetype (wave-1 data groundwork). "aoe" is the existing generic radial burst;
+ *  "projectile" marks borgs whose OBSERVED_WIKI X move reads as a fired attack (e.g. G Red's
+ *  G Crash, missiles/beams). Selection heuristic is TUNED over wiki move fields. */
+export type SpecialArchetype = "aoe" | "projectile";
+
 export interface SpecialActionDef {
   cooldown: number;
   duration: number;
   radius: number;
   damageMultiplier: number;
   knockbackMultiplier: number;
+  /** Optional archetype; ABSENT means "aoe" so combat.ts's radial burst (unchanged this wave)
+   *  stays the behavior for every borg until the projectile runtime lands in a later wave. */
+  archetype?: SpecialArchetype;
+  /** OBSERVED_WIKI X move name (borgMoveProperties.json wiki harvest) — presentation hook for
+   *  the app layer; never a gameplay input. */
+  moveName?: string;
+  /** Projectile-archetype params (emitted only when archetype === "projectile"; all TUNED —
+   *  no ROM per-move special table is decoded, wiki evidence only selects WHO fires one). */
+  projectileSpeed?: number;
+  projectileHitRadius?: number;
+  projectileCount?: number;
+  /** TUNED-visual, from the X move name / projectileVisualFamilies.json. */
+  projectileVisualKind?: ProjectileVisualKind;
 }
 
 export interface BorgActionProfile {

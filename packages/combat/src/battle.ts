@@ -12,7 +12,7 @@
 
 import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
-import { stepBurst } from "./burst.js";
+import { createBurstMeter, stepBurst, sweepBurstCharged } from "./burst.js";
 import {
   acquireAllyLock,
   acquireLock,
@@ -44,6 +44,7 @@ import {
   type BattleConfig,
   type BattleState,
   type BorgRuntime,
+  type BurstMeterState,
   type DeployEntry,
   type PlayerInput,
   type RectStageBounds,
@@ -56,6 +57,41 @@ const SPAWN_RADIUS_FRACTION = 0.35;
 const SPAWN_RADIUS_MAX = 3200;
 const SPAWN_FLOOR_NORMAL_MIN_Y = 0.5;
 const SPAWN_LOW_SURFACE_Y_BAND = 640;
+
+// W17 (wiki-mechanics-queue.md): a player whose force is exhausted while a same-team ally
+// still fights respawns as a hidden 1-HP husk borg, and keeps respawning until the ally
+// falls. LIVE-VERIFIED (2026-07-03 GDB probe of the owned "meter charged.sav", 2v2): the
+// husk actor reads species word actor+0x3e8 = 0xf07 (pl0f07 — the unnamed final entry of
+// the Death Borg family; assets exist but it is not in the player roster/borgs.json),
+// hp = 1, weapon cell +0x774/+0x776 = 1/1. NOTE the chunk_0006.c:7175 +0x4a0 spawn path
+// queued as a lead in W17 was disproven by the same probe (+0x4a0 = 0 on the husk).
+export const HUSK_BORG_ID = "pl0f07";
+const HUSK_HP = 1; // live-verified
+const HUSK_AMMO = 1; // live-verified (HUD "B 1" + weapon cell 1/1)
+
+/**
+ * pl0f07 has no roster stats (hidden borg), so the profile is synthesized. hp/ammo are
+ * live-verified; energy MUST be 0 so the husk never contributes to the team energy pool
+ * (the team is destroyed when its real forces hit 0, husks on-field or not). The remaining
+ * stat bytes are TUNED minimal placeholders until pl0f07data.bin is parsed like the roster.
+ */
+function buildHuskProfile(): BorgProfile {
+  return {
+    id: HUSK_BORG_ID,
+    name: "DEATH BORG HUSK",
+    energy: 0,
+    maxHp: HUSK_HP,
+    defense: 1,
+    shot: 1,
+    attack: 0,
+    speed: 1,
+    airJumpLevel: 0,
+    flyer: false,
+    hasShot: true,
+    hasMelee: false,
+    rangePref: "ranged",
+  };
+}
 
 /** Internal per-force runtime: the deploy queue + which team/owner it belongs to. */
 interface ForceRuntime {
@@ -117,6 +153,16 @@ class BattleImpl implements Battle {
       });
     });
 
+    // Per-player Power Burst meters (Q4 RESOLVED 2026-07-03 — findings §S): PER-PLAYER like
+    // the ROM's player-struct array (+i*0x3c), created ONCE at battle creation and never
+    // touched by deployNext — the meter persists across borg deaths/deploys/switches of the
+    // same player. CPU forces (ownerPlayer === null) get no entry in this wave (documented in
+    // creditBurstFill, burst.ts). Battle start = empty/uncharged (createBurstMeter).
+    const burstMeterByPlayer: Record<string, BurstMeterState> = {};
+    for (const force of this.forces) {
+      if (force.ownerPlayer !== null) burstMeterByPlayer[force.ownerPlayer] = createBurstMeter();
+    }
+
     this.state = {
       borgs: [],
       projectiles: [],
@@ -124,6 +170,7 @@ class BattleImpl implements Battle {
       defeated: {},
       defeatedEnergy: {},
       activeUidByPlayer: {},
+      burstMeterByPlayer,
       frame: 0,
       timeRemainingFrames: this.timeLimitFrames,
       result: "ongoing",
@@ -161,8 +208,28 @@ class BattleImpl implements Battle {
     return { pos: spawn, rotY };
   }
 
+  /**
+   * W17: true while any OTHER same-team force still has real fight left (queued borgs or a
+   * live non-husk active borg). Gates husk (re)deploys — once every real allied force is
+   * gone the team's energy is 0 and the battle is decided, so no further husk spawns.
+   */
+  private allyForceStillFighting(force: ForceRuntime): boolean {
+    return this.forces.some((f) => {
+      if (f === force || f.team !== force.team) return false;
+      if (f.queue.length > 0) return true;
+      if (f.activeUid === null) return false;
+      const active = this.byUid.get(f.activeUid);
+      return !!active && active.alive && active.hp > 0 && active.borgId !== HUSK_BORG_ID;
+    });
+  }
+
   private deployNext(force: ForceRuntime, spawn: { pos: Vec3; rotY: number }): void {
-    const entry = force.queue.shift();
+    // W17: an exhausted force with a fighting ally deploys the husk instead of going dark;
+    // the husk's own deaths land back here, so it respawns until the ally falls
+    // (owner-observed live behavior; identity/stats live-verified — see HUSK_BORG_ID).
+    const entry =
+      force.queue.shift() ??
+      (this.allyForceStillFighting(force) ? { borgId: HUSK_BORG_ID, profile: buildHuskProfile() } : undefined);
     if (!entry) {
       force.activeUid = null;
       delete this.state.activeUidByPlayer[force.controlKey];
@@ -188,7 +255,7 @@ class BattleImpl implements Battle {
       state: "spawn",
       stateTime: 0,
       anim: "spawn",
-      ammo: startingAmmoForProfile(prof),
+      ammo: entry.borgId === HUSK_BORG_ID ? HUSK_AMMO : startingAmmoForProfile(prof),
       cooldowns: { boostFuel: JUMP.BOOST_FUEL_FRAMES, jumpHeld: 0 },
       invincTimer: SPAWN_INVINCIBILITY_FRAMES,
       balanceGauge: gauges.balanceGaugeMax,
@@ -247,6 +314,13 @@ class BattleImpl implements Battle {
   step(_dt: number, inputs: Record<string, PlayerInput>): void {
     void _dt; // sim is fixed-step (SIM.DT); dt accepted for API symmetry.
     if (this.state.result !== "ongoing") return;
+
+    // 0) Power Burst charged-flag sweep (ROM +0x103, Q4): the flag flips ONE frame AFTER the
+    // clamped meter reaches METER_MAX. Deterministic check-BEFORE-fill ordering: this runs
+    // before any of this frame's hit connections (stepAttacks in loop 2 / stepProjectiles in
+    // step 3) can fill meters, so a meter maxed on frame N is first seen — and charged — on
+    // frame N+1, matching the live-observed delay. See sweepBurstCharged (burst.ts).
+    sweepBurstCharged(this.state.burstMeterByPlayer);
 
     const all = this.state.borgs;
     const profiles = this.profiles;
@@ -328,6 +402,9 @@ class BattleImpl implements Battle {
       if (!isBusy(b)) {
         const res = stepAttacks(b, prof, input.attack, input.special, all, profiles, {
           sideRankForTeam: (team) => this.sideRankForTeam(team),
+          // Burst-meter fill plumbing (Q4): applyHit credits the attacker's player per
+          // hit connection — see creditBurstFill (burst.ts).
+          burstMeters: this.state.burstMeterByPlayer,
         });
         if (res.projectiles.length) this.state.projectiles.push(...res.projectiles);
       }
@@ -362,6 +439,10 @@ class BattleImpl implements Battle {
       },
       {
         sideRankForTeam: (team) => this.sideRankForTeam(team),
+        // Burst-meter fill plumbing (Q4): projectile hit connections credit the OWNER'S
+        // player meter per connection (a persisting beam re-hitting = one credit per
+        // connection, matching the ROM's dead-husk 3 x 50 trace).
+        burstMeters: this.state.burstMeterByPlayer,
       },
     );
     this.accountPendingDefeats();
@@ -382,9 +463,14 @@ class BattleImpl implements Battle {
     this.tickBattleTimer();
 
     // 6) Cull fully-dead borgs from the active list to keep arrays small (keep maps for energy already counted via queue=0).
+    // NOTE: byUid deliberately RETAINS defeated borgs (alive === false, never deleted). The
+    // projectile owner-liveness despawn (stepProjectiles, zz_00840b8_ chunk_0012.c:3216)
+    // depends on this: a dead owner is found in byUid with alive=false, which despawns its
+    // in-flight projectiles. Deleting entries here would silently disable that despawn (a
+    // missing uid is treated as "no liveness info" for synthetic callers).
     this.state.borgs = this.state.borgs.filter((b) => {
       if (!b.alive && b.state === "death" && b.stateTime >= 0 && b.hp <= 0) {
-        // Already counted as removed; drop from byUid too unless re-queued.
+        // Already counted as removed; stays in byUid (see NOTE above).
         return false;
       }
       return b.alive;
@@ -442,6 +528,10 @@ class BattleImpl implements Battle {
       const prof = this.profiles.get(b.uid);
       if (!prof) continue;
       b.defeatAccounted = true;
+      // W17: husk deaths carry no force cost (energy 0) and are excluded from the defeated
+      // counters — the husk respawns indefinitely, so counting it would inflate the
+      // score/stat counters with unbounded repeat kills.
+      if (b.borgId === HUSK_BORG_ID) continue;
       this.state.defeated[b.team] = (this.state.defeated[b.team] ?? 0) + 1;
       this.state.defeatedEnergy[b.team] = (this.state.defeatedEnergy[b.team] ?? 0) + prof.energy;
     }

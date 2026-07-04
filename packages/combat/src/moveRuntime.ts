@@ -1,15 +1,27 @@
 import { actionProfileForProfile, type PrimaryAttackKind } from "./actionProfiles.js";
+import {
+  commandMoveRecordsForBorgButton,
+  type CommandMoveRecord,
+  type RuntimeCommandMoveButton,
+} from "./commandMoveTables.js";
 import { moveByButton, moveProfileForBorgId, type BorgMove, type Penetration } from "./moveProperties.js";
 import { sourceStatsForBorgId, type BorgSourceWeaponSlot } from "./sourceBorgStats.js";
 import type { BorgProfile } from "./stats.js";
 
-export type RuntimeMoveButton = "B Shot" | "B Attack" | "B Charge" | "X" | "X Charge";
+export type RuntimeMoveButton = RuntimeCommandMoveButton;
 export type RuntimeMoveAction = "shot" | "melee" | "shot-charge" | "special" | "special-charge";
 export type RuntimeMoveCommandStatus =
   | "direct-b"
   | "contextual-b"
   | "charge-release"
   | "direct-x"
+  // X Charge is LIVE in the sim runtime: combat.ts stepAttacks accumulates
+  // b.cooldowns["xChargeFrames"] while X is held and fires the special on release with
+  // B-charge-mirrored tier scaling (X_CHARGE in combat.ts). Same release semantics as the
+  // B-side "charge-release", kept as a distinct literal so overlays can tell the slots apart.
+  | "x-charge-release"
+  // Retired status (kept in the union for back-compat with overlay consumers written while
+  // X Charge was unimplemented; commandStatusForButton no longer returns it).
   | "x-charge-blocked";
 export type RuntimeMoveHitboxStatus =
   | "projectile-radius"
@@ -35,6 +47,8 @@ export interface RuntimeMoveBinding {
   ammo: RuntimeMoveAmmo;
   penetration: Penetration | null;
   commandStatus: RuntimeMoveCommandStatus;
+  commandRecords: CommandMoveRecord[];
+  exactCommand: boolean;
   actionStatus: "profile-backed" | "profile-missing";
   hitboxStatus: RuntimeMoveHitboxStatus;
   exactHitbox: boolean;
@@ -43,11 +57,35 @@ export interface RuntimeMoveBinding {
 const BUTTONS: readonly RuntimeMoveButton[] = ["B Shot", "B Attack", "B Charge", "X", "X Charge"];
 
 export function usesContextualBResolver(id: string): boolean {
-  return moveByButton(id, "B Shot") !== null && moveByButton(id, "B Attack") !== null;
+  // Wiki-catalog evidence: the borg has BOTH a "B Shot" and a "B Attack" row, so B must be
+  // proximity-contextual (93/208 borgs via borgMoveProperties.json).
+  if (moveByButton(id, "B Shot") !== null && moveByButton(id, "B Attack") !== null) return true;
+  // ROM command-table evidence (stronger): the borg's decoded command-move table carries live
+  // B-close (commandType 1) records — the target-proximity B path where zz_0069a88_/zz_0069b10_
+  // write actor+0x585 = 1 (vs the B-far type-0 path writing 0). A live type-1 record IS the
+  // ROM's per-borg battle-mode-melee selection, so such borgs use the contextual resolver even
+  // when the wiki catalog lacks a separate "B Attack" row. See commandMoveTables.ts
+  // BUTTON_COMMAND_TYPES and data/commandMoveTables.json (25 borgs / 17 decoded tables,
+  // 21 with live type-1 melee records).
+  return commandMoveRecordsForBorgButton(id, "B Attack").length > 0;
 }
 
 export function runtimeShotPenetrationForBorgId(id: string, charged: boolean): Penetration | null {
   return runtimeMoveBindingForBorgId(id, charged ? "B Charge" : "B Shot")?.penetration ?? null;
+}
+
+/**
+ * OBSERVED_WIKI "X Charge" row for a borg (17 cataloged borgs in
+ * data/borgMoveProperties.json — e.g. pl0504 Black Hole, pl0806 Copy Attack, pl0707 Time
+ * Stop, pl0d02 Catch Crane), or null when the borg has no charged X move. A non-null row
+ * marks the borg X-charge-capable at runtime: combat.ts stepAttacks accumulates
+ * b.cooldowns["xChargeFrames"] while X is held and fires the special on RELEASE with tier
+ * scaling mirroring the B-charge tiers (combat.ts X_CHARGE); ai.ts mirrors the B-charge
+ * hold-then-release rule off the same predicate. The wiki row only proves WHO charges —
+ * thresholds/multipliers stay TUNED in combat.ts (no ROM per-move X-charge table decoded).
+ */
+export function xChargeMoveForBorgId(id: string): BorgMove | null {
+  return moveByButton(id, "X Charge");
 }
 
 export function runtimeMoveBindingForBorgId(id: string, button: RuntimeMoveButton): RuntimeMoveBinding | null {
@@ -111,6 +149,7 @@ function buildBinding(
 ): RuntimeMoveBinding {
   const action = actionForButton(button);
   const weaponSlot = weaponSlotForButton(button);
+  const commandRecords = commandMoveRecordsForBorgButton(id, button);
   return {
     button,
     move,
@@ -119,6 +158,8 @@ function buildBinding(
     ammo: ammoFor(id, level, weaponSlot),
     penetration: move?.penetration ?? null,
     commandStatus: commandStatusForButton(id, button),
+    commandRecords,
+    exactCommand: commandRecords.length > 0,
     actionStatus: actionProfile ? actionStatusFor(actionProfile, action) : "profile-backed",
     hitboxStatus: hitboxStatusForAction(action),
     exactHitbox: false,
@@ -142,7 +183,11 @@ function weaponSlotForButton(button: RuntimeMoveButton): 0 | 1 | null {
 function commandStatusForButton(id: string, button: RuntimeMoveButton): RuntimeMoveCommandStatus {
   if (button === "B Shot" || button === "B Attack") return usesContextualBResolver(id) ? "contextual-b" : "direct-b";
   if (button === "B Charge") return "charge-release";
-  if (button === "X Charge") return "x-charge-blocked";
+  // Live since the specials sim-runtime wave: hold-X accumulate + release-fire is implemented
+  // in combat.ts stepAttacks (xChargeFrames accumulator, X_CHARGE tier scaling). A binding for
+  // this button only exists for borgs with an OBSERVED_WIKI "X Charge" row (see
+  // xChargeMoveForBorgId above), so no capability re-check is needed here.
+  if (button === "X Charge") return "x-charge-release";
   return "direct-x";
 }
 

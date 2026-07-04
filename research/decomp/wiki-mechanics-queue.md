@@ -172,6 +172,28 @@ Sources (player-facing taxonomy only):
   simultaneous presses give co-op simultaneous bursts (reads the +0x6fb=6 window as
   the simultaneity tolerance). Feeds ATK-011/012 and T3.
 
+## Player-reported additions (owner gameplay session, 2026-07-03)
+
+- **W17. Force-exhausted player becomes a 1-HP husk borg — IMPLEMENTED (2026-07-03)**:
+  in team battles, a player who loses ALL borgs in their force respawns as a tiny 1-HP,
+  1-bullet husk while an ally is still alive, and keeps respawning per husk death (owner
+  observed live). Identity LIVE-VERIFIED by GDB probe of the owned "meter charged.sav"
+  (scripts/probe-actor-slots.mjs): the husk actor's species word actor+0x3e8 = **0xf07 ->
+  pl0f07**, the UNNAMED final entry of the Death Borg family (assets exist:
+  pl0f07.pzz/_mdl.arc/data.bin/hit.bin/mot.bin; absent from borgs.json/roster) — NOT
+  pl0d07 DEATH BOMB as first guessed. hp=1 and weapon cell +0x774/+0x776 = 1/1 confirmed
+  on the live actor. The chunk_0006.c:7175 +0x4a0 lead was DISPROVEN by the same probe
+  (+0x4a0 = 0 on the husk; that spawn path is a different mechanism). The probe also
+  established actor+0x3e8 (u16) as the actor's borg-number field (0x615 on all three
+  live G REDs) and actor+0x3e7 as a slot echo, NOT species (confirming behavior-notes
+  534). Ported in battle.ts: deployNext falls through to a synthesized pl0f07 entry
+  (HUSK_BORG_ID, energy 0, hp/ammo 1/1 live-verified) while allyForceStillFighting();
+  husk deaths skip the defeated counters. Selfcheck
+  assertHuskDeploysOnForceExhaustion covers deploy/respawn/0-energy/uncounted/loss-on-
+  ally-death. Residual unknowns: the husk's real stat bytes (pl0f07data.bin unparsed —
+  defense/speed are labeled TUNED placeholders) and whether the ROM counts husk kills
+  anywhere (score screens).
+
 ## Explicitly NOT queued (already resolved or closed)
 
 - GF Energy cost/budget system — already ported (challenge tables, energy accounting (ae)/(af)).

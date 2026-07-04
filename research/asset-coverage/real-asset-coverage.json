@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-03T21:03:39.030Z",
+  "generatedAt": "2026-07-03T21:07:53.866Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -1026,11 +1026,11 @@
         "fallback": "packages/missions/src/combat-config.ts:27"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:791",
+        "loadStage": "apps/game/src/main.ts:777",
         "fetchStageManifest": "apps/game/src/main.ts:null",
         "loadStageCollision": "apps/game/src/main.ts:null",
         "parseStageHitGrid": "apps/game/src/main.ts:null",
-        "loadDefaultArena": "apps/game/src/main.ts:816",
+        "loadDefaultArena": "apps/game/src/main.ts:802",
         "loadConvertedStage": "apps/game/src/main.ts:null"
       },
       "collisionBounds": {
@@ -2669,7 +2669,7 @@
     "runtimeResolverRefs": {
       "slotLabels": "apps/game/src/main.ts:411",
       "slotFallbacks": "apps/game/src/main.ts:450",
-      "pickAnimBank": "apps/game/src/main.ts:702",
+      "pickAnimBank": "apps/game/src/main.ts:688",
       "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:223"
     },
     "boostFlyMapped": true

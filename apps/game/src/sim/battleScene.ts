@@ -12,6 +12,7 @@
 
 import * as THREE from "three";
 import type { BorgRuntime, Projectile, ProjectileVisualKind } from "@gf/combat";
+import { MUZZLE_OFFSET, SHOT, SPECIAL } from "@gf/combat";
 import {
   ARROW_MDL_BOUNDS,
   ARROW_MDL_INDICES,
@@ -82,8 +83,20 @@ interface Actor {
 }
 
 interface ProjectileActor {
-  sprite: THREE.Sprite;
-  material: THREE.SpriteMaterial;
+  /** Scene node: a camera-facing Sprite for billboard kinds, or the crossed-plane beam rig
+   *  (long axis oriented along velocity each frame) for "energy" bolts. */
+  node: THREE.Object3D;
+  /** Material shared by the sprite (billboards) or by BOTH crossed planes (beam rig). */
+  material: THREE.SpriteMaterial | THREE.MeshBasicMaterial;
+  /**
+   * The sim's Projectile object. stepProjectiles mutates projectiles IN PLACE and writes
+   * `despawnReason` on this same object the frame it is dropped from the survivors list
+   * (packages/combat/src/types.ts), so holding the reference lets the despawn sweep read
+   * why the uid vanished and fire impact FX only for real impacts.
+   */
+  sim: Projectile;
+  /** True when `node` is the velocity-oriented beam rig (needs per-frame orient/stretch). */
+  beam: boolean;
 }
 
 interface ImpactActor {
@@ -164,6 +177,39 @@ const PROJECTILE_COLORS: Record<ProjectileVisualKind, { ally: number; enemy: num
   flame: { ally: 0xffd36a, enemy: 0xff5a2e },
   muzzle: { ally: 0xfff1a8, enemy: 0xffb14a },
 };
+
+/**
+ * Projectile end-of-life fade window (frames of remaining `life`). Derived from the DEFAULT
+ * projectile lifetime SHOT.LIFETIME (600f, DERIVED_ROM: init FUN_8006f11c seeds the life
+ * counter, chunk_0009.c:3907 — see packages/combat constants.ts) instead of the old hardcoded
+ * 12 that was tuned against the pre-overhaul TUNED 40f lifetime. The 2% ratio is TUNED-visual:
+ * under the corrected 600f default it reproduces the same 12-frame dissolve, so the short
+ * per-borg TUNED lifetimes in data/actionProfiles.json (~40f) keep looking exactly as before,
+ * while a lifetime retune moves the window with it. Fades to 0 (no 0.35 floor) so lifetime
+ * expiry dissolves instead of popping; real impacts despawn early at full opacity and get
+ * impact FX instead.
+ */
+const PROJECTILE_FADE_FRAMES = Math.max(1, Math.round(SHOT.LIFETIME * 0.02));
+
+/**
+ * Beam ("energy" visualKind) bolt stretch, in frames of travel: the rig's long axis spans the
+ * distance covered over the last N frames (length = |vel| * N, floored at the billboard
+ * footprint). TUNED-visual — matched by eye against captures of elongated energy bolts; no
+ * ROM-side stretch/trail parameter is decoded (ptcl00.ptl/.ref are unparsed).
+ */
+const BEAM_STRETCH_FRAMES = 3;
+
+/** Shared unit-plane geometries for the beam rig: two crossed planes with the long axis along
+ *  local +Y (PlaneGeometry height), reused by every beam actor and never disposed per-actor. */
+const BEAM_PLANE_XY = new THREE.PlaneGeometry(1, 1);
+const BEAM_PLANE_ZY = new THREE.PlaneGeometry(1, 1).rotateY(Math.PI / 2);
+
+/** +Y unit vector (the beam rig's rest long axis) for orientBeam's quaternion. */
+const BEAM_REST_AXIS = new THREE.Vector3(0, 1, 0);
+
+/** Scratch vector for orientBeam — reused every frame so the syncProjectiles hot loop stays
+ *  allocation-free (same convention as the rest of the per-frame sync code). */
+const BEAM_DIR_SCRATCH = new THREE.Vector3();
 
 export class BattleScene {
   private actors = new Map<string, Actor>();
@@ -275,6 +321,7 @@ export class BattleScene {
       // Edge-triggered battle FX (same pattern as the hit spark above).
       if (slot === "death" && slotChanged) this.spawnDeathExplosion(actor.group.position);
       if (slotChanged && slot.startsWith("dash")) this.spawnDashBurst(actor.group.position);
+      if (slot === "special" && slotChanged) this.spawnSpecialBurst(actor.group.position);
       if (slot === "shoot" && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY);
       this.syncChargeGlow(actor, b);
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid);
@@ -491,13 +538,30 @@ export class BattleScene {
         actor = this.spawnProjectile(projectile);
         this.projectileActors.set(projectile.uid, actor);
       }
-      actor.sprite.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
-      actor.material.opacity = Math.max(0.35, Math.min(1, projectile.life / 12));
+      actor.sim = projectile; // keep the stable sim reference fresh for the despawn sweep
+      actor.node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
+      actor.material.opacity = Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
+      if (actor.beam) orientBeam(actor.node, projectile);
+      // Persisting projectiles (consumeOnHit === false, ATK-008) apply re-hits WITHOUT
+      // despawning; the sim flags each applied hit for exactly one frame
+      // (hitConfirmedThisFrame, combat.ts stepProjectiles), so puff here too.
+      if (projectile.hitConfirmedThisFrame) this.spawnImpact(actor.node.position);
     }
 
     for (const [uid, actor] of this.projectileActors) {
       if (!live.has(uid)) {
-        this.spawnImpact(actor.sprite.position);
+        // Impact FX only for REAL impacts: stepProjectiles writes despawnReason on the
+        // projectile OBJECT the same frame it drops it from the survivors list
+        // (packages/combat/src/types.ts). Lifetime expiry (600f seed, FUN_8006f11c
+        // chunk_0009.c:3907), out-of-bounds culls, and owner-death despawns
+        // (zz_00840b8_, chunk_0012.c:3216) vanish without a hit-puff.
+        const reason = actor.sim.despawnReason;
+        if (reason === "hit-target" || reason === "hit-terrain") {
+          // Use the sim's final pos: for hit-terrain it was moved to the geometry impact
+          // point (zz_0083244_/zz_0083714_ via zz_006f268_, chunk_0009.c:3956).
+          actor.node.position.set(actor.sim.pos.x, actor.sim.pos.y, actor.sim.pos.z);
+          this.spawnImpact(actor.node.position);
+        }
         this.disposeProjectileActor(actor);
         this.projectileActors.delete(uid);
       }
@@ -507,9 +571,32 @@ export class BattleScene {
   private spawnProjectile(projectile: Projectile): ProjectileActor {
     const kind = projectile.visualKind;
     const colors = PROJECTILE_COLORS[kind];
+    const color = projectile.team === 0 ? colors.ally : colors.enemy;
+    if (kind === "energy") {
+      // Beam/energy bolts: crossed-plane rig stretched along the flight direction instead of
+      // a fixed round billboard, so homing curves read as an oriented bolt. Both planes share
+      // one material; geometry is the shared module-level unit plane. TUNED-visual composition
+      // (no ROM effect->geometry table is decoded; ptcl00.ptl/.ref are unparsed).
+      const material = new THREE.MeshBasicMaterial({
+        map: this.projectileTextures.get(kind) ?? null,
+        color,
+        transparent: true,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      const node = new THREE.Group();
+      node.add(new THREE.Mesh(BEAM_PLANE_XY, material));
+      node.add(new THREE.Mesh(BEAM_PLANE_ZY, material));
+      node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
+      orientBeam(node, projectile);
+      this.root.add(node);
+      return { node, material, sim: projectile, beam: true };
+    }
     const material = new THREE.SpriteMaterial({
       map: this.projectileTextures.get(kind),
-      color: projectile.team === 0 ? colors.ally : colors.enemy,
+      color,
       transparent: true,
       opacity: 1,
       blending: THREE.AdditiveBlending,
@@ -519,11 +606,13 @@ export class BattleScene {
     sprite.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
     sprite.scale.setScalar(Math.max(42, projectile.hitRadius * 1.8));
     this.root.add(sprite);
-    return { sprite, material };
+    return { node: sprite, material, sim: projectile, beam: false };
   }
 
   private disposeProjectileActor(actor: ProjectileActor): void {
-    this.root.remove(actor.sprite);
+    this.root.remove(actor.node);
+    // Beam rigs share ONE material across both planes and use the shared module-level unit
+    // plane geometries (never disposed here) — a single material.dispose covers both paths.
     actor.material.dispose();
   }
 
@@ -628,15 +717,53 @@ export class BattleScene {
   }
 
   /**
+   * Caster-side X-special burst, edge-triggered on entry into the "special" anim slot (the
+   * same one-shot pattern as spawnDashBurst on dash entry above) so the AoE special reads at
+   * its SOURCE — previously only the victims' hit sparks were visible and the burst itself
+   * was invisible. Reuses the existing extracted cells: efct00_atlas white shockwave ring
+   * (RING_CELL) expanding to the sim's actual AoE reach, plus a ptcl00.txg#1 fireball core.
+   * The ring's end scale tracks SPECIAL.RADIUS (packages/combat constants.ts, the TUNED
+   * 110-unit XZ burst radius stepSpecials hits against) so the visual footprint matches the
+   * hit volume; every other size/color/timing here is TUNED-visual (no ROM effect->texture
+   * usage table is decoded — ptcl00.ptl/.ref are unparsed), the pixels are real assets.
+   */
+  private spawnSpecialBurst(position: THREE.Vector3): void {
+    const at = new THREE.Vector3(position.x, position.y + 70, position.z); // torso height, TUNED
+    this.spawnBurstSprite(this.projectileTextures.get("flame") ?? null, at, {
+      ttl: 0.3, // TUNED-visual: quicker than the 0.5s death fireball so it reads as a pulse
+      startScale: 50, // TUNED-visual
+      endScale: 140, // TUNED-visual
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+      color: 0xaad4ff, // TUNED-visual: cool blue-white so it does not read as the death explosion
+    });
+    this.spawnBurstSprite(this.ringTexture, at, {
+      ttl: 0.35, // TUNED-visual
+      startScale: 40, // TUNED-visual
+      // Sprite scale is the full quad edge, so 2x the sim's XZ burst radius spans the
+      // actual AoE diameter (SPECIAL.RADIUS = 110, packages/combat constants.ts).
+      endScale: SPECIAL.RADIUS * 2,
+      opacity: 0.9, // TUNED-visual
+    });
+  }
+
+  /**
    * Muzzle flash: ptcl00.txg#6 ray-burst quadrant at the borg's gun height, offset along
-   * facing. No per-borg muzzle node is decoded yet, so the offset is TUNED (forward =
-   * (sin rotY, cos rotY), same convention as dashSlotForBorg).
+   * facing (forward = (sin rotY, cos rotY), same convention as dashSlotForBorg). The offset
+   * is the SHARED sim/render MUZZLE_OFFSET constant (packages/combat constants.ts) that
+   * combat.ts spawnProjectile also uses, so the bullet materializes inside its own flash
+   * (the old renderer-only forward 46 / up 86 sat ~66 units away from the sim spawn point).
+   * TUNED — the ROM's real per-muzzle position lives in the undumped weapon-param table
+   * DAT_802d39dc read by the spawn function zz_006ee14_ (0x8006ee14, chunk_0009.c:3769).
+   * Per-borg TUNED overrides in data/actionProfiles.json (muzzleForwardOffset/muzzleYOffset)
+   * can shift the sim spawn slightly off this shared default; the flash is a 0.12s burst, so
+   * the shared constant is accepted as close enough until profiles are plumbed here.
    */
   private spawnMuzzleFlash(position: THREE.Vector3, rotY: number): void {
     const at = new THREE.Vector3(
-      position.x + Math.sin(rotY) * 46,
-      position.y + 86,
-      position.z + Math.cos(rotY) * 46,
+      position.x + Math.sin(rotY) * MUZZLE_OFFSET.forward,
+      position.y + MUZZLE_OFFSET.up,
+      position.z + Math.cos(rotY) * MUZZLE_OFFSET.forward,
     );
     this.spawnBurstSprite(this.projectileTextures.get("muzzle") ?? null, at, {
       ttl: 0.12,
@@ -716,6 +843,24 @@ export class BattleScene {
   private disposeImpactActor(actor: ImpactActor): void {
     this.root.remove(actor.sprite);
     actor.material.dispose();
+  }
+}
+
+/**
+ * Orient + stretch a beam rig along the projectile's velocity: the rig's rest long axis is
+ * local +Y (BEAM_REST_AXIS), rotated onto the normalized velocity; length spans the distance
+ * covered over BEAM_STRETCH_FRAMES frames (TUNED-visual), floored at the round billboard
+ * footprint so a near-stalled bolt still reads. Near-zero velocity (below the sim's
+ * HOMING.MIN_STEER_SPEED-style epsilon) keeps the previous orientation rather than snapping
+ * to +Y. Allocation-free (module scratch vector) — runs in the per-frame sync hot loop.
+ */
+function orientBeam(node: THREE.Object3D, projectile: Projectile): void {
+  const width = Math.max(42, projectile.hitRadius * 1.8); // same footprint as billboard kinds
+  const speed = BEAM_DIR_SCRATCH.set(projectile.vel.x, projectile.vel.y, projectile.vel.z).length();
+  node.scale.set(width, Math.max(width, speed * BEAM_STRETCH_FRAMES), width);
+  if (speed > 1e-4) {
+    BEAM_DIR_SCRATCH.divideScalar(speed);
+    node.quaternion.setFromUnitVectors(BEAM_REST_AXIS, BEAM_DIR_SCRATCH);
   }
 }
 

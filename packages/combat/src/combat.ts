@@ -7,13 +7,19 @@
 
 import {
   add,
+  candidateTrianglesForSegment,
+  clamp,
   distXZ,
   floorSurfaceYAt,
   forwardFromYaw,
+  isFiniteVec,
   knockbackDirectionFromPositions,
+  len,
   normalize,
   scale,
+  sub,
   yawFromXZ,
+  type StageCollisionTriangle,
   type Vec3,
 } from "@gf/physics";
 import {
@@ -24,9 +30,11 @@ import {
   DAMAGE,
   HEAL,
   HEAL_VAMPIRE_BORG_IDS,
+  HOMING,
   MASH,
   MELEE,
   LOCK,
+  MUZZLE_OFFSET,
   SHOT,
   SPECIAL,
   STAGGER,
@@ -45,14 +53,17 @@ import {
   type BorgActionProfile,
   type MeleeActionDef,
   type ShotActionDef,
+  type SpecialActionDef,
   type SwordBeamDef,
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
-import { runtimeShotPenetrationForBorgId, usesContextualBResolver } from "./moveRuntime.js";
+import { runtimeShotPenetrationForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
+import { creditBurstFill } from "./burst.js";
 import type {
   BorgRuntime,
+  BurstMeterState,
   Projectile,
   ProjectileVisualKind,
   RectStageBounds,
@@ -86,9 +97,10 @@ export function isInvincible(b: BorgRuntime): boolean {
 export function stepCooldowns(b: BorgRuntime): void {
   for (const k of Object.keys(b.cooldowns)) {
     const v = b.cooldowns[k] ?? 0;
-    // jumpHeld / switchLockHeld / allyLockHeld / hyperHeld / attackHeld are 0/1 press latches,
-    // boostFuel is a fuel gauge, chargeFrames is a hold-B charge accumulator, comboStep is the
-    // current melee-chain index, and mashCount (ATK-017) is a press-edge COUNTER (not a
+    // jumpHeld / switchLockHeld / allyLockHeld / hyperHeld / attackHeld / specialHeld are 0/1
+    // press latches, boostFuel is a fuel gauge, chargeFrames / xChargeFrames are hold-charge
+    // accumulators (hold-B shot charge and hold-X special charge respectively), comboStep is
+    // the current melee-chain index, and mashCount (ATK-017) is a press-edge COUNTER (not a
     // countdown timer) that combat.ts's mash-counting code owns entirely (increments on press
     // edges during an active swing, resets on swing start) — none of these decay 1/frame like
     // the countdown timers this loop drives, so all are skipped here.
@@ -99,7 +111,9 @@ export function stepCooldowns(b: BorgRuntime): void {
       k === "allyLockHeld" ||
       k === "hyperHeld" ||
       k === "attackHeld" ||
+      k === "specialHeld" ||
       k === "chargeFrames" ||
+      k === "xChargeFrames" ||
       k === "comboStep" ||
       k === "mashCount"
     )
@@ -363,6 +377,14 @@ export interface HitSourceContext {
 
 export interface DamageRuntimeContext {
   sideRankForTeam?: ((team: number) => number | undefined) | undefined;
+  /**
+   * Battle-level per-player Power Burst meter map (BattleState.burstMeterByPlayer). When
+   * present, every hit CONNECTION with an attacker context credits the attacker's player
+   * meter (+50 flat — Q4 T3 live traces; see BURST.FILL_PER_HIT and creditBurstFill in
+   * burst.ts). Optional so legacy/synthetic callers (selfchecks, fixtures) keep compiling
+   * and simply never fill.
+   */
+  burstMeters?: Record<string, BurstMeterState> | undefined;
 }
 
 /**
@@ -384,6 +406,9 @@ export function applyHit(
   // Default = melee archetype so legacy callers keep the old always-interrupt behavior.
   record: DamageRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
   source?: HitSourceContext,
+  // Battle-level plumbing (burst meters etc.); optional so every legacy call site keeps
+  // compiling. Legacy paths without `source` can never fill (the fill below requires both).
+  damageContext?: DamageRuntimeContext,
 ): number {
   if (!isTargetable(victim) || isInvincible(victim)) return 0;
 
@@ -411,6 +436,19 @@ export function applyHit(
     if (steal > 0 && source.attacker.alive && source.attacker.state !== "death") {
       source.attacker.hp = Math.min(source.attacker.maxHp, source.attacker.hp + steal);
     }
+  }
+
+  // Power Burst meter fill (Q4 RESOLVED 2026-07-03, T3 live traces — research/decomp/
+  // attack-mechanics-open-questions.md Q4 lines 59-74, findings §S): +50 per hit CONNECTION,
+  // credited to the ATTACKER'S player only, flat/damage-independent. applyHit runs once per
+  // connection per victim, matching the ROM's per-connection semantics (a penetrating beam
+  // through a dead husk credited 3 x 50). Placed BEFORE the lethal early-return below so the
+  // killing blow's connection also credits (the ROM counts connections, and dead borgs still
+  // register hits per the husk trace). The victim is never credited ("none of the other three
+  // players' meters moved"); source-less legacy calls never fill (no attacker to credit —
+  // `source &&` is the structural assert). CPU attackers: see creditBurstFill (burst.ts).
+  if (source && damageContext?.burstMeters) {
+    creditBurstFill(damageContext.burstMeters, source.attacker.ownerPlayer);
   }
 
   // Knockback DIRECTION — ROM-accurate port of zz_00300bc_ (0x800300bc), mode 1 ("attacker to
@@ -722,7 +760,6 @@ export interface AttackResult {
 }
 
 let projCounter = 0;
-const CONTEXTUAL_B_CACHE = new Map<string, boolean>();
 export function resetProjectileCounter(): void {
   projCounter = 0;
 }
@@ -756,19 +793,67 @@ export function projectileVisualKindForProfile(p: BorgProfile): ProjectileVisual
   return "energy";
 }
 
+/**
+ * X-Charge hold/release tiers. OBSERVED_WIKI selects WHO charges: 17 borgs carry an
+ * "X Charge" row in data/borgMoveProperties.json (pl0504 Black Hole, pl0806 Copy Attack,
+ * pl0707 Time Stop, pl0d02 Catch Crane, pl0609/pl061d A.R.B., pl0e05 Max Shot, pl0808 Hero
+ * Beam, pl080f Metamorphose, pl0003 Ninpo Kage Bunshin, pl0209 Omega Cross Slash, pl0101
+ * Powered Long Shot, pl0704 Shogun Slash, pl0005 Teleport Slash, pl0510 Black Hole, pl0809
+ * Catch, pl0c04 Ultimate Beam — harvested by scripts/gen-borg-move-properties.mjs; runtime
+ * predicate moveRuntime.ts xChargeMoveForBorgId). The thresholds/multipliers below are TUNED
+ * mirrors of the B-charge tiers (actionProfiles DEFAULT_SHOT chargeTier1/2Frames 30/90 and
+ * chargeTier1/2DamageMult 1.6/2.4; speed/radius/hitstun/knockback reuse the shared CHARGE.*
+ * tier constants via xChargeScaling below) — no ROM per-move X-charge table is decoded (the
+ * per-weapon command resolver is unread), so nothing here is promoted past TUNED.
+ *
+ * NOTE (presentation follow-up): HUD surfacing of the b.cooldowns["xChargeFrames"]
+ * accumulator (a charge bar over the X slot) belongs to the presentation workstream — the
+ * sim only owns the accumulator + release mechanics here.
+ */
+export const X_CHARGE = {
+  /** Held frames for tier 1 / tier 2 (tier 2 is also the accumulation cap). TUNED. */
+  TIER1_FRAMES: 30,
+  TIER2_FRAMES: 90,
+  /** Damage multipliers per tier (mirror the B-charge profile defaults). TUNED. */
+  TIER1_DAMAGE_MULT: 1.6,
+  TIER2_DAMAGE_MULT: 2.4,
+} as const;
+
+/** Per-tier X-charge scaling — the X-side mirror of chargeScaling below: damage from the
+ *  TUNED X_CHARGE mults, speed/radius/hitstun/knockback from the shared CHARGE.* tier
+ *  constants (tier 0 = all 1x, identical to an uncharged X press). */
+function xChargeScaling(tier: number): {
+  damage: number;
+  speed: number;
+  radius: number;
+  hitstun: number;
+  knockback: number;
+} {
+  if (tier >= 2) {
+    return {
+      damage: X_CHARGE.TIER2_DAMAGE_MULT,
+      speed: CHARGE.TIER2_SPEED_MULT,
+      radius: CHARGE.TIER2_RADIUS_MULT,
+      hitstun: CHARGE.TIER2_HITSTUN_MULT,
+      knockback: CHARGE.TIER2_KNOCKBACK_MULT,
+    };
+  }
+  if (tier === 1) {
+    return {
+      damage: X_CHARGE.TIER1_DAMAGE_MULT,
+      speed: CHARGE.TIER1_SPEED_MULT,
+      radius: CHARGE.TIER1_RADIUS_MULT,
+      hitstun: CHARGE.TIER1_HITSTUN_MULT,
+      knockback: CHARGE.TIER1_KNOCKBACK_MULT,
+    };
+  }
+  return { damage: 1, speed: 1, radius: 1, hitstun: 1, knockback: 1 };
+}
+
 type BActionKind = "melee" | "shot";
 
 function primaryBActionOrder(actionProfile: BorgActionProfile): readonly BActionKind[] {
   return actionProfile.primary === "shot" ? (["shot", "melee"] as const) : (["melee", "shot"] as const);
-}
-
-function usesContextualBMoveProfile(borgId: string): boolean {
-  const key = borgId.toLowerCase();
-  const cached = CONTEXTUAL_B_CACHE.get(key);
-  if (cached !== undefined) return cached;
-  const value = usesContextualBResolver(key);
-  CONTEXTUAL_B_CACHE.set(key, value);
-  return value;
 }
 
 function contextualBTarget(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null {
@@ -789,27 +874,59 @@ function contextualBTarget(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime |
   return best;
 }
 
-function targetWithinMeleeContext(self: BorgRuntime, target: BorgRuntime, meleeDef: MeleeActionDef): boolean {
-  return distXZ(self.pos, target.pos) <= meleeDef.range && Math.abs(target.pos.y - self.pos.y) <= meleeDef.yTolerance;
+/**
+ * Contextual-B melee SELECTION range for a borg's melee def: the larger of its damage reach
+ * (meleeDef.range) and the shared MELEE.ENGAGE_RANGE window (TUNED — the ROM's threshold
+ * FLOAT_8043762c that flips the reticle red and selects battle-mode melee is T1-blocked,
+ * behavior-notes.md (ai)/(av); the close=battle-attack mechanism itself is CONFIRMED_MANUAL,
+ * (ao)). Exported so the app-layer reticle (presentation.ts focusHasMeleeRangeTarget) and the
+ * AI (ai.ts) consume the SAME window the resolver selects with.
+ */
+export function meleeEngageRangeFor(meleeDef: MeleeActionDef): number {
+  return Math.max(meleeDef.range, MELEE.ENGAGE_RANGE);
 }
 
+/**
+ * SELECTION-only proximity test for the contextual B (and the reticle): XZ within
+ * meleeEngageRangeFor, vertical within the widened MELEE.ENGAGE_Y_TOLERANCE (the per-hit
+ * meleeDef.yTolerance of 50 blocked vertical engagements outright — the DAMAGE check in
+ * stepAttacks keeps the tight per-borg values untouched).
+ */
+export function targetWithinMeleeEngage(selfPos: Vec3, targetPos: Vec3, meleeDef: MeleeActionDef): boolean {
+  return (
+    distXZ(selfPos, targetPos) <= meleeEngageRangeFor(meleeDef) &&
+    Math.abs(targetPos.y - selfPos.y) <= Math.max(meleeDef.yTolerance, MELEE.ENGAGE_Y_TOLERANCE)
+  );
+}
+
+/**
+ * B-press action order. ROM evidence for proximity selection being the engine-wide B
+ * dispatch: the command-move tables (data/commandMoveTables.json) decode per-borg B-far
+ * (commandType 0) vs B-close (commandType 1) records, selected by the target-proximity
+ * branches zz_0069a88_/zz_0069b10_ writing actor+0x585 = 0/1 — see commandMoveTables.ts
+ * BUTTON_COMMAND_TYPES and moveRuntime.ts usesContextualBResolver (25 borgs / 17 decoded
+ * tables, 21 with live type-1 melee records; plus 93 borgs with both catalog rows). On that
+ * strength, EVERY borg whose action profile has BOTH melee and shot defs selects by
+ * proximity here (the ~165 melee-capable hybrids), instead of the old static primary order
+ * that never reached melee for primary:'shot' profiles while ammo > 0.
+ *
+ * Charge-lock fix: proximity is evaluated BEFORE honoring a held charge — shot stays first
+ * only when a charge is banked AND no melee-context target exists, so holding B while
+ * closing to point-blank resolves to the battle attack instead of always releasing the gun.
+ */
 function resolveBActionOrder(
   b: BorgRuntime,
-  p: BorgProfile,
   actionProfile: BorgActionProfile,
   meleeDef: MeleeActionDef | null,
   shotDef: ShotActionDef | null,
-  all: BorgRuntime[],
+  meleeEngaged: boolean,
 ): readonly BActionKind[] {
   const fallback = primaryBActionOrder(actionProfile);
   if (!meleeDef || !shotDef) return fallback;
-  if (!usesContextualBMoveProfile(p.id)) return fallback;
-  // Once a charge is already being held, keep the shot path first so release semantics stay stable.
-  if ((b.cooldowns["chargeFrames"] ?? 0) > 0) return fallback;
-
-  const target = contextualBTarget(b, all);
-  if (target && targetWithinMeleeContext(b, target, meleeDef)) return ["melee", "shot"];
-  return ["shot", "melee"];
+  // A held charge keeps the shot path first (stable release semantics) ONLY while no
+  // melee-context target is in the engage window.
+  if ((b.cooldowns["chargeFrames"] ?? 0) > 0 && !meleeEngaged) return fallback;
+  return meleeEngaged ? (["melee", "shot"] as const) : (["shot", "melee"] as const);
 }
 
 /**
@@ -834,7 +951,11 @@ export function stepAttacks(
   b: BorgRuntime,
   p: BorgProfile,
   attackHeld: boolean,
-  pressedSpecial: boolean,
+  // The X button's HELD state each frame — battle.ts passes the raw input.special boolean,
+  // exactly like attackHeld above (the old name `pressedSpecial` was a misnomer: no caller
+  // ever edge-detected it). Press/release edges are detected internally via the
+  // `specialHeld` latch below, mirroring the attackHeld latch.
+  specialHeld: boolean,
   all: BorgRuntime[],
   profiles: Map<string, BorgProfile>,
   damageContext: DamageRuntimeContext = {},
@@ -849,6 +970,14 @@ export function stepAttacks(
   const prevAttackHeld = (b.cooldowns["attackHeld"] ?? 0) > 0;
   b.cooldowns["attackHeld"] = attackHeld ? 1 : 0;
   const releasedAttack = !attackHeld && prevAttackHeld;
+
+  // Press/release edge detection for the special button (X). Without this latch the old code
+  // treated the held boolean as a press, so holding X re-fired the special on every cooldown
+  // expiry and made an X-hold charge impossible.
+  const prevSpecialHeld = (b.cooldowns["specialHeld"] ?? 0) > 0;
+  b.cooldowns["specialHeld"] = specialHeld ? 1 : 0;
+  const pressedSpecialEdge = specialHeld && !prevSpecialHeld;
+  const releasedSpecial = !specialHeld && prevSpecialHeld;
 
   // ATK-017 mash-counter scaffold (DISABLED consumer — MASH.ENABLED stays false, BLOCKED-
   // until-Q9): count attack-button PRESS EDGES (not held frames) into b.cooldowns["mashCount"]
@@ -880,9 +1009,10 @@ export function stepAttacks(
   // --- Special (X) -------------------------------------------------------------------
   // Input binding (CONFIRMED_MANUAL, behavior-notes.md (ao), the official NA instruction manual):
   // B = contextual shot/melee (weapon 0), X = the SECOND weapon (weapon 1), Y = Power Burst. The
-  // port's `pressedSpecial` is the X button — types.ts documents the control scheme as
+  // port's `specialHeld` is the X button — types.ts documents the control scheme as
   // "X=special" and this branch is the port's only X-driven attack — so per (ao) the X/special
   // must consume weapon cell 1 ("X Bullets"), separate from B's weapon cell 0 ("B Bullets").
+  // The ammo decrement/re-arm now lives in startSpecialAttack (both fire paths below).
   //
   // Only borgs whose weapon-1 cell has max>0 (DERIVED per-borg data via
   // weaponOneCellSourceForBorgId / borgSourceStats weaponSlots[1]) use X-ammo. For those, the
@@ -898,71 +1028,57 @@ export function stepAttacks(
   const xCell = ensureWeaponCells(b, p)[1];
   const xHasAmmo = !!xCell && xCell.max > 0;
   const xCanFire = !xHasAmmo || (xCell as WeaponCell).cur >= 1; // infinite/unused cell always passes
-  if (canStartAction && pressedSpecial && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
-    const specialDef = actionProfile.special;
-    // Consume one X-bullet from weapon cell 1 (only when the borg actually has X-ammo; max==0
-    // cells stay untouched -> current cooldown-only behavior). Mirrors startShotAttack's cell-0
-    // decrement + all-at-once re-arm (see that function): decrement, then arm the refill timer
-    // the instant the cell empties for non-gradual (refillType!==1) cells; gradual cells refill
-    // fractionally each frame via stepWeaponCellRefill and don't use `timer`.
-    if (xHasAmmo) {
-      const cell = xCell as WeaponCell;
-      cell.cur = Math.max(0, cell.cur - 1);
-      if (cell.cur <= 0 && cell.refillType !== 1) {
-        cell.timer = cell.refillParam > 0 ? cell.refillParam : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES;
+  if (canStartAction && xCanFire && (b.cooldowns["special"] ?? 0) <= 0) {
+    if (xChargeMoveForBorgId(b.borgId) !== null) {
+      // X Charge (OBSERVED_WIKI — the borg has an "X Charge" row in borgMoveProperties.json;
+      // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
+      // accumulate xChargeFrames (capped at the tier-2 threshold), release to fire the
+      // special scaled by the reached tier — the exact hold/release shape of the B-charge
+      // branch below. Accumulating does NOT consume the frame for B: charging the X slot
+      // while working the B button stays possible (TUNED — the ROM's per-weapon command
+      // sequencing is unread).
+      if (specialHeld) {
+        b.cooldowns["xChargeFrames"] = Math.min(
+          X_CHARGE.TIER2_FRAMES,
+          (b.cooldowns["xChargeFrames"] ?? 0) + 1,
+        );
+      } else if (releasedSpecial && (b.cooldowns["xChargeFrames"] ?? 0) > 0) {
+        const frames = b.cooldowns["xChargeFrames"] ?? 0;
+        b.cooldowns["xChargeFrames"] = 0;
+        const tier = frames >= X_CHARGE.TIER2_FRAMES ? 2 : frames >= X_CHARGE.TIER1_FRAMES ? 1 : 0;
+        startSpecialAttack(b, p, actionProfile, tier, out, all, profiles, damageContext);
+        return { projectiles: out };
       }
+    } else if (pressedSpecialEdge) {
+      // Non-charging borgs: fire once per PRESS EDGE (the latch above), never on held
+      // re-expiry — holding X across the cooldown no longer machine-guns the special.
+      startSpecialAttack(b, p, actionProfile, 0, out, all, profiles, damageContext);
+      return { projectiles: out };
     }
-    b.cooldowns["special"] = specialDef.cooldown;
-    b.cooldowns["attackLock"] = specialDef.duration;
-    b.state = "special";
-    b.stateTime = 0;
-    b.anim = "special";
-    // AoE burst around the borg. HP damage comes from record 2 via damageFormula.ts; the
-    // special multiplier remains a port-side bridge until per-special hitbox records are mapped.
-    const specialRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
-    for (const o of all) {
-      if (!canReceiveHit(b, o)) continue;
-      if (distXZ(b.pos, o.pos) <= specialDef.radius) {
-        const op = profiles.get(o.uid);
-        if (op) {
-          // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target,
-          // via the ported zz_00300bc_ atan2/BAM16 calc) instead of this raw un-ported subtract.
-          applyHit(
-            o,
-            op,
-            0,
-            SPECIAL.KNOCKBACK * specialDef.knockbackMultiplier,
-            { x: 0, y: 0, z: 0 },
-            b.pos,
-            true,
-            // Specials -> record 2 (DERIVED mapping, gauges.ts DAMAGE_RECORD_INDEX).
-            specialRecord,
-            {
-              attacker: b,
-              attackerProfile: p,
-              damageScale: specialDef.damageMultiplier,
-              attackerSideRank: damageContext.sideRankForTeam?.(b.team),
-              defenderSideRank: damageContext.sideRankForTeam?.(o.team),
-            },
-          );
-        }
-      }
-    }
-    return { projectiles: out };
   }
 
   // --- Attack (B): asset-backed per-borg primary action, generic fallback-safe -------
+  // Contextual-B target + engage window, computed once per frame: drives the melee-vs-shot
+  // SELECTION (resolveBActionOrder), the whiff gate below, and the lunge target/drive.
+  const contextTarget = meleeDef ? contextualBTarget(b, all) : null;
+  const meleeEngaged =
+    meleeDef !== null && contextTarget !== null && targetWithinMeleeEngage(b.pos, contextTarget.pos, meleeDef);
   if (canStartAction && (attackHeld || releasedAttack)) {
-    const order = resolveBActionOrder(b, p, actionProfile, meleeDef, shotDef, all);
+    const order = resolveBActionOrder(b, actionProfile, meleeDef, shotDef, meleeEngaged);
     for (const kind of order) {
       if (kind === "melee" && meleeDef && attackHeld) {
+        // Whiff gate: a hybrid that fell through to melee (e.g. empty magazine on the shot
+        // path) only swings with a target inside the engage window — out-of-ammo ranged
+        // borgs no longer air-swing from 600 units. Melee-primary borgs (and melee-only,
+        // shotDef null) keep their unconditional swing: swinging is their whole B action.
+        if (!meleeEngaged && shotDef && actionProfile.primary !== "melee") continue;
         const window = b.cooldowns["comboWindow"] ?? 0;
         const prevStep = b.cooldowns["comboStep"] ?? 0;
         // Chain: within the combo window and more hits remain — bypass the melee cooldown.
         const canChain = window > 0 && prevStep + 1 < meleeDef.comboHits;
         const canFresh = (b.cooldowns["melee"] ?? 0) <= 0;
         if (canChain || canFresh) {
-          startMeleeAttack(b, meleeDef, canChain ? prevStep + 1 : 0);
+          startMeleeAttack(b, meleeDef, canChain ? prevStep + 1 : 0, meleeEngaged ? contextTarget : null);
           break;
         }
         continue; // melee gated — a hybrid may still fire its gun below
@@ -981,15 +1097,44 @@ export function stepAttacks(
             const frames = b.cooldowns["chargeFrames"] ?? 0;
             b.cooldowns["chargeFrames"] = 0;
             const tier = frames >= shotDef.chargeTier2Frames ? 2 : frames >= shotDef.chargeTier1Frames ? 1 : 0;
-            startShotAttack(b, p, shotDef, tier, out);
+            startShotAttack(b, p, shotDef, tier, out, all);
             break;
           }
           continue;
         }
         if (attackHeld) {
-          startShotAttack(b, p, shotDef, 0, out);
+          startShotAttack(b, p, shotDef, 0, out, all);
           break;
         }
+      }
+    }
+  }
+
+  // --- Melee lunge drive (the signature close-range homing dash) ----------------------
+  // Sim-side replacement for the attack_lunge_s* bone-0 root motion the renderer strips
+  // (apps/game/src/main.ts buildClip zeroes bone-0 XZ; rootZ spans ~100-389 units per the
+  // PREFERRED_LABELS comments there). While the swing's meleeLunge window (armed by
+  // startMeleeAttack, decays 1/frame via stepCooldowns) is open, drive velocity toward the
+  // contextual target and stop inside reach. All values TUNED (MELEE.LUNGE_*) —
+  // FLOAT_8043762c, the ROM's melee-engage threshold, remains T1-blocked (behavior-notes.md
+  // (ai)/(av)). stepMovement (which runs before stepAttacks each frame) integrates this
+  // velocity next frame with bounds/wall/floor collision applied, so the lunge cannot carry
+  // a borg off stage; it also decays it by MOVE.DECEL first — see MELEE.LUNGE_SPEED's note.
+  if (b.state === "attack" && b.anim === "melee" && meleeDef && (b.cooldowns["meleeLunge"] ?? 0) > 0) {
+    const lungeTarget = contextTarget && isTargetable(contextTarget) ? contextTarget : null;
+    if (lungeTarget) {
+      const d = distXZ(b.pos, lungeTarget.pos);
+      const stop = meleeDef.range * MELEE.LUNGE_STOP_FRACTION;
+      if (d > stop) {
+        const dir = normalize({ x: lungeTarget.pos.x - b.pos.x, y: 0, z: lungeTarget.pos.z - b.pos.z });
+        const speed = Math.min(MELEE.LUNGE_SPEED, d - stop);
+        b.vel.x = dir.x * speed;
+        b.vel.z = dir.z * speed;
+      } else {
+        // Inside reach: kill the drive so the attacker doesn't overrun through the target.
+        b.cooldowns["meleeLunge"] = 0;
+        b.vel.x = 0;
+        b.vel.z = 0;
       }
     }
   }
@@ -1005,7 +1150,7 @@ export function stepAttacks(
     // Sword beam: the combo finisher's FIRST active frame emits a fast short-lived projectile
     // with melee-scaled damage (TUNED design; see actionProfiles.ts SwordBeamDef).
     if (meleeDef.swordBeam && isFinisher && meleeActive === meleeDef.active) {
-      out.push(spawnSwordBeam(b, meleeDef, meleeDef.swordBeam));
+      out.push(spawnSwordBeam(b, meleeDef, meleeDef.swordBeam, all));
     }
     // Only the active window (after startup) deals damage; one hit per swing per target.
     const fwd = forwardFromYaw(b.rotY);
@@ -1047,6 +1192,7 @@ export function stepAttacks(
           attackerSideRank: damageContext.sideRankForTeam?.(b.team),
           defenderSideRank: damageContext.sideRankForTeam?.(o.team),
         },
+        damageContext,
       );
       if (dealt > 0) (b.meleeHitUids ??= []).push(o.uid);
     }
@@ -1067,13 +1213,33 @@ export function stepAttacks(
   return { projectiles: out };
 }
 
-function startMeleeAttack(b: BorgRuntime, meleeDef: MeleeActionDef, comboStep: number): void {
+function startMeleeAttack(
+  b: BorgRuntime,
+  meleeDef: MeleeActionDef,
+  comboStep: number,
+  lungeTarget: BorgRuntime | null,
+): void {
   // Chained swings come out faster (COMBO.STEP_STARTUP_SCALE); the opener uses full startup.
   const startup =
     comboStep > 0 ? Math.max(2, Math.round(meleeDef.startup * COMBO.STEP_STARTUP_SCALE)) : meleeDef.startup;
   b.cooldowns["melee"] = meleeDef.duration + meleeDef.cooldown;
   b.cooldowns["meleeActive"] = startup + meleeDef.active;
   b.cooldowns["attackLock"] = meleeDef.duration;
+  // Lunge (contextual-B target inside the engage window only): snap facing onto the target
+  // and arm the lunge-drive window for the swing's startup+active frames, clamped so the
+  // total travel stays within MELEE.LUNGE_MAX_DIST (see the lunge drive in stepAttacks and
+  // the MELEE.LUNGE_* citations in constants.ts — all TUNED, root-motion-anchored). The full
+  // facing snap is a TUNED stand-in for the ROM's lock-tracked attack facing; stepMovement's
+  // lock-facing keeps tracking the target on subsequent frames either way.
+  if (lungeTarget && distXZ(b.pos, lungeTarget.pos) > 1e-3) {
+    b.rotY = yawFromXZ(lungeTarget.pos.x - b.pos.x, lungeTarget.pos.z - b.pos.z);
+    b.cooldowns["meleeLunge"] = Math.min(
+      startup + meleeDef.active,
+      Math.max(1, Math.floor(MELEE.LUNGE_MAX_DIST / MELEE.LUNGE_SPEED)),
+    );
+  } else {
+    b.cooldowns["meleeLunge"] = 0;
+  }
   // The chain window covers this swing plus a grace period after its recovery. The renderer
   // alternates melee/melee_alt banks on each melee re-entry (battleScene meleeParity), and the
   // >=1 idle frame between chained swings is what lets it see the re-entry.
@@ -1088,6 +1254,155 @@ function startMeleeAttack(b: BorgRuntime, meleeDef: MeleeActionDef, comboStep: n
   b.anim = "melee";
 }
 
+/**
+ * Fire the X special (possibly X-charge-scaled): consumes X-ammo (weapon cell 1), sets
+ * cooldowns/state/anim, then resolves per the wave-1 SpecialActionDef archetype:
+ *   - archetype "projectile" (59 borgs whose OBSERVED_WIKI X move reads as a fired attack,
+ *     e.g. G Red's G Crash — data selection in actionProfiles.json, TUNED params): spawns
+ *     projectiles into `out`, which battle.ts pushes into state.projectiles — the NORMAL
+ *     projectile pipeline, so terrain/owner/bounds despawn reasons, burst-meter crediting via
+ *     applyHit `source`, and the CHARGE_OR_SPECIAL damage-record accounting all apply
+ *     unchanged (no parallel bookkeeping).
+ *   - archetype "aoe"/absent (default/fallback, unchanged semantics): the pre-existing radial
+ *     burst around the borg.
+ * chargeTier 0 = plain press (identical to the pre-X-charge behavior for every borg); tiers
+ * 1/2 only reachable via the X-charge hold/release path (X_CHARGE, TUNED).
+ */
+function startSpecialAttack(
+  b: BorgRuntime,
+  p: BorgProfile,
+  actionProfile: BorgActionProfile,
+  chargeTier: number,
+  out: Projectile[],
+  all: BorgRuntime[],
+  profiles: Map<string, BorgProfile>,
+  damageContext: DamageRuntimeContext,
+): void {
+  const specialDef = actionProfile.special;
+  // Consume one X-bullet from weapon cell 1 (only when the borg actually has X-ammo; max==0
+  // cells stay untouched -> cooldown-only behavior). Mirrors startShotAttack's cell-0
+  // decrement + all-at-once re-arm (see that function): decrement, then arm the refill timer
+  // the instant the cell empties for non-gradual (refillType!==1) cells; gradual cells refill
+  // fractionally each frame via stepWeaponCellRefill and don't use `timer`.
+  const xCell = ensureWeaponCells(b, p)[1];
+  if (xCell && xCell.max > 0) {
+    xCell.cur = Math.max(0, xCell.cur - 1);
+    if (xCell.cur <= 0 && xCell.refillType !== 1) {
+      xCell.timer = xCell.refillParam > 0 ? xCell.refillParam : AMMO.DEFAULT_ALL_AT_ONCE_TIMER_FRAMES;
+    }
+  }
+  b.cooldowns["special"] = specialDef.cooldown;
+  b.cooldowns["attackLock"] = specialDef.duration;
+  b.state = "special";
+  b.stateTime = 0;
+  b.anim = "special";
+
+  const tier = xChargeScaling(chargeTier);
+
+  // Projectile-archetype special: fired attack instead of the generic radial burst.
+  if (specialDef.archetype === "projectile") {
+    out.push(...spawnSpecialProjectiles(b, p, specialDef, tier, all));
+    return;
+  }
+
+  // AoE burst around the borg (default/fallback archetype — bit-for-bit the pre-existing
+  // behavior at tier 0). HP damage comes from record 2 via damageFormula.ts; the special
+  // multiplier remains a port-side bridge until per-special hitbox records are mapped. Tier
+  // scaling (X-charge releases only) widens the burst and scales damage/knockback via the
+  // same TUNED tier mults as a charged shot.
+  const specialRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
+  for (const o of all) {
+    if (!canReceiveHit(b, o)) continue;
+    if (distXZ(b.pos, o.pos) <= specialDef.radius * tier.radius) {
+      const op = profiles.get(o.uid);
+      if (op) {
+        // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target,
+        // via the ported zz_00300bc_ atan2/BAM16 calc) instead of this raw un-ported subtract.
+        applyHit(
+          o,
+          op,
+          0,
+          SPECIAL.KNOCKBACK * specialDef.knockbackMultiplier * tier.knockback,
+          { x: 0, y: 0, z: 0 },
+          b.pos,
+          true,
+          // Specials -> record 2 (DERIVED mapping, gauges.ts DAMAGE_RECORD_INDEX).
+          specialRecord,
+          {
+            attacker: b,
+            attackerProfile: p,
+            damageScale: specialDef.damageMultiplier * tier.damage,
+            attackerSideRank: damageContext.sideRankForTeam?.(b.team),
+            defenderSideRank: damageContext.sideRankForTeam?.(o.team),
+          },
+          damageContext,
+        );
+      }
+    }
+  }
+}
+
+/** TUNED spread between the muzzles of a multi-projectile special (radians between adjacent
+ *  shots) — same fan shape as spawnProjectiles' spreadRadians; no ROM per-special muzzle
+ *  table is decoded (see the multi-muzzle note above spawnProjectiles). */
+const SPECIAL_PROJECTILE_SPREAD_RADIANS = 0.14;
+
+/**
+ * Spawn the projectile(s) of a projectile-archetype special. Mirrors spawnProjectile's shape
+ * so the result flows through stepProjectiles' normal pipeline (homing gate, terrain/owner
+ * despawn reasons, burst-meter crediting via the applyHit `source` built from ownerUid, and
+ * record-2 gauge accounting via damageRecordIndex). All params TUNED from the wave-1
+ * SpecialActionDef fields (OBSERVED_WIKI only selects WHO fires a projectile special);
+ * generic SHOT/SPECIAL/MUZZLE_OFFSET constants fill any absent field.
+ */
+function spawnSpecialProjectiles(
+  b: BorgRuntime,
+  p: BorgProfile,
+  specialDef: SpecialActionDef,
+  tier: ReturnType<typeof xChargeScaling>,
+  all: BorgRuntime[],
+): Projectile[] {
+  const count = Math.max(1, Math.floor(specialDef.projectileCount ?? 1));
+  const projectiles: Projectile[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const centered = count === 1 ? 0 : i - (count - 1) / 2;
+    const yaw = b.rotY + centered * SPECIAL_PROJECTILE_SPREAD_RADIANS;
+    const fwd = { x: Math.sin(yaw), y: 0, z: Math.cos(yaw) };
+    // Muzzle: the shared sim/render default (see spawnProjectile's muzzle note) — no
+    // per-special muzzle data exists yet.
+    const muzzlePos = {
+      x: b.pos.x + fwd.x * MUZZLE_OFFSET.forward,
+      y: b.pos.y + MUZZLE_OFFSET.up,
+      z: b.pos.z + fwd.z * MUZZLE_OFFSET.forward,
+    };
+    projectiles.push({
+      uid: `proj_${projCounter++}`,
+      ownerUid: b.uid,
+      team: b.team,
+      pos: muzzlePos,
+      vel: scale(fwd, (specialDef.projectileSpeed ?? SHOT.SPEED) * tier.speed),
+      // `damage` is the damageScale fed to computeSourceDamage by stepProjectiles (same
+      // convention as gun projectiles); the AoE path passes the same multiplier as its
+      // damageScale, so both special archetypes hit with identical record-2 strength.
+      damage: specialDef.damageMultiplier * tier.damage,
+      hitstun: Math.max(1, Math.round(SPECIAL.HITSTUN * tier.hitstun)),
+      knockback: SPECIAL.KNOCKBACK * specialDef.knockbackMultiplier * tier.knockback,
+      homingTurn: SHOT.HOMING_TURN,
+      // Same spawn-time aim-cone gate as gun projectiles (FUN_8006c334, chunk_0009.c:1995/3841).
+      homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
+      life: SHOT.LIFETIME,
+      hitRadius: (specialDef.projectileHitRadius ?? SHOT.HIT_RADIUS) * tier.radius,
+      // TUNED-visual from the OBSERVED_WIKI X move name (actionProfiles generator), falling
+      // back to the borg's asset-family kind.
+      visualKind: specialDef.projectileVisualKind ?? projectileVisualKindForProfile(p),
+      // Specials -> record 2 (DERIVED mapping, gauges.ts DAMAGE_RECORD_INDEX) — the same
+      // record the AoE path and charged releases use.
+      damageRecordIndex: DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL,
+    });
+  }
+  return projectiles;
+}
+
 /** Fire a (possibly charge-scaled) shot: consumes ammo, sets cooldowns/anim, spawns projectiles.
  *  chargeTier 0 = normal shot; tiers 1/2 scale damage per-profile and speed/radius/hitstun/
  *  knockback via the TUNED CHARGE constants. */
@@ -1097,6 +1412,7 @@ function startShotAttack(
   shotDef: ShotActionDef,
   chargeTier: number,
   out: Projectile[],
+  all: BorgRuntime[],
 ): void {
   b.cooldowns["shot"] = shotDef.cooldown;
   // ATK-009: consume from weapon-0's cell, not a flat pool. Fire-gate cost is a flat 1 (the
@@ -1120,7 +1436,7 @@ function startShotAttack(
   b.state = "attack";
   b.stateTime = 0;
   b.anim = "shoot";
-  out.push(...spawnProjectiles(b, p, shotDef, chargeTier));
+  out.push(...spawnProjectiles(b, p, shotDef, chargeTier, all));
 }
 
 /** Per-tier charge scaling (tier 0 = all 1x). Damage mults come from the profile; the rest
@@ -1153,19 +1469,52 @@ function chargeScaling(shotDef: ShotActionDef, tier: number): {
   return { damage: 1, speed: 1, radius: 1, hitstun: 1, knockback: 1 };
 }
 
+// Multi-muzzle note (ROM, fx-cluster-2026-07-03): the fire handler zz_0070558_
+// (chunk_0009.c:4650) selects WHICH muzzle(s) of the weapon-param table fire based on the
+// weapon FAMILY — family 3 fires dual muzzles 0 AND 2 in one trigger pull, others fire a
+// single indexed muzzle. The port's projectileCount/spreadRadians fan below is the TUNED
+// stand-in for that per-family muzzle layout until DAT_802d39dc (per-muzzle position/velocity
+// table, identified but UNDUMPED) is dumped; restructuring the per-borg data lives with
+// actionProfiles, not here.
 function spawnProjectiles(
   b: BorgRuntime,
   p: BorgProfile,
   shotDef: ShotActionDef,
   chargeTier = 0,
+  all: BorgRuntime[] = [],
 ): Projectile[] {
   const count = Math.max(1, Math.floor(shotDef.projectileCount));
   const projectiles: Projectile[] = [];
   for (let i = 0; i < count; i += 1) {
     const centered = count === 1 ? 0 : i - (count - 1) / 2;
-    projectiles.push(spawnProjectile(b, p, shotDef, centered * shotDef.spreadRadians, chargeTier));
+    projectiles.push(
+      spawnProjectile(b, p, shotDef, centered * shotDef.spreadRadians, chargeTier, all),
+    );
   }
   return projectiles;
+}
+
+/** Spawn-time homing gate — FUN_8006c334 (chunk_0009.c:1995), called from the projectile
+ *  spawn path at chunk_0009.c:3841: a projectile only receives a homing lock if the shooter's
+ *  locked target lies inside an aim cone around the projectile's INITIAL flight direction;
+ *  otherwise it flies straight (homingTarget = null). Previously the port granted
+ *  homingTarget = b.lockTarget unconditionally. The cone half-angle is TUNED
+ *  (HOMING.AIM_CONE_HALF_ANGLE_RAD) — the ROM compares against FLOAT_8043768c, identified but
+ *  UNDUMPED. `dir` must be a unit vector. */
+function homingTargetForSpawn(
+  b: BorgRuntime,
+  all: BorgRuntime[],
+  muzzlePos: Vec3,
+  dir: Vec3,
+): string | null {
+  if (!b.lockTarget) return null;
+  const tgt = all.find((o) => o.uid === b.lockTarget);
+  if (!tgt || !isTargetable(tgt)) return null;
+  const to = sub(tgt.pos, muzzlePos);
+  const dist = len(to);
+  if (dist <= 1e-6) return b.lockTarget; // muzzle on top of the target: trivially in-cone
+  const cos = (to.x * dir.x + to.y * dir.y + to.z * dir.z) / dist;
+  return cos >= Math.cos(HOMING.AIM_CONE_HALF_ANGLE_RAD) ? b.lockTarget : null;
 }
 
 function spawnProjectile(
@@ -1174,28 +1523,43 @@ function spawnProjectile(
   shotDef: ShotActionDef,
   yawOffset: number,
   chargeTier = 0,
+  all: BorgRuntime[] = [],
 ): Projectile {
   const yaw = b.rotY + yawOffset;
   const fwd = { x: Math.sin(yaw), y: 0, z: Math.cos(yaw) };
   const tier = chargeScaling(shotDef, chargeTier);
+  // Muzzle world position: the ROM reads it per-muzzle from the weapon-param table
+  // DAT_802d39dc (spawn zz_006ee14_ 0x8006ee14, chunk_0009.c:3769) — identified but UNDUMPED,
+  // so offsets stay TUNED. Per-borg values come from actionProfiles data; the shared
+  // constants.ts MUZZLE_OFFSET is the sim/render default (the renderer's muzzle flash uses
+  // the same constant so flash and projectile agree).
+  const muzzlePos = {
+    x: b.pos.x + fwd.x * (shotDef.muzzleForwardOffset ?? MUZZLE_OFFSET.forward),
+    y: b.pos.y + (shotDef.muzzleYOffset ?? MUZZLE_OFFSET.up),
+    z: b.pos.z + fwd.z * (shotDef.muzzleForwardOffset ?? MUZZLE_OFFSET.forward),
+  };
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
     team: b.team,
-    pos: {
-      x: b.pos.x + fwd.x * shotDef.muzzleForwardOffset,
-      y: b.pos.y + shotDef.muzzleYOffset,
-      z: b.pos.z + fwd.z * shotDef.muzzleForwardOffset,
-    },
+    pos: muzzlePos,
     vel: scale(fwd, shotDef.speed * tier.speed),
     damage: shotDef.damageMultiplier * tier.damage,
     hitstun: Math.max(1, Math.round(SHOT.HITSTUN * shotDef.hitstunMultiplier * tier.hitstun)),
     knockback: SHOT.KNOCKBACK * shotDef.knockbackMultiplier * tier.knockback,
     homingTurn: shotDef.homingTurn,
-    homingTarget: b.lockTarget,
+    // Spawn-time aim-cone gate (FUN_8006c334) — no longer unconditional.
+    homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
     life: shotDef.lifetime,
     hitRadius: shotDef.hitRadius * tier.radius,
-    visualKind: shotDef.visualKind ?? projectileVisualKindForProfile(p),
+    // Charged releases (tier>=1) switch to the profile's distinct charged visual family when
+    // one is sourced (ShotActionDef.chargedVisualKind, TUNED-visual from the OBSERVED_WIKI
+    // "B Charge" move name — the renderer already draws per-visualKind, so no render change
+    // is needed). Tap shots and profiles without the field keep the existing kind.
+    visualKind:
+      chargeTier >= 1 && shotDef.chargedVisualKind
+        ? shotDef.chargedVisualKind
+        : shotDef.visualKind ?? projectileVisualKindForProfile(p),
     ...(shotDef.bulletDrop > 0 ? { drop: shotDef.bulletDrop } : {}),
     // OBSERVED_WIKI (moveProperties, ATK-008 consume-vs-persist): a shot whose cataloged move
     // penetrates borgs ("borgs" or "total") passes THROUGH borg hits instead of despawning on the
@@ -1224,23 +1588,28 @@ function spawnSwordBeam(
   b: BorgRuntime,
   meleeDef: MeleeActionDef,
   beam: SwordBeamDef,
+  all: BorgRuntime[],
 ): Projectile {
   const fwd = forwardFromYaw(b.rotY);
+  // TUNED spawn offsets (forward 40 / up 20): a port-side design value for the beam's launch
+  // point — no ROM anchor (the sword-beam emitter is not one of the dumped muzzle params).
+  const spawnPos = {
+    x: b.pos.x + fwd.x * 40,
+    y: b.pos.y + 20,
+    z: b.pos.z + fwd.z * 40,
+  };
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
     team: b.team,
-    pos: {
-      x: b.pos.x + fwd.x * 40,
-      y: b.pos.y + 20,
-      z: b.pos.z + fwd.z * 40,
-    },
+    pos: spawnPos,
     vel: scale(fwd, beam.speed),
     damage: meleeDef.damageMultiplier * beam.damageMultiplier,
     hitstun: SHOT.HITSTUN,
     knockback: SHOT.KNOCKBACK * meleeDef.knockbackMultiplier,
     homingTurn: beam.homingTurn,
-    homingTarget: b.lockTarget,
+    // Same spawn-time aim-cone gate as gun projectiles (FUN_8006c334, chunk_0009.c:1995/3841).
+    homingTarget: homingTargetForSpawn(b, all, spawnPos, fwd),
     life: beam.lifetime,
     hitRadius: beam.hitRadius,
     visualKind: beam.visualKind,
@@ -1264,30 +1633,53 @@ export function stepProjectiles(
 ): Projectile[] {
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
+    pr.hitConfirmedThisFrame = false;
     pr.life -= 1;
-    if (pr.life <= 0) continue;
+    if (pr.life <= 0) {
+      pr.despawnReason = "expired"; // life seed: FUN_8006f11c, 600 frames (chunk_0009.c:3907)
+      continue;
+    }
 
-    // Homing toward the locked target.
-    if (pr.homingTarget) {
+    // Owner-liveness despawn — zz_00840b8_ (chunk_0012.c:3216), called every frame from the
+    // projectile update FUN_8006f0cc: a projectile whose owner actor is dead is removed.
+    // battle.ts's byUid map retains defeated borgs (alive === false) rather than deleting
+    // them, so "found && !alive" covers the ROM's dead-or-gone case in real battles; a
+    // MISSING uid only occurs for synthetic callers (selfchecks/fixtures passing empty maps)
+    // and is treated as "no liveness info" so those fixtures keep working.
+    const owner = byUid.get(pr.ownerUid);
+    if (owner && !owner.alive) {
+      pr.despawnReason = "owner-dead";
+      continue;
+    }
+
+    // Homing toward the locked target: full 3D angle-clamped steer (FUN_8006c1c8,
+    // chunk_0009.c:1947 — axis-angle rotation of the WHOLE velocity vector with a per-frame
+    // angle clamp; zz_006c440_, chunk_0009.c:2033 then advances by normalized(vel) * speed).
+    // Replaces the old yaw-only XZ rotation, whose `|| SHOT.SPEED` fallback also silently
+    // re-accelerated stalled projectiles with no ROM basis — a ~zero-speed projectile now
+    // simply skips steering (HOMING.MIN_STEER_SPEED).
+    if (pr.homingTarget && pr.homingTurn > 0) {
       const tgt = byUid.get(pr.homingTarget);
-      if (tgt && isTargetable(tgt)) {
-        const desired = yawFromXZ(tgt.pos.x - pr.pos.x, tgt.pos.z - pr.pos.z);
-        const cur = yawFromXZ(pr.vel.x, pr.vel.z);
-        let d = desired - cur;
-        while (d > Math.PI) d -= Math.PI * 2;
-        while (d < -Math.PI) d += Math.PI * 2;
-        const step = Math.max(-pr.homingTurn, Math.min(pr.homingTurn, d));
-        const newYaw = cur + step;
-        const speed = Math.hypot(pr.vel.x, pr.vel.z) || SHOT.SPEED;
-        pr.vel = { x: Math.sin(newYaw) * speed, y: pr.vel.y, z: Math.cos(newYaw) * speed };
-      }
+      if (tgt && isTargetable(tgt)) steerProjectile3d(pr, tgt.pos);
     }
 
     // Ballistic drop for bullet-kind projectiles (profile-driven; 0/absent for beams/flames).
+    // ROM mechanism: the fly function zz_006f268_ integrates gravity/drag every frame (via
+    // FUN_80083874/FUN_80083ad4, chunk_0009.c:3956) from seeds set at init (FUN_8006f11c).
+    // The per-projectile magnitude here stays TUNED: the param values are undumped, and raw
+    // ROM gravity would not transfer across the port's ~4x world rescale anyway
+    // (behavior-notes.md section (bc)).
     if (pr.drop) pr.vel.y -= pr.drop;
 
+    const prevPos = pr.pos;
     pr.pos = add(pr.pos, pr.vel as Vec3);
-    if (ctx && !projectileInPlayArea(pr, ctx)) continue;
+    if (ctx) {
+      const impact = projectileImpactReason(pr, prevPos, ctx);
+      if (impact) {
+        pr.despawnReason = impact;
+        continue;
+      }
+    }
 
     // Hit test against any non-owner borg. Same-team hits use the derived 0.25x reducer.
     //
@@ -1313,6 +1705,9 @@ export function stepProjectiles(
       for (const o of all) {
         if (!isTargetable(o) || o.uid === pr.ownerUid) continue;
         if (isInvincible(o)) continue;
+        // Vertical hit band |dy| <= 60: TUNED — the ROM's projectile-vs-borg overlap is a real
+        // 3D hitbox record test (chunk_0013.c hit pipeline), not a cylinder; this flat band is
+        // the port's stand-in until per-move hitbox records are dumped.
         if (distXZ(pr.pos, o.pos) <= pr.hitRadius && Math.abs(pr.pos.y - o.pos.y) <= 60) {
           const op = profiles.get(o.uid);
           const record = damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT);
@@ -1344,8 +1739,10 @@ export function stepProjectiles(
                     defenderSideRank: damageContext.sideRankForTeam?.(o.team),
                   }
                 : undefined,
+              damageContext,
             );
           }
+          pr.hitConfirmedThisFrame = true; // renderer impact-puff trigger (persisting re-hits too)
           if (persistent) {
             // Reload the single per-object counter immediately so this same frame's loop can't
             // apply a second hit (the ROM shape: counter gates the next application, then
@@ -1355,6 +1752,7 @@ export function stepProjectiles(
             break;
           }
           consumed = true;
+          pr.despawnReason = "hit-target";
           break;
         }
       }
@@ -1366,12 +1764,143 @@ export function stepProjectiles(
   return survivors;
 }
 
-function projectileInPlayArea(projectile: Projectile, ctx: ProjectileContext): boolean {
+/** Per-frame 3D homing steer — FUN_8006c1c8 (chunk_0009.c:1947): rotate the FULL velocity
+ *  vector toward the target point by an angle clamped to `homingTurn` per frame (axis-angle
+ *  about cur x desired), then keep flying at the SAME speed (zz_006c440_, chunk_0009.c:2033:
+ *  advance by normalized(vel) * speed(+0x44)). Implemented as a slerp between the current and
+ *  desired unit directions — mathematically identical to the clamped axis-angle rotation.
+ *  Aim point: the target's tracked origin (the ROM's exact aim-point offset inside the target
+ *  comes from undumped params — zero offset is the TUNED choice; the |dy|<=60 TUNED hit band
+ *  in stepProjectiles absorbs the residual). */
+function steerProjectile3d(pr: Projectile, targetPos: Vec3): void {
+  const speed = len(pr.vel as Vec3);
+  if (speed <= HOMING.MIN_STEER_SPEED) return; // stalled: no ROM re-acceleration (see HOMING)
+  const cur = scale(pr.vel as Vec3, 1 / speed);
+  const toTarget = sub(targetPos, pr.pos);
+  const dist = len(toTarget);
+  if (dist <= 1e-6) return; // on top of the target: no defined steer direction
+  const desired = scale(toTarget, 1 / dist);
+  const dot = clamp(cur.x * desired.x + cur.y * desired.y + cur.z * desired.z, -1, 1);
+  const angle = Math.acos(dot);
+  if (angle <= 1e-6) return; // already aligned
+  if (angle <= pr.homingTurn) {
+    pr.vel = scale(desired, speed); // clamp not binding: snap onto the target direction
+    return;
+  }
+  const sinAngle = Math.sin(angle);
+  if (sinAngle <= 1e-6) {
+    // Anti-parallel: the rotation axis (cur x desired) degenerates to zero — the ROM builds
+    // its axis from the same cross product and its tie-break is unread, so TUNED: turn the
+    // horizontal component by the clamp in the +yaw direction this frame (deterministic).
+    const horiz = Math.hypot(cur.x, cur.z);
+    if (horiz <= 1e-6) return; // straight up/down reversal: leave it for the hit/impact tests
+    const newYaw = yawFromXZ(cur.x, cur.z) + pr.homingTurn;
+    pr.vel = {
+      x: Math.sin(newYaw) * horiz * speed,
+      y: cur.y * speed,
+      z: Math.cos(newYaw) * horiz * speed,
+    };
+    return;
+  }
+  // Slerp cur -> desired by t = homingTurn/angle (equivalent to rotating cur about the
+  // cur x desired axis by exactly homingTurn radians).
+  const t = pr.homingTurn / angle;
+  const w0 = Math.sin((1 - t) * angle) / sinAngle;
+  const w1 = Math.sin(t * angle) / sinAngle;
+  const dir = normalize({
+    x: cur.x * w0 + desired.x * w1,
+    y: cur.y * w0 + desired.y * w1,
+    z: cur.z * w0 + desired.z * w1,
+  });
+  pr.vel = scale(dir, speed);
+}
+
+/**
+ * Despawn test for one projectile frame, with the REASON (null = keep flying):
+ *   - "out-of-bounds": outside the stage rect, or no supporting floor beneath the new
+ *     position (the pre-existing play-area cull, unchanged semantics).
+ *   - "hit-terrain": the frame's movement segment crossed stage collision geometry — the
+ *     ROM's terrain/wall impact tests zz_0083244_ (terrain) / zz_0083714_ (wall) called from
+ *     the projectile fly function zz_006f268_ (chunk_0009.c:3956). Both floor and wall
+ *     triangles are tested with one segment-vs-triangle crossing (no normal filter), and the
+ *     projectile position is moved to the impact point so the renderer can place the puff.
+ */
+function projectileImpactReason(
+  projectile: Projectile,
+  prevPos: Vec3,
+  ctx: ProjectileContext,
+): "hit-terrain" | "out-of-bounds" | null {
   const { pos } = projectile;
   if (pos.x < ctx.bounds.minX || pos.x > ctx.bounds.maxX || pos.z < ctx.bounds.minZ || pos.z > ctx.bounds.maxZ) {
-    return false;
+    return "out-of-bounds";
   }
-  if (!ctx.collision || ctx.collision.triangles.length === 0) return true;
-  return floorSurfaceYAt(ctx.collision, pos.x, pos.z, pos.y) != null;
+  if (!ctx.collision || ctx.collision.triangles.length === 0) return null;
+  // Terrain/wall impact: earliest crossing along prev->new (zz_0083244_/zz_0083714_ shape).
+  let best: { point: Vec3; t: number } | null = null;
+  for (const tri of candidateTrianglesForSegment(ctx.collision, prevPos, pos)) {
+    const hit = segmentTriangleImpact(tri, prevPos, pos);
+    if (hit && (!best || hit.t < best.t)) best = hit;
+  }
+  if (best) {
+    projectile.pos = best.point;
+    return "hit-terrain";
+  }
+  // Pre-existing floor-presence cull: flying over space with no floor at all counts as
+  // leaving the play area (port-side; the original relies on geometry + the 600f lifetime).
+  if (floorSurfaceYAt(ctx.collision, pos.x, pos.z, pos.y) == null) return "out-of-bounds";
+  return null;
+}
+
+/** Segment-vs-triangle crossing for projectile impact. Same solid-geometry filters as the
+ *  movement port (marker 0xcccccccc, finite normal/vertices — movement.ts
+ *  segmentTriangleWallHit / physics bestFloorFromCandidates), but with NO normal-direction
+ *  filter: floors, walls, and ceilings all stop a projectile (zz_006f268_ runs both the
+ *  terrain and wall tests, chunk_0009.c:3956). */
+function segmentTriangleImpact(
+  tri: StageCollisionTriangle,
+  p0: Vec3,
+  p1: Vec3,
+): { point: Vec3; t: number } | null {
+  if (tri.marker !== 0xcccccccc) return null;
+  if (!isFiniteVec(tri.normal) || !tri.vertices.every(isFiniteVec)) return null;
+  const a = tri.vertices[0];
+  const n = tri.normal;
+  const d0 = (p0.x - a.x) * n.x + (p0.y - a.y) * n.y + (p0.z - a.z) * n.z;
+  const d1 = (p1.x - a.x) * n.x + (p1.y - a.y) * n.y + (p1.z - a.z) * n.z;
+  if (!Number.isFinite(d0) || !Number.isFinite(d1)) return null;
+  if (Math.abs(d0 - d1) < 1e-5) return null; // parallel to the plane
+  if (d0 === 0 || d0 * d1 > 0) return null; // no crossing (start-on-plane skipped, as movement.ts)
+  const t = d0 / (d0 - d1);
+  if (t < -1e-4 || t > 1 + 1e-4) return null;
+  const point = {
+    x: p0.x + (p1.x - p0.x) * t,
+    y: p0.y + (p1.y - p0.y) * t,
+    z: p0.z + (p1.z - p0.z) * t,
+  };
+  return pointInTriangleByDominantAxis(point, tri) ? { point, t } : null;
+}
+
+/** Point-in-triangle via barycentric weights on the plane's dominant-axis 2D projection
+ *  (pure fixed-step math; tolerances mirror physics yAtTriangleXZ). */
+function pointInTriangleByDominantAxis(p: Vec3, tri: StageCollisionTriangle): boolean {
+  const [a, b, c] = tri.vertices;
+  const n = tri.normal;
+  const ax = Math.abs(n.x);
+  const ay = Math.abs(n.y);
+  const az = Math.abs(n.z);
+  let pu: number, pv: number, u0: number, v0: number, u1: number, v1: number, u2: number, v2: number;
+  if (ay >= ax && ay >= az) {
+    pu = p.x; pv = p.z; u0 = a.x; v0 = a.z; u1 = b.x; v1 = b.z; u2 = c.x; v2 = c.z;
+  } else if (ax >= az) {
+    pu = p.y; pv = p.z; u0 = a.y; v0 = a.z; u1 = b.y; v1 = b.z; u2 = c.y; v2 = c.z;
+  } else {
+    pu = p.x; pv = p.y; u0 = a.x; v0 = a.y; u1 = b.x; v1 = b.y; u2 = c.x; v2 = c.y;
+  }
+  const denom = (v1 - v2) * (u0 - u2) + (u2 - u1) * (v0 - v2);
+  if (Math.abs(denom) < 1e-8) return false; // degenerate projection
+  const wa = ((v1 - v2) * (pu - u2) + (u2 - u1) * (pv - v2)) / denom;
+  const wb = ((v2 - v0) * (pu - u2) + (u0 - u2) * (pv - v2)) / denom;
+  const wc = 1 - wa - wb;
+  return wa >= -1e-4 && wb >= -1e-4 && wc >= -1e-4;
 }
 

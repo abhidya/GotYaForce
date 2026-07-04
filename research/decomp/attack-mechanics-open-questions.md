@@ -48,15 +48,35 @@ agent; **code** = cheap coding agent; **Fable** = needs cross-system synthesis j
 - **Expected output**: table layout + source file offsets -> unblocks ATK-005 for real.
 - **Agent type**: grep, then Fable to bless the format interpretation.
 
-## Q4. Power Burst meter: which field accumulates, what threshold arms activation, and what clears +0x6fc (duration)?
+## Q4. Power Burst meter: which field accumulates, what threshold arms activation, and what clears +0x6fc (duration)? — MOSTLY RESOLVED (2026-07-03)
 
-- **Why it matters**: whole mechanic S; the wiki's most player-visible super system.
-- **Evidence searched**: no `+=` accumulator in the hit path; no explicit +0x6fc clear;
-  arm chain FUN_80069814 -> +0x6fb=6 -> zz_005b2b8_ -> +0x6fc=1 found.
-- **Next search/trace**: Dolphin T3 — save-state diff with the HUD burst gauge empty vs
-  full; then watch +0x6fc for the clear.
-- **Expected output**: meter address + fill rule + duration -> unblocks ATK-012.
-- **Agent type**: **Dolphin** (T3). Corpus reading has hit diminishing returns here.
+- **Resolved by save-state diff (scripts/diff-actor-block.mjs) + targeted corpus re-read**
+  (full detail in attack-mechanics-findings.md §S): meter = per-player struct
+  `PTR_DAT_80433934 + i*0x3c + 0x126` (u16), max at +0x124 = 3000, charged flag +0x103
+  (the FUN_80069814 arm precondition), burst mode +0x104 (1=Y burst, 2=spawn hyper),
+  duration countdown +0x10c/+0x10e = 600 frames (Y) / 1800 frames (spawn). +0x6fc clear:
+  zz_005b2b8_ top-of-frame sweep when the player's +0x104 drops to 0.
+- **FILL RULE RESOLVED (2026-07-03 T3 live traces)**: **+50 per hit connection, attacker
+  only, flat** — independent of damage dealt:
+  - B shot on live G Red: 16 HP damage -> +50 meter (reproduced 3x);
+  - Plasma Knuckle melee on live G Red: 25 HP damage -> +50 meter;
+  - one penetrating beam through a DEAD borg husk: +150 = 3 hit connections x 50
+    (dead borgs still register hits; G Red beam penetration = "borgs");
+  - victim side: NONE of the other three players' meters moved on any hit taken —
+    taking damage does NOT fill the victim's meter;
+  - clamp/flag timing (live): +0x126 clamps at max 3000 while +0x12a keeps accumulating
+    (2929 -> 3079 -> 3129); charged flag +0x103 flips to 1 ONE frame after +0x126
+    reaches max.
+  - Caveat: 50 confirmed for two different G Red moves (shot + melee); a per-move or
+    per-record override elsewhere can't be fully excluded. NOTE the damage-record field
+    `forceGaugeCurveIndex` is NOT this — that's a damage multiplier keyed to the TEAM
+    GF-energy gauge (player struct +0x114 max), a separate gauge from the burst circle
+    (+0x124/+0x126). The damage pipeline (chunk_0004.c:6672-6828) never writes +0x126.
+- **Remaining (minor)**: live-verify the 600-frame duration + what the +0x12a unclamped
+  accumulator feeds (results screen? chunk_0022.c:1671/1737 reads it for min/max across
+  players); Q5 speed boost (non-burst baseline captured: 22.0 world-units/frame dash).
+- ATK-012 fill rule: **unblocked** — port as `onHitConnect(attacker): meter = min(meter+50,
+  3000); unclamped += 50; if (meter == 3000) charged = 1` per player.
 
 ## Q5. Where does Power Burst's speed boost live (wiki: "massive speed"), given no +0x6fc-gated speed modifier exists?
 

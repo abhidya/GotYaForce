@@ -47,7 +47,10 @@ which is how the tinted text in the captures reads.
 | Enemy bar fill | right edge 35.3%, y 12.3–14.8% | right-anchored at x 226, 59..71 | two-tone red (`#ff7a52` over `#f2200a`); right-anchored, depletes from the left (564 → short bar in challenge-9) |
 | Enemy tab "ENEMY ► 1267" | x 4.3–20.8%, y 16.3–20.4% | 27..133, 78..98 | right-tipped maroon arrow plate; yellow `ENEMY`, pink number `#ff9ed8` |
 | "!" alert roundel | center (49.7%, 9.8%), dia ~4.7%W | (318, 47), r 15 | yellow disc, black ring, inner white ring, black bold `!` glyph |
-| Boost gear (top-right) | center (75.5%, 10.0%), outer dia ~11%W | (483, 48), r ~35 | dark gear silhouette + cyan `#3fe8c4` inner ring; ring is full in challenge-9 → treated as 0..1 gauge (`boost01`) |
+| Boost gear (top-right) | center (75.5%, 10.0%), outer dia ~11%W | (483, 48), r ~35 | dark gear silhouette + cyan `#3fe8c4` inner ring; ring is full in challenge-9 → treated as 0..1 gauge (`boost01`) — **SUPERSEDED**: the ring is the Power Burst gauge, see the 2026-07-03 addendum row below |
+| Power Burst gauge (gear ring) | same gear, ring anchored at 6 o'clock; challenge-8 ~20–25% filled, challenge-9 complete | (483, 48), ring r 15, stroke 7 | **capture-verified rebind (2026-07-03)**: challenge-8 shows the ring part-filled while the borg stands GROUNDED (boost fuel refills on land → a fuel ring would read full); challenge-9 (late battle, heavy inflicted damage) shows it complete — matches the manual/StrategyWiki "circle fills with inflicted damage" burst gauge (behavior-notes (ao), CONFIRMED_MANUAL) and the ported per-player meter (Q4 RESOLVED, findings §S: +0x126 / max +0x124 = 3000, +50 per attacker hit, `charged` +0x103 one frame after max). Driven by `burst01`; flashes bright when `burstCharged` (flash period TUNED). Fill start = bottom (capture); fill DIRECTION cw/ccw TUNED (single frame). Boost fuel demoted to a small TUNED secondary arc (r 7) in the gear hub, hidden at full so the at-rest HUD still matches the captures |
+| DEFEATED banner | — no capture exists | TUNED: left 236, top 228 (centered on 640x480), scale-3 bold ascii.tpl, red `#ff2f1a` | shown while the local player's active borg is dead/absent awaiting redeploy or the battle is lost (`HudState.defeated`, presentation.ts). Position, wording ("DEFEATED") and art are ALL stand-ins until a real banner capture is taken |
+| Player tag ("1P"/"2P") | — no capture exists | TUNED: left 8, top 8, scale-2 bold, yellow | hidden unless `HudState.playerLabel` set (multi-local sessions only); placeholder for future multi-viewport work — needs a 2P quadrant-HUD capture |
 | HP ring gauge | center (7.7%, 82.9%), outer dia ~10%W | (49, 398), outer r 32 | glossy green ring w/ specular; arc = hp/maxHp |
 | HP digits | x 9.4–17%, cap height ~5.4%H | left 60, top 384, 24px digits | chunky yellow-green `#cde23c`, advance 21px |
 | Critical capsule (challenge-9) | x 4.1–22.0%, y 84.4–89.5% | 26..141, 405..430 | red pill + darker ring knob + yellow tick; replaces the ring; digits shift into it |
@@ -104,3 +107,50 @@ button, now corrected to X.
   apps/game/public/ui/hsd/fmg00_mdl/).
 - `arrow_mdl.arc`: confirmed vertex-colored geometry only (no textures to decode); covered by
   arrowMdlGeometry.generated.ts.
+
+## Addendum (2026-07-03, burst gauge + DEFEATED wave)
+
+**Gear-ring rebind (boost → burst).** Re-examining the two captures against the ported
+per-player Power Burst meter (Q4 RESOLVED — research/decomp/attack-mechanics-open-questions.md
+Q4, attack-mechanics-findings.md §S) settles what the top-right cyan ring is:
+
+- challenge-8: the borg is standing **grounded** yet the ring shows only a small cyan arc
+  anchored at the bottom of the gear (~20–25%). Boost fuel refills on landing
+  (movement.ts), so a fuel gauge would read **full** here — the partial ring refutes the
+  boost reading.
+- challenge-9: late battle (enemy 1267 → 564, critical HP), ring **complete** — consistent
+  with a gauge that fills with inflicted damage over the battle.
+- The official NA manual / StrategyWiki describe the burst gauge as a circle that fills with
+  inflicted damage and "press Y when the burst gauge is at max" (behavior-notes (ao),
+  CONFIRMED_MANUAL).
+
+BattleHud.ts therefore drives the ring from `burst01` (meter / BURST.METER_MAX, sim state
+`BattleState.burstMeterByPlayer`) and flashes it bright while `burstCharged` (ROM +0x103, one
+frame after max; flash period TUNED). Fill anchor = 6 o'clock (measured, challenge-8); fill
+direction is TUNED (unmeasurable from one frame). The TUNED `boost01` fuel readout is demoted
+to a small secondary arc inside the gear hub, hidden while full so the at-rest HUD still
+matches the captures (which show an empty hub). The gauge is **display-only** until ATK-012
+lands burst gameplay effects (BURST.ENABLED stays false; Q5 speed boost still open). CPU-owned
+attackers do not fill a meter this wave (documented in packages/combat burst.ts) — the HUD
+surfaces exactly what the sim provides.
+
+**DEFEATED banner.** New center-screen scale-3 red bold ascii.tpl banner behind
+`HudState.defeated` (local active borg dead/absent awaiting redeploy, or result = lose —
+presentation.ts battleHudState). Everything about it (position, the word "DEFEATED", color)
+is TUNED until a real capture exists.
+
+**Melee reticle sync.** presentation.ts focusHasMeleeRangeTarget now evaluates the sim's own
+contextual-B SELECTION window (combat.ts targetWithinMeleeEngage / meleeEngageRangeFor —
+MELEE.ENGAGE_RANGE / ENGAGE_Y_TOLERANCE widened by the borg's reach) so the yellow→red
+reticle flip matches when B actually selects melee. Mechanism CONFIRMED_MANUAL
+(behavior-notes (ao)); the numeric threshold FLOAT_8043762c remains untraced → TUNED.
+
+### Remaining capture needs (research follow-ups)
+
+| Need | Unblocks |
+|---|---|
+| DEFEATED banner frame (die in a Dolphin battle, capture the banner) | real placement/art/wording for the TUNED center-screen banner |
+| 2P quadrant HUD (splitscreen VS capture) | player-tag placement + per-quadrant HUD layout for multi-viewport |
+| Center-screen team-energy variant (user-described; no capture) | whether/when the ally/enemy meters move center-screen — **do not move them** until captured |
+| Ammo-pips variant (user-described; no capture) | whether some borgs show ammo as pips instead of digits — **keep digits** until captured |
+| Burst ring mid-fill + charged-state frames (hit-count-correlated captures) | fill direction (cw/ccw), exact ring radii/stroke, real charged-flash treatment |

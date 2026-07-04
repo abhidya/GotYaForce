@@ -16,6 +16,9 @@ export {
   type SymmetricStageBounds,
 } from "@gf/physics";
 import type { BorgProfile } from "./stats.js";
+// Re-exported here (index.ts does `export * from "./types.js"`) so the renderer can import the
+// shared sim/render muzzle offset from the package root — see constants.ts MUZZLE_OFFSET.
+export { MUZZLE_OFFSET } from "./constants.js";
 
 /** One frame of intent for a single controlled borg (player OR resolved by AI). */
 export interface PlayerInput {
@@ -215,10 +218,13 @@ export interface BorgRuntime {
   burstArmFrames: number;
   /** Power Burst activation flag (ROM +0x6fc = 1, set by `zz_005b2b8_` when +0x6fb is nonzero
    *  and the borg is active). Gated behind constants.ts BURST.ENABLED (default false, BLOCKED-
-   *  until-T3) so this is always false in real battles; has ZERO gameplay effects (ATK-011
+   *  until-ATK-012) so this is always false in real battles; has ZERO gameplay effects (ATK-011
    *  shell only — see ATK-012). Per (ao) (official manual, CONFIRMED_MANUAL): real activation's
-   *  precondition is "the burst gauge is at max" — the gauge itself is still unlocated in RAM,
-   *  which is exactly why BURST.ENABLED stays false until that meter is found and wired. */
+   *  precondition is "the burst gauge is at max". UPDATE (Q4 RESOLVED 2026-07-03): that gauge
+   *  is now LOCATED and ported — it is PER-PLAYER (player struct +i*0x3c, +0x124/+0x126/
+   *  +0x12a/+0x103, findings §S), lives in BattleState.burstMeterByPlayer (see BurstMeterState
+   *  below), and is display-only until ATK-012 wires gameplay effects (Q5 speed boost still
+   *  open) — which is why BURST.ENABLED still stays false. */
   burstActive: boolean;
   /** Power Burst "paired" flag (ROM +0x6fa = 1, set alongside +0x6fc by `zz_005b2b8_`). Shell
    *  bookkeeping only; not wired to fusion pairing (fusionPartnerUid/fusionState below) until
@@ -278,6 +284,30 @@ export type BattleResult = "ongoing" | "win" | "lose" | "draw";
 
 export type ProjectileVisualKind = "energy" | "flame" | "muzzle";
 
+/**
+ * Why a projectile left the field. Set by stepProjectiles on the projectile OBJECT in the same
+ * frame it is dropped from the survivors list, so a renderer that keeps per-uid references to
+ * Projectile objects can read the reason after removal and spawn impact effects only for real
+ * impacts (hit-target / hit-terrain), not for expiry or bounds culls.
+ *   - "hit-target":   consumed by a valid borg hit (default consumeOnHit path).
+ *   - "hit-terrain":  the frame's movement segment crossed stage collision geometry — the
+ *                     ROM's terrain/wall impact tests zz_0083244_/zz_0083714_ called from the
+ *                     projectile fly function zz_006f268_ (chunk_0009.c:3956). pos is moved to
+ *                     the impact point.
+ *   - "out-of-bounds": left the stage rect or crossed into unsupported-floor space (port-side
+ *                     play-area cull; the original relies on geometry + lifetime instead).
+ *   - "expired":      life counter reached 0 (init FUN_8006f11c seeds 600 frames,
+ *                     chunk_0009.c:3907).
+ *   - "owner-dead":   owner-liveness despawn — zz_00840b8_ (chunk_0012.c:3216), called every
+ *                     frame from the projectile update FUN_8006f0cc.
+ */
+export type ProjectileDespawnReason =
+  | "hit-target"
+  | "hit-terrain"
+  | "out-of-bounds"
+  | "expired"
+  | "owner-dead";
+
 /** A homing/straight projectile in flight. */
 export interface Projectile {
   uid: string;
@@ -316,6 +346,40 @@ export interface Projectile {
    *  (chunk_0013.c:1188 gates despawn, not this counter). Absent/undefined = not yet initialized;
    *  treated as hit-ready (0) the first time stepProjectiles sees a persisting projectile. */
   rehitCounter?: number;
+  /** Why this projectile despawned (see ProjectileDespawnReason). Written by stepProjectiles
+   *  the frame the projectile is dropped from the survivors list; absent while in flight.
+   *  Additive/back-compat: no sim code reads it — it exists for the renderer. */
+  despawnReason?: ProjectileDespawnReason;
+  /** True when this projectile applied at least one damage hit during the most recent
+   *  stepProjectiles frame (covers BOTH the consuming hit-target despawn and persisting
+   *  ATK-008 re-hits, which never despawn). Reset to false at the start of each projectile
+   *  step. Additive/back-compat: renderer-facing only (impact-puff trigger). */
+  hitConfirmedThisFrame?: boolean;
+}
+
+/**
+ * Per-PLAYER Power Burst circle-gauge meter state (Q4 RESOLVED 2026-07-03 —
+ * research/decomp/attack-mechanics-open-questions.md Q4 lines 51-79, attack-mechanics-
+ * findings.md §S, save-state diff scripts/diff-actor-block.mjs + T3 live traces). ROM fields,
+ * all in the PLAYER struct at `PTR_DAT_80433934 + i*0x3c` (NOT the borg/actor struct — the
+ * meter persists across borg deploys/switches of the same player):
+ *   - `meter`     = +0x126 (u16), the displayed value, clamped at +0x124 max (BURST.METER_MAX
+ *                   = 3000);
+ *   - `unclamped` = +0x12a, keeps accumulating past max (live: 2929 -> 3079 -> 3129; read by
+ *                   the results screen min/max scan, chunk_0022.c:1671/1737);
+ *   - `charged`   = +0x103, the FUN_80069814 arm precondition; flips to 1 ONE frame AFTER
+ *                   +0x126 reaches max (live-observed delay — ported as the check-before-fill
+ *                   sweep in battle.ts step()).
+ * Distinct from the per-BORG burstArmFrames/burstActive/burstPaired shell on BorgRuntime
+ * (ATK-011, inert behind BURST.ENABLED=false).
+ */
+export interface BurstMeterState {
+  /** Clamped meter (ROM +0x126 u16), 0..BURST.METER_MAX. */
+  meter: number;
+  /** Unclamped accumulator (ROM +0x12a) — keeps counting past METER_MAX. */
+  unclamped: number;
+  /** Charged flag (ROM +0x103) — set one frame after `meter` reaches METER_MAX. */
+  charged: boolean;
 }
 
 export interface BattleState {
@@ -329,6 +393,14 @@ export interface BattleState {
   defeatedEnergy: Record<number, number>;
   /** The currently-active (controllable) borg uid per player id. */
   activeUidByPlayer: Record<string, string>;
+  /**
+   * Per-player Power Burst meter, keyed by player id (ForceConfig.ownerPlayer). PER-PLAYER
+   * like the ROM (player struct +i*0x3c — see BurstMeterState above): it persists across
+   * borg deaths/deploys/switches and is never reset by deployNext. CPU-owned forces
+   * (ownerPlayer === null) get no entry in this wave — see creditBurstFill in burst.ts for
+   * the documented decision. Display-only until ATK-012 (BURST.ENABLED stays false).
+   */
+  burstMeterByPlayer: Record<string, BurstMeterState>;
   frame: number;
   /** Frames remaining on the battle timer, or null when untimed. */
   timeRemainingFrames: number | null;

@@ -13,6 +13,7 @@ const PATHS = {
   borgs: "packages/assets/data/borgs.json",
   hitInventory: "research/asset-inventory/hit-bin-inventory.json",
   commandMap: "research/decomp/data/command-button-map.json",
+  commandMoveTables: "packages/combat/src/data/commandMoveTables.json",
   stateAnimDispatch: "research/decomp/data/state-anim-dispatch-802d3570.json",
   decompDir: "research/decomp/ghidra-export",
 };
@@ -23,6 +24,14 @@ const ATTACK_REMAP_SLOTS = 32;
 const ATTACK_REMAP_STRIDE = 4;
 const ATTACK_RECORD_COUNT = 64;
 const ATTACK_RECORD_SIZE = 0x50;
+
+const BUTTON_COMMAND_TYPES = {
+  "B Shot": { type: 0, context: "B far/default" },
+  "B Attack": { type: 1, context: "B close/proximity" },
+  X: { type: 2, context: "secondary/X" },
+  "B Charge": { type: 3, context: "charged" },
+  "X Charge": { type: 5, context: "ranged/target-forced" },
+};
 
 function usage() {
   return `usage: node scripts/audit-move-unblockers.mjs [--borg pl0615] [--top 12] [--records 16]
@@ -333,6 +342,35 @@ function stateRows(stateDispatch) {
     }));
 }
 
+function commandMoveRows(commandMoveTables, id) {
+  const assignment = commandMoveTables?.borgs?.[id] ?? null;
+  if (!assignment?.tableId) return { assignment, rows: [] };
+  const tableEntry = commandMoveTables?.tables?.[assignment.tableId] ?? null;
+  if (!tableEntry) return { assignment, rows: [] };
+  const rows = Object.entries(BUTTON_COMMAND_TYPES).map(([button, spec]) => {
+    const typeEntry = tableEntry.types?.find((entry) => entry.type === spec.type) ?? null;
+    const records = (typeEntry?.records ?? []).filter((record) => !record.disabled);
+    const sample = records
+      .slice(0, 4)
+      .map((record) => {
+        const dir = record.direction === null ? "" : `/d${record.direction}`;
+        return `s${record.subtype}${dir} [${record.bytes.join(",")}]`;
+      })
+      .join("; ");
+    return {
+      button,
+      context: spec.context,
+      type: spec.type,
+      mode: typeEntry?.modeName ?? "missing",
+      recordCount: records.length,
+      actionIndexes: [...new Set(records.map((record) => record.actionIndex))].join(","),
+      variants: [...new Set(records.map((record) => record.variantIndex))].join(","),
+      sample,
+    };
+  });
+  return { assignment, tableEntry, rows };
+}
+
 function renderCommandEvidence(commandMap) {
   console.log("Command Evidence");
   console.log(short(commandMap?.summary, 160));
@@ -368,6 +406,40 @@ function renderStateEvidence(stateDispatch) {
   );
 }
 
+function renderBorgCommandTable(commandMoveTables, borg) {
+  console.log("");
+  console.log("Borg Command Table Evidence");
+  const { assignment, tableEntry, rows } = commandMoveRows(commandMoveTables, borg.id.toLowerCase());
+  if (!assignment) {
+    console.log("No constructor-table assignment found.");
+    return;
+  }
+  console.log(
+    `Constructor ${assignment.constructorAddress}; exact +0x4ec table: ${bool(assignment.exactCommandTable)}${
+      assignment.tableId ? ` (${assignment.tableId})` : ""
+    }`,
+  );
+  if (!tableEntry) {
+    console.log("No decoded command table for this constructor yet.");
+    return;
+  }
+  console.log(
+    `Root ${tableEntry.rootAddress}; command struct ${tableEntry.commandStructAddress}; evidence ${tableEntry.evidence}`,
+  );
+  console.log(
+    table(rows, [
+      { header: "button", value: (row) => row.button },
+      { header: "context", value: (row) => row.context },
+      { header: "type", value: (row) => row.type },
+      { header: "mode", value: (row) => row.mode },
+      { header: "records", value: (row) => row.recordCount },
+      { header: "action", value: (row) => row.actionIndexes || "none" },
+      { header: "variant", value: (row) => row.variants || "none" },
+      { header: "sample bytes", value: (row) => short(row.sample || "none", 96) },
+    ]),
+  );
+}
+
 function renderCallsites(sites) {
   const summary = callsiteSummary(sites);
   console.log("");
@@ -399,7 +471,7 @@ function renderCallsites(sites) {
   );
 }
 
-function renderRosterSummary(borgsData, hitInventory, sites, opts) {
+function renderRosterSummary(borgsData, hitInventory, commandMoveTables, sites, opts) {
   const players = playerHitInventory(hitInventory);
   const summaries = players
     .map((entry) => ({ entry, summary: inventoryAttackSummary(entry) }))
@@ -417,15 +489,23 @@ function renderRosterSummary(borgsData, hitInventory, sites, opts) {
 
   console.log("Move Unblocker Audit: roster");
   console.log(`Borgs: ${(borgsData.borgs ?? []).length}; player HIT tables: ${players.length}`);
+  const commandCoverage = commandMoveTables?._meta?.coverage;
   console.log(
     table(
       [
+        commandCoverage
+          ? {
+              metric: "borgs with exact +0x4ec command tables",
+              count: `${commandCoverage.exactCommandTableBorgs}/${commandCoverage.rosterBorgs}`,
+            }
+          : null,
+        commandCoverage ? { metric: "decoded +0x4ec command tables", count: commandCoverage.decodedTables } : null,
         { metric: "borgs with attack remaps", count: totals.withAttackRemaps },
         { metric: "active attack remap entries", count: totals.activeRemapEntries },
         { metric: "unique active attack records", count: totals.uniqueActiveRecords },
         { metric: "nonzero attack records", count: totals.nonZeroRecords },
         { metric: "zz_008ac80 call sites", count: sites.length },
-      ],
+      ].filter(Boolean),
       [
         { header: "metric", value: (row) => row.metric },
         { header: "count", value: (row) => row.count },
@@ -498,6 +578,7 @@ const opts = parseArgs(process.argv.slice(2));
 const borgsData = readJson(PATHS.borgs);
 const hitInventory = readJson(PATHS.hitInventory);
 const commandMap = readJson(PATHS.commandMap);
+const commandMoveTables = readJson(PATHS.commandMoveTables);
 const stateDispatch = readJson(PATHS.stateAnimDispatch);
 const sites = readHitCallsites();
 
@@ -507,11 +588,12 @@ if (opts.borg) {
   console.log(`Move Unblocker Audit: ${borg.id} ${borg.name}`);
   renderCommandEvidence(commandMap);
   renderStateEvidence(stateDispatch);
+  renderBorgCommandTable(commandMoveTables, borg);
   renderBorgHitReport(borg, hitInventoryForBorg(hitInventory, borg.id.toLowerCase()), opts);
   renderCallsites(sites);
   renderNextUnlocks(sites);
 } else {
-  renderRosterSummary(borgsData, hitInventory, sites, opts);
+  renderRosterSummary(borgsData, hitInventory, commandMoveTables, sites, opts);
   renderCommandEvidence(commandMap);
   renderStateEvidence(stateDispatch);
   renderCallsites(sites);

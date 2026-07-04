@@ -14,6 +14,7 @@ const DATA_PATHS = {
   moveProperties: "packages/combat/src/data/borgMoveProperties.json",
   sourceStats: "packages/combat/src/data/borgSourceStats.json",
   actionProfiles: "packages/combat/src/data/actionProfiles.json",
+  commandMoveTables: "packages/combat/src/data/commandMoveTables.json",
   modelManifest: "apps/game/public/models/library/manifest.json",
   runtimeMain: "apps/game/src/main.ts",
   runtimeCombat: "packages/combat/src/combat.ts",
@@ -28,6 +29,14 @@ const BUTTON_WIRING = {
   "B Charge": { action: "shot", weaponSlot: 0, animSlot: "shoot", runtime: "b-charge" },
   X: { action: "special", weaponSlot: 1, animSlot: "special", runtime: "x" },
   "X Charge": { action: "special", weaponSlot: 1, animSlot: "special", runtime: "x-charge" },
+};
+
+const BUTTON_COMMAND_TYPES = {
+  "B Shot": { type: 0, context: "B far/default" },
+  "B Attack": { type: 1, context: "B close/proximity" },
+  X: { type: 2, context: "secondary/X" },
+  "B Charge": { type: 3, context: "charged" },
+  "X Charge": { type: 5, context: "ranged/target-forced" },
 };
 
 const SLOT_LABELS = {
@@ -346,6 +355,47 @@ function actionCoverage(actionProfile, button) {
   return { text: action, ok: true, gaps: [] };
 }
 
+function commandCoverage(commandMoveTables, id, button) {
+  const spec = BUTTON_COMMAND_TYPES[button];
+  if (!spec) return { text: "n/a", exact: false, gaps: [] };
+
+  const assignment = commandMoveTables?.borgs?.[id] ?? null;
+  if (!assignment) {
+    return { text: "no constructor map", exact: false, gaps: ["exact ROM command table missing"] };
+  }
+  if (!assignment.tableId) {
+    return {
+      text: `ctor ${assignment.constructorAddress}; no +0x4ec table`,
+      exact: false,
+      gaps: ["exact ROM command table missing"],
+    };
+  }
+
+  const tableEntry = commandMoveTables?.tables?.[assignment.tableId] ?? null;
+  const typeEntry = tableEntry?.types?.find((entry) => entry.type === spec.type) ?? null;
+  if (!tableEntry || !typeEntry) {
+    return { text: `t${spec.type} missing`, exact: false, gaps: ["exact ROM command type missing"] };
+  }
+  const records = (typeEntry.records ?? []).filter((record) => !record.disabled);
+  if (records.length === 0) {
+    return {
+      text: `t${spec.type} ${typeEntry.modeName}; no active records`,
+      exact: false,
+      gaps: ["exact ROM command records missing"],
+    };
+  }
+
+  const actionIndexes = [...new Set(records.map((record) => record.actionIndex))].join(",");
+  const variants = [...new Set(records.map((record) => record.variantIndex))].join(",");
+  return {
+    text: `${spec.context}; t${spec.type} ${typeEntry.modeName} ${records.length} recs a[${actionIndexes}] v[${variants}]`,
+    exact: true,
+    gaps: [],
+    tableId: assignment.tableId,
+    records,
+  };
+}
+
 function normalizeButton(button) {
   if (!button) return null;
   const exact = BUTTON_ORDER.find((candidate) => candidate.toLowerCase() === button.toLowerCase());
@@ -392,6 +442,7 @@ function auditBorg(borg, data) {
       const move = wikiByButton.get(button) ?? null;
       const ammo = sourceAmmoCoverage(sourceProfile, button);
       const action = actionCoverage(actionProfile, button);
+      const command = commandCoverage(data.commandMoveTables, id, button);
       const anim = animCoverage(id, BUTTON_WIRING[button].animSlot, animIndex, data.preferredLabels);
       const gaps = [];
 
@@ -400,17 +451,18 @@ function auditBorg(borg, data) {
       const mismatch = ammoMismatch(move, ammo);
       if (mismatch) gaps.push(mismatch);
       gaps.push(...action.gaps);
+      gaps.push(...command.gaps);
       if (!move || move.penetration == null) gaps.push("penetration missing");
       gaps.push(...anim.gaps);
 
-      if ((button === "B Shot" || button === "B Attack") && hasBShot && hasBAttack) {
+      if ((button === "B Shot" || button === "B Attack") && hasBShot && hasBAttack && !command.exact) {
         gaps.push(
           data.runtimeFlags.contextualBResolver
-            ? "B Shot/B Attack uses extracted type/subtype context; exact ROM move-table id unresolved"
+            ? "B Shot/B Attack context resolver exists, but exact ROM command table is not assigned"
             : `B Shot/B Attack resolver is primary-order only (${actionProfile?.primary ?? "fallback"})`,
         );
       }
-      if (button === "B Charge") {
+      if (button === "B Charge" && !command.exact) {
         gaps.push("B Charge uses shot charge bridge, not an exact move record");
       }
       if (button === "X") {
@@ -428,6 +480,7 @@ function auditBorg(borg, data) {
         wikiMove: !!move,
         sourceAmmo: ammo,
         action,
+        command,
         penetration: move?.penetration ?? null,
         anim,
         gaps: [...new Set(gaps)],
@@ -456,9 +509,9 @@ function countGapCategories(rows) {
     missingWiki: 0,
     missingSource: 0,
     missingAction: 0,
+    missingExactCommand: 0,
     missingPenetration: 0,
     missingExactAnimMap: 0,
-    splitBResolver: 0,
     missingXHitbox: 0,
     missingXChargeResolver: 0,
     ammoMismatch: 0,
@@ -467,9 +520,9 @@ function countGapCategories(rows) {
     if (!row.wikiMove) counts.missingWiki += 1;
     if (row.gaps.some((gap) => gap.includes("source") || gap.includes("weapon"))) counts.missingSource += 1;
     if (row.gaps.some((gap) => gap.includes("action"))) counts.missingAction += 1;
+    if (row.gaps.some((gap) => gap.includes("exact ROM command"))) counts.missingExactCommand += 1;
     if (row.gaps.includes("penetration missing")) counts.missingPenetration += 1;
     if (row.gaps.some((gap) => gap.includes("anim"))) counts.missingExactAnimMap += 1;
-    if (row.gaps.some((gap) => gap.includes("B Shot/B Attack"))) counts.splitBResolver += 1;
     if (row.gaps.some((gap) => gap.includes("X hitbox"))) counts.missingXHitbox += 1;
     if (row.gaps.some((gap) => gap.includes("X Charge resolver"))) counts.missingXChargeResolver += 1;
     if (row.gaps.some((gap) => gap.includes("wiki ammo"))) counts.ammoMismatch += 1;
@@ -517,6 +570,7 @@ function renderBorgReport(audit, data) {
       { header: "wiki", value: (row) => yesNo(row.wikiMove) },
       { header: "source ammo", value: (row) => row.sourceAmmo.text },
       { header: "action", value: (row) => row.action.text },
+      { header: "cmd", value: (row) => row.command.text },
       { header: "pen", value: (row) => row.penetration ?? "missing" },
       { header: "anim", value: (row) => row.anim.text },
       { header: "gaps", value: (row) => row.gaps.join("; ") || "none" },
@@ -544,6 +598,12 @@ function renderSummary(audits, data, top) {
   console.log(`Preferred animation map parsed: ${yesNo(data.preferredLabelsParsed)} (${Object.keys(data.preferredLabels).length} borg entries)`);
   console.log(`Runtime contextual B resolver: ${yesNo(data.runtimeFlags.contextualBResolver)}`);
   console.log(`Runtime move overlay: ${yesNo(data.runtimeFlags.runtimeMoveOverlay)}`);
+  if (data.commandMoveTables?._meta?.coverage) {
+    const coverage = data.commandMoveTables._meta.coverage;
+    console.log(
+      `Exact command tables: ${coverage.exactCommandTableBorgs}/${coverage.rosterBorgs} borgs; decoded tables=${coverage.decodedTables}`,
+    );
+  }
   console.log("");
   console.log(
     table(
@@ -569,9 +629,9 @@ function renderSummary(audits, data, top) {
     { category: "wiki move missing", count: sum(audits, (audit) => audit.gapCounts.missingWiki) },
     { category: "source ammo/stat gap", count: sum(audits, (audit) => audit.gapCounts.missingSource) },
     { category: "action profile gap", count: sum(audits, (audit) => audit.gapCounts.missingAction) },
+    { category: "exact command table missing", count: sum(audits, (audit) => audit.gapCounts.missingExactCommand) },
     { category: "penetration missing", count: sum(audits, (audit) => audit.gapCounts.missingPenetration) },
     { category: "missing exact anim map", count: sum(audits, (audit) => audit.gapCounts.missingExactAnimMap) },
-    { category: "exact B Shot/B Attack move-table id unresolved", count: sum(audits, (audit) => audit.gapCounts.splitBResolver) },
     { category: "missing X hitbox", count: sum(audits, (audit) => audit.gapCounts.missingXHitbox) },
     { category: "missing X Charge resolver", count: sum(audits, (audit) => audit.gapCounts.missingXChargeResolver) },
     { category: "wiki/source ammo mismatch", count: sum(audits, (audit) => audit.gapCounts.ammoMismatch) },
@@ -612,7 +672,7 @@ function renderSummary(audits, data, top) {
 }
 
 function topCategoryLabel(key) {
-  if (key === "splitBResolver") return "exactBResolver";
+  if (key === "missingExactCommand") return "exactCommand";
   if (key === "missingXHitbox") return "xHitbox";
   if (key === "missingExactAnimMap") return "exactAnim";
   if (key === "missingPenetration") return "penetration";
@@ -624,6 +684,7 @@ const borgsData = readJson(DATA_PATHS.borgs);
 const moveProperties = readJson(DATA_PATHS.moveProperties);
 const sourceStats = readJson(DATA_PATHS.sourceStats);
 const actionProfiles = readJson(DATA_PATHS.actionProfiles);
+const commandMoveTables = readJson(DATA_PATHS.commandMoveTables);
 const modelManifest = readModelManifest();
 const preferred = readPreferredLabels();
 const runtimeFlags = readRuntimeCombatFlags();
@@ -637,6 +698,7 @@ const data = {
   moveProperties,
   sourceStats,
   actionProfiles,
+  commandMoveTables,
   modelManifest,
   preferredLabels: preferred.labels,
   preferredLabelsParsed: preferred.parsed,

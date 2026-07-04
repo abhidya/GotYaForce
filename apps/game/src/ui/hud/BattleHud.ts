@@ -26,7 +26,9 @@
  *    fixed black torn zigzag on its right); "300 ALLY" arrow tab above,
  *    "ENEMY 1267" arrow tab below.
  *  - yellow "!" alert roundel right of the ally tab.
- *  - dark gear + cyan ring (boost gauge) top-right.
+ *  - dark gear + cyan ring top-right: the Power Burst gauge (re-identified
+ *    2026-07-03 from the captures — see the BURST GEAR block), with the TUNED
+ *    boost-fuel readout demoted to a small secondary arc in the gear hub.
  *  - green ring HP gauge + chunky digits bottom-left; red capsule variant when
  *    critical (challenge-9).
  *  - bottom-right: X special prompt with dashed cooldown ring, cyan reload
@@ -79,8 +81,41 @@ export interface HudState {
   timeRemainingFrames?: number | null;
   /** Optional: show the yellow "!" alert roundel. Defaults to false. */
   alert?: boolean;
-  /** Optional boost/dash gauge 0..1 (cyan ring in the top-right gear). */
+  /**
+   * Optional boost/dash fuel 0..1. DEMOTED to a small secondary arc inside the top-right gear
+   * (2026-07-03): the gear's big cyan ring is the Power Burst gauge (see burst01) per capture
+   * re-examination — challenge-8 shows the ring only part-filled while the borg stands GROUNDED
+   * (boost fuel refills on landing, so a fuel reading would be full), and challenge-9 (late
+   * battle, heavy inflicted damage) shows it complete, matching the manual/StrategyWiki
+   * "circle fills with inflicted damage" burst description. boostFuel itself stays TUNED
+   * (movement.ts drain/refill, no ROM timing).
+   */
   boost01?: number;
+  /**
+   * Optional Power Burst gauge 0..1 (the big cyan ring in the top-right gear). Q4 RESOLVED
+   * (research/decomp/attack-mechanics-open-questions.md Q4, findings §S): per-player meter,
+   * ROM player struct +0x126 over +0x124 max (BURST.METER_MAX = 3000), +50 per attacker hit
+   * connection. Display-only until ATK-012 wires gameplay effects. Undefined = empty.
+   */
+  burst01?: number;
+  /**
+   * Optional Power Burst "charged" flag (ROM player struct +0x103 — flips one frame AFTER the
+   * meter reaches max, Q4/findings §S). Flashes the burst ring bright as the "press Y when the
+   * burst gauge is at max" cue (official NA manual, behavior-notes (ao), CONFIRMED_MANUAL).
+   */
+  burstCharged?: boolean;
+  /**
+   * Optional DEFEATED banner flag: the local player's active borg is dead/absent while awaiting
+   * redeploy, or the battle is lost (presentation.ts battleHudState). Placement/styling is
+   * TUNED — no capture of the real banner exists yet (see HUD-FIDELITY-PLAN.md follow-ups).
+   */
+  defeated?: boolean;
+  /**
+   * Optional player tag ("1P"/"2P") for future multi-viewport work. Hidden when undefined
+   * (the single-viewport captures show no player tag). Placement TUNED — no 2P quadrant-HUD
+   * capture exists yet.
+   */
+  playerLabel?: string;
   /**
    * Optional hold-B charge gauge 0..1 (small meter by the ammo/cooldown block).
    * Sourced from the TUNED `chargeFrames` accumulator (combat.ts stepAttacks) over the
@@ -258,9 +293,18 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   const timer = el("div", { class: "gf-hud-timer gf-hidden" }, [timerText]);
   root.appendChild(timer);
 
-  // ================== BOOST GEAR (top-right, cyan inner ring) ================
-  // challenge-8: gear center (483, 48) (75.5%W, 10.0%H), outer dia ~70px;
-  // challenge-9 shows the cyan ring complete (full boost).
+  // ============ BURST GEAR (top-right: Power Burst gauge, cyan ring) =========
+  // challenge-8: gear center (483, 48) (75.5%W, 10.0%H), outer dia ~70px.
+  // RE-IDENTIFIED 2026-07-03 (was "boost gauge"): the big cyan ring is the Power Burst gauge.
+  // Capture evidence — challenge-8 shows the ring only ~20-25% filled, anchored at the BOTTOM
+  // of the gear, while the borg stands GROUNDED (boost fuel refills on landing, so a fuel ring
+  // would read full); challenge-9 (late battle, heavy inflicted damage, enemy 1267 -> 564)
+  // shows the ring complete. That matches the official manual / StrategyWiki description of
+  // the burst gauge as a circle that fills with inflicted damage (behavior-notes (ao),
+  // CONFIRMED_MANUAL: "press Y when the burst gauge is at max"), and the ported per-player
+  // meter (Q4 RESOLVED — findings §S: +0x126 / +0x124 max 3000, +50 per attacker hit).
+  // Fill starts at 6 o'clock per the challenge-8 arc position (rotate 90); the fill DIRECTION
+  // (cw vs ccw) is unmeasurable from a single frame — clockwise is TUNED.
   const gearG = svgEl("g", { transform: "translate(483 48)", opacity: 0.85 });
   for (let i = 0; i < 8; i++) {
     gearG.appendChild(
@@ -270,18 +314,39 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   gearG.appendChild(svgEl("circle", { r: 31, fill: "#1d1d1d" }));
   gearG.appendChild(svgEl("circle", { r: 22, fill: "#0c0c0c" }));
   svg.appendChild(gearG);
-  const BOOST_R = 15;
+  const BURST_R = 15;
+  const BURST_C = 2 * Math.PI * BURST_R;
+  const burstArc = svgEl("circle", {
+    cx: 483,
+    cy: 48,
+    r: BURST_R,
+    fill: "none",
+    stroke: "#3fe8c4",
+    "stroke-width": 7,
+    "stroke-dasharray": BURST_C,
+    "stroke-dashoffset": BURST_C,
+    transform: "rotate(90 483 48)",
+  });
+  svg.appendChild(burstArc);
+
+  // Boost fuel, DEMOTED to a small secondary arc INSIDE the gear hub (the space left of the
+  // burst ring). TUNED placement — the captures show no separate boost element (the gear hub
+  // reads empty at rest), so this indicator is shown ONLY while fuel is actually draining/
+  // refilling (boost01 < 1) and hidden at rest to keep the at-rest HUD capture-faithful.
+  // boostFuel itself is a TUNED cooldown (movement.ts), not a ROM-timed value.
+  const BOOST_R = 7;
   const BOOST_C = 2 * Math.PI * BOOST_R;
   const boostArc = svgEl("circle", {
     cx: 483,
     cy: 48,
     r: BOOST_R,
     fill: "none",
-    stroke: "#3fe8c4",
-    "stroke-width": 7,
+    stroke: "#2a9c86",
+    "stroke-width": 3,
     "stroke-dasharray": BOOST_C,
     "stroke-dashoffset": 0,
     transform: "rotate(-90 483 48)",
+    class: "gf-hidden",
   });
   svg.appendChild(boostArc);
 
@@ -466,6 +531,25 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   chargeG.appendChild(chargeHi);
   svg.appendChild(chargeG);
 
+  // ======================== DEFEATED banner (center) =========================
+  // Shown while HudState.defeated is true (local borg dead/awaiting redeploy, or battle lost —
+  // presentation.ts battleHudState). Bold ascii.tpl bitmap text, red-tinted, scale 3 like the
+  // chunky HP digits. Placement TUNED: centered on the 640x480 stage ("DEFEATED" = 8 glyphs x
+  // 21px advance ≈ 168px wide, 24px tall -> left 236, top 228); no capture of the real banner
+  // exists yet (HUD-FIDELITY-PLAN.md capture follow-ups), so both the position and the exact
+  // wording/art are stand-ins until one is taken.
+  const TINT_DEFEATED = "#ff2f1a"; // TUNED red, echoing the critical-capsule palette
+  const defeatedText = hudText("gf-defeated-text gf-hidden", 236, 228);
+  root.appendChild(defeatedText);
+  setBitmapText(defeatedText, "DEFEATED", { bold: true, scale: 3, advance: 21, tint: TINT_DEFEATED });
+
+  // ================== player tag ("1P"/"2P", multi-viewport slot) ============
+  // Hidden unless HudState.playerLabel is set (single-viewport captures show no player tag).
+  // Placement TUNED (top-left corner of the viewport quadrant) — no 2P quadrant-HUD capture
+  // exists yet; revisit when one is taken (HUD-FIDELITY-PLAN.md capture follow-ups).
+  const playerLabelText = hudText("gf-player-label gf-hidden", 8, 8);
+  root.appendChild(playerLabelText);
+
   // ================= floating teammate plates ("CPU" + mini bar) =============
   // challenge-8: "CPU" label x 56..60%W y 21.5..23.5%H, mini bar x 56.2..66%W
   // y 25.2..26.4%H (bar ~63x6px). Positions are supplied per-frame via state.
@@ -491,6 +575,12 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
   let lastHp = Number.NaN;
   let lastAmmo = Number.NaN;
   let lastXAmmo = Number.NaN;
+  let lastPlayerLabel: string | undefined;
+  // Burst-charged flash phase, advanced once per HUD update (one sim frame at 60fps). The
+  // flash EXISTENCE is the manual's "press Y when the burst gauge is at max" readiness cue
+  // (behavior-notes (ao)); its period (8 frames bright / 8 dim) is TUNED — no capture of the
+  // charged state exists yet.
+  let burstFlashFrame = 0;
 
   function update(s: HudState): void {
     // GF-energy fills (value-proportional widths, anchored per the captures).
@@ -539,8 +629,23 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
       setBitmapText(hpNum, String(hpVal), { bold: true, scale: 3, advance: 21, tint: TINT_DIGITS });
     }
 
-    // Boost gear ring (defaults to full when not driven).
+    // Power Burst ring (Q4/findings §S — see the BURST GEAR block above for the capture
+    // evidence). Empty when not driven; flashes bright while charged (+0x103 set) as the
+    // manual's "press Y when the burst gauge is at max" cue (behavior-notes (ao)).
+    const burst = clamp01(s.burst01 ?? 0);
+    burstArc.setAttribute("stroke-dashoffset", String(BURST_C * (1 - burst)));
+    if (s.burstCharged) {
+      burstFlashFrame += 1;
+      burstArc.setAttribute("stroke", burstFlashFrame % 16 < 8 ? "#eafff8" : "#3fe8c4");
+    } else {
+      burstFlashFrame = 0;
+      burstArc.setAttribute("stroke", "#3fe8c4");
+    }
+
+    // Boost fuel mini-arc (demoted secondary indicator): visible only while fuel is not full,
+    // keeping the at-rest gear hub empty like the captures.
     const boost = clamp01(s.boost01 ?? 1);
+    boostArc.classList.toggle("gf-hidden", boost >= 1);
     boostArc.setAttribute("stroke-dashoffset", String(BOOST_C * (1 - boost)));
 
     // Weapon prompts.
@@ -598,6 +703,17 @@ export function createBattleHud(container: HTMLElement, opts: BattleHudOptions =
           pip.setAttribute("fill", i < lit ? "#3fe8c4" : "#22403c");
         }
       }
+    }
+
+    // DEFEATED banner (placement TUNED — see the element block above).
+    defeatedText.classList.toggle("gf-hidden", !s.defeated);
+
+    // Player tag ("1P"/"2P") — hidden unless supplied (future multi-viewport work).
+    const hasPlayerLabel = s.playerLabel !== undefined && s.playerLabel.length > 0;
+    playerLabelText.classList.toggle("gf-hidden", !hasPlayerLabel);
+    if (hasPlayerLabel && s.playerLabel !== lastPlayerLabel) {
+      lastPlayerLabel = s.playerLabel;
+      setBitmapText(playerLabelText, s.playerLabel ?? "", { bold: true, scale: 2, advance: 12, tint: TINT_LABEL });
     }
 
     // Floating teammate plates.

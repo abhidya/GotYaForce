@@ -16,6 +16,7 @@
     "selfcheck:challenge-stages": "node scripts/selfcheck-challenge-stages.mjs",
     "audit:move-wiring": "node scripts/audit-move-wiring.mjs",
     "audit:move-unblockers": "node scripts/audit-move-unblockers.mjs",
+    "gen:command-move-tables": "node scripts/gen-command-move-tables.mjs",
     "clean": "pnpm -r exec rimraf dist tsconfig.tsbuildinfo",
     "extract": "node scripts/extract-user-disc.mjs",
     "sync:assets": "node scripts/sync-exported-assets.mjs",

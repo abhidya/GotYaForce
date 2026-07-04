@@ -23,15 +23,22 @@
 // as a SIMULTANEITY tolerance for synchronized co-op bursts (a partner's Y within the window
 // counts as "same time"), not merely a solo activation buffer — and confirms the real
 // activation precondition is a full "Power Burst meter" (officially named; StrategyWiki's
-// interface page adds that it "fills as the player inflicts and receives damage"). The meter
-// itself is still unlocated in RAM, which is exactly why BURST.ENABLED stays false here; exact
-// window/pairing semantics remain for trace T3.
+// interface page adds that it "fills as the player inflicts and receives damage").
+//
+// UPDATE (Q4 RESOLVED 2026-07-03 — research/decomp/attack-mechanics-open-questions.md Q4
+// lines 51-79, attack-mechanics-findings.md §S): the meter is now LOCATED and PORTED. It is
+// PER-PLAYER (player struct +i*0x3c: +0x126 clamped u16 meter, +0x124 max = 3000, +0x12a
+// unclamped accumulator, +0x103 charged flag one frame late) — see BurstMeterState in
+// types.ts, BURST.METER_MAX/FILL_PER_HIT in constants.ts, the fill in combat.ts applyHit,
+// and the charged sweep wired in battle.ts step(). BURST.ENABLED still stays false: the
+// gauge is DISPLAY-ONLY until ATK-012 lands real burst gameplay effects (Q5 speed boost
+// still open); exact arm-window/pairing semantics remain for trace T3.
 //
 // Do not add gameplay effects here — burstActive/burstPaired are inert bookkeeping until
 // ATK-012 (blocked on trace T3).
 
 import { BURST } from "./constants.js";
-import type { BorgRuntime } from "./types.js";
+import type { BorgRuntime, BurstMeterState } from "./types.js";
 
 /**
  * Advance one frame of Power Burst arm/activation state for a single borg.
@@ -61,5 +68,56 @@ export function stepBurst(b: BorgRuntime, hyperPressed: boolean): void {
     // Inert shell: never activate while the feature is disabled (default).
     b.burstActive = false;
     b.burstPaired = false;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+// Per-player Power Burst meter (Q4 RESOLVED 2026-07-03 — open-questions Q4 lines 51-79,
+// findings §S). See BurstMeterState in types.ts for the ROM field map (+0x126/+0x124/
+// +0x12a/+0x103). Display-only until ATK-012 (BURST.ENABLED stays false).
+// ---------------------------------------------------------------------------------------
+
+/** A fresh (battle-start) per-player meter: empty, uncharged. */
+export function createBurstMeter(): BurstMeterState {
+  return { meter: 0, unclamped: 0, charged: false };
+}
+
+/**
+ * Credit the ATTACKER'S player meter for one hit connection (Q4 fill rule, T3 live traces
+ * 2026-07-03): `meter = min(meter + FILL_PER_HIT, METER_MAX); unclamped += FILL_PER_HIT` —
+ * flat +50 per connection, damage-independent (see BURST.FILL_PER_HIT's caveat re: possible
+ * per-move overrides). Called once per applyHit connection per victim, matching the ROM's
+ * per-connection semantics (a penetrating beam through a dead husk credited 3 x 50).
+ *
+ * CPU-owned attackers (`ownerPlayer === null`) are NOT credited in this wave — a documented
+ * port decision, not ROM truth: the ROM meter lives in the per-controller player-struct array
+ * (+i*0x3c), so CPU-occupied slots plausibly accumulate too, but the port's BorgRuntime only
+ * carries `ownerPlayer` (null for CPU forces, whose synthetic control keys are not visible in
+ * the damage path), and the gauge is display-only for human HUDs until ATK-012. Revisit
+ * (per-controlKey slots) if/when CPU bursts gain gameplay effects.
+ */
+export function creditBurstFill(
+  meters: Record<string, BurstMeterState>,
+  ownerPlayer: string | null,
+): void {
+  if (ownerPlayer === null) return; // CPU attacker — see doc comment above.
+  const m = meters[ownerPlayer] ?? (meters[ownerPlayer] = createBurstMeter());
+  m.meter = Math.min(m.meter + BURST.FILL_PER_HIT, BURST.METER_MAX);
+  m.unclamped += BURST.FILL_PER_HIT;
+}
+
+/**
+ * Charged-flag sweep (ROM +0x103): the flag flips to 1 ONE frame AFTER the clamped meter
+ * +0x126 reaches max (live-observed delay, Q4). Ported deterministically via check-before-fill
+ * ordering: battle.ts runs this at the TOP of step(), before any of this frame's hit
+ * connections fill meters (stepAttacks/stepProjectiles run later in the same step) — so a
+ * meter that reaches METER_MAX on frame N is first seen here on frame N+1. The flag never
+ * clears in this wave: the ROM clear path is burst CONSUMPTION (+0x104 mode / zz_005b2b8_
+ * end sweep), which is ATK-012 territory (BURST.ENABLED false, no consume exists yet).
+ */
+export function sweepBurstCharged(meters: Record<string, BurstMeterState>): void {
+  for (const key of Object.keys(meters)) {
+    const m = meters[key];
+    if (m && m.meter >= BURST.METER_MAX) m.charged = true;
   }
 }

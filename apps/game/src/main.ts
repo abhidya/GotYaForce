@@ -126,9 +126,9 @@ const DISABLE_COMBAT_SFX = new URLSearchParams(window.location.search).has("noCo
 // of the decoded PCM (documented in AUDIO-PORT-STATUS.md), not by traced sound IDs:
 //   se00_00 1.35s hard-attack multi-burst -> knockdown / dash
 //   se00_01 1.86s two-part long burst     -> death / explosion
-//   se00_02 1.07s slow build then burst   -> special / charge release / low-energy alert
+//   se00_02 1.07s slow build then burst   -> special / charge build-up + release / low-energy alert
 //   se00_03 0.47s instant-attack impact   -> melee swing / damage taken / menu confirm
-//   se00_04 0.64s short tonal burst       -> shot / lock-on switch / menu back-edit
+//   se00_04 0.64s short tonal burst       -> shot / lock-on switch / tier-up tick / menu back-edit
 // jump and land stay deliberately unmapped: no plausible short jump/land sample exists in the
 // exported set, and reusing an impact cue there would reintroduce the "wrong asset" bug class.
 const COMBAT_SFX: Partial<Record<BattleEventCue, string>> = {
@@ -136,6 +136,15 @@ const COMBAT_SFX: Partial<Record<BattleEventCue, string>> = {
   melee_alt: "se00_03",
   shoot: "se00_04",
   special: "se00_02",
+  // TUNED: hold-B charge build-up (edge-detected in presentation.ts battleAudioEvents when
+  // chargeFrames leaves 0). se00_02's "slow build then burst" waveform (AUDIO-PORT-STATUS.md)
+  // is the only exported cue whose envelope reads as a build-up, so the hold reuses it.
+  charge_start: "se00_02",
+  // TUNED: charge tier-1/tier-2 crossings (thresholds read from the borg's action profile in
+  // presentation.ts, NOT hardcoded here). The short tonal se00_04 doubles as the tier-up
+  // "tick"; no dedicated tier chime exists in the 5-cue exported set.
+  charge_tier1: "se00_04",
+  charge_tier2: "se00_04",
   charge_release: "se00_02",
   hit: "se00_03",
   down: "se00_00",
@@ -156,6 +165,14 @@ const COMBAT_SFX_MIN_GAP_MS: Partial<Record<BattleEventCue, number>> = {
   melee_alt: 220,
   shoot: 180,
   special: 450,
+  // charge_start can only re-fire after a release zeroes chargeFrames; the gap guards a
+  // rapid tap-tap-tap on a chargeable trigger from stacking the 1.07s build-up clip.
+  charge_start: 450,
+  // Tier crossings fire at most once per hold each (chargeFrames is capped at tier2);
+  // the small gap only de-dupes a tier1 tick against an immediately following tier2 when
+  // thresholds sit close together on some profile.
+  charge_tier1: 300,
+  charge_tier2: 300,
   charge_release: 450,
   hit: 180,
   down: 450,
@@ -358,6 +375,13 @@ function buildClip(json: BakedClip): THREE.AnimationClip {
     if (bone.pos?.length === json.frameCount * 3) {
       const values = Float32Array.from(bone.pos);
       if (bone.i === 0) {
+        // Root-motion strip: zero bone-0 XZ for ALL clips so authored root translation never
+        // fights the sim (the sim owns world position). NOTE for the attack_lunge_s* banks
+        // specifically (rootZ spans ~100-389 units — see the PREFERRED_LABELS comments
+        // below): that stripped root motion IS the melee lunge, and the sim now drives the
+        // equivalent translation itself (packages/combat/src/combat.ts melee lunge drive,
+        // MELEE.LUNGE_* in constants.ts). If a future exporter/playback change re-enables
+        // root XZ here, the sim lunge must be disabled first or the dash double-translates.
         for (let i = 0; i < values.length; i += 3) {
           values[i] = 0;
           values[i + 2] = 0;
@@ -423,6 +447,13 @@ const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
   fall: [/^jump_land$/],
   fly: [/^boost$/, /^fly_transition$/, /^move_s\d+$/],
   attack: [/^attack_s\d+$/, /^attack_lunge_s\d+$/],
+  // Melee prefers the attack_lunge_s* banks. Their bone-0 root motion (the actual dash,
+  // rootZ ~100-389 units in the per-borg notes below) is stripped in buildClip above; the
+  // sim's melee lunge drive (packages/combat/src/combat.ts + MELEE.LUNGE_* constants)
+  // supplies that translation instead. Playback-duration note: many lunge banks run ~37f
+  // while per-borg meleeDef.duration can be shorter (e.g. pl0615: 17f), so the clip is cut
+  // by the next state's crossfade before its last frames — a timeScale sync
+  // (bankFrames / meleeDef.duration) would live in battleScene's melee playback, not here.
   melee: [/^attack_lunge_s\d+$/, /^attack_s\d+$/],
   // Resolved via SLOT_VARIANTS (second distinct melee-pattern bank) so borgs with
   // multiple exported swings alternate; falls back to melee when only one exists.
@@ -484,6 +515,19 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     // attack was silently playing its own knockdown pose. DERIVED that g4s0 != special;
     // g4s1 as "the" special move is a reasonable TUNED pick among g4s1-4 (not individually
     // decomp-confirmed which of s1-s4 maps to the X-button special specifically).
+    //
+    // Command-table cross-check (validation only, 2026-07-03): pl0615 has an EXACT decoded
+    // command table (ctor_8018ccfc, root 0x80365ea8, chunk_0046.c:4804-4807 — packages/combat
+    // data/commandMoveTables.json). Its X-path records (commandType 2) are all actionIndex=2
+    // with variantIndex {0,2,3,1,4} keyed by subtype 0-4. A NAIVE actionIndex/variantIndex ->
+    // exported-anim_index reading (variantIndex -> g4 slot) would put the default subtype-0
+    // X record on g4s0 — the knockdown pose, i.e. exactly the g4s0-as-special bug
+    // (behavior-notes.md s4r) this override fixed. The record is therefore NOT consistent
+    // with the known-good special_s1 under the naive mapping: either the runtime subtype is
+    // nonzero here, or actionIndex/variantIndex address a different anim space than the
+    // exported group/slot bake. The record->anim mapping stays UNPROVEN and these records
+    // are FUTURE EVIDENCE only (needs a live trace of zz_006a104_ consuming a record against
+    // the animation actually played) — do not rewrite special overrides from them.
     special: ["special_s1"],
     down: ["down_s0"],
     death: ["death"],
@@ -494,9 +538,16 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
   // research/format-specs/borg-animation-banks.md + behavior-notes.md s4r). Each has
   // a distinct special_s1+ bank confirmed present in its anim_index.json, used here
   // instead. TUNED which of s1-s4 is "the" X-button special where multiple exist.
+  //
+  // Command-table notes (validation only — the record->anim mapping is UNPROVEN, see the
+  // pl0615 cross-check above): pl0008 and pl000c are among the 25 exact-table borgs in
+  // packages/combat data/commandMoveTables.json; pl0105/pl0109 have no exact table.
   pl0008: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
+    // Exact table ctor_8019e9a4 (chunk_0049.c:1169-1172) marks the X path (commandType 2)
+    // DISABLED (mode -1; only B types 0/1 carry records), so the table offers NO X-anim
+    // evidence for this borg — special_s1 stays a TUNED pick.
     special: ["special_s1"],
     down: ["down_s0"],
     death: ["death", "win_or_death"],
@@ -505,6 +556,10 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
   pl000c: {
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
+    // Exact table ctor_8019e9a4_alt_000c (chunk_0049.c:1178-1181): X records (commandType 2)
+    // are actionIndex=2, variantIndex 0-4 by subtype — the same shape as the pl0615 anchor
+    // whose naive variantIndex->g4-slot reading is contradicted by its known-good override,
+    // so this stays FUTURE EVIDENCE only; special_s1 remains the TUNED pick.
     special: ["special_s1"],
     down: ["down_s0"],
     death: ["death", "win_or_death"],
@@ -634,35 +689,27 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
     dash_left: ["boost"],
     dash_right: ["boost"],
     melee: ["g7_s0"], // 61f; only attack-plausible bank (no g1/g3 exported)
-    // No g3/g7 flinch exists for Ultimate Cannon. Use the only non-idle short source pose
-    // (g0s14, 11f) as an explicit low-confidence hit stand-in instead of silent idle fallback.
+    // DERIVED_ROM hit state = g0s14. Ultimate Cannon exports that as an 11f pose_short.
     hit: ["pose_short"],
   },
-  // ---- Borgs with no group-3 hit reacts: short group-4 launch flinches instead ---------
-  // These export no hit_react/guard banks; their g4 sets carry 10-15f clips with pure
-  // vertical root motion (rootY 161/215/182/215 per anim_index.json) — the launch/knock-up
-  // flinch. Previously hit fell back to idle (no reaction at all).
-  pl0604: { hit: ["special_s2"] }, // 11f rootY 161
-  pl0610: { hit: ["special_s1"] }, // 15f rootY 215
-  pl0613: { hit: ["special_s2"] }, // 10f rootY 182
-  pl0618: { hit: ["special_s2"] }, // 11f rootY 161
-  pl061e: { hit: ["special_s1"] }, // 15f rootY 215
-  pl0620: { hit: ["special_s1"] }, // 15f rootY 215
-  pl0621: { hit: ["special_s1"] }, // 15f rootY 215
-  pl0623: { hit: ["special_s1"] }, // 15f rootY 215
-  pl0627: { hit: ["special_s2"] }, // 10f rootY 182
   // ---- Borgs whose only group-4 bank is the knockdown pose (down_s0) -------------------
   // After the g4s0 relabel (behavior-notes.md s4r) these have no special_s* left, so
   // "special" fell back through attack to attack_s0 — a 2-frame placeholder on several.
   // Use the longest exported lunge/attack bank instead (TUNED pick, banks verified in
   // each borg's anim_index.json).
+  // pl0301: exact command table ctor_80106e3c (chunk_0029.c:1927-1930, packages/combat
+  // data/commandMoveTables.json) marks the X path (commandType 2) DISABLED — only types
+  // 0/1/3 (B shot / B attack / B charge) carry records — so it offers no X-anim evidence;
+  // the pick below stays TUNED (record->anim mapping UNPROVEN, see pl0615 cross-check).
   pl0301: { special: ["attack_lunge_s10"] }, // 54f
   pl0800: { special: ["attack_lunge_s18"] }, // 50f
   pl0805: { special: ["attack_lunge_s2"] }, // 71f
+  // pl0807: exact command table ctor_801a04f0 (chunk_0049.c:2356-2359) has records ONLY on
+  // type 1 (B attack); the X path is DISABLED — no X-anim evidence, pick stays TUNED.
   pl0807: { special: ["attack_lunge_s13"] }, // 51f
-  // Cyber Hero exports no g3 hit-react bank; its 12f jump_land is the only short recovery pose.
-  // Low-confidence stand-in, but source-backed and visibly reactive unlike idle.
-  pl0808: { hit: ["jump_land"], special: ["attack_lunge_s12"] }, // special 50f
+  // Cyber Hero exports ROM-cited g0s14 as a 2f pose_short; use it instead of the old
+  // jump_land visual stand-in.
+  pl0808: { hit: ["pose_short"], special: ["attack_lunge_s12"] }, // special 50f
   pl080d: { special: ["attack_lunge_s2"] }, // 71f
   pl080e: { special: ["attack_lunge_s2"] }, // 71f
   pl0a00: { special: ["attack_s7"] }, // 71f
@@ -1220,7 +1267,20 @@ function updateHud(): void {
   const presentation = currentBattlePresentation();
   if (presentation) {
     const teammates = projectedTeammateMarkers(session.battle, presentation.focus);
-    session.hud.update(teammates.length > 0 ? { ...presentation.hud, teammates } : presentation.hud);
+    // Player tag ("1P"/"2P") from the local player's index in localPlayerIds — only surfaced
+    // in multi-local sessions (future multi-viewport work); single-player HUD stays
+    // capture-faithful with no tag. Conditional-spread keeps the keys absent (not undefined)
+    // under exactOptionalPropertyTypes, matching battleHudState's optional-field style.
+    const playerIndex = session.localPlayerIds.indexOf(session.localPlayerId);
+    const playerLabel =
+      session.localPlayerIds.length > 1 && playerIndex >= 0 ? `${playerIndex + 1}P` : undefined;
+    const extras = {
+      ...(teammates.length > 0 ? { teammates } : {}),
+      ...(playerLabel !== undefined ? { playerLabel } : {}),
+    };
+    session.hud.update(
+      teammates.length > 0 || playerLabel !== undefined ? { ...presentation.hud, ...extras } : presentation.hud,
+    );
   }
 }
 
@@ -1331,9 +1391,16 @@ function stepBattle(dt: number): void {
 
   let steps = 0;
   while (simAccumulator >= SIM_DT && steps < 15) {
-    const audioBefore = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax);
+    // The profile accessor lets the snapshot capture the local borg's charge tier thresholds
+    // (chargeTier1Frames/chargeTier2Frames) for the charge_start/tier-up cues — read from the
+    // combat package's action profiles, never hardcoded app-side.
+    const audioBefore = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax, (id) =>
+      BORG_CATALOG.actionProfileFor(id),
+    );
     battle.step(SIM_DT, inputs);
-    const audioAfter = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax);
+    const audioAfter = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax, (id) =>
+      BORG_CATALOG.actionProfileFor(id),
+    );
     for (const cue of battleAudioEvents(audioBefore, audioAfter)) {
       playBattleEventSfx(cue);
     }

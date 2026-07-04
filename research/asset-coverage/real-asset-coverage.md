@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-03T21:03:39.030Z
+Generated: 2026-07-03T21:07:53.866Z
 
 ## Summary
 
@@ -86,7 +86,7 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 18 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:791, apps/game/src/main.ts:null, apps/game/src/main.ts:null, apps/game/src/main.ts:null, apps/game/src/main.ts:816, apps/game/src/main.ts:null
+Runtime loader refs: apps/game/src/main.ts:777, apps/game/src/main.ts:null, apps/game/src/main.ts:null, apps/game/src/main.ts:null, apps/game/src/main.ts:802, apps/game/src/main.ts:null
 
 Runtime collision parser: none (bounds not wired, triangles not wired, walls wired, ceilings wired)
 
@@ -218,7 +218,7 @@ Battle camera mode-1 blend:
 ## Borg Animation Coverage
 
 Validator report: research/asset-inventory/borg-animation-action-gaps.md
-Runtime resolver refs: apps/game/src/main.ts:411, apps/game/src/main.ts:450, apps/game/src/main.ts:702, apps/game/src/sim/battleScene.ts:223
+Runtime resolver refs: apps/game/src/main.ts:411, apps/game/src/main.ts:450, apps/game/src/main.ts:688, apps/game/src/sim/battleScene.ts:223
 Animation indexes parsed: 185/185; exported banks: 8242; canonical slot checks: 2405.
 Direct matches: 2405; fallbacks: 0; missing: 0; parse errors: 0.
 Fly/boost mapping: fly state resolves through exported boost labels.

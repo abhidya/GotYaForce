@@ -103,6 +103,10 @@ const PRESETS = {
   T3: {
     slug: "hyper-power-burst-meter",
     title: "Hyper/Power Burst meter + duration",
+    // Player-struct fields (meter etc.) are player-0 absolute addresses derived from
+    // PTR_DAT_80433934 = *(u32*)0x80433934 = 0x803c5420 (GG4E, static across boots;
+    // verified twice via scripts/diff-actor-block.mjs --base-ptr 0x80433934). Per-player
+    // stride 0x3c. See attack-mechanics-findings.md §S for the field map.
     fields: [
       { name: "armWindow", off: 0x6fb, type: "u8" },
       { name: "burstActive", off: 0x6fc, type: "u8" },
@@ -113,6 +117,21 @@ const PRESETS = {
       { name: "posX", off: 0x20, type: "f32" },
       { name: "posY", off: 0x24, type: "f32" },
       { name: "posZ", off: 0x28, type: "f32" },
+      { name: "p0MeterCharged", off: 0x803c5523, type: "u8", absolute: true }, // ps+0x103
+      { name: "p0BurstMode", off: 0x803c5524, type: "u8", absolute: true }, // ps+0x104
+      { name: "p0BurstTimerA", off: 0x803c552c, type: "u16", absolute: true }, // ps+0x10c
+      { name: "p0BurstTimerB", off: 0x803c552e, type: "u16", absolute: true }, // ps+0x10e
+      { name: "p0MeterMax", off: 0x803c5544, type: "u16", absolute: true }, // ps+0x124
+      { name: "p0MeterValue", off: 0x803c5546, type: "u16", absolute: true }, // ps+0x126
+      { name: "p0MeterUnclamped", off: 0x803c554a, type: "u16", absolute: true }, // ps+0x12a
+      // Players 1-3 (the 2v2 save has 4 combatants; victim index unconfirmed): +0x3c stride.
+      { name: "p1MeterValue", off: 0x803c5582, type: "u16", absolute: true }, // ps+0x3c+0x126
+      { name: "p1MeterUnclamped", off: 0x803c5586, type: "u16", absolute: true }, // ps+0x3c+0x12a
+      { name: "p2MeterValue", off: 0x803c55be, type: "u16", absolute: true }, // ps+0x78+0x126
+      { name: "p3MeterValue", off: 0x803c55fa, type: "u16", absolute: true }, // ps+0xb4+0x126
+      // Slot-1 actor HP (actor array stride 0x1e00; base 0x805dbdc0 stable across boots of
+      // the owned save states — re-derive via slot table if a trace shows it as garbage).
+      { name: "slot1ActorHp", off: 0x805ddd86, type: "s16", absolute: true }, // actor1+0x1c6
     ],
   },
   T4: {
@@ -395,28 +414,38 @@ const PAD_READ = 0x8021379c;
 const SLOT_TABLE_PTR = 0x80433934;
 const ACTOR_ARRAY = 0x803c4e84;
 
+async function validateBorgBase(gdb, base, slot) {
+  if (!isMem1(base)) return false;
+  const slotBuf = await gdb.readMem((base + 0x3e4) >>> 0, 1);
+  const stateBuf = await gdb.readMem((base + 0x544) >>> 0, 4);
+  if (!slotBuf || !stateBuf) return false;
+  const slotField = slotBuf.readInt8(0);
+  const state = stateBuf.readInt32BE(0);
+  return slotField === slot && state >= -1 && state <= 64;
+}
+
 async function resolveBorgBase(gdb, baseOverride) {
   if (baseOverride !== null) return { base: baseOverride, via: "cli-override" };
   const tBuf = await gdb.readMem(SLOT_TABLE_PTR, 4);
   const t = tBuf ? tBuf.readUInt32BE(0) : 0;
   if (isMem1(t)) {
     const slotBuf = await gdb.readMem((t + 0xc0) >>> 0, 1);
-    const slot = slotBuf ? slotBuf.readInt8(0) : -1;
-    if (slot >= 0 && slot <= 5) {
-      const baseBuf = await gdb.readMem((ACTOR_ARRAY + slot * 4) >>> 0, 4);
-      const base = baseBuf ? baseBuf.readUInt32BE(0) : 0;
-      if (isMem1(base)) return { base, via: `slot-table(slot=${slot})` };
-    }
+    const rawSlot = slotBuf ? slotBuf.readInt8(0) : 0;
+    const slot = rawSlot >= 0 && rawSlot <= 5 ? rawSlot : 0;
+    const baseBuf = await gdb.readMem((ACTOR_ARRAY + slot * 4) >>> 0, 4);
+    const base = baseBuf ? baseBuf.readUInt32BE(0) : 0;
+    if (await validateBorgBase(gdb, base, slot)) return { base, via: `slot-table(slot=${slot})` };
   }
   // Single-player fast path fallback.
   const fastBuf = await gdb.readMem(ACTOR_ARRAY, 4);
   const fastBase = fastBuf ? fastBuf.readUInt32BE(0) : 0;
-  if (isMem1(fastBase)) return { base: fastBase, via: "fast-path-slot0" };
+  if (await validateBorgBase(gdb, fastBase, 0)) return { base: fastBase, via: "fast-path-slot0" };
   throw new Error("could not resolve active borg base (no battle in progress?)");
 }
 
 async function readField(gdb, base, field) {
-  const address = field.absolute ? field.offset ?? field.address ?? field.off : (base + field.off) >>> 0;
+  const relativeOffset = field.off ?? field.offset;
+  const address = field.absolute ? field.offset ?? field.address ?? field.off : (base + relativeOffset) >>> 0;
   const buf = await gdb.readMem(address >>> 0, field.size);
   if (!buf) return null;
   return readerFor(field.type)(buf);
@@ -453,40 +482,8 @@ async function runCapture(argv) {
   gdb.interrupt();
   await gdb.waitPacket(10000).catch(() => {});
 
-  const { base, via } = await resolveBorgBase(gdb, baseOverride);
-  console.log(`active borg base = 0x${base.toString(16)} (via ${via})`);
-
-  const out = fs.createWriteStream(outPath, { flags: "a" });
-  const meta = {
-    type: "meta",
-    schema: "gotyaforce.attackMechanicsTrace.v1",
-    generatedBy: "scripts/trace-attack-mechanics.mjs",
-    preset: presetId,
-    title: preset.title,
-    recordedAt: new Date().toISOString(),
-    region: "GG4E",
-    borg,
-    scenario,
-    note,
-    borgBase: `0x${base.toString(16)}`,
-    borgBaseVia: via,
-    tickAddr: `0x${tickAddr.toString(16)}`,
-    tickKind: tickAddr === DEFAULT_TICK_ADDR ? "game-pad-normalization-cluster" : tickAddr === PAD_READ ? "pad-read" : "custom",
-    padReadAddr: `0x${PAD_READ.toString(16)}`,
-    pairing:
-      tickAddr === PAD_READ
-        ? "pad buffer at PADRead entry = PREVIOUS frame's input; fields = state after that frame"
-        : "fields sampled on the proven game-side per-frame input/normalization tick at 0x8010d450",
-    watchList: buildWatchList(preset),
-    chase: preset.chase ?? null,
-    limitations:
-      presetId === "T1"
-        ? "cmdStructBytes is chased via two sequential (non-atomic) GDB-stub reads per frame " +
-          "(read cmdStructPtr, then read cmdStructPtr+0..7); treat cmdStructPtr as ground truth " +
-          "if the chased bytes look torn. See script header for detail."
-        : null,
-  };
-  out.write(JSON.stringify(meta) + "\n");
+  const out = fs.createWriteStream(outPath, { flags: "w" });
+  let metaWritten = false;
 
   const watchList = buildWatchList(preset);
   const kind = await gdb.setBreak(tickAddr);
@@ -523,6 +520,49 @@ async function runCapture(argv) {
       }
       if (stop.pc !== tickAddr) continue;
 
+      let base;
+      let via;
+      try {
+        ({ base, via } = await resolveBorgBase(gdb, baseOverride));
+      } catch (error) {
+        if (recorded === 0) console.log(`  tick hit, but no valid active borg base yet (${error.message}); waiting`);
+        continue;
+      }
+      if (!metaWritten) {
+        console.log(`active borg base = 0x${base.toString(16)} (via ${via})`);
+        const meta = {
+          type: "meta",
+          schema: "gotyaforce.attackMechanicsTrace.v1",
+          generatedBy: "scripts/trace-attack-mechanics.mjs",
+          preset: presetId,
+          title: preset.title,
+          recordedAt: new Date().toISOString(),
+          region: "GG4E",
+          borg,
+          scenario,
+          note,
+          borgBase: `0x${base.toString(16)}`,
+          borgBaseVia: via,
+          tickAddr: `0x${tickAddr.toString(16)}`,
+          tickKind: tickAddr === DEFAULT_TICK_ADDR ? "game-pad-normalization-cluster" : tickAddr === PAD_READ ? "pad-read" : "custom",
+          padReadAddr: `0x${PAD_READ.toString(16)}`,
+          pairing:
+            tickAddr === PAD_READ
+              ? "pad buffer at PADRead entry = PREVIOUS frame's input; fields = state after that frame"
+              : "fields sampled on the proven game-side per-frame input/normalization tick at 0x8010d450",
+          watchList: buildWatchList(preset),
+          chase: preset.chase ?? null,
+          limitations:
+            presetId === "T1"
+              ? "cmdStructBytes is chased via two sequential (non-atomic) GDB-stub reads per frame " +
+                "(read cmdStructPtr, then read cmdStructPtr+0..7); treat cmdStructPtr as ground truth " +
+                "if the chased bytes look torn. See script header for detail."
+              : null,
+        };
+        out.write(JSON.stringify(meta) + "\n");
+        metaWritten = true;
+      }
+
       const fields = {};
       for (const field of watchList) {
         fields[field.name] = await readField(gdb, base, field);
@@ -537,7 +577,7 @@ async function runCapture(argv) {
         }
       }
 
-      out.write(JSON.stringify({ type: "frame", f: recorded, fields }) + "\n");
+      out.write(JSON.stringify({ type: "frame", f: recorded, borgBase: `0x${base.toString(16)}`, borgBaseVia: via, fields }) + "\n");
       recorded += 1;
       if (recorded % 300 === 0) console.log(`  ${recorded}/${frames} frames`);
     }

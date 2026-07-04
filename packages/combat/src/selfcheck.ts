@@ -10,14 +10,15 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-import { isFiniteVec, yAtTriangleXZ } from "@gf/physics";
+import { distXZ, isFiniteVec, yAtTriangleXZ } from "@gf/physics";
 
 import { actorDataCombatStatsForBorgId, actorDataCombatStatsSummary } from "./actorDataStats.js";
 import { borgSourceStatsSummary, sourceStatsForBorgId } from "./sourceBorgStats.js";
-import { createBattle } from "./battle.js";
+import { createBattle, HUSK_BORG_ID } from "./battle.js";
 import { stepAI } from "./ai.js";
 import { actionProfileForProfile, startingAmmoForProfile } from "./actionProfiles.js";
 import {
+  X_CHARGE,
   applyHit,
   projectileVisualKindForProfile,
   stepAttacks,
@@ -25,7 +26,10 @@ import {
   stepGaugeWindows,
   stepProjectiles,
 } from "./combat.js";
-import { DASH, JUMP, MELEE, STAGGER, STATE, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
+import { createBurstMeter } from "./burst.js";
+import { moveByButton } from "./moveProperties.js";
+import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
+import { BURST, DASH, JUMP, MELEE, STAGGER, STATE, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, type DamageRecord } from "./gauges.js";
 import { stepMovement } from "./movement.js";
 import {
@@ -1006,8 +1010,11 @@ function assertResolverPrimaryMeleeHybridStartsMelee(borgs: BorgStats[]): void {
   if (actionProfileForProfile(hybridMelee).primary !== "melee") {
     throw new Error("[selfcheck] resolver: melee-preferring hybrid synthetic profile should resolve primary=melee");
   }
+  // MELEE WORKSTREAM UPDATE: hybrids with BOTH melee and shot defs now select by PROXIMITY
+  // (combat.ts resolveBActionOrder — commandMoveTables B-far/B-close type-0/1 evidence), so
+  // the enemy sits INSIDE the engage window here (100 < MELEE.ENGAGE_RANGE) where melee wins.
   const attacker = fakeRuntime("resolver_melee_hybrid", 0, 0);
-  const enemy = fakeRuntime("resolver_melee_hybrid_enemy", 1, 220);
+  const enemy = fakeRuntime("resolver_melee_hybrid_enemy", 1, 100);
   enemy.hp = enemy.maxHp = 5000;
   const profiles = new Map([
     [attacker.uid, hybridMelee],
@@ -1023,7 +1030,25 @@ function assertResolverPrimaryMeleeHybridStartsMelee(borgs: BorgStats[]): void {
   if (result.length !== 0) {
     throw new Error("[selfcheck] resolver: primary=melee hybrid should not fire a shot on the same B press");
   }
-  console.log("[selfcheck] resolver: primary=melee hybrid at B held starts melee (state=attack, anim=melee)");
+
+  // And OUTSIDE the engage window, the same melee-primary hybrid selects the gun by
+  // proximity instead of whiff-swinging at range (the B-far / type-0 path).
+  const farAttacker = fakeRuntime("resolver_melee_hybrid_far", 0, 0);
+  farAttacker.ammo = startingAmmoForProfile(hybridMelee);
+  const farEnemy = fakeRuntime("resolver_melee_hybrid_far_enemy", 1, 400);
+  const farProfiles = new Map([
+    [farAttacker.uid, hybridMelee],
+    [farEnemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const farResult = pumpAttackFrame(farAttacker, hybridMelee, true, [farAttacker, farEnemy], farProfiles);
+  if (farResult.length === 0 || farAttacker.anim !== "shoot") {
+    throw new Error(
+      `[selfcheck] resolver: primary=melee hybrid far from any target should fire its gun (B-far/type-0): anim=${farAttacker.anim}, projectiles=${farResult.length}`,
+    );
+  }
+  console.log(
+    "[selfcheck] resolver: melee/shot hybrid selects by proximity — melee inside the engage window, gun outside it",
+  );
 }
 
 function assertResolverPrimaryShotHybridFiresShotFirst(borgs: BorgStats[]): void {
@@ -1103,11 +1128,19 @@ function assertResolverShotOnlyNeverAttemptsMelee(borgs: BorgStats[]): void {
 }
 
 function assertResolverSpecialHitsOnceAndSetsCooldown(borgs: BorgStats[]): void {
-  // 6) X pressed -> special AoE damages a borg in radius exactly once, sets cooldown.
+  // 6) X PRESS EDGE -> special AoE damages a borg in radius exactly once, sets cooldown.
+  // SPECIALS-WORKSTREAM UPDATE: stepAttacks now edge-detects the X held boolean via the
+  // specialHeld latch (mirroring attackHeld), so this test's first frame is a fresh edge
+  // (latch empty) and the follow-up frames below exercise BOTH gates: a continued hold is
+  // no longer a press at all (latch), and a genuine re-press is still blocked by the active
+  // cooldown/attackLock — the original intent of this assert, adjusted to edge semantics.
   const base = buildProfile(borgById(borgs, "pl0615"));
   const attacker = fakeRuntime("resolver_special", 0, 0);
   const target = fakeRuntime("resolver_special_target", 1, 20); // inside SPECIAL.RADIUS (110)
   target.hp = target.maxHp = 5000;
+  // Synthetic id: default AoE special profile; NOTE attacker.borgId stays the fakeRuntime
+  // default pl0615, which has no OBSERVED_WIKI "X Charge" row — so the plain press-edge
+  // (non-charging) X path is the one under test here.
   const profile = { ...base, id: "zzatk002e" };
   const profiles = new Map([
     [attacker.uid, profile],
@@ -1130,13 +1163,19 @@ function assertResolverSpecialHitsOnceAndSetsCooldown(borgs: BorgStats[]): void 
     throw new Error(`[selfcheck] resolver: X special should enter the special state: state=${attacker.state}`);
   }
 
-  // Re-pressing X immediately (cooldown still active) must NOT deal a second hit.
+  // A continued HOLD is not a press (latch: no edge)...
+  stepCooldowns(attacker);
+  stepAttacks(attacker, profile, false, true, [attacker, target], profiles);
+  // ...and a genuine release -> re-press while the cooldown/attackLock is still active is a
+  // fresh edge but must ALSO not deal a second hit (cooldown gate unchanged).
+  stepCooldowns(attacker);
+  stepAttacks(attacker, profile, false, false, [attacker, target], profiles);
   stepCooldowns(attacker);
   stepAttacks(attacker, profile, false, true, [attacker, target], profiles);
   const damageAfterSecondPress = target.maxHp - target.hp;
   if (damageAfterSecondPress !== damageAfterOneHit) {
     throw new Error(
-      `[selfcheck] resolver: X special should not re-hit while its cooldown/attackLock is active: first=${damageAfterOneHit}, after=${damageAfterSecondPress}`,
+      `[selfcheck] resolver: X special should not re-hit on hold or on an in-cooldown re-press: first=${damageAfterOneHit}, after=${damageAfterSecondPress}`,
     );
   }
   console.log(
@@ -1148,7 +1187,12 @@ function assertSameTeamDamageDivisor(borgs: BorgStats[]): void {
   const attacker = fakeRuntime("attacker", 0, 0);
   const ally = fakeRuntime("ally", 0, 20);
   const enemy = fakeRuntime("enemy", 1, 20);
-  const profile = buildProfile(borgById(borgs, "pl0615"));
+  // Synthetic id -> DEFAULT_SPECIAL (AoE archetype): G Red's real special became the
+  // projectile-archetype G Crash in the specials workstream, which no longer radial-hits the
+  // two adjacent victims this divisor test relies on. The divisor under test is archetype-
+  // independent (it lives in computeSourceDamage), so the generic AoE keeps the intent.
+  // attacker.borgId stays pl0615 (no 'X Charge' row) -> plain press-edge X fires immediately.
+  const profile = { ...buildProfile(borgById(borgs, "pl0615")), id: "zzffdivisor" };
   const profiles = new Map([
     [attacker.uid, profile],
     [ally.uid, profile],
@@ -1430,10 +1474,14 @@ function assertAiKeepsLockedTarget(borgs: BorgStats[]): void {
   self.lockTarget = lockedEnemy.uid;
 
   const input = stepAI(self, buildProfile(borgById(borgs, "pl0615")), [self, closerEnemy, lockedEnemy]);
-  if (input.moveX <= 0) {
+  // Locked AI emits TARGET-RELATIVE movement (+moveZ = toward the lock target — stepMovement's
+  // resolveHorizontalIntent resolves the stick relative to the lock vector). Had the AI dropped
+  // the lock for the nearer enemy, lockedToTarget would be false and it would emit the
+  // world-space fallback (moveX toward x=-800, i.e. negative).
+  if (!(input.moveZ > 0 && input.moveX === 0)) {
     throw new Error("[selfcheck] AI target memory failed: ignored valid lockTarget for nearer enemy");
   }
-  console.log("[selfcheck] AI kept valid lockTarget before nearest-enemy fallback");
+  console.log("[selfcheck] AI kept valid lockTarget before nearest-enemy fallback (lock-relative approach)");
 }
 
 function assertFrozenBattleTimerNeverExpires(borgs: BorgStats[]): void {
@@ -1603,6 +1651,100 @@ function assertDeathAccountingAtKillEvent(borgs: BorgStats[]): void {
     throw new Error("[selfcheck] death timer double-counted defeated energy");
   }
   console.log("[selfcheck] kill-event force accounting is immediate; queued deploy still waits for death timer");
+}
+
+/**
+ * W17 (wiki-mechanics-queue.md): a player whose force is exhausted while a same-team ally
+ * still fights respawns as the hidden pl0f07 husk (1 HP / 1 ammo, live-verified via GDB
+ * probe of the owned 2v2 save), keeps respawning per husk death, contributes 0 energy,
+ * and is excluded from the defeated counters. No husk once every allied force is gone.
+ */
+function assertHuskDeploysOnForceExhaustion(borgs: BorgStats[]): void {
+  const gRed = borgs.find((b) => b.id === "pl0615");
+  if (!gRed) throw new Error("[selfcheck] husk test needs pl0615 in borgs.json");
+  const gRedProfile = buildProfile(gRed);
+
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 0, ownerPlayer: null, borgIds: ["pl0615"] }, // the surviving ally force
+        { team: 1, ownerPlayer: null, borgIds: ["pl0615"] },
+      ],
+      bounds: { x: 4000, z: 4000 },
+      spawnPoints: [
+        { pos: { x: -3500, y: 10, z: -3500 } },
+        { pos: { x: -3500, y: 10, z: 0 } },
+        { pos: { x: 3500, y: 10, z: 3500 } },
+      ],
+    },
+    borgs,
+  );
+  const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
+  const killActive = (uid: string): void => {
+    const b = battle.state.borgs.find((x) => x.uid === uid);
+    if (!b) throw new Error(`[selfcheck] husk test lost borg ${uid}`);
+    b.invincTimer = 0;
+    b.state = "idle";
+    // Victim profile only shapes damage scaling; 9999 is lethal for any test borg.
+    applyHit(b, gRedProfile, 9999, 0, { x: 0, y: 0, z: 0 }, { x: b.pos.x, y: b.pos.y, z: b.pos.z - 10 });
+  };
+  const stepUntil = (pred: () => boolean, label: string): void => {
+    for (let f = 0; f < STATE.DEATH_DURATION + 60; f += 1) {
+      battle.step(1 / 60, idleInputs);
+      if (pred()) return;
+    }
+    throw new Error(`[selfcheck] husk test timed out waiting for ${label}`);
+  };
+  const p1Active = (): BorgRuntime | undefined =>
+    battle.state.borgs.find((b) => b.ownerPlayer === "p1" && b.alive && b.hp > 0);
+
+  const first = p1Active();
+  if (!first || first.borgId !== "pl0615") throw new Error("[selfcheck] husk test: p1 borg missing at start");
+
+  // Exhaust p1's force -> the husk must deploy in its place.
+  killActive(first.uid);
+  stepUntil(() => p1Active()?.borgId === HUSK_BORG_ID, "first husk deploy");
+  const husk = p1Active();
+  if (!husk) throw new Error("[selfcheck] husk vanished after deploy");
+  if (husk.hp !== 1 || husk.maxHp !== 1 || husk.ammo !== 1) {
+    throw new Error(`[selfcheck] husk stats wrong: hp=${husk.hp}/${husk.maxHp}, ammo=${husk.ammo} (want 1/1, 1)`);
+  }
+  if ((battle.state.energy[0] ?? 0) !== gRedProfile.energy) {
+    throw new Error(
+      `[selfcheck] husk must add 0 energy: team0=${battle.state.energy[0]}, want ally-only ${gRedProfile.energy}`,
+    );
+  }
+  if ((battle.state.defeated[0] ?? 0) !== 1) {
+    throw new Error(`[selfcheck] defeated[0] after real-borg death: ${battle.state.defeated[0]}, want 1`);
+  }
+  if (battle.state.result !== "ongoing") throw new Error("[selfcheck] battle ended by husk deploy");
+
+  // Husk death -> another husk (respawns while the ally fights), still uncounted.
+  killActive(husk.uid);
+  stepUntil(() => {
+    const active = p1Active();
+    return !!active && active.borgId === HUSK_BORG_ID && active.uid !== husk.uid;
+  }, "husk respawn");
+  if ((battle.state.defeated[0] ?? 0) !== 1 || (battle.state.defeatedEnergy[0] ?? 0) !== gRedProfile.energy) {
+    throw new Error(
+      `[selfcheck] husk death must not count: defeated=${battle.state.defeated[0]}, energy=${battle.state.defeatedEnergy[0]}`,
+    );
+  }
+
+  // Ally falls -> team 0 has no real force left: battle resolves, no fresh husk chain.
+  const ally = battle.state.borgs.find((b) => b.team === 0 && b.ownerPlayer === null && b.alive && b.hp > 0);
+  if (!ally || ally.borgId !== "pl0615") throw new Error("[selfcheck] husk test lost the ally borg");
+  killActive(ally.uid);
+  stepUntil(() => battle.state.result !== "ongoing", "battle resolution after ally death");
+  // step() mutates result; re-widen past the earlier "ongoing" narrowing (same pattern as
+  // assertDeathAccountingAtKillEvent's state casts).
+  const finalResult: string = battle.state.result;
+  if (finalResult !== "lose") {
+    throw new Error(`[selfcheck] expected p1 loss once all real team-0 forces fell: ${finalResult}`);
+  }
+  console.log("[selfcheck] W17 husk: deploys on force exhaustion, respawns, 0 energy, uncounted, ends with ally");
 }
 
 function assertActorParamTierMatchesCClamp(): void {
@@ -1841,6 +1983,409 @@ function assertResistanceFalloffPinned(borgs: BorgStats[]): void {
   );
 }
 
+// ---------------------------------------------------------------------------------------
+// Melee workstream: engage window + lunge + charge-lock + empty-ammo whiff gate + melee AI.
+// Sim side: combat.ts resolveBActionOrder / targetWithinMeleeEngage / melee lunge drive /
+// startMeleeAttack; constants.ts MELEE.ENGAGE_* and MELEE.LUNGE_* (all TUNED — the ROM's
+// engage threshold FLOAT_8043762c is T1-blocked per behavior-notes.md (ai)/(av); the
+// close=battle-attack mechanism is CONFIRMED_MANUAL per (ao)).
+// ---------------------------------------------------------------------------------------
+function assertContextualMeleeBeatsChargeAtEngageRange(borgs: BorgStats[]): void {
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  const meleeDef = actionProfileForProfile(gRed).melee;
+  if (!meleeDef) throw new Error("[selfcheck] engage test needs G RED's melee def");
+  if (!(MELEE.ENGAGE_RANGE > meleeDef.range)) {
+    throw new Error(
+      `[selfcheck] MELEE.ENGAGE_RANGE (${MELEE.ENGAGE_RANGE}) should extend beyond the damage reach (${meleeDef.range})`,
+    );
+  }
+  const b = fakeRuntime("engage_charge", 0, 0);
+  b.borgId = gRed.id;
+  b.ammo = startingAmmoForProfile(gRed);
+  // Target BEYOND the damage reach but INSIDE the engage window — before this workstream the
+  // resolver only selected melee within meleeDef.range AND honored a banked charge first, so
+  // this press charged the gun instead of swinging.
+  const engageDist = Math.floor((meleeDef.range + MELEE.ENGAGE_RANGE) / 2);
+  const enemy = fakeRuntime("engage_charge_enemy", 1, engageDist);
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [b.uid, gRed],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  b.cooldowns["chargeFrames"] = 20; // banked charge must NOT keep the shot path first in context
+  const spawned = pumpAttackFrame(b, gRed, true, [b, enemy], profiles);
+  if (b.state !== "attack" || b.anim !== "melee" || spawned.length !== 0) {
+    throw new Error(
+      `[selfcheck] contextual B at engage range (${engageDist}) should select melee over a held charge: state=${b.state}, anim=${b.anim}, projectiles=${spawned.length}`,
+    );
+  }
+  console.log(
+    `[selfcheck] contextual B at ${engageDist} units (reach ${meleeDef.range}, engage ${MELEE.ENGAGE_RANGE}) selected melee over a banked charge`,
+  );
+}
+
+function assertMeleeLungeClosesDistance(borgs: BorgStats[]): void {
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  const meleeDef = actionProfileForProfile(gRed).melee;
+  if (!meleeDef) throw new Error("[selfcheck] lunge test needs G RED's melee def");
+  const startDist = 150; // inside the engage window (180), well outside the reach (64)
+  const enemyProfile = buildProfile(borgById(borgs, "pl0008"));
+  const ctxBounds = { minX: -1000, maxX: 1000, minZ: -1000, maxZ: 1000 };
+
+  const runOnce = (): { finalX: number; finalDist: number; victimHp: number } => {
+    const attacker = fakeRuntime("lunge", 0, 0);
+    attacker.borgId = gRed.id;
+    attacker.ammo = startingAmmoForProfile(gRed);
+    const victim = fakeRuntime("lunge_victim", 1, startDist);
+    victim.hp = victim.maxHp = 5000;
+    const profiles = new Map([
+      [attacker.uid, gRed],
+      [victim.uid, enemyProfile],
+    ]);
+    const ctx = { lockTargetPos: victim.pos, bounds: ctxBounds, collision: null };
+    for (let f = 0; f < meleeDef.duration + 6; f += 1) {
+      stepCooldowns(attacker);
+      // Movement runs before attacks (battle.ts order): integrates the lunge velocity the
+      // attack step set on the previous frame, with the combat-state MOVE.DECEL applied.
+      stepMovement(attacker, gRed, emptyInput(), ctx);
+      stepAttacks(attacker, gRed, f === 0, false, [attacker, victim], profiles);
+      assertSane([attacker, victim], f);
+    }
+    return { finalX: attacker.pos.x, finalDist: distXZ(attacker.pos, victim.pos), victimHp: victim.hp };
+  };
+
+  const r1 = runOnce();
+  const r2 = runOnce();
+  if (r1.finalX !== r2.finalX || r1.victimHp !== r2.victimHp) {
+    throw new Error(
+      `[selfcheck] melee lunge is not deterministic: x=${r1.finalX}/${r2.finalX}, hp=${r1.victimHp}/${r2.victimHp}`,
+    );
+  }
+  if (!(r1.finalDist < startDist - 50)) {
+    throw new Error(`[selfcheck] melee lunge did not close distance: ${startDist} -> ${r1.finalDist}`);
+  }
+  if (r1.victimHp >= 5000) {
+    throw new Error(
+      `[selfcheck] lunge swing from ${startDist} units did not land its hit (final dist ${r1.finalDist}, reach ${meleeDef.range})`,
+    );
+  }
+  console.log(
+    `[selfcheck] melee lunge closed ${startDist} -> ${r1.finalDist.toFixed(1)} units deterministically and landed the swing`,
+  );
+}
+
+function assertEmptyAmmoFarHoldDoesNotWhiffMelee(borgs: BorgStats[]): void {
+  const gRed = buildProfile(borgById(borgs, "pl0615")); // primary:'shot' hybrid
+  const b = fakeRuntime("noammo", 0, 0);
+  b.borgId = gRed.id;
+  b.ammo = 0; // empty magazine: the shot path is gated; the old fall-through air-swung here
+  const enemy = fakeRuntime("noammo_enemy", 1, 600); // far outside the engage window
+  const profiles = new Map([
+    [b.uid, gRed],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  for (let f = 0; f < 30; f += 1) {
+    const spawned = pumpAttackFrame(b, gRed, true, [b, enemy], profiles);
+    if (spawned.length !== 0) {
+      throw new Error("[selfcheck] empty-magazine far hold should not spawn projectiles");
+    }
+    if (b.anim === "melee" || b.state === "attack") {
+      throw new Error(`[selfcheck] empty-ammo far-range hold whiff-swung at 600 units (frame ${f})`);
+    }
+  }
+  console.log("[selfcheck] empty-ammo far-range hold no longer air-swings (whiff gate on the engage window)");
+}
+
+function assertMeleeAiReachesEngageAndHits(borgs: BorgStats[]): void {
+  const swordKnight = buildProfile(borgById(borgs, "pl0200"));
+  const meleeDef = actionProfileForProfile(swordKnight).melee;
+  if (!meleeDef || swordKnight.rangePref === "ranged") {
+    throw new Error("[selfcheck] melee AI test needs melee-pref Sword Knight");
+  }
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: null, borgIds: ["pl0200"] }, // melee-pref CPU
+      ],
+      bounds: { minX: -1000, maxX: 1000, minZ: -1000, maxZ: 1000 },
+      spawnPoints: [
+        { pos: { x: -300, y: 10, z: 0 }, rotY: Math.PI / 2 },
+        { pos: { x: 300, y: 10, z: 0 }, rotY: -Math.PI / 2 },
+      ],
+    },
+    borgs,
+  );
+  const p1Uid = battle.state.activeUidByPlayer["p1"];
+  const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
+  let minDist = Infinity;
+  let sawMeleeSwing = false;
+  let meleeHitFrame = -1;
+  let prevHp = Infinity;
+  for (let f = 0; f < 900 && meleeHitFrame < 0; f += 1) {
+    battle.step(1 / 60, idleInputs);
+    assertSane(battle.state.borgs, f);
+    const p1 = battle.state.borgs.find((x) => x.uid === p1Uid);
+    const cpu = battle.state.borgs.find((x) => x.team === 1);
+    if (!p1 || !cpu) break;
+    const d = distXZ(cpu.pos, p1.pos);
+    minDist = Math.min(minDist, d);
+    if (cpu.anim === "melee") sawMeleeSwing = true;
+    // A melee hit: hp dropped this frame while the CPU is mid-swing within its reach
+    // (a homing charge shot could also drop hp, but only the melee swing satisfies both).
+    if (p1.hp < prevHp && cpu.anim === "melee" && d <= meleeDef.range + 5) meleeHitFrame = f;
+    prevHp = p1.hp;
+  }
+  if (minDist > meleeDef.range + 5 || !sawMeleeSwing || meleeHitFrame < 0) {
+    throw new Error(
+      `[selfcheck] melee-pref AI failed to close and land melee from 600 units: minDist=${minDist.toFixed(1)}, swung=${sawMeleeSwing}, hitFrame=${meleeHitFrame}`,
+    );
+  }
+  console.log(
+    `[selfcheck] melee-pref AI closed 600 -> ${minDist.toFixed(1)} units and landed a melee hit at frame ${meleeHitFrame}`,
+  );
+}
+
+// ---------------------------------------------------------------------------------------
+// Specials workstream (sim runtime phase) asserts: broadened B-charge coverage, X press-edge
+// semantics, projectile-archetype specials through the normal pipeline, and X-Charge
+// hold/release (OBSERVED_WIKI rows in data/borgMoveProperties.json; TUNED tiers in combat.ts
+// X_CHARGE).
+// ---------------------------------------------------------------------------------------
+
+/** (a) Every borg with an OBSERVED_WIKI "B Charge" row must resolve a chargeable shot —
+ *  wave-1 broadened actionProfiles.json chargeable to the union of the family heuristic and
+ *  the wiki "B Charge" rows; this pins that union roster-wide, anchored on G Red the same way
+ *  assertChargeShotTiers is. */
+function assertWikiBChargeRowsResolveChargeable(borgs: BorgStats[]): void {
+  // Anchor first (mirrors assertChargeShotTiers): G Red (pl0615, hero line) carries a wiki
+  // "B Charge" row and must resolve chargeable.
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  if (moveByButton(gRed.id, "B Charge") === null) {
+    throw new Error("[selfcheck] G Red anchor lost its OBSERVED_WIKI 'B Charge' row");
+  }
+  if (!actionProfileForProfile(gRed).shot?.chargeable) {
+    throw new Error("[selfcheck] G Red anchor: 'B Charge' row did not resolve chargeable:true");
+  }
+  let checked = 0;
+  for (const stats of borgs) {
+    if (moveByButton(stats.id, "B Charge") === null) continue;
+    const shot = actionProfileForProfile(buildProfile(stats)).shot;
+    if (!shot?.chargeable) {
+      throw new Error(
+        `[selfcheck] ${stats.id} has an OBSERVED_WIKI 'B Charge' move but resolves chargeable=${shot?.chargeable ?? "no shot def"}`,
+      );
+    }
+    checked += 1;
+  }
+  // The harvest catalogs 34 'B Charge' rows; keep a loose floor so a data regen that drops
+  // most of them fails loudly without pinning the exact count.
+  if (checked < 30) {
+    throw new Error(`[selfcheck] suspiciously few 'B Charge' rows resolved chargeable: ${checked}`);
+  }
+  console.log(`[selfcheck] all ${checked} OBSERVED_WIKI 'B Charge' borgs resolve chargeable shots`);
+}
+
+/** (b) Press-edge latch: holding X across the special's cooldown expiry fires exactly ONCE
+ *  per press edge — the old held-as-pressed code re-fired on every cooldown expiry. Also
+ *  verifies a fresh edge after cooldown fires again, and that the AI still lands specials
+ *  under edge semantics (it holds for one decision frame per press). */
+function assertSpecialFiresOncePerPressEdge(borgs: BorgStats[]): void {
+  const base = buildProfile(borgById(borgs, "pl0615"));
+  const profile = { ...base, id: "zzspecialedge" }; // default AoE special; borgId below is non-X-charge
+  const attacker = fakeRuntime("special_edge", 0, 0);
+  attacker.borgId = profile.id; // unknown id -> no OBSERVED_WIKI 'X Charge' row -> plain press-edge X
+  const target = fakeRuntime("special_edge_target", 1, 20);
+  target.hp = target.maxHp = 50000;
+  const profiles = new Map([
+    [attacker.uid, profile],
+    [target.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const specialDef = actionProfileForProfile(profile).special;
+
+  // One long HOLD spanning the whole cooldown + recovery: must hit exactly once.
+  let hits = 0;
+  let prevHp = target.hp;
+  const holdFrames = specialDef.cooldown + specialDef.duration + 30;
+  for (let f = 0; f < holdFrames; f += 1) {
+    stepCooldowns(attacker);
+    stepAttacks(attacker, profile, false, true, [attacker, target], profiles);
+    if (target.hp < prevHp) hits += 1;
+    prevHp = target.hp;
+  }
+  if (hits !== 1) {
+    throw new Error(`[selfcheck] held X across cooldown expiry should fire exactly once, fired ${hits}x`);
+  }
+  // Release, then a fresh press edge (cooldown long since expired): second hit.
+  stepCooldowns(attacker);
+  stepAttacks(attacker, profile, false, false, [attacker, target], profiles);
+  stepCooldowns(attacker);
+  stepAttacks(attacker, profile, false, true, [attacker, target], profiles);
+  if (target.hp >= prevHp) {
+    throw new Error("[selfcheck] fresh X press edge after cooldown did not fire the special again");
+  }
+
+  // AI check (the ai.ts special block now paces presses off the specialHeld latch): a
+  // melee-pref CPU with a close target must still land a special under edge semantics.
+  const knight = buildProfile(borgById(borgs, "pl0200"));
+  const cpu = fakeRuntime("special_edge_ai", 1, 0);
+  cpu.borgId = knight.id;
+  const aiTarget = fakeRuntime("special_edge_ai_target", 0, 60); // inside the AI's 120-unit special window
+  aiTarget.hp = aiTarget.maxHp = 50000;
+  const aiProfiles = new Map([
+    [cpu.uid, knight],
+    [aiTarget.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  let aiFired = false;
+  for (let f = 0; f < 300 && !aiFired; f += 1) {
+    stepCooldowns(cpu);
+    const input = stepAI(cpu, knight, [cpu, aiTarget]);
+    stepAttacks(cpu, knight, input.attack, input.special, [cpu, aiTarget], aiProfiles);
+    if (cpu.state === "special") aiFired = true;
+  }
+  if (!aiFired) {
+    throw new Error("[selfcheck] AI never fired a special under press-edge semantics");
+  }
+  console.log("[selfcheck] X special fires once per press edge (hold never re-fires; AI still specials)");
+}
+
+/** (c) Projectile-archetype special (wave-1 SpecialActionDef.archetype): G Red's X (G Crash,
+ *  OBSERVED_WIKI) spawns a projectile carrying the CHARGE_OR_SPECIAL damage record, and that
+ *  projectile flows through the NORMAL stepProjectiles pipeline — hit-target despawn reason,
+ *  damage application, and burst-meter crediting via the applyHit `source` all intact. */
+function assertProjectileArchetypeSpecialFiresThroughPipeline(borgs: BorgStats[]): void {
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  const specialDef = actionProfileForProfile(gRed).special;
+  if (specialDef.archetype !== "projectile") {
+    throw new Error(
+      `[selfcheck] G Red's X special (G Crash) should be projectile-archetype, got ${specialDef.archetype}`,
+    );
+  }
+  const attacker = fakeRuntime("special_proj", 0, 0); // borgId pl0615; rotY 0 faces +z
+  attacker.ammo = startingAmmoForProfile(gRed);
+  const enemy = fakeRuntime("special_proj_enemy", 1, 0);
+  enemy.pos = { x: 0, y: 0, z: 150 }; // downrange of the +z muzzle
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [attacker.uid, gRed],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+
+  stepCooldowns(attacker);
+  const res = stepAttacks(attacker, gRed, false, true, [attacker, enemy], profiles);
+  const proj = res.projectiles[0];
+  if (!proj || attacker.state !== "special") {
+    throw new Error(
+      `[selfcheck] projectile-archetype X press spawned nothing: projectiles=${res.projectiles.length}, state=${attacker.state}`,
+    );
+  }
+  if (proj.damageRecordIndex !== DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL) {
+    throw new Error(
+      `[selfcheck] special projectile should carry the CHARGE_OR_SPECIAL record: got=${proj.damageRecordIndex}`,
+    );
+  }
+
+  // Fly it through the normal pipeline with burst-meter plumbing attached.
+  const byUid = new Map([
+    [attacker.uid, attacker],
+    [enemy.uid, enemy],
+  ]);
+  const burstMeters = { p1: createBurstMeter() };
+  let flying = res.projectiles;
+  for (let f = 0; f < 60 && flying.length > 0; f += 1) {
+    flying = stepProjectiles(flying, [attacker, enemy], profiles, byUid, undefined, { burstMeters });
+  }
+  if (enemy.hp >= enemy.maxHp) {
+    throw new Error("[selfcheck] special projectile never damaged the downrange target");
+  }
+  if (proj.despawnReason !== "hit-target") {
+    throw new Error(
+      `[selfcheck] special projectile should despawn via the normal hit-target path: got=${proj.despawnReason}`,
+    );
+  }
+  if (burstMeters.p1.meter !== BURST.FILL_PER_HIT) {
+    throw new Error(
+      `[selfcheck] special projectile hit should credit the attacker's burst meter +${BURST.FILL_PER_HIT}: got=${burstMeters.p1.meter}`,
+    );
+  }
+  console.log(
+    `[selfcheck] projectile-archetype special (G Crash) hit downrange via the normal pipeline (record 2, burst +${BURST.FILL_PER_HIT})`,
+  );
+}
+
+/** (d) X Charge (OBSERVED_WIKI 'X Charge' rows, 17 borgs): holding X accumulates
+ *  xChargeFrames (capped at the tier-2 threshold) without firing; releasing fires the special
+ *  scaled by the reached tier (X_CHARGE mirrors the B-charge tiers, TUNED), resets the
+ *  accumulator, and the moveRuntime command status is live (no longer "x-charge-blocked"). */
+function assertXChargeAccumulatesAndReleases(borgs: BorgStats[]): void {
+  const cosmic = buildProfile(borgById(borgs, "pl0504")); // Cosmic Dragon: 'X Charge' row "Black Hole"
+  if (xChargeMoveForBorgId("pl0504") === null) {
+    throw new Error("[selfcheck] pl0504 should carry an OBSERVED_WIKI 'X Charge' row (Black Hole)");
+  }
+  const specialDef = actionProfileForProfile(cosmic).special;
+  const enemyProfile = buildProfile(borgById(borgs, "pl0008"));
+
+  const releaseAfterHold = (holdFrames: number): Projectile => {
+    const b = fakeRuntime("xcharge", 0, 0);
+    b.borgId = cosmic.id;
+    b.ammo = startingAmmoForProfile(cosmic);
+    const enemy = fakeRuntime("xcharge_enemy", 1, 500);
+    const profiles = new Map([
+      [b.uid, cosmic],
+      [enemy.uid, enemyProfile],
+    ]);
+    for (let f = 0; f < holdFrames; f += 1) {
+      stepCooldowns(b);
+      const held = stepAttacks(b, cosmic, false, true, [b, enemy], profiles);
+      if (held.projectiles.length > 0 || b.state === "special") {
+        throw new Error("[selfcheck] X-charge borg fired while still holding X");
+      }
+    }
+    const expectFrames = Math.min(X_CHARGE.TIER2_FRAMES, holdFrames);
+    if ((b.cooldowns["xChargeFrames"] ?? 0) !== expectFrames) {
+      throw new Error(
+        `[selfcheck] xChargeFrames accumulated wrong: got=${b.cooldowns["xChargeFrames"]}, want=${expectFrames}`,
+      );
+    }
+    stepCooldowns(b);
+    const released = stepAttacks(b, cosmic, false, false, [b, enemy], profiles);
+    const proj = released.projectiles[0];
+    if (!proj || b.state !== "special") {
+      throw new Error(
+        `[selfcheck] X-charge release after ${holdFrames} held frames did not fire: projectiles=${released.projectiles.length}, state=${b.state}`,
+      );
+    }
+    if ((b.cooldowns["xChargeFrames"] ?? 0) !== 0) {
+      throw new Error("[selfcheck] xChargeFrames should reset on release");
+    }
+    if (b.cooldowns["special"] !== specialDef.cooldown) {
+      throw new Error(
+        `[selfcheck] X-charge release should arm the special cooldown: got=${b.cooldowns["special"]}, want=${specialDef.cooldown}`,
+      );
+    }
+    return proj;
+  };
+
+  const tier0 = releaseAfterHold(3);
+  const tier2 = releaseAfterHold(X_CHARGE.TIER2_FRAMES + 25); // also exercises the accumulator cap
+  const ratio = tier2.damage / tier0.damage;
+  if (Math.abs(ratio - X_CHARGE.TIER2_DAMAGE_MULT) > 1e-6) {
+    throw new Error(
+      `[selfcheck] X-charge tier-2 damage scaling wrong: ratio=${ratio}, want=${X_CHARGE.TIER2_DAMAGE_MULT}`,
+    );
+  }
+  const binding = runtimeMoveBindingForBorgId("pl0504", "X Charge");
+  if (binding?.commandStatus !== "x-charge-release") {
+    throw new Error(
+      `[selfcheck] moveRuntime 'X Charge' status should be live (x-charge-release): got=${binding?.commandStatus}`,
+    );
+  }
+  console.log(
+    `[selfcheck] X-charge holds accumulate (cap ${X_CHARGE.TIER2_FRAMES}f) and release-fire (tier2 x${ratio.toFixed(2)}); moveRuntime status live`,
+  );
+}
+
 function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
   return {
     uid,
@@ -1944,9 +2489,18 @@ export function main(): number {
   assertFrozenBattleTimerNeverExpires(borgs);
   assertSpawnDeployLockDuration(borgs);
   assertDeathAccountingAtKillEvent(borgs);
+  assertHuskDeploysOnForceExhaustion(borgs);
   assertActorParamTierMatchesCClamp();
   assertGaugeStaggerModel(borgs);
   assertResistanceFalloffPinned(borgs);
+  assertContextualMeleeBeatsChargeAtEngageRange(borgs);
+  assertMeleeLungeClosesDistance(borgs);
+  assertEmptyAmmoFarHoldDoesNotWhiffMelee(borgs);
+  assertMeleeAiReachesEngageAndHits(borgs);
+  assertWikiBChargeRowsResolveChargeable(borgs);
+  assertSpecialFiresOncePerPressEdge(borgs);
+  assertProjectileArchetypeSpecialFiresThroughPipeline(borgs);
+  assertXChargeAccumulatesAndReleases(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

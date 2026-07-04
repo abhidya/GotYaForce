@@ -1,4 +1,7 @@
-// Self-test for ATK-008 (projectile consumption refactor: persist + rehit interval).
+// Self-test for ATK-008 (projectile consumption refactor: persist + rehit interval) and the
+// fx-cluster-2026-07-03 projectile lifecycle mechanisms: 3D angle-clamped homing steer
+// (FUN_8006c1c8), owner-liveness despawn (zz_00840b8_), terrain impact (zz_006f268_ ->
+// zz_0083244_/zz_0083714_), and the renderer-facing despawn reasons.
 //
 // Deliberately separate from selfcheck.ts (another agent is concurrently editing that file) —
 // this is its own entry point with its own runner (scripts/run-projectile-tests.mjs), per the
@@ -11,7 +14,7 @@
 import { stepProjectiles } from "./combat.js";
 import { DAMAGE_RECORD_INDEX } from "./gauges.js";
 import { JUMP } from "./constants.js";
-import type { BorgRuntime, Projectile } from "./types.js";
+import type { BorgRuntime, Projectile, StageCollision } from "./types.js";
 import type { BorgProfile } from "./stats.js";
 
 // --- Test scaffolding --------------------------------------------------------------------
@@ -145,6 +148,9 @@ function testDefaultConsumesOnFirstHit(): void {
 
   assertEqual(survivors.length, 0, "default projectile: consumed (not in survivors) after first hit");
   assertTrue(target.hp < 1_000_000, "default projectile: target took damage on first hit");
+  // Renderer-facing despawn metadata (set on the dropped object).
+  assertEqual(proj.despawnReason, "hit-target", "default projectile: despawnReason === 'hit-target'");
+  assertEqual(proj.hitConfirmedThisFrame, true, "default projectile: hitConfirmedThisFrame set on the consuming hit");
 
   // consumeOnHit explicitly true behaves the same as absent.
   const target2 = makeBorg({ uid: "t2", team: 1, pos: { x: 0, y: JUMP.GROUND_Y, z: 20 } });
@@ -270,6 +276,134 @@ function testPersistIntervalTenRehitsSameTargetEveryTenFrames(): void {
   }
 }
 
+// --- Test 4: owner-liveness despawn (zz_00840b8_, chunk_0012.c:3216) ---------------------
+
+function testOwnerDeadDespawn(): void {
+  // Dead owner still PRESENT in byUid (battle.ts retains defeated borgs with alive=false) —
+  // its in-flight projectile must despawn with reason "owner-dead" and apply no hit.
+  const owner = makeBorg({ uid: "owner", team: 0, alive: false, hp: 0 });
+  const target = makeBorg({ uid: "t1", team: 1, pos: { x: 0, y: JUMP.GROUND_Y, z: 0 } });
+  const all = [owner, target];
+  const profiles = new Map<string, BorgProfile>([
+    ["owner", makeProfile()],
+    ["t1", makeProfile()],
+  ]);
+  const byUid = new Map(all.map((b) => [b.uid, b]));
+
+  const proj = makeProjectile({ pos: { x: 0, y: JUMP.GROUND_Y, z: 0 } });
+  const survivors = stepProjectiles([proj], all, profiles, byUid);
+  assertEqual(survivors.length, 0, "owner-dead: projectile despawned");
+  assertEqual(proj.despawnReason, "owner-dead", "owner-dead: despawnReason === 'owner-dead'");
+  assertEqual(target.hp, 1_000_000, "owner-dead: no hit applied on the despawn frame");
+}
+
+// --- Test 5: expiry reason ----------------------------------------------------------------
+
+function testExpiredReason(): void {
+  const proj = makeProjectile({ life: 1 });
+  const survivors = stepProjectiles([proj], [], new Map(), new Map());
+  assertEqual(survivors.length, 0, "expired: projectile despawned when life ran out");
+  assertEqual(proj.despawnReason, "expired", "expired: despawnReason === 'expired'");
+}
+
+// --- Test 6: full-3D angle-clamped homing steer (FUN_8006c1c8/zz_006c440_) ----------------
+
+function test3dHomingSteer(): void {
+  const owner = makeOwner();
+  // Target far ahead AND far above: the old yaw-only homing could never change vel.y.
+  const target = makeBorg({ uid: "t1", team: 1, pos: { x: 0, y: JUMP.GROUND_Y + 300, z: 300 } });
+  const all = [owner, target];
+  const profiles = new Map<string, BorgProfile>([
+    ["owner", makeProfile()],
+    ["t1", makeProfile()],
+  ]);
+  const byUid = new Map(all.map((b) => [b.uid, b]));
+
+  const TURN = 0.2; // per-profile homingTurn under test (radians/frame clamp)
+  const proj = makeProjectile({
+    pos: { x: 0, y: JUMP.GROUND_Y, z: 0 },
+    vel: { x: 0, y: 0, z: 10 },
+    homingTurn: TURN,
+    homingTarget: "t1",
+    life: 999,
+  });
+  const survivors = stepProjectiles([proj], all, profiles, byUid);
+  assertEqual(survivors.length, 1, "3D steer: projectile still in flight after one frame");
+  const pr = survivors[0];
+  if (!pr) return;
+  assertTrue(pr.vel.y > 0, `3D steer: vel.y pitched up toward the high target (vel.y=${pr.vel.y})`);
+  const speed = Math.hypot(pr.vel.x, pr.vel.y, pr.vel.z);
+  assertTrue(
+    Math.abs(speed - 10) < 1e-9,
+    `3D steer: speed preserved by the steer (|vel|=${speed}, expected 10 — no SHOT.SPEED re-acceleration)`,
+  );
+  // Per-frame angle clamp: the direction rotated by EXACTLY homingTurn this frame (the target
+  // sits ~0.785 rad off-axis, so the clamp binds).
+  const newDir = { x: pr.vel.x / speed, y: pr.vel.y / speed, z: pr.vel.z / speed };
+  const angleTurned = Math.acos(Math.max(-1, Math.min(1, newDir.z))); // old dir was +Z
+  assertTrue(
+    Math.abs(angleTurned - TURN) < 1e-6,
+    `3D steer: per-frame turn clamped to homingTurn (turned ${angleTurned}, clamp ${TURN})`,
+  );
+}
+
+// --- Test 7: terrain impact + out-of-bounds despawn reasons -------------------------------
+
+function flatFloorCollision(y: number): StageCollision {
+  return {
+    triangles: [
+      {
+        index: 0,
+        layerIndex: 0,
+        marker: 0xcccccccc, // solid-geometry marker (same filter as movement/physics floor code)
+        vertices: [
+          { x: -200, y, z: -200 },
+          { x: 200, y, z: -200 },
+          { x: 0, y, z: 200 },
+        ],
+        normal: { x: 0, y: 1, z: 0 },
+        planeD: y,
+        bounds2d: { minX: -200, maxX: 200, minZ: -200, maxZ: 200 },
+      },
+    ],
+  };
+}
+
+function testTerrainAndBoundsDespawnReasons(): void {
+  const bounds = { minX: -100, maxX: 100, minZ: -100, maxZ: 100 };
+
+  // Descending through the floor plane -> "hit-terrain", position moved to the impact point.
+  const floorY = 20;
+  const diving = makeProjectile({ pos: { x: 0, y: 40, z: 0 }, vel: { x: 0, y: -30, z: 0 } });
+  const survivors = stepProjectiles([diving], [], new Map(), new Map(), {
+    bounds,
+    collision: flatFloorCollision(floorY),
+  });
+  assertEqual(survivors.length, 0, "terrain: diving projectile despawned on the floor");
+  assertEqual(diving.despawnReason, "hit-terrain", "terrain: despawnReason === 'hit-terrain'");
+  assertTrue(
+    Math.abs(diving.pos.y - floorY) < 1e-3,
+    `terrain: pos moved to the impact point (y=${diving.pos.y}, floor=${floorY})`,
+  );
+
+  // Flying parallel ABOVE the floor does NOT impact (no plane crossing).
+  const cruising = makeProjectile({ pos: { x: 0, y: 40, z: 0 }, vel: { x: 10, y: 0, z: 0 } });
+  const cruiseSurvivors = stepProjectiles([cruising], [], new Map(), new Map(), {
+    bounds,
+    collision: flatFloorCollision(floorY),
+  });
+  assertEqual(cruiseSurvivors.length, 1, "terrain: parallel flight above the floor survives");
+
+  // Leaving the stage rect -> "out-of-bounds".
+  const escaping = makeProjectile({ pos: { x: 95, y: 40, z: 0 }, vel: { x: 10, y: 0, z: 0 } });
+  const escapeSurvivors = stepProjectiles([escaping], [], new Map(), new Map(), {
+    bounds,
+    collision: null,
+  });
+  assertEqual(escapeSurvivors.length, 0, "bounds: projectile culled past the stage rect");
+  assertEqual(escaping.despawnReason, "out-of-bounds", "bounds: despawnReason === 'out-of-bounds'");
+}
+
 // --- Runner ---------------------------------------------------------------------------------
 
 export function runSelfTest(): number {
@@ -279,6 +413,10 @@ export function runSelfTest(): number {
   testDefaultConsumesOnFirstHit();
   testPersistIntervalZeroHitsTwoLinedUpBorgs();
   testPersistIntervalTenRehitsSameTargetEveryTenFrames();
+  testOwnerDeadDespawn();
+  testExpiredReason();
+  test3dHomingSteer();
+  testTerrainAndBoundsDespawnReasons();
 
   if (failures > 0) {
     console.error(`projectileConsumption.selftest: ${failures}/${checks} checks FAILED`);

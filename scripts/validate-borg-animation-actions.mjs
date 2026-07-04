@@ -206,26 +206,16 @@ const PREFERRED_LABELS = {
     dash_left: ["boost"],
     dash_right: ["boost"],
     melee: ["g7_s0"],
-    // No g3/g7 flinch exists in this export; pose_short is the shortest explicit pose state.
+    // DERIVED_ROM hit state = g0s14.
     hit: ["pose_short"],
   },
-  // No group-3 reacts: short group-4 launch flinches used as hit.
-  pl0604: { hit: ["special_s2"] },
-  pl0610: { hit: ["special_s1"] },
-  pl0613: { hit: ["special_s2"] },
-  pl0618: { hit: ["special_s2"] },
-  pl061e: { hit: ["special_s1"] },
-  pl0620: { hit: ["special_s1"] },
-  pl0621: { hit: ["special_s1"] },
-  pl0623: { hit: ["special_s1"] },
-  pl0627: { hit: ["special_s2"] },
   // Only group-4 bank is down_s0: longest lunge/attack as special.
   pl0301: { special: ["attack_lunge_s10"] },
   pl0800: { special: ["attack_lunge_s18"] },
   pl0805: { special: ["attack_lunge_s2"] },
   pl0807: { special: ["attack_lunge_s13"] },
-  // Cyber Hero exports no g3 hit-react bank; jump_land is the only short recovery clip.
-  pl0808: { hit: ["jump_land"], special: ["attack_lunge_s12"] },
+  // Cyber Hero exports ROM-cited g0s14 as pose_short.
+  pl0808: { hit: ["pose_short"], special: ["attack_lunge_s12"] },
   pl080d: { special: ["attack_lunge_s2"] },
   pl080e: { special: ["attack_lunge_s2"] },
   pl0a00: { special: ["attack_s7"] },

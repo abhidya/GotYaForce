@@ -132,12 +132,51 @@ function testNonPenetratingBorgSpawnsDefaultProjectile(): void {
   }
 }
 
+// --- Spawn-time homing aim-cone gate (FUN_8006c334, chunk_0009.c:1995 / spawn call :3841) ---
+//
+// The homing lock is only granted when the locked target sits inside the aim cone around the
+// projectile's initial flight direction (cone half-angle TUNED — FLOAT_8043768c undumped).
+// Fire pl0e03 (non-chargeable, fires on one attackHeld frame) with a locked enemy dead ahead
+// vs directly behind and check the spawned projectile's homingTarget.
+
+function fireShotWithLockedEnemy(enemyZ: number): { homingTarget: string | null } | null {
+  const prof = profileFor("pl0e03");
+  const enemyProf = profileFor("pl0008");
+  const b = makeBorg("pl0e03", { lockTarget: "enemy" }); // facing +Z (rotY 0)
+  const enemy = makeBorg("pl0008", {
+    uid: "enemy",
+    team: 1,
+    ownerPlayer: null,
+    pos: { x: 0, y: 10, z: enemyZ },
+  });
+  const profiles = new Map<string, BorgProfile>([
+    [b.uid, prof],
+    [enemy.uid, enemyProf],
+  ]);
+  const res = stepAttacks(b, prof, true, false, [b, enemy], profiles);
+  const p = res.projectiles[0];
+  return p ? { homingTarget: p.homingTarget } : null;
+}
+
+function testSpawnAimConeGatesHomingLock(): void {
+  // Enemy 300 units dead ahead: well inside the cone -> homing lock granted.
+  const ahead = fireShotWithLockedEnemy(300);
+  assertTrue(ahead !== null, "aim cone: pl0e03 fires with a locked enemy ahead");
+  if (ahead) assertEqual(ahead.homingTarget, "enemy", "aim cone: in-cone locked target grants the homing lock");
+
+  // Enemy 300 units directly BEHIND the muzzle direction: outside the cone -> flies straight.
+  const behind = fireShotWithLockedEnemy(-300);
+  assertTrue(behind !== null, "aim cone: pl0e03 fires with a locked enemy behind");
+  if (behind) assertEqual(behind.homingTarget, null, "aim cone: out-of-cone locked target spawns a straight shot");
+}
+
 export function runSelfTest(): number {
   failures = 0;
   checks = 0;
   testPenetrationDataMapping();
   testPenetratingBorgSpawnsPersistentProjectile();
   testNonPenetratingBorgSpawnsDefaultProjectile();
+  testSpawnAimConeGatesHomingLock();
   if (failures > 0) {
     console.error(`projectilePenetration.selftest: ${failures}/${checks} checks FAILED`);
     return 1;

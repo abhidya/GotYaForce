@@ -130,6 +130,13 @@ function readyForNextX(b: BorgRuntime): void {
   b.anim = "idle";
   b.cooldowns["special"] = 0;
   b.cooldowns["attackLock"] = 0;
+  // stepAttacks now edge-detects X via the `specialHeld` latch (combat.ts stepAttacks,
+  // mirroring attackHeld — press-EDGE semantics, not held-boolean). This test drives
+  // stepAttacks with special=true on every call, which under edge semantics is one long
+  // hold that only ever edges once; clearing the latch here makes the next call read as
+  // a release-then-re-press, i.e. a fresh press edge per shot (test scaffolding, not a
+  // gameplay claim).
+  b.cooldowns["specialHeld"] = 0;
 }
 
 // --- Tests -----------------------------------------------------------------------------------

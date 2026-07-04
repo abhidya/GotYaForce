@@ -407,13 +407,45 @@ Confidence: BLOCKED. Trace: T5. Ticket: ATK-007.
   - Negatives (corpus read): NO meter accumulator found anywhere in the damage path; NO
     +0x6fc-gated movement/attack-speed modifier found; NO explicit +0x6fc clear/duration
     (only +0x6fb clears, chunk_0007.c:3922). NO "hyper/burst" strings in the DOL.
-- **confidence**: DERIVED_ROM (flags + 3 effects + activation chain); BLOCKED (meter fill,
-  activation precondition, duration, speed effects). The notebook's older "pair-attack"
+- **meter/duration RESOLVED (2026-07-03, save-state diff via scripts/diff-actor-block.mjs
+  + targeted corpus re-read)**: the meter lives in the PER-PLAYER struct at
+  `PTR_DAT_80433934` (= 0x803c5420 in GG4E, static across boots), stride 0x3c per player:
+  - `+0x3c*i + 0x126` (u16): **meter value** (verified live: 2929 in "nexthitChargesMeter"
+    save -> 3000 in "meter charged" save);
+  - `+0x3c*i + 0x124` (u16): **meter max = 3000** (init chunk_0000.c:1128-1131, together
+    with meter=0 and +0x12a=0);
+  - `+0x3c*i + 0x12a` (u16): unclamped companion accumulator (2929 -> 3255 across the same
+    pair — keeps counting past max while +0x126 clamps);
+  - `+0x3c*i + 0x103` (u8): **charged/ready flag** (0 -> 1 in the same diff) — this is the
+    activation precondition: `FUN_80069814` refuses to arm unless it is nonzero
+    (chunk_0009.c:107), answering the "arm gate precondition" unknown;
+  - `+0x3c*i + 0x104` (u8): burst-active mode (1 = Y-activated burst; 2 = spawn-granted
+    hyper, chunk_0006.c:7178);
+  - `+0x3c*i + 0x10c/+0x10e` (u16 pair): **duration countdown — 600 frames (10 s) on
+    Y-activation** (zz_005b2b8_ chunk_0007.c:3432-3433, which also consumes the charged
+    flag: [0x103]=0, [0x104]=1); **1800 frames (30 s)** for the spawn-granted variant
+    (chunk_0006.c:7179-7180);
+  - +0x6fc CLEAR found: top of zz_005b2b8_ (chunk_0007.c:3379-3396) zeroes each actor's
+    +0x6fc (and +0x8c4 bit0, +0x7de) once the owning player's [0x104] flag is 0 — so
+    duration is enforced player-side, not actor-side;
+  - HUD circle gauge reader: chunk_0001.c:7715-7784 draws +0x126/+0x124 as the fill
+    fraction, plays sfx zz_00f0468_(0,0x78,0) on reaching max, flashes while full.
+- **FILL RULE (2026-07-03 live T3 traces)**: flat **+50 meter per hit connection, attacker
+  only** — measured 16-damage shot -> +50 (3x), 25-damage melee -> +50, penetrating beam
+  through a dead borg -> +150 (3 connections); victims gain nothing (all 4 player meters
+  watched). +0x126 clamps at 3000, +0x12a accumulates unclamped, +0x103 sets 1 frame after
+  clamp. 3000/50 = 60 hits to charge from zero. (The damage-record field
+  forceGaugeCurveIndex is the TEAM GF-energy gauge damage multiplier — player struct
+  +0x114 — a different gauge; the damage pipeline never writes +0x126.)
+- **confidence**: DERIVED_ROM (flags + 3 effects + activation chain + meter location/max/
+  fill + charged flag + durations); remaining open: Q5 speed effects, live duration
+  confirmation, +0x12a consumer. The notebook's older "pair-attack"
   reading of +0x6fc (§ah step 3) and this Power-Burst reading are the SAME mechanism seen
   from two angles — Power Burst is the player-facing name; the pair/fusion path is its
   co-op variant. Keep calling the field `burstActive` with the pair semantics documented.
 - **exact_values_found**: x2.0 / x0.5 / refill-boost multiplier address (FLOAT_804376c8,
-  value undumped); +0x6fb=6 arm window.
+  value undumped); +0x6fb=6 arm window; meter max 3000; burst duration 600 frames
+  (Y-activated) / 1800 frames (spawn-granted hyper).
 - **likely_ts_touchpoints**: `types.ts` (PlayerInput.hyper; BorgRuntime burst fields),
   `battle.ts` (input plumbing), `damageFormula.ts` (attackerPairAttack/defenderPairAttack
   already exist as context params — wire, don't duplicate), `combat.ts` (refill boost).

@@ -7,6 +7,12 @@ import {
   type Penetration,
 } from "./moveProperties.js";
 import {
+  commandMoveRecordsForBorgButton,
+  commandMoveTableAssignmentForBorgId,
+  commandMoveTableCoverage,
+  hasExactCommandMoveTableForBorgId,
+} from "./commandMoveTables.js";
+import {
   runtimeMoveBindingsForProfile,
   runtimeMoveCoverage,
   runtimeShotPenetrationForBorgId,
@@ -75,12 +81,29 @@ ok(gRedButtons.has("X"), "runtime move overlay includes G RED X");
 const gRedBShot = gRedRuntimeMoves.find((move) => move.button === "B Shot");
 ok(gRedBShot?.ammo.lv1 === 5 && gRedBShot.ammo.lv10 === 8 && gRedBShot.ammo.current === 8, `runtime G RED B Shot ammo lv1/lv10/current = 5/8/8 (got ${JSON.stringify(gRedBShot?.ammo)})`);
 ok(gRedBShot?.commandStatus === "contextual-b", `runtime G RED B Shot commandStatus contextual-b (got ${gRedBShot?.commandStatus})`);
+ok(gRedBShot?.exactCommand === true, "runtime G RED B Shot has exact ROM command records");
+ok(gRedBShot?.commandRecords[0]?.commandType === 0, `runtime G RED B Shot command type 0 far/default (got ${gRedBShot?.commandRecords[0]?.commandType})`);
 ok(gRedBShot?.hitboxStatus === "projectile-radius", `runtime G RED B Shot hitbox projectile-radius (got ${gRedBShot?.hitboxStatus})`);
+const gRedBAttack = gRedRuntimeMoves.find((move) => move.button === "B Attack");
+ok(gRedBAttack?.exactCommand === true, "runtime G RED B Attack has exact ROM command records");
+ok(gRedBAttack?.commandRecords[0]?.commandType === 1, `runtime G RED B Attack command type 1 close/proximity (got ${gRedBAttack?.commandRecords[0]?.commandType})`);
+const gRedBCharge = gRedRuntimeMoves.find((move) => move.button === "B Charge");
+ok(gRedBCharge?.exactCommand === true, "runtime G RED B Charge has exact ROM command records");
+ok(gRedBCharge?.commandRecords[0]?.commandType === 3, `runtime G RED B Charge command type 3 (got ${gRedBCharge?.commandRecords[0]?.commandType})`);
 const gRedX = gRedRuntimeMoves.find((move) => move.button === "X");
+ok(gRedX?.exactCommand === true, "runtime G RED X has exact ROM command records");
+ok(gRedX?.commandRecords[0]?.commandType === 2, `runtime G RED X command type 2 (got ${gRedX?.commandRecords[0]?.commandType})`);
 ok(gRedX?.hitboxStatus === "generic-special-aoe", `runtime G RED X hitbox remains explicit generic-special-aoe blocker (got ${gRedX?.hitboxStatus})`);
 ok(usesContextualBResolver("pl0615"), "G RED participates in roster-wide contextual B resolver");
 ok(runtimeShotPenetrationForBorgId("pl0615", false) === "borgs", "runtime shot penetration reads G RED B Shot");
 ok(runtimeShotPenetrationForBorgId("pl0615", true) === "total", "runtime shot penetration reads G RED B Charge");
+ok(hasExactCommandMoveTableForBorgId("pl0615"), "G RED has an exact constructor command table assignment");
+ok(commandMoveTableAssignmentForBorgId("pl0615")?.constructorAddress === "0x8018ccfc", "G RED constructor table dispatch resolves to 0x8018ccfc");
+ok(commandMoveRecordsForBorgButton("pl0615", "B Shot").length === 24, "G RED B Shot far/default command table exposes 24 directional records");
+
+const commandCoverage = commandMoveTableCoverage();
+ok(commandCoverage.decodedTables >= 17, `command table coverage decoded tables >= 17 (got ${commandCoverage.decodedTables})`);
+ok(commandCoverage.exactCommandTableBorgs >= 25, `command table exact borgs >= 25 (got ${commandCoverage.exactCommandTableBorgs})`);
 
 const runtimeCoverage = runtimeMoveCoverage();
 ok(runtimeCoverage.borgsWithMoves >= 160, `runtime coverage borgs >= 160 (got ${runtimeCoverage.borgsWithMoves})`);

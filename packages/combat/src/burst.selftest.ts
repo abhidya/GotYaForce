@@ -1,15 +1,20 @@
-// Self-test for ATK-011 (Hyper/Power Burst input + state shell).
+// Self-test for ATK-011 (Hyper/Power Burst input + state shell) and the per-player Power
+// Burst METER (Q4 RESOLVED 2026-07-03 — fill/clamp/charged-delay, see burst.ts).
 //
 // Deliberately separate from selfcheck.ts (another agent is concurrently editing that file) —
 // own entry point, own runner (scripts/run-burst-tests.mjs), per the commandSchema.selftest.ts /
-// fusionPairs.selftest.ts precedent. Does not import or modify selfcheck.ts/battle.ts/combat.ts.
+// fusionPairs.selftest.ts precedent. Does not import or modify selfcheck.ts/battle.ts (the
+// meter tests exercise combat.ts applyHit read-only via import).
 //
 // Run (from repo root), after building packages/combat:
 //   node scripts/run-burst-tests.mjs
 
-import { stepBurst } from "./burst.js";
+import { createBurstMeter, creditBurstFill, stepBurst, sweepBurstCharged } from "./burst.js";
+import { applyHit } from "./combat.js";
 import { BURST } from "./constants.js";
-import { type BorgRuntime } from "./types.js";
+import { DAMAGE_RECORD_INDEX, damageRecordByIndex } from "./gauges.js";
+import type { BorgProfile } from "./stats.js";
+import type { BorgRuntime, BurstMeterState } from "./types.js";
 
 // --- Test scaffolding --------------------------------------------------------------------
 
@@ -159,6 +164,155 @@ function testBurstActiveHasZeroEffects(): void {
   assertEqual(after, before, "stepBurst never mutates hp/ammo/state/pos/vel");
 }
 
+// --- Per-player burst METER tests (Q4 RESOLVED 2026-07-03 — open-questions Q4 lines 51-79,
+// findings §S; fill rule from the T3 live traces: +50 per hit connection, attacker only) ------
+
+/** Synthetic profile — the meter fill is damage-independent, so no roster stats are needed. */
+function makeProfile(id: string): BorgProfile {
+  return {
+    id,
+    name: id.toUpperCase(),
+    energy: 10,
+    maxHp: 100,
+    defense: 1,
+    shot: 1,
+    attack: 1,
+    speed: 1,
+    airJumpLevel: 0,
+    flyer: false,
+    hasShot: true,
+    hasMelee: true,
+    rangePref: "melee",
+  };
+}
+
+/** One applyHit connection with an attacker context = +FILL_PER_HIT on the ATTACKER'S meter.
+ *  Clears the victim's reaction/i-frames first so each call is a guaranteed fresh CONNECTION
+ *  (a melee hit balance-breaks and grants stagger i-frames, under which a follow-up would be
+ *  a non-connection — correctly filling nothing, but not what these tests exercise). */
+function hitOnce(
+  meters: Record<string, BurstMeterState>,
+  attacker: BorgRuntime,
+  victim: BorgRuntime,
+): number {
+  victim.invincTimer = 0;
+  victim.state = "idle";
+  victim.stateTime = 0;
+  return applyHit(
+    victim,
+    makeProfile(victim.borgId),
+    0,
+    0,
+    { x: 0, y: 0, z: 0 },
+    { x: victim.pos.x, y: victim.pos.y, z: victim.pos.z - 10 },
+    false,
+    damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
+    { attacker, attackerProfile: makeProfile(attacker.borgId) },
+    { burstMeters: meters },
+  );
+}
+
+/** Pins the Q4 ROM constants so they can't silently drift. */
+function testMeterConstants(): void {
+  assertEqual(BURST.METER_MAX, 3000, "BURST.METER_MAX is 3000 (player struct +0x124, Q4/§S)");
+  assertEqual(BURST.FILL_PER_HIT, 50, "BURST.FILL_PER_HIT is 50 (T3 live traces, Q4 lines 59-74)");
+}
+
+/** A landed hit credits the ATTACKER'S player meter +50, and the victim's meter never moves. */
+function testFillOnAttackerHitOnly(): void {
+  const meters: Record<string, BurstMeterState> = { p1: createBurstMeter(), p2: createBurstMeter() };
+  const attacker = makeBorg({ uid: "a", ownerPlayer: "p1", team: 0, state: "attack" });
+  const victim = makeBorg({ uid: "v", ownerPlayer: "p2", team: 1, hp: 100000, maxHp: 100000, invincTimer: 0 });
+  const dmg = hitOnce(meters, attacker, victim);
+  assertTrue(dmg > 0, "the test hit actually connects and deals damage");
+  assertEqual(meters["p1"]?.meter, 50, "attacker's player meter fills +50 on a hit connection");
+  assertEqual(meters["p1"]?.unclamped, 50, "attacker's unclamped accumulator also gains +50");
+  assertEqual(meters["p2"]?.meter, 0, "victim's meter NEVER fills (Q4: no other player's meter moved)");
+  assertEqual(meters["p2"]?.unclamped, 0, "victim's unclamped accumulator never moves either");
+
+  // Per-connection semantics: a second connection credits another flat +50 (damage-independent).
+  hitOnce(meters, attacker, victim);
+  assertEqual(meters["p1"]?.meter, 100, "each hit CONNECTION credits a flat +50 (dead-husk trace: 3x50)");
+}
+
+/** +0x126 clamps at METER_MAX while +0x12a keeps accumulating past it (live: 2929->3079->3129). */
+function testClampAndUnclampedPastMax(): void {
+  const meters: Record<string, BurstMeterState> = { p1: { meter: 2975, unclamped: 2975, charged: false } };
+  creditBurstFill(meters, "p1");
+  assertEqual(meters["p1"]?.meter, 3000, "meter clamps at METER_MAX (3000), not 3025");
+  assertEqual(meters["p1"]?.unclamped, 3025, "unclamped keeps counting past max");
+  creditBurstFill(meters, "p1");
+  assertEqual(meters["p1"]?.meter, 3000, "meter stays clamped on further fills");
+  assertEqual(meters["p1"]?.unclamped, 3075, "unclamped keeps climbing (+50 per connection)");
+}
+
+/** Charged flag (+0x103) flips EXACTLY one frame after the meter reaches max — battle.ts's
+ *  check-before-fill ordering: sweep at top of frame N+1 sees frame N's maxed meter. */
+function testChargedFlipsOneFrameLate(): void {
+  const meters: Record<string, BurstMeterState> = { p1: { meter: 2950, unclamped: 2950, charged: false } };
+  // Frame N: sweep first (meter 2950 < max -> no charge), then this frame's fill maxes it.
+  sweepBurstCharged(meters);
+  creditBurstFill(meters, "p1");
+  assertEqual(meters["p1"]?.meter, 3000, "meter reaches max on frame N");
+  assertEqual(meters["p1"]?.charged, false, "charged is still false at the end of frame N (one-frame delay)");
+  // Frame N+1: the sweep now sees the maxed meter and flips the flag.
+  sweepBurstCharged(meters);
+  assertEqual(meters["p1"]?.charged, true, "charged flips true on frame N+1 (ROM +0x103, one frame late)");
+}
+
+/** Source-less legacy applyHit paths (no attacker context) must NEVER fill any meter. */
+function testSourcelessDamageNeverFills(): void {
+  const meters: Record<string, BurstMeterState> = { p1: createBurstMeter() };
+  const victim = makeBorg({ uid: "v", ownerPlayer: "p1", team: 1, hp: 100000, maxHp: 100000, invincTimer: 0 });
+  const dmg = applyHit(
+    victim,
+    makeProfile(victim.borgId),
+    25,
+    0,
+    { x: 0, y: 0, z: 0 },
+    { x: victim.pos.x, y: victim.pos.y, z: victim.pos.z - 10 },
+    false,
+    damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
+    undefined, // no source (legacy path)
+    { burstMeters: meters },
+  );
+  assertTrue(dmg > 0, "source-less legacy hit still deals damage");
+  assertEqual(meters["p1"]?.meter, 0, "source-less damage never fills any meter (no attacker to credit)");
+  assertEqual(Object.keys(meters).length, 1, "no meter record is invented by a source-less hit");
+}
+
+/** CPU-owned attackers (ownerPlayer === null) are not credited — documented wave-1 decision
+ *  (see creditBurstFill in burst.ts). */
+function testCpuAttackerNotCredited(): void {
+  const meters: Record<string, BurstMeterState> = {};
+  const cpu = makeBorg({ uid: "c", ownerPlayer: null, team: 0, state: "attack" });
+  const victim = makeBorg({ uid: "v", ownerPlayer: "p2", team: 1, hp: 100000, maxHp: 100000, invincTimer: 0 });
+  hitOnce(meters, cpu, victim);
+  assertEqual(Object.keys(meters).length, 0, "a CPU attacker (ownerPlayer null) credits no meter");
+}
+
+/** The meter is PER-PLAYER (ROM player struct +i*0x3c), NOT per-borg: it survives the borg's
+ *  death and keeps accumulating through the same player's next deployed borg. */
+function testMeterPersistsAcrossRedeploy(): void {
+  const meters: Record<string, BurstMeterState> = { p1: createBurstMeter() };
+  const first = makeBorg({ uid: "b1", ownerPlayer: "p1", team: 0, state: "attack" });
+  const victim = makeBorg({ uid: "v", ownerPlayer: "p2", team: 1, hp: 100000, maxHp: 100000, invincTimer: 0 });
+  hitOnce(meters, first, victim);
+  assertEqual(meters["p1"]?.meter, 50, "first borg's hit fills the player meter");
+
+  // First borg dies — nothing in the borg lifecycle touches the per-player map.
+  first.hp = 0;
+  first.alive = false;
+  first.state = "death";
+  assertEqual(meters["p1"]?.meter, 50, "meter untouched by the borg's death");
+
+  // The same player's NEXT deployed borg keeps accumulating on the same record.
+  const second = makeBorg({ uid: "b2", ownerPlayer: "p1", team: 0, state: "attack" });
+  hitOnce(meters, second, victim);
+  assertEqual(meters["p1"]?.meter, 100, "same player's redeployed borg accumulates on the SAME meter");
+  assertEqual(meters["p1"]?.unclamped, 100, "unclamped accumulator persists across redeploy too");
+}
+
 // --- Runner ---------------------------------------------------------------------------------
 
 export function runSelfTest(): number {
@@ -171,6 +325,13 @@ export function runSelfTest(): number {
   testDisabledStaysInert();
   testActivationShapeWhenEnabled();
   testBurstActiveHasZeroEffects();
+  testMeterConstants();
+  testFillOnAttackerHitOnly();
+  testClampAndUnclampedPastMax();
+  testChargedFlipsOneFrameLate();
+  testSourcelessDamageNeverFills();
+  testCpuAttackerNotCredited();
+  testMeterPersistsAcrossRedeploy();
 
   if (failures > 0) {
     console.error(`burst.selftest: ${failures}/${checks} checks FAILED`);

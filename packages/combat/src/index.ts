@@ -32,6 +32,17 @@ export {
   inputRequestsBurst,
   type AttackCommand,
 } from "./command.js";
+export {
+  commandMoveRecordsForBorgButton,
+  commandMoveRecordSummaryForBorgButton,
+  commandMoveTableAssignmentForBorgId,
+  commandMoveTableCoverage,
+  hasExactCommandMoveTableForBorgId,
+  type CommandMoveRecord,
+  type CommandMoveTableAssignment,
+  type CommandMoveTableCoverage,
+  type RuntimeCommandMoveButton,
+} from "./commandMoveTables.js";
 export { movementContextOf, type MovementContext } from "./movement.js";
 export {
   buildProfile,

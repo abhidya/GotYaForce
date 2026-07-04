@@ -1,12 +1,25 @@
-import type { Battle, BorgActionProfile, BorgRuntime, Projectile } from "@gf/combat";
-import { JUMP } from "@gf/combat";
+import type { Battle, BorgActionProfile, BorgRuntime, MeleeActionDef, Projectile } from "@gf/combat";
+import { JUMP, MELEE } from "@gf/combat";
+// Deep source imports: BURST (METER_MAX, Q4/findings §S) and the contextual-B melee engage
+// test are not re-exported from the package index this wave (index.ts belongs to the combat
+// workstream), so the HUD layer reads them straight from the sources. Both are read-only
+// consumers; no combat behavior is duplicated here.
+import { BURST } from "@gf/combat/src/constants";
+import { targetWithinMeleeEngage } from "@gf/combat/src/combat";
 import type { BattleOutcome } from "@gf/missions";
 
 const BOOST_FUEL_FRAMES = JUMP.BOOST_FUEL_FRAMES;
 import type { AnimSlot } from "./battleScene.js";
 import type { HudState } from "../ui/index.js";
 
-export type BattleEventCue = AnimSlot | "lockon" | "charge_release" | "alert";
+export type BattleEventCue =
+  | AnimSlot
+  | "lockon"
+  | "charge_start"
+  | "charge_tier1"
+  | "charge_tier2"
+  | "charge_release"
+  | "alert";
 
 export interface BattleAudioBorgSnapshot {
   borgId: string;
@@ -23,9 +36,23 @@ export interface BattleAudioSnapshot {
   borgs: Map<string, BattleAudioBorgSnapshot>;
   localActiveUid: string | null;
   allyAlert: boolean;
+  /**
+   * Local active borg's hold-B charge tier thresholds (frames), read from its action profile's
+   * shot def (chargeTier1Frames/chargeTier2Frames, packages/combat actionProfiles.ts — the same
+   * per-profile values combat.ts stepAttacks compares chargeFrames against on release). 0 when
+   * no profile accessor was supplied or the borg has no chargeable shot, which suppresses the
+   * tier-crossing cues in battleAudioEvents.
+   */
+  localChargeTier1: number;
+  localChargeTier2: number;
 }
 
-export function snapshotBattleAudio(battle: Battle, localPlayerId: string, allyMax: number): BattleAudioSnapshot {
+export function snapshotBattleAudio(
+  battle: Battle,
+  localPlayerId: string,
+  allyMax: number,
+  actionProfileFor?: (borgId: string) => BorgActionProfile | null,
+): BattleAudioSnapshot {
   const borgs = new Map<string, BattleAudioBorgSnapshot>();
   for (const b of battle.state.borgs) {
     borgs.set(b.uid, {
@@ -40,10 +67,19 @@ export function snapshotBattleAudio(battle: Battle, localPlayerId: string, allyM
     });
   }
   const allyEnergy = battle.state.energy[0] ?? 0;
+  const localActiveUid = battle.state.activeUidByPlayer[localPlayerId] ?? null;
+  // Resolve charge tier thresholds for the LOCAL borg only (the only borg whose charge cues
+  // are audible, mirroring the charge_release scoping below). actionProfileForProfile caches
+  // per profile upstream, so this per-step lookup is cheap and allocation-free.
+  const localBorg = localActiveUid ? battle.state.borgs.find((b) => b.uid === localActiveUid) ?? null : null;
+  const localShot = localBorg && actionProfileFor ? actionProfileFor(localBorg.borgId)?.shot ?? null : null;
+  const localChargeable = localShot?.chargeable === true;
   return {
     borgs,
-    localActiveUid: battle.state.activeUidByPlayer[localPlayerId] ?? null,
+    localActiveUid,
     allyAlert: allyEnergy > 0 && allyEnergy <= allyMax * 0.25,
+    localChargeTier1: localChargeable ? localShot.chargeTier1Frames : 0,
+    localChargeTier2: localChargeable ? localShot.chargeTier2Frames : 0,
   };
 }
 
@@ -80,6 +116,34 @@ export function battleAudioEvents(before: BattleAudioSnapshot, after: BattleAudi
     }
 
     if (localNext.lockTarget && localNext.lockTarget !== localPrev.lockTarget) emit("lockon");
+
+    // Hold-B charge build-up cues, edge-detected per sim step exactly like charge_release
+    // above (deterministic frame-count transitions, no wall-clock). chargeFrames accumulates
+    // +1/frame while the attack button is held on a chargeable shooter and is zeroed on
+    // release (packages/combat combat.ts stepAttacks, hold/release branch), so:
+    //   0 -> >0            = a new hold began            -> charge_start
+    //   crosses tier1/tier2 = a charge tier was reached  -> charge_tier1 / charge_tier2
+    // Tier thresholds come from the borg's OWN profile via the snapshot (localChargeTier1/2,
+    // packages/combat actionProfiles.ts chargeTier1Frames/chargeTier2Frames — the same values
+    // the sim's release-tier comparison uses); 0 thresholds suppress the tier cues. The cap
+    // at chargeTier2Frames means charge_tier2 fires exactly once per hold. No ROM audio-event
+    // table exists to cite (behavior-notes.md (v)), so the EXISTENCE of these cues is TUNED
+    // presentation; the thresholds themselves are the sim's.
+    if (localPrev.chargeFrames === 0 && localNext.chargeFrames > 0) emit("charge_start");
+    if (
+      after.localChargeTier1 > 0 &&
+      localPrev.chargeFrames < after.localChargeTier1 &&
+      localNext.chargeFrames >= after.localChargeTier1
+    ) {
+      emit("charge_tier1");
+    }
+    if (
+      after.localChargeTier2 > 0 &&
+      localPrev.chargeFrames < after.localChargeTier2 &&
+      localNext.chargeFrames >= after.localChargeTier2
+    ) {
+      emit("charge_tier2");
+    }
   }
 
   if (after.allyAlert && !before.allyAlert) emit("alert");
@@ -163,6 +227,8 @@ export interface BattleHudPresentationInput {
   allyMax: number;
   enemyMax: number;
   defaultBorgId: string;
+  /** Local player id — keys burstMeterByPlayer / activeUidByPlayer for the burst gauge + DEFEATED banner. */
+  localPlayerId: string;
 }
 
 export interface BattlePresentationInput {
@@ -197,6 +263,14 @@ export function activeBorgForPlayer(battle: Battle, playerId: string): BorgRunti
   return uid ? battle.state.borgs.find((b) => b.uid === uid) ?? null : null;
 }
 
+/**
+ * Scene-facing battle snapshot. `projectiles` is deliberately the live sim array passed
+ * VERBATIM (no clone): stepProjectiles mutates Projectile objects in place and writes
+ * `despawnReason` on the OBJECT the frame it drops it from the list (packages/combat
+ * types.ts), and BattleScene.syncProjectiles keeps per-uid references so it can read that
+ * reason after removal and fire impact FX only for real impacts. Snapshotting/cloning the
+ * projectile objects here would silently break that contract.
+ */
 export function battleSceneState(battle: Battle, focus: BorgRuntime | null): {
   borgs: readonly BorgRuntime[];
   projectiles: readonly Projectile[];
@@ -252,6 +326,7 @@ export function battlePresentationState(input: BattlePresentationInput): BattleP
       allyMax: input.allyMax,
       enemyMax: input.enemyMax,
       defaultBorgId: input.defaultBorgId,
+      localPlayerId: input.localPlayerId,
     }),
   };
 }
@@ -269,8 +344,31 @@ function focusBorg(battle: Battle, active: BorgRuntime | null): BorgRuntime | nu
 }
 
 export function battleHudState(input: BattleHudPresentationInput): HudState {
-  const { battle, focus, actionProfile, allyMax, enemyMax, defaultBorgId } = input;
+  const { battle, focus, actionProfile, allyMax, enemyMax, defaultBorgId, localPlayerId } = input;
   const st = battle.state;
+
+  // Power Burst gauge (Q4 RESOLVED 2026-07-03 — research/decomp/attack-mechanics-open-
+  // questions.md Q4, attack-mechanics-findings.md §S): per-PLAYER meter, ROM player struct
+  // +i*0x3c: +0x126 clamped value / +0x124 max (BURST.METER_MAX = 3000) / +0x103 charged flag
+  // (flips one frame after max). Fills +50 per attacker hit connection (BURST.FILL_PER_HIT).
+  // Display-only until ATK-012 (BURST.ENABLED stays false); this just SURFACES the sim's
+  // value — CPU-owned forces have no meter entry (documented decision in packages/combat
+  // burst.ts creditBurstFill), so a missing entry reads as an empty, uncharged gauge.
+  const burstMeter = st.burstMeterByPlayer[localPlayerId] ?? null;
+  const burst01 = burstMeter ? clamp01(burstMeter.meter / BURST.METER_MAX) : 0;
+  const burstCharged = burstMeter?.charged ?? false;
+
+  // DEFEATED banner flag: the LOCAL player's own slot is down — their active borg is dead or
+  // absent while awaiting redeploy (battle.ts deployNext keeps activeUidByPlayer pointing at
+  // the dead borg until the planned respawn lands, and DELETES the key when the force is
+  // exhausted), or the battle is lost outright. Gated to result === "ongoing" for the
+  // awaiting-redeploy case so a win/draw on the same frame never flashes the banner. Note this
+  // reads the local ACTIVE slot, not `focus` — focus falls back to a live ally (FIGHT ALONE)
+  // exactly when the banner should be up.
+  const localActiveUid = st.activeUidByPlayer[localPlayerId] ?? null;
+  const localActive = localActiveUid ? st.borgs.find((b) => b.uid === localActiveUid) ?? null : null;
+  const defeated =
+    st.result === "lose" || (st.result === "ongoing" && (localActive === null || !localActive.alive));
   const ammoMax = actionProfile?.shot?.ammoMax ?? 0;
   const specialCooldownMax = actionProfile?.special.cooldown ?? 90;
 
@@ -281,10 +379,13 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
   const chargeFrames = focus?.cooldowns?.["chargeFrames"] ?? 0;
   const charge01 = chargeCap > 0 ? clamp01(chargeFrames / chargeCap) : 0;
 
-  // Melee/"battle mode" flag: true when the focus borg has a lock target within melee reach.
-  // Behavior-notes (ao): the target cursor flips yellow -> red at this range. The exact ROM
-  // threshold FLOAT_8043762c is trace-T1-blocked (behavior-notes (ai)/(av)); we use the profile's
-  // melee reach where present, else a documented TUNED fallback (MELEE.RANGE = 60 XZ units).
+  // Melee/"battle mode" flag: true when the focus borg has a lock target inside the contextual-B
+  // melee SELECTION window — the SAME window the sim resolves B with (combat.ts
+  // targetWithinMeleeEngage / meleeEngageRangeFor, i.e. MELEE.ENGAGE_RANGE widened by the borg's
+  // own reach), so the yellow -> red reticle flip and the sim's melee selection agree.
+  // Behavior-notes (ao), CONFIRMED_MANUAL: the target cursor flips yellow -> red at the
+  // HUD-observable battle-mode threshold; the ROM's numeric threshold FLOAT_8043762c is still
+  // untraced (behavior-notes (ai)/(av), T1-blocked), so MELEE.ENGAGE_RANGE remains TUNED.
   const meleeRange = focusHasMeleeRangeTarget(battle, focus, actionProfile);
 
   // X-ammo readout (behavior-notes (ao), CONFIRMED_MANUAL: weapon 1 = X-attack ammo, separate
@@ -328,6 +429,9 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
     boost01: focus ? clamp01((focus.cooldowns?.["boostFuel"] ?? BOOST_FUEL_FRAMES) / BOOST_FUEL_FRAMES) : 1,
     charge01,
     meleeRange,
+    burst01,
+    burstCharged,
+    defeated,
     // Conditional-spread so the keys are simply absent (not `undefined`) for borgs without
     // X-ammo — required under exactOptionalPropertyTypes, and keeps the HUD readout hidden.
     ...(xAmmo !== undefined ? { xAmmo } : {}),
@@ -340,13 +444,36 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
 }
 
 /**
- * TUNED melee-reach fallback when a borg's action profile has no melee def (XZ units).
- * Mirrors combat MELEE.RANGE (60). The exact ROM value (FLOAT_8043762c) is trace-T1-blocked
- * per behavior-notes (ai)/(av) — this is a display-only threshold, not a gameplay one.
+ * TUNED melee-def stand-in for the rare case where the focus borg's action profile could not
+ * be resolved at all (unknown borg id): mirrors the combat defaults (MELEE.RANGE = 60,
+ * MELEE.Y_TOLERANCE = 50, actionProfiles.ts DEFAULT_MELEE) so targetWithinMeleeEngage still
+ * evaluates the shared window. Display-only; the exact ROM threshold FLOAT_8043762c is
+ * trace-T1-blocked per behavior-notes (ai)/(av).
  */
-const MELEE_RANGE_HUD_FALLBACK = 60;
+const MELEE_DEF_HUD_FALLBACK: MeleeActionDef = {
+  startup: MELEE.STARTUP,
+  active: MELEE.ACTIVE,
+  duration: MELEE.DURATION,
+  cooldown: MELEE.COOLDOWN,
+  range: MELEE.RANGE,
+  yTolerance: MELEE.Y_TOLERANCE,
+  damageMultiplier: 1,
+  knockbackMultiplier: 1,
+  comboHits: 1,
+  comboWindowFrames: 0,
+  swordBeam: null,
+};
 
-/** True when the focus borg has a lock target whose XZ distance is within melee reach. */
+/**
+ * True when the focus borg's LOCK target is inside the contextual-B melee SELECTION window —
+ * evaluated with the sim's own targetWithinMeleeEngage (combat.ts: XZ within
+ * max(meleeDef.range, MELEE.ENGAGE_RANGE), vertical within max(meleeDef.yTolerance,
+ * MELEE.ENGAGE_Y_TOLERANCE)) so the reticle's yellow -> red flip matches when B actually
+ * selects melee. Behavior-notes (ao): manual-confirmed HUD-observable threshold;
+ * FLOAT_8043762c untraced, so the window's numbers stay TUNED in packages/combat constants.ts.
+ * A profile WITHOUT a melee def can never be resolved to battle-mode melee by the sim
+ * (combat.ts resolveBActionOrder requires meleeDef), so it never flips the reticle.
+ */
 function focusHasMeleeRangeTarget(
   battle: Battle,
   focus: BorgRuntime | null,
@@ -355,11 +482,9 @@ function focusHasMeleeRangeTarget(
   if (!focus?.lockTarget) return false;
   const target = battle.state.borgs.find((b) => b.uid === focus.lockTarget && b.alive);
   if (!target) return false;
-  const dx = focus.pos.x - target.pos.x;
-  const dz = focus.pos.z - target.pos.z;
-  const distXZ = Math.hypot(dx, dz);
-  const reach = actionProfile?.melee?.range ?? MELEE_RANGE_HUD_FALLBACK;
-  return distXZ <= reach;
+  if (actionProfile && !actionProfile.melee) return false; // sim cannot select melee for this borg
+  const meleeDef = actionProfile?.melee ?? MELEE_DEF_HUD_FALLBACK;
+  return targetWithinMeleeEngage(focus.pos, target.pos, meleeDef);
 }
 
 function clamp01(v: number): number {
