@@ -49,6 +49,17 @@
 //     (kept as a shorter ladder) rather than discarding the whole ladder.
 // Callers (combat.ts) fall back to the existing TUNED COMBO.STEP_STARTUP_SCALE rescale for any
 // borg/step this module returns null for.
+//
+// AIR B / B CHARGE (actionIndex 2 / 3): airBMoveForBorgId / chargeMoveForBorgId below extend
+// the same exact-data join to the two OTHER B-family actions (see cue-script-stream-decode-
+// 2026-07-04.md hop 3's actionIndex table: a0=dash, a1=ground melee (above), a2=air B,
+// a3=B charge). Neither is a combo LADDER — both are single baseline leaves (action 2's air
+// row plays once per press; action 3 never re-arms via +0x6ea at all) — so they're exposed as
+// ExactMoveLeaf, not ComboStep[]. Air B prefers the leaf's airSeedSlot (the airborne-fork slot)
+// over the shared seedSlot when the extraction found a distinct one. B charge leaves often arm
+// NO kind (windup-only — the real hit is a spawned projectile child, e.g. G RED's chest beam);
+// callers must check `kind !== null` before trusting activeStart/activeEnd/damageRecord, but
+// animStreamRef is still valid on a windup-only leaf (the charge-fire anim is real either way).
 
 import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
 import meleeAnimKindsData from "./data/meleeAnimKinds.json" with { type: "json" };
@@ -69,6 +80,11 @@ interface ActionVariant {
   bank: string | null;
   group: number | null;
   seedSlot: number | null;
+  /** Airborne-fork slot (config's air-config byte, when the extraction found a distinct
+   *  branch guarded on actor+0x5e0 & 0x40 — see cue-script-stream-decode-2026-07-04.md's
+   *  "airborne" evidence entry). Null when the leaf has no separate air seed (either it's
+   *  ground-only, or the ground/air paths share the same slot). */
+  airSeedSlot: number | null;
   chainCallback: ChainCallback | null;
 }
 
@@ -109,11 +125,18 @@ const KINDS = meleeAnimKindsData as unknown as MeleeAnimKindsFile;
 /** B-melee (ground) action index in the family action table (+0x580 == 1, DERIVED — see
  *  cue-script-stream-decode-2026-07-04.md hop 3). */
 const GROUND_MELEE_ACTION_INDEX = "1";
+/** Air B action index (+0x580 == 2, DERIVED — same hop). */
+const AIR_MELEE_ACTION_INDEX = "2";
+/** B charge action index (+0x580 == 3, DERIVED — same hop). */
+const CHARGE_ACTION_INDEX = "3";
 /** Baseline (opener) variant index (+0x581 == 0). */
 const BASELINE_VARIANT_INDEX = "0";
 /** The action-script group constant for melee strikes (DERIVED — group 3 in every validated
  *  family; group 2 = dash rams, group 4 = charge/air specials). */
 const MELEE_GROUP = 3;
+/** The action-script group constant for charge/air specials (DERIVED — group 4 in every
+ *  validated family; see cue-script-stream-decode-2026-07-04.md hop 3's "rule" paragraph). */
+const CHARGE_AIR_GROUP = 4;
 /** Cap on ladder length: matches COMBO.STEP_DAMAGE_MULT.length / the existing comboHits
  *  generator's own cap. See header caveat on why plain auto-increment isn't walked further. */
 const MAX_LADDER_STEPS = 3;
@@ -142,18 +165,22 @@ export interface ComboStep {
 
 const cache = new Map<string, ComboStep[] | null>();
 
-/** Resolve one action-script stream's armed HIT kind + playAnim target, or null if the bank/
- *  slot is missing or the stream arms no kind (windup-only). */
+/** Resolve one action-script stream's armed HIT kind (null when the stream is windup-only —
+ *  e.g. a charge stream that only fires a projectile child) + playAnim target. Returns null
+ *  only when the bank/group/slot itself is missing (nothing to resolve at all); a windup-only
+ *  stream still returns its animStreamRef with kind null so callers can set the anim without
+ *  fabricating hit data. `streamGroup` is the meleeAnimKinds.json group axis (3 = melee
+ *  strikes, 4 = charge/air specials — see cue-script-stream-decode-2026-07-04.md hop 3). */
 function resolveStreamArm(
   bankAddress: string,
+  streamGroup: number,
   slot: number,
-): { kind: number; animStreamRef: { group: number; slot: number } | null } | null {
+): { kind: number | null; animStreamRef: { group: number; slot: number } | null } | null {
   const bank = KINDS.banks[bankAddress];
-  const group = bank?.groups?.[`g${MELEE_GROUP}`];
+  const group = bank?.groups?.[`g${streamGroup}`];
   const stream = group?.[`s${slot}`];
   if (!stream) return null;
   const armHit = stream.events.find((e) => e.op === "armHit" && typeof e.kind === "number");
-  if (!armHit || typeof armHit.kind !== "number") return null;
   const playAnim = stream.events.find(
     (e) => e.op === "playAnim" && typeof e.group === "number" && typeof e.slot === "number",
   );
@@ -161,7 +188,7 @@ function resolveStreamArm(
     playAnim && typeof playAnim.group === "number" && typeof playAnim.slot === "number"
       ? { group: playAnim.group, slot: playAnim.slot }
       : null;
-  return { kind: armHit.kind, animStreamRef };
+  return { kind: armHit && typeof armHit.kind === "number" ? armHit.kind : null, animStreamRef };
 }
 
 /** Build one ComboStep from a resolved (kind, animStreamRef) pair, or null if the kind has no
@@ -218,8 +245,8 @@ function computeLadder(borgId: string): ComboStep[] | null {
   let cursor = baseline.seedSlot;
 
   const tryPushSlot = (slot: number): boolean => {
-    const arm = resolveStreamArm(bankAddress, slot);
-    if (!arm) return false;
+    const arm = resolveStreamArm(bankAddress, MELEE_GROUP, slot);
+    if (!arm || arm.kind === null) return false; // no stream, or windup-only (no armed kind)
     const step = stepFromKind(borgId, slot, arm.kind, arm.animStreamRef);
     if (!step) return false; // stream arms a kind, but no usable hit-bin window for it
     steps.push(step);
@@ -255,4 +282,149 @@ function computeLadder(borgId: string): ComboStep[] | null {
  *  against the exact DOL-derived ladder length without this pass changing comboHits itself. */
 export function comboLadderStepCountForBorgId(id: string): number {
   return comboLadderForBorgId(id)?.length ?? 0;
+}
+
+// ---------------------------------------------------------------------------------------
+// Air B (actionIndex 2) and B charge (actionIndex 3) — single baseline leaves, NOT combo
+// ladders (neither action re-arms via +0x6ea the way ground B melee does — see
+// cue-script-stream-decode-2026-07-04.md's G RED end-to-end table: action 2's air row is a
+// one-shot swing, and action 3 never touches the melee-strike group at all). Same DERIVED
+// join (actionStreamTables.json leaf -> meleeAnimKinds.json stream -> attackHitTables.json
+// record -> familyDamageData.ts), but exposed as a single ExactMoveLeaf per borg instead of a
+// stepped array.
+// ---------------------------------------------------------------------------------------
+
+export interface ExactMoveLeaf {
+  /** The action-script (group, slot) this leaf's stream lives at (the group-4 axis for both
+   *  air B and B charge — see CHARGE_AIR_GROUP). */
+  slot: number;
+  /** The script-armed HIT kind, or null when the stream is windup-only (e.g. G RED's B-charge
+   *  stream arms no kind at all — its damage comes from a spawned projectile child, per the
+   *  decode note's "no armHit — windup only" row). A null kind still carries a valid
+   *  animStreamRef; callers use it to drive the anim without fabricating hit data. */
+  kind: number | null;
+  /** First active frame of the swing (hit.bin record +0x06), null when kind is null. */
+  activeStart: number | null;
+  /** Last active frame (inclusive, +0x08), null when kind is null. */
+  activeEnd: number | null;
+  /** Longest hitbox reach across the kind's records, 0 when kind is null or has no records. */
+  reach: number;
+  /** The borg family's exact damage record for this leaf, or null (kind null, or the kind has
+   *  no windowed hit-bin record, or the family table lookup itself came up empty). */
+  damageRecord: DamageRecord | null;
+  /** The action-script (group, slot) this leaf's stream plays via its playAnim op — the
+   *  anim-label bridge target (see ComboStep.animStreamRef's doc for the numbering-axis
+   *  caveat; same rule applies here). */
+  animStreamRef: { group: number; slot: number } | null;
+}
+
+const airMoveCache = new Map<string, ExactMoveLeaf | null>();
+const chargeMoveCache = new Map<string, ExactMoveLeaf | null>();
+
+/** Shared leaf-resolution: given a (bank, group, slot), build an ExactMoveLeaf. Returns null
+ *  only when the bank/group/slot is entirely missing from meleeAnimKinds.json (nothing was
+ *  captured for this stream at all) — a resolved-but-windup-only stream (kind null) still
+ *  returns a leaf so callers can use its animStreamRef. */
+function leafFromSlot(borgId: string, bank: string, group: number, slot: number): ExactMoveLeaf | null {
+  const arm = resolveStreamArm(bank, group, slot);
+  if (!arm) return null;
+  if (arm.kind === null) {
+    return {
+      slot,
+      kind: null,
+      activeStart: null,
+      activeEnd: null,
+      reach: 0,
+      damageRecord: null,
+      animStreamRef: arm.animStreamRef,
+    };
+  }
+  const records = attackHitRecordsForKind(borgId, arm.kind);
+  const windowed = records.find((record) => record.activeEnd >= record.activeStart && record.activeStart >= 0);
+  const reach = attackHitMaxReachForKind(borgId, arm.kind);
+  return {
+    slot,
+    kind: arm.kind,
+    activeStart: windowed ? windowed.activeStart : null,
+    activeEnd: windowed ? windowed.activeEnd : null,
+    reach: reach ?? 0,
+    damageRecord: windowed ? familyDamageRecordForBorg(borgId, windowed.damageRecordIndex) : null,
+    animStreamRef: arm.animStreamRef,
+  };
+}
+
+/**
+ * Resolve a borg's exact air-B move (action index 2, baseline variant 0), DERIVED end-to-end
+ * from actionStreamTables.json + meleeAnimKinds.json + attackHitTables.json. Prefers the
+ * leaf's airSeedSlot (the airborne-fork slot, config's air-config byte guarded on actor+0x5e0
+ * & 0x40 — cue-script-stream-decode-2026-07-04.md's "airborne" evidence) when the extraction
+ * captured a distinct one; falls back to the shared seedSlot for leaves whose ground/air paths
+ * share the same slot (most of the roster — see the G RED row: seedSlot 0 IS the air slot,
+ * airSeedSlot null). Returns null when the borg has no action-2 baseline leaf, or its group
+ * isn't the charge/air-special axis (CHARGE_AIR_GROUP), or the resolved slot has no captured
+ * stream at all. Callers keep today's ground-melee-def-reuse fallback for null. Cached per
+ * borg id.
+ */
+export function airBMoveForBorgId(id: string): ExactMoveLeaf | null {
+  const key = id.toLowerCase();
+  const cached = airMoveCache.get(key);
+  if (cached !== undefined) return cached;
+
+  const result = computeAirMove(key);
+  airMoveCache.set(key, result);
+  return result;
+}
+
+function computeAirMove(borgId: string): ExactMoveLeaf | null {
+  const borg = STREAMS.borgs[borgId];
+  const action = borg?.actions?.[AIR_MELEE_ACTION_INDEX];
+  const baseline = action?.variants?.[BASELINE_VARIANT_INDEX];
+  if (!baseline || baseline.group !== CHARGE_AIR_GROUP || !baseline.bank) return null;
+  const slot = typeof baseline.airSeedSlot === "number" ? baseline.airSeedSlot : baseline.seedSlot;
+  if (typeof slot !== "number") return null;
+  return leafFromSlot(borgId, baseline.bank, CHARGE_AIR_GROUP, slot);
+}
+
+/**
+ * Resolve a borg's exact B-charge move (action index 3, baseline variant 0), DERIVED
+ * end-to-end the same way as airBMoveForBorgId. B-charge leaves live on the group-4 axis
+ * (charge/air specials) and often arm NO kind at all — the decode note's G RED row: the
+ * charge stream is windup-only, and the actual hit comes from a spawned projectile child
+ * (zz_00e19a8_ type 0x20). Callers still get the leaf's animStreamRef in that case (the
+ * charge-fire anim is real even when the damage isn't a melee-shaped hit), and must gate any
+ * damage-record use behind `kind !== null` themselves (this module never fabricates one).
+ * Returns null when the borg has no action-3 baseline leaf, its group isn't the charge/air
+ * axis, or the seeded slot has no captured stream at all. Cached per borg id.
+ */
+export function chargeMoveForBorgId(id: string): ExactMoveLeaf | null {
+  const key = id.toLowerCase();
+  const cached = chargeMoveCache.get(key);
+  if (cached !== undefined) return cached;
+
+  const result = computeChargeMove(key);
+  chargeMoveCache.set(key, result);
+  return result;
+}
+
+function computeChargeMove(borgId: string): ExactMoveLeaf | null {
+  const borg = STREAMS.borgs[borgId];
+  const action = borg?.actions?.[CHARGE_ACTION_INDEX];
+  const baseline = action?.variants?.[BASELINE_VARIANT_INDEX];
+  if (!baseline || baseline.group !== CHARGE_AIR_GROUP || typeof baseline.seedSlot !== "number" || !baseline.bank) {
+    return null;
+  }
+  return leafFromSlot(borgId, baseline.bank, CHARGE_AIR_GROUP, baseline.seedSlot);
+}
+
+/** Fleet coverage counters (roster scan), used by the selfcheck log lines to report how many
+ *  borgs resolve an exact air-B / charge leaf. Not cached — cheap one-shot roster walk. */
+export function airBChargeCoverage(): { airBResolved: number; chargeResolved: number; rosterSize: number } {
+  const ids = Object.keys(STREAMS.borgs);
+  let airBResolved = 0;
+  let chargeResolved = 0;
+  for (const id of ids) {
+    if (airBMoveForBorgId(id) !== null) airBResolved += 1;
+    if (chargeMoveForBorgId(id) !== null) chargeResolved += 1;
+  }
+  return { airBResolved, chargeResolved, rosterSize: ids.length };
 }

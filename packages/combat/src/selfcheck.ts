@@ -29,7 +29,7 @@ import {
 } from "./combat.js";
 import { createBurstMeter } from "./burst.js";
 import { exactMeleeForBorgId } from "./meleeExactData.js";
-import { comboLadderForBorgId } from "./actionStreamData.js";
+import { airBChargeCoverage, airBMoveForBorgId, chargeMoveForBorgId, comboLadderForBorgId } from "./actionStreamData.js";
 import { moveByButton } from "./moveProperties.js";
 import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
 import {
@@ -992,6 +992,224 @@ function assertUnresolvedLadderBorgStillCombosViaTunedPath(borgs: BorgStats[]): 
   }
   console.log(
     `[selfcheck] pl0100 (no resolved action-stream ladder) still chained to step ${maxStep} (${meleeDef.comboHits} hits) over ${swingStarts} swings via the TUNED path`,
+  );
+}
+
+/**
+ * G RED (pl0615) B-charge release: action index 3, baseline variant 0 seeds group-4 slot 2
+ * (config byte @0x80365854, per actionStreamTables.json) — but that stream is NOT captured in
+ * meleeAnimKinds.json's bank 0x80366220 g4 table at all (only s0/s1/s4 were captured for that
+ * bank), so chargeMoveForBorgId("pl0615") resolves to null and the runtime must keep today's
+ * behavior (no exact anim stream ref, generic CHARGE_OR_SPECIAL record) rather than fabricate
+ * one. This is the HONEST outcome cue-script-stream-decode-2026-07-04.md's G RED table
+ * documents (the charge stream fires a projectile CHILD, not a captured melee-style stream) —
+ * asserting it locks the null-safe fallback path in instead of silently regressing to a wrong
+ * "found a stream" reading if the source data ever shifts.
+ */
+function assertGRedChargeStreamUnresolvedKeepsFallback(borgs: BorgStats[]): void {
+  const leaf = chargeMoveForBorgId("pl0615");
+  if (leaf !== null) {
+    throw new Error(
+      `[selfcheck] expected G RED's B-charge leaf to be unresolved (its g4 s2 stream isn't in meleeAnimKinds.json): got ${JSON.stringify(leaf)}`,
+    );
+  }
+
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  const b = fakeRuntime("gred_charge_fallback", 0, 0);
+  b.borgId = gRed.id;
+  b.ammo = startingAmmoForProfile(gRed);
+  const enemy = fakeRuntime("gred_charge_fallback_enemy", 1, 500);
+  const profiles = new Map([
+    [b.uid, gRed],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const shotDef = actionProfileForProfile(gRed).shot;
+  if (!shotDef?.chargeable) throw new Error("[selfcheck] G RED should have a chargeable shot");
+  for (let f = 0; f < shotDef.chargeTier1Frames + 5; f += 1) pumpAttackFrame(b, gRed, true, [b, enemy], profiles);
+  const released = pumpAttackFrame(b, gRed, false, [b, enemy], profiles);
+  const proj = released[0];
+  if (!proj) throw new Error("[selfcheck] G RED charge release spawned nothing");
+  if (b.meleeAnimStream) {
+    throw new Error(
+      `[selfcheck] G RED's unresolved charge leaf should leave meleeAnimStream null: got ${JSON.stringify(b.meleeAnimStream)}`,
+    );
+  }
+  if (proj.damageRecordIndex !== DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL) {
+    throw new Error(
+      `[selfcheck] G RED's charged release should keep the generic CHARGE_OR_SPECIAL record: got ${proj.damageRecordIndex}`,
+    );
+  }
+  console.log(
+    "[selfcheck] G RED B-charge leaf unresolved (g4 s2 not captured) -> runtime kept the fallback anim/record exactly",
+  );
+}
+
+/**
+ * A borg with a resolved+ARMED charge leaf (kind !== null AND the kind has real records in
+ * the borg's own hit-remap): the runtime must set BOTH the exact anim stream ref AND the
+ * exact damage record on a tier-1+ release, generalizing the pl0615/pl0629/pl062a
+ * PREFERRED_LABELS hardcode in borgPresentationAssets.ts to every such borg. Scans
+ * chargeMoveForBorgId across the roster (rather than hardcoding an assumption). The harness
+ * primes the melee cooldown so a melee-primary hybrid's B press falls through to the shot/
+ * charge path within the SAME frame's resolveBActionOrder pass (the ROM-exact command tables
+ * for these borgs route far-range B to melee-only, so an engage-range target + gated melee
+ * cooldown is the only way this harness reaches their charge path — matching how a real
+ * player would charge mid-fight after a recent swing, not a synthetic gap in coverage).
+ */
+function assertArmedChargeLeafSetsExactAnimAndRecord(borgs: BorgStats[]): void {
+  let armedId: string | null = null;
+  let armedLeaf: ReturnType<typeof chargeMoveForBorgId> = null;
+  for (const stats of borgs) {
+    const leaf = chargeMoveForBorgId(stats.id);
+    if (!leaf || leaf.kind === null || !leaf.damageRecord || !leaf.animStreamRef) continue;
+    const profile = buildProfile(stats);
+    const shotDef = actionProfileForProfile(profile).shot;
+    if (!shotDef?.chargeable) continue;
+    armedId = stats.id;
+    armedLeaf = leaf;
+    break;
+  }
+  if (!armedId || !armedLeaf) {
+    throw new Error("[selfcheck] expected at least one roster borg with a fully-armed charge leaf for this test to be meaningful");
+  }
+  const leaf = armedLeaf;
+
+  const profile = buildProfile(borgById(borgs, armedId));
+  const shotDef = actionProfileForProfile(profile).shot;
+  if (!shotDef?.chargeable) {
+    throw new Error(`[selfcheck] ${armedId} should have a chargeable shot for this test to be meaningful`);
+  }
+  const b = fakeRuntime("armed_charge", 0, 0);
+  b.borgId = profile.id;
+  b.ammo = startingAmmoForProfile(profile);
+  b.cooldowns["melee"] = 999; // gate melee off so B falls through to shot/charge even for melee-primary hybrids
+  const enemy = fakeRuntime("armed_charge_enemy", 1, 40); // inside melee engage range
+  const profiles = new Map([
+    [b.uid, profile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  b.lockTarget = enemy.uid;
+  for (let f = 0; f < shotDef.chargeTier1Frames + 5; f += 1) pumpAttackFrame(b, profile, true, [b, enemy], profiles);
+  const released = pumpAttackFrame(b, profile, false, [b, enemy], profiles);
+  const proj = released[0];
+  if (!proj) throw new Error(`[selfcheck] ${armedId} charge release spawned nothing`);
+  if (!b.meleeAnimStream || b.meleeAnimStream.group !== leaf.animStreamRef!.group || b.meleeAnimStream.slot !== leaf.animStreamRef!.slot) {
+    throw new Error(
+      `[selfcheck] ${armedId} charged release should set the exact anim stream ref ${JSON.stringify(leaf.animStreamRef)}: got ${JSON.stringify(b.meleeAnimStream)}`,
+    );
+  }
+  if (JSON.stringify(proj.damageRecord) !== JSON.stringify(leaf.damageRecord)) {
+    throw new Error(
+      `[selfcheck] ${armedId} charged release should use the exact charge-leaf damage record: got ${JSON.stringify(proj.damageRecord)}, expected ${JSON.stringify(leaf.damageRecord)}`,
+    );
+  }
+  console.log(
+    `[selfcheck] ${armedId} charge leaf resolved armed (kind ${leaf.kind}) -> release set exact anim stream g${leaf.animStreamRef!.group}s${leaf.animStreamRef!.slot} and the exact damage record`,
+  );
+}
+
+/**
+ * Air B (actionIndex 2): a borg whose airB leaf resolves with an ARMED kind must use that
+ * leaf's exact active window (meleeActive length) for an airborne B press instead of reusing
+ * the ground melee def's window. Scans actionStreamTables (via airBMoveForBorgId) for one such
+ * borg rather than hardcoding an id — the decode note's "NEO G RED air g4 s0 kind 15" turned
+ * out on ground-truth review to belong to G RED (pl0615) instead (both id 0x615 and 0x629
+ * share the family bank; the note's own groundTruth correction says so), so this asserts
+ * against whichever borg the roster scan actually finds armed, and logs which one.
+ */
+function assertArmedAirBLeafUsesExactWindow(borgs: BorgStats[]): void {
+  let armedId: string | null = null;
+  for (const stats of borgs) {
+    const leaf = airBMoveForBorgId(stats.id);
+    if (leaf && leaf.kind !== null && leaf.activeStart !== null && leaf.activeEnd !== null) {
+      const profile = buildProfile(stats);
+      const meleeDef = actionProfileForProfile(profile).melee;
+      // Needs a melee profile (air melee reuses meleeDef's lunge/hit-test scaffolding) AND a
+      // DIFFERENT window than the ground def, or the assertion below would be trivially true.
+      if (meleeDef && leaf.activeEnd - leaf.activeStart + 1 !== meleeDef.active) {
+        armedId = stats.id;
+        break;
+      }
+    }
+  }
+  if (!armedId) {
+    throw new Error("[selfcheck] expected at least one roster borg with an armed air-B leaf (distinct from its ground window) for this test to be meaningful");
+  }
+  const leaf = airBMoveForBorgId(armedId);
+  if (!leaf || leaf.kind === null || leaf.activeStart === null || leaf.activeEnd === null) {
+    throw new Error(`[selfcheck] ${armedId}'s air-B leaf should still resolve armed: ${JSON.stringify(leaf)}`);
+  }
+  const exactAirWindow = leaf.activeEnd - leaf.activeStart + 1;
+
+  const profile = buildProfile(borgById(borgs, armedId));
+  const meleeDef = actionProfileForProfile(profile).melee;
+  if (!meleeDef) throw new Error(`[selfcheck] ${armedId} should have a melee profile for this test to be meaningful`);
+
+  const attacker = fakeRuntime("air_b", 0, 0);
+  attacker.borgId = profile.id;
+  attacker.grounded = false; // airborne B press
+  const enemy = fakeRuntime("air_b_enemy", 1, 40);
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [attacker.uid, profile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+
+  let peakMeleeActive = 0;
+  for (let f = 0; f < 30; f += 1) {
+    pumpAttackFrame(attacker, profile, true, [attacker, enemy], profiles);
+    peakMeleeActive = Math.max(peakMeleeActive, attacker.cooldowns["meleeActive"] ?? 0);
+    if ((attacker.cooldowns["meleeActive"] ?? 0) > 0) break; // swing has started
+    assertSane([attacker, enemy], f);
+  }
+  const airSwingActiveLen = peakMeleeActive - leaf.activeStart; // meleeActive = startup+active; startup == activeStart when exact
+  if (airSwingActiveLen !== exactAirWindow) {
+    throw new Error(
+      `[selfcheck] ${armedId} airborne B swing should use the air-B leaf's exact ${exactAirWindow}f window (kind ${leaf.kind}), got ${airSwingActiveLen}f (peak meleeActive=${peakMeleeActive})`,
+    );
+  }
+  console.log(
+    `[selfcheck] ${armedId} airborne B press used the exact air-B leaf window (${exactAirWindow}f, kind ${leaf.kind}) instead of the ground melee def's ${meleeDef.active}f`,
+  );
+}
+
+/**
+ * A borg with no resolved air-B or charge leaf at all must keep today's behavior exactly: no
+ * meleeAnimStream set from either path (airBMoveForBorgId/chargeMoveForBorgId both null), so
+ * neither addition regresses the unresolved majority of the roster. Also logs fleet-wide
+ * coverage counts (airBChargeCoverage) per the ticket's reporting requirement.
+ */
+function assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs: BorgStats[]): void {
+  const id = "pl0100";
+  if (airBMoveForBorgId(id) !== null || chargeMoveForBorgId(id) !== null) {
+    throw new Error(`[selfcheck] expected pl0100 to have no resolved air-B/charge leaf for this test to be meaningful`);
+  }
+  const profile = buildProfile(borgById(borgs, id));
+  const b = fakeRuntime("unresolved_air_charge", 0, 0);
+  b.borgId = profile.id;
+  b.grounded = false;
+  const enemy = fakeRuntime("unresolved_air_charge_enemy", 1, 40);
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [b.uid, profile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  for (let f = 0; f < 30; f += 1) {
+    pumpAttackFrame(b, profile, true, [b, enemy], profiles);
+    if ((b.cooldowns["meleeActive"] ?? 0) > 0) break;
+  }
+  if (b.meleeAnimStream) {
+    throw new Error(
+      `[selfcheck] pl0100 with no resolved air-B leaf should not set meleeAnimStream: got ${JSON.stringify(b.meleeAnimStream)}`,
+    );
+  }
+
+  const coverage = airBChargeCoverage();
+  if (coverage.airBResolved <= 0 || coverage.chargeResolved <= 0) {
+    throw new Error(`[selfcheck] expected nonzero fleet coverage for both air-B and charge: ${JSON.stringify(coverage)}`);
+  }
+  console.log(
+    `[selfcheck] air-B/charge coverage: ${coverage.airBResolved}/${coverage.rosterSize} borgs resolve an exact air-B leaf, ${coverage.chargeResolved}/${coverage.rosterSize} resolve an exact charge leaf; unresolved borgs (e.g. pl0100) keep today's behavior exactly`,
   );
 }
 
@@ -2986,6 +3204,10 @@ export function main(): number {
   assertSwordKnightLadderResolvesThreeSteps(borgs);
   assertNeoGRedLadderChainsToS27(borgs);
   assertUnresolvedLadderBorgStillCombosViaTunedPath(borgs);
+  assertGRedChargeStreamUnresolvedKeepsFallback(borgs);
+  assertArmedChargeLeafSetsExactAnimAndRecord(borgs);
+  assertArmedAirBLeafUsesExactWindow(borgs);
+  assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs);
   assertMeleeHitsOncePerSwing(borgs);
   assertChargeShotTiers(borgs);
   assertSwordBeamFinisher(borgs);

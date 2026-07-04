@@ -219,6 +219,74 @@ playAnim target) and the existing `attackHitTables.json`/`familyDamageRecords.js
 
 ---
 
+## ★ 2026-07-04 session: air B + B charge exact wiring (fleet-wide, same treatment as melee)
+
+Extended `actionStreamData.ts`'s exact-data join (actionStreamTables.json → meleeAnimKinds.json
+→ attackHitTables.json → familyDamageData.ts) from ground B melee (actionIndex 1, above) to the
+family action table's OTHER two B-family actions per the decode note's hop-3 table: actionIndex 2
+(air B) and actionIndex 3 (B charge). Neither re-arms via `+0x6ea` the way the ground ladder does,
+so both are exposed as a single `ExactMoveLeaf` (not a `ComboStep[]` ladder):
+
+- **`airBMoveForBorgId(id)`**: resolves action index 2, baseline variant 0's leaf, preferring the
+  extraction's `airSeedSlot` (the airborne-fork slot, config's air-config byte guarded on
+  `actor+0x5e0 & 0x40`) over the shared `seedSlot` when the extraction captured a distinct one.
+  **Coverage: 18/208 borgs** resolve a fully-armed (kind ≠ null, with a windowed hit-bin record)
+  air-B leaf. Ground-truth-validated against the decode note's G RED row (bank 0x80366220, g4 s0,
+  kind 15, records `[33]`) — the note's own `groundTruth` correction clarifies this row belongs to
+  id `0x615` (G RED), not `0x629` (NEO G RED) as first drafted; NEO G RED's OWN air leaf (g4 s1,
+  kind 29) is a separate, equally-valid resolution.
+- **`chargeMoveForBorgId(id)`**: resolves action index 3, baseline variant 0's leaf (always
+  group 4). **Coverage: 2/208 borgs** resolve a fully-armed charge leaf (pl0209 kind 23 with a
+  record; pl0203 kind 18 with no windowed record). The roster-wide low coverage is the HONEST
+  outcome, not a bug: B charge streams are frequently windup-only (kind null) — G RED's own g4 s2
+  charge slot isn't even captured in `meleeAnimKinds.json`'s bank 0x80366220 (only g4 s0/s1/s4
+  were captured for that bank), matching the decode note's finding that G RED's charge fire is a
+  **spawned projectile child** (`zz_00e19a8_`), not a captured melee-style stream — so
+  `chargeMoveForBorgId("pl0615")` correctly returns `null` and the runtime keeps its existing
+  fallback exactly (asserted by `assertGRedChargeStreamUnresolvedKeepsFallback`).
+- **`combat.ts` — air B**: `stepAttacks`' melee call site resolves `airBMoveForBorgId` only when
+  `!b.grounded`, and only USES it when armed (`kind !== null`); `startMeleeAttack` takes the
+  resolved leaf as a new optional trailing param and lets it override window/anim exactly like a
+  combo-ladder step does, and persists a `b.cooldowns["meleeAirSwing"]` 0/1 latch (added to the
+  `stepCooldowns` skip-list alongside the other press-latches) so the swing-resolution block —
+  which re-reads exact data every active frame from `b.cooldowns["comboStep"]`, independent of the
+  call that started the swing — keeps using the air leaf's reach/record for the swing's whole
+  duration even if the borg lands mid-swing. Grounded swings and borgs without an armed air leaf
+  are byte-for-byte unaffected; `stepAttacks`' public signature is unchanged.
+- **`combat.ts` — B charge**: `startShotAttack` resolves `chargeMoveForBorgId` on any tier-1+
+  release and sets `BorgRuntime.meleeAnimStream` from its `animStreamRef` (reusing the exact same
+  renderer-bridge field the melee ladder sets — generalizing the hardcoded
+  `pl0615`/`pl0629`/`pl062a` → `"hit_react_s18"` `PREFERRED_LABELS` precedent in
+  `borgPresentationAssets.ts`, which now serves as the fallback for every borg WITHOUT a resolved
+  leaf instead of the only path). The charge leaf's damage record replaces the generic
+  `CHARGE_OR_SPECIAL` archetype ONLY when gated (`chargeDamageRecordSpread`): the leaf must have an
+  armed kind AND a resolved record AND that kind must have real entries in the borg's OWN hit
+  remap (`attackHitTableForBorgId(id).kinds`) — otherwise the existing archetype record stands.
+  Plain (tier-0) taps are untouched.
+- **Renderer**: `battleScene.ts`'s `playSlot` stream-ref bypass (previously gated to
+  `"melee"`/`"melee_alt"`) now also covers `"charge_shot"`, so a charged release's exact anim
+  stream flows through `loadClipByStreamRef` the same way melee does, falling back to the
+  existing `PREFERRED_LABELS`/pattern heuristic when the exact bank isn't in a borg's baked
+  `anim_index.json`.
+- New selfcheck asserts: `assertGRedChargeStreamUnresolvedKeepsFallback` (G RED's null charge leaf
+  keeps today's behavior), `assertArmedChargeLeafSetsExactAnimAndRecord` (scans the roster for a
+  fully-armed charge leaf — currently resolves to pl0209 — and asserts the exact anim stream ref
+  AND exact damage record land on release), `assertArmedAirBLeafUsesExactWindow` (scans for an
+  armed air-B leaf with a window DIFFERENT from the ground def — resolves to pl0200 Sword Knight,
+  5f exact vs 8f ground — and asserts the airborne swing's `meleeActive` length matches exactly),
+  `assertUnresolvedAirBAndChargeKeepTodaysBehavior` (pl0100, no resolved leaves either way, plus
+  logs the fleet coverage line via `airBChargeCoverage()`).
+- VALIDATED: `pnpm typecheck`, `packages/combat/dist/selfcheck.js`,
+  `scripts/selfcheck-1p-challenge.mjs`, `scripts/selfcheck-challenge-stages.mjs` all pass.
+- DERIVED vs TUNED: every number consumed by the two new resolvers (seed slot, air-seed slot,
+  armed kind, hit-bin window, reach, family damage record, playAnim group/slot) is DERIVED
+  end-to-end from the same DOL-emulation + hit-bin/damage-table sources as the ground melee ladder
+  — nothing new here is TUNED. The `b.cooldowns["meleeAirSwing"]` latch and the
+  `chargeDamageRecordSpread` remap gate are port-side bookkeeping/safety checks, not gameplay
+  values.
+
+---
+
 ## ★ Finish-line handoff (what's left, prioritized) — 2026-07-03
 
 The port is **playable end-to-end** (challenge verified) with every cleanly-derivable mechanic

@@ -223,13 +223,16 @@ export interface BorgRuntime {
    *  Transient bookkeeping, reset on every swing start; optional so external constructors
    *  (tests/fakes) don't need to provide it. */
   meleeHitUids?: string[];
-  /** The CURRENT melee swing's action-script playAnim target (mot.bin bank group/slot — a
-   *  DIFFERENT numbering axis than the action-script stream slot; see actionStreamData.ts's
-   *  header and the pl0615 charge_shot precedent in borgPresentationAssets.ts), when the
-   *  combo-ladder step resolved one (actionStreamData.ts ComboStep.animStreamRef). Set by
-   *  startMeleeAttack on every swing start (including the TUNED-fallback opener, which
-   *  clears it to null); renderers may use it to pick a per-combo-step clip instead of the
-   *  generic "melee"/"melee_alt" slot. Optional so external fakes self-heal to undefined. */
+  /** The CURRENT melee swing's (or charged release's) action-script playAnim target (mot.bin
+   *  bank group/slot — a DIFFERENT numbering axis than the action-script stream slot; see
+   *  actionStreamData.ts's header and the pl0615 charge_shot precedent in
+   *  borgPresentationAssets.ts), when the combo-ladder step / air-B leaf resolved one
+   *  (actionStreamData.ts ComboStep/ExactMoveLeaf.animStreamRef). Set by startMeleeAttack on
+   *  every swing start (including the TUNED-fallback opener, which clears it to null) AND by
+   *  startShotAttack on a charged release (chargeMoveForBorgId's leaf, or null on an
+   *  unresolved borg / a plain tap); renderers may use it to pick a per-swing/per-release clip
+   *  instead of the generic "melee"/"melee_alt"/"charge_shot" slot. Optional so external fakes
+   *  self-heal to undefined. */
   meleeAnimStream?: { group: number; slot: number } | null;
   /** Power Burst arm window (ROM +0x6fb), frames remaining. Y press edge sets this to
    *  BURST.ARM_WINDOW_FRAMES (6, DERIVED — `FUN_80069814` chunk_0009.c:113); decrements to 0

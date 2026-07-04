@@ -15,10 +15,11 @@ export interface BattleActorView {
   allyLockTarget: string | null;
   dashActiveFrames: number;
   chargeFrames: number;
-  /** The CURRENT melee swing's exact action-script anim target (mot.bin bank group/slot),
-   *  when combat.ts's combo-ladder step resolved one (@gf/combat ComboStep.animStreamRef via
-   *  actionStreamData.ts). Null/undefined when unresolved — battleScene falls back to the
-   *  existing generic melee/melee_alt slot heuristic. */
+  /** The CURRENT melee swing's (or charged release's) exact action-script anim target
+   *  (mot.bin bank group/slot), when combat.ts's combo-ladder step / air-B leaf / charge leaf
+   *  resolved one (@gf/combat actionStreamData.ts ComboStep/ExactMoveLeaf.animStreamRef).
+   *  Null/undefined when unresolved — battleScene falls back to the existing generic
+   *  melee/melee_alt/charge_shot slot heuristic. */
   meleeAnimStream: BorgRuntime["meleeAnimStream"];
 }
 

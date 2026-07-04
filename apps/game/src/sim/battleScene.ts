@@ -507,13 +507,18 @@ export class BattleScene {
   }
 
   private playSlot(actor: Actor, slot: AnimSlot, meleeAnimStream?: { group: number; slot: number } | null): void {
-    // Per-combo-step melee anim: the slot axis ("melee"/"melee_alt") stays constant across a
-    // whole combo chain, but a resolved stream ref should still swap the clip on every step.
-    // Track the last CLIP actually played (lastMeleeClipKey) separately from `current` so this
-    // case bypasses the plain slot-unchanged short-circuit below without disturbing every
-    // other slot's existing behavior.
-    const streamRef = (slot === "melee" || slot === "melee_alt") && meleeAnimStream ? meleeAnimStream : null;
-    const streamKey = streamRef ? `melee@g${streamRef.group}s${streamRef.slot}` : null;
+    // Per-combo-step melee anim (and, since the air-B/charge exact-data pass, charged
+    // releases): the slot axis ("melee"/"melee_alt"/"charge_shot") stays constant across a
+    // whole combo chain or charge, but a resolved stream ref should still swap the clip on
+    // every step/release. Track the last CLIP actually played (lastMeleeClipKey) separately
+    // from `current` so this case bypasses the plain slot-unchanged short-circuit below
+    // without disturbing every other slot's existing behavior. combat.ts sets
+    // BorgRuntime.meleeAnimStream for BOTH the melee ladder/air-B leaf AND a charged
+    // release's charge leaf (startMeleeAttack / startShotAttack respectively) — same field,
+    // reused per the renderer bridge's original design (borgPresentationAssets.ts doc).
+    const streamRef =
+      (slot === "melee" || slot === "melee_alt" || slot === "charge_shot") && meleeAnimStream ? meleeAnimStream : null;
+    const streamKey = streamRef ? `${slot}@g${streamRef.group}s${streamRef.slot}` : null;
     const clipKey = streamKey ?? slot;
     if (actor.current === slot && actor.lastMeleeClipKey === clipKey) return;
     if (!actor.mixer) {

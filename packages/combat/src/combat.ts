@@ -67,10 +67,16 @@ import {
   resolveLiveCommand,
   type ContextualBGates,
 } from "./commandDispatch.js";
-import { attackHitRecordsForKind, shotHitRadiusForBorgId } from "./attackHitData.js";
+import { attackHitRecordsForKind, attackHitTableForBorgId, shotHitRadiusForBorgId } from "./attackHitData.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
-import { comboLadderForBorgId, type ComboStep } from "./actionStreamData.js";
+import {
+  airBMoveForBorgId,
+  chargeMoveForBorgId,
+  comboLadderForBorgId,
+  type ComboStep,
+  type ExactMoveLeaf,
+} from "./actionStreamData.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
@@ -113,13 +119,16 @@ export function isInvincible(b: BorgRuntime): boolean {
 export function stepCooldowns(b: BorgRuntime): void {
   for (const k of Object.keys(b.cooldowns)) {
     const v = b.cooldowns[k] ?? 0;
-    // jumpHeld / switchLockHeld / allyLockHeld / hyperHeld / attackHeld / specialHeld are 0/1
+  // jumpHeld / switchLockHeld / allyLockHeld / hyperHeld / attackHeld / specialHeld are 0/1
     // press latches, boostFuel is a fuel gauge, chargeFrames / xChargeFrames are hold-charge
     // accumulators (hold-B shot charge and hold-X special charge respectively), comboStep is
-    // the current melee-chain index, and mashCount (ATK-017) is a press-edge COUNTER (not a
+    // the current melee-chain index, mashCount (ATK-017) is a press-edge COUNTER (not a
     // countdown timer) that combat.ts's mash-counting code owns entirely (increments on press
-    // edges during an active swing, resets on swing start) — none of these decay 1/frame like
-    // the countdown timers this loop drives, so all are skipped here.
+    // edges during an active swing, resets on swing start), and meleeAirSwing is a 0/1 latch
+    // set at swing start (startMeleeAttack) recording whether THIS swing began airborne with a
+    // resolved air-B leaf — read by stepAttacks' swing-resolution block for the swing's whole
+    // duration even if the borg lands mid-swing — none of these decay 1/frame like the
+    // countdown timers this loop drives, so all are skipped here.
     if (
       k === "jumpHeld" ||
       k === "boostFuel" ||
@@ -131,7 +140,8 @@ export function stepCooldowns(b: BorgRuntime): void {
       k === "chargeFrames" ||
       k === "xChargeFrames" ||
       k === "comboStep" ||
-      k === "mashCount"
+      k === "mashCount" ||
+      k === "meleeAirSwing"
     )
       continue;
     if (v > 0) b.cooldowns[k] = v - 1;
@@ -1457,6 +1467,14 @@ export function stepAttacks(
         const canFresh = (b.cooldowns["melee"] ?? 0) <= 0;
         if (canChain || canFresh) {
           const nextStep = canChain ? prevStep + 1 : 0;
+          // Air B (actionStreamData.ts, cached lookup): pressing B airborne with a resolved,
+          // ARMED (kind !== null) air-B leaf uses that leaf's exact window/reach/record for
+          // the whole swing instead of reusing the ground melee ladder — see
+          // airBMoveForBorgId's doc (a windup-only leaf, kind null, keeps today's ground-def
+          // reuse: there's no melee hit data to prefer over it). Grounded swings, or borgs
+          // without a resolved+armed air leaf, are unaffected.
+          const airLeaf = !b.grounded ? airBMoveForBorgId(b.borgId) : null;
+          const armedAirLeaf = airLeaf && airLeaf.kind !== null ? airLeaf : null;
           startMeleeAttack(
             b,
             meleeDef,
@@ -1467,7 +1485,10 @@ export function stepAttacks(
             // B-melee ladder is DERIVED end-to-end, THIS step's own window/reach/record
             // replace the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0. Null (borg has
             // no resolved ladder, or this step index isn't in it) keeps that TUNED fallback.
-            comboLadderForBorgId(b.borgId)?.[nextStep] ?? null,
+            // Skipped entirely when an armed air leaf is driving this swing (armedAirLeaf
+            // takes priority — see the param below).
+            armedAirLeaf ? null : comboLadderForBorgId(b.borgId)?.[nextStep] ?? null,
+            armedAirLeaf,
           );
           break;
         }
@@ -1532,6 +1553,12 @@ export function stepAttacks(
   // --- Resolve an active melee swing against enemies in reach ------------------------
   const meleeActive = b.cooldowns["meleeActive"] ?? 0;
   const comboStepForSwing = b.cooldowns["comboStep"] ?? 0;
+  // Air B (actionStreamData.ts, cached lookup): re-read the persisted latch (set once at
+  // swing start by startMeleeAttack, NOT re-derived from current b.grounded — a mid-swing
+  // landing must not swap this swing's data out from under it) to decide whether this ACTIVE
+  // swing should keep using the air leaf's exact reach/record instead of the ground ladder's.
+  const airExactForSwing =
+    meleeDef && (b.cooldowns["meleeAirSwing"] ?? 0) > 0 ? airBMoveForBorgId(b.borgId) : null;
   // Exact per-borg swing data (meleeExactData.ts, cached lookup): first-swing active-window
   // length, authored reach, and family damage record — the fallback for borgs/steps without a
   // resolved combo ladder.
@@ -1539,13 +1566,18 @@ export function stepAttacks(
   // Per-combo-step exact data (actionStreamData.ts, cached lookup): when the borg's B-melee
   // ladder is DERIVED end-to-end, THIS swing's step gets its OWN window/reach/record instead of
   // exactMelee's first-swing data. Null (no ladder, or this step index isn't in it) falls back
-  // to exactMelee, which itself falls back to the TUNED profile.
-  const exactStep = meleeDef ? comboLadderForBorgId(b.borgId)?.[comboStepForSwing] ?? null : null;
-  const meleeActiveLen = exactStep
-    ? exactStep.activeEnd - exactStep.activeStart + 1
-    : exactMelee
-      ? exactMelee.activeEnd - exactMelee.activeStart + 1
-      : meleeDef?.active ?? 0;
+  // to exactMelee, which itself falls back to the TUNED profile. Skipped when this swing is
+  // air-leaf-driven (airExactForSwing takes priority below).
+  const exactStep =
+    meleeDef && !airExactForSwing ? comboLadderForBorgId(b.borgId)?.[comboStepForSwing] ?? null : null;
+  const meleeActiveLen =
+    airExactForSwing?.activeStart != null && airExactForSwing.activeEnd != null
+      ? airExactForSwing.activeEnd - airExactForSwing.activeStart + 1
+      : exactStep
+        ? exactStep.activeEnd - exactStep.activeStart + 1
+        : exactMelee
+          ? exactMelee.activeEnd - exactMelee.activeStart + 1
+          : meleeDef?.active ?? 0;
   if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && STATE.MELEE_IFRAME_REFRESH_PER_FRAME) {
     b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
   }
@@ -1571,14 +1603,17 @@ export function stepAttacks(
       // frame, silently multiplying melee damage by the active-frame count.)
       if (b.meleeHitUids?.includes(o.uid)) continue;
       const d = distXZ(b.pos, o.pos);
-      // Authored reach (hit.bin record offset+extent): this step's own reach where the combo
-      // ladder resolved it, else the first-swing exact reach, else the TUNED profile range.
+      // Authored reach (hit.bin record offset+extent): the air leaf's own reach when this
+      // swing is air-driven, else this step's own reach where the ground combo ladder
+      // resolved it, else the first-swing exact reach, else the TUNED profile range.
       const meleeRange =
-        exactStep && exactStep.reach > 0
-          ? exactStep.reach
-          : exactMelee && exactMelee.reach > 0
-            ? exactMelee.reach
-            : meleeDef.range;
+        airExactForSwing && airExactForSwing.reach > 0
+          ? airExactForSwing.reach
+          : exactStep && exactStep.reach > 0
+            ? exactStep.reach
+            : exactMelee && exactMelee.reach > 0
+              ? exactMelee.reach
+              : meleeDef.range;
       if (d > meleeRange) continue;
       if (Math.abs(o.pos.y - b.pos.y) > meleeDef.yTolerance) continue;
       const to = normalize({ x: o.pos.x - b.pos.x, y: 0, z: o.pos.z - b.pos.z });
@@ -1588,10 +1623,14 @@ export function stepAttacks(
       const knockbackMult =
         meleeDef.knockbackMultiplier * (isFinisher && meleeDef.comboHits > 1 ? COMBO.FINISHER_KNOCKBACK_MULT : 1);
       // Exact family record for this swing (script-armed kind → hit record → family table):
-      // this step's own record where the combo ladder resolved it, else the first-swing exact
-      // record, else archetype record 1 for borgs without decoded data.
+      // the air leaf's own record when this swing is air-driven, else this step's own record
+      // where the ground combo ladder resolved it, else the first-swing exact record, else
+      // archetype record 1 for borgs without decoded data.
       const meleeRecord =
-        exactStep?.damageRecord ?? exactMelee?.damageRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
+        airExactForSwing?.damageRecord ??
+        exactStep?.damageRecord ??
+        exactMelee?.damageRecord ??
+        damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
       // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
       // instead of the attacker's facing vector (`fwd`) used here previously.
       const dealt = applyHit(
@@ -1647,19 +1686,34 @@ function startMeleeAttack(
   // replace the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0. Null (no ladder, or this
   // step index isn't in it) keeps that TUNED fallback.
   exactStep: ComboStep | null = null,
+  // Exact air-B leaf (actionStreamData.ts airBMoveForBorgId, ARMED — kind !== null — only;
+  // the caller filters windup-only leaves out before passing one in). Takes priority over
+  // exactStep/exactMelee for window+anim when present: an airborne swing plays its OWN
+  // action-script data, not the ground ladder's. Null keeps the existing ground-reuse
+  // behavior exactly (today's air-melee fallback).
+  airExact: ExactMoveLeaf | null = null,
 ): void {
   // Exact window: activeStart..activeEnd are anim-frame numbers (the ROM clocks the hitbox
   // against actor+0x1cdc); the port's state timer stands in for the anim clock 1:1 at 60Hz.
-  // A resolved ladder step uses its OWN exact window; otherwise chain steps keep the TUNED
-  // faster-startup scale of step 0's window (exactMelee / the profile default).
-  const baseStartup = exactStep ? exactStep.activeStart : exactMelee ? exactMelee.activeStart : meleeDef.startup;
-  const baseActive = exactStep
-    ? exactStep.activeEnd - exactStep.activeStart + 1
-    : exactMelee
-      ? exactMelee.activeEnd - exactMelee.activeStart + 1
-      : meleeDef.active;
+  // A resolved ladder step (or armed air leaf) uses its OWN exact window; otherwise chain
+  // steps keep the TUNED faster-startup scale of step 0's window (exactMelee / the profile
+  // default). airExact's activeStart/activeEnd are non-null here by construction (the caller
+  // only passes an ARMED leaf), but the `?? meleeDef.startup`-shaped fallback chain stays
+  // defensive against the type's nullability.
+  const baseStartup =
+    airExact?.activeStart ?? (exactStep ? exactStep.activeStart : exactMelee ? exactMelee.activeStart : meleeDef.startup);
+  const baseActive =
+    airExact?.activeStart != null && airExact.activeEnd != null
+      ? airExact.activeEnd - airExact.activeStart + 1
+      : exactStep
+        ? exactStep.activeEnd - exactStep.activeStart + 1
+        : exactMelee
+          ? exactMelee.activeEnd - exactMelee.activeStart + 1
+          : meleeDef.active;
   const startup =
-    comboStep > 0 && !exactStep ? Math.max(2, Math.round(baseStartup * COMBO.STEP_STARTUP_SCALE)) : baseStartup;
+    comboStep > 0 && !exactStep && !airExact
+      ? Math.max(2, Math.round(baseStartup * COMBO.STEP_STARTUP_SCALE))
+      : baseStartup;
   // The swing/lock must outlast the exact active window when it runs longer than the
   // TUNED profile duration.
   const duration = Math.max(meleeDef.duration, startup + baseActive + 2);
@@ -1691,10 +1745,16 @@ function startMeleeAttack(
   b.cooldowns["comboWindow"] = meleeDef.duration + meleeDef.comboWindowFrames;
   b.cooldowns["comboStep"] = comboStep;
   b.meleeHitUids = []; // fresh swing: everyone is hittable once again
-  // This step's action-script anim target (renderer bridge — see the BorgRuntime field doc);
-  // null when the ladder didn't resolve this step, which keeps the existing generic melee/
-  // melee_alt slot selection in borgPresentationAssets.ts unchanged.
-  b.meleeAnimStream = exactStep?.animStreamRef ?? null;
+  // This swing's action-script anim target (renderer bridge — see the BorgRuntime field doc);
+  // an armed air leaf takes priority (it's this swing's OWN data), else the ground ladder
+  // step, else null — which keeps the existing generic melee/melee_alt slot selection in
+  // borgPresentationAssets.ts unchanged.
+  b.meleeAnimStream = airExact?.animStreamRef ?? exactStep?.animStreamRef ?? null;
+  // Persisted latch (stepCooldowns skip-list): records that THIS swing is air-leaf-driven so
+  // stepAttacks' swing-resolution block (which re-reads exact data every active frame from
+  // b.cooldowns["comboStep"], not from this call's params) keeps using the air leaf's
+  // reach/record for the swing's whole duration, even if the borg lands mid-swing.
+  b.cooldowns["meleeAirSwing"] = airExact ? 1 : 0;
   // ATK-017 mash-counter scaffold: every new swing (opener or chained) resets the press-edge
   // counter to 0 — see the mash-counting block in stepAttacks for what increments it.
   b.cooldowns["mashCount"] = 0;
@@ -1914,11 +1974,21 @@ function startShotAttack(
   b.state = "attack";
   b.stateTime = 0;
   // Charged releases carry their own anim label: the charge-fire animation is a distinct
-  // clip in source (G RED: action-script stream g3 s27 arms beam kind 8 and plays anim
-  // group 3 slot 18 — the chest-beam hop; meleeAnimKinds.json bank 0x80366220). The
-  // renderer maps "charge_shot" per borg and falls back to the plain shoot clip.
+  // clip in source (action index 3's group-4 stream — see actionStreamData.ts
+  // chargeMoveForBorgId; G RED's leaf plays anim group 3 slot 18, the chest-beam hop, per
+  // meleeAnimKinds.json bank 0x80366220 — the borg's stream is windup-only, arming no kind,
+  // per the decode note's corrected reading). The renderer maps "charge_shot" per borg and
+  // falls back to the plain shoot clip.
   b.anim = chargeTier >= 1 ? "charge_shot" : "shoot";
-  out.push(...spawnProjectiles(b, p, shotDef, chargeTier, all));
+  // Exact charge leaf (actionStreamData.ts, cached lookup): generalizes the pl0615/pl0629/
+  // pl062a PREFERRED_LABELS hardcode in borgPresentationAssets.ts to every borg with a
+  // resolved leaf — set the same renderer bridge field startMeleeAttack uses for melee
+  // (BorgRuntime.meleeAnimStream), so loadClipByStreamRef fires for "charge_shot" too. Only
+  // meaningful on a charged release; a plain tap keeps this cleared so a stale charge stream
+  // ref never leaks into the next plain "shoot" anim.
+  const chargeLeaf = chargeTier >= 1 ? chargeMoveForBorgId(b.borgId) : null;
+  b.meleeAnimStream = chargeLeaf?.animStreamRef ?? null;
+  out.push(...spawnProjectiles(b, p, shotDef, chargeTier, all, chargeLeaf));
 }
 
 /** Per-tier charge scaling (tier 0 = all 1x). Damage mults come from the profile; the rest
@@ -1964,13 +2034,18 @@ function spawnProjectiles(
   shotDef: ShotActionDef,
   chargeTier = 0,
   all: BorgRuntime[] = [],
+  // Exact charge leaf (actionStreamData.ts chargeMoveForBorgId), resolved once by the caller
+  // (startShotAttack) for chargeTier>=1 releases. Threaded through to spawnProjectile so its
+  // damage record can replace the generic CHARGE_OR_SPECIAL archetype — see
+  // chargeDamageRecordSpread's gating doc.
+  chargeLeaf: ExactMoveLeaf | null = null,
 ): Projectile[] {
   const count = Math.max(1, Math.floor(shotDef.projectileCount));
   const projectiles: Projectile[] = [];
   for (let i = 0; i < count; i += 1) {
     const centered = count === 1 ? 0 : i - (count - 1) / 2;
     projectiles.push(
-      spawnProjectile(b, p, shotDef, centered * shotDef.spreadRadians, chargeTier, all),
+      spawnProjectile(b, p, shotDef, centered * shotDef.spreadRadians, chargeTier, all, chargeLeaf),
     );
   }
   return projectiles;
@@ -2006,6 +2081,7 @@ function spawnProjectile(
   yawOffset: number,
   chargeTier = 0,
   all: BorgRuntime[] = [],
+  chargeLeaf: ExactMoveLeaf | null = null,
 ): Projectile {
   const yaw = b.rotY + yawOffset;
   const fwd = { x: Math.sin(yaw), y: 0, z: Math.cos(yaw) };
@@ -2056,13 +2132,16 @@ function spawnProjectile(
     // stays subject to the play-area despawn; trace T6 remains the arbiter of the engine mechanism.
     ...(isPenetratingShot(p.id, chargeTier) ? { consumeOnHit: false } : {}),
     // DERIVED mapping (gauges.ts): normal shots are the light-hit archetype (record 0);
-    // charged releases hit like the charge/special archetype (record 2).
+    // charged releases hit like the charge/special archetype (record 2), UNLESS the exact
+    // charge leaf's own record resolved (chargeDamageRecordSpread below), in which case its
+    // damageRecord spread wins on top of this fallback index/no-op.
     damageRecordIndex:
       chargeTier >= 1 ? DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL : DAMAGE_RECORD_INDEX.SHOT,
     // EXACT per-borg record for plain shots (the ROM path: the borg's kind-0 hitbox record's
     // u16+0x04 indexes the FAMILY damage table bound at actor+0x27c — familyDamageData.ts).
-    // Charged releases keep the archetype until their kind (variant table) is wired.
-    ...(chargeTier === 0 ? shotFamilyRecordSpread(b.borgId) : {}),
+    // Charged releases prefer the exact charge-leaf record (chargeDamageRecordSpread) when the
+    // borg's remap actually carries it; otherwise they keep the CHARGE_OR_SPECIAL archetype.
+    ...(chargeTier === 0 ? shotFamilyRecordSpread(b.borgId) : chargeDamageRecordSpread(b.borgId, chargeLeaf)),
   };
 }
 
@@ -2074,6 +2153,22 @@ function shotFamilyRecordSpread(borgId: string): { damageRecord?: DamageRecord }
   if (!first) return {};
   const record = familyDamageRecordForBorg(borgId, first.damageRecordIndex);
   return record ? { damageRecord: record } : {};
+}
+
+/**
+ * Resolve a charged release's exact damage record from its charge leaf (actionStreamData.ts
+ * chargeMoveForBorgId), gated to ONLY apply when the leaf's kind has real records in the
+ * borg's OWN hit-remap (attackHitTableForBorgId(id).kinds) — task requirement: many charge
+ * streams are windup-only (kind null, e.g. G RED's chest-beam stream, whose real hit is a
+ * spawned projectile child, not this shot projectile) or arm a kind the borg's remap never
+ * populated, and in both cases the generic CHARGE_OR_SPECIAL archetype set above must stand.
+ * Empty spread whenever the gate fails or the leaf/record itself didn't resolve.
+ */
+function chargeDamageRecordSpread(borgId: string, chargeLeaf: ExactMoveLeaf | null): { damageRecord?: DamageRecord } {
+  if (!chargeLeaf || chargeLeaf.kind === null || !chargeLeaf.damageRecord) return {};
+  const remapHasKind = (attackHitTableForBorgId(borgId)?.kinds[String(chargeLeaf.kind)]?.length ?? 0) > 0;
+  if (!remapHasKind) return {};
+  return { damageRecord: chargeLeaf.damageRecord };
 }
 
 /** OBSERVED_WIKI: whether a borg's primary shot (B Shot, or B Charge when chargeTier>=1) is
