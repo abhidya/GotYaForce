@@ -86,6 +86,21 @@ Under all tested encodings/offsets, no exact or affine encoding exists for:
 - 141 of 432 byte columns are constant across all 198 files (structure padding or
   engine defaults).
 
+## Decomp-proven runtime float fields
+
+These fields are not proven by metadata correlation; they are proven by static runtime copy/read
+sites. `FUN_800562b8` copies them from the actor-data page (`actor+0x4ac`) to runtime actor
+fields, and `FUN_8000fc2c` consumes the copied camera fields in gameplay camera mode 1.
+
+| Source offset | Enc | Runtime field | Meaning | Evidence |
+| ------ | --- | ------- | ------- | ------- |
+| 0x0b8 | f32be | actor+0x88c | camera target-height slot 0 | `chunk_0007.c:171`, `chunk_0001.c:1257` |
+| 0x0bc | f32be | actor+0x890 | camera target-height slot 1 | `chunk_0007.c:172`, selected by actor+0x582 slot |
+| 0x0c0 | f32be | actor+0x894 | camera follow min-distance slot 0 | `chunk_0007.c:173`, `FUN_8000fc2c` clamp |
+| 0x0c4 | f32be | actor+0x898 | camera follow max-distance slot 0 | `chunk_0007.c:174`, `FUN_8000fc2c` clamp/init |
+| 0x0c8 | f32be | actor+0x89c | camera follow min-distance slot 1 | `chunk_0007.c:175`, selected by actor+0x582 slot |
+| 0x0cc | f32be | actor+0x8a0 | camera follow max-distance slot 1 | `chunk_0007.c:176`, selected by actor+0x582 slot |
+
 ## What is wired into the port
 
 - `scripts/gen-borg-actor-data-stats.mjs` now also emits `typeCode` (0x1a0) and
@@ -100,3 +115,6 @@ Under all tested encodings/offsets, no exact or affine encoding exists for:
   the "N/A" sentinel `0xff` is normalized to zero discrete air jumps. `parseJump`
   still supplies the flyer/non-flyer distinction and fallback behavior for borgs
   without actor-data records.
+- `scripts/gen-movement-physics.mjs` emits the decomp-proven camera block
+  (`0x0b8..0x0cc`) into `movementPhysics.json`, and `apps/game/src/sim/camera.ts`
+  consumes it through `cameraParamsForBorgId` for target height and follow-distance bands.

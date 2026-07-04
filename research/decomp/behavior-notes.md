@@ -1764,9 +1764,11 @@ unrelated to distance.
 the primary policy (constants via gen-camera-mode1-constants.mjs; FLOAT_80436af0/adc newly
 generated); FUN_8000cf28/FUN_8000d11c lock follow/transition ported against active
 actor+0x50c target state; FUN_8000c988 ported as the battle-entry approach replacing the instant
-snap (consumes 80/0.9/0x200/+4; exit-at-band is TUNED — ROM exit unknown). Still TUNED:
-per-borg band/height data (+0x894..+0x8A0, +0x6D0, +0x668 — trace band 466.5..504.9
-substitutes), multi-actor widen, wall-guard; correctives FUN_800101c8/FUN_8000fffc unported. Helpers:
+snap (consumes 80/0.9/0x200/+4; exit-at-band is TUNED — ROM exit unknown). Per-borg camera
+target-height/follow-distance slots (+0x88c/+0x890, +0x894..+0x8A0) are now read from
+pl####data.bin +0xb8..+0xcc through `cameraParamsForBorgId` and consumed by the browser
+camera. Still TUNED/unported: dynamic actor height/size terms (+0x6D0, +0x668, camera+0x354
+actor scale), multi-actor widen, wall-guard; correctives FUN_800101c8/FUN_8000fffc unported. Helpers:
 `zz_0045204_`/`zz_0045238_` @ 0x80045204/0x80045238 = sin/cos(BAM16); DOUBLE_80436ab0/ab8
 (0.5/3.0) are just the PPC frsqrte Newton iteration, not tunables.
 

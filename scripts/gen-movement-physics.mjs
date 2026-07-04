@@ -19,6 +19,11 @@
 // (chunk_0007.c:24-25). A matching bit blocks that status write; the shared bit 0x400 of
 // immunityB blocks BOTH aura types (contact-slow and contact-haste).
 //
+// Also reads the per-borg gameplay camera block (DERIVED, behavior-notes.md §ad /
+// chunk_0007.c:171-176): +0xb8/+0xbc copy to actor+0x88c/+0x890 target-height slots;
+// +0xc0/+0xc4 copy to actor+0x894/+0x898 follow min/max for camera slot 0;
+// +0xc8/+0xcc copy to actor+0x89c/+0x8a0 follow min/max for camera slot 1.
+//
 // Output: packages/combat/src/data/movementPhysics.json — consumed by
 // packages/combat/src/movementData.ts (the scale-reconciled runtime adapter).
 
@@ -51,6 +56,12 @@ const FIELDS = [
   ["gravityGround", 0x68],
   ["gravityFall", 0x6c],
   ["gravityC", 0x70],
+  ["cameraHeightSlot0", 0xb8],
+  ["cameraHeightSlot1", 0xbc],
+  ["cameraFollowMinSlot0", 0xc0],
+  ["cameraFollowMaxSlot0", 0xc4],
+  ["cameraFollowMinSlot1", 0xc8],
+  ["cameraFollowMaxSlot1", 0xcc],
 ];
 
 // u16 status-immunity masks — read separately from FIELDS (those are f32 read via

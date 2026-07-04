@@ -26,6 +26,9 @@
 //   - dash page (+0x58/+0x5c/+0x60/+0x64) — WIRED 2026-07-04 via dashPhysicsForBorgId
 //     (was mislabeled knockdownLaunch*; the dash states FUN_80061560/FUN_80063230 seed
 //     actor speed/accel/v-speed/duration verbatim from these fields).
+//   - gameplay camera block (+0xb8..+0xcc) — WIRED for browser camera follow: chunk_0007.c
+//     copies these to actor+0x88c..+0x8a0 and FUN_8000fc2c consumes them as target-height
+//     and follow-distance slots.
 
 import movementPhysicsData from "./data/movementPhysics.json" with { type: "json" };
 import { JUMP } from "./constants.js";
@@ -56,6 +59,18 @@ export interface BorgMovementPhysics {
   gravityFall: number;
   /** +0x70 — gravity slot C. */
   gravityC: number;
+  /** +0xb8 — camera target-height slot 0, copied to actor+0x88c. */
+  cameraHeightSlot0: number;
+  /** +0xbc — camera target-height slot 1, copied to actor+0x890. */
+  cameraHeightSlot1: number;
+  /** +0xc0 — camera follow min-distance slot 0, copied to actor+0x894. */
+  cameraFollowMinSlot0: number;
+  /** +0xc4 — camera follow max-distance slot 0, copied to actor+0x898. */
+  cameraFollowMaxSlot0: number;
+  /** +0xc8 — camera follow min-distance slot 1, copied to actor+0x89c. */
+  cameraFollowMinSlot1: number;
+  /** +0xcc — camera follow max-distance slot 1, copied to actor+0x8a0. */
+  cameraFollowMaxSlot1: number;
   /** +0xa8 — status-immunity mask A (u16), checked against a hit record's flagsA. A matching
    *  bit blocks that flagsA status write (grow/shrink). DERIVED, status-effects-decode-
    *  2026-07-04.md §B (chunk_0007.c:24-25). */
@@ -113,6 +128,29 @@ export function dashPhysicsForBorgId(
     vSpeed: data.dashVSpeed,
     durationFrames: Math.round(data.dashDurationFrames),
   };
+}
+
+export interface BorgCameraParams {
+  /** actor+0x582-selected slot; browser uses 0 until that actor byte is ported. */
+  slot: 0 | 1;
+  /** actor[+0x88c/+0x890] selected height target before dynamic actor+0x6d0 is added. */
+  targetHeight: number;
+  /** actor[+0x894/+0x89c] selected follow min-distance. */
+  followMin: number;
+  /** actor[+0x898/+0x8a0] selected follow max-distance. */
+  followMax: number;
+}
+
+/** DERIVED gameplay camera params (pl####data.bin +0xb8..+0xcc -> actor+0x88c..+0x8a0).
+ *  Returns null only for synthetic ids without a data page; the shipped roster has rows. */
+export function cameraParamsForBorgId(id: string, slot: 0 | 1 = 0): BorgCameraParams | null {
+  const data = movementPhysicsForBorgId(id);
+  if (!data) return null;
+  const targetHeight = slot === 0 ? data.cameraHeightSlot0 : data.cameraHeightSlot1;
+  const followMin = slot === 0 ? data.cameraFollowMinSlot0 : data.cameraFollowMinSlot1;
+  const followMax = slot === 0 ? data.cameraFollowMaxSlot0 : data.cameraFollowMaxSlot1;
+  if (!(targetHeight > 0) || !(followMin > 0) || !(followMax >= followMin)) return null;
+  return { slot, targetHeight, followMin, followMax };
 }
 
 /** DERIVED per-borg status-immunity masks (RAW page+0xa8/+0xaa u16), or all-zero (no

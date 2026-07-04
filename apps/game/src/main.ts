@@ -29,6 +29,7 @@ import {
   prepareImportedModel,
 } from "@gf/render";
 import {
+  cameraParamsForBorgId,
   emptyInput,
   type Battle,
   type BorgRuntime,
@@ -77,7 +78,7 @@ import { createBattleBootstrap } from "./sim/battleBootstrap.js";
 import { BattleScene } from "./sim/battleScene.js";
 import { BORG_CATALOG, DEFAULT_LEAD } from "./sim/borgCatalog.js";
 import { createBorgPresentationAssets } from "./sim/borgPresentationAssets.js";
-import { BattleCamera } from "./sim/camera.js";
+import { BattleCamera, type CameraFollowTarget } from "./sim/camera.js";
 import {
   activeBorgForPlayer,
   battleEnergyMaxima,
@@ -906,7 +907,7 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
   battleScene.sync(initialScene.actors, initialScene.projectiles, initialScene.focusUid);
   const focus = localFocusBorg();
   const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
-  battleCamera.snapTo(focus && focusPos ? { pos: focusPos, rotY: focus.rotY } : null);
+  battleCamera.snapTo(focus && focusPos ? cameraFollowTargetForBorg(focus, focusPos) : null);
   updateHud();
 }
 
@@ -1108,16 +1109,33 @@ function followCamera(): void {
     (activeTargetSim ? new THREE.Vector3(activeTargetSim.pos.x, activeTargetSim.pos.y, activeTargetSim.pos.z) : null);
   const primary =
     focus && target
-      ? {
-          pos: target,
-          rotY: focus.rotY,
+      ? cameraFollowTargetForBorg(focus, target, {
           lockTargetPos,
           lockTargetKey: activeTargetUid,
           lockCameraState: focus.targetLockState?.cameraState ?? 2,
-        }
+        })
       : null;
   const positions = battleLiveActorPositions(session.battle, (uid) => battleScene.positionOf(uid));
   battleCamera.update(primary, positions, session.stageBounds);
+}
+
+function cameraFollowTargetForBorg(
+  borg: BorgRuntime,
+  pos: THREE.Vector3,
+  lock?: Pick<CameraFollowTarget, "lockTargetPos" | "lockTargetKey" | "lockCameraState">,
+): CameraFollowTarget {
+  const cameraParams = cameraParamsForBorgId(borg.borgId);
+  if (!cameraParams) {
+    throw new Error(`Missing source camera params for ${borg.borgId}`);
+  }
+  return {
+    pos,
+    cameraParams,
+    rotY: borg.rotY,
+    lockTargetPos: lock?.lockTargetPos ?? null,
+    lockTargetKey: lock?.lockTargetKey ?? null,
+    lockCameraState: lock?.lockCameraState ?? 2,
+  };
 }
 
 function updateBattleDebugDataset(): void {

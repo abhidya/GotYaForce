@@ -59,7 +59,7 @@ import {
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, type DamageRecord } from "./gauges.js";
-import { dashPhysicsForBorgId, statusImmunityMasksForBorgId } from "./movementData.js";
+import { cameraParamsForBorgId, dashPhysicsForBorgId, statusImmunityMasksForBorgId } from "./movementData.js";
 import { actorVelocityScale, isFrozen, tierVelocityScale } from "./timescale.js";
 import { stepMovement } from "./movement.js";
 import {
@@ -715,6 +715,29 @@ function assertActorDataStatsBound(borgs: BorgStats[]): void {
   ) {
     throw new Error("[selfcheck] source borg stat verification has missing rows or HP mismatches");
   }
+}
+
+function assertSourceCameraParamsBound(): void {
+  const samples = [
+    ["pl0615", 180, 500, 600],
+    ["pl0f05", 170, 500, 600],
+    ["pl0d00", 200, 550, 600],
+    ["pl0000", 160, 450, 550],
+  ] as const;
+  for (const [id, height, min, max] of samples) {
+    const params = cameraParamsForBorgId(id);
+    if (!params) throw new Error(`[selfcheck] missing source camera params for ${id}`);
+    if (params.slot !== 0 || params.targetHeight !== height || params.followMin !== min || params.followMax !== max) {
+      throw new Error(
+        `[selfcheck] camera params mismatch for ${id}: got ${JSON.stringify(params)}, want slot0 height=${height} band=${min}..${max}`,
+      );
+    }
+  }
+  const gRedSlot1 = cameraParamsForBorgId("pl0615", 1);
+  if (!gRedSlot1 || gRedSlot1.slot !== 1 || gRedSlot1.targetHeight !== 180 || gRedSlot1.followMin !== 500 || gRedSlot1.followMax !== 600) {
+    throw new Error(`[selfcheck] camera slot1 params mismatch for pl0615: ${JSON.stringify(gRedSlot1)}`);
+  }
+  console.log("[selfcheck] source camera params bound from pl####data.bin +0xb8..+0xcc");
 }
 
 function assertLockRelativeControls(borgs: BorgStats[]): void {
@@ -3750,6 +3773,7 @@ export function main(): number {
   assertSourceSwitchLockDirections(borgs);
   assertAllyLockTargetsTeammate(borgs);
   assertActorDataStatsBound(borgs);
+  assertSourceCameraParamsBound();
   assertLockRelativeControls(borgs);
   assertProjectileVisualKinds(borgs);
   assertProjectilesCullOutsideStageFloor();

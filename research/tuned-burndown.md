@@ -9,7 +9,7 @@ intentional, documented simplification).
 ## Score
 
 - **TUNED markers remaining: 174**
-- DERIVED markers: 184
+- DERIVED markers: 185
 - Files with TUNED debt: 19
 
 ## TUNED markers by file
@@ -134,24 +134,24 @@ intentional, documented simplification).
 
 ### packages/combat/src/selfcheck.ts (18)
 
-- [ ] `packages/combat/src/selfcheck.ts:758` — // Dash speed/duration are per-borg page data now (+0x58/+0x64); fall back to the TUNED
-- [ ] `packages/combat/src/selfcheck.ts:1018` — // (activeEnd - activeStart + 1), NOT the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0's
-- [ ] `packages/combat/src/selfcheck.ts:1079` — * reached" bucket) must still combo via the pre-existing TUNED COMBO.STEP_STARTUP_SCALE path —
-- [ ] `packages/combat/src/selfcheck.ts:1091` — throw new Error(`[selfcheck] pl0100 should have a multi-hit TUNED combo profile: ${JSON.stringify(meleeDef)}`);
-- [ ] `packages/combat/src/selfcheck.ts:1116` — `[selfcheck] pl0100 TUNED-fallback combo never reached its finisher: maxStep=${maxStep}, comboHits=${meleeDef.comboHits}`,
-- [ ] `packages/combat/src/selfcheck.ts:1120` — throw new Error(`[selfcheck] pl0100 TUNED-fallback combo produced too few swings: ${swingStarts}`);
-- [ ] `packages/combat/src/selfcheck.ts:1123` — `[selfcheck] pl0100 (no resolved action-stream ladder) still chained to step ${maxStep} (${meleeDef.comboHits} hits) over ${swingStarts} swings via the TUNED pa
-- [ ] `packages/combat/src/selfcheck.ts:1188` — *      its TUNED profile hitRadius (35) — proof the resolved-kind path, not kind 0 or the
-- [ ] `packages/combat/src/selfcheck.ts:1213` — `[selfcheck] pl0000's resolved-kind (1) shot radius should be 10 (kind-0 would be 5, profile TUNED is 35): got ${ninjaRadius}`,
-- [ ] `packages/combat/src/selfcheck.ts:1228` — // hitRadius reflects the resolved kind-1 record (10), not the profile's TUNED 35 nor kind 0's 5.
-- [ ] `packages/combat/src/selfcheck.ts:1267` — * the per-player weapon bank instead (today's TUNED sprite/mesh stand-in stays exact).
-- [ ] `packages/combat/src/selfcheck.ts:1715` — `[selfcheck] X-special coverage: ${coverage.xResolved}/${coverage.rosterSize} borgs resolve an exact X leaf; unresolved borgs (e.g. pl0100) keep today's TUNED b
-- [ ] `packages/combat/src/selfcheck.ts:1733` — // exact HIT-record frame window (meleeExactData) over the TUNED profile timing, so the
-- [ ] `packages/combat/src/selfcheck.ts:1896` — // An id with no generated profile entry must resolve to the generic TUNED defaults:
-- [ ] `packages/combat/src/selfcheck.ts:2276` — // Cover the exact HIT-record window when it runs longer than the TUNED profile timing.
-- [ ] `packages/combat/src/selfcheck.ts:2948` — // startMeleeAttack; constants.ts MELEE.ENGAGE_* and MELEE.LUNGE_* (all TUNED — the ROM's
-- [ ] `packages/combat/src/selfcheck.ts:3166` — // hold/release (OBSERVED_WIKI rows in data/borgMoveProperties.json; TUNED tiers in combat.ts
-- [ ] `packages/combat/src/selfcheck.ts:3333` — *  scaled by the reached tier (X_CHARGE mirrors the B-charge tiers, TUNED), resets the
+- [ ] `packages/combat/src/selfcheck.ts:781` — // Dash speed/duration are per-borg page data now (+0x58/+0x64); fall back to the TUNED
+- [ ] `packages/combat/src/selfcheck.ts:1041` — // (activeEnd - activeStart + 1), NOT the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0's
+- [ ] `packages/combat/src/selfcheck.ts:1102` — * reached" bucket) must still combo via the pre-existing TUNED COMBO.STEP_STARTUP_SCALE path —
+- [ ] `packages/combat/src/selfcheck.ts:1114` — throw new Error(`[selfcheck] pl0100 should have a multi-hit TUNED combo profile: ${JSON.stringify(meleeDef)}`);
+- [ ] `packages/combat/src/selfcheck.ts:1139` — `[selfcheck] pl0100 TUNED-fallback combo never reached its finisher: maxStep=${maxStep}, comboHits=${meleeDef.comboHits}`,
+- [ ] `packages/combat/src/selfcheck.ts:1143` — throw new Error(`[selfcheck] pl0100 TUNED-fallback combo produced too few swings: ${swingStarts}`);
+- [ ] `packages/combat/src/selfcheck.ts:1146` — `[selfcheck] pl0100 (no resolved action-stream ladder) still chained to step ${maxStep} (${meleeDef.comboHits} hits) over ${swingStarts} swings via the TUNED pa
+- [ ] `packages/combat/src/selfcheck.ts:1211` — *      its TUNED profile hitRadius (35) — proof the resolved-kind path, not kind 0 or the
+- [ ] `packages/combat/src/selfcheck.ts:1236` — `[selfcheck] pl0000's resolved-kind (1) shot radius should be 10 (kind-0 would be 5, profile TUNED is 35): got ${ninjaRadius}`,
+- [ ] `packages/combat/src/selfcheck.ts:1251` — // hitRadius reflects the resolved kind-1 record (10), not the profile's TUNED 35 nor kind 0's 5.
+- [ ] `packages/combat/src/selfcheck.ts:1290` — * the per-player weapon bank instead (today's TUNED sprite/mesh stand-in stays exact).
+- [ ] `packages/combat/src/selfcheck.ts:1738` — `[selfcheck] X-special coverage: ${coverage.xResolved}/${coverage.rosterSize} borgs resolve an exact X leaf; unresolved borgs (e.g. pl0100) keep today's TUNED b
+- [ ] `packages/combat/src/selfcheck.ts:1756` — // exact HIT-record frame window (meleeExactData) over the TUNED profile timing, so the
+- [ ] `packages/combat/src/selfcheck.ts:1919` — // An id with no generated profile entry must resolve to the generic TUNED defaults:
+- [ ] `packages/combat/src/selfcheck.ts:2299` — // Cover the exact HIT-record window when it runs longer than the TUNED profile timing.
+- [ ] `packages/combat/src/selfcheck.ts:2971` — // startMeleeAttack; constants.ts MELEE.ENGAGE_* and MELEE.LUNGE_* (all TUNED — the ROM's
+- [ ] `packages/combat/src/selfcheck.ts:3189` — // hold/release (OBSERVED_WIKI rows in data/borgMoveProperties.json; TUNED tiers in combat.ts
+- [ ] `packages/combat/src/selfcheck.ts:3356` — *  scaled by the reached tier (X_CHARGE mirrors the B-charge tiers, TUNED), resets the
 
 ### packages/combat/src/ai.ts (10)
 
@@ -231,7 +231,7 @@ intentional, documented simplification).
 
 ### packages/combat/src/movementData.ts (1)
 
-- [ ] `packages/combat/src/movementData.ts:103` — *  null for ids without a data page (callers fall back to the TUNED DASH block). Pages with
+- [ ] `packages/combat/src/movementData.ts:118` — *  null for ids without a data page (callers fall back to the TUNED DASH block). Pages with
 
 ### packages/combat/src/moveRuntime.ts (1)
 

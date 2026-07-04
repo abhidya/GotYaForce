@@ -14,8 +14,10 @@
 //   state 4 = `FUN_8000d11c` (transition), state 5 = `FUN_8000d318` (actor+0x7c9 special).
 // - The PRIMARY follow policy ported here is state 2 (`FUN_8000cdc0` @ 0x8000cdc0 plus the
 //   shared interest/distance update `FUN_8000fc2c` @ 0x8000fc2c):
-//     1. interest.xz = actor pos (+0x20/+0x28); interest.y = (goalY + prevInterestY) * 0.5
-//        (FLOAT_80436ac4) where goalY = actorY + per-borg height terms (+0x6d0, +0x88c).
+//     1. camera+0x350 eases toward the selected per-borg height slot (+0x88c/+0x890);
+//        interest.xz = actor pos (+0x20/+0x28); interest.y = (actorY + camera+0x350 +
+//        prevInterestY + actor+0x6d0) * 0.5 (FLOAT_80436ac4; actor+0x6d0 dynamic term
+//        is still trace-pending).
 //     2. trail dir = horizontal (prevGoalEye - interest); if |dir| <= FLOAT_80436ad8 it is
 //        rebuilt from a BAM16 heading as (sin, 0, cos) (`FUN_800452e4` @ 0x800452e4).
 //     3. distance = horizontal |prevGoalEye - actorPos| clamped to a per-borg [min, max]
@@ -33,9 +35,9 @@
 //   toward a cap, eye = (4 * prevEye + interest + trail * distance) / 5.
 //
 // Honest gaps (kept TUNED, marked below):
-// - Per-borg camera data is not extracted: min/max follow distances (actor +0x894/+0x898),
-//   height offsets (+0x88c/+0x6d0), and the mode-2 height cap (10 * actor+0x668). The port
-//   substitutes the ram-trace band/offset (§3.1) for those values.
+// - Per-borg camera data (+0x88c/+0x890, +0x894..+0x8a0) is wired from pl####data.bin
+//   through @gf/combat. Dynamic actor height/size terms (+0x6d0, +0x668, camera+0x354 actor
+//   scale) remain trace-pending, so the browser currently applies the raw page values.
 // - Lock-on states 3/4 (`FUN_8000cf28`/`FUN_8000d11c`) are ported when the sim provides
 //   actor+0x50c lock target state.
 // - The corrective pitch clamp / distance re-clamp passes (`FUN_800101c8` @ 0x800101c8,
@@ -46,6 +48,7 @@
 //   policy once its distance decays into the follow band (TUNED exit).
 
 import * as THREE from "three";
+import type { BorgCameraParams } from "@gf/combat";
 import {
   CAMERA_MODE1_DISTANCE_DECAY,
   CAMERA_MODE1_EYE_BLEND_DENOMINATOR,
@@ -62,6 +65,8 @@ import {
 export interface CameraFollowTarget {
   /** World position to frame (typically the local player's active borg). */
   pos: THREE.Vector3;
+  /** Source camera fields copied from pl####data.bin to actor+0x88c..+0x8a0. */
+  cameraParams: BorgCameraParams;
   /** Facing yaw (radians). DERIVED role: only the degenerate-trail fallback uses it —
    * FUN_800452e4 rebuilds the trail from a BAM16 heading; mode-0 init (FUN_8000c660) seats
    * the camera behind the actor at heading - 0x8000. */
@@ -81,19 +86,10 @@ export interface StageBoundsLike {
   maxZ: number;
 }
 
-/** DERIVED-but-approximate: ram-trace-analysis.md §3.1 — camera sat 60 world units above the
- * tracked player. In the ROM this is per-borg data (actor +0x6d0 / +0x88c eased into
- * camera+0x350, FUN_8000fc2c); the flat 60 stands in until that data is extracted. */
-export const CAMERA_TARGET_Y_OFFSET_DERIVED = 60;
-
-/** DERIVED-but-approximate: ram-trace-analysis.md §3.1 — horizontal camera-to-player distance
- * measured 466.5 and 504.9 world units across the only two sampled frames (mean ~485). The
- * §ad decomp shows the ROM clamps distance to a per-borg [min, max] band (FUN_8000fc2c,
- * actor +0x894/+0x898 × camera+0x354) rather than fixing it; the port uses the two trace
- * samples as the band until per-borg data is extracted. */
-export const CAMERA_BASE_DISTANCE_DERIVED = 485;
-const CAMERA_FOLLOW_MIN_DISTANCE_TRACE = 466.5;
-const CAMERA_FOLLOW_MAX_DISTANCE_TRACE = 504.9;
+/** Explicit legacy-only trace values kept behind `legacyApproximation`. Default camera follow
+ * now consumes per-borg pl####data.bin camera params instead. */
+const LEGACY_CAMERA_TARGET_Y_OFFSET_TRACE = 60;
+const LEGACY_CAMERA_BASE_DISTANCE_TRACE = 485;
 
 /** DERIVED: mode init/follow writes camera+0x70 = 0x600 (FUN_8000c660, FUN_8000cdc0). */
 export const CAMERA_MODE_INIT_PITCH_BAM_DERIVED = 0x600;
@@ -186,6 +182,8 @@ export class BattleCamera {
   private readonly approachTrail = new THREE.Vector3();
   private approachDistance = 0;
   private approachEyeY = 0;
+  /** Source camera+0x350: selected per-borg target-height slot, eased every frame. */
+  private sourceHeightOffset = 0;
   /** Internal camera+0x2e6 state. Combat seeds retarget/loss requests; camera advances it. */
   private sourceCameraState: 2 | 3 | 4 = 2;
   private lastLockTargetKey: string | null = null;
@@ -196,6 +194,7 @@ export class BattleCamera {
     this.approachActive = false;
     this.approachDistance = 0;
     this.approachEyeY = 0;
+    this.sourceHeightOffset = 0;
     this.sourceCameraState = 2;
     this.lastLockTargetKey = null;
     if (!primary) {
@@ -204,14 +203,15 @@ export class BattleCamera {
     }
 
     const { camera, controlsTarget } = this.opts;
-    _focus.set(primary.pos.x, primary.pos.y + CAMERA_TARGET_Y_OFFSET_DERIVED, primary.pos.z);
+    this.sourceHeightOffset = primary.cameraParams.targetHeight;
+    _focus.set(primary.pos.x, primary.pos.y + this.sourceHeightOffset, primary.pos.z);
     _trail.set(-Math.sin(primary.rotY), 0, -Math.cos(primary.rotY));
     if (_trail.lengthSq() <= MODE1_TRAIL_EPSILON_DERIVED * MODE1_TRAIL_EPSILON_DERIVED) {
       _trail.set(0, 0, -1);
     } else {
       _trail.normalize();
     }
-    const distance = CAMERA_FOLLOW_MAX_DISTANCE_TRACE;
+    const distance = primary.cameraParams.followMax;
     controlsTarget.copy(_focus);
     this.goalEye.set(
       _focus.x + _trail.x * distance,
@@ -233,18 +233,25 @@ export class BattleCamera {
     }
     const { camera, controlsTarget } = this.opts;
     const focusBase = primary?.pos ?? _center.set(0, 80, 0);
-    _focus.set(focusBase.x, focusBase.y + CAMERA_TARGET_Y_OFFSET_DERIVED, focusBase.z);
 
     if (!primary) {
+      _focus.set(focusBase.x, focusBase.y + LEGACY_CAMERA_TARGET_Y_OFFSET_TRACE, focusBase.z);
       controlsTarget.copy(mode1InterestTarget(controlsTarget, _focus));
       return;
     }
 
+    if (!this.initialized) {
+      this.sourceHeightOffset = primary.cameraParams.targetHeight;
+    } else {
+      this.sourceHeightOffset =
+        (primary.cameraParams.targetHeight + this.sourceHeightOffset) * MODE1_INTEREST_Y_BLEND_DERIVED;
+    }
+    _focus.set(focusBase.x, focusBase.y + this.sourceHeightOffset, focusBase.z);
+
     const extraHeight = 0;
-    // DERIVED structure (FUN_8000fc2c): distance clamps to a [min, max] band. Band values are
-    // the two ram-trace samples (per-borg ROM data not extracted).
-    const followMin = CAMERA_FOLLOW_MIN_DISTANCE_TRACE;
-    const followMax = CAMERA_FOLLOW_MAX_DISTANCE_TRACE;
+    // DERIVED (FUN_8000fc2c): distance clamps to the selected per-borg [min, max] band.
+    const followMin = primary.cameraParams.followMin;
+    const followMax = primary.cameraParams.followMax;
 
     if (!this.initialized) {
       this.initialized = true;
@@ -482,7 +489,7 @@ export class BattleCamera {
   ): void {
     const { camera, controlsTarget } = this.opts;
     const focusBase = primary?.pos ?? _center.set(0, 80, 0);
-    _focus.set(focusBase.x, focusBase.y + CAMERA_TARGET_Y_OFFSET_DERIVED, focusBase.z);
+    _focus.set(focusBase.x, focusBase.y + LEGACY_CAMERA_TARGET_Y_OFFSET_TRACE, focusBase.z);
 
     if (!primary) {
       controlsTarget.copy(mode1InterestTarget(controlsTarget, _focus));
@@ -499,7 +506,7 @@ export class BattleCamera {
       spread * MULTI_ACTOR_ZOOM_TUNED.spreadToHeightGain,
     );
 
-    const distance = CAMERA_BASE_DISTANCE_DERIVED + extraDistance;
+    const distance = LEGACY_CAMERA_BASE_DISTANCE_TRACE + extraDistance;
     const pitchSin = Math.sin(CAMERA_PITCH_RADIANS_DERIVED);
     const pitchCos = Math.cos(CAMERA_PITCH_RADIANS_DERIVED);
     const horizontalDistance = distance * pitchCos;
