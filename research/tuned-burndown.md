@@ -8,99 +8,240 @@ intentional, documented simplification).
 
 ## Score
 
-- **TUNED markers remaining: 72**
-- DERIVED markers: 61
-- Files with TUNED debt: 6
+- **TUNED markers remaining: 174**
+- DERIVED markers: 184
+- Files with TUNED debt: 19
 
 ## TUNED markers by file
 
-### packages/combat/src/constants.ts (45)
+### packages/combat/src/constants.ts (57)
 
 - [ ] `packages/combat/src/constants.ts:3` — // What is DERIVED from the decomp vs. TUNED:
-- [ ] `packages/combat/src/constants.ts:10` — //   - Movement gravity/ranges/cooldowns and knockback magnitudes remain TUNED. Combat HP
-- [ ] `packages/combat/src/constants.ts:43` — //     is always 0 for now (mechanism DERIVED, values TUNED-absent).
-- [ ] `packages/combat/src/constants.ts:45` — //     HITSTUN below) remains entirely TUNED — `zz_00300bc_` only ever computes/stores a direction,
-- [ ] `packages/combat/src/constants.ts:49` — //   - LOCK.RANGE/CONE (manual lock-on acquisition): TUNED, CHECKED CLOSED (2026-07-01,
-- [ ] `packages/combat/src/constants.ts:53` — //   - Full TUNED-constants audit (2026-07-01, behavior-notes.md s4s): every remaining TUNED field
-- [ ] `packages/combat/src/constants.ts:62` — //     MELEE.HITSTUN/SHOT.HITSTUN stay TUNED rather than silently becoming 60 — porting that number
-- [ ] `packages/combat/src/constants.ts:81` — //     remain TUNED: s4u identifies WHICH handler is Likely each state family but the actual frame
-- [ ] `packages/combat/src/constants.ts:99` — /** Spawn (deploy) invincibility, frames. TUNED — brief protection on auto-spawn. */
-- [ ] `packages/combat/src/constants.ts:110` — * (-16.9, -14.1)). BASE/PER_STAT are the old TUNED values scaled 4x so speed-6 hits the
-- [ ] `packages/combat/src/constants.ts:111` — * measured 22.0 while preserving the TUNED stat spread — the BASE/PER_STAT split itself is
-- [ ] `packages/combat/src/constants.ts:112` — * still TUNED (one data point can't pin two constants; capture a different-speed borg to
-- [ ] `packages/combat/src/constants.ts:122` — * Acceleration toward target velocity (units/frame^2). TUNED-rescaled 4x alongside the
-- [ ] `packages/combat/src/constants.ts:126` — /** Deceleration when no input (units/frame^2). TUNED-rescaled 4x (see ACCEL). */
-- [ ] `packages/combat/src/constants.ts:134` — * Initial upward velocity of a jump (units/frame). TUNED — audited 2026-07-01 (s4s), not
-- [ ] `packages/combat/src/constants.ts:140` — /** Gravity pulling Y down (units/frame^2). TUNED — audited 2026-07-01 (s4s), not findable. */
-- [ ] `packages/combat/src/constants.ts:156` — * Dash/step impulse speed (units/frame). TUNED — audited 2026-07-01 (s4s): every non-60.0
-- [ ] `packages/combat/src/constants.ts:162` — * TUNED-rescaled 4x (2026-07-01) alongside the DERIVED ground-speed anchor in MOVE — a
-- [ ] `packages/combat/src/constants.ts:163` — * dash must clearly outpace the measured 22.0 u/f walk. Absolute value still TUNED;
-- [ ] `packages/combat/src/constants.ts:167` — /** Dash duration (frames). TUNED — see SPEED note; no dash state found to time. */
-- [ ] `packages/combat/src/constants.ts:169` — /** Invincibility frames granted by a dash/step (dodge). TUNED — see SPEED note. */
-- [ ] `packages/combat/src/constants.ts:171` — /** Cooldown before another dash (frames). TUNED — see SPEED note. */
-- [ ] `packages/combat/src/constants.ts:176` — /** Reach of a melee swing (XZ units). TUNED. */
-- [ ] `packages/combat/src/constants.ts:186` — /** Cooldown after a swing (frames). TUNED — audited 2026-07-01 (s4s), not findable: the
-- [ ] `packages/combat/src/constants.ts:194` — * Reaction LENGTH after a confirmed melee stagger (frames). Still TUNED — the original's
-- [ ] `packages/combat/src/constants.ts:206` — /** Knockback speed imparted (units/frame). TUNED — s4p derived knockback DIRECTION fully
-- [ ] `packages/combat/src/constants.ts:208` — *  zz_00300bc_ only ever writes angle fields, never a force/velocity. Magnitude stays TUNED. */
-- [ ] `packages/combat/src/constants.ts:213` — /** Projectile speed (units/frame). TUNED. */
-- [ ] `packages/combat/src/constants.ts:230` — /** Reaction LENGTH after a confirmed shot stagger (frames). Still TUNED (animation-gated in
-- [ ] `packages/combat/src/constants.ts:236` — /** Knockback imparted (units/frame). TUNED — see MELEE.KNOCKBACK note; direction is DERIVED
-- [ ] `packages/combat/src/constants.ts:243` — * Melee combo chain scaling, all TUNED. WHICH borgs chain (and for how many hits) comes from
-- [ ] `packages/combat/src/constants.ts:251` — /** Chained swings start up faster than the opener (multiplier on melee startup). TUNED. */
-- [ ] `packages/combat/src/constants.ts:253` — /** Extra knockback on the chain's final hit, which also forces a knockdown. TUNED. */
-- [ ] `packages/combat/src/constants.ts:259` — * Hold-B charge shot scaling, all TUNED (same convention as COMBO above: profile data selects
-- [ ] `packages/combat/src/constants.ts:277` — /** Special (X) damage multiplier over a melee/shot hit. TUNED. */
-- [ ] `packages/combat/src/constants.ts:287` — /** Reaction LENGTH after a confirmed special-hit stagger (frames). Still TUNED (animation-
-- [ ] `packages/combat/src/constants.ts:359` — * frames slot 23 stays active) is still TUNED — see MELEE.DURATION-adjacent notes below.
-- [ ] `packages/combat/src/constants.ts:362` — /** Knockdown (down) lie-time before the wake-up i-frames kick in (frames). TUNED — s4u
-- [ ] `packages/combat/src/constants.ts:367` — /** Death state duration before the borg is removed / next deploys (frames). TUNED — see
-- [ ] `packages/combat/src/constants.ts:377` — * TUNED — and CHECKED CLOSED, not an open TODO (2026-07-01, behavior-notes.md s4q). A
-- [ ] `packages/combat/src/constants.ts:387` — /** Lock-on cone half-angle (radians) — must be "in front" to acquire. TUNED (see note above). */
-- [ ] `packages/combat/src/constants.ts:393` — * AI desired engage distance for melee borgs (XZ units). TUNED — audited 2026-07-01 (s4s):
-- [ ] `packages/combat/src/constants.ts:400` — /** AI desired engage distance for ranged borgs. TUNED — see MELEE_RANGE note. */
-- [ ] `packages/combat/src/constants.ts:402` — /** Slack around the desired range before AI stops advancing. TUNED — see MELEE_RANGE note. */
-- [ ] `packages/combat/src/constants.ts:404` — /** AI re-evaluates its target every N frames. TUNED — see MELEE_RANGE note. */
+- [ ] `packages/combat/src/constants.ts:48` — //     is always 0 for now (mechanism DERIVED, values TUNED-absent).
+- [ ] `packages/combat/src/constants.ts:52` — //     multiplier. Hit-reaction LENGTHS below remain TUNED because the original is animation-
+- [ ] `packages/combat/src/constants.ts:57` — //   - Full TUNED-constants audit (2026-07-01, behavior-notes.md s4s): every remaining TUNED field
+- [ ] `packages/combat/src/constants.ts:66` — //     MELEE.HITSTUN/SHOT.HITSTUN stay TUNED rather than silently becoming 60 — porting that number
+- [ ] `packages/combat/src/constants.ts:85` — //     remain TUNED: s4u identifies WHICH handler is Likely each state family but the actual frame
+- [ ] `packages/combat/src/constants.ts:103` — /** Spawn (deploy) invincibility, frames. TUNED — brief protection on auto-spawn. */
+- [ ] `packages/combat/src/constants.ts:107` — * "landing" MovementContext window after `onLand` (movement.ts), frames. TUNED — a port-side
+- [ ] `packages/combat/src/constants.ts:131` — /** Flight horizontal speed is a touch faster than ground. TUNED (ROM flight = gravity
+- [ ] `packages/combat/src/constants.ts:135` — * Acceleration toward target velocity (units/frame^2). TUNED stand-in for the ROM's
+- [ ] `packages/combat/src/constants.ts:140` — /** Deceleration when no input (units/frame^2). TUNED stand-in for the ROM's ×0.98/frame
+- [ ] `packages/combat/src/constants.ts:162` — *  TUNED (ROM flight = gravity-coeff-0, no thrust constant exists); rescaled with the
+- [ ] `packages/combat/src/constants.ts:165` — /** Max upward speed under boost flight (units/frame). TUNED, rescaled with the migration. */
+- [ ] `packages/combat/src/constants.ts:180` — * Ninja 40 u/f ×60f). Real borgs never hit these TUNED fallback values.
+- [ ] `packages/combat/src/constants.ts:185` — /** Invincibility frames granted by a dash/step (dodge). TUNED — see SPEED note. */
+- [ ] `packages/combat/src/constants.ts:187` — /** Cooldown before another dash (frames). TUNED — see SPEED note. */
+- [ ] `packages/combat/src/constants.ts:192` — /** Reach of a melee swing (XZ units). TUNED. */
+- [ ] `packages/combat/src/constants.ts:202` — /** Cooldown after a swing (frames). TUNED — audited 2026-07-01 (s4s), not findable: the
+- [ ] `packages/combat/src/constants.ts:210` — * Reaction LENGTH after a confirmed melee stagger (frames). Still TUNED — the original's
+- [ ] `packages/combat/src/constants.ts:233` — * TUNED — do NOT promote to DERIVED: the ROM threshold FLOAT_8043762c that flips the cursor
+- [ ] `packages/combat/src/constants.ts:243` — * Vertical tolerance of the ENGAGE window (units). TUNED — intentionally wider than the
+- [ ] `packages/combat/src/constants.ts:251` — * a swing's startup+active frames (cooldowns["meleeLunge"] window). TUNED — the ROM carries
+- [ ] `packages/combat/src/constants.ts:263` — * window to floor(LUNGE_MAX_DIST / LUNGE_SPEED) frames. TUNED, asset-anchored: the exported
+- [ ] `packages/combat/src/constants.ts:270` — * the attacker closes into reach without overrunning through the target. TUNED.
+- [ ] `packages/combat/src/constants.ts:276` — /** Projectile speed (units/frame). TUNED — the ROM's per-muzzle speed comes from the weapon-
+- [ ] `packages/combat/src/constants.ts:285` — *  TUNED 40 together with the owner-liveness despawn (zz_00840b8_, chunk_0012.c:3216) and
+- [ ] `packages/combat/src/constants.ts:289` — *  separate TUNED values owned by that dataset; this constant is the default/fallback. */
+- [ ] `packages/combat/src/constants.ts:291` — /** Homing turn rate toward lockTarget (radians/frame); 0 = straight. TUNED magnitude — the
+- [ ] `packages/combat/src/constants.ts:306` — /** Reaction LENGTH after a confirmed shot stagger (frames). Still TUNED (animation-gated in
+- [ ] `packages/combat/src/constants.ts:335` — /** TUNED vertical pop applied ONLY on forced knockdowns (combo finishers/launch hits) so
+- [ ] `packages/combat/src/constants.ts:357` — *  TUNED (30 degrees) until that float is dumped. */
+- [ ] `packages/combat/src/constants.ts:359` — /** Speed floor below which the per-frame steer is skipped entirely. TUNED epsilon — replaces
+- [ ] `packages/combat/src/constants.ts:372` — * TUNED — the ROM's real muzzle world position comes from the per-muzzle weapon-param table
+- [ ] `packages/combat/src/constants.ts:375` — * Per-borg TUNED overrides in data/actionProfiles.json (muzzleForwardOffset/muzzleYOffset)
+- [ ] `packages/combat/src/constants.ts:388` — * scale for all-at-once cells. TUNED — the ROM's real rate float lives at actor+0x768
+- [ ] `packages/combat/src/constants.ts:394` — * TUNED constant rather than a guessed DERIVED value.
+- [ ] `packages/combat/src/constants.ts:423` — * Melee combo chain scaling, all TUNED. WHICH borgs chain (and for how many hits) comes from
+- [ ] `packages/combat/src/constants.ts:431` — /** Chained swings start up faster than the opener (multiplier on melee startup). TUNED. */
+- [ ] `packages/combat/src/constants.ts:433` — /** Extra knockback on the chain's final hit, which also forces a knockdown. TUNED. */
+- [ ] `packages/combat/src/constants.ts:439` — * Hold-B charge shot scaling, all TUNED (same convention as COMBO above: profile data selects
+- [ ] `packages/combat/src/constants.ts:446` — // TUNED-visual (2026-07-04 playtest feedback): a full charge (G Buster class) previously
+- [ ] `packages/combat/src/constants.ts:451` — // these stay TUNED multipliers over the borg's own base radius until that mapping lands.
+- [ ] `packages/combat/src/constants.ts:463` — /** Special (X) damage multiplier over a melee/shot hit. TUNED. */
+- [ ] `packages/combat/src/constants.ts:476` — /** Reaction LENGTH after a confirmed special-hit stagger (frames). Still TUNED (animation-
+- [ ] `packages/combat/src/constants.ts:548` — * frames slot 23 stays active) is still TUNED — see MELEE.DURATION-adjacent notes below.
+- [ ] `packages/combat/src/constants.ts:551` — /** Knockdown (down) lie-time before the wake-up i-frames kick in (frames). TUNED — s4u
+- [ ] `packages/combat/src/constants.ts:556` — /** Death state duration before the borg is removed / next deploys (frames). TUNED — see
+- [ ] `packages/combat/src/constants.ts:566` — * AI desired engage distance for melee borgs (XZ units). TUNED — audited 2026-07-01 (s4s):
+- [ ] `packages/combat/src/constants.ts:577` — * 64-110 whiff band the flat 50+RANGE_SLACK window produced. Kept (still TUNED, still NOT
+- [ ] `packages/combat/src/constants.ts:580` — /** AI desired engage distance for ranged borgs. TUNED — see MELEE_RANGE note. */
+- [ ] `packages/combat/src/constants.ts:582` — /** Slack around the desired range before AI stops advancing. TUNED — see MELEE_RANGE note. */
+- [ ] `packages/combat/src/constants.ts:584` — /** AI re-evaluates its target every N frames. TUNED — see MELEE_RANGE note. */
+- [ ] `packages/combat/src/constants.ts:588` — * movement-hit-decode-2026-07-04.md §1): TUNED port-ism, NOT ROM-derived — the ROM CPU
+- [ ] `packages/combat/src/constants.ts:606` — * a relatively huge, slow-to-cross band for a 12 u/f mover. TUNED port-ism.
+- [ ] `packages/combat/src/constants.ts:612` — * every single frame while in range. TUNED port-ism — fixes a mutual-invincibility
+- [ ] `packages/combat/src/constants.ts:663` — * The one TUNED element is the bleed GATE: the ROM keys it on state bytes +0x18==1/+0x19==2
+- [ ] `packages/combat/src/constants.ts:801` — * full drain ledger summing to exactly 3000. Per-action cost mapping is TUNED/unmapped —
 
-### packages/combat/src/combat.ts (15)
+### packages/combat/src/combat.ts (55)
 
-- [ ] `packages/combat/src/combat.ts:99` — // TUNED, and CHECKED CLOSED (2026-07-01, behavior-notes.md s4q): this is not a partially-derived
-- [ ] `packages/combat/src/combat.ts:158` — /** Z ally-lock target selection. CONFIRMED-ASSET input, TUNED nearest-ally selection.
-- [ ] `packages/combat/src/combat.ts:176` — * ally lock this selects the nearest ally, matching acquireAllyLock. TUNED — the
-- [ ] `packages/combat/src/combat.ts:256` — // Knockback MAGNITUDE remains a flat TUNED scalar (`knockback` param) — the ROM function only
-- [ ] `packages/combat/src/combat.ts:333` — // Reaction LENGTH stays the port's TUNED hitstun/down durations (animation-gated in ROM).
-- [ ] `packages/combat/src/combat.ts:468` — // behavior-notes.md s4t for the full citation. TUNED, but backed by real per-borg PZZ/model/
-- [ ] `packages/combat/src/combat.ts:473` — // IDs), so this remains explicitly TUNED, not DERIVED.
-- [ ] `packages/combat/src/combat.ts:480` — * the ~half of the roster with no confident family signal in that table. Both paths are TUNED —
-- [ ] `packages/combat/src/combat.ts:481` — * see the comment above and constants.ts's DERIVED/TUNED header for why neither can be labeled
-- [ ] `packages/combat/src/combat.ts:501` — * profile-driven mechanics hang off it (all with generic fallbacks, all TUNED — see
-- [ ] `packages/combat/src/combat.ts:642` — // with melee-scaled damage (TUNED design; see actionProfiles.ts SwordBeamDef).
-- [ ] `packages/combat/src/combat.ts:675` — // A multi-hit chain's finisher launches: forced knockdown (TUNED game-feel choice).
-- [ ] `packages/combat/src/combat.ts:726` — *  knockback via the TUNED CHARGE constants. */
-- [ ] `packages/combat/src/combat.ts:745` — *  from the TUNED CHARGE constants. */
-- [ ] `packages/combat/src/combat.ts:909` — // this remains a TUNED choice between two reasonable direction sources.
+- [ ] `packages/combat/src/combat.ts:172` — //   - refillType 1 (gradual): a per-frame TUNED rate (AMMO.REFILL_RATE_PER_FRAME — the ROM's
+- [ ] `packages/combat/src/combat.ts:908` — // Forced knockdowns keep a small TUNED pop for the launch read. (Page +0x58/+0x5c were
+- [ ] `packages/combat/src/combat.ts:987` — // Reaction LENGTH stays the port's TUNED hitstun/down durations (animation-gated in ROM).
+- [ ] `packages/combat/src/combat.ts:1029` — * every 0x1e frames). The steal half of the mechanic is applied in applyHit. Gate (TUNED): the
+- [ ] `packages/combat/src/combat.ts:1270` — // behavior-notes.md s4t for the full citation. TUNED, but backed by real per-borg PZZ/model/
+- [ ] `packages/combat/src/combat.ts:1275` — // IDs), so this remains explicitly TUNED, not DERIVED.
+- [ ] `packages/combat/src/combat.ts:1282` — * the ~half of the roster with no confident family signal in that table. Both paths are TUNED —
+- [ ] `packages/combat/src/combat.ts:1283` — * see the comment above and constants.ts's DERIVED/TUNED header for why neither can be labeled
+- [ ] `packages/combat/src/combat.ts:1304` — * predicate moveRuntime.ts xChargeMoveForBorgId). The thresholds/multipliers below are TUNED
+- [ ] `packages/combat/src/combat.ts:1308` — * per-weapon command resolver is unread), so nothing here is promoted past TUNED.
+- [ ] `packages/combat/src/combat.ts:1315` — /** Held frames for tier 1 / tier 2 (tier 2 is also the accumulation cap). TUNED. */
+- [ ] `packages/combat/src/combat.ts:1318` — /** Damage multipliers per tier (mirror the B-charge profile defaults). TUNED. */
+- [ ] `packages/combat/src/combat.ts:1324` — *  TUNED X_CHARGE mults, speed/radius/hitstun/knockback from the shared CHARGE.* tier
+- [ ] `packages/combat/src/combat.ts:1368` — * (meleeDef.range) and the shared MELEE.ENGAGE_RANGE window (TUNED — the ROM's threshold
+- [ ] `packages/combat/src/combat.ts:1439` — * profile-driven mechanics hang off it (all with generic fallbacks, all TUNED — see
+- [ ] `packages/combat/src/combat.ts:1547` — // interplay (ammo gate stacked ON TOP of the existing `special` cooldown) is TUNED — the ROM's
+- [ ] `packages/combat/src/combat.ts:1561` — // see X_CHARGE above for the 17-borg roster and the TUNED tier values): hold X to
+- [ ] `packages/combat/src/combat.ts:1565` — // while working the B button stays possible (TUNED — the ROM's per-weapon command
+- [ ] `packages/combat/src/combat.ts:1625` — exactMeleeForBorgId(b.borgId), // cached lookup; null keeps TUNED timing
+- [ ] `packages/combat/src/combat.ts:1628` — // replace the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0. Null (borg has
+- [ ] `packages/combat/src/combat.ts:1629` — // no resolved ladder, or this step index isn't in it) keeps that TUNED fallback.
+- [ ] `packages/combat/src/combat.ts:1671` — // contextual target and stop inside reach. All values TUNED (MELEE.LUNGE_*) —
+- [ ] `packages/combat/src/combat.ts:1711` — // to exactMelee, which itself falls back to the TUNED profile. Skipped when this swing is
+- [ ] `packages/combat/src/combat.ts:1730` — // with melee-scaled damage (TUNED design; see actionProfiles.ts SwordBeamDef).
+- [ ] `packages/combat/src/combat.ts:1732` — // resolved window length — meleeActiveLen, not the TUNED meleeDef.active, which diverges
+- [ ] `packages/combat/src/combat.ts:1750` — // resolved it, else the first-swing exact reach, else the TUNED profile range.
+- [ ] `packages/combat/src/combat.ts:1786` — // A multi-hit chain's finisher launches: forced knockdown (TUNED game-feel choice).
+- [ ] `packages/combat/src/combat.ts:1824` — // record armed by the borg's action script. Null keeps the TUNED profile timing.
+- [ ] `packages/combat/src/combat.ts:1828` — // replace the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0. Null (no ladder, or this
+- [ ] `packages/combat/src/combat.ts:1829` — // step index isn't in it) keeps that TUNED fallback.
+- [ ] `packages/combat/src/combat.ts:1841` — // steps keep the TUNED faster-startup scale of step 0's window (exactMelee / the profile
+- [ ] `packages/combat/src/combat.ts:1860` — // TUNED profile duration.
+- [ ] `packages/combat/src/combat.ts:1872` — // the MELEE.LUNGE_* citations in constants.ts — all TUNED, root-motion-anchored). The full
+- [ ] `packages/combat/src/combat.ts:1873` — // facing snap is a TUNED stand-in for the ROM's lock-tracked attack facing; stepMovement's
+- [ ] `packages/combat/src/combat.ts:1917` — *     e.g. G Red's G Crash — data selection in actionProfiles.json, TUNED params): spawns
+- [ ] `packages/combat/src/combat.ts:1925` — * 1/2 only reachable via the X-charge hold/release path (X_CHARGE, TUNED).
+- [ ] `packages/combat/src/combat.ts:1931` — * ONLY makes the record/anim/sounds exact; every TUNED mechanic below (AoE radius, projectile
+- [ ] `packages/combat/src/combat.ts:1982` — // same TUNED tier mults as a charged shot. An armed xLeaf's own exact record
+- [ ] `packages/combat/src/combat.ts:2040` — /** TUNED spread between the muzzles of a multi-projectile special (radians between adjacent
+- [ ] `packages/combat/src/combat.ts:2049` — * record-2 gauge accounting via damageRecordIndex). All params TUNED from the wave-1
+- [ ] `packages/combat/src/combat.ts:2077` — // TUNED floor (2026-07-04 playtest): several generated profiles carry projectileSpeed
+- [ ] `packages/combat/src/combat.ts:2102` — // TUNED-visual from the OBSERVED_WIKI X move name (actionProfiles generator), falling
+- [ ] `packages/combat/src/combat.ts:2118` — *  knockback via the TUNED CHARGE constants. */
+- [ ] `packages/combat/src/combat.ts:2169` — *  from the TUNED CHARGE constants. */
+- [ ] `packages/combat/src/combat.ts:2201` — // single indexed muzzle. The port's projectileCount/spreadRadians fan below is the TUNED
+- [ ] `packages/combat/src/combat.ts:2232` — *  homingTarget = b.lockTarget unconditionally. The cone half-angle is TUNED
+- [ ] `packages/combat/src/combat.ts:2265` — // so offsets stay TUNED. Per-borg values come from actionProfiles data; the shared
+- [ ] `packages/combat/src/combat.ts:2295` — // extent/radius replaces the TUNED per-profile hitRadius 1:1 (raw world units).
+- [ ] `packages/combat/src/combat.ts:2298` — // one is sourced (ShotActionDef.chargedVisualKind, TUNED-visual from the OBSERVED_WIKI
+- [ ] `packages/combat/src/combat.ts:2398` — // TUNED spawn offsets (forward 40 / up 20): a port-side design value for the beam's launch
+- [ ] `packages/combat/src/combat.ts:2476` — // The per-projectile magnitude here stays TUNED: the param values are undumped, and raw
+- [ ] `packages/combat/src/combat.ts:2515` — // Vertical hit band \|dy\| <= 60: TUNED — the ROM's projectile-vs-borg overlap is a real
+- [ ] `packages/combat/src/combat.ts:2529` — // this remains a TUNED choice between two reasonable direction sources.
+- [ ] `packages/combat/src/combat.ts:2588` — *  comes from undumped params — zero offset is the TUNED choice; the \|dy\|<=60 TUNED hit band
+- [ ] `packages/combat/src/combat.ts:2608` — // its axis from the same cross product and its tie-break is unread, so TUNED: turn the
 
-### packages/physics/src/knockback.ts (6)
+### packages/combat/src/selfcheck.ts (18)
+
+- [ ] `packages/combat/src/selfcheck.ts:758` — // Dash speed/duration are per-borg page data now (+0x58/+0x64); fall back to the TUNED
+- [ ] `packages/combat/src/selfcheck.ts:1018` — // (activeEnd - activeStart + 1), NOT the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0's
+- [ ] `packages/combat/src/selfcheck.ts:1079` — * reached" bucket) must still combo via the pre-existing TUNED COMBO.STEP_STARTUP_SCALE path —
+- [ ] `packages/combat/src/selfcheck.ts:1091` — throw new Error(`[selfcheck] pl0100 should have a multi-hit TUNED combo profile: ${JSON.stringify(meleeDef)}`);
+- [ ] `packages/combat/src/selfcheck.ts:1116` — `[selfcheck] pl0100 TUNED-fallback combo never reached its finisher: maxStep=${maxStep}, comboHits=${meleeDef.comboHits}`,
+- [ ] `packages/combat/src/selfcheck.ts:1120` — throw new Error(`[selfcheck] pl0100 TUNED-fallback combo produced too few swings: ${swingStarts}`);
+- [ ] `packages/combat/src/selfcheck.ts:1123` — `[selfcheck] pl0100 (no resolved action-stream ladder) still chained to step ${maxStep} (${meleeDef.comboHits} hits) over ${swingStarts} swings via the TUNED pa
+- [ ] `packages/combat/src/selfcheck.ts:1188` — *      its TUNED profile hitRadius (35) — proof the resolved-kind path, not kind 0 or the
+- [ ] `packages/combat/src/selfcheck.ts:1213` — `[selfcheck] pl0000's resolved-kind (1) shot radius should be 10 (kind-0 would be 5, profile TUNED is 35): got ${ninjaRadius}`,
+- [ ] `packages/combat/src/selfcheck.ts:1228` — // hitRadius reflects the resolved kind-1 record (10), not the profile's TUNED 35 nor kind 0's 5.
+- [ ] `packages/combat/src/selfcheck.ts:1267` — * the per-player weapon bank instead (today's TUNED sprite/mesh stand-in stays exact).
+- [ ] `packages/combat/src/selfcheck.ts:1715` — `[selfcheck] X-special coverage: ${coverage.xResolved}/${coverage.rosterSize} borgs resolve an exact X leaf; unresolved borgs (e.g. pl0100) keep today's TUNED b
+- [ ] `packages/combat/src/selfcheck.ts:1733` — // exact HIT-record frame window (meleeExactData) over the TUNED profile timing, so the
+- [ ] `packages/combat/src/selfcheck.ts:1896` — // An id with no generated profile entry must resolve to the generic TUNED defaults:
+- [ ] `packages/combat/src/selfcheck.ts:2276` — // Cover the exact HIT-record window when it runs longer than the TUNED profile timing.
+- [ ] `packages/combat/src/selfcheck.ts:2948` — // startMeleeAttack; constants.ts MELEE.ENGAGE_* and MELEE.LUNGE_* (all TUNED — the ROM's
+- [ ] `packages/combat/src/selfcheck.ts:3166` — // hold/release (OBSERVED_WIKI rows in data/borgMoveProperties.json; TUNED tiers in combat.ts
+- [ ] `packages/combat/src/selfcheck.ts:3333` — *  scaled by the reached tier (X_CHARGE mirrors the B-charge tiers, TUNED), resets the
+
+### packages/combat/src/ai.ts (10)
+
+- [ ] `packages/combat/src/ai.ts:28` — * per-borg without any RNG/nondeterminism. TUNED port-ism — see AI.ATTACK_REACTION_* in
+- [ ] `packages/combat/src/ai.ts:66` — // whiffed the whole 64-110 band. Still TUNED (constants.ts AI note: no isolated CPU
+- [ ] `packages/combat/src/ai.ts:81` — // TUNED port-ism (no isolated CPU decision function exists in the ROM — cpu-ai-evidence.md).
+- [ ] `packages/combat/src/ai.ts:96` — // in 1200 frames. Dashing (movement.ts DASH.SPEED, a TUNED port-ism — no dash state exists
+- [ ] `packages/combat/src/ai.ts:100` — // dash press that the sim would just ignore. TUNED port-ism.
+- [ ] `packages/combat/src/ai.ts:118` — // Decision-pacing gate (RAW-SCALE RETUNE 2026-07-04, TUNED port-ism — see
+- [ ] `packages/combat/src/ai.ts:141` — // Wake-up i-frame awareness (TUNED pacing gate): a melee swing started now lands during
+- [ ] `packages/combat/src/ai.ts:184` — // hold->release edge and fires the scaled projectile that frame. TUNED pacing choice.
+- [ ] `packages/combat/src/ai.ts:200` — // hold->release edge). TUNED pacing choice, same +10-frame margin as the B rule.
+- [ ] `packages/combat/src/ai.ts:224` — // borg boosts by holding jump in the air while fuel remains, not only flyers). TUNED
+
+### packages/combat/src/actionProfiles.ts (9)
+
+- [ ] `packages/combat/src/actionProfiles.ts:10` — /** Sword-beam finisher projectile (TUNED design: emitted by the LAST hit of a melee combo
+- [ ] `packages/combat/src/actionProfiles.ts:33` — /** Frames after a swing's recovery during which the next chain press still connects. TUNED. */
+- [ ] `packages/combat/src/actionProfiles.ts:63` — /** Ballistic drop applied to the projectile's Y velocity each frame (0 = none). TUNED. */
+- [ ] `packages/combat/src/actionProfiles.ts:65` — /** Visual family for tier>=1 charged releases (TUNED-visual). Sourced by the generator from
+- [ ] `packages/combat/src/actionProfiles.ts:84` — *  G Crash, missiles/beams). Selection heuristic is TUNED over wiki move fields. */
+- [ ] `packages/combat/src/actionProfiles.ts:99` — /** Projectile-archetype params (emitted only when archetype === "projectile"; all TUNED —
+- [ ] `packages/combat/src/actionProfiles.ts:104` — /** TUNED-visual, from the X move name / projectileVisualFamilies.json. */
+- [ ] `packages/combat/src/actionProfiles.ts:182` — * Resolve the TUNED asset-backed action profile for a borg.
+- [ ] `packages/combat/src/actionProfiles.ts:245` — * labeled-TUNED conversion knobs for borgs without a usable row value.
+
+### packages/combat/src/actionStreamData.ts (4)
+
+- [ ] `packages/combat/src/actionStreamData.ts:50` — // Callers (combat.ts) fall back to the existing TUNED COMBO.STEP_STARTUP_SCALE rescale for any
+- [ ] `packages/combat/src/actionStreamData.ts:127` — *  TUNED simplification), 2\|3 = listener-lerped positional; `part` is the anim part the
+- [ ] `packages/combat/src/actionStreamData.ts:262` — * meleeExactData.ts single-swing behavior + the TUNED COMBO.STEP_STARTUP_SCALE rescale for
+- [ ] `packages/combat/src/actionStreamData.ts:524` — * or the borg has no command table at all. Callers keep today's TUNED special-attack behavior
+
+### packages/combat/src/types.ts (3)
+
+- [ ] `packages/combat/src/types.ts:114` — *  float conversion is TUNED, see constants.ts AMMO.REFILL_RATE_PER_FRAME / open-questions Q7). */
+- [ ] `packages/combat/src/types.ts:235` — *  every swing start (including the TUNED-fallback opener, which clears it to null) AND by
+- [ ] `packages/combat/src/types.ts:247` — *  anim carries no sound events. Renderers may schedule these instead of the TUNED
+
+### packages/physics/src/knockback.ts (3)
 
 - [ ] `packages/physics/src/knockback.ts:24` — // WHAT'S PORTED vs. TUNED-FALLBACK, mode by mode (see behavior-notes.md section (p) for the
 - [ ] `packages/physics/src/knockback.ts:41` — //     flat-vector TUNED behavior (attacker-to-target or a caller-supplied direction) rather
 - [ ] `packages/physics/src/knockback.ts:46` — //     Until that format is cracked, callers pass trimYaw/trimPitch = 0 (TUNED default, i.e.
-- [ ] `packages/physics/src/knockback.ts:50` — //     MELEE.KNOCKBACK / SHOT.KNOCKBACK / SPECIAL.KNOCKBACK in constants.ts remain TUNED flat
-- [ ] `packages/physics/src/knockback.ts:151` — * is handled separately as a TUNED constant in applyHit()).
-- [ ] `packages/physics/src/knockback.ts:161` — * normalized-ish XZ direction vector ready to multiply by a (still-TUNED) knockback magnitude
 
-### packages/combat/src/actionProfiles.ts (4)
+### packages/combat/src/gauges.ts (2)
 
-- [ ] `packages/combat/src/actionProfiles.ts:8` — /** Sword-beam finisher projectile (TUNED design: emitted by the LAST hit of a melee combo
-- [ ] `packages/combat/src/actionProfiles.ts:31` — /** Frames after a swing's recovery during which the next chain press still connects. TUNED. */
-- [ ] `packages/combat/src/actionProfiles.ts:61` — /** Ballistic drop applied to the projectile's Y velocity each frame (0 = none). TUNED. */
-- [ ] `packages/combat/src/actionProfiles.ts:139` — * Resolve the TUNED asset-backed action profile for a borg.
+- [ ] `packages/combat/src/gauges.ts:72` — * port's knockback APPLICATION stays anchored-TUNED (flat per-attack magnitude in applyHit)
+- [ ] `packages/combat/src/gauges.ts:104` — * Only PORT_SCALE (one anchor preserving the old melee base) remains TUNED; see constants.ts.
 
-### packages/combat/src/ai.ts (1)
+### packages/combat/src/meleeExactData.ts (2)
 
-- [ ] `packages/combat/src/ai.ts:75` — // hold->release edge and fires the scaled projectile that frame. TUNED pacing choice.
+- [ ] `packages/combat/src/meleeExactData.ts:19` — // records replace this single-swing selection. Marked TUNED-selection over DERIVED data.
+- [ ] `packages/combat/src/meleeExactData.ts:49` — /** Exact first-swing melee data for a borg, or null (callers keep the TUNED profile). */
 
-### packages/combat/src/selfcheck.ts (1)
+### packages/combat/src/movement.ts (2)
 
-- [ ] `packages/combat/src/selfcheck.ts:891` — // An id with no generated profile entry must resolve to the generic TUNED defaults:
+- [ ] `packages/combat/src/movement.ts:150` — // (FUN_80061560 / FUN_80063230). TUNED DASH block is only the fallback for synthetic
+- [ ] `packages/combat/src/movement.ts:206` — // TUNED (no ROM thrust constant exists — flight is a gravity toggle). The boost only
+
+### packages/combat/src/xammo.selftest.ts (2)
+
+- [ ] `packages/combat/src/xammo.selftest.ts:14` — //     TUNED (the ROM's per-weapon command resolver is unread).
+- [ ] `packages/combat/src/xammo.selftest.ts:125` — *  cooldown/`attackLock` (the TUNED cooldown gate that is orthogonal to the ammo gate) and the
+
+### packages/combat/src/ammo.selftest.ts (1)
+
+- [ ] `packages/combat/src/ammo.selftest.ts:385` — // the exact ROM rate is still TUNED (Q7); the intent is no order-of-magnitude regression.
+
+### packages/combat/src/battle.ts (1)
+
+- [ ] `packages/combat/src/battle.ts:86` — * stat bytes are TUNED minimal placeholders until pl0f07data.bin is parsed like the roster.
+
+### packages/combat/src/commandDispatch.ts (1)
+
+- [ ] `packages/combat/src/commandDispatch.ts:15` — // TUNED link in the chain — the manual (ao) fixes the button ROLES (B contextual, X secondary,
+
+### packages/combat/src/movementData.ts (1)
+
+- [ ] `packages/combat/src/movementData.ts:103` — *  null for ids without a data page (callers fall back to the TUNED DASH block). Pages with
+
+### packages/combat/src/moveRuntime.ts (1)
+
+- [ ] `packages/combat/src/moveRuntime.ts:85` — * thresholds/multipliers stay TUNED in combat.ts (no ROM per-move X-charge table decoded).
+
+### packages/combat/src/projectilePenetration.selftest.ts (1)
+
+- [ ] `packages/combat/src/projectilePenetration.selftest.ts:138` — // projectile's initial flight direction (cone half-angle TUNED — FLOAT_8043768c undumped).
+
+### packages/missions/src/scoring.ts (1)
+
+- [ ] `packages/missions/src/scoring.ts:19` — // bonus DAT_80433b58 = 5000 extracted from boot.dol. This replaces the old TUNED
 

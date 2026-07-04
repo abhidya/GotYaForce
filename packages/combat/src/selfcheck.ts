@@ -21,6 +21,7 @@ import {
   X_CHARGE,
   applyHit,
   projectileVisualKindForProfile,
+  sourceInitialEnemyLock,
   stepAttacks,
   stepCooldowns,
   stepGaugeWindows,
@@ -495,13 +496,92 @@ function assertPlayersAutoLockByDefault(borgs: BorgStats[]): void {
     active.targetLockState.sourceState !== 1 ||
     active.targetLockState.cameraState !== 3 ||
     active.targetLockState.activeTargetUid !== active.lockTarget ||
-    active.targetLockState.enemyIndex < 0
+    active.targetLockState.enemyIndex !== 0
   ) {
     throw new Error(
       `[selfcheck] source-shaped enemy lock state was not retained: ${JSON.stringify(active.targetLockState)}`,
     );
   }
   console.log(`[selfcheck] human-controlled borg auto-locked enemy ${active.lockTarget} by default`);
+}
+
+function assertSourceInitialLockSelector(): void {
+  const self3d = fakeRuntime("selector_self_3d", 0, 0);
+  self3d.pos = { x: 0, y: 0, z: 0 };
+  const xzNearHigh = fakeRuntime("selector_xz_near_high", 1, 1);
+  xzNearHigh.pos = { x: 1, y: 100, z: 0 };
+  const xzFarGround = fakeRuntime("selector_xz_far_ground", 1, 20);
+  xzFarGround.pos = { x: 20, y: 0, z: 0 };
+  const selection3d = sourceInitialEnemyLock(self3d, [self3d, xzNearHigh, xzFarGround]);
+  if (selection3d.targetUid !== xzFarGround.uid || selection3d.targetIndex !== 1) {
+    throw new Error(
+      `[selfcheck] source initial lock must use 3D squared distance, not XZ distance: ${JSON.stringify(selection3d)}`,
+    );
+  }
+
+  const selfTie = fakeRuntime("selector_self_tie", 0, 0);
+  selfTie.pos = { x: 0, y: 0, z: 0 };
+  const earlierTie = fakeRuntime("selector_tie_earlier", 1, 10);
+  earlierTie.pos = { x: 10, y: 0, z: 0 };
+  const laterTie = fakeRuntime("selector_tie_later", 1, -10);
+  laterTie.pos = { x: -10, y: 0, z: 0 };
+  const selectionTie = sourceInitialEnemyLock(selfTie, [selfTie, earlierTie, laterTie]);
+  if (selectionTie.targetUid !== laterTie.uid || selectionTie.targetIndex !== 1) {
+    throw new Error(
+      `[selfcheck] source initial lock must let later equal-distance entries win: ${JSON.stringify(selectionTie)}`,
+    );
+  }
+
+  console.log("[selfcheck] source initial lock selector uses 3D squared distance with later-tie wins");
+}
+
+function assertSourceSwitchLockDirections(borgs: BorgStats[]): void {
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
+        { team: 1, ownerPlayer: "p3", borgIds: ["pl000c"] },
+        { team: 1, ownerPlayer: "p4", borgIds: ["pl0105"] },
+      ],
+      bounds: { x: 1000, z: 1000 },
+      spawnPoints: [
+        { pos: { x: 0, y: JUMP.GROUND_Y, z: 0 }, rotY: 0 },
+        { pos: { x: 100, y: JUMP.GROUND_Y, z: 0 }, rotY: 0 },
+        { pos: { x: 200, y: JUMP.GROUND_Y, z: 0 }, rotY: 0 },
+        { pos: { x: 300, y: JUMP.GROUND_Y, z: 0 }, rotY: 0 },
+      ],
+    },
+    borgs,
+  );
+
+  const activeUid = battle.state.activeUidByPlayer["p1"];
+  const active = () => {
+    const b = battle.state.borgs.find((candidate) => candidate.uid === activeUid);
+    if (!b) throw new Error("[selfcheck] switch-lock direction test lost active p1 borg");
+    return b;
+  };
+  const enemies = battle.state.borgs.filter((b) => b.team === 1).map((b) => b.uid);
+  if (enemies.length !== 3) throw new Error("[selfcheck] switch-lock direction test expected 3 enemies");
+  if (active().lockTarget !== enemies[0] || active().targetLockState?.enemyIndex !== 0) {
+    throw new Error(`[selfcheck] switch-lock initial target/index mismatch: ${JSON.stringify(active().targetLockState)}`);
+  }
+
+  battle.step(1 / 60, { p1: { ...emptyInput(), switchLockPrev: true } });
+  if (active().lockTarget !== enemies[2] || active().targetLockState?.enemyIndex !== 2) {
+    throw new Error(`[selfcheck] L/request-3 did not wrap to previous enemy: ${JSON.stringify(active().targetLockState)}`);
+  }
+
+  battle.step(1 / 60, { p1: emptyInput() });
+  battle.step(1 / 60, { p1: { ...emptyInput(), switchLock: true, switchLockPrev: true } });
+  if (active().lockTarget !== enemies[0] || active().targetLockState?.enemyIndex !== 0) {
+    throw new Error(
+      `[selfcheck] simultaneous R/L should honor source request-2 priority: ${JSON.stringify(active().targetLockState)}`,
+    );
+  }
+
+  console.log("[selfcheck] source switch-lock directions: L/request-3 prev, R/request-2 priority");
 }
 
 function assertAllyLockTargetsTeammate(borgs: BorgStats[]): void {
@@ -523,6 +603,8 @@ function assertAllyLockTargetsTeammate(borgs: BorgStats[]): void {
   if (!active) throw new Error("[selfcheck] ally-lock test lost active p1 borg");
   const ally = active.allyLockTarget ? battle.state.borgs.find((b) => b.uid === active.allyLockTarget) : null;
   const enemy = active.lockTarget ? battle.state.borgs.find((b) => b.uid === active.lockTarget) : null;
+  const retainedEnemyUid = active.lockTarget;
+  const retainedAllyUid = active.allyLockTarget;
   if (!ally || ally.team !== active.team || ally.uid === active.uid) {
     throw new Error(`[selfcheck] Z ally-lock did not select a same-team ally: ${active.allyLockTarget}`);
   }
@@ -534,14 +616,33 @@ function assertAllyLockTargetsTeammate(borgs: BorgStats[]): void {
     active.targetLockState.sourceState !== 1 ||
     active.targetLockState.cameraState !== 3 ||
     active.targetLockState.activeTargetUid !== active.allyLockTarget ||
-    active.targetLockState.allyIndex < 0 ||
-    active.targetLockState.enemyIndex < 0
+    active.targetLockState.allyIndex !== 0 ||
+    active.targetLockState.enemyIndex !== 0
   ) {
     throw new Error(
       `[selfcheck] source-shaped ally lock state was not retained: ${JSON.stringify(active.targetLockState)}`,
     );
   }
-  console.log(`[selfcheck] Z ally-lock selected teammate ${active.allyLockTarget} without changing enemy lock`);
+
+  battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
+  const afterRelease = battle.state.borgs.find((b) => b.uid === activeUid);
+  if (!afterRelease) throw new Error("[selfcheck] ally-lock release test lost active p1 borg");
+  if (
+    afterRelease.lockTarget !== retainedEnemyUid ||
+    afterRelease.allyLockTarget !== retainedAllyUid ||
+    afterRelease.targetLockState?.mode !== "enemy" ||
+    afterRelease.targetLockState.sourceState !== 2 ||
+    afterRelease.targetLockState.cameraState !== 4 ||
+    afterRelease.targetLockState.activeTargetUid !== retainedEnemyUid ||
+    afterRelease.targetLockState.enemyIndex !== 0
+  ) {
+    throw new Error(
+      `[selfcheck] Z release did not restore retained enemy lock: beforeEnemy=${retainedEnemyUid} beforeAlly=${retainedAllyUid} after=${JSON.stringify(afterRelease.targetLockState)}`,
+    );
+  }
+  console.log(
+    `[selfcheck] Z hold ally-lock selected teammate ${retainedAllyUid}; release restored enemy ${retainedEnemyUid}`,
+  );
 }
 
 function assertActorDataStatsBound(borgs: BorgStats[]): void {
@@ -581,8 +682,31 @@ function assertActorDataStatsBound(borgs: BorgStats[]): void {
       `[selfcheck] buildProfile did not bind pl####data.bin stats: profile=${JSON.stringify(profile)} actor=${JSON.stringify(actorStats)}`,
     );
   }
+
+  const roach = buildProfile(borgById(borgs, "pl0f05"));
+  const roachStats = actorDataCombatStatsForBorgId("pl0f05");
+  const blueStriker = buildProfile(borgById(borgs, "pl0d00"));
+  const blueStats = actorDataCombatStatsForBorgId("pl0d00");
+  if (!roachStats || !blueStats) {
+    throw new Error("[selfcheck] missing actor-data jump anchors");
+  }
+  if (profile.airJumpLevel !== actorStats.airJump || profile.airJumpLevel !== 0 || !profile.flyer) {
+    throw new Error(
+      `[selfcheck] Boost Jump actor-data air jump was not consumed: profile=${JSON.stringify(profile)} actor=${JSON.stringify(actorStats)}`,
+    );
+  }
+  if (roach.airJumpLevel !== roachStats.airJump || roach.airJumpLevel !== 1 || roach.flyer) {
+    throw new Error(
+      `[selfcheck] Air jump level actor-data count mismatch: profile=${JSON.stringify(roach)} actor=${JSON.stringify(roachStats)}`,
+    );
+  }
+  if (blueStats.airJump !== 0xff || blueStriker.airJumpLevel !== 0 || !blueStriker.flyer) {
+    throw new Error(
+      `[selfcheck] N/A flyer air-jump sentinel was not normalized: profile=${JSON.stringify(blueStriker)} actor=${JSON.stringify(blueStats)}`,
+    );
+  }
   console.log(
-    `[selfcheck] source stats bound: hp=${profile.maxHp}; actor-data exact rows=${expected}; pl0615 def/shot/atk/spd=${profile.defense}/${profile.shot}/${profile.attack}/${profile.speed}`,
+    `[selfcheck] source stats bound: hp=${profile.maxHp}; actor-data exact rows=${expected}; pl0615 def/shot/atk/spd=${profile.defense}/${profile.shot}/${profile.attack}/${profile.speed}; airJump pl0615=${profile.airJumpLevel} pl0f05=${roach.airJumpLevel} pl0d00=${blueStriker.airJumpLevel}`,
   );
 
   if (
@@ -756,17 +880,7 @@ function pumpAttackFrame(
   // direct stepAttacks harnesses see battle-shaped state.
   const lockAlive = all.some((o) => o.uid === b.lockTarget && o.team !== b.team && o.hp > 0);
   if (!lockAlive) {
-    let nearest: BorgRuntime | null = null;
-    let nearestD = Infinity;
-    for (const o of all) {
-      if (o.team === b.team || o.hp <= 0) continue;
-      const d = Math.hypot(o.pos.x - b.pos.x, o.pos.z - b.pos.z);
-      if (d < nearestD) {
-        nearestD = d;
-        nearest = o;
-      }
-    }
-    b.lockTarget = nearest ? nearest.uid : null;
+    sourceInitialEnemyLock(b, all);
   }
   stepCooldowns(b);
   return stepAttacks(b, p, attackHeld, false, all, profiles).projectiles;
@@ -2309,12 +2423,24 @@ function assertAiKeepsLockedTarget(borgs: BorgStats[]): void {
   const input = stepAI(self, buildProfile(borgById(borgs, "pl0615")), [self, closerEnemy, lockedEnemy]);
   // Locked AI emits TARGET-RELATIVE movement (+moveZ = toward the lock target — stepMovement's
   // resolveHorizontalIntent resolves the stick relative to the lock vector). Had the AI dropped
-  // the lock for the nearer enemy, lockedToTarget would be false and it would emit the
-  // world-space fallback (moveX toward x=-800, i.e. negative).
+  // the lock for the nearer enemy, the old fallback path emitted world-space moveX toward x=-800.
   if (!(input.moveZ > 0 && input.moveX === 0)) {
     throw new Error("[selfcheck] AI target memory failed: ignored valid lockTarget for nearer enemy");
   }
-  console.log("[selfcheck] AI kept valid lockTarget before nearest-enemy fallback (lock-relative approach)");
+
+  const unlocked = fakeRuntime("unlocked", 0, 0);
+  const unlockedInput = stepAI(unlocked, buildProfile(borgById(borgs, "pl0615")), [unlocked, closerEnemy]);
+  if (
+    unlockedInput.moveX !== 0 ||
+    unlockedInput.moveZ !== 0 ||
+    unlockedInput.attack ||
+    unlockedInput.special ||
+    unlockedInput.lockOn
+  ) {
+    throw new Error(`[selfcheck] AI invented a target without source lock state: ${JSON.stringify(unlockedInput)}`);
+  }
+
+  console.log("[selfcheck] AI consumes source lock target and does not run an independent nearest selector");
 }
 
 function assertFrozenBattleTimerNeverExpires(borgs: BorgStats[]): void {
@@ -3124,6 +3250,7 @@ function assertSpecialFiresOncePerPressEdge(borgs: BorgStats[]): void {
     [cpu.uid, knight],
     [aiTarget.uid, buildProfile(borgById(borgs, "pl0008"))],
   ]);
+  sourceInitialEnemyLock(cpu, [cpu, aiTarget]);
   let aiFired = false;
   for (let f = 0; f < 300 && !aiFired; f += 1) {
     stepCooldowns(cpu);
@@ -3619,6 +3746,8 @@ export function main(): number {
   assertTriangleWallCollision(borgs);
   assertTriangleCeilingCollision(borgs);
   assertPlayersAutoLockByDefault(borgs);
+  assertSourceInitialLockSelector();
+  assertSourceSwitchLockDirections(borgs);
   assertAllyLockTargetsTeammate(borgs);
   assertActorDataStatsBound(borgs);
   assertLockRelativeControls(borgs);

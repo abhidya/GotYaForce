@@ -785,8 +785,10 @@ finds what consumes `+0x284`/`+0x282` to produce an actual velocity impulse.
 was too broad. The real system was later resolved in `zz_006b450_`, `FUN_8006b850`,
 `FUN_8006ba60`, `zz_006bc74_`, and `zz_006bcf4_`: actor fields `+0x502/+0x503/+0x504/+0x508`,
 target position `+0x50c/+0x510/+0x514`, and list-index bytes `+0x73d/+0x73e` retain source target
-state over the `DAT_803c1d7c` / `DAT_80436242` target-entry list. Browser runtime ports that shape
-as `SourceTargetLockState` and source-order R/Z cycling in `packages/combat/src/combat.ts`.
+state over the `DAT_803c1d7c` / `DAT_80436242` target-entry list. Initial null-target acquisition
+uses the source nearest rule by 3D squared distance, with later equal-distance entries winning.
+Browser runtime ports that shape as `SourceTargetLockState`, source-order R/Z cycling, and the
+source nearest-acquisition rule in `packages/combat/src/combat.ts`.
 
 Historical audit retained below: it remains evidence that the removed forward-cone/distance-sorted
 selector was not the source algorithm.
@@ -1743,7 +1745,9 @@ FUN_8000d560) and DAT_802c3900 (kill/victory cams, e.g. FUN_8000d990).
 **Lock-on (state 3, `FUN_8000cf28`)**: trail dir rotated toward `interest - lockTargetPos
 (+0x324 ← actor+0x50C)` by ≤ FLOAT_80436af4=0.589 rad/frame (`FUN_80045460` axis-angle),
 goal-eye blend weights 2/3 prev + 1/3 new (FLOAT_80436af8/afc), same re-projection. State 4
-scales the new-weight by distance (FLOAT_80436b00..b10). Not ported (web port has no lock-on).
+scales the new-weight by distance (FLOAT_80436b00..b10). Browser camera now consumes the
+source-shaped target state, runs state 3/4 lock follow/transition, and keeps an internal
+camera+0x2e6 state so `FUN_8000cf28` can advance to state 4 after the trail catches up.
 
 **Mode-2 approach (`FUN_8000c988` @ 0x8000c988, mode table [2]) — the actual home of the
 "min distance"/"decay" floats**: init captures trail = eye - interest (ε-fallback to
@@ -1756,12 +1760,13 @@ trail*dist)/5`. It's a spiral-in/orbit camera; the mode-2 setter wasn't located 
 occur on gameplay cams). FLOAT_80436ae4 also appears in `zz_0010980_` as a fade-alpha decay —
 unrelated to distance.
 
-**Port status (apps/game/src/sim/camera.ts, 2026-07-02):** FUN_8000cdc0 steps 1-6 ported as
+**Port status (apps/game/src/sim/camera.ts, 2026-07-04):** FUN_8000cdc0 steps 1-6 ported as
 the primary policy (constants via gen-camera-mode1-constants.mjs; FLOAT_80436af0/adc newly
-generated); FUN_8000c988 ported as the battle-entry approach replacing the instant snap
-(consumes 80/0.9/0x200/+4; exit-at-band is TUNED — ROM exit unknown). Still TUNED: per-borg
-band/height data (+0x894..+0x8A0, +0x6D0, +0x668 — trace band 466.5..504.9 substitutes),
-multi-actor widen, wall-guard; correctives FUN_800101c8/FUN_8000fffc unported. Helpers:
+generated); FUN_8000cf28/FUN_8000d11c lock follow/transition ported against active
+actor+0x50c target state; FUN_8000c988 ported as the battle-entry approach replacing the instant
+snap (consumes 80/0.9/0x200/+4; exit-at-band is TUNED — ROM exit unknown). Still TUNED:
+per-borg band/height data (+0x894..+0x8A0, +0x6D0, +0x668 — trace band 466.5..504.9
+substitutes), multi-actor widen, wall-guard; correctives FUN_800101c8/FUN_8000fffc unported. Helpers:
 `zz_0045204_`/`zz_0045238_` @ 0x80045204/0x80045238 = sin/cos(BAM16); DOUBLE_80436ab0/ab8
 (0.5/3.0) are just the PPC frsqrte Newton iteration, not tunables.
 
@@ -2177,8 +2182,11 @@ truth. Paraphrased facts:
   same time get simultaneous power bursts — reading the (aj) +0x6fb = 6 arm window as
   the co-op simultaneity tolerance (reconcile in T3). Burst meter officially "fills as
   the player inflicts and receives damage" (StrategyWiki interface page corroborates).
-- **L AND R both switch targets** (port models only R); **Z = HOLD to lock onto your
-  partner** (port models Z as press-to-cycle ally lock — semantics differ);
+- **L AND R both switch targets** (browser port maps both source request directions:
+  L/prev = +0x73c 3, R/next = +0x73c 2); **Z = HOLD to lock onto your
+  partner** (browser port now models target selection as source-shaped request bytes
+  +0x73c = 5 while held and +0x73c = 4 on release, restoring the retained enemy lock;
+  partner charge/power-up behavior remains untraced);
   **A while blown away = jump away from danger** — an AIR RECOVERY mechanic the port
   lacks entirely (new queue item W14); **stick double-tap = evade dash** (port
   triggers dodge differently — W15); A hold = booster jump rise, with a Jump Gauge

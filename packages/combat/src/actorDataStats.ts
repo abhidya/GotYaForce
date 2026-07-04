@@ -10,7 +10,7 @@ export interface ActorDataCombatStats {
   /**
    * Raw air-jump count byte 0x1a3 (DERIVED on its verifiable domain: equals N for all
    * "Air jump level N" borgs, 0 for all "Boost jump" borgs; 0xff observed for most
-   * "N/A" flyers). Not yet consumed by the sim.
+   * "N/A" flyers and normalized to no discrete air jumps by buildProfile.
    */
   airJump: number;
   defense: number;

@@ -95,6 +95,8 @@ Under all tested encodings/offsets, no exact or affine encoding exists for:
 - `packages/combat/src/stats.ts` `rangePrefOf` now prefers the DERIVED `typeCode`
   (0 -> ranged, 1 -> melee, else stat-based mixed heuristic) over the borgs.json type
   string, which remains as fallback for borgs without an actor-data record.
-- `airJump` is emitted but NOT yet consumed: `parseJump` still reads the borgs.json
-  string because the sim needs the flyer distinction, and the "N/A" byte values (0xff
-  vs 0) have unproven semantics.
+- `airJump` is now consumed for the discrete mid-air-jump count in
+  `packages/combat/src/stats.ts`: verifiable raw counts are used directly, while
+  the "N/A" sentinel `0xff` is normalized to zero discrete air jumps. `parseJump`
+  still supplies the flyer/non-flyer distinction and fallback behavior for borgs
+  without actor-data records.

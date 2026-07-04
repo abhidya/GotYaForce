@@ -7,9 +7,14 @@
 //   - SIM_HZ = 60: DERIVED. GameCube ran at 60 fps; the "60 frames ~= 1s" note confirms it.
 //   - Ground plane Y and "forward = +Z": DERIVED. ram-trace-analysis.md s3.1 (Y=10 grounded,
 //     holding FORWARD produced +Z movement). GROUND_Y default 10 to match the trace.
-//   - Movement gravity/ranges/cooldowns and knockback magnitudes remain TUNED. Combat HP
-//     damage now uses the decoded zz_003cd5c_ formula via damageFormula.ts for runtime hits;
-//     MELEE/SHOT damage constants below remain only as legacy/direct-helper fallbacks.
+//   - Runtime movement now consumes raw per-borg movement pages for run speed, jump impulse,
+//     fall gravity, dash speed/decay/duration, and status/tier velocity multipliers. Remaining
+//     movement constants below are limited to unported interaction windows, fallback values for
+//     synthetic ids, and boost/dash feel where no source consumer has been mapped.
+//   - Runtime knockback magnitude now consumes the ROM strength-indexed table via gauges.ts;
+//     old MELEE/SHOT/SPECIAL knockback constants below are historical/direct-helper references.
+//   - Combat HP damage uses the decoded zz_003cd5c_ formula via damageFormula.ts for runtime
+//     hits; MELEE/SHOT damage constants below remain only as legacy/direct-helper fallbacks.
 //
 //   - HP field: DERIVED (2026-07-01). Confirmed live — a 16-bit uint mirrored at 5 fixed
 //     addresses (0x803b069c, 0x805dbf86, 0x805f3850/58/5c) tracks the on-screen HP gauge;
@@ -41,11 +46,11 @@
 //     unported; mode 3 ("linked object") is exposed but not wired (no linked-object concept on
 //     BorgRuntime yet). The per-move angle-trim VALUES are still-undecoded hit.bin data, so trim
 //     is always 0 for now (mechanism DERIVED, values TUNED-absent).
-//     Knockback MAGNITUDE (MELEE.KNOCKBACK/HITSTUN, SHOT.KNOCKBACK/HITSTUN, SPECIAL.KNOCKBACK/
-//     HITSTUN below) remains entirely TUNED — `zz_00300bc_` only ever computes/stores a direction,
-//     never a speed/force value or hitstun duration. Do not read the direction fix as license to
-//     upgrade these magnitude/hitstun constants; they need a separate trace of whatever consumes
-//     the stored yaw/pitch to actually apply a velocity impulse.
+//     Knockback MAGNITUDE was later resolved separately (2026-07-04, behavior-notes.md (bc)):
+//     the damage record's +0x0d strength byte indexes DAT_802d3664[s]=(s+1)*8; applyHit now
+//     uses gauges.ts knockbackVelocityForRecord(record) × KNOCKBACK.PORT_SCALE × the per-move
+//     multiplier. Hit-reaction LENGTHS below remain TUNED because the original is animation-
+//     gated, not a flat hitstun constant.
 //   - Lock-on target state is source-shaped in combat.ts/types.ts. The old manual
 //     LOCK.RANGE/CONE view-cone heuristic was removed after resolving zz_006b450_,
 //     FUN_8006b850/FUN_8006ba60, and the actor +0x502/+0x508/+0x73d/+0x73e state.

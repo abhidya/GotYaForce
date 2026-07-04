@@ -1176,7 +1176,7 @@ function renderMarkdown(report) {
   add(report.commonBattleDataEvidence.assessment);
   if (report.commonBattleDataEvidence.actorDataStatOffsets) {
     add();
-    add("Actor-data combat-stat offsets:");
+    add("Actor-data runtime offsets:");
     add(report.commonBattleDataEvidence.actorDataStatOffsets.assessment);
     mdTable(
       Object.entries(report.commonBattleDataEvidence.actorDataStatOffsets.offsets ?? {}).map(([field, offset]) => ({
@@ -1184,11 +1184,18 @@ function renderMarkdown(report) {
         offset,
         exact: report.commonBattleDataEvidence.actorDataStatOffsets.exactMatches?.[field] ?? 0,
         total: report.commonBattleDataEvidence.actorDataStatOffsets.matchedMetadataRows ?? 0,
+        unverifiable: report.commonBattleDataEvidence.actorDataStatOffsets.airJumpUnverifiable ?? 0,
       })),
       [
         { title: "Field", value: (row) => row.field },
         { title: "Offset", value: (row) => row.offset },
-        { title: "Exact matches", value: (row) => `${row.exact}/${row.total}` },
+        {
+          title: "Exact matches",
+          value: (row) =>
+            row.field === "airJump"
+              ? `${row.exact}/${row.exact} verifiable + ${row.unverifiable} N/A sentinel rows`
+              : `${row.exact}/${row.total}`,
+        },
       ],
     );
   }
@@ -1198,7 +1205,7 @@ function renderMarkdown(report) {
     add(`- App imports borgs.json: ${report.commonBattleDataEvidence.runtimeBinding.appImportsBorgsJson ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.appBorgImport ?? "n/a"})`);
     add(`- Generated actor-data stats JSON: ${report.commonBattleDataEvidence.runtimeBinding.actorDataStatsJsonExists ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.actorDataStatsJson ?? "n/a"})`);
     add(`- Combat buildProfile consumes actor-data stats: ${report.commonBattleDataEvidence.runtimeBinding.buildProfileUsesActorDataStats ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.buildProfile ?? "n/a"})`);
-    add(`- Combat buildProfile consumes stats: ${report.commonBattleDataEvidence.runtimeBinding.buildProfileConsumesBorgsJsonFields ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.buildProfile ?? "n/a"})`);
+    add(`- Combat buildProfile consumes stats and discrete air-jump count: ${report.commonBattleDataEvidence.runtimeBinding.buildProfileConsumesBorgsJsonFields && report.commonBattleDataEvidence.runtimeBinding.buildProfileUsesActorDataAirJump ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.buildProfile ?? "n/a"})`);
     add(`- Combat formulas still marked tuned: ${report.commonBattleDataEvidence.runtimeBinding.combatConstantsDeclareTunedFormulas ? "yes" : "no"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.tunedFormulaNote ?? "n/a"})`);
     add(`- Generic PZZ package parser implemented: ${report.commonBattleDataEvidence.runtimeBinding.formatsPzzStillTodo ? "no" : "yes"} (${report.commonBattleDataEvidence.runtimeBinding.refs?.pzzParser ?? "n/a"})`);
     add(report.commonBattleDataEvidence.runtimeBinding.assessment);

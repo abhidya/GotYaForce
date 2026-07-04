@@ -1,8 +1,8 @@
 {
   "schema": "gotyaforce.commonBattleDataInventory.v2",
-  "generatedAt": "2026-07-02T04:19:54.601Z",
+  "generatedAt": "2026-07-04T20:20:51.212Z",
   "generatedBy": "scripts/inventory-common-battle-data.mjs",
-  "scope": "Byte-level inventory for common battle data and actor-data records. Four combat-stat bytes are named only where they match every metadata-backed pl####data.bin record exactly.",
+  "scope": "Byte-level inventory for common battle data and actor-data records. Actor-data fields are named only where they match every metadata-backed pl####data.bin record exactly, or where the verifiable metadata domain proves the byte semantics.",
   "source": {
     "archive": "user-data/GG4E/afs_data/root/cmn_data.pzz",
     "memberId": "003",
@@ -1480,6 +1480,8 @@
   "actorDataStatOffsets": {
     "recordSize": 432,
     "offsets": {
+      "typeCode": "0x01a0",
+      "airJump": "0x01a3",
       "defense": "0x01a4",
       "shot": "0x01a5",
       "attack": "0x01a6",
@@ -1487,14 +1489,17 @@
     },
     "matchedMetadataRows": 190,
     "exactMatches": {
+      "typeCode": 190,
+      "airJump": 175,
       "defense": 190,
       "shot": 190,
       "attack": 190,
       "speed": 190
     },
+    "airJumpUnverifiable": 15,
     "allFieldsExact": true,
     "mismatches": [],
-    "assessment": "defense/shot/attack/speed are exact unsigned-byte matches at pl####data.bin offsets 0x1a4..0x1a7 for every actor-data file that has borgs.json metadata."
+    "assessment": "typeCode/defense/shot/attack/speed are exact unsigned-byte matches for every actor-data file that has borgs.json metadata. airJump is exact on the verifiable jump domains: `Air jump level N` -> N and `Boost jump` -> 0; most `N/A` flyers carry sentinel/no-count byte 0xff."
   },
   "exactActorDataMatches": [
     {
@@ -1539,19 +1544,20 @@
     "actorDataStatsJsonExists": true,
     "actorDataStatsAccessorExists": true,
     "buildProfileUsesActorDataStats": true,
+    "buildProfileUsesActorDataAirJump": true,
     "actorDataStatsBoundToCombat": true,
     "buildProfileConsumesBorgsJsonFields": true,
     "combatConstantsDeclareTunedFormulas": true,
     "formatsPzzStillTodo": false,
     "refs": {
-      "appBorgImport": "apps/game/src/main.ts:23",
-      "buildProfile": "packages/combat/src/stats.ts:108",
-      "actorDataStats": "packages/combat/src/actorDataStats.ts:25",
+      "appBorgImport": "apps/game/src/sim/borgCatalog.ts:1",
+      "buildProfile": "packages/combat/src/stats.ts:149",
+      "actorDataStats": "packages/combat/src/actorDataStats.ts:37",
       "actorDataStatsJson": "packages/combat/src/data/actorDataStats.json",
-      "tunedFormulaNote": "packages/combat/src/constants.ts:28",
+      "tunedFormulaNote": "packages/combat/src/constants.ts:52",
       "pzzParser": "packages/formats/src/pzz.ts:103"
     },
-    "assessment": "Runtime combat profiles now bind defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, jump, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven."
+    "assessment": "Runtime combat profiles now bind typeCode/airJump/defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, flyer classification, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven."
   },
-  "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. defense/shot/attack/speed are now exact-mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation."
+  "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. typeCode/airJump/defense/shot/attack/speed are now mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation."
 }

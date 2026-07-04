@@ -7,7 +7,8 @@
 //   shot    -> fallback only; runtime prefers pl####data.bin byte 0x1a5
 //   attack  -> fallback only; runtime prefers pl####data.bin byte 0x1a6
 //   speed   -> fallback only; runtime prefers pl####data.bin byte 0x1a7
-//   jump    -> "Air jump level N" | "Boost jump" | "N/A" -> air-jump count + flyer flag
+//   jump    -> fallback flyer flag; runtime prefers pl####data.bin byte 0x1a3
+//              for the discrete air-jump count
 //   type    -> fallback only; runtime prefers pl####data.bin byte 0x1a0 (type enum)
 //   tribe   -> cosmetic / grouping, unused by the sim
 //
@@ -83,7 +84,7 @@ export function parseHp(hp: string | number | undefined): number {
 }
 
 /**
- * Parse the "jump" field into (airJumpLevel, flyer).
+ * Parse the "jump" field into fallback (airJumpLevel, flyer).
  *  - "Air jump level N"  -> N air jumps, not a sustained flyer
  *  - "Boost jump"        -> sustained-flight flyer (3 air jumps as the airborne budget)
  *  - "N/A"               -> always-airborne flyer (jets/fortresses) -> treated as flyer
@@ -103,6 +104,15 @@ export function parseJump(jump: string | number | undefined): {
   }
   if (typeof jump === "number") return { airJumpLevel: jump, flyer: false };
   return { airJumpLevel: 3, flyer: false };
+}
+
+function actorDataAirJumpLevel(raw: number | undefined, fallback: number): number {
+  if (raw === undefined) return fallback;
+  // DERIVED: pl####data.bin byte +0x1a3 is the discrete air-jump count on the
+  // verifiable domains: Air jump level N -> N, Boost jump -> 0. Most N/A flyer
+  // records carry 0xff, which is a sentinel/no-count value rather than 255 jumps.
+  if (raw === 0xff) return 0;
+  return raw;
 }
 
 function rangePrefOf(
@@ -137,12 +147,13 @@ function rangePrefOf(
  * the borg's available rows by sourceStatsForBorgId itself.
  */
 export function buildProfile(s: BorgStats, level?: number): BorgProfile {
-  const { airJumpLevel, flyer } = parseJump(s.jump);
+  const parsedJump = parseJump(s.jump);
   const actorStats = actorDataCombatStatsForBorgId(s.id);
   const defense = actorStats?.defense ?? s.defense;
   const shot = actorStats?.shot ?? s.shot;
   const attack = actorStats?.attack ?? s.attack;
   const speed = actorStats?.speed ?? s.speed;
+  const airJumpLevel = actorDataAirJumpLevel(actorStats?.airJump, parsedJump.airJumpLevel);
   const sourceStats = sourceStatsForBorgId(s.id, level);
   const hasShot = shot > 0;
   const hasMelee = attack > 0;
@@ -156,7 +167,7 @@ export function buildProfile(s: BorgStats, level?: number): BorgProfile {
     attack,
     speed,
     airJumpLevel,
-    flyer,
+    flyer: parsedJump.flyer,
     hasShot,
     hasMelee,
     rangePref: rangePrefOf(actorStats?.typeCode, s.type, hasShot, hasMelee),

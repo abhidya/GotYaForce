@@ -29,6 +29,7 @@ export interface LocalControls {
   special: boolean;
   lockOn: boolean;
   switchLock: boolean;
+  switchLockPrev: boolean;
   allyLock: boolean;
   switchBorg: boolean;
   dash: boolean;
@@ -43,7 +44,8 @@ export interface LocalControls {
  *   L / X                 = special (X)
  *   Shift                 = dash (keyboard affordance; stick-snap dodge is handled by movement)
  *   U                     = explicit lockOn request (players auto-lock in combat core)
- *   R / Tab               = switchLock (GC R "lock-on switch": cycle enemy targets; edge-triggered in battle core)
+ *   R / Tab               = switchLock (GC R "lock-on switch": source request 2 / next target)
+ *   Q                     = switchLockPrev (GC L "lock-on switch": source request 3 / previous target)
  *   Z                     = allyLock (GC Z "ally lock-on"; target selection only until charge behavior is decoded)
  * Manual borg switching is deliberately unbound: the extracted control texture does not
  * show it, and current C evidence only proves death/auto-deploy swap flow.
@@ -63,6 +65,7 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
   let dash = keys.has("ShiftLeft") || keys.has("ShiftRight");
   let lockOn = keys.has("KeyU");
   let switchLock = keys.has("KeyR") || keys.has("Tab");
+  let switchLockPrev = keys.has("KeyQ");
   let allyLock = keys.has("KeyZ");
   const switchBorg = false;
   let hyper = keys.has("KeyY") || keys.has("KeyH");
@@ -77,8 +80,10 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
     attack = attack || b(1); // B
     special = special || b(2); // X
     // Explicit lock is mostly diagnostic because player borgs auto-lock by default.
-    lockOn = lockOn || b(6);
+    // No exact browser mapping for the GameCube shoulder cluster; use right shoulder/trigger
+    // for source request 2 and left trigger for request 3. LB remains the Z stand-in below.
     switchLock = switchLock || b(5) || b(7);
+    switchLockPrev = switchLockPrev || b(6);
     // XInput has no exact GC Z; use the left shoulder as the least-conflicting ally-lock stand-in.
     allyLock = allyLock || b(4);
     // XInput button 3 (Y on the standard mapping) is otherwise unused here — natural stand-in
@@ -94,6 +99,7 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
     special,
     lockOn,
     switchLock,
+    switchLockPrev,
     allyLock,
     switchBorg,
     dash,

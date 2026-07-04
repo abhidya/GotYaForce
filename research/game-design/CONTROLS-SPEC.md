@@ -105,8 +105,8 @@ gaps, jump/fly, dash/step, attack/special, and manual borg switch status.
 | A | Jump | Space or J; gamepad button 0 | Rising edge sets vertical velocity; air-jumps use `airJumps`; flyer holding jump spends boost fuel and enters fly | `CONFIRMED-ASSET` input, `TUNED` velocity/boost values | Texture proves A jump. Current mapping is `adapter.ts:139` and `:153`; mechanics are `movement.ts:126-198`; constants are `constants.ts:134-153`. Trace notes say tap A = jump and hold A = fly/boost (`behavior-notes.md:1500`). Exact original vertical field/velocity remains unknown (`behavior-notes.md:995-1000`, `1677-1684`). |
 | B | Attack | K or B; gamepad button 1 | B resolves per-borg primary action: melee if melee-primary/available, shot if shot-primary/available; shot consumes ammo/reload and may home to lock target | `CONFIRMED-ASSET` input, B bit bridge `DERIVED`, action semantics `TUNED` | Texture proves B attack. GDB injection plus decomp prove B `0x00000200` reaches normalized PAD and survives the command mask into `actor+0x5b4` when the input bridge runs. Current mapping is `adapter.ts`; attack code is `combat.ts`, melee start, projectile spawn. Per-borg action profiles are asset-backed but tuned, not decoded hit-bin semantics (`packages/combat/src/data/actionProfiles.json`, `packages/combat/src/actionProfiles.ts`). Next: one close B and one ranged B Dolphin trace. |
 | X | Special attack | L or X; gamepad button 2 | Starts special if cooldown is clear; current generic implementation is radial/AoE burst with cooldown and action lock | `CONFIRMED-ASSET` input, X bit bridge `DERIVED`, `TUNED` mechanic | Texture and in-battle HUD capture both show X special. GDB injection plus decomp prove X `0x00000400` reaches normalized PAD and survives the command mask into `actor+0x5b4` when the input bridge runs. Current mapping is `adapter.ts`; special path is `combat.ts`; constants are `constants.ts`. |
-| R | Lock-on switch (texture label: `ロックオン きりかえ`) | R or Tab; gamepad buttons 5 or 7 stand in for GC R | Human borgs auto-acquire locks; each R PRESS (edge-triggered) cycles to the next enemy by distance — never dead borgs, never self, never allies. The locked enemy is marked with a continuously spinning red ring reticle | Original input `CONFIRMED-ASSET`; current binding + enemy-only spinning reticle `CONFIRMED-CODE`; cycle algorithm `TUNED` | Texture shows R is switch-lock, not generic lock-on. Current code keeps Start/button 9 for pause and binds switch-lock to R-like buttons (`adapter.ts:147-148`, `:163`); the press latch lives in `battle.ts:242-262` and cycling in `combat.ts:142-153`. The reticle renders only over the local human's `lockTarget` and follows borg switches/deaths (`battleScene.ts:283-318`, `:542-`). Decomp search concluded no manual scan-select enemy-lock system exists (`behavior-notes.md:781-856`), so browser lock range/cone are tuned (`constants.ts:322-335`). Next: trace R in original battle to refine cycling order and camera behavior. |
-| Z | Ally lock-on (texture label: `みかた ロックオン`) | Z; gamepad left shoulder (button 4) stand-in | Each Z PRESS (edge-triggered) acquires the nearest same-team ally, or cycles allies if one is already locked; records a separate `allyLockTarget`, marked with a GREEN overhead arrow (different shape + color from the red enemy reticle); does not redirect attacks or trigger ally charge/power-up yet | `CONFIRMED-ASSET` input; Z bit bridge `DERIVED`; current binding + distinct ally marker `CONFIRMED-CODE`; target selection `TUNED`; charge behavior `UNKNOWN` | Texture proves Z ally-lock exists as a command label. GDB injection plus decomp prove Z `0x00000010` reaches normalized PAD and survives the command mask into `actor+0x5b4` when the input bridge runs. Current code carries this separately from enemy lock (`adapter.ts:149`, `:165`, `battle.ts:248-267`, `combat.ts:155-183`) so future charge/camera work has state to attach to; the ally marker is the extracted `arrow_mdl` geometry tinted green (`battleScene.ts:649-`). Next: trace Z with ally visible to identify original target choice, camera behavior, and charge/power-up side effects. |
+| L/R | Lock-on switch (texture label: `ロックオン きりかえ`) | Q = previous/L stand-in; R or Tab = next/R stand-in; gamepad left trigger = previous, right shoulder/trigger = next | Human borgs auto-acquire locks; R/request-2 cycles forward through the compact source enemy list, L/request-3 cycles backward, never dead borgs, never self, never allies. The locked enemy is marked with a continuously spinning red ring reticle | Original input `CONFIRMED-ASSET`; request mapping `DERIVED`; current binding + enemy-only spinning reticle `CONFIRMED-CODE` | `FUN_8005a298` maps source input bits to `+0x73c = 2/3`; `zz_006b450_` applies next/previous over the retained target-list index. Browser mapping uses Q because keyboard L is already X/special. The reticle renders only over the local human's `lockTarget` and follows borg switches/deaths. Exact native GC physical mapping still needs live trace. |
+| Z | Ally lock-on (texture label: `みかた ロックオン`) | Z; gamepad left shoulder (button 4) stand-in | Hold Z selects a same-team ally using source target-list state; release restores the retained enemy lock. Records a separate `allyLockTarget`, marked with a GREEN overhead arrow; does not redirect attacks or trigger ally charge/power-up yet | `CONFIRMED-ASSET` input; Z request mapping `DERIVED`; current binding + distinct ally marker `CONFIRMED-CODE`; charge behavior `UNKNOWN` | `FUN_8005a298` maps Z hold/release into `+0x73c = 5/4`; `zz_006b450_` saves/restores the enemy target while selecting allies through +0x73e. Future charge/power-up side effects remain trace-pending. |
 | Start | Pause / advance / skip, depending screen | Battle pause: Escape, Enter, gamepad button 9; Load Box skip currently S | Battle pause opens `PauseMenu`; menus use screen-specific handlers | Original battle binding `UNKNOWN`; current `CONFIRMED-CODE` | UI notes prove Start advances boot/title and Load Box has START=SKIP (`UI-FIDELITY-SPEC.md:59`, `:67-68`). Current pause poll is `main.ts:1345-1351`; Load Box keyboard skip is `LoadBoxData.ts:52-59`. Next: capture original pause/control screen for battle Start semantics. |
 | Manual borg switch | Unknown / not on control texture | none | Inactive; active borg changes only through death/auto-deploy | Current `CONFIRMED-CODE`, original manual input `UNKNOWN` | The browser E-key retirement/requeue path was removed because the texture shows no manual switch and decomp has death/swap timer anchors, not a proven manual switch button (`function-evidence-index.md:56-57`, `chunk_0076.c:3819-3821`, `:4844-4897`). Next: trace `0x802807ac`/`0x80281c38` while pressing candidate buttons and while a borg dies. |
 
@@ -121,16 +121,17 @@ These are current implementation facts, not claims about the original:
 | Attack | K or B | button 1 | `adapter.ts` |
 | Special | L or X | button 2 | `adapter.ts` |
 | Dash | Shift | none; pure lateral stick while locked auto-dodges | `adapter.ts:142`; `movement.ts:237-244` |
-| Lock request | U | button 6 | `adapter.ts:147`, `:162` |
-| Switch-lock (cycle enemy) | R or Tab | buttons 5 or 7 | `adapter.ts:148`, `:163`; edge-trigger latch `battle.ts:242-262`; Tab focus suppression in battle at `main.ts` |
-| Ally-lock | Z | button 4 stand-in | `adapter.ts:149`, `:165`; edge-trigger + target state `battle.ts:248-267`, `combat.ts:155-183` |
+| Lock request | U | none | diagnostic only; players auto-lock in combat core |
+| Switch-lock next | R or Tab | buttons 5 or 7 | source request 2; `adapter.ts`, `battle.ts` |
+| Switch-lock previous | Q | button 6 | source request 3; `adapter.ts`, `battle.ts` |
+| Ally-lock | Z | button 4 stand-in | source hold/release requests 5/4; `adapter.ts`, `battle.ts`, `combat.ts` |
 | Switch borg | none | none | `adapter.ts:145`; no battle-core consumer |
 | Pause | Escape or Enter | button 9 | `main.ts:1345-1351` |
 
 Known mismatches:
 
-- Current switch-lock is still a web stand-in for GC R; exact GameCube trigger semantics
-  need a live trace before calling the binding final.
+- Current switch-lock physical bindings are browser stand-ins for the GameCube shoulder cluster;
+  exact native button-to-request mapping still needs a live trace.
 - Current HUD labels special as X (`BattleHud.ts`), matching the control texture and
   the in-battle reference capture.
 
@@ -149,15 +150,16 @@ Known mismatches:
 
 ### Lock-On, Switch-Lock, Ally-Lock
 
-- Current browser lock-on is intentionally not a ROM-derived formula. `combat.ts` documents
-  that the decomp search found no button-triggered scan-and-select enemy-lock mechanic
-  (`packages/combat/src/combat.ts:60-75`).
-- Human-controlled borgs auto-acquire a target if none is valid; `switchLock` cycles targets.
-  R and Z are EDGE-TRIGGERED via 0/1 press latches in `cooldowns` (`switchLockHeld` /
-  `allyLockHeld`, same pattern as movement's `jumpHeld`; skipped by `stepCooldowns`), so
-  holding the button cycles exactly once per press (`packages/combat/src/battle.ts:242-267`).
-- The tuned enemy acquisition heuristic is nearest enemy in range/cone
-  (`packages/combat/src/combat.ts:119-153`, `packages/combat/src/constants.ts:322-335`).
+- Current browser lock-on now uses the recovered source-shaped target state: compact filtered
+  target-list indices mirror actor +0x73d/+0x73e, active target state mirrors +0x502/+0x503,
+  and R/Z write source request-byte families through the combat runtime. Initial null-target
+  acquisition uses the source nearest-candidate rule from `FUN_8006b850` / `zz_006b450_`:
+  eligible targets are scanned in source-list order, compared by 3D squared distance, and later
+  equal-distance entries win.
+- Human-controlled borgs keep continuous lock state while active. R/request-2 and L/request-3 are
+  edge-triggered switch-lock (+0x73c = 2/3). Z is hold-ally-lock: press/hold requests ally lock
+  (+0x73c = 5), release restores the retained enemy lock (+0x73c = 4). The press latches live
+  in `cooldowns` (`switchLockHeld` / `allyLockHeld`, skipped by `stepCooldowns`).
 - Marker rendering (browser, `apps/game/src/sim/battleScene.ts:283-318`): the enemy reticle —
   a continuously spinning red ring with inward blue triangles, a TUNED canvas stand-in
   transcribed from `apps/game/reference/captures/challenge-8-in-battle-hud.png` (no extracted
@@ -172,10 +174,9 @@ Known mismatches:
   (`chunk_0003.c:5844-5956`), and the damage resolver writes target reaction fields
   (`chunk_0003.c:7473-7484`, `:7718`). Behavior note conclusion is
   `research/decomp/behavior-notes.md:781-856`.
-- Ally-lock is still a gameplay gap: the asset says Z is ally-lock, and current code now
-  records a separate same-team `allyLockTarget` (edge-triggered acquire-nearest, then cycle
-  on repeat presses, `packages/combat/src/combat.ts:155-183`) with a distinct green marker,
-  but the original charge/power-up behavior remains untraced. Enemy lock targets remain
+- Ally-lock target selection now records a separate same-team `allyLockTarget` while Z is held,
+  uses the same source-shaped target state as enemy lock, and restores the retained enemy on
+  release. Original partner charge/power-up behavior remains untraced. Enemy lock targets remain
   enemy-only.
 
 ### Jump/Fly

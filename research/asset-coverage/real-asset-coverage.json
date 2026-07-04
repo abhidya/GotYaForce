@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-04T05:56:45.474Z",
+  "generatedAt": "2026-07-04T20:20:58.906Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -837,7 +837,7 @@
       "parses": true,
       "stageCount": 40,
       "completeVisualCount": 40,
-      "collisionCoveredCount": 18,
+      "collisionCoveredCount": 40,
       "renderStateCoveredCount": 40,
       "stageIds": [
         "st00",
@@ -1026,11 +1026,11 @@
         "fallback": "packages/missions/src/combat-config.ts:27"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:371",
+        "loadStage": "apps/game/src/main.ts:467",
         "fetchStageManifest": "packages/assets/src/index.ts:186",
         "loadStageCollision": "packages/assets/src/index.ts:296",
         "parseStageHitGrid": "packages/assets/src/index.ts:308",
-        "loadDefaultArena": "apps/game/src/main.ts:402",
+        "loadDefaultArena": "apps/game/src/main.ts:498",
         "loadConvertedStage": "apps/game/src/main.ts:null"
       },
       "collisionBounds": {
@@ -1062,7 +1062,7 @@
       "copyReady": 13,
       "exported": 13,
       "modelFiles": 813,
-      "textureFiles": 55
+      "textureFiles": 256
     },
     "requestedScenes": [
       {
@@ -1146,7 +1146,7 @@
           "apps/game/public/ui/scenes/entry00/model_27.glb",
           "apps/game/public/ui/scenes/entry00/model_28.glb"
         ],
-        "textureCount": 2,
+        "textureCount": 4,
         "nextCommand": null
       },
       {
@@ -1208,7 +1208,7 @@
           "apps/game/public/ui/scenes/rpot20/model_19.glb",
           "apps/game/public/ui/scenes/rpot20/model_20.glb"
         ],
-        "textureCount": 4,
+        "textureCount": 5,
         "nextCommand": null
       },
       {
@@ -1238,7 +1238,7 @@
           "apps/game/public/ui/scenes/rpot21/model_19.glb",
           "apps/game/public/ui/scenes/rpot21/model_20.glb"
         ],
-        "textureCount": 4,
+        "textureCount": 5,
         "nextCommand": null
       },
       {
@@ -1268,7 +1268,7 @@
           "apps/game/public/ui/scenes/rpot22/model_19.glb",
           "apps/game/public/ui/scenes/rpot22/model_20.glb"
         ],
-        "textureCount": 4,
+        "textureCount": 5,
         "nextCommand": null
       },
       {
@@ -1298,7 +1298,7 @@
           "apps/game/public/ui/scenes/rpot23/model_19.glb",
           "apps/game/public/ui/scenes/rpot23/model_20.glb"
         ],
-        "textureCount": 4,
+        "textureCount": 5,
         "nextCommand": null
       },
       {
@@ -1387,7 +1387,7 @@
           "apps/game/public/ui/scenes/staff00/model_78.glb",
           "apps/game/public/ui/scenes/staff00/model_79.glb"
         ],
-        "textureCount": 2,
+        "textureCount": 5,
         "nextCommand": null
       },
       {
@@ -1433,7 +1433,7 @@
           "apps/game/public/ui/scenes/tl00/model_35.glb",
           "apps/game/public/ui/scenes/tl00/model_36.glb"
         ],
-        "textureCount": 4,
+        "textureCount": 10,
         "nextCommand": null
       },
       {
@@ -1644,7 +1644,7 @@
           "apps/game/public/ui/scenes/unitall/model_98.glb",
           "apps/game/public/ui/scenes/unitall/model_99.glb"
         ],
-        "textureCount": 1,
+        "textureCount": 161,
         "nextCommand": null
       },
       {
@@ -1818,7 +1818,7 @@
           "apps/game/public/ui/scenes/vsel00/model_98.glb",
           "apps/game/public/ui/scenes/vsel00/model_99.glb"
         ],
-        "textureCount": 12,
+        "textureCount": 30,
         "nextCommand": null
       },
       {
@@ -1992,7 +1992,7 @@
           "apps/game/public/ui/scenes/vsel01/model_98.glb",
           "apps/game/public/ui/scenes/vsel01/model_99.glb"
         ],
-        "textureCount": 9,
+        "textureCount": 17,
         "nextCommand": null
       }
     ]
@@ -2488,6 +2488,8 @@
     "actorDataStatOffsets": {
       "recordSize": 432,
       "offsets": {
+        "typeCode": "0x01a0",
+        "airJump": "0x01a3",
         "defense": "0x01a4",
         "shot": "0x01a5",
         "attack": "0x01a6",
@@ -2495,35 +2497,39 @@
       },
       "matchedMetadataRows": 190,
       "exactMatches": {
+        "typeCode": 190,
+        "airJump": 175,
         "defense": 190,
         "shot": 190,
         "attack": 190,
         "speed": 190
       },
+      "airJumpUnverifiable": 15,
       "allFieldsExact": true,
       "mismatches": [],
-      "assessment": "defense/shot/attack/speed are exact unsigned-byte matches at pl####data.bin offsets 0x1a4..0x1a7 for every actor-data file that has borgs.json metadata."
+      "assessment": "typeCode/defense/shot/attack/speed are exact unsigned-byte matches for every actor-data file that has borgs.json metadata. airJump is exact on the verifiable jump domains: `Air jump level N` -> N and `Boost jump` -> 0; most `N/A` flyers carry sentinel/no-count byte 0xff."
     },
     "runtimeBinding": {
       "appImportsBorgsJson": true,
       "actorDataStatsJsonExists": true,
       "actorDataStatsAccessorExists": true,
       "buildProfileUsesActorDataStats": true,
+      "buildProfileUsesActorDataAirJump": true,
       "actorDataStatsBoundToCombat": true,
       "buildProfileConsumesBorgsJsonFields": true,
       "combatConstantsDeclareTunedFormulas": true,
       "formatsPzzStillTodo": false,
       "refs": {
-        "appBorgImport": "apps/game/src/main.ts:23",
-        "buildProfile": "packages/combat/src/stats.ts:108",
-        "actorDataStats": "packages/combat/src/actorDataStats.ts:25",
+        "appBorgImport": "apps/game/src/sim/borgCatalog.ts:1",
+        "buildProfile": "packages/combat/src/stats.ts:149",
+        "actorDataStats": "packages/combat/src/actorDataStats.ts:37",
         "actorDataStatsJson": "packages/combat/src/data/actorDataStats.json",
-        "tunedFormulaNote": "packages/combat/src/constants.ts:28",
+        "tunedFormulaNote": "packages/combat/src/constants.ts:52",
         "pzzParser": "packages/formats/src/pzz.ts:103"
       },
-      "assessment": "Runtime combat profiles now bind defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, jump, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven."
+      "assessment": "Runtime combat profiles now bind typeCode/airJump/defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, flyer classification, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven."
     },
-    "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. defense/shot/attack/speed are now exact-mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation."
+    "assessment": "cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. typeCode/airJump/defense/shot/attack/speed are now mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation."
   },
   "typeDamageEvidence": {
     "generatedModule": "packages/combat/src/typeDamage.generated.ts",
@@ -2667,10 +2673,10 @@
       }
     ],
     "runtimeResolverRefs": {
-      "slotLabels": "apps/game/src/sim/borgPresentationAssets.ts:112",
-      "slotFallbacks": "apps/game/src/sim/borgPresentationAssets.ts:158",
-      "pickAnimBank": "apps/game/src/sim/borgPresentationAssets.ts:426",
-      "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:270"
+      "slotLabels": "apps/game/src/sim/borgPresentationAssets.ts:123",
+      "slotFallbacks": "apps/game/src/sim/borgPresentationAssets.ts:173",
+      "pickAnimBank": "apps/game/src/sim/borgPresentationAssets.ts:451",
+      "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:627"
     },
     "boostFlyMapped": true
   },
@@ -2678,9 +2684,9 @@
     "battleStateHasItems": false,
     "battleRuntimeSpawnsDrops": false,
     "evidenceRefs": {
-      "battleState": "packages/combat/src/types.ts:425",
-      "deployNextBorg": "packages/combat/src/battle.ts:234",
-      "deathProcessing": "packages/combat/src/battle.ts:505",
+      "battleState": "packages/combat/src/types.ts:542",
+      "deployNextBorg": "packages/combat/src/battle.ts:239",
+      "deathProcessing": "packages/combat/src/battle.ts:559",
       "particleInventory": "research/asset-inventory/particle-effect-inventory.json",
       "hudInventory": "research/asset-inventory/ui-hud-assets.md"
     },

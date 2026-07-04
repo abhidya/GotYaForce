@@ -24,6 +24,7 @@ import {
   activeSourceTargetUid,
   isBusy,
   refreshSourceTargetLock,
+  sourceReleaseAllyLock,
   resetProjectileCounter,
   sourceSwitchAllyLock,
   sourceSwitchEnemyLock,
@@ -448,19 +449,28 @@ class BattleImpl implements Battle {
       // the discrete slow/haste/freeze/size-tier/hero-buff timers regardless of hit reaction.
       stepHitStatus(b);
 
-      // Source lock-on is continuous for active borgs; R (switch-lock) and Z (ally-lock) are
-      // EDGE-TRIGGERED via 0/1 press latches stored in
-      // cooldowns (same pattern as movement's jumpHeld; stepCooldowns skips them): holding the
-      // button must cycle exactly once per press, not re-cycle at 60 Hz.
+      // Source lock-on is continuous for active borgs. R/L are edge-triggered switch-lock
+      // (+0x73c = 2/3). Z is hold-ally-lock: press requests ally lock (+0x73c = 5), release
+      // restores the retained enemy lock (+0x73c = 4). Latches live in cooldowns like
+      // movement's jumpHeld, and stepCooldowns skips them.
       const switchLockPressed = input.switchLock && (b.cooldowns["switchLockHeld"] ?? 0) === 0;
+      const switchLockPrevPressed =
+        input.switchLockPrev && (b.cooldowns["switchLockPrevHeld"] ?? 0) === 0;
       b.cooldowns["switchLockHeld"] = input.switchLock ? 1 : 0;
-      const allyLockPressed = input.allyLock && (b.cooldowns["allyLockHeld"] ?? 0) === 0;
+      b.cooldowns["switchLockPrevHeld"] = input.switchLockPrev ? 1 : 0;
+      const allyLockWasHeld = (b.cooldowns["allyLockHeld"] ?? 0) !== 0;
+      const allyLockPressed = input.allyLock && !allyLockWasHeld;
+      const allyLockReleased = !input.allyLock && allyLockWasHeld;
       b.cooldowns["allyLockHeld"] = input.allyLock ? 1 : 0;
 
       if (switchLockPressed) {
         sourceSwitchEnemyLock(b, all, "next");
+      } else if (switchLockPrevPressed) {
+        sourceSwitchEnemyLock(b, all, "prev");
       } else if (allyLockPressed) {
         sourceSwitchAllyLock(b, all);
+      } else if (allyLockReleased) {
+        sourceReleaseAllyLock(b, all);
       } else {
         refreshSourceTargetLock(b, all);
       }

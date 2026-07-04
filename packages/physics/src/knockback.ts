@@ -45,10 +45,10 @@
 //     plxxxxhit.bin/comhit.bin per-move record format (research/format-specs/hit-bin-format.md).
 //     Until that format is cracked, callers pass trimYaw/trimPitch = 0 (TUNED default, i.e.
 //     "no trim" rather than a guessed nonzero value).
-//   - The actual KNOCKBACK MAGNITUDE (how far/hard the target launches once the direction is
-//     known) is NOT computed by this ROM function at all — it only ever writes angle fields.
-//     MELEE.KNOCKBACK / SHOT.KNOCKBACK / SPECIAL.KNOCKBACK in constants.ts remain TUNED flat
-//     scalars; only the DIRECTION those scalars get multiplied into is upgraded here.
+//   - The actual KNOCKBACK MAGNITUDE is not computed by `zz_00300bc_` itself — this function
+//     only writes angle fields. Magnitude was resolved in a separate 2026-07-04 pass: combat.ts
+//     now derives it from the hit record's +0x0d strength byte through gauges.ts
+//     knockbackVelocityForRecord(record), then applies source-independent per-move multipliers.
 
 import {
   BAM16_PER_RADIAN,
@@ -147,8 +147,8 @@ export function angleTrimByteToBam16(trimByte: number): number {
 
 /**
  * BAM16 angle -> unit direction vector on the XZ plane (yaw only; ignores pitch — matches how
- * combat.ts currently only consumes the horizontal knockback direction, since vertical "pop-up"
- * is handled separately as a TUNED constant in applyHit()).
+ * combat.ts currently only consumes the horizontal knockback direction; standard vertical
+ * knockback is source-derived zero, with only forced knockdown launch pop handled separately.
  */
 export function bam16YawToXZ(yaw: number): Vec3 {
   const rad = yaw / BAM16_PER_RADIAN;
@@ -158,8 +158,7 @@ export function bam16YawToXZ(yaw: number): Vec3 {
 /**
  * Full ROM-accurate direction for a melee/shot/special hit, given only attacker and target
  * positions (mode 1 — the only mode fully computable from data this port tracks). Returns a
- * normalized-ish XZ direction vector ready to multiply by a (still-TUNED) knockback magnitude
- * scalar in combat.ts's applyHit().
+ * normalized-ish XZ direction vector ready for combat.ts's strength-indexed magnitude model.
  *
  * `trimYaw` defaults to 0 (see angleTrimByteToBam16 — no real per-move trim data ported yet).
  */

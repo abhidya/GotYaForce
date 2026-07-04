@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-04T05:56:45.474Z
+Generated: 2026-07-04T20:20:58.906Z
 
 ## Summary
 
@@ -84,9 +84,9 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 
 ## Stage Coverage
 
-Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 18 have collision bins.
+Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 40 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:371, packages/assets/src/index.ts:186, packages/assets/src/index.ts:296, packages/assets/src/index.ts:308, apps/game/src/main.ts:402, apps/game/src/main.ts:null
+Runtime loader refs: apps/game/src/main.ts:467, packages/assets/src/index.ts:186, packages/assets/src/index.ts:296, packages/assets/src/index.ts:308, apps/game/src/main.ts:498, apps/game/src/main.ts:null
 
 Runtime collision parser: @gf/formats (bounds wired, triangles wired, walls wired, ceilings wired)
 
@@ -182,19 +182,19 @@ Actor data reference files: 198 (432 bytes each).
 | 0 | user-data/GG4E/afs_data/root/pl0f05data.bin | pl0f05 ROACH | GF 30, HP 60/78, shot 1, attack 0, speed 2 |
 | 1 | user-data/GG4E/afs_data/root/pl0f06data.bin | pl0f06 DEATH EYE | GF 10, HP 30/48, shot 1, attack 0, speed 2 |
 
-cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. defense/shot/attack/speed are now exact-mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation.
+cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. typeCode/airJump/defense/shot/attack/speed are now mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation.
 
-Actor-data combat-stat offsets:
-defense/shot/attack/speed are exact unsigned-byte matches at pl####data.bin offsets 0x1a4..0x1a7 for every actor-data file that has borgs.json metadata.
+Actor-data runtime offsets:
+typeCode/defense/shot/attack/speed are exact unsigned-byte matches for every actor-data file that has borgs.json metadata. airJump is exact on the verifiable jump domains: `Air jump level N` -> N and `Boost jump` -> 0; most `N/A` flyers carry sentinel/no-count byte 0xff.
 
 Runtime binding:
-- App imports borgs.json: yes (apps/game/src/main.ts:23)
+- App imports borgs.json: yes (apps/game/src/sim/borgCatalog.ts:1)
 - Generated actor-data stats JSON: yes (packages/combat/src/data/actorDataStats.json)
-- Combat buildProfile consumes actor-data stats: yes (packages/combat/src/stats.ts:108)
-- Combat buildProfile consumes stats: yes (packages/combat/src/stats.ts:108)
-- Combat formulas still marked tuned: yes (packages/combat/src/constants.ts:28)
+- Combat buildProfile consumes actor-data stats: yes (packages/combat/src/stats.ts:149)
+- Combat buildProfile consumes stats and discrete air-jump count: yes (packages/combat/src/stats.ts:149)
+- Combat formulas still marked tuned: yes (packages/combat/src/constants.ts:52)
 - Generic PZZ package parser implemented: yes (packages/formats/src/pzz.ts:103)
-Runtime combat profiles now bind defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, jump, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven.
+Runtime combat profiles now bind typeCode/airJump/defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, flyer classification, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven.
 
 Type damage matrix:
 - Generated from DOL tables: yes (packages/combat/src/typeDamage.generated.ts:720)
@@ -218,7 +218,7 @@ Battle camera mode-1 blend:
 ## Borg Animation Coverage
 
 Validator report: research/asset-inventory/borg-animation-action-gaps.md
-Runtime resolver refs: apps/game/src/sim/borgPresentationAssets.ts:112, apps/game/src/sim/borgPresentationAssets.ts:158, apps/game/src/sim/borgPresentationAssets.ts:426, apps/game/src/sim/battleScene.ts:270
+Runtime resolver refs: apps/game/src/sim/borgPresentationAssets.ts:123, apps/game/src/sim/borgPresentationAssets.ts:173, apps/game/src/sim/borgPresentationAssets.ts:451, apps/game/src/sim/battleScene.ts:627
 Animation indexes parsed: 208/208; exported banks: 8633; canonical slot checks: 2704.
 Direct matches: 2704; fallbacks: 0; missing: 0; parse errors: 0.
 Fly/boost mapping: fly state resolves through exported boost labels.
@@ -243,7 +243,7 @@ Fly/boost mapping: fly state resolves through exported boost labels.
 
 Items/powerups in BattleState: no
 Runtime spawns item/drop/pickup entities: no
-Evidence refs: packages/combat/src/types.ts:425, packages/combat/src/battle.ts:234, packages/combat/src/battle.ts:505, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
+Evidence refs: packages/combat/src/types.ts:542, packages/combat/src/battle.ts:239, packages/combat/src/battle.ts:559, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
 Asset leads: item model ARZ count 90, as_icon documented yes, comhit documented yes.
 Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory.
 

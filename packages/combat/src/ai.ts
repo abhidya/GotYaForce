@@ -1,10 +1,10 @@
 // Simple CPU AI: produce a PlayerInput for a borg whose ownerPlayer === null (CPU), or for
-// a CPU-ally / single-player opponent. Behaviour: keep a valid target, otherwise seek the
-// nearest enemy, hold preferred engage range, lock on, and attack when in range. Deterministic.
+// a CPU-ally / single-player opponent. Behaviour: consume the battle's resolved lock target,
+// hold preferred engage range, lock on, and attack when in range. Deterministic.
 
 import { distXZ } from "@gf/physics";
 import { actionProfileForProfile } from "./actionProfiles.js";
-import { meleeEngageRangeFor, X_CHARGE } from "./combat.js";
+import { activeSourceTargetUid, meleeEngageRangeFor, X_CHARGE } from "./combat.js";
 import { AI, MOVE } from "./constants.js";
 import { exactMeleeForBorgId } from "./meleeExactData.js";
 import { groundRunSpeedForBorgId } from "./movementData.js";
@@ -17,23 +17,10 @@ function isEnemy(self: BorgRuntime, other: BorgRuntime): boolean {
 }
 
 function currentLockedEnemy(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null {
-  if (!self.lockTarget) return null;
-  const target = all.find((o) => o.uid === self.lockTarget);
+  const uid = activeSourceTargetUid(self);
+  if (!uid) return null;
+  const target = all.find((o) => o.uid === uid);
   return target && isEnemy(self, target) ? target : null;
-}
-
-function nearestEnemy(self: BorgRuntime, all: BorgRuntime[]): BorgRuntime | null {
-  let best: BorgRuntime | null = null;
-  let bestD = Infinity;
-  for (const o of all) {
-    if (!isEnemy(self, o)) continue;
-    const d = distXZ(self.pos, o.pos);
-    if (d < bestD) {
-      bestD = d;
-      best = o;
-    }
-  }
-  return best;
 }
 
 /**
@@ -64,18 +51,13 @@ function ownGroundSpeed(self: BorgRuntime, p: BorgProfile): number {
  */
 export function stepAI(self: BorgRuntime, p: BorgProfile, all: BorgRuntime[]): PlayerInput {
   const input = emptyInput();
-  const target = currentLockedEnemy(self, all) ?? nearestEnemy(self, all);
+  const target = currentLockedEnemy(self, all);
   if (!target) return input;
 
   // Always try to keep a lock so projectiles home and facing tracks.
   input.lockOn = true;
 
   const d = distXZ(self.pos, target.pos);
-  const dx = target.pos.x - self.pos.x;
-  const dz = target.pos.z - self.pos.z;
-  const inv = d > 1e-3 ? 1 / d : 0;
-  const dirX = dx * inv;
-  const dirZ = dz * inv;
 
   // Per-borg melee window (melee workstream): the borg's ACTUAL meleeDef.range replaces the
   // flat AI.MELEE_RANGE as the desired distance, and the attack gate uses the same shared
@@ -90,9 +72,8 @@ export function stepAI(self: BorgRuntime, p: BorgProfile, all: BorgRuntime[]): P
 
   // Movement intent. While locked to `target`, stepMovement resolves the stick TARGET-
   // RELATIVE (resolveHorizontalIntent: +moveZ = toward the lock target, -moveZ = away), so
-  // emit lock-relative input — the old world-space direction got rotated by that resolver
-  // and melee AI orbited instead of closing. Unlocked (e.g. lock not yet acquired this
-  // frame), keep the world-space fallback.
+  // emit lock-relative input. AI no longer runs an independent nearest-enemy selector; lock
+  // acquisition lives in the shared source-shaped target state.
   //
   // RAW-SCALE RETUNE (2026-07-04): kite slack is now proportional to the borg's OWN
   // groundRunSpeedForBorgId (movementData.ts) instead of the flat AI.RANGE_SLACK (60 units,
@@ -100,24 +81,11 @@ export function stepAI(self: BorgRuntime, p: BorgProfile, all: BorgRuntime[]): P
   // TUNED port-ism (no isolated CPU decision function exists in the ROM — cpu-ai-evidence.md).
   const ownSpeed = ownGroundSpeed(self, p);
   const kiteSlack = Math.max(AI.RANGE_SLACK, ownSpeed * AI.KITE_SLACK_SPEED_MULT);
-  const lockedToTarget = self.lockTarget === target.uid;
   const farFromDesired = d > desired + kiteSlack;
   if (farFromDesired) {
-    // Approach.
-    if (lockedToTarget) {
-      input.moveZ = 1;
-    } else {
-      input.moveX = dirX;
-      input.moveZ = dirZ;
-    }
+    input.moveZ = 1;
   } else if (d < desired - kiteSlack) {
-    // Back off (ranged kiting / spacing).
-    if (lockedToTarget) {
-      input.moveZ = -1;
-    } else {
-      input.moveX = -dirX;
-      input.moveZ = -dirZ;
-    }
+    input.moveZ = -1;
   }
 
   // Dash to close ground when well outside engage range. RAW-SCALE RETUNE (2026-07-04):

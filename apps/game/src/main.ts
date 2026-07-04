@@ -1112,6 +1112,7 @@ function followCamera(): void {
           pos: target,
           rotY: focus.rotY,
           lockTargetPos,
+          lockTargetKey: activeTargetUid,
           lockCameraState: focus.targetLockState?.cameraState ?? 2,
         }
       : null;

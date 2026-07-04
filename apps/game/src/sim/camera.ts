@@ -68,6 +68,8 @@ export interface CameraFollowTarget {
   rotY: number;
   /** Runtime actor+0x50c target position used by lock-on camera states 3/4. */
   lockTargetPos?: THREE.Vector3 | null;
+  /** Stable runtime uid for actor+0x508; used to reset camera state on source retargets. */
+  lockTargetKey?: string | null;
   /** camera+0x2e6 state: 2 no-lock, 3 lock follow, 4 lock/unlock transition. */
   lockCameraState?: 2 | 3 | 4;
 }
@@ -184,6 +186,9 @@ export class BattleCamera {
   private readonly approachTrail = new THREE.Vector3();
   private approachDistance = 0;
   private approachEyeY = 0;
+  /** Internal camera+0x2e6 state. Combat seeds retarget/loss requests; camera advances it. */
+  private sourceCameraState: 2 | 3 | 4 = 2;
+  private lastLockTargetKey: string | null = null;
 
   constructor(private readonly opts: BattleCameraOptions) {}
 
@@ -191,6 +196,8 @@ export class BattleCamera {
     this.approachActive = false;
     this.approachDistance = 0;
     this.approachEyeY = 0;
+    this.sourceCameraState = 2;
+    this.lastLockTargetKey = null;
     if (!primary) {
       this.initialized = false;
       return;
@@ -269,9 +276,12 @@ export class BattleCamera {
     const horizontalDist = Math.hypot(this.goalEye.x - focusBase.x, this.goalEye.z - focusBase.z);
     const distance = Math.min(followMax, Math.max(followMin, horizontalDist));
 
-    const lockCameraState = primary.lockCameraState ?? (primary.lockTargetPos ? 3 : 2);
+    const lockCameraState = this.resolveSourceCameraState(primary, camera.position, interest);
     if (lockCameraState === 3 && primary.lockTargetPos) {
-      this.updateLockFollow(camera.position, interest, primary.lockTargetPos, distance, extraHeight);
+      const stillTurning = this.updateLockFollow(camera.position, interest, primary.lockTargetPos, distance, extraHeight);
+      // FUN_8000cf28 writes camera+0x2e6 = 4 once FUN_80045460 no longer has more than the
+      // max rotation left. The frame that catches up still runs state 3; state 4 starts next frame.
+      if (!stillTurning) this.sourceCameraState = 4;
       return;
     }
     if (lockCameraState === 4) {
@@ -312,13 +322,14 @@ export class BattleCamera {
     lockTarget: THREE.Vector3,
     distance: number,
     extraHeight: number,
-  ): void {
+  ): boolean {
     _trail.set(this.goalEye.x - interest.x, 0, this.goalEye.z - interest.z);
     _eyeGoal.set(interest.x - lockTarget.x, 0, interest.z - lockTarget.z);
-    rotateTrailTowardXZ(_trail, _eyeGoal, MODE1_LOCK_TRAIL_MAX_RADIANS_DERIVED);
+    const stillTurning = rotateTrailTowardXZ(_trail, _eyeGoal, MODE1_LOCK_TRAIL_MAX_RADIANS_DERIVED);
     desiredFromTrail(_desired, interest, _trail, distance, extraHeight);
     blendGoalEye(this.goalEye, _desired, MODE1_LOCK_PREV_WEIGHT_DERIVED, MODE1_LOCK_NEW_WEIGHT_DERIVED);
     reprojectGoalEye(eyeOut, this.goalEye, interest, distance);
+    return stillTurning;
   }
 
   /** Ported FUN_8000d11c (camera state 4): lock/unlock transition. With no target it trails
@@ -423,6 +434,42 @@ export class BattleCamera {
       this.approachActive = false;
       this.goalEye.copy(eyeOut);
     }
+  }
+
+  private resolveSourceCameraState(
+    primary: CameraFollowTarget,
+    eye: THREE.Vector3,
+    interest: THREE.Vector3,
+  ): 2 | 3 | 4 {
+    const rawSeed = primary.lockCameraState ?? (primary.lockTargetPos ? 3 : 2);
+    const seededState = primary.lockTargetPos && rawSeed === 2 ? 3 : rawSeed;
+    const lockKey = primary.lockTargetPos ? primary.lockTargetKey ?? "__lock_target__" : null;
+
+    if (!primary.lockTargetPos) {
+      this.sourceCameraState = 2;
+      this.lastLockTargetKey = null;
+      return this.sourceCameraState;
+    }
+
+    if (lockKey !== this.lastLockTargetKey) {
+      this.sourceCameraState = seededState === 4 ? 4 : 3;
+      this.lastLockTargetKey = lockKey;
+    } else if (seededState === 4) {
+      this.sourceCameraState = 4;
+    } else if (this.sourceCameraState === 2) {
+      this.sourceCameraState = 3;
+    }
+
+    // FUN_8000cb8c can re-enter state 3 from state 4 when the lock target crosses in front of
+    // the interest point in camera-local forward depth.
+    if (
+      this.sourceCameraState === 4 &&
+      shouldState4ReenterLockFollow(eye, interest, primary.lockTargetPos)
+    ) {
+      this.sourceCameraState = 3;
+    }
+
+    return this.sourceCameraState;
   }
 
   /** Pre-§ad approximation (explicit fallback): fixed base distance 485 behind the borg's
@@ -542,7 +589,7 @@ function normalizeTrailOrDefault(trail: THREE.Vector3): void {
   }
 }
 
-function rotateTrailTowardXZ(current: THREE.Vector3, target: THREE.Vector3, maxRadians: number): void {
+function rotateTrailTowardXZ(current: THREE.Vector3, target: THREE.Vector3, maxRadians: number): boolean {
   normalizeTrailOrDefault(current);
   normalizeTrailOrDefault(target);
   const currentYaw = Math.atan2(current.x, current.z);
@@ -551,6 +598,20 @@ function rotateTrailTowardXZ(current: THREE.Vector3, target: THREE.Vector3, maxR
   const step = Math.max(-maxRadians, Math.min(maxRadians, delta));
   const yaw = currentYaw + step;
   current.set(Math.sin(yaw), 0, Math.cos(yaw));
+  return Math.abs(delta) > maxRadians;
+}
+
+function shouldState4ReenterLockFollow(
+  eye: THREE.Vector3,
+  interest: THREE.Vector3,
+  lockTarget: THREE.Vector3,
+): boolean {
+  _forward.set(interest.x - eye.x, 0, interest.z - eye.z);
+  if (_forward.lengthSq() <= MODE1_TRAIL_EPSILON_DERIVED * MODE1_TRAIL_EPSILON_DERIVED) return false;
+  _forward.normalize();
+  const interestDepth = (interest.x - eye.x) * _forward.x + (interest.z - eye.z) * _forward.z;
+  const targetDepth = (lockTarget.x - eye.x) * _forward.x + (lockTarget.z - eye.z) * _forward.z;
+  return targetDepth < interestDepth;
 }
 
 function transitionNewWeight(distance: number): number {

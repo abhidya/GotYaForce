@@ -1,7 +1,7 @@
 // Public types for the deterministic battle API. Mirrors the contract in the task brief.
 // Control scheme (CONFIRMED from the game's controls screen + lock-relative movement trace):
 //   A=jump, B=attack(melee/contextual), X=special, R=switch lock-on target,
-//   Z=ally lock-on (target selection only; ally charge/power-up behavior not decoded yet),
+//   hold Z=ally lock-on (target selection only; ally charge/power-up behavior not decoded yet),
 //   stick=move in the target-relative frame while locked. Pure left/right is a dodge step
 //   (surfaced as `dash`); forward+left/right is circle-strafe.
 
@@ -34,9 +34,11 @@ export interface PlayerInput {
   special: boolean;
   /** Acquire / hold lock-on for non-player callers; human-controlled borgs auto-lock by default. */
   lockOn: boolean;
-  /** R — cycle lock-on target. */
+  /** R — cycle lock-on target forward/source request +0x73c=2. */
   switchLock: boolean;
-  /** Z — ally lock-on request. Target selection is modeled; ally charge behavior is still unknown. */
+  /** L — cycle lock-on target backward/source request +0x73c=3. */
+  switchLockPrev: boolean;
+  /** Hold Z — ally lock-on request; release restores the retained enemy lock. Ally charge behavior is still unknown. */
   allyLock: boolean;
   /** Reserved/prototype; Challenge battle core ignores manual switching until original proof exists. */
   switchBorg: boolean;
@@ -56,6 +58,7 @@ export function emptyInput(): PlayerInput {
     special: false,
     lockOn: false,
     switchLock: false,
+    switchLockPrev: false,
     allyLock: false,
     switchBorg: false,
     dash: false,
@@ -165,9 +168,10 @@ export interface BorgRuntime {
    * Per-weapon ammo cells (struct+0x774/+0x77c/+0x784, stride 8; ROM models 3). Optional and
    * lazily initialized (same convention as `meleeHitUids` below) so existing constructors/
    * fakes that only set `ammo` keep compiling — combat.ts's ammo helpers self-heal it from
-   * the borg's action profile on first use. Weapon 0 mirrors `ammo` and drives the existing
-   * shot path (B); cells 1/2 exist structurally but are unused until the per-weapon command
-   * resolver lands (ATK-009 "Required behavior").
+   * the borg's action profile on first use. Weapon 0 mirrors `ammo` and drives B shot ammo;
+   * weapon 1 drives X/special ammo where the extracted stat row supplies a max/refill cell.
+   * Weapon 2 remains inert because the recovered per-borg stat row only carries two weapon
+   * segments.
    */
   weaponCells?: WeaponCell[];
   /** Named cooldown timers (frames remaining). */

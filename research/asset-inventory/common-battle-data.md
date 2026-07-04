@@ -1,11 +1,11 @@
 # Common Battle Data Inventory
 
-Generated: 2026-07-02T04:19:54.601Z
+Generated: 2026-07-04T20:20:51.212Z
 Scanner: `scripts/inventory-common-battle-data.mjs`
 
 ## Scope
 
-Byte-level inventory for common battle data and actor-data records. Four combat-stat bytes are named only where they match every metadata-backed pl####data.bin record exactly.
+Byte-level inventory for common battle data and actor-data records. Actor-data fields are named only where they match every metadata-backed pl####data.bin record exactly, or where the verifiable metadata domain proves the byte semantics.
 
 ## Summary
 
@@ -15,7 +15,8 @@ Byte-level inventory for common battle data and actor-data records. Four combat-
 - Member 003 splits into 2 x 432-byte candidate records.
 - Exact actor-data matches: pl0f05 ROACH, pl0f06 DEATH EYE.
 - Actor-data stat offsets exact: yes (190 metadata rows).
-- Runtime binds actor-data combat stats: yes.
+- Actor-data air-jump offset exact: yes on 175 verifiable Air jump/Boost jump rows; 15 N/A rows carry sentinel/no-count values.
+- Runtime binds actor-data combat stats and discrete air-jump count: yes.
 
 ## Candidate Records
 
@@ -56,12 +57,14 @@ Same-offset u16 values observed in actor data: 216
 | `user-data/GG4E/afs_data/root/pl0c06data.bin` | LEOPARD | 361 | 173 | 164 | 69 | 0.8356 |
 | `user-data/GG4E/afs_data/root/pl0c01data.bin` | GATLING TANK | 362 | 171 | 164 | 67 | 0.838 |
 
-## Actor Data Combat Stat Offsets
+## Actor Data Runtime Offsets
 
-defense/shot/attack/speed are exact unsigned-byte matches at pl####data.bin offsets 0x1a4..0x1a7 for every actor-data file that has borgs.json metadata.
+typeCode/defense/shot/attack/speed are exact unsigned-byte matches for every actor-data file that has borgs.json metadata. airJump is exact on the verifiable jump domains: `Air jump level N` -> N and `Boost jump` -> 0; most `N/A` flyers carry sentinel/no-count byte 0xff.
 
 | Field | Offset | Exact matches |
 |---|---:|---:|
+| typeCode | `0x01a0` | 190/190 |
+| airJump | `0x01a3` | 175/175 verifiable + 15 N/A sentinel rows |
 | defense | `0x01a4` | 190/190 |
 | shot | `0x01a5` | 190/190 |
 | attack | `0x01a6` | 190/190 |
@@ -69,19 +72,19 @@ defense/shot/attack/speed are exact unsigned-byte matches at pl####data.bin offs
 
 ## Assessment
 
-cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. defense/shot/attack/speed are now exact-mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation.
+cmn_data.pzz member 003 cleanly splits into 432-byte records, the same stride as pl####data.bin actor data. typeCode/airJump/defense/shot/attack/speed are now mapped actor-data bytes and runtime-bound; the remaining common-record fields still require DOL/runtime trace or HexWorkshop bookmark correlation.
 
 ## Runtime Binding
 
-- App imports borgs.json: yes (apps/game/src/main.ts:23)
+- App imports borgs.json: yes (apps/game/src/sim/borgCatalog.ts:1)
 - Generated actor-data stats JSON exists: yes (packages/combat/src/data/actorDataStats.json)
-- Actor-data stats accessor exists: yes (packages/combat/src/actorDataStats.ts:25)
-- Combat buildProfile consumes actor-data stats: yes (packages/combat/src/stats.ts:108)
-- Combat buildProfile consumes stat fields: yes (packages/combat/src/stats.ts:108)
-- Combat constants still declare tuned formulas: yes (packages/combat/src/constants.ts:28)
+- Actor-data stats accessor exists: yes (packages/combat/src/actorDataStats.ts:37)
+- Combat buildProfile consumes actor-data stats: yes (packages/combat/src/stats.ts:149)
+- Combat buildProfile consumes stat fields and discrete air-jump count: yes (packages/combat/src/stats.ts:149)
+- Combat constants still declare tuned formulas: yes (packages/combat/src/constants.ts:52)
 - Generic PZZ parser package implemented: yes (packages/formats/src/pzz.ts:103)
 
-Runtime combat profiles now bind defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, jump, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven.
+Runtime combat profiles now bind typeCode/airJump/defense/shot/attack/speed to original pl####data.bin actor-data bytes via packages/combat/src/data/actorDataStats.json. Energy, HP, flyer classification, and the absolute damage coefficients still use the existing roster/tuned formula path until their binary fields or formula consumers are proven.
 
 ## Verification
 

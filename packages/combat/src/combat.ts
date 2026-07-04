@@ -127,7 +127,7 @@ export function isInvincible(b: BorgRuntime): boolean {
 export function stepCooldowns(b: BorgRuntime): void {
   for (const k of Object.keys(b.cooldowns)) {
     const v = b.cooldowns[k] ?? 0;
-  // jumpHeld / switchLockHeld / allyLockHeld / hyperHeld / attackHeld / specialHeld are 0/1
+  // jumpHeld / switchLockHeld / switchLockPrevHeld / allyLockHeld / hyperHeld / attackHeld / specialHeld are 0/1
     // press latches, boostFuel is a fuel gauge, chargeFrames / xChargeFrames are hold-charge
     // accumulators (hold-B shot charge and hold-X special charge respectively), comboStep is
     // the current melee-chain index, mashCount (ATK-017) is a press-edge COUNTER (not a
@@ -141,6 +141,7 @@ export function stepCooldowns(b: BorgRuntime): void {
       k === "jumpHeld" ||
       k === "boostFuel" ||
       k === "switchLockHeld" ||
+      k === "switchLockPrevHeld" ||
       k === "allyLockHeld" ||
       k === "hyperHeld" ||
       k === "attackHeld" ||
@@ -161,9 +162,9 @@ export function stepCooldowns(b: BorgRuntime): void {
 // research/decomp/data/borg-hp-stat-rows-802f2988.json, live-verified G RED/pl0615 -> ammo 5).
 //
 // ROM shape: 3 weapon cells (struct+0x774/+0x77c/+0x784, stride 8; aux max/refillType/
-// refillParam at struct+0x78c stride 8). Weapon 0 drives the existing shot path (B) and
-// mirrors BorgRuntime.ammo for compat; cells 1/2 exist structurally but nothing reads them
-// yet (no per-weapon command resolver in the port).
+// refillParam at struct+0x78c stride 8). Weapon 0 drives the B shot path and mirrors
+// BorgRuntime.ammo for compat. Weapon 1 is now bound to the X/special ammo path per the
+// official B/X counter split; weapon 2 has no recovered stat-row feed and remains inert.
 //
 // Refill semantics (zz_006dcc0_, chunk_0009.c:2909-2973):
 //   - max === 0 -> infinite: the fire gate is skipped entirely (chunk_0002.c:7158-7165), cur
@@ -181,10 +182,9 @@ export function stepCooldowns(b: BorgRuntime): void {
  *  fallback otherwise; see actionProfiles.ts weaponZeroRowOverrides) and the stat-row's
  *  weapon-1 slot (DERIVED where available via weaponOneCellSourceForBorgId — behavior-notes.md
  *  section (am) cross-check; see that function's doc for the row-layout citation). Weapon 1
- *  is data-sourced but STILL STRUCTURALLY UNUSED (no per-weapon command resolver dispatches to
- *  it yet — ATK-009 "Required behavior"); weapon 2 has no stat-row data at all (the ROM's
- *  per-borg row only carries 2 weapon segments) and stays fully inert (max 0 = infinite/
- *  unused). */
+ *  drives X/special ammo gating/decrement/refill in stepAttacks/startSpecialAttack. Weapon 2
+ *  has no stat-row data at all (the ROM's per-borg row only carries 2 weapon segments) and
+ *  stays fully inert (max 0 = infinite/unused). */
 function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
   const shotDef = actionProfileForProfile(p).shot;
   const max = shotDef?.ammoMax ?? 0;
@@ -200,7 +200,7 @@ function initWeaponCells(b: BorgRuntime, p: BorgProfile): WeaponCell[] {
   const weapon1Source = weaponOneCellSourceForBorgId(p.id, p.level);
   const weapon1: WeaponCell = weapon1Source
     ? {
-        cur: weapon1Source.max, // weapon 1 is never fired by the port yet; start full like spawn init does.
+        cur: weapon1Source.max, // spawn init: weapon 1 starts full and is consumed by X/special.
         max: weapon1Source.max,
         refillType: weapon1Source.refillType,
         refillParam: weapon1Source.refillParam,
@@ -293,14 +293,17 @@ export function grantAmmo(b: BorgRuntime, weaponIdx: number, p: BorgProfile): vo
 }
 
 // ---------------------------------------------------------------------------------------
-// Source target lock state (R switch-lock, Z ally-lock).
+// Source target lock state (R switch-lock, Z hold-ally-lock).
 //
 // Port target: zz_006b450_, FUN_8006b850, FUN_8006ba60, zz_006bc74_, zz_006bcf4_
 // (research/decomp/ghidra-export/chunk_0009.c). Raw source pointers are represented as uids:
 // actor+0x504 = target entry, +0x508 = target actor, +0x50c/+0x510/+0x514 = target position.
 // DAT_803c1d7c/DAT_80436242 target-entry order is represented by BattleState.borgs order.
-// Initial source acquisition picks nearest from that ordered list; R/Z cycling advances
+// Initial source acquisition picks nearest by 3D squared distance from that ordered list
+// (later equal-distance entries win, matching the source <= compare); R/Z cycling advances
 // through the retained source list index instead of re-sorting by distance or camera cone.
+// FUN_8005a298 writes request byte +0x73c = 5 while Z is held and 4 on release; release
+// restores the retained enemy lock family instead of leaving ally mode active forever.
 // ---------------------------------------------------------------------------------------
 function isEnemyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
   return isTargetable(o) && o.team !== self.team && o.uid !== self.uid;
@@ -320,7 +323,8 @@ function isTargetable(b: BorgRuntime): boolean {
 
 interface SourceTargetEntry {
   borg: BorgRuntime;
-  listIndex: number;
+  /** Compact index inside the filtered source target list (actor +0x73d/+0x73e). */
+  sourceIndex: number;
 }
 
 export interface SourceTargetSelection {
@@ -385,6 +389,34 @@ export function sourceSwitchAllyLock(self: BorgRuntime, all: BorgRuntime[]): Sou
   return cycleSourceTarget(self, all, "ally", "next");
 }
 
+export function sourceReleaseAllyLock(self: BorgRuntime, all: BorgRuntime[]): SourceTargetSelection {
+  const state = ensureSourceTargetLockState(self);
+  const previousActive = state.activeTargetUid;
+  const enemyUid = self.lockTarget;
+  if (targetUidStillValid(self, all, "enemy", enemyUid)) {
+    const entry = sourceTargetEntries(self, all, "enemy").find((candidate) => candidate.borg.uid === enemyUid);
+    if (entry) state.enemyIndex = entry.sourceIndex;
+    state.mode = "enemy";
+    // FUN_8006b450 request 4 restores actor+0x508 from the saved enemy actor and writes
+    // actor+0x502 = 2. Keep the active target as the retained enemy uid and let the next
+    // refresh promote it back to state 1 after position/state refresh.
+    state.sourceState = 2;
+    state.cameraState = 4;
+    state.activeTargetUid = enemyUid;
+    return {
+      mode: state.mode,
+      targetUid: state.activeTargetUid,
+      targetIndex: state.enemyIndex,
+      sourceState: state.sourceState,
+      cameraState: state.cameraState,
+      changed: previousActive !== state.activeTargetUid,
+    };
+  }
+
+  state.mode = "enemy";
+  return sourceInitialEnemyLock(self, all);
+}
+
 function sourceTargetEntries(
   self: BorgRuntime,
   all: BorgRuntime[],
@@ -395,7 +427,7 @@ function sourceTargetEntries(
     const candidate = all[listIndex];
     if (!candidate) continue;
     if (mode === "enemy" ? isEnemyAlive(self, candidate) : isAllyAlive(self, candidate)) {
-      entries.push({ borg: candidate, listIndex });
+      entries.push({ borg: candidate, sourceIndex: entries.length });
     }
   }
   return entries;
@@ -405,12 +437,19 @@ function chooseNearestSourceEntry(self: BorgRuntime, entries: readonly SourceTar
   let best: SourceTargetEntry | null = null;
   let bestDist = Infinity;
   for (const entry of entries) {
-    const d = distXZ(self.pos, entry.borg.pos);
-    if (d >= bestDist) continue;
+    const d = sourceTargetDistanceSq(self.pos, entry.borg.pos);
+    if (d > bestDist) continue;
     best = entry;
     bestDist = d;
   }
   return best;
+}
+
+function sourceTargetDistanceSq(a: Vec3, b: Vec3): number {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  const dz = a.z - b.z;
+  return dx * dx + dy * dy + dz * dz;
 }
 
 function cycleSourceTarget(
@@ -512,15 +551,15 @@ function applySourceTarget(
   state.activeTargetUid = targetUid;
   if (mode === "enemy") {
     self.lockTarget = targetUid;
-    state.enemyIndex = entry.listIndex;
+    state.enemyIndex = entry.sourceIndex;
   } else {
     self.allyLockTarget = targetUid;
-    state.allyIndex = entry.listIndex;
+    state.allyIndex = entry.sourceIndex;
   }
   return {
     mode,
     targetUid,
-    targetIndex: entry.listIndex,
+    targetIndex: entry.sourceIndex,
     sourceState: state.sourceState,
     cameraState: state.cameraState,
     changed: previousActive !== targetUid,
@@ -851,9 +890,10 @@ export function applyHit(
   // the attacker-position input to the mode-1 calc either way).
   // Knockback MAGNITUDE — DERIVED strength-indexed model (behavior-notes (bc), T9 resolved
   // statically): the record's +0x0d strength byte indexes DAT_802d3664[s]=(s+1)*8 (gauges.ts
-  // knockbackVelocityForRecord), scaled by the single TUNED PORT_SCALE anchor and the caller's
-  // per-move multiplier. Replaces the old flat MELEE/SHOT/SPECIAL.KNOCKBACK scalars — the
-  // relative push of melee(56) > shot(40) > charge/special(24) is now ROM data.
+  // knockbackVelocityForRecord), scaled by KNOCKBACK.PORT_SCALE (DERIVED 1.0 under raw ROM
+  // units) and the caller's per-move multiplier. Replaces the old flat
+  // MELEE/SHOT/SPECIAL.KNOCKBACK scalars — the relative push of
+  // melee(56) > shot(40) > charge/special(24) is now ROM data.
   const knockback = knockbackVelocityForRecord(record) * KNOCKBACK.PORT_SCALE * knockbackMult;
   const dir =
     knockDir.x === 0 && knockDir.z === 0
@@ -863,7 +903,7 @@ export function applyHit(
   victim.vel.z = dir.z * knockback;
   // Vertical: DERIVED — the ROM's standard knockback launch vertical is ZERO
   // (FLOAT_80437444 = 0.0; knockback falls under gravity −1.2, behavior-notes (bc)).
-  // The old TUNED 0.4×knockback pop became 22 u/f under the raw-scale migration and
+  // The old port-side 0.4×knockback pop became 22 u/f under the raw-scale migration and
   // launched victims over stage wall collision (playtest: borgs knocked out of the arena).
   // Forced knockdowns keep a small TUNED pop for the launch read. (Page +0x58/+0x5c were
   // once suspected to be knockdown-launch tables — they are actually the DASH page block,
