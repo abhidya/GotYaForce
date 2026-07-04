@@ -129,6 +129,17 @@ const PRESETS = {
       { name: "p1MeterUnclamped", off: 0x803c5586, type: "u16", absolute: true }, // ps+0x3c+0x12a
       { name: "p2MeterValue", off: 0x803c55be, type: "u16", absolute: true }, // ps+0x78+0x126
       { name: "p3MeterValue", off: 0x803c55fa, type: "u16", absolute: true }, // ps+0xb4+0x126
+      // Q5 speed-boost candidates: if the burst speed boost is a field write at activation,
+      // one of these moves when +0x6fc flips (movement stats per behavior-notes 2758-2760;
+      // param-tier row outputs per open-questions Q5).
+      { name: "maxGroundSpeed2c", off: 0x2c, type: "f32" },
+      { name: "moveMult1dd4", off: 0x1dd4, type: "f32" },
+      { name: "paramTierA74a", off: 0x74a, type: "u16" },
+      { name: "paramTierB74e", off: 0x74e, type: "u16" },
+      { name: "paramTierC750", off: 0x750, type: "u16" },
+      { name: "tierOutB8", off: 0xb8, type: "f32" },
+      { name: "tierOut5f8", off: 0x5f8, type: "f32" },
+      { name: "tierOut1dd0", off: 0x1dd0, type: "f32" },
       // Slot-1 actor HP (actor array stride 0x1e00; base 0x805dbdc0 stable across boots of
       // the owned save states — re-derive via slot table if a trace shows it as garbage).
       { name: "slot1ActorHp", off: 0x805ddd86, type: "s16", absolute: true }, // actor1+0x1c6
@@ -408,6 +419,15 @@ async function connectWithRetry(gdb, attempts = 24, delayMs = 5000) {
 
 const DEFAULT_TICK_ADDR = 0x8010d450;
 const PAD_READ = 0x8021379c;
+// Pad injection (ported from the proof-kit scripts/dolphin-gdb-trace.mjs strategy): the
+// PADStatus[4] array pointer is r3 at PADRead entry; overwriting PADStatus.button/stick and
+// clearing .err at 0x8010d4d0 — after PADRead returns, before the game-side normalization
+// consumes the buffer — makes the game see a synthetic press. Injecting at the 0x8010d450
+// tick does NOT work (verified live): PADRead refreshes the buffer between d450 and d4d0,
+// clobbering the write. So injection takes a second breakpoint at d4d0.
+const PAD_STATUS_SIZE = 12;
+const PAD_BUTTON_Y = 0x0800;
+const PAD_INJECT_ADDR = 0x8010d4d0;
 // Battle/slot-table chain (behavior-notes.md §z, code-confirmed). Single-player fast path
 // reads *(u32*)0x803C4E84 directly; we use the full chain so this also works when the
 // player isn't in slot 0.
@@ -470,6 +490,17 @@ async function runCapture(argv) {
   const scenario = argv.get("scenario") ?? "";
   const note = argv.get("note") ?? "";
   const baseOverride = argv.has("base") ? Number.parseInt(argv.get("base"), 16) >>> 0 : null;
+  // Hands-free input injection: --inject-y <frame> presses Y (pad bit 0x0800) for 10 frames
+  // starting at that recorded frame; --inject-stick <frame> holds main-stick DOWN (stickY=-100,
+  // the pure-translation back-walk per behavior-notes (y) — same input as the 22.0 u/f ground
+  // baseline) from that frame until the capture ends. --inject-port selects the PADStatus slot.
+  const injectY = argv.has("inject-y") ? Number.parseInt(argv.get("inject-y"), 10) : null;
+  const injectStick = argv.has("inject-stick") ? Number.parseInt(argv.get("inject-stick"), 10) : null;
+  // --inject-start <frame>: hold Start (pad bit 0x1000) for 5 frames — unpauses a save state
+  // that was captured at the pause menu (the pause menu polls the same PADStatus buffer).
+  const injectStart = argv.has("inject-start") ? Number.parseInt(argv.get("inject-start"), 10) : null;
+  const injectPort = Number.parseInt(argv.get("inject-port") ?? "0", 10);
+  const wantsInjection = injectY !== null || injectStick !== null || injectStart !== null;
   const outPath =
     argv.get("out") ??
     path.join(repoRoot, "user-data", "dolphin-trace", "attack-mechanics", `${presetId}-${preset.slug}.jsonl`);
@@ -487,11 +518,78 @@ async function runCapture(argv) {
 
   const watchList = buildWatchList(preset);
   const kind = await gdb.setBreak(tickAddr);
+
+  // Capture the PADStatus[4] array pointer once (r3 at PADRead entry — proof-kit strategy).
+  // The buffer is a static array, so one capture suffices for the whole run.
+  let padPtr = null;
+  if (wantsInjection) {
+    const padKind = await gdb.setBreak(PAD_READ);
+    for (let i = 0; i < 600 && padPtr === null; i += 1) {
+      const stop = await gdb.continueAndWaitStop(30000);
+      if (stop.pc === PAD_READ) {
+        const r3 = await gdb.readReg(3).catch(() => null);
+        if (isMem1(r3)) padPtr = r3;
+      }
+    }
+    await gdb.clearBreak(PAD_READ, padKind).catch(() => {});
+    if (padPtr === null) throw new Error("could not capture PADStatus pointer for injection");
+    console.log(`pad injection armed: PADStatus[${injectPort}] at 0x${(padPtr + injectPort * PAD_STATUS_SIZE).toString(16)}`);
+  }
+  // Injection writes land at PAD_INJECT_ADDR (see header note); sampling stays on tickAddr.
+  const injectKind = wantsInjection ? await gdb.setBreak(PAD_INJECT_ADDR) : null;
+
+  let injectStops = 0;
+  let injectWrites = 0;
+  let injectDebugged = false;
+  let lastBase = null; // active borg base from the most recent tick resolve (for word injection)
+  /** Overwrite this frame's PADStatus for the injected port (buttons/stick), clear .err. */
+  const injectPad = async (frame) => {
+    if (padPtr === null) return;
+    const yActive = injectY !== null && frame >= injectY && frame < injectY + 10;
+    const stickActive = injectStick !== null && frame >= injectStick;
+    const startActive = injectStart !== null && frame >= injectStart && frame < injectStart + 5;
+    if (!yActive && !stickActive && !startActive) return;
+    const address = (padPtr + injectPort * PAD_STATUS_SIZE) >>> 0;
+    const cur = (await gdb.readMem(address, PAD_STATUS_SIZE)) ?? Buffer.alloc(PAD_STATUS_SIZE);
+    const bytes = Buffer.alloc(PAD_STATUS_SIZE);
+    cur.copy(bytes, 0, 0, Math.min(cur.length, PAD_STATUS_SIZE));
+    if (yActive) bytes.writeUInt16BE(bytes.readUInt16BE(0) | PAD_BUTTON_Y, 0);
+    if (startActive) bytes.writeUInt16BE(bytes.readUInt16BE(0) | 0x1000, 0); // Start
+    if (stickActive) bytes.writeInt8(-100, 3); // stickY down = back-walk (behavior-notes (y))
+    bytes.writeInt8(0, 10); // PADStatus.err = PAD_ERR_NONE
+    const ok = await gdb.writeMem(address, bytes);
+    if (ok) injectWrites += 1;
+    if (!injectDebugged) {
+      injectDebugged = true;
+      const back = await gdb.readMem(address, PAD_STATUS_SIZE);
+      console.log(
+        `  [inject debug] f${frame} addr=0x${address.toString(16)} before=${cur.toString("hex")} wrote=${bytes.toString("hex")} readback=${back ? back.toString("hex") : "null"} ok=${ok}`,
+      );
+    }
+    // The OS PADStatus buffer write alone was proven insufficient (2026-07-03 diag run: 90
+    // clean writes, zero game reaction — the game consumes a different copy when no real
+    // pad is attached). Belt-and-braces: also OR the Y bit into the GAME-side transformed
+    // button words on the active borg (+0x5d4 held word, verified 0x200=Y in live traces;
+    // +0x5e0 companion word, read as press mask by e.g. FUN_80069860 chunk_0009.c:126).
+    // At the d4d0 stop this frame's normalization output is final and the actor-update
+    // consumers (FUN_80069814 arm gate) run later in the frame.
+    if (yActive && isMem1(lastBase)) {
+      for (const off of [0x5d4, 0x5e0]) {
+        const addr = (lastBase + off) >>> 0;
+        const word = await gdb.readMem(addr, 4);
+        if (!word) continue;
+        const withY = Buffer.alloc(4);
+        withY.writeUInt32BE((word.readUInt32BE(0) | 0x200) >>> 0, 0);
+        await gdb.writeMem(addr, withY);
+      }
+    }
+  };
   let cleanedUp = false;
   const cleanup = async () => {
     if (cleanedUp) return;
     cleanedUp = true;
     await gdb.clearBreak(tickAddr, kind).catch(() => {});
+    if (injectKind !== null) await gdb.clearBreak(PAD_INJECT_ADDR, injectKind).catch(() => {});
     await gdb.send("c").catch(() => {});
     out.end();
     gdb.close();
@@ -518,6 +616,11 @@ async function runCapture(argv) {
         if (quietStreak >= 6) throw new Error("no tick hits for 3 minutes; stopping with what we have");
         continue;
       }
+      if (stop.pc === PAD_INJECT_ADDR) {
+        injectStops += 1;
+        await injectPad(recorded);
+        continue;
+      }
       if (stop.pc !== tickAddr) continue;
 
       let base;
@@ -528,6 +631,7 @@ async function runCapture(argv) {
         if (recorded === 0) console.log(`  tick hit, but no valid active borg base yet (${error.message}); waiting`);
         continue;
       }
+      lastBase = base;
       if (!metaWritten) {
         console.log(`active borg base = 0x${base.toString(16)} (via ${via})`);
         const meta = {
@@ -586,6 +690,7 @@ async function runCapture(argv) {
     process.removeListener("SIGTERM", onSignal);
     await cleanup();
   }
+  if (wantsInjection) console.log(`injection stats: ${injectStops} d4d0 stops, ${injectWrites} pad writes`);
   console.log(`wrote ${recorded} frames to ${outPath}`);
   console.log(`next: node scripts/trace-attack-mechanics.mjs --summarize ${outPath}`);
 }

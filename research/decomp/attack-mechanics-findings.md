@@ -437,9 +437,17 @@ Confidence: BLOCKED. Trace: T5. Ticket: ATK-007.
   clamp. 3000/50 = 60 hits to charge from zero. (The damage-record field
   forceGaugeCurveIndex is the TEAM GF-energy gauge damage multiplier — player struct
   +0x114 — a different gauge; the damage pipeline never writes +0x126.)
+- **DURATION + SPEED RESOLVED LIVE (2026-07-04, paired activation trace
+  T3-q5-speed-final.jsonl)**: activation in versus requires BOTH teammates armed within the
+  6-frame window (paired Y; zz_005b2b8_ candidate count > 1 unless player +0xf5 == 1). On
+  activation the meter DRAINS -5/frame from 3000 (600f/10s ceiling, parallel to the +0x10c
+  timer) and the burst ends when it empties; actions spend extra meter (discrete -45/-50/-60
+  dash-shaped and -350/-470 events; ledger sums exactly 3000; observed 437-frame burst with
+  movement). Movement speed during burst = **x1.5** (33.0 vs 22.0 u/f walk baseline).
+  Ported: BURST.DRAIN_PER_FRAME / BURST.SPEED_MULTIPLIER (constants.ts).
 - **confidence**: DERIVED_ROM (flags + 3 effects + activation chain + meter location/max/
-  fill + charged flag + durations); remaining open: Q5 speed effects, live duration
-  confirmation, +0x12a consumer. The notebook's older "pair-attack"
+  fill + charged flag + drain/duration + measured x1.5 speed); remaining open: the code path
+  carrying the x1.5, per-action meter costs, +0x12a consumer. The notebook's older "pair-attack"
   reading of +0x6fc (§ah step 3) and this Power-Burst reading are the SAME mechanism seen
   from two angles — Power Burst is the player-facing name; the pair/fusion path is its
   co-op variant. Keep calling the field `burstActive` with the pair semantics documented.

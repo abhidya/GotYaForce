@@ -727,4 +727,24 @@ export const BURST = {
    * (chunk_0004.c:6672-6828) never writes +0x126.
    */
   FILL_PER_HIT: 50,
+  /**
+   * DERIVED — Q5/duration RESOLVED at value level (live T3 trace 2026-07-03/04,
+   * T3-q5-speed-final.jsonl): on paired Y activation (versus needs BOTH teammates armed —
+   * zz_005b2b8_ requires >1 candidate unless player flag +0xf5 == 1) the burst timer pair
+   * +0x10c/+0x10e is set to 600 AND the meter itself drains DRAIN_PER_FRAME per frame from
+   * 3000 (343 measured -5 frames; 3000/5 = the same 600-frame/10s ceiling). The burst ends
+   * when the meter empties — measured 437 frames with movement, because ACTIONS SPEND EXTRA
+   * meter: discrete -45/-50/-60 events (dash-shaped) and two large -350/-470 events, with the
+   * full drain ledger summing to exactly 3000. Per-action cost mapping is TUNED/unmapped —
+   * needs a controlled per-action trace before porting costs individually.
+   */
+  DRAIN_PER_FRAME: 5,
+  /**
+   * DERIVED — Q5 RESOLVED at value level (same trace): median moving speed during burst =
+   * 33.0 world-units/frame vs the proven 22.0 u/f ground-walk baseline (behavior-notes (ac))
+   * = exactly x1.5. The CODE PATH carrying the multiplier is still unlocated (no +0x6fc-gated
+   * speed modifier exists in the read corpus; moveMult/param-tier candidate fields did NOT
+   * change at activation), so this is a measured value, not a code-anchored one.
+   */
+  SPEED_MULTIPLIER: 1.5,
 } as const;

@@ -115,6 +115,12 @@ export class GdbRemote {
     return Buffer.from(raw, "hex");
   }
 
+  /** Write a Buffer to memory at `address`; returns true on stub OK. */
+  async writeMem(address, buffer, ms = 3000) {
+    const raw = await this.send(`M${address.toString(16)},${buffer.length.toString(16)}:${buffer.toString("hex")}`, ms);
+    return raw === "OK";
+  }
+
   /** Insert a code breakpoint. Tries software (Z0) then hardware (Z1). Returns the kind used. */
   async setBreak(address) {
     for (const kind of ["0", "1"]) {

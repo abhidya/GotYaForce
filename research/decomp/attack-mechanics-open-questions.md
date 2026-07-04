@@ -78,15 +78,21 @@ agent; **code** = cheap coding agent; **Fable** = needs cross-system synthesis j
 - ATK-012 fill rule: **unblocked** — port as `onHitConnect(attacker): meter = min(meter+50,
   3000); unclamped += 50; if (meter == 3000) charged = 1` per player.
 
-## Q5. Where does Power Burst's speed boost live (wiki: "massive speed"), given no +0x6fc-gated speed modifier exists?
+## Q5. Where does Power Burst's speed boost live (wiki: "massive speed"), given no +0x6fc-gated speed modifier exists? — RESOLVED AT VALUE LEVEL (2026-07-04)
 
-- **Why it matters**: without it, a ported burst would be damage/reload-only — visibly wrong.
-- **Evidence searched**: all +0x6fc readers outside the formula (only the refill boost).
-- **Next search/trace**: during T3, log per-frame position deltas and the param-tier fields
-  (+0x74a row outputs +0xb8/+0x1dd0/+0x5f8) with burst on/off — the boost may run through
-  the param-tier system or a movement multiplier field like +0x1dd4.
-- **Expected output**: the speed channel + multiplier value.
-- **Agent type**: **Dolphin** (T3 extension).
+- **Live-measured (T3-q5-speed-final.jsonl, live paired activation with owner at both pads)**:
+  **burst movement speed = x1.5** — median moving delta 33.0 world-units/frame during burst vs
+  the proven 22.0 u/f ground-walk baseline ((ac)). Ported as BURST.SPEED_MULTIPLIER.
+- **Duration model CORRECTED by the same trace**: the +0x10c/+0x10e=600 timer runs in parallel
+  with the METER ITSELF draining -5/frame from 3000 (BURST.DRAIN_PER_FRAME; 343 clean -5
+  frames measured; 3000/5 = the 600f ceiling). Burst ends when the meter empties — observed
+  437 frames because ACTIONS SPEND EXTRA meter: discrete -45/-50/-60 (dash-shaped) and
+  -350/-470 events; the drain ledger sums to exactly 3000. Also confirmed: versus-mode
+  activation requires BOTH teammates armed within the 6-frame window (zz_005b2b8_ candidate
+  count > 1 unless player flag +0xf5 == 1) — solo Y just arms and expires.
+- **Still open (minor)**: the code path carrying the x1.5 (no +0x6fc-gated modifier in the
+  read corpus; moveMult1dd4/param-tier fields did NOT change at activation — likely inside
+  the movement-physics bucket), and the per-action meter-cost table.
 
 ## Q6. Do solid projectiles / projectile-vs-projectile collisions exist in code, and where?
 
