@@ -160,12 +160,18 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       renderer.setClearColor(0x000000, 0);
 
       const scene3 = new THREE.Scene();
-      // The SOBJ carries 3 authored lights + fog; their parameters are not yet extracted
-      // (probe dumps counts only), so lighting stays a TUNED warm-room approximation.
-      scene3.add(new THREE.AmbientLight(0xf4efe3, 1.15));
-      const key = new THREE.DirectionalLight(0xfff1d6, 1.0);
-      key.position.set(-2000, 5200, 2600);
-      scene3.add(key);
+      // AUTHORED scene lights (DERIVED, tl00-scene-camera-2026-07-04.md probe): ambient
+      // rgba(152,140,178) — a cool lavender — plus two gray INFINITE diffuse+specular
+      // lights whose direction vectors convert through the same 180° Y-rotation as the
+      // camera. The authored fog is a linear 1e6..2e6 range — beyond the 32768 far clip,
+      // i.e. authored OFF — so no fog is added (also DERIVED).
+      scene3.add(new THREE.AmbientLight(new THREE.Color(152 / 255, 140 / 255, 178 / 255), 1.0));
+      const dir1 = new THREE.DirectionalLight(new THREE.Color(0.5, 0.5, 0.5), 1.0);
+      dir1.position.set(2.7812777, 1.9665543, -1.140989);
+      scene3.add(dir1);
+      const dir2 = new THREE.DirectionalLight(new THREE.Color(0.5, 0.5, 0.5), 1.0);
+      dir2.position.set(-0.9624716, 2.0371425, 0.698656);
+      scene3.add(dir2);
 
       // Authored CObj, converted through the exporter's 180° Y-rotation.
       const camera = new THREE.PerspectiveCamera(41.538998, 1, 1, 32768);

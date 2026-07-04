@@ -25,8 +25,14 @@ root 'scene_data' size=16
   Z-negate instead.)
 - Earlier negative result stands: the DOL menu cameras (zz_008c88c_ eye (0,0,100)→(0,0,−100),
   zz_008c9d4_ (0,0,0)→(0,0,−10)) are flat UI-plane cameras, not the desk framing.
-- Remaining unextracted: the SOBJ's 3 authored lights + fog parameters (probe prints counts
-  only) — TitleIntro lighting stays a TUNED warm-room approximation until dumped.
+- Authored lights (probe extended with HSD_LOBJ walk):
+  - light[0]: AMBIENT, rgba (152, 140, 178) — cool lavender room ambient.
+  - light[1]: INFINITE diffuse+specular, rgba (128,128,128), dir vec (−2.781, 1.967, 1.141).
+  - light[2]: INFINITE diffuse+specular, rgba (128,128,128), dir vec (0.962, 2.037, −0.699).
+  Direction vectors convert through the same 180° Y-rotation as the camera.
+- Authored fog: `HSD_FogDesc` bytes `00000002 | 00000000 | 1e6 | 2e6 | rgba(42,196,188,255)`
+  — a linear fog whose 1,000,000..2,000,000 range sits far beyond the 32768 far clip:
+  **authored OFF**. No fog is rendered (DERIVED negative).
 
 Wired in apps/game/src/ui/screens/TitleIntro.ts (3D desk backdrop layer over the captured
 PNG, which remains the instant paint + failure fallback).
