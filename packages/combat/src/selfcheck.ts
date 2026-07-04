@@ -3505,6 +3505,43 @@ export function main(): number {
 
   console.log(`[selfcheck] team0 energy=${t0Now}, team1 energy=${t1Now} (team1 start=${startEnergyT1})`);
 
+  // Results telemetry sanity (BattleState.telemetry, hit connections + attack attempts):
+  // a resolved battle must have counted real attempts/hits/damage, hits can't exceed
+  // attempts, and the team-0 defeat split must sum to the team-0 defeated counter.
+  const tel = s.telemetry;
+  if (!tel) {
+    console.error("[selfcheck] FAIL: BattleState.telemetry missing");
+    ok = false;
+  } else {
+    for (const team of [0, 1]) {
+      const hits = tel.hitsByTeam[team] ?? 0;
+      const attempts = tel.attemptsByTeam[team] ?? 0;
+      const dmg = tel.damageByTeam[team] ?? 0;
+      // One AoE/multi-target attempt can produce several hit connections, so hits may
+      // exceed attempts — but hits without ANY attempt, or hits with zero damage, are bugs.
+      if ((hits > 0 && attempts === 0) || (hits > 0 && dmg <= 0)) {
+        console.error(
+          `[selfcheck] FAIL: telemetry inconsistent for team ${team}: hits=${hits}, attempts=${attempts}, damage=${dmg}`,
+        );
+        ok = false;
+      }
+    }
+    const split = (s.defeatedPlayerBorgs ?? 0) + (s.defeatedAllyBorgs ?? 0);
+    if (split !== (s.defeated[0] ?? 0)) {
+      console.error(
+        `[selfcheck] FAIL: team-0 defeat split ${s.defeatedPlayerBorgs}+${s.defeatedAllyBorgs} != defeated ${s.defeated[0]}`,
+      );
+      ok = false;
+    }
+    if (ok) {
+      console.log(
+        `[selfcheck] results telemetry: t0 ${tel.hitsByTeam[0] ?? 0}/${tel.attemptsByTeam[0] ?? 0} hits dmg=${Math.round(tel.damageByTeam[0] ?? 0)}; ` +
+          `t1 ${tel.hitsByTeam[1] ?? 0}/${tel.attemptsByTeam[1] ?? 0} hits dmg=${Math.round(tel.damageByTeam[1] ?? 0)}; ` +
+          `t0 defeats split player=${s.defeatedPlayerBorgs ?? 0}/ally=${s.defeatedAllyBorgs ?? 0}`,
+      );
+    }
+  }
+
   if (ok) {
     console.log(`[selfcheck] PASS: sim ran ${s.frame} frames with no NaN and the battle resolved (${s.result}).`);
     return 0;

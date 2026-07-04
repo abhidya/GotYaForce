@@ -179,6 +179,9 @@ class BattleImpl implements Battle {
       defeatedEnergy: {},
       activeUidByPlayer: {},
       burstMeterByPlayer,
+      telemetry: { damageByTeam: {}, hitsByTeam: {}, attemptsByTeam: {} },
+      defeatedPlayerBorgs: 0,
+      defeatedAllyBorgs: 0,
       frame: 0,
       timeRemainingFrames: this.timeLimitFrames,
       result: "ongoing",
@@ -471,13 +474,28 @@ class BattleImpl implements Battle {
 
       // Attacks (no-op while busy/hit/down/death/spawn).
       if (!isBusy(b)) {
+        const meleeActiveBefore = b.cooldowns["meleeActive"] ?? 0;
+        const specialCdBefore = b.cooldowns["special"] ?? 0;
         const res = stepAttacks(b, prof, input.attack, input.special, all, profiles, {
           sideRankForTeam: (team) => this.sideRankForTeam(team),
           // Burst-meter fill plumbing (Q4): applyHit credits the attacker's player per
           // hit connection — see creditBurstFill (burst.ts).
           burstMeters: this.state.burstMeterByPlayer,
+          telemetry: this.state.telemetry,
         });
         if (res.projectiles.length) this.state.projectiles.push(...res.projectiles);
+        // Results telemetry ATTEMPTS: each attack initiation counts once — a new melee
+        // swing (meleeActive grew this frame), each projectile spawned, or a special fire
+        // (its cooldown was re-armed this frame). One AoE attempt can connect with several
+        // victims, so hits may legitimately exceed attempts.
+        const t = this.state.telemetry;
+        if (t) {
+          const meleeActiveAfter = b.cooldowns["meleeActive"] ?? 0;
+          const specialFired = (b.cooldowns["special"] ?? 0) > specialCdBefore ? 1 : 0;
+          const started =
+            (meleeActiveAfter > meleeActiveBefore ? 1 : 0) + res.projectiles.length + specialFired;
+          if (started > 0) t.attemptsByTeam[b.team] = (t.attemptsByTeam[b.team] ?? 0) + started;
+        }
       }
 
       // Passive contact damage (ATK-006 scaffold): immediate no-op while
@@ -515,6 +533,7 @@ class BattleImpl implements Battle {
         // player meter per connection (a persisting beam re-hitting = one credit per
         // connection, matching the ROM's dead-husk 3 x 50 trace).
         burstMeters: this.state.burstMeterByPlayer,
+        telemetry: this.state.telemetry,
       },
     );
     this.accountPendingDefeats();
@@ -602,6 +621,12 @@ class BattleImpl implements Battle {
       if (b.borgId === HUSK_BORG_ID) continue;
       this.state.defeated[b.team] = (this.state.defeated[b.team] ?? 0) + 1;
       this.state.defeatedEnergy[b.team] = (this.state.defeatedEnergy[b.team] ?? 0) + prof.energy;
+      // Results split for the player side: PLAYER BORGS DEFEATED counts human-owned borgs,
+      // ALLY BORGS DEFEATED counts CPU teammates (same team, ownerPlayer null).
+      if (b.team === 0) {
+        if (b.ownerPlayer !== null) this.state.defeatedPlayerBorgs = (this.state.defeatedPlayerBorgs ?? 0) + 1;
+        else this.state.defeatedAllyBorgs = (this.state.defeatedAllyBorgs ?? 0) + 1;
+      }
     }
   }
 

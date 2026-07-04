@@ -510,6 +510,21 @@ export interface BattleState {
    * the documented decision. Drained by active Power Burst once a human player activates.
    */
   burstMeterByPlayer: Record<string, BurstMeterState>;
+  /**
+   * Per-team battle telemetry feeding the Results screen (real accounting replacing the
+   * old synthesized ratios): damage dealt on hit connection (applyHit, same point that
+   * credits burst fill), hits = connections, attempts = attack initiations (new melee
+   * swings + projectiles spawned, counted by the battle step loop). Optional so
+   * pre-existing state constructors stay valid.
+   */
+  telemetry?: {
+    damageByTeam: Record<number, number>;
+    hitsByTeam: Record<number, number>;
+    attemptsByTeam: Record<number, number>;
+  };
+  /** Team-0 defeat split for the Results screen: player-owned vs CPU-ally borgs. */
+  defeatedPlayerBorgs?: number;
+  defeatedAllyBorgs?: number;
   frame: number;
   /** Frames remaining on the battle timer, or null when untimed. */
   timeRemainingFrames: number | null;

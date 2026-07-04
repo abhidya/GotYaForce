@@ -555,6 +555,15 @@ export interface DamageRuntimeContext {
    * and simply never fill.
    */
   burstMeters?: Record<string, BurstMeterState> | undefined;
+  /** Battle-level Results telemetry sink (BattleState.telemetry). Hit connections credit
+   *  the attacker team's damage/hits here; optional so legacy callers never count. */
+  telemetry?:
+    | {
+        damageByTeam: Record<number, number>;
+        hitsByTeam: Record<number, number>;
+        attemptsByTeam: Record<number, number>;
+      }
+    | undefined;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -731,6 +740,16 @@ export function applyHit(
   // `source &&` is the structural assert). CPU attackers: see creditBurstFill (burst.ts).
   if (source && damageContext?.burstMeters) {
     creditBurstFill(damageContext.burstMeters, source.attacker.ownerPlayer);
+  }
+
+  // Results telemetry: every hit CONNECTION with an attacker context credits the attacker
+  // team's damage/hit counters (attempts are counted by the battle step loop at attack
+  // initiation). Same placement rationale as the burst fill above — the killing blow counts.
+  if (source && damageContext?.telemetry) {
+    const t = damageContext.telemetry;
+    const team = source.attacker.team;
+    t.damageByTeam[team] = (t.damageByTeam[team] ?? 0) + dmg;
+    t.hitsByTeam[team] = (t.hitsByTeam[team] ?? 0) + 1;
   }
 
   // Hit-inflicted status effects (DERIVED, status-effects-decode-2026-07-04.md; see the

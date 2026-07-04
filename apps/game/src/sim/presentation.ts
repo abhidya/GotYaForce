@@ -297,16 +297,27 @@ export function battleOutcomeFromState(battle: Battle): BattleOutcome {
   const playerDefeated = st.defeated[0] ?? 0;
   const costWon = st.defeatedEnergy[1] ?? 0;
   const costLost = st.defeatedEnergy[0] ?? 0;
+  // Real battle telemetry (BattleState.telemetry): damage/hits credited per team at hit
+  // connection (combat.ts applyHit, same point as the burst fill), attempts counted at
+  // attack initiation by the battle step loop. DODGE RATIO definition is a TUNED reading
+  // (the ROM's exact ratio source is undecoded): incoming = enemy attack attempts,
+  // dodges = the ones that never connected.
+  const t = st.telemetry;
+  const hits = t?.hitsByTeam[0] ?? 0;
+  const attempts = Math.max(t?.attemptsByTeam[0] ?? 0, hits);
+  const enemyHits = t?.hitsByTeam[1] ?? 0;
+  const incoming = Math.max(t?.attemptsByTeam[1] ?? 0, enemyHits);
+  const dodges = Math.max(0, incoming - enemyHits);
   return {
     win,
-    attack: Math.round(costWon),
-    hits: enemyDefeated,
-    attempts: Math.max(1, enemyDefeated + 2),
-    dodges: 0,
-    incoming: 1,
+    attack: Math.round(t?.damageByTeam[0] ?? 0),
+    hits,
+    attempts: Math.max(1, attempts),
+    dodges,
+    incoming: Math.max(1, incoming),
     enemyBorgsDefeated: enemyDefeated,
-    playerBorgsDefeated: playerDefeated,
-    allyBorgsDefeated: 0,
+    playerBorgsDefeated: st.defeatedPlayerBorgs ?? playerDefeated,
+    allyBorgsDefeated: st.defeatedAllyBorgs ?? 0,
     costWon,
     costLost,
   };
