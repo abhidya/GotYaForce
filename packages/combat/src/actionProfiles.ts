@@ -1,3 +1,4 @@
+import { comboLadderStepCountForBorgId } from "./actionStreamData.js";
 import { AMMO, MELEE, SHOT, SPECIAL } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
 import type { ProjectileVisualKind, WeaponRefillType } from "./types.js";
@@ -198,6 +199,15 @@ export function actionProfileForProfile(profile: BorgProfile): BorgActionProfile
 function resolveActionProfile(profile: BorgProfile): BorgActionProfile {
   const raw = RAW_PROFILES[profile.id];
   const melee = profile.hasMelee ? { ...DEFAULT_MELEE, ...(raw?.melee ?? {}) } : null;
+  if (melee) {
+    // comboHits reconciliation (2026-07-04): the DOL combo ladder (actionStreamData,
+    // dispatch-table DERIVED) is authoritative over the asset-derived swing-bank count in
+    // actionProfiles.json when a ladder fully resolves (58/208 disagreed — 32 borgs gain
+    // chains the clip counting missed, 8 lose a phantom third hit; all values 1..3).
+    // Unresolved ladders report 0 steps and keep the asset-derived count.
+    const ladderSteps = comboLadderStepCountForBorgId(profile.id);
+    if (ladderSteps !== null && ladderSteps >= 1) melee.comboHits = ladderSteps;
+  }
   const shot = profile.hasShot
     ? { ...DEFAULT_SHOT, ...(raw?.shot ?? {}), ...weaponZeroRowOverrides(profile.id, profile.level) }
     : null;
