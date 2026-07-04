@@ -71,6 +71,16 @@ export {
   type BorgAttackHitTable,
 } from "./attackHitData.js";
 export { groundRunSpeedForBorgId } from "./movementData.js";
+export { familyDamageRecordCountForBorg, familyDamageRecordForBorg } from "./familyDamageData.js";
+export { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
+export {
+  actorVelocityScale,
+  statusTimescale,
+  tierSizeScale,
+  tierVelocityScale,
+  PARAM_TIER_DEFAULT,
+  type StatusSpeedLevels,
+} from "./timescale.js";
 export {
   buildProfile,
   forceEnergy,

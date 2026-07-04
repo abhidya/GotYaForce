@@ -35,6 +35,9 @@ export { GF_UI_CSS };
 export { borgUiCode, borgBannerPath, borgMiniPath, borgFacePath, ASSETS } from "./assets.js";
 
 // ---- screens ----
+export { createTitleIntro } from "./screens/TitleIntro.js";
+export type { TitleIntroOptions, TitleIntroHandle } from "./screens/TitleIntro.js";
+
 export { createMainMenu } from "./screens/MainMenu.js";
 export type { MainMenuMode, MainMenuOptions, MainMenuHandle } from "./screens/MainMenu.js";
 

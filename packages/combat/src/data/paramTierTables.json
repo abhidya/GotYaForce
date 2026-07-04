@@ -1,0 +1,428 @@
+{
+ "_meta": {
+  "source": "user-data/GG4E/disc/sys/boot.dol",
+  "generator": "scripts/gen-param-tier-tables.mjs",
+  "evidence": "research/decomp/movement-hit-decode-2026-07-04.md §1 (refresh_actor_param_tier_table @0x8006826c; FUN_8005a378)",
+  "tierDefault": 16,
+  "rowLayout": "[sizeScale, animRateScale, velocityScale] per tier, stride 0xc"
+ },
+ "tierTables": {
+  "0x802dd5a0": [
+   {
+    "tier": 0,
+    "sizeScale": 0.06,
+    "animRateScale": 1,
+    "velocityScale": 0.06
+   },
+   {
+    "tier": 1,
+    "sizeScale": 0.07,
+    "animRateScale": 1,
+    "velocityScale": 0.07
+   },
+   {
+    "tier": 2,
+    "sizeScale": 0.08,
+    "animRateScale": 1,
+    "velocityScale": 0.08
+   },
+   {
+    "tier": 3,
+    "sizeScale": 0.09,
+    "animRateScale": 1,
+    "velocityScale": 0.09
+   },
+   {
+    "tier": 4,
+    "sizeScale": 0.1,
+    "animRateScale": 1,
+    "velocityScale": 0.1
+   },
+   {
+    "tier": 5,
+    "sizeScale": 0.11,
+    "animRateScale": 1,
+    "velocityScale": 0.11
+   },
+   {
+    "tier": 6,
+    "sizeScale": 0.13,
+    "animRateScale": 1,
+    "velocityScale": 0.13
+   },
+   {
+    "tier": 7,
+    "sizeScale": 0.16,
+    "animRateScale": 1,
+    "velocityScale": 0.16
+   },
+   {
+    "tier": 8,
+    "sizeScale": 0.2,
+    "animRateScale": 1,
+    "velocityScale": 0.2
+   },
+   {
+    "tier": 9,
+    "sizeScale": 0.25,
+    "animRateScale": 1,
+    "velocityScale": 0.25
+   },
+   {
+    "tier": 10,
+    "sizeScale": 0.36,
+    "animRateScale": 1,
+    "velocityScale": 0.36
+   },
+   {
+    "tier": 11,
+    "sizeScale": 0.43,
+    "animRateScale": 1,
+    "velocityScale": 0.43
+   },
+   {
+    "tier": 12,
+    "sizeScale": 0.51,
+    "animRateScale": 1,
+    "velocityScale": 0.51
+   },
+   {
+    "tier": 13,
+    "sizeScale": 0.6,
+    "animRateScale": 1,
+    "velocityScale": 0.6
+   },
+   {
+    "tier": 14,
+    "sizeScale": 0.7,
+    "animRateScale": 1,
+    "velocityScale": 0.7
+   },
+   {
+    "tier": 15,
+    "sizeScale": 0.81,
+    "animRateScale": 1,
+    "velocityScale": 0.81
+   },
+   {
+    "tier": 16,
+    "sizeScale": 1,
+    "animRateScale": 1,
+    "velocityScale": 1
+   },
+   {
+    "tier": 17,
+    "sizeScale": 1.4,
+    "animRateScale": 0.98,
+    "velocityScale": 1.4
+   },
+   {
+    "tier": 18,
+    "sizeScale": 1.8,
+    "animRateScale": 0.96,
+    "velocityScale": 1.746
+   },
+   {
+    "tier": 19,
+    "sizeScale": 2.2,
+    "animRateScale": 0.94,
+    "velocityScale": 2.068
+   },
+   {
+    "tier": 20,
+    "sizeScale": 2.6,
+    "animRateScale": 0.92,
+    "velocityScale": 2.366
+   },
+   {
+    "tier": 21,
+    "sizeScale": 3,
+    "animRateScale": 0.9,
+    "velocityScale": 2.64
+   },
+   {
+    "tier": 22,
+    "sizeScale": 3.4,
+    "animRateScale": 0.88,
+    "velocityScale": 2.89
+   },
+   {
+    "tier": 23,
+    "sizeScale": 3.8,
+    "animRateScale": 0.86,
+    "velocityScale": 3.116
+   },
+   {
+    "tier": 24,
+    "sizeScale": 4.2,
+    "animRateScale": 0.84,
+    "velocityScale": 3.318
+   },
+   {
+    "tier": 25,
+    "sizeScale": 4.6,
+    "animRateScale": 0.82,
+    "velocityScale": 3.496
+   },
+   {
+    "tier": 26,
+    "sizeScale": 5.1,
+    "animRateScale": 0.8,
+    "velocityScale": 3.723
+   },
+   {
+    "tier": 27,
+    "sizeScale": 5.6,
+    "animRateScale": 0.78,
+    "velocityScale": 3.92
+   },
+   {
+    "tier": 28,
+    "sizeScale": 6.2,
+    "animRateScale": 0.76,
+    "velocityScale": 4.154
+   },
+   {
+    "tier": 29,
+    "sizeScale": 6.8,
+    "animRateScale": 0.74,
+    "velocityScale": 4.352
+   },
+   {
+    "tier": 30,
+    "sizeScale": 7.4,
+    "animRateScale": 0.72,
+    "velocityScale": 4.514
+   },
+   {
+    "tier": 31,
+    "sizeScale": 8,
+    "animRateScale": 0.7,
+    "velocityScale": 4.56
+   },
+   {
+    "tier": 32,
+    "sizeScale": 0.06,
+    "animRateScale": 1,
+    "velocityScale": 0.06
+   }
+  ],
+  "0x802dd720": [
+   {
+    "tier": 0,
+    "sizeScale": 0.06,
+    "animRateScale": 1,
+    "velocityScale": 0.06
+   },
+   {
+    "tier": 1,
+    "sizeScale": 0.07,
+    "animRateScale": 1,
+    "velocityScale": 0.07
+   },
+   {
+    "tier": 2,
+    "sizeScale": 0.08,
+    "animRateScale": 1,
+    "velocityScale": 0.08
+   },
+   {
+    "tier": 3,
+    "sizeScale": 0.09,
+    "animRateScale": 1,
+    "velocityScale": 0.09
+   },
+   {
+    "tier": 4,
+    "sizeScale": 0.1,
+    "animRateScale": 1,
+    "velocityScale": 0.1
+   },
+   {
+    "tier": 5,
+    "sizeScale": 0.11,
+    "animRateScale": 1,
+    "velocityScale": 0.11
+   },
+   {
+    "tier": 6,
+    "sizeScale": 0.13,
+    "animRateScale": 1,
+    "velocityScale": 0.13
+   },
+   {
+    "tier": 7,
+    "sizeScale": 0.16,
+    "animRateScale": 1,
+    "velocityScale": 0.16
+   },
+   {
+    "tier": 8,
+    "sizeScale": 0.2,
+    "animRateScale": 1,
+    "velocityScale": 0.2
+   },
+   {
+    "tier": 9,
+    "sizeScale": 0.25,
+    "animRateScale": 1,
+    "velocityScale": 0.25
+   },
+   {
+    "tier": 10,
+    "sizeScale": 0.36,
+    "animRateScale": 1,
+    "velocityScale": 0.36
+   },
+   {
+    "tier": 11,
+    "sizeScale": 0.43,
+    "animRateScale": 1,
+    "velocityScale": 0.43
+   },
+   {
+    "tier": 12,
+    "sizeScale": 0.51,
+    "animRateScale": 1,
+    "velocityScale": 0.51
+   },
+   {
+    "tier": 13,
+    "sizeScale": 0.6,
+    "animRateScale": 1,
+    "velocityScale": 0.6
+   },
+   {
+    "tier": 14,
+    "sizeScale": 0.7,
+    "animRateScale": 1,
+    "velocityScale": 0.7
+   },
+   {
+    "tier": 15,
+    "sizeScale": 0.81,
+    "animRateScale": 1,
+    "velocityScale": 0.81
+   },
+   {
+    "tier": 16,
+    "sizeScale": 1,
+    "animRateScale": 1,
+    "velocityScale": 1
+   },
+   {
+    "tier": 17,
+    "sizeScale": 1.2,
+    "animRateScale": 0.98,
+    "velocityScale": 1.2
+   },
+   {
+    "tier": 18,
+    "sizeScale": 1.4,
+    "animRateScale": 0.96,
+    "velocityScale": 1.358
+   },
+   {
+    "tier": 19,
+    "sizeScale": 1.6,
+    "animRateScale": 0.94,
+    "velocityScale": 1.504
+   },
+   {
+    "tier": 20,
+    "sizeScale": 1.8,
+    "animRateScale": 0.92,
+    "velocityScale": 1.638
+   },
+   {
+    "tier": 21,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 22,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 23,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 24,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 25,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 26,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 27,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 28,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 29,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 30,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 31,
+    "sizeScale": 2,
+    "animRateScale": 0.9,
+    "velocityScale": 1.76
+   },
+   {
+    "tier": 32,
+    "sizeScale": 0,
+    "animRateScale": 7,
+    "velocityScale": 14
+   }
+  ]
+ },
+ "statusTimescale": {
+  "slow_802dd57c": [
+   0,
+   0.7,
+   0.4,
+   0.2
+  ],
+  "haste_802dd58c": [
+   0.1,
+   1.25,
+   1.5,
+   1.75
+  ],
+  "burstFusionMultiplier_804373d8": 1.5,
+  "freezeMultiplier_804373dc": 0.03,
+  "base_804373c8": 1
+ }
+}

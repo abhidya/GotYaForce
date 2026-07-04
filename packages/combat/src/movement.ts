@@ -27,6 +27,7 @@ import {
 } from "@gf/physics";
 import { BURST, DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
 import { fallGravityForBorgId, groundRunSpeedForBorgId, jumpVelocityForBorgId } from "./movementData.js";
+import { actorVelocityScale } from "./timescale.js";
 import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
 
@@ -157,7 +158,10 @@ export function stepMovement(
   if (!dashing) {
     const flying = !b.grounded && p.flyer;
     const burstMult = b.burstActive ? BURST.SPEED_MULTIPLIER : 1;
-    const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1) * burstMult;
+    // actorVelocityScale = the ROM's status(+0x5f4) × tier(+0x5f8) multipliers (timescale.ts,
+    // DERIVED tables) — ×1.0 until tier/status writers land. Burst ×1.5 (the same
+    // FLOAT_804373d8 the ROM folds into +0x5f4) stays in burstMult, not double-applied.
+    const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1) * burstMult * actorVelocityScale(b);
     let targetVx = 0;
     let targetVz = 0;
     if (free && (horizontal.walkX !== 0 || horizontal.walkZ !== 0)) {

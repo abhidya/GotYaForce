@@ -47,6 +47,7 @@ import {
 
 import {
   ensureStyles,
+  createTitleIntro,
   createMainMenu,
   createSelectDifficulty,
   createSelectPlayers,
@@ -514,6 +515,7 @@ function activeGamepad(playerIndex = 0, allowFallback = playerIndex === 0): Game
 // ------------------------------------------------------------------------------------------
 
 type Screen =
+  | "title"
   | "menu"
   | "difficulty"
   | "players"
@@ -545,6 +547,25 @@ const flow: Flow = {
 
 function mountScreen(build: (root: HTMLElement) => { destroy(): void }): void {
   screenHost.mount(build);
+}
+
+/**
+ * Title/desk-intro screen, per research/decomp/index/title-main-menu-flow.md: the real boot
+ * path runs the frontend desk script (FUN_801c795c / G-Red desk-intro actor) before the
+ * title/main-menu scene enter (title_main_menu_scene_enter -> set_global_menu_mode(9)). "Press
+ * start" (click/any key) models that handoff into the existing menu hub.
+ */
+function showTitleIntro(): void {
+  flow.screen = "title";
+  queueBgm(AUDIO_CUES.menuBgm);
+  mountScreen((root) =>
+    createTitleIntro(root, {
+      onEnter: () => {
+        playConfirmSfx();
+        showMenu();
+      },
+    }),
+  );
 }
 
 function showMenu(initial: MainMenuMode = "challenge"): void {
@@ -1131,7 +1152,7 @@ showLoadingMessage("Loading extracted stage + model assets…");
 
 void loadInitialAssets()
   .then(() => {
-    showMenu();
+    showTitleIntro();
   })
   .catch((error: unknown) => {
     showLoadingMessage(`Asset load failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -1168,6 +1189,10 @@ function showLoadingMessage(text: string): void {
     return normalized;
   },
   startChallenge: () => showDifficulty(),
+  // Debug: jump back to the title/desk-intro screen or straight to the menu hub, for preview
+  // verification of the Slice 6 title-intro flow without a full reload.
+  showTitle: () => showTitleIntro(),
+  showMenu: () => showMenu(),
   renderDiagnostics: () => viewport.diagnostics(),
   // Read-only scene readout for preview debugging: current stage, lights, and a per-material
   // summary (color/map/side/transparent) of everything under the stage and battle roots.

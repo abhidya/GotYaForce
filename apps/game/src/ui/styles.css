@@ -652,6 +652,42 @@
   left: 46%;
 }
 
+/* ============================ TITLE INTRO ============================ */
+/* Source-shaped desk/title intro (research/decomp/index/title-main-menu-flow.md):
+ * real tl00 scene backdrop + the G-Red desk-intro actor, replacing the old handcoded
+ * CSS gear backdrop for this screen. "Press start" advances to the main menu, modeling
+ * the title_main_menu_scene_enter -> set_global_menu_mode(9) handoff. */
+.gf-title-intro {
+  background: #10131c;
+  cursor: pointer;
+}
+.gf-title-intro-scene {
+  z-index: 1;
+}
+.gf-title-intro-actor {
+  z-index: 2;
+}
+.gf-title-intro-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  z-index: 3;
+  transform: translateX(-50%);
+  color: var(--gf-yellow);
+  font-size: clamp(18px, 3.4vw, 34px);
+  letter-spacing: 0.08em;
+  -webkit-text-stroke: clamp(1.5px, 0.28vw, 4px) #071126;
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 #ffffff, 0 6px 0 rgba(0, 0, 0, 0.5);
+  animation: gf-title-prompt-blink 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes gf-title-prompt-blink {
+  0%, 55% { opacity: 1; }
+  78% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
+
 /* ============================ MAIN MENU ============================ */
 .gf-mainmenu {
   background: #6eb6d7;

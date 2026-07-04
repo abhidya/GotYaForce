@@ -65,7 +65,9 @@ import {
   resolveLiveCommand,
   type ContextualBGates,
 } from "./commandDispatch.js";
-import { shotHitRadiusForBorgId } from "./attackHitData.js";
+import { attackHitRecordsForKind, shotHitRadiusForBorgId } from "./attackHitData.js";
+import { familyDamageRecordForBorg } from "./familyDamageData.js";
+import { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
@@ -1257,7 +1259,13 @@ export function stepAttacks(
         const canChain = window > 0 && prevStep + 1 < meleeDef.comboHits;
         const canFresh = (b.cooldowns["melee"] ?? 0) <= 0;
         if (canChain || canFresh) {
-          startMeleeAttack(b, meleeDef, canChain ? prevStep + 1 : 0, meleeEngaged ? contextTarget : null);
+          startMeleeAttack(
+            b,
+            meleeDef,
+            canChain ? prevStep + 1 : 0,
+            meleeEngaged ? contextTarget : null,
+            exactMeleeForBorgId(b.borgId), // cached lookup; null keeps TUNED timing
+          );
           break;
         }
         continue; // melee gated — a hybrid may still fire its gun below
@@ -1320,10 +1328,14 @@ export function stepAttacks(
 
   // --- Resolve an active melee swing against enemies in reach ------------------------
   const meleeActive = b.cooldowns["meleeActive"] ?? 0;
+  // Exact per-borg swing data (meleeExactData.ts, cached lookup): active-window length,
+  // authored reach, and the family damage record replace the TUNED profile values.
+  const exactMelee = meleeDef ? exactMeleeForBorgId(b.borgId) : null;
+  const meleeActiveLen = exactMelee ? exactMelee.activeEnd - exactMelee.activeStart + 1 : meleeDef?.active ?? 0;
   if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && STATE.MELEE_IFRAME_REFRESH_PER_FRAME) {
     b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
   }
-  if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && meleeActive <= meleeDef.active) {
+  if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && meleeActive <= meleeActiveLen) {
     const comboStep = b.cooldowns["comboStep"] ?? 0;
     const isFinisher = comboStep >= meleeDef.comboHits - 1;
     // Sword beam: the combo finisher's FIRST active frame emits a fast short-lived projectile
@@ -1342,7 +1354,9 @@ export function stepAttacks(
       // frame, silently multiplying melee damage by the active-frame count.)
       if (b.meleeHitUids?.includes(o.uid)) continue;
       const d = distXZ(b.pos, o.pos);
-      if (d > meleeDef.range) continue;
+      // Authored reach (hit.bin record offset+extent) where exact; TUNED profile otherwise.
+      const meleeRange = exactMelee && exactMelee.reach > 0 ? exactMelee.reach : meleeDef.range;
+      if (d > meleeRange) continue;
       if (Math.abs(o.pos.y - b.pos.y) > meleeDef.yTolerance) continue;
       const to = normalize({ x: o.pos.x - b.pos.x, y: 0, z: o.pos.z - b.pos.z });
       if (fwd.x * to.x + fwd.z * to.z < 0) continue; // behind us
@@ -1350,7 +1364,9 @@ export function stepAttacks(
       if (!op) continue;
       const knockbackMult =
         meleeDef.knockbackMultiplier * (isFinisher && meleeDef.comboHits > 1 ? COMBO.FINISHER_KNOCKBACK_MULT : 1);
-      const meleeRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
+      // Exact family record for this swing (script-armed kind → hit record → family table);
+      // archetype record 1 remains the fallback for borgs without decoded data.
+      const meleeRecord = exactMelee?.damageRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
       // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
       // instead of the attacker's facing vector (`fwd`) used here previously.
       const dealt = applyHit(
@@ -1398,13 +1414,23 @@ function startMeleeAttack(
   meleeDef: MeleeActionDef,
   comboStep: number,
   lungeTarget: BorgRuntime | null,
+  // Exact per-borg first-swing data (meleeExactData.ts): frame window from the hit.bin
+  // record armed by the borg's action script. Null keeps the TUNED profile timing.
+  exactMelee: ExactMeleeAttack | null = null,
 ): void {
-  // Chained swings come out faster (COMBO.STEP_STARTUP_SCALE); the opener uses full startup.
+  // Exact window: activeStart..activeEnd are anim-frame numbers (the ROM clocks the hitbox
+  // against actor+0x1cdc); the port's state timer stands in for the anim clock 1:1 at 60Hz.
+  // Chain steps keep the TUNED faster-startup scale until per-step script records land.
+  const baseStartup = exactMelee ? exactMelee.activeStart : meleeDef.startup;
+  const baseActive = exactMelee ? exactMelee.activeEnd - exactMelee.activeStart + 1 : meleeDef.active;
   const startup =
-    comboStep > 0 ? Math.max(2, Math.round(meleeDef.startup * COMBO.STEP_STARTUP_SCALE)) : meleeDef.startup;
-  b.cooldowns["melee"] = meleeDef.duration + meleeDef.cooldown;
-  b.cooldowns["meleeActive"] = startup + meleeDef.active;
-  b.cooldowns["attackLock"] = meleeDef.duration;
+    comboStep > 0 ? Math.max(2, Math.round(baseStartup * COMBO.STEP_STARTUP_SCALE)) : baseStartup;
+  // The swing/lock must outlast the exact active window when it runs longer than the
+  // TUNED profile duration.
+  const duration = Math.max(meleeDef.duration, startup + baseActive + 2);
+  b.cooldowns["melee"] = duration + meleeDef.cooldown;
+  b.cooldowns["meleeActive"] = startup + baseActive;
+  b.cooldowns["attackLock"] = duration;
   // Lunge (contextual-B target inside the engage window only): snap facing onto the target
   // and arm the lunge-drive window for the swing's startup+active frames, clamped so the
   // total travel stays within MELEE.LUNGE_MAX_DIST (see the lunge drive in stepAttacks and
@@ -1759,7 +1785,21 @@ function spawnProjectile(
     // charged releases hit like the charge/special archetype (record 2).
     damageRecordIndex:
       chargeTier >= 1 ? DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL : DAMAGE_RECORD_INDEX.SHOT,
+    // EXACT per-borg record for plain shots (the ROM path: the borg's kind-0 hitbox record's
+    // u16+0x04 indexes the FAMILY damage table bound at actor+0x27c — familyDamageData.ts).
+    // Charged releases keep the archetype until their kind (variant table) is wired.
+    ...(chargeTier === 0 ? shotFamilyRecordSpread(b.borgId) : {}),
   };
+}
+
+/** Resolve the borg's exact plain-shot damage record: kind-0 hitbox record → family table.
+ *  Empty spread when either half is missing (archetype fallback stays in effect). */
+function shotFamilyRecordSpread(borgId: string): { damageRecord?: DamageRecord } {
+  const hitRecords = attackHitRecordsForKind(borgId, 0);
+  const first = hitRecords[0];
+  if (!first) return {};
+  const record = familyDamageRecordForBorg(borgId, first.damageRecordIndex);
+  return record ? { damageRecord: record } : {};
 }
 
 /** OBSERVED_WIKI: whether a borg's primary shot (B Shot, or B Charge when chargeTier>=1) is
@@ -1898,7 +1938,9 @@ export function stepProjectiles(
         // the port's stand-in until per-move hitbox records are dumped.
         if (distXZ(pr.pos, o.pos) <= pr.hitRadius && Math.abs(pr.pos.y - o.pos.y) <= 60) {
           const op = profiles.get(o.uid);
-          const record = damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT);
+          // A projectile carrying an exact per-borg FAMILY record (familyDamageData.ts, bound
+          // at spawn from the borg's kind-0 hitbox record) uses it; others keep the archetype.
+          const record = pr.damageRecord ?? damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT);
           if (op) {
             // Intentionally NOT the zero-vector convention: a projectile's own travel vector
             // (which may have curved via homing) is a more accurate knockback direction than

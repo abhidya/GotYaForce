@@ -1,5 +1,13 @@
 # Movement speed chain + HIT kind pipeline + damage-table bindings (2026-07-04 decode)
 
+**LIVE-TRACE VALIDATION (same day):** the existing T11 capture
+(user-data/dolphin-trace/attack-mechanics/T11-2v2-no-cpu-port3-a-hold-jump-fly.jsonl,
+`--summarize` headless) shows a jump takeoff with per-frame Y deltas starting at exactly
+**15.0 world-units/frame** — matching the pl####data.bin jump impulse applied RAW by the
+migrated port (§1's 1:1 world-unit conclusion confirmed by live data; the rise then gains
++0.8/frame under held-A boost). The T1 captures show the command byte stepping 1→2 on held
+B (tester sequence corroboration; port-3 borg id unrecorded).
+
 Three corpus digs, all DERIVED with quoted evidence (condensed from the session's agent
 reports). These retire the port's biggest remaining TUNED movement debt and fully map the
 attack-HIT selection pipeline.

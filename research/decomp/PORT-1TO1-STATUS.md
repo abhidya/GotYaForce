@@ -96,6 +96,48 @@ per-borg family damage-record extractor (recipe in the decode note) → per-hit 
 selection; mot event-track extraction → melee kind/frame wiring; per-family variant tables →
 shot kind selection.
 
+**B6. SLICE 3 COMPLETE + SLICES 6/8/9 (2026-07-04 third pass).**
+- **Family damage records EXTRACTED + WIRED**: gen-family-damage-records.mjs resolves all
+  208 borgs' +0x27c tables via per-borg ctor emulation (124 distinct tables; family-01
+  validates byte-for-byte; pl0806's 1-record table is real ROM packing). Runtime: plain
+  B-shots and melee swings now use the borg's EXACT family record (familyDamageData.ts) —
+  G RED's shot hits for its real 20 HP (record 0 of DAT_80365ec0), not the generic 10.
+- **Melee action-script kinds EXTRACTED + WIRED**: premise corrected — the event scripts are
+  DOL action-script banks at actor+0x1d80/+0x1d84 (NOT mot.bin); 18-opcode format decoded
+  (op 0x0a = armHit(kind), op 0x00 wait = the frame clock); gen-melee-anim-kinds.mjs dumps
+  114 banks / 863 hit-bearing streams / 191/208 borgs (17 bankless boss/special families are
+  code-driven, honest). pl0615 validation 27/27 kinds. Runtime (meleeExactData.ts): first
+  B-close swing uses the script-armed kind's EXACT active frame window, authored reach
+  (offset+extent), and family damage record — per-borg melee identity is now data
+  (G RED f10-12/30hp/170u; Sword Knight f17-20/283u; Magnet Robot 50hp). The
+  lowest-armed-kind selection is the one TUNED link (cue→script map still undecoded);
+  per-combo-step records deferred.
+- **Shot variant tables EXTRACTED (data only)**: gen-shot-variant-kinds.mjs — 85/85 static
+  zz_008ac80_ sites spawner-linked, 81 tables / 662 rows, incl. the two GLOBAL shot
+  registries (0x80303138: 123×0x44; 0x802d7b10: 129×0x38). G RED B-shot chain traced
+  end-to-end: all 5 variants converge on zz_018dcb0_ → global registry id 0x2b → kind 0 —
+  the port's kind-0 heuristic is EXACT for G RED. General wiring needs each fire-fn's shot
+  id read (only 277/662 rows are kind 0); doc corrections: chunk_0036:2328 + chunk_0039:2358
+  are static, not dynamic.
+- **Slice 6 title/desk intro LANDED**: TitleIntro.ts mounts the real tl00 scene + G-Red
+  playing the recovered desk sequence (anim ids 0,1,6,3,4,7 = g0 slots idle/move/jump_takeoff/
+  dash_back/dash_left/jump_land), press-start → menu (set_global_menu_mode(9) model); slot-1
+  actor left undecoded per the index note; asset-failure falls back to CSS. UI scenes
+  re-exported WITH textures (813 models, 256 textures — the blank-texture fix applied).
+- **Slice 8 mechanism**: timescale.ts ports the status(+0x5f4)/tier(+0x5f8) velocity system
+  with exact DOL tables (gen-param-tier-tables.mjs: tier 16=×1.0 … 20=×2.366; haste
+  {1.25,1.5,1.75}/slow {0.7,0.4,0.2}/freeze 0.03; burst ×1.5 = FLOAT_804373d8, upgrading
+  BURST.SPEED_MULTIPLIER to DERIVED). ×1.0 for everyone until the special-move tier/status
+  WRITERS are attributed (the Acceleration archetype = +4 tiers/1200f awaits its family
+  dispatch link).
+- **Slice 9**: existing captures re-used headless — T11 jump capture shows takeoff deltas of
+  EXACTLY 15.0 u/f, live-validating the raw-scale migration; T1 held-B shows the command
+  byte stepping 1→2 (tester-order corroboration). New injection presets remain
+  human-in-the-loop (no Dolphin session available headless).
+- NOTE: CPU AI kiting/approach constants were tuned for the old 22-speed world — several
+  big stages now take >1200f to first hit in the smoke (still PASS). AI retune is a
+  follow-up, not a correctness gap.
+
 **C. Stale audit detectors fixed:** `audit-real-asset-coverage.mjs` claimed STIH
 bounds/triangles were "not wired" — they moved into packages/assets + battleBootstrap in the
 app-flow refactor and ARE fully wired (parse → StageAssets → BattleConfig → walls/ceilings/
