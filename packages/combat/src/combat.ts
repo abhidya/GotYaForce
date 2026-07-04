@@ -1582,12 +1582,17 @@ function spawnSpecialProjectiles(
       y: b.pos.y + MUZZLE_OFFSET.up,
       z: b.pos.z + fwd.z * MUZZLE_OFFSET.forward,
     };
+    // TUNED floor (2026-07-04 playtest): several generated profiles carry projectileSpeed
+    // below the borg's own bullet speed (G RED's G Crash was 24 vs his 28 u/f shots), which
+    // read as broken. A special is never slower than 1.4x the generic shot speed until the
+    // per-move speed params (shot variant table row bytes, undecoded) replace this.
+    const specialSpeed = Math.max(specialDef.projectileSpeed ?? SHOT.SPEED, SHOT.SPEED * 1.4);
     projectiles.push({
       uid: `proj_${projCounter++}`,
       ownerUid: b.uid,
       team: b.team,
       pos: muzzlePos,
-      vel: scale(fwd, (specialDef.projectileSpeed ?? SHOT.SPEED) * tier.speed),
+      vel: scale(fwd, specialSpeed * tier.speed),
       // `damage` is the damageScale fed to computeSourceDamage by stepProjectiles (same
       // convention as gun projectiles); the AoE path passes the same multiplier as its
       // damageScale, so both special archetypes hit with identical record-2 strength.

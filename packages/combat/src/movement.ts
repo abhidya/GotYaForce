@@ -178,9 +178,25 @@ export function stepMovement(
   if (input.jump && free) {
     handleJump(b, jumpVelocityForBorgId(b.borgId));
   }
-  // Boost flight: flyer holding jump in the air gets sustained lift while fuel remains.
+  // Boost flight — UNIVERSAL (2026-07-04): EVERY borg boosts by holding jump in the air
+  // while fuel remains, not only p.flyer. Evidence: the ROM's flight is the
+  // gravity-coefficient-0 state (FUN_80067310 with coeff FLOAT_804374ec = 0.0 —
+  // behavior-notes (bc)), the boost gauge is on every borg's HUD, and (ap) W17's three
+  // flight models include the plain "boost" model for standard borgs. Thrust/max-rise stay
+  // TUNED (no ROM thrust constant exists — flight is a gravity toggle). The boost only
+  // engages once the jump arc has decayed to the boost ceiling (vel.y <= BOOST_MAX_RISE),
+  // so a held ground jump keeps its full DERIVED impulse arc and then transitions into the
+  // sustained jet climb; entering "fly" plays the exported boost (jetpack) clip.
   const boostFuel = b.cooldowns["boostFuel"] ?? JUMP.BOOST_FUEL_FRAMES;
-  if (p.flyer && !b.grounded && input.jump && free && boostFuel > 0) {
+  // Flyer-class borgs enter flight immediately (their whole movement identity); standard
+  // borgs finish the jump arc first (vel gate), then the jet climb takes over.
+  const boosting =
+    !b.grounded &&
+    input.jump &&
+    free &&
+    boostFuel > 0 &&
+    (p.flyer || b.vel.y <= JUMP.BOOST_MAX_RISE);
+  if (boosting) {
     b.vel.y = Math.min(b.vel.y + JUMP.BOOST_THRUST, JUMP.BOOST_MAX_RISE);
     b.cooldowns["boostFuel"] = boostFuel - 1;
     if (b.state === "jump" || b.state === "idle" || b.state === "move") {
@@ -188,11 +204,14 @@ export function stepMovement(
     }
   }
 
-  // Gravity (always, even in combat states, so knockback arcs fall). Per-borg DERIVED raw
-  // fall gravity (pl####data.bin +0x6c — movementData.ts): heavies drop faster, the
-  // pl0d/pl0e satellite/air families float (-0.1 in source data). MAX_FALL is the DERIVED
-  // global terminal clamp (FLOAT_804375f0 = -35.0).
-  b.vel.y = Math.max(b.vel.y - fallGravityForBorgId(b.borgId), -JUMP.MAX_FALL);
+  // Gravity (skipped while boosting — the ROM's flight IS gravity-coefficient-0, so heavy
+  // borgs hover too instead of fighting a thrust term). Per-borg DERIVED raw fall gravity
+  // (pl####data.bin +0x6c — movementData.ts): heavies drop faster, the pl0d/pl0e
+  // satellite/air families float (-0.1 in source data). MAX_FALL is the DERIVED global
+  // terminal clamp (FLOAT_804375f0 = -35.0).
+  if (!boosting) {
+    b.vel.y = Math.max(b.vel.y - fallGravityForBorgId(b.borgId), -JUMP.MAX_FALL);
+  }
 
   // --- Integrate ----------------------------------------------------------------------
   const prevPos = { ...b.pos };

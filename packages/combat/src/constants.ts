@@ -434,10 +434,16 @@ export const CHARGE = {
    * chargeTier2Frames (~90f cap). Damage multipliers are per-profile
    * (chargeTier1DamageMult/chargeTier2DamageMult); speed/radius/hitstun/knockback scale here.
    */
-  TIER1_SPEED_MULT: 1.1,
-  TIER2_SPEED_MULT: 1.25,
-  TIER1_RADIUS_MULT: 1.25,
-  TIER2_RADIUS_MULT: 1.6,
+  // TUNED-visual (2026-07-04 playtest feedback): a full charge (G Buster class) previously
+  // fired a bolt visually indistinguishable from a plain shot (radius 20→32 at the same
+  // "energy" family). The renderer scales bolt footprint by hitRadius, so the tier-2 radius
+  // is sized to read as the big charged beam; speed up so the release feels like a cannon.
+  // Real per-move charged hitboxes are hit.bin kinds not yet mapped to the charge command —
+  // these stay TUNED multipliers over the borg's own base radius until that mapping lands.
+  TIER1_SPEED_MULT: 1.3,
+  TIER2_SPEED_MULT: 1.6,
+  TIER1_RADIUS_MULT: 1.8,
+  TIER2_RADIUS_MULT: 3.2,
   TIER1_HITSTUN_MULT: 1.2,
   TIER2_HITSTUN_MULT: 1.5,
   TIER1_KNOCKBACK_MULT: 1.2,
