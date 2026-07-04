@@ -27,8 +27,8 @@
   ],
   "unresolvedBorgs": [],
   "distinctBanks": 114,
-  "hitBearingSlots": 863,
-  "totalEventsInHitSlots": 4926,
+  "hitBearingSlots": 871,
+  "totalEventsInHitSlots": 4975,
   "validation": {
    "borgsCheckedAgainstHitBinRemap": 191,
    "clean": 190,
@@ -7895,6 +7895,246 @@
         "val": 8
        }
       ]
+     },
+     "s1": {
+      "streamAddress": "0x8030bfb4",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 2,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 127,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 1
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 13
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 21
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 29
+       },
+       {
+        "op": "wait",
+        "mode": 0,
+        "val": -1
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 0,
+        "slot": 0
+       },
+       {
+        "op": "wait",
+        "mode": 1,
+        "val": 8
+       }
+      ]
+     },
+     "s2": {
+      "streamAddress": "0x8030c00c",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 4,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 0,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 3
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 15
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 23
+       },
+       {
+        "op": "wait",
+        "mode": 0,
+        "val": -1
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 0,
+        "slot": 0
+       },
+       {
+        "op": "wait",
+        "mode": 1,
+        "val": 8
+       }
+      ]
+     },
+     "s3": {
+      "streamAddress": "0x8030c058",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 5,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 0,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 4
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 15
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 30
+       },
+       {
+        "op": "wait",
+        "mode": 0,
+        "val": -1
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 0,
+        "slot": 0
+       },
+       {
+        "op": "wait",
+        "mode": 1,
+        "val": 8
+       }
+      ]
+     },
+     "s4": {
+      "streamAddress": "0x8030c0a4",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 6,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 0,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 5
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 18
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 23
+       },
+       {
+        "op": "wait",
+        "mode": 0,
+        "val": -1
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 0,
+        "slot": 0
+       },
+       {
+        "op": "wait",
+        "mode": 1,
+        "val": 8
+       }
+      ]
+     },
+     "s5": {
+      "streamAddress": "0x8030c0ec",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 7,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 0,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 2
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 4
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 19
+       },
+       {
+        "op": "wait",
+        "mode": 0,
+        "val": -1
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 0,
+        "slot": 14
+       },
+       {
+        "op": "wait",
+        "mode": 1,
+        "val": 15
+       }
+      ]
      }
     }
    }
@@ -13675,6 +13915,104 @@
         "op": "wait",
         "mode": 1,
         "val": -1
+       }
+      ]
+     },
+     "s3": {
+      "streamAddress": "0x803279c4",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 4,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 0,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 4
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 8
+       },
+       {
+        "op": "wait",
+        "mode": 8,
+        "val": 16
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 29
+       },
+       {
+        "op": "wait",
+        "mode": 1,
+        "val": -1
+       }
+      ]
+     },
+     "s4": {
+      "streamAddress": "0x8032796c",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 5,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 0,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 5
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 8
+       },
+       {
+        "op": "wait",
+        "mode": 3,
+        "val": 15
+       }
+      ]
+     },
+     "s6": {
+      "streamAddress": "0x80327a00",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 7,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 0,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 3
+       },
+       {
+        "op": "wait",
+        "mode": 3,
+        "val": 11
        }
       ]
      }
@@ -36180,7 +36518,10 @@
    "hitKinds": [
     1,
     2,
-    3
+    3,
+    4,
+    5,
+    7
    ]
   },
   "pl0403": {
@@ -36249,7 +36590,10 @@
    "hitKinds": [
     1,
     2,
-    3
+    3,
+    4,
+    5,
+    7
    ]
   },
   "pl0409": {
@@ -36503,7 +36847,12 @@
    "familyBank": "0x8030b900",
    "sharedBank": "0x802bcc64",
    "hitKinds": [
-    1
+    1,
+    2,
+    4,
+    5,
+    6,
+    7
    ]
   },
   "pl0602": {
@@ -36675,7 +37024,12 @@
    "familyBank": "0x8030b900",
    "sharedBank": "0x802bcc64",
    "hitKinds": [
-    1
+    1,
+    2,
+    4,
+    5,
+    6,
+    7
    ]
   },
   "pl0618": {

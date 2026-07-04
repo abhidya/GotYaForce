@@ -247,12 +247,22 @@ function decodeStream(addr, streamStarts) {
   return { events, end: "iterationLimit" };
 }
 
+// All bank base addresses across the fleet (populated by the pre-pass below). Banks can be
+// laid out back-to-back with SHARED slot tables (e.g. 0x80327440 / 0x8032744c / 0x80327458,
+// 12 bytes apart): the "read the group array until the smallest positive offset" rule then
+// runs one bank's group array straight into the next bank's, and the misread entries become
+// bogus table pointers that truncate the real slot tables (this silently dropped the
+// pl0402/pl0408 melee streams). A bank's group array therefore also ends at the next known
+// bank base.
+const allBankBases = new Set();
+
 function parseBank(base) {
   const rawGroups = [];
   {
     let minPos = Infinity;
     for (let i = 0; ; i++) {
       if (i * 2 >= Math.min(minPos, 0x200)) break;
+      if (i > 0 && allBankBases.has(base + i * 2)) break;
       const v = readS16(base + i * 2);
       if (v === null) break;
       rawGroups.push(v);
@@ -327,10 +337,21 @@ const borgs = {};
 const unresolved = [];
 const bankless = [];
 const validation = { checked: 0, clean: 0, mismatched: [] };
+// Pre-pass: collect every borg's bank stores FIRST so parseBank knows all bank bases
+// (interleaved-bank group-array bound — see allBankBases above) before any bank decodes.
+const storesByBorg = new Map();
 for (const id of borgIds) {
   const ctor = parseInt(cmd.borgs[id].constructorAddress, 16);
   const borgValue = parseInt(id.slice(2), 16);
   const stores = collectBankStores(ctor, borgValue);
+  storesByBorg.set(id, stores);
+  for (const off of [0x1d80, 0x1d84]) {
+    const v = stores.get(off);
+    if (typeof v === "number" && v >= 0x80000000) allBankBases.add(v);
+  }
+}
+for (const id of borgIds) {
+  const stores = storesByBorg.get(id);
   const isBank = (v) => typeof v === "number" && v >= 0x80000000;
   const family = isBank(stores.get(0x1d80)) ? stores.get(0x1d80) : null;
   const shared = isBank(stores.get(0x1d84)) ? stores.get(0x1d84) : null;
