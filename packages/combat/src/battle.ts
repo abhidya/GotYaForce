@@ -12,7 +12,14 @@
 
 import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
-import { createBurstMeter, stepBurst, sweepBurstCharged } from "./burst.js";
+import {
+  canActivateBurst,
+  createBurstMeter,
+  stepActiveBurst,
+  stepBurst,
+  sweepBurstCharged,
+  tryActivateBurst,
+} from "./burst.js";
 import {
   acquireAllyLock,
   acquireLock,
@@ -311,6 +318,58 @@ class BattleImpl implements Battle {
 
   // --- Per-frame step -----------------------------------------------------------------
 
+  private burstMeterFor(b: BorgRuntime): BurstMeterState | undefined {
+    return b.ownerPlayer === null ? undefined : this.state.burstMeterByPlayer[b.ownerPlayer];
+  }
+
+  /**
+   * Sample Y press edges for human-controlled active borgs, then resolve Power Burst
+   * activation after all same-frame teammate inputs are visible.
+   */
+  private stepPowerBurstInputs(resolved: Map<string, PlayerInput>): void {
+    const humanBorgsByTeam = new Map<number, BorgRuntime[]>();
+
+    for (const force of this.forces) {
+      if (force.ownerPlayer === null || force.activeUid === null) continue;
+      const b = this.byUid.get(force.activeUid);
+      if (!b || !b.alive) continue;
+      const input = resolved.get(b.uid) ?? emptyInput();
+      const hyperPressed = input.hyper && (b.cooldowns["hyperHeld"] ?? 0) === 0;
+      b.cooldowns["hyperHeld"] = input.hyper ? 1 : 0;
+      stepBurst(b, hyperPressed);
+
+      const teamBorgs = humanBorgsByTeam.get(b.team);
+      if (teamBorgs) {
+        teamBorgs.push(b);
+      } else {
+        humanBorgsByTeam.set(b.team, [b]);
+      }
+    }
+
+    for (const teamBorgs of humanBorgsByTeam.values()) {
+      if (teamBorgs.length === 1) {
+        const b = teamBorgs[0];
+        if (!b) continue;
+        tryActivateBurst(b, this.burstMeterFor(b), false);
+        continue;
+      }
+
+      const ready = teamBorgs.every((b) => canActivateBurst(b, this.burstMeterFor(b)));
+      if (!ready) continue;
+      for (const b of teamBorgs) {
+        tryActivateBurst(b, this.burstMeterFor(b), true);
+      }
+    }
+  }
+
+  private drainPowerBursts(): void {
+    for (const force of this.forces) {
+      if (force.ownerPlayer === null || force.activeUid === null) continue;
+      const b = this.byUid.get(force.activeUid);
+      if (b) stepActiveBurst(b, this.burstMeterFor(b));
+    }
+  }
+
   step(_dt: number, inputs: Record<string, PlayerInput>): void {
     void _dt; // sim is fixed-step (SIM.DT); dt accepted for API symmetry.
     if (this.state.result !== "ongoing") return;
@@ -341,6 +400,8 @@ class BattleImpl implements Battle {
       resolved.set(b.uid, input);
     }
 
+    this.stepPowerBurstInputs(resolved);
+
     // 2) Lock-on resolution + facing context, then movement, then attacks.
     for (const b of all) {
       if (!b.alive) continue;
@@ -352,13 +413,6 @@ class BattleImpl implements Battle {
       // frame's gating is correct. stepGaugeWindows self-freezes while in hit/down (the
       // ROM's "in hit reaction" gate, chunk_0006.c:7982-8011).
       stepCooldowns(b);
-      // Y (Hyper/Power Burst arm) is EDGE-TRIGGERED via the same 0/1 press-latch pattern as
-      // switchLockHeld/allyLockHeld below: re-arming must happen once per fresh press, not
-      // every frame the button is held. Shell only (ATK-011) — stepBurst has zero gameplay
-      // effects while constants.ts BURST.ENABLED stays false.
-      const hyperPressed = input.hyper && (b.cooldowns["hyperHeld"] ?? 0) === 0;
-      b.cooldowns["hyperHeld"] = input.hyper ? 1 : 0;
-      stepBurst(b, hyperPressed);
       stepAmmoRefill(b, prof);
       stepStatus(b);
       stepInvincibility(b);
@@ -425,6 +479,7 @@ class BattleImpl implements Battle {
         this.spawnPlanned.add(this.forceIndexOfUid(b.uid));
       }
     }
+    this.drainPowerBursts();
     this.accountPendingDefeats();
 
     // 3) Projectiles.

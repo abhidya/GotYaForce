@@ -1,6 +1,6 @@
 import borgData from "../../../../packages/assets/data/borgs.json";
 
-import { readBorgRoster, type BorgAssetEntry, type BorgRosterData } from "@gf/assets";
+import { createBorgRoster, type BorgAssetEntry, type BorgRoster, type BorgRosterData } from "@gf/assets";
 import {
   actionProfileForProfile,
   buildProfile,
@@ -20,6 +20,7 @@ const DEFAULT_FORCE_SLOT_SEEDS: ForceSlot[] = [
 
 export interface GameBorgCatalog {
   roster: readonly BorgAssetEntry[];
+  rosterIndex: BorgRoster;
   combatStats: readonly BorgStats[];
   profiles: ReadonlyMap<string, BorgProfile>;
   forceCatalog: readonly ForceBorg[];
@@ -30,21 +31,16 @@ export interface GameBorgCatalog {
 }
 
 export function createGameBorgCatalog(data: BorgRosterData): GameBorgCatalog {
-  const roster = readBorgRoster(data);
+  const rosterIndex = createBorgRoster(data);
+  const roster = rosterIndex.entries;
   const combatStats = roster as readonly BorgStats[];
   const profiles = new Map(combatStats.map((borg) => [borg.id, buildProfile(borg)] as const));
-  const forceCatalog: ForceBorg[] = [...roster]
-    .sort(
-      (a, b) =>
-        (a.tribe ?? "").localeCompare(b.tribe ?? "") ||
-        a.energy - b.energy ||
-        a.name.localeCompare(b.name),
-    )
-    .map((b) => ({ id: b.id, name: b.name, energy: b.energy }));
+  const forceCatalog: ForceBorg[] = [...rosterIndex.forceCatalog()];
   const forceById = new Map(forceCatalog.map((entry) => [entry.id, entry] as const));
 
   return {
     roster,
+    rosterIndex,
     combatStats,
     profiles,
     forceCatalog,
@@ -55,8 +51,7 @@ export function createGameBorgCatalog(data: BorgRosterData): GameBorgCatalog {
       return profile ? actionProfileForProfile(profile) : null;
     },
     forceFromSlot(slot) {
-      const valid = slot.borgIds.filter((id) => forceById.has(id));
-      return valid.length > 0 ? valid : [DEFAULT_LEAD];
+      return rosterIndex.validIds(slot.borgIds, { fallbackId: DEFAULT_LEAD });
     },
   };
 }

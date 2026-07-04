@@ -31,7 +31,7 @@ import {
   type ChallengeMode,
 } from "./challenge-reference.js";
 import { createAdventureCampaign } from "./adventure.js";
-import type { BattleConfig } from "./battle-config.js";
+import type { MissionBattleConfig } from "./battle-config.js";
 import { computeResults, type BattleOutcome } from "./scoring.js";
 import { readBorgs, type BorgData } from "./borg-data.js";
 import type { StagesData } from "./adventure.js";
@@ -127,7 +127,7 @@ function assertChallengeStageFamilyResolution(): void {
       },
     };
   };
-  const cfg = (stageByte: number, stageSubtable: number): BattleConfig => ({
+  const cfg = (stageByte: number, stageSubtable: number): MissionBattleConfig => ({
     arena: "challenge",
     forces: [],
     meta: {

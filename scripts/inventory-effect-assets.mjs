@@ -3,6 +3,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseTplMetadata } from "../packages/formats/src/tpl.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -115,20 +116,6 @@ const familyTerms = {
     "arrow",
   ],
 };
-
-const tplFormats = new Map([
-  [0, "I4"],
-  [1, "I8"],
-  [2, "IA4"],
-  [3, "IA8"],
-  [4, "RGB565"],
-  [5, "RGB5A3"],
-  [6, "RGBA8"],
-  [8, "C4"],
-  [9, "C8"],
-  [10, "C14X2"],
-  [14, "CMPR"],
-]);
 
 const confidenceRank = { High: 3, Medium: 2, Low: 1 };
 const motCache = new Map();
@@ -250,56 +237,7 @@ function inferNeededScripts(file) {
 
 async function parseTpl(file) {
   const buffer = await fs.readFile(file.abs);
-  if (buffer.length < 12) return { parseStatus: "too small for TPL header" };
-
-  const magic = buffer.readUInt32BE(0);
-  if (magic !== 0x0020af30) {
-    return { parseStatus: `unexpected magic 0x${magic.toString(16).padStart(8, "0")}` };
-  }
-
-  const imageCount = buffer.readUInt32BE(4);
-  const imageTableOffset = buffer.readUInt32BE(8);
-  const images = [];
-  const maxImages = Math.min(imageCount, 64);
-
-  for (let i = 0; i < maxImages; i += 1) {
-    const entryOffset = imageTableOffset + i * 8;
-    if (entryOffset + 8 > buffer.length) break;
-
-    const textureHeaderOffset = buffer.readUInt32BE(entryOffset);
-    const paletteHeaderOffset = buffer.readUInt32BE(entryOffset + 4);
-    if (textureHeaderOffset + 12 > buffer.length) {
-      images.push({
-        index: i,
-        parseStatus: "texture header outside file",
-        textureHeaderOffset,
-        paletteHeaderOffset,
-      });
-      continue;
-    }
-
-    const height = buffer.readUInt16BE(textureHeaderOffset);
-    const width = buffer.readUInt16BE(textureHeaderOffset + 2);
-    const formatCode = buffer.readUInt32BE(textureHeaderOffset + 4);
-    const dataOffset = buffer.readUInt32BE(textureHeaderOffset + 8);
-    images.push({
-      index: i,
-      width,
-      height,
-      format: tplFormats.get(formatCode) || `unknown(${formatCode})`,
-      formatCode,
-      dataOffset,
-      textureHeaderOffset,
-      paletteHeaderOffset: paletteHeaderOffset || null,
-    });
-  }
-
-  return {
-    parseStatus: images.length === imageCount ? "ok" : "partial",
-    imageCount,
-    imageTableOffset,
-    images,
-  };
+  return parseTplMetadata(buffer);
 }
 
 async function parseTxg(file) {

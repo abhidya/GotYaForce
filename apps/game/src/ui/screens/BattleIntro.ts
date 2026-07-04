@@ -6,14 +6,14 @@
  * transparent so the already-loaded stage canvas can show through behind this UI.
  */
 
-import type { BattleConfig } from "@gf/missions";
+import type { MissionBattleConfig } from "@gf/missions";
 import { ASSETS, borgMiniPath } from "../assets.js";
 import { el, legendItem } from "../dom.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
 export interface BattleIntroOptions {
-  config: BattleConfig;
+  config: MissionBattleConfig;
   catalog: readonly ForceBorg[];
   onConfirm: () => void;
   onBack?: () => void;

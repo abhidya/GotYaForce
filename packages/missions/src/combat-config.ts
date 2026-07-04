@@ -3,7 +3,7 @@ import type {
   StageBounds,
   StageCollision,
 } from "@gf/combat";
-import type { BattleConfig as MissionBattleConfig } from "./battle-config.js";
+import type { MissionBattleConfig } from "./battle-config.js";
 
 export interface CombatStageCatalog {
   defaultStageId: string;

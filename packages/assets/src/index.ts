@@ -24,6 +24,33 @@ export interface BorgAssetEntry {
 
 export type BorgRosterData = readonly BorgAssetEntry[] | { borgs: readonly BorgAssetEntry[] };
 
+export interface BorgForceEntry {
+  id: string;
+  name: string;
+  energy: number;
+}
+
+export interface BorgRosterQuery {
+  ids?: readonly string[];
+  tribe?: string;
+  type?: string;
+  hasModel?: boolean;
+}
+
+export interface BorgRoster {
+  entries: readonly BorgAssetEntry[];
+  ids: readonly string[];
+  byId: ReadonlyMap<string, BorgAssetEntry>;
+  get(id: string): BorgAssetEntry | null;
+  require(id: string): BorgAssetEntry;
+  has(id: string): boolean;
+  select(query?: BorgRosterQuery): readonly BorgAssetEntry[];
+  forceCatalog(query?: BorgRosterQuery): readonly BorgForceEntry[];
+  entriesForIds(ids: readonly string[]): readonly BorgAssetEntry[];
+  validIds(ids: readonly string[], options?: { fallbackId?: string }): string[];
+  energyFor(ids: readonly string[]): number;
+}
+
 export interface ModelManifestEntry {
   id: string;
   name: string;
@@ -82,8 +109,69 @@ export interface StageAssets<T = unknown> {
 }
 
 export function readBorgRoster(data: BorgRosterData): readonly BorgAssetEntry[] {
-  const borgs = "borgs" in data ? data.borgs : data;
-  return borgs.filter((b) => b.id.trim() !== "" && b.name.trim() !== "");
+  return createBorgRoster(data).entries;
+}
+
+export function createBorgRoster(data: BorgRosterData): BorgRoster {
+  const entries = ("borgs" in data ? data.borgs : data).filter((b) => b.id.trim() !== "" && b.name.trim() !== "");
+  const byId = new Map<string, BorgAssetEntry>();
+  for (const borg of entries) {
+    if (!byId.has(borg.id)) byId.set(borg.id, borg);
+  }
+  const ids = entries.map((borg) => borg.id);
+
+  const get = (id: string): BorgAssetEntry | null => byId.get(id) ?? null;
+  const has = (id: string): boolean => byId.has(id);
+  const select = (query: BorgRosterQuery = {}): readonly BorgAssetEntry[] => {
+    const source = query.ids === undefined ? entries : query.ids.map((id) => get(id)).filter(isBorgEntry);
+    return source.filter((borg) => matchesBorgQuery(borg, query));
+  };
+
+  return {
+    entries,
+    ids,
+    byId,
+    get,
+    require(id: string) {
+      const borg = get(id);
+      if (!borg) throw new Error(`Unknown borg id: ${id}`);
+      return borg;
+    },
+    has,
+    select,
+    forceCatalog(query?: BorgRosterQuery) {
+      return select(query)
+        .map((borg) => ({ id: borg.id, name: borg.name, energy: borg.energy }))
+        .sort(
+          (a, b) =>
+            (get(a.id)?.tribe ?? "").localeCompare(get(b.id)?.tribe ?? "") ||
+            a.energy - b.energy ||
+            a.name.localeCompare(b.name),
+        );
+    },
+    entriesForIds(inputIds: readonly string[]) {
+      return inputIds.map((id) => get(id)).filter(isBorgEntry);
+    },
+    validIds(inputIds: readonly string[], options: { fallbackId?: string } = {}) {
+      const valid = inputIds.filter((id) => has(id));
+      if (valid.length > 0) return valid;
+      return options.fallbackId && has(options.fallbackId) ? [options.fallbackId] : [];
+    },
+    energyFor(inputIds: readonly string[]) {
+      return inputIds.reduce((total, id) => total + (get(id)?.energy ?? 0), 0);
+    },
+  };
+}
+
+function isBorgEntry(value: BorgAssetEntry | null): value is BorgAssetEntry {
+  return value !== null;
+}
+
+function matchesBorgQuery(borg: BorgAssetEntry, query: BorgRosterQuery): boolean {
+  if (query.tribe !== undefined && borg.tribe !== query.tribe) return false;
+  if (query.type !== undefined && borg.type !== query.type) return false;
+  if (query.hasModel !== undefined && (borg.hasModel === true || Boolean(borg.model)) !== query.hasModel) return false;
+  return true;
 }
 
 export function createPublicAssetCatalog(options: PublicAssetCatalogOptions = {}): PublicAssetCatalog {

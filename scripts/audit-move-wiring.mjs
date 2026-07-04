@@ -16,7 +16,7 @@ const DATA_PATHS = {
   actionProfiles: "packages/combat/src/data/actionProfiles.json",
   commandMoveTables: "packages/combat/src/data/commandMoveTables.json",
   modelManifest: "apps/game/public/models/library/manifest.json",
-  runtimeMain: "apps/game/src/main.ts",
+  runtimeAnimationResolver: "apps/game/src/sim/borgPresentationAssets.ts",
   runtimeCombat: "packages/combat/src/combat.ts",
   runtimeMove: "packages/combat/src/moveRuntime.ts",
 };
@@ -125,8 +125,12 @@ function compact(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim();
 }
 
+function stripJsComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+}
+
 function readPreferredLabels() {
-  const filePath = abs(DATA_PATHS.runtimeMain);
+  const filePath = abs(DATA_PATHS.runtimeAnimationResolver);
   if (!fs.existsSync(filePath)) return { labels: {}, parsed: false };
 
   const source = fs.readFileSync(filePath, "utf8");
@@ -151,7 +155,7 @@ function readPreferredLabels() {
   }
   if (close < 0) return { labels: {}, parsed: false };
 
-  const body = source.slice(open + 1, close);
+  const body = stripJsComments(source.slice(open + 1, close));
   const labels = {};
   const entryRe = /\b(pl[0-9a-f]{4})\s*:\s*\{([\s\S]*?)\}\s*,?/gi;
   for (const entry of body.matchAll(entryRe)) {

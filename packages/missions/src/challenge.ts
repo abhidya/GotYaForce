@@ -13,7 +13,7 @@
 // The CPU ally/enemy rosters and Challenge stage ids below are not heuristic:
 // they are built from the deobfuscated 0x801962c4 / 0x80196dac DOL tables.
 
-import type { BattleConfig, BattleForce } from "./battle-config.js";
+import type { MissionBattleConfig, MissionBattleForce } from "./battle-config.js";
 import { type BorgData, readBorgs } from "./borg-data.js";
 import {
   CHALLENGE_GROUP_ROSTERS,
@@ -111,7 +111,7 @@ export interface ChallengeRun {
   /** Original Challenge player branch, clamped to 1P/2P. */
   playerCount: number;
   /** Ordered escalating battles. */
-  battles: BattleConfig[];
+  battles: MissionBattleConfig[];
   /** Total battles in the run. */
   total: number;
   /** Index of the battle currently to be played (0-based). */
@@ -121,7 +121,7 @@ export interface ChallengeRun {
   /** Whether the run has ended (loss or run completed). */
   ended: boolean;
   /** Get the current battle config, or null if the run has ended. */
-  getCurrentBattle(): BattleConfig | null;
+  getCurrentBattle(): MissionBattleConfig | null;
   /**
    * Advance the run with a battle result.
    *  - WIN  → score accumulates, advance to the next (tougher) battle. If that
@@ -145,7 +145,7 @@ export interface ChallengeProgress {
   /** Action the caller should take. */
   action: "advance" | "complete" | "title";
   /** Next battle to play, or null when ending. */
-  nextBattle: BattleConfig | null;
+  nextBattle: MissionBattleConfig | null;
   /** Cumulative score after this result. */
   score: number;
   /** 0-based index now current. */
@@ -153,7 +153,7 @@ export interface ChallengeProgress {
 }
 
 /**
- * Build a challenge run: an ordered list of escalating `BattleConfig`s plus the
+ * Build a challenge run: an ordered list of escalating mission battle plans plus the
  * `next()` progression and cumulative scoring.
  */
 export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
@@ -172,7 +172,7 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
   const rng = options.rng ?? createChallengeRng(options.seed ?? seedFromRunOptions(mode, budget, playerCount));
   const energyById = energyMap(borgs);
 
-  const battles: BattleConfig[] = [];
+  const battles: MissionBattleConfig[] = [];
   let previousStageByte: number | null = null;
 
   for (let i = 0; i < totalBattles; i++) {
@@ -189,7 +189,7 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
       }),
     );
 
-    const playerForceConfigs: BattleForce[] = playerForces.map((pf) => ({
+    const playerForceConfigs: MissionBattleForce[] = playerForces.map((pf) => ({
       team: "player" as const,
       ownerPlayer: pf.player,
       borgIds: pf.borgIds,
@@ -220,7 +220,7 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
       });
     }
 
-    const enemyForces: BattleForce[] = enemyRosters.map((enemy) => ({
+    const enemyForces: MissionBattleForce[] = enemyRosters.map((enemy) => ({
       team: "enemy",
       ownerPlayer: null,
       borgIds: enemy.borgIds,

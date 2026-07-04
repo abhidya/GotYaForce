@@ -1,6 +1,6 @@
-// BattleScene — syncs a @gf/combat Battle's BorgRuntime[] to three.js models.
+// BattleScene — syncs render-facing battle actor facts to three.js models.
 //
-// One three.js Group per live BorgRuntime (keyed by uid). Each frame:
+// One three.js Group per live actor (keyed by uid). Each frame:
 //   - spawn a model for any new uid, despawn models whose uid is gone,
 //   - copy pos -> position, rotY -> rotation.y,
 //   - pick a baked clip from the borg's state/action and play it,
@@ -11,7 +11,7 @@
 // duplicating them. A capsule is shown only while the production model is loading.
 
 import * as THREE from "three";
-import type { BorgRuntime, Projectile, ProjectileVisualKind } from "@gf/combat";
+import type { Projectile, ProjectileVisualKind } from "@gf/combat";
 import { MUZZLE_OFFSET, SHOT, SPECIAL } from "@gf/combat";
 import {
   ARROW_MDL_BOUNDS,
@@ -19,6 +19,7 @@ import {
   ARROW_MDL_POSITIONS,
   ARROW_MDL_SOURCE,
 } from "./data/arrowMdlGeometry.generated.js";
+import type { BattleActorView } from "./battleView.js";
 
 /** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
 export interface BorgAssets {
@@ -266,8 +267,8 @@ export class BattleScene {
   }
 
   /** Map a sim state/action to one of the exported game animation groups. */
-  private slotForBorg(b: BorgRuntime): AnimSlot {
-    if ((b.cooldowns["dashActive"] ?? 0) > 0) return dashSlotForBorg(b);
+  private slotForBorg(b: BattleActorView): AnimSlot {
+    if (b.dashActiveFrames > 0) return dashSlotForBorg(b);
     if (b.state === "death") return "death";
     if (b.state === "down") return "down";
     if (b.state === "hit") return "hit";
@@ -293,7 +294,7 @@ export class BattleScene {
 
   /** Reconcile the scene with the current list of live borgs. Call once per frame. */
   sync(
-    borgs: readonly BorgRuntime[],
+    borgs: readonly BattleActorView[],
     projectiles: readonly Projectile[] = [],
     localActiveUid: string | null = null,
     meleeMode = false,
@@ -381,7 +382,7 @@ export class BattleScene {
     return this.actors.get(uid)?.group.position ?? null;
   }
 
-  private spawn(b: BorgRuntime): Actor {
+  private spawn(b: BattleActorView): Actor {
     const group = new THREE.Group();
     group.position.set(b.pos.x, b.pos.y, b.pos.z);
     group.rotation.y = b.rotY;
@@ -423,7 +424,7 @@ export class BattleScene {
    * reticle can never appear over the player's own borg or an ally.
    */
   private syncLockMarkers(
-    borgs: readonly BorgRuntime[],
+    borgs: readonly BattleActorView[],
     localActiveUid: string | null,
     meleeMode = false,
   ): void {
@@ -780,10 +781,10 @@ export class BattleScene {
    * The glow is the real ptcl00.txg#7 magenta spiral aura ramped by charge progress.
    * Tier thresholds mirror the actionProfiles defaults (chargeTier1Frames 30 /
    * chargeTier2Frames 90) — presentation-only TUNED values; per-profile overrides are
-   * not visible from BorgRuntime (read-only cooldowns is all the sim exposes).
+   * not visible from BattleActorView (charge frames are the only cooldown fact exposed).
    */
-  private syncChargeGlow(actor: Actor, b: BorgRuntime): void {
-    const frames = b.cooldowns["chargeFrames"] ?? 0;
+  private syncChargeGlow(actor: Actor, b: BattleActorView): void {
+    const frames = b.chargeFrames;
     if (frames <= 0 || !b.alive) {
       if (actor.chargeGlow) actor.chargeGlow.sprite.visible = false;
       return;
@@ -864,7 +865,7 @@ function orientBeam(node: THREE.Object3D, projectile: Projectile): void {
   }
 }
 
-function dashSlotForBorg(b: BorgRuntime): AnimSlot {
+function dashSlotForBorg(b: BattleActorView): AnimSlot {
   const vx = b.vel.x;
   const vz = b.vel.z;
   const speedSq = vx * vx + vz * vz;

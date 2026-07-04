@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { parseTplMetadata } from "../packages/formats/src/tpl.ts";
 
 const repoRoot = process.cwd();
 const scriptPath = "scripts/inventory-ui-hud-assets.mjs";
@@ -62,34 +63,6 @@ const categoryDefinitions = [
     pattern: /^(bn[0-9a-f]{4}|mn[0-9a-f]{4}|face[0-9a-f]{4}(_mdl)?|font_00|ascii|mini_t|titles)\.(tpl|arc)$/i,
   },
 ];
-
-const tplFormats = new Map([
-  [0, "I4"],
-  [1, "I8"],
-  [2, "IA4"],
-  [3, "IA8"],
-  [4, "RGB565"],
-  [5, "RGB5A3"],
-  [6, "RGBA8"],
-  [8, "C4"],
-  [9, "C8"],
-  [10, "C14X2"],
-  [14, "CMPR"],
-]);
-
-const bytesPerPixel = new Map([
-  [0, 0.5],
-  [1, 1],
-  [2, 1],
-  [3, 2],
-  [4, 2],
-  [5, 2],
-  [6, 4],
-  [8, 0.5],
-  [9, 1],
-  [10, 2],
-  [14, 0.5],
-]);
 
 function abs(file) {
   return path.resolve(repoRoot, file);
@@ -237,60 +210,7 @@ function hexBytes(buffer, length = 16) {
 }
 
 function parseTpl(buffer) {
-  if (buffer.length < 12) return { parseStatus: "too small for TPL header" };
-  const magic = buffer.readUInt32BE(0);
-  if (magic !== 0x0020af30) {
-    return { parseStatus: `unexpected magic 0x${magic.toString(16).padStart(8, "0")}` };
-  }
-
-  const imageCount = buffer.readUInt32BE(4);
-  const imageTableOffset = buffer.readUInt32BE(8);
-  const images = [];
-  const maxImages = Math.min(imageCount, 64);
-
-  for (let i = 0; i < maxImages; i += 1) {
-    const entryOffset = imageTableOffset + i * 8;
-    if (entryOffset + 8 > buffer.length) {
-      images.push({ index: i, parseStatus: "image table entry outside file", entryOffset });
-      break;
-    }
-
-    const textureHeaderOffset = buffer.readUInt32BE(entryOffset);
-    const paletteHeaderOffset = buffer.readUInt32BE(entryOffset + 4);
-    if (textureHeaderOffset + 12 > buffer.length) {
-      images.push({
-        index: i,
-        parseStatus: "texture header outside file",
-        textureHeaderOffset,
-        paletteHeaderOffset: paletteHeaderOffset || null,
-      });
-      continue;
-    }
-
-    const height = buffer.readUInt16BE(textureHeaderOffset);
-    const width = buffer.readUInt16BE(textureHeaderOffset + 2);
-    const formatCode = buffer.readUInt32BE(textureHeaderOffset + 4);
-    const dataOffset = buffer.readUInt32BE(textureHeaderOffset + 8);
-    images.push({
-      index: i,
-      width,
-      height,
-      formatCode,
-      format: tplFormats.get(formatCode) || `unknown(${formatCode})`,
-      dataOffset,
-      textureHeaderOffset,
-      paletteHeaderOffset: paletteHeaderOffset || null,
-      estimatedPayloadBytes: bytesPerPixel.has(formatCode) ? Math.ceil(width * height * bytesPerPixel.get(formatCode)) : null,
-    });
-  }
-
-  return {
-    parseStatus: "ok",
-    magic: "0x0020af30",
-    imageCount,
-    imageTableOffset,
-    images,
-  };
+  return parseTplMetadata(buffer);
 }
 
 function parseHsdDat(buffer, base, container) {

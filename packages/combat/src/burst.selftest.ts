@@ -1,5 +1,6 @@
-// Self-test for ATK-011 (Hyper/Power Burst input + state shell) and the per-player Power
-// Burst METER (Q4 RESOLVED 2026-07-03 — fill/clamp/charged-delay, see burst.ts).
+// Self-test for ATK-011/012 (Hyper/Power Burst input, activation, drain, speed effect) and
+// the per-player Power Burst METER (Q4 RESOLVED 2026-07-03 — fill/clamp/charged-delay,
+// see burst.ts).
 //
 // Deliberately separate from selfcheck.ts (another agent is concurrently editing that file) —
 // own entry point, own runner (scripts/run-burst-tests.mjs), per the commandSchema.selftest.ts /
@@ -9,12 +10,22 @@
 // Run (from repo root), after building packages/combat:
 //   node scripts/run-burst-tests.mjs
 
-import { createBurstMeter, creditBurstFill, stepBurst, sweepBurstCharged } from "./burst.js";
+import {
+  canActivateBurst,
+  createBurstMeter,
+  creditBurstFill,
+  stepActiveBurst,
+  stepBurst,
+  sweepBurstCharged,
+  tryActivateBurst,
+} from "./burst.js";
+import { createBattle } from "./battle.js";
 import { applyHit } from "./combat.js";
 import { BURST } from "./constants.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex } from "./gauges.js";
-import type { BorgProfile } from "./stats.js";
-import type { BorgRuntime, BurstMeterState } from "./types.js";
+import { stepMovement } from "./movement.js";
+import type { BorgProfile, BorgStats } from "./stats.js";
+import { emptyInput, type BorgRuntime, type BurstMeterState } from "./types.js";
 
 // --- Test scaffolding --------------------------------------------------------------------
 
@@ -123,38 +134,62 @@ function testRePressReArms(): void {
   assertEqual(c.burstArmFrames, 6, "re-press after expiry re-arms to 6");
 }
 
-/** With ENABLED=false (the real default), burstActive/burstPaired never become true no matter
- *  how the arm window is driven — the shell is fully inert in real battles. */
-function testDisabledStaysInert(): void {
-  assertEqual(BURST.ENABLED, false, "BURST.ENABLED default is false (BLOCKED-until-T3)");
+/** Arming alone samples the Y edge only; activation needs a charged per-player meter. */
+function testArmingAloneDoesNotActivate(): void {
+  assertEqual(BURST.ENABLED, true, "BURST.ENABLED is true for the ATK-012 core slice");
   const b = makeBorg();
   stepBurst(b, true);
-  assertEqual(b.burstActive, false, "burstActive stays false while armed (ENABLED=false)");
-  assertEqual(b.burstPaired, false, "burstPaired stays false while armed (ENABLED=false)");
-  stepBurst(b, false);
-  assertEqual(b.burstActive, false, "burstActive stays false across frames (ENABLED=false)");
+  assertEqual(b.burstActive, false, "stepBurst only arms; it does not activate without a charged meter");
+  assertEqual(b.burstPaired, false, "stepBurst alone does not mark paired");
 }
 
-/** Test-only: with a local ENABLED=true stand-in for the gating condition, verify the shape
- *  activation would take once BURST.ENABLED flips — without mutating the shared constant
- *  (BURST is `as const`; instead this re-implements the exact gate stepBurst uses to prove the
- *  SHAPE, since stepBurst reads the module-level constant directly). */
-function testActivationShapeWhenEnabled(): void {
+function testActivationRequiresChargedMeter(): void {
   const b = makeBorg();
-  b.burstArmFrames = 6;
-  b.alive = true;
-  // Mirrors stepBurst's activation branch: `BURST.ENABLED && b.burstArmFrames > 0 && b.alive`.
-  const wouldActivate = true && b.burstArmFrames > 0 && b.alive;
-  assertTrue(wouldActivate, "activation precondition (armed + alive) holds when ENABLED=true");
-  // Applying the branch directly (since we can't flip the real `as const` BURST.ENABLED here):
-  b.burstActive = wouldActivate;
-  b.burstPaired = wouldActivate;
-  assertEqual(b.burstActive, true, "burstActive would be set true under ENABLED=true + armed");
-  assertEqual(b.burstPaired, true, "burstPaired would be set true under ENABLED=true + armed");
+  stepBurst(b, true);
+  assertEqual(canActivateBurst(b, createBurstMeter()), false, "empty meter cannot activate");
+
+  const fullUncharged: BurstMeterState = { meter: BURST.METER_MAX, unclamped: BURST.METER_MAX, charged: false };
+  assertEqual(canActivateBurst(b, fullUncharged), false, "full but not-yet-charged meter cannot activate");
+
+  const charged: BurstMeterState = { meter: BURST.METER_MAX, unclamped: BURST.METER_MAX, charged: true };
+  assertEqual(canActivateBurst(b, charged), true, "armed + charged full meter can activate");
+  assertEqual(tryActivateBurst(b, charged, false), true, "tryActivateBurst succeeds when gate holds");
+  assertEqual(b.burstActive, true, "activation sets burstActive");
+  assertEqual(b.burstPaired, false, "solo activation leaves burstPaired false");
+  assertEqual(charged.charged, false, "activation consumes the charged flag");
+  assertEqual(tryActivateBurst(b, charged, false), false, "already-active burst cannot re-activate");
 }
 
-/** burstActive has zero side effects: driving it directly doesn't touch hp/pos/state/ammo/etc. */
-function testBurstActiveHasZeroEffects(): void {
+function testPairedActivationFlag(): void {
+  const b = makeBorg();
+  const meter: BurstMeterState = { meter: BURST.METER_MAX, unclamped: BURST.METER_MAX, charged: true };
+  stepBurst(b, true);
+  assertEqual(tryActivateBurst(b, meter, true), true, "paired activation succeeds when gate holds");
+  assertEqual(b.burstActive, true, "paired activation sets burstActive");
+  assertEqual(b.burstPaired, true, "paired activation records the simultaneous-team shape");
+}
+
+function testActiveBurstDrainsAndEnds(): void {
+  const b = makeBorg({ burstActive: true, burstPaired: true });
+  const meter: BurstMeterState = { meter: 12, unclamped: 12, charged: true };
+
+  stepActiveBurst(b, meter);
+  assertEqual(meter.meter, 7, "active burst drains -5 meter per frame");
+  assertEqual(meter.charged, false, "active drain clears charged");
+  assertEqual(b.burstActive, true, "burst stays active while meter remains");
+
+  stepActiveBurst(b, meter);
+  assertEqual(meter.meter, 2, "drain continues at -5/frame");
+  assertEqual(b.burstActive, true, "burst stays active above zero");
+
+  stepActiveBurst(b, meter);
+  assertEqual(meter.meter, 0, "meter floors at zero");
+  assertEqual(b.burstActive, false, "burst ends when meter empties");
+  assertEqual(b.burstPaired, false, "paired flag clears when burst ends");
+}
+
+/** stepBurst itself has no direct side effects: it does not touch hp/pos/state/ammo/etc. */
+function testBurstInputHasNoDirectSideEffects(): void {
   const b = makeBorg({ hp: 77, ammo: 3, state: "idle" });
   const before = JSON.stringify({ hp: b.hp, ammo: b.ammo, state: b.state, pos: b.pos, vel: b.vel });
   stepBurst(b, true);
@@ -164,11 +199,81 @@ function testBurstActiveHasZeroEffects(): void {
   assertEqual(after, before, "stepBurst never mutates hp/ammo/state/pos/vel");
 }
 
+function testBurstSpeedMultiplierAffectsMovement(): void {
+  const input = { ...emptyInput(), moveZ: 1 };
+  const bounds = { minX: -10000, maxX: 10000, minZ: -10000, maxZ: 10000 };
+  const profile = makeProfile("pl0615", { speed: 6 });
+
+  const normal = makeBorg();
+  for (let i = 0; i < 10; i++) {
+    stepMovement(normal, profile, input, { lockTargetPos: null, bounds, collision: null });
+  }
+
+  const burst = makeBorg({ burstActive: true });
+  for (let i = 0; i < 10; i++) {
+    stepMovement(burst, profile, input, { lockTargetPos: null, bounds, collision: null });
+  }
+
+  assertEqual(Math.hypot(normal.vel.x, normal.vel.z), 22, "speed-6 baseline reaches 22 u/f");
+  assertEqual(Math.hypot(burst.vel.x, burst.vel.z), 33, "active burst applies x1.5 movement speed");
+}
+
+function testBattleStepActivatesAndDrainsBurst(): void {
+  const stats: BorgStats[] = [
+    {
+      id: "pl0615",
+      name: "G RED",
+      energy: 10,
+      hp: 100,
+      defense: 1,
+      shot: 1,
+      attack: 1,
+      speed: 6,
+      jump: "Air jump level 1",
+      type: "Short range",
+    },
+  ];
+  const battle = createBattle(
+    {
+      stageId: "test",
+      bounds: { x: 10000, z: 10000 },
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: null, borgIds: ["pl0615"] },
+      ],
+    },
+    stats,
+  );
+  const playerUid = battle.state.activeUidByPlayer["p1"];
+  const player = battle.state.borgs.find((b) => b.uid === playerUid);
+  const meter = battle.state.burstMeterByPlayer["p1"];
+  if (!player || !meter) {
+    assertTrue(false, "test battle creates a player borg and meter");
+    return;
+  }
+
+  player.state = "idle";
+  player.stateTime = 0;
+  player.invincTimer = 0;
+  meter.meter = BURST.METER_MAX;
+  meter.unclamped = BURST.METER_MAX;
+  meter.charged = true;
+
+  const input = { ...emptyInput(), hyper: true, moveZ: 1 };
+  for (let i = 0; i < 10; i++) battle.step(1 / 60, { p1: input });
+
+  assertEqual(player.burstActive, true, "Battle.step activates Power Burst from charged Y input");
+  assertEqual(player.burstPaired, false, "single-human battle activation is solo, not paired");
+  assertEqual(meter.meter, BURST.METER_MAX - BURST.DRAIN_PER_FRAME * 10, "Battle.step drains active burst each frame");
+  assertEqual(meter.charged, false, "Battle.step clears charged during active burst");
+  assertEqual(Math.hypot(player.vel.x, player.vel.z), 33, "Battle.step movement sees active burst speed");
+}
+
 // --- Per-player burst METER tests (Q4 RESOLVED 2026-07-03 — open-questions Q4 lines 51-79,
 // findings §S; fill rule from the T3 live traces: +50 per hit connection, attacker only) ------
 
 /** Synthetic profile — the meter fill is damage-independent, so no roster stats are needed. */
-function makeProfile(id: string): BorgProfile {
+function makeProfile(id: string, overrides: Partial<BorgProfile> = {}): BorgProfile {
   return {
     id,
     name: id.toUpperCase(),
@@ -183,6 +288,7 @@ function makeProfile(id: string): BorgProfile {
     hasShot: true,
     hasMelee: true,
     rangePref: "melee",
+    ...overrides,
   };
 }
 
@@ -216,6 +322,8 @@ function hitOnce(
 function testMeterConstants(): void {
   assertEqual(BURST.METER_MAX, 3000, "BURST.METER_MAX is 3000 (player struct +0x124, Q4/§S)");
   assertEqual(BURST.FILL_PER_HIT, 50, "BURST.FILL_PER_HIT is 50 (T3 live traces, Q4 lines 59-74)");
+  assertEqual(BURST.DRAIN_PER_FRAME, 5, "BURST.DRAIN_PER_FRAME is 5 (Q5 live trace)");
+  assertEqual(BURST.SPEED_MULTIPLIER, 1.5, "BURST.SPEED_MULTIPLIER is x1.5 (Q5 live trace)");
 }
 
 /** A landed hit credits the ATTACKER'S player meter +50, and the victim's meter never moves. */
@@ -322,9 +430,13 @@ export function runSelfTest(): number {
   testPressEdgeArmsSixFrames();
   testWindowDecrementsPerFrame();
   testRePressReArms();
-  testDisabledStaysInert();
-  testActivationShapeWhenEnabled();
-  testBurstActiveHasZeroEffects();
+  testArmingAloneDoesNotActivate();
+  testActivationRequiresChargedMeter();
+  testPairedActivationFlag();
+  testActiveBurstDrainsAndEnds();
+  testBurstInputHasNoDirectSideEffects();
+  testBurstSpeedMultiplierAffectsMovement();
+  testBattleStepActivatesAndDrainsBurst();
   testMeterConstants();
   testFillOnAttackerHitOnly();
   testClampAndUnclampedPastMax();

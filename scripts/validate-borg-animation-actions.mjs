@@ -2,8 +2,8 @@
 // Validate exported Borg animation labels against the runtime resolver.
 //
 // The SLOT_LABELS, SLOT_FALLBACKS, pick order, and bank sort below intentionally
-// mirror apps/game/src/main.ts so this reports the app's current behavior rather
-// than inventing a second animation label system.
+// mirror apps/game/src/sim/borgPresentationAssets.ts so this reports the app's
+// current behavior rather than inventing a second animation label system.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -30,7 +30,7 @@ const CANONICAL_SLOTS = [
   "death",
 ];
 
-// Mirrored from apps/game/src/main.ts SLOT_LABELS.
+// Mirrored from apps/game/src/sim/borgPresentationAssets.ts SLOT_LABELS.
 const SLOT_LABELS = {
   idle: [/^idle$/],
   move: [/^move$/, /^move_s\d+$/],
@@ -54,7 +54,7 @@ const SLOT_LABELS = {
   victory: [/^victory$/, /^win_or_death$/],
 };
 
-// Mirrored from apps/game/src/main.ts SLOT_FALLBACKS.
+// Mirrored from apps/game/src/sim/borgPresentationAssets.ts SLOT_FALLBACKS.
 const SLOT_FALLBACKS = {
   dash_fwd: ["dash", "move", "idle"],
   dash_back: ["dash", "move", "idle"],
@@ -77,7 +77,7 @@ const SLOT_FALLBACKS = {
   victory: ["idle"],
 };
 
-// Mirrored from apps/game/src/main.ts PREFERRED_LABELS.
+// Mirrored from apps/game/src/sim/borgPresentationAssets.ts PREFERRED_LABELS.
 const PREFERRED_LABELS = {
   pl0615: {
     shoot: ["attack_s4"],
@@ -299,7 +299,8 @@ function sortedBanks(index) {
   return [...index.banks].sort((a, b) => a.group - b.group || a.slot - b.slot || a.frames - b.frames);
 }
 
-// Mirrored from apps/game/src/main.ts SLOT_VARIANTS / MIN_ACTION_FRAMES / PLACEHOLDER_OK_SLOTS.
+// Mirrored from apps/game/src/sim/borgPresentationAssets.ts SLOT_VARIANTS /
+// MIN_ACTION_FRAMES / PLACEHOLDER_OK_SLOTS.
 const SLOT_VARIANTS = {
   melee_alt: { base: "melee", index: 1 },
 };
@@ -318,7 +319,7 @@ function pickAnimBankDirect(index, slot) {
   return pool[variant?.index ?? 0] ?? null;
 }
 
-// Mirrored from apps/game/src/main.ts collectAnimBankMatches.
+// Mirrored from apps/game/src/sim/borgPresentationAssets.ts collectAnimBankMatches.
 function collectAnimBankMatches(index, slot) {
   const banks = sortedBanks(index);
   const matches = [];
@@ -466,7 +467,7 @@ function renderReport(records, parseErrors) {
   lines.push(`Scope: ${code("apps/game/public/models/pl*/anim_index.json")}`);
   lines.push(`Canonical app slots: ${codeList(CANONICAL_SLOTS)}`);
   lines.push(
-    "Runtime resolver: mirrors `PREFERRED_LABELS`, `SLOT_LABELS`, `SLOT_FALLBACKS`, `pickAnimBank`, and `pickAnimBankDirect` from `apps/game/src/main.ts` (runtime label tables and bank sort/pick order). `BattleScene` may still ask for `idle` after `loadClip` returns null, so `missing` below means the main runtime resolver found no canonical clip before that last idle request.",
+    "Runtime resolver: mirrors `PREFERRED_LABELS`, `SLOT_LABELS`, `SLOT_FALLBACKS`, `pickAnimBank`, and `pickAnimBankDirect` from `apps/game/src/sim/borgPresentationAssets.ts` (runtime label tables and bank sort/pick order). `BattleScene` may still ask for `idle` after `loadClip` returns null, so `missing` below means the main runtime resolver found no canonical clip before that last idle request.",
   );
   lines.push("");
   lines.push("## Summary");
@@ -558,6 +559,23 @@ function renderReport(records, parseErrors) {
   lines.push("rtk node scripts/validate-borg-animation-actions.mjs");
   lines.push("rtk node scripts/validate-borg-animation-actions.mjs --strict");
   lines.push("```");
+  lines.push("");
+  lines.push("");
+  lines.push("## Historical Session Findings Used To Resolve Prior Fallbacks (2026-07-03)");
+  lines.push("");
+  lines.push("- `pl0625` (VICTORY MACHINE, `anim: null` in borgs.json) is a layout anomaly, not an export");
+  lines.push("  miss: its export contains ONLY `idle` in group 0; all locomotion-shaped banks live in");
+  lines.push("  group 2 (`g2_s16/s17/s19` carry dash-length root spans ~100-224 units, `g2_s21` a");
+  lines.push("  224-unit forward translation). The bake heuristic (scripts/bake-all-borg-anims.mjs");
+  lines.push("  `label()`) only labels group-0 slots, so every canonical slot fell back to idle.");
+  lines.push("  Do NOT relabel by span heuristics -- that is exactly the generic-labels failure mode.");
+  lines.push("- Source-accurate path found: the original state handlers select animation banks through");
+  lines.push("  `zz_004beb8_(speed, actor, bank, 0, slotExpr, -1, -1)` -- e.g. the knockdown entry");
+  lines.push("  `zz_0060c94_` @0x80060c94 plays (2, `+0x57c` + 0x1b) and `zz_0060be8_` plays");
+  lines.push("  (0xd, `+0x57c` + 0x1b) (chunk_0007.c:6810-6871). Tracing every `zz_004beb8_` call site");
+  lines.push("  per state handler (35-slot table at 0x802d3570, extracted in behavior-notes (af)) yields");
+  lines.push("  the authored action -> (bank, slot) mapping per state, including alternate layouts for");
+  lines.push("  large/boss borgs like pl0625.");
   lines.push("");
 
   return {

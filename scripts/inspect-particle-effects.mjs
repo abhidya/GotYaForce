@@ -4,6 +4,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { decompressPzzpStream, unpack as unpackPzz } from "../packages/formats/src/pzz.ts";
+import { parseTplMetadata, TPL_BYTES_PER_PIXEL, TPL_FORMATS } from "../packages/formats/src/tpl.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const rootDir = path.join(repoRoot, "user-data/GG4E/afs_data/root");
@@ -52,34 +53,6 @@ const familyTerms = {
   trail: ["trail", "aura", "boost", "wing", "jet", "ghost", "shadow", "cyber", "flame", "beam", "plasma", "phoenix"],
   reticle: ["reticle", "target", "cursor", "crosshair", "lock", "aim", "icon", "arrow"],
 };
-
-const tplFormats = new Map([
-  [0, "I4"],
-  [1, "I8"],
-  [2, "IA4"],
-  [3, "IA8"],
-  [4, "RGB565"],
-  [5, "RGB5A3"],
-  [6, "RGBA8"],
-  [8, "C4"],
-  [9, "C8"],
-  [10, "C14X2"],
-  [14, "CMPR"],
-]);
-
-const bytesPerPixel = new Map([
-  [0, 0.5],
-  [1, 1],
-  [2, 1],
-  [3, 2],
-  [4, 2],
-  [5, 2],
-  [6, 4],
-  [8, 0.5],
-  [9, 1],
-  [10, 2],
-  [14, 0.5],
-]);
 
 function toRepoPath(absPath) {
   return path.relative(repoRoot, absPath).replaceAll(path.sep, "/");
@@ -260,48 +233,7 @@ function classifyByTerms(file, sourceInventory, borgMap) {
 }
 
 function parseTpl(buffer) {
-  if (buffer.length < 12) return { parseStatus: "too small" };
-  const magic = buffer.readUInt32BE(0);
-  if (magic !== 0x0020af30) {
-    return { parseStatus: `unexpected magic ${hex(magic)}`, magic: hex(magic) };
-  }
-
-  const imageCount = buffer.readUInt32BE(4);
-  const imageTableOffset = buffer.readUInt32BE(8);
-  const images = [];
-  for (let i = 0; i < imageCount && i < 64; i += 1) {
-    const entryOffset = imageTableOffset + i * 8;
-    if (entryOffset + 8 > buffer.length) break;
-    const textureHeaderOffset = buffer.readUInt32BE(entryOffset);
-    const paletteHeaderOffset = buffer.readUInt32BE(entryOffset + 4);
-    if (textureHeaderOffset + 12 > buffer.length) {
-      images.push({ index: i, parseStatus: "texture header outside file", textureHeaderOffset });
-      continue;
-    }
-    const height = buffer.readUInt16BE(textureHeaderOffset);
-    const width = buffer.readUInt16BE(textureHeaderOffset + 2);
-    const formatCode = buffer.readUInt32BE(textureHeaderOffset + 4);
-    const dataOffset = buffer.readUInt32BE(textureHeaderOffset + 8);
-    images.push({
-      index: i,
-      width,
-      height,
-      formatCode,
-      format: tplFormats.get(formatCode) || `unknown(${formatCode})`,
-      dataOffset,
-      textureHeaderOffset,
-      paletteHeaderOffset: paletteHeaderOffset || null,
-      estimatedPayloadBytes: bytesPerPixel.has(formatCode) ? Math.ceil(width * height * bytesPerPixel.get(formatCode)) : null,
-    });
-  }
-
-  return {
-    parseStatus: images.length === imageCount ? "ok" : "partial",
-    magic: hex(magic),
-    imageCount,
-    imageTableOffset,
-    images,
-  };
+  return parseTplMetadata(buffer);
 }
 
 function readCString(buffer, offset) {
@@ -588,7 +520,8 @@ function parseTxg(buffer) {
     const unknown5 = buffer.readUInt32BE(offset + 20);
     const dataOffset = buffer.readUInt32BE(offset + 24);
     const paletteOffsetWord = buffer.readUInt32BE(offset + 28);
-    const expectedPayloadBytes = bytesPerPixel.has(formatCode) ? Math.ceil(width * height * bytesPerPixel.get(formatCode)) : null;
+    const bytesPerPixel = TPL_BYTES_PER_PIXEL.get(formatCode);
+    const expectedPayloadBytes = bytesPerPixel === undefined ? null : Math.ceil(width * height * bytesPerPixel);
     const actualPayloadBytes = nextOffset - dataOffset;
     return {
       index,
@@ -597,7 +530,7 @@ function parseTxg(buffer) {
       spanBytes: nextOffset - offset,
       imageCount,
       formatCode,
-      format: tplFormats.get(formatCode) || `unknown(${formatCode})`,
+      format: TPL_FORMATS.get(formatCode) || `unknown(${formatCode})`,
       unknown2,
       width,
       height,

@@ -698,7 +698,8 @@ function inspectBorgAnimationCoverage() {
     missing: Number.parseInt(match[4], 10),
     notes: match[5].trim(),
   }));
-  const main = readText("apps/game/src/main.ts");
+  const resolverPath = "apps/game/src/sim/borgPresentationAssets.ts";
+  const resolver = readText(resolverPath);
   const battleScene = readText("apps/game/src/sim/battleScene.ts");
   return {
     path: reportPath,
@@ -713,13 +714,13 @@ function inspectBorgAnimationCoverage() {
     parseErrors: metric("Parse errors"),
     slotRows,
     runtimeResolverRefs: {
-      slotLabels: `apps/game/src/main.ts:${lineOf(main, "const SLOT_LABELS")}`,
-      slotFallbacks: `apps/game/src/main.ts:${lineOf(main, "const SLOT_FALLBACKS")}`,
-      pickAnimBank: `apps/game/src/main.ts:${lineOf(main, "function pickAnimBank")}`,
+      slotLabels: `${resolverPath}:${lineOf(resolver, "const SLOT_LABELS")}`,
+      slotFallbacks: `${resolverPath}:${lineOf(resolver, "const SLOT_FALLBACKS")}`,
+      pickAnimBank: `${resolverPath}:${lineOf(resolver, "function pickAnimBank")}`,
       battleSceneSlotMapping: `apps/game/src/sim/battleScene.ts:${lineOf(battleScene, "private slotForBorg")}`,
     },
     boostFlyMapped:
-      main.includes("fly: [/^boost$/") &&
+      resolver.includes("fly: [/^boost$/") &&
       battleScene.includes('if (b.state === "fly") return "fly"'),
   };
 }

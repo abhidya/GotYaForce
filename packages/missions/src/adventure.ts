@@ -1,7 +1,7 @@
 // @gf/missions — adventure.ts
 //
 // ADVENTURE (Story) mode content layer: parses packages/assets/data/stages.json
-// into an ordered campaign of `BattleConfig`s.
+// into an ordered campaign of mission battle plans.
 //
 // Per stage we:
 //  - resolve each enemy NAME → borg id against the roster (fuzzy name match),
@@ -14,7 +14,7 @@
 // enemy names are guide-transcription approximations — unresolved names are
 // reported in the battle meta rather than silently dropped.
 
-import type { BattleConfig, BattleForce } from "./battle-config.js";
+import type { MissionBattleConfig, MissionBattleForce } from "./battle-config.js";
 import { readBorgs, type BorgData, type Borg } from "./borg-data.js";
 
 /** A stage entry as it appears in stages.json. */
@@ -60,7 +60,7 @@ export interface AdventureStage {
   /** Summed enemy energy (count × energy, skipping unresolved). */
   enemyForceEnergy: number;
   /** The battle the simulation should run for this stage. */
-  battle: BattleConfig;
+  battle: MissionBattleConfig;
 }
 
 /** The whole campaign + progression. */
@@ -77,13 +77,13 @@ export interface AdventureCampaign {
 
 export interface AdventureOptions {
   /** A player force to embed in each generated battle (optional). */
-  playerForce?: BattleForce;
+  playerForce?: MissionBattleForce;
   /** Default spawn count when a name has no "Nx" hint. Default 1. */
   defaultCount?: number;
 }
 
 /**
- * Parse stages.json + borgs.json into an ordered campaign of BattleConfigs.
+ * Parse stages.json + borgs.json into an ordered campaign of mission battle plans.
  */
 export function createAdventureCampaign(
   stagesData: StagesData,
@@ -149,7 +149,7 @@ function resolveStage(
 
   const isBoss = Boolean(entry.boss);
 
-  const forces: BattleForce[] = [];
+  const forces: MissionBattleForce[] = [];
   if (options.playerForce) forces.push(options.playerForce);
   forces.push({
     team: "enemy",
@@ -157,7 +157,7 @@ function resolveStage(
     borgIds: enemyBorgIds,
   });
 
-  const battle: BattleConfig = {
+  const battle: MissionBattleConfig = {
     arena: entry.arena,
     label: entry.name,
     forces,
@@ -307,4 +307,147 @@ export function normalizeName(name: string): string {
     .trim()
     .replace(/\s+/g, " ")
     .toLocaleLowerCase();
+}
+
+// ---------------------------------------------------------------------------
+// Legacy story-stage resolver.
+//
+// These exports preserve the older @gf/missions interface while keeping the
+// resolution implementation inside the Adventure module instead of the barrel.
+// ---------------------------------------------------------------------------
+
+export type LegacyAdventureStageId = string | number;
+
+export type LegacyAdventureStage = {
+  stage: LegacyAdventureStageId;
+  name: string;
+  arena: string;
+  enemies: readonly string[];
+  boss?: string | null;
+  confidence?: string | null;
+};
+
+export type LegacyAdventureStagesData =
+  | readonly LegacyAdventureStage[]
+  | { stages: readonly LegacyAdventureStage[] };
+
+export type LegacyAdventureBorg = {
+  id: string;
+  name: string;
+  energy?: number | null;
+  hasModel?: boolean;
+  model?: string | null;
+};
+
+export type LegacyAdventureBorgData =
+  | readonly LegacyAdventureBorg[]
+  | { borgs: readonly LegacyAdventureBorg[] };
+
+export type LegacyResolvedAdventureEnemy = {
+  name: string;
+  id: string | null;
+  energy: number | null;
+  modelAvailable: boolean;
+};
+
+export type LegacyResolvedAdventureStage = {
+  id: string;
+  name: string;
+  arena: string;
+  boss: string | null;
+  confidence: string | null;
+  enemies: LegacyResolvedAdventureEnemy[];
+  enemyForceEnergy: number;
+};
+
+type LegacyBorgMatch = LegacyAdventureBorg | null;
+
+export type LegacyAdventureBorgIndex = {
+  exactNames: ReadonlyMap<string, LegacyBorgMatch>;
+  normalizedNames: ReadonlyMap<string, LegacyBorgMatch>;
+};
+
+export function resolveAdventureStage(
+  stagesData: LegacyAdventureStagesData,
+  borgData: LegacyAdventureBorgData,
+  stageId: LegacyAdventureStageId,
+): LegacyResolvedAdventureStage | null {
+  const stage = readLegacyStages(stagesData).find((item) => String(item.stage) === String(stageId));
+  if (!stage) return null;
+
+  return resolveAdventureStageEntry(stage, borgData);
+}
+
+export function resolveAdventureStageEntry(
+  stage: LegacyAdventureStage,
+  borgData: LegacyAdventureBorgData,
+): LegacyResolvedAdventureStage {
+  const index = buildAdventureBorgIndex(borgData);
+  const enemies = stage.enemies.map((name) => resolveAdventureEnemy(name, index));
+
+  return {
+    id: String(stage.stage),
+    name: stage.name,
+    arena: stage.arena,
+    boss: stage.boss ?? null,
+    confidence: stage.confidence ?? null,
+    enemies,
+    enemyForceEnergy: enemies.reduce((total, enemy) => total + (enemy.energy ?? 0), 0),
+  };
+}
+
+export function resolveAdventureEnemy(
+  name: string,
+  index: LegacyAdventureBorgIndex,
+): LegacyResolvedAdventureEnemy {
+  const borg = findAdventureBorg(name, index);
+
+  return {
+    name,
+    id: borg?.id ?? null,
+    energy: borg?.energy ?? null,
+    modelAvailable: borg ? borg.hasModel === true || Boolean(borg.model) : false,
+  };
+}
+
+export function buildAdventureBorgIndex(borgData: LegacyAdventureBorgData): LegacyAdventureBorgIndex {
+  const exactNames = new Map<string, LegacyBorgMatch>();
+  const normalizedNames = new Map<string, LegacyBorgMatch>();
+
+  for (const borg of readLegacyBorgs(borgData)) {
+    addUnique(exactNames, borg.name.trim().toLocaleLowerCase(), borg);
+    addUnique(normalizedNames, normalizeName(borg.name), borg);
+  }
+
+  return { exactNames, normalizedNames };
+}
+
+export function findAdventureBorg(
+  name: string,
+  index: LegacyAdventureBorgIndex,
+): LegacyAdventureBorg | null {
+  const exact = index.exactNames.get(name.trim().toLocaleLowerCase());
+  if (exact !== undefined) return exact;
+
+  const normalized = index.normalizedNames.get(normalizeName(name));
+  return normalized ?? null;
+}
+
+export const normalizeAdventureName = normalizeName;
+
+function readLegacyStages(data: LegacyAdventureStagesData): readonly LegacyAdventureStage[] {
+  return "stages" in data ? data.stages : data;
+}
+
+function readLegacyBorgs(data: LegacyAdventureBorgData): readonly LegacyAdventureBorg[] {
+  return "borgs" in data ? data.borgs : data;
+}
+
+function addUnique(
+  map: Map<string, LegacyBorgMatch>,
+  key: string,
+  borg: LegacyAdventureBorg,
+): void {
+  if (!key) return;
+  map.set(key, map.has(key) ? null : borg);
 }

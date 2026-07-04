@@ -1,16 +1,11 @@
 import type { Battle, BorgActionProfile, BorgRuntime, MeleeActionDef, Projectile } from "@gf/combat";
-import { JUMP, MELEE } from "@gf/combat";
-// Deep source imports: BURST (METER_MAX, Q4/findings §S) and the contextual-B melee engage
-// test are not re-exported from the package index this wave (index.ts belongs to the combat
-// workstream), so the HUD layer reads them straight from the sources. Both are read-only
-// consumers; no combat behavior is duplicated here.
-import { BURST } from "@gf/combat/src/constants";
-import { targetWithinMeleeEngage } from "@gf/combat/src/combat";
+import { BURST, JUMP, MELEE, targetWithinMeleeEngage } from "@gf/combat";
 import type { BattleOutcome } from "@gf/missions";
+import type { AnimSlot } from "./battleScene.js";
+import { battleActorView, type BattleActorView } from "./battleView.js";
+import type { HudState } from "../ui/index.js";
 
 const BOOST_FUEL_FRAMES = JUMP.BOOST_FUEL_FRAMES;
-import type { AnimSlot } from "./battleScene.js";
-import type { HudState } from "../ui/index.js";
 
 export type BattleEventCue =
   | AnimSlot
@@ -272,12 +267,12 @@ export function activeBorgForPlayer(battle: Battle, playerId: string): BorgRunti
  * projectile objects here would silently break that contract.
  */
 export function battleSceneState(battle: Battle, focus: BorgRuntime | null): {
-  borgs: readonly BorgRuntime[];
+  actors: readonly BattleActorView[];
   projectiles: readonly Projectile[];
   focusUid: string | null;
 } {
   return {
-    borgs: battle.state.borgs,
+    actors: battle.state.borgs.map(battleActorView),
     projectiles: battle.state.projectiles,
     focusUid: focus?.uid ?? null,
   };
@@ -351,8 +346,8 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
   // questions.md Q4, attack-mechanics-findings.md §S): per-PLAYER meter, ROM player struct
   // +i*0x3c: +0x126 clamped value / +0x124 max (BURST.METER_MAX = 3000) / +0x103 charged flag
   // (flips one frame after max). Fills +50 per attacker hit connection (BURST.FILL_PER_HIT).
-  // Display-only until ATK-012 (BURST.ENABLED stays false); this just SURFACES the sim's
-  // value — CPU-owned forces have no meter entry (documented decision in packages/combat
+  // Surfaces the sim's live value and charged flag. CPU-owned forces have no meter entry
+  // (documented decision in packages/combat
   // burst.ts creditBurstFill), so a missing entry reads as an empty, uncharged gauge.
   const burstMeter = st.burstMeterByPlayer[localPlayerId] ?? null;
   const burst01 = burstMeter ? clamp01(burstMeter.meter / BURST.METER_MAX) : 0;

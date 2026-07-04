@@ -1,6 +1,7 @@
-// ATK-011: Hyper/Power Burst input + state shell.
+// ATK-011/012: Hyper/Power Burst input, meter, activation, and core effects.
 //
-// Ports the ROM's two-stage arm/consume shape for the Y button with ZERO gameplay effects.
+// Ports the ROM's two-stage arm/consume shape for the Y button and the value-level T3/Q5
+// findings: player meter max/fill, charged flag, active drain, and x1.5 movement speed.
 // Evidence:
 //   - Arm gate: `FUN_80069814` chunk_0009.c:104-115 — the Y-family bit in the transformed
 //     input word (+0x5d4) sets object+0x6fb = 6 (a 6-frame arm window).
@@ -12,9 +13,8 @@
 // needs reconciling against a SECOND reading of the same field — the fusion per-slot loop also
 // decrements +0x6fb and its expiry there drives the burst/fusion END path. It's unresolved
 // whether these are the same timer serving two roles or two different fields at a shared
-// offset misread as one. Trace T3 is required to reconcile before ATK-012 wires any real
-// duration/effect off this value; this port only implements the arm/decrement/activate SHAPE,
-// gated fully inert behind BURST.ENABLED (see constants.ts).
+// offset misread as one. The value-level drain/speed model is now wired; exact per-action
+// burst costs and the code path carrying the x1.5 multiplier remain unmapped.
 //
 // UPDATE (behavior-notes.md (ao), official NA instruction manual, CONFIRMED_MANUAL tier — still
 // not numeric ROM truth): the manual documents the Y button as "Power burst — press when the
@@ -30,29 +30,25 @@
 // PER-PLAYER (player struct +i*0x3c: +0x126 clamped u16 meter, +0x124 max = 3000, +0x12a
 // unclamped accumulator, +0x103 charged flag one frame late) — see BurstMeterState in
 // types.ts, BURST.METER_MAX/FILL_PER_HIT in constants.ts, the fill in combat.ts applyHit,
-// and the charged sweep wired in battle.ts step(). BURST.ENABLED still stays false: the
-// gauge is DISPLAY-ONLY until ATK-012 lands real burst gameplay effects (Q5 speed boost
-// still open); exact arm-window/pairing semantics remain for trace T3.
+// and the charged sweep wired in battle.ts step().
 //
-// Do not add gameplay effects here — burstActive/burstPaired are inert bookkeeping until
-// ATK-012 (blocked on trace T3).
+// UPDATE (Q5 RESOLVED at value level 2026-07-04): paired activation drains the meter at
+// -5/frame from 3000 and gives x1.5 movement speed. That core gameplay is ported here and in
+// movement.ts; per-action extra meter costs are still not ported because their table is not
+// mapped yet.
 
 import { BURST } from "./constants.js";
 import type { BorgRuntime, BurstMeterState } from "./types.js";
 
 /**
- * Advance one frame of Power Burst arm/activation state for a single borg.
+ * Advance one frame of Power Burst arm-window state for a single borg.
  *
  * Shape (mirrors the ROM's two-stage arm -> consume):
  *   - Y press edge (`hyperPressed`) sets `burstArmFrames = BURST.ARM_WINDOW_FRAMES` (6),
  *     re-arming on every fresh press even if a previous window is still counting down.
  *   - Otherwise, while `burstArmFrames > 0`, it decrements by 1 per frame (floored at 0).
- *   - Activation (`burstActive = true`) only happens while armed AND `BURST.ENABLED` is true;
- *     with the default `ENABLED = false` this branch never fires, so `burstActive`/
- *     `burstPaired` stay false in every real battle today (labeled BLOCKED-until-T3 in
- *     constants.ts — no meter/resource precondition exists yet to gate real activation on).
- *   - `burstActive`/`burstPaired` have ZERO effects on damage, movement, or any other system
- *     in this ticket; they exist only as state to be read by ATK-012.
+ *   - Activation is handled separately once all active same-team players have had their Y
+ *     press sampled for the frame; see `tryActivateBurst`.
  */
 export function stepBurst(b: BorgRuntime, hyperPressed: boolean): void {
   if (hyperPressed) {
@@ -61,11 +57,53 @@ export function stepBurst(b: BorgRuntime, hyperPressed: boolean): void {
     b.burstArmFrames -= 1;
   }
 
-  if (BURST.ENABLED && b.burstArmFrames > 0 && b.alive) {
-    b.burstActive = true;
-    b.burstPaired = true;
-  } else if (!BURST.ENABLED) {
-    // Inert shell: never activate while the feature is disabled (default).
+  if (!b.alive) {
+    b.burstActive = false;
+    b.burstPaired = false;
+  }
+}
+
+/** True when this borg/player currently satisfies the ROM-observed Power Burst activation
+ *  preconditions the port can model: enabled feature, alive active borg, an armed Y window,
+ *  and a charged full per-player meter. */
+export function canActivateBurst(b: BorgRuntime, meter: BurstMeterState | undefined): boolean {
+  return (
+    BURST.ENABLED &&
+    b.alive &&
+    b.burstArmFrames > 0 &&
+    !b.burstActive &&
+    !!meter &&
+    meter.charged &&
+    meter.meter >= BURST.METER_MAX
+  );
+}
+
+/** Activate Power Burst if `canActivateBurst` holds. `paired` records the same-team
+ *  simultaneous activation shape; it does not yet imply fusion. */
+export function tryActivateBurst(
+  b: BorgRuntime,
+  meter: BurstMeterState | undefined,
+  paired: boolean,
+): boolean {
+  if (!meter || !canActivateBurst(b, meter)) return false;
+  b.burstActive = true;
+  b.burstPaired = paired;
+  meter.charged = false;
+  return true;
+}
+
+/** Drain an active burst by the measured -5/frame meter drain and end it when empty. */
+export function stepActiveBurst(b: BorgRuntime, meter: BurstMeterState | undefined): void {
+  if (!b.burstActive) return;
+  if (!BURST.ENABLED || !b.alive || !meter) {
+    b.burstActive = false;
+    b.burstPaired = false;
+    return;
+  }
+
+  meter.meter = Math.max(0, meter.meter - BURST.DRAIN_PER_FRAME);
+  meter.charged = false;
+  if (meter.meter <= 0) {
     b.burstActive = false;
     b.burstPaired = false;
   }
@@ -74,7 +112,7 @@ export function stepBurst(b: BorgRuntime, hyperPressed: boolean): void {
 // ---------------------------------------------------------------------------------------
 // Per-player Power Burst meter (Q4 RESOLVED 2026-07-03 — open-questions Q4 lines 51-79,
 // findings §S). See BurstMeterState in types.ts for the ROM field map (+0x126/+0x124/
-// +0x12a/+0x103). Display-only until ATK-012 (BURST.ENABLED stays false).
+// +0x12a/+0x103).
 // ---------------------------------------------------------------------------------------
 
 /** A fresh (battle-start) per-player meter: empty, uncharged. */
@@ -93,8 +131,8 @@ export function createBurstMeter(): BurstMeterState {
  * port decision, not ROM truth: the ROM meter lives in the per-controller player-struct array
  * (+i*0x3c), so CPU-occupied slots plausibly accumulate too, but the port's BorgRuntime only
  * carries `ownerPlayer` (null for CPU forces, whose synthetic control keys are not visible in
- * the damage path), and the gauge is display-only for human HUDs until ATK-012. Revisit
- * (per-controlKey slots) if/when CPU bursts gain gameplay effects.
+ * the damage path), and the player meter map only models human-owned entries. Revisit
+ * (per-controlKey slots) if/when CPU bursts need to activate.
  */
 export function creditBurstFill(
   meters: Record<string, BurstMeterState>,
@@ -112,8 +150,7 @@ export function creditBurstFill(
  * ordering: battle.ts runs this at the TOP of step(), before any of this frame's hit
  * connections fill meters (stepAttacks/stepProjectiles run later in the same step) — so a
  * meter that reaches METER_MAX on frame N is first seen here on frame N+1. The flag never
- * clears in this wave: the ROM clear path is burst CONSUMPTION (+0x104 mode / zz_005b2b8_
- * end sweep), which is ATK-012 territory (BURST.ENABLED false, no consume exists yet).
+ * clears on activation/drain in `tryActivateBurst` and `stepActiveBurst`.
  */
 export function sweepBurstCharged(meters: Record<string, BurstMeterState>): void {
   for (const key of Object.keys(meters)) {

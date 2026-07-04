@@ -95,7 +95,7 @@ export interface HudState {
    * Optional Power Burst gauge 0..1 (the big cyan ring in the top-right gear). Q4 RESOLVED
    * (research/decomp/attack-mechanics-open-questions.md Q4, findings §S): per-player meter,
    * ROM player struct +0x126 over +0x124 max (BURST.METER_MAX = 3000), +50 per attacker hit
-   * connection. Display-only until ATK-012 wires gameplay effects. Undefined = empty.
+   * connection. Undefined = empty.
    */
   burst01?: number;
   /**

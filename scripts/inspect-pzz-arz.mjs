@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseTplMetadata } from "../packages/formats/src/tpl.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const assetRootRel = "user-data/GG4E/afs_data/root";
@@ -410,78 +411,21 @@ async function matchSibling(buffer, candidates) {
 }
 
 function parseTpl(buffer) {
-  if (buffer.length < 12) return null;
-  if (buffer.readUInt32BE(0) !== 0x0020af30) return null;
-  const imageCount = buffer.readUInt32BE(4);
-  const imageTableOffset = buffer.readUInt32BE(8);
-  const formats = new Map([
-    [0, "I4"],
-    [1, "I8"],
-    [2, "IA4"],
-    [3, "IA8"],
-    [4, "RGB565"],
-    [5, "RGB5A3"],
-    [6, "RGBA8"],
-    [8, "C4"],
-    [9, "C8"],
-    [10, "C14X2"],
-    [14, "CMPR"],
-  ]);
-  const bytesPerPixel = new Map([
-    [0, 0.5],
-    [1, 1],
-    [2, 1],
-    [3, 2],
-    [4, 2],
-    [5, 2],
-    [6, 4],
-    [8, 0.5],
-    [9, 1],
-    [10, 2],
-    [14, 0.5],
-  ]);
-  const images = [];
-  for (let i = 0; i < imageCount && i < 16; i += 1) {
-    const tableOffset = imageTableOffset + i * 8;
-    if (tableOffset + 8 > buffer.length) break;
-    const textureHeaderOffset = buffer.readUInt32BE(tableOffset);
-    const paletteHeaderOffset = buffer.readUInt32BE(tableOffset + 4);
-    if (textureHeaderOffset + 12 > buffer.length) {
-      images.push({ index: i, textureHeaderOffset, parseStatus: "texture header outside payload" });
-      continue;
-    }
-    const height = buffer.readUInt16BE(textureHeaderOffset);
-    const width = buffer.readUInt16BE(textureHeaderOffset + 2);
-    const formatCode = buffer.readUInt32BE(textureHeaderOffset + 4);
-    const dataOffset = buffer.readUInt32BE(textureHeaderOffset + 8);
-    const estimatedPayloadBytes = bytesPerPixel.has(formatCode) ? Math.ceil(width * height * bytesPerPixel.get(formatCode)) : null;
-    images.push({
-      index: i,
-      width,
-      height,
-      formatCode,
-      format: formats.get(formatCode) ?? `unknown(${formatCode})`,
-      dataOffset,
-      textureHeaderOffset,
-      paletteHeaderOffset: paletteHeaderOffset || null,
-      estimatedPayloadBytes,
-    });
+  const metadata = parseTplMetadata(buffer, { includePaddingBytes: true, maxImages: 16 });
+  if (metadata.parseStatus.startsWith("too small") || metadata.parseStatus.startsWith("unexpected magic")) {
+    return null;
   }
-
-  const exactBytes =
-    images.length > 0 && images.every((image) => Number.isInteger(image.estimatedPayloadBytes))
-      ? Math.max(...images.map((image) => image.dataOffset + image.estimatedPayloadBytes))
-      : null;
 
   return {
     kind: "tpl-texture",
-    magic: "0x0020af30",
-    imageCount,
-    imageTableOffset,
-    images,
-    exactBytes,
-    paddingBytes: exactBytes === null ? null : buffer.length - exactBytes,
-    paddingIsZero: exactBytes === null ? null : isAllZero(buffer, exactBytes),
+    parseStatus: metadata.parseStatus,
+    magic: metadata.magic,
+    imageCount: metadata.imageCount,
+    imageTableOffset: metadata.imageTableOffset,
+    images: metadata.images,
+    exactBytes: metadata.exactBytes,
+    paddingBytes: metadata.paddingBytes,
+    paddingIsZero: metadata.exactBytes === null ? null : isAllZero(buffer, metadata.exactBytes),
   };
 }
 

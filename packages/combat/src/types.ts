@@ -42,9 +42,8 @@ export interface PlayerInput {
   switchBorg: boolean;
   /** Step/dodge (stick-action). */
   dash: boolean;
-  /** Y — Hyper/Power Burst arm input. Evidence: `FUN_80069814` chunk_0009.c:104-115 (Y-family
-   *  bit in transformed word +0x5d4 sets +0x6fb = 6, a 6-frame arm window). Shell only (ATK-011);
-   *  no gameplay effects until ATK-012. */
+  /** Y — Hyper/Power Burst arm/activate input. Evidence: `FUN_80069814` chunk_0009.c:104-115
+   *  (Y-family bit in transformed word +0x5d4 sets +0x6fb = 6, a 6-frame arm window). */
   hyper: boolean;
 }
 
@@ -208,7 +207,7 @@ export interface BorgRuntime {
    *  (behavior-notes.md (aj)): the ROM also decrements +0x6fb in the fusion per-slot loop and
    *  its expiry there drives the burst/fusion END path — the audit's "6-frame arm window" and
    *  the fusion timer may be the SAME field read in two different contexts, not two fields;
-   *  this still needs trace T3 to reconcile before ATK-012 wires any real duration/effects.
+   *  this still needs trace T3 to reconcile before fusion/duration semantics are final.
    *  UPDATE (behavior-notes.md (ao), official NA instruction manual, CONFIRMED_MANUAL tier):
    *  "press the button at the same time [as your partner] for simultaneous power bursts" — this
    *  gives the 6-frame window a coherent reading as a SIMULTANEITY tolerance for synchronized
@@ -217,19 +216,18 @@ export interface BorgRuntime {
    *  (whose window, how it gates pairing) remain for trace T3 to reconcile. */
   burstArmFrames: number;
   /** Power Burst activation flag (ROM +0x6fc = 1, set by `zz_005b2b8_` when +0x6fb is nonzero
-   *  and the borg is active). Gated behind constants.ts BURST.ENABLED (default false, BLOCKED-
-   *  until-ATK-012) so this is always false in real battles; has ZERO gameplay effects (ATK-011
-   *  shell only — see ATK-012). Per (ao) (official manual, CONFIRMED_MANUAL): real activation's
-   *  precondition is "the burst gauge is at max". UPDATE (Q4 RESOLVED 2026-07-03): that gauge
-   *  is now LOCATED and ported — it is PER-PLAYER (player struct +i*0x3c, +0x124/+0x126/
-   *  +0x12a/+0x103, findings §S), lives in BattleState.burstMeterByPlayer (see BurstMeterState
-   *  below), and is display-only until ATK-012 wires gameplay effects (Q5 speed boost still
-   *  open) — which is why BURST.ENABLED still stays false. */
+   *  and the borg is active). Per (ao) (official manual, CONFIRMED_MANUAL): real activation's
+   *  precondition is "the burst gauge is at max". UPDATE (Q4/Q5 RESOLVED at value level): the
+   *  per-player meter lives in BattleState.burstMeterByPlayer, activation consumes the charged
+   *  flag, active burst drains the meter by BURST.DRAIN_PER_FRAME each frame, and movement reads
+   *  this flag for BURST.SPEED_MULTIPLIER. Remaining gaps: per-action extra meter costs and the
+   *  exact ROM code path carrying the speed multiplier. */
   burstActive: boolean;
-  /** Power Burst "paired" flag (ROM +0x6fa = 1, set alongside +0x6fc by `zz_005b2b8_`). Shell
-   *  bookkeeping only; not wired to fusion pairing (fusionPartnerUid/fusionState below) until
-   *  a later ticket confirms the relationship. See (ao) note on burstArmFrames re: simultaneous
-   *  co-op bursts — "paired" may end up meaning that, but it is UNCONFIRMED pending T3. */
+  /** Power Burst "paired" flag (ROM +0x6fa = 1, set alongside +0x6fc by `zz_005b2b8_`).
+   *  Records same-team simultaneous activation; not wired to fusion pairing
+   *  (fusionPartnerUid/fusionState below) until a later ticket confirms the relationship.
+   *  See (ao) note on burstArmFrames re: simultaneous co-op bursts — "paired" may end up
+   *  meaning that, but it is UNCONFIRMED pending T3. */
   burstPaired: boolean;
   /** Power Burst fusion partner uid, or null when not fused/linked (ROM +0x4a4 partner
    *  pointer, modeled as a uid). Nothing sets this yet (ATK-018 shell only). */
@@ -370,8 +368,7 @@ export interface Projectile {
  *   - `charged`   = +0x103, the FUN_80069814 arm precondition; flips to 1 ONE frame AFTER
  *                   +0x126 reaches max (live-observed delay — ported as the check-before-fill
  *                   sweep in battle.ts step()).
- * Distinct from the per-BORG burstArmFrames/burstActive/burstPaired shell on BorgRuntime
- * (ATK-011, inert behind BURST.ENABLED=false).
+ * Distinct from the per-BORG burstArmFrames/burstActive/burstPaired state on BorgRuntime.
  */
 export interface BurstMeterState {
   /** Clamped meter (ROM +0x126 u16), 0..BURST.METER_MAX. */
@@ -398,7 +395,7 @@ export interface BattleState {
    * like the ROM (player struct +i*0x3c — see BurstMeterState above): it persists across
    * borg deaths/deploys/switches and is never reset by deployNext. CPU-owned forces
    * (ownerPlayer === null) get no entry in this wave — see creditBurstFill in burst.ts for
-   * the documented decision. Display-only until ATK-012 (BURST.ENABLED stays false).
+   * the documented decision. Drained by active Power Burst once a human player activates.
    */
   burstMeterByPlayer: Record<string, BurstMeterState>;
   frame: number;

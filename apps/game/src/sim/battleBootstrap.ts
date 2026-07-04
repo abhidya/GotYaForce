@@ -10,7 +10,7 @@ import {
   playerIdFor,
   stageIdForBattleConfig,
   toCombatBattleConfig,
-  type BattleConfig as MissionBattleConfig,
+  type MissionBattleConfig,
   type CombatStageCatalog,
 } from "@gf/missions";
 

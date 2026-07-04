@@ -18,6 +18,7 @@ const borgId = (process.argv[2] ?? "pl0615").toLowerCase();
 const repoRoot = path.resolve(".");
 const rootDir = path.join(repoRoot, "user-data", region, "afs_data", "root");
 const tempSourceDir = path.join(repoRoot, ".tmp", "pzz-bake-members", region, borgId);
+const pzzManifestPath = path.join(repoRoot, "research", "asset-inventory", "pzz-member-extraction-manifest.json");
 const motPath = materializeSourceMember(`${borgId}mot.bin`, 3);
 const modelPath = materializeSourceMember(`${borgId}_mdl.arc`, 4);
 const outDir = path.join(repoRoot, "apps", "game", "public", "models", borgId);
@@ -117,13 +118,31 @@ function materializeSourceMember(fileName, memberIndex) {
   if (!fs.existsSync(archivePath)) return { path: loosePath, source: "missing" };
 
   const archive = unpackPzz(fs.readFileSync(archivePath));
-  const member = archive.members[memberIndex];
+  const resolvedIndex = pzzManifestMemberIndex(fileName) ?? memberIndex;
+  const member = archive.members[resolvedIndex];
   if (!member || member.payload.byteLength === 0) return { path: loosePath, source: "missing" };
 
   fs.mkdirSync(tempSourceDir, { recursive: true });
   const outPath = path.join(tempSourceDir, fileName);
   fs.writeFileSync(outPath, Buffer.from(member.payload));
   return { path: outPath, source: "pzz" };
+}
+
+function pzzManifestMemberIndex(fileName) {
+  if (!fs.existsSync(pzzManifestPath)) return null;
+  try {
+    const manifest = JSON.parse(fs.readFileSync(pzzManifestPath, "utf8"));
+    const records = manifest.records ?? manifest.members ?? [];
+    const record = records.find(
+      (item) =>
+        item?.borgId === borgId &&
+        String(item?.inferredName ?? "").toLowerCase() === fileName.toLowerCase() &&
+        Number.isInteger(item?.memberIndex),
+    );
+    return record?.memberIndex ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function rel(filePath) {

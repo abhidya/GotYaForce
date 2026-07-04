@@ -1,27 +1,19 @@
 // @gf/missions — battle-config.ts
 //
-// Local mirror of the @gf/combat simulation API surface this package produces.
-//
-// NOTE: as of writing, `@gf/combat` (packages/combat/src/index.ts) exports
-// BorgStats / forceEnergy / validateForceBudget but does NOT yet export
-// `BattleConfig` or `createBattle`. The task specifies the eventual core API as
-// `createBattle(BattleConfig)` with `BattleConfig.forces[] = {team, ownerPlayer,
-// borgIds[]}`. We define a matching interface here so the missions layer is
-// self-contained and typechecks in isolation. When @gf/combat starts exporting
-// `BattleConfig`, replace this file with a re-export:
-//
-//     export type { BattleConfig, BattleForce, Team } from "@gf/combat";
+// Mission-owned battle plan shape. It keeps mode-facing facts such as arena
+// names, labels, and scoring/debug metadata. `combat-config.ts` is the adapter
+// that projects this into @gf/combat's numeric-team BattleConfig.
 
 /** Which side a force fights on. */
-export type Team = "player" | "enemy";
+export type MissionTeam = "player" | "enemy";
 
 /**
  * One force in a battle. A battle has at least one player force and one enemy
  * force; "fight alone" adds a CPU ally force on the player side.
  */
-export interface BattleForce {
+export interface MissionBattleForce {
   /** Side this force fights for. */
-  team: Team;
+  team: MissionTeam;
   /**
    * Owning player index (0-based) for human-controlled forces, or null for
    * CPU-controlled forces (enemy waves and the "fight alone" CPU ally).
@@ -38,11 +30,11 @@ export interface BattleForce {
 }
 
 /** Configuration handed to `@gf/combat`'s `createBattle()`. */
-export interface BattleConfig {
+export interface MissionBattleConfig {
   /** Arena / stage id this battle is fought in. */
   arena: string;
   /** All forces in the battle (player force(s), optional CPU ally, enemy force). */
-  forces: BattleForce[];
+  forces: MissionBattleForce[];
   /** Original battle timer in frames; omitted means no timer. */
   timeLimitFrames?: number;
   /**
@@ -55,11 +47,11 @@ export interface BattleConfig {
   /** Optional human-readable label (e.g. "BATTLE 2 VS" or the stage name). */
   label?: string;
   /** Optional metadata for UI/debugging; never read by the simulation. */
-  meta?: BattleMeta;
+  meta?: MissionBattleMeta;
 }
 
 /** Non-simulation metadata attached to a generated battle. */
-export interface BattleMeta {
+export interface MissionBattleMeta {
   /** Which mode produced this battle. */
   mode: "challenge" | "adventure";
   /** 0-based index within the run/campaign. */
@@ -99,3 +91,10 @@ export interface BattleMeta {
   /** Enemy names that failed to resolve to a borg id (adventure). */
   unresolvedEnemies?: string[];
 }
+
+// Back-compat aliases for existing callers. Prefer the Mission* names in new
+// mission code; use toCombatBattleConfig() at the @gf/combat interface.
+export type Team = MissionTeam;
+export type BattleForce = MissionBattleForce;
+export type BattleConfig = MissionBattleConfig;
+export type BattleMeta = MissionBattleMeta;

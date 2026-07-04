@@ -689,22 +689,20 @@ export const BURST = {
    */
   ARM_WINDOW_FRAMES: 6,
   /**
-   * BLOCKED-until-ATK-012. Keeping this false makes the per-BORG burst shell inert in real
-   * battles: burstArmFrames/burstActive/burstPaired are tracked but never change gameplay
-   * output until ATK-012 wires real effects.
-   * Per (ao) (official NA instruction manual, CONFIRMED_MANUAL): activation's real precondition
-   * is "press when the burst gauge is at max" — a full Power Burst meter, officially named in
-   * the manual and corroborated by StrategyWiki's interface page.
+   * ENABLED (ATK-012 core slice). Per (ao) (official NA instruction manual,
+   * CONFIRMED_MANUAL): activation's real precondition is "press when the burst gauge is at
+   * max" — a full Power Burst meter, officially named in the manual and corroborated by
+   * StrategyWiki's interface page.
    * UPDATE (Q4 RESOLVED 2026-07-03 — research/decomp/attack-mechanics-open-questions.md Q4
-   * lines 51-79, attack-mechanics-findings.md §S): the meter is now LOCATED (per-PLAYER, player
+   * lines 51-79, attack-mechanics-findings.md §S): the meter is LOCATED (per-PLAYER, player
    * struct +i*0x3c: +0x126 clamped u16 / +0x124 max / +0x12a unclamped / +0x103 charged) and
    * its fill model is PORTED (METER_MAX / FILL_PER_HIT below; state in
    * BattleState.burstMeterByPlayer, fill in combat.ts applyHit, charged sweep in battle.ts).
-   * This still stays false because the gauge is DISPLAY-ONLY until ATK-012 lands real burst
-   * gameplay effects — Q5 (the burst speed boost's code location) is still open, so flipping
-   * this would activate the effect-free shell, not the real mechanic.
+   * UPDATE (Q5 RESOLVED at value level 2026-07-04): charged Y activation, same-team paired
+   * activation, -5/frame drain, and x1.5 movement speed are wired. Remaining gaps: the exact
+   * ROM code path carrying the speed multiplier and the per-action extra burst meter costs.
    */
-  ENABLED: false,
+  ENABLED: true,
   /**
    * DERIVED — Q4 RESOLVED (2026-07-03): the per-player burst meter's max, player struct
    * +0x124 = 3000 (save-state diff scripts/diff-actor-block.mjs; research/decomp/

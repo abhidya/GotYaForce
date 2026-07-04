@@ -32,6 +32,7 @@ export {
   inputRequestsBurst,
   type AttackCommand,
 } from "./command.js";
+export { targetWithinMeleeEngage } from "./combat.js";
 export {
   commandMoveRecordsForBorgButton,
   commandMoveRecordSummaryForBorgButton,
@@ -56,6 +57,7 @@ export {
   type RangePref,
 } from "./stats.js";
 export {
+  BURST,
   CHARGE,
   COMBO,
   DASH,

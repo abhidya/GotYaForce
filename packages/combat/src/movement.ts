@@ -25,7 +25,7 @@ import {
   yawFromXZ,
   type Vec3,
 } from "@gf/physics";
-import { DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
+import { BURST, DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
 import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
 
@@ -153,7 +153,8 @@ export function stepMovement(
   // --- Horizontal movement ------------------------------------------------------------
   if (!dashing) {
     const flying = !b.grounded && p.flyer;
-    const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1);
+    const burstMult = b.burstActive ? BURST.SPEED_MULTIPLIER : 1;
+    const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1) * burstMult;
     let targetVx = 0;
     let targetVz = 0;
     if (free && (horizontal.walkX !== 0 || horizontal.walkZ !== 0)) {
