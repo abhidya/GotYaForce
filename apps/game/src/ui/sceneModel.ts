@@ -79,8 +79,10 @@ export function mountUiSceneModels(host: HTMLElement, opts: UiSceneModelOptions)
       host.dataset["gfModelStatus"] = "loaded";
     })
     .catch((error) => {
+      // Scene load failure: leave the canvas empty so whatever CSS/image presentation the
+      // caller layers on top (or behind) remains the fallback. Never break the screen flow.
       host.dataset["gfModelStatus"] = "failed";
-      throw error;
+      console.warn(`[sceneModel] UI scene failed to load (${opts.sceneId ?? "explicit paths"})`, error);
     });
 
   const render = (): void => {
