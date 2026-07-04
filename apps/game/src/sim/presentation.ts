@@ -96,10 +96,15 @@ export function battleAudioEvents(before: BattleAudioSnapshot, after: BattleAudi
     else if (localNext.state === "special" && localPrev.state !== "special") emit("special");
     else if (
       localNext.state === "attack" &&
-      localNext.anim === "shoot" &&
-      (localPrev.state !== "attack" || localPrev.anim !== "shoot")
+      (localNext.anim === "shoot" || localNext.anim === "charge_shot") &&
+      (localPrev.state !== "attack" || (localPrev.anim !== "shoot" && localPrev.anim !== "charge_shot"))
     ) {
-      emit(localPrev.chargeFrames > 0 && localNext.chargeFrames === 0 ? "charge_release" : "shoot");
+      // charge_shot is the charged-release fire anim (sim sets it on tier>=1 releases).
+      emit(
+        localNext.anim === "charge_shot" || (localPrev.chargeFrames > 0 && localNext.chargeFrames === 0)
+          ? "charge_release"
+          : "shoot",
+      );
     } else if (
       localNext.state === "attack" &&
       localNext.anim === "melee" &&

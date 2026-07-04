@@ -580,6 +580,44 @@ export const AI = {
   RANGE_SLACK: 60,
   /** AI re-evaluates its target every N frames. TUNED — see MELEE_RANGE note. */
   RETARGET_FRAMES: 30,
+  /**
+   * RAW-SCALE RETUNE (2026-07-04 movement migration, research/decomp/
+   * movement-hit-decode-2026-07-04.md §1): TUNED port-ism, NOT ROM-derived — the ROM CPU
+   * brain (zz_001c9d0_) is unread, so every field below is a port-side pacing choice, not a
+   * decoded decision function.
+   *
+   * Ground speeds moved to per-borg DERIVED raw values (G RED 12 u/f) from the old
+   * 22 u/f trace anchor (~0.55x as fast). Walking alone from stage-scale spawn separations
+   * (several thousand XZ units on the larger Challenge stages) now takes far longer, so the
+   * CPU dashes to close ground when it is well outside its engage range. Expressed as a
+   * multiple of the borg's OWN groundRunSpeedForBorgId (movementData.ts) rather than a flat
+   * distance so faster/slower borgs get a proportionally-scaled trigger instead of a
+   * one-size-fits-all threshold tuned for the retired 22 u/f world.
+   */
+  DASH_APPROACH_SPEED_MULT: 30,
+  /**
+   * Kite/hold-range slack, expressed as a fraction of the borg's own ground run speed
+   * (units/frame) rather than the flat absolute RANGE_SLACK (60, sized for the old 22 u/f
+   * world). At the DERIVED raw scale (G RED 12 u/f) this keeps the dead-band roughly
+   * proportional to how far the borg can drift in a single retarget window instead of being
+   * a relatively huge, slow-to-cross band for a 12 u/f mover. TUNED port-ism.
+   */
+  KITE_SLACK_SPEED_MULT: 5,
+  /**
+   * Attack decision pacing: after a swing/special recovers, the CPU waits a per-borg
+   * staggered reaction delay before pressing again, instead of holding the attack button
+   * every single frame while in range. TUNED port-ism — fixes a mutual-invincibility
+   * phase-lock: two symmetric CPUs (matched range/timing) that both spam attack the instant
+   * they're in range enter their swings on the SAME frame, and the melee-active i-frame
+   * refresh (STATE.MELEE_IFRAME_REFRESH_PER_FRAME, constants.ts) keeps each one invincible
+   * for the other's entire active window every cycle — verified live via
+   * scripts/selfcheck-challenge-stages.mjs (st02/st04/st08/st0b/st0c all showed two CPUs
+   * locked at ~52 units, alternating attack/special forever with hp never moving). Staggering
+   * the reaction delay per-uid desynchronizes the swing cycles so each side's active window
+   * eventually lands on the other's non-invincible frames.
+   */
+  ATTACK_REACTION_MIN_FRAMES: 4,
+  ATTACK_REACTION_JITTER_FRAMES: 26,
 } as const;
 
 /** Default stage half-extent if a BattleConfig omits bounds (XZ units from origin). */

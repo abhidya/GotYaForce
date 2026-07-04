@@ -136,6 +136,10 @@ const SLOT_LABELS: Record<AnimSlot, RegExp[]> = {
   // multiple exported swings alternate; falls back to melee when only one exists.
   melee_alt: [],
   shoot: [/^attack_s\d+$/, /^special_s\d+$/],
+  // Charge-release fire animation. No generic pattern: the exact clip is per-borg action-
+  // script data (the charge stream's playAnim target — e.g. G RED bank 0x80366220 stream
+  // g3 s27 plays anim g3 s18); borgs without a PREFERRED_LABELS entry fall back to shoot.
+  charge_shot: [],
   special: [/^special_s\d+$/],
   // DERIVED_ROM: state dispatch `zz_004beb8_` plays hit-react through group0 slot 13/14
   // (see research/decomp/data/state-anim-dispatch-802d3570.json). The bake labels g0s14 as
@@ -169,6 +173,7 @@ const SLOT_FALLBACKS: Partial<Record<AnimSlot, AnimSlot[]>> = {
   melee: ["attack", "idle"],
   melee_alt: ["melee", "attack", "idle"],
   shoot: ["attack", "special", "move", "idle"],
+  charge_shot: ["shoot", "attack", "special", "idle"],
   special: ["attack", "idle"],
   hit: ["idle"],
   down: ["hit", "death", "idle"],
@@ -178,10 +183,19 @@ const SLOT_FALLBACKS: Partial<Record<AnimSlot, AnimSlot[]>> = {
 };
 
 const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]>>>> = {
+  // NEO G RED / G BLACK share G RED's family action-script bank (ctor 0x8018ccfc), so the
+  // same charge-fire stream (g3 s27 → anim g3 s18) applies — see the pl0615 entry's note.
+  pl0629: { charge_shot: ["hit_react_s18"] },
+  pl062a: { charge_shot: ["hit_react_s18"] },
   pl0615: {
     // G RED (borgs.json name "G RED", id pl0615 — the game's box-art mascot borg,
     // NOT pl0000 "NORMAL NINJA"). This is the defaultLeadId / most fully-animated borg.
     shoot: ["attack_s4"],
+    // DERIVED (meleeAnimKinds.json bank 0x80366220 stream g3 s27): the charge-fire script
+    // arms the beam HIT kind 8 (bone-7 chest sweep records f7..16) and plays anim group 3
+    // slot 18 — exported as the mislabeled "hit_react_s18" clip. This is the G Buster
+    // chest-beam hop animation.
+    charge_shot: ["hit_react_s18"],
     melee: ["attack_lunge_s1"],
     hit: ["hit_react_s0"],
     // g4s0 ("special_s0" in the old mislabeled bake, now "down_s0") is actually the

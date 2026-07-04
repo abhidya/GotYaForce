@@ -54,6 +54,7 @@ export type AnimSlot =
   | "melee"
   | "melee_alt"
   | "shoot"
+  | "charge_shot"
   | "special"
   | "hit"
   | "down"
@@ -275,6 +276,7 @@ export class BattleScene {
     if (b.state === "spawn") return "spawn";
     if (b.state === "special") return "special";
     if (b.state === "attack") {
+      if (b.anim === "charge_shot") return "charge_shot";
       if (b.anim === "shoot") return "shoot";
       if (b.anim === "melee") return "melee";
       return "attack";
@@ -323,7 +325,7 @@ export class BattleScene {
       if (slot === "death" && slotChanged) this.spawnDeathExplosion(actor.group.position);
       if (slotChanged && slot.startsWith("dash")) this.spawnDashBurst(actor.group.position);
       if (slot === "special" && slotChanged) this.spawnSpecialBurst(actor.group.position);
-      if (slot === "shoot" && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY);
+      if ((slot === "shoot" || slot === "charge_shot") && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY);
       this.syncChargeGlow(actor, b);
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid);
       actor.lastSeenSlot = slot;

@@ -1654,7 +1654,11 @@ function startShotAttack(
   b.cooldowns["attackLock"] = shotDef.recovery;
   b.state = "attack";
   b.stateTime = 0;
-  b.anim = "shoot";
+  // Charged releases carry their own anim label: the charge-fire animation is a distinct
+  // clip in source (G RED: action-script stream g3 s27 arms beam kind 8 and plays anim
+  // group 3 slot 18 — the chest-beam hop; meleeAnimKinds.json bank 0x80366220). The
+  // renderer maps "charge_shot" per borg and falls back to the plain shoot clip.
+  b.anim = chargeTier >= 1 ? "charge_shot" : "shoot";
   out.push(...spawnProjectiles(b, p, shotDef, chargeTier, all));
 }
 
