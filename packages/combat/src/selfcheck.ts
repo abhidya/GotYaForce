@@ -37,7 +37,7 @@ import {
   xMoveForBorgId,
   xMoveCoverage,
 } from "./actionStreamData.js";
-import { attackHitTableForBorgId } from "./attackHitData.js";
+import { attackHitTableForBorgId, shotHitRadiusForBorgId, shotKindForBorgId } from "./attackHitData.js";
 import { moveByButton } from "./moveProperties.js";
 import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
 import {
@@ -1049,6 +1049,93 @@ function assertGRedChargeStreamUnresolvedKeepsFallback(borgs: BorgStats[]): void
   }
   console.log(
     "[selfcheck] G RED B-charge leaf unresolved (g4 s2 not captured) -> runtime kept the fallback anim/record exactly",
+  );
+}
+
+/**
+ * B-shot HIT-kind resolution (shotKindForBorgId, wired into shotHitRadiusForBorgId and
+ * combat.ts's shotFamilyRecordSpread): a borg whose fire fn is call-site-guarded to a PROVEN
+ * non-zero HIT kind (shotVariantKinds.json borgShotKinds) must use THAT kind's hit.bin
+ * radius/damage record instead of the generic kind-0 heuristic. Three cases, per the task:
+ *
+ *  (a) G RED (pl0615) is the generator's own ground-truth gate: its ONLY attribution resolves
+ *      to kind 0, so wiring shotKindForBorgId in must be BEHAVIOR-IDENTICAL to the pre-existing
+ *      kind-0 heuristic. Pinned: hitRadius extent 20 (attackHitData.ts's existing comment cites
+ *      this as the roster median too).
+ *  (b) pl0000 (NORMAL NINJA) has a guarded attribution resolving to kind 1 (table 0x802d6d68),
+ *      whose hit.bin record has a LARGER radius (10) than its own kind-0 record (5) and than
+ *      its TUNED profile hitRadius (35) — proof the resolved-kind path, not kind 0 or the
+ *      profile fallback, is what actually reaches the spawned projectile.
+ *  (c) pl0001 (SHURIKEN NINJA) has NO guarded attribution at all (borgShotKinds has no entry
+ *      keyed by its runtime guard id 0x1) — shotKindForBorgId must return null and the spawned
+ *      projectile must keep using the kind-0 heuristic (extent 5) exactly as before this change.
+ */
+function assertShotKindResolutionPrefersProvenAttribution(borgs: BorgStats[]): void {
+  // (a) G RED: kind 0 either way.
+  if (shotKindForBorgId("pl0615") !== 0) {
+    throw new Error(`[selfcheck] G RED's resolved shot kind should be 0 (ground-truth gate): got ${shotKindForBorgId("pl0615")}`);
+  }
+  const gRedRadius = shotHitRadiusForBorgId("pl0615");
+  if (gRedRadius !== 20) {
+    throw new Error(`[selfcheck] G RED shot hit radius must stay pinned at 20 (kind-0, unchanged): got ${gRedRadius}`);
+  }
+
+  // (b) pl0000: guarded attribution resolves to a non-zero kind (1) with a DIFFERENT radius
+  // than kind 0 — proves the new resolution path is actually consumed, not just present.
+  const ninjaKind = shotKindForBorgId("pl0000");
+  if (ninjaKind !== 1) {
+    throw new Error(`[selfcheck] pl0000 (NORMAL NINJA) should resolve guarded shot kind 1: got ${ninjaKind}`);
+  }
+  const ninjaRadius = shotHitRadiusForBorgId("pl0000");
+  if (ninjaRadius !== 10) {
+    throw new Error(
+      `[selfcheck] pl0000's resolved-kind (1) shot radius should be 10 (kind-0 would be 5, profile TUNED is 35): got ${ninjaRadius}`,
+    );
+  }
+
+  // (c) pl0001: no guarded attribution at all -> falls back to the kind-0 heuristic unchanged.
+  const shurikenKind = shotKindForBorgId("pl0001");
+  if (shurikenKind !== null) {
+    throw new Error(`[selfcheck] pl0001 (SHURIKEN NINJA) has no borgShotKinds entry and should resolve null: got ${shurikenKind}`);
+  }
+  const shurikenRadius = shotHitRadiusForBorgId("pl0001");
+  if (shurikenRadius !== 5) {
+    throw new Error(`[selfcheck] pl0001's kind-0 fallback shot radius should stay 5: got ${shurikenRadius}`);
+  }
+
+  // End-to-end: pl0000's plain (non-chargeable) B tap must actually spawn a projectile whose
+  // hitRadius reflects the resolved kind-1 record (10), not the profile's TUNED 35 nor kind 0's 5.
+  const ninjaProfile = buildProfile(borgById(borgs, "pl0000"));
+  const ninjaRuntime = fakeRuntime("ninja_shotkind", 0, 0);
+  ninjaRuntime.borgId = ninjaProfile.id;
+  ninjaRuntime.ammo = startingAmmoForProfile(ninjaProfile);
+  const enemy = fakeRuntime("ninja_shotkind_enemy", 1, 220);
+  const profiles = new Map([
+    [ninjaRuntime.uid, ninjaProfile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const fired = pumpAttackFrame(ninjaRuntime, ninjaProfile, true, [ninjaRuntime, enemy], profiles);
+  const proj = fired[0];
+  if (!proj) throw new Error("[selfcheck] pl0000 shot tap should spawn a projectile");
+  if (proj.hitRadius !== 10) {
+    throw new Error(`[selfcheck] pl0000's spawned projectile hitRadius should be exactly 10 (resolved kind 1): got ${proj.hitRadius}`);
+  }
+
+  // Fleet coverage telemetry: how many borgs now resolve a PROVEN non-zero shot kind (vs.
+  // falling back to the kind-0 heuristic or having no attribution at all).
+  let nonZeroCount = 0;
+  let zeroCount = 0;
+  let noneCount = 0;
+  for (const stats of borgs) {
+    const kind = shotKindForBorgId(stats.id);
+    if (kind === null) noneCount += 1;
+    else if (kind === 0) zeroCount += 1;
+    else nonZeroCount += 1;
+  }
+  console.log(
+    `[selfcheck] shot-kind resolution: G RED pinned (kind 0, radius 20) unchanged; pl0000 resolves kind 1 (radius 10, was 5/35); ` +
+      `pl0001 has no attribution (falls back, radius 5). Fleet: ${nonZeroCount} borgs resolve a proven NON-ZERO shot kind, ` +
+      `${zeroCount} resolve a proven kind 0, ${noneCount} have no attribution (kind-0 heuristic fallback) out of ${borgs.length}.`,
   );
 }
 
@@ -3392,6 +3479,7 @@ export function main(): number {
   assertNeoGRedLadderChainsToS27(borgs);
   assertUnresolvedLadderBorgStillCombosViaTunedPath(borgs);
   assertGRedChargeStreamUnresolvedKeepsFallback(borgs);
+  assertShotKindResolutionPrefersProvenAttribution(borgs);
   assertArmedChargeLeafSetsExactAnimAndRecord(borgs);
   assertArmedAirBLeafUsesExactWindow(borgs);
   assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs);

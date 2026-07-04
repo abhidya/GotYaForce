@@ -67,7 +67,12 @@ import {
   resolveLiveCommand,
   type ContextualBGates,
 } from "./commandDispatch.js";
-import { attackHitRecordsForKind, attackHitTableForBorgId, shotHitRadiusForBorgId } from "./attackHitData.js";
+import {
+  attackHitRecordsForKind,
+  attackHitTableForBorgId,
+  shotHitRadiusForBorgId,
+  shotKindForBorgId,
+} from "./attackHitData.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
 import {
@@ -2160,9 +2165,11 @@ function spawnProjectile(
     // Spawn-time aim-cone gate (FUN_8006c334) — no longer unconditional.
     homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
     life: shotDef.lifetime,
-    // DERIVED where present: the ROM's generic shot-child init arms HIT kind 0
-    // (FUN_80099bb4 chunk_0015.c:1263 etc. — movement-hit-decode-2026-07-04.md), so the
-    // borg's kind-0 hit.bin record carries the authored projectile hit volume; its largest
+    // DERIVED where present: the borg's B-shot HIT kind resolves via shotKindForBorgId — the
+    // guarded fire-site attribution (shotVariantKinds.json borgShotKinds) when the borg's fire
+    // fn was traced to a proven table row, else the ROM's generic shot-child kind-0 heuristic
+    // (FUN_80099bb4 chunk_0015.c:1263 etc. — movement-hit-decode-2026-07-04.md). Either way the
+    // resolved kind's hit.bin record carries the authored projectile hit volume; its largest
     // extent/radius replaces the TUNED per-profile hitRadius 1:1 (raw world units).
     hitRadius: (shotHitRadiusForBorgId(b.borgId) ?? shotDef.hitRadius) * tier.radius,
     // Charged releases (tier>=1) switch to the profile's distinct charged visual family when
@@ -2187,18 +2194,23 @@ function spawnProjectile(
     // damageRecord spread wins on top of this fallback index/no-op.
     damageRecordIndex:
       chargeTier >= 1 ? DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL : DAMAGE_RECORD_INDEX.SHOT,
-    // EXACT per-borg record for plain shots (the ROM path: the borg's kind-0 hitbox record's
-    // u16+0x04 indexes the FAMILY damage table bound at actor+0x27c — familyDamageData.ts).
+    // EXACT per-borg record for plain shots (the ROM path: the borg's resolved-kind hitbox
+    // record's u16+0x04 indexes the FAMILY damage table bound at actor+0x27c —
+    // familyDamageData.ts; resolved kind is shotKindForBorgId's proven attribution when present,
+    // else kind 0).
     // Charged releases prefer the exact charge-leaf record (chargeDamageRecordSpread) when the
     // borg's remap actually carries it; otherwise they keep the CHARGE_OR_SPECIAL archetype.
     ...(chargeTier === 0 ? shotFamilyRecordSpread(b.borgId) : chargeDamageRecordSpread(b.borgId, chargeLeaf)),
   };
 }
 
-/** Resolve the borg's exact plain-shot damage record: kind-0 hitbox record → family table.
- *  Empty spread when either half is missing (archetype fallback stays in effect). */
+/** Resolve the borg's exact plain-shot damage record: the borg's resolved B-shot HIT kind
+ *  (shotKindForBorgId — the guarded fire-site attribution when proven, else the kind-0
+ *  heuristic) hitbox record → family table. Empty spread when either half is missing
+ *  (archetype fallback stays in effect). */
 function shotFamilyRecordSpread(borgId: string): { damageRecord?: DamageRecord } {
-  const hitRecords = attackHitRecordsForKind(borgId, 0);
+  const kind = shotKindForBorgId(borgId) ?? 0;
+  const hitRecords = attackHitRecordsForKind(borgId, kind);
   const first = hitRecords[0];
   if (!first) return {};
   const record = familyDamageRecordForBorg(borgId, first.damageRecordIndex);

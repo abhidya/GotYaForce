@@ -13,6 +13,61 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 
 ---
 
+## ★ 2026-07-04 session: B-shot HIT kind resolved from guarded fire-site attribution (non-zero kinds wired)
+
+Closed the "General wiring needs each fire-fn's shot id read" gap noted in B6 above.
+`shotVariantKinds.json` gained `borgShotKinds`: 130 borgs / 267 call-site-guarded attributions
+(all 267 join-verified against the borg's own hit.bin remap, `remapHasKind: true`), each mapping
+a borg to the HIT kind(s) its B-shot fire fn actually spawns — as opposed to the port's prior
+kind-0-for-everyone heuristic (G RED-only ground truth).
+
+- **`attackHitData.ts` — `shotKindForBorgId(id)`**: new resolver. `borgShotKinds` is keyed by the
+  runtime borg-id guard value (`*(short*)(actor+1000)`), a DIFFERENT id space from the `pl####`
+  file id used everywhere else in the package — the two are the same digits read in different
+  bases (pl0615/G RED ↔ guard `0x615`, pl0629/NEO G RED ↔ guard `0x629`); `borgIdToShotKindKey`
+  converts. When a borg has attributions, the resolver picks the MODE (most common) kind among
+  them, filtered to `remapHasKind===true` entries, tie-broken by first occurrence in the
+  attribution array. **Tie-break rationale**: a "lowest variant id" rule (as originally
+  considered) isn't meaningful here because `id` is a row index into a PER-TABLE array scoped to
+  one fire fn/call site, not a global ordering across a borg's different fire fns/tables — e.g.
+  pl0407 fires two different tables whose row ids are 120/121 and 0/0 respectively, so comparing
+  those ids across tables says nothing about which variant is "baseline". Mode-of-attributions is
+  the only borg-level aggregate that's actually comparable. Returns `null` when the borg has no
+  guarded attribution (or none pass the remap-join filter), and callers keep the kind-0 heuristic.
+- **Wired into both consumers**: `shotHitRadiusForBorgId(id)` now resolves
+  `shotKindForBorgId(id) ?? 0` and reads that kind's hit-bin records (was hardcoded to kind 0);
+  `combat.ts`'s `shotFamilyRecordSpread` does the same for the damage-record join
+  (`familyDamageRecordForBorg`). The existing ≤150 plausibility gate on the radius is unchanged
+  and applies to non-zero resolved kinds too.
+- **G RED (pl0615) is BEHAVIOR-IDENTICAL**: his only attribution is kind 0 (the generator's own
+  ground-truth gate), so `shotKindForBorgId("pl0615") === 0` and his hit radius/damage record are
+  byte-for-byte what they were before this change (radius pinned at 20).
+- **Fleet coverage**: of 208 borgs, **47 now resolve a PROVEN non-zero B-shot HIT kind** (were
+  silently using kind 0 before), 70 resolve a proven kind 0 (no behavior change), and 91 have no
+  guarded attribution at all (unchanged kind-0 heuristic fallback).
+- New selfcheck `assertShotKindResolutionPrefersProvenAttribution`: (a) pins G RED's resolved
+  kind/radius unchanged; (b) pl0000 (NORMAL NINJA) resolves guarded kind 1 (hit-bin radius 10,
+  vs. kind 0's 5 and the TUNED profile's 35) and an actual spawned projectile carries that exact
+  radius; (c) pl0001 (SHURIKEN NINJA) has no attribution and keeps the kind-0 fallback (radius 5)
+  exactly; logs the fleet coverage split above.
+- VALIDATED: `pnpm typecheck`, `packages/combat/dist/selfcheck.js` (full suite, all asserts
+  green), `scripts/selfcheck-1p-challenge.mjs`, `scripts/selfcheck-challenge-stages.mjs` all PASS.
+  **Challenge smoke numbers shifted (expected — more accurate/larger shot hitboxes land hits
+  sooner for the 47 newly-exact borgs)**: 1P challenge `firstEnergyChangeFrame` 154→117,
+  `resolvedFrame` 2613→1732 (same `stage=st00`, `result=win`, `finalEnergy` unchanged); the
+  11-stage smoke's per-stage `energyFrame`/`frames` dropped similarly across the board (e.g. st00
+  341→142 / 537→260, st0e 623→361 / 979→501) — `result`/triangle counts/stage set unchanged, all
+  11 stages still PASS.
+- DERIVED vs TUNED: the borg→kind attribution, its hit.bin radius/records, and the mode
+  tie-break's underlying data are all DERIVED (call-site-guarded, join-verified against the
+  borg's own remap). The mode-selection RULE ITSELF (as opposed to the per-attribution data) is a
+  judgment call documented above, not extracted from the ROM — a borg with multiple genuinely
+  different fire-fn kinds (e.g. tap vs. a distinct charged-variant fire path) collapses to one
+  "the" shot kind for this heuristic's purposes, same limitation the pre-existing kind-0
+  heuristic already had.
+
+---
+
 ## ★ 2026-07-04 session: asset-pipeline root cause + command dispatch landed
 
 **A. Every shipped runtime GLB had BLANK embedded textures (root cause of "the game looks
@@ -132,7 +187,8 @@ shot kind selection.
   hard-fail gate in the script (0x615 → zz_018dcb0_ → id 0x2b → kind 0). Spot-verified
   vs corpus: zz_0070558_ borg-3 guard variants 0/2; zz_0166bbc_ uVar4 union ids 39-42.
   Runtime wiring of non-zero kinds (replace the kind-0-only lookup in attackHitData.ts
-  with borgShotKinds) is the follow-up pass — data-only this pass.
+  with borgShotKinds) was data-only this pass — **NOW LANDED, see the 2026-07-04 "B-shot HIT
+  kind resolved from guarded fire-site attribution" session at the top of this file.**
 - **Slice 6 title/desk intro LANDED**: TitleIntro.ts mounts the real tl00 scene + G-Red
   playing the recovered desk sequence (anim ids 0,1,6,3,4,7 = g0 slots idle/move/jump_takeoff/
   dash_back/dash_left/jump_land), press-start → menu (set_global_menu_mode(9) model); slot-1
