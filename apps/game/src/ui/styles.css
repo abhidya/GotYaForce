@@ -674,6 +674,13 @@
   background-position: center;
   filter: brightness(0.9);
 }
+/* Real tl00 3D desk scene through its authored HSD camera — sits over the capture
+ * (which stays as instant paint + load-failure fallback) and under the actor layer. */
+.gf-title-intro-desk {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
 .gf-title-intro-actor {
   z-index: 2;
 }

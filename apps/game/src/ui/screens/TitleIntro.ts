@@ -132,15 +132,96 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     attrs: { role: "button", tabindex: "0", "aria-label": "Title screen — press start" },
   });
 
-  // Backdrop: the NATIVE captured title/desk frame (reference/captures/title-main-menu.png,
-  // the same real capture MainMenu's STORY entry uses) — it includes the desk, the room, and
-  // the GOTCHA FORCE logo exactly as the game frames them. The earlier tl00 whole-scene
-  // mount is retired for this screen: fitting all 37 tl00 models frames the giant ROOM, so
-  // the desk (the actual subject) renders as a distant speck; a per-model desk framing needs
-  // the scene's object-placement tables decoded first (title-main-menu-flow.md follow-up).
+  // Backdrop layers, back to front:
+  //  1. The NATIVE captured title/desk frame (reference/captures/title-main-menu.png) —
+  //     instant paint and the fallback if the 3D scene fails to load.
+  //  2. The REAL tl00 3D scene rendered through its AUTHORED HSD scene camera (DERIVED,
+  //     research/decomp/tl00-scene-camera-2026-07-04.md): the scene_data SOBJ carries one
+  //     PERSPECTIVE CObj — fov 41.539°, eye (5, 3557.153, −3145.1), target (5, 3557.153,
+  //     −12625), near 0.1 / far 32768. This resolves the old "whole-scene fit frames the
+  //     giant room" problem: the placement is authored INTO the scene meshes (world-space
+  //     vertices) and the camera frames the desk exactly like hardware. The exporter's
+  //     GX→glTF handedness conversion is a 180° Y-rotation, so the camera converts to
+  //     eye (−5, 3557.153, 3145.1) → target (−5, 3557.153, 12625) (labeled convention).
   const backdrop = el("div", { class: "gf-title-intro-backdrop" });
   backdrop.style.backgroundImage = `url(${TITLE_CAPTURE_URL})`;
   root.appendChild(backdrop);
+
+  const deskHost = createUiSceneHost("gf-ui-scene gf-title-intro-desk");
+  root.appendChild(deskHost);
+  let deskDisposed = false;
+  let deskFrame = 0;
+  void (async () => {
+    try {
+      const canvas = deskHost.querySelector<HTMLCanvasElement>(".gf-ui-scene-canvas");
+      if (!canvas) return;
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.setClearColor(0x000000, 0);
+
+      const scene3 = new THREE.Scene();
+      // The SOBJ carries 3 authored lights + fog; their parameters are not yet extracted
+      // (probe dumps counts only), so lighting stays a TUNED warm-room approximation.
+      scene3.add(new THREE.AmbientLight(0xf4efe3, 1.15));
+      const key = new THREE.DirectionalLight(0xfff1d6, 1.0);
+      key.position.set(-2000, 5200, 2600);
+      scene3.add(key);
+
+      // Authored CObj, converted through the exporter's 180° Y-rotation.
+      const camera = new THREE.PerspectiveCamera(41.538998, 1, 1, 32768);
+      camera.position.set(-5, 3557.153, 3145.1);
+      const deskLookAt = new THREE.Vector3(-5, 3557.153, 12625);
+
+      const loader = createThreeAssetLoader({ enableFileCache: true });
+      const models = await Promise.all(
+        Array.from({ length: 37 }, (_, i) =>
+          loader
+            .loadGlbScene(`/ui/scenes/tl00/model_${String(i).padStart(2, "0")}.glb`)
+            .catch(() => null),
+        ),
+      );
+      if (deskDisposed) return;
+      let mounted = 0;
+      for (const model of models) {
+        if (!model) continue;
+        // Authored world-space vertices: mount at identity — no fit, no recenter.
+        prepareImportedModel(model, { materialSide: THREE.DoubleSide, metalness: 0 });
+        scene3.add(model);
+        mounted += 1;
+      }
+      if (mounted === 0) return; // capture stays as the backdrop
+      deskHost.dataset["gfDeskModels"] = String(mounted);
+
+      const resize = (): void => {
+        const rect = deskHost.getBoundingClientRect();
+        const width = Math.max(1, Math.round(rect.width));
+        const height = Math.max(1, Math.round(rect.height));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      };
+      const observer = new ResizeObserver(resize);
+      observer.observe(deskHost);
+      resize();
+      teardown.push(() => observer.disconnect());
+
+      const render = (): void => {
+        if (deskDisposed) return;
+        camera.lookAt(deskLookAt);
+        renderer.render(scene3, camera);
+        deskFrame = requestAnimationFrame(render);
+      };
+      deskFrame = requestAnimationFrame(render);
+      teardown.push(() => {
+        deskDisposed = true;
+        cancelAnimationFrame(deskFrame);
+        renderer.dispose();
+      });
+    } catch (err) {
+      console.warn("[title] tl00 3D desk backdrop unavailable, keeping capture:", err);
+    }
+  })();
 
   const prompt = el("div", { class: "gf-title-intro-prompt", text: "PRESS START" });
   root.appendChild(prompt);
