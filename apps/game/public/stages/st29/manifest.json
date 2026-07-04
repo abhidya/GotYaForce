@@ -8,7 +8,11 @@
   "copied": {
     "stageArc": "st29/raw/st29_mdl.arc",
     "stagePzz": "st29/raw/st29.pzz",
-    "hitBins": [],
+    "hitBins": [
+      "st29/collision/hit290.bin",
+      "st29/collision/hit291.bin",
+      "st29/collision/hit292.bin"
+    ],
     "setArcs": []
   },
   "visual": {
@@ -48,7 +52,20 @@
       "complete": true
     }
   },
-  "collision": [],
+  "collision": [
+    {
+      "path": "collision/hit290.bin",
+      "bytes": 23784
+    },
+    {
+      "path": "collision/hit291.bin",
+      "bytes": 14312
+    },
+    {
+      "path": "collision/hit292.bin",
+      "bytes": 14312
+    }
+  ],
   "sets": {
     "sourceSetFiles": [],
     "exportedSetCount": 0,

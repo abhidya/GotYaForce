@@ -8,7 +8,11 @@
   "copied": {
     "stageArc": "st4e/raw/st4e_mdl.arc",
     "stagePzz": "st4e/raw/st4e.pzz",
-    "hitBins": [],
+    "hitBins": [
+      "st4e/collision/hit4e0.bin",
+      "st4e/collision/hit4e1.bin",
+      "st4e/collision/hit4e2.bin"
+    ],
     "setArcs": []
   },
   "visual": {
@@ -82,7 +86,20 @@
       "complete": true
     }
   },
-  "collision": [],
+  "collision": [
+    {
+      "path": "collision/hit4e0.bin",
+      "bytes": 101144
+    },
+    {
+      "path": "collision/hit4e1.bin",
+      "bytes": 188052
+    },
+    {
+      "path": "collision/hit4e2.bin",
+      "bytes": 18256
+    }
+  ],
   "sets": {
     "sourceSetFiles": [],
     "exportedSetCount": 0,

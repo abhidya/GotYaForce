@@ -8,7 +8,11 @@
   "copied": {
     "stageArc": "st25/raw/st25_mdl.arc",
     "stagePzz": "st25/raw/st25.pzz",
-    "hitBins": [],
+    "hitBins": [
+      "st25/collision/hit250.bin",
+      "st25/collision/hit251.bin",
+      "st25/collision/hit252.bin"
+    ],
     "setArcs": []
   },
   "visual": {
@@ -67,7 +71,20 @@
       "complete": true
     }
   },
-  "collision": [],
+  "collision": [
+    {
+      "path": "collision/hit250.bin",
+      "bytes": 92440
+    },
+    {
+      "path": "collision/hit251.bin",
+      "bytes": 85420
+    },
+    {
+      "path": "collision/hit252.bin",
+      "bytes": 16364
+    }
+  ],
   "sets": {
     "sourceSetFiles": [],
     "exportedSetCount": 0,

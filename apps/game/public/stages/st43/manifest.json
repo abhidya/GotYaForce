@@ -8,7 +8,11 @@
   "copied": {
     "stageArc": "st43/raw/st43_mdl.arc",
     "stagePzz": "st43/raw/st43.pzz",
-    "hitBins": [],
+    "hitBins": [
+      "st43/collision/hit430.bin",
+      "st43/collision/hit431.bin",
+      "st43/collision/hit432.bin"
+    ],
     "setArcs": []
   },
   "visual": {
@@ -82,7 +86,20 @@
       "complete": true
     }
   },
-  "collision": [],
+  "collision": [
+    {
+      "path": "collision/hit430.bin",
+      "bytes": 94812
+    },
+    {
+      "path": "collision/hit431.bin",
+      "bytes": 52556
+    },
+    {
+      "path": "collision/hit432.bin",
+      "bytes": 14356
+    }
+  ],
   "sets": {
     "sourceSetFiles": [],
     "exportedSetCount": 0,

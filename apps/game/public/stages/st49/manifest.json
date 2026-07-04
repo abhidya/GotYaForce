@@ -8,7 +8,11 @@
   "copied": {
     "stageArc": "st49/raw/st49_mdl.arc",
     "stagePzz": "st49/raw/st49.pzz",
-    "hitBins": [],
+    "hitBins": [
+      "st49/collision/hit490.bin",
+      "st49/collision/hit491.bin",
+      "st49/collision/hit492.bin"
+    ],
     "setArcs": []
   },
   "visual": {
@@ -48,7 +52,20 @@
       "complete": true
     }
   },
-  "collision": [],
+  "collision": [
+    {
+      "path": "collision/hit490.bin",
+      "bytes": 23784
+    },
+    {
+      "path": "collision/hit491.bin",
+      "bytes": 14312
+    },
+    {
+      "path": "collision/hit492.bin",
+      "bytes": 14312
+    }
+  ],
   "sets": {
     "sourceSetFiles": [],
     "exportedSetCount": 0,

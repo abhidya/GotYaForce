@@ -8,7 +8,11 @@
   "copied": {
     "stageArc": "st4b/raw/st4b_mdl.arc",
     "stagePzz": "st4b/raw/st4b.pzz",
-    "hitBins": [],
+    "hitBins": [
+      "st4b/collision/hit4b0.bin",
+      "st4b/collision/hit4b1.bin",
+      "st4b/collision/hit4b2.bin"
+    ],
     "setArcs": []
   },
   "visual": {
@@ -67,7 +71,20 @@
       "complete": true
     }
   },
-  "collision": [],
+  "collision": [
+    {
+      "path": "collision/hit4b0.bin",
+      "bytes": 124864
+    },
+    {
+      "path": "collision/hit4b1.bin",
+      "bytes": 60596
+    },
+    {
+      "path": "collision/hit4b2.bin",
+      "bytes": 14304
+    }
+  ],
   "sets": {
     "sourceSetFiles": [],
     "exportedSetCount": 0,

@@ -8,7 +8,11 @@
   "copied": {
     "stageArc": "st2e/raw/st2e_mdl.arc",
     "stagePzz": "st2e/raw/st2e.pzz",
-    "hitBins": [],
+    "hitBins": [
+      "st2e/collision/hit2e0.bin",
+      "st2e/collision/hit2e1.bin",
+      "st2e/collision/hit2e2.bin"
+    ],
     "setArcs": []
   },
   "visual": {
@@ -82,7 +86,20 @@
       "complete": true
     }
   },
-  "collision": [],
+  "collision": [
+    {
+      "path": "collision/hit2e0.bin",
+      "bytes": 101144
+    },
+    {
+      "path": "collision/hit2e1.bin",
+      "bytes": 188052
+    },
+    {
+      "path": "collision/hit2e2.bin",
+      "bytes": 18256
+    }
+  ],
   "sets": {
     "sourceSetFiles": [],
     "exportedSetCount": 0,
