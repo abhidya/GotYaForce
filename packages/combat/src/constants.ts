@@ -167,17 +167,15 @@ export const JUMP = {
 
 export const DASH = {
   /**
-   * Dash/step impulse speed (units/frame). TUNED — audited 2026-07-01 (s4s): every non-60.0
-   * write to the confirmed invincibility field (+0x720) was checked (120.0 in a scripted
-   * spawn-arc handler @0x8005e868, 30.0/60.0 in a respawn-reset helper @0x80060b60) and neither
-   * is a dash/step state. No dash/dodge state was found anywhere in the corpus this pass.
-   */
-  /**
-   * TUNED port-ism (no dash state exists in the ROM), rescaled with the 2026-07-04 raw
-   * migration to keep its ~1.65x-over-run-speed feel against the DERIVED 12 u/f run.
+   * FALLBACK dash speed (units/frame) for synthetic borgs without a data page. The 2026-07-01
+   * "no dash state exists in the ROM" audit is REFUTED (2026-07-04): FUN_80061560
+   * (chunk_0007.c:7231-7238) and FUN_80063230 (chunk_0008.c:1220-1223) ARE dash states —
+   * they seed speed/accel/v-speed/duration verbatim from the data page +0x58/+0x5c/+0x60/+0x64
+   * (movementData.ts dashPhysicsForBorgId, RAW DERIVED: G RED 30 u/f ×30f, Acceleration
+   * Ninja 40 u/f ×60f). Real borgs never hit these TUNED fallback values.
    */
   SPEED: 20.0,
-  /** Dash duration (frames). TUNED — see SPEED note; no dash state found to time. */
+  /** FALLBACK dash duration (frames) — see SPEED note; real borgs use page+0x64. */
   DURATION: 10,
   /** Invincibility frames granted by a dash/step (dodge). TUNED — see SPEED note. */
   IFRAMES: 8,

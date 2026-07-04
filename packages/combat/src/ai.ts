@@ -6,6 +6,7 @@ import { distXZ } from "@gf/physics";
 import { actionProfileForProfile } from "./actionProfiles.js";
 import { meleeEngageRangeFor, X_CHARGE } from "./combat.js";
 import { AI, MOVE } from "./constants.js";
+import { exactMeleeForBorgId } from "./meleeExactData.js";
 import { groundRunSpeedForBorgId } from "./movementData.js";
 import { xChargeMoveForBorgId } from "./moveRuntime.js";
 import type { BorgProfile } from "./stats.js";
@@ -169,7 +170,21 @@ export function stepAI(self: BorgRuntime, p: BorgProfile, all: BorgRuntime[]): P
     pairOffset * AI.ATTACK_REACTION_JITTER_FRAMES +
     Math.floor(hash01(self.uid) * AI.ATTACK_REACTION_MIN_FRAMES);
 
-  let attackGated = false;
+  // Wake-up i-frame awareness (TUNED pacing gate): a melee swing started now lands during
+  // its active window (exact HIT-record frames when available). If the target's remaining
+  // invincibility outlasts that whole window, the swing is a guaranteed whiff — and with a
+  // knockdown special in the rotation the CPU phase-locks into an okizeme loop that swings
+  // exactly inside every wake-up i-frame window (trace: p1inv 32→12 across every active
+  // frame, hp only ever moved by specials). Wait out the i-frames instead of swinging.
+  const exactSwing = meleeDef ? exactMeleeForBorgId(p.id) : null;
+  const swingLandsBy = meleeDef
+    ? exactSwing
+      ? exactSwing.activeEnd
+      : meleeDef.startup + meleeDef.active
+    : 0;
+  const meleeWhiffsOnIframes = meleeDef !== null && d <= meleeEngage && target.invincTimer > swingLandsBy;
+
+  let attackGated = meleeWhiffsOnIframes;
   if (inAttackWindow && meleeDef && (self.cooldowns["attackLock"] ?? 0) <= 0) {
     let holdoff = self.cooldowns["aiAttackHoldoff"];
     if (holdoff === undefined) {
@@ -179,7 +194,7 @@ export function stepAI(self: BorgRuntime, p: BorgProfile, all: BorgRuntime[]): P
       holdoff = holdoffFrames;
       self.cooldowns["aiAttackHoldoff"] = holdoff;
     }
-    attackGated = holdoff > 0;
+    attackGated = attackGated || holdoff > 0;
   } else {
     // Out of the melee window (or mid-swing/lunge): clear the holdoff so the next entry into
     // range re-arms a fresh staggered delay rather than reusing a stale one.

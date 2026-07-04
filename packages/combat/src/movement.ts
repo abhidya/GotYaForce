@@ -26,7 +26,7 @@ import {
   type Vec3,
 } from "@gf/physics";
 import { BURST, DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
-import { fallGravityForBorgId, groundRunSpeedForBorgId, jumpVelocityForBorgId } from "./movementData.js";
+import { dashPhysicsForBorgId, fallGravityForBorgId, groundRunSpeedForBorgId, jumpVelocityForBorgId } from "./movementData.js";
 import { actorVelocityScale } from "./timescale.js";
 import type { BorgProfile } from "./stats.js";
 import type { BorgRuntime, PlayerInput, RectStageBounds, StageCollision, StageCollisionTriangle } from "./types.js";
@@ -145,14 +145,34 @@ export function stepMovement(
       dz = fwd.z;
     }
     const dir = normalize({ x: dx, y: 0, z: dz });
-    b.vel.x = dir.x * DASH.SPEED;
-    b.vel.z = dir.z * DASH.SPEED;
-    b.cooldowns["dashActive"] = DASH.DURATION;
+    // Per-borg dash page (DERIVED, +0x58/+0x5c/+0x64): the ROM dash states snap the actor's
+    // speed to page+0x58 and run for page+0x64 frames with page+0x5c decay per frame
+    // (FUN_80061560 / FUN_80063230). TUNED DASH block is only the fallback for synthetic
+    // borgs without a data page.
+    const dashPage = dashPhysicsForBorgId(b.borgId);
+    const dashSpeed = dashPage ? dashPage.hSpeed : DASH.SPEED;
+    b.vel.x = dir.x * dashSpeed;
+    b.vel.z = dir.z * dashSpeed;
+    b.cooldowns["dashActive"] = dashPage ? dashPage.durationFrames : DASH.DURATION;
     b.cooldowns["dash"] = DASH.COOLDOWN;
     b.invincTimer = Math.max(b.invincTimer, DASH.IFRAMES);
   }
 
   const dashing = (b.cooldowns["dashActive"] ?? 0) > 0;
+  if (dashing) {
+    // ROM dash decay: actor+0x4c (= page+0x5c, negative) is added to the speed magnitude
+    // every frame of the dash state. Applied along the current dash direction.
+    const dashPage = dashPhysicsForBorgId(b.borgId);
+    if (dashPage && dashPage.accel !== 0) {
+      const hSpeed = Math.hypot(b.vel.x, b.vel.z);
+      if (hSpeed > 0) {
+        const next = Math.max(0, hSpeed + dashPage.accel);
+        const scale = next / hSpeed;
+        b.vel.x *= scale;
+        b.vel.z *= scale;
+      }
+    }
+  }
 
   // --- Horizontal movement ------------------------------------------------------------
   if (!dashing) {

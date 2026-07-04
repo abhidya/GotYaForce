@@ -23,7 +23,9 @@
 //     and the param-tier velocity table (0x802dd5a0: tier 16=×1.0 … 20=×2.366 — the
 //     "acceleration"-style self-buff is +4 tiers for 1200f) — the tier/status WRITERS are
 //     special-move wiring, a separate slice; BorgRuntime.paramTier already carries state.
-//   - knockdownLaunch* (+0x58/+0x5c) for the knockback launch path.
+//   - dash page (+0x58/+0x5c/+0x60/+0x64) — WIRED 2026-07-04 via dashPhysicsForBorgId
+//     (was mislabeled knockdownLaunch*; the dash states FUN_80061560/FUN_80063230 seed
+//     actor speed/accel/v-speed/duration verbatim from these fields).
 
 import movementPhysicsData from "./data/movementPhysics.json" with { type: "json" };
 import { JUMP } from "./constants.js";
@@ -37,10 +39,17 @@ export interface BorgMovementPhysics {
   jumpImpulse: number;
   /** +0x50 — min/turn speed = the guide "speed stat"; launch floor + 0.5× landing seed. */
   minTurnSpeed: number;
-  /** +0x58 — knockdown launch h-speed (future launch-path input). */
-  knockdownLaunchHSpeed: number;
-  /** +0x5c — knockdown launch accel. */
-  knockdownLaunchAccel: number;
+  /** +0x58 — DASH horizontal speed: the dash states (FUN_80061560 chunk_0007.c:7231-7238,
+   *  FUN_80063230 chunk_0008.c:1220-1223/1631-1634) snap actor+0x44 to this on entry.
+   *  Previously mislabeled knockdownLaunchHSpeed. */
+  dashHSpeed: number;
+  /** +0x5c — DASH per-frame accel (negative decay applied via actor+0x4c while dashing). */
+  dashAccel: number;
+  /** +0x60 — DASH vertical speed seed (actor+0x48; air-dash path FUN_80061560 only). */
+  dashVSpeed: number;
+  /** +0x64 — DASH duration in frames (actor+0x568 counter, ticked down by the status
+   *  timescale +0x5f4 each frame; phase advances when it reaches 0). */
+  dashDurationFrames: number;
   /** +0x68 — gravity slot A (ground/turn states). */
   gravityGround: number;
   /** +0x6c — gravity slot B: the true airborne fall gravity (RAW u/f²; G RED -1.0). */
@@ -87,6 +96,23 @@ export function fallGravityForBorgId(id: string): number {
   const data = movementPhysicsForBorgId(id);
   const mag = data ? Math.abs(data.gravityFall) : 0;
   return mag > 0 ? mag : JUMP.GRAVITY;
+}
+
+/** DERIVED per-borg dash physics (RAW page +0x58/+0x5c/+0x60/+0x64 — the dash states seed
+ *  actor speed/accel/v-speed/duration verbatim from these; see the field docs above), or
+ *  null for ids without a data page (callers fall back to the TUNED DASH block). Pages with
+ *  a zero/negative dash speed also return null — those borgs have no authored dash. */
+export function dashPhysicsForBorgId(
+  id: string,
+): { hSpeed: number; accel: number; vSpeed: number; durationFrames: number } | null {
+  const data = movementPhysicsForBorgId(id);
+  if (!data || !(data.dashHSpeed > 0) || !(data.dashDurationFrames > 0)) return null;
+  return {
+    hSpeed: data.dashHSpeed,
+    accel: data.dashAccel,
+    vSpeed: data.dashVSpeed,
+    durationFrames: Math.round(data.dashDurationFrames),
+  };
 }
 
 /** DERIVED per-borg status-immunity masks (RAW page+0xa8/+0xaa u16), or all-zero (no

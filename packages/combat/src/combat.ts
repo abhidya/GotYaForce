@@ -752,8 +752,9 @@ export function applyHit(
   // (FLOAT_80437444 = 0.0; knockback falls under gravity −1.2, behavior-notes (bc)).
   // The old TUNED 0.4×knockback pop became 22 u/f under the raw-scale migration and
   // launched victims over stage wall collision (playtest: borgs knocked out of the arena).
-  // Forced knockdowns keep a small TUNED pop for the launch read until the per-borg
-  // knockdownLaunch tables (+0x58/+0x5c, movementPhysics.json) are wired.
+  // Forced knockdowns keep a small TUNED pop for the launch read. (Page +0x58/+0x5c were
+  // once suspected to be knockdown-launch tables — they are actually the DASH page block,
+  // wired in movement.ts 2026-07-04; no per-borg knockdown-launch data has been found.)
   if (knockback > 0 && forceKnockdown) {
     victim.vel.y = Math.max(victim.vel.y, KNOCKBACK.KNOCKDOWN_POP);
   }
@@ -1629,6 +1630,10 @@ function startMeleeAttack(
   b.cooldowns["melee"] = duration + meleeDef.cooldown;
   b.cooldowns["meleeActive"] = startup + baseActive;
   b.cooldowns["attackLock"] = duration;
+  // Melee is a FULL-BODY state in the ROM (cue table pair [61, 0]) — entering it replaces
+  // the dash state and the attack script re-seeds velocity. Without this, the 30f-page
+  // dashes carry the swing straight past the target before the active window opens.
+  b.cooldowns["dashActive"] = 0;
   // Lunge (contextual-B target inside the engage window only): snap facing onto the target
   // and arm the lunge-drive window for the swing's startup+active frames, clamped so the
   // total travel stays within MELEE.LUNGE_MAX_DIST (see the lunge drive in stepAttacks and

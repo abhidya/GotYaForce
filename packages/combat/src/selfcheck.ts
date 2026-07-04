@@ -42,7 +42,7 @@ import {
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, type DamageRecord } from "./gauges.js";
-import { statusImmunityMasksForBorgId } from "./movementData.js";
+import { dashPhysicsForBorgId, statusImmunityMasksForBorgId } from "./movementData.js";
 import { actorVelocityScale, isFrozen, tierVelocityScale } from "./timescale.js";
 import { stepMovement } from "./movement.js";
 import {
@@ -615,7 +615,15 @@ function assertLockRelativeControls(borgs: BorgStats[]): void {
 
   const lateralDash = makeLocked();
   stepMovement(lateralDash, profile, { ...emptyInput(), moveX: 1, dash: true }, ctx);
-  if ((lateralDash.cooldowns["dashActive"] ?? 0) !== DASH.DURATION || lateralDash.vel.x > -DASH.SPEED * 0.9) {
+  // Dash speed/duration are per-borg page data now (+0x58/+0x64); fall back to the TUNED
+  // block only for synthetic ids without a page.
+  const dashPage = dashPhysicsForBorgId(lateralDash.borgId);
+  const expectDashDuration = dashPage ? dashPage.durationFrames : DASH.DURATION;
+  const expectDashSpeed = dashPage ? dashPage.hSpeed : DASH.SPEED;
+  if (
+    (lateralDash.cooldowns["dashActive"] ?? 0) !== expectDashDuration ||
+    lateralDash.vel.x > -expectDashSpeed * 0.9
+  ) {
     throw new Error(`[selfcheck] explicit lateral dash should use lock-relative direction: vel=${JSON.stringify(lateralDash.vel)}`);
   }
 
@@ -2110,6 +2118,57 @@ function assertContextualMeleeBeatsChargeAtEngageRange(borgs: BorgStats[]): void
   );
 }
 
+function assertPerBorgDashPhysics(borgs: BorgStats[]): void {
+  // DERIVED dash page (+0x58/+0x5c/+0x64, dash states FUN_80061560/FUN_80063230): borgs
+  // must differentiate — Acceleration Ninja's dash (40 u/f × 60f) outruns and outlasts
+  // Sword Knight's (22 u/f × 30f) — and the per-frame page accel must decay dash speed.
+  const ninja = dashPhysicsForBorgId("pl0004");
+  const knight = dashPhysicsForBorgId("pl0200");
+  if (!ninja || !knight) {
+    throw new Error("[selfcheck] dash page missing for pl0004/pl0200 — movementPhysics.json regressed");
+  }
+  if (!(ninja.hSpeed > knight.hSpeed && ninja.durationFrames > knight.durationFrames)) {
+    throw new Error(
+      `[selfcheck] per-borg dash not differentiated: ninja=${ninja.hSpeed}x${ninja.durationFrames}f, knight=${knight.hSpeed}x${knight.durationFrames}f`,
+    );
+  }
+
+  const ctx = {
+    lockTargetPos: null,
+    bounds: { minX: -100000, maxX: 100000, minZ: -100000, maxZ: 100000 },
+    collision: null,
+  };
+  const profile = buildProfile(borgById(borgs, "pl0004"));
+  const dasher = fakeRuntime("dash_ninja", 0, 0);
+  dasher.borgId = "pl0004";
+  dasher.pos = { x: 0, y: JUMP.GROUND_Y, z: 0 };
+  dasher.rotY = 0;
+  dasher.grounded = true;
+  stepMovement(dasher, profile, { ...emptyInput(), moveZ: 1, dash: true }, ctx);
+  const startSpeed = Math.hypot(dasher.vel.x, dasher.vel.z);
+  if (Math.abs(startSpeed - ninja.hSpeed) > ninja.hSpeed * 0.05) {
+    throw new Error(`[selfcheck] dash start speed should be page+0x58: got ${startSpeed}, want ~${ninja.hSpeed}`);
+  }
+  if ((dasher.cooldowns["dashActive"] ?? 0) !== ninja.durationFrames) {
+    throw new Error(
+      `[selfcheck] dash duration should be page+0x64: got ${dasher.cooldowns["dashActive"]}, want ${ninja.durationFrames}`,
+    );
+  }
+  // Run out the dash: page accel (−0.18/f for pl0004) must decay speed monotonically.
+  let prevSpeed = startSpeed;
+  for (let f = 0; f < 10; f += 1) {
+    stepMovement(dasher, profile, { ...emptyInput(), moveZ: 1 }, ctx);
+    const s = Math.hypot(dasher.vel.x, dasher.vel.z);
+    if (!(s < prevSpeed)) {
+      throw new Error(`[selfcheck] dash speed should decay by page+0x5c each frame: ${prevSpeed} -> ${s} at f=${f}`);
+    }
+    prevSpeed = s;
+  }
+  console.log(
+    `[selfcheck] per-borg dash physics: ninja ${ninja.hSpeed}u/f x${ninja.durationFrames}f decaying ${ninja.accel}/f > knight ${knight.hSpeed}u/f x${knight.durationFrames}f (page +0x58/+0x5c/+0x64)`,
+  );
+}
+
 function assertMeleeLungeClosesDistance(borgs: BorgStats[]): void {
   const gRed = buildProfile(borgById(borgs, "pl0615"));
   const meleeDef = actionProfileForProfile(gRed).melee;
@@ -2817,6 +2876,7 @@ export function main(): number {
   assertGaugeStaggerModel(borgs);
   assertResistanceFalloffPinned(borgs);
   assertContextualMeleeBeatsChargeAtEngageRange(borgs);
+  assertPerBorgDashPhysics(borgs);
   assertMeleeLungeClosesDistance(borgs);
   assertEmptyAmmoFarHoldDoesNotWhiffMelee(borgs);
   assertMeleeAiReachesEngageAndHits(borgs);

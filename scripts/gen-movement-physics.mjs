@@ -39,8 +39,15 @@ const FIELDS = [
   ["groundAccel", 0x44],
   ["jumpImpulse", 0x48],
   ["minTurnSpeed", 0x50],
-  ["knockdownLaunchHSpeed", 0x58],
-  ["knockdownLaunchAccel", 0x5c],
+  // +0x58..+0x64 are the DASH page block, seeded verbatim by the dash states
+  // FUN_80061560 (chunk_0007.c:7231-7238) and FUN_80063230 (chunk_0008.c:1220-1223, 1631-1634):
+  // actor+0x44 (h speed) = +0x58, +0x4c (per-frame accel, negative decay) = +0x5c,
+  // +0x48 (v speed, air-dash path) = +0x60, +0x568 (duration counter, ticked by the
+  // status timescale) = +0x64. Previously mislabeled knockdownLaunch*.
+  ["dashHSpeed", 0x58],
+  ["dashAccel", 0x5c],
+  ["dashVSpeed", 0x60],
+  ["dashDurationFrames", 0x64],
   ["gravityGround", 0x68],
   ["gravityFall", 0x6c],
   ["gravityC", 0x70],
