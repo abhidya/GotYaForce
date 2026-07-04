@@ -526,7 +526,7 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Audio: BGM/menu | ~90% | — |
 | Audio: combat/voice | ~85% (voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04; **PATH-B per-anim swing audio DECODED+WIRED 2026-07-04**) | real bank samples exported (scripts/export-combat-se.py, 23 files) + wired (shoot/hit/down/dash/jump/spawn/land DERIVED); melee/charge swings now play their ROM-AUTHORED per-anim sounds (actor+0x4e8 sound-event table joined via the anim-descriptor banks — anim-sound-op-decode-2026-07-04.md; 103/103 resolved ladders + 18 air / 2 charge leaves covered, TUNED fallback kept for the rest); death stays TUNED (op-0x0f voice is per-borg table-driven, tables undecoded); voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
-| FX: particles/projectiles | ~70% | PTL/REF decode; 3D weapon meshes |
+| FX: particles/projectiles | ~75% (hit-impact SELECTION chain decoded+wired 2026-07-04: record impactEffectId → table 0x802c7ed0 → variant/lifetime/scale-alpha curves; per-id styled FX replace the generic spark) | PTL/REF decode (texId→cell, last TUNED hop); 3D weapon meshes |
 
 **Trace status update (2026-07-03, (bc)):** T9 (knockback magnitude) is **no longer trace-blocked**
 — it was found statically in the DOL as strength-indexed tables (DAT_802dd8a0/DAT_802d3664), and
@@ -573,6 +573,7 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Fusion | data + shell (ATK-018) | fusion-pairs JSON | pair table 0x802d352c (aj) | trace T3 (co-op control split) |
 | Statuses (id/timer/immunity) | framework DERIVED (bd), catalog T8-blocked | status.ts | +0x71a=immunity-idx+bone-idx (NOT behavior-selector); tick FUN_8005a378 id-agnostic (bd) | port isImmune/i-frames/hitstun; per-id wiki behaviors genuinely need T8 trace |
 | Hit-inflicted status (slow/haste/freeze/grow-shrink) | **DONE (2026-07-04)** | combat.ts applyHitInflictedStatus/stepHitStatus, timescale.ts statusTimescale | resolve_hitbox_target_effects_and_damage @0x8002e2a8 (chunk_0003.c:7621-8157) | — (separate mechanism from the +0x71a statusId shell above) |
+| Hit-impact effect selection (record impactEffectId u8+0x09) | **DECODED+WIRED (2026-07-04, impact-effect-id-decode-2026-07-04.md)** | applyHit/stepProjectiles carry the id; battleScene.ts spawnHitFx maps id→style (0xff=none DERIVED; lifetimes/curves/counts DERIVED, cell/tint TUNED) | chunk_0003.c:8087-8156 → zz_0019550_ @0x80019550 → effect-def table 0x802c7ed0 (ids 0..8) → variant handlers PTR_FUN_802c8174 + defs PTR_DAT_802c8154 + keyframe tracks | parse ptcl00.ptl/.ref for texId→cell (kills last TUNED hop); locate subVariant (+0x12) reader (ids 2-7 palette?) |
 | Hero X tier-buff (STAR/PLANET HERO ramming dash) | **DONE (2026-07-04)** | combat.ts applyHeroXBuff/startSpecialAttack | zz_011230c_/FUN_8010f790 (chunk_0031.c:576-617/chunk_0030.c:4004-4026) | — |
 | Vampire lifesteal | **PORTED (aef234f1)** | combat.ts steal+bleed, wired | steal chunk_0003.c:7982/apply 6318/bleed chunk_0006.c:7900 | done: steal=dmg/2 cap@maxHP + 1HP/30f bleed, 47/47 test |
 | Nurse heal | **HP-write ABSENT (ay)** | ATK-019 shell | table 0x802d1130 (ax); no +0x1c6 write reachable | Dolphin-trace +0x1c6 on healed ally |
@@ -671,8 +672,12 @@ Detail in the asset survey (session 2026-07-03) + `research/format-specs/*`, `re
   completely unwired.** No footstep/land audio.
 - **Stages/lighting:** geometry 40/40 visual, collision 18/40; lighting/fog fully DERIVED from
   HSD CObj/LObj/FogDesc (all GX_FOG_LIN → exact THREE.Fog).
-- **FX:** real extracted textures (ptcl00/efct00), TUNED effect→cell mapping (PTL/REF unparsed);
-  projectiles are 2D billboards, not the 3D it####_mdl.arz weapon meshes.
+- **FX:** real extracted textures (ptcl00/efct00). Hit-impact effect SELECTION is now DERIVED
+  end-to-end (2026-07-04): record impactEffectId u8+0x09 → zz_0019550_ → def table 0x802c7ed0
+  (ids 0..8, 0xff = none) → 4 variant handlers with dumped lifetimes + scale/alpha keyframe
+  tracks, wired as per-id styled FX (battleScene.ts spawnHitFx). The texId→cell hop stays
+  TUNED (PTL/REF unparsed), as does the rest of the effect→cell mapping; projectiles are 2D
+  billboards, not the 3D it####_mdl.arz weapon meshes.
 
 ---
 

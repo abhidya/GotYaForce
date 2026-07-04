@@ -131,8 +131,11 @@ interface ImpactActor {
   ttl: number;
   startScale: THREE.Vector2;
   endScale: THREE.Vector2;
-  /** Opacity at age 0 (fades linearly to 0 over ttl). */
+  /** Opacity at age `delay` (fades linearly to 0 over ttl). */
   startOpacity: number;
+  /** Seconds to hold the sprite invisible before its ttl window starts (the ROM's variant-2
+   *  ring layer keys scale/alpha 0 until frame 3 — see IMPACT_EFFECT_STYLES). Default 0. */
+  delay?: number | undefined;
   /** Optional flipbook: material.map steps through these frames over the lifetime. */
   flipbookFrames?: readonly THREE.Texture[] | undefined;
 }
@@ -147,10 +150,14 @@ const TEAM_COLORS: Record<number, number> = { 0: 0x4cc7ff, 1: 0xff5a4d };
 // shared particle container ptcl00.txg (apps/game/public/ui/txg/ptcl00/image_*.png,
 // see research/asset-inventory/ptcl00-txg-export-results.json) plus the efct00.tpl
 // blob/ring atlas. Cell identification is documented in
-// research/asset-inventory/ptcl00-cell-map.md; no ROM-side effect->texture usage
-// table has been decoded (ptcl00.ptl/.ref are unparsed), so each effect->cell
-// assignment below is TUNED-visual (matched by eye against battle captures), while
-// the pixels themselves are real extracted assets.
+// research/asset-inventory/ptcl00-cell-map.md. The hit-impact effect SELECTION chain
+// (damage record impactEffectId -> effect variant/lifetimes/scale-alpha curves) IS
+// decoded — see IMPACT_EFFECT_STYLES below and research/decomp/
+// impact-effect-id-decode-2026-07-04.md — but the final texId -> pixel-cell hop
+// (particle-definition bank indexed by zz_0006fb4_'s texId arg; ptcl00.ptl/.ref are
+// unparsed) is not, so each effect->cell assignment below remains TUNED-visual
+// (matched by eye against battle captures), while the pixels themselves are real
+// extracted assets.
 //
 // RGB565 cells have no alpha channel (black = transparent -> additive blending).
 // Cells #2/#5/#6 are mirror-wrap QUADRANTS: the bright corner is the sprite centre
@@ -343,7 +350,15 @@ export class BattleScene {
         if (actor.meleeParity) slot = "melee_alt";
       }
       const slotChanged = actor.lastSeenSlot !== slot;
-      if (slot === "hit" && slotChanged) this.spawnHitSpark(actor.group.position);
+      // Contact effect on hit-reaction entry, styled by the DERIVED impactEffectId of the
+      // record that caused it (spawnHitFx). +82 lift = the old hit-spark torso height (TUNED).
+      if (slot === "hit" && slotChanged) {
+        this.spawnHitFx(
+          new THREE.Vector3(b.pos.x, b.pos.y + 82, b.pos.z),
+          b.lastHitImpactEffectId,
+          b.lastHitAttackerTeam,
+        );
+      }
       // Edge-triggered battle FX (same pattern as the hit spark above).
       if (slot === "death" && slotChanged) this.spawnDeathExplosion(actor.group.position);
       if (slotChanged && slot.startsWith("dash")) this.spawnDashBurst(actor.group.position);
@@ -618,8 +633,11 @@ export class BattleScene {
       if (actor.beam) orientBeam(actor.node, projectile);
       // Persisting projectiles (consumeOnHit === false, ATK-008) apply re-hits WITHOUT
       // despawning; the sim flags each applied hit for exactly one frame
-      // (hitConfirmedThisFrame, combat.ts stepProjectiles), so puff here too.
-      if (projectile.hitConfirmedThisFrame) this.spawnImpact(actor.node.position);
+      // (hitConfirmedThisFrame, combat.ts stepProjectiles). Borg hits get the record's
+      // DERIVED contact effect (lastImpactEffectId, written alongside the flag).
+      if (projectile.hitConfirmedThisFrame) {
+        this.spawnHitFx(actor.node.position, projectile.lastImpactEffectId, projectile.team);
+      }
     }
 
     for (const [uid, actor] of this.projectileActors) {
@@ -634,7 +652,15 @@ export class BattleScene {
           // Use the sim's final pos: for hit-terrain it was moved to the geometry impact
           // point (zz_0083244_/zz_0083714_ via zz_006f268_, chunk_0009.c:3956).
           actor.node.position.set(actor.sim.pos.x, actor.sim.pos.y, actor.sim.pos.z);
-          this.spawnImpact(actor.node.position);
+          if (reason === "hit-target") {
+            // Borg hit: the damage record's DERIVED contact effect (chunk_0003.c:8152-8155),
+            // carried on the projectile by stepProjectiles as lastImpactEffectId.
+            this.spawnHitFx(actor.node.position, actor.sim.lastImpactEffectId, actor.sim.team);
+          } else {
+            // Terrain impact: a different ROM path (terrain hit, not the damage-record effect
+            // spawner) — keep the generic efct00 puff.
+            this.spawnImpact(actor.node.position);
+          }
         }
         this.disposeProjectileActor(actor);
         this.projectileActors.delete(uid);
@@ -690,21 +716,26 @@ export class BattleScene {
     actor.material.dispose();
   }
 
-  /** Shared short-lived FX sprite: expands from startScale to endScale while fading out. */
+  /** Shared short-lived FX sprite: lerps from startScale to endScale while fading out.
+   *  Scales accept a scalar or per-axis {x,y} (the ROM's variant-3 slash layer keys X and Y
+   *  independently — see IMPACT_EFFECT_STYLES). `delay` holds the sprite invisible first. */
   private spawnBurstSprite(
     map: THREE.Texture | null,
     position: THREE.Vector3,
     opts: {
       ttl: number;
-      startScale: number;
-      endScale: number;
+      startScale: number | { x: number; y: number };
+      endScale: number | { x: number; y: number };
       opacity: number;
       blending?: THREE.Blending;
       color?: number;
+      delay?: number;
       flipbookFrames?: readonly THREE.Texture[];
     },
   ): void {
     if (!map) return;
+    const start = typeof opts.startScale === "number" ? { x: opts.startScale, y: opts.startScale } : opts.startScale;
+    const end = typeof opts.endScale === "number" ? { x: opts.endScale, y: opts.endScale } : opts.endScale;
     const material = new THREE.SpriteMaterial({
       map,
       color: opts.color ?? 0xffffff,
@@ -715,16 +746,18 @@ export class BattleScene {
     });
     const sprite = new THREE.Sprite(material);
     sprite.position.copy(position);
-    sprite.scale.set(opts.startScale, opts.startScale, 1);
+    sprite.scale.set(start.x, start.y, 1);
+    if ((opts.delay ?? 0) > 0) sprite.visible = false;
     this.root.add(sprite);
     this.impactActors.push({
       sprite,
       material,
       age: 0,
       ttl: opts.ttl,
-      startScale: new THREE.Vector2(opts.startScale, opts.startScale),
-      endScale: new THREE.Vector2(opts.endScale, opts.endScale),
+      startScale: new THREE.Vector2(start.x, start.y),
+      endScale: new THREE.Vector2(end.x, end.y),
       startOpacity: opts.opacity,
+      delay: opts.delay,
       flipbookFrames: opts.flipbookFrames,
     });
   }
@@ -740,15 +773,121 @@ export class BattleScene {
     });
   }
 
-  /** Hit spark: ptcl00.txg#2 white-hot ember quadrant, mirror-wrapped to a radial flash. */
-  private spawnHitSpark(position: THREE.Vector3): void {
-    this.spawnBurstSprite(this.hitSparkTexture, new THREE.Vector3(position.x, position.y + 82, position.z), {
-      ttl: 0.16,
-      startScale: 34,
-      endScale: 58,
-      opacity: 1,
-      blending: THREE.AdditiveBlending,
-    });
+  /**
+   * Hit-impact effect, selected by the damage record's impactEffectId (u8 +0x09).
+   *
+   * DERIVED selection chain (research/decomp/impact-effect-id-decode-2026-07-04.md):
+   * resolve_hitbox_target_effects_and_damage @0x8002e2a8 gates the contact-effect spawn on
+   * `record[+0x09] != 0xff` (chunk_0003.c:8087) and calls zz_0019550_(attacker, contactPoint,
+   * impactEffectId) (:8154). zz_0019550_ (chunk_0002.c:1501) reads the 4-byte entry at
+   * 0x802c7ed0 + id*4 = [unused, variantHandler->+0x11, subVariant->+0x12, kind->+0x13] and
+   * spawns an effect object whose init/update handlers are PTR_FUN_802c8174/802c8184[variant].
+   * Per-variant defs (PTR_DAT_802c8154) + keyframe tracks dumped from boot.dol:
+   *
+   *   id 0     -> variant 0: ONE sprite (texId 21), life 20f; scale keys 1@f0 -> 2@f4 -> 3@f20;
+   *               alpha keys 1@f0 -> 1@f10 -> 0@f20 (a big slow swelling flash).
+   *   id 1     -> variant 1: BURST of (8..11)+(8..11) random particles, life 10f, particle
+   *               texId selected by the ATTACKER's player index (texId 2 / 3 for players 0/1 —
+   *               FUN_80019a14 chunk_0002.c:1750-1758). 66.7% of all family damage records.
+   *   ids 2..7 -> variant 2: THREE layers oriented by the attacker->contact direction
+   *               (FUN_8001a288): flash texId 144 life 7f scale 1->0.25->0; core texId 145
+   *               life 10f scale 1->0; ring texId 146 life 13f scale 0 until f3 -> 1@f3 ->
+   *               1.5@f13, alpha 0/0/1@f3/1@f8/0@f13. The subVariant byte (0..5) is stored at
+   *               effect+0x12 but its consumer was NOT located — ids 2-7 render identically
+   *               here (honest unknown).
+   *   id 8     -> variant 3: TWO layers (FUN_8001a71c): texId 53 life 10f scale 0.5->1@f2->0;
+   *               texId 54 life 6f ANISOTROPIC scale (x,y) (0,1.5)->(1,1)@f2->(1.5,0) — a
+   *               collapsing/expanding cross, reads as a slash flash.
+   *   id 0xff  -> NO contact effect (DERIVED suppression, chunk_0003.c:8087-8088).
+   *   other    -> out-of-table ids only appear on familyDamageRecords rows that are table-extent
+   *               overshoot (the same corrupt rows combat.ts's isSaneStatusRecord filters);
+   *               fall back to the id-1 burst.
+   *
+   * DERIVED here: the id, its consumption chain, layer counts, lifetimes, scale/alpha keyframe
+   * endpoints, the 0xff suppression, and the attacker-team texture split of id 1.
+   * TUNED here: which ptcl00/efct00 CELL each texId maps to (texIds index the particle
+   * definition bank zz_0197a0c_(1); ptcl00.ptl/.ref are unparsed), the world-unit base
+   * footprint, team tint colors, the linear approximation of multi-key curves, and the burst's
+   * scatter offsets (the ROM gives each burst particle a random velocity seed).
+   */
+  private spawnHitFx(position: THREE.Vector3, impactEffectId: number | undefined, attackerTeam: number | undefined): void {
+    const id = impactEffectId ?? 1;
+    if (id === 0xff) return; // DERIVED: -1 suppresses the contact effect entirely.
+    const at = position;
+    if (id === 0) {
+      // Variant 0 — single swelling flash: 20f, scale x3, hold-then-fade (fade approximated linear).
+      this.spawnBurstSprite(this.hitSparkTexture, at, {
+        ttl: 20 / 60,
+        startScale: 36,
+        endScale: 108,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+      });
+      return;
+    }
+    if (id >= 2 && id <= 7) {
+      // Variant 2 — three-layer directional impact (flash / core / delayed ring).
+      this.spawnBurstSprite(this.hitSparkTexture, at, {
+        ttl: 7 / 60,
+        startScale: 52,
+        endScale: 0,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+      });
+      this.spawnBurstSprite(this.hitSparkTexture, at, {
+        ttl: 10 / 60,
+        startScale: 40,
+        endScale: 0,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+      });
+      this.spawnBurstSprite(this.ringTexture, at, {
+        ttl: 10 / 60,
+        startScale: 0,
+        endScale: 66,
+        opacity: 0.9,
+        delay: 3 / 60,
+      });
+      return;
+    }
+    if (id === 8) {
+      // Variant 3 — two-layer slash flash: shrinking core + anisotropic collapsing cross.
+      this.spawnBurstSprite(this.dashStarTexture, at, {
+        ttl: 10 / 60,
+        startScale: 44,
+        endScale: 0,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+      });
+      this.spawnBurstSprite(this.hitSparkTexture, at, {
+        ttl: 6 / 60,
+        startScale: { x: 0, y: 66 },
+        endScale: { x: 66, y: 0 },
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+      });
+      return;
+    }
+    // Variant 1 (id 1, the dominant record effect) + out-of-table fallback: particle burst,
+    // 16..22 particles (DERIVED (8..11)+(8..11)), life 10f, tinted by the attacker's team
+    // (DERIVED split, TUNED colors — the ROM's per-player texId 2/3 pixels are unresolved).
+    const count = 16 + Math.floor(Math.random() * 7);
+    const tint = attackerTeam === undefined ? 0xffffff : attackerTeam === 0 ? 0xbfe4ff : 0xffc9a1;
+    for (let i = 0; i < count; i++) {
+      const jitter = new THREE.Vector3(
+        at.x + (Math.random() - 0.5) * 52,
+        at.y + (Math.random() - 0.5) * 52,
+        at.z + (Math.random() - 0.5) * 52,
+      );
+      this.spawnBurstSprite(this.hitSparkTexture, jitter, {
+        ttl: 10 / 60,
+        startScale: 10 + Math.random() * 10,
+        endScale: 26,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+        color: tint,
+      });
+    }
   }
 
   /**
@@ -894,7 +1033,15 @@ export class BattleScene {
       const actor = this.impactActors[i];
       if (!actor) continue;
       actor.age += dt;
-      const t = Math.min(1, actor.age / actor.ttl);
+      // Delayed layers (e.g. the variant-2 ring, keyed to appear at frame 3) stay hidden
+      // until their delay elapses; the ttl window then runs from that point.
+      const delay = actor.delay ?? 0;
+      if (actor.age < delay) {
+        actor.sprite.visible = false;
+        continue;
+      }
+      actor.sprite.visible = true;
+      const t = Math.min(1, (actor.age - delay) / actor.ttl);
       actor.material.opacity = actor.startOpacity * (1 - t);
       actor.sprite.scale.set(
         THREE.MathUtils.lerp(actor.startScale.x, actor.endScale.x, t),

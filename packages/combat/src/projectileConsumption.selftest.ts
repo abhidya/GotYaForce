@@ -12,7 +12,7 @@
 // main()/runSelfTest() return an exit code (0 = pass).
 
 import { stepProjectiles } from "./combat.js";
-import { DAMAGE_RECORD_INDEX } from "./gauges.js";
+import { DAMAGE_RECORD_INDEX, damageRecordByIndex } from "./gauges.js";
 import { JUMP } from "./constants.js";
 import type { BorgRuntime, Projectile, StageCollision } from "./types.js";
 import type { BorgProfile } from "./stats.js";
@@ -151,6 +151,18 @@ function testDefaultConsumesOnFirstHit(): void {
   // Renderer-facing despawn metadata (set on the dropped object).
   assertEqual(proj.despawnReason, "hit-target", "default projectile: despawnReason === 'hit-target'");
   assertEqual(proj.hitConfirmedThisFrame, true, "default projectile: hitConfirmedThisFrame set on the consuming hit");
+  // The hit carries the applied record's DERIVED impactEffectId (u8 +0x09) for the renderer's
+  // contact-effect selection (chunk_0003.c:8152-8155 -> zz_0019550_ -> table 0x802c7ed0).
+  assertEqual(
+    proj.lastImpactEffectId,
+    damageRecordByIndex(DAMAGE_RECORD_INDEX.SHOT).impactEffectId,
+    "default projectile: lastImpactEffectId carries the applied record's impactEffectId",
+  );
+  assertEqual(
+    target.lastHitImpactEffectId,
+    damageRecordByIndex(DAMAGE_RECORD_INDEX.SHOT).impactEffectId,
+    "default projectile: victim.lastHitImpactEffectId mirrors the applied record",
+  );
 
   // consumeOnHit explicitly true behaves the same as absent.
   const target2 = makeBorg({ uid: "t2", team: 1, pos: { x: 0, y: JUMP.GROUND_Y, z: 20 } });

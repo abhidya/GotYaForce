@@ -8,9 +8,14 @@ container), canonical export via HSDRaw GXImageConverter to
 
 ## Identification method and confidence
 
-No ROM-side effect->texture usage table has been decoded (`ptcl00.ptl` /
-`ptcl00.ref` — the particle settings/reference tables — remain unparsed), so
-every effect assignment below is **TUNED-visual**: identified by inspecting the
+UPDATE 2026-07-04: the hit-impact effect SELECTION chain IS now decoded
+(damage record impactEffectId -> effect-def table 0x802c7ed0 -> variant
+handlers with per-layer texIds/lifetimes/keyframe tracks — see
+`research/decomp/impact-effect-id-decode-2026-07-04.md`), but its texIds
+index the particle-DEFINITION bank (`ptcl00.ptl` entries, values up to 146),
+not the 8-cell txg directly, and `ptcl00.ptl`/`ptcl00.ref` remain unparsed —
+so the final texId -> txg-cell hop, and therefore every effect->cell
+assignment below, is still **TUNED-visual**: identified by inspecting the
 decoded pixels (upscaled) and cross-referencing
 `particle-effect-inventory.json` family counts and
 `weapons-effects-projectiles.md` (which confirm muzzle / impact-explosion /

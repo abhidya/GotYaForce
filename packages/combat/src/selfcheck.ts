@@ -3250,6 +3250,42 @@ function assertHitInflictedHasteSpeedsUpVictim(borgs: BorgStats[]): void {
 }
 
 /**
+ * Every hit connection records the applied damage record's impactEffectId (u8 +0x09) + the
+ * attacker's team on the victim — the renderer's DERIVED contact-effect selector
+ * (resolve_hitbox_target_effects_and_damage chunk_0003.c:8152-8155 feeds record[+0x09] to
+ * the impact-spark spawner zz_0019550_; 0xff suppresses, :8087). Focused carriage assert:
+ * the id must be the record's own byte, verbatim, including the 0xff sentinel.
+ */
+function assertHitCarriesRecordImpactEffectId(borgs: BorgStats[]): void {
+  const attacker = fakeRuntime("fx_atk", 0, 0);
+  const victim = fakeRuntime("fx_victim", 1, 20);
+  const victimProfile = buildProfile(borgById(borgs, "pl0615"));
+  const noDir = { x: 0, y: 0, z: 0 };
+  const from = { x: 0, y: 0, z: 10 };
+
+  for (const id of [7, 0xff]) {
+    const record = fakeStatusRecord({ impactEffectId: id });
+    applyHit(victim, victimProfile, 0, 0, noDir, from, false, record, {
+      attacker,
+      attackerProfile: victimProfile,
+    });
+    if (victim.lastHitImpactEffectId !== id) {
+      throw new Error(
+        `[selfcheck] applyHit must carry record.impactEffectId verbatim: want=${id}, got=${victim.lastHitImpactEffectId}`,
+      );
+    }
+  }
+  if (victim.lastHitAttackerTeam !== attacker.team) {
+    throw new Error(
+      `[selfcheck] applyHit must carry the attacker team for the contact-effect tint: got=${victim.lastHitAttackerTeam}`,
+    );
+  }
+  console.log(
+    `[selfcheck] hit connections carry record.impactEffectId (u8 +0x09, incl. 0xff suppression sentinel) + attacker team`,
+  );
+}
+
+/**
  * (c) Freeze halts both parties ~hitStrength frames (timescale 0.03). Uses the melee
  * archetype's real hitStrength (4) since it's already a normal-reaction record (flagsB=0).
  */
@@ -3524,6 +3560,7 @@ export function main(): number {
   assertFreezeHaltsBothPartiesForHitStrengthFrames(borgs);
   assertStatusImmunityMaskBlocksWrite(borgs);
   assertHeroXBuffAppliesTierScaleAndReverts(borgs);
+  assertHitCarriesRecordImpactEffectId(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

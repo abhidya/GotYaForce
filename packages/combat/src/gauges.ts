@@ -52,6 +52,16 @@ export interface DamageRecord {
    * 7621-7625, 7633-7640).
    */
   hitStrength: number;
+  /**
+   * u8 +0x09 — impactEffectId: contact-effect selector (DERIVED, research/decomp/
+   * impact-effect-id-decode-2026-07-04.md). resolve_hitbox_target_effects_and_damage gates
+   * the impact-spark spawn on this byte != 0xff (chunk_0003.c:8087) and passes it to
+   * zz_0019550_ (:8154), which indexes the 4-byte effect-definition table at 0x802c7ed0
+   * (id -> [_, variantHandler, subVariant, kind]). Real table ids are 0..8 (+0xff = none);
+   * id 1 (attacker-team-colored particle burst) covers 66.7% of family records. Consumed by
+   * the renderer via applyHit's victim.lastHitImpactEffectId / Projectile.lastImpactEffectId.
+   */
+  impactEffectId: number;
   /** u8 +0x0b — reaction flags; bits 2|0x80 force a stagger regardless of gauges. */
   reactionFlags: number;
   /**

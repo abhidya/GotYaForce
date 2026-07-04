@@ -25,6 +25,13 @@ export interface BattleActorView {
    *  BorgRuntime.meleeSounds — frame = ROM anim-clock frame, id = soundId/se_<hex> key axis).
    *  Null when the swing has none; the SFX layer keeps its TUNED slot-keyed fallback then. */
   meleeSounds: BorgRuntime["meleeSounds"];
+  /** impactEffectId (damage record u8 +0x09) of the most recent hit applied to this borg —
+   *  DERIVED contact-effect selector (chunk_0003.c:8087-8156 -> zz_0019550_ -> effect-def
+   *  table 0x802c7ed0). battleScene maps it to an FX style on hit-slot entry. */
+  lastHitImpactEffectId: BorgRuntime["lastHitImpactEffectId"];
+  /** Attacker team of that hit (the ROM's variant-1 hit burst picks its particle texture by
+   *  the ATTACKER's player index — FUN_80019a14, chunk_0002.c:1750-1758). */
+  lastHitAttackerTeam: BorgRuntime["lastHitAttackerTeam"];
 }
 
 export function battleActorView(borg: BorgRuntime): BattleActorView {
@@ -45,5 +52,7 @@ export function battleActorView(borg: BorgRuntime): BattleActorView {
     chargeFrames: borg.cooldowns["chargeFrames"] ?? 0,
     meleeAnimStream: borg.meleeAnimStream,
     meleeSounds: borg.meleeSounds,
+    lastHitImpactEffectId: borg.lastHitImpactEffectId,
+    lastHitAttackerTeam: borg.lastHitAttackerTeam,
   };
 }

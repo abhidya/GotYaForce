@@ -243,6 +243,18 @@ export interface BorgRuntime {
    *  anim carries no sound events. Renderers may schedule these instead of the TUNED
    *  slot-keyed COMBAT_SFX fallback. Optional so external fakes self-heal to undefined. */
   meleeSounds?: readonly { frame: number; id: number; mode: number; part: number }[] | null;
+  /** impactEffectId (damage record u8 +0x09) of the most recent hit applied to this borg, plus
+   *  the attacker's team. DERIVED chain: resolve_hitbox_target_effects_and_damage
+   *  (@0x8002e2a8, chunk_0003.c:8087-8156) gates the contact-effect spawn on the attacker
+   *  record's +0x09 byte != 0xff, then zz_0019550_ (chunk_0002.c:1501) indexes the 4-byte
+   *  effect-definition table at 0x802c7ed0 with it (see battleScene.ts for the decoded
+   *  id -> variant/lifetime/scale-curve mapping). Written by applyHit on every connection;
+   *  renderer-facing only (no sim code reads it). Optional so external fakes self-heal. */
+  lastHitImpactEffectId?: number;
+  /** Team of the attacker for the most recent hit (the ROM's variant-1 hit burst selects its
+   *  particle texture by the ATTACKER's player index — FUN_80019a14 chunk_0002.c:1750-1758
+   *  reads spawner+0x88, copied from the attacker actor in zz_001959c_). Renderer-facing. */
+  lastHitAttackerTeam?: number | undefined;
   /** Power Burst arm window (ROM +0x6fb), frames remaining. Y press edge sets this to
    *  BURST.ARM_WINDOW_FRAMES (6, DERIVED — `FUN_80069814` chunk_0009.c:113); decrements to 0
    *  per frame (mirrors `zz_005b2b8_` chunk_0007.c:3473-3490); a re-press re-arms it. NOTE
@@ -465,6 +477,12 @@ export interface Projectile {
    *  ATK-008 re-hits, which never despawn). Reset to false at the start of each projectile
    *  step. Additive/back-compat: renderer-facing only (impact-puff trigger). */
   hitConfirmedThisFrame?: boolean;
+  /** impactEffectId (u8 +0x09) of the damage record this projectile applied on its most recent
+   *  confirmed borg hit (the same record stepProjectiles passed to applyHit). DERIVED field +
+   *  consumption chain: chunk_0003.c:8087-8156 spawns the contact effect from this byte via
+   *  zz_0019550_ / effect-def table 0x802c7ed0 (0xff = no effect). Written alongside
+   *  `hitConfirmedThisFrame`; absent until the first confirmed hit. Renderer-facing only. */
+  lastImpactEffectId?: number;
 }
 
 /**

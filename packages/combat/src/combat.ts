@@ -708,6 +708,13 @@ export function applyHit(
 ): number {
   if (!isTargetable(victim) || isInvincible(victim)) return 0;
 
+  // Contact-effect selector for the renderer (DERIVED): the record's u8 +0x09 impactEffectId is
+  // what resolve_hitbox_target_effects_and_damage feeds to the impact-spark spawner zz_0019550_
+  // at the contact point (chunk_0003.c:8152-8155; 0xff = spawn suppressed, :8087). Recorded on
+  // every connection; the renderer maps id -> effect style (battleScene.ts spawnHitFx).
+  victim.lastHitImpactEffectId = record.impactEffectId;
+  victim.lastHitAttackerTeam = source?.attacker.team;
+
   const dmg = source
     ? computeSourceDamage({
         attacker: source.attacker,
@@ -2421,6 +2428,9 @@ export function stepProjectiles(
             );
           }
           pr.hitConfirmedThisFrame = true; // renderer impact-puff trigger (persisting re-hits too)
+          // DERIVED: the record's u8 +0x09 impactEffectId selects the contact effect
+          // (chunk_0003.c:8152-8155 -> zz_0019550_ -> table 0x802c7ed0); carried for the renderer.
+          pr.lastImpactEffectId = record.impactEffectId;
           if (persistent) {
             // Reload the single per-object counter immediately so this same frame's loop can't
             // apply a second hit (the ROM shape: counter gates the next application, then
