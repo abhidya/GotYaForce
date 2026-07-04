@@ -29,7 +29,15 @@ import {
 } from "./combat.js";
 import { createBurstMeter } from "./burst.js";
 import { exactMeleeForBorgId } from "./meleeExactData.js";
-import { airBChargeCoverage, airBMoveForBorgId, chargeMoveForBorgId, comboLadderForBorgId } from "./actionStreamData.js";
+import {
+  airBChargeCoverage,
+  airBMoveForBorgId,
+  chargeMoveForBorgId,
+  comboLadderForBorgId,
+  xMoveForBorgId,
+  xMoveCoverage,
+} from "./actionStreamData.js";
+import { attackHitTableForBorgId } from "./attackHitData.js";
 import { moveByButton } from "./moveProperties.js";
 import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
 import {
@@ -1210,6 +1218,185 @@ function assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs: BorgStats[]): vo
   }
   console.log(
     `[selfcheck] air-B/charge coverage: ${coverage.airBResolved}/${coverage.rosterSize} borgs resolve an exact air-B leaf, ${coverage.chargeResolved}/${coverage.rosterSize} resolve an exact charge leaf; unresolved borgs (e.g. pl0100) keep today's behavior exactly`,
+  );
+}
+
+/**
+ * (a) STAR HERO (pl0804) X special: the command-type-2 (X button) record's actionIndex 2
+ * resolves the ramming-dash leaf (g4 s1, kind 12 per meleeAnimKinds.json) — matching
+ * status-effects-decode-2026-07-04.md §A's "command table ... maps actionIndex 2 exclusively
+ * to command type 2 = X button" finding. A plain X press (pressedSpecialEdge path,
+ * startSpecialAttack chargeTier 0) must set the exact anim stream ref on press, on top of the
+ * existing hero-buff mechanic (untouched — this only makes the anim/record exact).
+ */
+function assertStarHeroXResolvesRamActionIndexAndSetsStream(borgs: BorgStats[]): void {
+  const leaf = xMoveForBorgId("pl0804");
+  if (!leaf || leaf.kind === null || !leaf.animStreamRef) {
+    throw new Error(`[selfcheck] expected STAR HERO's X leaf to resolve armed (actionIndex 2, the ram): got ${JSON.stringify(leaf)}`);
+  }
+  if (leaf.kind !== 12) {
+    throw new Error(`[selfcheck] expected STAR HERO's X leaf to arm kind 12 (the ram hit, per meleeAnimKinds.json g4 s1): got kind ${leaf.kind}`);
+  }
+
+  const heroProfile = buildProfile(borgById(borgs, "pl0804"));
+  const hero = fakeRuntime("hero_x_stream", 0, 0);
+  hero.borgId = heroProfile.id;
+  const enemy = fakeRuntime("hero_x_stream_enemy", 1, 20); // inside the special's AoE radius
+  const profiles = new Map([
+    [hero.uid, heroProfile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+
+  stepCooldowns(hero);
+  stepAttacks(hero, heroProfile, false, true, [hero, enemy], profiles); // X press edge
+
+  if (!hero.meleeAnimStream || hero.meleeAnimStream.group !== leaf.animStreamRef.group || hero.meleeAnimStream.slot !== leaf.animStreamRef.slot) {
+    throw new Error(
+      `[selfcheck] STAR HERO X press should set the exact anim stream ref ${JSON.stringify(leaf.animStreamRef)}: got ${JSON.stringify(hero.meleeAnimStream)}`,
+    );
+  }
+  console.log(
+    `[selfcheck] STAR HERO X resolves command-type-2 actionIndex 2 (the ram, kind ${leaf.kind}) -> press set exact anim stream g${leaf.animStreamRef.group}s${leaf.animStreamRef.slot}`,
+  );
+}
+
+/**
+ * (b) A borg with an armed X leaf (kind !== null AND the kind has real records in the borg's
+ * own hit-remap) must use its exact damage record for the special's hit application, in place
+ * of the generic CHARGE_OR_SPECIAL record — mirrors assertArmedChargeLeafSetsExactAnimAndRecord
+ * but drives the AoE archetype's applyHit path (the more common special archetype) via a real
+ * X press. Scans xMoveForBorgId across the roster (rather than hardcoding an assumption).
+ */
+function assertArmedXLeafUsesExactDamageRecord(borgs: BorgStats[]): void {
+  let armedId: string | null = null;
+  let armedLeaf: ReturnType<typeof xMoveForBorgId> = null;
+  for (const stats of borgs) {
+    const leaf = xMoveForBorgId(stats.id);
+    if (!leaf || leaf.kind === null || !leaf.damageRecord) continue;
+    const remapHasKind = (attackHitTableForBorgId(stats.id)?.kinds[String(leaf.kind)]?.length ?? 0) > 0;
+    if (!remapHasKind) continue;
+    // Needs a record DISTINCT from the generic CHARGE_OR_SPECIAL archetype (else this test
+    // would be trivially true even if the exact-record wiring were dead code).
+    if (JSON.stringify(leaf.damageRecord) === JSON.stringify(damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL))) continue;
+    const profile = buildProfile(stats);
+    if (actionProfileForProfile(profile).special.archetype === "projectile") continue; // exercise the AoE hit-apply path
+    armedId = stats.id;
+    armedLeaf = leaf;
+    break;
+  }
+  if (!armedId || !armedLeaf || !armedLeaf.damageRecord) {
+    throw new Error("[selfcheck] expected at least one roster borg with a fully-armed AoE-archetype X leaf (record distinct from the generic archetype) for this test to be meaningful");
+  }
+  const leaf = armedLeaf;
+  const exactRecord = armedLeaf.damageRecord;
+
+  const profile = buildProfile(borgById(borgs, armedId));
+  const b = fakeRuntime("armed_x", 0, 0);
+  b.borgId = profile.id;
+  const enemy = fakeRuntime("armed_x_enemy", 1, 20); // inside the special's AoE radius
+  enemy.hp = enemy.maxHp = 10_000_000; // stabilize the defender hp-ratio curve index
+  const profiles = new Map([
+    [b.uid, profile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  b.lockTarget = enemy.uid;
+
+  const specialDef = actionProfileForProfile(profile).special;
+  const expectedExactDamage = computeSourceDamage({
+    attacker: b,
+    attackerProfile: profile,
+    victim: enemy,
+    victimProfile: profiles.get(enemy.uid)!,
+    record: exactRecord,
+    damageScale: specialDef.damageMultiplier,
+  });
+  const expectedGenericDamage = computeSourceDamage({
+    attacker: b,
+    attackerProfile: profile,
+    victim: enemy,
+    victimProfile: profiles.get(enemy.uid)!,
+    record: damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL),
+    damageScale: specialDef.damageMultiplier,
+  });
+  if (expectedExactDamage === expectedGenericDamage) {
+    throw new Error(`[selfcheck] ${armedId}'s exact X-leaf record should predict damage distinct from the generic archetype for this test to be meaningful`);
+  }
+
+  stepCooldowns(b);
+  stepAttacks(b, profile, false, true, [b, enemy], profiles); // X press edge
+  const dealt = enemy.maxHp - enemy.hp;
+
+  if (!b.meleeAnimStream || b.meleeAnimStream.group !== leaf.animStreamRef!.group || b.meleeAnimStream.slot !== leaf.animStreamRef!.slot) {
+    throw new Error(
+      `[selfcheck] ${armedId} X press should set the exact anim stream ref ${JSON.stringify(leaf.animStreamRef)}: got ${JSON.stringify(b.meleeAnimStream)}`,
+    );
+  }
+  if (dealt !== expectedExactDamage) {
+    throw new Error(
+      `[selfcheck] ${armedId} X special should hit with the exact X-leaf damage record: dealt ${dealt}, expected ${expectedExactDamage} (generic archetype would have dealt ${expectedGenericDamage})`,
+    );
+  }
+  console.log(
+    `[selfcheck] ${armedId} X leaf resolved armed (kind ${leaf.kind}) -> press set exact anim stream g${leaf.animStreamRef!.group}s${leaf.animStreamRef!.slot} and dealt the exact-record damage (${dealt}, vs generic-archetype ${expectedGenericDamage})`,
+  );
+}
+
+/**
+ * (c) A borg with no resolved X leaf at all must keep today's behavior exactly: no
+ * meleeAnimStream set from the X press, and the generic CHARGE_OR_SPECIAL record still applies
+ * — xMoveForBorgId returning null must not regress the (majority) unresolved roster. Also logs
+ * fleet-wide X coverage (xMoveCoverage) per the ticket's reporting requirement.
+ */
+function assertUnresolvedXKeepsTodaysBehavior(borgs: BorgStats[]): void {
+  const id = "pl0100";
+  if (xMoveForBorgId(id) !== null) {
+    throw new Error(`[selfcheck] expected pl0100 to have no resolved X leaf for this test to be meaningful`);
+  }
+  const profile = buildProfile(borgById(borgs, id));
+  const specialDef = actionProfileForProfile(profile).special;
+  if (specialDef.archetype === "projectile") {
+    throw new Error("[selfcheck] pl0100 fixture assumption stale: expected an AoE-archetype special for this test");
+  }
+  const b = fakeRuntime("unresolved_x", 0, 0);
+  b.borgId = profile.id;
+  const enemy = fakeRuntime("unresolved_x_enemy", 1, 20); // inside the special's AoE radius
+  enemy.hp = enemy.maxHp = 10_000_000; // stabilize the defender hp-ratio curve index
+  const profiles = new Map([
+    [b.uid, profile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  b.lockTarget = enemy.uid;
+
+  const expectedGenericDamage = computeSourceDamage({
+    attacker: b,
+    attackerProfile: profile,
+    victim: enemy,
+    victimProfile: profiles.get(enemy.uid)!,
+    record: damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL),
+    damageScale: specialDef.damageMultiplier,
+  });
+
+  stepCooldowns(b);
+  stepAttacks(b, profile, false, true, [b, enemy], profiles); // X press edge
+  const dealt = enemy.maxHp - enemy.hp;
+
+  if (b.meleeAnimStream) {
+    throw new Error(
+      `[selfcheck] pl0100 with no resolved X leaf should not set meleeAnimStream: got ${JSON.stringify(b.meleeAnimStream)}`,
+    );
+  }
+  if (dealt !== expectedGenericDamage) {
+    throw new Error(
+      `[selfcheck] pl0100's unresolved X special should keep the generic CHARGE_OR_SPECIAL record: dealt ${dealt}, expected ${expectedGenericDamage}`,
+    );
+  }
+
+  const coverage = xMoveCoverage();
+  if (coverage.xResolved <= 0) {
+    throw new Error(`[selfcheck] expected nonzero fleet coverage for X specials: ${JSON.stringify(coverage)}`);
+  }
+  console.log(
+    `[selfcheck] X-special coverage: ${coverage.xResolved}/${coverage.rosterSize} borgs resolve an exact X leaf; unresolved borgs (e.g. pl0100) keep today's TUNED behavior exactly`,
   );
 }
 
@@ -3208,6 +3395,9 @@ export function main(): number {
   assertArmedChargeLeafSetsExactAnimAndRecord(borgs);
   assertArmedAirBLeafUsesExactWindow(borgs);
   assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs);
+  assertStarHeroXResolvesRamActionIndexAndSetsStream(borgs);
+  assertArmedXLeafUsesExactDamageRecord(borgs);
+  assertUnresolvedXKeepsTodaysBehavior(borgs);
   assertMeleeHitsOncePerSwing(borgs);
   assertChargeShotTiers(borgs);
   assertSwordBeamFinisher(borgs);

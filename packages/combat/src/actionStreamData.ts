@@ -65,6 +65,7 @@ import actionStreamTablesData from "./data/actionStreamTables.json" with { type:
 import meleeAnimKindsData from "./data/meleeAnimKinds.json" with { type: "json" };
 import { attackHitRecordsForKind, attackHitMaxReachForKind } from "./attackHitData.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
+import { commandMoveRecordsForBorgButton } from "./commandMoveTables.js";
 import type { DamageRecord } from "./gauges.js";
 
 // --- data/actionStreamTables.json shape (only the fields this module reads) --------------
@@ -472,4 +473,86 @@ export function airBChargeCoverage(): { airBResolved: number; chargeResolved: nu
     if (chargeMoveForBorgId(id) !== null) chargeResolved += 1;
   }
   return { airBResolved, chargeResolved, rosterSize: ids.length };
+}
+
+// ---------------------------------------------------------------------------------------
+// X special (command type 2 — the X button, commandMoveTables.ts BUTTON_COMMAND_TYPES) —
+// same DERIVED join as air B / B charge above, but the (actionIndex, variantIndex) pair is
+// NOT fixed per family the way ground-B/air-B/charge are (+0x580 == 1/2/3 for every family):
+// X is dispatched through the borg's own decoded command-move table
+// (data/commandMoveTables.json), whose type-2 records carry the actionIndex/variantIndex the
+// ROM's command dispatch actually runs for THIS borg (cue-script-stream-decode-2026-07-04.md's
+// header: "a borg's type-2 command records carry the actionIndex/variantIndex the dispatch
+// runs"). Most of the roster resolves to actionIndex 2 (2291/2807 active type-2 records), but
+// a real minority resolve to 0/1/3/4 instead (144/96/180/96) — hardcoding actionIndex "2" the
+// way GROUND_MELEE_ACTION_INDEX etc. do for the fixed B-family actions would silently
+// mis-resolve those borgs, so this reads the actionIndex/variantIndex OFF the command record
+// instead of assuming one. Validated case: pl0804 STAR HERO's X (status-effects-decode-
+// 2026-07-04.md §A: "command table ... maps actionIndex 2 exclusively to command type 2 = X
+// button") resolves actionIndex 2 variant 0 -> g4 s1 (via airSeedSlot, seedSlot null on that
+// leaf) -> kind 12, matching the decode's ramming-dash hitbox.
+// ---------------------------------------------------------------------------------------
+
+const xMoveCache = new Map<string, ExactMoveLeaf | null>();
+
+/** Baseline command-type-2 (X) record for a borg: subtype 0 if present (falling back to the
+ *  lowest subtype/direction pair otherwise — same base-row convention as
+ *  commandDispatch.ts selectCommandRecord's un-charged/un-airborne sort), read straight off
+ *  the borg's OWN decoded command-move table (commandMoveTables.ts). Returns null when the
+ *  borg has no exact command table, or its table has no active type-2 records at all. */
+function baselineXCommandRecord(borgId: string): { actionIndex: number; variantIndex: number } | null {
+  const records = commandMoveRecordsForBorgButton(borgId, "X");
+  if (records.length === 0) return null;
+  const sorted = [...records].sort(
+    (a, b) => a.subtype - b.subtype || (a.direction ?? -1) - (b.direction ?? -1),
+  );
+  const base = sorted[0];
+  return base ? { actionIndex: base.actionIndex, variantIndex: base.variantIndex } : null;
+}
+
+/**
+ * Resolve a borg's exact X-special baseline move: find the borg's command-type-2 (X) record
+ * (commandMoveTables.ts, joined through data/commandMoveTables.json), read the
+ * (actionIndex, variantIndex) the ROM dispatch actually runs for it, then resolve that leaf
+ * from actionStreamTables.json exactly like airBMoveForBorgId/chargeMoveForBorgId do —
+ * preferring the leaf's airSeedSlot (the airborne-fork slot) over the shared seedSlot when the
+ * extraction found a distinct one, same rationale as air B (X specials are frequently the
+ * SAME underlying action/variant as air B — see G RED's pl0615 row, whose X and air-B command
+ * records both land on actionIndex 2 variant 0 -> bank 0x80366220 g4 s0). Returns null when the
+ * borg has no exact command table, its type-2 baseline record has no resolvable action-stream
+ * leaf (group isn't the charge/air-special axis, or the resolved slot has no captured stream),
+ * or the borg has no command table at all. Callers keep today's TUNED special-attack behavior
+ * (OBSERVED_WIKI move properties + X-charge tiers) for null. Cached per borg id.
+ */
+export function xMoveForBorgId(id: string): ExactMoveLeaf | null {
+  const key = id.toLowerCase();
+  const cached = xMoveCache.get(key);
+  if (cached !== undefined) return cached;
+
+  const result = computeXMove(key);
+  xMoveCache.set(key, result);
+  return result;
+}
+
+function computeXMove(borgId: string): ExactMoveLeaf | null {
+  const baseline = baselineXCommandRecord(borgId);
+  if (!baseline) return null;
+  const borg = STREAMS.borgs[borgId];
+  const action = borg?.actions?.[String(baseline.actionIndex)];
+  const variant = action?.variants?.[String(baseline.variantIndex)];
+  if (!variant || variant.group !== CHARGE_AIR_GROUP || !variant.bank) return null;
+  const slot = typeof variant.airSeedSlot === "number" ? variant.airSeedSlot : variant.seedSlot;
+  if (typeof slot !== "number") return null;
+  return leafFromSlot(borgId, variant.bank, CHARGE_AIR_GROUP, slot);
+}
+
+/** Fleet coverage counter (roster scan) for the X-special leaf, mirroring
+ *  airBChargeCoverage's shape. Not cached — cheap one-shot roster walk. */
+export function xMoveCoverage(): { xResolved: number; rosterSize: number } {
+  const ids = Object.keys(STREAMS.borgs);
+  let xResolved = 0;
+  for (const id of ids) {
+    if (xMoveForBorgId(id) !== null) xResolved += 1;
+  }
+  return { xResolved, rosterSize: ids.length };
 }

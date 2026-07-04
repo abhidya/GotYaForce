@@ -74,6 +74,7 @@ import {
   airBMoveForBorgId,
   chargeMoveForBorgId,
   comboLadderForBorgId,
+  xMoveForBorgId,
   type ComboStep,
   type ExactMoveLeaf,
 } from "./actionStreamData.js";
@@ -1431,13 +1432,13 @@ export function stepAttacks(
         const frames = b.cooldowns["xChargeFrames"] ?? 0;
         b.cooldowns["xChargeFrames"] = 0;
         const tier = frames >= X_CHARGE.TIER2_FRAMES ? 2 : frames >= X_CHARGE.TIER1_FRAMES ? 1 : 0;
-        startSpecialAttack(b, p, actionProfile, tier, out, all, profiles, damageContext);
+        startSpecialAttack(b, p, actionProfile, tier, out, all, profiles, damageContext, xMoveForBorgId(b.borgId));
         return { projectiles: out };
       }
     } else if (pressedSpecialEdge) {
       // Non-charging borgs: fire once per PRESS EDGE (the latch above), never on held
       // re-expiry — holding X across the cooldown no longer machine-guns the special.
-      startSpecialAttack(b, p, actionProfile, 0, out, all, profiles, damageContext);
+      startSpecialAttack(b, p, actionProfile, 0, out, all, profiles, damageContext, xMoveForBorgId(b.borgId));
       return { projectiles: out };
     }
   }
@@ -1781,6 +1782,13 @@ function startMeleeAttack(
  *     burst around the borg.
  * chargeTier 0 = plain press (identical to the pre-X-charge behavior for every borg); tiers
  * 1/2 only reachable via the X-charge hold/release path (X_CHARGE, TUNED).
+ * `xLeaf` (actionStreamData.ts xMoveForBorgId, resolved once by the caller): when non-null,
+ * sets the exact anim stream ref + authored sounds (same meleeAnimStream/meleeSounds renderer
+ * bridge startMeleeAttack/startShotAttack's charge release use) and, when the leaf's kind has
+ * real records in the borg's OWN hit remap, replaces the generic CHARGE_OR_SPECIAL record with
+ * the exact one (xDamageRecordSpread — same guarded pattern as chargeDamageRecordSpread). This
+ * ONLY makes the record/anim/sounds exact; every TUNED mechanic below (AoE radius, projectile
+ * archetypes, the hero X ram buff) is unchanged.
  */
 function startSpecialAttack(
   b: BorgRuntime,
@@ -1791,6 +1799,7 @@ function startSpecialAttack(
   all: BorgRuntime[],
   profiles: Map<string, BorgProfile>,
   damageContext: DamageRuntimeContext,
+  xLeaf: ExactMoveLeaf | null = null,
 ): void {
   const specialDef = actionProfile.special;
   // Consume one X-bullet from weapon cell 1 (only when the borg actually has X-ammo; max==0
@@ -1810,12 +1819,18 @@ function startSpecialAttack(
   b.state = "special";
   b.stateTime = 0;
   b.anim = "special";
+  // Exact X-special anim stream ref + PATH-B authored sounds (actionStreamData.ts
+  // xMoveForBorgId), same renderer bridge fields startMeleeAttack/startShotAttack's charge
+  // release set. Null leaf (unresolved) clears both exactly like today — no ref/sounds ever
+  // leaked from a stale prior swing/charge into a special press.
+  b.meleeAnimStream = xLeaf?.animStreamRef ?? null;
+  b.meleeSounds = xLeaf && xLeaf.sounds.length > 0 ? xLeaf.sounds : null;
 
   const tier = xChargeScaling(chargeTier);
 
   // Projectile-archetype special: fired attack instead of the generic radial burst.
   if (specialDef.archetype === "projectile") {
-    out.push(...spawnSpecialProjectiles(b, p, specialDef, tier, all));
+    out.push(...spawnSpecialProjectiles(b, p, specialDef, tier, all, xLeaf));
     return;
   }
 
@@ -1823,8 +1838,10 @@ function startSpecialAttack(
   // behavior at tier 0). HP damage comes from record 2 via damageFormula.ts; the special
   // multiplier remains a port-side bridge until per-special hitbox records are mapped. Tier
   // scaling (X-charge releases only) widens the burst and scales damage/knockback via the
-  // same TUNED tier mults as a charged shot.
-  const specialRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
+  // same TUNED tier mults as a charged shot. An armed xLeaf's own exact record
+  // (xDamageRecordSpread) replaces the generic archetype record where the borg's remap
+  // actually carries it.
+  const specialRecord = xDamageRecordSpread(b.borgId, xLeaf).damageRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
   for (const o of all) {
     if (!canReceiveHit(b, o)) continue;
     if (distXZ(b.pos, o.pos) <= specialDef.radius * tier.radius) {
@@ -1898,6 +1915,10 @@ function spawnSpecialProjectiles(
   specialDef: SpecialActionDef,
   tier: ReturnType<typeof xChargeScaling>,
   all: BorgRuntime[],
+  // Exact X-special leaf (actionStreamData.ts xMoveForBorgId), resolved once by the caller
+  // (startSpecialAttack). Threaded through so its damage record can replace the generic
+  // CHARGE_OR_SPECIAL archetype on the fired projectile — see xDamageRecordSpread's gating.
+  xLeaf: ExactMoveLeaf | null = null,
 ): Projectile[] {
   const count = Math.max(1, Math.floor(specialDef.projectileCount ?? 1));
   const projectiles: Projectile[] = [];
@@ -1939,8 +1960,11 @@ function spawnSpecialProjectiles(
       // back to the borg's asset-family kind.
       visualKind: specialDef.projectileVisualKind ?? projectileVisualKindForProfile(p),
       // Specials -> record 2 (DERIVED mapping, gauges.ts DAMAGE_RECORD_INDEX) — the same
-      // record the AoE path and charged releases use.
+      // record the AoE path and charged releases use, UNLESS the exact X-special leaf's own
+      // record resolved (xDamageRecordSpread below), in which case its damageRecord spread wins
+      // on top of this fallback index/no-op.
       damageRecordIndex: DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL,
+      ...xDamageRecordSpread(b.borgId, xLeaf),
     });
   }
   return projectiles;
@@ -2176,6 +2200,23 @@ function chargeDamageRecordSpread(borgId: string, chargeLeaf: ExactMoveLeaf | nu
   const remapHasKind = (attackHitTableForBorgId(borgId)?.kinds[String(chargeLeaf.kind)]?.length ?? 0) > 0;
   if (!remapHasKind) return {};
   return { damageRecord: chargeLeaf.damageRecord };
+}
+
+/**
+ * Resolve an X special's exact damage record from its resolved leaf (actionStreamData.ts
+ * xMoveForBorgId), gated EXACTLY like chargeDamageRecordSpread: only apply when the leaf's
+ * kind has real records in the borg's OWN hit-remap (attackHitTableForBorgId(id).kinds) — many
+ * X leaves are windup-only (kind null) or arm a kind the borg's remap never populated, and in
+ * both cases the generic CHARGE_OR_SPECIAL archetype record must stand. Empty spread whenever
+ * the gate fails or the leaf/record itself didn't resolve. Shared by both special archetypes
+ * (AoE burst reads `.damageRecord` directly; the projectile archetype spreads this object the
+ * same way spawnProjectile spreads chargeDamageRecordSpread).
+ */
+function xDamageRecordSpread(borgId: string, xLeaf: ExactMoveLeaf | null): { damageRecord?: DamageRecord } {
+  if (!xLeaf || xLeaf.kind === null || !xLeaf.damageRecord) return {};
+  const remapHasKind = (attackHitTableForBorgId(borgId)?.kinds[String(xLeaf.kind)]?.length ?? 0) > 0;
+  if (!remapHasKind) return {};
+  return { damageRecord: xLeaf.damageRecord };
 }
 
 /** OBSERVED_WIKI: whether a borg's primary shot (B Shot, or B Charge when chargeTier>=1) is

@@ -328,6 +328,72 @@ Full decode note: `research/decomp/anim-sound-op-decode-2026-07-04.md`.
 
 ---
 
+## ★ 2026-07-04 session: X special (command type 2) exact wiring
+
+Extended the same DERIVED join (actionStreamTables.json → meleeAnimKinds.json →
+attackHitTables.json → familyDamageData.ts) to the X button, per
+`cue-script-stream-decode-2026-07-04.md`'s finding that a borg's type-2 command records (X
+button, `commandMoveTables.ts` `BUTTON_COMMAND_TYPES`) carry the `(actionIndex, variantIndex)`
+the ROM dispatch actually runs — unlike ground-B/air-B/B-charge, this is NOT a fixed
+`+0x580` value per family (most borgs resolve actionIndex 2, but a real minority resolve
+0/1/3/4 instead: 144/96/2291/180/96 active type-2 records across the roster by actionIndex).
+
+- **`actionStreamData.ts` — `xMoveForBorgId(id)`**: reads the borg's baseline command-type-2
+  record (`commandMoveTables.ts` `commandMoveRecordsForBorgButton(id, "X")`, subtype 0 preferred
+  — same base-row convention as `commandDispatch.ts`'s `selectCommandRecord`), then resolves
+  THAT `(actionIndex, variantIndex)` leaf from `actionStreamTables.json` exactly like
+  `airBMoveForBorgId`/`chargeMoveForBorgId` do (preferring `airSeedSlot` over the shared
+  `seedSlot` when the extraction found a distinct one — the same rationale as air B, since an
+  X special is frequently the SAME underlying action/variant as air B, e.g. G RED's pl0615: both
+  land on actionIndex 2 variant 0 → bank 0x80366220 g4 s0). Returns `null` when the borg has no
+  exact command table or the resolved leaf doesn't join. `xMoveCoverage()` mirrors
+  `airBChargeCoverage()`'s roster-scan shape.
+  **Coverage: 16/208 borgs (7.7%)** resolve a fully-armed (kind ≠ null, windowed hit-bin record)
+  X leaf.
+- **Validated against the decode**: `status-effects-decode-2026-07-04.md` §A proved **pl0804
+  STAR HERO**'s X (shared hero module with pl080c PLANET HERO) is command type 2 → actionIndex 2
+  exclusively, a ramming dash. `xMoveForBorgId("pl0804")` resolves that exact leaf: variant 0 has
+  `seedSlot: null, airSeedSlot: 1` (an air-only fork, same shape as several air-B leaves) →
+  bank 0x80325c80 g4 s1 → **kind 12**, whose remap records (`[13, 14]`) are real family-damage
+  entries — matching the decode's "kind-0xf hitbox live" ramming-dash finding at the mechanism
+  level (this pass resolves the exact stream/kind/anim; the buff mechanic itself, `applyHeroXBuff`,
+  is untouched TUNED-adjacent logic that already existed).
+- **`combat.ts` — `startSpecialAttack`**: both X-fire call sites (plain press-edge and
+  X-charge release) now resolve `xMoveForBorgId(b.borgId)` once and pass it through as a new
+  optional trailing param. On every fire (any chargeTier), it sets `BorgRuntime.meleeAnimStream`
+  / `meleeSounds` from the leaf's `animStreamRef`/`sounds` — same renderer-bridge fields
+  `startMeleeAttack`/`startShotAttack`'s charge release already set, so `battleScene.ts`'s
+  existing stream-ref bypass picks it up for the `"special"` anim with no renderer change needed.
+  The leaf's exact damage record replaces the generic `CHARGE_OR_SPECIAL` archetype ONLY when
+  gated (new `xDamageRecordSpread`, copied verbatim from `chargeDamageRecordSpread`'s pattern):
+  the leaf needs an armed kind AND a resolved record AND that kind must have real entries in the
+  borg's OWN hit remap (`attackHitTableForBorgId(id).kinds`) — otherwise the existing archetype
+  record stands. Wired into BOTH special archetypes: the AoE burst loop (`specialRecord` local)
+  and the projectile archetype (`spawnSpecialProjectiles` now takes `xLeaf` and spreads
+  `xDamageRecordSpread` onto each spawned projectile, same as `spawnProjectile` does for charged
+  shots). **No behavior removed**: AoE radius/tier scaling, projectile archetypes/params, and the
+  STAR HERO/PLANET HERO ram buff (`applyHeroXBuff`) are all unchanged — this slice only makes the
+  record/anim/sounds exact on top of them.
+- New selfcheck asserts: `assertStarHeroXResolvesRamActionIndexAndSetsStream` (pl0804 resolves
+  actionIndex 2 → kind 12 → a real press sets the exact anim stream, on top of the existing hero
+  buff mechanic), `assertArmedXLeafUsesExactDamageRecord` (scans the roster for a fully-armed
+  AoE-archetype X leaf whose record is DISTINCT from the generic archetype — currently resolves
+  to pl0202 — and asserts both the exact anim stream AND that the actual HP dealt matches
+  `computeSourceDamage` run with the exact record, not the generic one), `assertUnresolvedXKeepsTodaysBehavior`
+  (pl0100, no resolved X leaf, asserts no stream is set and damage still matches the generic
+  `CHARGE_OR_SPECIAL` record exactly, plus logs the `xMoveCoverage()` fleet line).
+- VALIDATED: `pnpm typecheck`, `packages/combat/dist/selfcheck.js`,
+  `scripts/selfcheck-1p-challenge.mjs`, `scripts/selfcheck-challenge-stages.mjs` all pass.
+- DERIVED vs TUNED: the command-record lookup, actionIndex/variantIndex, seed/air-seed slot,
+  armed kind, hit-bin window, reach, family damage record, playAnim group/slot, and authored
+  sounds are all DERIVED end-to-end from the same DOL-emulation + hit-bin/damage-table sources as
+  the ground-melee/air-B/charge resolvers. TUNED residue is unchanged from before this pass: the
+  AoE radius/projectile archetype params/tier-scaling constants (wave-1 `SpecialActionDef`,
+  OBSERVED_WIKI-selected), and the hero ram-buff velocity/duration constants (already DERIVED
+  from the decode, not touched here).
+
+---
+
 ## ★ Finish-line handoff (what's left, prioritized) — 2026-07-03
 
 The port is **playable end-to-end** (challenge verified) with every cleanly-derivable mechanic
