@@ -25,7 +25,7 @@
    "joinChecked": 2198,
    "joinOk": 2198,
    "joinCoverage": 1,
-   "joinHitStreams": 716
+   "joinHitStreams": 736
   },
   "groundTruth": {
    "failures": [],
@@ -28792,7 +28792,7 @@
         "bankPresent": true,
         "groupSlotCount": 8,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "2": {
@@ -28821,7 +28821,7 @@
         "bankPresent": true,
         "groupSlotCount": 8,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "3": {
@@ -28850,7 +28850,7 @@
         "bankPresent": true,
         "groupSlotCount": 8,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "4": {
@@ -28879,7 +28879,7 @@
         "bankPresent": true,
         "groupSlotCount": 8,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       }
      }
@@ -31443,7 +31443,7 @@
         "bankPresent": true,
         "groupSlotCount": 8,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "2": {
@@ -31472,7 +31472,7 @@
         "bankPresent": true,
         "groupSlotCount": 8,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "3": {
@@ -31501,7 +31501,7 @@
         "bankPresent": true,
         "groupSlotCount": 8,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "4": {
@@ -31530,7 +31530,7 @@
         "bankPresent": true,
         "groupSlotCount": 8,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       }
      }
@@ -42531,7 +42531,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "2": {
@@ -42560,7 +42560,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "3": {
@@ -42589,7 +42589,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "4": {
@@ -42618,7 +42618,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       }
      }
@@ -45551,7 +45551,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "4": {
@@ -45580,7 +45580,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       }
      }
@@ -51129,7 +51129,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "2": {
@@ -51158,7 +51158,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "3": {
@@ -51187,7 +51187,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "4": {
@@ -51216,7 +51216,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       }
      }
@@ -54108,7 +54108,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       },
       "4": {
@@ -54137,7 +54137,7 @@
         "bankPresent": true,
         "groupSlotCount": 6,
         "slotInRange": true,
-        "hitStream": false
+        "hitStream": true
        }
       }
      }

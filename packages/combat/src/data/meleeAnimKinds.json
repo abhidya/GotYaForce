@@ -27,12 +27,12 @@
   ],
   "unresolvedBorgs": [],
   "distinctBanks": 114,
-  "hitBearingSlots": 871,
-  "totalEventsInHitSlots": 4975,
+  "hitBearingSlots": 872,
+  "totalEventsInHitSlots": 4982,
   "animSounds": {
    "borgsWithAnimSounds": 169,
-   "animRefsWithSounds": 1325,
-   "soundEvents": 2984,
+   "animRefsWithSounds": 1329,
+   "soundEvents": 2992,
    "distinctSoundIds": 15
   },
   "validation": {
@@ -8390,6 +8390,53 @@
         "op": "wait",
         "mode": 1,
         "val": 8
+       }
+      ]
+     },
+     "s5": {
+      "streamAddress": "0x8030c0ec",
+      "end": "terminated",
+      "events": [
+       {
+        "op": "armHit",
+        "kind": 7,
+        "frame": 0,
+        "frameKind": "start",
+        "statusId": 0,
+        "statusArg": 255,
+        "anim": null
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 3,
+        "slot": 2
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 4
+       },
+       {
+        "op": "wait",
+        "mode": 2,
+        "val": 19
+       },
+       {
+        "op": "wait",
+        "mode": 0,
+        "val": -1
+       },
+       {
+        "op": "playAnim",
+        "shared": false,
+        "group": 0,
+        "slot": 14
+       },
+       {
+        "op": "wait",
+        "mode": 1,
+        "val": 15
        }
       ]
      }
@@ -48692,7 +48739,8 @@
     2,
     4,
     5,
-    6
+    6,
+    7
    ],
    "descBanks": {
     "family": "0x8030ab20",
@@ -48872,6 +48920,34 @@
       "id": 103,
       "mode": 1,
       "part": 1
+     }
+    ],
+    "g3s2": [
+     {
+      "frame": 9,
+      "id": 36,
+      "mode": 0,
+      "part": 0
+     },
+     {
+      "frame": 17,
+      "id": 103,
+      "mode": 1,
+      "part": 3
+     }
+    ],
+    "g0s14": [
+     {
+      "frame": 1,
+      "id": 103,
+      "mode": 1,
+      "part": 3
+     },
+     {
+      "frame": 17,
+      "id": 103,
+      "mode": 1,
+      "part": 3
      }
     ]
    }
@@ -50716,7 +50792,8 @@
     2,
     4,
     5,
-    6
+    6,
+    7
    ],
    "descBanks": {
     "family": "0x8030ab20",
@@ -50896,6 +50973,34 @@
       "id": 103,
       "mode": 1,
       "part": 1
+     }
+    ],
+    "g3s2": [
+     {
+      "frame": 9,
+      "id": 36,
+      "mode": 0,
+      "part": 0
+     },
+     {
+      "frame": 17,
+      "id": 103,
+      "mode": 1,
+      "part": 3
+     }
+    ],
+    "g0s14": [
+     {
+      "frame": 1,
+      "id": 103,
+      "mode": 1,
+      "part": 3
+     },
+     {
+      "frame": 17,
+      "id": 103,
+      "mode": 1,
+      "part": 3
      }
     ]
    }

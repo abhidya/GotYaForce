@@ -282,7 +282,9 @@ function decodeStream(addr, streamStarts) {
 // runs one bank's group array straight into the next bank's, and the misread entries become
 // bogus table pointers that truncate the real slot tables (this silently dropped the
 // pl0402/pl0408 melee streams). A bank's group array therefore also ends at the next known
-// bank base.
+// bank base. (The -1 sentinel can NOT terminate the GROUP array the way it terminates slot
+// tables: -1 is a legitimate mid-array "unused group" value, so a smallest-positive-offset
+// bound alone would still absorb the neighbor bank's entries as phantom groups.)
 const allBankBases = new Set();
 
 function parseBank(base) {
@@ -303,13 +305,13 @@ function parseBank(base) {
   const slotTables = new Map();
   const streamStarts = new Set();
   for (const gp of distinct) {
-    // -1 sentinel is the primary terminator (every sampled table ends with one, and
-    // cross-bank backref tables have no in-bank next-table bound); the next distinct
-    // table start acts as a safety cap only.
-    const next = distinct.find((s) => s > gp);
-    const count = next ? Math.floor((next - gp) / 2) : 0x2000;
+    // The -1 sentinel is the SOLE slot-table terminator (0x40-entry sanity cap), matching
+    // gen-action-stream-tables.mjs parseBankLayout. A "next distinct table start" bound is
+    // NOT safe: interleaved banks share slot tables, and a shared table can extend past a
+    // same-bank group pointer (bank 0x80327440 g3 @0x80327512 ends at its -1 exactly at the
+    // g4 pointer 0x80327524 only by luck — other layouts would truncate silently).
     const slots = [];
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < 0x40; i++) {
       const v = readS16(gp + i * 2);
       if (v === null || v === -1) break;
       slots.push(gp + v);
