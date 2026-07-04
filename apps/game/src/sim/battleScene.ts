@@ -28,6 +28,14 @@ export interface BorgAssets {
   /** Resolve a baked AnimationClip for (borgId, slot). Null if unavailable. */
   loadClip(borgId: string, slot: AnimSlot): Promise<THREE.AnimationClip | null>;
   /**
+   * Optional: resolve a baked clip DIRECTLY by its exported mot.bin (group, slot), bypassing
+   * the slot-label heuristic. Used for per-combo-step melee anim (BattleActorView.meleeAnimStream,
+   * DERIVED from @gf/combat's actionStreamData.ts ComboStep.animStreamRef — see
+   * borgPresentationAssets.ts's loadClipByStreamRef doc). Absent, or null result, falls back to
+   * the plain melee/melee_alt loadClip slot.
+   */
+  loadClipByStreamRef?(borgId: string, ref: { group: number; slot: number }): Promise<THREE.AnimationClip | null>;
+  /**
    * Optional: called exactly once per animation-slot transition (edge-triggered, same
    * pattern as the existing hit-spark VFX trigger below — NOT fired every frame and NOT
    * fired on state re-entry while already in that slot). main.ts uses this to trigger
@@ -68,6 +76,10 @@ interface Actor {
   mixer: THREE.AnimationMixer | null;
   /** Cached actions per slot for this actor. */
   actions: Partial<Record<AnimSlot, THREE.AnimationAction>>;
+  /** Cached actions keyed by "g{group}s{slot}" for per-combo-step melee anim (loadClipByStreamRef).
+   *  Kept separate from `actions` because the slot axis ("melee"/"melee_alt") doesn't change
+   *  across combo steps but the underlying clip does — see lastMeleeClipKey below. */
+  streamActions: Partial<Record<string, THREE.AnimationAction>>;
   current: AnimSlot | null;
   lastSeenSlot: AnimSlot | null;
   /**
@@ -77,6 +89,14 @@ interface Actor {
    * to the plain melee bank when only one exists, so this is visual-only and fallback-safe.)
    */
   meleeParity: boolean;
+  /**
+   * Cache key of the last melee clip actually loaded/played — either the plain slot
+   * ("melee"/"melee_alt") or "melee@g{group}s{slot}" when a per-combo-step stream ref drove
+   * it. Combo steps keep `current` at "melee"/"melee_alt" across the whole chain (the slot
+   * axis doesn't change), so this is the signal that a NEW clip must be loaded even though
+   * `current === slot` would otherwise short-circuit playSlot.
+   */
+  lastMeleeClipKey: string | null;
   /** True once the (async) model has been attached. */
   ready: boolean;
   isPlaceholder: boolean;
@@ -329,7 +349,7 @@ export class BattleScene {
       this.syncChargeGlow(actor, b);
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid);
       actor.lastSeenSlot = slot;
-      if (actor.ready) this.playSlot(actor, slot);
+      if (actor.ready) this.playSlot(actor, slot, b.meleeAnimStream);
       // Dim/hide once dead so the death pose reads (sim culls dead borgs next frame).
       if (!b.alive) actor.group.visible = true;
     }
@@ -398,9 +418,11 @@ export class BattleScene {
       borgId: b.borgId,
       mixer: null,
       actions: {},
+      streamActions: {},
       current: null,
       lastSeenSlot: null,
       meleeParity: true, // first melee entry flips this to false => plain "melee" first
+      lastMeleeClipKey: null,
       ready: false,
       isPlaceholder: true,
       chargeGlow: null,
@@ -484,12 +506,52 @@ export class BattleScene {
     actor.ready = true;
   }
 
-  private playSlot(actor: Actor, slot: AnimSlot): void {
-    if (actor.current === slot) return;
+  private playSlot(actor: Actor, slot: AnimSlot, meleeAnimStream?: { group: number; slot: number } | null): void {
+    // Per-combo-step melee anim: the slot axis ("melee"/"melee_alt") stays constant across a
+    // whole combo chain, but a resolved stream ref should still swap the clip on every step.
+    // Track the last CLIP actually played (lastMeleeClipKey) separately from `current` so this
+    // case bypasses the plain slot-unchanged short-circuit below without disturbing every
+    // other slot's existing behavior.
+    const streamRef = (slot === "melee" || slot === "melee_alt") && meleeAnimStream ? meleeAnimStream : null;
+    const streamKey = streamRef ? `melee@g${streamRef.group}s${streamRef.slot}` : null;
+    const clipKey = streamKey ?? slot;
+    if (actor.current === slot && actor.lastMeleeClipKey === clipKey) return;
     if (!actor.mixer) {
       return; // placeholder has no animation
     }
     actor.current = slot;
+    actor.lastMeleeClipKey = clipKey;
+
+    if (streamKey) {
+      const existingStream = actor.streamActions[streamKey];
+      if (existingStream) {
+        this.crossfadeTo(actor, existingStream, slot);
+        return;
+      }
+      const loader = this.assets.loadClipByStreamRef;
+      if (loader && streamRef) {
+        void loader(actor.borgId, streamRef).then((clip) => {
+          if (!actor.mixer || actor.lastMeleeClipKey !== clipKey) return;
+          if (clip) {
+            const action = actor.mixer.clipAction(clip);
+            actor.streamActions[streamKey] = action;
+            this.crossfadeTo(actor, action, slot);
+            return;
+          }
+          // The exact bank isn't in this borg's baked anim_index — fall back to the plain
+          // slot-heuristic clip below rather than leaving the actor frozen on its last pose.
+          this.playSlotByLabel(actor, slot, clipKey);
+        });
+        return;
+      }
+    }
+    this.playSlotByLabel(actor, slot, clipKey);
+  }
+
+  /** Slot-label-heuristic clip load/play (the pre-existing behavior), keyed by `clipKey` so it
+   *  composes with playSlot's per-combo-step stream-ref bypass above. */
+  private playSlotByLabel(actor: Actor, slot: AnimSlot, clipKey: string): void {
+    if (!actor.mixer) return;
     const existing = actor.actions[slot];
     if (existing) {
       this.crossfadeTo(actor, existing, slot);
@@ -497,15 +559,12 @@ export class BattleScene {
     }
     // Lazily load the clip; apply when ready if still current.
     void this.assets.loadClip(actor.borgId, slot).then((clip) => {
-      if (!actor.mixer || actor.current !== slot) return;
-      // Fall back to idle clip if the requested slot has no baked clip.
-      const useClip = clip ?? (slot !== "idle" ? null : null);
-      const finalClip = useClip ?? clip;
-      if (!finalClip) {
+      if (!actor.mixer || actor.lastMeleeClipKey !== clipKey) return;
+      if (!clip) {
         // No clip for this slot; try idle as a fallback.
         if (slot !== "idle") {
           void this.assets.loadClip(actor.borgId, "idle").then((idle) => {
-            if (!actor.mixer || actor.current !== slot || !idle) return;
+            if (!actor.mixer || actor.lastMeleeClipKey !== clipKey || !idle) return;
             const a = actor.mixer.clipAction(idle);
             actor.actions[slot] = a;
             this.crossfadeTo(actor, a, slot);
@@ -513,7 +572,7 @@ export class BattleScene {
         }
         return;
       }
-      const action = actor.mixer.clipAction(finalClip);
+      const action = actor.mixer.clipAction(clip);
       actor.actions[slot] = action;
       this.crossfadeTo(actor, action, slot);
     });
@@ -526,9 +585,13 @@ export class BattleScene {
       .setLoop(looping ? THREE.LoopRepeat : THREE.LoopOnce, looping ? Infinity : 1)
       .play();
     action.clampWhenFinished = !looping;
-    // Fade out any other playing action.
+    // Fade out any other playing action (both the plain slot cache and the per-combo-step
+    // stream-ref cache, since a melee chain may cross between the two).
     for (const [s, a] of Object.entries(actor.actions)) {
-      if (s !== slot && a.isRunning()) a.crossFadeTo(action, 0.18, false);
+      if (s !== slot && a !== action && a.isRunning()) a.crossFadeTo(action, 0.18, false);
+    }
+    for (const a of Object.values(actor.streamActions)) {
+      if (a && a !== action && a.isRunning()) a.crossFadeTo(action, 0.18, false);
     }
   }
 

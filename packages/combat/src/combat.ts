@@ -70,6 +70,7 @@ import {
 import { attackHitRecordsForKind, shotHitRadiusForBorgId } from "./attackHitData.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
+import { comboLadderForBorgId, type ComboStep } from "./actionStreamData.js";
 import { computeSourceDamage } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
@@ -1455,12 +1456,18 @@ export function stepAttacks(
         const canChain = window > 0 && prevStep + 1 < meleeDef.comboHits;
         const canFresh = (b.cooldowns["melee"] ?? 0) <= 0;
         if (canChain || canFresh) {
+          const nextStep = canChain ? prevStep + 1 : 0;
           startMeleeAttack(
             b,
             meleeDef,
-            canChain ? prevStep + 1 : 0,
+            nextStep,
             meleeEngaged ? contextTarget : null,
             exactMeleeForBorgId(b.borgId), // cached lookup; null keeps TUNED timing
+            // Per-step exact ladder (actionStreamData.ts, cached lookup): when the borg's
+            // B-melee ladder is DERIVED end-to-end, THIS step's own window/reach/record
+            // replace the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0. Null (borg has
+            // no resolved ladder, or this step index isn't in it) keeps that TUNED fallback.
+            comboLadderForBorgId(b.borgId)?.[nextStep] ?? null,
           );
           break;
         }
@@ -1524,15 +1531,26 @@ export function stepAttacks(
 
   // --- Resolve an active melee swing against enemies in reach ------------------------
   const meleeActive = b.cooldowns["meleeActive"] ?? 0;
-  // Exact per-borg swing data (meleeExactData.ts, cached lookup): active-window length,
-  // authored reach, and the family damage record replace the TUNED profile values.
+  const comboStepForSwing = b.cooldowns["comboStep"] ?? 0;
+  // Exact per-borg swing data (meleeExactData.ts, cached lookup): first-swing active-window
+  // length, authored reach, and family damage record — the fallback for borgs/steps without a
+  // resolved combo ladder.
   const exactMelee = meleeDef ? exactMeleeForBorgId(b.borgId) : null;
-  const meleeActiveLen = exactMelee ? exactMelee.activeEnd - exactMelee.activeStart + 1 : meleeDef?.active ?? 0;
+  // Per-combo-step exact data (actionStreamData.ts, cached lookup): when the borg's B-melee
+  // ladder is DERIVED end-to-end, THIS swing's step gets its OWN window/reach/record instead of
+  // exactMelee's first-swing data. Null (no ladder, or this step index isn't in it) falls back
+  // to exactMelee, which itself falls back to the TUNED profile.
+  const exactStep = meleeDef ? comboLadderForBorgId(b.borgId)?.[comboStepForSwing] ?? null : null;
+  const meleeActiveLen = exactStep
+    ? exactStep.activeEnd - exactStep.activeStart + 1
+    : exactMelee
+      ? exactMelee.activeEnd - exactMelee.activeStart + 1
+      : meleeDef?.active ?? 0;
   if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && STATE.MELEE_IFRAME_REFRESH_PER_FRAME) {
     b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
   }
   if (b.state === "attack" && b.anim === "melee" && meleeDef && meleeActive > 0 && meleeActive <= meleeActiveLen) {
-    const comboStep = b.cooldowns["comboStep"] ?? 0;
+    const comboStep = comboStepForSwing;
     const isFinisher = comboStep >= meleeDef.comboHits - 1;
     // Sword beam: the combo finisher's FIRST active frame emits a fast short-lived projectile
     // with melee-scaled damage (TUNED design; see actionProfiles.ts SwordBeamDef).
@@ -1553,8 +1571,14 @@ export function stepAttacks(
       // frame, silently multiplying melee damage by the active-frame count.)
       if (b.meleeHitUids?.includes(o.uid)) continue;
       const d = distXZ(b.pos, o.pos);
-      // Authored reach (hit.bin record offset+extent) where exact; TUNED profile otherwise.
-      const meleeRange = exactMelee && exactMelee.reach > 0 ? exactMelee.reach : meleeDef.range;
+      // Authored reach (hit.bin record offset+extent): this step's own reach where the combo
+      // ladder resolved it, else the first-swing exact reach, else the TUNED profile range.
+      const meleeRange =
+        exactStep && exactStep.reach > 0
+          ? exactStep.reach
+          : exactMelee && exactMelee.reach > 0
+            ? exactMelee.reach
+            : meleeDef.range;
       if (d > meleeRange) continue;
       if (Math.abs(o.pos.y - b.pos.y) > meleeDef.yTolerance) continue;
       const to = normalize({ x: o.pos.x - b.pos.x, y: 0, z: o.pos.z - b.pos.z });
@@ -1563,9 +1587,11 @@ export function stepAttacks(
       if (!op) continue;
       const knockbackMult =
         meleeDef.knockbackMultiplier * (isFinisher && meleeDef.comboHits > 1 ? COMBO.FINISHER_KNOCKBACK_MULT : 1);
-      // Exact family record for this swing (script-armed kind → hit record → family table);
-      // archetype record 1 remains the fallback for borgs without decoded data.
-      const meleeRecord = exactMelee?.damageRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
+      // Exact family record for this swing (script-armed kind → hit record → family table):
+      // this step's own record where the combo ladder resolved it, else the first-swing exact
+      // record, else archetype record 1 for borgs without decoded data.
+      const meleeRecord =
+        exactStep?.damageRecord ?? exactMelee?.damageRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
       // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
       // instead of the attacker's facing vector (`fwd`) used here previously.
       const dealt = applyHit(
@@ -1616,14 +1642,24 @@ function startMeleeAttack(
   // Exact per-borg first-swing data (meleeExactData.ts): frame window from the hit.bin
   // record armed by the borg's action script. Null keeps the TUNED profile timing.
   exactMelee: ExactMeleeAttack | null = null,
+  // Exact per-STEP data (actionStreamData.ts): when the borg's B-melee combo ladder is
+  // DERIVED end-to-end, this step's OWN window/reach/record (comboLadderForBorgId(id)[comboStep])
+  // replace the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0. Null (no ladder, or this
+  // step index isn't in it) keeps that TUNED fallback.
+  exactStep: ComboStep | null = null,
 ): void {
   // Exact window: activeStart..activeEnd are anim-frame numbers (the ROM clocks the hitbox
   // against actor+0x1cdc); the port's state timer stands in for the anim clock 1:1 at 60Hz.
-  // Chain steps keep the TUNED faster-startup scale until per-step script records land.
-  const baseStartup = exactMelee ? exactMelee.activeStart : meleeDef.startup;
-  const baseActive = exactMelee ? exactMelee.activeEnd - exactMelee.activeStart + 1 : meleeDef.active;
+  // A resolved ladder step uses its OWN exact window; otherwise chain steps keep the TUNED
+  // faster-startup scale of step 0's window (exactMelee / the profile default).
+  const baseStartup = exactStep ? exactStep.activeStart : exactMelee ? exactMelee.activeStart : meleeDef.startup;
+  const baseActive = exactStep
+    ? exactStep.activeEnd - exactStep.activeStart + 1
+    : exactMelee
+      ? exactMelee.activeEnd - exactMelee.activeStart + 1
+      : meleeDef.active;
   const startup =
-    comboStep > 0 ? Math.max(2, Math.round(baseStartup * COMBO.STEP_STARTUP_SCALE)) : baseStartup;
+    comboStep > 0 && !exactStep ? Math.max(2, Math.round(baseStartup * COMBO.STEP_STARTUP_SCALE)) : baseStartup;
   // The swing/lock must outlast the exact active window when it runs longer than the
   // TUNED profile duration.
   const duration = Math.max(meleeDef.duration, startup + baseActive + 2);
@@ -1655,6 +1691,10 @@ function startMeleeAttack(
   b.cooldowns["comboWindow"] = meleeDef.duration + meleeDef.comboWindowFrames;
   b.cooldowns["comboStep"] = comboStep;
   b.meleeHitUids = []; // fresh swing: everyone is hittable once again
+  // This step's action-script anim target (renderer bridge — see the BorgRuntime field doc);
+  // null when the ladder didn't resolve this step, which keeps the existing generic melee/
+  // melee_alt slot selection in borgPresentationAssets.ts unchanged.
+  b.meleeAnimStream = exactStep?.animStreamRef ?? null;
   // ATK-017 mash-counter scaffold: every new swing (opener or chained) resets the press-edge
   // counter to 0 — see the mash-counting block in stepAttacks for what increments it.
   b.cooldowns["mashCount"] = 0;

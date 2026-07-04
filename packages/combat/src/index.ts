@@ -75,6 +75,11 @@ export { groundRunSpeedForBorgId } from "./movementData.js";
 export { familyDamageRecordCountForBorg, familyDamageRecordForBorg } from "./familyDamageData.js";
 export { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
 export {
+  comboLadderForBorgId,
+  comboLadderStepCountForBorgId,
+  type ComboStep,
+} from "./actionStreamData.js";
+export {
   actorVelocityScale,
   isFrozen,
   statusTimescale,

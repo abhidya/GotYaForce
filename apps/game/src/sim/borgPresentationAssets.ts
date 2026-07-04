@@ -7,6 +7,17 @@ import type { AnimSlot, BorgAssets } from "./battleScene.js";
 
 export interface BorgPresentationAssets extends BorgAssets {
   setModelManifest(manifest: readonly ModelManifestEntry[]): void;
+  /**
+   * Resolve a baked clip DIRECTLY by its exported mot.bin (group, slot) — bypassing the
+   * SLOT_LABELS/PREFERRED_LABELS heuristic tables entirely. Used when the sim has an EXACT
+   * per-combo-step action-script anim target (combat.ts's BorgRuntime.meleeAnimStream, from
+   * @gf/combat's actionStreamData.ts ComboStep.animStreamRef): the action-script stream's
+   * OWN playAnim op already names the (group, slot) to play, so no label matching is needed
+   * or wanted. Null when the borg's anim_index.json doesn't export that exact bank (not every
+   * borg's baker captured every mot.bin slot — see actionStreamData.ts's header) — callers
+   * fall back to the slot-heuristic loadClip.
+   */
+  loadClipByStreamRef(borgId: string, ref: { group: number; slot: number }): Promise<THREE.AnimationClip | null>;
 }
 
 export interface BorgPresentationAssetsOptions {
@@ -498,10 +509,30 @@ async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.Animation
   return p;
 }
 
+async function loadBorgClipByStreamRef(
+  id: string,
+  ref: { group: number; slot: number },
+): Promise<THREE.AnimationClip | null> {
+  const key = `${id}:g${ref.group}s${ref.slot}`;
+  let p = clipCache.get(key);
+  if (!p) {
+    p = loadAnimIndex(id)
+      .then((index) => {
+        const bank = index?.banks.find((b) => b.group === ref.group && b.slot === ref.slot) ?? null;
+        return bank ? fetch(`/models/${id}/${bank.file}`) : null;
+      })
+      .then((r) => (r?.ok ? (r.json() as Promise<BakedClip>) : null))
+      .then((json) => (json ? buildClip(json) : null))
+      .catch(() => null);
+    clipCache.set(key, p);
+  }
+  return p;
+}
 
   return {
     loadModel: loadBorgModel,
     loadClip: loadBorgClip,
+    loadClipByStreamRef: loadBorgClipByStreamRef,
     setModelManifest(manifest: readonly ModelManifestEntry[]): void {
       modelManifest = [...manifest];
       libraryIds.clear();

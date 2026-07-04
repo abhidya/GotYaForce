@@ -372,6 +372,7 @@ const borgPresentationAssets = createBorgPresentationAssets({
 const battleScene = new BattleScene(battleRoot, {
   loadModel: borgPresentationAssets.loadModel,
   loadClip: borgPresentationAssets.loadClip,
+  loadClipByStreamRef: borgPresentationAssets.loadClipByStreamRef,
   // Audio glue: edge-triggered per-slot cue for every actor (dash/melee/hit/down/death/...).
   // Overlaps with the sim-level edges in emitBattleAudioEdges by design; the per-event
   // min-gap map in playCombatSfx dedupes the two sources. The air->ground slot edge

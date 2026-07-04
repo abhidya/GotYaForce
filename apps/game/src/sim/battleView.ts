@@ -15,6 +15,11 @@ export interface BattleActorView {
   allyLockTarget: string | null;
   dashActiveFrames: number;
   chargeFrames: number;
+  /** The CURRENT melee swing's exact action-script anim target (mot.bin bank group/slot),
+   *  when combat.ts's combo-ladder step resolved one (@gf/combat ComboStep.animStreamRef via
+   *  actionStreamData.ts). Null/undefined when unresolved — battleScene falls back to the
+   *  existing generic melee/melee_alt slot heuristic. */
+  meleeAnimStream: BorgRuntime["meleeAnimStream"];
 }
 
 export function battleActorView(borg: BorgRuntime): BattleActorView {
@@ -33,5 +38,6 @@ export function battleActorView(borg: BorgRuntime): BattleActorView {
     allyLockTarget: borg.allyLockTarget,
     dashActiveFrames: borg.cooldowns["dashActive"] ?? 0,
     chargeFrames: borg.cooldowns["chargeFrames"] ?? 0,
+    meleeAnimStream: borg.meleeAnimStream,
   };
 }

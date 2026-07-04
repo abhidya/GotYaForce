@@ -111,7 +111,7 @@ shot kind selection.
   (offset+extent), and family damage record — per-borg melee identity is now data
   (G RED f10-12/30hp/170u; Sword Knight f17-20/283u; Magnet Robot 50hp). The
   lowest-armed-kind selection is the one TUNED link (cue→script map still undecoded);
-  per-combo-step records deferred.
+  per-combo-step records deferred — **DONE, see the 2026-07-04 per-combo-step entry below.**
 - **Shot variant tables EXTRACTED (data only)**: gen-shot-variant-kinds.mjs — 85/85 static
   zz_008ac80_ sites spawner-linked, 81 tables / 662 rows, incl. the two GLOBAL shot
   registries (0x80303138: 123×0x44; 0x802d7b10: 129×0x38). G RED B-shot chain traced
@@ -161,6 +161,61 @@ bounds/triangles were "not wired" — they moved into packages/assets + battleBo
 app-flow refactor and ARE fully wired (parse → StageAssets → BattleConfig → walls/ceilings/
 floor height/spawn placement). Detectors now point at the real path. The true collision gap
 is 22/40 stages missing source hit bins, not runtime wiring.
+
+---
+
+## ★ 2026-07-04 session: per-combo-step melee (cue→script chain wired fleet-wide)
+
+**Melee combo chains are DONE (per-step), not just the first swing.** New adapter
+`packages/combat/src/actionStreamData.ts` derives the B-melee combo ladder end-to-end from
+`data/actionStreamTables.json` (the cue→family-jump-table→config-seed→(bank,group,slot)
+extraction, `research/decomp/cue-script-stream-decode-2026-07-04.md` /
+`action-stream-extraction-audit.md`) joined against `meleeAnimKinds.json` (armed HIT kind +
+playAnim target) and the existing `attackHitTables.json`/`familyDamageRecords.json` chain:
+
+- `comboLadderForBorgId(id)` resolves action index 1 (ground B) baseline variant 0's seed slot,
+  then walks the ROM's `(actor+0x6ea)++` re-arm auto-increment (validated generic mechanic,
+  FUN_801780e4) for held-B follow-ups, preferring a resolved chain-callback's redirected variant
+  (e.g. NEO G RED's v0→v6) for the ladder's final rung when the extraction recorded one. Capped
+  at 3 steps (matches `COMBO.STEP_DAMAGE_MULT.length` / the existing comboHits generator cap).
+- **Coverage: 103/208 borgs (49.5%) get a fully DERIVED per-step ladder** (93 with 2-3 steps,
+  10 single-step openers only — those still benefit from exact reach/record/damage on step 0);
+  **105/208 have no resolved ladder** (dash-only/shot-only/code-driven roots, or the emulation's
+  "no stream call reached"/"run capped"/"ambiguous" buckets from the extraction audit) and keep
+  today's TUNED `COMBO.STEP_STARTUP_SCALE` rescale unchanged.
+- Validated exactly against the decode note's ground truth: **pl0200 (SWORD KNIGHT)** → g3
+  s0/s1/s2, kinds 1/2/5; **pl0629 (NEO G RED)** → g3 s25/s26 (auto-increment) + chain callback
+  → s27, kinds 1/2/8 (the "standing-mash 3rd-hit finisher"). New selfcheck asserts
+  (`assertSwordKnightLadderResolvesThreeSteps`, `assertNeoGRedLadderChainsToS27`,
+  `assertUnresolvedLadderBorgStillCombosViaTunedPath`) pin both plus the TUNED-fallback path
+  (pl0100, a comboHits=3 borg with no resolved ladder).
+- `combat.ts`: `startMeleeAttack` and the swing-resolution block (meleeActiveLen/meleeRange/
+  meleeRecord) now prefer THIS combo step's own exact window/reach/record
+  (`comboLadderForBorgId(id)?.[comboStep]`) over the first-swing-only `meleeExactData.ts`
+  fallback, which itself remains the fallback over the TUNED profile. `stepAttacks`' public
+  signature is unchanged.
+- **Honest cross-check (not acted on this pass, per the task brief)**: comparing ladder length
+  against `actionProfiles.json`'s asset-derived `comboHits` finds **58/208 borgs disagree**
+  (e.g. many ninja-family borgs resolve a 2-step DOL ladder but comboHits says 3 from exported
+  swing-bank counts, and vice versa for a few). `comboLadderStepCountForBorgId(id)` is exported
+  for a future pass to reconcile; `comboHits` itself is untouched here.
+- **Anim-label bridge (renderer) LANDED**: verified the `playAnim` op's OWN (group, slot) —
+  a DIFFERENT numbering axis than the action-script stream slot — is what the exported clip
+  label suffix (`_sNN`) actually encodes (checked against pl0615/pl0629's `anim_index.json`:
+  stream g3 s27 arms kind 8 and plays `(group 3, slot 18)` → exported `hit_react_s18`, exactly
+  the pre-existing `PREFERRED_LABELS.pl0629.charge_shot` precedent, now understood as this
+  combo's 3rd hit rather than a charge move). `BorgRuntime.meleeAnimStream` (set by
+  `startMeleeAttack` from the resolved step's `animStreamRef`) flows through
+  `BattleActorView.meleeAnimStream` to `battleScene.ts`, which — when present — calls a new
+  `loadClipByStreamRef(borgId, {group, slot})` (borgPresentationAssets.ts, direct anim_index
+  lookup, bypassing the SLOT_LABELS/PREFERRED_LABELS heuristic entirely) instead of the generic
+  melee/melee_alt slot pick, falling back to the existing heuristic when the exact bank isn't
+  in that borg's baked anim_index (e.g. pl0200's exporter didn't capture g3 s0/s1/s2 at all —
+  confirmed by inspecting its anim_index.json, an honest per-borg exporter gap, not a bug in
+  this wiring). Every borg keeps its current visual behavior when no ladder resolves or the
+  exact bank is missing.
+- VALIDATED: `pnpm typecheck`, `packages/combat/dist/selfcheck.js`,
+  `scripts/selfcheck-1p-challenge.mjs`, `scripts/selfcheck-challenge-stages.mjs` all pass.
 
 ---
 

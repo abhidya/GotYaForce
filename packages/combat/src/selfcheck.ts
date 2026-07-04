@@ -29,6 +29,7 @@ import {
 } from "./combat.js";
 import { createBurstMeter } from "./burst.js";
 import { exactMeleeForBorgId } from "./meleeExactData.js";
+import { comboLadderForBorgId } from "./actionStreamData.js";
 import { moveByButton } from "./moveProperties.js";
 import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
 import {
@@ -860,6 +861,137 @@ function assertMeleeComboChains(borgs: BorgStats[]): void {
   }
   console.log(
     `[selfcheck] melee combo chained to step ${maxStep} (${meleeDef.comboHits} hits) over ${swingStarts} swings while holding B`,
+  );
+}
+
+/**
+ * actionStreamData.ts ladder resolution for pl0200 (SWORD KNIGHT): action index 1 (ground B)
+ * baseline variant 0 seeds action-script bank group 3 slot 0, and holding B re-arms the SAME
+ * variant via the ROM's `(actor+0x6ea)++` auto-increment cursor (no chain callback for this
+ * borg) — so the ladder is the pure auto-increment g3 s0/s1/s2, kinds 1/2/5 exactly as the
+ * cue-script-stream-decode-2026-07-04.md audit validates end-to-end.
+ */
+function assertSwordKnightLadderResolvesThreeSteps(borgs: BorgStats[]): void {
+  const swordKnight = buildProfile(borgById(borgs, "pl0200"));
+  const ladder = comboLadderForBorgId(swordKnight.id);
+  if (!ladder || ladder.length !== 3) {
+    throw new Error(`[selfcheck] Sword Knight combo ladder should resolve 3 steps: ${JSON.stringify(ladder)}`);
+  }
+  const slots = ladder.map((s) => s.slot);
+  const kinds = ladder.map((s) => s.kind);
+  if (slots.join(",") !== "0,1,2" || kinds.join(",") !== "1,2,5") {
+    throw new Error(
+      `[selfcheck] Sword Knight combo ladder should be g3 s0/s1/s2 kinds 1/2/5: slots=${slots} kinds=${kinds}`,
+    );
+  }
+
+  // Held-B combo: the SECOND swing's meleeActive window must equal step 1's OWN exact window
+  // (activeEnd - activeStart + 1), NOT the TUNED COMBO.STEP_STARTUP_SCALE rescale of step 0's
+  // window that the fallback path would have produced.
+  const attacker = fakeRuntime("ladder", 0, 0);
+  attacker.borgId = swordKnight.id;
+  const enemy = fakeRuntime("ladder_enemy", 1, 40);
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [attacker.uid, swordKnight],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+
+  const swingActiveLens: number[] = [];
+  let prevMeleeActive = 0;
+  for (let f = 0; f < 240 && swingActiveLens.length < 2; f += 1) {
+    pumpAttackFrame(attacker, swordKnight, true, [attacker, enemy], profiles);
+    const active = attacker.cooldowns["meleeActive"] ?? 0;
+    if (active > prevMeleeActive) swingActiveLens.push(active); // new swing: peak meleeActive = startup+active
+    prevMeleeActive = active;
+    assertSane([attacker, enemy], f);
+  }
+  if (swingActiveLens.length < 2) {
+    throw new Error(`[selfcheck] expected at least 2 chained swings, saw ${swingActiveLens.length}`);
+  }
+  const step1 = ladder[1];
+  if (!step1) throw new Error("[selfcheck] ladder step 1 missing");
+  const step1ActiveLen = step1.activeEnd - step1.activeStart + 1;
+  const secondSwingActiveLen = swingActiveLens[1]! - step1.activeStart; // meleeActive = startup + active at swing start; startup == step1.activeStart when exact
+  if (secondSwingActiveLen !== step1ActiveLen) {
+    throw new Error(
+      `[selfcheck] second swing should use step 1's exact active window (${step1ActiveLen}f from slot ${step1.slot} kind ${step1.kind}), got ${secondSwingActiveLen}f (peak meleeActive=${swingActiveLens[1]})`,
+    );
+  }
+  console.log(
+    `[selfcheck] Sword Knight combo ladder resolved g3 s0/s1/s2 (kinds 1/2/5); second swing used step 1's exact ${step1ActiveLen}f active window`,
+  );
+}
+
+/**
+ * NEO G RED (pl0629): action index 1 baseline variant 0 seeds g3 s25 (kind 1); holding B
+ * auto-increments to s26 (kind 2), then the variant's chain callback (FUN_8018ded0, config+0x10)
+ * fires and redirects the finisher to v6's OWN seed s27 (kind 8) — the decode note's "standing-
+ * mash 3rd-hit finisher", not a further blind auto-increment.
+ */
+function assertNeoGRedLadderChainsToS27(_borgs: BorgStats[]): void {
+  const ladder = comboLadderForBorgId("pl0629");
+  if (!ladder || ladder.length !== 3) {
+    throw new Error(`[selfcheck] NEO G RED combo ladder should resolve 3 steps: ${JSON.stringify(ladder)}`);
+  }
+  const slots = ladder.map((s) => s.slot);
+  const kinds = ladder.map((s) => s.kind);
+  if (slots.join(",") !== "25,26,27" || kinds.join(",") !== "1,2,8") {
+    throw new Error(
+      `[selfcheck] NEO G RED combo ladder should be g3 s25/s26/s27 kinds 1/2/8 (chain cb -> v6): slots=${slots} kinds=${kinds}`,
+    );
+  }
+  console.log("[selfcheck] NEO G RED combo ladder resolved g3 s25/s26 (auto-increment) + chain cb -> s27 (kind 8)");
+}
+
+/**
+ * A borg with NO resolved action-stream ladder (pl0100 — its action-1 baseline variant reaches
+ * no stream call in the emulation, per action-stream-extraction-audit.md's "no stream call
+ * reached" bucket) must still combo via the pre-existing TUNED COMBO.STEP_STARTUP_SCALE path —
+ * comboLadderForBorgId returning null must not silently break chaining for the unresolved
+ * majority of the roster.
+ */
+function assertUnresolvedLadderBorgStillCombosViaTunedPath(borgs: BorgStats[]): void {
+  const id = "pl0100";
+  if (comboLadderForBorgId(id) !== null) {
+    throw new Error(`[selfcheck] expected pl0100 to be in the unresolved-ladder bucket for this test to be meaningful`);
+  }
+  const profile = buildProfile(borgById(borgs, id));
+  const meleeDef = actionProfileForProfile(profile).melee;
+  if (!meleeDef || meleeDef.comboHits < 2) {
+    throw new Error(`[selfcheck] pl0100 should have a multi-hit TUNED combo profile: ${JSON.stringify(meleeDef)}`);
+  }
+
+  const attacker = fakeRuntime("tuned_combo", 0, 0);
+  attacker.borgId = profile.id;
+  const enemy = fakeRuntime("tuned_combo_enemy", 1, 40);
+  enemy.hp = enemy.maxHp = 5000;
+  const profiles = new Map([
+    [attacker.uid, profile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+
+  let maxStep = 0;
+  let swingStarts = 0;
+  let prevMeleeActive = 0;
+  for (let f = 0; f < 240; f += 1) {
+    pumpAttackFrame(attacker, profile, true, [attacker, enemy], profiles);
+    const active = attacker.cooldowns["meleeActive"] ?? 0;
+    if (active > prevMeleeActive) swingStarts += 1;
+    prevMeleeActive = active;
+    maxStep = Math.max(maxStep, attacker.cooldowns["comboStep"] ?? 0);
+    assertSane([attacker, enemy], f);
+  }
+  if (maxStep !== meleeDef.comboHits - 1) {
+    throw new Error(
+      `[selfcheck] pl0100 TUNED-fallback combo never reached its finisher: maxStep=${maxStep}, comboHits=${meleeDef.comboHits}`,
+    );
+  }
+  if (swingStarts < meleeDef.comboHits) {
+    throw new Error(`[selfcheck] pl0100 TUNED-fallback combo produced too few swings: ${swingStarts}`);
+  }
+  console.log(
+    `[selfcheck] pl0100 (no resolved action-stream ladder) still chained to step ${maxStep} (${meleeDef.comboHits} hits) over ${swingStarts} swings via the TUNED path`,
   );
 }
 
@@ -2851,6 +2983,9 @@ export function main(): number {
   assertProjectilesCullOutsideStageFloor();
   assertActionProfilesDrivePrimaryAttacks(borgs);
   assertMeleeComboChains(borgs);
+  assertSwordKnightLadderResolvesThreeSteps(borgs);
+  assertNeoGRedLadderChainsToS27(borgs);
+  assertUnresolvedLadderBorgStillCombosViaTunedPath(borgs);
   assertMeleeHitsOncePerSwing(borgs);
   assertChargeShotTiers(borgs);
   assertSwordBeamFinisher(borgs);
