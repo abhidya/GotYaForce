@@ -492,6 +492,27 @@ export interface Projectile {
    *  zz_0019550_ / effect-def table 0x802c7ed0 (0xff = no effect). Written alongside
    *  `hitConfirmedThisFrame`; absent until the first confirmed hit. Renderer-facing only. */
   lastImpactEffectId?: number;
+  /**
+   * Resolved efct00-bank FLIGHT visual for this shot (research/decomp/
+   * efct-consumers-decode-2026-07-04.md §3, FUN_8007dd84's shot-init row +0x00): set only
+   * when the borg's guarded shot-variant row proves the shot uses the efct00 particle bank
+   * (texId|flags bit 0x4000 or 0x8000) rather than the per-player weapon bank (neither bit —
+   * honest unknown, no port visual change). `attackHitData.ts` shotFlightVisualForBorgId
+   * resolves this from the SAME borgShotKinds/firedBy guarded attribution as the HIT-kind
+   * resolver; absent/undefined means "keep today's visualKind sprite" (unattributed or
+   * weapon-bank rows). Renderer-facing only (battleScene.ts syncProjectiles), no sim-side
+   * gameplay effect. */
+  flightVisual?: {
+    /** efct00_mdl.arc bank texId (0..156, apps/game/src/sim/data/efctBankMeshes.json). */
+    bankTexId: number;
+    /** True when the row's 0x4000 bit is set: the ROM attaches the entry's matAnim at the
+     *  shooter's TEAM frame (1.0 team 0 / 3.0 team 1 — FLOAT_804379d0/d4). False (0x8000
+     *  alone) draws the bank mesh's plain material, no matAnim. */
+    teamTint: boolean;
+    /** s8 +0x34 launch-FX id into the muzzle/launch fence table (zz_00aedc0_,
+     *  0x802fafd0/0x802faef8) or null when the row's byte is -1 (no launch flash). */
+    launchFxId: number | null;
+  };
 }
 
 /**

@@ -171,10 +171,12 @@ const STATUS_FX_HAND_SPIN = { 1: -2184, 2: -182 } as const; // s16 units/frame (
 const S16_TO_RAD = (Math.PI * 2) / 0x10000;
 
 interface ProjectileActor {
-  /** Scene node: a camera-facing Sprite for billboard kinds, or the crossed-plane beam rig
-   *  (long axis oriented along velocity each frame) for "energy" bolts. */
+  /** Scene node: a camera-facing Sprite for billboard kinds, the crossed-plane beam rig
+   *  (long axis oriented along velocity each frame) for "energy" bolts, or (when the sim
+   *  resolved a flightVisual) the efct00 bank-mesh Group attached to the moving projectile. */
   node: THREE.Object3D;
-  /** Material shared by the sprite (billboards) or by BOTH crossed planes (beam rig). */
+  /** Material shared by the sprite (billboards) or by BOTH crossed planes (beam rig).
+   *  Unused (a dummy) for bank-mesh projectiles, which own their own `bankMaterials`. */
   material: THREE.SpriteMaterial | THREE.MeshBasicMaterial;
   /**
    * The sim's Projectile object. stepProjectiles mutates projectiles IN PLACE and writes
@@ -185,6 +187,11 @@ interface ProjectileActor {
   sim: Projectile;
   /** True when `node` is the velocity-oriented beam rig (needs per-frame orient/stretch). */
   beam: boolean;
+  /** Per-layer materials of a bank-mesh flight visual (Projectile.flightVisual resolved —
+   *  research/decomp/efct-consumers-decode-2026-07-04.md §3), so opacity fade can be applied
+   *  on top of the layer's own matAnim-sampled rest opacity, same convention as BankFxActor. */
+  bankMaterials?: THREE.MeshBasicMaterial[];
+  bankLayerOpacity?: number[];
 }
 
 interface ImpactActor {
@@ -958,7 +965,17 @@ export class BattleScene {
       }
       actor.sim = projectile; // keep the stable sim reference fresh for the despawn sweep
       actor.node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
-      actor.material.opacity = Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
+      const fade = Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
+      if (actor.bankMaterials) {
+        // Bank-mesh flight visual: fade multiplies each layer's OWN rest opacity (the
+        // matAnim-sampled/authored value), same convention as BankFxActor's tween.
+        for (let i = 0; i < actor.bankMaterials.length; i++) {
+          actor.bankMaterials[i]!.opacity = (actor.bankLayerOpacity?.[i] ?? 1) * fade;
+        }
+        actor.node.rotation.y = Math.atan2(projectile.vel.x, projectile.vel.z);
+      } else {
+        actor.material.opacity = fade;
+      }
       if (actor.beam) orientBeam(actor.node, projectile);
       // Persisting projectiles (consumeOnHit === false, ATK-008) apply re-hits WITHOUT
       // despawning; the sim flags each applied hit for exactly one frame
@@ -1009,7 +1026,58 @@ export class BattleScene {
     }
   }
 
+  /**
+   * Bank-mesh flight visual (Projectile.flightVisual, research/decomp/
+   * efct-consumers-decode-2026-07-04.md §3): the shot's efct00_mdl.arc bank entry attached to
+   * the projectile itself instead of the generic sprite/beam stand-in, reusing the SAME cached
+   * geometry-template machinery spawnBankFx uses for muzzle flashes and hit impacts. teamTint
+   * rows sample the entry's matAnim at the shooter's team frame (1.0 team 0 / 3.0 team 1 —
+   * FLOAT_804379d0/d4, same convention as spawnMuzzleFlash) ONCE at spawn (the ROM attaches the
+   * matAnim at a fixed frame at init, not a per-frame re-sample — same policy as the muzzle
+   * flash). Plain (0x8000-only) rows draw the bank's authored material with no matAnim sample.
+   * Returns null when the texId has no drawable bank entry so the caller keeps the sprite.
+   */
+  private buildBankProjectileActor(projectile: Projectile): ProjectileActor | null {
+    const visual = projectile.flightVisual;
+    if (!visual) return null;
+    const layers = bankFxTemplate(visual.bankTexId);
+    if (!layers) return null;
+    const node = new THREE.Group();
+    const bankMaterials: THREE.MeshBasicMaterial[] = [];
+    const bankLayerOpacity: number[] = [];
+    const animColor = new THREE.Color();
+    const matAnimFrame = visual.teamTint ? (projectile.team === 1 ? 3 : 1) : undefined;
+    for (const layer of layers) {
+      let color = layer.color;
+      let restOpacity = layer.baseOpacity;
+      if (matAnimFrame !== undefined && layer.anim) {
+        restOpacity = sampleBankAnim(layer, matAnimFrame, animColor).opacity;
+        color = animColor.clone();
+      }
+      const material = new THREE.MeshBasicMaterial({
+        color,
+        vertexColors: layer.vertexColors,
+        transparent: true,
+        opacity: restOpacity,
+        blending: layer.additive ? THREE.AdditiveBlending : THREE.NormalBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      node.add(new THREE.Mesh(layer.geometry, material));
+      bankMaterials.push(material);
+      bankLayerOpacity.push(restOpacity);
+    }
+    node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
+    node.rotation.y = Math.atan2(projectile.vel.x, projectile.vel.z);
+    this.root.add(node);
+    // `material` is unused for the bank-mesh path (bankMaterials drives opacity instead); a
+    // throwaway MeshBasicMaterial keeps ProjectileActor's shared field non-optional.
+    return { node, material: new THREE.MeshBasicMaterial(), sim: projectile, beam: false, bankMaterials, bankLayerOpacity };
+  }
+
   private spawnProjectile(projectile: Projectile): ProjectileActor {
+    const bankActor = this.buildBankProjectileActor(projectile);
+    if (bankActor) return bankActor;
     const kind = projectile.visualKind;
     const colors = PROJECTILE_COLORS[kind];
     const color = projectile.team === 0 ? colors.ally : colors.enemy;
@@ -1052,6 +1120,12 @@ export class BattleScene {
 
   private disposeProjectileActor(actor: ProjectileActor): void {
     this.root.remove(actor.node);
+    if (actor.bankMaterials) {
+      // Bank-mesh projectile: geometries are the shared module-level bankFxTemplate cache
+      // (never disposed here, same convention as BankFxActor); only per-instance materials
+      // + the unused placeholder `material` need disposing.
+      for (const material of actor.bankMaterials) material.dispose();
+    }
     // Beam rigs share ONE material across both planes and use the shared module-level unit
     // plane geometries (never disposed here) — a single material.dispose covers both paths.
     actor.material.dispose();

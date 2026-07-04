@@ -70,6 +70,7 @@ import {
 import {
   attackHitRecordsForKind,
   attackHitTableForBorgId,
+  shotFlightVisualForBorgId,
   shotHitRadiusForBorgId,
   shotKindForBorgId,
 } from "./attackHitData.js";
@@ -2229,6 +2230,7 @@ function spawnProjectile(
     y: b.pos.y + (shotDef.muzzleYOffset ?? MUZZLE_OFFSET.up),
     z: b.pos.z + fwd.z * (shotDef.muzzleForwardOffset ?? MUZZLE_OFFSET.forward),
   };
+  const flightVisual = shotFlightVisualForBorgId(b.borgId);
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
@@ -2281,6 +2283,13 @@ function spawnProjectile(
     // Charged releases prefer the exact charge-leaf record (chargeDamageRecordSpread) when the
     // borg's remap actually carries it; otherwise they keep the CHARGE_OR_SPECIAL archetype.
     ...(chargeTier === 0 ? shotFamilyRecordSpread(b.borgId) : chargeDamageRecordSpread(b.borgId, chargeLeaf)),
+    // DERIVED where present: the borg's B-shot flight visual (efct00 bank texId/team-tint/
+    // launch-FX) resolved from the SAME guarded fire-site attribution as shotKindForBorgId,
+    // restricted to the one row shape proven to carry this field layout (attackHitData.ts
+    // shotFlightVisualForBorgId — research/decomp/efct-consumers-decode-2026-07-04.md §3).
+    // undefined (the common case today — no borg has a provable attribution landing on a bank
+    // row yet) keeps the renderer's existing sprite/mesh visualKind exactly as before.
+    ...(flightVisual ? { flightVisual } : {}),
   };
 }
 

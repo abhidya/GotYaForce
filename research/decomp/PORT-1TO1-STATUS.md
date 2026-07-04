@@ -13,6 +13,72 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 
 ---
 
+## ★ 2026-07-04 session: projectile flight-visual resolver wired (honest fleet coverage: 0/208 today)
+
+Extended `research/decomp/efct-consumers-decode-2026-07-04.md` §3's shot-init row decode
+(FUN_8007dd84's +0x00 texId|flags / +0x34 launch-FX byte) into a runtime resolver and threaded
+it to spawned projectiles, using the SAME guarded fire-site attribution machinery
+(`borgShotKinds`) the B-shot HIT-kind resolver already uses.
+
+- **`attackHitData.ts` — `shotFlightVisualForBorgId(id)`**: resolves `{ bankTexId, teamTint,
+  launchFxId }` from a borg's guarded `borgShotKinds` attribution, restricted to rows whose
+  TABLE shares table `0x802d6d68`'s proven byte shape (stride 56 / kindOffset 3 — the ONE shape
+  the decode note documents at those offsets). Verified independently (by a second, isolated
+  agent) that this shape gate is load-bearing: reading the same nominal offsets in
+  differently-shaped tables decodes to texIds far outside the 157-entry efct00 bank (1794,
+  3213, 9219, 3596, 3615, 16383 — the census's own `0x802d9758` table's few flag-shaped hits
+  are a coincidence, confirmed by inspecting its actual value set). Returns null (keep today's
+  visualKind) when unattributed, wrong-shaped, or the row's texId|flags has NEITHER 0x4000 nor
+  0x8000 (a per-player weapon-bank row, not efct00 — the dominant case). New
+  `shotFlightVisualForTableRow(table, variant)` (direct row decode, bypassing borg attribution)
+  and `hasSafeShapeShotAttribution(id)` (coverage telemetry) support the selfcheck.
+- **Honest fleet finding, asserted not hidden**: of 208 roster borgs, 42 have a guarded
+  attribution landing in the one provably-safe table shape, but **all 42 land on a weapon-bank
+  row** — the two real ROM rows that DO carry a bank flag (table `0x802d6d68` variant 6-9,
+  texId 125, both flags, the "G RED/BLACK 0x615-family" row the original decode note describes
+  in prose; table `0x802d7b10` variant 10, texId 9, 0x4000 only) have **no call-site-guarded
+  borg attribution at all** — their firing functions (`FUN_80166fa8`, `zz_0092534_`) carry no
+  static actor-id guard the extractor could prove, so no borg's shot legitimately resolves a
+  bank flight visual today. **This is not a bug**: `shotFlightVisualForBorgId` is correct and
+  conservative; the ROM's own call-site structure just doesn't yet give up which borg fires
+  those two rows. 166 borgs are unattributed or attributed to a different-shaped table.
+- **`types.ts`**: `Projectile.flightVisual?: { bankTexId, teamTint, launchFxId }` (renderer-
+  facing only, no sim-side gameplay effect). **`combat.ts` `spawnProjectile`**: spreads the
+  resolved visual onto every spawned projectile (undefined for the honest-null case above —
+  every borg's projectile is byte-for-byte unaffected today, including G RED and pl0000, both
+  explicitly asserted).
+- **`battleScene.ts`**: `syncProjectiles`/`spawnProjectile` (renderer) now check
+  `projectile.flightVisual` first and, when present, build a bank-mesh Group via the SAME
+  cached `bankFxTemplate`/`sampleBankAnim` machinery `spawnMuzzleFlash`/`spawnHitFx` use —
+  team-tint rows sample the entry's matAnim at the shooter's team frame (1/3, same convention
+  as the muzzle flash) once at spawn; the mesh tracks the projectile's position and flight-yaw
+  every frame and fades via each layer's own rest opacity, same policy as `BankFxActor`. Falls
+  back to the existing sprite/beam stand-ins whenever `flightVisual` is absent OR the texId has
+  no drawable bank entry. Launch-FX: within the safe-shape table family the only launch-FX id
+  ever paired with a bank-flag row is 0 (both real bank rows above), which is already wired
+  (the generic muzzle flash, texId 35) — no new launch-FX id needed this pass.
+- New selfcheck `assertShotFlightVisualResolution`: (a) direct-row decode of the two real ROM
+  bank rows is byte-exact (`shotFlightVisualForTableRow`); (b) a weapon-bank row in the SAME
+  safe-shape table decodes to null (proves the flag gate, not just the shape gate); (c) an
+  out-of-shape table is never read regardless of its bytes; (d) G RED and pl0000 (the latter
+  landing IN the safe-shape table on a weapon-bank row — a stronger negative than "wrong
+  shape") both resolve null and pl0000's actually-spawned projectile carries no
+  `flightVisual`; logs the fleet split (0 resolved / 42 safe-shape-but-weapon-bank / 166
+  other) every run so a future census update that adds a borg guard to those two functions
+  will visibly move this number.
+- DERIVED vs TUNED: the row shape gate, byte offsets, flag semantics, and the two real ROM
+  rows' decoded values are all DERIVED (independently re-verified this session). The
+  team-frame sample values (1/3) and "sample once at spawn, not per-frame" policy reuse the
+  existing muzzle-flash convention (already DERIVED there); the yaw-from-velocity orientation
+  or the bank mesh is the same TUNED stand-in `spawnHitFx`'s directional layers already use for
+  the ROM's real attacker->contact/shot-axis basis.
+- VALIDATED: `pnpm typecheck`, `packages/combat/dist/selfcheck.js` (full suite incl. the new
+  assert), `scripts/selfcheck-1p-challenge.mjs`, `scripts/selfcheck-challenge-stages.mjs`,
+  `scripts/run-projectile-tests.mjs` all PASS; challenge/stage smoke numbers UNCHANGED (this
+  pass is a strict visual-only no-op for every borg today).
+
+---
+
 ## ★ 2026-07-04 session: B-shot HIT kind resolved from guarded fire-site attribution (non-zero kinds wired)
 
 Closed the "General wiring needs each fire-fn's shot id read" gap noted in B6 above.
@@ -526,7 +592,7 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Audio: BGM/menu | ~90% | — |
 | Audio: combat/voice | ~85% (voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04; **PATH-B per-anim swing audio DECODED+WIRED 2026-07-04**) | real bank samples exported (scripts/export-combat-se.py, 23 files) + wired (shoot/hit/down/dash/jump/spawn/land DERIVED); melee/charge swings now play their ROM-AUTHORED per-anim sounds (actor+0x4e8 sound-event table joined via the anim-descriptor banks — anim-sound-op-decode-2026-07-04.md; 103/103 resolved ladders + 18 air / 2 charge leaves covered, TUNED fallback kept for the rest); death stays TUNED (op-0x0f voice is per-borg table-driven, tables undecoded); voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
-| FX: particles/projectiles | ~85% (hit-impact chain decoded end-to-end 2026-07-04 incl. the texId hop — ptl-format-notes-2026-07-04.md; PLUS muzzle/launch FX family, projectile-row visual fields, slow/haste status FX and the matAnim color tracks decoded+wired — efct-consumers-decode-2026-07-04.md) | per-borg projectile flight texIds (mechanical join over shotVariantKinds.json rawBytes); melee hand-flash id 7; DAT_803bb384/470 bank identities; ptcl00.ptl emitter bank loader; 3D weapon meshes |
+| FX: particles/projectiles | ~85% (hit-impact chain decoded end-to-end 2026-07-04 incl. the texId hop — ptl-format-notes-2026-07-04.md; PLUS muzzle/launch FX family, projectile-row visual fields, slow/haste status FX and the matAnim color tracks decoded+wired — efct-consumers-decode-2026-07-04.md; per-borg flight-visual RESOLVER + renderer wiring landed 2026-07-04, honest fleet coverage 0/208 today — see the top-of-file session entry) | a borg-id guard on FUN_80166fa8/zz_0092534_ (the two real bank-flag rows have no provable per-borg attribution yet) would unlock the first live case; melee hand-flash id 7; DAT_803bb384/470 bank identities; ptcl00.ptl emitter bank loader; 3D weapon meshes |
 
 **Trace status update (2026-07-03, (bc)):** T9 (knockback magnitude) is **no longer trace-blocked**
 — it was found statically in the DOL as strength-indexed tables (DAT_802dd8a0/DAT_802d3664), and

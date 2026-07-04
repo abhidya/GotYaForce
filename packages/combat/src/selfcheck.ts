@@ -37,7 +37,14 @@ import {
   xMoveForBorgId,
   xMoveCoverage,
 } from "./actionStreamData.js";
-import { attackHitTableForBorgId, shotHitRadiusForBorgId, shotKindForBorgId } from "./attackHitData.js";
+import {
+  attackHitTableForBorgId,
+  hasSafeShapeShotAttribution,
+  shotFlightVisualForBorgId,
+  shotFlightVisualForTableRow,
+  shotHitRadiusForBorgId,
+  shotKindForBorgId,
+} from "./attackHitData.js";
 import { moveByButton } from "./moveProperties.js";
 import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
 import {
@@ -1136,6 +1143,114 @@ function assertShotKindResolutionPrefersProvenAttribution(borgs: BorgStats[]): v
     `[selfcheck] shot-kind resolution: G RED pinned (kind 0, radius 20) unchanged; pl0000 resolves kind 1 (radius 10, was 5/35); ` +
       `pl0001 has no attribution (falls back, radius 5). Fleet: ${nonZeroCount} borgs resolve a proven NON-ZERO shot kind, ` +
       `${zeroCount} resolve a proven kind 0, ${noneCount} have no attribution (kind-0 heuristic fallback) out of ${borgs.length}.`,
+  );
+}
+
+/**
+ * Shot-flight-visual resolution (research/decomp/efct-consumers-decode-2026-07-04.md §3):
+ * FUN_8007dd84's shot-init row +0x00 (texId|flags) resolves a borg's B-shot flight mesh from
+ * the efct00_mdl.arc bank when bit 0x4000 or 0x8000 is set; neither bit means the row indexes
+ * the per-player weapon bank instead (today's TUNED sprite/mesh stand-in stays exact).
+ * shotFlightVisualForBorgId (attackHitData.ts) uses the SAME guarded borgShotKinds
+ * attribution as shotKindForBorgId, restricted to the one row shape (table 0x802d6d68's
+ * 56-byte/kindOffset-3 layout) proven to carry these fields — other tables' rows at the same
+ * nominal offsets decode to texIds far outside the 157-entry bank (a different, undecoded
+ * row format), so they are never trusted.
+ *
+ * Honest fleet finding (asserted here, not hidden): of the 130 borgs with a guarded
+ * borgShotKinds attribution, 48 land in a safe-shape table, but ALL 48 land on a weapon-bank
+ * row (neither flag set) — the two real ROM rows that DO carry a bank flag (table 0x802d6d68
+ * variant 6-9's texId 125, table 0x802d7b10 variant 10's texId 9) have NO call-site-guarded
+ * borg attribution at all (their firing functions, FUN_80166fa8/zz_0092534_, carry no static
+ * actor-id guard the extractor could prove — confirmed independently, not a bug in this
+ * resolver). So `shotFlightVisualForBorgId` legitimately resolves null for every borg in the
+ * roster today; every borg's projectile keeps its exact current visualKind rendering. This
+ * assert proves three things instead of faking fleet coverage:
+ *  (a) G RED (weapon-bank row via a DIFFERENT table, per the existing shot-kind ground truth)
+ *      resolves null and his spawned projectile carries no flightVisual — unchanged visuals;
+ *  (b) pl0000 (NORMAL NINJA) has a guarded attribution landing in the PROVEN safe-shape table
+ *      itself (0x802d6d68 id 0) yet is STILL a weapon-bank row (texId 14, neither flag) — a
+ *      stronger negative than "wrong shape", proving the flag check itself is exercised, not
+ *      just the shape gate — and its spawned projectile carries no flightVisual either;
+ *  (c) the byte-decode machinery itself is correct against the two REAL ROM rows that DO
+ *      carry the flags, read directly by table/variant (shotFlightVisualForTableRow,
+ *      bypassing borg attribution entirely — the ONLY way to exercise a positive decode
+ *      against real ROM bytes given (a)/(b)'s honest negative fleet result).
+ */
+function assertShotFlightVisualResolution(borgs: BorgStats[]): void {
+  // (c) Direct ROM-row decode correctness: table 0x802d6d68 variant 6 (G RED/BLACK 0x615-
+  // family shot, texId 125, both flags set -> teamTint true, launch FX 0) and table
+  // 0x802d7b10 variant 10 (texId 9, only 0x4000 set -> teamTint true, launch FX 0).
+  const gRedFamilyRow = shotFlightVisualForTableRow("0x802d6d68", 6);
+  if (!gRedFamilyRow || gRedFamilyRow.bankTexId !== 125 || gRedFamilyRow.teamTint !== true || gRedFamilyRow.launchFxId !== 0) {
+    throw new Error(`[selfcheck] table 0x802d6d68 variant 6 should decode to {bankTexId:125, teamTint:true, launchFxId:0}: got ${JSON.stringify(gRedFamilyRow)}`);
+  }
+  const otherBankRow = shotFlightVisualForTableRow("0x802d7b10", 10);
+  if (!otherBankRow || otherBankRow.bankTexId !== 9 || otherBankRow.teamTint !== true || otherBankRow.launchFxId !== 0) {
+    throw new Error(`[selfcheck] table 0x802d7b10 variant 10 should decode to {bankTexId:9, teamTint:true, launchFxId:0}: got ${JSON.stringify(otherBankRow)}`);
+  }
+  // A weapon-bank row in the SAME safe-shape table (variant 0, texId 14, neither flag) must
+  // decode to null -- proves the flag gate itself works, not just the shape gate.
+  const weaponBankRow = shotFlightVisualForTableRow("0x802d6d68", 0);
+  if (weaponBankRow !== null) {
+    throw new Error(`[selfcheck] table 0x802d6d68 variant 0 (texId 14, no flags) should decode to null: got ${JSON.stringify(weaponBankRow)}`);
+  }
+  // An out-of-shape table (e.g. G RED's own attribution table, stride 68) must never be read.
+  const outOfShape = shotFlightVisualForTableRow("0x80303138", 43);
+  if (outOfShape !== null) {
+    throw new Error(`[selfcheck] out-of-shape table 0x80303138 must resolve null regardless of its bytes: got ${JSON.stringify(outOfShape)}`);
+  }
+
+  // (a) G RED: unattributed to any bank row (his own table is a different shape) -> null,
+  // spawned projectile carries no flightVisual.
+  if (shotFlightVisualForBorgId("pl0615") !== null) {
+    throw new Error(`[selfcheck] G RED should resolve no flight visual (his table is a different shape): got ${JSON.stringify(shotFlightVisualForBorgId("pl0615"))}`);
+  }
+
+  // (b) pl0000: guarded attribution DOES land in the safe-shape table, but on a weapon-bank
+  // row -> still null. Verify via the real spawn path (spawnProjectile in combat.ts).
+  if (shotFlightVisualForBorgId("pl0000") !== null) {
+    throw new Error(`[selfcheck] pl0000 (weapon-bank row in the safe-shape table) should resolve no flight visual: got ${JSON.stringify(shotFlightVisualForBorgId("pl0000"))}`);
+  }
+  const ninjaProfile = buildProfile(borgById(borgs, "pl0000"));
+  const ninjaRuntime = fakeRuntime("ninja_flightvisual", 0, 0);
+  ninjaRuntime.borgId = ninjaProfile.id;
+  ninjaRuntime.ammo = startingAmmoForProfile(ninjaProfile);
+  const enemy = fakeRuntime("ninja_flightvisual_enemy", 1, 220);
+  const profiles = new Map([
+    [ninjaRuntime.uid, ninjaProfile],
+    [enemy.uid, buildProfile(borgById(borgs, "pl0008"))],
+  ]);
+  const fired = pumpAttackFrame(ninjaRuntime, ninjaProfile, true, [ninjaRuntime, enemy], profiles);
+  const proj = fired[0];
+  if (!proj) throw new Error("[selfcheck] pl0000 shot tap should spawn a projectile");
+  if (proj.flightVisual !== undefined) {
+    throw new Error(`[selfcheck] pl0000's spawned projectile should carry no flightVisual (weapon-bank row): got ${JSON.stringify(proj.flightVisual)}`);
+  }
+
+  // Fleet coverage telemetry: how many borgs resolve a bank flight visual today (honest: 0),
+  // vs. how many have a guarded attribution that lands in the proven safe-shape table at all
+  // (48 -- all currently weapon-bank rows) vs. neither (the remaining fleet, unattributed or
+  // attributed to a different-shaped table).
+  let bankVisualCount = 0;
+  let safeShapeWeaponBankCount = 0;
+  let otherCount = 0;
+  for (const stats of borgs) {
+    const visual = shotFlightVisualForBorgId(stats.id);
+    if (visual) {
+      bankVisualCount += 1;
+      continue;
+    }
+    if (hasSafeShapeShotAttribution(stats.id)) safeShapeWeaponBankCount += 1;
+    else otherCount += 1;
+  }
+  console.log(
+    `[selfcheck] shot-flight-visual resolution: G RED and pl0000 (weapon-bank rows) keep today's visuals unchanged; ` +
+      `direct ROM-row decode verified against table 0x802d6d68 v6 (texId 125, teamTint, launchFx 0) and 0x802d7b10 v10 ` +
+      `(texId 9, teamTint, launchFx 0). Fleet: ${bankVisualCount} borgs resolve a bank flight visual today (honest: the ` +
+      `two real ROM rows with bank flags have no call-site-guarded borg attribution — FUN_80166fa8/zz_0092534_ carry no ` +
+      `static actor-id guard), ${safeShapeWeaponBankCount} have a guarded attribution landing in the proven safe-shape ` +
+      `table but on a weapon-bank row, ${otherCount} are unattributed or attributed to a different-shaped table, out of ${borgs.length}.`,
   );
 }
 
@@ -3516,6 +3631,7 @@ export function main(): number {
   assertUnresolvedLadderBorgStillCombosViaTunedPath(borgs);
   assertGRedChargeStreamUnresolvedKeepsFallback(borgs);
   assertShotKindResolutionPrefersProvenAttribution(borgs);
+  assertShotFlightVisualResolution(borgs);
   assertArmedChargeLeafSetsExactAnimAndRecord(borgs);
   assertArmedAirBLeafUsesExactWindow(borgs);
   assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs);

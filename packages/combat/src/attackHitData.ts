@@ -68,12 +68,73 @@ interface BorgShotKindEntry {
   remapHasKind: boolean;
 }
 
+/** One decoded shot-variant table row (scripts/gen-shot-variant-kinds.mjs): a 0x38-stride
+ *  (56-byte) row with kindOffset 3 shares table 0x802d6d68's proven byte layout (research/
+ *  decomp/efct-consumers-decode-2026-07-04.md §3) — u16 BE +0x00 = texId|flags, s8 +0x34 =
+ *  launch-FX id. Tables with a DIFFERENT stride/kindOffset do NOT share this layout (spot
+ *  check: reading +0x00/+0x34 off-shape yields texIds far outside the 157-entry efct00 bank,
+ *  e.g. 1794/3213/9219 — a different row format, not a real bank reference), so the flight-
+ *  visual resolver below only trusts rows from stride-56/kindOffset-3 tables. */
+interface ShotVariantTableRow {
+  variant: number;
+  kind: number;
+  rawBytes: string;
+  firedBy: Array<{ fn: string; chunkLine: string; borgIds?: string[] }>;
+}
+
+interface ShotVariantTable {
+  stride: number;
+  kindOffset: number;
+  rows: ShotVariantTableRow[];
+}
+
 type ShotVariantKindsFile = {
   _meta: Record<string, unknown>;
+  tables: Record<string, ShotVariantTable>;
   borgShotKinds: Record<string, BorgShotKindEntry[]>;
 };
 
 const SHOT_VARIANT_KINDS = shotVariantKindsData as unknown as ShotVariantKindsFile;
+
+/** The one row shape proven to carry the +0x00 texId|flags / +0x34 launch-FX layout (§3 of
+ *  the decode note documents table 0x802d6d68, stride 56/kindOffset 3; a handful of other
+ *  tables share the exact same stride+kindOffset and are safe by the same construction). */
+function isFlightVisualRowShape(table: ShotVariantTable): boolean {
+  return table.stride === 56 && table.kindOffset === 3;
+}
+
+/** Read one big-endian byte pair from a hex-string row at byte offset `off` (row bytes are
+ *  dumped in ROM — big-endian — order; two hex chars per byte). Returns null when the row is
+ *  too short to cover the offset. Package-portable (no node:buffer — this file is imported by
+ *  the browser bundle too). */
+function readHexU16BE(hex: string, off: number): number | null {
+  if (hex.length < (off + 2) * 2) return null;
+  return Number.parseInt(hex.slice(off * 2, off * 2 + 4), 16);
+}
+
+/** Read one signed byte from a hex-string row at byte offset `off`. Returns null when the row
+ *  is too short to cover the offset. */
+function readHexS8(hex: string, off: number): number | null {
+  if (hex.length < (off + 1) * 2) return null;
+  const u8 = Number.parseInt(hex.slice(off * 2, off * 2 + 2), 16);
+  return u8 >= 0x80 ? u8 - 0x100 : u8;
+}
+
+/** Decode one safe-shape row's +0x00 texId|flags and +0x34 launch-FX byte. Returns null when
+ *  neither bank flag (0x4000/0x8000) is set — those rows index the per-player weapon bank
+ *  (honest unknown; callers keep today's visuals). */
+function decodeFlightVisualRow(
+  row: ShotVariantTableRow,
+): { bankTexId: number; teamTint: boolean; launchFxId: number | null } | null {
+  const texRaw = readHexU16BE(row.rawBytes, 0x00);
+  if (texRaw === null) return null;
+  const teamTint = (texRaw & 0x4000) !== 0;
+  const bankPlain = (texRaw & 0x8000) !== 0;
+  if (!teamTint && !bankPlain) return null; // neither flag: per-player weapon bank, not efct00
+  const bankTexId = texRaw & 0x3fff;
+  const launchFxByte = readHexS8(row.rawBytes, 0x34) ?? -1;
+  return { bankTexId, teamTint, launchFxId: launchFxByte >= 0 ? launchFxByte : null };
+}
 
 /** borgShotKinds is keyed by the runtime borg-id guard value (`*(short*)(actor+1000)`), a
  *  DIFFERENT id space from the `pl####` file id used everywhere else in this package. The two
@@ -116,6 +177,85 @@ export function shotKindForBorgId(id: string): number | null {
     }
   }
   return bestKind;
+}
+
+/** Resolved B-shot flight visual: which efct00 bank mesh a projectile draws in flight, plus
+ *  its team-tint/launch-FX bits (research/decomp/efct-consumers-decode-2026-07-04.md §3). */
+export interface ShotFlightVisual {
+  /** efct00_mdl.arc bank texId (apps/game/src/sim/data/efctBankMeshes.json), 0..156. */
+  bankTexId: number;
+  /** Row flag 0x4000: attach the entry's matAnim at the shooter's team frame. */
+  teamTint: boolean;
+  /** Row byte +0x34 (launch-FX id into the muzzle/launch fence table), or null (-1 = none). */
+  launchFxId: number | null;
+}
+
+/**
+ * Resolve the borg's B-shot flight visual from the SAME guarded fire-site attribution
+ * shotKindForBorgId uses (shotVariantKinds.json borgShotKinds, keyed by the runtime borg-id
+ * guard — borgIdToShotKindKey), restricted to rows whose TABLE shares table 0x802d6d68's
+ * proven 56-byte/kindOffset-3 shape (isFlightVisualRowShape) — the +0x00 texId|flags / +0x34
+ * launch-FX byte offsets are only PROVEN for that exact row layout; other tables' rows at the
+ * same nominal offsets decode to texIds far outside the 157-entry efct00 bank (a different,
+ * undecoded row format), so they are not trusted here.
+ *
+ * Returns null (keep today's sprite/mesh visualKind) when:
+ *  - the borg has no guarded borgShotKinds attribution at all (unattributed — same set of
+ *    borgs shotKindForBorgId falls back on), or
+ *  - every attribution's table is a different (non-flight-visual) row shape, or
+ *  - the resolved row's texId|flags has NEITHER 0x4000 nor 0x8000 set (a per-player weapon-
+ *    bank row, not the efct00 bank — honest unknown, not renderable from this data).
+ *
+ * When a borg has multiple safe-shape attributions this picks the first one in attribution
+ * order (the generator's call-site scan order) that decodes to a bank row — same stability
+ * convention as shotKindForBorgId's mode/tie-break, simplified because in practice (fleet
+ * census) no borg currently has more than one safe-shape attribution.
+ */
+export function shotFlightVisualForBorgId(id: string): ShotFlightVisual | null {
+  const entries = SHOT_VARIANT_KINDS.borgShotKinds[borgIdToShotKindKey(id)];
+  if (!entries || entries.length === 0) return null;
+  for (const entry of entries) {
+    const table = SHOT_VARIANT_KINDS.tables[entry.table];
+    if (!table || !isFlightVisualRowShape(table)) continue;
+    const row = table.rows.find((r) => r.variant === entry.id);
+    if (!row) continue;
+    const decoded = decodeFlightVisualRow(row);
+    if (decoded) return decoded;
+  }
+  return null;
+}
+
+/**
+ * Direct table-row decode, bypassing borg attribution entirely — exposed for the selfcheck to
+ * prove the byte-decode itself is correct against the two REAL ROM rows the census actually
+ * found carrying bank flags (table 0x802d6d68 variant 6-9, table 0x802d7b10 variant 10 — see
+ * research/decomp/efct-consumers-decode-2026-07-04.md §3). Neither row currently has a
+ * call-site-guarded borg attribution (confirmed: no borgShotKinds entry references them, and
+ * their own firedBy[].borgIds are empty — FUN_80166fa8/zz_0092534_ fire unconditionally, no
+ * static actor-id guard), so `shotFlightVisualForBorgId` legitimately resolves null fleet-wide
+ * today; this accessor is NOT a borg-attribution path and gameplay code must not call it.
+ */
+export function shotFlightVisualForTableRow(table: string, variant: number): ShotFlightVisual | null {
+  const t = SHOT_VARIANT_KINDS.tables[table];
+  if (!t || !isFlightVisualRowShape(t)) return null;
+  const row = t.rows.find((r) => r.variant === variant);
+  return row ? decodeFlightVisualRow(row) : null;
+}
+
+/**
+ * True when the borg has at least one guarded borgShotKinds attribution whose table is the
+ * proven safe row shape (isFlightVisualRowShape) — regardless of whether that row turns out
+ * to carry a bank flag. Fleet-coverage telemetry only (selfcheck.ts): distinguishes "resolved
+ * to a weapon-bank row in a table we CAN read" from "unattributed or attributed to a
+ * different-shaped table we can't read at all".
+ */
+export function hasSafeShapeShotAttribution(id: string): boolean {
+  const entries = SHOT_VARIANT_KINDS.borgShotKinds[borgIdToShotKindKey(id)];
+  if (!entries) return false;
+  return entries.some((entry) => {
+    const table = SHOT_VARIANT_KINDS.tables[entry.table];
+    return !!table && isFlightVisualRowShape(table);
+  });
 }
 
 /** The borg's full decoded HIT table, or null when no pl####hit.bin exists. */
