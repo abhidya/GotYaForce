@@ -664,6 +664,16 @@
 .gf-title-intro-scene {
   z-index: 1;
 }
+/* Native captured title/desk frame (reference/captures/title-main-menu.png) — cover-fit,
+ * slightly dimmed so the G-Red actor layer and PRESS START read on top. */
+.gf-title-intro-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.9);
+}
 .gf-title-intro-actor {
   z-index: 2;
 }

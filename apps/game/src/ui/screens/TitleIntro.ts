@@ -39,7 +39,7 @@ import * as THREE from "three";
 import { createThreeAssetLoader } from "@gf/render";
 import { prepareImportedModel } from "@gf/render";
 
-import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+import { createUiSceneHost } from "../sceneModel.js";
 import { el } from "../dom.js";
 
 export interface TitleIntroOptions {
@@ -54,6 +54,12 @@ export interface TitleIntroHandle {
 /** G-Red (pl0615) is the confirmed desk-intro actor (DAT_8038a4ec first halfword = 0x0615). */
 const GRED_MODEL_URL = "/models/pl0615/model_00.glb";
 const GRED_BORG_ID = "pl0615";
+
+/** Native captured title/desk frame (same capture MainMenu's STORY entry binds). */
+const TITLE_CAPTURE_URL = new URL(
+  "../../../reference/captures/title-main-menu.png",
+  import.meta.url,
+).href;
 
 /**
  * Desk-intro anim sequence, in script order, DERIVED from the decoded byte-code table in
@@ -126,18 +132,15 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     attrs: { role: "button", tabindex: "0", "aria-label": "Title screen — press start" },
   });
 
-  // Real tl00 desk/title scene backdrop (mounted via the same UI-scene helper the main menu
-  // uses), replacing the old handcoded CSS gear backdrop for this screen.
-  const scene = createUiSceneHost("gf-ui-scene gf-title-intro-scene");
-  root.appendChild(scene);
-  teardown.push(
-    mountUiSceneModels(scene, {
-      sceneId: "tl00",
-      fitSize: 560,
-      camera: { fov: 32, position: [440, 280, 640], lookAt: [0, 40, 0] },
-      rotation: [-0.2, -0.36, 0.02],
-    }),
-  );
+  // Backdrop: the NATIVE captured title/desk frame (reference/captures/title-main-menu.png,
+  // the same real capture MainMenu's STORY entry uses) — it includes the desk, the room, and
+  // the GOTCHA FORCE logo exactly as the game frames them. The earlier tl00 whole-scene
+  // mount is retired for this screen: fitting all 37 tl00 models frames the giant ROOM, so
+  // the desk (the actual subject) renders as a distant speck; a per-model desk framing needs
+  // the scene's object-placement tables decoded first (title-main-menu-flow.md follow-up).
+  const backdrop = el("div", { class: "gf-title-intro-backdrop" });
+  backdrop.style.backgroundImage = `url(${TITLE_CAPTURE_URL})`;
+  root.appendChild(backdrop);
 
   const prompt = el("div", { class: "gf-title-intro-prompt", text: "PRESS START" });
   root.appendChild(prompt);
@@ -173,9 +176,11 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       key.position.set(-260, 520, 420);
       scene3.add(key);
 
-      const camera = new THREE.PerspectiveCamera(30, 1, 1, 5000);
-      camera.position.set(120, 220, 520);
-      const lookAt = new THREE.Vector3(0, 60, 0);
+      // Frame G-Red as a desk figure (~1/3 of screen height, lower half) instead of the
+      // old close-up that filled the whole screen. TUNED presentation framing.
+      const camera = new THREE.PerspectiveCamera(30, 1, 1, 6000);
+      camera.position.set(300, 260, 1250);
+      const lookAt = new THREE.Vector3(0, 90, 0);
 
       const loader = createThreeAssetLoader({ enableFileCache: true });
       const [model, clips] = await Promise.all([loader.loadGlbScene(GRED_MODEL_URL), loadIntroClips()]);

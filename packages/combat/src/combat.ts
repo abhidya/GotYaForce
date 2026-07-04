@@ -616,9 +616,15 @@ export function applyHit(
       : normalize(knockDir);
   victim.vel.x = dir.x * knockback;
   victim.vel.z = dir.z * knockback;
-  // Vertical pop stays TUNED (the ROM's launch vertical is a separate gravity/zero model —
-  // FLOAT_80437444/FLOAT_80437470 — not yet ported; keep the port's 0.4 lift factor).
-  if (knockback > 0) victim.vel.y = Math.max(victim.vel.y, knockback * 0.4);
+  // Vertical: DERIVED — the ROM's standard knockback launch vertical is ZERO
+  // (FLOAT_80437444 = 0.0; knockback falls under gravity −1.2, behavior-notes (bc)).
+  // The old TUNED 0.4×knockback pop became 22 u/f under the raw-scale migration and
+  // launched victims over stage wall collision (playtest: borgs knocked out of the arena).
+  // Forced knockdowns keep a small TUNED pop for the launch read until the per-borg
+  // knockdownLaunch tables (+0x58/+0x5c, movementPhysics.json) are wired.
+  if (knockback > 0 && forceKnockdown) {
+    victim.vel.y = Math.max(victim.vel.y, KNOCKBACK.KNOCKDOWN_POP);
+  }
 
   if (victim.hp <= 0) {
     victim.hp = 0;

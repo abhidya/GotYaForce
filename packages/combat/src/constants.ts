@@ -329,6 +329,12 @@ export const KNOCKBACK = {
    * this scale, and do not add per-record tuning here.
    */
   PORT_SCALE: 1.0,
+  /** TUNED vertical pop applied ONLY on forced knockdowns (combo finishers/launch hits) so
+   *  the launch reads. Standard knockback vertical is DERIVED ZERO (FLOAT_80437444 = 0.0,
+   *  falling under gravity — behavior-notes (bc)); the real per-borg knockdown launch model
+   *  (+0x58 h-speed / +0x5c accel, data/movementPhysics.json) is the follow-up consumer.
+   *  Kept small: a large pop under raw scale launched victims over stage wall collision. */
+  KNOCKDOWN_POP: 6,
 } as const;
 
 /**
