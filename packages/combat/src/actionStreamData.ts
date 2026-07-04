@@ -107,6 +107,8 @@ interface StreamEvent {
   kind?: number;
   group?: number;
   slot?: number;
+  /** playAnim/blendAnim only: group byte 0x80 flag (shared descriptor bank axis). */
+  shared?: boolean;
 }
 
 interface StreamEntry {
@@ -114,9 +116,26 @@ interface StreamEntry {
   events: StreamEvent[];
 }
 
+/** One PATH-B per-anim authored sound event (DERIVED — the actor+0x4e8 sound-event table
+ *  joined to the anim the stream plays via the anim-descriptor banks +0x1d88/+0x1d8c; see
+ *  research/decomp/anim-sound-op-decode-2026-07-04.md and gen-melee-anim-kinds.mjs's
+ *  collectAnimSounds). `frame` is the ROM anim-clock frame the sound fires on (0 = anim
+ *  start); `id` is the literal soundId (dispatcher zz_00efb3c_, bank = id>>7, sample =
+ *  id&0x7f — the se_<hex> manifest key axis); `mode` 0 = plain positional, 1 = anim-rate
+ *  variant select (ROM plays id-1/id/id+1 around rate 0.7/2.0 — the port plays the base id,
+ *  TUNED simplification), 2|3 = listener-lerped positional; `part` is the anim part the
+ *  event rode (deduped across parts by the generator). */
+export interface AuthoredSoundEvent {
+  frame: number;
+  id: number;
+  mode: number;
+  part: number;
+}
+
 interface MeleeAnimKindsFile {
   _meta: Record<string, unknown>;
   banks: Record<string, { groups: Record<string, Record<string, StreamEntry>> }>;
+  borgs: Record<string, { animSounds?: Record<string, AuthoredSoundEvent[]> }>;
 }
 
 const STREAMS = actionStreamTablesData as unknown as ActionStreamTablesFile;
@@ -161,21 +180,31 @@ export interface ComboStep {
    *  action-script slot (those are two different numbering axes — see actionStreamData.ts's
    *  header and the pl0615 charge_shot precedent in borgPresentationAssets.ts). */
   animStreamRef: { group: number; slot: number } | null;
+  /** PATH-B authored sound events of the anim this step plays (DERIVED — see
+   *  AuthoredSoundEvent). Empty when the anim carries none. */
+  sounds: AuthoredSoundEvent[];
 }
 
 const cache = new Map<string, ComboStep[] | null>();
 
 /** Resolve one action-script stream's armed HIT kind (null when the stream is windup-only —
- *  e.g. a charge stream that only fires a projectile child) + playAnim target. Returns null
- *  only when the bank/group/slot itself is missing (nothing to resolve at all); a windup-only
- *  stream still returns its animStreamRef with kind null so callers can set the anim without
- *  fabricating hit data. `streamGroup` is the meleeAnimKinds.json group axis (3 = melee
- *  strikes, 4 = charge/air specials — see cue-script-stream-decode-2026-07-04.md hop 3). */
+ *  e.g. a charge stream that only fires a projectile child) + playAnim target + the played
+ *  anim's PATH-B authored sound events (empty when the anim carries none, or the borg has no
+ *  captured sound table). Returns null only when the bank/group/slot itself is missing
+ *  (nothing to resolve at all); a windup-only stream still returns its animStreamRef with
+ *  kind null so callers can set the anim without fabricating hit data. `streamGroup` is the
+ *  meleeAnimKinds.json group axis (3 = melee strikes, 4 = charge/air specials — see
+ *  cue-script-stream-decode-2026-07-04.md hop 3). */
 function resolveStreamArm(
+  borgId: string,
   bankAddress: string,
   streamGroup: number,
   slot: number,
-): { kind: number | null; animStreamRef: { group: number; slot: number } | null } | null {
+): {
+  kind: number | null;
+  animStreamRef: { group: number; slot: number } | null;
+  sounds: AuthoredSoundEvent[];
+} | null {
   const bank = KINDS.banks[bankAddress];
   const group = bank?.groups?.[`g${streamGroup}`];
   const stream = group?.[`s${slot}`];
@@ -188,7 +217,15 @@ function resolveStreamArm(
     playAnim && typeof playAnim.group === "number" && typeof playAnim.slot === "number"
       ? { group: playAnim.group, slot: playAnim.slot }
       : null;
-  return { kind: armHit && typeof armHit.kind === "number" ? armHit.kind : null, animStreamRef };
+  // PATH-B authored sounds for the anim this stream plays (generator key mirrors the
+  // playAnim op's shared-bank flag — the same descriptor-bank axis zz_004d1f4_ resolves).
+  const soundKey = playAnim ? `${playAnim.shared ? "shared:" : ""}g${playAnim.group}s${playAnim.slot}` : null;
+  const sounds = (soundKey ? KINDS.borgs?.[borgId]?.animSounds?.[soundKey] : undefined) ?? [];
+  return {
+    kind: armHit && typeof armHit.kind === "number" ? armHit.kind : null,
+    animStreamRef,
+    sounds,
+  };
 }
 
 /** Build one ComboStep from a resolved (kind, animStreamRef) pair, or null if the kind has no
@@ -199,6 +236,7 @@ function stepFromKind(
   slot: number,
   kind: number,
   animStreamRef: { group: number; slot: number } | null,
+  sounds: AuthoredSoundEvent[],
 ): ComboStep | null {
   const records = attackHitRecordsForKind(borgId, kind);
   const windowed = records.find((record) => record.activeEnd >= record.activeStart && record.activeStart >= 0);
@@ -212,6 +250,7 @@ function stepFromKind(
     reach: reach ?? 0,
     damageRecord: familyDamageRecordForBorg(borgId, windowed.damageRecordIndex),
     animStreamRef,
+    sounds,
   };
 }
 
@@ -245,9 +284,9 @@ function computeLadder(borgId: string): ComboStep[] | null {
   let cursor = baseline.seedSlot;
 
   const tryPushSlot = (slot: number): boolean => {
-    const arm = resolveStreamArm(bankAddress, MELEE_GROUP, slot);
+    const arm = resolveStreamArm(borgId, bankAddress, MELEE_GROUP, slot);
     if (!arm || arm.kind === null) return false; // no stream, or windup-only (no armed kind)
-    const step = stepFromKind(borgId, slot, arm.kind, arm.animStreamRef);
+    const step = stepFromKind(borgId, slot, arm.kind, arm.animStreamRef, arm.sounds);
     if (!step) return false; // stream arms a kind, but no usable hit-bin window for it
     steps.push(step);
     return true;
@@ -316,6 +355,10 @@ export interface ExactMoveLeaf {
    *  anim-label bridge target (see ComboStep.animStreamRef's doc for the numbering-axis
    *  caveat; same rule applies here). */
   animStreamRef: { group: number; slot: number } | null;
+  /** PATH-B authored sound events of the anim this leaf plays (DERIVED — see
+   *  AuthoredSoundEvent). Empty when the anim carries none. Valid on windup-only leaves too
+   *  (a charge-fire anim's whoosh is real even when the damage is a spawned child). */
+  sounds: AuthoredSoundEvent[];
 }
 
 const airMoveCache = new Map<string, ExactMoveLeaf | null>();
@@ -326,7 +369,7 @@ const chargeMoveCache = new Map<string, ExactMoveLeaf | null>();
  *  captured for this stream at all) — a resolved-but-windup-only stream (kind null) still
  *  returns a leaf so callers can use its animStreamRef. */
 function leafFromSlot(borgId: string, bank: string, group: number, slot: number): ExactMoveLeaf | null {
-  const arm = resolveStreamArm(bank, group, slot);
+  const arm = resolveStreamArm(borgId, bank, group, slot);
   if (!arm) return null;
   if (arm.kind === null) {
     return {
@@ -337,6 +380,7 @@ function leafFromSlot(borgId: string, bank: string, group: number, slot: number)
       reach: 0,
       damageRecord: null,
       animStreamRef: arm.animStreamRef,
+      sounds: arm.sounds,
     };
   }
   const records = attackHitRecordsForKind(borgId, arm.kind);
@@ -350,6 +394,7 @@ function leafFromSlot(borgId: string, bank: string, group: number, slot: number)
     reach: reach ?? 0,
     damageRecord: windowed ? familyDamageRecordForBorg(borgId, windowed.damageRecordIndex) : null,
     animStreamRef: arm.animStreamRef,
+    sounds: arm.sounds,
   };
 }
 

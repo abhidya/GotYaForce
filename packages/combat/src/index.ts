@@ -77,6 +77,7 @@ export { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js"
 export {
   comboLadderForBorgId,
   comboLadderStepCountForBorgId,
+  type AuthoredSoundEvent,
   type ComboStep,
 } from "./actionStreamData.js";
 export {

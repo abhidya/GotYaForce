@@ -88,6 +88,14 @@ AFS_MEMBERS = {
 
 # The 11 mapped combat events (research/decomp/data/combat-se-ids.json). The break trio
 # 0x00/0x80/0x100 is intentionally absent: TSB volume 0 in every bank (see HONEST NOTES).
+# EXTRA ids (PATH-B per-anim sound events, --ids flag): the anim-descriptor/sound-event-table
+# extraction (research/decomp/anim-sound-op-decode-2026-07-04.md, gen-melee-anim-kinds.mjs
+# collectAnimSounds) yields literal per-swing soundIds; pass them as --ids 0x0b,0x24,...
+STREAM_ID_EVENT = "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)"
+STREAM_ID_EVIDENCE = (
+    "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted "
+    "per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)"
+)
 COMBAT_IDS = {
     0x08: ("shot fire / projectile launch", "zz_006ee14_ projectile spawn (chunk_0009.c:3859)"),
     0x10: ("wall/ground crash impact, light borg families", "FUN_8005a580 knockback-terrain impact (chunk_0007.c:2949)"),
@@ -296,7 +304,12 @@ def sha1(path: Path) -> str:
 
 
 def main() -> None:
-    export = "--export" in sys.argv[1:]
+    args = sys.argv[1:]
+    export = "--export" in args
+    extra_ids: list[int] = []
+    if "--ids" in args:
+        raw = args[args.index("--ids") + 1]
+        extra_ids = [int(tok, 16) for tok in raw.split(",") if tok]
     banks = {}
     for name in BATTLE_SLOTS:
         chd = parse_chd(BANK_DIR / f"{name}.chd")
@@ -304,9 +317,19 @@ def main() -> None:
         dpk = (BANK_DIR / f"{name}.dpk").read_bytes()
         banks[name] = (chd, tsb, dpk)
 
+    all_ids = dict(COMBAT_IDS)
+    for sound_id in extra_ids:
+        if sound_id not in all_ids:
+            all_ids[sound_id] = (STREAM_ID_EVENT, STREAM_ID_EVIDENCE)
+
     plans = []
-    for sound_id, (event, caller) in sorted(COMBAT_IDS.items()):
-        resolved = resolve_id(sound_id, banks)
+    for sound_id, (event, caller) in sorted(all_ids.items()):
+        try:
+            resolved = resolve_id(sound_id, banks)
+        except ValueError as err:
+            # Honest skip: muted/sequence/looped entries are reported, never faked.
+            print(f"0x{sound_id:03x} SKIPPED: {err}")
+            continue
         key = f"se_{sound_id:03x}"
         duration = max(len(l["pcm"]) for l in resolved["layers"]) / resolved["rate"]
         plans.append((sound_id, key, event, caller, resolved, duration))
@@ -371,11 +394,13 @@ def main() -> None:
         "format": "OGG Vorbis",
         "idScheme": "key = se_<soundId hex, 3 digits>; soundId = bank<<7 | sample (dispatcher zz_00efb3c_ @ 0x800efb3c)",
         "notes": (
-            "DERIVED combat SE: literal soundIds from research/decomp/data/combat-se-ids.json resolved "
-            "through the battle TSB/CHD/DPK banks (afs_data.afs members 2839..2847, DOL bank table "
-            "DAT_802d0bec @ boot.dol 0x2cdbec). Gains bake in TSB entry volume x CHD tone volume. "
-            "Guard-break ids 0x00/0x80/0x100 are TSB-muted (volume 0) in all three banks and are "
-            "deliberately NOT exported. id 0x176 is a TSB type-1 sequence command, not a sample."
+            "DERIVED combat SE: literal soundIds from research/decomp/data/combat-se-ids.json (code "
+            "call sites) plus the PATH-B per-anim sound-event ids (actor+0x4e8 table, "
+            "research/decomp/anim-sound-op-decode-2026-07-04.md via --ids), resolved through the "
+            "battle TSB/CHD/DPK banks (afs_data.afs members 2839..2847, DOL bank table DAT_802d0bec "
+            "@ boot.dol 0x2cdbec). Gains bake in TSB entry volume x CHD tone volume. Guard-break ids "
+            "0x00/0x80/0x100 are TSB-muted (volume 0) in all three banks and are deliberately NOT "
+            "exported. id 0x176 is a TSB type-1 sequence command, not a sample."
         ),
         "files": entries,
     }

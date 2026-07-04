@@ -287,6 +287,47 @@ so both are exposed as a single `ExactMoveLeaf` (not a `ComboStep[]` ladder):
 
 ---
 
+## ★ 2026-07-04 session: anim-driven swing SFX decoded + wired (PATH B resolved)
+
+Full decode note: `research/decomp/anim-sound-op-decode-2026-07-04.md`.
+
+- **Stream sound opcode found, then honestly ruled out as the carrier.** The action-script
+  handler table @0x802d0da0 was audited handler-by-handler (decomp bodies + raw DOL bl-target
+  scans for the non-decompiled ones): op **0x0e** (FUN_8004c97c) IS a playSound op with a
+  LITERAL soundId in byte3 (modes: plain / anim-rate id±1 variant / listener-lerped
+  positional), and op **0x0f** plays a per-borg table-driven voice/cry (no id in the operand).
+  But a full walk of all 114 known action-script banks (12031 slots) finds **zero op 0x0e
+  records** — the data never uses it. gen-melee-anim-kinds.mjs still decodes it (future-proof).
+- **The REAL swing audio is the PATH-B per-anim sound-event table — now statically extracted**
+  (corrects combat-se-ids.json's "requires dumping binary blobs, out of scope" and behavior-
+  notes (v)'s "no per-action audio table recoverable"): family ctors bind `actor+0x4e8` (sound
+  -event table) and `+0x1d88/+0x1d8c` (anim-descriptor banks). The descriptor record for the
+  (group, slot) a stream's playAnim targets carries a per-part sound-list index; records are
+  `{u16 frame, u8 windowFlag, u8 mode, u16 soundId, u8 cont}` (consumers zz_005b880_/
+  zz_005b98c_, chunk_0007.c:3579/3668). Validated on G RED: every group-3 swing anim plays
+  whoosh 0x24 or 0x0b at frames 4-21. Extraction: `gen-melee-anim-kinds.mjs` ctor-emulates the
+  three new bindings per borg (incl. the pl062a variant REBIND of +0x4e8) → `meleeAnimKinds.
+  json borgs[id].animSounds` (169 borgs, 1325 anim refs, 2984 events, 15 distinct ids;
+  hit-bearing slots unchanged at 871, pl0003 still the only validation mismatch).
+- **Wired end-to-end**: `actionStreamData.ts` exposes `sounds` on ComboStep/ExactMoveLeaf
+  (census over the resolved joins: **103/103 ladders, 281/281 steps, 18/18 air-B leaves, 2/2
+  charge leaves carry authored sounds**, 11 distinct ids); `combat.ts` sets
+  `BorgRuntime.meleeSounds` per swing/charged release (same bridge as meleeAnimStream);
+  `battleScene.ts onSlotEnter` hands it to `main.ts`, which schedules each event at its
+  anim-clock frame (60fps) and SKIPS the TUNED slot cue for that swing only (fallback se00_03
+  kept for unresolved borgs; the sim-edge melee/charge_release generics are suppressed when
+  the local swing is authored so nothing double-plays). 14 new samples exported
+  (`export-combat-se.py --ids`, manifest now 23 files: +0x003/005/009/00a/00b/00c/00f/012/020/
+  024/067/06a/0ac/0e6).
+- DERIVED vs TUNED: soundIds, frames, per-anim binding, and the samples are DERIVED. TUNED
+  residue (documented in-code): scheduling hangs off the renderer slot edge + wall clock (not
+  the ROM part-anim clock), mode-1 events play the base id (no rate-variant id±1), positional
+  modes play flat, and the 150ms per-sample stacking floor is port-side.
+- VALIDATED: `pnpm typecheck`, `packages/combat/dist/selfcheck.js`,
+  `scripts/selfcheck-1p-challenge.mjs`, `scripts/selfcheck-challenge-stages.mjs` all pass.
+
+---
+
 ## ★ Finish-line handoff (what's left, prioritized) — 2026-07-03
 
 The port is **playable end-to-end** (challenge verified) with every cleanly-derivable mechanic
@@ -347,7 +388,7 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
 | Assets: animation playback | ~88% (dispatch mapped+reconciled, ba/bb) | asset re-bake: relabel g4s0 special_s0→down_s0 (worktree); death/deploy slots unresolved |
 | Audio: BGM/menu | ~90% | — |
-| Audio: combat/voice | ~75% (voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04) | real bank samples exported (scripts/export-combat-se.py) + wired (shoot/hit/down/dash/jump/spawn/land DERIVED); melee/death stay TUNED (animation-data-driven, PATH B); voice cue-role TUNED |
+| Audio: combat/voice | ~85% (voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04; **PATH-B per-anim swing audio DECODED+WIRED 2026-07-04**) | real bank samples exported (scripts/export-combat-se.py, 23 files) + wired (shoot/hit/down/dash/jump/spawn/land DERIVED); melee/charge swings now play their ROM-AUTHORED per-anim sounds (actor+0x4e8 sound-event table joined via the anim-descriptor banks — anim-sound-op-decode-2026-07-04.md; 103/103 resolved ladders + 18 air / 2 charge leaves covered, TUNED fallback kept for the rest); death stays TUNED (op-0x0f voice is per-borg table-driven, tables undecoded); voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
 | FX: particles/projectiles | ~70% | PTL/REF decode; 3D weapon meshes |
 

@@ -39,12 +39,15 @@ export interface BorgAssets {
    * Optional: called exactly once per animation-slot transition (edge-triggered, same
    * pattern as the existing hit-spark VFX trigger below — NOT fired every frame and NOT
    * fired on state re-entry while already in that slot). main.ts uses this to trigger
-   * combat SFX. See behavior-notes.md (v): no ROM per-action audio-event table was
-   * recoverable (AnimAudioEventLookup @ 0x801a7640 is a red-herring symbol name — generic
-   * nlQSort<T> plumbing, not a decoded frame/sound-id table), so slot->sound mapping here
-   * is an honest TUNED placeholder, not a ROM-derived cue.
+   * combat SFX. Slot->sound mapping is TUNED presentation EXCEPT where `meleeSounds` is
+   * provided: the borg's CURRENT swing/release carries its ROM-authored PATH-B per-anim
+   * sound events (BattleActorView.meleeSounds, DERIVED from the actor+0x4e8 sound-event
+   * table — research/decomp/anim-sound-op-decode-2026-07-04.md; this CORRECTS the older
+   * behavior-notes.md (v) "no per-action audio table recoverable" finding). meleeSounds is
+   * only meaningful for the melee/melee_alt/charge_shot slots and is null for borgs whose
+   * swing has no authored sounds — callers keep the TUNED fallback then.
    */
-  onSlotEnter?(borgId: string, slot: AnimSlot, uid: string): void;
+  onSlotEnter?(borgId: string, slot: AnimSlot, uid: string, meleeSounds?: BattleActorView["meleeSounds"]): void;
 }
 
 export type AnimSlot =
@@ -347,7 +350,7 @@ export class BattleScene {
       if (slot === "special" && slotChanged) this.spawnSpecialBurst(actor.group.position);
       if ((slot === "shoot" || slot === "charge_shot") && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY);
       this.syncChargeGlow(actor, b);
-      if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid);
+      if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid, b.meleeSounds);
       actor.lastSeenSlot = slot;
       if (actor.ready) this.playSlot(actor, slot, b.meleeAnimStream);
       // Dim/hide once dead so the death pose reads (sim culls dead borgs next frame).

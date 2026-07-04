@@ -1750,6 +1750,11 @@ function startMeleeAttack(
   // step, else null — which keeps the existing generic melee/melee_alt slot selection in
   // borgPresentationAssets.ts unchanged.
   b.meleeAnimStream = airExact?.animStreamRef ?? exactStep?.animStreamRef ?? null;
+  // This swing's PATH-B authored sound events (same precedence as the anim ref above — the
+  // sounds belong to the SAME anim the ref names). Renderer bridge only; the sim never plays
+  // audio. Empty lists are normalized to null so fallback SFX logic stays a simple null check.
+  const swingSounds = airExact?.sounds ?? exactStep?.sounds ?? null;
+  b.meleeSounds = swingSounds && swingSounds.length > 0 ? swingSounds : null;
   // Persisted latch (stepCooldowns skip-list): records that THIS swing is air-leaf-driven so
   // stepAttacks' swing-resolution block (which re-reads exact data every active frame from
   // b.cooldowns["comboStep"], not from this call's params) keeps using the air leaf's
@@ -1988,6 +1993,8 @@ function startShotAttack(
   // ref never leaks into the next plain "shoot" anim.
   const chargeLeaf = chargeTier >= 1 ? chargeMoveForBorgId(b.borgId) : null;
   b.meleeAnimStream = chargeLeaf?.animStreamRef ?? null;
+  // Charged release's PATH-B authored sounds (see startMeleeAttack's twin assignment).
+  b.meleeSounds = chargeLeaf && chargeLeaf.sounds.length > 0 ? chargeLeaf.sounds : null;
   out.push(...spawnProjectiles(b, p, shotDef, chargeTier, all, chargeLeaf));
 }
 

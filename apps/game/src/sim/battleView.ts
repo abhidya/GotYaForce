@@ -21,6 +21,10 @@ export interface BattleActorView {
    *  Null/undefined when unresolved — battleScene falls back to the existing generic
    *  melee/melee_alt/charge_shot slot heuristic. */
   meleeAnimStream: BorgRuntime["meleeAnimStream"];
+  /** The CURRENT swing/release's PATH-B authored sound events (DERIVED, @gf/combat
+   *  BorgRuntime.meleeSounds — frame = ROM anim-clock frame, id = soundId/se_<hex> key axis).
+   *  Null when the swing has none; the SFX layer keeps its TUNED slot-keyed fallback then. */
+  meleeSounds: BorgRuntime["meleeSounds"];
 }
 
 export function battleActorView(borg: BorgRuntime): BattleActorView {
@@ -40,5 +44,6 @@ export function battleActorView(borg: BorgRuntime): BattleActorView {
     dashActiveFrames: borg.cooldowns["dashActive"] ?? 0,
     chargeFrames: borg.cooldowns["chargeFrames"] ?? 0,
     meleeAnimStream: borg.meleeAnimStream,
+    meleeSounds: borg.meleeSounds,
   };
 }

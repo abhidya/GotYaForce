@@ -146,7 +146,10 @@ type CombatSfxCue = BattleEventCue | "land";
 // banks — the "layered break stinger" plays silence on hardware — so there is no break sample to
 // wire (scripts/export-combat-se.py HONEST NOTES).
 const COMBAT_SFX: Partial<Record<CombatSfxCue, string>> = {
-  melee: "se00_03", // TUNED: swing audio is animation-data-driven (PATH B), no literal id
+  // melee/melee_alt are FALLBACKS only since the PATH-B extraction (2026-07-04): swings whose
+  // stream resolved authored per-anim sound events play those instead (playAuthoredSwingSounds
+  // below; research/decomp/anim-sound-op-decode-2026-07-04.md decodes the actor+0x4e8 table).
+  melee: "se00_03", // TUNED fallback for borgs without extracted authored swing audio
   melee_alt: "se00_03", // TUNED: same
   shoot: "se_008", // DERIVED: projectile-spawn id 0x08 (zz_006ee14_, fired from weapon-FIRE handler)
   special: "se00_02", // TUNED
@@ -222,7 +225,52 @@ function playCombatSfx(cue: CombatSfxCue): void {
 }
 
 function playBattleEventSfx(cue: BattleEventCue): void {
+  // Authored-audio suppression (DERIVED data, TUNED routing): when the LOCAL borg's current
+  // swing/charged release carries ROM-authored PATH-B sound events (BorgRuntime.meleeSounds,
+  // research/decomp/anim-sound-op-decode-2026-07-04.md), the slot-enter path below plays
+  // those exact samples — skip the generic TUNED cue here so the same swing/release doesn't
+  // double-play (the sim edge fires in the same tick as the slot edge).
+  if ((cue === "melee" || cue === "charge_release") && localActiveBorgHasAuthoredSwingAudio()) return;
   playCombatSfx(cue);
+}
+
+function localActiveBorgHasAuthoredSwingAudio(): boolean {
+  if (!session) return false;
+  const active = activeBorgForPlayer(session.battle, session.localPlayerId);
+  return (active?.meleeSounds?.length ?? 0) > 0;
+}
+
+// Authored PATH-B swing audio (research/decomp/anim-sound-op-decode-2026-07-04.md): each
+// melee swing / charged release's action-script stream plays an anim whose descriptor binds
+// a list of {frame, soundId} events (ROM actor+0x4e8 table). The sim resolves them per swing
+// (BorgRuntime.meleeSounds, DERIVED end-to-end) and the slot-enter edge schedules each event
+// at its anim-clock frame (60fps). TUNED residue, labeled honestly: the schedule hangs off
+// the renderer's slot edge + wall clock (not the ROM part-anim clock), mode-1 events play the
+// base id only (no anim-rate id±1 variant select), and positional modes play flat.
+const AUTHORED_SWING_SLOTS: ReadonlySet<string> = new Set(["melee", "melee_alt", "charge_shot"]);
+/** Per-SAMPLE floor so 8 simultaneous AI swings can't stack the same whoosh into clipping;
+ *  keys live in lastCombatSfxAt's se_* keyspace, disjoint from the per-EVENT cue keys. */
+const AUTHORED_SE_MIN_GAP_MS = 150;
+/** Defensive cap: swing sound frames are single-digit-to-~21 in the extracted data; anything
+ *  wildly larger would be a data bug, not a real cue. */
+const AUTHORED_MAX_DELAY_MS = 2000;
+
+function seKeyForSoundId(id: number): string {
+  return `se_${id.toString(16).padStart(3, "0")}`;
+}
+
+function playAuthoredSwingSounds(sounds: readonly { frame: number; id: number }[]): void {
+  if (DISABLE_COMBAT_SFX) return;
+  for (const sound of sounds) {
+    const delayMs = Math.min((sound.frame * 1000) / 60, AUTHORED_MAX_DELAY_MS);
+    window.setTimeout(() => {
+      const key = seKeyForSoundId(sound.id);
+      const now = performance.now();
+      if (now - (lastCombatSfxAt.get(key) ?? -Infinity) < AUTHORED_SE_MIN_GAP_MS) return;
+      lastCombatSfxAt.set(key, now);
+      playSfx(key);
+    }, delayMs);
+  }
 }
 
 // Landing-cue edge detection state (see onSlotEnter below): a borg whose anim slot goes from an
@@ -379,11 +427,17 @@ const battleScene = new BattleScene(battleRoot, {
   // synthesizes the "land" cue: the SAMPLE is the DERIVED landing id 0x1e (se_01e), but the
   // trigger edge itself is TUNED presentation (the ROM fires it from landing state slot 31
   // and grounded-recovery handlers, which the port's slot machine does not model 1:1).
-  onSlotEnter: (_borgId, slot, uid) => {
+  onSlotEnter: (_borgId, slot, uid, meleeSounds) => {
     const prev = lastAnimSlotByUid.get(uid);
     lastAnimSlotByUid.set(uid, slot);
     if (prev !== undefined && LANDING_FROM_SLOTS.has(prev) && LANDING_TO_SLOTS.has(slot)) {
       playCombatSfx("land");
+    }
+    // Authored per-swing audio (DERIVED — see playAuthoredSwingSounds): replaces the TUNED
+    // slot cue for THIS swing/release only; borgs without authored sounds keep the fallback.
+    if (AUTHORED_SWING_SLOTS.has(slot) && meleeSounds && meleeSounds.length > 0) {
+      playAuthoredSwingSounds(meleeSounds);
+      return;
     }
     playCombatSfx(slot);
   },

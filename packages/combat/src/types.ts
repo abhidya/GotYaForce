@@ -234,6 +234,15 @@ export interface BorgRuntime {
    *  instead of the generic "melee"/"melee_alt"/"charge_shot" slot. Optional so external fakes
    *  self-heal to undefined. */
   meleeAnimStream?: { group: number; slot: number } | null;
+  /** The CURRENT melee swing's (or charged release's) PATH-B authored sound events (DERIVED —
+   *  the per-anim sound-event table at ROM actor+0x4e8 joined through the anim-descriptor
+   *  banks; actionStreamData.ts AuthoredSoundEvent, research/decomp/
+   *  anim-sound-op-decode-2026-07-04.md). `frame` = ROM anim-clock frame (0 = anim start),
+   *  `id` = literal soundId (se_<hex> manifest key axis). Set alongside meleeAnimStream by
+   *  startMeleeAttack / startShotAttack; null when the swing has no resolved stream or its
+   *  anim carries no sound events. Renderers may schedule these instead of the TUNED
+   *  slot-keyed COMBAT_SFX fallback. Optional so external fakes self-heal to undefined. */
+  meleeSounds?: readonly { frame: number; id: number; mode: number; part: number }[] | null;
   /** Power Burst arm window (ROM +0x6fb), frames remaining. Y press edge sets this to
    *  BURST.ARM_WINDOW_FRAMES (6, DERIVED — `FUN_80069814` chunk_0009.c:113); decrements to 0
    *  per frame (mirrors `zz_005b2b8_` chunk_0007.c:3473-3490); a re-press re-arms it. NOTE

@@ -3,8 +3,68 @@
   "source": "Gotcha Force (GG4E) afs_data.afs snd_com01/02/03 soundbanks - GC DSP-ADPCM decoded by scripts/export-combat-se.py",
   "format": "OGG Vorbis",
   "idScheme": "key = se_<soundId hex, 3 digits>; soundId = bank<<7 | sample (dispatcher zz_00efb3c_ @ 0x800efb3c)",
-  "notes": "DERIVED combat SE: literal soundIds from research/decomp/data/combat-se-ids.json resolved through the battle TSB/CHD/DPK banks (afs_data.afs members 2839..2847, DOL bank table DAT_802d0bec @ boot.dol 0x2cdbec). Gains bake in TSB entry volume x CHD tone volume. Guard-break ids 0x00/0x80/0x100 are TSB-muted (volume 0) in all three banks and are deliberately NOT exported. id 0x176 is a TSB type-1 sequence command, not a sample.",
+  "notes": "DERIVED combat SE: literal soundIds from research/decomp/data/combat-se-ids.json (code call sites) plus the PATH-B per-anim sound-event ids (actor+0x4e8 table, research/decomp/anim-sound-op-decode-2026-07-04.md via --ids), resolved through the battle TSB/CHD/DPK banks (afs_data.afs members 2839..2847, DOL bank table DAT_802d0bec @ boot.dol 0x2cdbec). Gains bake in TSB entry volume x CHD tone volume. Guard-break ids 0x00/0x80/0x100 are TSB-muted (volume 0) in all three banks and are deliberately NOT exported. id 0x176 is a TSB type-1 sequence command, not a sample.",
   "files": [
+    {
+      "key": "se_003",
+      "type": "sfx",
+      "path": "audio/se/se_003.ogg",
+      "durationSec": 0.746,
+      "loop": false,
+      "soundId": 3,
+      "bank": 0,
+      "sample": 3,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 3,
+          "dpkOffset": 100800,
+          "numSamples": 32896,
+          "sampleRate": 44100,
+          "gain": 0.7874,
+          "pan": 64
+        }
+      ],
+      "sha1": "fe30af19cb1a9fc23a0c511a4097625a504f5e82"
+    },
+    {
+      "key": "se_005",
+      "type": "sfx",
+      "path": "audio/se/se_005.ogg",
+      "durationSec": 1.309,
+      "loop": false,
+      "soundId": 5,
+      "bank": 0,
+      "sample": 5,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 5,
+          "dpkOffset": 138656,
+          "numSamples": 57728,
+          "sampleRate": 44100,
+          "gain": 0.7874,
+          "pan": 64
+        }
+      ],
+      "sha1": "bf95af4a3c95df2d15f7576b68bdf26a3d9648a5"
+    },
     {
       "key": "se_008",
       "type": "sfx",
@@ -33,7 +93,157 @@
           "pan": 64
         }
       ],
-      "sha1": "91882032f3d610581bd867022ef5045fd2f3631e"
+      "sha1": "75619b3bfca08ea1e051744aab2d1f38eb0f32f5"
+    },
+    {
+      "key": "se_009",
+      "type": "sfx",
+      "path": "audio/se/se_009.ogg",
+      "durationSec": 0.622,
+      "loop": false,
+      "soundId": 9,
+      "bank": 0,
+      "sample": 9,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 9,
+          "dpkOffset": 265440,
+          "numSamples": 27436,
+          "sampleRate": 44100,
+          "gain": 0.7087,
+          "pan": 64
+        }
+      ],
+      "sha1": "505d25cbcb42ac251128366c7cc6912bd69d902d"
+    },
+    {
+      "key": "se_00a",
+      "type": "sfx",
+      "path": "audio/se/se_00a.ogg",
+      "durationSec": 0.618,
+      "loop": false,
+      "soundId": 10,
+      "bank": 0,
+      "sample": 10,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 10,
+          "dpkOffset": 281120,
+          "numSamples": 27264,
+          "sampleRate": 44100,
+          "gain": 0.9055,
+          "pan": 64
+        }
+      ],
+      "sha1": "85956c9a5e96197939a4b86208e6967be48d0fae"
+    },
+    {
+      "key": "se_00b",
+      "type": "sfx",
+      "path": "audio/se/se_00b.ogg",
+      "durationSec": 0.665,
+      "loop": false,
+      "soundId": 11,
+      "bank": 0,
+      "sample": 11,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 11,
+          "dpkOffset": 296704,
+          "numSamples": 29312,
+          "sampleRate": 44100,
+          "gain": 0.9055,
+          "pan": 64
+        }
+      ],
+      "sha1": "e9df8334b992f61d89529d8a865584dc042093b8"
+    },
+    {
+      "key": "se_00c",
+      "type": "sfx",
+      "path": "audio/se/se_00c.ogg",
+      "durationSec": 3.413,
+      "loop": false,
+      "soundId": 12,
+      "bank": 0,
+      "sample": 12,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 12,
+          "dpkOffset": 313472,
+          "numSamples": 150528,
+          "sampleRate": 44100,
+          "gain": 0.7874,
+          "pan": 64
+        }
+      ],
+      "sha1": "d9cde3cb67f410c0b9a8c3091534d2467d284650"
+    },
+    {
+      "key": "se_00f",
+      "type": "sfx",
+      "path": "audio/se/se_00f.ogg",
+      "durationSec": 0.827,
+      "loop": false,
+      "soundId": 15,
+      "bank": 0,
+      "sample": 15,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 15,
+          "dpkOffset": 507360,
+          "numSamples": 36480,
+          "sampleRate": 44100,
+          "gain": 0.6299,
+          "pan": 64
+        }
+      ],
+      "sha1": "f6478e17393948af2d025dfe3343b86e6a29b4ab"
     },
     {
       "key": "se_010",
@@ -63,7 +273,37 @@
           "pan": 64
         }
       ],
-      "sha1": "dd805259d894c2cdc26698238dac9a8a6648232c"
+      "sha1": "b42cab20d2c2a5178ff2e4c28fec886acce81c14"
+    },
+    {
+      "key": "se_012",
+      "type": "sfx",
+      "path": "audio/se/se_012.ogg",
+      "durationSec": 1.838,
+      "loop": false,
+      "soundId": 18,
+      "bank": 0,
+      "sample": 18,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 18,
+          "dpkOffset": 562400,
+          "numSamples": 81066,
+          "sampleRate": 44100,
+          "gain": 0.8268,
+          "pan": 64
+        }
+      ],
+      "sha1": "a7aba884cb14da891998bded9fc2ef7009e8fc9c"
     },
     {
       "key": "se_013",
@@ -93,7 +333,7 @@
           "pan": 64
         }
       ],
-      "sha1": "47bf290121e94843e8d338e06277199669e8e93f"
+      "sha1": "7babb472253af13ba338a311f3cb70a810b58ba9"
     },
     {
       "key": "se_01e",
@@ -123,7 +363,67 @@
           "pan": 64
         }
       ],
-      "sha1": "8310b05ee44de9e3c0b9f2222083f5faa6202499"
+      "sha1": "ec52c21f02c7d6cccacef5406e3f32642f9f0e62"
+    },
+    {
+      "key": "se_020",
+      "type": "sfx",
+      "path": "audio/se/se_020.ogg",
+      "durationSec": 0.972,
+      "loop": false,
+      "soundId": 32,
+      "bank": 0,
+      "sample": 32,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 32,
+          "dpkOffset": 2340288,
+          "numSamples": 42880,
+          "sampleRate": 44100,
+          "gain": 1.0,
+          "pan": 64
+        }
+      ],
+      "sha1": "2751d396bcb6d2b3310ebe50b6fd823c82bcff58"
+    },
+    {
+      "key": "se_024",
+      "type": "sfx",
+      "path": "audio/se/se_024.ogg",
+      "durationSec": 0.535,
+      "loop": false,
+      "soundId": 36,
+      "bank": 0,
+      "sample": 36,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 36,
+          "dpkOffset": 752992,
+          "numSamples": 23584,
+          "sampleRate": 44100,
+          "gain": 0.6693,
+          "pan": 64
+        }
+      ],
+      "sha1": "3bada4589a267bdd5943971f70202eed94502f85"
     },
     {
       "key": "se_025",
@@ -153,7 +453,7 @@
           "pan": 64
         }
       ],
-      "sha1": "5a54ce32c3728ebc7a8eab8e779fb5887ab27910"
+      "sha1": "e997b5a1e7657a5d1d6f75b3831004ada9c85296"
     },
     {
       "key": "se_026",
@@ -183,7 +483,67 @@
           "pan": 64
         }
       ],
-      "sha1": "e48bce8cee5c687c5236807f3b964f5ae3e33635"
+      "sha1": "443be849d1de4534fc2b111b4966f71c0a05e1a5"
+    },
+    {
+      "key": "se_067",
+      "type": "sfx",
+      "path": "audio/se/se_067.ogg",
+      "durationSec": 0.402,
+      "loop": false,
+      "soundId": 103,
+      "bank": 0,
+      "sample": 103,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 103,
+          "dpkOffset": 497216,
+          "numSamples": 17730,
+          "sampleRate": 44100,
+          "gain": 0.7874,
+          "pan": 64
+        }
+      ],
+      "sha1": "fb80e91a344b33e276d781e67a8ba5fa6c261bcb"
+    },
+    {
+      "key": "se_06a",
+      "type": "sfx",
+      "path": "audio/se/se_06a.ogg",
+      "durationSec": 0.74,
+      "loop": false,
+      "soundId": 106,
+      "bank": 0,
+      "sample": 106,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 106,
+          "dpkOffset": 543712,
+          "numSamples": 32650,
+          "sampleRate": 44100,
+          "gain": 0.7874,
+          "pan": 64
+        }
+      ],
+      "sha1": "8c6b6b09dda3a45b1f68300436b841a37b812365"
     },
     {
       "key": "se_09b",
@@ -221,7 +581,37 @@
           "pan": 127
         }
       ],
-      "sha1": "a21533cefcd6f72586eeb0d5ec6edd81c1fde60c"
+      "sha1": "d2ef877ae2103780a3237d8195ceedb4e29002e6"
+    },
+    {
+      "key": "se_0ac",
+      "type": "sfx",
+      "path": "audio/se/se_0ac.ogg",
+      "durationSec": 1.42,
+      "loop": false,
+      "soundId": 172,
+      "bank": 1,
+      "sample": 44,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com02",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2842,
+        "chd": 2843,
+        "dpk": 2844
+      },
+      "layers": [
+        {
+          "tsbEntry": 44,
+          "dpkOffset": 2145504,
+          "numSamples": 62615,
+          "sampleRate": 44100,
+          "gain": 1.0,
+          "pan": 64
+        }
+      ],
+      "sha1": "0f567bf5d2b0beefe43139b03ed08548b4ca0ae0"
     },
     {
       "key": "se_0dd",
@@ -251,7 +641,37 @@
           "pan": 64
         }
       ],
-      "sha1": "710793c78989aea44c4d9d7fcf4fc3512ee6191d"
+      "sha1": "3e510015303a4e4795ee01100526a344c55777e8"
+    },
+    {
+      "key": "se_0e6",
+      "type": "sfx",
+      "path": "audio/se/se_0e6.ogg",
+      "durationSec": 0.989,
+      "loop": false,
+      "soundId": 230,
+      "bank": 1,
+      "sample": 102,
+      "event": "authored per-anim sound event (PATH-B swing/whoosh, actor+0x4e8 table)",
+      "callerEvidence": "zz_005b880_/zz_005b98c_ anim sound-event consumer (chunk_0007.c:3579/3628); extracted per-borg by scripts/gen-melee-anim-kinds.mjs (meleeAnimKinds.json borgs[id].animSounds)",
+      "sourceBank": "snd_com02",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2842,
+        "chd": 2843,
+        "dpk": 2844
+      },
+      "layers": [
+        {
+          "tsbEntry": 102,
+          "dpkOffset": 1082336,
+          "numSamples": 43621,
+          "sampleRate": 44100,
+          "gain": 1.0,
+          "pan": 64
+        }
+      ],
+      "sha1": "8db24fcc38cbbbedbe2ee5d4d6807cdba4929582"
     },
     {
       "key": "se_0f2",
@@ -281,7 +701,7 @@
           "pan": 64
         }
       ],
-      "sha1": "6a8ad18dffaebfe61ba75e5b6367d87755fff9bb"
+      "sha1": "f48db443d573829e662a88af4782f55d2b3dfda8"
     }
   ]
 }

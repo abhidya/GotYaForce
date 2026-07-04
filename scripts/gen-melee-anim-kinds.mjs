@@ -28,6 +28,9 @@
 //              activeStart/activeEnd comes from the hit.bin record, chunk_0013.c:1351-1413);
 //              byte2/byte3 = status-effect id/arg (actor+0x6f8/+0x6f9).
 //     op 0x09 fireChild (4B, FUN_8004c67c -> zz_0099e70_): s16@2 low byte = child variant.
+//     op 0x0e playSound (4B, FUN_8004c97c chunk_0006.c:1826 -> zz_00f036c_/zz_00f061c_ ->
+//              dispatcher zz_00efb3c_): byte1 = part index, byte2 = mode (>=4 no-op),
+//              byte3 = LITERAL soundId — research/decomp/anim-sound-op-decode-2026-07-04.md.
 // - Validation (pl0615 G RED): 27 distinct armHit kinds extracted from its family bank,
 //   27/27 present in its hit.bin remap table (attackHitTables.json), including all melee
 //   kinds 1-15,17,18. Shared banks carry no armHit events (movement/reaction anims).
@@ -64,6 +67,10 @@ const readS16 = (a) => {
   const o = offsetFor(a >>> 0);
   return o === null ? null : dol.readInt16BE(o);
 };
+const readU16 = (a) => {
+  const o = offsetFor(a >>> 0);
+  return o === null ? null : dol.readUInt16BE(o);
+};
 const readU8 = (a) => {
   const o = offsetFor(a >>> 0);
   return o === null ? null : dol.readUInt8(o);
@@ -98,6 +105,8 @@ function branchConditionMet(word, cr0) {
   return null;
 }
 
+const CAPTURED_STORE_OFFSETS = new Set([0x1d80, 0x1d84, 0x1d88, 0x1d8c, 0x4e8]);
+
 function collectBankStores(ctorAddress, borgValue) {
   const stores = new Map(); // actor offset -> value (last write wins, call order)
   const visit = (entry, depth, visited) => {
@@ -128,7 +137,9 @@ function collectBankStores(ctorAddress, borgValue) {
         const av = ra === 3 ? actorLoadValue(simm, borgValue) : null;
         regs[rt] = av !== null ? sign16(av) : regs[ra] !== null ? readS16(regs[ra] + simm) : null;
       } else if (op === 36) {
-        if (ra === 3 && (simm === 0x1d80 || simm === 0x1d84)) stores.set(simm, regs[rt]);
+        // +0x1d80/+0x1d84 action-script banks; +0x1d88/+0x1d8c anim-descriptor banks;
+        // +0x4e8 PATH-B anim sound-event table (anim-sound-op-decode-2026-07-04.md).
+        if (ra === 3 && CAPTURED_STORE_OFFSETS.has(simm)) stores.set(simm, regs[rt]);
       } else if (op === 16) {
         const taken = branchConditionMet(word, cr0);
         if (taken) {
@@ -241,6 +252,24 @@ function decodeStream(addr, streamStarts) {
       });
     } else if (op === 0x09) {
       events.push({ op: "fireChild", variant: (b[3] << 24) >> 24 });
+    } else if (op === 0x0e) {
+      // playSound (FUN_8004c97c chunk_0006.c:1826): byte1 = part index (gate partMask &
+      // 1<<part), byte2 = mode (0 plain positional, 1 anim-rate variant select id-1/id/id+1
+      // around thresholds 0.7/2.0, 2|3 listener-lerped positional, >=4 no-op), byte3 =
+      // LITERAL soundId (zz_00f036c_/zz_00f061c_ -> dispatcher zz_00efb3c_, bank=id>>7,
+      // sample=id&0x7f). Same wait-clock frame context as armHit. See
+      // research/decomp/anim-sound-op-decode-2026-07-04.md.
+      if (b[2] < 4) {
+        events.push({
+          op: "playSound",
+          id: b[3],
+          mode: b[2],
+          part: b[1],
+          frame,
+          frameKind,
+          anim: lastAnim,
+        });
+      }
     }
     p += len;
   }
@@ -292,6 +321,91 @@ function parseBank(base) {
     gp === null ? null : { group: g, groupPtr: gp, slots: slotTables.get(gp) },
   );
   return { groups, streamStarts };
+}
+
+// ---------- PATH-B per-anim sound events (anim-sound-op-decode-2026-07-04.md) ----------
+// The swing/whoosh audio does NOT ride the action-script streams (op 0x0e is defined by the
+// interpreter but appears 0 times across all known banks). It rides a per-ANIM sound-event
+// table: family ctors bind actor+0x4e8 = sound-event table, actor+0x1d88/+0x1d8c =
+// family/shared anim-DESCRIPTOR banks (same s16 group/slot offset scheme, zz_004d1f4_
+// chunk_0006.c:2210). The descriptor record for the (group, slot) a playAnim/blendAnim op
+// targets carries, at byte +8+part*8 (zz_004d244_ chunk_0006.c:2237-2343), the part's
+// sound-list START INDEX into the +0x4e8 table (0xff = none). Records are 8 bytes
+// (zz_005b880_/zz_005b98c_ chunk_0007.c:3579-3668):
+//   u16 frame | u8 windowFlag | u8 mode (0 plain, 1 rate-variant id±1, 2|3 pitched
+//   positional, >=4 no-op) | u16 soundId (bank=id>>7, sample=id&0x7f) | u8 cont (0xff =
+//   last) | u8 pad.
+// Validated on pl0615 G RED: every group-3 swing anim resolves to whoosh 0x24 or 0x0b at
+// frames 4-21 through desc bank 0x80367460 / table 0x80365878.
+
+function descRecordAddr(descFam, descShared, shared, group, slot) {
+  const bank = shared ? descShared : descFam;
+  if (!bank) return null;
+  const g = readS16(bank + group * 2);
+  if (g === null || g === -1) return null;
+  const gp = bank + g;
+  const s = readS16(gp + slot * 2);
+  if (s === null || s === -1) return null;
+  return gp + s;
+}
+
+// Walk one sound-event list. Junk guards (id/frame bounds, unterminated list) return null so
+// a bad descriptor index never fabricates events.
+function soundListAt(table, idx) {
+  if (idx === null || idx === 0xff || idx >= 0x80) return [];
+  const out = [];
+  for (let i = 0; i < 24; i++) {
+    const p = table + (idx + i) * 8;
+    const frame = readU16(p);
+    const mode = readU8(p + 3);
+    const id = readU16(p + 4);
+    const cont = readU8(p + 6);
+    if (frame === null || mode === null || id === null || cont === null) return null;
+    if (id >= 0x180 || frame > 0x2000) return null; // dispatcher guard is id<0x180
+    if (mode < 4) out.push({ frame, id, mode });
+    if (cont === 0xff) return out;
+  }
+  return null; // unterminated: not a real list
+}
+
+// Per-borg: join every playAnim/blendAnim ref in the borg's stored (hit-bearing) streams to
+// its PATH-B sound list. Part-level lists are deduped by (frame,id,mode) — parts frequently
+// share a list index and the port plays one model.
+function collectAnimSounds(actionBanks, descFam, descShared, soundTable) {
+  const animSounds = {};
+  if (!soundTable || (!descFam && !descShared)) return animSounds;
+  const seen = new Set();
+  for (const bankAddr of actionBanks) {
+    if (!bankAddr) continue;
+    const decoded = decodeBank(bankAddr);
+    for (const g of Object.values(decoded.groups)) {
+      for (const slotEntry of Object.values(g)) {
+        for (const e of slotEntry.events) {
+          if (e.op !== "playAnim" && e.op !== "blendAnim") continue;
+          const key = `${e.shared ? "shared:" : ""}g${e.group}s${e.slot}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          const rec = descRecordAddr(descFam, descShared, e.shared, e.group, e.slot);
+          if (rec === null) continue;
+          const events = [];
+          const dedupe = new Set();
+          for (let part = 0; part < 4; part++) {
+            const idx = readU8(rec + 8 + part * 8);
+            const list = soundListAt(soundTable, idx);
+            if (!list) continue;
+            for (const s of list) {
+              const dk = `${s.frame}:${s.id}:${s.mode}`;
+              if (dedupe.has(dk)) continue;
+              dedupe.add(dk);
+              events.push({ ...s, part });
+            }
+          }
+          if (events.length) animSounds[key] = events.sort((a, b) => a.frame - b.frame);
+        }
+      }
+    }
+  }
+  return animSounds;
 }
 
 // ---------- run over all borgs ----------
@@ -372,6 +486,18 @@ for (const id of borgIds) {
         for (const e of slot.events) if (e.op === "armHit" && e.kind > 0) kinds.add(e.kind);
   }
   entry.hitKinds = [...kinds].sort((a, b) => a - b);
+  // PATH-B per-anim sound events for every anim the stored streams play (see the helpers'
+  // header comment). Computed per BORG, not per bank: ctors can rebind the sound table for
+  // one variant (pl062a, chunk_0046.c:4813-4814), so family-mates may not share it.
+  const descFam = isBank(stores.get(0x1d88)) ? stores.get(0x1d88) : null;
+  const descShared = isBank(stores.get(0x1d8c)) ? stores.get(0x1d8c) : null;
+  const soundTable = isBank(stores.get(0x4e8)) ? stores.get(0x4e8) : null;
+  if (descFam || descShared) {
+    entry.descBanks = { family: descFam ? hex(descFam) : null, shared: descShared ? hex(descShared) : null };
+  }
+  if (soundTable) entry.soundTable = hex(soundTable);
+  const animSounds = collectAnimSounds([family, shared], descFam, descShared, soundTable);
+  if (Object.keys(animSounds).length) entry.animSounds = animSounds;
   // validate against the borg's hit.bin remap table
   const remap = hit.borgs?.[id]?.kinds;
   if (remap) {
@@ -390,6 +516,16 @@ for (const id of borgIds) {
 const banks = Object.fromEntries([...bankCache.entries()].sort());
 const totalHitSlots = [...bankStats.values()].reduce((a, v) => a + v.hitSlotCount, 0);
 const totalEvents = [...bankStats.values()].reduce((a, v) => a + v.eventCount, 0);
+const soundStats = { borgsWithAnimSounds: 0, animRefsWithSounds: 0, soundEvents: 0, distinctIds: new Set() };
+for (const entry of Object.values(borgs)) {
+  if (!entry.animSounds) continue;
+  soundStats.borgsWithAnimSounds++;
+  for (const list of Object.values(entry.animSounds)) {
+    soundStats.animRefsWithSounds += 1;
+    soundStats.soundEvents += list.length;
+    for (const s of list) soundStats.distinctIds.add(s.id);
+  }
+}
 
 const payload = {
   _meta: {
@@ -403,7 +539,12 @@ const payload = {
       "banks[addr].groups.gN.sM.events = ordered stream events; armHit.kind feeds zz_008ac80_ " +
       "(hit.bin remap -> hitbox records; active frame window comes from the hit.bin record, " +
       "not the stream); armHit.frame/frameKind = wait context when armed (start = anim start); " +
-      "anim = last playAnim/blendAnim before the arm (group byte 0x80 flag -> shared descriptor bank)",
+      "anim = last playAnim/blendAnim before the arm (group byte 0x80 flag -> shared descriptor bank); " +
+      "borgs[id].animSounds['g{G}s{S}'|'shared:g{G}s{S}'] = PATH-B per-anim sound events " +
+      "{frame (anim clock), id (soundId, bank=id>>7 sample=id&0x7f), mode (0 plain, 1 " +
+      "rate-variant id±1, 2|3 pitched positional), part} for each anim the stored streams " +
+      "play — anim-sound-op-decode-2026-07-04.md (actor+0x4e8 table via desc banks " +
+      "+0x1d88/+0x1d8c; stream op 0x0e is UNUSED by all GG4E banks)",
     region,
     borgs: Object.keys(borgs).length,
     banklessBorgs: bankless,
@@ -411,6 +552,12 @@ const payload = {
     distinctBanks: bankCache.size,
     hitBearingSlots: totalHitSlots,
     totalEventsInHitSlots: totalEvents,
+    animSounds: {
+      borgsWithAnimSounds: soundStats.borgsWithAnimSounds,
+      animRefsWithSounds: soundStats.animRefsWithSounds,
+      soundEvents: soundStats.soundEvents,
+      distinctSoundIds: soundStats.distinctIds.size,
+    },
     validation: {
       borgsCheckedAgainstHitBinRemap: validation.checked,
       clean: validation.clean,
@@ -425,7 +572,9 @@ fs.writeFileSync(OUT_PATH, JSON.stringify(payload, null, 1) + "\n");
 console.log(
   `meleeAnimKinds.json: ${Object.keys(borgs).length}/${borgIds.length} borgs, ` +
     `${bankCache.size} distinct banks, ${totalHitSlots} hit-bearing slots, ` +
-    `validation ${validation.clean}/${validation.checked} clean` +
+    `validation ${validation.clean}/${validation.checked} clean; ` +
+    `animSounds: ${soundStats.borgsWithAnimSounds} borgs, ${soundStats.animRefsWithSounds} anim refs, ` +
+    `${soundStats.soundEvents} events, ${soundStats.distinctIds.size} distinct ids` +
     (validation.mismatched.length
       ? `; MISMATCHED: ${validation.mismatched.map((m) => `${m.id}(${m.kindsNotInRemap})`).join(", ")}`
       : "") +
