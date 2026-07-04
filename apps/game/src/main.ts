@@ -35,7 +35,7 @@ import {
   type PlayerInput,
   type RectStageBounds,
 } from "@gf/combat";
-import { createAudioManager, type GotchaAudioManager } from "@gf/audio";
+import { createAudioManager, loadAudioManifest, type GotchaAudioManager } from "@gf/audio";
 import {
   createChallengeRun,
   computeResults,
@@ -118,50 +118,68 @@ const AUDIO_CUES = {
 // (replaces the old opt-in ?tunedCombatSfx=1 gate, whose rationale — 12s clips — is gone).
 const DISABLE_COMBAT_SFX = new URLSearchParams(window.location.search).has("noCombatSfx");
 
-// Battle event -> SFX cue mapping. TUNED, NOT DERIVED: behavior-notes.md (v) confirms there is
-// no recovered ROM per-action audio-event table to port (AnimAudioEventLookup @ 0x801a7640 is a
-// generic nlQSort<T> instantiation name, not a decoded frame/sound-id table; hit.bin/comhit.bin's
-// 0xF4-byte records have no identified sound-id field either). Only 5 exported SE cues exist
-// (poq_adx_usa.afs members 33..37); their real durations are 0.47-1.86s (the old 3-12s manifest
-// durations were a broken export, since fixed). Assignments below are guided by waveform analysis
-// of the decoded PCM (documented in AUDIO-PORT-STATUS.md), not by traced sound IDs:
-//   se00_00 1.35s hard-attack multi-burst -> knockdown / dash
-//   se00_01 1.86s two-part long burst     -> death / explosion
-//   se00_02 1.07s slow build then burst   -> special / charge build-up + release / low-energy alert
-//   se00_03 0.47s instant-attack impact   -> melee swing / damage taken / menu confirm
-//   se00_04 0.64s short tonal burst       -> shot / lock-on switch / tier-up tick / menu back-edit
-// jump and land stay deliberately unmapped: no plausible short jump/land sample exists in the
-// exported set, and reusing an impact cue there would reintroduce the "wrong asset" bug class.
-const COMBAT_SFX: Partial<Record<BattleEventCue, string>> = {
-  melee: "se00_03",
-  melee_alt: "se00_03",
-  shoot: "se00_04",
-  special: "se00_02",
+// "land" is not a BattleEventCue/AnimSlot: it is synthesized from the air->ground slot edge in
+// onSlotEnter below so the DERIVED landing sample (id 0x1e) has an event to hang off.
+type CombatSfxCue = BattleEventCue | "land";
+
+// Battle event -> SFX cue mapping. Split DERIVED / TUNED per event:
+//
+// DERIVED (se_<hex> keys): REAL GameCube combat samples. The decomp recovered 11 combat events
+// with literal soundIds (research/decomp/data/combat-se-ids.json; dispatcher zz_00efb3c_ decodes
+// id as bank=id>>7, sample=id&0x7f). Those ids resolve through the battle soundbanks
+// snd_com01/02/03 (afs_data.afs members 2839..2847: TSBD id table -> CHD tone/DSP header ->
+// DPK GC DSP-ADPCM data; bank->slot order proven by the DOL bank table DAT_802d0bec @ boot.dol
+// 0x2cdbec). scripts/export-combat-se.py decodes them to audio/se/se_<id>.ogg with an id-keyed
+// manifest that initAudio() merges into the audio manager.
+//
+// TUNED (se00_* keys): events with NO recovered literal id keep the older waveform-guess
+// assignments (poq_adx_usa.afs members 33..37, see AUDIO-PORT-STATUS.md). Per combat-se-ids.json
+// these are genuinely un-derivable from code constants: melee swings / per-move whooshes are
+// PATH-B animation-data sounds (soundIds live in per-move animation blobs at actor+0x4e8, not in
+// code), death audio comes from the death reaction ANIMATION's embedded events (cue id 9 is an
+// anim selector, not a soundId), and charge/lockon/alert have no traced ids at all.
+//
+// Exported but deliberately unwired: se_013 (heavy-borg-family crash variant of se_010 — the
+// real branch is on borg family, which the port does not model here yet), se_026 (actor-vs-actor
+// body bump — no bump event in the sim), se_09b (grab/throw connect — no throw mechanic yet).
+// Guard-break ids 0x00/0x80/0x100 turned out to be TSB-muted (volume byte 0) in all three real
+// banks — the "layered break stinger" plays silence on hardware — so there is no break sample to
+// wire (scripts/export-combat-se.py HONEST NOTES).
+const COMBAT_SFX: Partial<Record<CombatSfxCue, string>> = {
+  melee: "se00_03", // TUNED: swing audio is animation-data-driven (PATH B), no literal id
+  melee_alt: "se00_03", // TUNED: same
+  shoot: "se_008", // DERIVED: projectile-spawn id 0x08 (zz_006ee14_, fired from weapon-FIRE handler)
+  special: "se00_02", // TUNED
   // TUNED: hold-B charge build-up (edge-detected in presentation.ts battleAudioEvents when
   // chargeFrames leaves 0). se00_02's "slow build then burst" waveform (AUDIO-PORT-STATUS.md)
   // is the only exported cue whose envelope reads as a build-up, so the hold reuses it.
   charge_start: "se00_02",
   // TUNED: charge tier-1/tier-2 crossings (thresholds read from the borg's action profile in
   // presentation.ts, NOT hardcoded here). The short tonal se00_04 doubles as the tier-up
-  // "tick"; no dedicated tier chime exists in the 5-cue exported set.
+  // "tick"; no dedicated tier chime exists in the exported set.
   charge_tier1: "se00_04",
   charge_tier2: "se00_04",
   charge_release: "se00_02",
-  hit: "se00_03",
-  down: "se00_00",
-  death: "se00_01",
-  dash: "se00_00",
-  dash_fwd: "se00_00",
-  dash_back: "se00_00",
-  dash_left: "se00_00",
-  dash_right: "se00_00",
-  lockon: "se00_04",
-  alert: "se00_02",
+  // DERIVED: knockback crash impact id 0x10 (FUN_8005a580, light/default borg families). The
+  // heavy-family variant 0x13 is exported as se_013 but unwired until the port models families.
+  hit: "se_010",
+  down: "se_0dd", // DERIVED: knockdown thud id 0xdd (state slot 30; ROM plays it pitched via zz_00f061c_)
+  death: "se00_01", // TUNED: death audio is a reaction-animation data cue, not a literal id
+  dash: "se_0f2", // DERIVED: dash/boost/warp-launch id 0xf2 (start_forced_move_to_point et al.)
+  dash_fwd: "se_0f2",
+  dash_back: "se_0f2",
+  dash_left: "se_0f2",
+  dash_right: "se_0f2",
+  jump: "se_025", // DERIVED: launch-state id 0x25 (FUN_80061338) — jump was previously unmapped
+  spawn: "se_0f2", // DERIVED: 0xf2 is also the deploy/warp-entrance launch (FUN_8005e868, state slot 33)
+  land: "se_01e", // DERIVED id 0x1e (landing/footfall states); the TRIGGER edge below is TUNED presentation
+  lockon: "se00_04", // TUNED
+  alert: "se00_02", // TUNED
 };
 
 // Rate limits are keyed by EVENT (not by file), so e.g. a damage-taken cue is not swallowed by a
 // just-played melee swing that happens to share the same sample.
-const COMBAT_SFX_MIN_GAP_MS: Partial<Record<BattleEventCue, number>> = {
+const COMBAT_SFX_MIN_GAP_MS: Partial<Record<CombatSfxCue, number>> = {
   melee: 220,
   melee_alt: 220,
   shoot: 180,
@@ -183,12 +201,15 @@ const COMBAT_SFX_MIN_GAP_MS: Partial<Record<BattleEventCue, number>> = {
   dash_back: 400,
   dash_left: 400,
   dash_right: 400,
+  jump: 300,
+  spawn: 500,
+  land: 250,
   lockon: 150,
   alert: 1500,
 };
 const lastCombatSfxAt = new Map<string, number>();
 
-function playCombatSfx(cue: BattleEventCue): void {
+function playCombatSfx(cue: CombatSfxCue): void {
   if (DISABLE_COMBAT_SFX) return;
   const key = COMBAT_SFX[cue];
   if (!key) return;
@@ -203,6 +224,13 @@ function playCombatSfx(cue: BattleEventCue): void {
 function playBattleEventSfx(cue: BattleEventCue): void {
   playCombatSfx(cue);
 }
+
+// Landing-cue edge detection state (see onSlotEnter below): a borg whose anim slot goes from an
+// airborne slot to a grounded one just touched down. Keyed by actor uid; stale entries from a
+// previous battle are harmless (worst case one spurious rate-limited land tick on re-entry).
+const LANDING_FROM_SLOTS: ReadonlySet<string> = new Set(["jump", "fall", "fly"]);
+const LANDING_TO_SLOTS: ReadonlySet<string> = new Set(["idle", "move"]);
+const lastAnimSlotByUid = new Map<string, string>();
 
 // Per-borg VOICE cues (behavior-notes (az)): deploy shout / death cry keyed on the borg family.
 // The family→voice-group mapping is DERIVED from the asset naming; the deploy=00 / death=01 role
@@ -346,8 +374,18 @@ const battleScene = new BattleScene(battleRoot, {
   loadClip: borgPresentationAssets.loadClip,
   // Audio glue: edge-triggered per-slot cue for every actor (dash/melee/hit/down/death/...).
   // Overlaps with the sim-level edges in emitBattleAudioEdges by design; the per-event
-  // min-gap map in playCombatSfx dedupes the two sources.
-  onSlotEnter: (_borgId, slot) => playCombatSfx(slot),
+  // min-gap map in playCombatSfx dedupes the two sources. The air->ground slot edge
+  // synthesizes the "land" cue: the SAMPLE is the DERIVED landing id 0x1e (se_01e), but the
+  // trigger edge itself is TUNED presentation (the ROM fires it from landing state slot 31
+  // and grounded-recovery handlers, which the port's slot machine does not model 1:1).
+  onSlotEnter: (_borgId, slot, uid) => {
+    const prev = lastAnimSlotByUid.get(uid);
+    lastAnimSlotByUid.set(uid, slot);
+    if (prev !== undefined && LANDING_FROM_SLOTS.has(prev) && LANDING_TO_SLOTS.has(slot)) {
+      playCombatSfx("land");
+    }
+    playCombatSfx(slot);
+  },
 });
 const battleCamera = new BattleCamera({ camera, controlsTarget: controls.target });
 
@@ -424,7 +462,20 @@ let pendingBgmKey: string | null = null;
 
 function initAudio(): Promise<GotchaAudioManager | null> {
   if (!audioManagerPromise) {
-    audioManagerPromise = createAudioManager().catch(() => null);
+    audioManagerPromise = (async () => {
+      const manifest = await loadAudioManifest();
+      // Merge the DERIVED combat-SE manifest (real GameCube soundbank samples, id-keyed
+      // se_<hex> cues, exported by scripts/export-combat-se.py from afs_data.afs
+      // snd_com01/02/03). Optional: when absent, the se_* COMBAT_SFX entries simply
+      // resolve to nothing and playSfx swallows them.
+      try {
+        const se = await loadAudioManifest("/audio/se/manifest.json");
+        manifest.files = [...manifest.files, ...se.files];
+      } catch {
+        // combat-SE manifest not exported; fall through with the base manifest only
+      }
+      return createAudioManager({ manifest });
+    })().catch(() => null);
   }
   return audioManagerPromise;
 }

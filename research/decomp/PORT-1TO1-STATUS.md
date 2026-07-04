@@ -164,8 +164,14 @@ role-identified (`identified-functions.json`). What remains splits into exactly 
 **B. STATIC but substantial refactors (queued as task chips — dedicated sessions, real risk):**
 3. **Knockback magnitude port** — DERIVED data ready (KNOCKBACK_STRENGTH_TABLE + record+0xd). Needs
    the model restructured to single-base × strength across all call sites (naive swap double-counts).
-4. **SE-bank extraction** — 11 combat events→real ids mapped (bd); needs the AFS soundbank format
-   decoded to extract the referenced samples, then wire main.ts COMBAT_SFX.
+4. **SE-bank extraction** — DONE (2026-07-04). Soundbank format decoded: afs_data.afs
+   snd_com01/02/03 (.tsb = LE 128-entry "TSBD" soundId table; .chd = BE Head/Prog/Smpl/Dspi
+   chunks, Dspi = u32 dpk offset + standard 96-byte GC DSP-ADPCM header; .dpk = raw ADPCM).
+   Bank→slot order proven via the DOL bank table DAT_802d0bec (boot.dol 0x2cdbec → AFS members
+   2839..2850; snd_com04 = menu-mode bank). scripts/export-combat-se.py exports the 9 audible
+   combat ids to apps/game/public/audio/se/ (id-keyed manifest); main.ts COMBAT_SFX wires
+   shoot/hit/down/dash×4/jump/spawn/land as DERIVED. Finding: guard-break ids 0x00/0x80/0x100
+   are TSB-muted (volume byte 0) in all three banks — the "layered break stinger" is silent.
 5. **Command resolver → stepAttacks** — `resolveCommandType()` implemented + tested; wiring it in is
    the ATK-003 refactor of working attack code.
 
@@ -200,7 +206,7 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Assets: models (static/anim) | 100% / 89% | 23 unanimated borgs |
 | Assets: animation playback | ~88% (dispatch mapped+reconciled, ba/bb) | asset re-bake: relabel g4s0 special_s0→down_s0 (worktree); death/deploy slots unresolved |
 | Audio: BGM/menu | ~90% | — |
-| Audio: combat/voice | ~55% (voice az; SE ids MAPPED bd) | 11 combat events→real ids known; wiring PENDING SE-bank extraction from AFS; voice cue-role TUNED |
+| Audio: combat/voice | ~75% (voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04) | real bank samples exported (scripts/export-combat-se.py) + wired (shoot/hit/down/dash/jump/spawn/land DERIVED); melee/death stay TUNED (animation-data-driven, PATH B); voice cue-role TUNED |
 | Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
 | FX: particles/projectiles | ~70% | PTL/REF decode; 3D weapon meshes |
 

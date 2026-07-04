@@ -1,0 +1,287 @@
+{
+  "generated": "2026-07-04",
+  "source": "Gotcha Force (GG4E) afs_data.afs snd_com01/02/03 soundbanks - GC DSP-ADPCM decoded by scripts/export-combat-se.py",
+  "format": "OGG Vorbis",
+  "idScheme": "key = se_<soundId hex, 3 digits>; soundId = bank<<7 | sample (dispatcher zz_00efb3c_ @ 0x800efb3c)",
+  "notes": "DERIVED combat SE: literal soundIds from research/decomp/data/combat-se-ids.json resolved through the battle TSB/CHD/DPK banks (afs_data.afs members 2839..2847, DOL bank table DAT_802d0bec @ boot.dol 0x2cdbec). Gains bake in TSB entry volume x CHD tone volume. Guard-break ids 0x00/0x80/0x100 are TSB-muted (volume 0) in all three banks and are deliberately NOT exported. id 0x176 is a TSB type-1 sequence command, not a sample.",
+  "files": [
+    {
+      "key": "se_008",
+      "type": "sfx",
+      "path": "audio/se/se_008.ogg",
+      "durationSec": 0.997,
+      "loop": false,
+      "soundId": 8,
+      "bank": 0,
+      "sample": 8,
+      "event": "shot fire / projectile launch",
+      "callerEvidence": "zz_006ee14_ projectile spawn (chunk_0009.c:3859)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 8,
+          "dpkOffset": 240288,
+          "numSamples": 43971,
+          "sampleRate": 44100,
+          "gain": 0.5906,
+          "pan": 64
+        }
+      ],
+      "sha1": "91882032f3d610581bd867022ef5045fd2f3631e"
+    },
+    {
+      "key": "se_010",
+      "type": "sfx",
+      "path": "audio/se/se_010.ogg",
+      "durationSec": 0.614,
+      "loop": false,
+      "soundId": 16,
+      "bank": 0,
+      "sample": 16,
+      "event": "wall/ground crash impact, light borg families",
+      "callerEvidence": "FUN_8005a580 knockback-terrain impact (chunk_0007.c:2949)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 16,
+          "dpkOffset": 528224,
+          "numSamples": 27070,
+          "sampleRate": 44100,
+          "gain": 0.7874,
+          "pan": 64
+        }
+      ],
+      "sha1": "dd805259d894c2cdc26698238dac9a8a6648232c"
+    },
+    {
+      "key": "se_013",
+      "type": "sfx",
+      "path": "audio/se/se_013.ogg",
+      "durationSec": 0.822,
+      "loop": false,
+      "soundId": 19,
+      "bank": 0,
+      "sample": 19,
+      "event": "wall/ground crash impact, heavy borg families",
+      "callerEvidence": "FUN_8005a580 knockback-terrain impact (chunk_0007.c:2946)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 19,
+          "dpkOffset": 608736,
+          "numSamples": 36270,
+          "sampleRate": 44100,
+          "gain": 0.8661,
+          "pan": 64
+        }
+      ],
+      "sha1": "47bf290121e94843e8d338e06277199669e8e93f"
+    },
+    {
+      "key": "se_01e",
+      "type": "sfx",
+      "path": "audio/se/se_01e.ogg",
+      "durationSec": 0.608,
+      "loop": false,
+      "soundId": 30,
+      "bank": 0,
+      "sample": 30,
+      "event": "landing / touchdown / footfall",
+      "callerEvidence": "FUN_8005e31c state slot 31 + grounded handlers (chunk_0007.c:5215)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 30,
+          "dpkOffset": 841088,
+          "numSamples": 26809,
+          "sampleRate": 44100,
+          "gain": 0.7874,
+          "pan": 64
+        }
+      ],
+      "sha1": "8310b05ee44de9e3c0b9f2222083f5faa6202499"
+    },
+    {
+      "key": "se_025",
+      "type": "sfx",
+      "path": "audio/se/se_025.ogg",
+      "durationSec": 0.534,
+      "loop": false,
+      "soundId": 37,
+      "bank": 0,
+      "sample": 37,
+      "event": "jump / hop launch",
+      "callerEvidence": "FUN_80061338 launch state (chunk_0007.c:7157)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 37,
+          "dpkOffset": 766496,
+          "numSamples": 23571,
+          "sampleRate": 44100,
+          "gain": 0.9055,
+          "pan": 64
+        }
+      ],
+      "sha1": "5a54ce32c3728ebc7a8eab8e779fb5887ab27910"
+    },
+    {
+      "key": "se_026",
+      "type": "sfx",
+      "path": "audio/se/se_026.ogg",
+      "durationSec": 0.466,
+      "loop": false,
+      "soundId": 38,
+      "bank": 0,
+      "sample": 38,
+      "event": "actor-vs-actor body bump",
+      "callerEvidence": "zz_002fcbc_ collision resolver (chunk_0003.c:8378)",
+      "sourceBank": "snd_com01",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2839,
+        "chd": 2840,
+        "dpk": 2841
+      },
+      "layers": [
+        {
+          "tsbEntry": 38,
+          "dpkOffset": 779968,
+          "numSamples": 20544,
+          "sampleRate": 44100,
+          "gain": 0.9449,
+          "pan": 64
+        }
+      ],
+      "sha1": "e48bce8cee5c687c5236807f3b964f5ae3e33635"
+    },
+    {
+      "key": "se_09b",
+      "type": "sfx",
+      "path": "audio/se/se_09b.ogg",
+      "durationSec": 1.836,
+      "loop": false,
+      "soundId": 155,
+      "bank": 1,
+      "sample": 27,
+      "event": "grab/throw connect",
+      "callerEvidence": "FUN_8005ace8 clash/grab resolution (chunk_0007.c:3283)",
+      "sourceBank": "snd_com02",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2842,
+        "chd": 2843,
+        "dpk": 2844
+      },
+      "layers": [
+        {
+          "tsbEntry": 27,
+          "dpkOffset": 2296832,
+          "numSamples": 79717,
+          "sampleRate": 44100,
+          "gain": 1.0,
+          "pan": 0
+        },
+        {
+          "tsbEntry": 27,
+          "dpkOffset": 2342400,
+          "numSamples": 80957,
+          "sampleRate": 44100,
+          "gain": 1.0,
+          "pan": 127
+        }
+      ],
+      "sha1": "a21533cefcd6f72586eeb0d5ec6edd81c1fde60c"
+    },
+    {
+      "key": "se_0dd",
+      "type": "sfx",
+      "path": "audio/se/se_0dd.ogg",
+      "durationSec": 2.533,
+      "loop": false,
+      "soundId": 221,
+      "bank": 1,
+      "sample": 93,
+      "event": "knockdown / heavy landing thud",
+      "callerEvidence": "FUN_8005dffc state slot 30 knockdown (chunk_0007.c:5111)",
+      "sourceBank": "snd_com02",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2842,
+        "chd": 2843,
+        "dpk": 2844
+      },
+      "layers": [
+        {
+          "tsbEntry": 93,
+          "dpkOffset": 753568,
+          "numSamples": 111701,
+          "sampleRate": 44100,
+          "gain": 1.0,
+          "pan": 64
+        }
+      ],
+      "sha1": "710793c78989aea44c4d9d7fcf4fc3512ee6191d"
+    },
+    {
+      "key": "se_0f2",
+      "type": "sfx",
+      "path": "audio/se/se_0f2.ogg",
+      "durationSec": 0.444,
+      "loop": false,
+      "soundId": 242,
+      "bank": 1,
+      "sample": 114,
+      "event": "dash / boost / deploy-warp launch",
+      "callerEvidence": "start_forced_move_to_point + FUN_8005e868 spawn state (chunk_0007.c:5446)",
+      "sourceBank": "snd_com02",
+      "sourceArchive": "user-data/GG4E/disc/root/afs_data.afs",
+      "afsMembers": {
+        "tsb": 2842,
+        "chd": 2843,
+        "dpk": 2844
+      },
+      "layers": [
+        {
+          "tsbEntry": 114,
+          "dpkOffset": 1343520,
+          "numSamples": 19580,
+          "sampleRate": 44100,
+          "gain": 0.9449,
+          "pan": 64
+        }
+      ],
+      "sha1": "6a8ad18dffaebfe61ba75e5b6367d87755fff9bb"
+    }
+  ]
+}
