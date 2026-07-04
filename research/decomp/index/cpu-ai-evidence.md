@@ -161,3 +161,16 @@ Writes a slot's action handler from a 6-entry mode table when the slot is active
 - DAT_8043612c is an effect-driven signed param-tier delta, not proven CPU desire/input.
 - The CPU decision-brain function is not fully isolated by this pass; current evidence covers shared target/effect/action dispatch used by CPU and player-controlled actors.
 
+
+
+## Update 2026-07-03: 0x8010d880 mode-table lead closed (negative)
+
+The 6-entry table `PTR_DAT_80325af4` consumed by `set_slot_action_handler` @0x8010d880 was
+extracted from the DOL: entries are DATA pointers (0x80434510/518/520 blocks of
+{bufferAddr 0x800a4000/0x80144000/0x801e4000, mask 0xffff0000}; mode 3 -> const block
+0x80325ae8), i.e. per-slot INPUT-STREAM/replay-buffer descriptors, not behavior functions.
+`set_slot_action_handler` is demo/input-source plumbing. The CPU decision brain remains
+NOT isolated; the "shared dispatch only" conclusion of this document stands. Next viable
+lead: trace who WRITES the per-slot PlayerInput-equivalent for slots whose pad mask bit in
+PTR_DAT_80433930[2] is clear (CPU slots) inside the per-frame loop — a Dolphin write-watch
+on the pad-state mirror for a CPU slot is the cheapest decisive capture.

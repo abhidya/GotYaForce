@@ -22,9 +22,11 @@ import {
   stepActionState,
   stepAttacks,
   stepCooldowns,
+  stepGaugeWindows,
   stepInvincibility,
   stepProjectiles,
 } from "./combat.js";
+import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { DEFAULT_BOUNDS, JUMP, SIM, SPAWN_INVINCIBILITY_FRAMES } from "./constants.js";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
@@ -72,6 +74,7 @@ class BattleImpl implements Battle {
   private readonly spawnArea: RectStageBounds;
   private readonly spawnPoints: readonly SpawnPoint[];
   private readonly timeLimitFrames: number | null;
+  private readonly timerFrozen: boolean;
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
@@ -84,6 +87,7 @@ class BattleImpl implements Battle {
     this.spawnArea = playableSpawnArea(this.collision, this.bounds);
     this.spawnPoints = cfg.spawnPoints ?? [];
     this.timeLimitFrames = cfg.timeLimitFrames !== undefined ? Math.max(0, Math.floor(cfg.timeLimitFrames)) : null;
+    this.timerFrozen = cfg.timerFrozen ?? false;
     resetProjectileCounter();
 
     let cpuIdx = 0;
@@ -154,6 +158,9 @@ class BattleImpl implements Battle {
     }
     const uid = `borg_${this.uidCounter++}`;
     const prof = entry.profile;
+    // VERIFIED per-borg gauge init (pl####data.bin u16[0]/u16[1], chunk_0007.c:47-52) with a
+    // DERIVED modal fallback (500/100) for ids missing from the extracted table.
+    const gauges = gaugeInitForBorgId(entry.borgId);
     const b: BorgRuntime = {
       uid,
       borgId: entry.borgId,
@@ -172,6 +179,15 @@ class BattleImpl implements Battle {
       ammo: startingAmmoForProfile(prof),
       cooldowns: { boostFuel: JUMP.BOOST_FUEL_FRAMES, jumpHeld: 0 },
       invincTimer: SPAWN_INVINCIBILITY_FRAMES,
+      balanceGauge: gauges.balanceGaugeMax,
+      balanceGaugeMax: gauges.balanceGaugeMax,
+      downGauge: gauges.downGaugeBase,
+      downGaugeBase: gauges.downGaugeBase,
+      balanceRefillDelay: 0,
+      downResetDelay: 0,
+      comboWindow: 0,
+      comboAccum: 0,
+      comboRank: 0,
       paramTier: resetActorParamTier(),
       lockTarget: null,
       allyLockTarget: null,
@@ -235,9 +251,12 @@ class BattleImpl implements Battle {
       if (!prof) continue;
       const input = resolved.get(b.uid) ?? emptyInput();
 
-      // Tick down timers first (cooldowns, invincibility) so this frame's gating is correct.
+      // Tick down timers first (cooldowns, invincibility, post-hit gauge windows) so this
+      // frame's gating is correct. stepGaugeWindows self-freezes while in hit/down (the
+      // ROM's "in hit reaction" gate, chunk_0006.c:7982-8011).
       stepCooldowns(b);
       stepInvincibility(b);
+      stepGaugeWindows(b);
 
       // Lock-on is the default player movement frame; `lockOn` also lets AI/future callers opt in.
       // R (switch-lock) and Z (ally-lock) are EDGE-TRIGGERED via 0/1 press latches stored in
@@ -320,8 +339,21 @@ class BattleImpl implements Battle {
 
   private tickBattleTimer(): void {
     if (this.state.result !== "ongoing" || this.timeLimitFrames === null) return;
+    // DERIVED — PTR_DAT_80433934[0x50] gate: with the freeze flag set, the original
+    // countdown (zz_0029b58_, chunk_0003.c:4631-4638) never decrements +0x4c and the
+    // judge's timeout branches (zz_00297c8_, chunk_0003.c:4519-4529/4547-4553) never
+    // fire. Challenge sets 18000 frames + frozen (chunk_0048.c:390-392), so a Challenge
+    // battle can only end by a side's borg count/energy reaching 0 — never by time.
+    if (this.timerFrozen) {
+      this.state.timeRemainingFrames = this.timeLimitFrames;
+      return;
+    }
     const remaining = Math.max(0, this.timeLimitFrames - this.state.frame - 1);
     this.state.timeRemainingFrames = remaining;
+    // DERIVED — timeout with neither side at 0 writes winner-mask 4 (a no-winner
+    // result, chunk_0003.c:4547-4553); every per-side "won" flag is an equality
+    // test (mask == 1<<side, chunk_0003.c:4560-4604), so a timeout displays as a
+    // loss for every player. "draw" is the sim-side name for that mask-4 state.
     if (remaining <= 0) this.state.result = "draw";
   }
 

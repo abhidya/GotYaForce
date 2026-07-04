@@ -16,8 +16,16 @@ import { actorDataCombatStatsForBorgId, actorDataCombatStatsSummary } from "./ac
 import { createBattle } from "./battle.js";
 import { stepAI } from "./ai.js";
 import { actionProfileForProfile, startingAmmoForProfile } from "./actionProfiles.js";
-import { projectileVisualKindForProfile, stepAttacks, stepCooldowns, stepProjectiles } from "./combat.js";
-import { DASH, JUMP, MELEE, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
+import {
+  applyHit,
+  projectileVisualKindForProfile,
+  stepAttacks,
+  stepCooldowns,
+  stepGaugeWindows,
+  stepProjectiles,
+} from "./combat.js";
+import { DASH, JUMP, MELEE, STAGGER, WAKE_UP_INVINCIBILITY_FRAMES } from "./constants.js";
+import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId } from "./gauges.js";
 import { stepMovement } from "./movement.js";
 import {
   PARAM_TIER_RESET,
@@ -995,6 +1003,61 @@ function assertAiKeepsLockedTarget(borgs: BorgStats[]): void {
   console.log("[selfcheck] AI kept valid lockTarget before nearest-enemy fallback");
 }
 
+function assertFrozenBattleTimerNeverExpires(borgs: BorgStats[]): void {
+  // DERIVED — Challenge writes timeLimit=18000 AND the pause flag [0x50]=1
+  // (chunk_0048.c:390-392); the countdown zz_0029b58_ (chunk_0003.c:4631-4638)
+  // and the judge's timeout branches (chunk_0003.c:4519-4529/4547-4553) are all
+  // gated on [0x50]==0. A frozen-timer battle must never resolve to "draw" by
+  // time; a running-timer battle must.
+  const mk = (timerFrozen: boolean) =>
+    createBattle(
+      {
+        stageId: "st00",
+        forces: [
+          { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+          { team: 1, ownerPlayer: null, borgIds: ["pl0008"] },
+        ],
+        bounds: { x: 4000, z: 4000 },
+        // Spawn the two forces far apart so nobody dies inside the window.
+        spawnPoints: [
+          { pos: { x: -3500, y: 10, z: -3500 } },
+          { pos: { x: 3500, y: 10, z: 3500 } },
+        ],
+        timeLimitFrames: 30,
+        timerFrozen,
+      },
+      borgs,
+    );
+  const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
+
+  const frozen = mk(true);
+  for (let f = 0; f < 90; f++) frozen.step(1 / 60, idleInputs);
+  if (frozen.state.result === "draw") {
+    throw new Error("[selfcheck] frozen battle timer expired: Challenge-style timer must never time out");
+  }
+  if (frozen.state.timeRemainingFrames !== 30) {
+    throw new Error(
+      `[selfcheck] frozen battle timer ticked: timeRemainingFrames=${frozen.state.timeRemainingFrames}, want 30`,
+    );
+  }
+
+  const running = mk(false);
+  let drawFrame = -1;
+  for (let f = 0; f < 90; f++) {
+    running.step(1 / 60, idleInputs);
+    if (running.state.result === "draw") {
+      drawFrame = f;
+      break;
+    }
+  }
+  if (drawFrame < 0) {
+    throw new Error("[selfcheck] running battle timer never expired (expected timeout draw at ~30 frames)");
+  }
+  console.log(
+    `[selfcheck] battle timer [0x50] gate ok: frozen timer held at 30 frames; running timer drew at frame ${drawFrame}`,
+  );
+}
+
 function assertActorParamTierMatchesCClamp(): void {
   const state = resetActorParamTier();
   expectParamTierState(state, PARAM_TIER_RESET, 0, 0, "reset");
@@ -1032,6 +1095,99 @@ function expectParamTierState(
   }
 }
 
+function assertGaugeStaggerModel(borgs: BorgStats[]): void {
+  // DERIVED model under test (see gauges.ts / combat.ts applyHit): no flat per-hit hitstun —
+  // a hit interrupts only via down-gauge depletion, balance-gauge break, or forced reaction
+  // flags (chunk_0003.c:6255-6263).
+  const victimProfile = buildProfile(borgById(borgs, "pl0615")); // G RED
+  const init = gaugeInitForBorgId("pl0615");
+  if (init.balanceGaugeMax !== 500 || init.downGaugeBase !== 100) {
+    throw new Error(`[selfcheck] G RED gauge init mismatch: ${JSON.stringify(init)}`);
+  }
+  const shotRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.SHOT); // record 0: down 25 / balance 25 / flags 1
+  const meleeRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE); // record 1: flags 2 -> forced stagger
+  const noDir = { x: 0, y: 0, z: 0 };
+  const from = { x: 0, y: 0, z: 10 };
+
+  // 1) A single shot dents the gauges but must NOT put the victim into the "hit" state.
+  const victim = fakeRuntime("gauge_shot", 1, 0);
+  const dealt = applyHit(victim, victimProfile, 2, 0, noDir, from, false, shotRecord);
+  if (dealt <= 0) throw new Error("[selfcheck] gauge model: shot hit dealt no HP damage");
+  if (victim.state !== "idle" || (victim.cooldowns["hitstun"] ?? 0) !== 0) {
+    throw new Error(`[selfcheck] gauge model: a single shot flinched the victim (state=${victim.state})`);
+  }
+  if (victim.balanceGauge !== 475 || victim.downGauge !== 75) {
+    throw new Error(
+      `[selfcheck] gauge model: shot gauge damage wrong: balance=${victim.balanceGauge}, down=${victim.downGauge}`,
+    );
+  }
+  if (victim.balanceRefillDelay !== STAGGER.BALANCE_REFILL_DELAY) {
+    throw new Error(`[selfcheck] gauge model: hit did not arm the 60f windows (${victim.balanceRefillDelay})`);
+  }
+
+  // 2) Repeated shots that deplete the balance gauge MUST stagger. A tank-like down gauge
+  //    isolates the balance path (real borgs go up to 30000 down base, e.g. the boss entry).
+  const tank = fakeRuntime("gauge_tank", 1, 0);
+  tank.downGauge = tank.downGaugeBase = 30000;
+  let staggerHit = -1;
+  for (let i = 1; i <= 40; i += 1) {
+    applyHit(tank, victimProfile, 2, 0, noDir, from, false, shotRecord);
+    if (tank.state === "hit") {
+      staggerHit = i;
+      break;
+    }
+  }
+  if (staggerHit !== 20) {
+    // balance 500 / 25 per shot -> the 20th shot breaks the gauge.
+    throw new Error(`[selfcheck] gauge model: balance break staggered at hit ${staggerHit}, want 20`);
+  }
+  if (tank.balanceGauge !== tank.balanceGaugeMax) {
+    // The ROM refills the balance gauge to max IMMEDIATELY on break (chunk_0003.c:8014-8015).
+    throw new Error(`[selfcheck] gauge model: balance not refilled on break (${tank.balanceGauge})`);
+  }
+  if (tank.invincTimer !== STAGGER.STAGGER_IFRAMES) {
+    throw new Error(`[selfcheck] gauge model: stagger i-frames missing (${tank.invincTimer})`);
+  }
+
+  // 3) A melee hit (record 1, reactionFlags bit 2) staggers immediately and resets the down gauge.
+  const meleeVictim = fakeRuntime("gauge_melee", 1, 0);
+  applyHit(meleeVictim, victimProfile, 2, 0, noDir, from, false, meleeRecord);
+  if (meleeVictim.state !== "hit") {
+    throw new Error(`[selfcheck] gauge model: forced-flag melee hit did not stagger (state=${meleeVictim.state})`);
+  }
+  if (meleeVictim.downGauge !== meleeVictim.downGaugeBase) {
+    throw new Error(`[selfcheck] gauge model: stagger did not reset the down gauge (${meleeVictim.downGauge})`);
+  }
+  // DERIVED — the 60 stagger i-frames are BALANCE-BREAK ONLY (zz_005c290_ gates the +0x720
+  // write on 0x6fd & 0x80, chunk_0007.c:3985-4050). A flag-forced melee stagger must NOT
+  // grant them, or melee chains throttle to one damaging hit per stagger.
+  if (meleeVictim.invincTimer !== 0) {
+    throw new Error(
+      `[selfcheck] gauge model: flag-forced stagger wrongly granted i-frames (${meleeVictim.invincTimer})`,
+    );
+  }
+
+  // 4) 60+ hit-free frames refill the balance gauge to max (and reset the down gauge).
+  const recovering = fakeRuntime("gauge_refill", 1, 0);
+  applyHit(recovering, victimProfile, 2, 0, noDir, from, false, shotRecord);
+  for (let f = 0; f < STAGGER.BALANCE_REFILL_DELAY - 1; f += 1) stepGaugeWindows(recovering);
+  if (recovering.balanceGauge !== 475) {
+    throw new Error(`[selfcheck] gauge model: balance refilled early (${recovering.balanceGauge})`);
+  }
+  stepGaugeWindows(recovering);
+  if (recovering.balanceGauge !== recovering.balanceGaugeMax || recovering.downGauge !== recovering.downGaugeBase) {
+    throw new Error(
+      `[selfcheck] gauge model: 60f windows did not restore gauges: balance=${recovering.balanceGauge}, down=${recovering.downGauge}`,
+    );
+  }
+
+  console.log(
+    "[selfcheck] gauge stagger model OK: shots don't flinch, balance break staggers at hit 20 " +
+      "(refill-to-max + 60 i-frames), forced melee staggers immediately (no i-frames), " +
+      "60f windows restore gauges",
+  );
+}
+
 function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
   return {
     uid,
@@ -1051,6 +1207,16 @@ function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
     ammo: 0,
     cooldowns: {},
     invincTimer: 0,
+    // Modal gauge init (matches pl0615: balance 500, down 100 — data/gaugeInit.json).
+    balanceGauge: 500,
+    balanceGaugeMax: 500,
+    downGauge: 100,
+    downGaugeBase: 100,
+    balanceRefillDelay: 0,
+    downResetDelay: 0,
+    comboWindow: 0,
+    comboAccum: 0,
+    comboRank: 0,
     paramTier: resetActorParamTier(),
     lockTarget: null,
     allyLockTarget: null,
@@ -1104,7 +1270,9 @@ export function main(): number {
   assertTypeDamageMatrixWired(borgs);
   assertMeleeRefreshesInvincibility(borgs);
   assertAiKeepsLockedTarget(borgs);
+  assertFrozenBattleTimerNeverExpires(borgs);
   assertActorParamTierMatchesCClamp();
+  assertGaugeStaggerModel(borgs);
 
   // 1v3: human on team 0 (one G RED), CPU team 1 with three Death Borgs. The human is IDLE,
   // so the three AI-controlled CPU borgs must close, lock on, and wear G RED down — i.e. the

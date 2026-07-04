@@ -8567,5 +8567,17 @@
         "sha1": "a327bd0f21624d068510d3dceabd904501619365"
       }
     ]
+  },
+  {
+    "id": "pl0f07",
+    "name": null,
+    "tribe": null,
+    "energy": 0,
+    "dae": "pl0f07.dae",
+    "bones": 3,
+    "meshes": 6,
+    "tris": 610,
+    "textures": [],
+    "files": []
   }
 ]

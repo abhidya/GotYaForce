@@ -1756,3 +1756,145 @@ band/height data (+0x894..+0x8A0, +0x6D0, +0x668 — trace band 466.5..504.9 sub
 multi-actor widen, wall-guard; correctives FUN_800101c8/FUN_8000fffc unported. Helpers:
 `zz_0045204_`/`zz_0045238_` @ 0x80045204/0x80045238 = sin/cos(BAM16); DOUBLE_80436ab0/ab8
 (0.5/3.0) are just the PPC frsqrte Newton iteration, not tunables.
+
+
+### (ae) Challenge flow end-to-end: battle judge, timer freeze, winner mask, rotation + generation tables (2026-07-03)
+
+Battle-end judge is `zz_00297c8_` @0x800297c8 (chunk_0003.c:4488-4615). Winner mask
+`PTR_DAT_80433934[0x1f]`: bit0 = side 0 won, bit1 = side 1 won, **4 = timeout with no
+winner** (flag mirror [0x17a]), 8 = a fourth result (mirror [0x1b6], writer not found).
+Per-side blocks stride 0x3c (side0 base +0xf4, side1 +0x130): remaining-energy s32 at
++0x118/+0x154, remaining-count byte at [0x10a]/[0x146], rule-enable flags [0x108]/[0x109]
+(and side1 [0x144]/[0x145]), win counters u16 +0x110/+0x14c.
+
+- Mode split on `PTR_DAT_80433930[0x32]` (0 = versus/challenge family, 1/2 = mission):
+  in mode 0, a side LOSES when its count byte or energy hits 0 (rule flags select which);
+  timeout ([0x15df] set, [0x50]==0, timer +0x4c < 1) awards the win by flag [0x10b]
+  (chunk_0003.c:4519-4529). In mode !=0, energy-only, and timeout with no winner writes
+  mask=4 = DRAW (chunk_0003.c:4547-4553).
+- **Timer freeze flag [0x50]**: countdown `zz_0029b58_` @0x80029b58 (chunk_0003.c:4621-4642)
+  only decrements +0x4c when battle-state [0x45]==4 AND [0x50]==0. Writers: Versus menu
+  chunk_0044.c:366-373 (limit selected -> seconds*60, [0x50]=0; no-limit -> 0xea24,
+  [0x50]=1), mission chunk_0046.c:1242-1250, **Challenge chunk_0048.c:390-392 writes
+  +0x48=+0x4c=18000 AND [0x50]=1** -> original Challenge battles can NEVER time out.
+  Ported as `BattleConfig.timerFrozen` (packages/combat) + challenge.ts passes true.
+- Per-side result flags are EQUALITY tests: `[0xc4+n] = ([0x1f] == 1 << side)` and
+  `[0x102]/[0x13e]/[0x17a]/[0x1b6] = ([0x1f] == 1/2/4/8)` (chunk_0003.c:4556-4604), so a
+  draw (3 or 4) displays as LOSE for every player. Results UI needs only WIN/LOSE.
+- Challenge post-battle branch `FUN_801969a0` @0x801969a0 (chunk_0048.c:466-506): advance
+  only when `([0x1f] & 1<<playerSide) && [0x1f] <= 2` (i.e. mask==1); mask 3 (mutual
+  simultaneous destruction) or 4 exits to state 6 = the same failure screen as a loss
+  (`zz_01f5ae0_(3)`, chunk_0048.c:618-637); full clear = state 5, `zz_01f5ae0_(difficulty)`.
+  Battle counter DAT_80436378[8]; total battles `(&DAT_804356d0)[difficulty]` = **5/10/15**
+  (extracted). Energy limits `DAT_8036f554` = **1500/2000/2500** (matches live captures).
+- Challenge state table PTR_FUN_8036f560 (extracted from DOL): 0=init 0x80195fbc,
+  1=menu poll 0x80196030, 2=box-load 0x80196188, 3=battle setup 0x801962c4, 4=in-battle
+  0x8019688c (sub-table PTR_FUN_8036f580: 0x801968cc load-wait, 0x80196948 run,
+  0x801969a0 post-battle), 5=clear 0x80196a9c, 6=fail 0x80196cec, 7=exit 0x80196d64.
+- **Stage rotation** `zz_0196dac_` @0x80196dac (chunk_0048.c:643-663): stage byte [0x1c] =
+  uniform pick from the 11-entry pool `DAT_8036f548` = st00-st05, st08, st0a, st0b, st0c,
+  st0e, re-rolled while equal to the previous battle's stage; [0x1d] = rand%3;
+  [0x1e] = rand % variantCount (the DAT_802da5d0 table already in challenge-reference.ts).
+- **Enemy/ally team generation** (build_challenge_battle_setup, chunk_0048.c:302-361):
+  per difficulty & battle index — CPU ally count/budget from PTR_DAT_8036f40c/8036f4b8,
+  enemy count/budget from PTR_DAT_8036f434/8036f53c, pool ids from PTR_DAT_8036f360/3e4
+  (battleIdx*4 + rand%4), member drawn by zz_0196eb8_ from PTR_DAT_80380804 lists; each
+  rolled borg charges floor(cost*2/3) against the budget (chunk_0048.c:351). All values
+  extracted to research/decomp/data/challenge-battle-tables-8036f360.json.
+
+### (af) Death/spawn flow: kill-event accounting, 3-phase deploy, symbol-map misattribution (2026-07-03)
+
+- **`cPlayer::ClearSwapControllerTimer` @0x802807ac and `zz_0281c38_` @0x80281c38 are NOT
+  gameplay code.** Their bodies are a Huffman/bitstream video-codec decoder (vtable
+  dispatch, code tables DAT_8041cfa0/cfa4, zero match-state access). The CSM symbol map is
+  a cross-game import (it contains literal `gnt4-*` symbols, `Bowser::DrawShadow`,
+  `LooseBallAnims::GetDesperationInfo`) — treat cPlayer/cTeam names as UNRELIABLE unless
+  the body is verified. challenge-flow-evidence.md's 'death_swap_flow_candidate' anchor is
+  withdrawn by this note.
+- **Death accounting happens at the kill event**, not after the death animation:
+  `zz_002f8dc_` @0x8002f8dc (chunk_0003.c:8212-8330) subtracts the victim's cost
+  (u16 victim+0x4aa) from the side energy `+side*0x3c+0x118`, decrements the side count
+  [0x10a], records last-kill pointers +0xb4/+0xb8, bumps victim losses (+0x435/+0x424)
+  and attacker kills (+0x434/+0x420) and team score `(&DAT_80436154)[side] += 100`.
+  Cost init: +0x4aa = `zz_0066168_(borgId)` (chunk_0006.c:8186), same lookup the
+  Challenge budget uses.
+- Death entry `zz_005bbc0_` @0x8005bbc0 (chunk_0007.c:3716-3751): immediately clears
+  active status (+0x18=2), sets 0x5e0|=0x80000000, clears the side deploy mask bit
+  [0xea], plays reaction cue id 9, then runs death anim phases via the SAME
+  PTR_FUN_802d3570 table indexed by +0x540.
+- **Spawn/deploy is a 3-phase timer on +0x558** (state table slots 0-2, extracted table
+  at 0x802d3570 confirmed s4u addresses): FUN_8005be08 counts 20.0 -> 0 at 1.0/frame
+  (descent; drop-visual toggle at 6.0 left), FUN_8005bec8 = 1 frame (sets 15.0, plays
+  ally reaction cue id 8), FUN_8005bf6c counts 15.0 -> 0 (pose), then clears spawn flags.
+  Total deploy lock ~ **36 frames**. Phase constants FLOAT_80437428=1.0, _30=6.0,
+  _34=15.0, _38=30.0, _3c=20.0 (DOL-extracted). Phase-0 init 20.0/30.0 chosen by
+  `zz_005c028_` (chunk_0007.c:3871-3891) on +0x6fe.
+- Respawn-reset helper FUN_80060b60 @0x80060b60 (chunk_0007.c:6778-6804) writes +0x720 =
+  30.0 (FLOAT_80437558) if +0x6cb==1 else 60.0 (FLOAT_80437564) — not in the 35-slot
+  table; its dispatch context is still unproven, so SPAWN_INVINCIBILITY stays TUNED with
+  these as the candidate real values.
+
+### (ag) Real per-borg HP/ammo table + gauge init + damage records extracted (2026-07-03)
+
+- **HP source found**: `zz_0055f90_` @0x80055f90 (chunk_0006.c:8167-8232) writes max/cur
+  HP (+0x1c4/+0x1c6/+0x1c8) from `(&PTR_DAT_802f2988)[family(+0x3e8)] +
+  (subIdx(+0x3ee) + variant(+0x3e9)*0x14 + DAT_804339e8[level(+0x3ec)]) * 0x12`, u16[0]
+  of the row. Same row's u16[1..] feed ammo/charge fields +0x774/+0x776/+0x78c/+0x790
+  (chunk_0007.c:60-94). Extracted for every roster family/variant to
+  research/decomp/data/borg-hp-stat-rows-802f2988.json.
+  **Cross-verified against live capture**: G RED (pl0615) level row (DAT_804339e8[0]=2)
+  = HP 200 and ammo 5 — exactly the captured HUD values (UI-FIDELITY-SPEC.md).
+- Gauge init (chunk_0007.c:47-52): balance max/cur (+0x6be/+0x6c2) = u16@0 of the
+  pl####data.bin page (+0x4ac), down gauge (+0x6c6/+0x6c4) = u16@2; +0x59c = u16@0xa8;
+  +0x204/+0x208 = u32@0x98. All 199 exported to
+  research/decomp/data/borg-gauge-init-pldata.json.
+- Damage-record tables (0x18 stride; consumed via hitbox record u16+0x04) extracted to
+  research/decomp/data/damage-records-802d46e0.json (borg family 9 records @0x802d46e0,
+  generic 12 @0x802c4760). Field map per the (ae)-adjacent hit-record census: hpDamage,
+  downGaugeDamage, balanceGaugeDamage, comboScoreValue, curve indices, hitStrength,
+  impact effect id, reaction flags, knockback dir mode + yaw/pitch trim, rehit interval.
+
+
+### (ah) `zz_003cd5c_` damage formula FULLY decoded — every table extracted (2026-07-03)
+
+Complete pipeline (chunk_0004.c:6672-6828), all stages in order. `rec` = the 0x18 damage
+record (see (ag)), `hero = (+0x3e6 != 0)` selects table set [1] vs [0]:
+
+1. `dmg = rec.hpDamage`; 0 if <= 0.0, or if victim status-immune
+   (victim+0x5a0 & 1<<victim[0x71a]) (chunk_0004.c:6693-6699).
+2. Attacker level/power: `dmg *= 1 + 0.5*(ctx+0xc4 - 1.0)` (6702-6703).
+3. Attacker pair-attack bonus: if attacker+0x6fc -> `dmg *= 2.0` (FLOAT_80436f9c=2.0!)
+   — +0x6fc is set by the pair-attack system (zz_005b2b8_), so this is the co-op
+   pair-attack DOUBLE damage, not a nerf (6705-6707).
+4. Attacker side-rank: `dmg *= PTR_DAT_804335e0[hero][PTR_DAT_80433950[side]]` — 32-float
+   table 1.02..0.94. Challenge writes the side rank bytes from DAT_804356e4:
+   NORMAL (0,31), TUFF (10,5), INSANE (28,4) (chunk_0048.c:404-405) (6710-6712).
+5. Hero-on-side-0 nerf in modes 0/1: `dmg *= 0.5` (6713-6716).
+6. Attacker HP-ratio curve: idx = clamp(32 - curHP*32/min(maxHP,200), <=31) using the HP
+   mirror (&DAT_803b069c)[slot]; `dmg *= PTR_PTR_804335e8[hero][rec.attackerHpCurveIndex][idx]`
+   (6717-6732). Borg-family records all use curve 0 = flat 1.0.
+7. Attacker force-gauge curve: idx from side energy (&DAT_803b068c)[side] vs max
+   (+side*0x3c+0x114); `dmg *= PTR_PTR_804335f0[hero][rec.forceGaugeCurveIndex][idx]` (6733-6740).
+8. Attack handicap: `dmg *= PTR_DAT_804335f8[hero][attacker+0x43a]` (6741).
+9. Type matrix (already ported): `dmg *= matrix802c5d60[defCat][atkCat]` via zz_0066298_
+   categories (6742-6749).
+10. Defender (or its parent if sub-object): pair flag -> *0.5? NO — defender +0x6fc ->
+    `dmg *= 0.5` (6761-6763: FLOAT_80436f7c) — pair-attackers TAKE half damage.
+11. Defense rank curve: `dmg *= PTR_PTR_80433600[hero][pldata[0x9c]][PTR_DAT_80433950[side]]`
+    — per-borg curve selector byte from pl####data.bin +0x9c (6764-6768).
+12. Hero-victim-on-side-0 halving in modes 0/1 (6769-6772).
+13. Defense stat: `dmg *= 1.0 / (1 + 0.5*(victim+0xb4 - 1.0))` (6773-6776).
+14. Defender HP-ratio curve on POST-HIT HP (mirror - rec.hpDamage), selector pldata[0x9d]
+    (6777-6795); defender force-gauge curve, selector pldata[0x9e] (6796-6803).
+15. Defense handicap `PTR_DAT_80433618[hero][victim+0x43a]` (6803).
+16. Combo falloff: unless rec.flagsB & 0x4000, `dmg *= DAT_802c7ca0[victim+0x6ca]` =
+    [1.0, 0.8, 0.5, 0.25, 0.1, 0.05, 0.02...] — successive combo hits decay hard (6804-6806).
+17. Defender state 0x5e0 & 0x4000000 -> *0.5 (6807-6809).
+18. Same team && !(flagsA & 0x1000): *0.25 (6811-6813); (flagsA & 0x1000) && victim+0x59c
+    & 0x1000: /40.0 (6814-6817); floor at 1.0 -> int (6818-6821).
+
+ALL tables extracted to research/decomp/data/damage-formula-tables-804335e0.json
+(+ per-borg defense curve selectors from pl data). Remaining unknowns for a full port:
+actor level floats ctx+0xc4 / victim+0xb4 init sites (level system; 1.0 at base level) and
+per-borg +0x43a handicap byte init (0 default). With those defaulted to 1.0/0, the formula
+is computable from extracted data end-to-end.

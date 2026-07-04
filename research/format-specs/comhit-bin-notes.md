@@ -22,10 +22,13 @@ should target this file.
 1. **Structure is byte-identical in kind to the known hit-table family**
    (already catalogued in `research/format-specs/hit-bin-format.md` and
    parsed by `packages/formats/src/hit-bin.ts` `parseActorHitTable()`):
-   - `0x000..0x3FF`: remap/index area (0xFF = empty; 248 non-0xFF bytes).
-   - `0x400..0x531B`: 83 complete records of stride **0xF4** — the exact
-     record size of `pl####hit.bin` (32 records) and `comhit2.bin` (64).
-   - `0x531C..0x53FF`: verified all-zero tail padding.
+   - `0x000..0x3FF`: remap area — 256 slots x 4 bytes, `0xFF`-terminated
+     u8 record-index lists (248 active entries).
+   - `0x400..0x53FF`: 256 records of stride **0x50** — REVISED 2026-07-03;
+     the stride is proven by the DOL reader `zz_008ae60_` @0x8008ae60
+     (chunk_0013.c:1439: remap `base+slot*4`, record `base+0x400+idx*0x50`).
+     The earlier "83 x 0xF4 + 0xE4 tail" reading was a stride artifact;
+     there is NO tail padding — 0x400 + 256*0x50 = 0x5400 exactly.
 
 2. **Record contents share the pl####hit.bin skeleton.** Record offset
    0x08 carries the same `0xFFFF`/zero sentinel pattern seen in
@@ -52,26 +55,27 @@ should target this file.
    Death Borg variants have near-empty personal `hit.bin` files — their
    attack data is expected to live in these shared `comhit*` tables.
 
-## Remap/index area observation (unproven, recorded honestly)
+## Remap/index area (RESOLVED 2026-07-03)
 
-The 0x400-byte header reads naturally as **256 slots x 4 bytes**, each
-slot holding up to 4 record-index-like bytes packed from the left with
-0xFF padding, e.g. the first slots: `[00 8c][01][02 03][04][05]...` —
-mostly ascending single entries with occasional multi-entry slots. The
-values span 0..247, which **exceeds the 83 local records**, so either the
-index space spans more than this file (83 + comhit2's 64 = 147 still does
-not cover 247) or the bytes are not plain record indices. The slot key
-space (0..255) is consistent with the per-Borg-`number` keying lead noted
-in `behavior-notes.md` (BetaIII(80)->29, Gamma(81)->30, DeltaII(84)->31),
-but that lead resolved only 3 of 8 tested Borgs. **No schema is asserted
-here beyond the slot layout observation.**
+The 0x400-byte header is **256 slots x 4 bytes**, each slot a
+`0xFF`-terminated list of up to 4 u8 record indices — and with the proven
+0x50 stride the record area holds **256 records**, so remap values up to
+247 are perfectly in range. The old "values exceed the 83 local records"
+anomaly was an artifact of the wrong 0xF4 stride and is withdrawn. Slot
+selection is consumer-side: `zz_008ae60_` receives the slot index as an
+argument (`base+slot*4`); which gameplay event uses which slot remains
+untraced.
 
-## Field semantics status
+## Field semantics status (REVISED 2026-07-03)
 
-Unchanged from `hit-bin-format.md`: the 0xF4 record body is still not
-semantically decoded (flags, action IDs, damage, hitbox shape, bone IDs,
-effect IDs, timing all unknown). Nothing in this pass identified — or
-fabricated — field meanings.
+The 0x50 record body IS now semantically decoded — see the field table in
+`hit-bin-format.md` (shapeKind, boneIndex, collisionFlags,
+damageRecordIndex, activeStart/End, localOffset, halfExtent, radius; all
+VERIFIED against chunk_0013.c/chunk_0004.c readers). Records are hitbox
+PLACEMENTS; per-hit damage lives in the separate 0x18-stride DOL table
+(`DAT_802c4760` for comhit-driven hits) — extracted to
+`research/decomp/data/damage-records-802d46e0.json`. `comhit2.bin`
+(0x3D40) fits neither stride model cleanly and remains EXPLICITLY OPEN.
 
 ## Consequence for the HUD plan
 

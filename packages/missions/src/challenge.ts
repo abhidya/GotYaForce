@@ -127,6 +127,15 @@ export interface ChallengeRun {
    *  - WIN  → score accumulates, advance to the next (tougher) battle. If that
    *           was the final battle, the run ends as completed.
    *  - LOSE → score accumulates (negative), run ends → caller returns to title.
+   *
+   * DERIVED — original post-battle branch FUN_801969a0 (chunk_0048.c:466-506):
+   * the run advances ONLY when the winner mask [0x1f] equals the player side's
+   * bit (mask==1); a mutual simultaneous destruction (mask==3) takes the same
+   * state-6 failure exit as a loss (`2 < [0x1f]` guard, chunk_0048.c:486-488).
+   * The judge's per-side "won" flags are equality tests (mask == 1<<side,
+   * chunk_0003.c:4560-4604), so a draw DISPLAYS as LOSE on results — which is
+   * why BattleResults only carries WIN/LOSE and a sim "draw" maps to LOSE here.
+   * Timeout draws cannot occur in Challenge at all (timer frozen, see above).
    */
   next(result: BattleResults): ChallengeProgress;
 }
@@ -222,6 +231,12 @@ export function createChallengeRun(options: ChallengeRunOptions): ChallengeRun {
     battles.push({
       arena: arena ?? stage?.stageId ?? "st00",
       timeLimitFrames: CHALLENGE_TIME_LIMIT_FRAMES,
+      // DERIVED — Challenge setup writes the 18000-frame timer AND the pause flag
+      // PTR_DAT_80433934[0x50]=1 (chunk_0048.c:390-392). The countdown zz_0029b58_
+      // and the judge zz_00297c8_'s timeout branches are gated on [0x50]==0, so an
+      // original Challenge battle can never end by timeout — only by a side's
+      // remaining borgs/energy reaching 0.
+      timerFrozen: true,
       label: `BATTLE ${i + 1} VS`,
       forces: [...playerForceConfigs, ...enemyForces],
       meta: {

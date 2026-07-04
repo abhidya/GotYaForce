@@ -1,6 +1,10 @@
 # Hit BIN Format Notes
 
 Generated from `scripts/inspect-hit-bins.mjs` against `user-data/GG4E/afs_data/root` on 2026-06-30.
+Actor/common table sections REVISED 2026-07-03: the record stride is **0x50**, proven by the
+DOL spawner indexing (`record = base + idx*0x50`, chunk_0013.c `zz_008ab30_` @0x8008ab30:1297,
+`zz_008ac80_` @0x8008ac80:1349, `zz_008ae60_` @0x8008ae60:1439). The former 0xF4 model was a
+size coincidence (`32*0xF4 + 0x20 == 0x20 + 32*0x50 + 0x80 + 64*0x50 == 0x1EA0`).
 
 The scan covers:
 
@@ -22,9 +26,9 @@ The machine-readable inventory is `research/asset-inventory/hit-bin-inventory.js
 | Family | Files scanned | Header or magic | Dimensions | Category |
 | --- | ---: | --- | --- | --- |
 | Stage `STIH` grids | 54 | ASCII `STIH` at `0x00` | 42 x 42 cells, 500 x 500 units, 0x38-byte triangle records | Stage spatial collision |
-| `pl####hit.bin` | 210 | no ASCII magic | 0x20-byte remap header plus 32 x 0xF4-byte records | Per-Borg hit/action table |
-| `comhit2.bin` | 1 | no ASCII magic | 0x20-byte remap header plus 64 complete x 0xF4-byte records, then 0x20 zero tail bytes | Secondary common hit table |
-| `comhit.bin` | 1 | no ASCII magic | 0x400-byte remap/index area plus 83 complete x 0xF4-byte records, then 0xE4 zero tail bytes | Global common hit table |
+| `pl####hit.bin` | 210 | no ASCII magic | two sections: 32-byte remap A + 32 x 0x50 body hurtboxes; 0x80 remap B + 64 x 0x50 attack hitboxes | Per-Borg hitbox tables |
+| `comhit2.bin` | 1 | no ASCII magic | 0x3D40 — layout EXPLICITLY OPEN (fits neither 0xF4 nor 0x50 cleanly; no DOL reader found) | Secondary common hit table |
+| `comhit.bin` | 1 | no ASCII magic | 0x400 remap (256 x 4-byte slots) plus 256 x 0x50 records, no tail | Global common hitbox table |
 
 ## Stage STIH Grid
 
@@ -83,37 +87,50 @@ Layer categories:
 
 The layer names are not proven by code yet; they are density and naming-based labels.
 
-## Actor/Common Hit Tables
+## Actor/Common Hit Tables (VERIFIED 0x50 layout, 2026-07-03)
 
-`pl####hit.bin` files are fixed at 7840 bytes:
+The record stride is `0x50`, and the tables are hitbox-PLACEMENT records; per-hit damage
+values live in separate 0x18-stride tables in the DOL (borg family: 9 records at
+`0x802d46e0`, bound via `actor+0x27c` by `zz_0072048_` @0x80072048; extracted to
+`research/decomp/data/damage-records-802d46e0.json`).
 
-- `0x00..0x1f`: 32 remap/order bytes. `0xff` means empty.
-- `0x20..EOF`: 32 records x `0xf4` bytes.
-- Active remap byte counts range from 2 to 25 across the 210 player files.
+`pl####hit.bin` (fixed 0x1EA0 = 7840 bytes; also the per-slot stride of the loaded table
+pages: `actor+0x3fc = *(PTR_DAT_80433934+0x9c) + slot*0x1EA0`, chunk_0006.c:7126):
 
-`comhit2.bin`:
+- `0x000..0x01f`: remap A — 32 x u8 record indices (`0xff` = empty). Consumed by
+  `zz_008ab30_` (record = `base + remapByte*0x50 + 0x20`).
+- `0x020..0xA1f`: 32 x `0x50` records — persistent BODY HURTBOXES (`activeEnd = -1`).
+- `0xA20..0xA9f`: remap B — 32 slots x 4 bytes, each slot a `0xff`-terminated list of up
+  to 4 u8 record indices. Consumed by `zz_008ac80_` (child/projectile hitboxes, slot
+  selected by spawner `kind` arg: `base+0xa20+kind*4`).
+- `0xAA0..0x1E9f`: 64 x `0x50` records — attack/child-object hitboxes with authored
+  active-frame windows.
 
-- `0x00..0x1f`: 32 remap/order bytes; 3 non-`0xff` values observed.
-- `0x20..0x3d1f`: 64 complete `0xf4` records.
-- `0x3d20..0x3d3f`: zero tail/padding.
+`comhit.bin` (0x5400, no tail padding):
 
-`comhit.bin`:
+- `0x000..0x3ff`: remap — 256 slots x 4 bytes, `0xff`-terminated u8 lists. Consumed by
+  `zz_008ae60_` via `*(PTR_DAT_80433934+0x98)` (`base+slot*4`).
+- `0x400..0x53ff`: 256 x `0x50` records. This resolves the old "remap values up to 247
+  exceed 83 records" anomaly — there are 256 record slots, not 83.
 
-- `0x000..0x3ff`: 0x400-byte remap/index area; 248 non-`0xff` bytes observed.
-- `0x400..0x531b`: 83 complete `0xf4` records.
-- `0x531c..0x53ff`: zero tail/padding.
+`comhit2.bin` (0x3D40): layout EXPLICITLY OPEN. It fits neither the refuted 0xF4 model nor
+the 0x50 two-section model cleanly, and no DOL reader indexing it has been identified.
 
-0xF4 record skeleton:
+0x50 record fields (VERIFIED against chunk_0013.c `FUN_8008a65c` :1121 and chunk_0004.c
+`FUN_8003c8b4` :6481):
 
-| Offset | Type | Status |
-| ---: | --- | --- |
-| `0x00` | u32 or u8[4] | packed flags/IDs candidate |
-| `0x04` | u32 | often zero, not proven |
-| `0x08` | u32 or u16[2] | often `0xffff0000` |
-| `0x0c` | u32/f32 | mixed/unknown |
-| `0x10..` | mixed f32/u32 | many values decode as plausible offsets, radii, or dimensions |
-
-The actor/common record body is not semantically decoded yet. Treat it as a fixed-size record with named raw fields until gameplay code or traces identify actions, bones, hitbox shapes, damage, effect IDs, and timing.
+| Offset | Type | Name | Meaning |
+| ---: | --- | --- | --- |
+| `0x00` | u8 | shapeKind | hitbox shape dispatch (`PTR_FUN_802da740`/`802da758`) |
+| `0x01` | u8 | boneIndex | bit `0x80` = actor root matrix (`+0x1aa4`), else `actor+0x8d4+bone*0x30`; checked vs destroyed-parts mask `+0x76c` |
+| `0x02` | u16 | collisionFlags | collision-list flags (`zz_008a2bc_` chunk_0013.c:973; bit `0x40` = attack list gated by i-frames `+0x720 <= 0`) |
+| `0x04` | u16 | damageRecordIndex | index into the 0x18-stride DOL damage table at `actor+0x27c` |
+| `0x06` | s16 | activeStart | borgs: anim-frame threshold vs `actor+0x1cdc`; non-borgs: countdown |
+| `0x08` | s16 | activeEnd | `-1` = persistent (body hurtboxes) |
+| `0x0c` | f32[3] | localOffset | transformed by the attach matrix |
+| `0x18` | f32[3] | halfExtent | capsule endpoints = offset ± this |
+| `0x24` | f32 | radius | scaled by actor scale (`+0xc0`) |
+| `0x28..0x4f` | — | (zero in sampled borg records) | other shape kinds may use them |
 
 ## Shared Parser
 
@@ -121,7 +138,7 @@ The actor/common record body is not semantically decoded yet. Treat it as a fixe
 
 - `parseStageHitGrid()` parses STIH headers, cells, record references, and 0x38 triangle records.
 - `stageBoundsFromHitGrid()` returns the decoded STIH arena rectangle.
-- `parseActorHitTable()` parses `pl####hit.bin`, `comhit.bin`, and `comhit2.bin` remap/index headers plus raw 0xF4 records without assigning unproven gameplay field names.
+- `parseActorHitTable()` parses `pl####hit.bin` (two 0x50-record sections) and `comhit.bin` (one section) with the VERIFIED field names above; `comhit2.bin` returns an explicit `valid: false` zero-section result.
 
 `scripts/inspect-hit-bins.mjs` implements the research inventory scanner:
 
@@ -129,7 +146,7 @@ The actor/common record body is not semantically decoded yet. Treat it as a fixe
 - Parses STIH grid dimensions, bounds, cell offset spans, record references, and 0x38 triangle records.
 - Validates record markers, normal lengths, record ref alignment, and record-section divisibility.
 - Classifies `hitSSN.bin` by stage code and layer suffix.
-- Parses `pl####hit.bin`, `comhit.bin`, and `comhit2.bin` as remap headers plus 0xF4 records.
+- Parses `pl####hit.bin` and `comhit.bin` as remap slots plus decoded 0x50 records; reports `comhit2.bin` as explicitly open.
 - Emits per-file categories, counts, sample records, unknowns, and cross-references to existing stage/effects inventories.
 
 Run:
@@ -143,5 +160,7 @@ rtk node scripts/inspect-hit-bins.mjs
 - Semantic name of STIH header word `0x20`.
 - Why STIH cell entries 0 and 1 point into the last two words of the offset table.
 - Exact gameplay meaning of stage layer suffixes `0`, `1`, and `2`.
-- Actor/common 0xF4 field meanings: flags, action IDs, damage, hitbox shape, bone/attachment IDs, effect IDs, and timing.
-- The input index space for `comhit.bin`'s 0x400-byte remap/index area.
+- `comhit2.bin` (0x3D40) layout — EXPLICITLY OPEN, no DOL reader identified.
+- Record bytes `+0x28..+0x4f` for non-capsule shape kinds.
+- The consumer-side mapping from attack remap slot (`kind` arg of `zz_008ac80_`) / comhit
+  slot to specific moves/effects.

@@ -46,8 +46,10 @@ Do not replace player-facing Challenge flow with fake menus/stages/mechanics. Ea
 | Address | Current name | Inferred hint | Topics | Source |
 | --- | --- | --- | --- | --- |
 | 0x802a3938 | `cTeam::GetPlayer(int)` | `team_get_player` | force-setup | `research/decomp/ghidra-export/chunk_0078.c:2079` |
-| 0x802807ac | `cPlayer::ClearSwapControllerTimer(void)` | `player_clear_swap_controller_timer` | force-setup | `research/decomp/ghidra-export/chunk_0076.c:3819` |
-| 0x80281c38 | `zz_0281c38_` | `death_swap_flow_candidate` | force-setup | `research/decomp/ghidra-export/chunk_0076.c:4844` |
+| ~~0x802807ac~~ | ~~`cPlayer::ClearSwapControllerTimer(void)`~~ | WITHDRAWN (behavior-notes.md ae/af: body is bitstream-codec code; CSM symbol map is a cross-game gnt4 import) | (none) | `research/decomp/behavior-notes.md` |
+| ~~0x80281c38~~ | ~~`zz_0281c38_`~~ | WITHDRAWN — codec code, not death/swap flow | (none) | `research/decomp/behavior-notes.md` |
+| 0x8002f8dc | `zz_002f8dc_` | `kill_event_energy_and_score_accounting` | force-setup | `research/decomp/ghidra-export/chunk_0003.c:8212` |
+| 0x8005bbc0 | `zz_005bbc0_` | `borg_death_entry` | force-setup | `research/decomp/ghidra-export/chunk_0007.c:3716` |
 | 0x800541ac | `FUN_800541ac` | `active_borg_spawn_init_from_slot_tables` | challenge-menu-flow, force-setup, battle-initialization, movement-physics | `research/decomp/ghidra-export/chunk_0006.c:6999` |
 | 0x80057b78 | `FUN_80057b78` | `active_object_init_from_slot_tables` | challenge-menu-flow, force-setup, battle-initialization, movement-physics | `research/decomp/ghidra-export/chunk_0007.c:896` |
 
@@ -192,8 +194,10 @@ Do not replace player-facing Challenge flow with fake menus/stages/mechanics. Ea
 
 | Address | Current name | Inferred hint | Topics | Source |
 | --- | --- | --- | --- | --- |
-| 0x802807ac | `cPlayer::ClearSwapControllerTimer(void)` | `player_clear_swap_controller_timer` | force-setup | `research/decomp/ghidra-export/chunk_0076.c:3819` |
-| 0x80281c38 | `zz_0281c38_` | `death_swap_flow_candidate` | force-setup | `research/decomp/ghidra-export/chunk_0076.c:4844` |
+| ~~0x802807ac~~ | ~~`cPlayer::ClearSwapControllerTimer(void)`~~ | WITHDRAWN (behavior-notes.md ae/af: body is bitstream-codec code; CSM symbol map is a cross-game gnt4 import) | (none) | `research/decomp/behavior-notes.md` |
+| ~~0x80281c38~~ | ~~`zz_0281c38_`~~ | WITHDRAWN — codec code, not death/swap flow | (none) | `research/decomp/behavior-notes.md` |
+| 0x8002f8dc | `zz_002f8dc_` | `kill_event_energy_and_score_accounting` | force-setup | `research/decomp/ghidra-export/chunk_0003.c:8212` |
+| 0x8005bbc0 | `zz_005bbc0_` | `borg_death_entry` | force-setup | `research/decomp/ghidra-export/chunk_0007.c:3716` |
 
 ### Supporting Artifacts
 

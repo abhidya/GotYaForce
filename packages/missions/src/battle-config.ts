@@ -45,6 +45,13 @@ export interface BattleConfig {
   forces: BattleForce[];
   /** Original battle timer in frames; omitted means no timer. */
   timeLimitFrames?: number;
+  /**
+   * Model of the original timer-pause flag PTR_DAT_80433934[0x50]: the countdown
+   * and the judge's timeout branches only run while the flag is clear. Challenge
+   * writes 18000 frames AND the pause flag (chunk_0048.c:390-392), so its timer
+   * displays but never expires.
+   */
+  timerFrozen?: boolean;
   /** Optional human-readable label (e.g. "BATTLE 2 VS" or the stage name). */
   label?: string;
   /** Optional metadata for UI/debugging; never read by the simulation. */

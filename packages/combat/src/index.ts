@@ -47,9 +47,19 @@ export {
   SHOT,
   SIM,
   SPECIAL,
+  STAGGER,
   STATE,
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
+export {
+  DAMAGE_RECORDS,
+  DAMAGE_RECORD_INDEX,
+  REACTION_FORCE_STAGGER_MASK,
+  damageRecordByIndex,
+  gaugeInitForBorgId,
+  type BorgGaugeInit,
+  type DamageRecord,
+} from "./gauges.js";
 export {
   actorDataCombatStatsForBorgId,
   actorDataCombatStatsSummary,

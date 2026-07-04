@@ -24,9 +24,16 @@ import {
   LOCK,
   SHOT,
   SPECIAL,
+  STAGGER,
   STATE,
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
+import {
+  DAMAGE_RECORD_INDEX,
+  REACTION_FORCE_STAGGER_MASK,
+  damageRecordByIndex,
+  type DamageRecord,
+} from "./gauges.js";
 import {
   actionProfileForProfile,
   type MeleeActionDef,
@@ -203,8 +210,12 @@ function mitigate(raw: number, defenderDef: number): number {
 }
 
 /**
- * Apply a hit to `victim`. Respects invincibility. Sets hitstun -> "hit", big hits or a
- * lethal blow route through knockdown -> "down" -> wake (60 i-frames). Returns dmg dealt.
+ * Apply a hit to `victim`. Respects invincibility. HP damage and knockback velocity always
+ * land, but whether the victim is INTERRUPTED is decided by the DERIVED gauge-based stagger
+ * model (see gauges.ts header): the original has no flat per-hit hitstun — a hit staggers
+ * only via down-gauge depletion, balance-gauge break, or the damage record's reaction flags
+ * (chunk_0003.c:6255-6263). On a confirmed stagger the existing reaction path runs (hitstun
+ * -> "hit", big/lethal blows -> "down" -> wake). Returns dmg dealt.
  */
 export function applyHit(
   victim: BorgRuntime,
@@ -214,6 +225,8 @@ export function applyHit(
   knockDir: Vec3,
   fromPos: Vec3,
   forceKnockdown = false,
+  // Default = melee archetype so legacy callers keep the old always-interrupt behavior.
+  record: DamageRecord = damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
 ): number {
   if (!victim.alive || isInvincible(victim)) return 0;
 
@@ -243,6 +256,68 @@ export function applyHit(
     return dmg;
   }
 
+  // --- Gauge-based stagger model (DERIVED — see gauges.ts header) -----------------------
+  // Every non-lethal hit arms the three 60-frame post-hit windows (all FLOAT_80436fac,
+  // chunk_0003.c:7995-8010); they tick down in stepGaugeWindows() while out of a reaction.
+  victim.balanceRefillDelay = STAGGER.BALANCE_REFILL_DELAY;
+  victim.downResetDelay = STAGGER.DOWN_RESET_DELAY;
+  victim.comboWindow = STAGGER.COMBO_WINDOW;
+
+  // Down-gauge damage (record u16+0x02; the ROM scales it x(1+0.5*(attackerLevel-1)) —
+  // x1 at the port's default level 0/1). Out of a reaction the ROM subtracts
+  // unconditionally (chunk_0003.c:8002); while IN a hit reaction it only re-depletes when
+  // the hit's down damage reaches the victim's base (:8004-8006, level-1 form) — the
+  // juggle limiter.
+  const inReaction = victim.state === "hit" || victim.state === "down";
+  if (!inReaction || record.downGaugeDamage >= victim.downGaugeBase) {
+    victim.downGauge -= record.downGaugeDamage;
+  }
+
+  // Balance-gauge damage (record u8+0x04). Depletion refills the gauge to max IMMEDIATELY,
+  // resets the combo counters, and flags the forced stagger (0x6fd |= 0xa6) —
+  // chunk_0003.c:8011-8019.
+  let balanceBroke = false;
+  victim.balanceGauge -= record.balanceGaugeDamage;
+  if (victim.balanceGauge < 1) {
+    victim.balanceGauge = victim.balanceGaugeMax;
+    victim.comboAccum = 0;
+    victim.comboRank = 0;
+    balanceBroke = true;
+  }
+
+  // Combo accumulator (+0x6c8, chunk_0003.c:8021-8029): add the record's combo score; past
+  // 99 the accumulator wraps to 0 and the rank byte (+0x6ca) increments, capped at 0x3f.
+  victim.comboAccum += record.comboScoreValue;
+  if (victim.comboAccum > 99) {
+    victim.comboAccum = 0;
+    victim.comboRank = Math.min(0x3f, victim.comboRank + 1);
+  }
+
+  // Stagger gate (chunk_0003.c:6255-6263): the hit interrupts the victim ONLY when the down
+  // gauge dropped below 1, the balance gauge broke, or the record's reaction flags force it
+  // (byte +0x0b bits 2|0x80). Otherwise the victim keeps acting normally — the ROM routes
+  // straight to dispatch_slot_action_update: HP damage and the knockback velocity above
+  // still land, but there is NO hitstun and NO state change.
+  const staggered =
+    victim.downGauge < 1 ||
+    balanceBroke ||
+    (record.reactionFlags & REACTION_FORCE_STAGGER_MASK) !== 0;
+  if (!staggered) return dmg;
+
+  // Stagger entry: reset the down gauge to base (zz_003d3e8_, chunk_0004.c:6866-6876 —
+  // +50%/level, x1 at the port's default level).
+  victim.downGauge = victim.downGaugeBase;
+  // DERIVED — the 60 stagger i-frames are BALANCE-BREAK ONLY: zz_005c290_ gates the
+  // +0x720 = FLOAT_80437448 (60.0) write on the balance-depletion flag (0x6fd & 0x80,
+  // chunk_0007.c:3985-4050; the 0xa6 mask including 0x80 is set at chunk_0003.c:8011-8019).
+  // Flag-forced staggers (record byte +0x0b, e.g. every melee hit) and down-gauge staggers
+  // do NOT grant them — otherwise melee chains would be throttled to one damaging hit per
+  // stagger, which is neither the ROM's behavior nor the game's feel.
+  if (balanceBroke) {
+    victim.invincTimer = Math.max(victim.invincTimer, STAGGER.STAGGER_IFRAMES);
+  }
+
+  // Reaction LENGTH stays the port's TUNED hitstun/down durations (animation-gated in ROM).
   const knockdown = forceKnockdown || dmg >= DAMAGE.KNOCKDOWN_DMG;
   if (knockdown) {
     enterDown(victim);
@@ -250,6 +325,40 @@ export function applyHit(
     enterHit(victim, MELEE.HITSTUN);
   }
   return dmg;
+}
+
+// ---------------------------------------------------------------------------------------
+// Post-hit gauge windows — DERIVED port of the per-frame decrement (chunk_0006.c:7982-8011):
+// while the victim is NOT in a hit reaction (ROM 0x5e0 bit 0x1000000; our "hit"/"down"
+// states), the three 60-frame windows armed by every hit tick down 1/frame. On expiry the
+// balance gauge refills to max (chunk_0006.c:7988), the down gauge resets to base
+// (zz_003d3e8_ via +0x688, chunk_0004.c:6866-6876), and the combo accumulator/rank reset
+// (chunk_0006.c:8009-8010). Called once per frame from battle.ts.
+// ---------------------------------------------------------------------------------------
+export function stepGaugeWindows(b: BorgRuntime): void {
+  if (b.state === "hit" || b.state === "down") return; // frozen while in a hit reaction
+  if (b.balanceRefillDelay > 0) {
+    b.balanceRefillDelay -= 1;
+    if (b.balanceRefillDelay <= 0) {
+      b.balanceRefillDelay = 0;
+      b.balanceGauge = b.balanceGaugeMax;
+    }
+  }
+  if (b.downResetDelay > 0) {
+    b.downResetDelay -= 1;
+    if (b.downResetDelay <= 0) {
+      b.downResetDelay = 0;
+      b.downGauge = b.downGaugeBase;
+    }
+  }
+  if (b.comboWindow > 0) {
+    b.comboWindow -= 1;
+    if (b.comboWindow <= 0) {
+      b.comboWindow = 0;
+      b.comboAccum = 0;
+      b.comboRank = 0;
+    }
+  }
 }
 
 export function enterHit(b: BorgRuntime, stun: number): void {
@@ -446,6 +555,8 @@ export function stepAttacks(
             { x: 0, y: 0, z: 0 },
             b.pos,
             true,
+            // Specials -> record 2 (DERIVED mapping, gauges.ts DAMAGE_RECORD_INDEX).
+            damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL),
           );
         }
       }
@@ -543,6 +654,8 @@ export function stepAttacks(
         b.pos,
         // A multi-hit chain's finisher launches: forced knockdown (TUNED game-feel choice).
         isFinisher && meleeDef.comboHits > 1,
+        // Melee -> record 1 (reactionFlags 2 -> always staggers; DERIVED mapping, gauges.ts).
+        damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE),
       );
       if (dealt > 0) (b.meleeHitUids ??= []).push(o.uid);
     }
@@ -676,6 +789,10 @@ function spawnProjectile(
     hitRadius: shotDef.hitRadius * tier.radius,
     visualKind: shotDef.visualKind ?? projectileVisualKindForProfile(p),
     ...(shotDef.bulletDrop > 0 ? { drop: shotDef.bulletDrop } : {}),
+    // DERIVED mapping (gauges.ts): normal shots are the light-hit archetype (record 0);
+    // charged releases hit like the charge/special archetype (record 2).
+    damageRecordIndex:
+      chargeTier >= 1 ? DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL : DAMAGE_RECORD_INDEX.SHOT,
   };
 }
 
@@ -707,6 +824,10 @@ function spawnSwordBeam(
     life: beam.lifetime,
     hitRadius: beam.hitRadius,
     visualKind: beam.visualKind,
+    // Combo-finisher beam hits like the charge/special archetype (DERIVED mapping, gauges.ts):
+    // heavier than a normal shot but not the always-stagger melee record — the beam is a
+    // projectile, and the melee finisher itself already forces the knockdown.
+    damageRecordIndex: DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL,
   };
 }
 
@@ -769,6 +890,9 @@ export function stepProjectiles(
             pr.knockback,
             pr.vel as Vec3,
             pr.pos,
+            false,
+            // Per-projectile record (charge/special = 2, normal shot = 0; gauges.ts).
+            damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT),
           );
         }
         consumed = true;
