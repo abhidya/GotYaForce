@@ -5,10 +5,25 @@
  * total COST, and exposes X = EDIT FORCE. This component presents the current
  * force slot from browser-local roster data; the edit screen owns the 30-slot
  * force mutation.
+ *
+ * Surface: the green force-display platform is the REAL captured native frame
+ * (`reference/captures/challenge-5-select-a-force.png`) cropped to just the pad
+ * + its ground shadow — the same "real captured asset" convention MainMenu.ts /
+ * SelectDifficulty.ts / SelectPlayers.ts already use, since the pad's baked
+ * lighting/bevel/shadow has no separate flat 2D texture in the export distinct
+ * from the 3D geometry. The entry00 scene mounts as an atmospheric backdrop
+ * behind it (same rationale as the vsel00/01 sub-menus: the archive bundles all
+ * entry00 sub-screens' geometry with no recoverable per-screen grouping — see
+ * UI_SCENE_LAYOUTS.entry00.semantics.selectForce's own caveat). COST / No. /
+ * force name / REMAIN are runtime-dynamic (per saved slot), so unlike the fixed
+ * difficulty/player-count labels they render in the real exported ascii.tpl
+ * bitmap font (see bitmapText.ts) rather than a capture crop of one baked value.
  */
 
 import { createPublicAssetCatalog } from "@gf/assets";
-import { ASSETS, borgBannerPath, borgMiniPath } from "../assets.js";
+import { bitmapText, setBitmapText } from "../bitmapText.js";
+import { borgBannerPath, borgMiniPath } from "../assets.js";
+import { captureCropImg } from "../captureCrop.js";
 import { clear, el, legendItem } from "../dom.js";
 import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
@@ -17,6 +32,15 @@ import type { ForceBorg } from "./ForceBuilder.js";
 
 const SELECT_FORCE_LAYOUT = UI_SCENE_LAYOUTS.entry00.semantics.selectForce;
 const assetCatalog = createPublicAssetCatalog();
+
+const CAPTURE = new URL(
+  "../../../reference/captures/challenge-5-select-a-force.png",
+  import.meta.url,
+).href;
+/** Native capture is 2560x1966; crop box below is in that pixel space. */
+const CAPTURE_W = 2560;
+/** Green force platform only (no baked COST/No./name/legend text below it, no standing borg). */
+const PLATFORM_CROP = { x: 150, y: 1050, w: 2410, h: 300 };
 
 export interface ForceSlot {
   no: number;
@@ -130,15 +154,19 @@ export function createSelectForce(
     class: "gf-screen gf-select-force",
     style: selectForceLayoutVars(),
   });
-  root.appendChild(el("div", { class: "gf-grid-bg gf-bg-purple" }));
   const entryScene = createUiSceneHost("gf-ui-scene gf-select-entry-scene");
   root.appendChild(entryScene);
-  root.appendChild(el("h1", { class: "gf-title", text: "SELECT A FORCE" }));
-  root.appendChild(
-    el("img", { class: "gf-select-entry-sheet", attrs: { src: ASSETS.entryControls, alt: "", "aria-hidden": "true" } }),
-  );
+  const title = bitmapText("gf-select-title-text");
+  setBitmapText(title, "SELECT A FORCE", { bold: true, scale: 3, tint: "#ffd21e" });
+  root.appendChild(el("h1", { class: "gf-title gf-select-title", attrs: { "aria-label": "SELECT A FORCE" } }, [title]));
 
-  const platform = el("div", { class: "gf-select-platform" });
+  const platformCrop = el(
+    "div",
+    { class: "gf-select-pad-crop", attrs: { role: "img", "aria-hidden": "true" } },
+    [captureCropImg(CAPTURE, CAPTURE_W, PLATFORM_CROP)],
+  );
+  root.appendChild(platformCrop);
+  const platform = el("div", { class: "gf-select-pad" });
   root.appendChild(platform);
 
   const costRoot = el("div", { class: "gf-select-cost" });
@@ -146,9 +174,11 @@ export function createSelectForce(
   const nameRoot = el("div", { class: "gf-select-name" });
   root.appendChild(nameRoot);
 
+  const lrLabel = bitmapText("gf-legend-lr-label");
+  setBitmapText(lrLabel, "L/R CHANGE FORCE", { bold: true, scale: 1 });
   root.appendChild(
     el("div", { class: "gf-legend" }, [
-      el("span", { class: "gf-legend-item" }, [el("span", { text: "L/R" }), el("span", { text: "CHANGE FORCE" })]),
+      el("span", { class: "gf-legend-item" }, [lrLabel]),
       legendItem("b", "BACK"),
       legendItem("a", "CONFIRM"),
       legendItem("x", "EDIT FORCE"),
@@ -225,38 +255,31 @@ export function createSelectForce(
         class: "gf-select-mini",
         attrs: { src: borgMiniPath(leadId), alt: fallbackText },
       }) as HTMLImageElement;
-      const fallback = el("span", {
-        class: "gf-select-mini",
-        style: {
-          display: "none",
-          color: "#ffd21e",
-          fontSize: "14px",
-          maxWidth: "160px",
-          textAlign: "center",
-          textShadow: "0 2px 0 #2a2150",
-        },
-        text: fallbackText,
-      });
+      const fallback = bitmapText("gf-select-mini gf-select-mini-fallback");
+      setBitmapText(fallback, fallbackText, { bold: true, scale: 2, tint: "#ffd21e" });
+      fallback.style.display = "none";
       mini.addEventListener("error", () => {
         mini.style.display = "none";
-        fallback.style.display = "block";
+        fallback.style.display = "flex";
       });
       platform.append(mini, fallback);
     }
 
     clear(costRoot);
-    costRoot.append(
-      el("span", { class: "gf-select-cost-label", text: "COST" }),
-      el("span", { class: "gf-select-cost-value", text: String(cost) }),
-    );
+    const costLabel = bitmapText("gf-select-cost-label");
+    setBitmapText(costLabel, "COST", { bold: true, scale: 2, tint: "#ffd21e" });
+    const costValue = bitmapText("gf-select-cost-value");
+    setBitmapText(costValue, String(cost), { bold: true, scale: 4, tint: "#ffffff" });
+    costRoot.append(costLabel, costValue);
 
     clear(nameRoot);
-    nameRoot.append(
-      el("span", { class: "gf-select-no", text: `No. ${slot.no}` }),
-      forceBanner(lead, leadBorg?.name ?? slot.name),
-      el("span", { class: "gf-select-force-name", text: slot.name }),
-      el("span", { class: "gf-select-limit", text: `${Math.max(0, opts.limit - cost)} REMAIN` }),
-    );
+    const noText = bitmapText("gf-select-no");
+    setBitmapText(noText, `NO. ${slot.no}`, { bold: true, scale: 2, tint: "#ffffff" });
+    const forceNameText = bitmapText("gf-select-force-name");
+    setBitmapText(forceNameText, slot.name, { bold: true, scale: 3, tint: "#ffd21e" });
+    const limitText = bitmapText("gf-select-limit");
+    setBitmapText(limitText, `${Math.max(0, opts.limit - cost)} REMAIN`, { bold: true, scale: 2, tint: "#dff6ff" });
+    nameRoot.append(noText, forceBanner(lead, leadBorg?.name ?? slot.name), forceNameText, limitText);
   }
 
   renderSlot();
@@ -285,10 +308,10 @@ function selectForceLayoutVars(): Partial<CSSStyleDeclaration> {
   const platform = SELECT_FORCE_LAYOUT.platform;
   const title = SELECT_FORCE_LAYOUT.title;
   const vars: Record<string, string> = {
-    "--gf-select-platform-left": `${platform.left}%`,
-    "--gf-select-platform-top": `${platform.top}%`,
-    "--gf-select-platform-width": `${platform.width}%`,
-    "--gf-select-platform-height": `${platform.height}%`,
+    "--gf-select-pad-left": `${platform.left}%`,
+    "--gf-select-pad-top": `${platform.top}%`,
+    "--gf-select-pad-width": `${platform.width}%`,
+    "--gf-select-pad-height": `${platform.height}%`,
   };
   if (title) {
     vars["--gf-select-title-left"] = `${title.left}%`;
@@ -301,20 +324,9 @@ function selectForceLayoutVars(): Partial<CSSStyleDeclaration> {
 function forceBanner(borgId: string, fallbackText: string): HTMLElement {
   const image = el("img", { class: "gf-select-banner", attrs: { src: borgBannerPath(borgId), alt: "" } }) as HTMLImageElement;
   image.addEventListener("error", () => {
-    image.replaceWith(
-      el("span", {
-        class: "gf-select-banner",
-        style: {
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "34px",
-          color: "#ffd21e",
-          textShadow: "0 2px 0 #2a2150",
-        },
-        text: fallbackText,
-      }),
-    );
+    const fallback = bitmapText("gf-select-banner gf-select-banner-fallback");
+    setBitmapText(fallback, fallbackText, { bold: true, scale: 2, tint: "#ffd21e" });
+    image.replaceWith(fallback);
   });
   return image;
 }

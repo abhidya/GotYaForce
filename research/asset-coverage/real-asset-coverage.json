@@ -1,12 +1,12 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-05T03:44:33.717Z",
+  "generatedAt": "2026-07-05T04:35:55.785Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
     "screensUsingAnyRealExportedAsset": 10,
-    "screensWithHandcodedSurfaceSignals": 4,
+    "screensWithHandcodedSurfaceSignals": 0,
     "screensWithRealSceneModel": 8,
     "publicUiTextureExportedImages": 831,
     "requestedUiSceneModelsExported": 13,
@@ -313,15 +313,9 @@
       ],
       "nextReplacement": "Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:116",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:140",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
-        {
-          "kind": "named-texture",
-          "symbol": "ASSETS.entryControls",
-          "publicPath": "/ui/hsd/entry00_mdl/texture_002_CI8.png",
-          "exists": true
-        },
         {
           "kind": "borg-ui-helper",
           "symbol": "borgBannerPath",
@@ -335,6 +329,12 @@
           "exists": "per-borg"
         },
         {
+          "kind": "bitmap-font-helper",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
+          "exists": true
+        },
+        {
           "kind": "literal-public-path",
           "publicPath": "/models/pl0615/model_00.glb",
           "exists": true
@@ -345,23 +345,7 @@
           "exists": false
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "css-grid-backdrop",
-          "pattern": "gf-grid-bg",
-          "line": 133
-        },
-        {
-          "kind": "css-force-platform",
-          "pattern": "gf-select-platform",
-          "line": 141
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 136
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
@@ -434,21 +418,9 @@
       ],
       "nextReplacement": "Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/ForceBuilder.ts:56",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/ForceBuilder.ts:95",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
-        {
-          "kind": "named-texture",
-          "symbol": "ASSETS.unitAllAtlas",
-          "publicPath": "/ui/hsd/unitall_mdl/texture_008_CI8.png",
-          "exists": true
-        },
-        {
-          "kind": "borg-ui-helper",
-          "symbol": "borgBannerPath",
-          "publicPathPattern": "/ui/tpl/bn<borgUiCode>/image_00_CI4.png",
-          "exists": "per-borg"
-        },
         {
           "kind": "borg-ui-helper",
           "symbol": "borgMiniPath",
@@ -456,33 +428,18 @@
           "exists": "per-borg"
         },
         {
+          "kind": "bitmap-font-helper",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
+          "exists": true
+        },
+        {
           "kind": "mounted-ui-scene",
           "publicPath": "/ui/scenes/unitall/model_00.dae",
           "exists": false
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "handcoded-force-grid",
-          "pattern": "gf-force-grid",
-          "line": 94
-        },
-        {
-          "kind": "handcoded-force-ring",
-          "pattern": "gf-force-ring",
-          "line": 106
-        },
-        {
-          "kind": "handcoded-force-slot",
-          "pattern": "gf-slot",
-          "line": 183
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 89
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
@@ -531,21 +488,9 @@
       ],
       "nextReplacement": "Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/BattleIntro.ts:27",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/BattleIntro.ts:44",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
-        {
-          "kind": "named-texture",
-          "symbol": "ASSETS.briefingVs",
-          "publicPath": "/ui/hsd/brif00_mdl/texture_000_IA4.png",
-          "exists": true
-        },
-        {
-          "kind": "named-texture",
-          "symbol": "ASSETS.vsSelectLabels",
-          "publicPath": "/ui/hsd/vsel00_mdl/texture_004_CI8.png",
-          "exists": true
-        },
         {
           "kind": "borg-ui-helper",
           "symbol": "borgMiniPath",
@@ -553,18 +498,18 @@
           "exists": "per-borg"
         },
         {
+          "kind": "bitmap-font-helper",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
+          "exists": true
+        },
+        {
           "kind": "mounted-ui-scene",
           "publicPath": "/ui/scenes/brif00/model_00.dae",
           "exists": false
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 54
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
@@ -682,31 +627,13 @@
       ],
       "nextReplacement": "Export and mount the real result/podium scenes instead of CSS rows and sky backdrop.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/Results.ts:71",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/Results.ts:90",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
         {
-          "kind": "named-texture",
-          "symbol": "ASSETS.resultsWin",
-          "publicPath": "/ui/hsd/rpot20_mdl/texture_000_RGBA8.png",
-          "exists": true
-        },
-        {
-          "kind": "named-texture",
-          "symbol": "ASSETS.resultsLose",
-          "publicPath": "/ui/hsd/rpot23_mdl/texture_000_RGBA8.png",
-          "exists": true
-        },
-        {
-          "kind": "named-texture",
-          "symbol": "ASSETS.resultsStartPrompt",
-          "publicPath": "/ui/hsd/rpot20_mdl/texture_003_CI8.png",
-          "exists": true
-        },
-        {
-          "kind": "named-texture",
-          "symbol": "ASSETS.resultsGameOver",
-          "publicPath": "/ui/hsd/rpot23_mdl/texture_004_CI8.png",
+          "kind": "bitmap-font-helper",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
           "exists": true
         },
         {
@@ -730,18 +657,7 @@
           "exists": false
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "css-results-row",
-          "pattern": "gf-result-pill",
-          "line": 122
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 122
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {

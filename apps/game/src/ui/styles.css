@@ -701,97 +701,97 @@
 }
 
 /* ============================ SELECT A FORCE ============================ */
+/*
+ * Rebuilt against reference/captures/challenge-5-select-a-force.png: the green
+ * force-display platform is a captureCropImg crop of the real baked frame (see
+ * SelectForce.ts doc comment), layered over the entry00 scene as atmospheric
+ * backdrop. Dynamic COST/No./name/REMAIN render via bitmapText (ascii.tpl).
+ */
 .gf-select-force { background: #8b4fb5; }
-.gf-select-force > .gf-title {
+.gf-select-force > .gf-select-title {
   position: absolute;
   left: var(--gf-select-title-left, 0);
   top: var(--gf-select-title-top, 2%);
   width: var(--gf-select-title-width, 100%);
   z-index: 3;
   padding-top: 0;
+  display: flex;
+  justify-content: center;
 }
 .gf-select-entry-scene {
-  opacity: 0.46;
+  opacity: 0.5;
   transform: scale(1.04);
   z-index: 1;
 }
 .gf-select-entry-scene .gf-ui-scene-canvas {
   filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.32));
 }
-.gf-select-entry-sheet {
+.gf-select-pad-crop {
   position: absolute;
-  left: 2%;
-  top: 2%;
-  width: min(16vw, 118px);
-  max-height: 18vh;
-  object-fit: contain;
-  image-rendering: pixelated;
-  opacity: 0.92;
-  z-index: 2;
+  left: var(--gf-select-pad-left, 50%);
+  top: var(--gf-select-pad-top, 47%);
+  width: min(var(--gf-select-pad-width, 58%), 620px);
+  aspect-ratio: 2410 / 300;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  z-index: 1;
+  filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.32));
 }
-.gf-select-platform {
+.gf-select-pad {
+  /* Invisible hosting region for the live borg model/mini-icon fallback,
+     centered above the real platform-crop pad image. */
   position: absolute;
-  left: var(--gf-select-platform-left, 50%);
-  top: var(--gf-select-platform-top, 47%);
-  width: min(var(--gf-select-platform-width, 45%), 420px);
-  height: min(var(--gf-select-platform-height, 17%), 150px);
-  transform: translate(-50%, -50%) perspective(720px) rotateX(62deg);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.1) 30%, transparent 31%),
-    radial-gradient(ellipse at center, #80d85d 0 46%, #378a34 47% 67%, #145e2f 68% 100%);
-  box-shadow: 0 18px 0 #85471d, 0 28px 24px rgba(0, 0, 0, 0.35);
+  left: var(--gf-select-pad-left, 50%);
+  top: var(--gf-select-pad-top, 47%);
+  width: min(var(--gf-select-pad-width, 45%), 420px);
+  height: min(var(--gf-select-pad-height, 17%), 150px);
+  transform: translate(-50%, -138%);
   z-index: 2;
 }
 .gf-select-face,
 .gf-select-mini {
   position: absolute;
   left: 50%;
-  top: 0;
-  max-width: 42%;
-  max-height: 160%;
+  bottom: 6%;
+  max-width: 60%;
+  max-height: 220%;
   object-fit: contain;
-  transform: translate(-50%, -74%) rotateX(-62deg) scale(2.1);
+  transform: translate(-50%, 0);
   image-rendering: pixelated;
   filter: drop-shadow(0 10px 0 rgba(0, 0, 0, 0.32));
+}
+.gf-select-mini-fallback {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  max-width: 90%;
 }
 .gf-select-borg-scene {
   position: absolute;
   left: 50%;
-  bottom: 34%;
+  bottom: 0;
   width: min(30vw, 280px);
-  height: min(38vw, 340px);
-  transform: translate(-50%, 0) rotateX(-62deg);
+  height: min(40vw, 360px);
+  transform: translate(-50%, 34%);
   pointer-events: none;
   filter: drop-shadow(0 14px 0 rgba(0, 0, 0, 0.32));
 }
 .gf-select-cost {
   position: absolute;
   left: 6%;
-  bottom: 24%;
+  top: 66%;
   /* Cap the block so it can never run under the force-name grid on the right. */
   max-width: 34%;
   z-index: 3;
-  display: grid;
-  grid-template-columns: auto auto;
+  display: flex;
   align-items: baseline;
   gap: 12px;
-  color: #ffffff;
-  -webkit-text-stroke: 1.5px #2a1f46;
-  paint-order: stroke fill;
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.38);
-}
-.gf-select-cost-label {
-  font-size: clamp(20px, 3vw, 36px);
-  color: var(--gf-yellow);
-}
-.gf-select-cost-value {
-  font-size: clamp(38px, 7vw, 90px);
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.38));
 }
 .gf-select-name {
   position: absolute;
   right: 7%;
-  bottom: 21%;
+  top: 64%;
   z-index: 3;
   display: grid;
   grid-template-columns: auto minmax(120px, 1fr);
@@ -803,14 +803,8 @@
   align-items: center;
   /* Never overlap the COST readout on the left. */
   width: min(52%, 520px);
-  color: #ffffff;
 }
-.gf-select-no {
-  grid-area: no;
-  font-size: clamp(18px, 2.4vw, 28px);
-  -webkit-text-stroke: 1.25px #2a1f46;
-  paint-order: stroke fill;
-}
+.gf-select-no { grid-area: no; }
 .gf-select-banner {
   grid-area: banner;
   width: 100%;
@@ -818,24 +812,17 @@
   image-rendering: pixelated;
   filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
 }
-.gf-select-force-name {
-  grid-area: force;
-  font-size: clamp(22px, 3.6vw, 44px);
-  color: var(--gf-yellow);
-  -webkit-text-stroke: 1.8px #2a1f46;
-  paint-order: stroke fill;
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
-}
-.gf-select-limit {
-  grid-area: limit;
-  justify-self: end;
-  font-size: clamp(14px, 2vw, 22px);
-  color: #dff6ff;
-  -webkit-text-stroke: 1px #2a1f46;
-  paint-order: stroke fill;
-}
+.gf-select-banner-fallback { grid-area: banner; }
+.gf-select-force-name { grid-area: force; }
+.gf-select-limit { grid-area: limit; justify-self: end; }
 
 /* ============================ BATTLE INTRO ============================ */
+/*
+ * Rebuilt so the exported brif00 scene is the PRIMARY surface (promoted from a
+ * faint low-opacity backdrop) — see BattleIntro.ts doc comment for why no
+ * dedicated real capture exists for this screen. All dynamic text (names,
+ * arena, energy, VS/objective copy) renders via bitmapText (ascii.tpl).
+ */
 .gf-battle-intro {
   background:
     radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), transparent 52%),
@@ -843,28 +830,8 @@
   pointer-events: auto;
 }
 .gf-brief-real-scene {
-  opacity: 0.34;
-  transform: scale(1.08);
-  filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.35));
-}
-.gf-brief-vs-sheet,
-.gf-brief-label-sheet {
-  position: absolute;
-  image-rendering: pixelated;
-  pointer-events: none;
-  opacity: 0.22;
-  z-index: 1;
-}
-.gf-brief-vs-sheet {
-  left: 50%;
-  top: 50%;
-  width: min(36vw, 300px);
-  transform: translate(-50%, -50%) scale(1.6);
-}
-.gf-brief-label-sheet {
-  right: 2%;
-  top: 2%;
-  width: min(24vw, 190px);
+  opacity: 0.92;
+  filter: drop-shadow(0 22px 20px rgba(0, 0, 0, 0.4));
 }
 .gf-brief-title {
   position: absolute;
@@ -874,12 +841,10 @@
   margin: 0;
   z-index: 3;
   width: min(86%, 860px);
-  color: var(--gf-yellow);
   text-align: center;
-  font-size: clamp(24px, 4.2vw, 50px);
-  -webkit-text-stroke: 2px var(--gf-outline);
-  paint-order: stroke fill;
-  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
+  padding-top: 0;
+  display: flex;
+  justify-content: center;
 }
 .gf-brief-side {
   position: absolute;
@@ -910,21 +875,15 @@
 .gf-brief-name {
   padding: 4px 16px;
   border-radius: 999px;
-  color: #ffffff;
-  font-size: clamp(15px, 2.2vw, 24px);
-  -webkit-text-stroke: 1px var(--gf-outline);
-  paint-order: stroke fill;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.22), 0 3px 0 rgba(0, 0, 0, 0.24);
+  display: flex;
+  justify-content: center;
 }
 .gf-brief-energy-player { background: linear-gradient(#3ea6ff, #1262c8); }
 .gf-brief-energy-enemy { background: linear-gradient(#ff5d4c, #b81d1a); }
 .gf-brief-name {
   max-width: 100%;
   background: linear-gradient(#fff2a8, #dc9f18);
-  color: #ffffff;
-  text-align: center;
-  white-space: normal;
 }
 .gf-brief-vs {
   position: absolute;
@@ -932,12 +891,8 @@
   top: 42%;
   transform: translate(-50%, -50%) rotate(-8deg);
   z-index: 4;
-  color: #ffffff;
-  font-size: clamp(46px, 9vw, 106px);
-  -webkit-text-stroke: 3px var(--gf-red);
-  paint-order: stroke fill;
-  text-shadow: 0 7px 0 rgba(0, 0, 0, 0.35);
 }
+.gf-brief-vs-text { transform: scale(1.4); }
 .gf-brief-preview {
   position: absolute;
   left: 50%;
@@ -961,10 +916,6 @@
   padding: 7px 24px;
   border-radius: 999px;
   background: linear-gradient(#ffd969, #e9a51a);
-  color: #ffffff;
-  font-size: clamp(14px, 2vw, 24px);
-  -webkit-text-stroke: 1px #754216;
-  paint-order: stroke fill;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
 }
 .gf-brief-arena-name {
@@ -977,15 +928,18 @@
   padding: 5px 20px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.55);
-  color: #ffffff;
-  font-size: clamp(13px, 1.8vw, 20px);
-  letter-spacing: 0.04em;
-  -webkit-text-stroke: 1px var(--gf-outline);
-  paint-order: stroke fill;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* ============================ FORCE BUILDER ============================ */
+/*
+ * Rebuilt against reference/captures/challenge-6-edit-force.png: the EDIT tab
+ * and active-force banner are captureCropImg crops of the real baked plates;
+ * the borg grid sits over a captureCropImg crop of the real checkered floor;
+ * each of the 30 ring slots is textured with a captureCropImg crop of one real
+ * hex tile (see ForceBuilder.ts's COMPROMISE doc comment for why the full ring
+ * isn't a single crop). Dynamic COST/LIMIT/REMAIN/names render via bitmapText.
+ */
 .gf-force-screen {
   background: #0e2138;
 }
@@ -1003,36 +957,28 @@
 }
 .gf-force { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr minmax(280px, 42%); gap: 12px; padding: 12px; box-sizing: border-box; height: 100%; }
 .gf-force-screen .gf-legend { z-index: 4; }
-.gf-force-unitall-atlas {
-  position: absolute;
-  left: 14px;
-  top: 54px;
-  width: min(46vw, 420px);
-  max-height: calc(100% - 118px);
-  object-fit: cover;
-  object-position: top left;
-  opacity: 0.12;
-  image-rendering: pixelated;
-  pointer-events: none;
-}
-.gf-force-edit-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
+.gf-force-edit-tab-crop {
+  position: relative;
   align-self: start;
-  padding: 6px 22px;
+  width: min(100%, 420px);
+  aspect-ratio: 900 / 210;
+  overflow: hidden;
   border-radius: 999px;
-  background: linear-gradient(#5f96d8, #2f6db0);
-  border: 2px solid #9fc8f0;
-  color: #fff;
-  font-size: 18px;
-  letter-spacing: 0.08em;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.4));
 }
 .gf-force-left { position: relative; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
-.gf-force-left > :not(.gf-force-unitall-atlas) { position: relative; z-index: 1; }
-.gf-force-grid {
+.gf-force-floor-crop {
+  position: relative;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 2px solid #2f5e96;
+}
+.gf-force-floor-crop .gf-capture-crop-img { image-rendering: pixelated; }
+.gf-borg-grid {
+  position: absolute;
+  inset: 0;
   overflow-y: auto;
   display: grid;
   /* The real extracted per-borg art (`mn<code>`) is a 224x32 name plate, not a
@@ -1040,9 +986,6 @@
   grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
   gap: 6px;
   padding: 10px;
-  border-radius: 10px;
-  background: linear-gradient(#1d3a63, #12263f);
-  border: 2px solid #2f5e96;
   align-content: start;
 }
 .gf-borg-cell {
@@ -1053,7 +996,7 @@
   justify-content: space-between;
   gap: 4px;
   border-radius: 8px;
-  background: linear-gradient(#8b93a5, #5c6374);
+  background: linear-gradient(rgba(139, 147, 165, 0.92), rgba(92, 99, 116, 0.92));
   border: 2px solid #b9c4d3;
   cursor: pointer;
   overflow: hidden;
@@ -1071,21 +1014,13 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: left;
-  font-size: 10px;
-  color: #f4f7fb;
-  -webkit-text-stroke: 0.5px #1a2233;
-  paint-order: stroke fill;
 }
 .gf-borg-cell.gf-in-force { border-color: var(--gf-yellow); box-shadow: 0 0 0 2px var(--gf-yellow) inset; }
 .gf-borg-cell.gf-disabled { opacity: 0.35; cursor: not-allowed; }
+.gf-borg-cell.gf-cursor { box-shadow: 0 0 0 2px #fff, 0 0 8px 2px rgba(255, 255, 255, 0.6); }
 .gf-borg-cell .gf-cost-tag {
   flex: none;
-  font-size: 10px;
   background: rgba(0, 0, 0, 0.7);
-  color: #ffd21e;
   padding: 1px 4px;
   border-radius: 4px;
 }
@@ -1099,6 +1034,7 @@
   padding: 0 3px;
   border-bottom-right-radius: 4px;
   -webkit-text-stroke: 0.4px var(--gf-outline);
+  z-index: 1;
 }
 
 .gf-force-right {
@@ -1113,60 +1049,105 @@
   min-height: 0;
 }
 .gf-force-banner {
+  position: relative;
   align-self: stretch;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: linear-gradient(#cfd3da, #9aa0ab);
-  border: 2px solid #eef2f7;
+  height: 40px;
   margin-bottom: 8px;
+  overflow: hidden;
 }
-.gf-force-banner img { height: 26px; image-rendering: pixelated; }
-.gf-force-banner .gf-force-banner-name {
-  font-size: 16px;
-  color: #2f6db0;
-  -webkit-text-stroke: 0.6px #fff;
-  paint-order: stroke fill;
-  letter-spacing: 0.06em;
+.gf-force-banner-crop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  z-index: 0;
 }
-.gf-force-ring {
+.gf-force-banner-mini {
+  position: relative;
+  z-index: 1;
+  height: 26px;
+  margin-left: 44px;
+  image-rendering: pixelated;
+}
+.gf-force-banner-name {
+  position: relative;
+  z-index: 1;
+}
+.gf-borg-ring {
   position: relative;
   width: 100%;
   flex: 1;
   min-height: 200px;
 }
-.gf-slot {
+/*
+ * Ring band: sampled navy/purple color from the capture rather than an image
+ * crop (see ForceBuilder.ts COMPROMISE doc — no single real texture covers all
+ * 30 procedurally-placed slot positions).
+ */
+.gf-borg-ring::before {
+  content: "";
   position: absolute;
-  width: 30px;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, transparent 62%, var(--gf-edit-purple) 63% 78%, #8f7fc9 79% 82%, transparent 83%);
+  pointer-events: none;
+  z-index: 0;
+}
+.gf-hexcell {
+  position: absolute;
+  width: 34px;
   height: 34px;
   transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
   cursor: pointer;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  background: linear-gradient(#ffd86b, #f5a800);
   border: 0;
-  font-size: 11px;
-  color: var(--gf-outline);
-  font-weight: 900;
+  background: none;
+  padding: 0;
+  overflow: hidden;
+  z-index: 1;
 }
-.gf-slot.gf-slot-empty { background: linear-gradient(#5a4a8a, #34265f); color: rgba(255, 255, 255, 0.5); }
-.gf-slot.gf-slot-filled { box-shadow: 0 0 0 1px #fff; }
-.gf-slot.gf-slot-active { box-shadow: 0 0 0 2px var(--gf-red); }
-.gf-slot img { width: 88%; height: 88%; object-fit: contain; image-rendering: pixelated; }
+.gf-hexcell-hex-tile {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: fill;
+  z-index: 0;
+}
+.gf-hexcell.gf-hexcell-empty .gf-hexcell-hex-tile { filter: grayscale(0.6) brightness(0.55) saturate(0.7); }
+.gf-hexcell-no {
+  position: relative;
+  z-index: 1;
+  transform: scale(0.85);
+}
+.gf-hexcell.gf-hexcell-filled .gf-hexcell-no { display: none; }
+.gf-hexcell-img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 88%;
+  height: 88%;
+  margin: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.gf-hexcell.gf-hexcell-active { filter: drop-shadow(0 0 0 2px var(--gf-red)); }
+.gf-hexcell.gf-cursor { filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px #fff); }
 
 .gf-cost-panel {
   position: absolute;
   right: 6%;
   top: 38%;
   width: 46%;
-  background: linear-gradient(#e9eef5, #c6cedb);
-  border: 2px solid #fff;
-  border-radius: 8px;
+  background: linear-gradient(#1f3f6e, #172e56);
+  border: 2px solid #b3b3b3;
+  border-radius: 4px;
   padding: 6px 8px;
-  color: var(--gf-outline);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 .gf-cost-panel .gf-cost-line {
@@ -1174,15 +1155,16 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 8px;
-  font-size: 13px;
 }
 .gf-cost-panel .gf-cost-total {
   border-bottom: 2px solid #9aa0ab;
   padding-bottom: 4px;
   margin-bottom: 4px;
 }
-.gf-cost-panel .gf-cost-val { font-size: 18px; -webkit-text-stroke: 0.4px #fff; paint-order: stroke fill; }
-.gf-cost-panel.gf-over .gf-cost-val.gf-remain { color: var(--gf-red); }
+.gf-cost-panel .gf-cost-val { transform: scale(0.9); }
+.gf-cost-panel.gf-over .gf-cost-val.gf-remain { filter: hue-rotate(0deg); }
+.gf-force-legend .gf-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.gf-legend-glyph { opacity: 0.9; }
 
 /* ============================ BATTLE HUD ============================ */
 /* Rebuilt 1:1 against reference/captures/challenge-8-in-battle-hud.png and
@@ -1296,29 +1278,25 @@
 }
 
 /* ============================ RESULTS ============================ */
+/*
+ * Rebuilt so the exported rpot20 (win) / rpot23 (lose) podium scene is the
+ * PRIMARY surface (promoted from a faint backdrop). Row LABELS are one real
+ * captureCropImg crop of the baked pill stack (fixed text, same every result);
+ * per-battle VALUES render via bitmapText. See Results.ts doc comment.
+ */
 .gf-results { background: #6a3f2a; }
-.gf-results-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-}
 .gf-results::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.08) 54%, rgba(0, 0, 0, 0.18));
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.04) 54%, rgba(0, 0, 0, 0.12));
   pointer-events: none;
 }
 .gf-results-real-scene {
-  z-index: 2;
-  opacity: 0.62;
-  transform: scale(1.04);
-  filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.34));
+  z-index: 0;
+  opacity: 1;
+  filter: drop-shadow(0 20px 20px rgba(0, 0, 0, 0.38));
 }
 /*
  * Row horizontal extent comes from the rpot20/rpot23 scene exports (row pills
@@ -1326,76 +1304,56 @@
  * vertical placement stays hand-tuned because the export is a rest pose (see
  * the generated anchor's caveat). Fallbacks preserve the hand-tuned layout.
  */
+.gf-results-labels-crop {
+  position: absolute;
+  left: var(--gf-results-rows-left, 6%);
+  top: 6%;
+  height: 88%;
+  aspect-ratio: 785 / 1355;
+  overflow: hidden;
+  z-index: 2;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.3));
+}
 .gf-results-rows {
   position: absolute;
   left: var(--gf-results-rows-left, 6%);
-  top: 10%;
-  width: var(--gf-results-rows-width, 56%);
+  top: 6%;
+  height: 88%;
+  aspect-ratio: 785 / 1355;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   z-index: 3;
 }
-.gf-result-row { display: flex; align-items: center; }
-.gf-result-pill {
+.gf-result-row { flex: 1; display: flex; align-items: center; }
+.gf-result-label-spacer { flex: 1.8; }
+.gf-result-val {
   flex: 1;
   display: flex;
-  align-items: center;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: linear-gradient(#7fb4e6, var(--gf-blue-pill-deep));
-  border: 2px solid #bcdcff;
-  color: #fff;
-  font-size: clamp(11px, 1.8vw, 17px);
-  letter-spacing: 0.04em;
-  -webkit-text-stroke: 0.5px var(--gf-outline);
-  paint-order: stroke fill;
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
-  text-transform: uppercase;
+  justify-content: flex-end;
+  padding-right: 6%;
 }
-.gf-result-sub { background: linear-gradient(#9ec3e8, #4f7fb0); }
-.gf-result-grand .gf-result-pill { background: linear-gradient(#ffe27a, var(--gf-orange)); color: var(--gf-outline); }
-.gf-result-val {
-  margin-left: 12px;
-  min-width: 4ch;
-  text-align: right;
-  font-size: clamp(16px, 3vw, 26px);
-  color: #fff;
-  -webkit-text-stroke: 1px var(--gf-outline);
-  paint-order: stroke fill;
-}
-.gf-result-val.gf-neg { color: var(--gf-red); }
+.gf-result-grand .gf-result-val { padding-right: 4%; }
 .gf-results-verdict {
   position: absolute;
   left: 42%;
   top: 44%;
   transform: translate(-50%, -50%) rotate(-6deg);
   z-index: 3;
-  font-size: clamp(48px, 12vw, 110px);
-  letter-spacing: 0.04em;
 }
-.gf-verdict-win { color: var(--gf-yellow); -webkit-text-stroke: 4px var(--gf-red); paint-order: stroke fill; text-shadow: 0 6px 0 rgba(0, 0, 0, 0.4); }
+.gf-verdict-win .gf-bitmap-text { filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.4)); }
 .gf-verdict-lose {
   left: 50%;
   top: 36%;
-  width: min(68vw, 448px);
   transform: translate(-50%, -50%) rotate(-3deg);
-}
-.gf-results-gameover {
-  display: block;
-  width: 100%;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 7px 0 rgba(0, 0, 0, 0.35));
 }
 .gf-results-start {
   position: absolute;
   right: 18px;
   bottom: 18px;
   z-index: 4;
-  width: 72px;
-  height: 40px;
-  object-fit: contain;
-  image-rendering: pixelated;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
   filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35));
 }
 

@@ -1,12 +1,12 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-05T03:44:33.717Z
+Generated: 2026-07-05T04:35:55.785Z
 
 ## Summary
 
 - Runtime screens audited: 10
 - Screens using at least one real exported UI asset: 10
-- Screens with handcoded/CSS/SVG surface signals: 4
+- Screens with handcoded/CSS/SVG surface signals: 0
 - Screens mounting a real exported UI scene model: 8
 - UI texture export: 831 images from apps/game/public/ui/manifest.json
 - Requested UI scene models exported: 13 from apps/game/public/ui/scenes/manifest.json
@@ -57,11 +57,11 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 | select-difficulty | real-assets-only | ASSETS.fontAscii<br>/ui/scenes/vsel00/model_00.dae | none | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
 | select-players | real-assets-only | ASSETS.fontAscii<br>/ui/scenes/vsel01/model_00.dae | none | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
 | load-box-data | real-assets-only | ASSETS.memoryCardSlot<br>ASSETS.vsSelectLabels<br>/ui/scenes/box00/model_00.dae | none | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
-| select-force | mixed-real-assets-handcoded-surface | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>/models/pl0615/model_00.glb<br>/ui/scenes/entry00/model_00.dae | css-grid-backdrop:133<br>css-force-platform:141<br>runtime-text-layout:136 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
-| force-builder | mixed-real-assets-handcoded-surface | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath<br>/ui/scenes/unitall/model_00.dae | handcoded-force-grid:94<br>handcoded-force-ring:106<br>handcoded-force-slot:183<br>runtime-text-layout:89 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
-| battle-intro | mixed-real-assets-handcoded-surface | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:54 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
+| select-force | real-assets-only | borgBannerPath<br>borgMiniPath<br>ASSETS.fontAscii<br>/models/pl0615/model_00.glb<br>/ui/scenes/entry00/model_00.dae | none | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
+| force-builder | real-assets-only | borgMiniPath<br>ASSETS.fontAscii<br>/ui/scenes/unitall/model_00.dae | none | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
+| battle-intro | real-assets-only | borgMiniPath<br>ASSETS.fontAscii<br>/ui/scenes/brif00/model_00.dae | none | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
 | battle-hud | real-assets-only | ASSETS.faceMarkerRoundel<br>borgBannerPath<br>ASSETS.fontAscii | none | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
-| results | mixed-real-assets-handcoded-surface | ASSETS.resultsWin<br>ASSETS.resultsLose<br>ASSETS.resultsStartPrompt<br>ASSETS.resultsGameOver<br>/ui/scenes/rpot20/model_00.glb<br>/ui/scenes/rpot23/model_00.glb<br>/ui/scenes/rpot20/model_00.dae<br>/ui/scenes/rpot23/model_00.dae | css-results-row:122<br>runtime-text-layout:122 | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |
+| results | real-assets-only | ASSETS.fontAscii<br>/ui/scenes/rpot20/model_00.glb<br>/ui/scenes/rpot23/model_00.glb<br>/ui/scenes/rpot20/model_00.dae<br>/ui/scenes/rpot23/model_00.dae | none | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |
 | pause-menu | real-assets-only | ASSETS.fontAscii | none | Find the original pause menu data/assets; current overlay is entirely recreated CSS/text. |
 
 ## UI Scene Export Coverage

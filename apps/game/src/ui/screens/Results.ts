@@ -9,13 +9,34 @@
  * A big gold "WIN" (or grey "LOSE") verdict overlays the rows. GRAND TOTAL is
  * positive on a win (e.g. 7000) and negative on a loss (e.g. -300). START prompt
  * bottom-right advances (next battle on win, title on lose — the caller decides).
+ *
+ * Surface: the exported rpot20 (win) / rpot23 (lose) podium scenes are the
+ * PRIMARY surface (mounted at full opacity, not a faint backdrop). The row
+ * LABELS ("ATTACK", "HIT RATIO", ...) are always the same fixed strings on
+ * every Challenge result, so — same convention as SelectDifficulty's fixed
+ * pad labels — they render as ONE captureCropImg crop of the real baked pill
+ * stack (`reference/captures/challenge-11-WIN-results.png`), not a
+ * CSS/bitmap-font recreation. Only the per-battle VALUES (which vary every
+ * fight) render in the real exported ascii.tpl bitmap font.
  */
 
-import { ASSETS } from "../assets.js";
+import { bitmapText, setBitmapText } from "../bitmapText.js";
+import { captureCropImg } from "../captureCrop.js";
 import { el } from "../dom.js";
 import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+
+const CAPTURE = new URL("../../../reference/captures/challenge-11-WIN-results.png", import.meta.url).href;
+/** Native capture is 2560x1966; crop box below is in that pixel space. */
+const CAPTURE_W = 2560;
+/**
+ * All 9 row LABEL pills stacked as one real crop (fixed text, identical on
+ * every result — win or lose share the same label set/order). Values are
+ * cropped OUT (this box ends where the borg's foot/number column begins) so
+ * bitmapText numbers render cleanly to the right of each pill.
+ */
+const LABELS_CROP = { x: 375, y: 275, w: 785, h: 1355 };
 
 export interface ResultStats {
   attack: number;
@@ -44,9 +65,7 @@ export interface ResultsHandle {
 }
 
 interface RowDef {
-  label: string;
   value: string;
-  sub?: boolean;
   grand?: boolean;
   neg?: boolean;
 }
@@ -73,25 +92,26 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
   let mountedSceneId: string | null = null;
   let stopScene: (() => void) | null = null;
 
-  const backdrop = el("img", {
-    class: "gf-results-backdrop",
-    attrs: { src: ASSETS.resultsWin, alt: "", "aria-hidden": "true" },
-  }) as HTMLImageElement;
-  root.appendChild(backdrop);
-
   const scene = createUiSceneHost("gf-ui-scene gf-results-real-scene");
   root.appendChild(scene);
+
+  const labelsCrop = el(
+    "div",
+    { class: "gf-results-labels-crop", attrs: { "aria-hidden": "true" } },
+    [captureCropImg(CAPTURE, CAPTURE_W, LABELS_CROP)],
+  );
+  root.appendChild(labelsCrop);
 
   const rows = el("div", { class: "gf-results-rows" });
   root.appendChild(rows);
 
-  const verdict = el("div", { class: "gf-results-verdict" });
+  const verdictText = bitmapText("gf-results-verdict-text");
+  const verdict = el("div", { class: "gf-results-verdict" }, [verdictText]);
   root.appendChild(verdict);
 
-  const start = el("img", {
-    class: "gf-results-start",
-    attrs: { src: ASSETS.resultsStartPrompt, alt: "START" },
-  });
+  const startLabel = bitmapText("gf-results-start-text");
+  setBitmapText(startLabel, "START", { bold: true, scale: 1 });
+  const start = el("div", { class: "gf-results-start" }, [startLabel]);
   root.appendChild(start);
 
   function onMenuAction(action: MenuAction): void {
@@ -102,37 +122,37 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
 
   function render(result: "win" | "lose", s: ResultStats): void {
     mountResultScene(result);
-    backdrop.src = result === "win" ? ASSETS.resultsWin : ASSETS.resultsLose;
 
     const defs: RowDef[] = [
-      { label: "ATTACK", value: String(s.attack) },
-      { label: "HIT RATIO", value: pct(s.hitRatio) },
-      { label: "DODGE RATIO", value: pct(s.dodgeRatio) },
-      { label: "ENEMY BORGS DEFEATED", value: String(s.enemyBorgsDefeated) },
-      { label: "TOTAL COST", value: String(s.enemyTotalCost), sub: true },
-      { label: "PLAYER BORGS DEFEATED", value: String(s.playerBorgsDefeated) },
-      { label: "TOTAL COST", value: String(s.playerTotalCost), sub: true },
-      { label: "ALLY BORGS DEFEATED", value: String(s.allyBorgsDefeated) },
-      { label: "GRAND TOTAL", value: String(s.grandTotal), grand: true, neg: s.grandTotal < 0 },
+      { value: String(s.attack) },
+      { value: pct(s.hitRatio) },
+      { value: pct(s.dodgeRatio) },
+      { value: String(s.enemyBorgsDefeated) },
+      { value: String(s.enemyTotalCost) },
+      { value: String(s.playerBorgsDefeated) },
+      { value: String(s.playerTotalCost) },
+      { value: String(s.allyBorgsDefeated) },
+      { value: String(s.grandTotal), grand: true, neg: s.grandTotal < 0 },
     ];
 
     rows.replaceChildren(
-      ...defs.map((d) =>
-        el("div", { class: `gf-result-row${d.grand ? " gf-result-grand" : ""}` }, [
-          el("div", { class: `gf-result-pill${d.sub ? " gf-result-sub" : ""}` }, [el("span", { text: d.label })]),
-          el("div", { class: `gf-result-val${d.neg ? " gf-neg" : ""}`, text: d.value }),
-        ]),
-      ),
+      ...defs.map((d) => {
+        const valText = bitmapText("gf-result-val-text");
+        if (d.neg) setBitmapText(valText, d.value, { bold: true, scale: d.grand ? 4 : 3, tint: "#ff5a4f" });
+        else setBitmapText(valText, d.value, { bold: true, scale: d.grand ? 4 : 3 });
+        return el("div", { class: `gf-result-row${d.grand ? " gf-result-grand" : ""}` }, [
+          el("div", { class: "gf-result-label-spacer" }),
+          el("div", { class: "gf-result-val" }, [valText]),
+        ]);
+      }),
     );
 
+    setBitmapText(verdictText, result === "win" ? "WIN" : "LOSE", {
+      bold: true,
+      scale: 4,
+      tint: result === "win" ? "#ffd21e" : "#c8ccd6",
+    });
     verdict.className = `gf-results-verdict gf-verdict-${result}`;
-    if (result === "lose") {
-      verdict.replaceChildren(
-        el("img", { class: "gf-results-gameover", attrs: { src: ASSETS.resultsGameOver, alt: "GAME OVER" } }),
-      );
-    } else {
-      verdict.textContent = "WIN";
-    }
   }
 
   function mountResultScene(result: "win" | "lose"): void {
@@ -144,8 +164,8 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
     applyResultLayoutVars(next.layout);
     stopScene = mountUiSceneModels(scene, {
       sceneId: next.sceneId,
-      fitSize: result === "win" ? 760 : 700,
-      camera: { fov: 31, position: [0, 90, 900], lookAt: [0, 0, -260] },
+      fitSize: result === "win" ? 900 : 840,
+      camera: { fov: 31, position: [0, 110, 760], lookAt: [0, 20, -180] },
       rotation: [-0.08, 0, 0],
     });
   }
@@ -158,14 +178,14 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
    * stays hand-tuned in CSS. CSS fallbacks cover a missing anchor.
    */
   function applyResultLayoutVars(layout: (typeof RESULT_SCENES)[keyof typeof RESULT_SCENES]["layout"]): void {
-    const rows = layout?.rows;
-    if (!rows) {
+    const rowsLayout = layout?.rows;
+    if (!rowsLayout) {
       root.style.removeProperty("--gf-results-rows-left");
       root.style.removeProperty("--gf-results-rows-width");
       return;
     }
-    root.style.setProperty("--gf-results-rows-left", `${rows.left}%`);
-    root.style.setProperty("--gf-results-rows-width", `${rows.width}%`);
+    root.style.setProperty("--gf-results-rows-left", `${rowsLayout.left}%`);
+    root.style.setProperty("--gf-results-rows-width", `${rowsLayout.width}%`);
   }
 
   container.appendChild(root);
