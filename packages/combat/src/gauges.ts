@@ -147,7 +147,7 @@ export function knockbackVelocityForRecord(record: DamageRecord): number {
  * the GROUND-reaction knockback horizontal speed, distinct from the LAUNCH-reaction velocity
  * above. `zz_005ec20_` @0x8005ec20 (chunk_0007.c:5546-5573):
  *   idx = clamp(|victim.reactionAnimVariant|, 0..15)
- *   ratio = attackerScale / victimScale        (T5; both default 1.0 — no size pipeline yet)
+ *   ratio = attackerScale / victimScale        (T5 — see below; now WIRED end-to-end)
  *   h-speed = ratio * DAT_802dd8a0[idx]         (= idx * 7.0, KNOCKBACK_STRENGTH_TABLE.HORIZONTAL)
  *   h-accel = -speed / 20.0                     (stops in 20 frames — see reactionGroundDecel)
  * This is the table the STAGGER-family reaction handlers (FUN_8005db44/FUN_8005dc24/FUN_8005df2c,
@@ -165,11 +165,14 @@ export function knockbackGroundSpeedForRecord(
 
 /**
  * DERIVED (T5 combat-feel-gaps-decode-2026-07-05.md): the knockback scale-ratio multiplier —
- * `victim+0x298 (attacker scale snapshot) / victim+0xc4 (victim's own render scale)`. The port
- * has no size-scale pipeline yet (T5's `ctx+0xc4`/`victim+0xb4` size-scale floats are not wired
- * to any runtime BorgRuntime field), so this is a documented no-op (1.0/1.0 = 1.0) until that
- * pipeline lands — wiring the FORMULA now (not a hardcoded 1) means the day size scale is real,
- * only this one function needs a real attackerScale/victimScale pair plugged in.
+ * `attacker+0xc4 (attacker render scale) / victim+0xb4 (victim render scale)`. NOW WIRED
+ * end-to-end: combat.ts applyHit feeds `tierSizeScale(attacker) / tierSizeScale(victim)`
+ * (timescale.ts), which is the full +0xb4/+0xc4 chain — the param-tier table row sizeScale
+ * (data/paramTierTables.json 0x802dd5a0) at the effective tier (paramTier.tier + sizeTierDelta).
+ * ×1.0/×1.0 (ratio 1.0) at the default tier 16 for every borg at spawn; diverges under
+ * grow/shrink hit-status or the hero X +4-tier buff. (No per-borg base size-scale data file is
+ * needed — the decode proves the base is uniformly 1.0; actor+0x3ec is the LEVEL byte, not a
+ * size class.)
  */
 export function knockbackScaleRatio(attackerScale = 1, victimScale = 1): number {
   if (victimScale === 0) return 1;

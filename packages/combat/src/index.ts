@@ -110,6 +110,7 @@ export {
   DASH,
   DAMAGE,
   DEFAULT_BOUNDS,
+  DEPLOY,
   HERO_X_BUFF,
   HIT_STATUS,
   JUMP,

@@ -44,7 +44,7 @@ import { challengeSideRanksForMode } from "./damageFormula.js";
 import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { stepStatus } from "./status.js";
-import { DEFAULT_BOUNDS, JUMP, SIM, SPAWN_INVINCIBILITY_FRAMES } from "./constants.js";
+import { DEFAULT_BOUNDS, JUMP, SIM } from "./constants.js";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
 import { resetActorParamTier } from "./paramTier.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
@@ -288,9 +288,15 @@ class BattleImpl implements Battle {
       state: "spawn",
       stateTime: 0,
       anim: "spawn",
+      // 3-phase deploy (DEPLOY, behavior-notes.md (af)): phase tracked in stepActionState;
+      // ally cue 8 fires at the phase-0 -> 1 boundary (~frame 20). The spawn STATE itself is
+      // the deploy-lock protection (combat.ts isInvincible), replacing the old flat TUNED 45f
+      // invincTimer — so invincTimer starts at 0 (no separate post-deploy residual is wired;
+      // the ROM's +0x720 30/60 respawn-reset dispatch is unproven, see DEPLOY comment).
+      deployPhase: 0,
       ammo: entry.borgId === HUSK_BORG_ID ? HUSK_AMMO : startingAmmoForProfile(prof),
       cooldowns: { boostFuel: JUMP.BOOST_FUEL_FRAMES, jumpHeld: 0 },
-      invincTimer: SPAWN_INVINCIBILITY_FRAMES,
+      invincTimer: 0,
       balanceGauge: gauges.balanceGaugeMax,
       balanceGaugeMax: gauges.balanceGaugeMax,
       downGauge: gauges.downGaugeBase,

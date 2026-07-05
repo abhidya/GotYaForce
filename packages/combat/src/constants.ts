@@ -100,8 +100,33 @@ export const SIM = {
 /** Wake-up / hit invincibility, in frames. DERIVED from decomp (struct+0x720 = 60.0). */
 export const WAKE_UP_INVINCIBILITY_FRAMES = 60;
 
-/** Spawn (deploy) invincibility, frames. TUNED — brief protection on auto-spawn. */
-export const SPAWN_INVINCIBILITY_FRAMES = 45;
+/**
+ * 3-phase DEPLOY timer on actor +0x558 (DERIVED — behavior-notes.md (af), state-table slots
+ * 0-2 at FUN_8005be08 / FUN_8005bec8 / FUN_8005bf6c, chunk_0007.c:3781+). Replaces the old
+ * flat TUNED 45f `SPAWN_INVINCIBILITY_FRAMES` invincTimer. The deploying borg is locked into
+ * the spawn state (combat.ts isInvincible now treats `state === "spawn"` as the deploy-lock
+ * protection) for this many frames, split into 3 phases:
+ *   - phase 0 FUN_8005be08: counts 20.0 -> 0 at 1.0/frame (descent; drop-visual toggle at
+ *     6.0 frames left).
+ *   - phase 1 FUN_8005bec8: 1 frame — sets the 15.0 pose countdown AND plays ALLY reaction
+ *     cue id 8 (an index into the per-borg reaction-ANIMATION-select table *(actor+0x4f0),
+ *     NOT a soundId — research/decomp/data/combat-se-ids.json:156; surfaced to renderers via
+ *     BorgRuntime.deployPhase, which hits 1 at this boundary).
+ *   - phase 2 FUN_8005bf6c: counts 15.0 -> 0 (pose), then clears spawn flags.
+ * Phase constants FLOAT_80437428=1.0, _30=6.0, _34=15.0, _38=30.0, _3c=20.0 (DOL-extracted).
+ * Phase-0 init 20.0 vs 30.0 is chosen by zz_005c028_ (chunk_0007.c:3871-3891) on +0x6fe — the
+ * port uses the 20.0 descent (normal-deploy branch). Total 20+1+15 = 36 == STATE.SPAWN_DURATION.
+ * Residual TUNED-pending-dispatch: FUN_80060b60 (chunk_0007.c:6778-6804) writes +0x720 = 30.0
+ * (FLOAT_80437558) or 60.0 (FLOAT_80437564) on respawn-reset, but its dispatch context is
+ * unproven, so NO separate post-deploy invincTimer is wired here (spawn state alone protects).
+ */
+export const DEPLOY = {
+  PHASE0_DESCENT_FRAMES: 20,
+  PHASE1_SETUP_FRAMES: 1,
+  PHASE2_POSE_FRAMES: 15,
+  /** Ally reaction-ANIMATION cue id fired at the phase-0 -> phase-1 boundary (FUN_8005bec8). */
+  ALLY_CUE_ID: 8,
+} as const;
 
 /**
  * "landing" MovementContext window after `onLand` (movement.ts), frames. TUNED — a port-side
@@ -378,15 +403,15 @@ export const REACTION = {
   LAUNCH_GRAVITY: -1.2,
   /**
    * Reaction-anim length fallback (frames), keyed by which reaction family gated the release.
-   * DERIVED MECHANISM (the release IS anim-completion-gated, `actor+0x1d0e`, per T6) but TUNED
-   * VALUE: the doc's own honest UNKNOWN is "the exact anim-bank group byte for reaction slots"
-   * — no per-borg exported reaction-clip length exists in this port's asset pipeline today
-   * (packages/combat has no renderer/mot-length data), so every borg falls back to these named
-   * constants until a real per-borg reaction-clip length table is wired (see
-   * reactionAnimLengthFrames in combat.ts, which is the single injectable seam for that future
-   * per-borg data — swapping the fallback for real lengths requires no call-site changes).
-   * Anchored to the OLD flat MELEE/SHOT/SPECIAL.HITSTUN tuned values so today's feel doesn't
-   * regress by default; the mechanism change is real even though the fallback numbers are not.
+   * DERIVED MECHANISM (the release IS anim-completion-gated, `actor+0x1d0e`, per T6). The
+   * per-borg VALUE is now DERIVED too for the 111/208 ground and 175/208 launch borgs whose
+   * reaction-clip lengths are exported (data/reactionAnimLengths.json, from the baked anim
+   * banks). These constants remain as the labeled TUNED fallback for borgs whose bake lacks a
+   * real reaction clip (97 ground / 33 launch — incl. the 23 render-frozen borgs whose 1-frame
+   * placeholder bakes are treated as missing). See reactionAnimLengthFrames in combat.ts (the
+   * single seam). Anchored to the OLD flat MELEE/SHOT/SPECIAL.HITSTUN tuned values so borgs on
+   * the fallback read the same as before; the mechanism change is real even though these
+   * fallback numbers are not.
    */
   GROUND_STAGGER_FALLBACK_FRAMES: 14,
   LAUNCH_FALLBACK_FRAMES: 30,

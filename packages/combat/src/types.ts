@@ -169,6 +169,16 @@ export interface BorgRuntime {
   stateTime: number;
   /** Current animation label (cosmetic; render reads it). */
   anim: string;
+  /**
+   * 3-phase deploy progress (ROM +0x558 state-table slots 0-2, behavior-notes.md (af); constants
+   * DEPLOY): 0 = descent (20f), 1 = setup (1f — the frame FUN_8005bec8 fires ALLY reaction cue
+   * id 8), 2 = pose (15f). Optional + defaults absent so external fakes self-heal; advanced in
+   * combat.ts stepActionState while state === "spawn". Renderer-readable: a teammate's
+   * deployPhase 0 -> 1 transition is the ally-cue-8 trigger the ROM fires (cue 8 is an index
+   * into the per-borg reaction-ANIMATION-select table, NOT a soundId — see DEPLOY/ALLY_CUE_ID).
+   * DERIVED.
+   */
+  deployPhase?: 0 | 1 | 2;
   /** Ranged ammo remaining before reload. Kept as the WEAPON-0 alias for compat: every
    *  existing reader/writer of `b.ammo` keeps working unchanged, mirroring
    *  `weaponCells[0].cur` (ATK-009, findings.md mechanic P). */

@@ -1,0 +1,797 @@
+{
+ "_meta": {
+  "schema": "gotyaforce.reactionAnimLengths.v1",
+  "source": "apps/game/public/models/pl####/anim_index.json (banks[].{group,slot,label,frames})",
+  "generatedBy": "scripts/export-reaction-anim-lengths.mjs (TEMP; permanent gen-script owned by the assets agent)",
+  "evidence": "research/decomp/PORT-1TO1-STATUS.md:858 (DERIVED anchors hit=g3 / down=g4s0); research/decomp/combat-feel-gaps-decode-2026-07-05.md T6 (reaction release is anim-completion-gated on actor+0x1d0e; ground family anim slots 0xd/0xe = group 3 hit_react, launch family FUN_8005ed38 anim 0x13/0x17+dir = group 4 slot 0 down_s0)",
+  "mapping": {
+   "ground": "group 3, lowest-slot clip whose label includes 'hit_react' (excludes guard)",
+   "launch": "group 4 slot 0 (down family, label 'down_s0')",
+   "omitted": "borgs whose anim_index lacks the clip keep the TUNED fallback (REACTION.*_FALLBACK_FRAMES)"
+  },
+  "coverage": {
+   "totalRoster": 208,
+   "groundResolved": 111,
+   "launchResolved": 175,
+   "missingGround": [
+    "pl0009",
+    "pl0109",
+    "pl0200",
+    "pl0201",
+    "pl0203",
+    "pl0204",
+    "pl0205",
+    "pl0206",
+    "pl0209",
+    "pl020a",
+    "pl020c",
+    "pl020d",
+    "pl020f",
+    "pl0500",
+    "pl0501",
+    "pl0502",
+    "pl0503",
+    "pl0504",
+    "pl0505",
+    "pl0506",
+    "pl0507",
+    "pl0509",
+    "pl050a",
+    "pl050b",
+    "pl050c",
+    "pl050d",
+    "pl050e",
+    "pl050f",
+    "pl0510",
+    "pl0511",
+    "pl0512",
+    "pl0513",
+    "pl0515",
+    "pl0516",
+    "pl0517",
+    "pl0604",
+    "pl0606",
+    "pl0610",
+    "pl0613",
+    "pl0618",
+    "pl0619",
+    "pl061b",
+    "pl061e",
+    "pl061f",
+    "pl0620",
+    "pl0621",
+    "pl0623",
+    "pl0625",
+    "pl0627",
+    "pl0628",
+    "pl0800",
+    "pl0801",
+    "pl0806",
+    "pl0807",
+    "pl0808",
+    "pl0809",
+    "pl080a",
+    "pl080f",
+    "pl0900",
+    "pl0901",
+    "pl0902",
+    "pl0903",
+    "pl0906",
+    "pl0907",
+    "pl0908",
+    "pl0909",
+    "pl090a",
+    "pl090b",
+    "pl090c",
+    "pl090d",
+    "pl0c00",
+    "pl0c01",
+    "pl0c02",
+    "pl0c04",
+    "pl0c05",
+    "pl0c06",
+    "pl0d00",
+    "pl0d01",
+    "pl0d02",
+    "pl0d03",
+    "pl0d04",
+    "pl0d05",
+    "pl0d06",
+    "pl0d07",
+    "pl0e00",
+    "pl0e01",
+    "pl0e02",
+    "pl0e03",
+    "pl0e04",
+    "pl0e05",
+    "pl0f00",
+    "pl0f01",
+    "pl0f02",
+    "pl0f03",
+    "pl0f04",
+    "pl0f05",
+    "pl0f06"
+   ],
+   "missingLaunch": [
+    "pl0505",
+    "pl0511",
+    "pl0606",
+    "pl0619",
+    "pl061b",
+    "pl0628",
+    "pl0800",
+    "pl0807",
+    "pl0808",
+    "pl0a00",
+    "pl0a05",
+    "pl0a0a",
+    "pl0d00",
+    "pl0d01",
+    "pl0d02",
+    "pl0d03",
+    "pl0d04",
+    "pl0d05",
+    "pl0d06",
+    "pl0d07",
+    "pl0e00",
+    "pl0e01",
+    "pl0e02",
+    "pl0e03",
+    "pl0e04",
+    "pl0e05",
+    "pl0f00",
+    "pl0f01",
+    "pl0f02",
+    "pl0f03",
+    "pl0f04",
+    "pl0f05",
+    "pl0f06"
+   ]
+  },
+  "note": "DERIVED from the baked animation banks (offline HSDRaw->Collada bake, dense per-frame). The bake is renderer-side; these are the SAME frame counts the ROM's anim-completion flag (actor+0x1d0e) ticks against."
+ },
+ "borgs": {
+  "pl0000": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl0001": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl0002": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl0003": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl0004": {
+   "ground": 12,
+   "launch": 16
+  },
+  "pl0005": {
+   "ground": 5,
+   "launch": 81
+  },
+  "pl0006": {
+   "ground": 8,
+   "launch": 2
+  },
+  "pl0007": {
+   "ground": 9,
+   "launch": 61
+  },
+  "pl0008": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl0009": {
+   "launch": 52
+  },
+  "pl000a": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl000b": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl000c": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl0100": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl0101": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl0102": {
+   "ground": 12,
+   "launch": 46
+  },
+  "pl0103": {
+   "ground": 6,
+   "launch": 46
+  },
+  "pl0104": {
+   "ground": 12,
+   "launch": 10
+  },
+  "pl0105": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl0106": {
+   "ground": 6,
+   "launch": 46
+  },
+  "pl0107": {
+   "ground": 6,
+   "launch": 31
+  },
+  "pl0108": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl0109": {
+   "launch": 71
+  },
+  "pl010a": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl0200": {
+   "launch": 84
+  },
+  "pl0201": {
+   "launch": 23
+  },
+  "pl0202": {
+   "ground": 10,
+   "launch": 24
+  },
+  "pl0203": {
+   "launch": 2
+  },
+  "pl0204": {
+   "launch": 10
+  },
+  "pl0205": {
+   "launch": 36
+  },
+  "pl0206": {
+   "launch": 84
+  },
+  "pl0207": {
+   "ground": 5,
+   "launch": 51
+  },
+  "pl0208": {
+   "ground": 6,
+   "launch": 106
+  },
+  "pl0209": {
+   "launch": 36
+  },
+  "pl020a": {
+   "launch": 84
+  },
+  "pl020b": {
+   "ground": 10,
+   "launch": 24
+  },
+  "pl020c": {
+   "launch": 2
+  },
+  "pl020d": {
+   "launch": 10
+  },
+  "pl020e": {
+   "ground": 6,
+   "launch": 106
+  },
+  "pl020f": {
+   "launch": 84
+  },
+  "pl0300": {
+   "ground": 8,
+   "launch": 73
+  },
+  "pl0301": {
+   "ground": 8,
+   "launch": 73
+  },
+  "pl0302": {
+   "ground": 8,
+   "launch": 56
+  },
+  "pl0303": {
+   "ground": 8,
+   "launch": 50
+  },
+  "pl0304": {
+   "ground": 8,
+   "launch": 61
+  },
+  "pl0305": {
+   "ground": 8,
+   "launch": 11
+  },
+  "pl0306": {
+   "ground": 8,
+   "launch": 56
+  },
+  "pl0307": {
+   "ground": 8,
+   "launch": 50
+  },
+  "pl0308": {
+   "ground": 8,
+   "launch": 73
+  },
+  "pl0309": {
+   "ground": 8,
+   "launch": 49
+  },
+  "pl030a": {
+   "ground": 8,
+   "launch": 11
+  },
+  "pl030b": {
+   "ground": 8,
+   "launch": 73
+  },
+  "pl030c": {
+   "ground": 8,
+   "launch": 49
+  },
+  "pl030d": {
+   "ground": 8,
+   "launch": 50
+  },
+  "pl0400": {
+   "ground": 10,
+   "launch": 15
+  },
+  "pl0401": {
+   "ground": 10,
+   "launch": 9
+  },
+  "pl0402": {
+   "ground": 10,
+   "launch": 10
+  },
+  "pl0403": {
+   "ground": 14,
+   "launch": 5
+  },
+  "pl0404": {
+   "ground": 10,
+   "launch": 10
+  },
+  "pl0405": {
+   "ground": 10,
+   "launch": 10
+  },
+  "pl0406": {
+   "ground": 10,
+   "launch": 15
+  },
+  "pl0407": {
+   "ground": 10,
+   "launch": 10
+  },
+  "pl0408": {
+   "ground": 10,
+   "launch": 10
+  },
+  "pl0409": {
+   "ground": 10,
+   "launch": 10
+  },
+  "pl040a": {
+   "ground": 10,
+   "launch": 15
+  },
+  "pl040b": {
+   "ground": 10,
+   "launch": 5
+  },
+  "pl040c": {
+   "ground": 10,
+   "launch": 5
+  },
+  "pl040d": {
+   "ground": 10,
+   "launch": 5
+  },
+  "pl0500": {
+   "launch": 121
+  },
+  "pl0501": {
+   "launch": 121
+  },
+  "pl0502": {
+   "launch": 121
+  },
+  "pl0503": {
+   "launch": 121
+  },
+  "pl0504": {
+   "launch": 121
+  },
+  "pl0506": {
+   "launch": 121
+  },
+  "pl0507": {
+   "launch": 121
+  },
+  "pl0509": {
+   "launch": 121
+  },
+  "pl050a": {
+   "launch": 121
+  },
+  "pl050b": {
+   "launch": 121
+  },
+  "pl050c": {
+   "launch": 121
+  },
+  "pl050d": {
+   "launch": 121
+  },
+  "pl050e": {
+   "launch": 121
+  },
+  "pl050f": {
+   "launch": 121
+  },
+  "pl0510": {
+   "launch": 121
+  },
+  "pl0512": {
+   "launch": 121
+  },
+  "pl0513": {
+   "launch": 121
+  },
+  "pl0515": {
+   "launch": 121
+  },
+  "pl0516": {
+   "launch": 121
+  },
+  "pl0517": {
+   "launch": 121
+  },
+  "pl0600": {
+   "ground": 12,
+   "launch": 39
+  },
+  "pl0601": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl0602": {
+   "ground": 2,
+   "launch": 34
+  },
+  "pl0604": {
+   "launch": 61
+  },
+  "pl0608": {
+   "ground": 12,
+   "launch": 39
+  },
+  "pl0609": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl060a": {
+   "ground": 2,
+   "launch": 34
+  },
+  "pl060c": {
+   "ground": 2,
+   "launch": 34
+  },
+  "pl060e": {
+   "ground": 2,
+   "launch": 34
+  },
+  "pl0610": {
+   "launch": 15
+  },
+  "pl0613": {
+   "launch": 76
+  },
+  "pl0615": {
+   "ground": 12,
+   "launch": 81
+  },
+  "pl0616": {
+   "ground": 12,
+   "launch": 39
+  },
+  "pl0617": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl0618": {
+   "launch": 61
+  },
+  "pl061a": {
+   "ground": 7,
+   "launch": 96
+  },
+  "pl061c": {
+   "ground": 12,
+   "launch": 39
+  },
+  "pl061d": {
+   "ground": 12,
+   "launch": 71
+  },
+  "pl061e": {
+   "launch": 15
+  },
+  "pl061f": {
+   "launch": 15
+  },
+  "pl0620": {
+   "launch": 15
+  },
+  "pl0621": {
+   "launch": 15
+  },
+  "pl0623": {
+   "launch": 15
+  },
+  "pl0625": {
+   "launch": 15
+  },
+  "pl0627": {
+   "launch": 76
+  },
+  "pl0629": {
+   "ground": 12,
+   "launch": 81
+  },
+  "pl062a": {
+   "ground": 12,
+   "launch": 81
+  },
+  "pl0700": {
+   "ground": 12,
+   "launch": 15
+  },
+  "pl0701": {
+   "ground": 12,
+   "launch": 12
+  },
+  "pl0702": {
+   "ground": 12,
+   "launch": 15
+  },
+  "pl0703": {
+   "ground": 12,
+   "launch": 10
+  },
+  "pl0704": {
+   "ground": 12,
+   "launch": 18
+  },
+  "pl0705": {
+   "ground": 12,
+   "launch": 15
+  },
+  "pl0706": {
+   "ground": 15,
+   "launch": 5
+  },
+  "pl0707": {
+   "ground": 12,
+   "launch": 21
+  },
+  "pl0708": {
+   "ground": 12,
+   "launch": 12
+  },
+  "pl0709": {
+   "ground": 12,
+   "launch": 15
+  },
+  "pl070a": {
+   "ground": 12,
+   "launch": 15
+  },
+  "pl070b": {
+   "ground": 12,
+   "launch": 15
+  },
+  "pl070c": {
+   "ground": 12,
+   "launch": 12
+  },
+  "pl070d": {
+   "ground": 12,
+   "launch": 12
+  },
+  "pl0801": {
+   "launch": 60
+  },
+  "pl0802": {
+   "ground": 8,
+   "launch": 21
+  },
+  "pl0804": {
+   "ground": 11,
+   "launch": 81
+  },
+  "pl0805": {
+   "ground": 10,
+   "launch": 38
+  },
+  "pl0806": {
+   "launch": 67
+  },
+  "pl0809": {
+   "launch": 67
+  },
+  "pl080a": {
+   "launch": 71
+  },
+  "pl080c": {
+   "ground": 11,
+   "launch": 81
+  },
+  "pl080d": {
+   "ground": 10,
+   "launch": 38
+  },
+  "pl080e": {
+   "ground": 10,
+   "launch": 38
+  },
+  "pl080f": {
+   "launch": 67
+  },
+  "pl0900": {
+   "launch": 101
+  },
+  "pl0901": {
+   "launch": 56
+  },
+  "pl0902": {
+   "launch": 50
+  },
+  "pl0903": {
+   "launch": 41
+  },
+  "pl0904": {
+   "ground": 8,
+   "launch": 31
+  },
+  "pl0906": {
+   "launch": 101
+  },
+  "pl0907": {
+   "launch": 50
+  },
+  "pl0908": {
+   "launch": 101
+  },
+  "pl0909": {
+   "launch": 50
+  },
+  "pl090a": {
+   "launch": 41
+  },
+  "pl090b": {
+   "launch": 101
+  },
+  "pl090c": {
+   "launch": 50
+  },
+  "pl090d": {
+   "launch": 101
+  },
+  "pl0a00": {
+   "ground": 10
+  },
+  "pl0a01": {
+   "ground": 10,
+   "launch": 61
+  },
+  "pl0a02": {
+   "ground": 10,
+   "launch": 38
+  },
+  "pl0a03": {
+   "ground": 10,
+   "launch": 81
+  },
+  "pl0a04": {
+   "ground": 10,
+   "launch": 46
+  },
+  "pl0a05": {
+   "ground": 10
+  },
+  "pl0a06": {
+   "ground": 10,
+   "launch": 81
+  },
+  "pl0a07": {
+   "ground": 10,
+   "launch": 38
+  },
+  "pl0a08": {
+   "ground": 10,
+   "launch": 46
+  },
+  "pl0a09": {
+   "ground": 10,
+   "launch": 46
+  },
+  "pl0a0a": {
+   "ground": 10
+  },
+  "pl0b00": {
+   "ground": 11,
+   "launch": 64
+  },
+  "pl0b01": {
+   "ground": 11,
+   "launch": 96
+  },
+  "pl0b02": {
+   "ground": 11,
+   "launch": 65
+  },
+  "pl0b03": {
+   "ground": 11,
+   "launch": 65
+  },
+  "pl0b04": {
+   "ground": 11,
+   "launch": 130
+  },
+  "pl0b05": {
+   "ground": 11,
+   "launch": 64
+  },
+  "pl0b06": {
+   "ground": 11,
+   "launch": 64
+  },
+  "pl0b07": {
+   "ground": 11,
+   "launch": 64
+  },
+  "pl0c00": {
+   "launch": 76
+  },
+  "pl0c01": {
+   "launch": 41
+  },
+  "pl0c02": {
+   "launch": 41
+  },
+  "pl0c04": {
+   "launch": 91
+  },
+  "pl0c05": {
+   "launch": 76
+  },
+  "pl0c06": {
+   "launch": 76
+  }
+ }
+}

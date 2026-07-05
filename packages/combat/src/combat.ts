@@ -43,6 +43,7 @@ import {
   SPECIAL,
   STAGGER,
   STATE,
+  DEPLOY,
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
 import {
@@ -93,6 +94,7 @@ import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
 import { statusImmunityMasksForBorgId } from "./movementData.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
+import { tierSizeScale } from "./timescale.js";
 import type {
   BorgRuntime,
   BurstMeterState,
@@ -105,6 +107,10 @@ import type {
   WeaponCell,
 } from "./types.js";
 import projectileVisualFamilies from "./data/projectileVisualFamilies.json" with { type: "json" };
+import reactionAnimLengthsData from "./data/reactionAnimLengths.json" with { type: "json" };
+
+type ReactionAnimLengthRow = { ground?: number; launch?: number };
+const REACTION_ANIM_LENGTHS = (reactionAnimLengthsData as { borgs: Record<string, ReactionAnimLengthRow> }).borgs;
 
 export interface ProjectileContext {
   bounds: RectStageBounds;
@@ -122,7 +128,10 @@ export function stepInvincibility(b: BorgRuntime): void {
 }
 
 export function isInvincible(b: BorgRuntime): boolean {
-  return b.invincTimer > 0;
+  // The +0x558 3-phase deploy lock (DEPLOY, behavior-notes.md (af)) keeps a spawning borg
+  // protected for the full SPAWN_DURATION — DERIVED, replaces the old flat TUNED 45f invincTimer
+  // (battle.ts now inits invincTimer=0 at spawn; the spawn STATE is the protection).
+  return b.invincTimer > 0 || b.state === "spawn";
 }
 
 // ---------------------------------------------------------------------------------------
@@ -820,19 +829,28 @@ export function knockbackPitchTrimRadians(record: DamageRecord): number {
 }
 
 /**
- * Reaction-anim length (frames) — T6 DERIVED MECHANISM, TUNED VALUE (see REACTION.*_FALLBACK_
- * FRAMES in constants.ts for the full citation). The ROM gates reaction release on the
- * reaction anim's OWN completion flag (`actor+0x1d0e`), not a flat hitstun constant — but this
- * port's asset pipeline does not export per-borg reaction-clip lengths (no renderer/mot-length
- * data reaches packages/combat, which is intentionally renderer-agnostic). This function is the
- * SINGLE seam: it currently always returns the labeled TUNED fallback, but every call site
- * already goes through it, so wiring a real per-borg reaction-clip length table later is a
- * one-function change, not a call-site hunt.
+ * Reaction-anim length (frames) — DERIVED MECHANISM + DERIVED per-borg VALUE where exported.
+ * The ROM gates reaction release on the reaction anim's OWN completion flag (`actor+0x1d0e`),
+ * not a flat hitstun constant (T6, combat-feel-gaps-decode-2026-07-05.md). Per-borg clip
+ * lengths are read from data/reactionAnimLengths.json, extracted (READ-ONLY) from the baked
+ * animation banks at apps/game/public/models/pl####/anim_index.json:
+ *   - ground = group 3 hit_react clip (the ground-stagger family, ROM anim slots 0xd/0xe),
+ *   - launch = group 4 slot 0 down_s0 (the launch/knockdown family, FUN_8005ed38 anim
+ *     0x13/0x17+dir).
+ * Borgs whose bake lacks the clip (or exports a degenerate placeholder — the 23 render-frozen
+ * borgs) are OMITTED and fall back to the labeled TUNED constants (REACTION.*_FALLBACK_FRAMES).
+ * Coverage: 111/208 ground, 175/208 launch — the honest count of borgs with a real exported
+ * reaction clip (the rest substitute/idle per PORT-1TO1-STATUS.md:859).
  */
 export function reactionAnimLengthFrames(
-  _borgId: string,
+  borgId: string,
   kind: "ground" | "launch",
 ): number {
+  const row = REACTION_ANIM_LENGTHS[borgId.toLowerCase()];
+  if (row) {
+    const v = kind === "launch" ? row.launch : row.ground;
+    if (typeof v === "number" && v >= 2) return v;
+  }
   return kind === "launch" ? REACTION.LAUNCH_FALLBACK_FRAMES : REACTION.GROUND_STAGGER_FALLBACK_FRAMES;
 }
 
@@ -1024,9 +1042,9 @@ export function applyHit(
   // replacing the earlier flat-table-only T9 read). Two ROM reaction families, selected by
   // useLaunchTable above:
   //   - GROUND (zz_005ec20_): idx*7 horizontal-only table (gauges.ts
-  //     knockbackGroundSpeedForRecord), scaled by the T5 attacker/victim SCALE RATIO (both 1.0
-  //     today — no size pipeline wired yet, so this is a documented no-op multiply, not a
-  //     hardcoded skip: gauges.ts knockbackScaleRatio()). Decel is -speed/20 (REACTION.
+  //     knockbackGroundSpeedForRecord), scaled by the T5 attacker/victim SIZE-SCALE RATIO
+  //     (timescale.ts tierSizeScale — DERIVED end-to-end; ×1.0 at default tier, diverges under
+  //     grow/shrink status + hero X buff). Decel is -speed/20 (REACTION.
   //     GROUND_DECEL_FRAMES), integrated per-frame in movement.ts while state is a ground
   //     reaction — see reactionDecelFramesRemaining below.
   //   - LAUNCH (FUN_8005ed38): (idx+1)*8 table (gauges.ts knockbackVelocityForRecord, the
@@ -1034,12 +1052,21 @@ export function applyHit(
   //     components, decel -0.1/frame horizontal, gravity -1.2/frame (REACTION.LAUNCH_DECEL/
   //     LAUNCH_GRAVITY) for the reaction's duration.
   // Both keep KNOCKBACK.PORT_SCALE (1.0, raw-scale anchor) and the caller's per-move multiplier.
-  const attackerScale = source?.attacker.paramTier ? 1 : 1; // T5: no size-scale field on
-  // BorgRuntime yet (paramTier is velocity/anim-rate tier, NOT the size-scale float chain —
-  // see T5's ctx+0xc4/victim+0xb4 chain). Both sides are honestly 1.0 until that pipeline
-  // exists; the ratio call below is still made for real so wiring a real scale later is a
-  // one-line change at the call site, not a new code path.
-  const victimScale = 1;
+  // T5 size-scale (combat-feel-gaps-decode-2026-07-05.md §T5): ctx+0xc4 (attacker) /
+  // victim+0xb4 are the actor SIZE-SCALE floats, init by zz_0056180_ (chunk_0006.c:8250-8293)
+  // from the param-tier table row [sizeScale,...] (data/paramTierTables.json 0x802dd5a0) at the
+  // effective tier (paramTier.tier + sizeTierDelta, both on BorgRuntime). timescale.ts
+  // tierSizeScale() is the full DERIVED chain: ×1.0 at the default tier 16 for EVERY borg (no
+  // per-borg base variation exists at spawn; actor+0x3ec is the LEVEL byte that feeds HP/ammo
+  // row select + force cost — NOT a size/scale class — so PORT-1TO1-STATUS.md:753's "+0x3ec is
+  // size/scale class 0-4" is STALE, resolved by the T5 decode). The ratio diverges under
+  // grow/shrink hit-status (sizeTierDelta, the _63 path) or the STAR/PLANET HERO X +4-tier
+  // self-buff (applyActorParamTierDelta127). Projectiles inherit the owner's scale at spawn
+  // (chunk_0006.c:2472-2478), so the attacker's CURRENT scale is the right input for in-flight
+  // shots too. No separate BorgRuntime.sizeScale field is added — it would duplicate
+  // tierSizeScale(b) which already reads paramTier.tier (the +0xb4/+0xc4 source).
+  const attackerScale = source?.attacker ? tierSizeScale(source.attacker) : 1;
+  const victimScale = tierSizeScale(victim);
   const scaleRatio = knockbackScaleRatio(attackerScale, victimScale);
   const baseSpeed = useLaunchTable
     ? knockbackVelocityForRecord(record)
@@ -1384,6 +1411,18 @@ export function stepActionState(b: BorgRuntime): { died: boolean } {
       return { died: false };
     }
     case "spawn": {
+      // 3-phase deploy (DEPLOY, behavior-notes.md (af), state-table slots 0-2 on actor +0x558):
+      // phase 0 descent (20f) -> phase 1 setup (1f, fires ALLY reaction cue id 8 via
+      // FUN_8005bec8) -> phase 2 pose (15f). stateTime is 1-based here (caller increments
+      // before calling), so phase 0 = stateTime 1..20, phase 1 = stateTime 21, phase 2 = 22..36.
+      // deployPhase is renderer-readable; the 0 -> 1 transition is the ally-cue-8 frame.
+      if (b.stateTime <= DEPLOY.PHASE0_DESCENT_FRAMES) {
+        b.deployPhase = 0;
+      } else if (b.stateTime <= DEPLOY.PHASE0_DESCENT_FRAMES + DEPLOY.PHASE1_SETUP_FRAMES) {
+        b.deployPhase = 1;
+      } else {
+        b.deployPhase = 2;
+      }
       if (b.stateTime >= STATE.SPAWN_DURATION) {
         b.state = "idle";
         b.stateTime = 0;

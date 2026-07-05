@@ -20,7 +20,9 @@ import { actionProfileForProfile, startingAmmoForProfile } from "./actionProfile
 import {
   X_CHARGE,
   applyHit,
+  isInvincible,
   projectileVisualKindForProfile,
+  reactionAnimLengthFrames,
   sourceInitialEnemyLock,
   stepAttacks,
   stepCooldowns,
@@ -51,6 +53,7 @@ import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime
 import {
   BURST,
   DASH,
+  DEPLOY,
   HERO_X_BUFF,
   JUMP,
   MELEE,
@@ -59,7 +62,7 @@ import {
   STATE,
   WAKE_UP_INVINCIBILITY_FRAMES,
 } from "./constants.js";
-import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, type DamageRecord } from "./gauges.js";
+import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, knockbackScaleRatio, type DamageRecord } from "./gauges.js";
 import {
   cameraParamsForBorgId,
   defaultCameraSlotForBorgId,
@@ -67,7 +70,7 @@ import {
   statusImmunityMasksForBorgId,
 } from "./movementData.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
-import { actorVelocityScale, isFrozen, tierVelocityScale } from "./timescale.js";
+import { actorVelocityScale, isFrozen, tierSizeScale, tierVelocityScale } from "./timescale.js";
 import { stepMovement } from "./movement.js";
 import {
   PARAM_TIER_RESET,
@@ -81,6 +84,13 @@ import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import { typeCategoryForBorgId, typeDamageMultiplier } from "./typeDamage.js";
 import { computeSourceDamage, forceGaugeRatioIndex } from "./damageFormula.js";
 import damageFormulaData from "./data/damageFormula.json" with { type: "json" };
+import reactionAnimLengthsData from "./data/reactionAnimLengths.json" with { type: "json" };
+
+const REACTION_LENGTHS_META = (reactionAnimLengthsData as {
+  _meta: {
+    coverage: { totalRoster: number; groundResolved: number; launchResolved: number };
+  };
+})._meta;
 
 function loadBorgs(): BorgStats[] {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -2573,16 +2583,44 @@ function assertSpawnDeployLockDuration(borgs: BorgStats[]): void {
   if (!activeNow()) throw new Error("[selfcheck] spawn duration test lost p1 borg");
   const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
 
-  for (let f = 0; f < STATE.SPAWN_DURATION - 1; f += 1) battle.step(1 / 60, idleInputs);
-  if (activeNow()?.state !== "spawn") {
-    throw new Error(`[selfcheck] spawn lock ended early at frame ${STATE.SPAWN_DURATION - 1}`);
+  // 3-phase deploy (DEPLOY, behavior-notes.md (af)): phase 0 descent (stateTime 1..20) ->
+  // phase 1 setup (stateTime 21, fires ally cue 8) -> phase 2 pose (stateTime 22..36). The
+  // spawning borg must be invincible for the whole deploy (spawn STATE = deploy-lock protection,
+  // replacing the old flat TUNED 45f invincTimer) with invincTimer itself at 0.
+  const spawn0 = activeNow()!;
+  if (spawn0.invincTimer !== 0) {
+    throw new Error(`[selfcheck] deploy lock should start invincTimer=0 (spawn state protects): ${spawn0.invincTimer}`);
   }
+
+  const phasesHit = new Set<number>();
+  for (let f = 0; f < STATE.SPAWN_DURATION - 1; f += 1) {
+    battle.step(1 / 60, idleInputs);
+    const b = activeNow();
+    if (b?.state !== "spawn") {
+      throw new Error(`[selfcheck] spawn lock ended early at frame ${f + 1}`);
+    }
+    if (!isInvincible(b)) {
+      throw new Error(`[selfcheck] spawning borg lost deploy-lock invulnerability at frame ${f + 1}`);
+    }
+    const st = b.stateTime;
+    const wantPhase = st <= DEPLOY.PHASE0_DESCENT_FRAMES ? 0 : st <= DEPLOY.PHASE0_DESCENT_FRAMES + DEPLOY.PHASE1_SETUP_FRAMES ? 1 : 2;
+    if (b.deployPhase !== wantPhase) {
+      throw new Error(`[selfcheck] deploy phase mismatch at stateTime ${st}: got ${b.deployPhase}, want ${wantPhase}`);
+    }
+    phasesHit.add(b.deployPhase ?? -1);
+  }
+  // 36th step ends the deploy lock.
   battle.step(1 / 60, idleInputs);
   const after = activeNow();
   if (after?.state !== "idle") {
     throw new Error(`[selfcheck] spawn lock did not end at ${STATE.SPAWN_DURATION} frames: ${after?.state}`);
   }
-  console.log(`[selfcheck] spawn deploy lock matched source total ${STATE.SPAWN_DURATION} frames`);
+  if (phasesHit.size !== 3 || !phasesHit.has(0) || !phasesHit.has(1) || !phasesHit.has(2)) {
+    throw new Error(`[selfcheck] 3-phase deploy did not visit all phases: ${[...phasesHit].join(",")}`);
+  }
+  console.log(
+    `[selfcheck] 3-phase deploy (af): phases 0/1/2 visited across ${STATE.SPAWN_DURATION}f, ally cue ${DEPLOY.ALLY_CUE_ID} fires at phase 0->1, spawn-state invuln held (invincTimer=0)`,
+  );
 }
 
 function assertDeathAccountingAtKillEvent(borgs: BorgStats[]): void {
@@ -3729,24 +3767,48 @@ function assertHeroXBuffAppliesTierScaleAndReverts(borgs: BorgStats[]): void {
 // ---------------------------------------------------------------------------------------
 
 /**
- * Item 1/6: reaction outlasts the OLD flat constant when the (fallback) reaction-anim length
- * is longer. Today every borg falls back to REACTION.GROUND_STAGGER_FALLBACK_FRAMES /
- * LAUNCH_FALLBACK_FRAMES (see reactionAnimLengthFrames's doc — no per-borg reaction-clip length
- * is exported yet), which are anchored to the OLD MELEE.HITSTUN (14)/STATE.DOWN_DURATION (30)
- * values — so this asserts the MECHANISM (enterHit/enterDown actually read
- * reactionAnimLengthFrames, not a hardcoded literal) by overriding the cooldown directly and
- * confirming stepActionState honors a longer-than-14/30 value, which is exactly what plugging
- * in a real per-borg length later would produce.
+ * Item 1/6: reaction outlasts the OLD flat constant when the reaction-anim length is longer,
+ * AND per-borg reaction-clip lengths now resolve from data/reactionAnimLengths.json (extracted
+ * from the baked anim banks). pl0615 G RED resolves a REAL non-fallback length (ground 12,
+ * launch 81); borgs whose bake lacks the clip (e.g. pl0009 — group 3 is guards-only) fall back
+ * to the labeled TUNED REACTION.*_FALLBACK_FRAMES. This asserts both the real-resolution path
+ * and the fallback path, plus the MECHANISM (stepActionState honors whatever length was
+ * written, not a hardcoded literal).
  */
 function assertReactionOutlastsFlatConstantWhenAnimLonger(borgs: BorgStats[]): void {
+  // Per-borg resolution: pl0615 has exported hit_react (group 3 slot 0 = 12f) and down (group 4
+  // slot 0 = 81f) clips, so it must NOT read the TUNED fallback (14 / 30).
+  const pl0615Ground = reactionAnimLengthFrames("pl0615", "ground");
+  const pl0615Launch = reactionAnimLengthFrames("pl0615", "launch");
+  if (pl0615Ground === REACTION_MODULE.GROUND_STAGGER_FALLBACK_FRAMES) {
+    throw new Error(`[selfcheck] pl0615 should resolve a real ground reaction length, not the fallback: got ${pl0615Ground}`);
+  }
+  if (pl0615Launch === REACTION_MODULE.LAUNCH_FALLBACK_FRAMES) {
+    throw new Error(`[selfcheck] pl0615 should resolve a real launch reaction length, not the fallback: got ${pl0615Launch}`);
+  }
+  if (pl0615Ground !== 12 || pl0615Launch !== 81) {
+    throw new Error(`[selfcheck] pl0615 reaction lengths drifted from the baked clip (ground 12, launch 81): got ${pl0615Ground}/${pl0615Launch}`);
+  }
+  // Fallback path: pl0009's bake has NO hit_react clip (group 3 is guards-only), so it must
+  // fall back to the labeled TUNED constant.
+  const pl0009Ground = reactionAnimLengthFrames("pl0009", "ground");
+  if (pl0009Ground !== REACTION_MODULE.GROUND_STAGGER_FALLBACK_FRAMES) {
+    throw new Error(`[selfcheck] pl0009 (no hit_react clip) should fall back to GROUND_STAGGER_FALLBACK_FRAMES: got ${pl0009Ground}`);
+  }
+
+  // Fleet coverage (data-driven, from reactionAnimLengths.json _meta.coverage).
+  const cov = REACTION_LENGTHS_META.coverage;
+  console.log(
+    `[selfcheck] reaction-anim lengths: pl0615 resolves ground=${pl0615Ground}/launch=${pl0615Launch} (non-fallback); fleet coverage ground=${cov.groundResolved}/${cov.totalRoster} launch=${cov.launchResolved}/${cov.totalRoster}, rest keep TUNED fallback`,
+  );
+
+  // Mechanism check: the ground hit on pl0615 writes its real (12) length into the hitstun
+  // cooldown (proving enterHit reads reactionAnimLengthFrames, not a hardcoded literal).
   const victim = fakeRuntime("reaction_len_victim", 1, 20);
   const victimProfile = buildProfile(borgById(borgs, "pl0615"));
   const attacker = fakeRuntime("reaction_len_atk", 0, 0);
   // reactionFlags 2 -> always staggers, but WITHOUT a pitch trim / forced knockdown so the
-  // GROUND reaction family is selected deterministically (a pitch-trimmed record — like the
-  // real archetype records 0/1, both of which carry a trim per the T8 census — would select
-  // the LAUNCH family instead, which is exactly what assertPitchedKnockbackRisesForTrimmedRecord
-  // tests separately).
+  // GROUND reaction family is selected deterministically.
   const meleeRecord = fakeStatusRecord({ reactionFlags: 2, knockbackPitchTrim: 0, knockbackYawTrim: 0 });
   const noDir = { x: 0, y: 0, z: 0 };
   const from = { x: 0, y: 0, z: 10 };
@@ -3759,25 +3821,24 @@ function assertReactionOutlastsFlatConstantWhenAnimLonger(borgs: BorgStats[]): v
     throw new Error(`[selfcheck] a forced-stagger melee record should enter "hit": got ${victim.state}`);
   }
   const stun = victim.cooldowns["hitstun"] ?? 0;
-  if (stun !== REACTION_MODULE.GROUND_STAGGER_FALLBACK_FRAMES) {
+  if (stun !== pl0615Ground) {
     throw new Error(
-      `[selfcheck] a trimless, non-launch reaction should use REACTION.GROUND_STAGGER_FALLBACK_FRAMES (${REACTION_MODULE.GROUND_STAGGER_FALLBACK_FRAMES}): got ${stun}`,
+      `[selfcheck] pl0615 ground reaction should write the resolved length ${pl0615Ground} into hitstun: got ${stun}`,
     );
   }
 
-  // Mechanism check: a longer-than-fallback stun value (simulating a future real per-borg
-  // reaction-clip length) must fully outlast the old flat constant before releasing —
-  // i.e. stepActionState is driven by whatever length was written, not a hardcoded 14.
-  const longerStun = MELEE.HITSTUN + 20;
+  // A longer-than-resolved stun value must fully outlast the resolved length before releasing —
+  // i.e. stepActionState is driven by whatever length was written, not a hardcoded value.
+  const longerStun = pl0615Ground + 20;
   victim.state = "hit";
   victim.stateTime = 0;
   victim.cooldowns["hitstun"] = longerStun;
-  for (let i = 0; i < MELEE.HITSTUN + 1; i += 1) {
+  for (let i = 0; i < pl0615Ground + 1; i += 1) {
     victim.cooldowns["hitstun"] = Math.max(0, (victim.cooldowns["hitstun"] ?? 0) - 1);
   }
   if (victim.cooldowns["hitstun"] === 0) {
     throw new Error(
-      `[selfcheck] a reaction length longer than the old flat MELEE.HITSTUN must still be counting down after MELEE.HITSTUN+1 frames`,
+      `[selfcheck] a reaction length longer than pl0615's resolved ${pl0615Ground}f must still be counting down after ${pl0615Ground + 1} frames`,
     );
   }
   for (let i = 0; i < longerStun; i += 1) {
@@ -3787,7 +3848,7 @@ function assertReactionOutlastsFlatConstantWhenAnimLonger(borgs: BorgStats[]): v
     throw new Error(`[selfcheck] reaction should fully release once its own (longer) length elapses`);
   }
   console.log(
-    `[selfcheck] reaction release is length-driven (reactionAnimLengthFrames), not the old flat MELEE.HITSTUN=${MELEE.HITSTUN}: a longer length outlasts it`,
+    `[selfcheck] reaction release is length-driven (reactionAnimLengthFrames): pl0615 ground=${pl0615Ground}f, a longer length outlasts it`,
   );
 }
 
@@ -3822,6 +3883,72 @@ function assertPitchedKnockbackRisesForTrimmedRecord(borgs: BorgStats[]): void {
   }
   console.log(
     `[selfcheck] pitch-trimmed record (trim=${shotRecord.knockbackPitchTrim}, ~${(shotRecord.knockbackPitchTrim! * 1.40625).toFixed(2)} deg) launches upward: vel.y=${victim.vel.y.toFixed(2)}`,
+  );
+}
+
+/**
+ * Item 4/6 (T5): the knockback scale-ratio is wired to the REAL actor size-scale floats
+ * (timescale.ts tierSizeScale, the +0xb4/+0xc4 chain). A grown attacker (hero-X-style +4 tier
+ * delta -> tier 20 -> sizeScale 2.6) knocking back a default-tier victim (tier 16 -> sizeScale
+ * 1.0) must produce ratio 2.6, and the end-to-end GROUND knockback magnitude must be 2.6x the
+ * default-tier case. Confirms the premise "both sides pinned to 1.0" (PORT-1TO1-STATUS.md:683)
+ * is retired. (Per-borg base size-scale is uniformly 1.0 at spawn — actor+0x3ec is the LEVEL
+ * byte, NOT a size class, per combat-feel-gaps-decode-2026-07-05.md §T5.)
+ */
+function assertKnockbackScaleRatioWiredFromSizeScale(borgs: BorgStats[]): void {
+  const victimProfile = buildProfile(borgById(borgs, "pl0615"));
+  // Ground-reaction record: reactionFlags 2 forces a stagger, no pitch trim / no forced
+  // knockdown -> the GROUND family (scaleRatio-scaled) is selected deterministically.
+  const groundRecord = fakeStatusRecord({ reactionFlags: 2, knockbackPitchTrim: 0, knockbackYawTrim: 0 });
+  const noDir = { x: 0, y: 0, z: 0 };
+  const from = { x: 0, y: 0, z: 10 };
+
+  // Default-tier baseline: both attacker + victim at tier 16 -> sizeScale 1.0 -> ratio 1.0.
+  const baseVictim = fakeRuntime("scale_base_vic", 1, 20);
+  const baseAttacker = fakeRuntime("scale_base_atk", 0, 0);
+  const baseRatio = knockbackScaleRatio(tierSizeScale(baseAttacker), tierSizeScale(baseVictim));
+  if (Math.abs(baseRatio - 1) > 1e-9) {
+    throw new Error(`[selfcheck] default-tier size-scale ratio should be 1.0: got ${baseRatio}`);
+  }
+  applyHit(baseVictim, victimProfile, 0, 1, noDir, from, false, groundRecord, {
+    attacker: baseAttacker,
+    attackerProfile: victimProfile,
+  });
+  const baseSpeed = Math.hypot(baseVictim.vel.x, baseVictim.vel.z);
+
+  // Grown attacker: +4 tier delta (the STAR/PLANET HERO X ramming-dash buff path,
+  // applyActorParamTierDelta127) -> effective tier 20 -> sizeScale 2.6.
+  const grownAttacker = fakeRuntime("scale_grown_atk", 0, 0);
+  applyActorParamTierDelta127(grownAttacker.paramTier, HERO_X_BUFF.TIER_DELTA);
+  const grownTier = grownAttacker.paramTier.tier;
+  const grownSize = tierSizeScale(grownAttacker);
+  if (grownTier !== 16 + HERO_X_BUFF.TIER_DELTA) {
+    throw new Error(`[selfcheck] +tier delta should put the attacker at tier ${16 + HERO_X_BUFF.TIER_DELTA}: got ${grownTier}`);
+  }
+  if (Math.abs(grownSize - 2.6) > 1e-9) {
+    throw new Error(`[selfcheck] tier-${grownTier} sizeScale should be 2.6 (paramTierTables 0x802dd5a0): got ${grownSize}`);
+  }
+  const grownVictim = fakeRuntime("scale_grown_vic", 1, 20);
+  const grownRatio = knockbackScaleRatio(tierSizeScale(grownAttacker), tierSizeScale(grownVictim));
+  if (Math.abs(grownRatio - 2.6) > 1e-9) {
+    throw new Error(`[selfcheck] grown(tier20)/default(tier16) size-scale ratio should be 2.6: got ${grownRatio}`);
+  }
+  applyHit(grownVictim, victimProfile, 0, 1, noDir, from, false, groundRecord, {
+    attacker: grownAttacker,
+    attackerProfile: victimProfile,
+  });
+  const grownSpeed = Math.hypot(grownVictim.vel.x, grownVictim.vel.z);
+  if (baseSpeed <= 0) {
+    throw new Error(`[selfcheck] baseline ground knockback should be nonzero: ${baseSpeed}`);
+  }
+  const observedRatio = grownSpeed / baseSpeed;
+  if (Math.abs(observedRatio - 2.6) > 1e-6) {
+    throw new Error(
+      `[selfcheck] grown-attacker ground knockback should be 2.6x baseline (${baseSpeed} -> ${grownSpeed}): observed ${observedRatio}`,
+    );
+  }
+  console.log(
+    `[selfcheck] T5 size-scale ratio wired: grown attacker (tier ${grownTier}, sizeScale ${grownSize}) vs default victim -> ratio ${grownRatio}, ground knockback ${baseSpeed.toFixed(1)} -> ${grownSpeed.toFixed(1)} (${observedRatio.toFixed(2)}x)`,
   );
 }
 
@@ -4165,6 +4292,7 @@ export function main(): number {
   // combat-feel-gaps-decode-2026-07-05.md wiring selfchecks (one per item, item 6/7).
   assertReactionOutlastsFlatConstantWhenAnimLonger(borgs);
   assertPitchedKnockbackRisesForTrimmedRecord(borgs);
+  assertKnockbackScaleRatioWiredFromSizeScale(borgs);
   assertSideWideBurstFlagsBothTeammates();
   assertNukeVsFortressIs125(borgs);
   assertForceGaugeCurveChangesDamageAtLowSideEnergy(borgs);
