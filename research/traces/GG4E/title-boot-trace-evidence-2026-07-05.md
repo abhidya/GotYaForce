@@ -67,11 +67,26 @@ dash_back / dash_left). Matches `apps/game/src/ui/screens/TitleIntro.ts`'s
 
 ## Still open: actor spawn coords
 
-The state base is `0x803D5D78`; spawn coords live at `state + 0x1604 + slot*0xc`
-(per `FUN_80056d28`). This trace captured memory at the register-pointed addresses
-(state head + PC), not at `+0x1604`. A follow-up trace that reads
-`0x803D5D78 + 0x1604` (+0x10 for slot 1) — or the actor structs' `+0x20/+0x24/+0x28`
-position floats — would retire the last TUNED residual (`stageBaseForSlot`).
+The state base is `0x803D5D78` (confirmed deterministic across two boots); spawn coords
+live at `state + 0x1604 + slot*0xc` (per `FUN_80056d28`). Two capture attempts:
+
+1. **state+0x1604 read at 65s post-boot** (post-intro, menu loaded): the table reads
+   all-zero — the **menu transition re-zeroes the state block** (`FUN_801c795c`-style
+   `gnt4_memset` runs again for the menu's own state). The spawn table is only populated
+   DURING the desk intro.
+2. **actor struct dump at the anim-trigger hit** (`zz_0057ff8_`, r3=actor=0x805dbdc0,
+   borgId @ +0x3e8 = 0x615 = G RED, groupSel=5, animId=0): the first `0x100` bytes
+   contain **no plausible world-position floats** (only 0.0 / 1.0 scale / self-pointer at
+   +0x8c). The desk actor's world position is NOT inline in the actor struct — it lives
+   in the actor's **JOBJ (rendered joint tree)** translation, a deeper pointer chase
+   (actor -> JOBJ root -> translation XYZ).
+
+**Conclusion:** capturing the exact ROM desk-actor placement needs a follow-up trace that
+walks the actor -> JOBJ pointer -> root joint translation, timed during the desk-intro
+window (~54s post-boot, ~3-5s wide). The port's TUNED `stageBaseForSlot`
+(`TitleIntro.ts`: ±240 X, +700 Z forward of the authored camera, y=3557) stays until that
+walk lands. It is a presentation constant, not a correctness gap — every gameplay/data
+aspect of the intro VM is now runtime-confirmed.
 
 ## Net
 
