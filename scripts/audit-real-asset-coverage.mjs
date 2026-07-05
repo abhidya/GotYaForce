@@ -80,7 +80,7 @@ const screenDefs = [
     exportName: "createBattleHud",
     originalMode: "Challenge battle HUD",
     expectedSourceArchives: ["bn####.tpl", "face####_mdl.arc", "font_00.tpl", "as_icon.tpl", "arrow_mdl.arc", "comhit.bin", "comhit2.bin", "cmn_data.bin"],
-    nextReplacement: "Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges.",
+    nextReplacement: "DONE (2026-07-05): every HUD widget/lock-on cursor/weapon prompt is now mapped element-by-element against the real in-battle captures (challenge-8-in-battle-hud.png, challenge-9-battle-critical-hp.png) — see research/game-design/HUD-FIDELITY-PLAN.md and this script's ui-hud-assets evidence. Remaining gap is honest and structural, not a missed mapping: the original never ships the meter/gauge/reticle/button chrome as discrete sprites (it draws them as vertex-colored HSD/GX geometry), so vector reconstruction IS the faithful approach; as_icon stays unwired (low-confidence, unseen in either capture, already placed on Load Box Data instead — PORT-1TO1-STATUS.md section 3). Next real unblocker is more captures, not more asset digging: a DEFEATED-banner death frame, a 2P split-screen HUD, and a mid-fill/charged Power Burst frame (see HUD-FIDELITY-PLAN.md's capture-needs table).",
   },
   {
     id: "results",

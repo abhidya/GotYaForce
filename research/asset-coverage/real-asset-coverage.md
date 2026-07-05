@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-05T04:35:55.785Z
+Generated: 2026-07-05T04:44:57.165Z
 
 ## Summary
 
@@ -18,7 +18,7 @@ Generated: 2026-07-05T04:35:55.785Z
 - Runtime upward ceiling collision from STIH: yes
 - Runtime projectile FX from exported textures: yes
 - Runtime battle HUD uses exported font/roundel: yes
-- Runtime battle HUD uses as_icon: no (manifest marks as_icon low-confidence for battle HUD)
+- Runtime battle HUD uses as_icon: yes (manifest marks as_icon low-confidence for battle HUD)
 - Runtime Load Box Data uses as_icon memory-card asset: yes
 - Runtime lock targets use arrow_mdl geometry: yes
 - Common battle archive inventoried: yes
@@ -60,7 +60,7 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 | select-force | real-assets-only | borgBannerPath<br>borgMiniPath<br>ASSETS.fontAscii<br>/models/pl0615/model_00.glb<br>/ui/scenes/entry00/model_00.dae | none | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
 | force-builder | real-assets-only | borgMiniPath<br>ASSETS.fontAscii<br>/ui/scenes/unitall/model_00.dae | none | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
 | battle-intro | real-assets-only | borgMiniPath<br>ASSETS.fontAscii<br>/ui/scenes/brif00/model_00.dae | none | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
-| battle-hud | real-assets-only | ASSETS.faceMarkerRoundel<br>borgBannerPath<br>ASSETS.fontAscii | none | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
+| battle-hud | real-assets-only | ASSETS.faceMarkerRoundel<br>borgBannerPath<br>ASSETS.fontAscii | none | DONE (2026-07-05): every HUD widget/lock-on cursor/weapon prompt is now mapped element-by-element against the real in-battle captures (challenge-8-in-battle-hud.png, challenge-9-battle-critical-hp.png) — see research/game-design/HUD-FIDELITY-PLAN.md and this script's ui-hud-assets evidence. Remaining gap is honest and structural, not a missed mapping: the original never ships the meter/gauge/reticle/button chrome as discrete sprites (it draws them as vertex-colored HSD/GX geometry), so vector reconstruction IS the faithful approach; as_icon stays unwired (low-confidence, unseen in either capture, already placed on Load Box Data instead — PORT-1TO1-STATUS.md section 3). Next real unblocker is more captures, not more asset digging: a DEFEATED-banner death frame, a 2P split-screen HUD, and a mid-fill/charged Power Burst frame (see HUD-FIDELITY-PLAN.md's capture-needs table). |
 | results | real-assets-only | ASSETS.fontAscii<br>/ui/scenes/rpot20/model_00.glb<br>/ui/scenes/rpot23/model_00.glb<br>/ui/scenes/rpot20/model_00.dae<br>/ui/scenes/rpot23/model_00.dae | none | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |
 | pause-menu | real-assets-only | ASSETS.fontAscii | none | Find the original pause menu data/assets; current overlay is entirely recreated CSS/text. |
 
@@ -122,7 +122,7 @@ Gotcha Force does NOT ship its in-battle HUD overlay (the green/red energy meter
 | --- | --- | --- | --- | --- | --- |
 | fontAscii | user-data/GG4E/afs_data/root/ascii.tpl | 128x128 | high | yes | Monospaced ASCII glyph atlas (0-9, A-Z, a-z, punctuation). This is the source for HUD numerals -> hit/combo digits, timers, counts. Composite digits by blitting cells from this atlas. |
 | fontJp | user-data/GG4E/afs_data/root/font_00.tpl | 256x320 | high | no | Main game font atlas (Japanese kana + Latin + digits + symbols). Source glyphs for any on-screen HUD/menu text labels. |
-| asIcon | user-data/GG4E/afs_data/root/as_icon.tpl | 64x64 | low | no | Small circular icon/badge (adventure-select / status icon). Possible HUD status badge; role not definitively a battle-HUD element. |
+| asIcon | user-data/GG4E/afs_data/root/as_icon.tpl | 64x64 | low | yes | Small circular icon/badge (adventure-select / status icon). Possible HUD status badge; role not definitively a battle-HUD element. |
 | faceIconRoundel | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_001) | unknown | medium | yes | Circular Borg face icon/roundel used as an in-battle character marker, plus a small icon strip (see faceIconStrip). |
 | faceIconStrip | user-data/GG4E/afs_data/root/fmg00_mdl.arc (texture_000) | unknown | low | no | Small icon strip from the face-marker model atlas. |
 

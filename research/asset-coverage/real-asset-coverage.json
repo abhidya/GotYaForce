@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-05T04:35:55.785Z",
+  "generatedAt": "2026-07-05T04:44:57.165Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -24,7 +24,7 @@
     "runtimeStageCeilingCollision": true,
     "runtimeProjectileFxFromExportedTextures": true,
     "runtimeBattleHudUsesAvailableFontAndRoundel": true,
-    "runtimeBattleHudUsesAsIcon": false,
+    "runtimeBattleHudUsesAsIcon": true,
     "runtimeLoadBoxUsesAsIcon": true,
     "runtimeLockTargetUsesArrowGeometry": true,
     "commonBattleArchiveInventoried": true,
@@ -574,9 +574,9 @@
           "exists": false
         }
       ],
-      "nextReplacement": "Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges.",
+      "nextReplacement": "DONE (2026-07-05): every HUD widget/lock-on cursor/weapon prompt is now mapped element-by-element against the real in-battle captures (challenge-8-in-battle-hud.png, challenge-9-battle-critical-hp.png) — see research/game-design/HUD-FIDELITY-PLAN.md and this script's ui-hud-assets evidence. Remaining gap is honest and structural, not a missed mapping: the original never ships the meter/gauge/reticle/button chrome as discrete sprites (it draws them as vertex-colored HSD/GX geometry), so vector reconstruction IS the faithful approach; as_icon stays unwired (low-confidence, unseen in either capture, already placed on Load Box Data instead — PORT-1TO1-STATUS.md section 3). Next real unblocker is more captures, not more asset digging: a DEFEATED-banner death frame, a 2P split-screen HUD, and a mid-fill/charged Power Burst frame (see HUD-FIDELITY-PLAN.md's capture-needs table).",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:205",
+      "fileRef": "apps/game/src/ui/hud/BattleHud.ts:213",
       "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
         {
@@ -1957,7 +1957,7 @@
         "format": "CI8",
         "confidence": "low",
         "role": "Small circular icon/badge (adventure-select / status icon). Possible HUD status badge; role not definitively a battle-HUD element.",
-        "usedInBattleHud": false
+        "usedInBattleHud": true
       },
       {
         "key": "faceIconRoundel",
@@ -2042,7 +2042,7 @@
     "asIconExists": true,
     "battleHudUsesFontAscii": true,
     "battleHudUsesFaceRoundel": true,
-    "battleHudUsesAsIcon": false,
+    "battleHudUsesAsIcon": true,
     "arrowGeometry": {
       "sourceArchive": "user-data/GG4E/afs_data/root/arrow_mdl.arc",
       "sourceArchiveExists": true,

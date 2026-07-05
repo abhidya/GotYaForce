@@ -15,6 +15,7 @@
     "selfcheck:1p": "node scripts/selfcheck-1p-challenge.mjs",
     "selfcheck:challenge-stages": "node scripts/selfcheck-challenge-stages.mjs",
     "selfcheck:menu-flow": "node scripts/selfcheck-menu-flow.mjs",
+    "selfcheck:hud": "node scripts/selfcheck-hud.mjs",
     "selfcheck:xammo": "node scripts/run-xammo-tests.mjs",
     "audit:move-wiring": "node scripts/audit-move-wiring.mjs",
     "audit:move-unblockers": "node scripts/audit-move-unblockers.mjs",

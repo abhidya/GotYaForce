@@ -34,6 +34,14 @@
  *  - bottom-right: X special prompt with dashed cooldown ring, cyan reload
  *    pill + ammo digits + white B disc over a dark-red arc.
  * Lock-on is a world-space marker owned by battleScene (not drawn here).
+ *
+ * as_icon.tpl (64x64 roundel, exported /ui/tpl/as_icon/image_00_CI8.png) is
+ * DELIBERATELY NOT used here: the HUD manifest marks its battle-HUD role
+ * low-confidence, it does not appear in either in-battle capture, and every
+ * element those captures show is already covered by a real asset or measured
+ * geometry — there is no unexplained slot for it to fill. It IS wired
+ * elsewhere (Load Box Data's memory-card icon, a capture-backed placement).
+ * See research/decomp/PORT-1TO1-STATUS.md section 3 for the full writeup.
  */
 
 import { ASSETS, borgBannerPath } from "../assets.js";

@@ -697,6 +697,22 @@ SelectForce, ForceBuilder, BattleIntro, Results, PauseMenu.
 | Jump gauge | DONE (32ca8c4a) | multi-level air-jump pips under boost gear |
 | Target cursor yellow→red | DONE (5010cc64) | meleeRange field drives reticle tint |
 
+**as_icon (battle HUD, not used):** `as_icon.tpl` (`user-data/GG4E/afs_data/root/as_icon.tpl`,
+64x64, exported at `apps/game/public/ui/tpl/as_icon/image_00_CI8.png`) is a small circular
+icon/badge. The HUD asset manifest (`apps/game/public/ui/hud/manifest.json`) marks its
+battle-HUD role LOW-CONFIDENCE because it was never actually seen occupying a slot in either
+in-battle capture (`challenge-8-in-battle-hud.png` normal state, `challenge-9-battle-critical-hp.png`
+critical state) — every HUD element visible in those two frames is already accounted for by
+either a real asset (font glyphs, `faceMarkerRoundel`) or measured vector geometry (energy bars,
+HP ring, burst gear, X/B discs), leaving no unexplained gap the icon could be filling. Its
+strongest attested role is elsewhere: it IS wired as the real memory-card/Slot-A icon on
+Load Box Data (`LoadBoxData.ts`), which is a confirmed, capture-backed placement for the same
+texture. Forcing it into the battle HUD without a capture showing it there would be exactly the
+kind of unverified guess this port tries to avoid — asset reuse across screens is common in the
+original game, but reuse is not evidence of reuse *here*. It stays unwired in BattleHud.ts until
+a capture (or a decoded `comhit.bin`/layout table — already ruled out as a HUD schema, see
+HUD-FIDELITY-PLAN.md's 2026-07-02 addendum) shows it actually on-screen during battle.
+
 **Controls (adapter.ts):** A/B/X/Y/dash/lock all bound. L/R target-switch now maps to the two
 source request bytes (+0x73c = 3/2; browser Q=prev, R/Tab=next). Gaps vs (ao): double-tap evade
 (Shift stand-in), air recovery (missing, W14). Z target selection is now modeled as source-shaped
