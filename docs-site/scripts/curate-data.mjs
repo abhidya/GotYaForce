@@ -4,7 +4,7 @@
 //
 // Replaces any hand-written JSON under .vitepress/data/. Never reads its own output.
 
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
@@ -20,6 +20,7 @@ const BASE = process.env.GH_PAGES_BASE ?? '/GotYaForce/'
 const readJson = (rel) => JSON.parse(readFileSync(join(REPO_ROOT, rel), 'utf8'))
 const readText = (rel) => readFileSync(join(REPO_ROOT, rel), 'utf8')
 const writeJson = (name, data) => {
+  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true })
   const out = join(DATA_DIR, name)
   writeFileSync(out, JSON.stringify(data, null, 2) + '\n', 'utf8')
   console.log(`  wrote ${name} (${(JSON.stringify(data).length / 1024).toFixed(1)} kB)`)
