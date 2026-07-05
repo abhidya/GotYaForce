@@ -1,0 +1,60 @@
+{
+  "schema": "gotyaforce.assetRuntimeCapturePlan.v1",
+  "generated": "2026-07-05",
+  "region": "GG4E / USA",
+  "purpose": "Capture the boot-to-title-desk-intro sequence (no save state) to resolve the trace-gated values: the front-end global state pointer (PTR_DAT_80433934), the per-slot spawn coords at state+0x1604, the actor borg ids at state+0x10, and the anim-bank (+0x1d80) binding via the family ctor dispatch.",
+  "authority": [
+    "research/decomp/ghidra-export/chunk_0055.c (FUN_801c795c desk-init, zz_01c7de4_ dispatcher, FUN_801c81a0 actorControl)",
+    "research/decomp/ghidra-export/chunk_0007.c (zz_0056ce0_ family-ctor dispatch, zz_0057ff8_ anim trigger)",
+    "apps/game/src/ui/intro/titleVm.ts (the 1:1 VM port these functions back)"
+  ],
+  "notes": [
+    "Fresh boot: launch via scripts/launch-dolphin-gdb.mjs --batch 0 (visible, NO --save-state) so the game runs the full boot->splash->title-desk-intro path.",
+    "The desk intro loops per frame (sndSeqContinue), so dispatcher/actorControl breakpoints catch even if installed after the title appears. FUN_801c795c runs once at desk-init start and may be missed if Dolphin already booted past it.",
+    "r3 in the dispatcher/actorControl handlers = the front-end state struct pointer (the PTR_DAT_80433934 value); a memory read at r3+0x10..0x1a gives the 6 borg ids, r3+0x1604+slot*0xc gives the spawn coords.",
+    "r3 in zz_0056ce0_ = the actor; actor+0x3e8 = borg id, and after the ctor returns actor+0x1d80 = the anim-descriptor bank pointer (the groupSel=5 mapping source)."
+  ],
+  "groups": [
+    {
+      "name": "title-boot",
+      "event_window": "Launch Dolphin fresh (no save state). Game boots through splash into the title desk intro. The desk-intro VM runs per frame. Run the trace for the full boot window (~60s) to catch desk-init + several frames of opcode dispatch + the actorControl opcodes + the family-ctor anim-bank binding.",
+      "breakpoints": [
+        {
+          "id": "desk-intro-init",
+          "type": "execute",
+          "address": "0x801c795c",
+          "symbol": "FUN_801c795c",
+          "event": "Desk-intro init: zeroes the 0x18b8-byte front-end state block, seeds the 6-slot borg-id table from DAT_8038a4ec, installs the script PC. r3/r4 carry the state context. Catching this PROVES boot reached the desk intro and lets us read the freshly-seeded borg-id table."
+        },
+        {
+          "id": "desk-dispatcher",
+          "type": "execute",
+          "address": "0x801c7de4",
+          "symbol": "zz_01c7de4_",
+          "event": "Per-frame bytecode dispatcher. r3 = state struct pointer (== PTR_DAT_80433934). Read r3+0x10..0x1a for the 6 borg ids (expect 0615 000a ffff ffff ffff ffff), r3+0x20 for the script PC, r3+0x1604 + slot*0xc for each actor's spawn XYZ."
+        },
+        {
+          "id": "desk-actor-control",
+          "type": "execute",
+          "address": "0x801c81a0",
+          "symbol": "FUN_801c81a0",
+          "event": "Opcode 0x0d actorControl. r3 = state; the payload at *(r3+0x20)+1/2/3 = mode/slot/value. Catches every actor reset / anim-start / visibility-toggle command in the script (18 hits expected across the montage). Confirms G RED (slot 0) + Sasuke (slot 1) anims."
+        },
+        {
+          "id": "family-ctor-dispatch",
+          "type": "execute",
+          "address": "0x80056ce0",
+          "symbol": "zz_0056ce0_",
+          "event": "Per-borg family-ctor virtual dispatch: (*PTR_PTR_802d3224[actor+0x3e8][actor+0x3e9])(). r3 = actor. Catches the anim-bank (+0x1d80) binding for each desk actor. After the hit, read actor+0x3e8 (borg id: 0x0615 G RED / 0x000a Sasuke) and actor+0x1d80 (the bound anim-descriptor bank pointer = the groupSel=5 mapping source)."
+        },
+        {
+          "id": "actor-anim-trigger",
+          "type": "execute",
+          "address": "0x80057ff8",
+          "symbol": "zz_0057ff8_",
+          "event": "Actor anim trigger (called by opcode 0x0d mode 0). r3 = actor, r4 = groupSel (expect 5), r5 = animId (0/1/6/3/4/7). Confirms the groupSel=5 value the desk intro actually passes."
+        }
+      ]
+    }
+  ]
+}
