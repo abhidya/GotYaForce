@@ -882,8 +882,57 @@ function verifiedStatus(record) {
   if (record.source.collision.hasHitFiles && record.public.collision.missingSourceHitFiles.length > 0) {
     return "visual-exported-missing-hit-files";
   }
-  if (!record.source.collision.hasHitFiles) return "visual-exported-no-source-hit-files";
+  if (!record.source.collision.hasHitFiles) {
+    // DERIVED — mirror of scripts/build-stage-manifests.mjs verifiedStatus: family
+    // variants (st2x/st4x) have no on-disc hit2XX/hit4XX but reuse the base st0x
+    // arena's hit0XX.bin triplet (research/decomp/challenge-stage-naming-2026-07-05.md
+    // §1.2). If the exported family collision bins are sha1-identical to the base
+    // stage's exported bins AND the base triplet exists on disc, recognize the
+    // shared-base collision as verified. build-stage-manifests.mjs is the
+    // authoritative status writer for `pnpm manifest:stages`; this mirror keeps a
+    // future full re-export from regressing the label.
+    const derived = familyCollisionDerivationFor(record.id);
+    if (derived.byteIdentical && derived.baseHitFilesOnDisc) {
+      return "verified-visual-and-collision-derived";
+    }
+    return "visual-exported-no-source-hit-files";
+  }
   return "verified-visual-and-collision";
+}
+
+// DERIVED — see research/decomp/challenge-stage-naming-2026-07-05.md §1.2: the [0x1d]
+// Challenge rand%3 selects the st0x / st2x / st4x archive family for outdoor arenas.
+// Family-variant codes (first nibble 2 or 4) reuse the base st0x collision geometry.
+function familyVariantBaseCode(code) {
+  if (code.length !== 2) return null;
+  const fam = code.charAt(0);
+  const sub = code.charAt(1);
+  if ((fam === "2" || fam === "4") && /^[0-9a-f]$/.test(sub)) return "0" + sub;
+  return null;
+}
+
+function familyCollisionDerivationFor(stageId) {
+  const code = stageId.slice(2);
+  const baseCode = familyVariantBaseCode(code);
+  if (!baseCode) return { byteIdentical: false, baseHitFilesOnDisc: false };
+  const sourceRootPath = path.resolve(repoRoot, "user-data", options.region, "afs_data", "root");
+  const baseHitFilesOnDisc =
+    fs.existsSync(sourceRootPath) &&
+    fs.readdirSync(sourceRootPath).some((file) => new RegExp(`^hit${baseCode}[0-9a-f]\\.bin$`, "i").test(file));
+  const familyDir = path.resolve(repoRoot, "apps", "game", "public", "stages", stageId, "collision");
+  const baseDir = path.resolve(repoRoot, "apps", "game", "public", "stages", `st${baseCode}`, "collision");
+  let byteIdentical = baseHitFilesOnDisc && fs.existsSync(familyDir) && fs.existsSync(baseDir);
+  if (byteIdentical) {
+    for (const layer of ["0", "1", "2"]) {
+      const f = path.join(familyDir, `hit${code}${layer}.bin`);
+      const b = path.join(baseDir, `hit${baseCode}${layer}.bin`);
+      if (!fs.existsSync(f) || !fs.existsSync(b) || sha1(f) !== sha1(b)) {
+        byteIdentical = false;
+        break;
+      }
+    }
+  }
+  return { byteIdentical, baseHitFilesOnDisc };
 }
 
 async function writePlanFiles(plan) {

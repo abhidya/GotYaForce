@@ -83,6 +83,19 @@ for (const entry of sortedDirEntries(stagesRoot)) {
   const missingSourceHitFiles = source.hitFiles.filter(
     (file) => !collision.some((exported) => path.basename(exported.path).toLowerCase() === file.toLowerCase()),
   );
+  // DERIVED — research/decomp/challenge-stage-naming-2026-07-05.md §1.2: the [0x1d]
+  // Challenge rand%3 selects the st0x / st2x / st4x archive FAMILY for outdoor
+  // arenas. The on-disc HIT bins (user-data/GG4E/afs_data/root) only exist for the
+  // BASE byte (hit0XX.bin / hit1XX.bin / hitffX.bin); there is NO hit2XX / hit4XX
+  // on disc because the family variants reuse the base arena's collision geometry.
+  // The exported collision bins under st2x/st4x/collision/ are byte-identical copies
+  // of the base stage's hit0XX.bin triplet (sha1-verified below). This wires the
+  // family-variant stages as DERIVED-shared-base collision so the manifest `status`
+  // no longer mislabels them "visual-exported-no-source-hit-files".
+  const familyBase = source.familyBase;
+  const collisionDerivation = familyBase
+    ? deriveFamilyCollision(stageDir, id, familyBase)
+    : null;
   const visual = {
     hasGlbPieces: models.length > 0 && zeroByteGlbFiles.length === 0,
     hasContiguousGlbSequence: models.length > 0 && zeroByteGlbFiles.length === 0 && missingModelIndices.length === 0,
@@ -119,6 +132,7 @@ for (const entry of sortedDirEntries(stagesRoot)) {
     },
     collision: {
       missingSourceHitFiles,
+      collisionDerivation,
     },
   });
   const renderStatus = hasCompleteGlbExport ? "glb-complete" : models.length > 0 ? "glb-partial" : "raw-only";
@@ -136,6 +150,7 @@ for (const entry of sortedDirEntries(stagesRoot)) {
     models,
     textures,
     collision,
+    ...(collisionDerivation ? { collisionDerivation } : {}),
     setArcs,
     renderStatus,
     ...(notes.length > 0 ? { notes } : {}),
@@ -169,12 +184,75 @@ function inspectSource(code) {
         .filter((file) => new RegExp(`^hit${code}[0-9a-f]\\.bin$`, "i").test(file))
         .sort()
     : [];
+  // DERIVED — family-variant codes (st2x / st4x) have no hit2XX / hit4XX on disc;
+  // they reuse the base stage st0x's hit0XX.bin triplet. Gather the base triplet
+  // (and the base stage folder for byte-identity verification) so verifiedStatus can
+  // recognize the shared-base collision instead of flagging "no source hit files".
+  const familyBase = familyVariantBaseCode(code);
+  const baseHitFiles =
+    familyBase && fs.existsSync(sourceRoot)
+      ? fs
+          .readdirSync(sourceRoot)
+          .filter((file) => new RegExp(`^hit${familyBase}[0-9a-f]\\.bin$`, "i").test(file))
+          .sort()
+      : [];
   return {
     stageArc,
     stagePzz,
     hasStageArc: fs.existsSync(stageArc),
     hasStagePzz: fs.existsSync(stagePzz),
     hitFiles,
+    familyBase,
+    baseHitFiles,
+  };
+}
+
+/**
+ * Map a stage code to its base st0x code when the code is a family variant
+ * (first nibble 2 or 4 — the Challenge [0x1d] rand%3 family roll). Returns null
+ * for base stages and stff. Citation: research/decomp/challenge-stage-naming-2026-07-05.md §1.2.
+ */
+function familyVariantBaseCode(code) {
+  if (code.length !== 2) return null;
+  const fam = code.charAt(0);
+  const sub = code.charAt(1);
+  if ((fam === "2" || fam === "4") && /^[0-9a-f]$/.test(sub)) {
+    return "0" + sub;
+  }
+  return null;
+}
+
+/**
+ * DERIVED — verify the exported family-variant collision bins are byte-identical
+ * (sha1) to the base stage's exported collision bins. The base stage folder is the
+ * canonical DERIVED source for the family variant's collision geometry.
+ */
+function deriveFamilyCollision(stageDir, familyId, baseCode) {
+  const baseId = `st${baseCode}`;
+  const baseDir = path.join(stagesRoot, baseId);
+  const familyCollisionDir = path.join(stageDir, "collision");
+  const baseCollisionDir = path.join(baseDir, "collision");
+  if (!fs.existsSync(baseCollisionDir) || !fs.existsSync(familyCollisionDir)) {
+    return { kind: "DERIVED_FAMILY_VARIANT", fromBaseStage: baseId, layers: [], byteIdentical: false };
+  }
+  const familyCode = familyId.slice(2);
+  const layers = ["0", "1", "2"].map((layer) => {
+    const familyFile = path.join(familyCollisionDir, `hit${familyCode}${layer}.bin`);
+    const baseFile = path.join(baseCollisionDir, `hit${baseCode}${layer}.bin`);
+    const exists = fs.existsSync(familyFile) && fs.existsSync(baseFile);
+    const shaMatch = exists && filesMatch(familyFile, baseFile);
+    return {
+      layer: Number(layer),
+      familyFile: exists ? path.relative(stagesRoot, familyFile).replaceAll("\\", "/") : null,
+      baseFile: exists ? path.relative(stagesRoot, baseFile).replaceAll("\\", "/") : null,
+      shaMatch: shaMatch === true,
+    };
+  });
+  return {
+    kind: "DERIVED_FAMILY_VARIANT",
+    fromBaseStage: baseId,
+    layers,
+    byteIdentical: layers.every((entry) => entry.shaMatch),
   };
 }
 
@@ -195,7 +273,18 @@ function verifiedStatus(record) {
   if (record.source.hitFiles.length > 0 && record.collision.missingSourceHitFiles.length > 0) {
     return "visual-exported-missing-hit-files";
   }
-  if (record.source.hitFiles.length === 0) return "visual-exported-no-source-hit-files";
+  if (record.source.hitFiles.length === 0) {
+    // DERIVED — family variants (st2x/st4x) have no on-disc hit2XX/hit4XX but reuse
+    // the base stage's hit0XX.bin triplet. If the exported family collision bins are
+    // sha1-identical to the base stage's exported bins, recognize the shared-base
+    // collision as verified. Otherwise (base absent on disc, or copy drifted) the
+    // stage genuinely has no source hit bin → keep the rect-bounds fallback label.
+    const derived = record.collision.collisionDerivation;
+    if (derived && derived.byteIdentical && (record.source.baseHitFiles?.length ?? 0) > 0) {
+      return "verified-visual-and-collision-derived";
+    }
+    return "visual-exported-no-source-hit-files";
+  }
   return "verified-visual-and-collision";
 }
 

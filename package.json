@@ -38,7 +38,11 @@
     "manifest:ui-scenes": "node scripts/generate-ui-scene-layouts.mjs",
     "runtime:assets": "pnpm convert:glb && pnpm manifest:model-library && pnpm manifest:stages && pnpm manifest:stage-render-state && pnpm manifest:ui-scenes",
     "convert": "node scripts/asset-convert.mjs",
-    "manifest": "node scripts/build-manifest.mjs"
+    "manifest": "node scripts/build-manifest.mjs",
+    "atlas:curate": "node docs-site/scripts/curate-data.mjs",
+    "atlas:dev": "pnpm atlas:curate && pnpm --filter gotcha-force-atlas dev",
+    "atlas:build": "pnpm atlas:curate && pnpm --filter gotcha-force-atlas build",
+    "atlas:preview": "pnpm --filter gotcha-force-atlas preview"
   },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.2",

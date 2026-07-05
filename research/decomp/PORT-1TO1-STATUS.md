@@ -773,7 +773,7 @@ Port: `packages/physics/src/*`, `packages/combat/src/movement.ts`, `constants.ts
   (see §1). Port change pending scale reconcile.
 - Three flight models observed ((ap) W17): winged forward-locked / air-class permanent /
   boost — the port has one FLY_MULT; a fidelity gap for flyer/air borgs.
-- Stage collision: triangle mesh from STIH, present on 18/40 stages.
+- Stage collision: triangle mesh from STIH, present on 22/40 stages (18 use rect-bounds fallback; the STIH cell X-column-major transpose was fixed 2026-07-05 commit 9f7ab8ea).
 
 ---
 
@@ -837,7 +837,7 @@ Port: `packages/missions/src/challenge*.ts`. ROM: (ae)/(af), challenge-flow-evid
 | Team generation (build_challenge_battle_setup) | DONE (structure) | floor(cost*2/3) charge exact; tables now cross-checked vs DOL extract (2026-07-03) |
 | Battle counts 5/10/15, energy 1500/2000/2500 | DONE | cross-checked |
 | Timer frozen (18000, [0x50]=1) | DONE | — |
-| Win/lose/draw judge (zz_00297c8_ mask) | PARTIAL | battle.ts uses "which team has energy" + first-human view, NOT the per-side count/energy/rule-flag + equality mask model (ae:1763-1787) |
+| Win/lose/draw judge (zz_00297c8_ mask) | **DONE (commit 3f66777b)** | battle.ts evaluateResult ports the per-side destroyed/equality mask model (ae:1763-1787); BattleState.winnerMask (bit0/bit1/3-mutual/4-timeout); mutual destruction resolves 'lose' for the player per FUN_801969a0. battleJudge.selftest 16/16. |
 | 3-phase deploy (~36f) | PARTIAL/MISSING | port = single spawn + flat 45f TUNED iframes vs ROM 20/1/15f phases + ally cue 8 (af) |
 | Kill accounting (zz_002f8dc_) | DONE (2026-07-04) | per-slot kills/costWon credited to the LAST DAMAGER + costLost on the victim's slot (ally cost EXCLUDED — capture-validated); battle.ts accountPendingDefeats. The flat +100/kill feeds only the in-battle team score DAT_80436154, NOT results |
 | Results ratios + counters | DERIVED (2026-07-04) | full decode: results-scoring-decode-2026-07-04.md. ATTACK = attack COUNT (+0x404 via zz_008a5d0_), HIT RATIO = +0x408/+0x404, DODGE RATIO = (+0x40c−+0x410)/(+0x40c++0x414). Port telemetry re-keyed to per-player SLOTS (SlotTelemetry, @gf/combat) with ROM increment semantics (aimed-vs-stray split from the attack object's target +0xcc) |
@@ -860,9 +860,10 @@ Detail in the asset survey (session 2026-07-03) + `research/format-specs/*`, `re
   23 borgs (worst: hit→idle on 10 = no flinch). **Finish via state→(group,slot) dispatch trace.**
 - **Audio:** BGM (33 tracks) + menu SFX wired and real. Combat SFX = 5 generic `se00_*` samples
   mapped onto 15 events (TUNED); NO ROM per-action table exists (AnimAudioEventLookup is a red
-  herring, (v)) — needs a live SE-dispatch trace. **46 per-borg VOICE cues are extracted but
-  completely unwired.** No footstep/land audio.
-- **Stages/lighting:** geometry 40/40 visual, collision 18/40; lighting/fog fully DERIVED from
+  herring, (v)) — needs a live SE-dispatch trace. **46 per-borg VOICE cues WIRED (commit 4e522cf4):**
+  battleVoiceCues plays cue 00 on deploy / cue 01 on death for the local borg (family→group
+  DERIVED, cue-role TUNED); validation script 8/8 (roster coverage 208/208). No footstep/land audio.
+- **Stages/lighting:** geometry 40/40 visual, collision 22/40; lighting/fog fully DERIVED from
   HSD CObj/LObj/FogDesc (all GX_FOG_LIN → exact THREE.Fog).
 - **FX:** hit-impact effects are now DERIVED end-to-end (2026-07-04): record impactEffectId
   u8+0x09 → zz_0019550_ → def table 0x802c7ed0 (ids 0..8, 0xff = none) → 4 variant handlers
@@ -968,7 +969,9 @@ so "disambiguated %" becomes a tracked burn-down like `tuned-burndown.md`.
 11. **T1** command→button mapping (unblocks B/X resolver, biggest feel item) — cursor-flip
     calibration available (ao).
 12. **T3** burst meter + duration (unblocks Power Burst HUD + effects + fusion control).
-13. **T9** knockback magnitude (the oldest TUNED debt; not in code).
+13. ✅ DONE (2026-07-05) — **T9** knockback magnitude PORTED: strength-indexed tables
+    DAT_802dd8a0[idx]=idx*7 / DAT_802d3664[idx]=(idx+1)*8, ground-vs-launch selection per hit,
+    real per-frame decel/gravity integration in movement.ts. See §0/§1.
 14. **T5/T6** projectile solidity/penetration engine gate (moveProperties has the taxonomy).
 15. **T8** status-id semantics; **T2** melee contexts; SE-dispatch audio trace; golden-trace
     movement-constant fitting.
