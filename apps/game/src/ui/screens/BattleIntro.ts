@@ -6,7 +6,7 @@
  * transparent so the already-loaded stage canvas can show through behind this UI.
  */
 
-import type { MissionBattleConfig } from "@gf/missions";
+import { arenaNameForStageByte, arenaNameForStageId, type MissionBattleConfig } from "@gf/missions";
 import { ASSETS, borgMiniPath } from "../assets.js";
 import { el, legendItem } from "../dom.js";
 import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
@@ -39,6 +39,7 @@ export function createBattleIntro(
   const enemyEnergy = opts.config.meta?.enemyForceEnergy ?? forceEnergy(enemyIds, byId);
   const playerLead = playerIds[0] ?? "";
   const enemyLead = enemyIds[0] ?? "";
+  const arenaName = arenaNameFor(opts.config);
 
   const root = el("div", { class: "gf-screen gf-battle-intro" });
   const briefingScene = createUiSceneHost("gf-ui-scene gf-brief-real-scene");
@@ -60,6 +61,7 @@ export function createBattleIntro(
   root.appendChild(el("div", { class: "gf-brief-vs", text: "Vs." }));
   root.appendChild(
     el("div", { class: "gf-brief-preview" }, [
+      ...(arenaName ? [el("div", { class: "gf-brief-arena-name", text: arenaName })] : []),
       el("div", { class: "gf-brief-objective", text: "DEFEAT ENEMY GOTCHA BORGS!" }),
     ]),
   );
@@ -97,6 +99,22 @@ export function createBattleIntro(
       root.remove();
     },
   };
+}
+
+/**
+ * Authentic Versus-select arena name for this battle's stage (DERIVED — see
+ * STAGE_ARENA_NAMES in @gf/missions / research/decomp/challenge-stage-naming-2026-07-05.md).
+ * Prefers the raw Challenge stage byte (meta.stageByte) so family variants
+ * (st2x/st4x) resolve to their base arena's name; falls back to decoding the
+ * `arena` (st## id) directly for non-Challenge callers.
+ */
+function arenaNameFor(config: MissionBattleConfig): string | null {
+  const stageByte = config.meta?.stageByte;
+  if (typeof stageByte === "number") {
+    const name = arenaNameForStageByte(stageByte);
+    if (name) return name;
+  }
+  return arenaNameForStageId(config.arena);
 }
 
 function forceEnergy(ids: readonly string[], byId: ReadonlyMap<string, ForceBorg>): number {

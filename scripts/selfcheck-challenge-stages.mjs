@@ -9,7 +9,12 @@ import {
   floorSurfaceYAt,
   JUMP,
 } from "../packages/combat/dist/index.js";
-import { CHALLENGE_STAGE_BYTES } from "../packages/missions/dist/index.js";
+import {
+  CHALLENGE_STAGE_BYTES,
+  STAGE_ARENA_NAMES,
+  arenaNameForStageByte,
+  arenaNameForStageId,
+} from "../packages/missions/dist/index.js";
 import { createNodePublicAssetCatalog, readPublicStageCatalog } from "./lib/node-public-assets.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -63,6 +68,58 @@ console.log(
       .map((s) => `${s.stageId}:tri=${s.triangles}:frames=${s.frames}:energyFrame=${s.firstEnergyChangeFrame}`)
       .join(" "),
 );
+
+// DERIVED — research/decomp/challenge-stage-naming-2026-07-05.md section 1.2:
+// [0x1d] (Challenge rand%3) selects the st0x/st2x/st4x archive family for
+// outdoor arenas. Spot-check that a st2x AND a st4x family variant actually
+// resolve exported assets and load real (non-degenerate) collision, the same
+// way the base st0x stages above did.
+const familyVariantSummaries = [];
+for (const stageId of ["st2c", "st4c"]) {
+  const stage = await loadStageResources(stageId);
+  if (stage.collision.triangles.length <= 0) {
+    throw new Error(`family-variant stage ${stageId} loaded zero collision triangles`);
+  }
+  const battle = createBattle(
+    {
+      stageId,
+      bounds: stage.bounds,
+      collision: stage.collision,
+      timeLimitFrames: FRAMES_PER_STAGE,
+      forces: [
+        { team: 0, ownerPlayer: "p0", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: null, borgIds: ["pl0008"] },
+      ],
+    },
+    borgs,
+  );
+  for (let frame = 0; frame < 120 && battle.state.result === "ongoing"; frame += 1) {
+    battle.step(1 / 60, { p0: playerInput(battle) });
+    assertSaneStage(stageId, stage, battle, frame);
+  }
+  familyVariantSummaries.push({ stageId, triangles: stage.collision.triangles.length, frames: battle.state.frame });
+}
+console.log(
+  `Challenge stage FAMILY VARIANT smoke PASS ` +
+    familyVariantSummaries.map((s) => `${s.stageId}:tri=${s.triangles}:frames=${s.frames}`).join(" "),
+);
+
+// DERIVED — every challenge-pool stage byte must resolve an authentic arena
+// name (research/decomp/challenge-stage-naming-2026-07-05.md section 2.4),
+// and family-variant st## ids (st2x/st4x) must share their base byte's name.
+for (const stageByte of CHALLENGE_STAGE_BYTES) {
+  const name = arenaNameForStageByte(stageByte);
+  if (typeof name !== "string" || name.length === 0) {
+    throw new Error(`challenge-pool stage byte 0x${stageByte.toString(16)} has no arena name`);
+  }
+}
+if (Object.keys(STAGE_ARENA_NAMES).length !== 18) {
+  throw new Error(`expected 18 authentic arena names, found ${Object.keys(STAGE_ARENA_NAMES).length}`);
+}
+if (arenaNameForStageId("st2c") !== arenaNameForStageByte(0x0c) || arenaNameForStageId("st4c") !== arenaNameForStageByte(0x0c)) {
+  throw new Error("st2c/st4c family variants must share st0c's arena name (LITTLE HILL)");
+}
+console.log(`Challenge arena name coverage PASS names=${Object.keys(STAGE_ARENA_NAMES).length} pool=${CHALLENGE_STAGE_BYTES.length}`);
 
 function playerInput(battle) {
   const activeUid = battle.state.activeUidByPlayer.p0;

@@ -85,6 +85,7 @@ export {
   CHALLENGE_ENEMY_GROUP_CODES,
   CHALLENGE_GROUP_ROSTERS,
   CHALLENGE_STAGE_VARIANT_COUNTS,
+  STAGE_ARENA_NAMES,
   challengeModeForPlayerBudget,
   challengeBattleCount,
   challengeBudgetFor,
@@ -93,6 +94,8 @@ export {
   challengeStageId,
   challengeStageVariantCount,
   selectChallengeStage,
+  arenaNameForStageByte,
+  arenaNameForStageId,
 } from "./challenge-reference.js";
 export type {
   ChallengeMode,

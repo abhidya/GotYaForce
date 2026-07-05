@@ -712,7 +712,7 @@ Port: `packages/missions/src/challenge*.ts`. ROM: (ae)/(af), challenge-flow-evid
 
 | Feature | Status | Note |
 |---|---|---|
-| Stage rotation (zz_0196dac_) | DONE | 11-entry pool, reroll-while-equal (matches (ae)) |
+| Stage rotation (zz_0196dac_) | DERIVED (2026-07-05) | 11-entry pool, reroll-while-equal (matches (ae)). `[0x1d]` rand%3 family roll (st0x/st2x/st4x) now fully wired end-to-end: `stageIdForBattleConfig` (combat-config.ts) resolves the family-encoded id from `meta.stageByte`/`stageSubtable` and falls back to the base build when no family exists (st06/st07/st08/st0d/st0f/st10/st11) or the catalog lacks the export; 22 st2x/st4x family folders verified exported with real (non-degenerate) collision, spot-checked st2c+st4c. Authentic arena names (STAGE_ARENA_NAMES, keyed by stage byte, in challenge-reference.ts) added and surfaced in BattleIntro.ts; 18/18 Versus-select names covered, name-id→texture-row binding corroborated 17/17 via story/wiki cross-check but NOT pixel-traced in Dolphin (residual caveat, see challenge-stage-naming-2026-07-05.md §2.6). Selfcheck extended: `packages/missions/src/selfcheck.ts` (name coverage + seeded family-roll distribution hits all 3 families) and `scripts/selfcheck-challenge-stages.mjs` (st2c/st4c load real collision + battle sim). |
 | Team generation (build_challenge_battle_setup) | DONE (structure) | floor(cost*2/3) charge exact; tables now cross-checked vs DOL extract (2026-07-03) |
 | Battle counts 5/10/15, energy 1500/2000/2500 | DONE | cross-checked |
 | Timer frozen (18000, [0x50]=1) | DONE | — |

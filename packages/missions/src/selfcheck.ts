@@ -13,7 +13,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-import { createChallengeRun, CHALLENGE_DIFFICULTIES, enemyTargetForBattle } from "./challenge.js";
+import { createChallengeRun, createChallengeRng, CHALLENGE_DIFFICULTIES, enemyTargetForBattle } from "./challenge.js";
 import { stageIdForBattleConfig, type CombatStageCatalog } from "./combat-config.js";
 import {
   CHALLENGE_ALLY_BUDGETS,
@@ -25,8 +25,12 @@ import {
   CHALLENGE_ENEMY_MAX_MEMBERS,
   CHALLENGE_GROUP_ROSTERS,
   CHALLENGE_STAGE_BYTES,
+  STAGE_ARENA_NAMES,
+  arenaNameForStageByte,
+  arenaNameForStageId,
   challengeStageId,
   challengeStageVariantCount,
+  selectChallengeStage,
   type ChallengeGroupCode,
   type ChallengeMode,
 } from "./challenge-reference.js";
@@ -154,6 +158,75 @@ function assertChallengeStageFamilyResolution(): void {
 }
 
 /**
+ * DERIVED — research/decomp/challenge-stage-naming-2026-07-05.md section 2.
+ * Every stage byte that has an authentic name (18 rows of vsel00_mdl
+ * texture_016, id = 112 + stageByte) must resolve via STAGE_ARENA_NAMES, and
+ * every byte in the 11-entry Challenge pool must be among them (the pool is
+ * a subset of the 18 "everyday town" arenas — see doc section 2.4).
+ */
+function assertArenaNameCoverage(): void {
+  assert(Object.keys(STAGE_ARENA_NAMES).length === 18, "authentic arena-name table must carry all 18 stage-select rows");
+  for (const stageByte of CHALLENGE_STAGE_BYTES) {
+    const name = arenaNameForStageByte(stageByte);
+    assert(typeof name === "string" && name.length > 0, `every challenge-pool stage byte 0x${stageByte.toString(16)} must have an arena name`);
+  }
+  assert(arenaNameForStageByte(0x00) === "KOU'S HOME", "stage byte 0x00 arena name must match the verified table");
+  assert(arenaNameForStageByte(0x0c) === "LITTLE HILL", "stage byte 0x0c arena name must match the verified table");
+  assert(arenaNameForStageByte(0x10) === "STRATOSPHERE", "stage byte 0x10 arena name must match the verified table");
+  assert(arenaNameForStageByte(0x11) === "????", "stage byte 0x11 (stff) must keep its literal in-game display name");
+  assert(arenaNameForStageByte(0x99) === null, "an out-of-range stage byte must not resolve to a name");
+
+  // Family variant ids (st2x/st4x) must resolve to their base arena's name —
+  // the name is per stage BYTE, not per st## build (doc section 2.4 header).
+  assert(arenaNameForStageId("st00") === "KOU'S HOME", "st00 must resolve to its arena name");
+  assert(arenaNameForStageId("st20") === "KOU'S HOME", "st20 (family variant of st00) must share st00's arena name");
+  assert(arenaNameForStageId("st40") === "KOU'S HOME", "st40 (family variant of st00) must share st00's arena name");
+  assert(arenaNameForStageId("st2c") === "LITTLE HILL", "st2c (family variant of st0c) must share st0c's arena name");
+  assert(arenaNameForStageId("st4c") === "LITTLE HILL", "st4c (family variant of st0c) must share st0c's arena name");
+  assert(arenaNameForStageId("stff") === "????", "stff must resolve to the literal ???? display name");
+  assert(arenaNameForStageId("not-a-stage") === null, "a malformed stage id must not resolve to a name");
+}
+
+/**
+ * DERIVED — research/decomp/challenge-stage-naming-2026-07-05.md section 1.2.
+ * `[0x1d]` (Challenge `rand%3`) selects the st0x/st2x/st4x archive family for
+ * the "outdoor" arenas that have one; a seeded run over many battles must
+ * observe all three families for a family-bearing stage. Stages without a
+ * family (st06/st07/st08/st0d/st0f/st10/st11 — none of which are in the
+ * Challenge pool except st08) always resolve to their single build regardless
+ * of the rolled subtable.
+ */
+function assertStageFamilyRollDistribution(): void {
+  const rng = createChallengeRng(0x51a9e2);
+  const subtableCounts = new Map<number, number>([[0, 0], [1, 0], [2, 0]]);
+  const rollsPerStageByte = new Map<number, number[]>();
+  let previousStageByte: number | null = null;
+
+  const SAMPLE_SIZE = 3000;
+  for (let i = 0; i < SAMPLE_SIZE; i += 1) {
+    const stage = selectChallengeStage(rng, previousStageByte);
+    previousStageByte = stage.stageByte;
+    subtableCounts.set(stage.stageSubtable, (subtableCounts.get(stage.stageSubtable) ?? 0) + 1);
+    const rolls = rollsPerStageByte.get(stage.stageByte) ?? [];
+    rolls.push(stage.stageSubtable);
+    rollsPerStageByte.set(stage.stageByte, rolls);
+  }
+
+  for (const [subtable, count] of subtableCounts) {
+    assert(count > 0, `stageSubtable ${subtable} must be reachable from the rand%3 family roll over ${SAMPLE_SIZE} samples`);
+  }
+
+  // st08 has no family (fallback-only stage per doc section 3 / combat-config
+  // fallback list) but still rolls stageSubtable 0..2 uniformly — the roll
+  // itself is unconditional; only the archive resolution short-circuits to
+  // the base build. A family-bearing pool stage (st00) must observe all three
+  // subtable values, confirming the roll drives real variety for stages that
+  // do have st2x/st4x builds.
+  const st00Rolls = new Set(rollsPerStageByte.get(0x00) ?? []);
+  assert(st00Rolls.has(0) && st00Rolls.has(1) && st00Rolls.has(2), "family-bearing stage byte 0x00 must hit all three families (0/1/2) over a seeded run");
+}
+
+/**
  * Deep per-round audit: for each difficulty, generate a full run and verify
  * every battle's enemy/ally rosters, budgets, member caps, and stage selector
  * bytes against the recovered DOL tables in challenge-reference.ts.
@@ -278,6 +351,8 @@ export function main(): void {
   const { borgs, stages } = loadData();
   assertChallengeReferenceInvariants();
   assertChallengeStageFamilyResolution();
+  assertArenaNameCoverage();
+  assertStageFamilyRollDistribution();
   auditChallengeRunAgainstReference(borgs);
 
   console.log("=".repeat(70));

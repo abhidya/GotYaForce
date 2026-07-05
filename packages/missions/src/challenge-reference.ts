@@ -183,6 +183,71 @@ export function challengeStageId(stageByte: number): string {
   return `st${stageByte.toString(16).padStart(2, "0")}`;
 }
 
+// DERIVED — authentic arena names, keyed by stage BYTE (not by st## build id: the
+// name is per-arena, and st20/st40 etc. share their st00-family base's name).
+// Source: research/decomp/challenge-stage-naming-2026-07-05.md section 2 —
+//   - Name strip texture: apps/game/public/ui/hsd/vsel00_mdl/texture_016_CI4.png
+//     (18 rows, top-to-bottom = stage bytes 0x00..0x11), from vsel00_mdl.arc.
+//   - Binding: boot.dol `0x80350158` (u16[18] name-asset id = 112+stageByte,
+//     chunk_0043.c:3057) + Versus stage-select record table `0x8035162c`
+//     (chunk_0044.c:352), keyed by the same raw stage byte Challenge writes to
+//     PTR_DAT_80433934[0x1c].
+// Cross-checked 17/17 named rows against the Adventure/Story mission table
+// (0x80358be4) and the wiki walkthrough (packages/assets/data/stages.json
+// `arena` field) — every independent match agrees.
+// CAVEAT: the name-id -> texture-row binding is corroborated (17/17 consistent
+// cross-checks), not pixel-traced — nobody has yet rendered the Versus
+// stage-select screen in Dolphin and read the highlighted name for a known
+// stage byte to directly confirm it. A contradiction would have shown up in
+// the cross-check above; none did. See doc section 2.6.
+export const STAGE_ARENA_NAMES: Readonly<Record<number, string>> = {
+  0x00: "KOU'S HOME",
+  0x01: "NEO ELEMENTARY",
+  0x02: "SUNNYSIDE PARK",
+  0x03: "CONSTRUCTION ZONE",
+  0x04: "SERENITY STREET",
+  0x05: "KAKERU'S HOME",
+  0x06: "RED DEATH LAIR",
+  0x07: "BLUE DEATH LAIR",
+  0x08: "THE PIT",
+  0x09: "GREATER TRICITY AREA",
+  0x0a: "SAFARITOWN MARKET PLACE",
+  0x0b: "STONE RIVER",
+  0x0c: "LITTLE HILL",
+  0x0d: "SKY FORTRESS",
+  0x0e: "MANA'S HOME",
+  0x0f: "DEATH BASE",
+  0x10: "STRATOSPHERE",
+  0x11: "????",
+};
+
+/**
+ * Authentic arena name for a raw Challenge/Versus stage byte (0x00..0x11).
+ * Returns `null` for a byte outside the verified 18-entry name table.
+ */
+export function arenaNameForStageByte(stageByte: number): string | null {
+  return STAGE_ARENA_NAMES[stageByte] ?? null;
+}
+
+/**
+ * Same lookup, but accepting an exported `st##`/`stff` build id (base OR
+ * family variant, e.g. "st20"/"st40" both resolve to st00's name) by decoding
+ * the low byte as the stage-byte component of the family-encoded id
+ * (`stageIdFromByte` in combat-config.ts encodes family ids as
+ * `stageSubtable*0x20 + stageByte`). `stff` is the one non-arithmetic
+ * sentinel id (stage byte 0x11 "????", all three subs load the literal
+ * `stff.pzz` per the doc's table) and is special-cased directly.
+ */
+export function arenaNameForStageId(stageId: string): string | null {
+  const normalized = stageId.trim().toLowerCase();
+  if (normalized === "stff") return arenaNameForStageByte(0x11);
+  const match = /^st([0-9a-f]{2})$/i.exec(normalized);
+  if (!match) return null;
+  const raw = Number.parseInt(match[1]!, 16);
+  const stageByte = raw & 0x1f;
+  return arenaNameForStageByte(stageByte);
+}
+
 export function challengeStageVariantCount(stageByte: number): number {
   const raw = CHALLENGE_STAGE_VARIANT_COUNTS[stageByte] ?? 0;
   return raw === 0 ? 1 : raw;

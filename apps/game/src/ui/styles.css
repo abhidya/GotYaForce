@@ -1278,6 +1278,23 @@
   paint-order: stroke fill;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
 }
+.gf-brief-arena-name {
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 92vw;
+  padding: 5px 20px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: clamp(13px, 1.8vw, 20px);
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: 1px var(--gf-outline);
+  paint-order: stroke fill;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+}
 
 /* ============================ FORCE BUILDER ============================ */
 .gf-force-screen {
