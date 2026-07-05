@@ -157,7 +157,7 @@
     },
     {
       "id": "st20",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 40,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -166,7 +166,7 @@
     },
     {
       "id": "st21",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 78,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -175,7 +175,7 @@
     },
     {
       "id": "st22",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 51,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -184,7 +184,7 @@
     },
     {
       "id": "st23",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 43,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -193,7 +193,7 @@
     },
     {
       "id": "st24",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 52,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -202,7 +202,7 @@
     },
     {
       "id": "st25",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 28,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -211,7 +211,7 @@
     },
     {
       "id": "st29",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 9,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -220,7 +220,7 @@
     },
     {
       "id": "st2a",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 43,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -229,7 +229,7 @@
     },
     {
       "id": "st2b",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 28,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -238,7 +238,7 @@
     },
     {
       "id": "st2c",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 20,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -247,7 +247,7 @@
     },
     {
       "id": "st2e",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 43,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -256,7 +256,7 @@
     },
     {
       "id": "st40",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 40,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -265,7 +265,7 @@
     },
     {
       "id": "st41",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 78,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -274,7 +274,7 @@
     },
     {
       "id": "st42",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 51,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -283,7 +283,7 @@
     },
     {
       "id": "st43",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 43,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -292,7 +292,7 @@
     },
     {
       "id": "st44",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 52,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -301,7 +301,7 @@
     },
     {
       "id": "st45",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 28,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -310,7 +310,7 @@
     },
     {
       "id": "st49",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 9,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -319,7 +319,7 @@
     },
     {
       "id": "st4a",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 43,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -328,7 +328,7 @@
     },
     {
       "id": "st4b",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 28,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -337,7 +337,7 @@
     },
     {
       "id": "st4c",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 20,
       "renderStatus": "glb-complete",
       "visualComplete": true,
@@ -346,7 +346,7 @@
     },
     {
       "id": "st4e",
-      "status": "visual-exported-no-source-hit-files",
+      "status": "verified-visual-and-collision-derived",
       "modelCount": 43,
       "renderStatus": "glb-complete",
       "visualComplete": true,

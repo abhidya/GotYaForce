@@ -2,7 +2,7 @@
   "region": "GG4E",
   "id": "st40",
   "source": "user-data/GG4E/afs_data/root",
-  "status": "visual-exported-no-source-hit-files",
+  "status": "verified-visual-and-collision-derived",
   "verifiedBy": "scripts/export-all-stages.mjs",
   "verifiedAt": "2026-07-04T05:55:33.227Z",
   "copied": {
@@ -487,5 +487,30 @@
     }
   ],
   "setArcs": [],
-  "renderStatus": "glb-complete"
+  "renderStatus": "glb-complete",
+  "collisionDerivation": {
+    "kind": "DERIVED_FAMILY_VARIANT",
+    "fromBaseStage": "st00",
+    "layers": [
+      {
+        "layer": 0,
+        "familyFile": "st40/collision/hit400.bin",
+        "baseFile": "st00/collision/hit000.bin",
+        "shaMatch": true
+      },
+      {
+        "layer": 1,
+        "familyFile": "st40/collision/hit401.bin",
+        "baseFile": "st00/collision/hit001.bin",
+        "shaMatch": true
+      },
+      {
+        "layer": 2,
+        "familyFile": "st40/collision/hit402.bin",
+        "baseFile": "st00/collision/hit002.bin",
+        "shaMatch": true
+      }
+    ],
+    "byteIdentical": true
+  }
 }
