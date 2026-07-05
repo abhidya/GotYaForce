@@ -398,8 +398,11 @@ shot kind selection.
 **C. Stale audit detectors fixed:** `audit-real-asset-coverage.mjs` claimed STIH
 bounds/triangles were "not wired" — they moved into packages/assets + battleBootstrap in the
 app-flow refactor and ARE fully wired (parse → StageAssets → BattleConfig → walls/ceilings/
-floor height/spawn placement). Detectors now point at the real path. The true collision gap
-is 22/40 stages missing source hit bins, not runtime wiring.
+floor height/spawn placement). Detectors now point at the real path. The "missing source hit
+bins" gap is also closed as of 2026-07-05: the 22 st2x/st4x family variants have no on-disc
+hit2XX/hit4XX, but they reuse their base st0x arena's hit0XX.bin triplet byte-identically
+(sha1-verified per-stage in manifest.json `collisionDerivation`), so all 40 stages carry real
+STIH triangle collision at runtime — zero rect-bounds fallback.
 
 ---
 
@@ -663,8 +666,10 @@ role-identified (`identified-functions.json`). What remains splits into exactly 
    the ATK-003 refactor of working attack code.
 
 **C. Open research reconciliations (low-risk, no gameplay impact):**
-6. The `+0x3ec` byte identity: (ak) reads it as level, (be) as size/scale class — reconcile which
-   field drives the stat row (the level-row port is validated vs wiki and unaffected either way).
+6. ✅ RESOLVED (2026-07-05, T5 decode `combat-feel-gaps-decode-2026-07-05.md:109`) — The `+0x3ec`
+   byte IS the LEVEL byte (ak was right); (be)'s "size/scale class" reading was wrong — the
+   size-scale floats are the separate +0xb4/+0xc4 chain driven by the param-tier table, now wired
+   via `tierSizeScale()`. Level-row port validated vs wiki and unaffected.
 7. The 3 non-normal-schedule borgs (pl0400/pl0507/pl0d01) — per-level HP off the row grid.
 8. g4s0 `special_s0`→`down_s0` anim relabel (asset re-bake, separate worktree).
 
@@ -678,9 +683,9 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Subsystem | 1:1 coverage | Gating blocker to finish |
 |---|---|---|
 | Combat: damage formula | ~95% DERIVED (2026-07-05: guard/40 data rule wired, CPU halvings wired, force-gauge ratio wired) | actor level-float init (+0xc4/+0xb4) — level→scale link honestly unfound (T5) |
-| Combat: gauges/stagger | ~95% DERIVED; reaction INTEGRATION now anim-gated-shaped (2026-07-05, T6) | reaction-anim LENGTHS still TUNED fallback (no per-borg clip-length export exists in this port yet) |
+| Combat: gauges/stagger | ~95% DERIVED; reaction INTEGRATION anim-gated (T6) + per-borg reaction-clip LENGTHS wired (2026-07-05) | residual: 97 ground / 33 launch borgs whose bake lacks the clip keep TUNED fallback (111/208 ground + 175/208 launch DERIVED via `data/reactionAnimLengths.json`) |
 | Combat: knockback direction | DONE (mode 1) + yaw trim wired (T8, 2026-07-05) | modes 0/2/3/4 need sub-object data |
-| Combat: knockback **magnitude** | **WIRED (2026-07-05, T6)** — ground (idx*7×scaleRatio) vs launch ((idx+1)*8, pitch-split by T8 trim) tables selected per-hit, real per-frame decel/gravity integration in movement.ts | T5 scale-ratio is a real formula call but both sides pinned to 1.0 (no size-scale pipeline on BorgRuntime yet) |
+| Combat: knockback **magnitude** | **WIRED end-to-end (2026-07-05, T6 + T5)** — ground (idx*7×scaleRatio) vs launch ((idx+1)*8, pitch-split by T8 trim) tables selected per-hit, real per-frame decel/gravity integration in movement.ts; T5 scale-ratio wired via existing `tierSizeScale()` (param-tier table, base uniformly 1.0 at spawn) | no TUNED residue; no per-borg base-scale data needed (decode proves base is uniformly 1.0) |
 | Combat: B/X contextual resolver | resolver DERIVED (bd), port upgradeable | fill type/subtype from testers; only pad-bit↔button label needs a dig |
 | Combat: ammo/refill | DONE (B cell-0 + X cell-1 wired) | — |
 | Combat: projectile penetration | wired OBSERVED_WIKI (borgs/total→persist) | trace T6 confirms engine gate; terrain-penetration + solidity still open |
@@ -694,7 +699,7 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Assets: animation playback | ~88% (dispatch mapped+reconciled, ba/bb) | asset re-bake: relabel g4s0 special_s0→down_s0 (worktree); death/deploy slots unresolved |
 | Audio: BGM/menu | ~90% | — |
 | Audio: combat/voice | ~85% (voice az; SE ids MAPPED bd, EXTRACTED+WIRED 2026-07-04; **PATH-B per-anim swing audio DECODED+WIRED 2026-07-04**) | real bank samples exported (scripts/export-combat-se.py, 23 files) + wired (shoot/hit/down/dash/jump/spawn/land DERIVED); melee/charge swings now play their ROM-AUTHORED per-anim sounds (actor+0x4e8 sound-event table joined via the anim-descriptor banks — anim-sound-op-decode-2026-07-04.md; 103/103 resolved ladders + 18 air / 2 charge leaves covered, TUNED fallback kept for the rest); death stays TUNED (op-0x0f voice is per-borg table-driven, tables undecoded); voice cue-role TUNED |
-| Stages: geometry/lighting | ~90% / ~98% | collision on 22/40 stages |
+| Stages: geometry/lighting | ~90% / ~98% | collision 40/40 (18 base + 22 DERIVED-shared-base family variants, sha1-verified 2026-07-05) |
 | FX: particles/projectiles | ~85% (hit-impact chain decoded end-to-end 2026-07-04 incl. the texId hop — ptl-format-notes-2026-07-04.md; PLUS muzzle/launch FX family, projectile-row visual fields, slow/haste status FX and the matAnim color tracks decoded+wired — efct-consumers-decode-2026-07-04.md; per-borg flight-visual RESOLVER + renderer wiring landed 2026-07-04, honest fleet coverage 0/208 today — see the top-of-file session entry) | a borg-id guard on FUN_80166fa8/zz_0092534_ (the two real bank-flag rows have no provable per-borg attribution yet) would unlock the first live case; melee hand-flash id 7; DAT_803bb384/470 bank identities; ptcl00.ptl emitter bank loader; 3D weapon meshes |
 
 **Trace status update (2026-07-03, (bc)):** T9 (knockback magnitude) is **no longer trace-blocked**
@@ -733,7 +738,9 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Guard/40 data rule | **DONE (2026-07-05, T1)** | damageFormula.ts victimStatusImmunityA gate, combat.ts applyHit | zz_003cd5c_ chunk_0004.c:6814-6817; victim mask = pldata+0xa8 (movementData.ts statusImmunityMasksForBorgId) | — (retired the old blockDivisorActive caller-flag stand-in) |
 | Gauge stagger (down/balance) | DONE | gauges.ts + applyHit | (ag)/(ah)/(s) | — |
 | Knockback **direction** | DONE (mode 1) + yaw trim (T8, 2026-07-05) | physics/knockback.ts, combat.ts (angleTrimByteToBam16 now fed a real value) | zz_00300bc_ (p); trim bytes +0x14/+0x15 (T8) | modes 0/2/3/4 need muzzle/camera vectors |
-| Knockback **magnitude** | **WIRED (2026-07-05, T6)** — ground/launch table selection + real per-frame decel/gravity integration | gauges.ts knockbackGroundSpeedForRecord/knockbackScaleRatio, combat.ts applyHit, movement.ts reaction-integration branch | DAT_802dd8a0[idx]=idx*7 (zz_005ec20_) vs DAT_802d3664[idx]=(idx+1)*8 (FUN_8005ed38), decel -speed/20 / -0.1, gravity -1.2 (T6) | T5 scale-ratio pinned 1.0 both sides (no size-scale pipeline yet); reaction-anim GROUP BYTE for real per-borg lengths still unconfirmed |
+| Knockback **magnitude** | **WIRED (2026-07-05, T6)** — ground/launch table selection + real per-frame decel/gravity integration | gauges.ts knockbackGroundSpeedForRecord/knockbackScaleRatio, combat.ts applyHit, movement.ts reaction-integration branch | DAT_802dd8a0[idx]=idx*7 (zz_005ec20_) vs     DAT_802d3664[idx]=(idx+1)*8 (FUN_8005ed38), decel -speed/20 / -0.1, gravity -1.2 (T6) | T5 scale-ratio
+    WIRED via `tierSizeScale()` (2026-07-05); per-borg reaction-anim LENGTHS wired fleet-partial
+    (111/208 ground + 175/208 launch DERIVED via `data/reactionAnimLengths.json`) |
 | Reaction ANIM-GATED release | **MECHANISM WIRED, VALUE TUNED-fallback (2026-07-05, T6)** | combat.ts reactionAnimLengthFrames/enterDown/stepActionState | actor+0x1d0e completion flag (T6) | no per-borg reaction-clip length export exists in this port yet — single-seam fallback, ready for real data |
 | B/X contextual resolve | **type resolver IMPLEMENTED (2a08a35c)** | command.ts resolveCommandType() | tester priority FUN_800699d8:228-238 (bd) | wire into stepAttacks (ATK-003); subtype+pad-button binding still need state/pad-decode |
 | Melee contexts (5-way) | schema | movementContextOf | subtype +0x586; wiki 5-context (av) | trace T2 |
@@ -750,7 +757,7 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Nurse heal | **HP-write ABSENT (ay)** | ATK-019 shell | table 0x802d1130 (ax); no +0x1c6 write reachable | Dolphin-trace +0x1c6 on healed ally |
 | Mash extra hits | shell (ATK-017) | constants MASH | +0x550 cap 4 (T/ax) | trace consumer |
 | Contact damage | scaffold (ATK-006) | disabled | per-borg authored (am/av) | trace T2 stomp |
-| Levels | DONE (row=byte+2, ay) | sourceBorgStats.ts | row=levelByte+2 (av/aw, 200/203) | NO in-battle EXP system exists (be) — level is save-stored, actor+0x3ec is size/scale class (0-4), CONFLICTS (ak)'s "+0x3ec=level" — reconcile which byte; 3 non-normal outliers open |
+| Levels | DONE (row=byte+2, ay) | sourceBorgStats.ts | row=levelByte+2 (av/aw, 200/203) | NO in-battle EXP system exists (be) — level is save-stored; **T5 decode (2026-07-05) resolves the +0x3ec conflict: it IS the LEVEL byte (HP/ammo row + force cost + UI), NOT a size/scale class — size-scale floats are the +0xb4/+0xc4 chain driven by the param-tier table** (`combat-feel-gaps-decode-2026-07-05.md:109`); 3 non-normal outliers open |
 | Lock-on target state | PORTED (source-shaped) | combat.ts refresh/sourceSwitch*, battle.ts activeSourceTargetUid | zz_006b450_, FUN_8006b850/FUN_8006ba60, actor +0x502/+0x508/+0x73d/+0x73e; null-target acquisition uses 3D squared-distance nearest with later equal-distance ties | trace still useful for exact 2P pairing / ally-support consumers |
 
 ---
@@ -773,7 +780,7 @@ Port: `packages/physics/src/*`, `packages/combat/src/movement.ts`, `constants.ts
   (see §1). Port change pending scale reconcile.
 - Three flight models observed ((ap) W17): winged forward-locked / air-class permanent /
   boost — the port has one FLY_MULT; a fidelity gap for flyer/air borgs.
-- Stage collision: triangle mesh from STIH, present on 22/40 stages (18 use rect-bounds fallback; the STIH cell X-column-major transpose was fixed 2026-07-05 commit 9f7ab8ea).
+- Stage collision: triangle mesh from STIH, present on 40/40 stages (18 base stages verified `verified-visual-and-collision` from on-disc hit0XX/hit1XX/hitffX bins; 22 st2x/st4x family variants `verified-visual-and-collision-derived` — they reuse their base st0x arena's hit0XX.bin triplet byte-identically, sha1-verified, since no hit2XX/hit4XX exists on disc; research/decomp/challenge-stage-naming-2026-07-05.md §1.2. The STIH cell X-column-major transpose was fixed 2026-07-05 commit 9f7ab8ea). Zero stages on rect-bounds fallback.
 
 ---
 
@@ -838,7 +845,7 @@ Port: `packages/missions/src/challenge*.ts`. ROM: (ae)/(af), challenge-flow-evid
 | Battle counts 5/10/15, energy 1500/2000/2500 | DONE | cross-checked |
 | Timer frozen (18000, [0x50]=1) | DONE | — |
 | Win/lose/draw judge (zz_00297c8_ mask) | **DONE (commit 3f66777b)** | battle.ts evaluateResult ports the per-side destroyed/equality mask model (ae:1763-1787); BattleState.winnerMask (bit0/bit1/3-mutual/4-timeout); mutual destruction resolves 'lose' for the player per FUN_801969a0. battleJudge.selftest 16/16. |
-| 3-phase deploy (~36f) | PARTIAL/MISSING | port = single spawn + flat 45f TUNED iframes vs ROM 20/1/15f phases + ally cue 8 (af) |
+| 3-phase deploy (~36f) | **DONE (2026-07-05, DERIVED)** | constants.ts `DEPLOY` (20/1/15f phases, ally cue 8 from (af)); combat.ts `stepActionState` spawn case tracks phase 0/1/2 by stateTime; `isInvincible` treats spawn state as deploy-lock; smoke 956f→943f (retired 9f post-spawn extra invuln) |
 | Kill accounting (zz_002f8dc_) | DONE (2026-07-04) | per-slot kills/costWon credited to the LAST DAMAGER + costLost on the victim's slot (ally cost EXCLUDED — capture-validated); battle.ts accountPendingDefeats. The flat +100/kill feeds only the in-battle team score DAT_80436154, NOT results |
 | Results ratios + counters | DERIVED (2026-07-04) | full decode: results-scoring-decode-2026-07-04.md. ATTACK = attack COUNT (+0x404 via zz_008a5d0_), HIT RATIO = +0x408/+0x404, DODGE RATIO = (+0x40c−+0x410)/(+0x40c++0x414). Port telemetry re-keyed to per-player SLOTS (SlotTelemetry, @gf/combat) with ROM increment semantics (aimed-vs-stray split from the attack object's target +0xcc) |
 | GRAND TOTAL formula (FUN_800d3260 / zz_00d1d24_) | DERIVED (2026-07-04) | = tier(costWon, DAT_8030e4b8) + tier(costLost, DAT_8030e6a8) + firstStrike×5000 (DAT_80433b58). NO win/lose sign flip. Tables verbatim in scoring.ts (incl. the ROM's 4901→40000 data quirk); WIN-capture validated (6000+1000+0=7000). Run total = Σ grand totals (+0x17e0, can go negative) = accumulateScore |
@@ -856,14 +863,17 @@ Detail in the asset survey (session 2026-07-03) + `research/format-specs/*`, `re
 - **Animation:** Hermite interpolation HONORED (hsd-anim.ts full FOBJ evaluator; offline bake is
   dense per-frame) — resolves (ar) lead 3. slot→bank is mostly heuristic (`pickAnimBank` label
   regex + PREFERRED_LABELS), with DERIVED anchors idle=g0s0/move=g0s1/dash=g0s2-5/hit=g3/down=g4s0
-  (the g4s0 relabel fixed a real special-plays-knockdown bug, (r)). 33 substitute fallbacks across
-  23 borgs (worst: hit→idle on 10 = no flinch). **Finish via state→(group,slot) dispatch trace.**
+  (the g4s0 relabel fixed a real special-plays-knockdown bug, (r)). The "33 substitute fallbacks
+  across 23 borgs" line is HISTORICAL (pre-override); `borg-animation-action-gaps.md` regenerated
+  2026-07-05 shows **0 runtime fallbacks across 208 borgs** — PREFERRED_LABELS overrides are the
+  closure, not current loss. State→(group,slot) dispatch table (`zz_004beb8_`): 20 DERIVED_ROM +
+  7 INFERRED + 7 UNRESOLVED (4 confirmed-no-anim, 2 matrix-warp blocked, 1 decodable: slot 8 guard).
 - **Audio:** BGM (33 tracks) + menu SFX wired and real. Combat SFX = 5 generic `se00_*` samples
   mapped onto 15 events (TUNED); NO ROM per-action table exists (AnimAudioEventLookup is a red
   herring, (v)) — needs a live SE-dispatch trace. **46 per-borg VOICE cues WIRED (commit 4e522cf4):**
   battleVoiceCues plays cue 00 on deploy / cue 01 on death for the local borg (family→group
   DERIVED, cue-role TUNED); validation script 8/8 (roster coverage 208/208). No footstep/land audio.
-- **Stages/lighting:** geometry 40/40 visual, collision 22/40; lighting/fog fully DERIVED from
+- **Stages/lighting:** geometry 40/40 visual, collision 40/40 (18 base + 22 DERIVED-shared-base family variants, sha1-verified); lighting/fog fully DERIVED from
   HSD CObj/LObj/FogDesc (all GX_FOG_LIN → exact THREE.Fog).
 - **FX:** hit-impact effects are now DERIVED end-to-end (2026-07-04): record impactEffectId
   u8+0x09 → zz_0019550_ → def table 0x802c7ed0 (ids 0..8, 0xff = none) → 4 variant handlers
