@@ -1,0 +1,1034 @@
+{
+  "_meta": {
+    "source": "user-data/GG4E/disc/sys/boot.dol @0x802f3dda",
+    "generator": "scripts/dump-projectile-variants.py",
+    "layout": "60-byte records: s16 boneIndex, s16 kind, s16 lifetime, pad, f32 speedX(+0x0e), f32 hSpeed(+0x12), f32 drop(+0x16), f32 scaleXYZ(+0x1a/+0x1e/+0x22), s16 angle(+0x26), u16 flags(+0x28)",
+    "evidence": "chunk_0015.c:1361 zz_0099e70_ + FUN_80099e94 + FUN_8009a12c variant-table reads"
+  },
+  "variants": [
+    {
+      "variant": 0,
+      "boneIndex": 1,
+      "kind": 10,
+      "lifetimeFrames": 30,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -1.5,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 16384,
+      "flags": 1
+    },
+    {
+      "variant": 1,
+      "boneIndex": 1,
+      "kind": 11,
+      "lifetimeFrames": 30,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -1.5,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 2,
+      "boneIndex": 0,
+      "kind": 12,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 3,
+      "boneIndex": 0,
+      "kind": 13,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": -8192,
+      "flags": 1
+    },
+    {
+      "variant": 4,
+      "boneIndex": 0,
+      "kind": 14,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 8192,
+      "flags": 1
+    },
+    {
+      "variant": 5,
+      "boneIndex": 0,
+      "kind": 15,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 6,
+      "boneIndex": 0,
+      "kind": 16,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 22528,
+      "flags": 1
+    },
+    {
+      "variant": 7,
+      "boneIndex": 0,
+      "kind": 17,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.25,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 8,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 9,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": -8192,
+      "flags": 1
+    },
+    {
+      "variant": 10,
+      "boneIndex": 0,
+      "kind": 9,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 11,
+      "boneIndex": 0,
+      "kind": 10,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 12,
+      "boneIndex": 0,
+      "kind": 11,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 13,
+      "boneIndex": 0,
+      "kind": 12,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 14,
+      "boneIndex": 0,
+      "kind": 13,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 15,
+      "boneIndex": 1,
+      "kind": 14,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 16,
+      "boneIndex": 0,
+      "kind": 0,
+      "lifetimeFrames": 6,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 17,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 18,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 8192,
+      "flags": 1
+    },
+    {
+      "variant": 19,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 4
+    },
+    {
+      "variant": 20,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": -8192,
+      "flags": 4
+    },
+    {
+      "variant": 21,
+      "boneIndex": 0,
+      "kind": 10,
+      "lifetimeFrames": 30,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -1.5,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 16384,
+      "flags": 1
+    },
+    {
+      "variant": 22,
+      "boneIndex": 0,
+      "kind": 11,
+      "lifetimeFrames": 30,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -1.5,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 23,
+      "boneIndex": 0,
+      "kind": 12,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 60.0,
+      "drop": -0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 8
+    },
+    {
+      "variant": 24,
+      "boneIndex": 0,
+      "kind": 13,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 60.0,
+      "drop": -0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": -8192,
+      "flags": 8
+    },
+    {
+      "variant": 25,
+      "boneIndex": 0,
+      "kind": 14,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 60.0,
+      "drop": -0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 8192,
+      "flags": 8
+    },
+    {
+      "variant": 26,
+      "boneIndex": 0,
+      "kind": 15,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 60.0,
+      "drop": -0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 8
+    },
+    {
+      "variant": 27,
+      "boneIndex": 0,
+      "kind": 16,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 60.0,
+      "drop": -0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 22528,
+      "flags": 8
+    },
+    {
+      "variant": 28,
+      "boneIndex": 0,
+      "kind": 17,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 60.0,
+      "drop": -0.0,
+      "scale": [
+        0.25,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 8
+    },
+    {
+      "variant": 29,
+      "boneIndex": 0,
+      "kind": 16,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 60.0,
+      "drop": -0.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": -10240,
+      "flags": 8
+    },
+    {
+      "variant": 30,
+      "boneIndex": 0,
+      "kind": 17,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 60.0,
+      "drop": -0.0,
+      "scale": [
+        0.5,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 8
+    },
+    {
+      "variant": 31,
+      "boneIndex": 0,
+      "kind": 14,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 12288,
+      "flags": 1
+    },
+    {
+      "variant": 32,
+      "boneIndex": 0,
+      "kind": 15,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": -12288,
+      "flags": 1
+    },
+    {
+      "variant": 33,
+      "boneIndex": 1,
+      "kind": 0,
+      "lifetimeFrames": 120,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -0.0,
+      "scale": [
+        0.25,
+        1.0,
+        0.25
+      ],
+      "angleBAM": 16384,
+      "flags": 8
+    },
+    {
+      "variant": 34,
+      "boneIndex": 1,
+      "kind": 0,
+      "lifetimeFrames": 120,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -0.0,
+      "scale": [
+        0.25,
+        1.0,
+        0.25
+      ],
+      "angleBAM": -16384,
+      "flags": 8
+    },
+    {
+      "variant": 35,
+      "boneIndex": 7,
+      "kind": 0,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 10.0,
+      "drop": 1.0,
+      "scale": [
+        0.15,
+        0.5,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 8
+    },
+    {
+      "variant": 36,
+      "boneIndex": 11,
+      "kind": 0,
+      "lifetimeFrames": 120,
+      "speedX": 100.0,
+      "hSpeed": 10.0,
+      "drop": 1.0,
+      "scale": [
+        0.15,
+        0.5,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 8
+    },
+    {
+      "variant": 37,
+      "boneIndex": 0,
+      "kind": 0,
+      "lifetimeFrames": 60,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -0.0,
+      "scale": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 8
+    },
+    {
+      "variant": 38,
+      "boneIndex": 0,
+      "kind": 0,
+      "lifetimeFrames": 60,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -0.0,
+      "scale": [
+        0.25,
+        0.5,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 8
+    },
+    {
+      "variant": 39,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 40,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 8192,
+      "flags": 1
+    },
+    {
+      "variant": 41,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 42,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": -8192,
+      "flags": 1
+    },
+    {
+      "variant": 43,
+      "boneIndex": 0,
+      "kind": 9,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 44,
+      "boneIndex": 0,
+      "kind": 10,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 45,
+      "boneIndex": 0,
+      "kind": 11,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 46,
+      "boneIndex": 0,
+      "kind": 12,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 47,
+      "boneIndex": 0,
+      "kind": 13,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 48,
+      "boneIndex": 1,
+      "kind": 14,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "angleBAM": 0,
+      "flags": 2
+    },
+    {
+      "variant": 49,
+      "boneIndex": 0,
+      "kind": 0,
+      "lifetimeFrames": 120,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -0.0,
+      "scale": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "angleBAM": 0,
+      "flags": 40
+    },
+    {
+      "variant": 50,
+      "boneIndex": 0,
+      "kind": 0,
+      "lifetimeFrames": 120,
+      "speedX": 50.0,
+      "hSpeed": 50.0,
+      "drop": -0.0,
+      "scale": [
+        3.0,
+        3.0,
+        3.0
+      ],
+      "angleBAM": 0,
+      "flags": 40
+    },
+    {
+      "variant": 51,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 52,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": -8192,
+      "flags": 1
+    },
+    {
+      "variant": 53,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 54,
+      "boneIndex": 0,
+      "kind": 4,
+      "lifetimeFrames": 15,
+      "speedX": 50.0,
+      "hSpeed": 30.0,
+      "drop": -2.0,
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "angleBAM": -8192,
+      "flags": 1
+    },
+    {
+      "variant": 55,
+      "boneIndex": 0,
+      "kind": 12,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 56,
+      "boneIndex": 0,
+      "kind": 13,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": -8192,
+      "flags": 1
+    },
+    {
+      "variant": 57,
+      "boneIndex": 0,
+      "kind": 14,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 8192,
+      "flags": 1
+    },
+    {
+      "variant": 58,
+      "boneIndex": 0,
+      "kind": 15,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 59,
+      "boneIndex": 0,
+      "kind": 12,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 60,
+      "boneIndex": 0,
+      "kind": 13,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": -8192,
+      "flags": 1
+    },
+    {
+      "variant": 61,
+      "boneIndex": 0,
+      "kind": 14,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 8192,
+      "flags": 1
+    },
+    {
+      "variant": 62,
+      "boneIndex": 0,
+      "kind": 15,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 0,
+      "flags": 1
+    },
+    {
+      "variant": 63,
+      "boneIndex": 0,
+      "kind": 16,
+      "lifetimeFrames": 15,
+      "speedX": 100.0,
+      "hSpeed": 50.0,
+      "drop": -3.0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "angleBAM": 22528,
+      "flags": 1
+    }
+  ]
+}

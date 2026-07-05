@@ -66,6 +66,7 @@ import {
 } from "./actionProfiles.js";
 import type { BorgProfile } from "./stats.js";
 import { runtimeShotPenetrationForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
+import { projectileVariant } from "./projectiles.js";
 import { AttackCommandType } from "./command.js";
 import {
   contextualBGatesForBorgId,
@@ -1808,6 +1809,12 @@ export function stepAttacks(
         return { projectiles: out };
       }
     } else if (pressedSpecialEdge) {
+      // ROM-family driver (1:1 ported X-special) — if this borg has a ported family
+      // (currently G RED family), delegate the X press to its phase machine instead of
+      // the generic startSpecialAttack projectile/aoe spawn. See packages/combat/src/bridge.ts.
+      if (b.romDriver?.tryStartXSpecial(b, all)) {
+        return { projectiles: out };
+      }
       // Non-charging borgs: fire once per PRESS EDGE (the latch above), never on held
       // re-expiry — holding X across the cooldown no longer machine-guns the special.
       startSpecialAttack(b, p, actionProfile, 0, out, all, profiles, damageContext, xMoveForBorgId(b.borgId));
@@ -2465,6 +2472,18 @@ function spawnProjectiles(
   return projectiles;
 }
 
+/** Find the first projectile variant with the given HIT kind in the decoded ROM table
+ *  (DAT_802f3dda). Returns null when no variant matches — callers keep TUNED values. */
+function findVariantByKind(kind: number): { hSpeed: number; drop: number; lifetimeFrames: number; scale: [number, number, number] } | null {
+  for (let i = 0; i < 64; i++) {
+    const variant = projectileVariant(i);
+    if (variant && variant.kind === kind) {
+      return { hSpeed: variant.hSpeed, drop: variant.drop, lifetimeFrames: variant.lifetimeFrames, scale: variant.scale };
+    }
+  }
+  return null;
+}
+
 /** Spawn-time homing gate — FUN_8006c334 (chunk_0009.c:1995), called from the projectile
  *  spawn path at chunk_0009.c:3841: a projectile only receives a homing lock if the shooter's
  *  locked target lies inside an aim cone around the projectile's INITIAL flight direction;
@@ -2528,12 +2547,23 @@ function spawnProjectile(
       if (d > 1e-6) flightDir = scale(to, 1 / d);
     }
   }
+  // ROM projectile data override: look up the borg's shot kind in the decoded variant
+  // table (DAT_802f3dda) and use the REAL speed/drop/lifetime instead of the TUNED
+  // shotDef values. The variant table has 64 entries decoded from boot.dol; each
+  // carries the ROM's actual hSpeed, drop, and lifetimeFrames.
+  const shotKind = shotKindForBorgId(b.borgId);
+  const romVariant = shotKind !== null ? findVariantByKind(shotKind) : null;
+  const romSpeed = romVariant?.hSpeed ?? null;
+  const romDrop = romVariant?.drop ?? null;
+  const romLife = romVariant?.lifetimeFrames ?? null;
+  const romScale = romVariant?.scale ?? null;
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
     team: b.team,
     pos: muzzlePos,
-    vel: scale(flightDir, shotDef.speed * tier.speed),
+    // ROM variant speed overrides TUNED shotDef.speed when available.
+    vel: scale(flightDir, (romSpeed ?? shotDef.speed) * tier.speed),
     damage: shotDef.damageMultiplier * tier.damage,
     hitstun: Math.max(1, Math.round(SHOT.HITSTUN * shotDef.hitstunMultiplier * tier.hitstun)),
     // Per-move MULTIPLIER (applyHit derives the base from the projectile's damage record).
@@ -2543,7 +2573,8 @@ function spawnProjectile(
     homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
     // ROM attack-object target +0xcc for the results DODGE counters (aimed vs stray).
     aimedTargetUid: activeSourceTargetUid(b),
-    life: shotDef.lifetime,
+    // ROM variant lifetime overrides TUNED shotDef.lifetime when available.
+    life: romLife ?? shotDef.lifetime,
     // DERIVED where present: the borg's B-shot HIT kind resolves via shotKindForBorgId — the
     // guarded fire-site attribution (shotVariantKinds.json borgShotKinds) when the borg's fire
     // fn was traced to a proven table row, else the ROM's generic shot-child kind-0 heuristic
@@ -2559,7 +2590,11 @@ function spawnProjectile(
       chargeTier >= 1 && shotDef.chargedVisualKind
         ? shotDef.chargedVisualKind
         : shotDef.visualKind ?? projectileVisualKindForProfile(p),
-    ...(shotDef.bulletDrop > 0 ? { drop: shotDef.bulletDrop } : {}),
+    // ROM variant drop (gravity per frame) overrides TUNED bulletDrop when available.
+    // The ROM table has real per-variant values: -1.5 beams, -3.0 bullets, 0.0 energy.
+    ...(romDrop !== null ? { drop: romDrop } : shotDef.bulletDrop > 0 ? { drop: shotDef.bulletDrop } : {}),
+    // ROM variant visual scale [X,Y,Z] from DAT_802f3dda.
+    ...(romScale ? { romScale } : {}),
     // OBSERVED_WIKI (moveProperties, ATK-008 consume-vs-persist): a shot whose cataloged move
     // penetrates borgs ("borgs" or "total") passes THROUGH borg hits instead of despawning on the
     // first — set consumeOnHit=false so stepProjectiles paces re-hits via rehitCounter. Default

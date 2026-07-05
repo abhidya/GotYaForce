@@ -12,6 +12,11 @@
 
 import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
+import { RomDriverBridge } from "./bridge.js";
+import { registerGroundClamp } from "./rom/physics.js";
+import { applyHit } from "./combat.js";
+import { familyDamageRecordForBorg } from "./familyDamageData.js";
+import { damageRecordByIndex, DAMAGE_RECORD_INDEX } from "./gauges.js";
 import {
   canActivateBurst,
   createBurstMeter,
@@ -45,6 +50,7 @@ import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { stepStatus } from "./status.js";
 import { DEFAULT_BOUNDS, JUMP, SIM } from "./constants.js";
+import { floorSurfaceYAt } from "@gf/physics";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
 import { resetActorParamTier } from "./paramTier.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
@@ -327,6 +333,10 @@ class BattleImpl implements Battle {
       fusionState: 0,
       defeatAccounted: false,
       alive: true,
+      // ROM-family driver sidecar: attaches when the borg's family has been ported to
+      // the 1:1 ROM runtime (currently the G RED family). Borgs without a ported family
+      // stay null and keep the generic archetype combat logic. See bridge.ts.
+      romDriver: null,
       // Hit-inflicted status effects (status-effects-decode-2026-07-04.md) — all start
       // inactive; aura levels are cleared every frame regardless (stepHitStatus).
       slowHitLevel: 0,
@@ -345,6 +355,44 @@ class BattleImpl implements Battle {
     this.profiles.set(uid, prof);
     force.activeUid = uid;
     this.state.activeUidByPlayer[force.controlKey] = uid;
+    // ROM-family driver: attach for ALL borgs with ported families or shared-engine
+    // fallback. The bridge's tick now COMPOSES with normal movement (returns false)
+    // — it layers hitbox/anim/damage ON TOP of stepMovement, not replacing it. This
+    // means AI borgs navigate normally while still getting ROM-driven X-specials.
+    const driver = RomDriverBridge.attach(b, {});
+    if (driver) {
+        driver.hitResolver = (attacker, victim, damageRecordIndex, knockbackMult) => {
+          const victimProfile = this.profiles.get(victim.uid);
+          if (!victimProfile) return;
+          const record =
+            familyDamageRecordForBorg(attacker.borgId, damageRecordIndex) ??
+            damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
+          const attackerProfile = this.profiles.get(attacker.uid);
+          const dir = { x: victim.pos.x - attacker.pos.x, y: 0, z: victim.pos.z - attacker.pos.z };
+          applyHit(victim, victimProfile, 0, knockbackMult, dir, attacker.pos, false, record,
+            attackerProfile ? { attacker, attackerProfile, damageScale: 1, attackerSideRank: this.sideRankForTeam(attacker.team), defenderSideRank: this.sideRankForTeam(victim.team) } : undefined,
+            { burstMeters: this.state.burstMeterByPlayer, telemetry: this.state.telemetry, energyByTeam: this.state.energy, energyMaxByTeam: this.state.energyMax, cpuHalvingEnabled: this.isChallengeMode });
+        };
+        const clampFn = (pos: { x: number; y: number; z: number }, velY: number) => {
+          const groundY = this.groundYFor(pos.x, pos.z, pos.y);
+          if (pos.y <= groundY) return { y: groundY, velY: 0, grounded: true };
+          return { y: pos.y, velY, grounded: false };
+        };
+        driver.groundClamp = clampFn;
+        registerGroundClamp(clampFn);
+        driver.bounds = { minX: this.bounds.minX, maxX: this.bounds.maxX, minZ: this.bounds.minZ, maxZ: this.bounds.maxZ };
+        driver.offMeshCheck = (x: number, z: number) => floorSurfaceYAt(this.collision, x, z, 100) != null;
+        b.romDriver = driver;
+    }
+  }
+
+  /** Ground-Y query for the ROM driver's ground clamp — mirrors movement.ts's
+   *  groundYAt (floorSurfaceYAt + GROUND_SNAP_UP fallback to JUMP.GROUND_Y). */
+  private groundYFor(x: number, z: number, currentY: number): number {
+    const GROUND_SNAP_UP = 35;
+    const surfaceY = floorSurfaceYAt(this.collision, x, z, currentY - 10 + GROUND_SNAP_UP);
+    if (surfaceY != null) return surfaceY;
+    return 10; // JUMP.GROUND_Y
   }
 
   /** energy[team] = sum of not-yet-defeated on-field borgs + queued borgs. */
@@ -550,6 +598,16 @@ class BattleImpl implements Battle {
       const activeTargetUid = activeSourceTargetUid(b);
       const lockPos = activeTargetUid ? this.byUid.get(activeTargetUid)?.pos ?? null : null;
       const ctx: MoveContext = { lockTargetPos: lockPos, bounds: this.bounds, collision: this.collision };
+
+      // ROM-family driver (1:1 ported state machine) — when active, owns the borg's
+      // motion + attacks for this frame; skip the generic stepMovement/stepAttacks.
+      // See packages/combat/src/bridge.ts. Borgs without a ported family are unaffected.
+      if (b.romDriver?.tick(b, SIM.DT, this.state.borgs)) {
+        // Drain any projectiles the ROM stream's fireChild op spawned this tick.
+        const romProjs = b.romDriver.drainProjectiles();
+        if (romProjs.length > 0) this.state.projectiles.push(...romProjs);
+        continue;
+      }
 
       // Movement (skips horizontal control while busy, but still applies gravity).
       stepMovement(b, prof, input, ctx);

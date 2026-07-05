@@ -175,6 +175,12 @@ export function prepareImportedModel(model: THREE.Object3D, options: ImportedMod
     if (options.groundY) model.position.y -= box.min.y;
   }
 
+  // TODO: reparent flattened mesh nodes under their skeleton bones. The HSD export
+  // puts Joint_N_Object_* as siblings of JOBJ_* bones. The correct mapping requires
+  // the per-model HSD joint table (undecoded). A heuristic (N % boneCount) maps to
+  // WRONG bones and deforms models. Do NOT enable until the joint table is decoded.
+  // reparentMeshesToBones(model);
+
   model.traverse((object) => {
     if (!(object instanceof THREE.Mesh || object instanceof THREE.SkinnedMesh)) return;
     applyCullingPolicy(object, options.culling ?? "auto");
@@ -227,3 +233,38 @@ function getRenderDiagnostics(renderer: THREE.WebGLRenderer, debugCapture: boole
     programs: info.programs ? info.programs.length : null,
   };
 }
+
+// Parked heuristic, not currently wired in (see call site above):
+// /** Reparent flattened mesh nodes under their skeleton bones. The HSD export puts
+//  *  "Joint_N_Object_*" meshes as siblings of "JOBJ_*" bones. This heuristic maps
+//  *  Joint_N → JOBJ_(N % boneCount) and preserves the world transform. */
+// function reparentMeshesToBones(model: THREE.Object3D): void {
+//   const bones: Array<{ name: string; obj: THREE.Object3D; index: number }> = [];
+//   const meshesToReparent: Array<{ node: THREE.Object3D; jointIndex: number }> = [];
+//   model.traverse((obj) => {
+//     const name = obj.name ?? "";
+//     const jobjMatch = /^JOBJ_(\d+)$/.exec(name);
+//     if (jobjMatch) {
+//       bones.push({ name, obj, index: parseInt(jobjMatch[1]!, 10) });
+//       return;
+//     }
+//     const jointMatch = /^Joint_(\d+)_Object/.exec(name);
+//     if (jointMatch) {
+//       meshesToReparent.push({ node: obj, jointIndex: parseInt(jointMatch[1]!, 10) });
+//     }
+//   });
+//   if (bones.length === 0 || meshesToReparent.length === 0) return;
+//   bones.sort((a, b) => a.index - b.index);
+//   const _m1 = new THREE.Matrix4();
+//   for (const { node, jointIndex } of meshesToReparent) {
+//     const boneIdx = jointIndex % bones.length;
+//     const targetBone = bones[boneIdx];
+//     if (!targetBone || targetBone.obj === node.parent) continue;
+//     node.updateWorldMatrix(true, false);
+//     targetBone.obj.updateWorldMatrix(true, false);
+//     _m1.copy(targetBone.obj.matrixWorld).invert().multiply(node.matrixWorld);
+//     node.matrix.copy(_m1);
+//     node.matrix.decompose(node.position, node.quaternion, node.scale);
+//     targetBone.obj.add(node);
+//   }
+// }

@@ -330,6 +330,12 @@ export interface BorgRuntime {
   // statusTimescale() rebuild (FUN_8005a378, chunk_0007.c:2817-2898). All optional so existing
   // fakeRuntime()/constructors that predate this ticket keep compiling (self-heal to 0/absent).
 
+  /** ROM-family driver sidecar (bridge.ts). When present, the 1:1 ported state machine
+   *  owns this borg's motion for actions its family implements (currently the G RED
+   *  family X-special). Null/absent for borgs whose family hasn't been ported yet —
+   *  they keep the generic archetype combat logic unchanged. See packages/combat/src/rom/. */
+  romDriver?: import("./bridge.js").RomDriverBridge | null;
+
   /** Slow-on-hit level (ROM +0x70e; discrete, flagsB&0x0004): 0 = none, else indexes the
    *  DERIVED slow table {0,0.7,0.4,0.2} in timescale.ts. Skipped for burst victims. */
   slowHitLevel?: number;
@@ -506,6 +512,10 @@ export interface Projectile {
    *  so it stays the default here. No gameplay caller sets this to `false` yet — that flip is
    *  T6's outcome (research/decomp/attack-mechanics-findings.md mechanic O). */
   consumeOnHit?: boolean;
+  /** ROM projectile variant visual scale [X, Y, Z] from DAT_802f3dda +0x1a/+0x1e/+0x22.
+   *  The renderer reads this to size the projectile sprite/mesh. Absent = default scale
+   *  (1.0 × 1.0 × 1.0). Source: projectiles.ts ProjectileVariant.scale. */
+  romScale?: [number, number, number];
   /** Frames remaining before this projectile may apply its next hit while persisting
    *  (`consumeOnHit === false`). Mirrors the ROM's SINGLE per-object counter at object+0x4e,
    *  reloaded from the damage record's s8+0x16 `rehitIntervalFrames` on every hit application
