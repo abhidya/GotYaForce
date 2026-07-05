@@ -409,9 +409,11 @@ scene.fog = new THREE.Fog(DEFAULT_RENDER_STATE.fogColor, DEFAULT_RENDER_STATE.fo
 
 import {
   createStageLightingRig,
-  applyStageRenderStateLighting,
+  resolveStageLighting,
+  applyResolvedStageLighting,
   type StageRenderState as LightingStageRenderState,
 } from "./stages/lighting";
+import { applyStageReadabilityOverrides } from "./stages/readabilityOverrides";
 // Real per-stage lighting rig (supports N directionals — stff carries 2); replaces the old
 // single ambient+directional pair. Values/validation: research/game-design/STAGE-LIGHTING-PORT.md.
 const stageLighting = createStageLightingRig(scene);
@@ -461,14 +463,21 @@ const battleCamera = new BattleCamera({ camera, controlsTarget: controls.target 
 // Stage loading (preserved)
 // ------------------------------------------------------------------------------------------
 
-function applyStageRenderState(rs: StageRenderState): void {
+function applyStageRenderState(stageId: string, rs: StageRenderState): void {
   // Delegates to the canonical module (validated 40/40 against on-disk render-state.json;
   // identical output for 39 stages, stff additionally gains its second directional). The
   // local StageRenderState type is a looser shape of the module's; same on-disk data.
-  const resolved = applyStageRenderStateLighting(scene, stageLighting, rs as LightingStageRenderState);
-  camera.fov = resolved.camera.fovDegrees;
-  camera.near = resolved.camera.near;
-  camera.far = resolved.camera.far;
+  //
+  // resolve -> readability override -> apply, rather than the single-call convenience wrapper,
+  // so the 3 audit-flagged stages (see readabilityOverrides.ts) get their fog-far clamp BEFORE
+  // it reaches the scene/rig. Authored render-state stays the only input for the other 37
+  // stages: applyStageReadabilityOverrides is a referential no-op when a stage has no entry.
+  const resolved = resolveStageLighting(rs as LightingStageRenderState);
+  const withOverrides = applyStageReadabilityOverrides(stageId, resolved);
+  applyResolvedStageLighting(scene, stageLighting, withOverrides);
+  camera.fov = withOverrides.camera.fovDegrees;
+  camera.near = withOverrides.camera.near;
+  camera.far = withOverrides.camera.far;
   camera.updateProjectionMatrix();
 }
 
@@ -480,7 +489,7 @@ async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>
   if (loadedStageId === stageId && loadedStageAssets) return loadedStageAssets;
   stageRoot.clear();
   const assets = await assetCatalog.loadStageAssets<StageRenderState>(stageId);
-  applyStageRenderState(assets.renderState);
+  applyStageRenderState(stageId, assets.renderState);
   const models = await Promise.all(assets.modelUrls.map((u) => renderAssets.loadGlbScene(u)));
   for (const model of models) {
     prepareImportedModel(model, {

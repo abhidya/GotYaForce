@@ -1,0 +1,2387 @@
+{
+  "generatedBy": "scripts/audit-stage-readability.mjs",
+  "generatedAt": "2026-07-05T05:00:15.958Z",
+  "stageCount": 40,
+  "flaggedCount": 3,
+  "thresholds": {
+    "TOO_DARK_BG_LUMA_MAX": 0.12,
+    "TOO_DARK_LIGHT_SUM_MAX": 0.6,
+    "FOG_CLIP_MARGIN": 1,
+    "BOUNDS_MISMATCH_RATIO": 4
+  },
+  "stages": [
+    {
+      "stageId": "st00",
+      "arenaName": "KOU'S HOME",
+      "modelCount": 40,
+      "lighting": {
+        "ambientHex": "#d8d0c2",
+        "ambientLuma": 0.819,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff0e6"
+        ],
+        "maxDirectionalLuma": 0.954,
+        "lightIntensitySum": 1.773
+      },
+      "background": {
+        "fogHex": "#fff6e5",
+        "bgLuma": 0.968,
+        "fogEnabled": true,
+        "fogStart": 900,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -5000.087,
+          "maxX": 4221.055,
+          "minZ": -5000,
+          "maxZ": 4215.799
+        },
+        "visualExcludedSkyboxModels": 8,
+        "visualDiagonalXZ": 13036.886,
+        "boundsMismatchRatio": 0.615
+      },
+      "spawn": {
+        "collisionTriangleCount": 1989,
+        "spawnFloorTriangleCount": 807,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st01",
+      "arenaName": "NEO ELEMENTARY",
+      "modelCount": 78,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffeccc"
+        ],
+        "maxDirectionalLuma": 0.933,
+        "lightIntensitySum": 1.733
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -4950,
+          "maxX": 4363.779,
+          "minZ": -4282.964,
+          "maxZ": 4239.027
+        },
+        "visualExcludedSkyboxModels": 9,
+        "visualDiagonalXZ": 12624.216,
+        "boundsMismatchRatio": 0.595
+      },
+      "spawn": {
+        "collisionTriangleCount": 1929,
+        "spawnFloorTriangleCount": 377,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st02",
+      "arenaName": "SUNNYSIDE PARK",
+      "modelCount": 51,
+      "lighting": {
+        "ambientHex": "#b3b3b3",
+        "ambientLuma": 0.702,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.702
+      },
+      "background": {
+        "fogHex": "#b8cff0",
+        "bgLuma": 0.8,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -4309.021,
+          "maxX": 4218.865,
+          "minZ": -3983.243,
+          "maxZ": 4726.901
+        },
+        "visualExcludedSkyboxModels": 18,
+        "visualDiagonalXZ": 12189.81,
+        "boundsMismatchRatio": 0.431
+      },
+      "spawn": {
+        "collisionTriangleCount": 4963,
+        "spawnFloorTriangleCount": 2731,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st03",
+      "arenaName": "CONSTRUCTION ZONE",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffe6cc"
+        ],
+        "maxDirectionalLuma": 0.92,
+        "lightIntensitySum": 1.72
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 12000,
+        "fogEnd": 50000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -5000.002,
+          "maxX": 5000,
+          "minZ": -5000,
+          "maxZ": 4188.673
+        },
+        "visualExcludedSkyboxModels": 8,
+        "visualDiagonalXZ": 13580.565,
+        "boundsMismatchRatio": 0.64
+      },
+      "spawn": {
+        "collisionTriangleCount": 1760,
+        "spawnFloorTriangleCount": 1247,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st04",
+      "arenaName": "SERENITY STREET",
+      "modelCount": 52,
+      "lighting": {
+        "ambientHex": "#9999cc",
+        "ambientLuma": 0.623,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.623
+      },
+      "background": {
+        "fogHex": "#e5ffec",
+        "bgLuma": 0.961,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000,
+          "maxX": 5000,
+          "minZ": -2652.745,
+          "maxZ": 5042.897
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 12618.356,
+        "boundsMismatchRatio": 0.446
+      },
+      "spawn": {
+        "collisionTriangleCount": 4726,
+        "spawnFloorTriangleCount": 2695,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st05",
+      "arenaName": "KAKERU'S HOME",
+      "modelCount": 28,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff3cc"
+        ],
+        "maxDirectionalLuma": 0.95,
+        "lightIntensitySum": 1.75
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -3956.659,
+          "maxX": 4494.904,
+          "minZ": -3190.159,
+          "maxZ": 5009.896
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 11775.815,
+        "boundsMismatchRatio": 0.555
+      },
+      "spawn": {
+        "collisionTriangleCount": 2195,
+        "spawnFloorTriangleCount": 1127,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st06",
+      "arenaName": "RED DEATH LAIR",
+      "modelCount": 4,
+      "lighting": {
+        "ambientHex": "#a39380",
+        "ambientLuma": 0.587,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.587
+      },
+      "background": {
+        "fogHex": "#41302c",
+        "bgLuma": 0.206,
+        "fogEnabled": true,
+        "fogStart": 900,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000,
+          "maxX": 5000,
+          "minZ": -5000,
+          "maxZ": 5000
+        },
+        "visualExcludedSkyboxModels": 1,
+        "visualDiagonalXZ": 14142.136,
+        "boundsMismatchRatio": 0.5
+      },
+      "spawn": {
+        "collisionTriangleCount": 5,
+        "spawnFloorTriangleCount": 2,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st07",
+      "arenaName": "BLUE DEATH LAIR",
+      "modelCount": 4,
+      "lighting": {
+        "ambientHex": "#a39380",
+        "ambientLuma": 0.587,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.587
+      },
+      "background": {
+        "fogHex": "#371a3d",
+        "bgLuma": 0.152,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000.001,
+          "maxX": 5000.001,
+          "minZ": -5000.001,
+          "maxZ": 5000.001
+        },
+        "visualExcludedSkyboxModels": 1,
+        "visualDiagonalXZ": 14142.14,
+        "boundsMismatchRatio": 0.5
+      },
+      "spawn": {
+        "collisionTriangleCount": 5,
+        "spawnFloorTriangleCount": 2,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st08",
+      "arenaName": "THE PIT",
+      "modelCount": 52,
+      "lighting": {
+        "ambientHex": "#b3b3b3",
+        "ambientLuma": 0.702,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.702
+      },
+      "background": {
+        "fogHex": "#868890",
+        "bgLuma": 0.535,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10110.26171875,
+          "minZ": -10000,
+          "maxZ": 10000.001953125
+        },
+        "collisionDiagonal": 28362.347,
+        "visualWorldXZ": {
+          "minX": -5000,
+          "maxX": 5000,
+          "minZ": -5000,
+          "maxZ": 5000
+        },
+        "visualExcludedSkyboxModels": 13,
+        "visualDiagonalXZ": 14142.136,
+        "boundsMismatchRatio": 0.499
+      },
+      "spawn": {
+        "collisionTriangleCount": 3629,
+        "spawnFloorTriangleCount": 1467,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st09",
+      "arenaName": "GREATER TRICITY AREA",
+      "modelCount": 9,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff9ec"
+        ],
+        "maxDirectionalLuma": 0.978,
+        "lightIntensitySum": 1.778
+      },
+      "background": {
+        "fogHex": "#b3d3d9",
+        "bgLuma": 0.793,
+        "fogEnabled": true,
+        "fogStart": 1000,
+        "fogEnd": 25000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000.001,
+          "maxX": 5000.002,
+          "minZ": -5000.001,
+          "maxZ": 5000.002
+        },
+        "visualExcludedSkyboxModels": 1,
+        "visualDiagonalXZ": 14142.14,
+        "boundsMismatchRatio": 0.5
+      },
+      "spawn": {
+        "collisionTriangleCount": 24,
+        "spawnFloorTriangleCount": 14,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [
+        "fog-clip"
+      ],
+      "notes": [
+        "fog-clip: fog.end=25000.000 < arena collision XZ diagonal=28284.271"
+      ]
+    },
+    {
+      "stageId": "st0a",
+      "arenaName": "SAFARITOWN MARKET PLACE",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff9e0"
+        ],
+        "maxDirectionalLuma": 0.972,
+        "lightIntensitySum": 1.772
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500.001953125,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.205,
+        "visualWorldXZ": {
+          "minX": -4105,
+          "maxX": 5000.057,
+          "minZ": -5008,
+          "maxZ": 5000
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 13530.045,
+        "boundsMismatchRatio": 0.638
+      },
+      "spawn": {
+        "collisionTriangleCount": 3270,
+        "spawnFloorTriangleCount": 1481,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500.001953125,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st0b",
+      "arenaName": "STONE RIVER",
+      "modelCount": 28,
+      "lighting": {
+        "ambientHex": "#a39380",
+        "ambientLuma": 0.587,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.587
+      },
+      "background": {
+        "fogHex": "#e8ffe8",
+        "bgLuma": 0.963,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10138.587890625,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28382.437,
+        "visualWorldXZ": {
+          "minX": -5000.002,
+          "maxX": 5000,
+          "minZ": -5000.002,
+          "maxZ": 5000.001
+        },
+        "visualExcludedSkyboxModels": 5,
+        "visualDiagonalXZ": 14142.139,
+        "boundsMismatchRatio": 0.498
+      },
+      "spawn": {
+        "collisionTriangleCount": 2189,
+        "spawnFloorTriangleCount": 1509,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st0c",
+      "arenaName": "LITTLE HILL",
+      "modelCount": 20,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffe6cc"
+        ],
+        "maxDirectionalLuma": 0.92,
+        "lightIntensitySum": 1.72
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 12000,
+        "fogEnd": 50000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -4492.751,
+          "maxX": 4183.301,
+          "minZ": -4429.467,
+          "maxZ": 4289.388
+        },
+        "visualExcludedSkyboxModels": 4,
+        "visualDiagonalXZ": 12300.094,
+        "boundsMismatchRatio": 0.435
+      },
+      "spawn": {
+        "collisionTriangleCount": 1753,
+        "spawnFloorTriangleCount": 673,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st0d",
+      "arenaName": "SKY FORTRESS",
+      "modelCount": 17,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffeccc"
+        ],
+        "maxDirectionalLuma": 0.933,
+        "lightIntensitySum": 1.733
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 12000,
+        "fogEnd": 50000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -3750,
+          "maxX": 4367.181,
+          "minZ": -4050,
+          "maxZ": 4050
+        },
+        "visualExcludedSkyboxModels": 4,
+        "visualDiagonalXZ": 11467.285,
+        "boundsMismatchRatio": 0.541
+      },
+      "spawn": {
+        "collisionTriangleCount": 980,
+        "spawnFloorTriangleCount": 808,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st0e",
+      "arenaName": "MANA'S HOME",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#b3b3b3",
+        "ambientLuma": 0.702,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff3cc"
+        ],
+        "maxDirectionalLuma": 0.95,
+        "lightIntensitySum": 1.652
+      },
+      "background": {
+        "fogHex": "#ffe1ee",
+        "bgLuma": 0.923,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -2994.354,
+          "maxX": 4096.902,
+          "minZ": -5001.417,
+          "maxZ": 4205.551
+        },
+        "visualExcludedSkyboxModels": 12,
+        "visualDiagonalXZ": 11621.282,
+        "boundsMismatchRatio": 0.411
+      },
+      "spawn": {
+        "collisionTriangleCount": 3963,
+        "spawnFloorTriangleCount": 1378,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st0f",
+      "arenaName": "DEATH BASE",
+      "modelCount": 13,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff3cc"
+        ],
+        "maxDirectionalLuma": 0.95,
+        "lightIntensitySum": 1.75
+      },
+      "background": {
+        "fogHex": "#ffc08c",
+        "bgLuma": 0.804,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -4715.536,
+          "maxX": 3000,
+          "minZ": -5000,
+          "maxZ": 5000
+        },
+        "visualExcludedSkyboxModels": 4,
+        "visualDiagonalXZ": 12630.499,
+        "boundsMismatchRatio": 0.595
+      },
+      "spawn": {
+        "collisionTriangleCount": 940,
+        "spawnFloorTriangleCount": 716,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st10",
+      "arenaName": "STRATOSPHERE",
+      "modelCount": 7,
+      "lighting": {
+        "ambientHex": "#b3b3b3",
+        "ambientLuma": 0.702,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.702
+      },
+      "background": {
+        "fogHex": "#000000",
+        "bgLuma": 0,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000,
+          "maxX": 5000,
+          "minZ": -5000,
+          "maxZ": 5000
+        },
+        "visualExcludedSkyboxModels": 1,
+        "visualDiagonalXZ": 14142.136,
+        "boundsMismatchRatio": 0.5
+      },
+      "spawn": {
+        "collisionTriangleCount": 3561,
+        "spawnFloorTriangleCount": 2043,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st20",
+      "arenaName": "KOU'S HOME",
+      "modelCount": 40,
+      "lighting": {
+        "ambientHex": "#d8d0c2",
+        "ambientLuma": 0.819,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff0e6"
+        ],
+        "maxDirectionalLuma": 0.954,
+        "lightIntensitySum": 1.773
+      },
+      "background": {
+        "fogHex": "#fff6e5",
+        "bgLuma": 0.968,
+        "fogEnabled": true,
+        "fogStart": 900,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -5000.087,
+          "maxX": 4221.055,
+          "minZ": -5000,
+          "maxZ": 4215.799
+        },
+        "visualExcludedSkyboxModels": 8,
+        "visualDiagonalXZ": 13036.886,
+        "boundsMismatchRatio": 0.615
+      },
+      "spawn": {
+        "collisionTriangleCount": 1989,
+        "spawnFloorTriangleCount": 807,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st21",
+      "arenaName": "NEO ELEMENTARY",
+      "modelCount": 78,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffeccc"
+        ],
+        "maxDirectionalLuma": 0.933,
+        "lightIntensitySum": 1.733
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -4950,
+          "maxX": 4363.779,
+          "minZ": -4282.964,
+          "maxZ": 4239.027
+        },
+        "visualExcludedSkyboxModels": 9,
+        "visualDiagonalXZ": 12624.216,
+        "boundsMismatchRatio": 0.595
+      },
+      "spawn": {
+        "collisionTriangleCount": 1929,
+        "spawnFloorTriangleCount": 377,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st22",
+      "arenaName": "SUNNYSIDE PARK",
+      "modelCount": 51,
+      "lighting": {
+        "ambientHex": "#b3b3b3",
+        "ambientLuma": 0.702,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.702
+      },
+      "background": {
+        "fogHex": "#b8cff0",
+        "bgLuma": 0.8,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -4309.021,
+          "maxX": 4218.865,
+          "minZ": -3983.243,
+          "maxZ": 4726.901
+        },
+        "visualExcludedSkyboxModels": 18,
+        "visualDiagonalXZ": 12189.81,
+        "boundsMismatchRatio": 0.431
+      },
+      "spawn": {
+        "collisionTriangleCount": 4963,
+        "spawnFloorTriangleCount": 2731,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st23",
+      "arenaName": "CONSTRUCTION ZONE",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffe6cc"
+        ],
+        "maxDirectionalLuma": 0.92,
+        "lightIntensitySum": 1.72
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 12000,
+        "fogEnd": 50000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -5000.002,
+          "maxX": 5000,
+          "minZ": -5000,
+          "maxZ": 4188.673
+        },
+        "visualExcludedSkyboxModels": 8,
+        "visualDiagonalXZ": 13580.565,
+        "boundsMismatchRatio": 0.64
+      },
+      "spawn": {
+        "collisionTriangleCount": 1760,
+        "spawnFloorTriangleCount": 1247,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st24",
+      "arenaName": "SERENITY STREET",
+      "modelCount": 52,
+      "lighting": {
+        "ambientHex": "#9999cc",
+        "ambientLuma": 0.623,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.623
+      },
+      "background": {
+        "fogHex": "#e5ffec",
+        "bgLuma": 0.961,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000,
+          "maxX": 5000,
+          "minZ": -2652.745,
+          "maxZ": 5042.897
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 12618.356,
+        "boundsMismatchRatio": 0.446
+      },
+      "spawn": {
+        "collisionTriangleCount": 4726,
+        "spawnFloorTriangleCount": 2695,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st25",
+      "arenaName": "KAKERU'S HOME",
+      "modelCount": 28,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff3cc"
+        ],
+        "maxDirectionalLuma": 0.95,
+        "lightIntensitySum": 1.75
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -3956.659,
+          "maxX": 4494.904,
+          "minZ": -3190.159,
+          "maxZ": 5009.896
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 11775.815,
+        "boundsMismatchRatio": 0.555
+      },
+      "spawn": {
+        "collisionTriangleCount": 2195,
+        "spawnFloorTriangleCount": 1127,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st29",
+      "arenaName": "GREATER TRICITY AREA",
+      "modelCount": 9,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff9ec"
+        ],
+        "maxDirectionalLuma": 0.978,
+        "lightIntensitySum": 1.778
+      },
+      "background": {
+        "fogHex": "#b3d3e6",
+        "bgLuma": 0.798,
+        "fogEnabled": true,
+        "fogStart": 1000,
+        "fogEnd": 25000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000.001,
+          "maxX": 5000.002,
+          "minZ": -5000.001,
+          "maxZ": 5000.002
+        },
+        "visualExcludedSkyboxModels": 1,
+        "visualDiagonalXZ": 14142.14,
+        "boundsMismatchRatio": 0.5
+      },
+      "spawn": {
+        "collisionTriangleCount": 24,
+        "spawnFloorTriangleCount": 14,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [
+        "fog-clip"
+      ],
+      "notes": [
+        "fog-clip: fog.end=25000.000 < arena collision XZ diagonal=28284.271"
+      ]
+    },
+    {
+      "stageId": "st2a",
+      "arenaName": "SAFARITOWN MARKET PLACE",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff9e0"
+        ],
+        "maxDirectionalLuma": 0.972,
+        "lightIntensitySum": 1.772
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500.001953125,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.205,
+        "visualWorldXZ": {
+          "minX": -4105,
+          "maxX": 5000.057,
+          "minZ": -5008,
+          "maxZ": 5000
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 13530.045,
+        "boundsMismatchRatio": 0.638
+      },
+      "spawn": {
+        "collisionTriangleCount": 3270,
+        "spawnFloorTriangleCount": 1481,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500.001953125,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st2b",
+      "arenaName": "STONE RIVER",
+      "modelCount": 28,
+      "lighting": {
+        "ambientHex": "#a39380",
+        "ambientLuma": 0.587,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.587
+      },
+      "background": {
+        "fogHex": "#e8ffe8",
+        "bgLuma": 0.963,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10138.587890625,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28382.437,
+        "visualWorldXZ": {
+          "minX": -5000.002,
+          "maxX": 5000,
+          "minZ": -5000.002,
+          "maxZ": 5000.001
+        },
+        "visualExcludedSkyboxModels": 5,
+        "visualDiagonalXZ": 14142.139,
+        "boundsMismatchRatio": 0.498
+      },
+      "spawn": {
+        "collisionTriangleCount": 2189,
+        "spawnFloorTriangleCount": 1509,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st2c",
+      "arenaName": "LITTLE HILL",
+      "modelCount": 20,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffe6cc"
+        ],
+        "maxDirectionalLuma": 0.92,
+        "lightIntensitySum": 1.72
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 12000,
+        "fogEnd": 50000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -4492.751,
+          "maxX": 4183.301,
+          "minZ": -4429.467,
+          "maxZ": 4289.388
+        },
+        "visualExcludedSkyboxModels": 4,
+        "visualDiagonalXZ": 12300.094,
+        "boundsMismatchRatio": 0.435
+      },
+      "spawn": {
+        "collisionTriangleCount": 1753,
+        "spawnFloorTriangleCount": 673,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st2e",
+      "arenaName": "MANA'S HOME",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#b3b3b3",
+        "ambientLuma": 0.702,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff3cc"
+        ],
+        "maxDirectionalLuma": 0.95,
+        "lightIntensitySum": 1.652
+      },
+      "background": {
+        "fogHex": "#ffe1ee",
+        "bgLuma": 0.923,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -2994.354,
+          "maxX": 4096.902,
+          "minZ": -5001.417,
+          "maxZ": 4205.551
+        },
+        "visualExcludedSkyboxModels": 12,
+        "visualDiagonalXZ": 11621.282,
+        "boundsMismatchRatio": 0.411
+      },
+      "spawn": {
+        "collisionTriangleCount": 3963,
+        "spawnFloorTriangleCount": 1378,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st40",
+      "arenaName": "KOU'S HOME",
+      "modelCount": 40,
+      "lighting": {
+        "ambientHex": "#d8d0c2",
+        "ambientLuma": 0.819,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff0e6"
+        ],
+        "maxDirectionalLuma": 0.954,
+        "lightIntensitySum": 1.773
+      },
+      "background": {
+        "fogHex": "#fff6e5",
+        "bgLuma": 0.968,
+        "fogEnabled": true,
+        "fogStart": 900,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -5000.087,
+          "maxX": 4221.055,
+          "minZ": -5000,
+          "maxZ": 4215.799
+        },
+        "visualExcludedSkyboxModels": 8,
+        "visualDiagonalXZ": 13036.886,
+        "boundsMismatchRatio": 0.615
+      },
+      "spawn": {
+        "collisionTriangleCount": 1989,
+        "spawnFloorTriangleCount": 807,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st41",
+      "arenaName": "NEO ELEMENTARY",
+      "modelCount": 78,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffeccc"
+        ],
+        "maxDirectionalLuma": 0.933,
+        "lightIntensitySum": 1.733
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -4950,
+          "maxX": 4363.779,
+          "minZ": -4282.964,
+          "maxZ": 4239.027
+        },
+        "visualExcludedSkyboxModels": 9,
+        "visualDiagonalXZ": 12624.216,
+        "boundsMismatchRatio": 0.595
+      },
+      "spawn": {
+        "collisionTriangleCount": 1929,
+        "spawnFloorTriangleCount": 377,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st42",
+      "arenaName": "SUNNYSIDE PARK",
+      "modelCount": 51,
+      "lighting": {
+        "ambientHex": "#b3b3b3",
+        "ambientLuma": 0.702,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.702
+      },
+      "background": {
+        "fogHex": "#b8cff0",
+        "bgLuma": 0.8,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -4309.021,
+          "maxX": 4218.865,
+          "minZ": -3983.243,
+          "maxZ": 4726.901
+        },
+        "visualExcludedSkyboxModels": 18,
+        "visualDiagonalXZ": 12189.81,
+        "boundsMismatchRatio": 0.431
+      },
+      "spawn": {
+        "collisionTriangleCount": 4963,
+        "spawnFloorTriangleCount": 2731,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st43",
+      "arenaName": "CONSTRUCTION ZONE",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffe6cc"
+        ],
+        "maxDirectionalLuma": 0.92,
+        "lightIntensitySum": 1.72
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 12000,
+        "fogEnd": 50000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -5000.002,
+          "maxX": 5000,
+          "minZ": -5000,
+          "maxZ": 4188.673
+        },
+        "visualExcludedSkyboxModels": 8,
+        "visualDiagonalXZ": 13580.565,
+        "boundsMismatchRatio": 0.64
+      },
+      "spawn": {
+        "collisionTriangleCount": 1760,
+        "spawnFloorTriangleCount": 1247,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st44",
+      "arenaName": "SERENITY STREET",
+      "modelCount": 52,
+      "lighting": {
+        "ambientHex": "#9999cc",
+        "ambientLuma": 0.623,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.623
+      },
+      "background": {
+        "fogHex": "#e5ffec",
+        "bgLuma": 0.961,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000,
+          "maxX": 5000,
+          "minZ": -2652.745,
+          "maxZ": 5042.897
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 12618.356,
+        "boundsMismatchRatio": 0.446
+      },
+      "spawn": {
+        "collisionTriangleCount": 4726,
+        "spawnFloorTriangleCount": 2695,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st45",
+      "arenaName": "KAKERU'S HOME",
+      "modelCount": 28,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff3cc"
+        ],
+        "maxDirectionalLuma": 0.95,
+        "lightIntensitySum": 1.75
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.203,
+        "visualWorldXZ": {
+          "minX": -3956.659,
+          "maxX": 4494.904,
+          "minZ": -3190.159,
+          "maxZ": 5009.896
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 11775.815,
+        "boundsMismatchRatio": 0.555
+      },
+      "spawn": {
+        "collisionTriangleCount": 2195,
+        "spawnFloorTriangleCount": 1127,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st49",
+      "arenaName": "GREATER TRICITY AREA",
+      "modelCount": 9,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff9ec"
+        ],
+        "maxDirectionalLuma": 0.978,
+        "lightIntensitySum": 1.778
+      },
+      "background": {
+        "fogHex": "#e6d3b9",
+        "bgLuma": 0.838,
+        "fogEnabled": true,
+        "fogStart": 1000,
+        "fogEnd": 25000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -5000.001,
+          "maxX": 5000.002,
+          "minZ": -5000.001,
+          "maxZ": 5000.002
+        },
+        "visualExcludedSkyboxModels": 1,
+        "visualDiagonalXZ": 14142.14,
+        "boundsMismatchRatio": 0.5
+      },
+      "spawn": {
+        "collisionTriangleCount": 24,
+        "spawnFloorTriangleCount": 14,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [
+        "fog-clip"
+      ],
+      "notes": [
+        "fog-clip: fog.end=25000.000 < arena collision XZ diagonal=28284.271"
+      ]
+    },
+    {
+      "stageId": "st4a",
+      "arenaName": "SAFARITOWN MARKET PLACE",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff9e0"
+        ],
+        "maxDirectionalLuma": 0.972,
+        "lightIntensitySum": 1.772
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500.001953125,
+          "maxZ": 7500
+        },
+        "collisionDiagonal": 21213.205,
+        "visualWorldXZ": {
+          "minX": -4105,
+          "maxX": 5000.057,
+          "minZ": -5008,
+          "maxZ": 5000
+        },
+        "visualExcludedSkyboxModels": 6,
+        "visualDiagonalXZ": 13530.045,
+        "boundsMismatchRatio": 0.638
+      },
+      "spawn": {
+        "collisionTriangleCount": 3270,
+        "spawnFloorTriangleCount": 1481,
+        "spawnArea": {
+          "minX": -7500,
+          "maxX": 7500,
+          "minZ": -7500.001953125,
+          "maxZ": 7500
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st4b",
+      "arenaName": "STONE RIVER",
+      "modelCount": 28,
+      "lighting": {
+        "ambientHex": "#a39380",
+        "ambientLuma": 0.587,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffffff"
+        ],
+        "maxDirectionalLuma": 1,
+        "lightIntensitySum": 1.587
+      },
+      "background": {
+        "fogHex": "#e8ffe8",
+        "bgLuma": 0.963,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10138.587890625,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28382.437,
+        "visualWorldXZ": {
+          "minX": -5000.002,
+          "maxX": 5000,
+          "minZ": -5000.002,
+          "maxZ": 5000.001
+        },
+        "visualExcludedSkyboxModels": 5,
+        "visualDiagonalXZ": 14142.139,
+        "boundsMismatchRatio": 0.498
+      },
+      "spawn": {
+        "collisionTriangleCount": 2189,
+        "spawnFloorTriangleCount": 1509,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st4c",
+      "arenaName": "LITTLE HILL",
+      "modelCount": 20,
+      "lighting": {
+        "ambientHex": "#cccccc",
+        "ambientLuma": 0.8,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#ffe6cc"
+        ],
+        "maxDirectionalLuma": 0.92,
+        "lightIntensitySum": 1.72
+      },
+      "background": {
+        "fogHex": "#cce6cc",
+        "bgLuma": 0.86,
+        "fogEnabled": true,
+        "fogStart": 12000,
+        "fogEnd": 50000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -4492.751,
+          "maxX": 4183.301,
+          "minZ": -4429.467,
+          "maxZ": 4289.388
+        },
+        "visualExcludedSkyboxModels": 4,
+        "visualDiagonalXZ": 12300.094,
+        "boundsMismatchRatio": 0.435
+      },
+      "spawn": {
+        "collisionTriangleCount": 1753,
+        "spawnFloorTriangleCount": 673,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "st4e",
+      "arenaName": "MANA'S HOME",
+      "modelCount": 43,
+      "lighting": {
+        "ambientHex": "#b3b3b3",
+        "ambientLuma": 0.702,
+        "directionalCount": 1,
+        "directionalHexes": [
+          "#fff3cc"
+        ],
+        "maxDirectionalLuma": 0.95,
+        "lightIntensitySum": 1.652
+      },
+      "background": {
+        "fogHex": "#ffe1ee",
+        "bgLuma": 0.923,
+        "fogEnabled": true,
+        "fogStart": 2000,
+        "fogEnd": 40000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collisionDiagonal": 28284.271,
+        "visualWorldXZ": {
+          "minX": -2994.354,
+          "maxX": 4096.902,
+          "minZ": -5001.417,
+          "maxZ": 4205.551
+        },
+        "visualExcludedSkyboxModels": 12,
+        "visualDiagonalXZ": 11621.282,
+        "boundsMismatchRatio": 0.411
+      },
+      "spawn": {
+        "collisionTriangleCount": 3963,
+        "spawnFloorTriangleCount": 1378,
+        "spawnArea": {
+          "minX": -10000,
+          "maxX": 10000,
+          "minZ": -10000,
+          "maxZ": 10000
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    },
+    {
+      "stageId": "stff",
+      "arenaName": "????",
+      "modelCount": 83,
+      "lighting": {
+        "ambientHex": "#988cb2",
+        "ambientLuma": 0.58,
+        "directionalCount": 2,
+        "directionalHexes": [
+          "#808080",
+          "#808080"
+        ],
+        "maxDirectionalLuma": 0.502,
+        "lightIntensitySum": 1.082
+      },
+      "background": {
+        "fogHex": "#2ac4bc",
+        "bgLuma": 0.584,
+        "fogEnabled": true,
+        "fogStart": 1000000,
+        "fogEnd": 2000000
+      },
+      "bounds": {
+        "collisionGridHeader": {
+          "minX": -11000,
+          "maxX": 10000,
+          "minZ": -11000,
+          "maxZ": 10000
+        },
+        "collision": {
+          "minX": -4994.79296875,
+          "maxX": 5165.140625,
+          "minZ": -1460.91796875,
+          "maxZ": 8699.01953125
+        },
+        "collisionDiagonal": 14368.319,
+        "visualWorldXZ": {
+          "minX": -1548.699,
+          "maxX": 1202.905,
+          "minZ": -1029.573,
+          "maxZ": 1386.477
+        },
+        "visualExcludedSkyboxModels": 11,
+        "visualDiagonalXZ": 3661.779,
+        "boundsMismatchRatio": 0.255
+      },
+      "spawn": {
+        "collisionTriangleCount": 4465,
+        "spawnFloorTriangleCount": 1340,
+        "spawnArea": {
+          "minX": -4994.79296875,
+          "maxX": 5165.140625,
+          "minZ": -1460.91796875,
+          "maxZ": 8699.01953125
+        },
+        "collapsedToFallback": false
+      },
+      "flags": [],
+      "notes": []
+    }
+  ]
+}
