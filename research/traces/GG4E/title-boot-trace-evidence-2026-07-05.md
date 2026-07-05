@@ -81,12 +81,27 @@ live at `state + 0x1604 + slot*0xc` (per `FUN_80056d28`). Two capture attempts:
    in the actor's **JOBJ (rendered joint tree)** translation, a deeper pointer chase
    (actor -> JOBJ root -> translation XYZ).
 
-**Conclusion:** capturing the exact ROM desk-actor placement needs a follow-up trace that
-walks the actor -> JOBJ pointer -> root joint translation, timed during the desk-intro
-window (~54s post-boot, ~3-5s wide). The port's TUNED `stageBaseForSlot`
-(`TitleIntro.ts`: ±240 X, +700 Z forward of the authored camera, y=3557) stays until that
-walk lands. It is a presentation constant, not a correctness gap — every gameplay/data
-aspect of the intro VM is now runtime-confirmed.
+**Conclusion:** the desk actor's world position is NOT a direct dereferenceable field. A
+third capture (3rd independent boot) ran a pointer-scan hunter: dumped `actor+0x00..0x800`,
+found 20 heap-pointer candidates, and dereferenced each 0x80 bytes deep. Findings:
+- `actor+0x3fc → 0x80be11c0` and `actor+0x530 → 0x8067cf00 → +0x28 → 0x80be1410` — the
+  `0x80be1xxx` region is the HSD JOBJ model tree (the rendered figure).
+- `actor+0x4ac → 0x807461c0` — small float values (5..30 range) = anim/bone data, not
+  world coords.
+- No candidate has a plausible world-coord XYZ triple (the desk scene is in thousands of
+  units; nothing in 50..20000 range appears in any direct deref).
+
+The desk figure stands at local origin `(0,0,0)` within a parent coordinate frame; the
+desk placement is the **HSD compound transform** (the parent→child joint matrix chain).
+Extracting the final world translation would require either (a) a breakpoint at the
+render/compose step that computes the JOBJ world matrix, reading the final translation
+there, or (b) walking the full parent chain from the JOBJ root. Both are deeper HSD
+scene-graph work, disproportionate for a presentation constant.
+
+**The port's TUNED `stageBaseForSlot` (`TitleIntro.ts`: ±240 X, +700 Z forward of the
+authored camera, y=3557) stays**, honestly labeled. Every *gameplay/data* aspect of the
+intro VM is runtime-confirmed across three independent boots; this is a visual-placement
+constant only.
 
 ## Net
 
