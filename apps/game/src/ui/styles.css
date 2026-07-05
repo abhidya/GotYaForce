@@ -71,6 +71,16 @@
 .gf-grid-bg.gf-bg-purple { --gf-screen-bg: #8b4fb5; }
 .gf-grid-bg.gf-bg-gold { --gf-screen-bg: #f3a312; }
 
+/*
+ * The vsel00/vsel01 GLB exports contain real pad/gear/backdrop/silhouette
+ * geometry, but each archive bundles EVERY vsel/challenge-select sub-menu
+ * (plus, for vsel00, 40 unrelated stage-preview dioramas) into one 165-model
+ * scene with no recoverable per-sub-menu grouping, so it cannot be reliably
+ * auto-fit to just the relevant cluster. It is mounted as atmospheric
+ * backdrop decoration (see SelectDifficulty.ts / SelectPlayers.ts); the pad
+ * tiles themselves use cropped real captured native frames instead (see
+ * cropImgStyle in SelectDifficulty.ts).
+ */
 .gf-vsel-real-scene {
   opacity: 0.36;
   transform: scale(1.03);
@@ -98,35 +108,6 @@
 .gf-select-players {
   --gf-vsel-outer: #168c20;
 }
-.gf-vsel-screen .gf-grid-bg {
-  background:
-    radial-gradient(circle at 50% 47%, rgba(255, 255, 255, 0.42), transparent 57%),
-    radial-gradient(circle at 50% 50%, transparent 0 42%, rgba(0, 25, 130, 0.22) 75%, rgba(0, 0, 80, 0.45) 100%),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.14) 0 4px, transparent 4px 161px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.14) 0 4px, transparent 4px 221px);
-  transform: scale(var(--gf-bg-scale, 1));
-  transform-origin: 50% 50%;
-}
-.gf-vsel-screen .gf-grid-bg::before,
-.gf-vsel-screen .gf-grid-bg::after {
-  content: "";
-  position: absolute;
-  inset: -8%;
-  opacity: 0.18;
-  background:
-    linear-gradient(24deg, transparent 0 39%, rgba(255, 255, 255, 0.8) 40% 43%, transparent 44% 100%),
-    linear-gradient(156deg, transparent 0 39%, rgba(255, 255, 255, 0.72) 40% 43%, transparent 44% 100%);
-}
-.gf-vsel-screen .gf-grid-bg::after {
-  transform: scaleX(-1);
-}
-.gf-select-players .gf-grid-bg {
-  background:
-    radial-gradient(circle at 50% 56%, rgba(150, 255, 30, 0.72), transparent 44%),
-    radial-gradient(circle at 50% 50%, transparent 0 42%, rgba(0, 95, 18, 0.24) 76%, rgba(0, 42, 8, 0.5) 100%),
-    repeating-linear-gradient(0deg, rgba(210, 255, 190, 0.17) 0 4px, transparent 4px 161px),
-    repeating-linear-gradient(90deg, rgba(210, 255, 190, 0.17) 0 4px, transparent 4px 221px);
-}
 .gf-vsel-screen .gf-title {
   position: absolute;
   left: 0;
@@ -134,16 +115,15 @@
   top: 25.8%;
   z-index: 3;
   padding-top: 0;
-  font-size: clamp(42px, 5.4vw, 88px);
-  line-height: 0.92;
-  letter-spacing: 0;
-  -webkit-text-stroke: clamp(2px, 0.24vw, 5px) var(--gf-outline);
-  text-shadow:
-    0 3px 0 #ffffff,
-    0 7px 0 rgba(0, 0, 0, 0.38);
+  display: flex;
+  justify-content: center;
   opacity: var(--gf-title-opacity, 1);
   transform: translateY(var(--gf-title-offset-y, 0%)) scale(var(--gf-title-scale, 1));
   transform-origin: 50% 55%;
+}
+/* Real ascii.tpl bitmap-font rendering of the vsel title (SELECT DIFFICULTY / SELECT NUMBER OF PLAYERS). */
+.gf-vsel-title-text {
+  transform: scale(var(--gf-vsel-title-fit, 1));
 }
 .gf-vsel-screen .gf-vsel-options {
   position: absolute;
@@ -258,52 +238,6 @@
 .gf-option:hover { transform: translateY(-2px); }
 .gf-option.gf-selected { transform: scale(1.06); }
 
-/* The colored oval "pad" that selected items sit on. */
-.gf-pad {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: clamp(110px, 22vw, 170px);
-  height: clamp(110px, 22vw, 170px);
-  border-radius: 50%;
-}
-.gf-option.gf-selected .gf-pad {
-  box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.85), 0 0 0 10px rgba(255, 255, 255, 0.25);
-}
-
-.gf-energy-label { font-size: 0.7em; color: #ffffff; text-shadow: 0 1px 0 #000; }
-.gf-energy-num {
-  font-size: clamp(26px, 6vw, 44px);
-  line-height: 0.9;
-  color: #ffffff;
-  -webkit-text-stroke: 1.5px var(--gf-outline);
-  paint-order: stroke fill;
-}
-.gf-energy-name {
-  font-size: clamp(13px, 2.4vw, 20px);
-  -webkit-text-stroke: 1px var(--gf-outline);
-  paint-order: stroke fill;
-}
-.gf-name-normal { color: var(--gf-red); }
-.gf-name-tuff { color: #ffffff; }
-.gf-name-insane { color: #ffffff; }
-
-/* Label pill under the player-count silhouettes. */
-.gf-pill {
-  margin-top: 6px;
-  padding: 4px 18px;
-  border-radius: 999px;
-  background: linear-gradient(#7fc1f0, var(--gf-blue-pill-deep));
-  color: #ffffff;
-  font-size: clamp(13px, 2.2vw, 18px);
-  -webkit-text-stroke: 0.6px var(--gf-outline);
-  paint-order: stroke fill;
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.3);
-}
-.gf-option.gf-selected .gf-pill { background: linear-gradient(#9ad4ff, #2f6db0); }
-
 .gf-vsel-screen .gf-option {
   position: absolute;
   padding: 0;
@@ -354,18 +288,6 @@
   filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.18));
   opacity: var(--gf-ring-opacity, 1);
 }
-.gf-vsel-screen .gf-pad {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1.38;
-  border-radius: 50%;
-  overflow: visible;
-  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.16);
-}
-.gf-vsel-screen .gf-option.gf-selected .gf-pad {
-  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.16);
-}
-
 /*
  * Row center X/Y comes from the vsel00 scene export (option-stage ellipse) via
  * --gf-diff-row-top / --gf-diff-center-x set in SelectDifficulty.ts; the pad
@@ -386,106 +308,24 @@
 .gf-diff-insane {
   left: calc(var(--gf-diff-center-x, 51%) + 27.5%);
 }
-.gf-diff-option .gf-pad {
-  background: linear-gradient(#3aa83a, #1f7a1f);
+/*
+ * Each pad tile shows a cropped region of the real captured native frame
+ * (reference/captures/challenge-2-select-difficulty.png — see
+ * SelectDifficulty.ts), which already bakes in the "GF ENERGY <n> <NAME>"
+ * art pixel-for-pixel, so no separate CSS/bitmap-font callout is layered on
+ * top. `.gf-diff-pad-crop` is the fixed-aspect crop window; the inner `<img>`
+ * is the full capture, scaled + shifted (see cropImgStyle) so only that
+ * window's pixels show.
+ */
+.gf-diff-pad-crop {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8%;
 }
-.gf-diff-tuff .gf-pad {
-  background: linear-gradient(#ff9a3c, #e06a18);
-}
-.gf-diff-insane .gf-pad {
-  background: linear-gradient(#ff5a4f, #c41010);
-}
-.gf-menu-gear {
-  position: absolute;
-  left: 51%;
-  top: -23%;
-  width: 50%;
-  aspect-ratio: 1;
-  transform: translateX(-50%) rotate(-10deg);
-  border-radius: 50%;
-  background: linear-gradient(#e6e9ee, #a9afba);
-  clip-path: polygon(
-    50% 0,
-    58% 10%,
-    69% 4%,
-    73% 17%,
-    86% 14%,
-    86% 28%,
-    98% 34%,
-    90% 45%,
-    100% 55%,
-    88% 63%,
-    91% 77%,
-    77% 78%,
-    70% 92%,
-    58% 86%,
-    50% 100%,
-    42% 86%,
-    30% 92%,
-    23% 78%,
-    9% 77%,
-    12% 63%,
-    0 55%,
-    10% 45%,
-    2% 34%,
-    14% 28%,
-    14% 14%,
-    27% 17%,
-    31% 4%,
-    42% 10%
-  );
-  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.26));
-}
-.gf-menu-gear::before {
-  content: "";
-  position: absolute;
-  inset: 32%;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
-  box-shadow: inset 8px 0 0 rgba(255, 255, 255, 0.2);
-}
-.gf-diff-normal .gf-menu-gear {
-  left: 58%;
-  top: -10%;
-  background: linear-gradient(#f4e83a, #c79b00);
-}
-.gf-diff-insane .gf-menu-gear {
-  background: linear-gradient(#f6d153, #c98c00);
-}
-.gf-diff-option .gf-energy-label,
-.gf-diff-option .gf-energy-num {
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 2;
-  text-align: center;
-  color: #fff;
-  letter-spacing: 0;
-  -webkit-text-stroke: clamp(1px, 0.12vw, 3px) #050505;
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
-}
-.gf-diff-option .gf-energy-label {
-  top: 31%;
-  font-size: clamp(18px, 2.2vw, 34px);
-  line-height: 1;
-}
-.gf-diff-option .gf-energy-num {
-  top: 44%;
-  font-size: clamp(52px, 7.4vw, 122px);
-  line-height: 0.8;
-}
-.gf-diff-option .gf-energy-name {
-  margin-top: -1%;
-  font-size: clamp(32px, 4vw, 68px);
-  line-height: 0.9;
-  color: #ffffff;
-  letter-spacing: 0;
-  -webkit-text-stroke: clamp(2px, 0.24vw, 5px) #050505;
-  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
-}
-.gf-diff-normal .gf-energy-name {
-  color: #e81745;
-  -webkit-text-stroke: clamp(2px, 0.2vw, 4px) #ffffff;
+.gf-capture-crop-img {
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 .gf-player-option {
@@ -499,157 +339,27 @@
   left: 71%;
   width: 31%;
 }
+/*
+ * Each tile shows a cropped region of the real captured native frame
+ * (reference/captures/challenge-3-select-players.png — see
+ * SelectPlayers.ts), which already bakes in the silhouette/pill-label/
+ * controller art pixel-for-pixel, so no separate CSS silhouette/pill/
+ * controller recreation is layered on top.
+ */
+.gf-player-tile-crop {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
 .gf-player-arrow {
   position: absolute;
   left: 50%;
   top: 59.5%;
   z-index: 4;
   width: 7.2%;
-  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #ffaaa0 0 25%, #f04437 26% 70%, #9d1812 71% 100%);
-  box-shadow:
-    inset 0 -5px 0 rgba(0, 0, 0, 0.32),
-    0 0 0 5px rgba(20, 20, 20, 0.92),
-    0 5px 0 rgba(0, 0, 0, 0.28);
-}
-.gf-player-arrow::before {
-  content: "";
-  position: absolute;
-  left: 39%;
-  top: 28%;
-  width: 34%;
-  height: 44%;
-  background: #ffffff;
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-  filter: drop-shadow(2px 1px 0 rgba(0, 0, 0, 0.18));
-}
-.gf-player-pad {
-  aspect-ratio: 1.05;
-  background: radial-gradient(circle at 50% 45%, #1a9b5d 0 55%, #12784d 56% 100%);
-  display: grid;
-  place-items: center;
-}
-.gf-player-2 .gf-player-pad {
-  background: transparent;
-  box-shadow: none;
-}
-.gf-people {
-  position: absolute;
-  left: 50%;
-  bottom: 28%;
-  width: 84%;
-  height: 78%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 2%;
-}
-.gf-person {
-  position: relative;
-  width: 47%;
-  height: 100%;
-  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.28));
-}
-.gf-person-head,
-.gf-person-body {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #eeeeee;
-  border: 3px solid rgba(0, 0, 0, 0.72);
-}
-.gf-player-2 .gf-person-head,
-.gf-player-2 .gf-person-body {
-  background: #cfe5bd;
-}
-.gf-person-head {
-  top: 0;
-  width: 70%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-}
-.gf-person-body {
-  bottom: 0;
-  width: 72%;
-  height: 70%;
-  border-radius: 46% 46% 6% 6% / 30% 30% 8% 8%;
-  border-top: 0;
-}
-.gf-person-num {
-  position: absolute;
-  left: 50%;
-  bottom: 13%;
-  transform: translateX(-50%);
-  color: rgba(70, 70, 70, 0.52);
-  font-size: clamp(72px, 9vw, 152px);
-  line-height: 0.8;
-  -webkit-text-stroke: 0;
-}
-.gf-pill {
-  position: absolute;
-  left: 50%;
-  bottom: 9%;
-  width: 98%;
-  min-height: 16%;
-  display: grid;
-  place-items: center;
-  transform: translateX(-50%);
-  margin-top: 0;
-  padding: 0 4%;
-  border-radius: 999px;
-  background: linear-gradient(#0988e0, #0059ac);
-  font-size: clamp(30px, 4.1vw, 70px);
-  line-height: 0.9;
-  letter-spacing: 0;
-  -webkit-text-stroke: clamp(2px, 0.24vw, 5px) #050505;
-  box-shadow:
-    inset 0 -7px 0 rgba(0, 0, 0, 0.22),
-    0 7px 0 rgba(0, 0, 0, 0.18);
-}
-.gf-player-2 .gf-pill {
-  color: #8d8d8d;
-}
-.gf-controller-row {
-  position: absolute;
-  left: 50%;
-  bottom: -18%;
-  width: 40%;
-  aspect-ratio: 1.55;
-  transform: translateX(-50%);
-}
-.gf-controller-row::before,
-.gf-controller-row::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 46% 54% 38% 42%;
-  background:
-    radial-gradient(circle at 62% 43%, #23b8b3 0 5%, transparent 6%),
-    radial-gradient(circle at 71% 36%, #df1c26 0 4%, transparent 5%),
-    radial-gradient(circle at 78% 48%, #506fd8 0 4%, transparent 5%),
-    radial-gradient(circle at 52% 62%, #ffd31d 0 8%, transparent 9%),
-    radial-gradient(circle at 24% 48%, #dbd7cf 0 9%, transparent 10%),
-    linear-gradient(150deg, #8372c7, #3f3183 70%);
-  filter: drop-shadow(0 7px 0 rgba(0, 0, 0, 0.32));
-}
-.gf-controller-row::after {
-  display: none;
-}
-.gf-controller-row-2 {
-  width: 72%;
-}
-.gf-controller-row-2::before,
-.gf-controller-row-2::after {
-  width: 54%;
-}
-.gf-controller-row-2::before {
-  left: 0;
-}
-.gf-controller-row-2::after {
-  display: block;
-  left: 46%;
 }
 
 /* ============================ TITLE INTRO ============================ */
@@ -944,56 +654,35 @@
 
 /* ============================ LOAD BOX DATA ============================ */
 .gf-load-box { background: #f3a312; }
-.gf-load-title {
+/*
+ * Real exported text plate (vsel00_mdl texture_004, ASSETS.vsSelectLabels) —
+ * "LOAD BOX DATA" / "Insert Memory Card into Slot A" / "and press the (A)
+ * Button." — shown as the actual screen art instead of recreated CSS copy.
+ * The sheet is a shared multi-line atlas (also used by BattleIntro.ts), so it
+ * is displayed at natural aspect ratio near the top of the screen rather than
+ * pixel-cropped to a single line.
+ */
+.gf-load-label-sheet {
   position: absolute;
-  top: 17%;
-  left: 0;
-  right: 0;
-  font-size: clamp(34px, 6.8vw, 72px);
-}
-.gf-load-rule {
-  position: absolute;
-  left: 17%;
-  right: 17%;
-  top: 34%;
-  height: 6px;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
-}
-.gf-load-copy {
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  top: 40%;
+  left: 50%;
+  top: 6%;
+  width: min(72vw, 620px);
+  transform: translateX(-50%);
+  image-rendering: pixelated;
   z-index: 2;
-  color: #ffffff;
-  text-align: center;
-  font-size: clamp(18px, 2.9vw, 34px);
-  line-height: 1.45;
-  -webkit-text-stroke: 1.5px #89420e;
-  paint-order: stroke fill;
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.28));
 }
 .gf-load-memory-icon {
   display: block;
+  position: absolute;
+  left: 50%;
+  top: 46%;
   width: clamp(42px, 7.8vw, 64px);
   height: auto;
-  margin: 0 auto 10px;
+  transform: translateX(-50%);
+  z-index: 2;
   image-rendering: pixelated;
   filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.28));
-}
-.gf-inline-a {
-  display: inline-grid;
-  place-items: center;
-  width: 1.3em;
-  height: 1.3em;
-  border-radius: 50%;
-  margin: 0 0.12em;
-  color: #ffffff;
-  background: #18a949;
-  -webkit-text-stroke: 0;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.25), 0 2px 0 rgba(0, 0, 0, 0.25);
 }
 .gf-box-model {
   position: absolute;
@@ -1719,13 +1408,35 @@
   background: rgba(0, 0, 0, 0.18);
   z-index: 20;
 }
-.gf-pause-box {
+/*
+ * RECREATED (no original pause-menu asset found) — see PauseMenu.ts header.
+ * The panel reuses an existing exported glossy roundel plate texture
+ * (ASSETS.menuRoundelPlate) as its backing art instead of a flat CSS gradient
+ * box; the purple border/shape remain a minimal, gamepad-safe recreation.
+ */
+.gf-pause-panel {
+  position: relative;
   min-width: 260px;
   border-radius: 16px;
-  background: linear-gradient(#cfd3da, #aeb4c0);
+  background: #aeb4c0;
   border: 4px solid var(--gf-edit-purple);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   overflow: hidden;
+}
+.gf-pause-plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+  mix-blend-mode: luminosity;
+  pointer-events: none;
+  z-index: 0;
+}
+.gf-pause-panel > :not(.gf-pause-plate) {
+  position: relative;
+  z-index: 1;
 }
 .gf-pause-title {
   min-height: 42px;

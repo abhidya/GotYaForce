@@ -2,11 +2,29 @@
  * SelectDifficulty — per reference `challenge-2-select-difficulty.png`.
  *
  * Three gears on colored oval pads = the GF-energy budget that becomes the force
- * LIMIT: NORMAL 1500 / TUFF 2000 / INSANE 2500. Blue gridded backdrop, gold
- * outlined "SELECT DIFFICULTY" title, B BACK / A CONFIRM legend. The selected pad
- * is ringed in black (matching the capture's dark selection ring).
+ * LIMIT: NORMAL 1500 / TUFF 2000 / INSANE 2500.
+ *
+ * Surface: the exported `vsel00` scene GLB is mounted as atmospheric backdrop
+ * decoration (its pad/gear/backdrop geometry — see
+ * UI_SCENE_LAYOUTS.vsel00.semantics.difficulty — shares one 165-model archive
+ * with every other vsel/challenge-select sub-menu and 40 unrelated stage-preview
+ * dioramas, with no per-sub-menu model grouping recoverable from the export
+ * metadata, so isolating just the difficulty cluster for a crisp full-opacity
+ * render was not reliable). The three pad tiles themselves use the REAL
+ * captured native frame (`reference/captures/challenge-2-select-difficulty.png`
+ * — the same "real exported/captured asset" convention MainMenu.ts already
+ * uses for its desk backdrop) cropped per-tile, since that frame already has
+ * the authentic baked "GF ENERGY <n> <NAME>" art pixel-for-pixel — there is no
+ * separate 2D pad/gear texture in the export distinct from the 3D geometry, and
+ * the value/name is fixed per difficulty (not runtime-dynamic data), so a
+ * static real capture is a more faithful surface than a CSS/bitmap-font
+ * reconstruction. The title uses the real exported ascii.tpl bitmap font (see
+ * bitmapText.ts). Selection highlight + motion system + menu-input wiring are
+ * unchanged.
  */
 
+import { bitmapText, setBitmapText } from "../bitmapText.js";
+import { captureCropImg } from "../captureCrop.js";
 import { el, legendItem } from "../dom.js";
 import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
 import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
@@ -15,20 +33,27 @@ import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 const DIFFICULTY_LAYOUT = UI_SCENE_LAYOUTS.vsel00.semantics.difficulty;
 
+const CAPTURE = new URL(
+  "../../../reference/captures/challenge-2-select-difficulty.png",
+  import.meta.url,
+).href;
+/** Native capture is 2560x1966; crop boxes below are in that pixel space. */
+const CAPTURE_W = 2560;
+
 export type Difficulty = "normal" | "tuff" | "insane";
 
 interface DiffEntry {
   key: Difficulty;
   energy: number;
   name: string;
-  gear: string; // gear color css
-  pad: string; // oval pad color css
+  /** Pixel crop box (native capture space) isolating this pad/gear tile. */
+  crop: { x: number; y: number; w: number; h: number };
 }
 
 const ENTRIES: readonly DiffEntry[] = [
-  { key: "normal", energy: 1500, name: "NORMAL", gear: "linear-gradient(#79d957,#2f9e2f)", pad: "linear-gradient(#3aa83a,#1f7a1f)" },
-  { key: "tuff", energy: 2000, name: "TUFF", gear: "linear-gradient(#e6e9ee,#a9afba)", pad: "linear-gradient(#ff9a3c,#e06a18)" },
-  { key: "insane", energy: 2500, name: "INSANE", gear: "linear-gradient(#ffd86b,#f3a800)", pad: "linear-gradient(#ff5a4f,#c41010)" },
+  { key: "normal", energy: 1500, name: "NORMAL", crop: { x: 90, y: 640, w: 825, h: 845 } },
+  { key: "tuff", energy: 2000, name: "TUFF", crop: { x: 964, y: 787, w: 687, h: 698 } },
+  { key: "insane", energy: 2500, name: "INSANE", crop: { x: 1668, y: 768, w: 764, h: 717 } },
 ];
 
 export interface SelectDifficultyOptions {
@@ -58,16 +83,27 @@ export function createSelectDifficulty(
   });
   const frame = el("div", { class: "gf-vsel-frame" });
   root.appendChild(frame);
-  frame.appendChild(el("div", { class: "gf-grid-bg gf-bg-blue" }));
   const selectScene = createUiSceneHost("gf-ui-scene gf-vsel-real-scene gf-vsel-difficulty-scene");
   frame.appendChild(selectScene);
-  frame.appendChild(el("h1", { class: "gf-title gf-vsel-title", text: "SELECT DIFFICULTY" }));
+  const title = bitmapText("gf-vsel-title-text");
+  setBitmapText(title, "SELECT DIFFICULTY", { bold: true, scale: 3, tint: "#ffd21e" });
+  frame.appendChild(el("h1", { class: "gf-title gf-vsel-title", attrs: { "aria-label": "SELECT DIFFICULTY" } }, [title]));
 
   const row = el("div", { class: "gf-row gf-vsel-options" });
   const tiles = new Map<Difficulty, HTMLButtonElement>();
   const motionItems: Array<{ element: HTMLElement; delayFrames: number; fromX: number; fromY: number }> = [];
 
   for (const [index, e] of ENTRIES.entries()) {
+    const pad = el(
+      "div",
+      {
+        class: "gf-diff-pad-crop",
+        style: { aspectRatio: `${e.crop.w} / ${e.crop.h}` } as Partial<CSSStyleDeclaration>,
+        attrs: { role: "img", "aria-label": `GF ENERGY ${e.energy} ${e.name}` },
+      },
+      [captureCropImg(CAPTURE, CAPTURE_W, e.crop)],
+    );
+
     const tile = el(
       "button",
       {
@@ -79,14 +115,7 @@ export function createSelectDifficulty(
           else select(e.key);
         },
       },
-      [
-        el("div", { class: "gf-pad", style: { background: e.pad } }, [
-          el("div", { class: "gf-menu-gear", style: { background: e.gear } }),
-          el("div", { class: "gf-energy-label", text: "GF ENERGY" }),
-          el("div", { class: "gf-energy-num", text: String(e.energy) }),
-        ]),
-        el("div", { class: `gf-energy-name gf-name-${e.key}`, text: e.name }),
-      ],
+      [pad],
     );
     tiles.set(e.key, tile);
     motionItems.push({

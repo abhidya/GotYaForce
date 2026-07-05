@@ -1,12 +1,12 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-04T20:20:58.906Z",
+  "generatedAt": "2026-07-05T03:44:33.717Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
     "screens": 10,
     "screensUsingAnyRealExportedAsset": 10,
-    "screensWithHandcodedSurfaceSignals": 8,
+    "screensWithHandcodedSurfaceSignals": 4,
     "screensWithRealSceneModel": 8,
     "publicUiTextureExportedImages": 831,
     "requestedUiSceneModelsExported": 13,
@@ -77,7 +77,7 @@
       ],
       "nextReplacement": "Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:71",
+      "fileRef": "apps/game/src/ui/screens/MainMenu.ts:72",
       "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
         {
@@ -126,42 +126,22 @@
       ],
       "nextReplacement": "Use the original Challenge select scene textures/models for the three GF-energy pads and cursor.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:46",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/SelectDifficulty.ts:72",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
+        {
+          "kind": "bitmap-font-helper",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
+          "exists": true
+        },
         {
           "kind": "mounted-ui-scene",
           "publicPath": "/ui/scenes/vsel00/model_00.dae",
           "exists": false
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "css-grid-backdrop",
-          "pattern": "gf-grid-bg",
-          "line": 60
-        },
-        {
-          "kind": "css-gradient-surface",
-          "pattern": "linear-gradient",
-          "line": 28
-        },
-        {
-          "kind": "css-menu-gear",
-          "pattern": "gf-menu-gear",
-          "line": 83
-        },
-        {
-          "kind": "css-option-pad",
-          "pattern": "gf-pad",
-          "line": 82
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 63
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
@@ -190,42 +170,22 @@
       ],
       "nextReplacement": "Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectPlayers.ts:36",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/SelectPlayers.ts:56",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
+        {
+          "kind": "bitmap-font-helper",
+          "symbol": "ASSETS.fontAscii",
+          "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
+          "exists": true
+        },
         {
           "kind": "mounted-ui-scene",
           "publicPath": "/ui/scenes/vsel01/model_00.dae",
           "exists": false
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "css-grid-backdrop",
-          "pattern": "gf-grid-bg",
-          "line": 48
-        },
-        {
-          "kind": "css-option-pad",
-          "pattern": "gf-pad",
-          "line": 74
-        },
-        {
-          "kind": "css-label-pill",
-          "pattern": "gf-pill",
-          "line": 75
-        },
-        {
-          "kind": "handcoded-player-silhouette",
-          "pattern": "personSilhouette",
-          "line": 28
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 32
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
@@ -254,8 +214,8 @@
       ],
       "nextReplacement": "Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/LoadBoxData.ts:23",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/LoadBoxData.ts:32",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
         {
           "kind": "named-texture",
@@ -264,23 +224,18 @@
           "exists": true
         },
         {
+          "kind": "named-texture",
+          "symbol": "ASSETS.vsSelectLabels",
+          "publicPath": "/ui/hsd/vsel00_mdl/texture_004_CI8.png",
+          "exists": true
+        },
+        {
           "kind": "mounted-ui-scene",
           "publicPath": "/ui/scenes/box00/model_00.dae",
           "exists": false
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "css-grid-backdrop",
-          "pattern": "gf-grid-bg",
-          "line": 28
-        },
-        {
-          "kind": "runtime-text-layout",
-          "pattern": "text:",
-          "line": 29
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     },
     {
@@ -358,7 +313,7 @@
       ],
       "nextReplacement": "Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:115",
+      "fileRef": "apps/game/src/ui/screens/SelectForce.ts:116",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
         {
@@ -394,17 +349,17 @@
         {
           "kind": "css-grid-backdrop",
           "pattern": "gf-grid-bg",
-          "line": 132
+          "line": 133
         },
         {
           "kind": "css-force-platform",
           "pattern": "gf-select-platform",
-          "line": 140
+          "line": 141
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 135
+          "line": 136
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -479,7 +434,7 @@
       ],
       "nextReplacement": "Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/ForceBuilder.ts:55",
+      "fileRef": "apps/game/src/ui/screens/ForceBuilder.ts:56",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
         {
@@ -510,22 +465,22 @@
         {
           "kind": "handcoded-force-grid",
           "pattern": "gf-force-grid",
-          "line": 93
+          "line": 94
         },
         {
           "kind": "handcoded-force-ring",
           "pattern": "gf-force-ring",
-          "line": 105
+          "line": 106
         },
         {
           "kind": "handcoded-force-slot",
           "pattern": "gf-slot",
-          "line": 182
+          "line": 183
         },
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 88
+          "line": 89
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -576,7 +531,7 @@
       ],
       "nextReplacement": "Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/BattleIntro.ts:26",
+      "fileRef": "apps/game/src/ui/screens/BattleIntro.ts:27",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
         {
@@ -607,7 +562,7 @@
         {
           "kind": "runtime-text-layout",
           "pattern": "text:",
-          "line": 52
+          "line": 54
         }
       ],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
@@ -727,7 +682,7 @@
       ],
       "nextReplacement": "Export and mount the real result/podium scenes instead of CSS rows and sky backdrop.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/Results.ts:70",
+      "fileRef": "apps/game/src/ui/screens/Results.ts:71",
       "coverageLevel": "mixed-real-assets-handcoded-surface",
       "realExportedAssetsUsed": [
         {
@@ -811,23 +766,17 @@
       ],
       "nextReplacement": "Find the original pause menu data/assets; current overlay is entirely recreated CSS/text.",
       "fileExists": true,
-      "fileRef": "apps/game/src/ui/screens/PauseMenu.ts:28",
-      "coverageLevel": "mixed-real-assets-handcoded-surface",
+      "fileRef": "apps/game/src/ui/screens/PauseMenu.ts:40",
+      "coverageLevel": "real-assets-only",
       "realExportedAssetsUsed": [
         {
-          "kind": "bitmap-font-helper",
+          "kind": "named-texture",
           "symbol": "ASSETS.fontAscii",
           "publicPath": "/ui/tpl/ascii/image_00_IA4.png",
           "exists": true
         }
       ],
-      "handcodedSurfaceSignals": [
-        {
-          "kind": "css-pause-box",
-          "pattern": "gf-pause-box",
-          "line": 33
-        }
-      ],
+      "handcodedSurfaceSignals": [],
       "replacementStatus": "Uses exported asset(s), but audit still treats CSS/SVG/DOM recreations as non-1:1 until original scene/layout is wired."
     }
   ],
@@ -1004,7 +953,16 @@
           "st0a",
           "st0b",
           "st0c",
-          "st0e"
+          "st0e",
+          "st11",
+          "st06",
+          "st07",
+          "st09",
+          "st0d",
+          "st0f",
+          "st10",
+          "st20",
+          "st1f"
         ],
         "adapterRef": "packages/missions/src/combat-config.ts:31",
         "bootstrapRef": "apps/game/src/sim/battleBootstrap.ts:11",
@@ -1026,11 +984,11 @@
         "fallback": "packages/missions/src/combat-config.ts:27"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:467",
+        "loadStage": "apps/game/src/main.ts:478",
         "fetchStageManifest": "packages/assets/src/index.ts:186",
         "loadStageCollision": "packages/assets/src/index.ts:296",
         "parseStageHitGrid": "packages/assets/src/index.ts:308",
-        "loadDefaultArena": "apps/game/src/main.ts:498",
+        "loadDefaultArena": "apps/game/src/main.ts:509",
         "loadConvertedStage": "apps/game/src/main.ts:null"
       },
       "collisionBounds": {
@@ -2566,7 +2524,7 @@
     "eyeBlendDenominator": 5,
     "halfBlend": 0.5,
     "sourceRef": "apps/game/src/sim/camera.generated.ts:6",
-    "runtimeRef": "apps/game/src/sim/camera.ts:60"
+    "runtimeRef": "apps/game/src/sim/camera.ts:63"
   },
   "borgAnimationCoverage": {
     "path": "research/asset-inventory/borg-animation-action-gaps.md",
@@ -2684,9 +2642,9 @@
     "battleStateHasItems": false,
     "battleRuntimeSpawnsDrops": false,
     "evidenceRefs": {
-      "battleState": "packages/combat/src/types.ts:542",
-      "deployNextBorg": "packages/combat/src/battle.ts:239",
-      "deathProcessing": "packages/combat/src/battle.ts:559",
+      "battleState": "packages/combat/src/types.ts:555",
+      "deployNextBorg": "packages/combat/src/battle.ts:240",
+      "deathProcessing": "packages/combat/src/battle.ts:569",
       "particleInventory": "research/asset-inventory/particle-effect-inventory.json",
       "hudInventory": "research/asset-inventory/ui-hud-assets.md"
     },

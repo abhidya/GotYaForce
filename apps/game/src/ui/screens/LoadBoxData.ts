@@ -4,6 +4,14 @@
  * The original asks for Memory Card Slot A and lets START skip. The browser port
  * has local extracted roster data already loaded, so A/START advance to the same
  * next Challenge state while preserving the native UX step.
+ *
+ * The title/rules copy previously here was handwritten CSS gold text. The real
+ * export has a baked text plate for exactly this screen: `vsel00_mdl` texture_004
+ * ("LOAD BOX DATA" / "Insert Memory Card into Slot A" / "and press the (A) Button.")
+ * is a shared multi-line label sheet used across several vsel/box screens (see
+ * ASSETS.vsSelectLabels, already used by BattleIntro.ts), so it is shown here as
+ * the real screen art instead of recreated copy. The real box00 DAE/GLB scene is
+ * unchanged.
  */
 
 import { ASSETS } from "../assets.js";
@@ -26,18 +34,17 @@ export function createLoadBoxData(
   opts: LoadBoxDataOptions,
 ): LoadBoxDataHandle {
   const root = el("div", { class: "gf-screen gf-load-box" });
-  root.appendChild(el("div", { class: "gf-grid-bg gf-bg-gold" }));
-  root.appendChild(el("h1", { class: "gf-title gf-load-title", text: "LOAD BOX DATA" }));
-  root.appendChild(el("div", { class: "gf-load-rule" }));
   root.appendChild(
-    el("div", { class: "gf-load-copy" }, [
-      el("img", {
-        class: "gf-load-memory-icon",
-        attrs: { src: ASSETS.memoryCardSlot, alt: "", "aria-hidden": "true" },
-      }),
-      el("div", { text: "Insert Memory Card into Slot A" }),
-      el("div", {}, ["and press the ", el("span", { class: "gf-inline-a", text: "A" }), " Button."]),
-    ]),
+    el("img", {
+      class: "gf-load-label-sheet",
+      attrs: { src: ASSETS.vsSelectLabels, alt: "Load Box Data — Insert Memory Card into Slot A and press the A Button." },
+    }),
+  );
+  root.appendChild(
+    el("img", {
+      class: "gf-load-memory-icon",
+      attrs: { src: ASSETS.memoryCardSlot, alt: "", "aria-hidden": "true" },
+    }),
   );
 
   const box = createBoxHost();

@@ -5,9 +5,20 @@
  * "1P PAUSE" title bar, then RESUME / QUIT. The highlighted item shows the green
  * A-button bullet and a filled blue pill. The "1P" reflects which player paused
  * (Challenge focus is 1P/2P; `playerLabel` remains for the TEAM UP branch).
+ *
+ * RECREATED (no original asset found): no pause-menu archive/layout data has
+ * been recovered from the export (see research/asset-coverage/real-asset-coverage.md,
+ * pause-menu row — `expectedSourceArchives` for this screen currently has no
+ * hits). All title/item text already renders through the real `ascii.tpl`
+ * bitmap font (bitmapText/setBitmapText, ASSETS.fontAscii — same convention as
+ * the battle HUD) rather than a CSS webfont. The box itself now uses an
+ * existing exported glossy roundel plate (`ASSETS.menuRoundelPlate`, from the
+ * vsel00 menu-select export) as its backing texture instead of a flat CSS
+ * gradient box, since no dedicated pause-box texture exists in the export.
  */
 
 import { bitmapText, setBitmapText } from "../bitmapText.js";
+import { ASSETS } from "../assets.js";
 import { el, faceButton } from "../dom.js";
 import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 
@@ -31,7 +42,13 @@ export function createPauseMenu(container: HTMLElement, opts: PauseMenuOptions):
   const order: PauseAction[] = ["resume", "quit"];
 
   const overlay = el("div", { class: "gf-pause-overlay" });
-  const box = el("div", { class: "gf-pause-box" });
+  const box = el("div", { class: "gf-pause-panel" });
+  box.appendChild(
+    el("img", {
+      class: "gf-pause-plate",
+      attrs: { src: ASSETS.menuRoundelPlate, alt: "", "aria-hidden": "true" },
+    }),
+  );
   const titleLabel = `${opts.playerLabel ?? "1P"} PAUSE`;
   const titleText = bitmapText("gf-pause-title-text");
   setBitmapText(titleText, titleLabel);

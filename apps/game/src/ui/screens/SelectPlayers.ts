@@ -3,14 +3,41 @@
  *
  * Real game: FIGHT ALONE (1P) vs TEAM UP (2P co-op), person silhouettes in a
  * selection ring with blue label pills + GameCube controllers underneath, on a
- * green gridded backdrop, B BACK / A CONFIRM legend. Challenge mode is kept to
- * the original two choices for now: 1 => FIGHT ALONE, 2 => TEAM UP.
+ * green backdrop.
+ *
+ * Surface: the exported `vsel01` scene GLB is mounted as atmospheric backdrop
+ * decoration, same rationale as SelectDifficulty.ts (vsel01 bundles every
+ * vsel/challenge-select sub-menu's geometry into one 165-model archive with no
+ * recoverable per-sub-menu grouping, so it cannot be reliably auto-fit to just
+ * this cluster). The silhouette/pill/controller tiles themselves use the REAL
+ * captured native frame (`reference/captures/challenge-3-select-players.png`)
+ * cropped per-tile — the same "real captured asset" convention MainMenu.ts
+ * already uses — since that frame already has the authentic baked
+ * silhouette/label/controller art pixel-for-pixel, and Challenge only ever
+ * offers these two fixed choices (not runtime-dynamic data). The title uses
+ * the real exported ascii.tpl bitmap font (see bitmapText.ts). Challenge mode
+ * is kept to the original two choices: 1 => FIGHT ALONE, 2 => TEAM UP.
  */
 
+import { bitmapText, setBitmapText } from "../bitmapText.js";
+import { captureCropImg, type CaptureCropBox } from "../captureCrop.js";
 import { el, legendItem } from "../dom.js";
 import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
 import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+
+const CAPTURE = new URL(
+  "../../../reference/captures/challenge-3-select-players.png",
+  import.meta.url,
+).href;
+/** Native capture is 2560x1966; crop boxes below are in that pixel space. */
+const CAPTURE_W = 2560;
+
+const TILE_CROPS: Record<number, CaptureCropBox> = {
+  1: { x: 300, y: 650, w: 730, h: 880 },
+  2: { x: 1440, y: 650, w: 890, h: 880 },
+};
+const ARROW_CROP: CaptureCropBox = { x: 1107, y: 1088, w: 115, h: 115 };
 
 export interface SelectPlayersOptions {
   /** Fired on confirm with the chosen player count (1..2 for Challenge). */
@@ -26,14 +53,6 @@ export interface SelectPlayersHandle {
   destroy: () => void;
 }
 
-function personSilhouette(label: string): HTMLElement {
-  return el("div", { class: "gf-person" }, [
-    el("span", { class: "gf-person-head" }),
-    el("span", { class: "gf-person-body" }),
-    el("span", { class: "gf-person-num", text: label }),
-  ]);
-}
-
 export function createSelectPlayers(
   container: HTMLElement,
   opts: SelectPlayersOptions,
@@ -46,20 +65,33 @@ export function createSelectPlayers(
   const root = el("div", { class: "gf-screen gf-vsel-screen gf-select-players" });
   const frame = el("div", { class: "gf-vsel-frame" });
   root.appendChild(frame);
-  frame.appendChild(el("div", { class: "gf-grid-bg gf-bg-green" }));
   const selectScene = createUiSceneHost("gf-ui-scene gf-vsel-real-scene gf-vsel-players-scene");
   frame.appendChild(selectScene);
-  frame.appendChild(el("h1", { class: "gf-title gf-vsel-title", text: "SELECT NUMBER OF PLAYERS" }));
+  // Shorter scale than SelectDifficulty's title: at scale 3 this 24-char string
+  // (vs. "SELECT DIFFICULTY"'s 17) overflows a 4:3 frame at common viewport sizes.
+  const title = bitmapText("gf-vsel-title-text");
+  setBitmapText(title, "SELECT NUMBER OF PLAYERS", { bold: true, scale: 2, tint: "#ffd21e" });
+  frame.appendChild(
+    el("h1", { class: "gf-title gf-vsel-title", attrs: { "aria-label": "SELECT NUMBER OF PLAYERS" } }, [title]),
+  );
 
   const row = el("div", { class: "gf-row gf-vsel-options" });
   const tiles = new Map<number, HTMLButtonElement>();
   const motionItems: Array<{ element: HTMLElement; delayFrames: number; fromX: number; fromY: number }> = [];
 
   for (let count = 1; count <= max; count++) {
-    const people = el("div", { class: `gf-people gf-people-${count}` });
-    for (let p = 1; p <= count; p++) people.appendChild(personSilhouette(String(p)));
-
     const label = count === 1 ? "FIGHT ALONE" : "TEAM UP";
+    const crop = TILE_CROPS[count]!;
+    const pad = el(
+      "div",
+      {
+        class: "gf-player-tile-crop",
+        style: { aspectRatio: `${crop.w} / ${crop.h}` } as Partial<CSSStyleDeclaration>,
+        attrs: { role: "img", "aria-label": `${count} player ${label}` },
+      },
+      [captureCropImg(CAPTURE, CAPTURE_W, crop)],
+    );
+
     const tile = el(
       "button",
       {
@@ -71,10 +103,7 @@ export function createSelectPlayers(
           else select(count);
         },
       },
-      [
-        el("div", { class: "gf-pad gf-player-pad" }, [people, el("div", { class: `gf-controller-row gf-controller-row-${count}` })]),
-        el("div", { class: "gf-pill", text: label }),
-      ],
+      [pad],
     );
     tiles.set(count, tile);
     motionItems.push({
@@ -87,7 +116,15 @@ export function createSelectPlayers(
   }
   frame.appendChild(row);
 
-  const centerArrow = el("div", { class: "gf-player-arrow gf-motion-object", attrs: { "aria-hidden": "true" } });
+  const centerArrow = el(
+    "div",
+    {
+      class: "gf-player-arrow gf-motion-object",
+      style: { aspectRatio: `${ARROW_CROP.w} / ${ARROW_CROP.h}` } as Partial<CSSStyleDeclaration>,
+      attrs: { "aria-hidden": "true" },
+    },
+    [captureCropImg(CAPTURE, CAPTURE_W, ARROW_CROP)],
+  );
   motionItems.push({ element: centerArrow, delayFrames: 2, fromX: 0, fromY: 60 });
   frame.appendChild(centerArrow);
 

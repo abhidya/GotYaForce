@@ -49,6 +49,13 @@ export const ASSETS = {
   briefingVs: "/ui/hsd/brif00_mdl/texture_000_IA4.png",
   briefingNames: "/ui/hsd/brif00_mdl/texture_001_CI4.png",
   vsSelectLabels: "/ui/hsd/vsel00_mdl/texture_004_CI8.png",
+  /**
+   * Generic glossy roundel disc from the vsel00 menu-select export. No original
+   * pause-menu archive/data is known (see PauseMenu.ts), so this reuses an
+   * existing exported plate/roundel texture as the pause box's backing plate
+   * instead of a pure CSS box.
+   */
+  menuRoundelPlate: "/ui/hsd/vsel00_mdl/texture_009_CMP.png",
   /** Results/podium exported scene texture sheets. */
   resultsWin: "/ui/hsd/rpot20_mdl/texture_000_RGBA8.png",
   resultsLose: "/ui/hsd/rpot23_mdl/texture_000_RGBA8.png",

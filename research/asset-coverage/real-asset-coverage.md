@@ -1,12 +1,12 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-04T20:20:58.906Z
+Generated: 2026-07-05T03:44:33.717Z
 
 ## Summary
 
 - Runtime screens audited: 10
 - Screens using at least one real exported UI asset: 10
-- Screens with handcoded/CSS/SVG surface signals: 8
+- Screens with handcoded/CSS/SVG surface signals: 4
 - Screens mounting a real exported UI scene model: 8
 - UI texture export: 831 images from apps/game/public/ui/manifest.json
 - Requested UI scene models exported: 13 from apps/game/public/ui/scenes/manifest.json
@@ -54,15 +54,15 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 | Screen | Coverage | Real exported assets used | Handcoded signals | Next replacement |
 | --- | --- | --- | --- | --- |
 | main-menu | real-assets-only | ASSETS.mainMenuOption<br>/ui/scenes/tl00/model_00.dae<br>/ui/scenes/optn00/model_00.dae | none | Export/wire the real 3D desk/menu scene instead of CSS ellipse gears and text labels. |
-| select-difficulty | mixed-real-assets-handcoded-surface | /ui/scenes/vsel00/model_00.dae | css-grid-backdrop:60<br>css-gradient-surface:28<br>css-menu-gear:83<br>css-option-pad:82<br>runtime-text-layout:63 | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
-| select-players | mixed-real-assets-handcoded-surface | /ui/scenes/vsel01/model_00.dae | css-grid-backdrop:48<br>css-option-pad:74<br>css-label-pill:75<br>handcoded-player-silhouette:28<br>runtime-text-layout:32 | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
-| load-box-data | mixed-real-assets-handcoded-surface | ASSETS.memoryCardSlot<br>/ui/scenes/box00/model_00.dae | css-grid-backdrop:28<br>runtime-text-layout:29 | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
-| select-force | mixed-real-assets-handcoded-surface | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>/models/pl0615/model_00.glb<br>/ui/scenes/entry00/model_00.dae | css-grid-backdrop:132<br>css-force-platform:140<br>runtime-text-layout:135 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
-| force-builder | mixed-real-assets-handcoded-surface | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath<br>/ui/scenes/unitall/model_00.dae | handcoded-force-grid:93<br>handcoded-force-ring:105<br>handcoded-force-slot:182<br>runtime-text-layout:88 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
-| battle-intro | mixed-real-assets-handcoded-surface | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:52 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
+| select-difficulty | real-assets-only | ASSETS.fontAscii<br>/ui/scenes/vsel00/model_00.dae | none | Use the original Challenge select scene textures/models for the three GF-energy pads and cursor. |
+| select-players | real-assets-only | ASSETS.fontAscii<br>/ui/scenes/vsel01/model_00.dae | none | Replace CSS silhouettes/pills/controllers with the real Challenge player-count select scene. |
+| load-box-data | real-assets-only | ASSETS.memoryCardSlot<br>ASSETS.vsSelectLabels<br>/ui/scenes/box00/model_00.dae | none | Keep the real box DAE, but replace handwritten gold screen copy/rules with original load/box scene assets. |
+| select-force | mixed-real-assets-handcoded-surface | ASSETS.entryControls<br>borgBannerPath<br>borgMiniPath<br>/models/pl0615/model_00.glb<br>/ui/scenes/entry00/model_00.dae | css-grid-backdrop:133<br>css-force-platform:141<br>runtime-text-layout:136 | Replace CSS platform/cost/name layout with the real force-slot/select scene and save/box data. |
+| force-builder | mixed-real-assets-handcoded-surface | ASSETS.unitAllAtlas<br>borgBannerPath<br>borgMiniPath<br>/ui/scenes/unitall/model_00.dae | handcoded-force-grid:94<br>handcoded-force-ring:106<br>handcoded-force-slot:183<br>runtime-text-layout:89 | Replace the CSS grid/ring/hex slots with original Edit Force layout data and model/collection assets. |
+| battle-intro | mixed-real-assets-handcoded-surface | ASSETS.briefingVs<br>ASSETS.vsSelectLabels<br>borgMiniPath<br>/ui/scenes/brif00/model_00.dae | runtime-text-layout:54 | Use the real briefing/entry scene sequencing, not only low-opacity extracted texture sheets over CSS plates. |
 | battle-hud | real-assets-only | ASSETS.faceMarkerRoundel<br>borgBannerPath<br>ASSETS.fontAscii | none | Map original HUD widgets, lock-on cursor, weapon prompts, and battle data instead of CSS/SVG gauges. |
 | results | mixed-real-assets-handcoded-surface | ASSETS.resultsWin<br>ASSETS.resultsLose<br>ASSETS.resultsStartPrompt<br>ASSETS.resultsGameOver<br>/ui/scenes/rpot20/model_00.glb<br>/ui/scenes/rpot23/model_00.glb<br>/ui/scenes/rpot20/model_00.dae<br>/ui/scenes/rpot23/model_00.dae | css-results-row:122<br>runtime-text-layout:122 | Export and mount the real result/podium scenes instead of CSS rows and sky backdrop. |
-| pause-menu | mixed-real-assets-handcoded-surface | ASSETS.fontAscii | css-pause-box:33 | Find the original pause menu data/assets; current overlay is entirely recreated CSS/text. |
+| pause-menu | real-assets-only | ASSETS.fontAscii | none | Find the original pause menu data/assets; current overlay is entirely recreated CSS/text. |
 
 ## UI Scene Export Coverage
 
@@ -86,7 +86,7 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 40 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:467, packages/assets/src/index.ts:186, packages/assets/src/index.ts:296, packages/assets/src/index.ts:308, apps/game/src/main.ts:498, apps/game/src/main.ts:null
+Runtime loader refs: apps/game/src/main.ts:478, packages/assets/src/index.ts:186, packages/assets/src/index.ts:296, packages/assets/src/index.ts:308, apps/game/src/main.ts:509, apps/game/src/main.ts:null
 
 Runtime collision parser: @gf/formats (bounds wired, triangles wired, walls wired, ceilings wired)
 
@@ -211,7 +211,7 @@ Knockback direction:
 
 Battle camera mode-1 blend:
 - Generated from boot.dol/decomp: yes (apps/game/src/sim/camera.generated.ts:6)
-- Runtime imports generated constants: yes (apps/game/src/sim/camera.ts:60)
+- Runtime imports generated constants: yes (apps/game/src/sim/camera.ts:63)
 - Runtime uses mode-1 blend: yes.
 - Shape/constants: eye previous weight 4; denominator 5; half blend 0.5.
 
@@ -243,7 +243,7 @@ Fly/boost mapping: fly state resolves through exported boost labels.
 
 Items/powerups in BattleState: no
 Runtime spawns item/drop/pickup entities: no
-Evidence refs: packages/combat/src/types.ts:542, packages/combat/src/battle.ts:239, packages/combat/src/battle.ts:559, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
+Evidence refs: packages/combat/src/types.ts:555, packages/combat/src/battle.ts:240, packages/combat/src/battle.ts:569, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
 Asset leads: item model ARZ count 90, as_icon documented yes, comhit documented yes.
 Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory.
 
