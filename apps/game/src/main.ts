@@ -834,7 +834,15 @@ function showBattleIntro(config: MissionBattleConfig): void {
       catalog: FORCE_CATALOG,
       onConfirm: () => {
         playConfirmSfx();
-        void enterBattle(config);
+        // Stall-resilience: enterBattle awaits stage-asset loading (createBattleBootstrap).
+        // Previously an unguarded `void enterBattle(...)` left an unhandled rejection and a
+        // permanently blank "loading" screen if that load ever failed (e.g. a bad stage id
+        // or a network hiccup on a stage asset) — the player had no back/advance path out.
+        // Recover to Select Force with a visible message instead of trapping input.
+        void enterBattle(config).catch((error: unknown) => {
+          console.error("[battle] failed to enter battle, returning to Select Force", error);
+          showSelectForce();
+        });
       },
       onBack: () => {
         playBackSfx();

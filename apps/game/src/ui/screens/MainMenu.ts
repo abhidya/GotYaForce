@@ -11,6 +11,7 @@
 
 import { ASSETS } from "../assets.js";
 import { el } from "../dom.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export type MainMenuMode =
@@ -178,23 +179,17 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
     }
   }
 
-  function onKey(ev: KeyboardEvent): void {
-    const key = ev.key.toLowerCase();
-    if (ev.key === "ArrowRight" || key === "d") {
+  function onMenuAction(action: MenuAction): void {
+    if (action === "right") {
       moveOnRing(1);
-      ev.preventDefault();
-    } else if (ev.key === "ArrowLeft" || key === "a") {
+    } else if (action === "left") {
       moveOnRing(-1);
-      ev.preventDefault();
-    } else if (ev.key === "ArrowDown" || key === "s") {
+    } else if (action === "down") {
       moveByDirection(0, 1);
-      ev.preventDefault();
-    } else if (ev.key === "ArrowUp" || key === "w") {
+    } else if (action === "up") {
       moveByDirection(0, -1);
-      ev.preventDefault();
-    } else if (ev.key === "Enter" || ev.key === " " || key === "j") {
+    } else if (action === "confirm") {
       opts.onSelect(selected);
-      ev.preventDefault();
     }
   }
 
@@ -221,14 +216,14 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
 
   setSelected(selected);
   container.appendChild(root);
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
 
   return {
     setSelected,
     getSelected: () => selected,
     destroy: () => {
       window.clearTimeout(transitionTimer);
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       for (const fn of teardown) fn();
       root.remove();
     },

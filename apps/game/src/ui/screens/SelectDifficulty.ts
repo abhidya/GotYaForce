@@ -9,6 +9,7 @@
 
 import { el, legendItem } from "../dom.js";
 import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
@@ -134,25 +135,18 @@ export function createSelectDifficulty(
     opts.onBack();
   }
 
-  function onKey(ev: KeyboardEvent): void {
-    if (!canInteract()) {
-      ev.preventDefault();
-      return;
-    }
+  function onMenuAction(action: MenuAction): void {
+    if (!canInteract()) return;
     const order = ENTRIES.map((e) => e.key);
     const idx = order.indexOf(selected);
-    if (ev.key === "ArrowRight") {
+    if (action === "right") {
       select(order[Math.min(idx + 1, order.length - 1)]!);
-      ev.preventDefault();
-    } else if (ev.key === "ArrowLeft") {
+    } else if (action === "left") {
       select(order[Math.max(idx - 1, 0)]!);
-      ev.preventDefault();
-    } else if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
+    } else if (action === "confirm") {
       void chooseSelected();
-      ev.preventDefault();
-    } else if (ev.key === "Escape" || ev.key.toLowerCase() === "b") {
+    } else if (action === "back") {
       void goBack();
-      ev.preventDefault();
     }
   }
 
@@ -165,14 +159,14 @@ export function createSelectDifficulty(
     camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 22, 0] },
     rotation: [-0.12, 0, 0],
   });
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
 
   return {
     getSelected: () => selected,
     destroy: () => {
       motion?.destroy();
       stopScene();
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       root.remove();
     },
   };

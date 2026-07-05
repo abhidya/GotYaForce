@@ -35,6 +35,7 @@ import {
 } from "../titleIntroScript.generated.js";
 import { createUiSceneHost } from "../sceneModel.js";
 import { el } from "../dom.js";
+import { subscribeMenuInput } from "../menuInput.js";
 
 export interface TitleIntroOptions {
   /** Called on confirm (click or Enter/Space/any key = "press start"). */
@@ -610,9 +611,27 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     opts.onEnter();
   }
 
+  // TitleIntro is "press ANY key/click to continue" — broader than the shared menu-input
+  // bus's mapped common-action key set (the bus deliberately only maps a fixed vocabulary
+  // of keys; TitleIntro wants literally any key). This raw window keydown listener is kept
+  // as a DOCUMENTED per-screen extra listener for that reason. It is intentionally NOT
+  // routed through subscribeMenuInput. Gamepad input, however, only ever reaches screens
+  // through the bus (there is no raw "any gamepad button" event to listen for), so this
+  // screen ALSO subscribes to the bus purely so a gamepad confirm/start press works here —
+  // both paths call the same enter().
+  //
+  // stopImmediatePropagation is required here: this raw listener and the bus's own window
+  // keydown listener are both registered on `window`. Without it, ONE keypress (e.g. Enter)
+  // double-advances the flow — this handler fires first and calls enter() -> showMenu(),
+  // which mounts MainMenu and subscribes it to the bus SYNCHRONOUSLY, then the bus's own
+  // listener (registered after this one, since TitleIntro is the first screen ever mounted)
+  // fires for that SAME event and re-dispatches "confirm" to the now-current subscriber
+  // (MainMenu), advancing it too. Swallowing the event here after handling it keeps a
+  // single keypress to a single action, matching every other screen's behavior.
   function onKey(ev: KeyboardEvent): void {
     enter();
     ev.preventDefault();
+    ev.stopImmediatePropagation();
   }
   function onClick(): void {
     enter();
@@ -621,12 +640,14 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
   window.addEventListener("keydown", onKey);
   root.addEventListener("click", onClick);
   container.appendChild(root);
+  const unsubscribeMenuInput = subscribeMenuInput(() => enter());
 
   return {
     destroy: () => {
       destroyed = true;
       window.removeEventListener("keydown", onKey);
       root.removeEventListener("click", onClick);
+      unsubscribeMenuInput();
       for (const fn of teardown) fn();
       root.remove();
     },

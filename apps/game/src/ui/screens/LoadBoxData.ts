@@ -8,6 +8,7 @@
 
 import { ASSETS } from "../assets.js";
 import { el, legendItem } from "../dom.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export interface LoadBoxDataOptions {
@@ -53,25 +54,22 @@ export function createLoadBoxData(
     opts.onConfirm();
   }
 
-  function onKey(ev: KeyboardEvent): void {
-    if (ev.key === " " || ev.key.toLowerCase() === "a") {
+  function onMenuAction(action: MenuAction): void {
+    if (action === "confirm") {
       confirm();
-      ev.preventDefault();
-    } else if (ev.key === "Enter" || ev.key.toLowerCase() === "s") {
+    } else if (action === "start") {
       (opts.onSkip ?? opts.onConfirm)();
-      ev.preventDefault();
-    } else if (ev.key === "Escape" || ev.key.toLowerCase() === "b") {
+    } else if (action === "back") {
       opts.onBack?.();
-      ev.preventDefault();
     }
   }
 
   container.appendChild(root);
   const stopBoxRender = mountGotchaBoxModel(box);
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
   return {
     destroy: () => {
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       stopBoxRender();
       root.remove();
     },

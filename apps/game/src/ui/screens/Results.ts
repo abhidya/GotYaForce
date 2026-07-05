@@ -13,6 +13,7 @@
 
 import { ASSETS } from "../assets.js";
 import { el } from "../dom.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
@@ -93,10 +94,9 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
   });
   root.appendChild(start);
 
-  function onKey(ev: KeyboardEvent): void {
-    if (ev.key === "Enter" || ev.key === " " || ev.key.toLowerCase() === "a") {
+  function onMenuAction(action: MenuAction): void {
+    if (action === "confirm" || action === "start") {
       opts.onAdvance?.();
-      ev.preventDefault();
     }
   }
 
@@ -169,13 +169,13 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
   }
 
   container.appendChild(root);
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
 
   return {
     render,
     destroy: () => {
       stopScene?.();
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       root.remove();
     },
   };

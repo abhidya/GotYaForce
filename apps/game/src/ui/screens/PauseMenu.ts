@@ -9,6 +9,7 @@
 
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { el, faceButton } from "../dom.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 
 export type PauseAction = "resume" | "quit";
 
@@ -77,31 +78,29 @@ export function createPauseMenu(container: HTMLElement, opts: PauseMenuOptions):
     else opts.onQuit();
   }
 
-  function onKey(ev: KeyboardEvent): void {
+  function onMenuAction(action: MenuAction): void {
     const idx = order.indexOf(selected);
-    if (ev.key === "ArrowDown" || ev.key === "ArrowRight") {
+    if (action === "down" || action === "right") {
       select(order[(idx + 1) % order.length]!);
-      ev.preventDefault();
-    } else if (ev.key === "ArrowUp" || ev.key === "ArrowLeft") {
+    } else if (action === "up" || action === "left") {
       select(order[(idx - 1 + order.length) % order.length]!);
-      ev.preventDefault();
-    } else if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
+    } else if (action === "confirm") {
       confirm();
-      ev.preventDefault();
-    } else if (ev.key === "Escape") {
+    } else if (action === "back" || action === "start") {
+      // Escape/B and START (pause toggle) both resume — matches the pre-refactor Escape
+      // behavior, and lets the same Start button that opened the pause menu close it.
       opts.onResume();
-      ev.preventDefault();
     }
   }
 
   select(selected);
   container.appendChild(overlay);
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
 
   return {
     getSelected: () => selected,
     destroy: () => {
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       overlay.remove();
     },
   };

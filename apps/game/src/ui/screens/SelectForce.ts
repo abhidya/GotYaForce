@@ -10,6 +10,7 @@
 import { createPublicAssetCatalog } from "@gf/assets";
 import { ASSETS, borgBannerPath, borgMiniPath } from "../assets.js";
 import { clear, el, legendItem } from "../dom.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
@@ -154,22 +155,20 @@ export function createSelectForce(
     ]),
   );
 
-  function onKey(ev: KeyboardEvent): void {
-    if (ev.key === "ArrowLeft" || ev.key.toLowerCase() === "q") {
+  function onMenuAction(action: MenuAction, dir?: -1 | 1): void {
+    if (action === "left") {
       selectSlot(selectedSlot - 1);
-      ev.preventDefault();
-    } else if (ev.key === "ArrowRight" || ev.key.toLowerCase() === "e") {
+    } else if (action === "right") {
       selectSlot(selectedSlot + 1);
-      ev.preventDefault();
-    } else if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
+    } else if (action === "switch") {
+      // L/R force cycling: dir carries which shoulder/dpad-edge fired (see menuInput.ts).
+      selectSlot(selectedSlot + (dir ?? 1));
+    } else if (action === "confirm") {
       opts.onConfirm(currentSlot());
-      ev.preventDefault();
-    } else if (ev.key.toLowerCase() === "x") {
+    } else if (action === "edit") {
       opts.onEdit(currentSlot());
-      ev.preventDefault();
-    } else if (ev.key === "Escape" || ev.key.toLowerCase() === "b") {
+    } else if (action === "back") {
       opts.onBack?.();
-      ev.preventDefault();
     }
   }
 
@@ -269,14 +268,14 @@ export function createSelectForce(
     rotation: [-0.12, 0, 0],
     maxModels: UI_SCENE_LAYOUTS.entry00.modelCount,
   });
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action, event.dir));
 
   return {
     destroy: () => {
       leadModelToken += 1; // cancel any in-flight async lead-model mount
       stopLeadModel?.();
       stopEntryScene();
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       root.remove();
     },
   };

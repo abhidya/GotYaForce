@@ -9,6 +9,7 @@
 import type { MissionBattleConfig } from "@gf/missions";
 import { ASSETS, borgMiniPath } from "../assets.js";
 import { el, legendItem } from "../dom.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
@@ -71,13 +72,11 @@ export function createBattleIntro(
     ]),
   );
 
-  function onKey(ev: KeyboardEvent): void {
-    if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
+  function onMenuAction(action: MenuAction): void {
+    if (action === "confirm") {
       opts.onConfirm();
-      ev.preventDefault();
-    } else if (ev.key === "Escape" || ev.key.toLowerCase() === "b") {
+    } else if (action === "back") {
       opts.onBack?.();
-      ev.preventDefault();
     }
   }
 
@@ -89,11 +88,11 @@ export function createBattleIntro(
     rotation: [-0.12, 0, 0],
     maxModels: 27,
   });
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
 
   return {
     destroy: () => {
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       stopBriefingScene();
       root.remove();
     },

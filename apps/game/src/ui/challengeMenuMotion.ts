@@ -2,6 +2,18 @@ const FRAME_MS = 1000 / 60;
 const BANNER_ENTER_FRAMES = 10;
 const OPTION_ENTER_FRAMES = 15;
 const SELECT_PULSE_FRAMES = 10;
+/**
+ * Stall-resilience guard (see apps/game/src/ui/menuInput.ts header for the broader
+ * input-bus rationale): SelectDifficulty/SelectPlayers gate `confirm` on `isReady()` and
+ * `await motion.finish()` before advancing. Both are driven by this module's internal
+ * requestAnimationFrame loop. If rAF ever stalls (backgrounded tab that then gets a
+ * synthetic/replayed input event, a slow device dropping frames, a bug in the tween
+ * math), `ready` would stay false and `finish()`'s promise would never resolve — the
+ * player's confirm/back input would silently do nothing forever. This constant caps how
+ * long the "ready" gate and the "finish" promise are allowed to wait on the animation
+ * before proceeding anyway, matching the "hard timeout after mount" requirement.
+ */
+const STALL_GUARD_MS = 1500;
 
 export interface ChallengeMenuMotionItem {
   element: HTMLElement;
@@ -33,8 +45,20 @@ export function mountChallengeMenuMotion(
   let exitStartTime = 0;
   let exitPromise: Promise<void> | null = null;
   let resolveExit: (() => void) | null = null;
+  // Stall guard: fires once, STALL_GUARD_MS after mount, regardless of rAF health
+  // (setTimeout keeps running even if rAF is stuck/throttled). See STALL_GUARD_MS doc.
+  let stallGuardFired = false;
+  const stallGuardTimer = window.setTimeout(() => {
+    stallGuardFired = true;
+    if (!exiting) {
+      ready = true;
+      root.dataset["motionReady"] = "true";
+    }
+    resolveExit?.(); // if finish() is already pending, unblock it too
+  }, STALL_GUARD_MS);
 
   if (reducedMotion) {
+    window.clearTimeout(stallGuardTimer);
     root.dataset["motionReady"] = "true";
     root.style.setProperty("--gf-title-offset-y", "0%");
     root.style.setProperty("--gf-title-scale", "1");
@@ -143,7 +167,7 @@ export function mountChallengeMenuMotion(
   raf = window.requestAnimationFrame(tick);
 
   return {
-    isReady: () => ready,
+    isReady: () => ready || stallGuardFired,
     pulseSelected: (element) => {
       if (selected && selected !== element) {
         selected.style.removeProperty("--gf-select-scale");
@@ -158,6 +182,7 @@ export function mountChallengeMenuMotion(
     },
     finish: () => {
       if (!alive) return Promise.resolve();
+      if (stallGuardFired) return Promise.resolve(); // never block on a stalled rAF loop
       if (exiting) return exitPromise ?? Promise.resolve();
       exiting = true;
       ready = false;
@@ -171,6 +196,7 @@ export function mountChallengeMenuMotion(
     },
     destroy: () => {
       alive = false;
+      window.clearTimeout(stallGuardTimer);
       if (raf) window.cancelAnimationFrame(raf);
       resolveExit?.();
       resolveExit = null;

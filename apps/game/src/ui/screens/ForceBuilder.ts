@@ -17,6 +17,7 @@
 
 import { el, legendItem, clear } from "../dom.js";
 import { ASSETS, borgBannerPath, borgMiniPath } from "../assets.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
@@ -258,26 +259,25 @@ export function createForceBuilder(
     opts.onChange?.([...force], totalCost(), remain());
   }
 
-  function onKey(ev: KeyboardEvent): void {
-    if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
+  function onMenuAction(action: MenuAction): void {
+    if (action === "confirm") {
       if (remain() >= 0 && force.length > 0) opts.onConfirm([...force]);
-      ev.preventDefault();
-    } else if (ev.key === "Escape" || ev.key === "Backspace" || ev.key.toLowerCase() === "b") {
+    } else if (action === "back" || action === "start") {
+      // Both B/Escape (original: Escape/Backspace/B) and START (legend: START=QUIT) quit.
       opts.onQuit?.();
-      ev.preventDefault();
     }
   }
 
   renderAll();
   container.appendChild(root);
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
 
   return {
     getForce: () => [...force],
     totalCost,
     destroy: () => {
       for (const stop of teardown) stop();
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       root.remove();
     },
   };

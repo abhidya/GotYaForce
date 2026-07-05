@@ -9,6 +9,7 @@
 
 import { el, legendItem } from "../dom.js";
 import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
+import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export interface SelectPlayersOptions {
@@ -124,23 +125,16 @@ export function createSelectPlayers(
     opts.onBack();
   }
 
-  function onKey(ev: KeyboardEvent): void {
-    if (!canInteract()) {
-      ev.preventDefault();
-      return;
-    }
-    if (ev.key === "ArrowRight") {
+  function onMenuAction(action: MenuAction): void {
+    if (!canInteract()) return;
+    if (action === "right") {
       select(Math.min(selected + 1, max));
-      ev.preventDefault();
-    } else if (ev.key === "ArrowLeft") {
+    } else if (action === "left") {
       select(Math.max(selected - 1, 1));
-      ev.preventDefault();
-    } else if (ev.key === "Enter" || ev.key.toLowerCase() === "a") {
+    } else if (action === "confirm") {
       void chooseSelected();
-      ev.preventDefault();
-    } else if (ev.key === "Escape" || ev.key.toLowerCase() === "b") {
+    } else if (action === "back") {
       void goBack();
-      ev.preventDefault();
     }
   }
 
@@ -153,14 +147,14 @@ export function createSelectPlayers(
     camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 22, 0] },
     rotation: [-0.12, 0, 0],
   });
-  window.addEventListener("keydown", onKey);
+  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
 
   return {
     getSelected: () => selected,
     destroy: () => {
       motion?.destroy();
       stopScene();
-      window.removeEventListener("keydown", onKey);
+      unsubscribeMenuInput();
       root.remove();
     },
   };
