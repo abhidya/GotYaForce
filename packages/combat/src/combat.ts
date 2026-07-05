@@ -2290,7 +2290,10 @@ function spawnSpecialProjectiles(
       hitstun: Math.max(1, Math.round(SPECIAL.HITSTUN * tier.hitstun)),
       // Per-move MULTIPLIER (applyHit derives the base from the projectile's damage record).
       knockback: specialDef.knockbackMultiplier * tier.knockback,
-      homingTurn: SHOT.HOMING_TURN,
+      // X-special projectiles keep in-flight homing only when the wiki move name evidences a
+      // homing weapon (same rule as B-shots after the straight-flight fix); missile-named
+      // specials are the common case. TUNED rate.
+      homingTurn: /missile|homing|seeker/i.test(specialDef.moveName ?? "") ? SHOT.HOMING_TURN : 0,
       // Same spawn-time aim-cone gate as gun projectiles (FUN_8006c334, chunk_0009.c:1995/3841).
       homingTarget: homingTargetForSpawn(b, all, muzzlePos, fwd),
       // ROM attack-object target +0xcc for the results DODGE counters (aimed vs stray).
@@ -2469,12 +2472,29 @@ function spawnProjectile(
     z: b.pos.z + fwd.z * (shotDef.muzzleForwardOffset ?? MUZZLE_OFFSET.forward),
   };
   const flightVisual = shotFlightVisualForBorgId(b.borgId);
+  // FIRE-TIME AIM (source-shaped): the ROM's lock-relative firing aims the shot AT the
+  // locked target when it sits inside the muzzle aim cone at the moment of fire — the full
+  // 3D muzzle→target direction, vertical included — and the bullet then flies STRAIGHT.
+  // Playtest confirmed the old model (horizontal fwd + universal in-flight homing) reads
+  // wrong: standard shots must not curve mid-flight. In-flight steering survives only on
+  // weapons with homing evidence (actionProfiles homingTurn provenance). Multi-shot fans
+  // (yawOffset != 0) keep their spread direction around the facing.
+  const aimUid = homingTargetForSpawn(b, all, muzzlePos, fwd);
+  let flightDir = fwd;
+  if (aimUid && yawOffset === 0) {
+    const tgt = all.find((o) => o.uid === aimUid);
+    if (tgt) {
+      const to = sub(add(tgt.pos, { x: 0, y: SHOT.AIM_TARGET_Y, z: 0 }), muzzlePos);
+      const d = len(to);
+      if (d > 1e-6) flightDir = scale(to, 1 / d);
+    }
+  }
   return {
     uid: `proj_${projCounter++}`,
     ownerUid: b.uid,
     team: b.team,
     pos: muzzlePos,
-    vel: scale(fwd, shotDef.speed * tier.speed),
+    vel: scale(flightDir, shotDef.speed * tier.speed),
     damage: shotDef.damageMultiplier * tier.damage,
     hitstun: Math.max(1, Math.round(SHOT.HITSTUN * shotDef.hitstunMultiplier * tier.hitstun)),
     // Per-move MULTIPLIER (applyHit derives the base from the projectile's damage record).

@@ -190,7 +190,7 @@ function meleeDef(borg, families, actionRecord, primary) {
   };
 }
 
-function shotDef(borg, families, actionRecord, bChargeMove, familyKind) {
+function shotDef(borg, families, actionRecord, bChargeMove, familyKind, bMove) {
   const shot = numberOr(borg.shot, 0);
   if (shot <= 0) return null;
 
@@ -238,9 +238,13 @@ function shotDef(borg, families, actionRecord, bChargeMove, familyKind) {
     spreadRadians: rapid ? 0.055 : heavy ? 0.025 : 0,
     speed: heavy ? 18 : beam ? 30 : flame ? 18 : gun ? 28 : 22,
     lifetime: heavy ? 54 : beam ? 46 : flame ? 44 : 40,
-    // Per-family homing (TUNED): beams track well, ballistic guns only slightly, lobbed
-    // heavy shells barely at all. Rapid multi-shot guns get low homing so the spread reads.
-    homingTurn: beam ? 0.045 : flame ? 0.03 : heavy ? 0.02 : rapid ? 0.05 : gun ? 0.06 : 0.075,
+    // Homing: ZERO for standard B-shots (playtest-confirmed + source-shaped: the ROM aims at
+    // the locked target AT FIRE TIME — full 3D muzzle->target direction — and the bullet
+    // flies STRAIGHT; the steer mechanism FUN_8006c1c8 exists but only specific weapons use
+    // it, and universal per-family homing was a TUNED guess that read wrong in play).
+    // In-flight homing survives only where the OBSERVED_WIKI B-move NAME evidences a homing
+    // weapon (missile/homing/seeker), at a single TUNED rate.
+    homingTurn: /missile|homing|seeker/i.test(bMove?.name ?? "") ? 0.05 : 0,
     hitRadius: heavy ? 58 : flame ? 46 : beam ? 34 : 35,
     // Per-family muzzle origin (TUNED): replaces the old flat 30/20. No decoded per-borg muzzle
     // node exists in the asset inventories (weapon-attachment-map only lists archive-level
@@ -337,11 +341,14 @@ async function main() {
     const moveProfile = moveProfilesById[id] ?? null;
     const familyKind = familyKindById[id] ?? null;
     const bChargeMove = wikiMoveByButton(moveProfile, "B Charge");
+    // EXACT "B" button match only (no prefix fallback — that would match "B Charge" too):
+    // the homing-evidence test reads the plain B-shot's wiki name.
+    const bMove = (moveProfile?.moves ?? []).find((m) => (m.button ?? "") === "B") ?? null;
     const xMove = wikiMoveByButton(moveProfile, "X");
     const families = Object.keys(weaponRecord?.families ?? {}).sort();
     const primary = choosePrimary(borg, families);
     const melee = meleeDef(borg, families, actionRecord, primary);
-    const shot = shotDef(borg, families, actionRecord, bChargeMove, familyKind);
+    const shot = shotDef(borg, families, actionRecord, bChargeMove, familyKind, bMove);
     const special = specialDef(borg, families, primary, xMove, familyKind);
 
     const noteParts = [

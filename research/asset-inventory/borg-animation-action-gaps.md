@@ -1,6 +1,6 @@
 # Borg Animation Action Gaps
 
-Generated: 2026-07-04T03:49:53.551Z
+Generated: 2026-07-05T05:58:44.741Z
 
 Scope: `apps/game/public/models/pl*/anim_index.json`
 Canonical app slots: `idle`, `move`, `dash_fwd`, `dash_back`, `dash_left`, `dash_right`, `jump`, `fly`, `shoot`, `melee`, `special`, `hit`, `death`

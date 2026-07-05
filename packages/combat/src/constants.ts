@@ -288,10 +288,16 @@ export const SHOT = {
    *  of flooding the arena. NOTE: per-borg shot lifetimes in data/actionProfiles.json are
    *  separate TUNED values owned by that dataset; this constant is the default/fallback. */
   LIFETIME: 600,
-  /** Homing turn rate toward lockTarget (radians/frame); 0 = straight. TUNED magnitude — the
-   *  MECHANISM (per-frame angle-clamped 3D steer) is the ROM's FUN_8006c1c8
-   *  (chunk_0009.c:1947); the per-projectile clamp value comes from undumped params. */
-  HOMING_TURN: 0.08,
+  /** Homing turn rate for EVIDENCED homing weapons only (radians/frame). The MECHANISM
+   *  (per-frame angle-clamped 3D steer) is the ROM's FUN_8006c1c8 (chunk_0009.c:1947); the
+   *  per-projectile clamp value comes from undumped params, so the rate stays TUNED.
+   *  Standard shots fly STRAIGHT with fire-time 3D aim at the locked target (playtest +
+   *  source-shaped — universal homing was wrong). */
+  HOMING_TURN: 0.05,
+  /** Fire-time aim height above the target's position origin (world units) — aims at center
+   *  mass instead of the feet. TUNED presentation of the ROM's lock-aim (exact aim node
+   *  undumped). */
+  AIM_TARGET_Y: 20,
   /** Hit radius (XZ units) for projectile-vs-borg. */
   HIT_RADIUS: 35,
   /** Frames between shots while firing. */

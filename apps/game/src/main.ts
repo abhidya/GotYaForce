@@ -237,11 +237,20 @@ function playCombatSfx(cue: CombatSfxCue): void {
 
 function playBattleEventSfx(cue: BattleEventCue): void {
   // Authored-audio suppression (DERIVED data, TUNED routing): when the LOCAL borg's current
-  // swing/charged release carries ROM-authored PATH-B sound events (BorgRuntime.meleeSounds,
-  // research/decomp/anim-sound-op-decode-2026-07-04.md), the slot-enter path below plays
-  // those exact samples — skip the generic TUNED cue here so the same swing/release doesn't
-  // double-play (the sim edge fires in the same tick as the slot edge).
-  if ((cue === "melee" || cue === "charge_release") && localActiveBorgHasAuthoredSwingAudio()) return;
+  // swing/charged release/X-special carries ROM-authored PATH-B sound events
+  // (BorgRuntime.meleeSounds, research/decomp/anim-sound-op-decode-2026-07-04.md), the
+  // slot-enter path below (onSlotEnter -> AUTHORED_SWING_SLOTS) plays those exact samples —
+  // skip the generic TUNED cue here so the same swing/release/special doesn't double-play (the
+  // sim edge fires in the same tick as the slot edge).
+  //
+  // This checks the SAME set (AUTHORED_SWING_SLOTS, defined below) rather than re-listing cue
+  // names here: battleAudioEvents currently only ever emits "melee"/"charge_release" (never the
+  // literal "melee_alt"/"charge_shot" members of the shared AnimSlot/BattleEventCue union), so a
+  // hardcoded 2-or-3-name check here looked complete but silently stopped covering
+  // AUTHORED_SWING_SLOTS the moment "special" (X-special) was added to that set — exactly the
+  // gap selfcheck-audio-wiring.mjs's parity check exists to catch. Sharing one Set makes the two
+  // call sites impossible to drift apart again.
+  if (AUTHORED_SWING_SLOTS.has(cue) && localActiveBorgHasAuthoredSwingAudio()) return;
   playCombatSfx(cue);
 }
 
@@ -258,7 +267,12 @@ function localActiveBorgHasAuthoredSwingAudio(): boolean {
 // at its anim-clock frame (60fps). TUNED residue, labeled honestly: the schedule hangs off
 // the renderer's slot edge + wall clock (not the ROM part-anim clock), mode-1 events play the
 // base id only (no anim-rate id±1 variant select), and positional modes play flat.
-const AUTHORED_SWING_SLOTS: ReadonlySet<string> = new Set(["melee", "melee_alt", "charge_shot"]);
+// "special" (X-special) added alongside melee/melee_alt/charge_shot: startSpecialAttack
+// (packages/combat combat.ts) resolves the SAME xLeaf.sounds -> BorgRuntime.meleeSounds bridge
+// for the X-move as the melee/charge paths use, so it was missing authored audio (falling
+// through to the "special" slot-edge fallback below) until this fix — see the matching
+// suppression-list fix in playBattleEventSfx above.
+const AUTHORED_SWING_SLOTS: ReadonlySet<string> = new Set(["melee", "melee_alt", "charge_shot", "special"]);
 /** Per-SAMPLE floor so 8 simultaneous AI swings can't stack the same whoosh into clipping;
  *  keys live in lastCombatSfxAt's se_* keyspace, disjoint from the per-EVENT cue keys. */
 const AUTHORED_SE_MIN_GAP_MS = 150;
@@ -1052,14 +1066,19 @@ function projectedTeammateMarkers(battle: Battle, focus: BorgRuntime | null): Te
 }
 
 // Pause handling (Start/Esc).
+//
+// Only the PAUSE-OPEN edge is polled here. Once paused, PauseMenu is mounted and subscribes
+// to the shared menuInput bus (menuInput.ts), which maps the same Escape/Enter/gamepad-Start
+// press to a "back"/"start" action and resumes via its own onResume callback below — so a
+// direct resumeBattle() call here as well would double-dispatch resume for one keypress (and,
+// now that onResume/onQuit play menu SFX, would have double-played the confirm/back cue too).
 let pausePressedLast = false;
 function pollPauseToggle(): void {
   if (!session || session.resolved) return;
   const pad = activeGamepad();
   const startPressed = keys.has("Escape") || keys.has("Enter") || (pad?.buttons[9]?.pressed ?? false);
-  if (startPressed && !pausePressedLast) {
-    if (session.paused) resumeBattle();
-    else pauseBattle();
+  if (startPressed && !pausePressedLast && !session.paused) {
+    pauseBattle();
   }
   pausePressedLast = startPressed;
 }
@@ -1068,8 +1087,16 @@ function pauseBattle(): void {
   if (!session || session.paused) return;
   session.paused = true;
   session.pauseHandle = createPauseMenu(ui, {
-    onResume: resumeBattle,
+    // PauseMenu treats "back"/"start" (Escape/Enter/gamepad-Start, routed through the bus) the
+    // same as an explicit RESUME confirm — see PauseMenu.ts onMenuAction — so this one callback
+    // covers every resume input path; playConfirmSfx here cannot double-fire against
+    // pollPauseToggle above, which no longer calls resumeBattle directly.
+    onResume: () => {
+      playConfirmSfx();
+      resumeBattle();
+    },
     onQuit: () => {
+      playBackSfx();
       session?.pauseHandle?.destroy();
       if (session) session.paused = false;
       endBattleToMenu();
