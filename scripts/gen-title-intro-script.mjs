@@ -18,7 +18,13 @@ const ADDRS = {
 };
 
 const OPCODE_COUNT = 0x16;
-const ACTOR_DESCRIPTOR_COUNT = 3;
+// DAT_8038a4ec is a FLAT array of 6 big-endian u16 borg ids (one per actor slot 0..5),
+// NOT three (borgId, variant) pairs. Proven at chunk_0006.c:7055
+// (Battle_SpawnActiveBorgFromSlotTables: `*(u16*)(actor+1000) = *(u16*)(global + slot*2 + 0x10)`)
+// and chunk_0046.c:1176-1192 (stride-2 / 6-slot layout: offsets +0x10/+0x12/+0x14/+0x16/+0x18/+0x1a).
+// The variant lives in a SEPARATE +0xa0 byte table seeded elsewhere, not here.
+// Slot 0 = 0x0615 (G RED), slot 1 = 0x000a (Sasuke pl000a), slots 2..5 = 0xffff (empty).
+const ACTOR_DESCRIPTOR_COUNT = 6;
 const MAX_SCRIPT_BYTES = 512;
 const MAX_WIDGET_DESCRIPTOR_BYTES = 0x100;
 
@@ -84,14 +90,12 @@ function readU32(buf, off) {
 function decodeActorDescriptors(buf) {
   const descriptors = [];
   for (let slot = 0; slot < ACTOR_DESCRIPTOR_COUNT; slot += 1) {
-    const off = slot * 4;
+    const off = slot * 2;
     const rawBorgId = readU16(buf, off);
-    const variant = readU16(buf, off + 2);
     descriptors.push({
       slot,
       rawBorgId,
       borgId: rawBorgId === 0xffff ? null : `pl${rawBorgId.toString(16).padStart(4, "0")}`,
-      variant: variant === 0xffff ? null : variant,
     });
   }
   return descriptors;
@@ -183,7 +187,7 @@ const scriptBuf = readAt(dol, ADDRS.script, MAX_SCRIPT_BYTES);
 const { commands, actorEvents, totalFrames, consumedBytes } = decodeCommands(scriptBuf, opcodeLengths, opcodeHandlers);
 const scriptBytes = Array.from(scriptBuf.subarray(0, consumedBytes));
 const actorDescriptors = decodeActorDescriptors(
-  readAt(dol, ADDRS.actorDescriptors, ACTOR_DESCRIPTOR_COUNT * 4),
+  readAt(dol, ADDRS.actorDescriptors, ACTOR_DESCRIPTOR_COUNT * 2),
 );
 const widgetDescriptors = decodeWidgetDescriptors(readAt(dol, ADDRS.widgetDescriptors, MAX_WIDGET_DESCRIPTOR_BYTES));
 

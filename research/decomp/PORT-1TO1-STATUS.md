@@ -358,11 +358,16 @@ shot kind selection.
   Runtime wiring of non-zero kinds (replace the kind-0-only lookup in attackHitData.ts
   with borgShotKinds) was data-only this pass — **NOW LANDED, see the 2026-07-04 "B-shot HIT
   kind resolved from guarded fire-site attribution" session at the top of this file.**
-- **Slice 6 title/desk intro LANDED**: TitleIntro.ts mounts the real tl00 scene + G-Red
-  playing the recovered desk sequence (anim ids 0,1,6,3,4,7 = g0 slots idle/move/jump_takeoff/
-  dash_back/dash_left/jump_land), press-start → menu (set_global_menu_mode(9) model); slot-1
-  actor left undecoded per the index note; asset-failure falls back to CSS. UI scenes
-  re-exported WITH textures (813 models, 256 textures — the blank-texture fix applied).
+- **Slice 6 title/desk intro LANDED**: TitleIntro.ts mounts the real tl00 scene with BOTH
+  desk actors composited into it through the authored HSD camera (2026-07-05: single scene,
+  no floating viewport). `DAT_8038a4ec` is a FLAT array of 6 big-endian u16 borg ids
+  (proven chunk_0006.c:7055 / chunk_0046.c:1176-1192): slot 0 = 0x0615 (G RED), slot 1 =
+  0x000a (Sasuke pl000a — Kakeru's partner borg), slots 2..5 = 0xffff empty. Both play the
+  recovered desk sequence (anim ids 0,1,6,3,4,7 = g0 slots idle/move/jump_takeoff/dash_back/
+  dash_left/jump_land); press-start → menu (set_global_menu_mode(9) model). Stage placement
+  is TUNED pending the tdc00..09.arc anim/pose-bank decode (those hold the real ROM actor
+  world coords); asset-failure falls back to the captured PNG. UI scenes re-exported WITH
+  textures (813 models, 256 textures — the blank-texture fix applied).
 - **Slice 8 mechanism**: timescale.ts ports the status(+0x5f4)/tier(+0x5f8) velocity system
   with exact DOL tables (gen-param-tier-tables.mjs: tier 16=×1.0 … 20=×2.366; haste
   {1.25,1.5,1.75}/slow {0.7,0.4,0.2}/freeze 0.03; burst ×1.5 = FLOAT_804373d8, upgrading

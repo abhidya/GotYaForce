@@ -327,20 +327,32 @@ export const TITLE_INTRO_ACTOR_DESCRIPTORS = [
   {
     "slot": 0,
     "rawBorgId": 1557,
-    "borgId": "pl0615",
-    "variant": 10
+    "borgId": "pl0615"
   },
   {
     "slot": 1,
-    "rawBorgId": 65535,
-    "borgId": null,
-    "variant": null
+    "rawBorgId": 10,
+    "borgId": "pl000a"
   },
   {
     "slot": 2,
     "rawBorgId": 65535,
-    "borgId": null,
-    "variant": null
+    "borgId": null
+  },
+  {
+    "slot": 3,
+    "rawBorgId": 65535,
+    "borgId": null
+  },
+  {
+    "slot": 4,
+    "rawBorgId": 65535,
+    "borgId": null
+  },
+  {
+    "slot": 5,
+    "rawBorgId": 65535,
+    "borgId": null
   }
 ] as const;
 
