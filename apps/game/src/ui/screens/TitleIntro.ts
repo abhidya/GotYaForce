@@ -12,33 +12,27 @@
  * animations through `zz_0057ff8_((&DAT_803c4e84)[slot], 5, anim_id)` ->
  * `zz_004beb8_(rate, actor, 0xf, action_group, anim_id, -1, -1)`.
  *
- * The decoded script plays these actor-slot/anim-id commands in order (title-main-menu-flow.md
- * "Decoded against DAT_8038a3b8..." table): slot0 anim 0, slot1 anim 0, slot0 anim 1, slot1
- * anim 1, slot0 anim 6, slot1 anim 6, slot0 anim 3, slot1 anim 3, slot1 anim 4, slot0 anim 4,
- * slot0 anim 7, slot1 anim 7 — i.e. anim ids 0,1,6,3,4,7 across two actor slots.
- *
- * anim id -> pl0615 exported clip (DERIVED: ids are the script's group-0 slot indices, which
- * line up 1:1 with pl0615's anim_index.json group-0 labels):
- *   0 = idle            (g0s0)
- *   1 = move             (g0s1)
- *   6 = jump_takeoff      (g0s6)
- *   3 = dash_back         (g0s3)
- *   4 = dash_left         (g0s4)
- *   7 = jump_land         (g0s7)
- *
- * Actor slot 0 is rendered here as the G-Red (pl0615) presentation model. Actor slot 1's
- * identity is explicitly UNDECODED in the source map (see the comment below) — we do not
- * spawn a second actor rather than guess who it is.
- *
- * Per-clip hold duration is TUNED (the exact script timing/frame-advance table
- * (`DAT_8038a3b8[opcode]`) is not fully decoded into wall-clock durations yet); each clip
- * plays once at its own baked length before advancing, then the whole sequence loops.
+ * `scripts/gen-title-intro-script.mjs` now dumps that bytecode, opcode lengths, actor
+ * descriptors, and widget descriptors directly from `boot.dol`. This component consumes the
+ * generated command stream instead of replaying a hand-authored clip list.
  */
 
 import * as THREE from "three";
+import {
+  fallGravityForBorgId,
+  groundRunSpeedForBorgId,
+  jumpVelocityForBorgId,
+} from "@gf/combat";
 import { createThreeAssetLoader } from "@gf/render";
 import { prepareImportedModel } from "@gf/render";
 
+import {
+  TITLE_INTRO_ACTOR_DESCRIPTORS,
+  TITLE_INTRO_ACTOR_EVENTS,
+  TITLE_INTRO_COMMANDS,
+  TITLE_INTRO_SCRIPT_SOURCE,
+  TITLE_INTRO_TOTAL_FRAMES,
+} from "../titleIntroScript.generated.js";
 import { createUiSceneHost } from "../sceneModel.js";
 import { el } from "../dom.js";
 
@@ -51,9 +45,10 @@ export interface TitleIntroHandle {
   destroy: () => void;
 }
 
+const GRED_DESCRIPTOR = TITLE_INTRO_ACTOR_DESCRIPTORS[0];
 /** G-Red (pl0615) is the confirmed desk-intro actor (DAT_8038a4ec first halfword = 0x0615). */
-const GRED_MODEL_URL = "/models/pl0615/model_00.glb";
-const GRED_BORG_ID = "pl0615";
+const GRED_BORG_ID = GRED_DESCRIPTOR.borgId ?? "pl0615";
+const GRED_MODEL_URL = `/models/${GRED_BORG_ID}/model_00.glb`;
 
 /** Native captured title/desk frame (same capture MainMenu's STORY entry binds). */
 const TITLE_CAPTURE_URL = new URL(
@@ -61,18 +56,15 @@ const TITLE_CAPTURE_URL = new URL(
   import.meta.url,
 ).href;
 
-/**
- * Desk-intro anim sequence, in script order, DERIVED from the decoded byte-code table in
- * title-main-menu-flow.md. Each entry names the exported pl0615 clip file for that group-0 slot.
- */
-const INTRO_ANIM_SEQUENCE: readonly { animId: number; label: string; file: string }[] = [
-  { animId: 0, label: "idle", file: "anim_g00_s00_idle.json" },
-  { animId: 1, label: "move", file: "anim_g00_s01_move.json" },
-  { animId: 6, label: "jump_takeoff", file: "anim_g00_s06_jump_takeoff.json" },
-  { animId: 3, label: "dash_back", file: "anim_g00_s03_dash_back.json" },
-  { animId: 4, label: "dash_left", file: "anim_g00_s04_dash_left.json" },
-  { animId: 7, label: "jump_land", file: "anim_g00_s07_jump_land.json" },
-];
+type TitleIntroCommand = (typeof TITLE_INTRO_COMMANDS)[number];
+type TitleActorEvent = (typeof TITLE_INTRO_ACTOR_EVENTS)[number];
+type PlayableTitleActorEvent = TitleActorEvent & { file: string; label: string };
+
+function isPlayableGRedEvent(event: TitleActorEvent): event is PlayableTitleActorEvent {
+  return event.slot === 0 && event.file !== null && event.label !== null;
+}
+
+const GRED_ACTOR_EVENTS = TITLE_INTRO_ACTOR_EVENTS.filter(isPlayableGRedEvent);
 
 type BakedClip = {
   name?: string;
@@ -81,8 +73,8 @@ type BakedClip = {
   bones: Array<{ i: number; pos?: number[]; rot?: number[]; scl?: number[] }>;
 };
 
-/** Same bake->AnimationClip conversion as sim/borgPresentationAssets.ts (kept local/minimal
- *  here since the title intro does not need the full borg-clip cache/fallback machinery). */
+/** Same bake->AnimationClip conversion as sim/borgPresentationAssets.ts. Bone-root X/Z remains
+ * stripped because the actor body is now advanced by source movement physics below. */
 function buildClip(json: BakedClip): THREE.AnimationClip {
   const fps = json.fps ?? 60;
   const times = Float32Array.from({ length: json.frameCount }, (_, frame) => frame / fps);
@@ -111,16 +103,106 @@ function buildClip(json: BakedClip): THREE.AnimationClip {
   return new THREE.AnimationClip(json.name ?? "mot", json.frameCount / fps, tracks);
 }
 
-async function loadIntroClips(): Promise<THREE.AnimationClip[]> {
+async function loadIntroClips(): Promise<Map<number, THREE.AnimationClip>> {
+  const uniqueEvents = Array.from(new Map(GRED_ACTOR_EVENTS.map((event) => [event.animId, event])).values());
   const clips = await Promise.all(
-    INTRO_ANIM_SEQUENCE.map(async (entry) => {
+    uniqueEvents.map(async (entry) => {
       const res = await fetch(`/models/${GRED_BORG_ID}/${entry.file}`);
       if (!res.ok) throw new Error(`Failed to load ${entry.file}: ${res.status}`);
       const json = (await res.json()) as BakedClip;
-      return buildClip(json);
+      return [entry.animId, buildClip(json)] as const;
     }),
   );
-  return clips;
+  return new Map(clips);
+}
+
+function commandPayloadByte(command: TitleIntroCommand, index: number): number | null {
+  return command.payload[index] ?? null;
+}
+
+type SourceActorPhysics = {
+  runSpeed: number;
+  jumpVelocity: number;
+  gravity: number;
+  dashSpeed: number;
+};
+
+type ActorMotionState = {
+  position: THREE.Vector3;
+  velocity: THREE.Vector3;
+  grounded: boolean;
+};
+
+const SOURCE_FPS = 60;
+const FIXED_FRAME_SECONDS = 1 / SOURCE_FPS;
+const LIGHT_BAR_ACTIVE_FRAMES = 90;
+const GRED_START_POSITION = new THREE.Vector3(-180, 0, 170);
+const GRED_RUN_DIRECTION = new THREE.Vector3(0.45, 0, -0.9).normalize();
+const GRED_DASH_BACK_DIRECTION = new THREE.Vector3(-0.25, 0, 1).normalize();
+const GRED_DASH_LEFT_DIRECTION = new THREE.Vector3(-1, 0, 0);
+const GRED_ACTOR_YAW = -0.24;
+
+function sourceActorPhysicsForBorgId(borgId: string): SourceActorPhysics {
+  const runSpeed = groundRunSpeedForBorgId(borgId) ?? 12;
+  return {
+    runSpeed,
+    jumpVelocity: jumpVelocityForBorgId(borgId),
+    gravity: fallGravityForBorgId(borgId),
+    // The title bytecode proves animation ids 3/4, but not a combat dash state. Use the
+    // same source run speed for title-layer translation so the montage stays in frame.
+    dashSpeed: runSpeed,
+  };
+}
+
+function createInitialActorMotion(): ActorMotionState {
+  return {
+    position: GRED_START_POSITION.clone(),
+    velocity: new THREE.Vector3(0, 0, 0),
+    grounded: true,
+  };
+}
+
+function applyPlanarVelocity(target: THREE.Vector3, direction: THREE.Vector3, speed: number): void {
+  target.set(direction.x * speed, target.y, direction.z * speed);
+}
+
+function applyActorEventMotion(
+  event: PlayableTitleActorEvent,
+  motion: ActorMotionState,
+  physics: SourceActorPhysics,
+): void {
+  switch (event.animId) {
+    case 0:
+      motion.velocity.set(0, 0, 0);
+      motion.grounded = true;
+      motion.position.y = 0;
+      break;
+    case 1:
+      applyPlanarVelocity(motion.velocity, GRED_RUN_DIRECTION, physics.runSpeed);
+      break;
+    case 6:
+      applyPlanarVelocity(motion.velocity, GRED_RUN_DIRECTION, physics.runSpeed);
+      motion.velocity.y = physics.jumpVelocity;
+      motion.grounded = false;
+      break;
+    case 3:
+      applyPlanarVelocity(motion.velocity, GRED_DASH_BACK_DIRECTION, physics.dashSpeed);
+      break;
+    case 4:
+      applyPlanarVelocity(motion.velocity, GRED_DASH_LEFT_DIRECTION, physics.dashSpeed);
+      break;
+    case 7:
+      motion.velocity.x = 0;
+      motion.velocity.z = 0;
+      if (motion.position.y <= physics.gravity * 3) {
+        motion.position.y = 0;
+        motion.velocity.y = 0;
+        motion.grounded = true;
+      }
+      break;
+    default:
+      break;
+  }
 }
 
 export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions): TitleIntroHandle {
@@ -129,7 +211,14 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
 
   const root = el("div", {
     class: "gf-screen gf-title-intro",
-    attrs: { role: "button", tabindex: "0", "aria-label": "Title screen — press start" },
+    attrs: {
+      role: "button",
+      tabindex: "0",
+      "aria-label": "Title screen — press start",
+      "data-gf-intro-source": TITLE_INTRO_SCRIPT_SOURCE.addresses.script,
+      "data-gf-intro-step": "0",
+      "data-gf-intro-frame": "0",
+    },
   });
 
   // Backdrop layers, back to front:
@@ -229,6 +318,12 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     }
   })();
 
+  const sourceTitle = el("div", { class: "gf-title-intro-source-title", text: "GOTCHA FORCE" });
+  root.appendChild(sourceTitle);
+
+  const lightBar = el("div", { class: "gf-title-intro-lightbar" });
+  root.appendChild(lightBar);
+
   const prompt = el("div", { class: "gf-title-intro-prompt", text: "PRESS START" });
   root.appendChild(prompt);
 
@@ -244,9 +339,6 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
 
   let actorDisposed = false;
   let actorFrame = 0;
-  let mixer: THREE.AnimationMixer | null = null;
-  let clock: THREE.Clock | null = null;
-  let sequenceTimer: ReturnType<typeof setTimeout> | null = null;
 
   void (async () => {
     try {
@@ -273,6 +365,9 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       const [model, clips] = await Promise.all([loader.loadGlbScene(GRED_MODEL_URL), loadIntroClips()]);
       if (actorDisposed) return;
 
+      const actorRoot = new THREE.Group();
+      actorRoot.name = "TitleIntro_GRed_SourcePhysicsRoot";
+      actorRoot.rotation.y = GRED_ACTOR_YAW;
       prepareImportedModel(model, {
         centerXZ: true,
         groundY: true,
@@ -280,10 +375,190 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
         metalness: 0,
         culling: "skinned-disabled",
       });
-      scene3.add(model);
+      actorRoot.add(model);
+      scene3.add(actorRoot);
 
-      mixer = new THREE.AnimationMixer(model);
-      clock = new THREE.Clock();
+      const mixer = new THREE.AnimationMixer(model);
+      const physics = sourceActorPhysicsForBorgId(GRED_BORG_ID);
+      const motion = createInitialActorMotion();
+      let activeAction: THREE.AnimationAction | null = null;
+      let activeEvent: PlayableTitleActorEvent | null = null;
+      let activeClipEndsAtFrame = 0;
+      let nextEventIndex = 0;
+      let commandIndex = 0;
+      let sourceFrame = 0;
+      let lightBarUntilFrame = -1;
+      let frameAccumulator = 0;
+      let lastNow = performance.now();
+
+      actorRoot.position.copy(motion.position);
+      actorHost.dataset["gfModelStatus"] = "loaded";
+      actorHost.dataset["gfIntroActor"] = GRED_BORG_ID;
+      actorHost.dataset["gfIntroRunSpeed"] = String(physics.runSpeed);
+      actorHost.dataset["gfIntroJumpVelocity"] = String(physics.jumpVelocity);
+      actorHost.dataset["gfIntroGravity"] = String(physics.gravity);
+      actorHost.dataset["gfIntroDashSpeed"] = String(physics.dashSpeed);
+
+      const resetActorMotion = (): void => {
+        motion.position.copy(GRED_START_POSITION);
+        motion.velocity.set(0, 0, 0);
+        motion.grounded = true;
+        actorRoot.position.copy(motion.position);
+        actorRoot.rotation.y = GRED_ACTOR_YAW;
+      };
+
+      const executeScriptCommand = (command: TitleIntroCommand): void => {
+        root.dataset["gfIntroFrame"] = String(sourceFrame);
+        root.dataset["gfIntroOpcode"] = `${command.opcode}@${command.offset}`;
+        switch (command.name) {
+          case "setSceneStep": {
+            const step = commandPayloadByte(command, 0);
+            if (step !== null) root.dataset["gfIntroStep"] = String(step);
+            break;
+          }
+          case "spawnTitleWidget": {
+            const slot = commandPayloadByte(command, 0);
+            const widget = commandPayloadByte(command, 1);
+            if (slot !== null && widget !== null) {
+              root.dataset["gfTitleWidget"] = `${slot}:${widget}`;
+            }
+            break;
+          }
+          case "selectWidgetOrEffect": {
+            const effect = commandPayloadByte(command, 0);
+            if (effect !== null) root.dataset["gfIntroEffect"] = String(effect);
+            break;
+          }
+          case "setTitleWidgetMode": {
+            const mode = commandPayloadByte(command, 0);
+            if (mode !== null) root.dataset["gfTitleWidgetMode"] = String(mode);
+            break;
+          }
+          case "fade": {
+            const fadeKind = commandPayloadByte(command, 0);
+            const fadeTarget = commandPayloadByte(command, 1);
+            const fadeStep = commandPayloadByte(command, 2);
+            root.dataset["gfIntroFade"] = `${fadeKind ?? -1}:${fadeTarget ?? -1}:${fadeStep ?? -1}`;
+            break;
+          }
+          case "setFadeTarget": {
+            const target = commandPayloadByte(command, 0);
+            if (target !== null) root.dataset["gfIntroFadeTarget"] = String(target);
+            break;
+          }
+          case "playSound": {
+            const bank = commandPayloadByte(command, 0);
+            const sound = commandPayloadByte(command, 1);
+            root.dataset["gfIntroSound"] = `${bank ?? -1}:${sound ?? -1}`;
+            break;
+          }
+          case "setAudioCue": {
+            const cue = commandPayloadByte(command, 0);
+            if (cue !== null) root.dataset["gfIntroAudioCue"] = String(cue);
+            break;
+          }
+          case "actorControl": {
+            const mode = commandPayloadByte(command, 0);
+            const slot = commandPayloadByte(command, 1);
+            const value = commandPayloadByte(command, 2);
+            actorHost.dataset["gfIntroActorCommand"] = `${slot ?? -1}:${mode ?? -1}:${value ?? -1}`;
+            if (slot === 0 && mode === 1) {
+              mixer.stopAllAction();
+              activeAction = null;
+              activeEvent = null;
+              activeClipEndsAtFrame = sourceFrame;
+              resetActorMotion();
+            }
+            break;
+          }
+          case "titleLightBar":
+            lightBarUntilFrame = sourceFrame + LIGHT_BAR_ACTIVE_FRAMES;
+            root.dataset["gfLightbar"] = "active";
+            break;
+          case "end":
+            root.dataset["gfIntroDone"] = "true";
+            break;
+          default:
+            break;
+        }
+      };
+
+      const executeScriptCommandsThroughFrame = (): void => {
+        while (commandIndex < TITLE_INTRO_COMMANDS.length) {
+          const command = TITLE_INTRO_COMMANDS[commandIndex];
+          if (!command || command.frame > sourceFrame) return;
+          executeScriptCommand(command);
+          commandIndex += 1;
+        }
+      };
+
+      const playActorEvent = (event: PlayableTitleActorEvent): void => {
+        const clip = clips.get(event.animId);
+        nextEventIndex += 1;
+        if (!clip) {
+          actorHost.dataset["gfIntroMissingAnim"] = String(event.animId);
+          return;
+        }
+        activeAction?.stop();
+        const action = mixer.clipAction(clip);
+        action.reset().setLoop(THREE.LoopOnce, 1);
+        action.clampWhenFinished = true;
+        action.play();
+        activeAction = action;
+        activeEvent = event;
+        activeClipEndsAtFrame = sourceFrame + Math.max(1, Math.ceil(clip.duration * SOURCE_FPS));
+        applyActorEventMotion(event, motion, physics);
+        actorHost.dataset["gfIntroAnim"] = event.label;
+        actorHost.dataset["gfIntroAnimId"] = String(event.animId);
+        actorHost.dataset["gfIntroAnimOffset"] = String(event.offset);
+        actorHost.dataset["gfIntroAnimSourceFrame"] = String(event.frame);
+      };
+
+      const startDueActorEvents = (): void => {
+        while (nextEventIndex < GRED_ACTOR_EVENTS.length) {
+          const nextEvent = GRED_ACTOR_EVENTS[nextEventIndex];
+          if (!nextEvent || nextEvent.frame > sourceFrame) return;
+          if (activeEvent && nextEvent.frame === activeEvent.frame && sourceFrame < activeClipEndsAtFrame) {
+            return;
+          }
+          playActorEvent(nextEvent);
+        }
+      };
+
+      const stepActorPhysics = (): void => {
+        motion.position.x += motion.velocity.x;
+        motion.position.y += motion.velocity.y;
+        motion.position.z += motion.velocity.z;
+        if (!motion.grounded || motion.velocity.y !== 0) {
+          motion.velocity.y -= physics.gravity;
+        }
+        if (motion.position.y <= 0) {
+          motion.position.y = 0;
+          motion.velocity.y = 0;
+          motion.grounded = true;
+        }
+        actorRoot.position.copy(motion.position);
+        actorHost.dataset["gfIntroPosition"] = [
+          motion.position.x.toFixed(1),
+          motion.position.y.toFixed(1),
+          motion.position.z.toFixed(1),
+        ].join(",");
+      };
+
+      const stepFixedFrame = (): void => {
+        if (sourceFrame < TITLE_INTRO_TOTAL_FRAMES) {
+          sourceFrame += 1;
+        }
+        root.dataset["gfIntroFrame"] = String(sourceFrame);
+        executeScriptCommandsThroughFrame();
+        startDueActorEvents();
+        stepActorPhysics();
+        mixer.update(FIXED_FRAME_SECONDS);
+        if (lightBarUntilFrame >= 0 && sourceFrame > lightBarUntilFrame) {
+          lightBarUntilFrame = -1;
+          root.dataset["gfLightbar"] = "idle";
+        }
+      };
 
       const resize = (): void => {
         const rect = actorHost.getBoundingClientRect();
@@ -299,30 +574,17 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       resize();
       teardown.push(() => observer.disconnect());
 
-      // Play the decoded anim-id sequence in order, one clip at a time, then loop the whole
-      // sequence — TUNED presentation timing (see file header), DERIVED clip order/ids.
-      let seqIndex = 0;
-      const playNext = (): void => {
-        if (actorDisposed || !mixer) return;
-        const entry = INTRO_ANIM_SEQUENCE[seqIndex % INTRO_ANIM_SEQUENCE.length]!;
-        const clip = clips[seqIndex % INTRO_ANIM_SEQUENCE.length]!;
-        mixer.stopAllAction();
-        const action = mixer.clipAction(clip);
-        action.reset().setLoop(THREE.LoopOnce, 1);
-        action.clampWhenFinished = true;
-        action.play();
-        seqIndex += 1;
-        actorHost.dataset["gfIntroAnim"] = entry.label;
-        const durationMs = Math.max(200, (clip.duration || 0.5) * 1000);
-        sequenceTimer = setTimeout(playNext, durationMs);
-      };
-      playNext();
-      actorHost.dataset["gfModelStatus"] = "loaded";
+      executeScriptCommandsThroughFrame();
 
-      const render = (): void => {
+      const render = (now = performance.now()): void => {
         if (actorDisposed) return;
-        const dt = clock?.getDelta() ?? 0;
-        mixer?.update(dt);
+        const dt = Math.min(0.1, Math.max(0, (now - lastNow) / 1000));
+        lastNow = now;
+        frameAccumulator += dt;
+        while (frameAccumulator >= FIXED_FRAME_SECONDS) {
+          stepFixedFrame();
+          frameAccumulator -= FIXED_FRAME_SECONDS;
+        }
         camera.lookAt(lookAt);
         renderer.render(scene3, camera);
         actorFrame = requestAnimationFrame(render);
@@ -332,7 +594,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       teardown.push(() => {
         actorDisposed = true;
         cancelAnimationFrame(actorFrame);
-        if (sequenceTimer !== null) clearTimeout(sequenceTimer);
+        mixer.stopAllAction();
         renderer.dispose();
       });
     } catch (error) {

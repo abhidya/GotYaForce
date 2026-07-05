@@ -65,3 +65,4 @@ hp_log.csv
 
 # Local extraction/build scratch.
 .tmp/
+.pnpm-store/

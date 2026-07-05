@@ -684,6 +684,67 @@
 .gf-title-intro-actor {
   z-index: 2;
 }
+.gf-title-intro-source-title {
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  z-index: 3;
+  max-width: 92%;
+  transform: translateX(-50%) scale(0.92);
+  transform-origin: 50% 50%;
+  opacity: 0;
+  color: #ffd21e;
+  font-size: clamp(30px, 7vh, 86px);
+  line-height: 0.92;
+  letter-spacing: 0;
+  white-space: nowrap;
+  -webkit-text-stroke: clamp(2px, 0.45vh, 5px) #071126;
+  paint-order: stroke fill;
+  text-shadow:
+    0 3px 0 #ffffff,
+    0 7px 0 rgba(0, 0, 0, 0.55),
+    0 0 18px rgba(255, 241, 126, 0.55);
+  pointer-events: none;
+  transition:
+    opacity 120ms linear,
+    transform 120ms linear;
+}
+.gf-title-intro[data-gf-intro-step="9"] .gf-title-intro-source-title,
+.gf-title-intro[data-gf-intro-step="10"] .gf-title-intro-source-title,
+.gf-title-intro[data-gf-intro-step="11"] .gf-title-intro-source-title,
+.gf-title-intro[data-gf-intro-step="12"] .gf-title-intro-source-title,
+.gf-title-intro[data-gf-intro-done="true"] .gf-title-intro-source-title {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+.gf-title-intro-lightbar {
+  position: absolute;
+  left: -38%;
+  top: 66%;
+  z-index: 4;
+  width: 42%;
+  height: clamp(4px, 0.8vh, 8px);
+  opacity: 0;
+  transform: skewX(-18deg);
+  transform-origin: 50% 50%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(97, 228, 255, 0.2) 18%,
+    #ffffff 50%,
+    rgba(120, 246, 255, 0.85) 70%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.95),
+    0 0 26px rgba(70, 224, 255, 0.88),
+    0 0 54px rgba(70, 224, 255, 0.42);
+  pointer-events: none;
+}
+.gf-title-intro[data-gf-lightbar="active"] .gf-title-intro-lightbar {
+  opacity: 1;
+  animation: gf-title-lightbar-sweep 700ms linear both;
+}
 .gf-title-intro-prompt {
   position: absolute;
   left: 50%;
@@ -692,12 +753,26 @@
   transform: translateX(-50%);
   color: var(--gf-yellow);
   font-size: clamp(18px, 3.4vw, 34px);
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   -webkit-text-stroke: clamp(1.5px, 0.28vw, 4px) #071126;
   paint-order: stroke fill;
   text-shadow: 0 3px 0 #ffffff, 0 6px 0 rgba(0, 0, 0, 0.5);
-  animation: gf-title-prompt-blink 1.4s ease-in-out infinite;
+  opacity: 0;
+  animation: none;
   pointer-events: none;
+}
+.gf-title-intro[data-gf-intro-step="12"] .gf-title-intro-prompt,
+.gf-title-intro[data-gf-intro-done="true"] .gf-title-intro-prompt {
+  opacity: 1;
+  animation: gf-title-prompt-blink 1.4s ease-in-out infinite;
+}
+@keyframes gf-title-lightbar-sweep {
+  from {
+    transform: translateX(0) skewX(-18deg);
+  }
+  to {
+    transform: translateX(340%) skewX(-18deg);
+  }
 }
 @keyframes gf-title-prompt-blink {
   0%, 55% { opacity: 1; }
