@@ -81,26 +81,34 @@ live at `state + 0x1604 + slot*0xc` (per `FUN_80056d28`). Two capture attempts:
    in the actor's **JOBJ (rendered joint tree)** translation, a deeper pointer chase
    (actor -> JOBJ root -> translation XYZ).
 
-**Conclusion:** the desk actor's world position is NOT a direct dereferenceable field. A
-third capture (3rd independent boot) ran a pointer-scan hunter: dumped `actor+0x00..0x800`,
-found 20 heap-pointer candidates, and dereferenced each 0x80 bytes deep. Findings:
-- `actor+0x3fc → 0x80be11c0` and `actor+0x530 → 0x8067cf00 → +0x28 → 0x80be1410` — the
-  `0x80be1xxx` region is the HSD JOBJ model tree (the rendered figure).
-- `actor+0x4ac → 0x807461c0` — small float values (5..30 range) = anim/bone data, not
-  world coords.
-- No candidate has a plausible world-coord XYZ triple (the desk scene is in thousands of
-  units; nothing in 50..20000 range appears in any direct deref).
+**Conclusion:** the desk actor's world position is NOT a direct dereferenceable field. Three
+follow-up captures (boots 3-5) progressively narrowed this:
 
-The desk figure stands at local origin `(0,0,0)` within a parent coordinate frame; the
-desk placement is the **HSD compound transform** (the parent→child joint matrix chain).
-Extracting the final world translation would require either (a) a breakpoint at the
-render/compose step that computes the JOBJ world matrix, reading the final translation
-there, or (b) walking the full parent chain from the JOBJ root. Both are deeper HSD
-scene-graph work, disproportionate for a presentation constant.
+- **Boot 3 (pointer scan):** 20 heap-pointer candidates in `actor+0x00..0x800`, dereffed
+  0x80-deep. `actor+0x3fc → 0x80be11c0` and `actor+0x530 → 0x8067cf00 → +0x28 → 0x80be1410`
+  looked like the model tree; no plausible world-coord XYZ triple in any direct deref.
+- **Boot 4 (JOBJ walk via HSD_JObjMakeMatrix layout):** dumped the HSD JOBJ field map from
+  `chunk_0071.c:3461-3521` (scale `+0x2c/30/34`, rotation `+0x38/3c/40`, translation
+  `+0x44/48/4c`, scale-cache ptr `+0x74`, parent `+0x0c`). Reading `0x80be11c0` as a JOBJ
+  yields **bogus fields** (`flags=0xffffffff`, `child=0x04050607` = mesh bytes, not a
+  pointer, `parent=0xffffffff`). So `actor+0x3fc` points at the **model geometry blob**,
+  NOT the JOBJ root. The real joint struct that renders this model references it via a
+  back-pointer from the HSD scene-graph root (the tl00 JOBJ tree), which is not stored in
+  the actor struct at any of the offsets scanned.
+
+The desk figure's world placement is computed in the **HSD render pipeline** (the JOBJ
+world-matrix compose in `HSD_JObjSetupMatrixSub` @0x80251908 / `PSMTXConcat` @0x8020af5c).
+Extracting the final translation would need either:
+- a back-pointer search from `0x80be11c0` to find which JOBJ renders it, then read that
+  JOBJ's cached world matrix after `HSD_JObjSetupMatrix_` runs, OR
+- a breakpoint at `HSD_JObjSetupMatrix_` @0x8024f5c8 (param_9/r4 = JOBJ) filtered to the
+  desk actor's joint, reading the resulting matrix.
+
+Both are deeper HSD scene-graph work — disproportionate for a presentation constant.
 
 **The port's TUNED `stageBaseForSlot` (`TitleIntro.ts`: ±240 X, +700 Z forward of the
 authored camera, y=3557) stays**, honestly labeled. Every *gameplay/data* aspect of the
-intro VM is runtime-confirmed across three independent boots; this is a visual-placement
+intro VM is runtime-confirmed across five independent boots; this is a visual-placement
 constant only.
 
 ## Net
