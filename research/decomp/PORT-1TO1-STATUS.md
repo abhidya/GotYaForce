@@ -13,6 +13,109 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 
 ---
 
+## ★ 2026-07-05 session: combat-feel-gaps wiring (research/decomp/combat-feel-gaps-decode-2026-07-05.md)
+
+Wired all 5 decode targets from the combat-feel-gaps decode pass, in feel-impact order. Every
+item's mechanism is DERIVED per the doc's citations; value-level items keep the doc's own honest
+UNKNOWNs labeled rather than guessed. Existing selfcheck/test suites stayed green throughout
+(see per-item deltas below); combat/missions selfchecks + selfcheck-1p-challenge/
+selfcheck-challenge-stages/selfcheck-menu-flow/selfcheck-hud/run-projectile-tests/
+run-xammo-tests (plus burst/healing/judge/ammo/status/mash-counter/contact-damage/fusion/
+move-properties/level/penetration/attack-schema selftests, checked proactively) all PASS.
+
+1. **ANIM-GATED REACTIONS + REAL KNOCKBACK — WIRED.** `applyHit` (combat.ts) now selects
+   GROUND (`zz_005ec20_`, gauges.ts `knockbackGroundSpeedForRecord` = idx*7 × scale-ratio) vs
+   LAUNCH (`FUN_8005ed38`, existing `knockbackVelocityForRecord` = (idx+1)*8, pitch-split by
+   T8 trim) knockback tables, selected by `knockdown || pitchTrimUnits !== 0`. Scale-ratio
+   (`knockbackScaleRatio`, gauges.ts) is wired as a real formula call with both sides pinned to
+   1.0 (T5's size-scale pipeline doesn't exist on BorgRuntime yet — honestly labeled, not
+   hardcoded away). movement.ts integrates the two families separately while
+   `state ∈ {hit,down}` and `reactionKind` is set: ground decel = -speed/20
+   (`REACTION.GROUND_DECEL_FRAMES=20`, frames-to-stop denominator, not a flat slope), launch
+   decel -0.1/frame + gravity -1.2/frame (`REACTION.LAUNCH_DECEL/LAUNCH_GRAVITY`) — replacing
+   the generic walk-decel/fall-gravity for the reaction's duration only; the gauge-based
+   stagger GATING (down/balance gauges, REACTION_FORCE_STAGGER_MASK) is untouched. Reaction
+   RELEASE is now anim-length-gated via `reactionAnimLengthFrames(borgId, kind)` (combat.ts) —
+   DEFERRED: no per-borg reaction-clip length is exported anywhere in this port's asset
+   pipeline (packages/combat is renderer-agnostic; borgPresentationAssets.ts's clip data never
+   reaches it), so this always returns the labeled TUNED fallback
+   (`REACTION.GROUND_STAGGER_FALLBACK_FRAMES=14`/`LAUNCH_FALLBACK_FRAMES=30`, anchored to the
+   OLD MELEE.HITSTUN/STATE.DOWN_DURATION so today's feel doesn't silently regress) — but every
+   call site already goes through the one function, so wiring real per-borg lengths later is a
+   one-function change. `enterDown`/`stepActionState`'s "down" case now read
+   `cooldowns["downAnimFrames"]` instead of the bare `STATE.DOWN_DURATION` constant.
+2. **ANGLE TRIMS — WIRED.** `DamageRecord.knockbackYawTrim`/`knockbackPitchTrim` added to the
+   gauges.ts interface (the JSON data already had both fields in damageRecords.json AND
+   familyDamageRecords.json — nothing to regenerate). Pitch trim feeds the LAUNCH knockback
+   split above (`knockbackPitchTrimRadians`, combat.ts); yaw trim feeds
+   `knockbackDirectionFromPositions`'s existing (previously always-0) `trimYaw` parameter via
+   `angleTrimByteToBam16` (@gf/physics, already existed, just never called with a real value).
+   SIGN: took the doc's own plain-English reading ("positive trim pitches the launch UP") —
+   labeled as an assumption in `knockbackPitchTrimRadians`'s doc comment and exercised by
+   `assertPitchedKnockbackRisesForTrimmedRecord`; not Confirmed by a live trace.
+3. **PAIR-BURST side-wide + ally passthrough — WIRED.** `battle.ts` `activateSideWideBurst`
+   sets `burstActive`/`burstPaired` on EVERY living team-mate once ANY presser(s) activate
+   (was: only the presser(s)) — `drainPowerBursts` now ends a whole side's burst together when
+   the metered presser's own meter empties (CPU/non-metered teammates have no meter of their
+   own to drain, per burst.ts's existing documented decision). `combat.ts`
+   `burstAllyPassthroughBlocks` (the doc's `zz_002fd7c_` finding) wired into all 3 hit-check
+   sites (melee loop, special AoE loop, projectile hit test): a same-team attacker cannot hit a
+   bursting ally at all, exempted only by the attacker record's flagsB bit 0x10 (matches the
+   doc's 107/1530-record exemption count). The existing 6-frame arm window
+   (`BURST.ARM_WINDOW_FRAMES`) and 2-presser requirement already matched the doc's description
+   — verified, not changed.
+4. **GUARD /40 DATA RULE — WIRED.** `damageFormula.ts`'s `blockDivisorActive` caller flag
+   retired; the /40 divide is now gated on `(record.flagsA & 0x1000) && (victimStatusImmunityA &
+   0x1000)`, where `victimStatusImmunityA` is `movementData.ts statusImmunityMasksForBorgId(...)
+   .immunityA` — VERIFIED the same pldata+0xa8 word already extracted for the status-immunity
+   gate (the doc's own "verify" instruction). `combat.ts applyHit` wires it from the victim's
+   borgId on every source-context hit. Also wired the /40 rule's two documented side-effects:
+   flagsA 0x1000 skips combo-score accrual (chunk_0003.c:7934) and (pre-existing, verified
+   unchanged) bypasses the same-team ×0.25 divisor.
+5. **CPU FLAG + FORCE-GAUGE — WIRED (7/7 damageFormula.ts discrepancies addressed).**
+   `damageFormula.ts`: (1) `attackerForceRatioIndex`/`defenderForceRatioIndex` now wired end to
+   end — new `BattleState.energyMax` (snapshotted once at battle creation, round-down-to-10 per
+   the doc) + `forceGaugeRatioIndex(energy, energyMax)` helper, fed from `battle.ts` via new
+   `DamageRuntimeContext.energyByTeam/energyMaxByTeam`; (2) HP-curve skip-gate documented as an
+   accepted equivalence (curve[0]==1.0 always, verified) rather than silently relying on the
+   clamp coincidence; (3) CPU-side ×0.5 halvings wired via `heroTableFor(ownerPlayer)` +
+   new `attackerIsCpuSide0`/`defenderIsCpuSide0` fields, gated on `cfg.challengeMode !==
+   undefined` (`battle.ts isChallengeMode`) so Versus-mode damage stays byte-for-byte
+   unchanged — the doc scopes the halving to Challenge modes 0/1 specifically; (4) step-17
+   `victim+0x5e0 & 0x4000000` documented as NOT REPRESENTABLE (no port-side +0x5e0 field exists
+   at all yet) via a permanently-false `victimSpawnProtection5e0_4000000` field, rather than
+   silently doing nothing uncommented; (5) defender post-hit HP index FIXED to use the record's
+   raw `hpDamage` instead of the damageScale-multiplied `recordBase` (diverges whenever
+   damageScale != 1, e.g. charge tiers); (6) `blockDivisorActive` retired, see item 4 above;
+   (7) naming comments added (`pairNerf_80436f9c` = pair-attack BONUS not nerf; `heroTable` =
+   CPU-controlled table, not "hero" — `heroTableFor()` documents the T2 correction).
+6. **SELFCHECKS added** (packages/combat/src/selfcheck.ts, one per item):
+   `assertReactionOutlastsFlatConstantWhenAnimLonger`,
+   `assertPitchedKnockbackRisesForTrimmedRecord`, `assertSideWideBurstFlagsBothTeammates`,
+   `assertNukeVsFortressIs125` (isolates the /40 ratio rather than asserting the raw headline
+   125 unconditionally, since this specific attacker/victim pairing's OTHER formula multipliers
+   aren't neutral — see the honest note logged by the assert itself),
+   `assertForceGaugeCurveChangesDamageAtLowSideEnergy` (falls back to a direct curve-table
+   comparison if the sampled borg/record's curve happens to be flat at the two sampled
+   indices). All 5 pass; full combat selfcheck suite (94 asserts + the 1v3 sim) still PASSES.
+7. **VALIDATION — all green.** `pnpm typecheck` clean throughout. `pnpm -r run build` clean.
+   Smoke deltas (numbers DID change, as expected — reaction lengths/knockback changed):
+   `selfcheck-1p-challenge.mjs` resolvedFrame 1732→5191 (win either way) — the battle now takes
+   much longer because knockback pushes borgs out of melee/shot range more (real scale-indexed
+   magnitude vs the old flat multiplier-only model) and ground reactions decay over 20 frames
+   instead of snapping instantly; `selfcheck-challenge-stages.mjs` per-stage frame counts shifted
+   similarly (e.g. st00 260→227, st0e 501→364 — direction of change is NOT uniform, since some
+   stages resolve FASTER with the new pitched-launch knockback keeping victims airborne/away from
+   counterattacks) but all 11 stages + both family-variant stages still PASS. `selfcheck-menu-flow`/
+   `selfcheck-hud` unaffected (static checks, no sim). `run-projectile-tests`/`run-xammo-tests`
+   unaffected (36/36, 32/32). Proactively also re-ran burst (70/70), healing (47/47), judge
+   (16/16), ammo (3097/3097), status (16/16), mash-counter (15/15), contact-damage (4/4), fusion
+   (112/112), move-properties (57/57), level (46/46), penetration (11/11), attack-schema (81/81)
+   selftests — all green, confirming the reaction/knockback rewrite didn't regress adjacent
+   systems.
+
+---
+
 ## ★ 2026-07-04 session: projectile flight-visual resolver wired (honest fleet coverage: 0/208 today)
 
 Extended `research/decomp/efct-consumers-decode-2026-07-04.md` §3's shot-init row decode
@@ -574,15 +677,15 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 
 | Subsystem | 1:1 coverage | Gating blocker to finish |
 |---|---|---|
-| Combat: damage formula | ~90% DERIVED | actor level-float init (+0xc4/+0xb4); guard /40 gate |
-| Combat: gauges/stagger | ~95% DERIVED | reaction lengths (animation-gated) |
-| Combat: knockback direction | DERIVED, ported (mode 1) | modes 0/2/3/4 need sub-object data |
-| Combat: knockback **magnitude** | DERIVED (found, bc) — port pending | strength-indexed tables DAT_802dd8a0/DAT_802d3664; port needs scale reconcile |
+| Combat: damage formula | ~95% DERIVED (2026-07-05: guard/40 data rule wired, CPU halvings wired, force-gauge ratio wired) | actor level-float init (+0xc4/+0xb4) — level→scale link honestly unfound (T5) |
+| Combat: gauges/stagger | ~95% DERIVED; reaction INTEGRATION now anim-gated-shaped (2026-07-05, T6) | reaction-anim LENGTHS still TUNED fallback (no per-borg clip-length export exists in this port yet) |
+| Combat: knockback direction | DONE (mode 1) + yaw trim wired (T8, 2026-07-05) | modes 0/2/3/4 need sub-object data |
+| Combat: knockback **magnitude** | **WIRED (2026-07-05, T6)** — ground (idx*7×scaleRatio) vs launch ((idx+1)*8, pitch-split by T8 trim) tables selected per-hit, real per-frame decel/gravity integration in movement.ts | T5 scale-ratio is a real formula call but both sides pinned to 1.0 (no size-scale pipeline on BorgRuntime yet) |
 | Combat: B/X contextual resolver | resolver DERIVED (bd), port upgradeable | fill type/subtype from testers; only pad-bit↔button label needs a dig |
 | Combat: ammo/refill | DONE (B cell-0 + X cell-1 wired) | — |
 | Combat: projectile penetration | wired OBSERVED_WIKI (borgs/total→persist) | trace T6 confirms engine gate; terrain-penetration + solidity still open |
 | Combat: vampire lifesteal | DONE (ported, ay) | — |
-| Combat: statuses / hyper / fusion | status framework DERIVED (bd); hyper/fusion shells | status catalog T8-blocked; burst/fusion T3; nurse heal-write not in corpus |
+| Combat: statuses / hyper / fusion | status framework DERIVED (bd); hyper shell now SIDE-WIDE + ally-passthrough (2026-07-05, T3); fusion shell | status catalog T8-blocked; burst-END side-timer clear site still trace-gated (port drives it off the presser's own meter instead); nurse heal-write not in corpus |
 | Physics: movement/jump/dash | DERIVED values found (bc), port TUNED | per-borg data.bin values known — scale-reconcile to port, then swap |
 | UI: screens | ~9 real screens | 6 modes are dead menu entries |
 | UI: HUD | ~90% (charge✓ cursor✓ X-ammo✓ boost✓ jump✓) | burst meter only (fill data is T3-blocked) |
@@ -623,19 +726,21 @@ Port: `packages/combat/src/*`. Full per-mechanic detail: `attack-mechanics-findi
 | Mechanic | Status | Port | ROM source | Next action |
 |---|---|---|---|---|
 | HP subtract/clamp | DONE | combat.ts applyHit | zz_003d344_ @0x8003d344 (h) | — |
-| Damage formula (18-stage) | DONE (modeled subset) | damageFormula.ts | zz_003cd5c_ @0x8003cd5c (ah) | level floats +0xc4/+0xb4 init (ak); guard /40 (av auto-shield) |
+| Damage formula (18-stage) | DONE (2026-07-05: guard/40 data rule, CPU halvings, force-gauge ratio, post-hit-HP-index fix all wired — T1/T2/T4) | damageFormula.ts | zz_003cd5c_ @0x8003cd5c (ah) | level floats +0xc4/+0xb4 init (ak, still honestly unfound); step-17 +0x5e0&0x4000000 documented NOT REPRESENTABLE (no port field for +0x5e0 at all) |
 | Type matrix 20×20 | DONE | typeDamage.ts | 802c5d60 + remap 802f2e28 (l/w) | — |
 | Combo falloff (resistance) | DONE | damageFormula comboRankScale | DAT_802c7ca0 step 16 (ah) | none — do NOT add a 2nd layer (U) |
 | Friendly fire ×0.25 | DONE | damageFormula sameTeam | step 18 (ah/o) | tests only (ATK-014 ✓) |
+| Guard/40 data rule | **DONE (2026-07-05, T1)** | damageFormula.ts victimStatusImmunityA gate, combat.ts applyHit | zz_003cd5c_ chunk_0004.c:6814-6817; victim mask = pldata+0xa8 (movementData.ts statusImmunityMasksForBorgId) | — (retired the old blockDivisorActive caller-flag stand-in) |
 | Gauge stagger (down/balance) | DONE | gauges.ts + applyHit | (ag)/(ah)/(s) | — |
-| Knockback **direction** | DONE (mode 1) | physics/knockback.ts | zz_00300bc_ (p) | modes 0/2/3/4 need muzzle/camera vectors |
-| Knockback **magnitude** | DERIVED (found, bc) | constants MELEE/SHOT KNOCKBACK (TUNED, port pending) | DAT_802dd8a0[str]=str*7, DAT_802d3664[str]=(str+1)*8, str=actor+0x702 (bc) | port strength-indexed magnitude (scale-reconcile) — T9 NO LONGER trace-blocked |
+| Knockback **direction** | DONE (mode 1) + yaw trim (T8, 2026-07-05) | physics/knockback.ts, combat.ts (angleTrimByteToBam16 now fed a real value) | zz_00300bc_ (p); trim bytes +0x14/+0x15 (T8) | modes 0/2/3/4 need muzzle/camera vectors |
+| Knockback **magnitude** | **WIRED (2026-07-05, T6)** — ground/launch table selection + real per-frame decel/gravity integration | gauges.ts knockbackGroundSpeedForRecord/knockbackScaleRatio, combat.ts applyHit, movement.ts reaction-integration branch | DAT_802dd8a0[idx]=idx*7 (zz_005ec20_) vs DAT_802d3664[idx]=(idx+1)*8 (FUN_8005ed38), decel -speed/20 / -0.1, gravity -1.2 (T6) | T5 scale-ratio pinned 1.0 both sides (no size-scale pipeline yet); reaction-anim GROUP BYTE for real per-borg lengths still unconfirmed |
+| Reaction ANIM-GATED release | **MECHANISM WIRED, VALUE TUNED-fallback (2026-07-05, T6)** | combat.ts reactionAnimLengthFrames/enterDown/stepActionState | actor+0x1d0e completion flag (T6) | no per-borg reaction-clip length export exists in this port yet — single-seam fallback, ready for real data |
 | B/X contextual resolve | **type resolver IMPLEMENTED (2a08a35c)** | command.ts resolveCommandType() | tester priority FUN_800699d8:228-238 (bd) | wire into stepAttacks (ATK-003); subtype+pad-button binding still need state/pad-decode |
 | Melee contexts (5-way) | schema | movementContextOf | subtype +0x586; wiki 5-context (av) | trace T2 |
 | Ammo/refill (3 weapon cells) | DONE (values extracted) | ammo.selftest, combat.ts | zz_006dbe0_/006dcc0_/006de10_ (ai/aw) | X-attack→cell-1 (survey UI #2); types 2/3 = dead (ax) |
 | Penetration (none/borgs/total) | data (moveProperties) | borgMoveProperties.json | wiki (aw) + rehit chunk_0013 (O) | trace T6 to confirm engine gate |
 | Projectile solidity/PvP | data + BLOCKED | moveProperties | shape table 0x802da740 = NOT pvp (at) | trace T5 |
-| Hyper / Power Burst | shell (ATK-011) | burst.ts | +0x6fb/+0x6fc, zz_005b2b8_ (aj/S) | **trace T3** — meter+duration |
+| Hyper / Power Burst | **SIDE-WIDE + ally-passthrough WIRED (2026-07-05, T3)** | burst.ts, battle.ts activateSideWideBurst/drainPowerBursts, combat.ts burstAllyPassthroughBlocks | +0x6fb/+0x6fc, zz_005b2b8_ (aj/S); ally-passthrough zz_002fd7c_ (T3) | burst-END side timer (+0x10c/+0x10e=600) clear site still trace-gated — port ends the whole side together off the metered presser's own meter instead |
 | Fusion | data + shell (ATK-018) | fusion-pairs JSON | pair table 0x802d352c (aj) | trace T3 (co-op control split) |
 | Statuses (id/timer/immunity) | framework DERIVED (bd), catalog T8-blocked | status.ts | +0x71a=immunity-idx+bone-idx (NOT behavior-selector); tick FUN_8005a378 id-agnostic (bd) | port isImmune/i-frames/hitstun; per-id wiki behaviors genuinely need T8 trace |
 | Hit-inflicted status (slow/haste/freeze/grow-shrink) | **DONE (2026-07-04)** | combat.ts applyHitInflictedStatus/stepHitStatus, timescale.ts statusTimescale | resolve_hitbox_target_effects_and_damage @0x8002e2a8 (chunk_0003.c:7621-8157) | — (separate mechanism from the +0x71a statusId shell above) |

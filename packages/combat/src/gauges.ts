@@ -77,6 +77,21 @@ export interface DamageRecord {
   flagsA: number;
   /** u16 +0x12 — formula/guard flags. */
   flagsB: number;
+  /**
+   * u8 +0x14 — knockback YAW trim (signed, T8 combat-feel-gaps-decode-2026-07-05.md). Added to
+   * the computed launch yaw as `trim * -256` BAM units (1 unit = 256 BAM = 1.40625 degrees).
+   * Rare/nonzero mostly at +-128 (180 degrees, "launch away-side"). Already extracted into
+   * damageRecords.json / familyDamageRecords.json; this field just exposes it on the type.
+   */
+  knockbackYawTrim?: number;
+  /**
+   * u8 +0x15 — knockback PITCH trim (signed, T8). Same `trim * -256` BAM conversion; pitch is
+   * itself stored negated in FUN_8005ed38's `sin(-pitch)` sense, so a positive pitch-trim value
+   * pitches the launch UP. Census: (0,24)=893/1530 records (~33.75 degrees up) is the modal
+   * nonzero pitch trim. NET SIGN is trace-gated per the doc — see knockbackPitchTrimRadians()
+   * in combat.ts for the assumption this port takes (labeled, not Confirmed).
+   */
+  knockbackPitchTrim?: number;
   /** s8 +0x16 — re-hit interval frames (chunk_0013.c:1173). Not consumed by the port yet. */
   rehitIntervalFrames: number;
 }
@@ -125,6 +140,40 @@ export function knockbackStrengthClamp(strength: number): number {
  */
 export function knockbackVelocityForRecord(record: DamageRecord): number {
   return KNOCKBACK_STRENGTH_TABLE.VELOCITY[knockbackStrengthClamp(record.reactionAnimVariant)] ?? 8;
+}
+
+/**
+ * DERIVED (T6 combat-feel-gaps-decode-2026-07-05.md §"Knockback magnitude — zz_005ec20_"):
+ * the GROUND-reaction knockback horizontal speed, distinct from the LAUNCH-reaction velocity
+ * above. `zz_005ec20_` @0x8005ec20 (chunk_0007.c:5546-5573):
+ *   idx = clamp(|victim.reactionAnimVariant|, 0..15)
+ *   ratio = attackerScale / victimScale        (T5; both default 1.0 — no size pipeline yet)
+ *   h-speed = ratio * DAT_802dd8a0[idx]         (= idx * 7.0, KNOCKBACK_STRENGTH_TABLE.HORIZONTAL)
+ *   h-accel = -speed / 20.0                     (stops in 20 frames — see reactionGroundDecel)
+ * This is the table the STAGGER-family reaction handlers (FUN_8005db44/FUN_8005dc24/FUN_8005df2c,
+ * anim slots 0xd/0xe) use; the LAUNCH handler (FUN_8005ed38, knockdown/get-up family, anim
+ * 0x13+dir/0x17+dir) uses the VELOCITY table with a pitch split instead (see
+ * combat.ts's launch-vs-ground selection and knockbackPitchTrimRadians for the pitch half).
+ */
+export function knockbackGroundSpeedForRecord(
+  record: DamageRecord,
+  scaleRatio = 1,
+): number {
+  const idx = knockbackStrengthClamp(Math.abs(record.reactionAnimVariant));
+  return scaleRatio * (KNOCKBACK_STRENGTH_TABLE.HORIZONTAL[idx] ?? 0);
+}
+
+/**
+ * DERIVED (T5 combat-feel-gaps-decode-2026-07-05.md): the knockback scale-ratio multiplier —
+ * `victim+0x298 (attacker scale snapshot) / victim+0xc4 (victim's own render scale)`. The port
+ * has no size-scale pipeline yet (T5's `ctx+0xc4`/`victim+0xb4` size-scale floats are not wired
+ * to any runtime BorgRuntime field), so this is a documented no-op (1.0/1.0 = 1.0) until that
+ * pipeline lands — wiring the FORMULA now (not a hardcoded 1) means the day size scale is real,
+ * only this one function needs a real attackerScale/victimScale pair plugged in.
+ */
+export function knockbackScaleRatio(attackerScale = 1, victimScale = 1): number {
+  if (victimScale === 0) return 1;
+  return attackerScale / victimScale;
 }
 
 /**

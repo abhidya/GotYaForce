@@ -332,12 +332,58 @@ export const KNOCKBACK = {
    * this scale, and do not add per-record tuning here.
    */
   PORT_SCALE: 1.0,
-  /** TUNED vertical pop applied ONLY on forced knockdowns (combo finishers/launch hits) so
-   *  the launch reads. Standard knockback vertical is DERIVED ZERO (FLOAT_80437444 = 0.0,
-   *  falling under gravity — behavior-notes (bc)); the real per-borg knockdown launch model
-   *  (+0x58 h-speed / +0x5c accel, data/movementPhysics.json) is the follow-up consumer.
-   *  Kept small: a large pop under raw scale launched victims over stage wall collision. */
+  /** TUNED vertical pop applied ONLY on forced knockdowns lacking a pitch trim (see T8/ANGLE
+   *  TRIMS below — a record that carries a nonzero knockbackPitchTrim uses the REAL pitched
+   *  launch vector instead and this pop is skipped). Standard knockback vertical is DERIVED
+   *  ZERO (FLOAT_80437444 = 0.0, falling under gravity — behavior-notes (bc)); the real
+   *  per-borg knockdown launch model (+0x58 h-speed / +0x5c accel, data/movementPhysics.json)
+   *  is the follow-up consumer. Kept small: a large pop under raw scale launched victims over
+   *  stage wall collision. */
   KNOCKDOWN_POP: 6,
+} as const;
+
+/**
+ * ANIM-GATED HIT REACTIONS + knockback integration — DERIVED, research/decomp/
+ * combat-feel-gaps-decode-2026-07-05.md T6. Two distinct reaction families, both gated on
+ * "hold the actor until the reaction anim completes" (ROM `actor+0x1d0e` flag), not a flat
+ * hitstun constant:
+ *   - GROUND/stagger family (`zz_005ec20_` @0x8005ec20, anim slots 0xd/0xe): horizontal-only
+ *     knockback, h-accel = -speed/20 (FLOAT_80437490 = 20.0 ROM-read) — stops in exactly 20
+ *     frames from its initial speed, independent of the speed itself (matches the ROM's
+ *     "denominator" decel shape, not a fixed units/frame^2 slope).
+ *   - LAUNCH/knockdown family (`FUN_8005ed38` @0x8005ed38, anim slots 0x13+dir/0x17+dir): speed
+ *     split by pitch (h = s*cos(-pitch), v = s*sin(-pitch)), decel -0.1/frame on the remaining
+ *     horizontal component (FLOAT_804374cc), gravity -1.2/frame (FLOAT_80437470) — a real
+ *     projectile arc, not a flat pop.
+ * Selection (per combat.ts applyHit): a launch is used when the hit forces a knockdown
+ * (forceKnockdown/finisher/lethal-adjacent, matching the existing enterDown() gate) OR the
+ * record carries a nonzero knockbackPitchTrim (T8) — i.e. "the ROM wants this hit to arc"; a
+ * plain ground stagger uses the ground table.
+ */
+export const REACTION = {
+  /** Ground-family horizontal decel denominator (frames-to-stop): h-accel = -speed/20.
+   *  FLOAT_80437490 = 20.0, DERIVED (zz_005ec20_ chunk_0007.c:5546-5573). */
+  GROUND_DECEL_FRAMES: 20,
+  /** Launch-family horizontal decel, units/frame^2. FLOAT_804374cc = -0.1, DERIVED
+   *  (FUN_8005ed38 chunk_0007.c:5606-5639). */
+  LAUNCH_DECEL: -0.1,
+  /** Launch-family gravity, units/frame^2 (replaces the borg's normal fall gravity for the
+   *  DURATION of the launch reaction only). FLOAT_80437470 = -1.2, DERIVED. */
+  LAUNCH_GRAVITY: -1.2,
+  /**
+   * Reaction-anim length fallback (frames), keyed by which reaction family gated the release.
+   * DERIVED MECHANISM (the release IS anim-completion-gated, `actor+0x1d0e`, per T6) but TUNED
+   * VALUE: the doc's own honest UNKNOWN is "the exact anim-bank group byte for reaction slots"
+   * — no per-borg exported reaction-clip length exists in this port's asset pipeline today
+   * (packages/combat has no renderer/mot-length data), so every borg falls back to these named
+   * constants until a real per-borg reaction-clip length table is wired (see
+   * reactionAnimLengthFrames in combat.ts, which is the single injectable seam for that future
+   * per-borg data — swapping the fallback for real lengths requires no call-site changes).
+   * Anchored to the OLD flat MELEE/SHOT/SPECIAL.HITSTUN tuned values so today's feel doesn't
+   * regress by default; the mechanism change is real even though the fallback numbers are not.
+   */
+  GROUND_STAGGER_FALLBACK_FRAMES: 14,
+  LAUNCH_FALLBACK_FRAMES: 30,
 } as const;
 
 /**

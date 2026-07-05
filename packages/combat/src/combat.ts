@@ -7,6 +7,7 @@
 
 import {
   add,
+  angleTrimByteToBam16,
   candidateTrianglesForSegment,
   clamp,
   distXZ,
@@ -37,6 +38,7 @@ import {
   MASH,
   MELEE,
   MUZZLE_OFFSET,
+  REACTION,
   SHOT,
   SPECIAL,
   STAGGER,
@@ -47,6 +49,8 @@ import {
   DAMAGE_RECORD_INDEX,
   REACTION_FORCE_STAGGER_MASK,
   damageRecordByIndex,
+  knockbackGroundSpeedForRecord,
+  knockbackScaleRatio,
   knockbackVelocityForRecord,
   type DamageRecord,
 } from "./gauges.js";
@@ -84,7 +88,7 @@ import {
   type ComboStep,
   type ExactMoveLeaf,
 } from "./actionStreamData.js";
-import { computeSourceDamage } from "./damageFormula.js";
+import { computeSourceDamage, forceGaugeRatioIndex } from "./damageFormula.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
 import { statusImmunityMasksForBorgId } from "./movementData.js";
@@ -315,6 +319,34 @@ function isAllyAlive(self: BorgRuntime, o: BorgRuntime): boolean {
 
 function canReceiveHit(self: BorgRuntime, o: BorgRuntime): boolean {
   return isTargetable(o) && o.uid !== self.uid;
+}
+
+/** flagsB bit that EXEMPTS a hit from the T3 burst ally-passthrough rule below (the "barrier
+ *  bits" exemption the doc's census found on 107/1530 records). */
+const FLAGS_B_BURST_PASSTHROUGH_EXEMPT = 0x0010;
+
+/**
+ * T3 burst ally-passthrough — DERIVED (combat-feel-gaps-decode-2026-07-05.md, `zz_002fd7c_`
+ * @0x8002fd7c, chunk_0003.c:8519-8525): teammates cannot hit a bursting ally. The ROM's gate is
+ * "defender has +0x6fc (burstActive) set, attacker is on the SAME side, the attacker's record
+ * flagsB bit 0x10 is clear, and the defender's record has no barrier bits" — the port has no
+ * per-defender-record barrier-bit concept at the hit-check callsite (that's the ATTACKER's
+ * record, resolved once per swing/shot), so this only ports the attacker-side flagsB 0x10
+ * exemption explicitly named in the doc; a record that sets that bit still lands on a bursting
+ * ally exactly like the ROM's 107/1530 exempted rows. Overturns the earlier (al) negative
+ * ("no ally-passthrough exists") — this is a real, decoded rule.
+ */
+function burstAllyPassthroughBlocks(
+  attacker: BorgRuntime,
+  defender: BorgRuntime,
+  record: DamageRecord,
+): boolean {
+  return (
+    defender.burstActive === true &&
+    attacker.team === defender.team &&
+    attacker.uid !== defender.uid &&
+    (record.flagsB & FLAGS_B_BURST_PASSTHROUGH_EXEMPT) === 0
+  );
 }
 
 function isTargetable(b: BorgRuntime): boolean {
@@ -618,6 +650,21 @@ export interface DamageRuntimeContext {
         firstStrikeBy?: string | null;
       }
     | undefined;
+  /**
+   * T4 FORCE-GAUGE: BattleState.energy/energyMax, keyed by team. When present, applyHit derives
+   * attackerForceRatioIndex/defenderForceRatioIndex from the hitting sides' own team energy pool
+   * via damageFormula.ts's forceGaugeRatioIndex() (idx = 32 - floor(energy*32/energyMax)).
+   * Optional so legacy/synthetic callers keep the pre-T4 default (full gauge, index 0).
+   */
+  energyByTeam?: Record<number, number> | undefined;
+  energyMaxByTeam?: Record<number, number> | undefined;
+  /**
+   * T4 item 3 / T2: enables the CPU-controlled ×0.5 halvings (Challenge modes 0/1, side 0 only
+   * — see damageFormula.ts's attackerIsCpuSide0/defenderIsCpuSide0 doc). The doc scopes this to
+   * Challenge specifically; battle.ts sets this from `cfg.challengeMode !== undefined` so Versus
+   * damage stays byte-for-byte unchanged. Absent/false = no halving (pre-T4 behavior).
+   */
+  cpuHalvingEnabled?: boolean | undefined;
 }
 
 /** Lazily materialize a player slot's results counters (ROM actor +0x404 block). */
@@ -752,6 +799,44 @@ function applyHitInflictedStatus(
 }
 
 /**
+ * BAM16-per-unit conversion for the T8 knockback pitch trim (record u8+0x15, signed):
+ * `combat-feel-gaps-decode-2026-07-05.md` T8 — the ROM adds `trim * -256` BAM to the computed
+ * launch pitch (1 unit = 256 BAM = 1.40625 degrees, pitch itself stored negated so a POSITIVE
+ * trim pitches the launch UP in FUN_8005ed38's `sin(-pitch)` sense). Converts straight to
+ * radians for this port's math (2*pi/65536 per BAM, matching packages/physics/src/knockback.ts's
+ * existing BAM16 convention).
+ *
+ * SIGN ASSUMPTION (labeled per the doc's own caveat, not Confirmed by a live trace): the doc
+ * says "assert the net sign in one live trace before locking UI-level signs" — this port takes
+ * the reading stated in T8's own prose (positive trim = upward pitch) since that is the only
+ * sign this port can act on today; selfcheck.ts's assertPitchedKnockbackRises exists specifically
+ * to make this assumption visible and easy to flip in one place if a future trace contradicts it.
+ */
+const BAM16_PER_TRIM_UNIT = 256;
+const RADIANS_PER_BAM16 = (2 * Math.PI) / 65536;
+export function knockbackPitchTrimRadians(record: DamageRecord): number {
+  const trim = record.knockbackPitchTrim ?? 0;
+  return trim * BAM16_PER_TRIM_UNIT * RADIANS_PER_BAM16;
+}
+
+/**
+ * Reaction-anim length (frames) — T6 DERIVED MECHANISM, TUNED VALUE (see REACTION.*_FALLBACK_
+ * FRAMES in constants.ts for the full citation). The ROM gates reaction release on the
+ * reaction anim's OWN completion flag (`actor+0x1d0e`), not a flat hitstun constant — but this
+ * port's asset pipeline does not export per-borg reaction-clip lengths (no renderer/mot-length
+ * data reaches packages/combat, which is intentionally renderer-agnostic). This function is the
+ * SINGLE seam: it currently always returns the labeled TUNED fallback, but every call site
+ * already goes through it, so wiring a real per-borg reaction-clip length table later is a
+ * one-function change, not a call-site hunt.
+ */
+export function reactionAnimLengthFrames(
+  _borgId: string,
+  kind: "ground" | "launch",
+): number {
+  return kind === "launch" ? REACTION.LAUNCH_FALLBACK_FRAMES : REACTION.GROUND_STAGGER_FALLBACK_FRAMES;
+}
+
+/**
  * Apply a hit to `victim`. Respects invincibility. HP damage and knockback velocity always
  * land, but whether the victim is INTERRUPTED is decided by the DERIVED gauge-based stagger
  * model (see gauges.ts header): the original has no flat per-hit hitstun — a hit staggers
@@ -797,6 +882,28 @@ export function applyHit(
         damageScale: source.damageScale ?? 1,
         attackerSideRank: source.attackerSideRank,
         defenderSideRank: source.defenderSideRank,
+        // GUARD/40 DATA RULE (T1): the victim's static per-borg resistance mask (pldata+0xa8),
+        // the SAME statusImmunityMasksForBorgId() the status-effect gate above already reads —
+        // see damageFormula.ts's victimStatusImmunityA doc for the full citation.
+        victimStatusImmunityA: statusImmunityMasksForBorgId(victim.borgId).immunityA,
+        // T4 FORCE-GAUGE: side energy ratio, when the battle wired BattleState.energy/energyMax
+        // through damageContext (see DamageRuntimeContext.energyByTeam/energyMaxByTeam doc).
+        // Absent damageContext/energy data keeps the pre-T4 default (full gauge, index 0).
+        attackerForceRatioIndex: forceGaugeRatioIndex(
+          damageContext?.energyByTeam?.[source.attacker.team] ?? 0,
+          damageContext?.energyMaxByTeam?.[source.attacker.team],
+        ),
+        defenderForceRatioIndex: forceGaugeRatioIndex(
+          damageContext?.energyByTeam?.[victim.team] ?? 0,
+          damageContext?.energyMaxByTeam?.[victim.team],
+        ),
+        // T4 item 3 / T2: CPU-controlled x0.5 halvings, Challenge modes 0/1, side 0 only.
+        attackerIsCpuSide0:
+          damageContext?.cpuHalvingEnabled === true &&
+          source.attacker.team === 0 &&
+          source.attacker.ownerPlayer === null,
+        defenderIsCpuSide0:
+          damageContext?.cpuHalvingEnabled === true && victim.team === 0 && victim.ownerPlayer === null,
       })
     : mitigate(rawDamage, victimProfile.defense);
   victim.hp -= dmg;
@@ -888,28 +995,93 @@ export function applyHit(
   // `knockDir` lets a caller override with a more specific vector (e.g. a projectile's travel
   // direction) when the "attacker position" isn't the right source (fromPos is still passed as
   // the attacker-position input to the mode-1 calc either way).
-  // Knockback MAGNITUDE — DERIVED strength-indexed model (behavior-notes (bc), T9 resolved
-  // statically): the record's +0x0d strength byte indexes DAT_802d3664[s]=(s+1)*8 (gauges.ts
-  // knockbackVelocityForRecord), scaled by KNOCKBACK.PORT_SCALE (DERIVED 1.0 under raw ROM
-  // units) and the caller's per-move multiplier. Replaces the old flat
-  // MELEE/SHOT/SPECIAL.KNOCKBACK scalars — the relative push of
-  // melee(56) > shot(40) > charge/special(24) is now ROM data.
-  const knockback = knockbackVelocityForRecord(record) * KNOCKBACK.PORT_SCALE * knockbackMult;
+  // T8 ANGLE TRIMS (yaw half): record byte +0x14 (knockbackYawTrim), converted the same way the
+  // ROM does (byte * -0x100 -> BAM16, angleTrimByteToBam16) and only applied on the mode-1
+  // attacker->target path (a caller-supplied knockDir override bypasses the whole BAM16 angle
+  // calc, so there is no yaw to trim there — unchanged from before T8). Yaw trims are rare in
+  // the census (mostly ±128 = 180 degrees, "launch away-side") but wired for real now rather
+  // than hardcoded to 0.
+  const yawTrimBam16 = angleTrimByteToBam16(record.knockbackYawTrim ?? 0);
   const dir =
     knockDir.x === 0 && knockDir.z === 0
-      ? knockbackDirectionFromPositions(fromPos, victim.pos)
+      ? knockbackDirectionFromPositions(fromPos, victim.pos, yawTrimBam16)
       : normalize(knockDir);
-  victim.vel.x = dir.x * knockback;
-  victim.vel.z = dir.z * knockback;
-  // Vertical: DERIVED — the ROM's standard knockback launch vertical is ZERO
-  // (FLOAT_80437444 = 0.0; knockback falls under gravity −1.2, behavior-notes (bc)).
-  // The old port-side 0.4×knockback pop became 22 u/f under the raw-scale migration and
-  // launched victims over stage wall collision (playtest: borgs knocked out of the arena).
-  // Forced knockdowns keep a small TUNED pop for the launch read. (Page +0x58/+0x5c were
-  // once suspected to be knockdown-launch tables — they are actually the DASH page block,
-  // wired in movement.ts 2026-07-04; no per-borg knockdown-launch data has been found.)
-  if (knockback > 0 && forceKnockdown) {
-    victim.vel.y = Math.max(victim.vel.y, KNOCKBACK.KNOCKDOWN_POP);
+
+  // Knockdown determination moved up (was computed after the knockback block below): the T6
+  // ground-vs-launch table SELECTION depends on it (a launch reaction uses the pitch-split
+  // FUN_8005ed38 table; a ground stagger uses the flat zz_005ec20_ table), so it must be known
+  // before the knockback magnitude is picked. Value/order unchanged from the original — only
+  // moved earlier.
+  const knockdown = forceKnockdown || dmg >= DAMAGE.KNOCKDOWN_DMG;
+  // T8 ANGLE TRIMS: a record with a nonzero pitch trim wants a real pitched arc even on a
+  // ground-reaction hit (893/1530 records carry the modal (0,24) ~=33.75-degree-up trim) — see
+  // combat-feel-gaps-decode-2026-07-05.md T8. Treat "has a pitch trim" as an additional launch
+  // trigger so those records get the pitched FUN_8005ed38 table instead of the flat ground one.
+  const pitchTrimUnits = record.knockbackPitchTrim ?? 0;
+  const useLaunchTable = knockdown || pitchTrimUnits !== 0;
+
+  // Knockback MAGNITUDE + INTEGRATION MODEL — DERIVED, T6 (combat-feel-gaps-decode-2026-07-05.md,
+  // replacing the earlier flat-table-only T9 read). Two ROM reaction families, selected by
+  // useLaunchTable above:
+  //   - GROUND (zz_005ec20_): idx*7 horizontal-only table (gauges.ts
+  //     knockbackGroundSpeedForRecord), scaled by the T5 attacker/victim SCALE RATIO (both 1.0
+  //     today — no size pipeline wired yet, so this is a documented no-op multiply, not a
+  //     hardcoded skip: gauges.ts knockbackScaleRatio()). Decel is -speed/20 (REACTION.
+  //     GROUND_DECEL_FRAMES), integrated per-frame in movement.ts while state is a ground
+  //     reaction — see reactionDecelFramesRemaining below.
+  //   - LAUNCH (FUN_8005ed38): (idx+1)*8 table (gauges.ts knockbackVelocityForRecord, the
+  //     table this port already had), split by the T8 pitch trim into horizontal/vertical
+  //     components, decel -0.1/frame horizontal, gravity -1.2/frame (REACTION.LAUNCH_DECEL/
+  //     LAUNCH_GRAVITY) for the reaction's duration.
+  // Both keep KNOCKBACK.PORT_SCALE (1.0, raw-scale anchor) and the caller's per-move multiplier.
+  const attackerScale = source?.attacker.paramTier ? 1 : 1; // T5: no size-scale field on
+  // BorgRuntime yet (paramTier is velocity/anim-rate tier, NOT the size-scale float chain —
+  // see T5's ctx+0xc4/victim+0xb4 chain). Both sides are honestly 1.0 until that pipeline
+  // exists; the ratio call below is still made for real so wiring a real scale later is a
+  // one-line change at the call site, not a new code path.
+  const victimScale = 1;
+  const scaleRatio = knockbackScaleRatio(attackerScale, victimScale);
+  const baseSpeed = useLaunchTable
+    ? knockbackVelocityForRecord(record)
+    : knockbackGroundSpeedForRecord(record, scaleRatio);
+  const knockback = baseSpeed * KNOCKBACK.PORT_SCALE * knockbackMult;
+
+  if (useLaunchTable) {
+    // Pitch split (FUN_8005ed38): h = s*cos(-pitch), v = s*sin(-pitch), where "pitch" is the
+    // ROM's STORED pitch field (+0x282) — which the doc says is "itself stored negated" versus
+    // the conceptual/UI-facing angle. knockbackPitchTrimRadians() returns the trim in the
+    // conceptual sense the doc states in plain English ("positive trim pitches the launch UP"):
+    // stored = -conceptual, so sin(-stored) = sin(conceptual) — a positive trim yields positive
+    // vel.y directly (the two negations cancel; written out here rather than simplified away so
+    // the ROM's own -pitch shape stays visible next to this port's sign choice). (SIGN
+    // ASSUMPTION, per knockbackPitchTrimRadians's own doc — labeled, not Confirmed by a live
+    // trace.) A trimless forced knockdown (pitch trim 0) falls back to the port's old flat
+    // KNOCKDOWN_POP so pre-T8 callers without trim data still read as a launch.
+    const conceptualPitch = knockbackPitchTrimRadians(record);
+    const storedPitch = -conceptualPitch;
+    const cosP = Math.cos(-storedPitch);
+    const sinP = Math.sin(-storedPitch);
+    victim.vel.x = dir.x * knockback * cosP;
+    victim.vel.z = dir.z * knockback * cosP;
+    if (knockback > 0 && pitchTrimUnits !== 0) {
+      victim.vel.y = knockback * sinP;
+    } else if (knockback > 0 && forceKnockdown) {
+      // Fallback for trimless forced knockdowns (T8 recipe: "keep the pop only as fallback for
+      // trimless forced knockdowns") — the old TUNED vertical pop.
+      victim.vel.y = Math.max(victim.vel.y, KNOCKBACK.KNOCKDOWN_POP);
+    }
+    victim.reactionDecelFramesRemaining = undefined; // launch uses the fixed LAUNCH_DECEL/frame, not a frames-to-stop denominator
+    victim.reactionKind = "launch";
+  } else {
+    victim.vel.x = dir.x * knockback;
+    victim.vel.z = dir.z * knockback;
+    // Standard ground knockback vertical is DERIVED ZERO (FLOAT_80437444 = 0.0) — falls under
+    // normal gravity, no special vertical handling for the ground family.
+    // Ground-family decel denominator (T6): h-accel = -speed/20, i.e. it stops in exactly
+    // REACTION.GROUND_DECEL_FRAMES frames regardless of the initial speed. movement.ts reads
+    // this each frame while the reaction is active.
+    victim.reactionDecelFramesRemaining = REACTION.GROUND_DECEL_FRAMES;
+    victim.reactionKind = "ground";
   }
 
   if (victim.hp <= 0) {
@@ -949,10 +1121,15 @@ export function applyHit(
 
   // Combo accumulator (+0x6c8, chunk_0003.c:8021-8029): add the record's combo score; past
   // 99 the accumulator wraps to 0 and the rank byte (+0x6ca) increments, capped at 0x3f.
-  victim.comboAccum += record.comboScoreValue;
-  if (victim.comboAccum > 99) {
-    victim.comboAccum = 0;
-    victim.comboRank = Math.min(0x3f, victim.comboRank + 1);
+  // GUARD/40 DATA RULE (T1) exemption: a blast-flagged record (flagsA & 0x1000) skips combo
+  // score entirely (chunk_0003.c:7934) — "blast hits teammates at full damage and awards
+  // nothing", per the doc.
+  if ((record.flagsA & 0x1000) === 0) {
+    victim.comboAccum += record.comboScoreValue;
+    if (victim.comboAccum > 99) {
+      victim.comboAccum = 0;
+      victim.comboRank = Math.min(0x3f, victim.comboRank + 1);
+    }
   }
 
   // Status-effect application (ATK-010 shell, chunk_0003.c:7638-7651): today's 3 archetype
@@ -984,12 +1161,19 @@ export function applyHit(
     victim.invincTimer = Math.max(victim.invincTimer, STAGGER.STAGGER_IFRAMES);
   }
 
-  // Reaction LENGTH stays the port's TUNED hitstun/down durations (animation-gated in ROM).
-  const knockdown = forceKnockdown || dmg >= DAMAGE.KNOCKDOWN_DMG;
+  // Reaction LENGTH — T6 DERIVED MECHANISM (combat-feel-gaps-decode-2026-07-05.md): the ROM
+  // holds the victim in its reaction handler until the reaction ANIM completes
+  // (`actor+0x1d0e` flag), not for a flat hitstun constant. `reactionAnimLengthFrames` below is
+  // the single seam for that: it returns a real per-borg reaction-clip length where one is
+  // exported, else the labeled TUNED fallback (REACTION.GROUND_STAGGER_FALLBACK_FRAMES /
+  // LAUNCH_FALLBACK_FRAMES) — see that function's own header for why no real per-borg length
+  // exists in this port yet. `knockdown`/`useLaunchTable` (computed above, before the knockback
+  // block) already carry the launch-vs-ground selection, so the SAME condition picks the
+  // matching reaction-anim family here.
   if (knockdown) {
-    enterDown(victim);
+    enterDown(victim, reactionAnimLengthFrames(victim.borgId, "launch"));
   } else {
-    enterHit(victim, MELEE.HITSTUN);
+    enterHit(victim, reactionAnimLengthFrames(victim.borgId, useLaunchTable ? "launch" : "ground"));
   }
   return dmg;
 }
@@ -1144,11 +1328,15 @@ export function enterHit(b: BorgRuntime, stun: number): void {
   b.cooldowns["hitstun"] = stun;
 }
 
-export function enterDown(b: BorgRuntime): void {
+export function enterDown(b: BorgRuntime, downAnimFrames: number = STATE.DOWN_DURATION): void {
   b.state = "down";
   b.stateTime = 0;
   b.anim = "down";
   b.grounded = false; // gets knocked off the ground; lands during down
+  // T6: reaction release is anim-completion-gated, not a flat STATE.DOWN_DURATION constant.
+  // reactionAnimLengthFrames feeds the real per-borg length where exported, else the labeled
+  // TUNED fallback — stepActionState's "down" case reads this instead of the old bare constant.
+  b.cooldowns["downAnimFrames"] = downAnimFrames;
 }
 
 export function enterDeath(b: BorgRuntime): void {
@@ -1175,7 +1363,11 @@ export function stepActionState(b: BorgRuntime): { died: boolean } {
       return { died: false };
     }
     case "down": {
-      if (b.stateTime >= STATE.DOWN_DURATION && b.grounded) {
+      // T6: release gated on the reaction anim completing (per-borg length where exported,
+      // else the labeled TUNED fallback — see enterDown/reactionAnimLengthFrames), same
+      // "must also be grounded" physical requirement the port already enforced.
+      const downAnimFrames = b.cooldowns["downAnimFrames"] ?? STATE.DOWN_DURATION;
+      if (b.stateTime >= downAnimFrames && b.grounded) {
         // Wake up with the ported 60-frame invincibility.
         b.invincTimer = WAKE_UP_INVINCIBILITY_FRAMES;
         b.state = "idle";
@@ -1773,6 +1965,10 @@ export function stepAttacks(
         exactStep?.damageRecord ??
         exactMelee?.damageRecord ??
         damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE);
+      // T3 burst ally-passthrough (zz_002fd7c_): a bursting teammate cannot be hit by this
+      // swing at all — skip entirely, same as a real ROM eligibility-filter miss (no damage,
+      // no combo credit, no telemetry).
+      if (burstAllyPassthroughBlocks(b, o, meleeRecord)) continue;
       // Zero vector -> applyHit() computes the real ROM-mode-1 direction (attacker->target)
       // instead of the attacker's facing vector (`fwd`) used here previously.
       const dealt = applyHit(
@@ -1985,6 +2181,8 @@ function startSpecialAttack(
   const specialRecord = xDamageRecordSpread(b.borgId, xLeaf).damageRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
   for (const o of all) {
     if (!canReceiveHit(b, o)) continue;
+    // T3 burst ally-passthrough (zz_002fd7c_) — see the melee-loop citation above.
+    if (burstAllyPassthroughBlocks(b, o, specialRecord)) continue;
     if (distXZ(b.pos, o.pos) <= specialDef.radius * tier.radius) {
       const op = profiles.get(o.uid);
       if (op) {
@@ -2529,6 +2727,11 @@ export function stepProjectiles(
             // this remains a TUNED choice between two reasonable direction sources.
             const attacker = byUid.get(pr.ownerUid);
             const attackerProfile = profiles.get(pr.ownerUid);
+            // T3 burst ally-passthrough (zz_002fd7c_ — the doc's zz_002fd7c_ finding): a
+            // bursting teammate's own team's projectile passes through them entirely. Skipped
+            // (fail-open, unchanged behavior) when the owner is already gone — there is no
+            // attacker to compare teams against.
+            if (attacker && burstAllyPassthroughBlocks(attacker, o, record)) continue;
             applyHit(
               o,
               op,

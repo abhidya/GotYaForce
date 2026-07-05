@@ -25,7 +25,7 @@ import {
   yawFromXZ,
   type Vec3,
 } from "@gf/physics";
-import { BURST, DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES } from "./constants.js";
+import { BURST, DASH, JUMP, MOVE, MOVEMENT_CONTEXT_LANDING_WINDOW_FRAMES, REACTION } from "./constants.js";
 import { dashPhysicsForBorgId, fallGravityForBorgId, groundRunSpeedForBorgId, jumpVelocityForBorgId } from "./movementData.js";
 import { actorVelocityScale } from "./timescale.js";
 import type { BorgProfile } from "./stats.js";
@@ -174,63 +174,107 @@ export function stepMovement(
     }
   }
 
-  // --- Horizontal movement ------------------------------------------------------------
-  if (!dashing) {
-    const flying = !b.grounded && p.flyer;
-    const burstMult = b.burstActive ? BURST.SPEED_MULTIPLIER : 1;
-    // actorVelocityScale = the ROM's status(+0x5f4) × tier(+0x5f8) multipliers (timescale.ts,
-    // DERIVED tables) — ×1.0 until tier/status writers land. Burst ×1.5 (the same
-    // FLOAT_804373d8 the ROM folds into +0x5f4) stays in burstMult, not double-applied.
-    const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1) * burstMult * actorVelocityScale(b);
-    let targetVx = 0;
-    let targetVz = 0;
-    if (free && (horizontal.walkX !== 0 || horizontal.walkZ !== 0)) {
-      const dir = normalize({ x: horizontal.walkX, y: 0, z: horizontal.walkZ });
-      targetVx = dir.x * maxSpeed;
-      targetVz = dir.z * maxSpeed;
+  // --- T6 reaction knockback integration (combat-feel-gaps-decode-2026-07-05.md) ------
+  // While the borg is in a knockback-driven hit/down reaction, the ROM's own decel/gravity
+  // model takes over from the generic walk-decel/fall-gravity below — see combat.ts applyHit
+  // (which sets reactionKind/reactionDecelFramesRemaining) for the two families. This ONLY
+  // changes the reaction's velocity INTEGRATION; the gauge-based stagger gating that decides
+  // whether/how long a hit staggers is untouched (combat.ts applyHit/gauges.ts).
+  const inKnockbackReaction = (b.state === "hit" || b.state === "down") && b.reactionKind !== undefined;
+  if (inKnockbackReaction) {
+    if (b.reactionKind === "ground") {
+      // zz_005ec20_: h-accel = -speed/20 — the horizontal speed reaches 0 in exactly
+      // REACTION.GROUND_DECEL_FRAMES frames from whatever it started at, not a fixed
+      // units/frame^2 slope. Modeled as "subtract 1/framesRemaining of the CURRENT speed every
+      // frame, then decrement framesRemaining" so it lands on exactly 0 at frame 0 regardless
+      // of the initial magnitude.
+      const framesLeft = b.reactionDecelFramesRemaining ?? 0;
+      if (framesLeft > 0) {
+        const decayFrac = 1 / framesLeft;
+        b.vel.x -= b.vel.x * decayFrac;
+        b.vel.z -= b.vel.z * decayFrac;
+        b.reactionDecelFramesRemaining = framesLeft - 1;
+      } else {
+        b.vel.x = 0;
+        b.vel.z = 0;
+        b.reactionKind = undefined;
+      }
+      // Ground family keeps NORMAL gravity/ground-clamp behavior (its vertical is DERIVED
+      // ZERO at launch — see combat.ts applyHit) — no override here, falls through below.
+      b.vel.y = Math.max(b.vel.y - fallGravityForBorgId(b.borgId), -JUMP.MAX_FALL);
+    } else {
+      // FUN_8005ed38 launch family: fixed decel/gravity for the whole reaction, not a
+      // frames-to-stop denominator.
+      const hSpeed = Math.hypot(b.vel.x, b.vel.z);
+      if (hSpeed > 0) {
+        const next = Math.max(0, hSpeed + REACTION.LAUNCH_DECEL);
+        const scale = next / hSpeed;
+        b.vel.x *= scale;
+        b.vel.z *= scale;
+      }
+      b.vel.y = Math.max(b.vel.y + REACTION.LAUNCH_GRAVITY, -JUMP.MAX_FALL);
     }
-    const rate = targetVx === 0 && targetVz === 0 ? MOVE.DECEL : MOVE.ACCEL;
-    b.vel.x = approachScalar(b.vel.x, targetVx, rate);
-    b.vel.z = approachScalar(b.vel.z, targetVz, rate);
-  }
+  } else {
+    if (b.reactionKind !== undefined) b.reactionKind = undefined; // reaction ended elsewhere (e.g. wake) — clear the latch
 
-  // --- Vertical: jump / air-jump / boost flight / gravity -----------------------------
-  if (input.jump && free) {
-    handleJump(b, jumpVelocityForBorgId(b.borgId));
-  }
-  // Boost flight — UNIVERSAL (2026-07-04): EVERY borg boosts by holding jump in the air
-  // while fuel remains, not only p.flyer. Evidence: the ROM's flight is the
-  // gravity-coefficient-0 state (FUN_80067310 with coeff FLOAT_804374ec = 0.0 —
-  // behavior-notes (bc)), the boost gauge is on every borg's HUD, and (ap) W17's three
-  // flight models include the plain "boost" model for standard borgs. Thrust/max-rise stay
-  // TUNED (no ROM thrust constant exists — flight is a gravity toggle). The boost only
-  // engages once the jump arc has decayed to the boost ceiling (vel.y <= BOOST_MAX_RISE),
-  // so a held ground jump keeps its full DERIVED impulse arc and then transitions into the
-  // sustained jet climb; entering "fly" plays the exported boost (jetpack) clip.
-  const boostFuel = b.cooldowns["boostFuel"] ?? JUMP.BOOST_FUEL_FRAMES;
-  // Flyer-class borgs enter flight immediately (their whole movement identity); standard
-  // borgs finish the jump arc first (vel gate), then the jet climb takes over.
-  const boosting =
-    !b.grounded &&
-    input.jump &&
-    free &&
-    boostFuel > 0 &&
-    (p.flyer || b.vel.y <= JUMP.BOOST_MAX_RISE);
-  if (boosting) {
-    b.vel.y = Math.min(b.vel.y + JUMP.BOOST_THRUST, JUMP.BOOST_MAX_RISE);
-    b.cooldowns["boostFuel"] = boostFuel - 1;
-    if (b.state === "jump" || b.state === "idle" || b.state === "move") {
-      setState(b, "fly");
+    // --- Horizontal movement ----------------------------------------------------------
+    if (!dashing) {
+      const flying = !b.grounded && p.flyer;
+      const burstMult = b.burstActive ? BURST.SPEED_MULTIPLIER : 1;
+      // actorVelocityScale = the ROM's status(+0x5f4) × tier(+0x5f8) multipliers (timescale.ts,
+      // DERIVED tables) — ×1.0 until tier/status writers land. Burst ×1.5 (the same
+      // FLOAT_804373d8 the ROM folds into +0x5f4) stays in burstMult, not double-applied.
+      const maxSpeed = groundSpeed(p) * (flying ? MOVE.FLY_MULT : 1) * burstMult * actorVelocityScale(b);
+      let targetVx = 0;
+      let targetVz = 0;
+      if (free && (horizontal.walkX !== 0 || horizontal.walkZ !== 0)) {
+        const dir = normalize({ x: horizontal.walkX, y: 0, z: horizontal.walkZ });
+        targetVx = dir.x * maxSpeed;
+        targetVz = dir.z * maxSpeed;
+      }
+      const rate = targetVx === 0 && targetVz === 0 ? MOVE.DECEL : MOVE.ACCEL;
+      b.vel.x = approachScalar(b.vel.x, targetVx, rate);
+      b.vel.z = approachScalar(b.vel.z, targetVz, rate);
     }
-  }
 
-  // Gravity (skipped while boosting — the ROM's flight IS gravity-coefficient-0, so heavy
-  // borgs hover too instead of fighting a thrust term). Per-borg DERIVED raw fall gravity
-  // (pl####data.bin +0x6c — movementData.ts): heavies drop faster, the pl0d/pl0e
-  // satellite/air families float (-0.1 in source data). MAX_FALL is the DERIVED global
-  // terminal clamp (FLOAT_804375f0 = -35.0).
-  if (!boosting) {
-    b.vel.y = Math.max(b.vel.y - fallGravityForBorgId(b.borgId), -JUMP.MAX_FALL);
+    // --- Vertical: jump / air-jump / boost flight / gravity ---------------------------
+    if (input.jump && free) {
+      handleJump(b, jumpVelocityForBorgId(b.borgId));
+    }
+    // Boost flight — UNIVERSAL (2026-07-04): EVERY borg boosts by holding jump in the air
+    // while fuel remains, not only p.flyer. Evidence: the ROM's flight is the
+    // gravity-coefficient-0 state (FUN_80067310 with coeff FLOAT_804374ec = 0.0 —
+    // behavior-notes (bc)), the boost gauge is on every borg's HUD, and (ap) W17's three
+    // flight models include the plain "boost" model for standard borgs. Thrust/max-rise stay
+    // TUNED (no ROM thrust constant exists — flight is a gravity toggle). The boost only
+    // engages once the jump arc has decayed to the boost ceiling (vel.y <= BOOST_MAX_RISE),
+    // so a held ground jump keeps its full DERIVED impulse arc and then transitions into the
+    // sustained jet climb; entering "fly" plays the exported boost (jetpack) clip.
+    const boostFuel = b.cooldowns["boostFuel"] ?? JUMP.BOOST_FUEL_FRAMES;
+    // Flyer-class borgs enter flight immediately (their whole movement identity); standard
+    // borgs finish the jump arc first (vel gate), then the jet climb takes over.
+    const boosting =
+      !b.grounded &&
+      input.jump &&
+      free &&
+      boostFuel > 0 &&
+      (p.flyer || b.vel.y <= JUMP.BOOST_MAX_RISE);
+    if (boosting) {
+      b.vel.y = Math.min(b.vel.y + JUMP.BOOST_THRUST, JUMP.BOOST_MAX_RISE);
+      b.cooldowns["boostFuel"] = boostFuel - 1;
+      if (b.state === "jump" || b.state === "idle" || b.state === "move") {
+        setState(b, "fly");
+      }
+    }
+
+    // Gravity (skipped while boosting — the ROM's flight IS gravity-coefficient-0, so heavy
+    // borgs hover too instead of fighting a thrust term). Per-borg DERIVED raw fall gravity
+    // (pl####data.bin +0x6c — movementData.ts): heavies drop faster, the pl0d/pl0e
+    // satellite/air families float (-0.1 in source data). MAX_FALL is the DERIVED global
+    // terminal clamp (FLOAT_804375f0 = -35.0).
+    if (!boosting) {
+      b.vel.y = Math.max(b.vel.y - fallGravityForBorgId(b.borgId), -JUMP.MAX_FALL);
+    }
   }
 
   // --- Integrate ----------------------------------------------------------------------

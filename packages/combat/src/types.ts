@@ -357,6 +357,20 @@ export interface BorgRuntime {
    *  applyActorParamTierDelta127 (NOT the ±63 accumulator — this is its own flat +4/-4 with
    *  its own 1200f timer) on a connecting ramming-dash hit, reverted when the timer expires. */
   heroTierBuffFrames?: number;
+
+  // --- T6 reaction knockback integration (combat-feel-gaps-decode-2026-07-05.md) ---------
+  /** Which reaction family's knockback integration is active, or undefined when not in a
+   *  knockback-driven reaction. "ground" = zz_005ec20_ (horizontal-only, -speed/20 decel over
+   *  reactionDecelFramesRemaining); "launch" = FUN_8005ed38 (pitch-split arc, fixed -0.1
+   *  horizontal decel + -1.2 gravity for the reaction's whole duration). Set by applyHit,
+   *  cleared by movement.ts once the ground decel finishes or the state leaves hit/down. */
+  reactionKind?: "ground" | "launch" | undefined;
+  /** Ground-family decel countdown (frames): the ROM's h-accel = -speed/20 means the knockback
+   *  stops in exactly REACTION.GROUND_DECEL_FRAMES frames from its initial speed, so this
+   *  counts down from that constant each frame movement.ts integrates it, reaching 0 when the
+   *  horizontal component is fully zeroed. undefined/absent for a launch reaction (which uses a
+   *  fixed per-frame decel instead of a frames-to-stop denominator) or when not reacting. */
+  reactionDecelFramesRemaining?: number | undefined;
 }
 
 /** Live-resolved ROM attack command (see commandDispatch.ts for the resolution pipeline). */
@@ -555,8 +569,20 @@ export interface BurstMeterState {
 export interface BattleState {
   borgs: BorgRuntime[];
   projectiles: Projectile[];
-  /** Remaining energy per team = sum of not-yet-defeated on-field + not-yet-deployed borg energy. */
+  /** Remaining energy per team = sum of not-yet-defeated on-field + not-yet-deployed borg energy.
+   *  This IS the ROM's side force-gauge current value (`side[+0x118]`, combat-feel-gaps-decode-
+   *  2026-07-05.md T4) — it already depletes on death exactly like the ROM's `zz_002f8dc_`. */
   energy: Record<number, number>;
+  /**
+   * Side force-gauge MAX (ROM `side[+0x114]`, T4): the team's total energy at battle start,
+   * rounded DOWN to a multiple of 10 (chunk_0000.c:1076-1079) — snapshotted once at battle
+   * creation (before any deaths can reduce `energy`). Used as the force-gauge ratio's
+   * denominator (damageFormula.ts attackerForceRatioIndex/defenderForceRatioIndex recipe:
+   * `idx = 32 - floor(energy[team] * 32 / energyMax[team])`). Optional so pre-existing state
+   * constructors/fakes stay valid; absent/0 means "no force-gauge ratio available" (callers
+   * should treat it the same as full gauge, i.e. curve index 0).
+   */
+  energyMax?: Record<number, number>;
   /** Whole borgs defeated per team, counted at the source death event before auto-deploy. */
   defeated: Record<number, number>;
   /** Energy/cost defeated per team, counted from each defeated borg's profile energy. */

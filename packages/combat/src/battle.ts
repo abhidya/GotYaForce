@@ -128,6 +128,14 @@ class BattleImpl implements Battle {
   private readonly timeLimitFrames: number | null;
   private readonly timerFrozen: boolean;
   private readonly sideRanks: readonly [number, number];
+  /**
+   * T4 item 3 CPU-side halving gate: the doc scopes the CPU-controlled ×0.5 halvings to
+   * "Challenge modes 0/1" specifically. `cfg.challengeMode` is only ever set by Challenge battle
+   * setup (undefined for Versus) — reusing its presence as the gate keeps Versus-mode damage
+   * byte-for-byte unchanged while still wiring the discrepancy for the mode the doc describes it
+   * in, rather than guessing at Versus's own (unread) CPU-halving semantics.
+   */
+  private readonly isChallengeMode: boolean;
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
@@ -142,6 +150,7 @@ class BattleImpl implements Battle {
     this.timeLimitFrames = cfg.timeLimitFrames !== undefined ? Math.max(0, Math.floor(cfg.timeLimitFrames)) : null;
     this.timerFrozen = cfg.timerFrozen ?? false;
     this.sideRanks = challengeSideRanksForMode(cfg.challengeMode ?? 0);
+    this.isChallengeMode = cfg.challengeMode !== undefined;
     resetProjectileCounter();
 
     let cpuIdx = 0;
@@ -177,6 +186,7 @@ class BattleImpl implements Battle {
       borgs: [],
       projectiles: [],
       energy: {},
+      energyMax: {},
       defeated: {},
       defeatedEnergy: {},
       activeUidByPlayer: {},
@@ -193,6 +203,15 @@ class BattleImpl implements Battle {
     this.forces.forEach((force, fi) => this.deployNext(force, this.spawnPosFor(fi)));
     this.refreshSourceLocks();
     this.recomputeEnergy();
+    // T4 force-gauge MAX snapshot: the team's total energy at battle start (all borgs alive +
+    // still queued, i.e. THIS frame's just-computed state.energy, before any death can reduce
+    // it), rounded DOWN to a multiple of 10 (chunk_0000.c:1076-1079). Snapshotted once — never
+    // recomputed — matching the ROM's side[+0x114] init-once-per-battle semantics.
+    const energyMax: Record<number, number> = {};
+    for (const [team, total] of Object.entries(this.state.energy)) {
+      energyMax[Number(team)] = Math.floor(total / 10) * 10;
+    }
+    this.state.energyMax = energyMax;
   }
 
   // --- Setup helpers ------------------------------------------------------------------
@@ -373,27 +392,74 @@ class BattleImpl implements Battle {
       }
     }
 
-    for (const teamBorgs of humanBorgsByTeam.values()) {
+    for (const [team, teamBorgs] of humanBorgsByTeam) {
       if (teamBorgs.length === 1) {
         const b = teamBorgs[0];
         if (!b) continue;
-        tryActivateBurst(b, this.burstMeterFor(b), false);
+        if (tryActivateBurst(b, this.burstMeterFor(b), false)) {
+          this.activateSideWideBurst(team);
+        }
         continue;
       }
 
       const ready = teamBorgs.every((b) => canActivateBurst(b, this.burstMeterFor(b)));
       if (!ready) continue;
+      let activated = false;
       for (const b of teamBorgs) {
-        tryActivateBurst(b, this.burstMeterFor(b), true);
+        if (tryActivateBurst(b, this.burstMeterFor(b), true)) activated = true;
       }
+      if (activated) this.activateSideWideBurst(team);
     }
   }
 
+  /**
+   * SIDE-WIDE burst flag — DERIVED (combat-feel-gaps-decode-2026-07-05.md T3): `+0x6fc` is set
+   * on EVERY LIVING actor of the side by `zz_005b2b8_` (chunk_0007.c:3429-3445), not only the
+   * armed Y-presser(s). The port previously only flipped `burstActive` on the presser(s)
+   * (tryActivateBurst above); this propagates the SAME activation to every other living,
+   * same-team borg still on the field (including CPU-controlled allies, which the ROM's
+   * per-actor loop does not distinguish). Non-presser teammates get `burstPaired = true` too
+   * (T3: the whole side entered the "Power Burst active" state together) but do NOT consume
+   * their own meter or the `charged` flag — the ROM's activation precondition (armed Y +
+   * charged meter) is a presser-only gate; only the presser(s)' own meters are spent.
+   */
+  private activateSideWideBurst(team: number): void {
+    for (const b of this.state.borgs) {
+      if (!b.alive || b.team !== team) continue;
+      if (b.burstActive) continue; // already set (the presser(s), handled by tryActivateBurst)
+      b.burstActive = true;
+      b.burstPaired = true;
+    }
+  }
+
+  /**
+   * Drain active Power Bursts. SIDE-WIDE per T3: the port's per-player meter is the only drain
+   * clock this port has (the ROM's real side timer pair +0x10c/+0x10e is trace-gated per the
+   * doc), so a side's burst duration is driven by its presser's OWN meter — when that empties
+   * (stepActiveBurst clears the presser's burstActive), every OTHER living teammate that was
+   * riding the side-wide flag (activateSideWideBurst, no meter of its own) ends together too,
+   * since there is no ROM-decoded reason a subset of one side would drop out of burst before
+   * the rest. CPU-owned/non-active teammates never had a meter to drain in the first place —
+   * this loop is what actually turns their flag back off once the side's burst ends.
+   */
   private drainPowerBursts(): void {
+    const teamsStillBursting = new Set<number>();
     for (const force of this.forces) {
       if (force.ownerPlayer === null || force.activeUid === null) continue;
       const b = this.byUid.get(force.activeUid);
-      if (b) stepActiveBurst(b, this.burstMeterFor(b));
+      if (!b || !b.burstActive) continue;
+      stepActiveBurst(b, this.burstMeterFor(b));
+      if (b.burstActive) teamsStillBursting.add(b.team);
+    }
+    for (const b of this.state.borgs) {
+      if (!b.alive || !b.burstActive) continue;
+      if (teamsStillBursting.has(b.team)) continue;
+      // No metered presser kept this team's burst alive this frame (either the presser's
+      // meter just emptied, or this borg's team has no active metered presser at all — e.g.
+      // an all-CPU side, which cannot self-activate burst today per burst.ts creditBurstFill,
+      // but stays defensive here in case a future wave adds CPU meters) — end it.
+      b.burstActive = false;
+      b.burstPaired = false;
     }
   }
 
@@ -493,6 +559,12 @@ class BattleImpl implements Battle {
           // hit connection — see creditBurstFill (burst.ts).
           burstMeters: this.state.burstMeterByPlayer,
           telemetry: this.state.telemetry,
+          // T4 FORCE-GAUGE: side energy pool + its once-per-battle max snapshot — see
+          // BattleState.energyMax / damageFormula.ts forceGaugeRatioIndex.
+          energyByTeam: this.state.energy,
+          energyMaxByTeam: this.state.energyMax,
+          // T4 item 3: CPU-side x0.5 halvings, Challenge-mode-only (see isChallengeMode doc).
+          cpuHalvingEnabled: this.isChallengeMode,
         });
         if (res.projectiles.length) this.state.projectiles.push(...res.projectiles);
         // Results telemetry ATTEMPTS: each attack initiation counts once — a new melee
@@ -562,6 +634,10 @@ class BattleImpl implements Battle {
         // connection, matching the ROM's dead-husk 3 x 50 trace).
         burstMeters: this.state.burstMeterByPlayer,
         telemetry: this.state.telemetry,
+        // T4 FORCE-GAUGE: see the stepAttacks call above.
+        energyByTeam: this.state.energy,
+        energyMaxByTeam: this.state.energyMax,
+        cpuHalvingEnabled: this.isChallengeMode,
       },
     );
     this.accountPendingDefeats();
