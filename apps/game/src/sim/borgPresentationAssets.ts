@@ -113,6 +113,14 @@ async function loadBorgModel(id: string): Promise<THREE.Object3D> {
       return model;
     });
     sourceModels.set(id, sourceP);
+    // Drop the cache entry on rejection so a transient load failure (dev-server 503,
+    // flaky URL resolution) is RETRIABLE on the next spawn. Without this the same
+    // rejected promise stays cached for the whole page session and that borg id can
+    // never render (every spawn re-throws in attachModel, the actor is removed, and
+    // the borg is invisible until reload).
+    sourceP.catch(() => {
+      if (sourceModels.get(id) === sourceP) sourceModels.delete(id);
+    });
   }
   const source = await sourceP;
   return assetLoader.cloneModel(source);

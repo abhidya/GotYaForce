@@ -1109,6 +1109,15 @@ function resumeBattle(): void {
   session.pauseHandle?.destroy();
   session.pauseHandle = null;
   session.paused = false;
+  // Swallow the in-flight pause key edge: the menuInput bus resumed the game
+  // SYNCHRONOUSLY inside the keydown event (well before this polled tick). The
+  // physical key is still in `keys`, so without marking it consumed here the
+  // next pollPauseToggle tick sees startPressed=true, pausePressedLast=false,
+  // session.paused=false → a rising edge → re-pauses immediately. That traps
+  // the player in the pause menu (Escape/Enter/gamepad-Start toggle the menu
+  // off then right back on). Claiming the press was "previous-frame" makes the
+  // next poll see no rising edge until the key is actually released.
+  pausePressedLast = true;
 }
 
 function endBattleToMenu(): void {

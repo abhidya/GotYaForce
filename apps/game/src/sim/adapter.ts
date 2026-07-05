@@ -49,12 +49,22 @@ export interface LocalControls {
  *   Z                     = allyLock (GC Z "ally lock-on"; target selection only until charge behavior is decoded)
  * Manual borg switching is deliberately unbound: the extracted control texture does not
  * show it, and current C evidence only proves death/auto-deploy swap flow.
+ *
+ * HORIZONTAL AXIS SIGN: +Z is forward (RAM trace) and yawFromXZ(x, z) = atan2(x, z)
+ * yields rotY that increases toward +X. The chase cam (camera.ts) trails the borg along
+ * -forward, so with up=+Y a borg facing +Z has world +X on the player's LEFT (Three.js
+ * camera-local +X = world -X). Feeding +X straight into yawFromXZ therefore turns the
+ * borg toward the player's LEFT when they press RIGHT. To make "press right = turn
+ * right" we feed the NEGATED stick X into the sim (and likewise for lock-frame strafing
+ * in movement.ts resolveHorizontalIntent, which consumes the same axis). The sim/AI
+ * keep their internal "+X is world-right" convention untouched; only the human-input
+ * adapter flips.
  */
 export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): PlayerInput {
   let moveX = 0;
   let moveZ = 0;
-  if (keys.has("KeyA") || keys.has("ArrowLeft")) moveX -= 1;
-  if (keys.has("KeyD") || keys.has("ArrowRight")) moveX += 1;
+  if (keys.has("KeyA") || keys.has("ArrowLeft")) moveX += 1;
+  if (keys.has("KeyD") || keys.has("ArrowRight")) moveX -= 1;
   // +Z is forward in the sim (per RAM trace). W / Up = forward.
   if (keys.has("KeyW") || keys.has("ArrowUp")) moveZ += 1;
   if (keys.has("KeyS") || keys.has("ArrowDown")) moveZ -= 1;
@@ -73,7 +83,7 @@ export function inputFromKeys(keys: ReadonlySet<string>, pad?: Gamepad | null): 
   if (pad) {
     const ax = pad.axes[0] ?? 0;
     const ay = pad.axes[1] ?? 0;
-    if (Math.abs(ax) > 0.2) moveX = ax;
+    if (Math.abs(ax) > 0.2) moveX = -ax; // see HORIZONTAL AXIS SIGN note above
     if (Math.abs(ay) > 0.2) moveZ = -ay; // stick up = forward
     const b = (i: number) => pad.buttons[i]?.pressed ?? false;
     jump = jump || b(0); // A

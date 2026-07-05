@@ -136,7 +136,14 @@ function fitModel(model: THREE.Object3D, targetSize: number): void {
   bounds.getSize(size);
   const maxDimension = Math.max(size.x, size.y, size.z, 1);
   const scale = targetSize / maxDimension;
-  model.position.set(-center.x, -center.y, -center.z);
+  // Scale the recentering translation by the SAME factor. Three.js composes the world
+  // matrix as T * R * S, so an unscaled `-center` translation lands in the parent frame
+  // while the geometry (here rotated by the scene root) is scaled inside R*S — without
+  // this scaling the centroid ends up at (scale-1)*center, visibly off-axis whenever the
+  // source asset's bounds are not already centered on the world origin (the common case
+  // for the entry00/brif00/vsel00 scene bundles and the per-borg lead models). Solving
+  // 0 = P + R*s*c_local for the new world centroid P gives P = -s*center.
+  model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
   model.scale.setScalar(scale);
 }
 

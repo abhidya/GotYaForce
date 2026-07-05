@@ -93,6 +93,13 @@ function loadAtlasImage(): Promise<HTMLImageElement> {
       img.onerror = () => reject(new Error(`failed to load ${ASSETS.fontAscii}`));
       img.src = ASSETS.fontAscii;
     });
+    // Reset the cache on rejection so a one-time atlas load failure (404, transient
+    // network blip) does not brick bitmap text for the rest of the page session —
+    // without this every subsequent setBitmapText call awaits the same rejected
+    // promise and silently produces no glyphs, taking the HUD/menus/results out.
+    atlasImagePromise.catch(() => {
+      if (atlasImagePromise !== null) atlasImagePromise = null;
+    });
   }
   return atlasImagePromise;
 }
@@ -132,6 +139,12 @@ function tintedAtlasUrl(color: string): Promise<string> {
     return url;
   });
   tintInFlight.set(color, p);
+  // Mirror loadAtlasImage's reset: a transient atlas failure must not pin a
+  // rejected tint promise for the session (every later use of this tint would
+  // await the same rejection and skip the glyph re-tint).
+  p.catch(() => {
+    if (tintInFlight.get(color) === p) tintInFlight.delete(color);
+  });
   return p;
 }
 
@@ -180,7 +193,7 @@ export function setBitmapText(node: HTMLElement, value: string, opts: BitmapText
   // If a tint was requested but not cached yet, swap the sheets in once ready.
   if (tint && !readyTint) {
     void tintedAtlasUrl(tint).then((url) => {
-      if (!node.isConnected && node.childElementCount === 0) return;
+      if (!node.isConnected || node.childElementCount === 0) return;
       for (const child of Array.from(node.children)) {
         if (child instanceof HTMLElement && child.classList.contains("gf-bitmap-glyph")) {
           child.style.backgroundImage = `url(${url})`;
