@@ -198,7 +198,7 @@ export function parseStageHitGrid(input: Uint8Array | ArrayBuffer): StageHitGrid
   const recordOffset = recordSentinelOffset + 8;
   const recordBytes = bytes.byteLength - recordOffset;
   const recordCount = Math.floor(recordBytes / STAGE_RECORD_SIZE);
-  const cells = parseCells(view, cellCount, gridX, offsetTableEnd, recordSentinelOffset, recordBytes);
+  const cells = parseCells(view, cellCount, gridZ, offsetTableEnd, recordSentinelOffset, recordBytes);
   const triangles = parseTriangles(view, recordOffset, recordCount);
   return {
     magic: "STIH",
@@ -360,7 +360,10 @@ function parseActorHitRecord(bytes: Uint8Array, view: DataView, offset: number, 
 function parseCells(
   view: DataView,
   cellCount: number,
-  gridX: number,
+  // STIH cell-offset tables are X-COLUMN-major: flat index = cx * gridZ + cz (EMPIRICALLY
+  // PROVEN 2026-07-05 — st00 wall tri at world cell (15,28) lives at flat 658 = 15*42+28;
+  // the old X-row-major reading transposed every cell and made walls walk-through).
+  gridZ: number,
   offsetTableEnd: number,
   recordSentinelOffset: number,
   recordBytes: number,
@@ -387,8 +390,8 @@ function parseCells(
     }
     return {
       index,
-      x: index % gridX,
-      z: Math.floor(index / gridX),
+      x: Math.floor(index / gridZ),
+      z: index % gridZ,
       offset,
       nextOffset,
       recordIndices,

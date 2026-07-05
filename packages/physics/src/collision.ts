@@ -114,7 +114,20 @@ export function stageCollisionFromHitGrids(layers: readonly StageCollisionLayer[
     }
 
     for (const cell of layer.grid.cells) {
-      const target = mergedCells[cell.index];
+      // STIH cell-offset tables are X-COLUMN-major: file flat index = cx * gridZ + cz.
+      // The runtime convention everywhere in this package is Z-row-major
+      // (lookup = cz * gridX + cx), so transpose here at the merge boundary.
+      // EMPIRICALLY PROVEN (2026-07-05 walk-through-walls playtest bug): st00's wall
+      // triangle at world cell (15,28) sits at file index 658 = 15*42+28; before this
+      // transpose every grid lookup read the mirrored cell, so wall candidates missed and
+      // lateral collision silently never fired (floor lookups only survived via
+      // floorSurfaceYAt's scan-all fallback).
+      const gridX = first.header.gridCells.x;
+      const gridZ = first.header.gridCells.z;
+      const fileCx = Math.floor(cell.index / gridZ);
+      const fileCz = cell.index % gridZ;
+      const runtimeIndex = fileCz * gridX + fileCx;
+      const target = mergedCells[runtimeIndex];
       if (!target) continue;
       target.triangleIndices.push(...cell.recordIndices.map((recordIndex) => base + recordIndex));
     }
