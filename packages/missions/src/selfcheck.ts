@@ -39,6 +39,17 @@ import type { MissionBattleConfig } from "./battle-config.js";
 import { computeResults, type BattleOutcome } from "./scoring.js";
 import { readBorgs, type BorgData } from "./borg-data.js";
 import type { StagesData } from "./adventure.js";
+import {
+  BORG_GET_DROP_TABLE,
+  createGetPool,
+  clonePool,
+  snapshotPool,
+  restorePool,
+  registerKill,
+  rollDrops,
+  getDropRowForBorgId,
+  type GetPool,
+} from "./getSystem.js";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(`selfcheck failed: ${message}`);
@@ -227,6 +238,114 @@ function assertStageFamilyRollDistribution(): void {
 }
 
 /**
+ * Seeded end-to-end audit of the Borg GET / Gotcha-Box drop pipeline
+ * (research/decomp/items-evidence-inventory-2026-07-05.md, getSystem.ts).
+ *
+ *  - register kills until a known low-threshold row (pl0003, normal threshold 16) crosses,
+ *    then assert the exact resulting drop;
+ *  - assert the pl0503 CYBER DEATH DRAGON fusion-credit special case (credits pl0505 +
+ *    pl0506 instead, both at partsKind 5 -> PARTS GET);
+ *  - assert lose/abandon revert restores the pre-battle snapshot exactly;
+ *  - assert points reset to 0 after a drop;
+ *  - assert never-drop borgs (no table row) never drop regardless of accrued points.
+ */
+function assertGetSystem(): void {
+  assert(BORG_GET_DROP_TABLE.rows.length === 197, "GET drop table must carry all 197 extracted rows");
+
+  // --- 1) register kills until a known threshold crosses; assert the exact drop. ---
+  // Seed 12345's first roll is gain=16 (verified offline), which exactly meets pl0003's
+  // (SHURIKEN NINJA) normal-variant threshold of 16 on the FIRST registered kill.
+  const pl0003Row = getDropRowForBorgId("pl0003");
+  assert(pl0003Row !== null, "pl0003 must have a drop-table row");
+  assert(pl0003Row.thresholds.normal === 16, "pl0003 normal threshold must be the known low value 16 (selfcheck picks this row deliberately)");
+
+  const rng = createChallengeRng(12345);
+  const pool = createGetPool();
+  registerKill(pool, "pl0003", 0, rng);
+  const entryBefore = pool.entries.find((e) => e.borgId === "pl0003" && e.colorVariant === 0);
+  assert(entryBefore !== undefined, "registerKill must create a pool entry for a new (borgId, colorVariant) pair");
+  assert(entryBefore.points === 16, `pl0003 pool entry must have accrued exactly 16 points from the seeded first roll, got ${entryBefore.points}`);
+
+  const drops = rollDrops(pool, rng);
+  assert(drops.length === 1, `expected exactly one qualifying drop, got ${drops.length}`);
+  const drop = drops[0]!;
+  assert(drop.borgId === "pl0003", "the qualifying drop must be pl0003");
+  assert(drop.colorVariant === 0, "the drop must carry the registered color variant (0/normal)");
+  assert(drop.kind === "unit", "pl0003 is partsKind 1 -> a whole-unit ('UNIT GET') drop");
+  assert(drop.partIndex === 0, "a whole-unit drop's partIndex must be 0");
+
+  // --- 4) points reset after a drop. ---
+  const entryAfter = pool.entries.find((e) => e.borgId === "pl0003" && e.colorVariant === 0);
+  assert(entryAfter !== undefined && entryAfter.points === 0, "pl0003's pool entry points must reset to 0 immediately after it drops");
+
+  // Rolling again with nothing re-accrued must yield no further drops.
+  assert(rollDrops(pool, rng).length === 0, "rollDrops must not re-emit a drop for an entry sitting at 0 points");
+
+  // --- 2) fusion-credit special case (pl0503 CYBER DEATH DRAGON -> pl0505 + pl0506). ---
+  const fusionPool = createGetPool();
+  const fusionRng = createChallengeRng(999);
+  registerKill(fusionPool, "pl0503", 2 /* gold */, fusionRng);
+  assert(fusionPool.entries.length === 2, "killing pl0503 must credit exactly its two fusion components, not pl0503 itself");
+  const deathHead = fusionPool.entries.find((e) => e.borgId === "pl0505");
+  const cyberDragon = fusionPool.entries.find((e) => e.borgId === "pl0506");
+  assert(deathHead !== undefined, "pl0503 kill must credit pl0505 (DEATH HEAD)");
+  assert(cyberDragon !== undefined, "pl0503 kill must credit pl0506 (CYBER DRAGON)");
+  assert(deathHead.colorVariant === 2 && cyberDragon.colorVariant === 2, "fusion credits must carry the victim's color variant");
+  assert(!fusionPool.entries.some((e) => e.borgId === "pl0503"), "pl0503 itself must never appear in the pool (it has no GET row)");
+
+  // Push both credited entries over their (shared) gold threshold and confirm both resolve
+  // as PARTS GET (partsKind 5 for both pl0505 and pl0506).
+  const goldThreshold = getDropRowForBorgId("pl0505")!.thresholds.gold;
+  assert(getDropRowForBorgId("pl0506")!.thresholds.gold === goldThreshold, "pl0505/pl0506 must share the same gold threshold for this assertion to be well-posed");
+  while ((fusionPool.entries.find((e) => e.borgId === "pl0505")?.points ?? 0) < goldThreshold) {
+    registerKill(fusionPool, "pl0503", 2, fusionRng);
+  }
+  const fusionDrops = rollDrops(fusionPool, fusionRng);
+  const fusionBorgIds = new Set(fusionDrops.map((d) => d.borgId));
+  assert(fusionBorgIds.has("pl0505") && fusionBorgIds.has("pl0506"), "once both fusion-credited entries cross the gold threshold, both must drop");
+  assert(fusionDrops.every((d) => d.kind === "parts" && d.partsCount === 5), "pl0505/pl0506 are partsKind 5 -> every drop must be a 5-part PARTS GET");
+  assert(fusionDrops.every((d) => d.partIndex >= 1 && d.partIndex <= 5), "a parts drop's partIndex must be in 1..partsCount");
+
+  // --- 3) lose/abandon revert restores the pre-battle snapshot exactly. ---
+  const revertRng = createChallengeRng(42);
+  const livePool: GetPool = createGetPool();
+  registerKill(livePool, "pl0000", 0, revertRng); // seed one entry pre-battle.
+  const preBattleSnapshot = snapshotPool(livePool);
+  const preBattlePointsCopy = clonePool(livePool);
+
+  // Simulate an in-battle kill, then abandon: pool must revert byte-for-byte.
+  registerKill(livePool, "pl0001", 0, revertRng);
+  assert(livePool.entries.length === 2, "the in-battle kill must have added a second pool entry before revert");
+  restorePool(livePool, preBattleSnapshot);
+  assert(livePool.entries.length === preBattlePointsCopy.entries.length, "revert must drop the in-battle-only entry");
+  assert(
+    JSON.stringify(livePool.entries) === JSON.stringify(preBattlePointsCopy.entries),
+    "revert must restore the pool to an exact byte-for-byte match of the pre-battle snapshot",
+  );
+  // Snapshot must be independent of subsequent pool mutation (deep clone, not a reference).
+  registerKill(livePool, "pl0002", 0, revertRng);
+  assert(
+    JSON.stringify(preBattleSnapshot.entries) === JSON.stringify(preBattlePointsCopy.entries),
+    "mutating the live pool after taking a snapshot must not retroactively change the snapshot",
+  );
+
+  // --- 5) never-drop borgs (no table row) never drop, regardless of accrued points. ---
+  const neverDropIds = ["pl0503", "pl0507", "pl050f", "pl0513", "pl0615"];
+  for (const id of neverDropIds) {
+    assert(getDropRowForBorgId(id) === null, `${id} must have NO drop-table row (never-drop borg)`);
+  }
+  const neverDropPool = createGetPool();
+  const neverDropRng = createChallengeRng(7);
+  // Directly seed a huge point total for a never-drop borg (bypassing registerKill's
+  // fusion-credit redirect) to prove rollDrops still refuses it even at absurd points.
+  neverDropPool.entries.push({ borgId: "pl0615", colorVariant: 0, points: 65535 });
+  const neverDrops = rollDrops(neverDropPool, neverDropRng);
+  assert(neverDrops.length === 0, "a never-drop borg (no table row) must never produce a drop, no matter how many points it has accrued");
+
+  console.log("GET system: seeded end-to-end audit PASS (threshold crossing, fusion credit, lose-revert, points reset, never-drop borgs)");
+}
+
+/**
  * Deep per-round audit: for each difficulty, generate a full run and verify
  * every battle's enemy/ally rosters, budgets, member caps, and stage selector
  * bytes against the recovered DOL tables in challenge-reference.ts.
@@ -354,6 +473,7 @@ export function main(): void {
   assertArenaNameCoverage();
   assertStageFamilyRollDistribution();
   auditChallengeRunAgainstReference(borgs);
+  assertGetSystem();
 
   console.log("=".repeat(70));
   console.log("CHALLENGE — NORMAL run (budget", CHALLENGE_DIFFICULTIES.NORMAL, ")");

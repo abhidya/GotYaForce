@@ -1767,3 +1767,66 @@
 .gf-pause-item.gf-selected .gf-pause-item-text {
   filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.65));
 }
+
+/* ============================ GETS (Borg GET drop list) ============================ */
+/* TUNED minimal recreation — see Gets.ts header. Deliberately simple: a static list of
+   this battle's rolled drops over the real getStrip (gets00_mdl) texture, no per-drop
+   box-open cinematic (future work). */
+.gf-gets {
+  background: #1a2f4a;
+  display: grid;
+  place-items: center;
+}
+.gf-gets-backdrop {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(80vw, 448px);
+  image-rendering: pixelated;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4));
+  z-index: 0;
+}
+.gf-gets-title {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%) scale(3);
+  z-index: 2;
+  color: var(--gf-yellow);
+  filter: drop-shadow(1px 1px 0 var(--gf-outline));
+}
+.gf-gets-rows {
+  position: relative;
+  z-index: 1;
+  margin-top: 18%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: min(80vw, 420px);
+}
+.gf-gets-row {
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: linear-gradient(#7fb4e6, var(--gf-blue-pill-deep));
+  border: 2px solid #bcdcff;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+.gf-gets-row-parts { background: linear-gradient(#f0c26a, #b5813a); border-color: #ffdf9c; }
+.gf-gets-row-text {
+  transform: scale(1.6);
+  transform-origin: center;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.55));
+}
+.gf-gets-prompt {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2;
+  color: #fff;
+  font-size: clamp(11px, 1.6vw, 15px);
+  letter-spacing: 0.06em;
+  -webkit-text-stroke: 0.5px var(--gf-outline);
+  paint-order: stroke fill;
+}

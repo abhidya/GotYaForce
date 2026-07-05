@@ -1,0 +1,2414 @@
+{
+  "_meta": {
+    "source": "boot.dol@0x8035b2dc",
+    "dolPath": "user-data/GG4E/disc/sys/boot.dol",
+    "dolFileOffset": "0x3582dc",
+    "sectionMappingPattern": "scripts/scan-damage-table-bindings.mjs:10-18",
+    "rowLayout": "8 x big-endian s16 (16 bytes): [borgId, partsKind, threshold[0..5]]",
+    "terminator": "negative first short",
+    "rowCount": 197,
+    "partsKindCounts": {
+      "1": 107,
+      "2": 44,
+      "3": 25,
+      "4": 17,
+      "5": 4
+    },
+    "variantOrder": [
+      "normal",
+      "altColor",
+      "gold",
+      "silver",
+      "crystal",
+      "black"
+    ],
+    "variantOrderSource": "research/symbols/eu_borgs_GET_values.csv header (Normal, Another Color, Gold, Silver, Crystal, Black)",
+    "crossValidation": {
+      "dataset": "research/symbols/eu_borgs_GET_values.csv",
+      "result": "197/197 byte-exact"
+    },
+    "partsKindSemantics": "1 = whole-unit drop ('UNIT GET'); 2..5 = split into N collectible parts ('PARTS GET', random part 1..N); a borg with no row never drops (never-drop borgs: pl0503/0507/050f/0513/0615/0602/060a/060c/060e/0629/062a).",
+    "thresholdSemantics": "threshold -1 means that color variant can never drop for this borg.",
+    "killCredits": {
+      "note": "chunk_0003.c:8061-8064 — killing pl0503 (CYBER DEATH DRAGON, a fusion with no GET row) instead registers a kill for its two fusion components.",
+      "pl0503": [
+        "pl0505",
+        "pl0506"
+      ]
+    },
+    "pointsPerKill": {
+      "min": 1,
+      "max": 16,
+      "note": "chunk_0045.c:4754-4757 (zz_018214c_): +(rng8() & 0xF) + 1 via the global 8-bit RNG zz_00055fc_."
+    },
+    "poolCap": 1536,
+    "pointsCap": 65535,
+    "evidenceDoc": "research/decomp/items-evidence-inventory-2026-07-05.md"
+  },
+  "rows": [
+    {
+      "borgId": "pl0000",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0001",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0002",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0003",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0004",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0005",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0006",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0007",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0008",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 640,
+        "altColor": 960,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0009",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl000a",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl000b",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl000c",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0100",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0101",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0102",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0103",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0104",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0105",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 800,
+        "altColor": 1200,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0106",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0107",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0108",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 48,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0109",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 800,
+        "altColor": 1200,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl010a",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 640,
+        "altColor": 960,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0200",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0201",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0202",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0203",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0204",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0205",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0206",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0207",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0208",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0209",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl020a",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl020b",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 48,
+        "altColor": 72,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl020c",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl020d",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl020e",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl020f",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 240,
+        "altColor": 360,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0300",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0301",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0302",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0303",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0304",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0305",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0306",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0307",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0308",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0309",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl030a",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl030b",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl030c",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl030d",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0400",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0401",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0402",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0403",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0404",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0405",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0406",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 800,
+        "altColor": 1200,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0407",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0408",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0409",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl040a",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl040b",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 800,
+        "altColor": 1200,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl040c",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 960,
+        "altColor": 1440,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl040d",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 800,
+        "altColor": 1200,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0500",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0501",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0502",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0504",
+      "partsKind": 5,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0505",
+      "partsKind": 5,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0506",
+      "partsKind": 5,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0509",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl050a",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl050b",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl050c",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl050d",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl050e",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0510",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0511",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0512",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 120,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0515",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0516",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0517",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0600",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0601",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0604",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0606",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0608",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0609",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0610",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0613",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0616",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0617",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0618",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0619",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl061a",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl061b",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl061c",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl061d",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl061e",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl061f",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0620",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0621",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0623",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0625",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0627",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0628",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0700",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0701",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0702",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0703",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0704",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0705",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0706",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0707",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0708",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0709",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl070a",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl070b",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 640,
+        "altColor": 960,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl070c",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 640,
+        "altColor": 960,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl070d",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 640,
+        "altColor": 960,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0800",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0801",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0802",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0804",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0805",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0806",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0807",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0808",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0809",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl080a",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl080c",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl080d",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl080e",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl080f",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0900",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0901",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0902",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0903",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 48,
+        "altColor": 72,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0904",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 48,
+        "altColor": 72,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0906",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 160,
+        "altColor": 240,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0907",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0908",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0909",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl090a",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl090b",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl090c",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl090d",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a00",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a01",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a02",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a03",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a04",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a05",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 560,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0a06",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 20,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a07",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a08",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a09",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0a0a",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 640,
+        "altColor": 960,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0b00",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0b01",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 48,
+        "altColor": 72,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0b02",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0b03",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0b04",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0b05",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0b06",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 40,
+        "altColor": 56,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0b07",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 640,
+        "altColor": 960,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0c00",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0c01",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0c02",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0c04",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0c05",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 32,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0c06",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0d00",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0d01",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0d02",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0d03",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 32,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0d04",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0d05",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0d06",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 24,
+        "altColor": 48,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0d07",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0e00",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0e01",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0e02",
+      "partsKind": 2,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0e03",
+      "partsKind": 3,
+      "thresholds": {
+        "normal": 16,
+        "altColor": 24,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0e04",
+      "partsKind": 5,
+      "thresholds": {
+        "normal": -1,
+        "altColor": -1,
+        "gold": -1,
+        "silver": -1,
+        "crystal": -1,
+        "black": -1
+      }
+    },
+    {
+      "borgId": "pl0e05",
+      "partsKind": 4,
+      "thresholds": {
+        "normal": 80,
+        "altColor": 120,
+        "gold": 10,
+        "silver": 4,
+        "crystal": 2,
+        "black": 8
+      }
+    },
+    {
+      "borgId": "pl0f00",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0f01",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0f02",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0f03",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0f04",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0f05",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    },
+    {
+      "borgId": "pl0f06",
+      "partsKind": 1,
+      "thresholds": {
+        "normal": 400,
+        "altColor": 600,
+        "gold": 40,
+        "silver": 28,
+        "crystal": 24,
+        "black": 36
+      }
+    }
+  ]
+}

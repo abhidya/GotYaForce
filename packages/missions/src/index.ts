@@ -104,6 +104,36 @@ export type {
   ChallengeStageSelection,
 } from "./challenge-reference.js";
 
+// --- Borg GET / Gotcha-Box drop pipeline (DERIVED — see getSystem.ts header) ---
+export {
+  BORG_GET_DROP_TABLE,
+  GET_COLOR_VARIANT_NAMES,
+  GET_KILL_CREDITS,
+  GET_POOL_CAP,
+  GET_POINTS_CAP,
+  GET_POINTS_PER_KILL_MIN,
+  GET_POINTS_PER_KILL_MAX,
+  createGetPool,
+  clonePool,
+  snapshotPool,
+  restorePool,
+  registerKill,
+  rollDrops,
+  rollPointsGain,
+  rollPartIndex,
+  getDropRowForBorgId,
+} from "./getSystem.js";
+export type {
+  GetColorVariant,
+  GetDropTableRow,
+  GetDropTableMeta,
+  GetDropTable,
+  GetPoolEntry,
+  GetPool,
+  GetDropKind,
+  GetDrop,
+} from "./getSystem.js";
+
 // --- Adventure mode ---
 export {
   createAdventureCampaign,

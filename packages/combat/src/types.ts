@@ -141,6 +141,15 @@ export interface SourceTargetLockState {
 export interface BorgRuntime {
   uid: string;
   borgId: string;
+  /**
+   * Palette/color-variant id (victim struct +0x3ed in the GET kill-registration path —
+   * research/decomp/items-evidence-inventory-2026-07-05.md §2a): 0=normal, 1=alt color,
+   * 2=gold, 3=silver, 4=crystal, 5=black. The port has no color-variant selection pipeline
+   * yet (borg spawns are always the default palette), so this is always 0 today — TUNED
+   * placeholder wired for the GET drop system (@gf/missions getSystem.ts) to read per-kill.
+   * Optional so existing fakes/constructors self-heal to undefined (treated as 0/normal).
+   */
+  colorVariant?: number;
   team: number;
   /** Owning player id, or null for CPU-controlled. */
   ownerPlayer: string | null;
@@ -591,6 +600,18 @@ export interface BattleState {
   /** Team-0 defeat split for the Results screen: player-owned vs CPU-ally borgs. */
   defeatedPlayerBorgs?: number;
   defeatedAllyBorgs?: number;
+  /**
+   * Ordered list of every kill accounted this battle (one entry per accountPendingDefeats
+   * kill, in kill order) — additive, optional so existing state constructors keep
+   * compiling. Feeds the Borg GET drop pool (@gf/missions getSystem.ts registerKill):
+   * research/decomp/items-evidence-inventory-2026-07-05.md §2a needs the VICTIM's borgId +
+   * colorVariant, which BorgRuntime now carries. `killerTeam`/`killerOwner` mirror the same
+   * cross-team-kill attribution accountPendingDefeats already uses for the slot counters
+   * (lastHitAttackerTeam/lastHitAttackerOwner); a defeat with no cross-team damager (e.g. a
+   * husk's own bookkeeping death) still appends an entry with killerTeam/killerOwner
+   * undefined so callers can filter it out explicitly rather than have it silently missing.
+   */
+  defeats?: BattleDefeat[];
   frame: number;
   /** Frames remaining on the battle timer, or null when untimed. */
   timeRemainingFrames: number | null;
@@ -602,6 +623,25 @@ export interface BattleState {
    * pre-existing state constructors stay valid; absent === 0 (ongoing).
    */
   winnerMask?: number;
+}
+
+/**
+ * One accounted kill (BattleState.defeats entry) — additive telemetry for the GET drop
+ * pipeline. See the `defeats` field doc above for provenance.
+ */
+export interface BattleDefeat {
+  /** The victim's borg id (pl####). */
+  borgId: string;
+  /** The victim's palette/color-variant id (0..5; see BorgRuntime.colorVariant). */
+  colorVariant: number;
+  /** The victim's team. */
+  victimTeam: number;
+  /** The killer's team, when the last damager was cross-team (accountPendingDefeats'
+   *  b.lastHitAttackerTeam !== b.team gate); undefined for a same-team/no-damager death. */
+  killerTeam?: number;
+  /** The killer's owning player id, or null for a CPU-owned killer; undefined when there
+   *  was no qualifying cross-team damager (mirrors killerTeam's undefined case). */
+  killerOwner?: string | null;
 }
 
 /**

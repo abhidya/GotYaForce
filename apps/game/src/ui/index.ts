@@ -62,6 +62,9 @@ export type { BattleIntroOptions, BattleIntroHandle } from "./screens/BattleIntr
 export { createResults } from "./screens/Results.js";
 export type { ResultStats, ResultsOptions, ResultsHandle } from "./screens/Results.js";
 
+export { createGets } from "./screens/Gets.js";
+export type { GetsRow, GetsOptions, GetsHandle } from "./screens/Gets.js";
+
 export { createPauseMenu } from "./screens/PauseMenu.js";
 export type { PauseAction, PauseMenuOptions, PauseMenuHandle } from "./screens/PauseMenu.js";
 

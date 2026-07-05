@@ -643,6 +643,23 @@ class BattleImpl implements Battle {
       const prof = this.profiles.get(b.uid);
       if (!prof) continue;
       b.defeatAccounted = true;
+      // DERIVED defeat-list entry (BattleState.defeats — GET drop pool feed, see the field
+      // doc in types.ts): appended for EVERY accounted defeat (including the husk — callers
+      // that need to filter it out can match borgId === HUSK_BORG_ID). killerTeam/killerOwner
+      // are only set on a genuine cross-team damager, same gate the ROM's kill event uses
+      // (chunk_0003.c:8066 `pcVar16[0x88] != pcVar18[0x88]`), independent of whether that
+      // damager was human or CPU-owned (unlike the slot-telemetry kills counter below, which
+      // only credits a PLAYER slot and so requires killerOwner !== null).
+      const crossTeamKill =
+        b.lastHitAttackerTeam !== undefined && b.lastHitAttackerTeam !== b.team
+          ? { killerTeam: b.lastHitAttackerTeam, killerOwner: b.lastHitAttackerOwner ?? null }
+          : null;
+      (this.state.defeats ??= []).push({
+        borgId: b.borgId,
+        colorVariant: b.colorVariant ?? 0,
+        victimTeam: b.team,
+        ...(crossTeamKill ?? {}),
+      });
       // W17: husk deaths carry no force cost (energy 0) and are excluded from the defeated
       // counters — the husk respawns indefinitely, so counting it would inflate the
       // score/stat counters with unbounded repeat kills.
