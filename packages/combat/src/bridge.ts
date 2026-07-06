@@ -34,6 +34,8 @@ import { configureStarHeroFamily } from "./families/star-hero.js";
 import { configureCyberMachineFamily } from "./families/cyber-machine.js";
 import { configureDragonFamily } from "./families/dragon.js";
 import { configureWormFamily } from "./families/worm.js";
+import { configureWireGunnerFamily } from "./families/wire-gunner.js";
+import { configureRobotFamily } from "./families/robot.js";
 import { configureSwordKnightFamily } from "./families/sword-knight.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
@@ -234,6 +236,22 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0708: makeSamuraiFamilyRegistration(),
       pl070c: makeSamuraiFamilyRegistration(),
       pl070d: makeSamuraiFamilyRegistration(),
+      // BUILD ROBOT family (ctor 0x80112b44) — cue table @0x80328148. The three robot
+      // borgs (BUILD/MEGATON/ARMY) share the bespoke X-special dive-bomb deploy
+      // (FUN_801132f8 → PTR_FUN_80327f98 phase machine); see families/robot.ts. The
+      // phase-1 contact spawns a borg-switched child: pl0402/pl0408 via zz_01138c0_
+      // (family child-deploy), pl0407 via FUN_801b8b6c (MEGATON heavy deploy, one-shot
+      // latched). All 3 members share ctor 0x80112b44 + group-4 seedSlot 0 (air 1).
+      pl0402: makeRobotFamilyRegistration(),
+      pl0407: makeRobotFamilyRegistration(),
+      pl0408: makeRobotFamilyRegistration(),
+      // WIRE GUNNER family (ctor 0x801301f8) — cue table @0x80336178. The three gunner
+      // borgs share the bespoke X-special phase machine FUN_80131688 → zz_01316e0_
+      // (direction-gated aim→fire shot deploy, group 4 slots 2/3/4); see
+      // families/wire-gunner.ts.
+      pl0103: makeWireGunnerFamilyRegistration(),
+      pl0106: makeWireGunnerFamilyRegistration(),
+      pl0107: makeWireGunnerFamilyRegistration(),
     };
   }
   return FAMILY_REGISTRY_CACHE;
@@ -444,6 +462,42 @@ function makeWormFamilyRegistration(): FamilyRegistration {
       configureWormFamily(actor, id as "pl0501" | "pl050b" | "pl050d" | "pl0517", ctx);
     },
     cueTable: cueTableForBorg("pl0501")!,
+  };
+}
+
+// BUILD ROBOT family (ctor 0x80112b44) — cue table @0x80328148. The X-special is a
+// BESPOKE 3-phase dive-bomb deploy (FUN_801132f8 → PTR_FUN_80327f98) ported in
+// families/robot.ts; engine 0x801132f8 lives in the family code block (not a shared-
+// engine range). The phase-1 contact spawns a borg-switched child: pl0402/pl0408 via
+// zz_01138c0_ (family child-deploy @0x801138c0), pl0407 via FUN_801b8b6c (MEGATON
+// heavy deploy @0x801b8b6c, one-shot latched at +0x150). All 3 members share the cue
+// table (ctor block-copy of the +0x4f0 binding) + group-4 seedSlot 0 (air 1).
+function makeRobotFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x407 ? "pl0407" :
+        actor.borgNumber === 0x408 ? "pl0408" : "pl0402";
+      configureRobotFamily(actor, id as "pl0402" | "pl0407" | "pl0408", ctx);
+    },
+    cueTable: cueTableForBorg("pl0402")!,
+  };
+}
+
+// WIRE GUNNER family (ctor 0x801301f8) — cue table @0x80336178. The X-special is a
+// BESPOKE 2-phase direction-gated shot deploy (FUN_80131688 → zz_01316e0_) ported in
+// families/wire-gunner.ts; engine 0x80131688 lives in the family code block (not a
+// shared-engine range). All 3 members (pl0103/pl0106/pl0107) share ctor 0x801301f8 +
+// group-4 slots 2/3/4 (direction-switched via +0x5e0 bits 0x10/0x40).
+function makeWireGunnerFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x106 ? "pl0106" :
+        actor.borgNumber === 0x107 ? "pl0107" : "pl0103";
+      configureWireGunnerFamily(actor, id as "pl0103" | "pl0106" | "pl0107", ctx);
+    },
+    cueTable: cueTableForBorg("pl0103")!,
   };
 }
 
@@ -683,6 +737,16 @@ export class RomDriverBridge {
       if (this.offMeshCheck && !this.offMeshCheck(runtime.pos.x, runtime.pos.z)) {
         runtime.pos.x = preX;
         runtime.pos.z = preZ;
+      }
+      // Y-guard: a family phase-0 reposition/impulse must never leave the borg BELOW
+      // the floor surface (the ROM's own step runs zz_00677b0_ ground collide right
+      // after; sword-knight's X dove through the mesh without this).
+      if (this.groundClamp) {
+        const clamped = this.groundClamp(runtime.pos, runtime.vel.y);
+        if (clamped.y > runtime.pos.y) {
+          runtime.pos.y = clamped.y;
+          runtime.vel.y = Math.max(0, runtime.vel.y);
+        }
       }
     }
     return true;

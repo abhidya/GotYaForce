@@ -33,6 +33,7 @@ import {
 import { createBurstMeter } from "./burst.js";
 import { exactMeleeForBorgId } from "./meleeExactData.js";
 import { findVariantByKind } from "./combat.js";
+import { stepRomAI, hasRomAiParams } from "./romAi.js";
 import {
   airBChargeCoverage,
   airBMoveForBorgId,
@@ -4165,6 +4166,42 @@ function forceGaugeRatioIndexSelf(energy: number, energyMax: number): number {
   return forceGaugeRatioIndex(energy, energyMax);
 }
 
+/** ROM-architecture CPU AI (romAi.ts) — DERIVED-skeleton sanity: params extracted,
+ *  target select + approach emitted, level-0 attack block honored. The module is
+ *  OPT-IN in live battles (BattleConfig.useRomAi) — see battle.ts. */
+function assertRomAiSkeleton(borgs: BorgStats[]): void {
+  if (!hasRomAiParams("pl0615")) {
+    throw new Error("[selfcheck] romAi: pl0615 should have extracted attack-slot params");
+  }
+  const gRed = buildProfile(borgById(borgs, "pl0615"));
+  const self = fakeRuntime("romai_self", 1, 0);
+  self.ownerPlayer = null;
+  const enemy = fakeRuntime("romai_enemy", 0, 5000);
+  // level-0 block: never initiates an attack (zz_001c80c_ +0x339 bit 0x10).
+  for (let f = 0; f < 120; f += 1) {
+    const input = stepRomAI(self, gRed, [self, enemy], { level: 0 });
+    if (input.attack || input.special) {
+      throw new Error("[selfcheck] romAi: level-0 CPU initiated an attack (block violated)");
+    }
+    if (f === 0 && !input.lockOn) {
+      throw new Error("[selfcheck] romAi: no lockOn emitted with an enemy in range");
+    }
+  }
+  // default level approaches from far and eventually presses something in range.
+  const self2 = fakeRuntime("romai_self2", 1, 0);
+  self2.ownerPlayer = null;
+  const enemy2 = fakeRuntime("romai_enemy2", 0, 900);
+  let sawApproachOrPress = false;
+  for (let f = 0; f < 300; f += 1) {
+    const input = stepRomAI(self2, gRed, [self2, enemy2], { level: 2 });
+    if (input.moveZ > 0 || input.attack || input.special) sawApproachOrPress = true;
+  }
+  if (!sawApproachOrPress) {
+    throw new Error("[selfcheck] romAi: CPU neither approached nor attacked over 300 frames");
+  }
+  console.log("[selfcheck] romAi skeleton OK (params, lock, level-0 block, approach/press)");
+}
+
 function fakeRuntime(uid: string, team: number, x: number): BorgRuntime {
   return {
     uid,
@@ -4257,6 +4294,7 @@ export function main(): number {
   assertGRedChargeStreamUnresolvedKeepsFallback(borgs);
   assertShotKindResolutionPrefersProvenAttribution(borgs);
   assertShotFlightVisualResolution(borgs);
+  assertRomAiSkeleton(borgs);
   assertArmedChargeLeafSetsExactAnimAndRecord(borgs);
   assertArmedAirBLeafUsesExactWindow(borgs);
   assertUnresolvedAirBAndChargeKeepTodaysBehavior(borgs);

@@ -4,7 +4,7 @@
 //
 // Replaces any hand-written JSON under .vitepress/data/. Never reads its own output.
 
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync, copyFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
@@ -14,6 +14,7 @@ const __dirname = dirname(__filename)
 const REPO_ROOT = join(__dirname, '..', '..')
 const RESEARCH = join(REPO_ROOT, 'research')
 const DATA_DIR = join(__dirname, '..', '.vitepress', 'data')
+const PUBLIC_DIR = join(__dirname, '..', 'public')
 
 const BASE = process.env.GH_PAGES_BASE ?? '/GotYaForce/'
 
@@ -400,6 +401,133 @@ writeJson('stages.json', {
   arenas: stages.length,
   challengePoolCount: stages.filter((s) => s.inChallengePool).length,
   stages
+})
+
+// ---------------------------------------------------------------------------
+// functions.json — slim function index for the Function Explorer.
+// Omits callers/callees arrays (kept in the full index) to keep this ~2 MB.
+// ---------------------------------------------------------------------------
+const allFns = fnIdx.functions
+const topicListFor = (fn) => {
+  const t = fn.topics || []
+  return Array.isArray(t) ? t : []
+}
+const functionsSlim = allFns.map((f) => ({
+  a: f.address,
+  n: f.currentFunctionName || f.symbolMapName || f.inferredName || f.address,
+  inf: f.inferredName || null,
+  chunk: f.chunkFile,
+  ls: f.lineStart,
+  le: f.lineEnd,
+  cnt: f.lineCount,
+  cc: (f.callers || []).length,
+  ce: (f.callees || []).length,
+  t: topicListFor(f),
+  src: f.sourceRef || null
+}))
+writeJson('functions.json', {
+  source: 'research/decomp/index/function-evidence-index.json',
+  count: functionsSlim.length,
+  functions: functionsSlim
+})
+
+// ---------------------------------------------------------------------------
+// functions-graph.json — top-N most-connected functions for the call graph.
+// Full graph (11,972 nodes) is too dense; cap to ~400 highest-degree nodes.
+// ---------------------------------------------------------------------------
+const degreeMap = new Map()
+for (const f of allFns) {
+  const deg = (f.callers || []).length + (f.callees || []).length
+  degreeMap.set(f.address, deg)
+}
+const topAddrs = [...degreeMap.entries()]
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 400)
+  .map(([a]) => a)
+const topSet = new Set(topAddrs)
+const addrToName = new Map(allFns.map((f) => [f.address, f.currentFunctionName || f.symbolMapName || f.address]))
+const addrToTopic = new Map(allFns.map((f) => [f.address, (f.topics || []).join('/') || 'unsorted']))
+const graphNodes = topAddrs.map((a) => ({
+  id: a,
+  name: addrToName.get(a),
+  topic: addrToTopic.get(a) || 'unsorted',
+  degree: degreeMap.get(a)
+}))
+const graphEdges = []
+const seenEdge = new Set()
+for (const f of allFns) {
+  if (!topSet.has(f.address)) continue
+  for (const c of (f.callees || [])) {
+    if (!topSet.has(c.address)) continue
+    const k = `${f.address}>${c.address}`
+    if (seenEdge.has(k)) continue
+    seenEdge.add(k)
+    graphEdges.push({ from: f.address, to: c.address })
+  }
+}
+writeJson('functions-graph.json', {
+  source: 'research/decomp/index/function-evidence-index.json',
+  note: 'Top 400 highest-degree functions. Full graph in function-evidence-index.json.',
+  nodes: graphNodes,
+  edges: graphEdges
+})
+
+// ---------------------------------------------------------------------------
+// Copy chunk_NNNN.c files to public/chunks/ for on-demand source fetch.
+// ---------------------------------------------------------------------------
+const chunkSrcDir = join(RESEARCH, 'decomp', 'ghidra-export')
+const chunkDstDir = join(PUBLIC_DIR, 'chunks')
+if (!existsSync(chunkDstDir)) mkdirSync(chunkDstDir, { recursive: true })
+let chunkCount = 0
+for (const f of readdirSync(chunkSrcDir)) {
+  if (/^chunk_\d+\.c$/.test(f) || f === 'challenge_deobfuscated.c') {
+    copyFileSync(join(chunkSrcDir, f), join(chunkDstDir, f))
+    chunkCount++
+  }
+}
+console.log(`  copied ${chunkCount} chunk files to public/chunks/`)
+
+// ---------------------------------------------------------------------------
+// type-matrix.json — 20x20 effectiveness matrix + axis labels.
+// ---------------------------------------------------------------------------
+const tm = readJson('research/decomp/data/type-multiplier-matrix-802c5d60.json')
+const typeLabels = [
+  'Ninja', 'Girl', 'Knight', 'Cyber', 'Battle',
+  'Tank', 'Air', 'Heavy', 'Fortress', 'Supply',
+  'Demon', 'Skeleton', 'Dragon', 'Machine', 'Insect',
+  'Animal', 'Poltergeist', 'Ocean', 'Flame', 'Misc'
+]
+writeJson('type-matrix.json', {
+  source: 'research/decomp/data/type-multiplier-matrix-802c5d60.json',
+  address: tm.address,
+  description: tm.description,
+  labels: typeLabels,
+  matrix: tm.matrix,
+  // orientation: matrix[defenderCategory*20 + attackerCategory]
+  indexing: 'row=defender, col=attacker'
+})
+
+// ---------------------------------------------------------------------------
+// borg-moves.json — merge NTSC_Borgs.csv stats with wiki-borg-moves.json.
+// ---------------------------------------------------------------------------
+const wikiMoves = readJson('research/decomp/data/wiki-borg-moves.json')
+const movesByBorgId = new Map()
+for (const b of Object.values(wikiMoves.borgs || {})) {
+  if (b.id) movesByBorgId.set(b.id, b.moves || [])
+}
+const borgsWithMoves = borgs.map((b) => ({
+  ...b,
+  moves: movesByBorgId.get(b.id) || []
+}))
+writeJson('borg-moves.json', {
+  source: [
+    'research/symbols/NTSC_Borgs.csv',
+    'research/decomp/data/wiki-borg-moves.json'
+  ],
+  crossValidation: wikiMoves.crossValidation,
+  count: borgsWithMoves.length,
+  withMoves: borgsWithMoves.filter((b) => b.moves.length > 0).length,
+  borgs: borgsWithMoves
 })
 
 console.log('Done. Output in docs-site/.vitepress/data/')

@@ -16,6 +16,7 @@ import { configureCyberMachineFamily } from "../families/cyber-machine.js";
 import { configureSwordKnightFamily } from "../families/sword-knight.js";
 import { configureDragonFamily, DRAGON_X } from "../families/dragon.js";
 import { configureWormFamily, WORM_X } from "../families/worm.js";
+import { configureWireGunnerFamily, WIRE_GUNNER_X } from "../families/wire-gunner.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
@@ -805,6 +806,139 @@ export function runSelfTest(): number {
         assert(bridge.actor.borgNumber === num, `${id}: borgNumber stamped 0x${num.toString(16)} via bridge attach`);
         // cue 36 → [47, 0] (deploy state) — same shape as Machine Red + Flame Dragon families.
         assert(t[36 * 2] === 47, `${id}: cue row 36 → full-body state 47 (deploy)`);
+      }
+    }
+  }
+
+  // Test 29: WIRE GUNNER family — X phase 0 ground arm (direction slot select, zz_004beb8_).
+  // zz_01316e0_:609-625 — +0x540 == 0 branch: advance phase, pick slot from controlWord
+  // direction bits (default 2 / side 0x10 → 4 / up 0x40 → 3), startStream(g4, slot).
+  console.log("\n[rom.selfcheck] families/wire-gunner — X phase 0 ground arm (zz_01316e0_):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: () => {},
+    };
+    configureWireGunnerFamily(a, "pl0103", ctx);
+    assert(a.borgNumber === 0x103, "borgNumber stamped 0x103 (WIRE GUNNER)");
+    a.actionIndex = 2;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    a.controlWord = 0x0; // neutral direction (no side/up/air bits)
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced 0 → 1 (+0x540++ arm)");
+    assert(a.streamSlot === WIRE_GUNNER_X.SLOT_DEFAULT,
+      `neutral direction → slot ${WIRE_GUNNER_X.SLOT_DEFAULT} (zz_01316e0_:616)`);
+  }
+
+  // Test 30: WIRE GUNNER family — phase 0 direction bits select slot 3/4.
+  console.log("\n[rom.selfcheck] families/wire-gunner — phase 0 direction slot select:");
+  {
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: () => {},
+    };
+    // Up bit (0x40) → slot 3.
+    const up = createRomActor();
+    configureWireGunnerFamily(up, "pl0106", ctx);
+    assert(up.borgNumber === 0x106, "borgNumber stamped 0x106 (TIME BOMBER)");
+    up.actionIndex = 2;
+    up.controlWord = WIRE_GUNNER_X.UP_BIT; // up only
+    up.rootAction!(up);
+    assert(up.fbPhaseSlots[0] === 1, "up: phase advanced 0 → 1");
+    assert(up.streamSlot === WIRE_GUNNER_X.SLOT_UP,
+      `up bit 0x40 → slot ${WIRE_GUNNER_X.SLOT_UP} (zz_01316e0_:620-622)`);
+    // Side bit (0x10) → slot 4.
+    const side = createRomActor();
+    configureWireGunnerFamily(side, "pl0107", ctx);
+    assert(side.borgNumber === 0x107, "borgNumber stamped 0x107 (REMOTE BOMBER)");
+    side.actionIndex = 2;
+    side.controlWord = WIRE_GUNNER_X.SIDE_BIT; // side only
+    side.rootAction!(side);
+    assert(side.streamSlot === WIRE_GUNNER_X.SLOT_SIDE,
+      `side bit 0x10 → slot ${WIRE_GUNNER_X.SLOT_SIDE} (zz_01316e0_:617-619)`);
+  }
+
+  // Test 31: WIRE GUNNER family — phase 0 air-with-target → fire kind=4 + exit.
+  // zz_01316e0_:626-635 — `(controlWord & 0x20) != 0 && +0x1cef != 0` branch: clear
+  // action-mode bits, fire zz_006a668_(actor, kind=4), seed cooldown.
+  console.log("\n[rom.selfcheck] families/wire-gunner — phase 0 air-target fire (kind=4):");
+  {
+    const a = createRomActor();
+    let shot = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { shot = { addr, type }; },
+    };
+    configureWireGunnerFamily(a, "pl0103", ctx);
+    a.actionIndex = 2;
+    a.controlWord = 0x3 | WIRE_GUNNER_X.AIR_BIT; // action-mode bits + air bit
+    a.contactP0 = 1; // +0x1cef target acquired
+    a.dt = 1;
+    a.rootAction!(a);
+    assert(shot !== null && shot.addr === WIRE_GUNNER_X.SHOT_SPAWNER_ADDR && shot.type === WIRE_GUNNER_X.SHOT_KIND_AIR,
+      "air-target fires zz_006a668_(actor, kind=4) (zz_01316e0_:629)");
+    assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
+    assert(approxEq(a.stateTimer, 1.0), "+0x694 seeded with dt (air-fire cooldown)");
+  }
+
+  // Test 32: WIRE GUNNER family — phase 1 contact → fire kind=30 + exit.
+  // zz_01316e0_:637-645 — else branch: zz_004cd24_(actor, 1) tick, on +0x1cee != 0 →
+  // clear bits + zz_006a668_(actor, kind=30).
+  console.log("\n[rom.selfcheck] families/wire-gunner — phase 1 contact fire (kind=30):");
+  {
+    const a = createRomActor();
+    let shot = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { shot = { addr, type }; },
+    };
+    configureWireGunnerFamily(a, "pl0107", ctx);
+    a.fbPhaseSlots[0] = 1; // already in phase 1
+    a.controlWord = 0x3; // action-mode bits set
+    a.wallContact = 1; // +0x1cee target acquired (contact gate)
+    a.actionIndex = 2;
+    a.rootAction!(a);
+    assert(shot !== null && shot.addr === WIRE_GUNNER_X.SHOT_SPAWNER_ADDR && shot.type === WIRE_GUNNER_X.SHOT_KIND_GROUND,
+      "contact fires zz_006a668_(actor, kind=30) (zz_01316e0_:642)");
+    assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
+  }
+
+  // Test 33: WIRE GUNNER family — bridge cue-table attach for all 3 members
+  // (ctor 0x801301f8, cue table @0x80336178). Verify each member attaches, gets the
+  // family cue table, and resolves rootAction via the bespoke family config.
+  console.log("\n[rom.selfcheck] families/wire-gunner — bridge cue-table (0x80336178):");
+  {
+    const members: Array<{ id: string; num: number }> = [
+      { id: "pl0103", num: 0x103 }, // WIRE GUNNER
+      { id: "pl0106", num: 0x106 }, // TIME BOMBER
+      { id: "pl0107", num: 0x107 }, // REMOTE BOMBER
+    ];
+    for (const { id, num } of members) {
+      const runtime = {
+        borgId: id, team: 0, uid: "t",
+        pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+        rotY: 0, grounded: true, cooldowns: {},
+      } as unknown as BorgRuntime;
+      const bridge = RomDriverBridge.attach(runtime, { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+      assert(bridge !== null, `RomDriverBridge attaches for ${id} (family registered)`);
+      if (bridge) {
+        const t = bridge.actor.cueTable!;
+        assert(t[44 * 2] === 61 && t[45 * 2] === 61,
+          `${id}: cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)`);
+        assert(bridge.actor.rootAction !== null, `${id}: wire-gunner rootAction configured`);
+        assert(bridge.actor.borgNumber === num, `${id}: borgNumber stamped 0x${num.toString(16)} via bridge attach`);
       }
     }
   }

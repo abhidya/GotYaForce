@@ -216,7 +216,13 @@ export function stepRomAI(
       // Slot→button mapping anchored by the +0x104(slot5)→0x400 evidence: 0-2 → B, 3-5 → X.
       const [slot, range] = slots[nextRand(s) % slots.length]!;
       s.queuedButton = slot >= 3 ? 0x400 : 0x200;
-      s.queuedRange = range;
+      // X presses are capped at the AI-root's own case-0xa press range (1000.0,
+      // FLOAT_80436e10) — the per-slot queue ranges reach 8000, and several X-specials
+      // BLINK relative to the target (the shared-X/G-Crash pos+(pos−target)×0.95
+      // reposition, PSVECSubtract confirmed a−b this session), so a cross-map X press
+      // teleports the CPU toward the void. Conservative until the per-state approach
+      // handlers (zz_001d058_…) are decoded.
+      s.queuedRange = s.queuedButton === 0x400 ? Math.min(range, X_PRESS_RANGE) : range;
     } else if (d <= X_PRESS_RANGE) {
       // AI-root case 0xa inline X-press: within 1000u, press 0x400.
       s.queuedButton = 0x400;
@@ -232,11 +238,16 @@ export function stepRomAI(
   }
 
   // Effective press range: the queue range is where the ROM STARTS the executor; the
-  // class-byte melee state handlers (undecoded) do the actual closing, so melee-def
-  // borgs press within the port's proven engage window instead of the raw queue range.
+  // class-byte melee state handlers (undecoded) do the actual closing, so the press
+  // gate uses the port's proven attack envelopes instead of the raw queue range:
+  // melee-pref B → engage window; B with a shot → ranged envelope; melee-ONLY borgs
+  // (no shot) always the engage window (a 8000u queue range must never hold a melee
+  // swing at cross-map distance — observed whiff-lock without this).
   const pressRange =
-    s.queuedButton === 0x200 && meleeDef && p.rangePref !== "ranged"
-      ? meleeEngage
+    s.queuedButton === 0x200
+      ? meleeDef && (p.rangePref !== "ranged" || !p.hasShot)
+        ? meleeEngage
+        : Math.min(s.queuedRange, AI.RANGED_RANGE + Math.max(AI.RANGE_SLACK, 60))
       : s.queuedRange;
 
   // Wake-up i-frame whiff gate — kept from the previous AI (a port-model necessity:

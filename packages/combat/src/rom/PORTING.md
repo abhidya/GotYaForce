@@ -61,7 +61,11 @@ port requires the actual handler code, transcribed per family.
 | Cue table extractor | `scripts/extract-family-cue-tables.mjs` | **Partial** — 17/30 families (direct lis+addi pattern); G RED cue table hardcoded in bridge.ts; indirect-load families (lwz-based) TODO |
 | G RED B-melee/dash/charge | — | **TODO** — actionIndex 0/1/3/4 of the G RED dispatcher (chunk_0047.c). NOTE (2026-07-06): G RED's command types 4/5 are mode-0xff DISABLED (descriptor 0x80365ac8+0xb8 = `01 00 00 01 ff ff`) — only type-3 B-charge is live; the action-4 table @0x80365e48 is dead data |
 | NORMAL NINJA B-combo/lunge | — | **TODO** — actions 0/1 transcribed to phase granularity in `nn-family-decode-2026-07-06.md` §3 (incl. the SHARED 4-phase melee lunge zz_00fed6c_ @0x800fed6c — port once like shared-X); actions 3/4 are command-disabled for pl0000/pl000a |
-| Remaining ~29 families | — | **TODO** — each family is ~0.5-1 session. CHECK FIRST whether the family's X routes to zz_00ff2bc_ (shared) — then it's just a config block + callback, not a full transcription |
+| **Fleet reality check (2026-07-06 scout)** | `familyCueTablesFull.json` + fleet classification | The roster is **119 family ctors** (not ~31): 8 shared X-machines, 19 pure-shared families, 64 bespoke, rest mixed/no-X. Cue tables extracted 119/119 (cues 44+45 → state 61 universally); bridge is data-driven for ALL borgs |
+| Shared melee lunge | `families/shared-melee-lunge.ts` | **Done (2026-07-06)** — zz_00fed6c_ 4-phase, config {slotBase, range, dashFrames, decelA/B/C} |
+| Ported family roster | 9 modules / 46 borgs | gred, ninja (X + actions 0/1), sword-knight, wire-gunner, robot, dragon, cyber-machine, worm (machine red/blue + alien worm), star-hero |
+| Wave-A shared-engine digs (7 engines) | `research/decomp/wave-a-shared-engines-digs-2026-07-06.json` | **BANKED, UNVERIFIED** — 143 claims; verify pass required before porting (all verify agents hit the session limit) |
+| Remaining families | — | **TODO** — port the 7 dug shared engines after verification (covers ~17 more families cheaply), then bespoke transcriptions in verified waves |
 
 ## What works RIGHT NOW
 

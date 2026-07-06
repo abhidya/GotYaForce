@@ -143,6 +143,7 @@ class BattleImpl implements Battle {
    * in, rather than guessing at Versus's own (unread) CPU-halving semantics.
    */
   private readonly isChallengeMode: boolean;
+  private readonly useRomAi: boolean;
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
@@ -158,6 +159,7 @@ class BattleImpl implements Battle {
     this.timerFrozen = cfg.timerFrozen ?? false;
     this.sideRanks = challengeSideRanksForMode(cfg.challengeMode ?? 0);
     this.isChallengeMode = cfg.challengeMode !== undefined;
+    this.useRomAi = cfg.useRomAi === true;
     resetProjectileCounter();
 
     let cpuIdx = 0;
@@ -543,8 +545,16 @@ class BattleImpl implements Battle {
         input = inputs[force.ownerPlayer] as PlayerInput;
       } else {
         const prof = profiles.get(b.uid);
+        // The ROM-architecture AI (romAi.ts, cpu-ai-decode-2026-07-06.md) is ported and
+        // selfchecked but OPT-IN (cfg.useRomAi): its DERIVED skeleton (retarget cadence,
+        // per-borg attack ranges, difficulty idle pacing) is faithful, but the per-state
+        // approach/strafe waypoint handlers (zz_001d058_…) are still undecoded and the
+        // TUNED gap-fill lost live battles to pathological cases (cross-map whiff-lock,
+        // runaway steering) in the 2026-07-06 smokes — the tuned legacy stepAI stays the
+        // live default until those handlers are decoded (or a Dolphin trace validates
+        // the ROM AI's live behavior).
         input = prof
-          ? hasRomAiParams(b.borgId)
+          ? this.useRomAi && hasRomAiParams(b.borgId)
             ? stepRomAI(b, prof, all)
             : stepAI(b, prof, all)
           : emptyInput();

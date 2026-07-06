@@ -13,6 +13,59 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 
 ---
 
+## ★ 2026-07-06 session part 3: fleet-port campaign — 9 families / 46 borgs live, fleet cue tables, ROM AI ported (opt-in), Wave-A digs banked
+
+**Fleet scout (DERIVED, scripts/…/classify_fleet + extract-family-cue-tables-full.py):** the
+roster is **119 family ctors** (not ~31 as PORTING.md estimated), 8 SHARED X-machines serve
+19 pure-shared + parts of 36 mixed families; 64 bespoke. **Fleet-wide cue tables extracted
+119/119** (`packages/combat/src/data/familyCueTablesFull.json`, byte-validated vs the two
+hand dumps; only 18 distinct row-sets; **cues 44 AND 45 → state 61 in ALL 119 families** —
+the root-action trampoline is universal; 3 ctors carry per-borg overrides). bridge.ts is now
+data-driven: EVERY borg gets its real cue table (registry + shared-engine fallback paths).
+
+**Families ported and registered (bridge FAMILY_REGISTRY): 9 modules / 46 borgs** — G RED,
+Normal Ninja (+ actions 0/1: B-combo machine A, shared lunge v0/v1, spin slash, leap,
+SASUKE big-shuriken reroute), Sword Knight, Wire Gunner, Robot, Dragon, Cyber Machine,
+Machine Red/Blue + Alien Worm (worm.ts), Star Hero — plus THREE shared machines:
+`shared-x-special.ts` (zz_00ff2bc_), `shared-melee-lunge.ts` (zz_00fed6c_, 4-phase, config
+{slotBase, range, dashFrames, 3 decels}), and the pre-existing shared-engine event fallback.
+`pnpm selfcheck:rom` all-pass (incl. per-family asserts). Boundary guards added to
+`tryStartXSpecial` (bounds clamp + off-mesh revert + floor Y-clamp) — family phase-0
+repositions/dives were teleporting CPUs out of the arena / through the mesh in smokes.
+**PSVECSubtract settled from raw opcodes** (ps_sub f, a, b → a−b): the blink reposition IS
+away-from-target; the "5%-pull toward" prose reading is dead.
+
+**ROM AI PORTED — but OPT-IN (`BattleConfig.useRomAi`), legacy stepAI stays live default.**
+`packages/combat/src/romAi.ts` + `data/romAiParams.json` (extract-rom-ai-params.py):
+DERIVED skeleton wired — retarget cadence {4,8,10,12,15,30,45,60}, 20000u nearest select,
+per-borg attack-slot RANGES (descriptor +0xf0..+0x104 — they are the zz_002347c_ queue-range
+floats, NOT roulette weights; 195/208 borgs), X-press 1000u cap, difficulty idle-cadence
+tables, level-0 attack block, held-B burst (cadence2 rows), deterministic LCG. HONEST
+verdict from live smokes: the undecoded per-state approach/strafe handlers (zz_001d058_…)
+force TUNED gap-fill that produced pathologies (cross-map whiff-lock, runaway steering,
+2-5× slower battles) — worse than the tuned legacy AI in practice. Selfchecked
+(assertRomAiSkeleton) and flagged for the state-handler decode or a Dolphin validation
+before it becomes default.
+
+**Wave-A shared-engine digs (7 engines + the 3rd zz_00ff2bc_ family): COMPLETED BUT
+UNVERIFIED** — all 14 adversarial verify agents died on the session usage limit. Banked
+verbatim at `research/decomp/wave-a-shared-engines-digs-2026-07-06.json` (143 claims;
+`fam-8019e9a4-ff2bc-config` is the only dig WITH verdicts). **Do not port from it until a
+verify pass runs** (per the DERIVED discipline). Also fixed in passing: wire-gunner phase-0
+now writes the direction slot to +0x6ea (its own selfcheck caught the WIP gap), and the
+docs-site EvidenceTrail attribute quoting that broke `pnpm atlas:build`.
+
+**Dolphin items (T8 status catalog / intro spawn coords / AI confirmation): NOT RUN** —
+they need a live Dolphin + a human/computer-use driver and the session limit forecloses
+agent-driven capture this session. Plans remain: `attack-mechanics-trace-plan.md` T8 and
+`cpu-ai-decode-2026-07-06.md` §5.
+
+**VALIDATED (all green at push):** `pnpm -r run build` (incl. docs-site), selfcheck:rom
+all-pass, full combat selfcheck + 1v3 sim, 1P challenge smoke (first hit f310, win f5517),
+11-stage + family-variant smokes, projectile 36/36, xammo 32/32, menu-flow.
+
+---
+
 ## ★ 2026-07-06 session: title-intro residuals CLOSED + CPU AI brain STATICALLY ISOLATED
 
 Multi-agent verified static dig (every claim independently adversarially re-verified from
