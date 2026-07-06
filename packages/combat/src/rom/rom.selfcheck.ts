@@ -12,6 +12,7 @@ import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dis
 import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
 import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
 import { configureStarHeroFamily } from "../families/star-hero.js";
+import { configureSwordKnightFamily } from "../families/sword-knight.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
@@ -309,6 +310,95 @@ export function runSelfTest(): number {
     assert(ext.heroBuffFrames === 1200, "already-buffed contact does not refresh the timer");
     assert(tierDelta === null && cuePlayed === null,
       "already-buffed contact does not re-apply the tier delta or cue");
+  }
+
+  // Test 13: SWORD KNIGHT family — X phase 0 windup (zz_007454c_).
+  console.log("\n[rom.selfcheck] families/sword-knight — X phase 0 windup (zz_007454c_):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureSwordKnightFamily(a, "pl0200", ctx);
+    assert(a.borgNumber === 0x200, "borgNumber stamped 0x200 (SWORD KNIGHT)");
+    a.pos.x = 100; a.pos.z = 0;
+    (a as RomActor & { lockTarget?: { x: number; y: number; z: number } }).lockTarget = { x: 0, y: 0, z: 0 };
+    a.hSpeed = 5; a.yVel = 3;
+    a.actionIndex = 2;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    // Phase 0 advanced +0x540 to 1 + windup timer seeded 20.0 (chunk_0010.c:1670-1671).
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced to 1 (approach)");
+    assert(approxEq(a.handlerTimer, 20.0), "handlerTimer == 20.0 (FLOAT_804377e8 windup seed)");
+    // Velocity scalars zeroed (chunk_0010.c:1674-1678).
+    assert(approxEq(a.hSpeed, 0) && approxEq(a.yVel, 0) && approxEq(a.hDecel, 0) && approxEq(a.gravityCoeff, 0),
+      "all four velocity scalars zeroed");
+    // Reposition ×0.95: motion = (100,0,0)×0.95 = (95,0,0); pos += motion → x = 195.
+    assert(approxEq(a.pos.x, 195.0), "pos.x == 195 (motion × FLOAT_804377ec=0.95 added)");
+    assert(approxEq(a.motion.x, 95.0), "motion.x == 95 (scaled approach vector)");
+    // Ground slot 0 → +0x6ea = slot+1 = 1.
+    assert(a.streamSlot === 1, "stream cursor = ground slot + 1 (+0x6ea++)");
+  }
+
+  // Test 14: SWORD KNIGHT family — phase 1 timer expiry → phase 2 + motion decay.
+  console.log("\n[rom.selfcheck] families/sword-knight — phase 1 timer + motion decay:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureSwordKnightFamily(a, "pl0200", ctx);
+    a.motion.x = 95.0; // carry over the phase-0 motion
+    a.handlerTimer = 1.0; // one frame from transition
+    a.fbPhaseSlots[0] = 1; // already in phase 1
+    a.dt = 1;
+    a.actionIndex = 2;
+    a.rootAction!(a);
+    // motion ×= 0.95 = 90.25; pos.x += 90.25 (chunk_0010.c:1704-1705).
+    assert(approxEq(a.motion.x, 90.25), "motion.x *= FLOAT_804377ec (0.95)");
+    // Timer ticked to 0 → phase advanced to 2 (chunk_0010.c:1712-1716).
+    assert(a.fbPhaseSlots[0] === 2, "timer ≤ 0 advances phase 1 → 2");
+  }
+
+  // Test 15: SWORD KNIGHT family — phase 2 contact-end → phase 3 + gravityCoeff restore.
+  console.log("\n[rom.selfcheck] families/sword-knight — phase 2 contact-end → phase 3:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureSwordKnightFamily(a, "pl0200", ctx);
+    a.descriptor = {
+      header: 0, mainHandBone: 0, subtypeCommand: new Int8Array(0),
+      handlerData6c: 1.5, // the per-family gravityCoeff restore value
+      subtypePartCommand: new Int8Array(0), buttonLiveFlag: new Int8Array(0),
+      defaultHand0: 0, defaultHand1: 0,
+    };
+    a.contactP0 = -1; // +0x1cef < 0 → kind-3/18 hit landed and ended
+    a.fbPhaseSlots[0] = 2;
+    a.dt = 1;
+    a.actionIndex = 2;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 3, "contact-end advances phase 2 → 3");
+    assert(approxEq(a.gravityCoeff, 1.5), "gravityCoeff restored from descriptor.+0x6c");
+  }
+
+  // Test 16: SWORD KNIGHT family — phase 3 wall-contact → idle dispatch + steerYaw decay.
+  console.log("\n[rom.selfcheck] families/sword-knight — phase 3 recovery + steerYaw decay:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureSwordKnightFamily(a, "pl020a", ctx); // NORMAL KNIGHT — same family module
+    assert(a.borgNumber === 0x20a, "borgNumber stamped 0x20a (NORMAL KNIGHT)");
+    a.steerYaw = 1000.0;
+    a.wallContact = 1; // +0x1cee != 0 → end the move
+    (a as RomActor & { grounded?: boolean }).grounded = true;
+    a.controlWord = 0x3; // action-mode bits set
+    a.fbPhaseSlots[0] = 3;
+    a.dt = 1;
+    a.actionIndex = 2;
+    a.rootAction!(a);
+    // steerYaw ×= 0.9 (chunk_0010.c:1759-1762, pure decay — DOUBLE_804377e0 is the
+    // GCC int→double coercion sentinel, NOT a base offset).
+    assert(approxEq(a.steerYaw, 900.0), "steerYaw *= FLOAT_804377f4 (0.9), no base offset");
+    assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
   }
 
   if (failures > 0) {

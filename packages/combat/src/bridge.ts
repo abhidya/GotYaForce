@@ -31,6 +31,7 @@ import {
 import { configureGRedFamily, type GRedFamilyCtx } from "./families/gred.js";
 import { configureNinjaFamily } from "./families/ninja.js";
 import { configureStarHeroFamily } from "./families/star-hero.js";
+import { configureSwordKnightFamily } from "./families/sword-knight.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
@@ -162,6 +163,13 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // shares the entire family module (status-effects-decode §A verified chain).
       pl0804: makeStarHeroFamilyRegistration(),
       pl080c: makeStarHeroFamilyRegistration(),
+      // SWORD KNIGHT family (ctor 0x80073b70) — cue table @0x802d4b50. NORMAL KNIGHT
+      // (pl020a) and DEATH BORG GAMMA II (pl020f) share the entire family module (the
+      // ctor block-copies word @0x802d47b8 to all three; only pl0200 wires command
+      // records to the X-special actionIndex 2 — cue-script-stream-decode §"Second family").
+      pl0200: makeSwordKnightFamilyRegistration(),
+      pl020a: makeSwordKnightFamilyRegistration(),
+      pl020f: makeSwordKnightFamilyRegistration(),
     };
   }
   return FAMILY_REGISTRY_CACHE;
@@ -236,6 +244,18 @@ function makeStarHeroFamilyRegistration(): FamilyRegistration {
       configureStarHeroFamily(actor, id as "pl0804" | "pl080c", ctx);
     },
     cueTable: cueTableForBorg("pl0804")!,
+  };
+}
+
+function makeSwordKnightFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x20a ? "pl020a" :
+        actor.borgNumber === 0x20f ? "pl020f" : "pl0200";
+      configureSwordKnightFamily(actor, id as "pl0200" | "pl020a" | "pl020f", ctx);
+    },
+    cueTable: cueTableForBorg("pl0200")!,
   };
 }
 
