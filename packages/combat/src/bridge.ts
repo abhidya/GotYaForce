@@ -196,6 +196,15 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl060a: makeCyberMachineFamilyRegistration(),
       pl060c: makeCyberMachineFamilyRegistration(),
       pl060e: makeCyberMachineFamilyRegistration(),
+      // MACHINE RED family (ctor 0x800c91bc) — cue table @0x8030a248. The four machine
+      // borgs (MACHINE RED/CYBER MARS/PROTO RED/PROTO MARS) share the X-special engine
+      // zz_0179d20_ (phaseTable 0x804347a8, group 4 seed slot 0) — the same shared
+      // X-special engine used by 12+ other borgs. No bespoke family phase logic, so this
+      // is a SHARED registration: cue table + shared-engine X config, no family module.
+      pl0600: makeMachineRedFamilyRegistration(),
+      pl0608: makeMachineRedFamilyRegistration(),
+      pl0616: makeMachineRedFamilyRegistration(),
+      pl061c: makeMachineRedFamilyRegistration(),
     };
   }
   return FAMILY_REGISTRY_CACHE;
@@ -305,6 +314,28 @@ function makeSwordKnightFamilyRegistration(): FamilyRegistration {
       configureSwordKnightFamily(actor, id as "pl0200" | "pl020a" | "pl020f", ctx);
     },
     cueTable: cueTableForBorg("pl0200")!,
+  };
+}
+
+// MACHINE RED family (ctor 0x800c91bc) — cue table @0x8030a248. The X-special ROUTES
+// THROUGH THE SHARED ENGINE zz_0179d20_ (phaseTable 0x804347a8, chunk_0044.c:4086):
+// action-2 handler FUN_800cb9d4 (chunk_0021.c:1545) tail-calls zz_0179d20_ — the same
+// cross-family group-4 X-special engine reused by 12+ borgs across the roster (per the
+// actionStreamTables.json engines header). All 5 action-2 variants route to leaf
+// 0x800cba10 with config @0x8030a66c (seedSlot 0), so every member uses the same config.
+// No bespoke family phase logic (contrast CYBER MACHINE's ammo-gated shot deploy), so
+// this is a SHARED registration: cue table + shared-engine X config, no family module.
+function makeMachineRedFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor) => {
+      actor.borgNumber = 0x600;
+      actor.rootAction = createSharedEngineRootAction({
+        xSpecial: DEFAULT_CONFIGS.dashAttack(0),
+      });
+      actor.defaultGroup = 0;
+      actor.streamSlot = 0;
+    },
+    cueTable: cueTableForBorg("pl0600")!,
   };
 }
 
