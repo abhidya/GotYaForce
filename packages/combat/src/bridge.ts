@@ -33,6 +33,7 @@ import { configureNinjaFamily } from "./families/ninja.js";
 import { configureStarHeroFamily } from "./families/star-hero.js";
 import { configureCyberMachineFamily } from "./families/cyber-machine.js";
 import { configureDragonFamily } from "./families/dragon.js";
+import { configureWormFamily } from "./families/worm.js";
 import { configureSwordKnightFamily } from "./families/sword-knight.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
@@ -189,6 +190,14 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl050c: makeDragonFamilyRegistration(),
       pl0515: makeDragonFamilyRegistration(),
       pl0516: makeDragonFamilyRegistration(),
+      // ALIEN WORM family (ctor 0x80118cb8) — cue table @0x8032b8d8. All 4 members
+      // share the bespoke X-special spawn dispatcher (FUN_80118efc); see
+      // families/worm.ts. pl0501/pl050d spawn a worm-child via FUN_8011a108;
+      // pl050b/pl0517 spawn a venom/poison cloud via zz_01d4d00_.
+      pl0501: makeWormFamilyRegistration(),
+      pl050b: makeWormFamilyRegistration(),
+      pl050d: makeWormFamilyRegistration(),
+      pl0517: makeWormFamilyRegistration(),
       // CYBER MACHINE family (ctor 0x800cc454) — cue table @0x8030c3c0. The four
       // beast-god borgs (SEIRYU/SUZAKU/BYAKKO/GENBU) share the entire family module
       // (X-special = ammo-gated shot deploy, FUN_800ce5dc).
@@ -416,6 +425,25 @@ function makeDragonFamilyRegistration(): FamilyRegistration {
       configureDragonFamily(actor, id as "pl0500" | "pl0509" | "pl050a" | "pl050c" | "pl0515" | "pl0516", ctx);
     },
     cueTable: cueTableForBorg("pl0500")!,
+  };
+}
+
+// ALIEN WORM family (ctor 0x80118cb8) — cue table @0x8032b8d8. The X-special is a
+// BESPOKE borg-switched spawn dispatcher (FUN_80118efc @ chunk_0032.c:662) ported in
+// families/worm.ts. pl0501/pl050d spawn a worm-child via FUN_8011a108 (family code
+// block); pl050b/pl0517 spawn a venom/poison cloud via the shared zz_01d4d00_ — the
+// routing decision is bespoke even though the cloud spawner is shared. All 4 members
+// share the cue table (ctor block-copy of the +0x4f0 binding).
+function makeWormFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x50b ? "pl050b" :
+        actor.borgNumber === 0x50d ? "pl050d" :
+        actor.borgNumber === 0x517 ? "pl0517" : "pl0501";
+      configureWormFamily(actor, id as "pl0501" | "pl050b" | "pl050d" | "pl0517", ctx);
+    },
+    cueTable: cueTableForBorg("pl0501")!,
   };
 }
 

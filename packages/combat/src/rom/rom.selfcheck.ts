@@ -15,6 +15,7 @@ import { configureStarHeroFamily } from "../families/star-hero.js";
 import { configureCyberMachineFamily } from "../families/cyber-machine.js";
 import { configureSwordKnightFamily } from "../families/sword-knight.js";
 import { configureDragonFamily, DRAGON_X } from "../families/dragon.js";
+import { configureWormFamily, WORM_X } from "../families/worm.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
@@ -579,7 +580,136 @@ export function runSelfTest(): number {
     }
   }
 
-  // Test 24: MACHINE RED family — bridge cue-table attach for all 4 members
+  // Test 24: ALIEN WORM family — X phase 0 spawn (FUN_80118efc → FUN_8011a108).
+  // Borg-switched: pl0501 → worm-child type 0, pl050d → worm-child type 1, both via
+  // the bespoke FUN_8011a108 spawner (chunk_0032.c:1391).
+  console.log("\n[rom.selfcheck] families/worm — X phase 0 worm-child spawn (FUN_8011a108):");
+  {
+    const a = createRomActor();
+    let spawn = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawn = { addr, type }; },
+    };
+    configureWormFamily(a, "pl0501", ctx);
+    assert(a.borgNumber === 0x501, "borgNumber stamped 0x501 (ALIEN WORM)");
+    a.actionIndex = 2;
+    a.dt = 1;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced 0 → 1 (+0x540++ arm)");
+    assert(spawn !== null && spawn!.addr === WORM_X.WORM_CHILD_SPAWNER_ADDR && spawn!.type === 0,
+      "worm-child spawned via FUN_8011a108 type 0 (pl0501)");
+    assert(approxEq(a.stateTimer, WORM_X.COOLDOWN + 1),
+      `+0x694 = FLOAT_80439870(4) + dt(1) = 5`);
+
+    // pl050d → worm-child type 1 (CLAW WORM).
+    const b = createRomActor();
+    let spawnB = null as { addr: number; type: number } | null;
+    const ctxB: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawnB = { addr, type }; },
+    };
+    configureWormFamily(b, "pl050d", ctxB);
+    assert(b.borgNumber === 0x50d, "borgNumber stamped 0x50d (CLAW WORM)");
+    b.actionIndex = 2; b.dt = 1;
+    b.cueTable = new Int8Array(96).fill(-1); b.cueTable[44 * 2] = 61; b.fbState = 61;
+    stepActor(b, table);
+    assert(spawnB !== null && spawnB!.addr === WORM_X.WORM_CHILD_SPAWNER_ADDR && spawnB!.type === 1,
+      "worm-child spawned via FUN_8011a108 type 1 (pl050d)");
+  }
+
+  // Test 25: ALIEN WORM family — X phase 0 cloud spawn (FUN_80118efc → zz_01d4d00_).
+  // pl050b/pl0517 use the shared venom/poison-cloud spawner (chunk_0057.c:338) with
+  // borg-switched record types: 0x50b→1 (venom), 0x517→3 (poison).
+  console.log("\n[rom.selfcheck] families/worm — X phase 0 cloud spawn (zz_01d4d00_):");
+  {
+    const a = createRomActor();
+    let spawn = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawn = { addr, type }; },
+    };
+    configureWormFamily(a, "pl050b", ctx);
+    assert(a.borgNumber === 0x50b, "borgNumber stamped 0x50b (VENOM WORM)");
+    a.actionIndex = 2; a.dt = 1;
+    a.cueTable = new Int8Array(96).fill(-1); a.cueTable[44 * 2] = 61; a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(spawn !== null && spawn!.addr === WORM_X.CLOUD_SPAWNER_ADDR && spawn!.type === 1,
+      "venom cloud spawned via zz_01d4d00_ type 1 (pl050b)");
+
+    // pl0517 → poison cloud type 3.
+    const b = createRomActor();
+    let spawnB = null as { addr: number; type: number } | null;
+    const ctxB: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawnB = { addr, type }; },
+    };
+    configureWormFamily(b, "pl0517", ctxB);
+    assert(b.borgNumber === 0x517, "borgNumber stamped 0x517 (POISON WORM)");
+    b.actionIndex = 2; b.dt = 1;
+    b.cueTable = new Int8Array(96).fill(-1); b.cueTable[44 * 2] = 61; b.fbState = 61;
+    stepActor(b, table);
+    assert(spawnB !== null && spawnB!.addr === WORM_X.CLOUD_SPAWNER_ADDR && spawnB!.type === 3,
+      "poison cloud spawned via zz_01d4d00_ type 3 (pl0517)");
+  }
+
+  // Test 26: ALIEN WORM family — phase 1 exit: action-mode bits cleared.
+  console.log("\n[rom.selfcheck] families/worm — phase 1 exit bit-clear:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureWormFamily(a, "pl0501", ctx);
+    a.fbPhaseSlots[0] = 1; // already in phase 1
+    a.controlWord = 0x3; // action-mode bits set
+    a.dt = 1;
+    a.actionIndex = 2;
+    a.rootAction!(a);
+    assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
+  }
+
+  // Test 27: ALIEN WORM family — bridge cue-table attach for all 4 members
+  // (ctor 0x80118cb8, cue table @0x8032b8d8). BESPOKE registration: the X-special
+  // routes through FUN_80118efc (borg-switched spawn dispatcher); see families/worm.ts.
+  console.log("\n[rom.selfcheck] families/worm — bridge cue-table (0x8032b8d8):");
+  {
+    const members: Array<{ id: string; num: number }> = [
+      { id: "pl0501", num: 0x501 }, // ALIEN WORM
+      { id: "pl050b", num: 0x50b }, // VENOM WORM
+      { id: "pl050d", num: 0x50d }, // CLAW WORM
+      { id: "pl0517", num: 0x517 }, // POISON WORM
+    ];
+    for (const { id, num } of members) {
+      const runtime = {
+        borgId: id, team: 0, uid: "t",
+        pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+        rotY: 0, grounded: true, cooldowns: {},
+      } as unknown as BorgRuntime;
+      const bridge = RomDriverBridge.attach(runtime, { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+      assert(bridge !== null, `RomDriverBridge attaches for ${id} (family registered)`);
+      if (bridge) {
+        const t = bridge.actor.cueTable!;
+        assert(t[44 * 2] === 61 && t[45 * 2] === 61,
+          `${id}: cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)`);
+        assert(bridge.actor.rootAction !== null, `${id}: worm rootAction configured`);
+        assert(bridge.actor.borgNumber === num, `${id}: borgNumber stamped 0x${num.toString(16)} via bridge attach`);
+      }
+    }
+  }
+
+  // Test 28: MACHINE RED family — bridge cue-table attach for all 4 members
   // (ctor 0x800c91bc, cue table @0x8030a248). SHARED registration: the X-special
   // routes through zz_0179d20_ (shared group-4 engine, phaseTable 0x804347a8); no
   // bespoke family module. Verify each member attaches, gets the family cue table,
