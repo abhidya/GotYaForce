@@ -31,6 +31,8 @@ import {
 import { configureGRedFamily, type GRedFamilyCtx } from "./families/gred.js";
 import { configureNinjaFamily } from "./families/ninja.js";
 import { configureStarHeroFamily } from "./families/star-hero.js";
+import { configureCyberMachineFamily } from "./families/cyber-machine.js";
+import { configureDragonFamily } from "./families/dragon.js";
 import { configureSwordKnightFamily } from "./families/sword-knight.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
@@ -163,6 +165,15 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // shares the entire family module (status-effects-decode §A verified chain).
       pl0804: makeStarHeroFamilyRegistration(),
       pl080c: makeStarHeroFamilyRegistration(),
+      // VICTORY KING family (ctor 0x8015a494) — cue table @0x80344b50. X-special routes
+      // through the shared engine zz_017a374_ (phase table 0x804347b0): action-2 handler
+      // FUN_8015ad10 delegates all arms to zz_017a374_ (no bespoke family phase machine).
+      // X group-4 seed slot per borg (actionStreamTables): pl0610 gnd 0 / air 1,
+      // pl0621 slot 0, pl0623 slot 1; pl061e has no action 2.
+      pl0610: makeVictoryKingFamilyRegistration(0),
+      pl061e: makeVictoryKingFamilyRegistration(null),
+      pl0621: makeVictoryKingFamilyRegistration(0),
+      pl0623: makeVictoryKingFamilyRegistration(1),
       // SWORD KNIGHT family (ctor 0x80073b70) — cue table @0x802d4b50. NORMAL KNIGHT
       // (pl020a) and DEATH BORG GAMMA II (pl020f) share the entire family module (the
       // ctor block-copies word @0x802d47b8 to all three; only pl0200 wires command
@@ -170,6 +181,21 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0200: makeSwordKnightFamilyRegistration(),
       pl020a: makeSwordKnightFamilyRegistration(),
       pl020f: makeSwordKnightFamilyRegistration(),
+      // FLAME DRAGON family (ctor 0x80075658) — cue table @0x802d5a58. All 6 members
+      // share the bespoke X-special phase machine (3 breath variants); see families/dragon.ts.
+      pl0500: makeDragonFamilyRegistration(),
+      pl0509: makeDragonFamilyRegistration(),
+      pl050a: makeDragonFamilyRegistration(),
+      pl050c: makeDragonFamilyRegistration(),
+      pl0515: makeDragonFamilyRegistration(),
+      pl0516: makeDragonFamilyRegistration(),
+      // CYBER MACHINE family (ctor 0x800cc454) — cue table @0x8030c3c0. The four
+      // beast-god borgs (SEIRYU/SUZAKU/BYAKKO/GENBU) share the entire family module
+      // (X-special = ammo-gated shot deploy, FUN_800ce5dc).
+      pl0602: makeCyberMachineFamilyRegistration(),
+      pl060a: makeCyberMachineFamilyRegistration(),
+      pl060c: makeCyberMachineFamilyRegistration(),
+      pl060e: makeCyberMachineFamilyRegistration(),
     };
   }
   return FAMILY_REGISTRY_CACHE;
@@ -247,6 +273,29 @@ function makeStarHeroFamilyRegistration(): FamilyRegistration {
   };
 }
 
+// VICTORY KING family (ctor 0x8015a494) — cue table @0x80344b50. The X-special ROUTES
+// THROUGH THE SHARED ENGINE zz_017a374_ (phase table 0x804347b0, chunk_0044.c:4322):
+// action-2 handler FUN_8015ad10 (chunk_0040.c:4103) is a thin borg-switch whose every
+// arm (pl0610→zz_015ad5c_, pl0621→zz_015ad84_, pl0623→zz_015adac_) tail-calls
+// zz_017a374_ — the same cross-family engine reused by Panther Robot + 2 others. No
+// bespoke family phase logic (contrast G RED's family-specific 4-phase G Crash chain),
+// so this is a SHARED registration: cue table + shared-engine X config, no family module.
+// pl061e (PROTO KING) has NO action 2 (FUN_8015ad10 falls through for 0x61e) → xSpecial
+// left null so its rootAction defers entirely to the generic combat layer.
+function makeVictoryKingFamilyRegistration(xSeedSlot: number | null): FamilyRegistration {
+  return {
+    configure: (actor) => {
+      actor.borgNumber = 0x610;
+      actor.rootAction = createSharedEngineRootAction({
+        xSpecial: xSeedSlot === null ? null : DEFAULT_CONFIGS.dashAttack(xSeedSlot),
+      });
+      actor.defaultGroup = 0;
+      actor.streamSlot = 0;
+    },
+    cueTable: cueTableForBorg("pl0610")!,
+  };
+}
+
 function makeSwordKnightFamilyRegistration(): FamilyRegistration {
   return {
     configure: (actor, ctx) => {
@@ -256,6 +305,40 @@ function makeSwordKnightFamilyRegistration(): FamilyRegistration {
       configureSwordKnightFamily(actor, id as "pl0200" | "pl020a" | "pl020f", ctx);
     },
     cueTable: cueTableForBorg("pl0200")!,
+  };
+}
+
+function makeCyberMachineFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x60a ? "pl060a" :
+        actor.borgNumber === 0x60c ? "pl060c" :
+        actor.borgNumber === 0x60e ? "pl060e" : "pl0602";
+      configureCyberMachineFamily(actor, id as "pl0602" | "pl060a" | "pl060c" | "pl060e", ctx);
+    },
+    cueTable: cueTableForBorg("pl0602")!,
+  };
+}
+
+// FLAME DRAGON family (ctor 0x80075658) — cue table @0x802d5a58. The X-special is a
+// BESPOKE 3-variant phase machine (ground/air/charged flame breath) ported in
+// families/dragon.ts; engines 0x80075ef0/0x80076088/0x80076244 live in the family code
+// block (not shared-engine ranges). All 6 members (pl0500/pl0509/pl050a/pl050c/
+// pl0515/pl0516) share one module — the ctor block-copies the same +0x4b4 binding;
+// only the borg-number switch inside zz_0076408_ (flame-child record select) differs.
+function makeDragonFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x509 ? "pl0509" :
+        actor.borgNumber === 0x50a ? "pl050a" :
+        actor.borgNumber === 0x50c ? "pl050c" :
+        actor.borgNumber === 0x515 ? "pl0515" :
+        actor.borgNumber === 0x516 ? "pl0516" : "pl0500";
+      configureDragonFamily(actor, id as "pl0500" | "pl0509" | "pl050a" | "pl050c" | "pl0515" | "pl0516", ctx);
+    },
+    cueTable: cueTableForBorg("pl0500")!,
   };
 }
 

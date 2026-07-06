@@ -12,6 +12,7 @@ import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dis
 import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
 import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
 import { configureStarHeroFamily } from "../families/star-hero.js";
+import { configureCyberMachineFamily } from "../families/cyber-machine.js";
 import { configureSwordKnightFamily } from "../families/sword-knight.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
@@ -399,6 +400,75 @@ export function runSelfTest(): number {
     // GCC int→double coercion sentinel, NOT a base offset).
     assert(approxEq(a.steerYaw, 900.0), "steerYaw *= FLOAT_804377f4 (0.9), no base offset");
     assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
+  }
+
+  // Test 17: CYBER MACHINE family — X phase 0 arm (effect child spawn via zz_016cc24_).
+  console.log("\n[rom.selfcheck] families/cyber-machine — X phase 0 arm (FUN_800ce5dc):");
+  {
+    const a = createRomActor();
+    let effectSpawn = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { effectSpawn = { addr, type }; },
+    };
+    configureCyberMachineFamily(a, "pl0602", ctx);
+    assert(a.borgNumber === 0x602, "borgNumber stamped 0x602 (CYBER MACHINE SEIRYU)");
+    a.actionIndex = 2;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced 0 → 1 (+0x540++ arm)");
+    assert(effectSpawn !== null && effectSpawn!.addr === 0x8016cc24 && effectSpawn!.type === 2,
+      "effect child spawned via zz_016cc24_(actor, 2)");
+  }
+
+  // Test 18: CYBER MACHINE family — phase 1 fire: shot spawn + cooldown + bit clear.
+  console.log("\n[rom.selfcheck] families/cyber-machine — phase 1 fire (zz_006a668_):");
+  {
+    const a = createRomActor();
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a: RomActor, addr: number, type: number) => { spawns.push({ addr, type }); },
+    };
+    configureCyberMachineFamily(a, "pl060e", ctx); // GENBU — same family module
+    assert(a.borgNumber === 0x60e, "borgNumber stamped 0x60e (CYBER MACHINE GENBU)");
+    a.fbPhaseSlots[0] = 1; // already in phase 1
+    a.controlWord = 0x3; // action-mode bits set
+    a.dt = 1;
+    a.actionIndex = 2;
+    a.rootAction!(a);
+    // Shot fired via zz_006a668_(actor, kind=1) — the last spawn in the list (after
+    // phase 0's effect spawn is skipped because we entered at phase 1).
+    const shot = spawns.find((s) => s.addr === 0x8006a668);
+    assert(shot !== undefined && shot.type === 1, "shot fired via zz_006a668_ kind 1");
+    assert(approxEq(a.stateTimer, 51.0), "+0x694 = FLOAT_804389a8(50) + dt(1) = 51");
+    assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
+  }
+
+  // Test 19: CYBER MACHINE family — bridge cue-table attach (rows 44/45 → state 61).
+  console.log("\n[rom.selfcheck] families/cyber-machine — bridge cue-table (0x8030c3c0):");
+  {
+    const runtime = {
+      borgId: "pl0602", team: 0, uid: "t",
+      pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+      rotY: 0, grounded: true, cooldowns: {},
+    } as unknown as BorgRuntime;
+    const bridge = RomDriverBridge.attach(runtime, { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    assert(bridge !== null, "RomDriverBridge attaches for pl0602 (family registered)");
+    if (bridge) {
+      const t = bridge.actor.cueTable!;
+      assert(t[44 * 2] === 61 && t[45 * 2] === 61,
+        "cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)");
+      assert(bridge.actor.rootAction !== null, "cyber-machine rootAction configured");
+      assert(bridge.actor.borgNumber === 0x602, "borgNumber stamped 0x602 via bridge attach");
+    }
   }
 
   if (failures > 0) {
