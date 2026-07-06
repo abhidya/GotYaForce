@@ -19,10 +19,10 @@
 //   fcn +0x14 = altChainCallback(phase 2/3, fires when +0x1dd&0x80 and not +0x745)
 
 import type { RomActor } from "../rom/actor.js";
-import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { computeLungeSpeed } from "./shared-engine.js";
+import { romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Machine constants — DOL-read (chunk_0044.c:3036,3039,3042,3166). */
 export const SHARED_MELEE_GRED = {
@@ -274,11 +274,11 @@ function meleePhase3(
   integratePhysics(0, actor, actor.activeYaw); // zz_00670dc_(actor, +0x5ae)
   // +0x1cee (wall/ground contact) != 0 → clear action bits + return to idle
   // (zz_006a474_). The +0x73f clear and +0x5e0 &= ~3 are the universal end-of-move
-  // teardown; zz_006a474_ dispatches cue 0 (ground idle).
+  // teardown; zz_006a474_ = upper cue 0 + velocity zeroing (decomp-verified,
+  // shared-idle-return.ts — the old full-cue-0 mapping was refuted).
   if (actor.wallContact !== 0) {
     actor.controlWord = actor.controlWord & ~0x3;
-    dispatchFullBodyCue(actor, 0);
-    dispatchUpperBodyCue(actor, 0);
+    romGroundIdleReturn(actor);
   }
   // zz_017a68c_(actor) — per-frame helper (stubbed).
 }

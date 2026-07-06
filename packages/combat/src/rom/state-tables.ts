@@ -15,6 +15,7 @@ import type { RomActor } from "./actor.js";
 import { dispatchUpperBodyCue, dispatchFullBodyCue, runState61 } from "./dispatch.js";
 import { integratePhysics } from "./physics.js";
 import { startStream, tickStream, type StreamContext } from "./stream-vm.js";
+import { romGroundIdleReturn } from "../families/shared-idle-return.js";
 
 // Decoded from boot.dol this session.
 export const ROM_STATE_FLOAT = {
@@ -137,9 +138,9 @@ function fb76HaltHandler(actor: RomActor, ctx: StreamContext): void {
   actor.yVel = 0;
   actor.hDecel = 0;
   actor.gravityCoeff = 0;
-  // zz_006a474_ — stop/land cue (resets state to idle).
-  dispatchFullBodyCue(actor, 0);
-  dispatchUpperBodyCue(actor, 6);
+  // zz_006a474_ — stop/land tail (decomp-verified: upper cue 0 only + velocity
+  // zeroing; shared-idle-return.ts — the old full-0 + upper-6 mapping was refuted).
+  romGroundIdleReturn(actor);
 }
 
 // ============================================================================

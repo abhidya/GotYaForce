@@ -41,7 +41,8 @@
 //   FLOAT_80439704 = 120.0  (phase-1 → phase-2 active-window timer seed)
 
 import type { RomActor } from "../rom/actor.js";
-import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
+import { dispatchUpperBodyCue } from "../rom/dispatch.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 import { integratePhysics, vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 
@@ -218,12 +219,13 @@ function robotXPhase1(actor: RomActor, ctx: RobotFamilyCtx): void {
       actor.fbPhaseSlots[0] = 2;
       actor.handlerTimer = ROBOT_X.ACTIVE_WINDOW;
     } else {
-      // Grounded on contact: clear the housekeeping flag + action-mode bits and exit
-      // (chunk_0031.c:1342-1346). zz_006a474_ is the ROM's ground-idle reset; the
-      // cue dispatch below mirrors its full-body idle reset (cue 0).
+      // Grounded on contact: clear the housekeeping flag + action-mode bits,
+      // +0x4c = +0x44 = 0, then the real zz_006a474_ call (chunk_0031.c:1342-1346;
+      // decomp-verified helper — the old upper-7 + full-0 mapping was refuted).
       actor.controlWord = actor.controlWord & ~ROBOT_X.ACTION_MODE_BITS;
-      dispatchUpperBodyCue(actor, 7);
-      dispatchFullBodyCue(actor, 0);
+      actor.hDecel = 0;
+      actor.hSpeed = 0;
+      romGroundIdleReturn(actor);
     }
   }
 }
@@ -251,16 +253,15 @@ function robotXPhase2(actor: RomActor, ctx: RobotFamilyCtx): void {
     actor.handlerTimer -= actor.dt;
     if (actor.handlerTimer <= ROBOT_X.ZERO) {
       actor.controlWord = actor.controlWord & ~ROBOT_X.ACTION_MODE_BITS;
-      // zz_006a5a4_ — air-fall exit (no cue change; the bridge's completion path
-      // transitions the actor out of attack state 61).
+      romAirKnockoutReturn(actor); // real zz_006a5a4_ call (chunk_0031.c:1375) — the
+      // old "no cue change" reading was wrong; the ROM dispatches upper cue 6.
     }
   } else {
-    // Grounded: clear bits, upper-body cue 7, ground-idle reset (zz_006a750_(actor, 7)
-    // + zz_006a474_ shape), and seed the post-special cooldown +0x694 = 4.0 + dt
-    // (chunk_0031.c:1379-1382).
+    // Grounded: clear bits, then zz_006a750_(actor, 7) ONLY — the ROM does NOT call
+    // zz_006a474_ here (chunk_0031.c:1379-1382; the old extra full-body cue 0 was
+    // not in the decomp) — and seed the post-special cooldown +0x694 = 4.0 + dt.
     actor.controlWord = actor.controlWord & ~ROBOT_X.ACTION_MODE_BITS;
     dispatchUpperBodyCue(actor, 7);
-    dispatchFullBodyCue(actor, 0);
     actor.stateTimer = ROBOT_X.COOLDOWN + actor.dt;
   }
 }

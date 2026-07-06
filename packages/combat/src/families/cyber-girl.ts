@@ -33,7 +33,7 @@
 
 import type { RomActor } from "../rom/actor.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
-import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Values inferred from the chunk_0034.c usage context (see file header). */
 export const CYBER_GIRL_X = {
@@ -241,15 +241,16 @@ function cyberGirlPhase1(actor: RomActor, ctx: CyberGirlFamilyCtx): void {
 
 /** Mirror of the ROM's zz_006a474_ (ground idle) / zz_006a5a4_ (air idle) tail that
  *  every cyber-girl phase falls into on completion. Clears the action-mode bits and
- *  dispatches the recovery cue. */
+ *  runs the decomp-verified idle-return helper (shared-idle-return.ts — the old
+ *  full-cue-0 + upper-6/7 mapping here was refuted against chunk_0009.c during the
+ *  valkrie verify pass). */
 function cyberGirlReturnToIdle(actor: RomActor, air: boolean): void {
   // +0x73f = 0, +0x5e0 &= ~0x3 (clear action-mode bits) — ends attack state 61.
   actor.controlWord = actor.controlWord & ~0x3;
   if (air) {
-    dispatchUpperBodyCue(actor, 7); // zz_006a5a4_ — air neutral
+    romAirKnockoutReturn(actor); // zz_006a5a4_ — upper cue 6
   } else {
-    dispatchFullBodyCue(actor, 0);  // zz_006a474_ — ground idle
-    dispatchUpperBodyCue(actor, 6);
+    romGroundIdleReturn(actor);  // zz_006a474_ — upper cue 0 + velocity zeroing
   }
 }
 

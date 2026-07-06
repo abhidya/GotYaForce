@@ -27,6 +27,7 @@ import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
 import { integratePhysics } from "../rom/physics.js";
 import { createSharedXSpecial, type SharedXConfig } from "./shared-x-special.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "./shared-melee-lunge.js";
+import { romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** zz_00715f8_ @0x800715f8 constants — every value read from boot.dol. */
 export const NINJA_X = {
@@ -165,8 +166,7 @@ function ninjaBComboPhase2(actor: RomActor, ctx: StreamContext): void {
   if (actor.handlerTimer <= 0) {
     s.comboStep = 0;
     actor.controlWord &= ~0x3;
-    dispatchUpperBodyCue(actor, 0);
-    dispatchFullBodyCue(actor, 0);
+    romGroundIdleReturn(actor); // zz_006a474_ (decomp-verified, shared-idle-return.ts)
   }
 }
 

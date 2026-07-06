@@ -38,10 +38,7 @@
 // directly used in the TS port, which has native number coercion).
 
 import type { RomActor } from "../rom/actor.js";
-import {
-  dispatchUpperBodyCue,
-  dispatchFullBodyCue,
-} from "../rom/dispatch.js";
+import { dispatchUpperBodyCue } from "../rom/dispatch.js";
 import {
   integratePhysics,
   groundClamp,
@@ -50,6 +47,7 @@ import {
   vecAdd,
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Engine constants — every value read from boot.dol this session (dol.py). */
 export const SHARED_CHARGE = {
@@ -309,13 +307,12 @@ function chargePhase3(actor: RomActor, _cfg: SharedChargeConfig, ctx: StreamCont
     actor.hDecel = SHARED_CHARGE.ZERO; // +0x4c = 0.0
     actor.hSpeed = SHARED_CHARGE.ZERO; // +0x44 = 0.0
     if (grounded) {
-      // zz_006a474_ ground idle reset.
-      dispatchUpperBodyCue(actor, 7);
-      dispatchFullBodyCue(actor, 0);
+      // Real zz_006a474_ call (chunk_0044.c:4078) — upper cue 0 + velocity zeroing
+      // (decomp-verified helper; the old upper-7 + full-0 mapping was refuted).
+      romGroundIdleReturn(actor);
     } else {
-      // zz_006a5a4_ air-fall exit — clear the action bits (done above) so the bridge's
-      // completion path runs the fall state (labeled approximation, same as gred.ts phase 3).
-      dispatchUpperBodyCue(actor, 7);
+      // Real zz_006a5a4_ call (chunk_0044.c:4075) — upper cue 6.
+      romAirKnockoutReturn(actor);
     }
   }
   // NOTE: phase 3 never increments +0x540; exit is solely the +0x5e0 &= ~3 clear (the

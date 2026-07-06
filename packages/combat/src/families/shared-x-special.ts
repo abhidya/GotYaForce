@@ -15,12 +15,10 @@
 //   ptr +0x04 = family on-hit callback (invoked on the phase-1 contact transition)
 
 import type { RomActor } from "../rom/actor.js";
-import {
-  dispatchUpperBodyCue,
-  dispatchFullBodyCue,
-} from "../rom/dispatch.js";
+import { dispatchUpperBodyCue } from "../rom/dispatch.js";
 import { integratePhysics, vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Motion constants — every value read from boot.dol (nn-family decode §A4-§A6). */
 export const SHARED_X = {
@@ -140,15 +138,22 @@ function sharedXPhase2(actor: RomActor, ctx: StreamContext): void {
 
   const grounded = (actor as RomActor & { grounded?: boolean }).grounded === true;
   if (grounded) {
-    // Landing exit: clear the action bits, upper-body cue 7, ground idle reset
-    // (zz_006a474_ path → full-body cue 0), attack cooldown +0x694 = 4.0 + dt.
+    // Landing exit (zz_00ff4d4_ @chunk_0028.c:1810-1839): the ROM's grounded arms are
+    // zz_006a750_(7) when the hover bit (+0x5e0 & 0x40) is set, else the real
+    // zz_006a474_ call — the old upper-7 + full-0 combination existed in neither arm.
+    // The exit CONDITION here (any grounded frame) remains the port's labeled
+    // stream-end approximation; only the cue outcome is corrected.
     actor.controlWord &= ~0x3;
-    dispatchUpperBodyCue(actor, 7);
-    dispatchFullBodyCue(actor, 0);
+    if ((actor.controlWord & 0x40) !== 0) {
+      dispatchUpperBodyCue(actor, 7); // zz_006a750_(actor, 7) — hover arm
+    } else {
+      romGroundIdleReturn(actor);     // zz_006a474_ (chunk_0028.c:1831)
+    }
     actor.stateTimer = SHARED_X.COOLDOWN + actor.dt;
   }
-  // Airborne: keep integrating (the zz_006a5a4_ air-fall exit fires via the bridge's
-  // completion path once the special's stream budget elapses).
+  // Airborne: keep integrating. The ROM's air arm exits via the real zz_006a5a4_
+  // (chunk_0028.c:1828) on wall contact / cancel-press; the port's bridge-owned
+  // completion path stands in for that gate (labeled approximation).
 }
 
 /**

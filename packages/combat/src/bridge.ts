@@ -33,7 +33,7 @@ import { configureNinjaFamily } from "./families/ninja.js";
 import { configureDeathBorgFamily } from "./families/death-borg.js";
 import { configureClawRobotFamily, configureDeathBorgOmegaFamily } from "./families/shared-aerial-dive-x.js";
 import { configureSeries3Family, type Series3BorgId } from "./families/shared-series3-x.js";
-import { configureLanceFlightFamily, type LanceFlightBorgId } from "./families/shared-flight-x.js";
+import { configureSamuraiClusterFamily, type SamuraiClusterBorgId } from "./families/samurai.js";
 import { createFamily1Charge3Action, createFamily2Charge3Action } from "./families/shared-charge3.js";
 import {
   createSharedAimedShotX,
@@ -202,9 +202,11 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0406: makeSimpleRegistration("pl0406", (a, ctx) => configureDeathBorgOmegaFamily(a, "pl0406", ctx)),
       // Series-3 girl-borg engine 0x8010ce60 (shared-series3-x.ts; bonus families slot-3-only):
       ...series3Registrations(),
-      // Knight-line lance flight zz_0149708_ (shared-flight-x.ts; family 2 already served
-      // by the samurai module):
-      ...lanceFlightRegistrations(),
+      // Samurai cluster (families/samurai.ts, 2026-07-06): 13 borgs / 6 families on
+      // the shared S-A ranged dash-slash (table 0x8033ed0c) + S-B close slash (table
+      // 0x8033ed20) + per-family action-1 v2 machines + zz_0149178_ lunge (v3/v4, ROM
+      // config) + X (shared lance flight zz_0149708_; SONIC/SHOGUN bespoke tables).
+      ...samuraiClusterRegistrations(),
       // Charge-3 release engine zz_0177a3c_ + morph engine zz_017a374_ composites:
       pl0619: makeSimpleRegistration("pl0619", (a, ctx) => {
         a.borgNumber = 0x619;
@@ -316,14 +318,10 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0609: makeMachineBlueFamilyRegistration(),
       pl0617: makeMachineBlueFamilyRegistration(),
       pl061d: makeMachineBlueFamilyRegistration(),
-      // DEMON SAMURAI family (ctor 0x801223c0) — cue table @0x8032d4d8. The X-special
-      // routes through the shared engine zz_0149708_ (phase table 0x8033ed3c), shared by
-      // 10 borgs across multiple families — no bespoke family module. All 4 members share
-      // ctor 0x801223c0 + group-4 seedSlot 0 (actionStreamTables).
-      pl0701: makeSamuraiFamilyRegistration(),
-      pl0708: makeSamuraiFamilyRegistration(),
-      pl070c: makeSamuraiFamilyRegistration(),
-      pl070d: makeSamuraiFamilyRegistration(),
+      // DEMON SAMURAI family (ctor 0x801223c0) — cue table @0x8032d4d8. Registered in
+      // the samurai cluster block above (families/samurai.ts): full action 0/1/2
+      // machines, X via the real zz_0149708_ port with the borg-switched configs
+      // (@0x8032c814 pl0701/pl0708; @0x8032c838 pl070c/pl070d).
       // BUILD ROBOT family (ctor 0x80112b44) — cue table @0x80328148. The three robot
       // borgs (BUILD/MEGATON/ARMY) share the bespoke X-special dive-bomb deploy
       // (FUN_801132f8 → PTR_FUN_80327f98 phase machine); see families/robot.ts. The
@@ -404,9 +402,9 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // PATRA WITCH / ISIS WITCH family (ctor 0x8015d674) — both members not yet in registry.
       pl0902: makeSimpleRegistration("pl0902", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0909: makeSimpleRegistration("pl0909", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // SAMURAI SHOGUN / CHRONO SAMURAI family (ctor 0x80174d88) — both members not yet in registry.
-      pl0704: makeSimpleRegistration("pl0704", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl0707: makeSimpleRegistration("pl0707", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(1) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // SAMURAI SHOGUN / CHRONO SAMURAI family (ctor 0x80174d88) — registered in the
+      // samurai cluster block above (families/samurai.ts): bespoke action-1 tables
+      // @0x80351908/14/24 + bespoke X @0x80351950 (borg-switched slot + payload).
       // SIRIUS / DEATH ARC family (ctor 0x801898b0) — both members not yet in registry.
       pl0e00: makeSimpleRegistration("pl0e00", () => { /* X-special stream not yet decoded; cue table only */ }),
       pl0e05: makeSimpleRegistration("pl0e05", () => { /* X-special stream not yet decoded; cue table only */ }),
@@ -522,13 +520,13 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(base, robotMeleeFactory);
     }
 
-    // Samurai group: zz_0149178_ (config-driven lunge melee).
+    // Samurai group: zz_0149178_ (config-driven lunge melee). Only pl0706 remains on
+    // the wave-C injection — the other 12 borgs now route action-1 variants through
+    // families/samurai.ts (v3/v4 → createMeleeSamurai with the DOL-read
+    // SAMURAI_LUNGE_ROM_CONFIG; v0/v1 → table S-B; v2 → the family machine).
     const samuraiMeleeFactory = (ctx: GRedFamilyCtx) =>
       createMeleeSamurai(ctx, SAMURAI_MELEE_DEFAULT_CONFIG);
-    for (const id of [
-      "pl0700", "pl0701", "pl0702", "pl0703", "pl0705", "pl0706",
-      "pl0708", "pl0709", "pl070a", "pl070b", "pl070c", "pl070d",
-    ] as const) {
+    for (const id of ["pl0706"] as const) {
       const base = FAMILY_REGISTRY_CACHE[id] ?? makeSimpleRegistration(id, () => {});
       FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(base, samuraiMeleeFactory);
     }
@@ -670,11 +668,22 @@ function series3Registrations(): Record<string, FamilyRegistration> {
   return out;
 }
 
-function lanceFlightRegistrations(): Record<string, FamilyRegistration> {
-  const ids = ["pl0700", "pl0709", "pl0702", "pl070a", "pl0705", "pl070b"] as LanceFlightBorgId[];
+// SAMURAI cluster (families/samurai.ts) — 13 borgs / 6 families (NORMAL SAMURAI
+// 0x800c7c80, DEMON SAMURAI 0x801223c0, VAMPIRE KNIGHT 0x80143b7c, SONIC SAMURAI
+// 0x80164324, SAMURAI SHOGUN 0x80174d88, DEATH BORG ZETA 0x8019c510). Supersedes the
+// earlier lance-flight-only registrations (pl0700/09, pl0702/0a, pl0705/0b), the
+// wave-A demon shared-engine registration (pl0701/0708/070c/070d), and the wave-B
+// shogun dashAttack fallback (pl0704/0707): the X wiring those provided is preserved
+// inside configureSamuraiClusterFamily (same shared-flight configs / real bespoke
+// machines), and actions 0/1 gain their ROM machines.
+function samuraiClusterRegistrations(): Record<string, FamilyRegistration> {
+  const ids: SamuraiClusterBorgId[] = [
+    "pl0700", "pl0701", "pl0702", "pl0703", "pl0704", "pl0705",
+    "pl0707", "pl0708", "pl0709", "pl070a", "pl070b", "pl070c", "pl070d",
+  ];
   const out: Record<string, FamilyRegistration> = {};
   for (const id of ids) {
-    out[id] = makeSimpleRegistration(id, (a, ctx) => configureLanceFlightFamily(a, id, ctx));
+    out[id] = makeSimpleRegistration(id, (a, ctx) => configureSamuraiClusterFamily(a, id, ctx));
   }
   return out;
 }
@@ -898,27 +907,6 @@ function makeWireGunnerFamilyRegistration(): FamilyRegistration {
       configureWireGunnerFamily(actor, id as "pl0103" | "pl0106" | "pl0107", ctx);
     },
     cueTable: cueTableForBorg("pl0103")!,
-  };
-}
-
-// DEMON SAMURAI family (ctor 0x801223c0) — cue table @0x8032d4d8. The X-special ROUTES
-// THROUGH THE SHARED ENGINE zz_0149708_ (phase table 0x8033ed3c, chunk_0038.c:2356):
-// action-2 handler FUN_80123390 (chunk_0033.c:1549) dispatches PTR_FUN_8032c800[+0x581]
-// whose sole entry is the leaf FUN_801233cc (chunk_0033.c:1558) — a one-line tail-call
-// to zz_0149708_. That engine is a GENERIC config-struct-driven lunge shared by 10 borgs
-// across multiple families (pl0700-070d, confirmed via actionStreamTables engine audit),
-// so this is a SHARED registration: cue table + shared-engine X config, no family module.
-// All 4 members (pl0701/pl0708/pl070c/pl070d) share ctor 0x801223c0 + group-4 seedSlot 0.
-function makeSamuraiFamilyRegistration(): FamilyRegistration {
-  return {
-    configure: (actor) => {
-      actor.rootAction = createSharedEngineRootAction({
-        xSpecial: DEFAULT_CONFIGS.dashAttack(0),
-      });
-      actor.defaultGroup = 0;
-      actor.streamSlot = 0;
-    },
-    cueTable: cueTableForBorg("pl0701")!,
   };
 }
 

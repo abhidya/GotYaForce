@@ -37,6 +37,13 @@ import {
   VALKRIE_SPAWNERS,
   type ValkrieFamilyCtx,
 } from "../families/valkrie.js";
+import {
+  configureSamuraiClusterFamily,
+  SAMURAI,
+  SAMURAI_SPAWNERS,
+  SAMURAI_LUNGE_ROM_CONFIG,
+  type SamuraiFamilyCtx,
+} from "../families/samurai.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
 import { RomDriverBridge, cueTableForBorg } from "../bridge.js";
@@ -942,10 +949,10 @@ export function runSelfTest(): number {
   }
 
   // Test 25: DEMON SAMURAI family — bridge cue-table attach for all 4 members
-  // (ctor 0x801223c0, cue table @0x8032d4d8). SHARED registration: the X-special
-  // routes through zz_0149708_ (shared group-4 engine, phaseTable 0x8033ed3c); no
-  // bespoke family module. Verify each member attaches, gets the family cue table,
-  // and resolves rootAction via the shared-engine config.
+  // (ctor 0x801223c0, cue table @0x8032d4d8). Now registered via the samurai cluster
+  // (families/samurai.ts): the X-special routes through the real zz_0149708_ port
+  // (shared-flight-x.ts, borg-switched configs @0x8032c814/0x8032c838). Verify each
+  // member attaches, gets the family cue table, and has the cluster rootAction.
   console.log("\n[rom.selfcheck] families/samurai — bridge cue-table (0x8032d4d8):");
   {
     const members: Array<{ id: string; num: number }> = [
@@ -966,7 +973,7 @@ export function runSelfTest(): number {
         const t = bridge.actor.cueTable!;
         assert(t[44 * 2] === 61 && t[45 * 2] === 61,
           `${id}: cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)`);
-        assert(bridge.actor.rootAction !== null, `${id}: shared-engine rootAction configured`);
+        assert(bridge.actor.rootAction !== null, `${id}: samurai-cluster rootAction configured`);
         assert(bridge.actor.borgNumber === num, `${id}: borgNumber stamped 0x${num.toString(16)} via bridge attach`);
         // cue 36 → [47, 0] (deploy state) — same shape as Flame Dragon + Machine Red.
         assert(t[36 * 2] === 47, `${id}: cue row 36 → full-body state 47 (deploy)`);
@@ -1315,23 +1322,30 @@ export function runSelfTest(): number {
 
   // Test 39: shared-melee-gred — phase 3 recovery end (+0x1cee → idle).
   // When wallContact (+0x1cee) fires and no combo-continue, the engine clears action-mode
-  // bits and dispatches cue 0 (ground idle via zz_006a474_).
+  // bits and runs the real zz_006a474_ tail (chunk_0009.c:708-729, decomp-verified in
+  // shared-idle-return.ts): upper-body cue 0 ONLY + velocity zeroing — NOT the old
+  // full-body cue 0 dispatch.
   console.log("\n[rom.selfcheck] shared-melee-gred — phase 3 recovery end (zz_006a474_):");
   {
     const a = createRomActor();
     a.cueTable = new Int8Array(96).fill(-1);
-    a.cueTable[0] = 0; // cue 0 → state 0 (ground idle)
-    a.cueTable[1] = 0;
+    a.cueTable[0] = 0; // cue 0 fb row (should NOT be consumed)
+    a.cueTable[1] = 5; // cue 0 ub row → ubState 5 (the zz_006a750_(0) target)
     a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999; a.activeYaw = 0;
     const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
     const cfg: SharedMeleeGRedConfig = { seedSlot: 0, timerFrames: 30, proximityRange: 100 };
     const melee = createSharedMeleeGRed(cfg, ctx);
     a.fbPhaseSlots[0] = 3;
+    a.fbState = 61;      // attack state — must be untouched by the upper-body-only exit
+    a.hSpeed = 12; a.yVel = 3; a.hDecel = 1; a.gravityCoeff = 1;
     a.controlWord = 0x3; // action-mode bits set
     a.wallContact = 1;   // +0x1cee → end the move
     melee(a);
     assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
-    assert(a.fbState === 0, "fbState → 0 (ground idle via cue 0 dispatch)");
+    assert(a.ubState === 5, "ubState set via upper cue 0 (zz_006a474_ → zz_006a750_(0))");
+    assert(a.fbState === 61, "fbState untouched (zz_006a474_ dispatches NO full-body cue)");
+    assert(a.hSpeed === 0 && a.yVel === 0 && a.hDecel === 0 && a.gravityCoeff === 0,
+      "velocities zeroed (+0x44/+0x48/+0x4c/+0x50 = 0)");
   }
 
   // Test 40: shared-melee-gred — G RED action table slot 1 routes B-melee here.
@@ -1878,6 +1892,449 @@ export function runSelfTest(): number {
     a.rootAction!(a); // phase 1 fire
     assert(spawns.some((s) => s.addr === VALKRIE_SPAWNERS.GENERIC_SHOT && s.type === 0x71),
       "lambda II volley shot via zz_0082824_ record 0x71 (borg-0xb07 arm)");
+  }
+
+  // Test 56: SAMURAI cluster — table S-A ranged dash-slash (FUN_80148838 @0x8033ed0c).
+  console.log("\n[rom.selfcheck] families/samurai — table S-A ranged dash (0x8033ed0c):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      dashWindow?: number; volleyYawSnap?: number;
+    };
+    const ctx: SamuraiFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureSamuraiClusterFamily(a, "pl0700", ctx);
+    assert(a.borgNumber === 0x700, "borgNumber stamped 0x700 (NORMAL SAMURAI)");
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 0; a.variantIndex = 0;
+    a.lockYaw = 0x1234;
+    a.rootAction!(a); // phase 0 (FUN_80148874)
+    assert(a.fbPhaseSlots[0] === 1, "S-A phase 0 → 1 (+0x540++)");
+    assert(approxEq(a.dashWindow ?? -1, SAMURAI.A0_WINDOW), "+0x560 window == 20 (FLOAT_8043a370)");
+    assert(a.volleyYawSnap === 0x1234, "+0x54a yaw snapshot == +0x5ae");
+    assert(a.streamSlot === 1, "ground slot 0 + 1 (+0x6ea++; hover bit clear)");
+    // Phase 1 holds while +0x1cee (part-0 event) is clear even when facing completes.
+    a.lockTarget = { x: 0, y: 0, z: 100 };
+    a.rootAction!(a); // phase 1 (FUN_80148968)
+    assert(a.fbPhaseSlots[0] === 1, "phase 1 holds while +0x1cee == 0");
+    a.wallContact = 1;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "facing + event byte → phase 2 (+0x540++)");
+    assert(a.streamSlot === 2, "slash stream armed (+0x6ea++)");
+    // Phase 2 GROUNDED fork: +0x540 += 2 (skip air recovery) + hover latch cleared.
+    a.controlWord = 0x40;
+    a.rootAction!(a); // phase 2 (FUN_80148ab0)
+    assert(a.fbPhaseSlots[0] === 4, "grounded slash end → phase 4 (+0x540 += 2)");
+    assert((a.controlWord & 0x40) === 0, "+0x5e0 &= ~0x40 (hover latch off)");
+    // Phase 4 recovery: wall event tears down via zz_006a474_ (ground idle return).
+    a.steerYaw = 100;
+    a.controlWord = 0x3;
+    a.rootAction!(a); // phase 4 (FUN_80148cb0)
+    assert((a.controlWord & 0x3) === 0, "wall event → +0x5e0 &= ~3 + zz_006a474_");
+    assert(a.steerYaw === 0, "+0x18da zeroed by the phase-4 teardown");
+    // AIR fork: phase 2 with airborne actor → phase 3 + gravity restore + 60f budget.
+    const b = createRomActor() as RomActor & { grounded?: boolean };
+    configureSamuraiClusterFamily(b, "pl0709", ctx);
+    assert(b.borgNumber === 0x709, "borgNumber stamped 0x709 (MUSASHI)");
+    b.grounded = false; b.dt = 1; b.maxFall = -9999;
+    b.actionIndex = 0; b.variantIndex = 0;
+    b.fbPhaseSlots[0] = 2;
+    b.wallContact = 1;
+    b.rootAction!(b); // phase 2 air arm
+    assert(b.fbPhaseSlots[0] === 3, "airborne slash end → phase 3 (+0x540++)");
+    assert(approxEq(b.handlerTimer, SAMURAI.FACE_BUDGET), "+0x558 == 60 (FLOAT_8043a384)");
+    assert((b as RomActor & { moveSubPhase?: number }).moveSubPhase === 1,
+      "+0x544 sub-phase byte == 1 (moveSubPhase — NOT the +0x541 lock-clear latch)");
+    assert(b.fbPhaseSlots[1] === 0, "+0x541 stays 0 (the air arm does not latch lock-clear)");
+  }
+
+  // Test 57: SAMURAI cluster — table S-B close slash (zz_0148d74_ @0x8033ed20).
+  console.log("\n[rom.selfcheck] families/samurai — table S-B close slash (0x8033ed20):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      bRetapInput?: boolean; swingEvent?: number; dashStrength?: number; bRetap?: boolean;
+    };
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: SamuraiFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+    };
+    configureSamuraiClusterFamily(a, "pl0702", ctx);
+    assert(a.borgNumber === 0x702, "borgNumber stamped 0x702 (VAMPIRE KNIGHT)");
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 1; a.variantIndex = 0;
+    a.lockTarget = { x: 0, y: 0, z: 400 };
+    a.rootAction!(a); // phase 0 (FUN_80148dc4)
+    assert(a.fbPhaseSlots[0] === 1, "S-B phase 0 → 1 (+0x540++)");
+    assert(a.streamSlot === 1, "v0 seed slot 0 + 1 (+0x6ea++; cfg @0x8033c36c)");
+    assert(approxEq(a.handlerTimer, SAMURAI.FACE_BUDGET), "+0x558 == 60 (FLOAT_8043a384)");
+    // Phase 1: facing complete → advance; dist 400 > fxRange 150 → melee FX child.
+    a.rootAction!(a); // phase 1 (FUN_80148ea8)
+    assert(a.fbPhaseSlots[0] === 2, "facing complete → phase 2 (+0x540++)");
+    assert(spawns.some((s) => s.addr === SAMURAI_SPAWNERS.MELEE_FX),
+      "cfg+4 (150) < +0x764 → zz_00b2190_(actor, 0) melee FX");
+    // Phase 2 stream-driven dash: (s8)+0x1d0f = 16 → dist × 16 × 0.0625 × 0.05.
+    a.dashStrength = 16;
+    a.rootAction!(a); // phase 2 (FUN_80148f4c)
+    assert(approxEq(a.hSpeed, 400 * 16 * 0.0625 * 0.05 * 0.92),
+      "dash speed = +0x764 × byte × 0.0625 (FLOAT_8043a390) × cfg+8 (0.05), ×0.92 drag");
+    assert(a.dashStrength === 0, "+0x1d0f consumed");
+    // Phase 2 combo: swing re-arm ((s8)+0x1cf0 < 0) + retap → STAYS in phase 2.
+    const slotBefore = a.streamSlot;
+    a.swingEvent = -1;
+    a.bRetapInput = true;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "combo re-arm keeps phase 2 (no backward loop)");
+    assert(a.streamSlot === slotBefore + 1, "combo advanced the g3 stream (+0x6ea++)");
+    assert(a.bRetap === false, "+0x746 retap latch cleared");
+    // Wall event → zz_006a474_ teardown.
+    a.swingEvent = 0; a.bRetapInput = false;
+    a.wallContact = 1;
+    a.controlWord = 0x3;
+    a.rootAction!(a);
+    assert((a.controlWord & 0x3) === 0, "wall event → +0x5e0 &= ~3 + zz_006a474_");
+    // v1 config seeds slot 4 (cfg @0x8033c398).
+    const b = createRomActor() as RomActor & { grounded?: boolean };
+    configureSamuraiClusterFamily(b, "pl070a", ctx);
+    b.grounded = true; b.dt = 1; b.maxFall = -9999;
+    b.actionIndex = 1; b.variantIndex = 1;
+    b.rootAction!(b);
+    assert(b.streamSlot === 5, "v1 seed slot 4 + 1 (+0x6ea++; cfg s32[0] @0x8033c398)");
+  }
+
+  // Test 58: SAMURAI cluster — 6-phase rising slash (NORMAL/ZETA clone + SHOGUN bank).
+  console.log("\n[rom.selfcheck] families/samurai — rising slash v2 (0x8030804c/0x8037381c/0x80351924):");
+  {
+    const ctx: SamuraiFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const run = (id: "pl0700" | "pl070b" | "pl0704", yv: number, grav: number) => {
+      const a = createRomActor() as RomActor & {
+        grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+        dashStrength?: number;
+      };
+      configureSamuraiClusterFamily(a, id, ctx);
+      a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+      a.actionIndex = 1; a.variantIndex = 2;
+      // Lock BEFORE activation — phase 0's FUN_80066838 gate latches +0x541 (lock
+      // forced clear every frame) when the move starts targetless.
+      a.lockTarget = { x: 0, y: 0, z: 400 };
+      a.rootAction!(a); // phase 0
+      assert(a.fbPhaseSlots[0] === 1, `${id}: v2 phase 0 → 1`);
+      assert(approxEq(a.handlerTimer, 60), `${id}: +0x558 == 60 face budget`);
+      // Phase 1: locked at 400; the row default is larger — the row-default path:
+      // f = max(row868=1000, dist) / 20 = 50.
+      a.rootAction!(a); // phase 1
+      assert(a.fbPhaseSlots[0] === 2, `${id}: facing → phase 2`);
+      assert(approxEq(a.hSpeed, 1000 / 20), `${id}: +0x44 = max(row868, +0x760) / 20`);
+      // Phase 2: range gate 200 — dist 400 keeps dashing; move to 100 → advance.
+      a.rootAction!(a); // dist 400 → hold
+      assert(a.fbPhaseSlots[0] === 2, `${id}: dist > 200 holds phase 2`);
+      a.pos.z = 300; // dist 100
+      a.handlerTimer = 5;
+      a.rootAction!(a);
+      assert(a.fbPhaseSlots[0] === 3, `${id}: FUN_80066838(200) in range → phase 3`);
+      // Phase 3: leap byte fires the rise.
+      a.dashStrength = 1;
+      a.rootAction!(a);
+      assert(a.fbPhaseSlots[0] === 4, `${id}: +0x1d0f != 0 → phase 4`);
+      assert(approxEq(a.yVel, yv), `${id}: +0x48 leap == ${yv}`);
+      assert(approxEq(a.gravityCoeff, grav), `${id}: +0x50 leap gravity == ${grav}`);
+      return a;
+    };
+    // NORMAL @0x8030804c: 32 / −2.3703704 (FLOAT_8043884c/80438850).
+    run("pl0700", 32, -2.3703704);
+    // ZETA clone @0x8037381c: 32 / −4 (FLOAT_8043b458/8043b45c — the ONE clone delta).
+    const z = run("pl070b", 32, -4);
+    assert(z.borgNumber === 0x70b, "borgNumber stamped 0x70b (DEATH BORG ZETA II)");
+    // SHOGUN @0x80351924: 40 / −3 (FLOAT_8043adb8/adbc) + rise timer + timer-gated fall.
+    const s = run("pl0704", 40, -3);
+    assert(approxEq(s.handlerTimer, 60), "SHOGUN p3 seeds +0x558 = 60 (FLOAT_8043ada8)");
+    (s as RomActor & { grounded?: boolean }).grounded = false;
+    s.handlerTimer = 1;
+    s.rootAction!(s); // phase 4 — airborne but timer expires → advance (SHOGUN gate)
+    assert(s.fbPhaseSlots[0] === 5, "SHOGUN p4 timer gate → phase 5 without landing");
+    // Liveness fallback: an UNSTAMPED +0x1d0f (host stamps only grounded/lockTarget)
+    // still fires the phase-3 leap via SAMURAI.DEFAULT_DASH_STRENGTH (TUNED, 16) —
+    // no stream-event deadlock in live play.
+    const u = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    configureSamuraiClusterFamily(u, "pl0700", ctx);
+    u.grounded = true; u.dt = 1; u.maxFall = -9999;
+    u.actionIndex = 1; u.variantIndex = 2;
+    u.lockTarget = { x: 0, y: 0, z: 100 };
+    u.fbPhaseSlots[0] = 3; // enter phase 3 directly, dashStrength never stamped
+    u.rootAction!(u);
+    assert(u.fbPhaseSlots[0] === 4,
+      "unstamped +0x1d0f → DEFAULT_DASH_STRENGTH fallback fires the leap (no deadlock)");
+  }
+
+  // Test 59: SAMURAI cluster — DEMON 7-phase rising slash (0x8032c7e4).
+  console.log("\n[rom.selfcheck] families/samurai — demon rising slash (0x8032c7e4):");
+  {
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: SamuraiFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+    };
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      pitchOffset54e?: number; hitReact?: number;
+    };
+    configureSamuraiClusterFamily(a, "pl0701", ctx);
+    assert(a.borgNumber === 0x701, "borgNumber stamped 0x701 (DEMON SAMURAI)");
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 1; a.variantIndex = 2;
+    a.lockTarget = { x: 0, y: 0, z: 100 }; // lock BEFORE activation (+0x541 gate)
+    a.rootAction!(a); // phase 0 (FUN_80122dec)
+    assert(a.fbPhaseSlots[0] === 1, "demon phase 0 → 1");
+    // Phase 1: within 200 → +0x54e = 0x8000 (rush-past flip) + hover latch + FX.
+    a.rootAction!(a); // phase 1 (FUN_80122ea8)
+    assert(a.fbPhaseSlots[0] === 2, "facing → phase 2");
+    assert(approxEq(a.yVel, 20), "+0x48 rise == 20 (FLOAT_80439b5c reuse)");
+    assert(approxEq(a.gravityCoeff, -1), "+0x50 == −1 (FLOAT_80439b58 reuse)");
+    assert(a.pitchOffset54e === 0x8000, "FUN_80066838(200) in range → +0x54e = 0x8000");
+    assert((a.controlWord & 0x40) !== 0, "zz_0066530_(0x2d) hover latch (+0x5e0 |= 0x40)");
+    assert(a.ubCue === 0x2d, "+0x5e4 == 0x2d (hover cue byte)");
+    assert(spawns.some((s) => s.addr === SAMURAI_SPAWNERS.MELEE_FX), "launch FX zz_00b2190_(0)");
+    // Phase 2: within 500 → advance with ×0.5 (DOUBLE_80439b30) on all four scalars.
+    const hs = a.hSpeed;
+    a.rootAction!(a); // phase 2 (FUN_80122fd4)
+    assert(a.fbPhaseSlots[0] === 3, "FUN_80066838(500) > 0 → phase 3");
+    assert(a.yVel <= 10 + 1e-4, "+0x48 halved (DOUBLE_80439b30 = 0.5)");
+    void hs;
+    // Phase 3 → 4 after the 10f hang window.
+    a.handlerTimer = 0;
+    a.rootAction!(a); // phase 3 (FUN_801230fc)
+    assert(a.fbPhaseSlots[0] === 4, "hang window done → phase 4 (slot 7 stream)");
+    // Phase 4: contact → dive −40 + gravity restore.
+    a.contactP0 = 1;
+    a.rootAction!(a); // phase 4 (FUN_801231b8)
+    assert(a.fbPhaseSlots[0] === 5, "+0x1cef contact → phase 5");
+    assert(approxEq(a.yVel, -40), "+0x48 == −40 (FLOAT_80439b70)");
+    // Phase 5: landing clears the hover latch (zz_0066530_(0x2c)).
+    a.contactP0 = 0;
+    (a as RomActor & { grounded?: boolean }).grounded = true;
+    a.wallContact = 1;
+    a.rootAction!(a); // phase 5 (FUN_80123254)
+    assert(a.fbPhaseSlots[0] === 6, "landed → phase 6");
+    assert((a.controlWord & 0xc0) === 0, "zz_0066530_(0x2c) cleared +0x5e0 bits 0x40|0x80");
+    assert(a.ubCue === 0x2c, "+0x5e4 == 0x2c (landing cue byte)");
+  }
+
+  // Test 60: SAMURAI cluster — SONIC v2 multi-slash + own X table.
+  console.log("\n[rom.selfcheck] families/samurai — sonic v2 (0x8034d598) + X (0x8034d5bc):");
+  {
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: SamuraiFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+    };
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      followUpEvent?: boolean; hitReact?: number;
+    };
+    configureSamuraiClusterFamily(a, "pl0703", ctx);
+    assert(a.borgNumber === 0x703, "borgNumber stamped 0x703 (SONIC SAMURAI)");
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 1; a.variantIndex = 2;
+    a.lockTarget = { x: 0, y: 0, z: 100 }; // lock BEFORE activation (+0x541 gate)
+    a.rootAction!(a); // phase 0 (FUN_801647a0)
+    assert(a.streamSlot === 7, "+0x6ea = 6 then ++ (slot 6 stream armed)");
+    spawns.length = 0;
+    a.rootAction!(a); // phase 1 (FUN_80164878)
+    assert(a.fbPhaseSlots[0] === 2, "facing → phase 2");
+    assert(spawns.some((s) => s.addr === SAMURAI_SPAWNERS.MELEE_FX),
+      "sonic phase-1 FX is UNCONDITIONAL (no range gate)");
+    a.rootAction!(a); // phase 2 (FUN_80164968) — within 500 → advance
+    assert(a.fbPhaseSlots[0] === 3, "FUN_80066838(500) != 0 → phase 3");
+    assert(approxEq(a.hSpeed, 40), "+0x44 pass-through speed == 40 (FLOAT_8043a99c)");
+    // Phase 3 re-fire: follow-up event + expired window re-arms the CURRENT slot.
+    a.handlerTimer = 0;
+    a.followUpEvent = true;
+    const slotBefore = a.streamSlot;
+    a.rootAction!(a); // phase 3 (FUN_80164a14)
+    assert(a.streamSlot === slotBefore, "re-fire uses (s8)+0x6ea WITHOUT increment");
+    // --- Own X table @0x8034d5bc ---
+    const x = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      hitReact?: number;
+    };
+    configureSamuraiClusterFamily(x, "pl0703", ctx);
+    x.grounded = true; x.dt = 1; x.timescale = 1; x.tierScale = 1; x.maxFall = -9999;
+    x.actionIndex = 2; x.variantIndex = 0;
+    x.pos.x = 100;
+    x.lockTarget = { x: 0, y: 0, z: 0 };
+    x.rootAction!(x); // phase 0 (FUN_80164b9c)
+    assert(x.fbPhaseSlots[0] === 1, "sonic X phase 0 → 1");
+    assert(approxEq(x.pos.x, 195), "blink-away ×0.95 (FLOAT_8043a9a8): pos.x 100 → 195");
+    assert(x.streamSlot === 1, "g4 slot 0 + 1 (+0x6ea++)");
+    x.handlerTimer = 0;
+    x.rootAction!(x); // phase 1 (FUN_80164ce0) — window done
+    assert(x.fbPhaseSlots[0] === 2, "wind-up done → phase 2 (next g4 slot)");
+    x.contactP0 = 1;
+    x.steerYaw = 0;
+    x.rootAction!(x); // phase 2 (FUN_80164dac)
+    assert(x.fbPhaseSlots[0] === 3, "+0x1cef contact → phase 3");
+    assert(approxEq(x.hSpeed, 100), "+0x44 == 100 × cos(+0x18da) (FLOAT_8043a9ac)");
+    // Phase 3 heavy-hit arm: (+0x1d9 & 0x10) doubles the brake + pops yVel + despawn.
+    x.hitReact = 0x10;
+    x.rootAction!(x); // phase 3 (FUN_80164e8c)
+    assert(x.fbPhaseSlots[0] === 4, "(+0x1d9 & 0x90) → phase 4");
+    assert(approxEq(x.handlerTimer, 60), "+0x558 = 30 + 30 (heavy-hit extension)");
+    // hSpeed 100 ×0.5 ×0.5 = 25 (integration already ran this frame — check yVel pop):
+    assert(x.yVel > 0 || approxEq(x.hSpeed, 25), "×0.5 ×0.5 brake + yVel += 3 arm ran");
+    // Phase 4 → 5 after wind-down; phase 5 landing.
+    x.handlerTimer = 0;
+    x.rootAction!(x); // phase 4 (FUN_80164f98)
+    assert(x.fbPhaseSlots[0] === 5, "wind-down done → phase 5 (finisher stream)");
+    x.contactP0 = -1;
+    (x as RomActor & { grounded?: boolean }).grounded = true;
+    x.controlWord = 0x3;
+    x.rootAction!(x); // phase 5 (FUN_801650a8)
+    assert((x.controlWord & 0x3) === 0, "landing → +0x5e0 &= ~3 + zz_006a750_(7)");
+    assert(approxEq(x.stateTimer, 5), "+0x694 == 4 (FLOAT_8043a9c4) + dt");
+  }
+
+  // Test 61: SAMURAI cluster — SHOGUN sky dive (0x80351908) + heavy slash (0x80351914).
+  console.log("\n[rom.selfcheck] families/samurai — shogun sky dive + heavy slash:");
+  {
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: SamuraiFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+    };
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      dashStrength?: number;
+    };
+    configureSamuraiClusterFamily(a, "pl0704", ctx);
+    assert(a.borgNumber === 0x704, "borgNumber stamped 0x704 (SAMURAI SHOGUN)");
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 1; a.variantIndex = 3; // v3/v4 → sky dive
+    a.pos.z = 1000; // far from target → phase-1 range gate (150) holds
+    a.lockTarget = { x: 0, y: 100, z: 0 };
+    a.rootAction!(a); // phase 0 (FUN_80175270) — TAIL-CALLS zz_0175380_ same frame
+    assert(a.fbPhaseSlots[0] === 1, "sky dive phase 0 → 1 (same-frame tail call ran)");
+    assert(spawns.some((s) => s.addr === SAMURAI_SPAWNERS.DIVE_FX),
+      "dive FX child via zz_0092dcc_(actor, 0)");
+    // The tail-called phase-1 body re-aimed: +0x48 = (targetY + 50 − posY) / 12.
+    assert(approxEq(a.yVel, 150 / 12, 1e-2), "+0x48 == (t.y + 50 (FLOAT_8043ad74)) / 12");
+    // Phase 1 → 2 once within 150 (FUN_80066838(FLOAT_8043ad80) != 0).
+    a.pos.x = 0; a.pos.z = 100;
+    a.rootAction!(a); // phase 1 (zz_0175380_)
+    assert(a.fbPhaseSlots[0] === 2, "FUN_80066838(150) in range → phase 2 (×0.25 scale)");
+    // Phase 2 dash-byte refresh: dist × 2.5 / 20 (DOUBLE_8043ad90 / DOUBLE_8043ad98).
+    a.pos.z = 200; // dist 200 (> NEAR_RANGE — skip the 0.8 near drag)
+    a.dashStrength = 1;
+    a.rootAction!(a); // phase 2 (FUN_80175508)
+    assert(approxEq(a.hSpeed, 200 * 2.5 / 20 * 0.92, 1e-3),
+      "+0x44 = (2.5 × +0x760) / 20 then ×0.92 drag (DOUBLE_8043ad90/ad98, FLOAT_8043ada4)");
+    // Heavy slash (v1) @0x80351914 seeds literal slot 5 → advance dash → slam slot 4.
+    const h = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    configureSamuraiClusterFamily(h, "pl0707", ctx);
+    assert(h.borgNumber === 0x707, "borgNumber stamped 0x707 (CHRONO SAMURAI)");
+    h.grounded = true; h.dt = 1; h.maxFall = -9999;
+    h.actionIndex = 1; h.variantIndex = 1;
+    h.lockTarget = { x: 0, y: 0, z: 400 }; // lock BEFORE activation (+0x541 gate)
+    h.rootAction!(h); // phase 0 (FUN_8017570c)
+    assert(h.fbPhaseSlots[0] === 1 && approxEq(h.handlerTimer, 60),
+      "heavy slash phase 0 → 1 (+0x558 = 60, FLOAT_8043ada8)");
+    h.rootAction!(h); // phase 1 (FUN_801757c8)
+    assert(h.fbPhaseSlots[0] === 2, "facing → phase 2 (dash arm)");
+    h.pos.z = 300; // dist 100 → range gate 200 advances
+    h.rootAction!(h); // phase 2 (FUN_801758c8)
+    assert(h.fbPhaseSlots[0] === 3, "FUN_80066838(200) → phase 3 (slam stream slot 4)");
+    h.wallContact = 1;
+    h.controlWord = 0x3;
+    h.rootAction!(h); // phase 3 (FUN_8017597c)
+    assert((h.controlWord & 0x3) === 0, "wall event → +0x5e0 &= ~3 + zz_006a474_");
+  }
+
+  // Test 62: SAMURAI cluster — SHOGUN X (0x80351950): borg-switched slot + payload;
+  // plus the 13-borg registration sweep.
+  console.log("\n[rom.selfcheck] families/samurai — shogun X + cluster registrations:");
+  {
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const freezes: number[] = [];
+    const ctx: SamuraiFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+      onTimeStop: (_a, frames) => { freezes.push(frames); },
+    };
+    // SHOGUN (0x704): g4 slot 0, phase-0 trail child, phase-2 strike child.
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      swingEvent?: number;
+    };
+    configureSamuraiClusterFamily(a, "pl0704", ctx);
+    a.grounded = true; a.dt = 1; a.maxFall = -9999;
+    a.actionIndex = 2; a.variantIndex = 0;
+    a.rootAction!(a); // phase 0 (FUN_80175ee8)
+    assert(a.streamSlot === 1, "SHOGUN X seeds g4 slot 0 (+0x6ea++ → 1)");
+    assert(spawns.some((s) => s.addr === SAMURAI_SPAWNERS.SHOGUN_X_TRAIL),
+      "borg 0x704 phase 0 spawns the trail child (zz_01a5e88_)");
+    a.lockTarget = { x: 0, y: 0, z: 100 };
+    a.rootAction!(a); // phase 1 (FUN_80175ffc) — facing → advance
+    assert(a.fbPhaseSlots[0] === 2, "facing → phase 2");
+    a.swingEvent = 1;
+    a.rootAction!(a); // phase 2 (FUN_801760b4)
+    assert(a.fbPhaseSlots[0] === 3, "+0x1cf0 swing event → phase 3");
+    assert(spawns.some((s) => s.addr === SAMURAI_SPAWNERS.SHOGUN_X_CHILD),
+      "borg 0x704 phase 2 spawns the strike child (zz_018eea4_)");
+    // CHRONO (0x707): g4 slot 1, phase-2 time-stop 300f (zz_0067f98_).
+    const c = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      swingEvent?: number;
+    };
+    configureSamuraiClusterFamily(c, "pl0707", ctx);
+    c.grounded = true; c.dt = 1; c.maxFall = -9999;
+    c.actionIndex = 2; c.variantIndex = 0;
+    c.rootAction!(c); // phase 0
+    assert(c.streamSlot === 2, "CHRONO X seeds g4 slot 1 (+0x6ea++ → 2)");
+    c.lockTarget = { x: 0, y: 0, z: 100 };
+    c.rootAction!(c); // phase 1
+    c.swingEvent = 1;
+    c.rootAction!(c); // phase 2
+    assert(freezes.length === 1 && freezes[0] === 300,
+      "borg 0x707 phase 2 fires onTimeStop(300) (zz_0067f98_(actor, 300))");
+    // Registration sweep: all 13 cluster borgs attach with rootAction + real cue table.
+    const members: Array<[string, number]> = [
+      ["pl0700", 0x700], ["pl0701", 0x701], ["pl0702", 0x702], ["pl0703", 0x703],
+      ["pl0704", 0x704], ["pl0705", 0x705], ["pl0707", 0x707], ["pl0708", 0x708],
+      ["pl0709", 0x709], ["pl070a", 0x70a], ["pl070b", 0x70b], ["pl070c", 0x70c],
+      ["pl070d", 0x70d],
+    ];
+    for (const [id, num] of members) {
+      const runtime = {
+        borgId: id, team: 0, uid: "t",
+        pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+        rotY: 0, grounded: true, cooldowns: {},
+      } as unknown as BorgRuntime;
+      const bridge = RomDriverBridge.attach(runtime,
+        { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+      assert(bridge !== null, `RomDriverBridge attaches for ${id}`);
+      if (!bridge) continue;
+      assert(bridge.actor.borgNumber === num, `${id}: borgNumber 0x${num.toString(16)}`);
+      assert(bridge.actor.rootAction !== null, `${id}: rootAction wired`);
+      const t = bridge.actor.cueTable!;
+      assert(t[44 * 2] === 61 && t[45 * 2] === 61, `${id}: cue rows 44/45 → state 61`);
+      // Action 0 phase 0 runs (table S-A) for every member.
+      const actor = bridge.actor;
+      (actor as RomActor & { grounded?: boolean }).grounded = true;
+      actor.maxFall = -9999;
+      actor.actionIndex = 0; actor.variantIndex = 0;
+      actor.rootAction!(actor);
+      assert(actor.fbPhaseSlots[0] === 1, `${id}: action 0 → S-A phase 0 ran`);
+    }
+    // v3/v4 lunge config sanity: the DOL-read config replaced the TUNED default.
+    assert(SAMURAI_LUNGE_ROM_CONFIG.seedSlot === 3 && SAMURAI_LUNGE_ROM_CONFIG.timerFrames === 20
+      && approxEq(SAMURAI_LUNGE_ROM_CONFIG.proximityRange, 150)
+      && approxEq(SAMURAI_LUNGE_ROM_CONFIG.velocityScale ?? 0, 0.25)
+      && approxEq(SAMURAI_LUNGE_ROM_CONFIG.decel ?? 0, 0.92)
+      && approxEq(SAMURAI_LUNGE_ROM_CONFIG.repositionScale ?? 0, 0.95),
+      "SAMURAI_LUNGE_ROM_CONFIG matches the DOL bytes @0x80308020 (+4 siblings)");
   }
 
   if (failures > 0) {

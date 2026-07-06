@@ -17,8 +17,8 @@
 //   f32 +0x14 = decelC        (0.8  — EXTRA brake applied when target dist < range)
 
 import type { RomActor } from "../rom/actor.js";
-import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Machine constants — DOL-read (nn-family-decode §A8). */
 export const SHARED_LUNGE = {
@@ -158,10 +158,10 @@ function lungePhase3(actor: RomActor, cfg: SharedLungeConfig, ctx: StreamContext
       actor.hSpeed = dashDist / cfg.dashFrames;
       return;
     }
-    // Stream end (+0x1cee) → ground idle reset (zz_006a474_: cues 0/0) and done.
+    // Stream end (+0x1cee) → ground idle reset (zz_006a474_, real call
+    // @chunk_0028.c:1686 — decomp-verified helper, shared-idle-return.ts).
     actor.controlWord &= ~0x3;
-    dispatchUpperBodyCue(actor, 0);
-    dispatchFullBodyCue(actor, 0);
+    romGroundIdleReturn(actor);
     return;
   }
   // Recovery decay: decelB, PLUS decelC when the target is WITHIN range (braking near

@@ -21,16 +21,13 @@
 
 import type { RomActor } from "../rom/actor.js";
 import {
-  dispatchUpperBodyCue,
-  dispatchFullBodyCue,
-} from "../rom/dispatch.js";
-import {
   integratePhysics,
   vecSubtract,
   vecScale,
   vecAdd,
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 // Motion constants — every value read from boot.dol this session.
 const SWORD_KNIGHT_X = {
@@ -207,16 +204,15 @@ function swordKnightXPhase3(actor: RomActor, ctx: StreamContext): void {
 
   // Wall/contact-end branch (chunk_1510.c:1766-1775): +0x1cee != 0 → clear +0x73f,
   // strip the action-mode bits (+0x5e0 &= ~3), and return to neutral via zz_006a474_
-  // (grounded) or zz_006a5a4_ (airborne). Both helpers dispatch cue 0; gred's port uses
-  // dispatchUpperBodyCue(7) + dispatchFullBodyCue(0) for the same transition.
+  // (grounded) or zz_006a5a4_ (airborne) — decomp-verified helpers in
+  // shared-idle-return.ts (the old cue-7/cue-0 mapping here was refuted).
   if (actor.wallContact !== 0) {
     actor.controlWord = actor.controlWord & ~0x3;
     const grounded = (actor as RomActor & { grounded?: boolean }).grounded === true;
     if (grounded) {
-      dispatchUpperBodyCue(actor, 7); // → idle upper body
-      dispatchFullBodyCue(actor, 0);  // → idle full body (zz_006a474_)
+      romGroundIdleReturn(actor);   // zz_006a474_ — upper cue 0 + velocity zeroing
     } else {
-      dispatchUpperBodyCue(actor, 7); // → fall upper body (zz_006a5a4_ approximation)
+      romAirKnockoutReturn(actor);  // zz_006a5a4_ — upper cue 6
     }
   }
 }

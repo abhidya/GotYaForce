@@ -26,6 +26,7 @@ import type { RomActor } from "../rom/actor.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Every value read from boot.dol this session (dump-dragon-floats.mjs). */
 export const DRAGON_X = {
@@ -112,8 +113,7 @@ function dragonGroundPhase2(actor: RomActor, ctx: DragonFamilyCtx): void {
   actor.handlerTimer -= actor.dt;
   if (actor.handlerTimer <= -RECOVERY_FRAMES) {
     actor.controlWord = actor.controlWord & ~0x3; // +0x5e0 &= ~0xfffffffc
-    dispatchFullBodyCue(actor, 0);  // zz_006a474_ → ground idle
-    dispatchUpperBodyCue(actor, 6);
+    romGroundIdleReturn(actor); // zz_006a474_ (real call @chunk_0010.c:2857)
   }
 }
 
@@ -147,8 +147,7 @@ function dragonAirPhase2(actor: RomActor, ctx: DragonFamilyCtx): void {
   actor.handlerTimer -= actor.dt;
   if (actor.handlerTimer <= -RECOVERY_FRAMES) {
     actor.controlWord = actor.controlWord & ~0x3;
-    // zz_006a5a4_ = return to airborne neutral; mirror G RED's airborne reset.
-    dispatchUpperBodyCue(actor, 7);
+    romAirKnockoutReturn(actor); // zz_006a5a4_ (real call @chunk_0010.c:2933)
   }
 }
 

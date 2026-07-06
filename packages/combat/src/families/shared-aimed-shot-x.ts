@@ -54,10 +54,7 @@
 //       the channel ×0.9 on target loss. A port that decays +0x18e0 would be wrong.
 
 import type { RomActor, Vec3 } from "../rom/actor.js";
-import {
-  dispatchUpperBodyCue,
-  dispatchFullBodyCue,
-} from "../rom/dispatch.js";
+import { dispatchUpperBodyCue } from "../rom/dispatch.js";
 import {
   integratePhysics,
   groundClamp,
@@ -66,6 +63,7 @@ import {
   vecAdd,
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Machine constants — every value read from boot.dol (dig claims MACHINE-P0/P1/P2). */
 export const AIMED_SHOT_X = {
@@ -409,15 +407,14 @@ function aimedShotPhase2(actor: RomActor, cfg: SharedAimedShotConfig, ctx: Strea
     // EXIT BLOCK: +0x73f = 0 (unsurfaced housekeeping byte — no-op); +0x5e0 &= ~3.
     actor.controlWord &= ~0x3;
     if (!grounded) {
-      // zz_006a5a4_(actor) — air-fall exit. Approximated as the neutral full-body cue;
-      // the real air-fall state lands via the bridge's grounded transition.
-      dispatchFullBodyCue(actor, 0);
+      // Real zz_006a5a4_ call (FUN_8017a208, chunk_0044.c:4302) — upper cue 6 (the
+      // old full-body cue 0 approximation was wrong; decomp-verified helper).
+      romAirKnockoutReturn(actor);
     } else if ((actor.controlWord & 0x40) === 0) {
-      // zz_006a474_(actor) — ground idle reset (cues 0/0).
-      dispatchUpperBodyCue(actor, 0);
-      dispatchFullBodyCue(actor, 0);
+      // Real zz_006a474_ call (chunk_0044.c:4305) — upper cue 0 + velocity zeroing.
+      romGroundIdleReturn(actor);
     } else {
-      // zz_006a750_(actor, 7) — upper cue 7 (family 3's always-air path lands here).
+      // zz_006a750_(actor, 7) — upper cue 7 (chunk_0044.c:4308; hover-flag arm).
       dispatchUpperBodyCue(actor, 7);
     }
     // Cooldown +0x694 = FLOAT_8043ae1c (1.0) + dt (+0x1dc8) — note 1.0, not 4.0.

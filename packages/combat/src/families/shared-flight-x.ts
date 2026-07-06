@@ -41,7 +41,7 @@
 //   f32 +0x20 accel        (P2 → +0x40; P3: +0x38 += +0x40 × dt)
 
 import type { RomActor, Vec3 } from "../rom/actor.js";
-import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
+import { dispatchUpperBodyCue } from "../rom/dispatch.js";
 import {
   integratePhysics,
   projectX,
@@ -51,6 +51,7 @@ import {
   vecAdd,
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Machine constants — every value read from boot.dol via dol.py (dig MACHINE-9,
  *  dual-lens re-read; r2-relative anchors verified with r2 = 0x8043ea20). */
@@ -495,9 +496,11 @@ function flightPhase4(actor: RomActor, cfg: SharedFlightXConfig, ctx: StreamCont
   }
   actor.controlWord &= ~0x40; // hover bit off
   actor.gravityCoeff = actor.descriptor?.handlerData6c ?? 1; // +0x50 = descriptor gravity
-  // Ground idle reset zz_006a474_ — cues 0/0 (the shared-melee-lunge precedent).
-  dispatchUpperBodyCue(actor, 0);
-  dispatchFullBodyCue(actor, 0);
+  // Real zz_006a474_ call (chunk_0038.c:2582) — runs AFTER the descriptor gravity
+  // restore above and zeroes +0x50 again (ROM order preserved; the restore is dead
+  // on this path in the ROM too). Decomp-verified helper — the old cues-0/0 mapping
+  // was refuted.
+  romGroundIdleReturn(actor);
   actor.stateTimer = FLIGHT_X.COOLDOWN + actor.dt; // +0x694 = 8.0 (FLOAT_8043a388) + dt
 }
 
@@ -525,10 +528,8 @@ function flightPhase5(actor: RomActor, ctx: StreamContext): void {
   if (actor.handlerTimer <= FLIGHT_X.ZERO) {
     actor.steerYaw = 0;
     actor.controlWord &= ~0x3;
-    // AIR-FALL EXIT zz_006a5a4_(actor) — return to airborne neutral; modeled as the
-    // upper-body cue-7 reset (the dragon.ts/G RED airborne-reset precedent — the
-    // exact zz_006a5a4_ cue mapping is a labeled approximation).
-    dispatchUpperBodyCue(actor, 7);
+    romAirKnockoutReturn(actor); // real zz_006a5a4_ call (chunk_0038.c:2614) —
+    // upper cue 6; the old cue-7 approximation was wrong.
     actor.stateTimer = FLIGHT_X.COOLDOWN + actor.dt;
   }
 }
@@ -646,52 +647,7 @@ export const FLIGHT_X_FAMILY4_CONFIG: SharedFlightXConfig = {
   accel: 2.0,
 };
 
-// ============================================================================
-// Family registration — the three registry-missing families (family 2 stays with
-// its existing bridge registration).
-// ============================================================================
-
-export type LanceFlightBorgId =
-  | "pl0700" | "pl0709"  // family 1 (ctor 0x800c7c80)
-  | "pl0702" | "pl070a"  // family 3 (ctor 0x80143b7c)
-  | "pl0705" | "pl070b"; // family 4 (ctor 0x8019c510)
-
-const LANCE_FLIGHT_BORGS: Record<LanceFlightBorgId, { num: number; cfg: SharedFlightXConfig }> = {
-  pl0700: { num: 0x700, cfg: FLIGHT_X_FAMILY1_CONFIG },
-  pl0709: { num: 0x709, cfg: FLIGHT_X_FAMILY1_CONFIG },
-  pl0702: { num: 0x702, cfg: FLIGHT_X_FAMILY3_CONFIG },
-  pl070a: { num: 0x70a, cfg: FLIGHT_X_FAMILY3_CONFIG },
-  pl0705: { num: 0x705, cfg: FLIGHT_X_FAMILY4_CONFIG },
-  pl070b: { num: 0x70b, cfg: FLIGHT_X_FAMILY4_CONFIG },
-};
-
-/** Root action dispatcher for a lance-flight family — the port of the family's
- *  action-table dispatch (fam1 FUN_800c84fc via PTR_FUN_80308064, fam3 FUN_801444c8
- *  via PTR_FUN_8033c3c0, fam4 FUN_8019cf78 via PTR_FUN_80373834). Only action 2 (X)
- *  is ported; other rows keep the generic fallback. All 5 variant entries are the
- *  same wrapper, so the variant index is ignored (variant tables are exactly 5 words —
- *  +0x581 must be 0-4). */
-export function createLanceFlightRootAction(
-  cfg: SharedFlightXConfig,
-  ctx: StreamContext,
-): (actor: RomActor) => void {
-  const xSpecial = createSharedFlightX(cfg, ctx);
-  const actionTable: Array<((actor: RomActor) => void) | null> = [null, null, xSpecial, null, null];
-  return (actor: RomActor) => {
-    const fn = actionTable[actor.actionIndex];
-    if (fn) fn(actor);
-  };
-}
-
-/** Configure a knight-line actor (families 1/3/4) onto the lance-flight machine. */
-export function configureLanceFlightFamily(
-  actor: RomActor,
-  borgId: LanceFlightBorgId,
-  ctx: StreamContext,
-): void {
-  const entry = LANCE_FLIGHT_BORGS[borgId];
-  actor.borgNumber = entry.num;
-  actor.rootAction = createLanceFlightRootAction(entry.cfg, ctx);
-  actor.defaultGroup = 0;
-  actor.streamSlot = 0;
-}
+// The former lance-flight family registration block (LanceFlightBorgId /
+// LANCE_FLIGHT_BORGS / createLanceFlightRootAction / configureLanceFlightFamily)
+// was superseded by the samurai-cluster registration (families/samurai.ts wires
+// createSharedFlightX directly with the per-family configs above) and deleted.

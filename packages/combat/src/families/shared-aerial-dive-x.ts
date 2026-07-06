@@ -45,10 +45,10 @@
 // shared-x-special's 4.0+dt).
 
 import type { RomActor, Vec3 } from "../rom/actor.js";
-import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
 import { integratePhysics, projectXzMagnitude } from "../rom/physics.js";
 import { vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Machine constants — every value DOL-read (dig claim M3, dual-lens verified). */
 export const SHARED_AERIAL_X = {
@@ -461,12 +461,13 @@ function aerialXPhase4(actor: RomActor, ctx: StreamContext): void {
   actor.handlerTimer -= actor.dt; // +0x558 -= dt
   if (actor.handlerTimer <= 0) {
     // AIR-FALL EXIT after 60f without landing: +0x4c = 0, +0x44 = 0, +0x73f = 0 (per-
-    // actor housekeeping byte, not surfaced — no-op), +0x5e0 &= ~3, zz_006a5a4_(actor).
+    // actor housekeeping byte, not surfaced — no-op), +0x5e0 &= ~3, then the real
+    // zz_006a5a4_ call (chunk_0026.c:3618 — dispatches upper cue 6; the old
+    // "no cue change" reading was wrong).
     actor.hDecel = SHARED_AERIAL_X.ZERO;
     actor.hSpeed = SHARED_AERIAL_X.ZERO;
     actor.controlWord &= ~0x3;
-    // zz_006a5a4_ — air-fall exit (no cue change; the bridge's completion path
-    // transitions the actor out of attack state 61 — robot.ts precedent).
+    romAirKnockoutReturn(actor);
   }
 }
 
@@ -509,12 +510,11 @@ function aerialXPhase6(actor: RomActor, ctx: StreamContext): void {
 
   if (actor.hSpeed < SHARED_AERIAL_X.EXIT_SPEED) {
     // GROUND-IDLE EXIT: +0x73f = 0 (housekeeping byte, not surfaced — no-op),
-    // +0x5e0 &= ~3, zz_006a474_(actor) → full ground-idle reset (cues 0/0, the
-    // shared-melee-lunge precedent). NO +0x694 attack-cooldown seed — this machine
+    // +0x5e0 &= ~3, then the real zz_006a474_ call (chunk_0026.c:3671 —
+    // decomp-verified helper). NO +0x694 attack-cooldown seed — this machine
     // seeds NO cooldown anywhere (verified; do not copy shared-x-special's 4.0+dt).
     actor.controlWord &= ~0x3;
-    dispatchUpperBodyCue(actor, 0);
-    dispatchFullBodyCue(actor, 0);
+    romGroundIdleReturn(actor);
   }
 }
 

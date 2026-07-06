@@ -37,6 +37,7 @@ import type { RomActor } from "../rom/actor.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 /** Every value read from boot.dol this session (cyber-dragon-floats dump). These
  *  mirror FLAME DRAGON's DRAGON_X table at FLOAT_80437814/24/2c/30/34 — the two
@@ -114,8 +115,7 @@ function cyberDragonGroundPhase2(actor: RomActor, ctx: CyberDragonFamilyCtx): vo
   actor.handlerTimer -= actor.dt;
   if (actor.handlerTimer <= -RECOVERY_FRAMES) {
     actor.controlWord = actor.controlWord & ~0x3; // +0x5e0 &= ~0xfffffffc
-    dispatchFullBodyCue(actor, 0);  // zz_006a474_ → ground idle
-    dispatchUpperBodyCue(actor, 6);
+    romGroundIdleReturn(actor); // zz_006a474_ (real call @chunk_0018.c:4211)
   }
 }
 
@@ -149,8 +149,7 @@ function cyberDragonAirPhase2(actor: RomActor, ctx: CyberDragonFamilyCtx): void 
   actor.handlerTimer -= actor.dt;
   if (actor.handlerTimer <= -RECOVERY_FRAMES) {
     actor.controlWord = actor.controlWord & ~0x3;
-    // zz_006a5a4_ = return to airborne neutral; mirror FLAME's airborne reset.
-    dispatchUpperBodyCue(actor, 7);
+    romAirKnockoutReturn(actor); // zz_006a5a4_ (real call @chunk_0018.c:4296)
   }
 }
 

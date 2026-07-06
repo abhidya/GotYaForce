@@ -10,7 +10,8 @@
 import type { RomActor } from "../rom/actor.js";
 import { integratePhysics, vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
-import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
+import { dispatchUpperBodyCue } from "../rom/dispatch.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
 const ENG = {
   STREAM_RATE: -1.0,
@@ -132,10 +133,11 @@ function createMeleePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
         startStream(actor, 0xf, 3, actor.streamSlot, ENG.STREAM_RATE);
         actor.streamSlot++;
       } else {
-        // Recovery: return to idle.
+        // Recovery: return to idle — real zz_006a474_ call (FUN_801780e4 wall/stream
+        // end, chunk_0044.c:3172; decomp-verified helper — the old full-0 + upper-6
+        // mapping was refuted).
         actor.controlWord = actor.controlWord & ~0x3;
-        dispatchFullBodyCue(actor, 0);
-        dispatchUpperBodyCue(actor, 6);
+        romGroundIdleReturn(actor);
       }
     },
   ];
@@ -197,9 +199,18 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       integratePhysics(0, actor, actor.activeYaw);
       actor.handlerTimer -= actor.dt;
       if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
+        // Exit per the lunge tail FUN_80178908 (chunk_0044.c:3465-3476): grounded +
+        // part-0 contact → zz_006a750_(7) + 1f cooldown; wall contact → the real
+        // zz_006a5a4_ call. The timer-expiry CONDITION here remains the port's
+        // labeled stream-end approximation; the cue outcome now matches the decomp
+        // (the old full-0 + upper-6 mapping was refuted).
         actor.controlWord = actor.controlWord & ~0x3;
-        dispatchFullBodyCue(actor, 0);
-        dispatchUpperBodyCue(actor, 6);
+        if ((actor as RomActor & { grounded?: boolean }).grounded === true) {
+          dispatchUpperBodyCue(actor, 7); // zz_006a750_(actor, 7) @:3468
+          actor.stateTimer = 1.0 + actor.dt; // +0x694 = FLOAT_8043ae1c + dt @:3469
+        } else {
+          romAirKnockoutReturn(actor); // zz_006a5a4_ @:3475
+        }
       }
     },
   ];
