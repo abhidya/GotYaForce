@@ -14,6 +14,7 @@ import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
 import { configureStarHeroFamily } from "../families/star-hero.js";
 import { configureCyberMachineFamily } from "../families/cyber-machine.js";
 import { configureSwordKnightFamily } from "../families/sword-knight.js";
+import { configureDragonFamily, DRAGON_X } from "../families/dragon.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
@@ -468,6 +469,113 @@ export function runSelfTest(): number {
         "cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)");
       assert(bridge.actor.rootAction !== null, "cyber-machine rootAction configured");
       assert(bridge.actor.borgNumber === 0x602, "borgNumber stamped 0x602 via bridge attach");
+    }
+  }
+
+  // Test 20: FLAME DRAGON family — v0 ground flame breath phase 0 setup (FUN_80075f2c).
+  console.log("\n[rom.selfcheck] families/dragon — v0 ground breath phase 0 (FUN_80075f2c):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureDragonFamily(a, "pl0500", ctx);
+    assert(a.borgNumber === 0x500, "borgNumber stamped 0x500 (FLAME DRAGON)");
+    a.actionIndex = 2;
+    a.variantIndex = 0;
+    a.hSpeed = 9; a.yVel = 5; a.hDecel = 3; // nonzero to confirm the phase-0 zeroing
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced 0 → 1 (+0x540++)");
+    assert(approxEq(a.handlerTimer, DRAGON_X.BREATH_WINDOW), `handlerTimer == 180.0 (FLOAT_80437830)`);
+    assert(approxEq(a.hSpeed, 0) && approxEq(a.yVel, 0) && approxEq(a.hDecel, 0),
+      "launch scalars zeroed (FLOAT_80437814)");
+    assert(approxEq(a.gravityCoeff, 0), "gravityCoeff zeroed (ground breath — no physics)");
+  }
+
+  // Test 21: FLAME DRAGON family — v0 phase 1 contact → flame child spawn (zz_0076408_).
+  // The borg-id switch (zz_0076408_:3034-3040) maps each Dragon to a flame-child type;
+  // verify pl050a → type 2 and pl0515 → type 4 via the onFamilyProjectile hook.
+  console.log("\n[rom.selfcheck] families/dragon — v0 phase 1 contact spawn (zz_0076408_):");
+  {
+    const a = createRomActor();
+    let flame = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { flame = { addr, type }; },
+    };
+    configureDragonFamily(a, "pl050a", ctx); // pl050a → flame type 2
+    assert(a.borgNumber === 0x50a, "borgNumber stamped 0x50a");
+    a.actionIndex = 2;
+    a.variantIndex = 0;
+    a.fbPhaseSlots[0] = 1; // already in phase 1
+    a.handlerTimer = DRAGON_X.BREATH_WINDOW; // not expired
+    a.contactP0 = 1; // +0x1cef contact flag fired (breath hitbox connected)
+    a.rootAction!(a);
+    assert(flame !== null && flame!.addr === DRAGON_X.FLAME_SPAWNER_ADDR && flame!.type === 2,
+      "flame child spawned via zz_00be948_ type 2 (pl050a)");
+    assert(a.contactP0 === 0, "+0x1cef cleared after consuming the contact (zz_0076408_)");
+
+    // Second borg in the same family: pl0515 → type 4 (the full switch).
+    const b = createRomActor();
+    let flameB = null as { addr: number; type: number } | null;
+    const ctxB: GRedFamilyCtx & {
+      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { flameB = { addr, type }; },
+    };
+    configureDragonFamily(b, "pl0515", ctxB);
+    assert(b.borgNumber === 0x515, "borgNumber stamped 0x515");
+    b.actionIndex = 2; b.variantIndex = 0; b.fbPhaseSlots[0] = 1;
+    b.handlerTimer = DRAGON_X.BREATH_WINDOW; b.contactP0 = 1;
+    b.rootAction!(b);
+    assert(flameB !== null && flameB!.type === 4, "flame child type 4 (pl0515)");
+  }
+
+  // Test 22: FLAME DRAGON family — v1 air variant velocity drag (FUN_80076088 tail).
+  // zz_006ed8c_(FLOAT_80437834=0.95) scales hSpeed and yVel by 0.95 each frame, then
+  // zz_0067458_(1.0) integrates physics. Verify the drag applies pre-integration.
+  console.log("\n[rom.selfcheck] families/dragon — v1 air breath velocity drag (FUN_80076088):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureDragonFamily(a, "pl0500", ctx);
+    a.actionIndex = 2;
+    a.variantIndex = 1; // air variant
+    a.fbPhaseSlots[0] = 1; // phase 1 (active breath)
+    a.handlerTimer = DRAGON_X.BREATH_WINDOW; // not expired
+    a.hSpeed = 10.0;
+    a.yVel = 20.0;
+    a.heading = 0; a.lockYaw = 0; a.activeYaw = 0;
+    a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.rootAction!(a);
+    // zz_006ed8c_ with dt==FLOAT_80437670(1.0): hSpeed *= 0.95; yVel *= 0.95 (drag).
+    assert(approxEq(a.hSpeed, 10.0 * DRAGON_X.AIR_DRAG), `hSpeed *= 0.95 (FLOAT_80437834)`);
+    assert(approxEq(a.yVel, 20.0 * DRAGON_X.AIR_DRAG), `yVel *= 0.95 (air drag pre-integration)`);
+  }
+
+  // Test 23: FLAME DRAGON family — bridge cue-table attach (rows 44/45 → state 61).
+  console.log("\n[rom.selfcheck] families/dragon — bridge cue-table (0x802d5a58):");
+  {
+    const runtime = {
+      borgId: "pl0500", team: 0, uid: "t",
+      pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+      rotY: 0, grounded: true, cooldowns: {},
+    } as unknown as BorgRuntime;
+    const bridge = RomDriverBridge.attach(runtime, { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    assert(bridge !== null, "RomDriverBridge attaches for pl0500 (family registered)");
+    if (bridge) {
+      const t = bridge.actor.cueTable!;
+      assert(t[44 * 2] === 61 && t[45 * 2] === 61,
+        "cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)");
+      assert(bridge.actor.rootAction !== null, "dragon rootAction configured");
+      assert(bridge.actor.borgNumber === 0x500, "borgNumber stamped 0x500 via bridge attach");
+      // cue 36 → [47, 0] (deploy state) — the Flame Dragon's deploy trampoline.
+      assert(t[36 * 2] === 47, "cue row 36 → full-body state 47 (deploy)");
     }
   }
 
