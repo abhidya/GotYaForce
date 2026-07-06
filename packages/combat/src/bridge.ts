@@ -52,6 +52,7 @@ import { configureStarHeroFamily } from "./families/star-hero.js";
 import { configureCyberMachineFamily } from "./families/cyber-machine.js";
 import { configureDragonFamily } from "./families/dragon.js";
 import { configureWormFamily } from "./families/worm.js";
+import { configureCyberGirlFamily } from "./families/cyber-girl.js";
 import { configureWireGunnerFamily } from "./families/wire-gunner.js";
 import { configureRobotFamily } from "./families/robot.js";
 import { configureSwordKnightFamily } from "./families/sword-knight.js";
@@ -321,6 +322,14 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0103: makeWireGunnerFamilyRegistration(),
       pl0106: makeWireGunnerFamilyRegistration(),
       pl0107: makeWireGunnerFamilyRegistration(),
+      // CYBER GIRL family (ctor 0x8012f204) — cue table @0x80333a60. All 3 members share
+      // the bespoke X-special phase machine (borg-switched beam); see families/cyber-girl.ts.
+      // pl0305/pl030a route through engine zz_012f728_ (PTR_FUN_80333a80, 3 phases);
+      // pl0309 routes through engine zz_012fb20_ (PTR_FUN_804345c0, 2 phases). The leaf
+      // FUN_8012f6f4 branches on borg number (0x309 vs others).
+      pl0305: makeSimpleRegistration("pl0305", (a, ctx) => configureCyberGirlFamily(a, "pl0305", ctx)),
+      pl0309: makeSimpleRegistration("pl0309", (a, ctx) => configureCyberGirlFamily(a, "pl0309", ctx)),
+      pl030a: makeSimpleRegistration("pl030a", (a, ctx) => configureCyberGirlFamily(a, "pl030a", ctx)),
     };
   }
   return FAMILY_REGISTRY_CACHE;

@@ -441,8 +441,9 @@ export interface BattleConfig {
   timerFrozen?: boolean;
   /** Original Challenge mode for damage side-rank bytes: 0=NORMAL, 1=TUFF, 2=INSANE. */
   challengeMode?: 0 | 1 | 2;
-  /** Opt into the ROM-architecture CPU AI (romAi.ts). Default false — see battle.ts's
-   *  AI-selection comment for why the legacy heuristic remains the live default. */
+  /** ROM-architecture CPU AI (romAi.ts) — DEFAULT true as of 2026-07-06 (the waypoint
+   *  policy is DERIVED: rom-waypoint.ts + rom-movement.ts). Set false to opt back into
+   *  the legacy heuristic stepAI. */
   useRomAi?: boolean;
 }
 

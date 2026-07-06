@@ -159,7 +159,10 @@ class BattleImpl implements Battle {
     this.timerFrozen = cfg.timerFrozen ?? false;
     this.sideRanks = challengeSideRanksForMode(cfg.challengeMode ?? 0);
     this.isChallengeMode = cfg.challengeMode !== undefined;
-    this.useRomAi = cfg.useRomAi === true;
+    // ROM AI is the DEFAULT as of 2026-07-06 (waypoint policy now DERIVED end-to-end:
+    // rom-waypoint.ts ring positioning + rom-movement.ts state machine + cadence/range
+    // executor). `useRomAi: false` opts back into the legacy heuristic stepAI.
+    this.useRomAi = cfg.useRomAi !== false;
     resetProjectileCounter();
 
     let cpuIdx = 0;
@@ -545,17 +548,15 @@ class BattleImpl implements Battle {
         input = inputs[force.ownerPlayer] as PlayerInput;
       } else {
         const prof = profiles.get(b.uid);
-        // The ROM-architecture AI (romAi.ts, cpu-ai-decode-2026-07-06.md) is ported and
-        // selfchecked but OPT-IN (cfg.useRomAi): its DERIVED skeleton (retarget cadence,
-        // per-borg attack ranges, difficulty idle pacing) is faithful, but the per-state
-        // approach/strafe waypoint handlers (zz_001d058_…) are still undecoded and the
-        // TUNED gap-fill lost live battles to pathological cases (cross-map whiff-lock,
-        // runaway steering) in the 2026-07-06 smokes — the tuned legacy stepAI stays the
-        // live default until those handlers are decoded (or a Dolphin trace validates
-        // the ROM AI's live behavior).
+        // ROM-architecture AI (romAi.ts + rom/rom-movement.ts + rom/rom-waypoint.ts;
+        // cpu-ai-decode-2026-07-06.md + the ai-state-handlers decode): DERIVED retarget
+        // cadence, per-borg attack-slot ranges, difficulty idle pacing, level-0 block,
+        // AND the waypoint policy (per-borg engage-radius ring + per-class bearing
+        // jitter — flankers orbit behind). Default ON; cfg.useRomAi=false opts back to
+        // the legacy heuristic; borgs without extracted params (13/208) use it too.
         input = prof
           ? this.useRomAi && hasRomAiParams(b.borgId)
-            ? stepRomAI(b, prof, all)
+            ? stepRomAI(b, prof, all, { bounds: this.bounds })
             : stepAI(b, prof, all)
           : emptyInput();
       }

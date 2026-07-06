@@ -160,6 +160,10 @@ export interface RomAiOptions {
   level?: number;
   /** AI tier 0-5 (the +0x438 byte): picks the cadence table pointer. Default 0. */
   tier?: number;
+  /** Arena bounds for the waypoint clamp (zz_00247b0_ @0x800247b0 clamps every picked
+   *  waypoint into the arena rect). Without it, ring waypoints near stage edges send
+   *  CPUs walking into walls until the travel timer expires. */
+  bounds?: { minX: number; maxX: number; minZ: number; maxZ: number };
 }
 
 /** Idle-cadence draw: (&PTR_802cb2f0)[tier] row [level*8 + rand&7]. */
@@ -255,9 +259,18 @@ export function stepRomAI(
   // melee-pref B → engage window; B with a shot → ranged envelope; melee-ONLY borgs
   // (no shot) always the engage window (a 8000u queue range must never hold a melee
   // swing at cross-map distance — observed whiff-lock without this).
+  // Charge-hold vs melee-tap discriminator: `chargeable` alone is wrong for melee
+  // borgs whose B-CHARGE is a sword-beam finisher (Sword Knight held B forever). The
+  // queued SLOT RANGE separates them: a short queue range (≤ the 1000.0 X-press anchor)
+  // is a melee-class attack → tap in the engage window; a long one (e.g. 8000) is the
+  // ranged charge gun → hold-release at the ranged envelope. TUNED discriminator over
+  // DERIVED ranges (the ROM's per-state attack machines make this split via class
+  // handlers).
+  const bIsChargeShot =
+    s.queuedButton === 0x200 && actionProfile.shot?.chargeable === true && s.queuedRange > X_PRESS_RANGE;
   const pressRange =
     s.queuedButton === 0x200
-      ? meleeDef && (p.rangePref !== "ranged" || !p.hasShot)
+      ? meleeDef && !bIsChargeShot && (p.rangePref !== "ranged" || !p.hasShot)
         ? meleeEngage
         : Math.min(s.queuedRange, AI.RANGED_RANGE + Math.max(AI.RANGE_SLACK, 60))
       : s.queuedRange;
@@ -274,9 +287,10 @@ export function stepRomAI(
     const inRange = d <= pressRange;
     if (s.queuedButton === 0x200) {
       const shot = actionProfile.shot;
-      if (shot?.chargeable) {
+      if (bIsChargeShot && shot) {
         // Charge-hold executor (3-phase +0x374 shape): hold B while closing, release
-        // once charged (release-edge fires in combat.ts).
+        // once charged (release-edge fires in combat.ts). Gated on the queue-range
+        // discriminator above — melee-class B queues (Sword Knight's 850) tap instead.
         const charged = (self.cooldowns["chargeFrames"] ?? 0) >= shot.chargeTier1Frames + 10;
         input.attack = !(charged && inRange);
         if (charged && inRange) burstDone = true;
@@ -340,6 +354,11 @@ export function stepRomAI(
   const chasing = s.queuedButton !== 0;
   if (!chasing && wpParams && (s.wp === null || s.wpTimer <= 0)) {
     s.wp = pickCombatWaypoint(self.pos, target.pos, wpParams.classByte, borgNumberOf(self.borgId), wpParams.engageRadius, nextRand(s));
+    // zz_00247b0_ arena clamp — every combat-scenario waypoint is clamped to the rect.
+    if (opts.bounds) {
+      s.wp.x = Math.min(opts.bounds.maxX, Math.max(opts.bounds.minX, s.wp.x));
+      s.wp.z = Math.min(opts.bounds.maxZ, Math.max(opts.bounds.minZ, s.wp.z));
+    }
     s.wpTimer = WAYPOINT_TRAVEL_FRAMES;
   }
   const steerToWp = !chasing && s.wp !== null;
@@ -348,8 +367,24 @@ export function stepRomAI(
   const steerDesired = steerToWp ? WAYPOINT_ARRIVAL_RADIUS : desired;
   const steerSlack = steerToWp ? WAYPOINT_ARRIVAL_SLACK : kiteSlack;
   const move = stepRomMovement(self, s.move, steerPos, { dist: steerDist, desiredRange: steerDesired, rangeSlack: steerSlack }, s.idleTimer);
-  input.moveX = move.moveX;
-  input.moveZ = move.moveZ;
+  // rom-movement emits a WORLD-space direction; the sim's resolveHorizontalIntent
+  // interprets (moveX, moveZ) LOCK-RELATIVE (world = right×moveX + toward×moveZ with
+  // right = (towardZ, −towardX)). Invert the orthonormal basis so ring waypoints off
+  // the lock axis steer correctly (pointing-at-target sticks are unchanged by this).
+  {
+    const tx = target.pos.x - self.pos.x;
+    const tz = target.pos.z - self.pos.z;
+    const tl = Math.hypot(tx, tz);
+    if (tl > 1e-6) {
+      const towardX = tx / tl;
+      const towardZ = tz / tl;
+      input.moveZ = move.moveX * towardX + move.moveZ * towardZ;
+      input.moveX = move.moveX * towardZ - move.moveZ * towardX;
+    } else {
+      input.moveX = move.moveX;
+      input.moveZ = move.moveZ;
+    }
+  }
   // Slope/climb jump from the ported state machine (chunk_0002.c:4072-4074 bit 0x100).
   if (move.wantJump) input.jump = true;
 
@@ -367,7 +402,10 @@ export function stepRomAI(
   ) {
     input.dash = true;
   }
-  if (!self.grounded && farFromDesired && (self.cooldowns["boostFuel"] ?? 0) > 0) input.jump = true;
+  // (The legacy AI's airborne boost-hold port-ism is REMOVED here: with the waypoint
+  // machine's ground-gated stick it deadlocked CPUs into a permanent hover — jump held
+  // forever, no horizontal input, idle timer never expiring. The ROM has no such boost
+  // policy; traversal is walk + the climb-jump + the dash port-ism above.)
 
   // State-machine retarget signal (chunk_0002.c:4075-4078 calls zz_0023bf4_ +
   //  zz_002104c_): force the brain's retarget clock to fire next frame and reset the

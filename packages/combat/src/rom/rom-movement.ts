@@ -161,10 +161,6 @@ export function stepRomMovement(
       if (!far && !close) {
         // Within the desired dead-band → ARRIVED.
         state.subState = 2;
-      } else if (!self.grounded) {
-        // Airborne (far above ground) → ARRIVED (chunk_0002.c:4082 FALSE branch lets
-        // gravity bring the borg back down; no horizontal stick while in the air).
-        state.subState = 2;
       } else {
         // Slope/climb gate: target notably higher while grounded → request jump
         // (chunk_0002.c:4072-4074 sets bit 0x100 in +0x5b4).
@@ -175,7 +171,10 @@ export function stepRomMovement(
         if (state.approachTimer < 1 && idleTimer < 1) {
           out.retarget = true;
         }
-        // Stick applied each grounded APPROACH frame (chunk_0002.c:4084-4089).
+        // Stick applied each APPROACH frame (chunk_0002.c:4084-4089). Airborne frames
+        // keep the stick too — the ROM's air-approach mode steers mid-jump; the former
+        // grounded-only gate (paired with the removed boost-hold port-ism) deadlocked
+        // borgs into a stickless hover.
         out.moveX = state.stickX;
         out.moveZ = state.stickZ;
       }

@@ -13,6 +13,45 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 
 ---
 
+## ★ 2026-07-06 session part 4: Wave-A engines VERIFIED + PORTED (fleet ~73 borgs), waypoint AI DERIVED → ROM AI is now the DEFAULT
+
+**Wave-A verification (resumed wf_1141168b-7b5): all 8 digs survived** — 5 clean on both
+lenses, 3 with precise corrections (child+0x11 store, bonus-family action wiring, pitch-clamp
+semantics, 2 pointer borrow fixes) — banked WITH verdicts at
+`wave-a-shared-engines-digs-2026-07-06.json`. **All 6 remaining shared engines ported**
+(one coding agent per module, corrections folded in): `shared-aerial-dive-x` (zz_00f41c4_,
+7-phase aimed dive), `shared-series3-x` (0x8010ce60, girl-borg line incl. the verified BONUS
+families pl0301/pl0302/pl0306 at action-3-only), `shared-flight-x` (zz_0149708_ knight lance,
+6-phase, pure-data configs), `shared-charge3` (zz_0177a3c_ action-3 release),
+`shared-aimed-shot-x` (zz_0179fcc_), `shared-morph-x` (zz_017a374_ Machine-Borg transform —
+morphFormId surfaced; renderer hot-swap is a host residual), `families/satellite.ts`
+(0x80188da4, zero-stream timer machine + B turret/pod actions). Registry wiring incl.
+titan/panther/victory composites (morph@[2] + aimed-shot/charge3@[3]). DEATH BORG ALPHA II
+(pl000c) landed earlier from the one pre-verified dig. **Fleet: ~73 borgs / 20 modules.**
+
+**CPU AI: waypoint policy DERIVED and the ROM AI is now the LIVE DEFAULT**
+(`useRomAi !== false`). The ai-state-handlers decode (wf_2d3592b3-0d4; 50 claims, ~10
+verifier corrections incl. scenario-10 no-clamp, zz_0023b18_ polarity, real cadence2 rows
+{602…}/{180…}/{170…}/{160…}, OR-gate attack semantics, 5.625° jitter steps) delivered the
+missing waypoint system: `rom/rom-waypoint.ts` ports FUN_8002400c (ring waypoint of
+PER-BORG radius = record +0x114 around the target, bearing = atan2(self−target) + per-class
+BAM jitter tables @0x802ca490/4b0/4d0 — class 3 FLANKERS orbit BEHIND; classByte = record
+byte 1; both extracted for 208/208 borgs into romAiParams.json) + the zz_00247b0_ arena
+clamp. Integration fixes en route (all documented in code): removed the legacy boost-hold
+port-ism (hover deadlock), airborne stick continuation, world→lock-frame stick basis
+inversion, charge-hold vs melee-tap discriminator (queue range > 1000 anchor — Sword
+Knight's sword-beam `chargeable` no longer causes hold-forever), X-press 1000u cap.
+**Validation:** forced-ROM-AI 1P smoke on par with legacy (first hit f309 vs f310, win);
+all suites green with the new default. Stage-smoke first-hits are SLOWER on big stages
+(7/11 stages no hit in the 1200f budget — authentic idle-cadence pacing vs the legacy AI's
+smoke-tuned aggression; smoke still PASSES). Scripted scenarios 1-10 waypoints + terrain/
+LOS fixup (FUN_800241c0/FUN_800245d0) remain unported (labeled).
+
+**Remaining fleet (Wave B): 58 bespoke families / 85 borgs** to dig+port, 27 no-X families
+/ 39 borgs to triage, 5 extraction-gap families. Dolphin items still not run (need driver).
+
+---
+
 ## ★ 2026-07-06 session part 3: fleet-port campaign — 9 families / 46 borgs live, fleet cue tables, ROM AI ported (opt-in), Wave-A digs banked
 
 **Fleet scout (DERIVED, scripts/…/classify_fleet + extract-family-cue-tables-full.py):** the
