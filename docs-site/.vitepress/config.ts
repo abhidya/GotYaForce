@@ -33,12 +33,15 @@ export default defineConfig({
     nav: [
       { text: 'Overview', link: '/' },
       { text: 'Progress', link: '/progress' },
+      { text: 'Functions', link: '/functions' },
+      { text: 'Call Graph', link: '/call-graph' },
       {
         text: 'Architecture',
         items: [
           { text: 'Execution Map', link: '/execution-map' },
           { text: 'Memory Map', link: '/memory-map' },
-          { text: 'Source Map', link: '/source-map' }
+          { text: 'Source Map', link: '/source-map' },
+          { text: 'Call Graph', link: '/call-graph' }
         ]
       },
       { text: 'Systems', link: '/systems/' },

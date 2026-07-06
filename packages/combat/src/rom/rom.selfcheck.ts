@@ -20,7 +20,8 @@ import { configureWireGunnerFamily, WIRE_GUNNER_X } from "../families/wire-gunne
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
-import { RomDriverBridge } from "../bridge.js";
+import { RomDriverBridge, cueTableForBorg } from "../bridge.js";
+import { configureDeathBorgFamily } from "../families/death-borg.js";
 import type { BorgRuntime } from "../types.js";
 
 const G_RED_LAUNCH_Y = 4.0;
@@ -177,6 +178,30 @@ export function runSelfTest(): number {
       assert(t[5 * 2] === 6 && t[8 * 2] === 9, "family-0 deltas vs G RED (cue 5→6, cue 8→9)");
       assert(bridge.actor.rootAction !== null, "ninja rootAction configured");
     }
+  }
+
+  // Test 7b: DEATH BORG ALPHA II — shared-X third family (verified Wave-A config dig).
+  console.log("\n[rom.selfcheck] families/death-borg — on-hit pop + type-5 shot (zz_01a0458_):");
+  {
+    const a = createRomActor();
+    let proj = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & { onFamilyProjectile?: (x: RomActor, addr: number, type: number) => void } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { proj = { addr, type }; },
+    };
+    configureDeathBorgFamily(a, "pl000c", ctx);
+    assert(a.borgNumber === 0x00c, "borgNumber stamped 0x00c (DEATH BORG ALPHA II)");
+    a.actionIndex = 2;
+    a.fbPhaseSlots[0] = 1;
+    a.heading = 0x2000;
+    a.contactP0 = 1;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "contact advanced phase 1 → 2 (shared machine)");
+    assert(approxEq(a.hSpeed, 10.0) && approxEq(a.yVel, 15.0) && approxEq(a.gravityCoeff, -1.0),
+      "pop constants 10/15/−1 (FLOAT_8043b51c/_8043b538/_8043b4cc)");
+    assert(proj !== null && proj!.type === 5, "type-5 shot requested (record 5 @0x802d6e80, borg-0xc gated)");
+    const bridgeCue = cueTableForBorg("pl000c");
+    assert(bridgeCue !== null && bridgeCue[44 * 2] === 61, "pl000c cue 44 → state 61 (data-driven table)");
   }
 
   // Test 8: shared melee lunge (zz_00fed6c_) — phase flow + dash-speed formula.

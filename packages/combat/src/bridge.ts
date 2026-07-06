@@ -30,6 +30,24 @@ import {
 } from "./rom/dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "./families/gred.js";
 import { configureNinjaFamily } from "./families/ninja.js";
+import { configureDeathBorgFamily } from "./families/death-borg.js";
+import { configureClawRobotFamily, configureDeathBorgOmegaFamily } from "./families/shared-aerial-dive-x.js";
+import { configureSeries3Family, type Series3BorgId } from "./families/shared-series3-x.js";
+import { configureLanceFlightFamily, type LanceFlightBorgId } from "./families/shared-flight-x.js";
+import { createFamily1Charge3Action, createFamily2Charge3Action } from "./families/shared-charge3.js";
+import {
+  createSharedAimedShotX,
+  TITAN_ROBOT_X_CONFIG,
+  PANTHER_ROBOT_X_CONFIG,
+} from "./families/shared-aimed-shot-x.js";
+import {
+  createSharedMorphXSpecial,
+  configureEagleFamily,
+  TITAN_MORPH_CONFIG,
+  PANTHER_MORPH_CONFIG,
+  VICTORY_MACHINE_MORPH_CONFIG,
+} from "./families/shared-morph-x.js";
+import { configureSatelliteFamily } from "./families/satellite.js";
 import { configureStarHeroFamily } from "./families/star-hero.js";
 import { configureCyberMachineFamily } from "./families/cyber-machine.js";
 import { configureDragonFamily } from "./families/dragon.js";
@@ -164,6 +182,57 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // shares the entire family: the ctor differs only in the +0x4b0 descriptor.
       pl0000: makeNinjaFamilyRegistration(),
       pl000a: makeNinjaFamilyRegistration(),
+      // DEATH BORG ALPHA family (ctor 0x8019e9a4) — third family on the shared-X
+      // machine (config @0x80435750). pl000c ONLY: pl0008's X command is descriptor-
+      // disabled in the ROM (+0xba mode 0xff) — it keeps the generic fallback.
+      pl000c: makeDeathBorgFamilyRegistration(),
+      // ---- Wave-A verified shared-engine families (2026-07-06, wf_1141168b-7b5) ----
+      // Aerial dive/leap-shot engine zz_00f41c4_ (shared-aerial-dive-x.ts):
+      pl0400: makeSimpleRegistration("pl0400", (a, ctx) => configureClawRobotFamily(a, "pl0400", ctx)),
+      pl040a: makeSimpleRegistration("pl040a", (a, ctx) => configureClawRobotFamily(a, "pl040a", ctx)),
+      pl0406: makeSimpleRegistration("pl0406", (a, ctx) => configureDeathBorgOmegaFamily(a, "pl0406", ctx)),
+      // Series-3 girl-borg engine 0x8010ce60 (shared-series3-x.ts; bonus families slot-3-only):
+      ...series3Registrations(),
+      // Knight-line lance flight zz_0149708_ (shared-flight-x.ts; family 2 already served
+      // by the samurai module):
+      ...lanceFlightRegistrations(),
+      // Charge-3 release engine zz_0177a3c_ + morph engine zz_017a374_ composites:
+      pl0619: makeSimpleRegistration("pl0619", (a, ctx) => {
+        a.borgNumber = 0x619;
+        a.rootAction = composeActionTable([null, null, null, createFamily1Charge3Action(ctx), null]);
+        a.defaultGroup = 0;
+        a.streamSlot = 0;
+      }),
+      pl061f: makeSimpleRegistration("pl061f", (a, ctx) => {
+        // VICTORY TANK: charge3 at [3]; its morph branch is a DEAD borg branch (verified) —
+        // action 2 keeps the generic fallback.
+        a.borgNumber = 0x61f;
+        a.rootAction = composeActionTable([null, null, null, createFamily2Charge3Action(ctx), null]);
+        a.defaultGroup = 0;
+        a.streamSlot = 0;
+      }),
+      pl0625: makeSimpleRegistration("pl0625", (a, ctx) => {
+        // VICTORY MACHINE: morph at [2] + charge3 at [3].
+        a.borgNumber = 0x625;
+        a.rootAction = composeActionTable([
+          null, null,
+          createSharedMorphXSpecial(VICTORY_MACHINE_MORPH_CONFIG, ctx, {}),
+          createFamily2Charge3Action(ctx),
+          null,
+        ]);
+        a.defaultGroup = 0;
+        a.streamSlot = 0;
+      }),
+      // Titan/Panther robots: morph at [2] + aimed-shot at [3] (two engines composed).
+      pl0604: makeMorphAimedComposite("pl0604", 0x604, TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG),
+      pl0618: makeMorphAimedComposite("pl0618", 0x618, TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG),
+      pl0613: makeMorphAimedComposite("pl0613", 0x613, PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG),
+      pl0627: makeMorphAimedComposite("pl0627", 0x627, PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG),
+      // Eagle robot morph (pl0606 only — pl061a's branch is bespoke, excluded):
+      pl0606: makeSimpleRegistration("pl0606", (a, ctx) => configureEagleFamily(a, "pl0606", ctx)),
+      // Satellite family (engine 0x80188da4, x-action 1 + B actions):
+      pl0d01: makeSimpleRegistration("pl0d01", (a, ctx) => configureSatelliteFamily(a, "pl0d01", ctx)),
+      pl0d05: makeSimpleRegistration("pl0d05", (a, ctx) => configureSatelliteFamily(a, "pl0d05", ctx)),
       // STAR HERO family (ctor 0x8010f5ac) — cue table @0x80326cf0. PLANET HERO (pl080c)
       // shares the entire family module (status-effects-decode §A verified chain).
       pl0804: makeStarHeroFamilyRegistration(),
@@ -306,6 +375,74 @@ function makeGRedFamilyRegistration(): FamilyRegistration {
       configureGRedFamily(actor, id as "pl0615" | "pl0629" | "pl062a", ctx);
     },
     cueTable: cueTableForBorg("pl0615")!,
+  };
+}
+
+/** Small helper: registration from a configure closure + the borg's data-driven cue table. */
+function makeSimpleRegistration(
+  borgId: string,
+  configure: (actor: RomActor, ctx: GRedFamilyCtx) => void,
+): FamilyRegistration {
+  return { configure, cueTable: cueTableForBorg(borgId)! };
+}
+
+/** Compose a 5-slot actionTable rootAction from per-slot handlers (null = generic fallback). */
+function composeActionTable(
+  table: Array<((actor: RomActor) => void) | null>,
+): (actor: RomActor) => void {
+  return (actor: RomActor) => {
+    const fn = table[actor.actionIndex];
+    if (fn) fn(actor);
+  };
+}
+
+/** Titan/Panther composite: morph engine at actionTable[2] + aimed-shot engine at [3]
+ *  (the ROM's PTR_FUN_8032f41c/PTR_FUN_8036546c wiring, split across two shared modules). */
+function makeMorphAimedComposite(
+  borgId: string,
+  borgNumber: number,
+  morphCfg: Parameters<typeof createSharedMorphXSpecial>[0],
+  aimedCfg: Parameters<typeof createSharedAimedShotX>[0],
+): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      actor.borgNumber = borgNumber;
+      actor.rootAction = composeActionTable([
+        null,
+        null,
+        createSharedMorphXSpecial(morphCfg, ctx, {}),
+        createSharedAimedShotX(aimedCfg, ctx),
+        null,
+      ]);
+      actor.defaultGroup = 0;
+      actor.streamSlot = 0;
+    },
+    cueTable: cueTableForBorg(borgId)!,
+  };
+}
+
+function series3Registrations(): Record<string, FamilyRegistration> {
+  const ids: Series3BorgId[] = ["pl0301", "pl0302", "pl0303", "pl0306", "pl0307", "pl030d"] as Series3BorgId[];
+  const out: Record<string, FamilyRegistration> = {};
+  for (const id of ids) {
+    out[id] = makeSimpleRegistration(id, (a, ctx) => configureSeries3Family(a, id, ctx));
+  }
+  return out;
+}
+
+function lanceFlightRegistrations(): Record<string, FamilyRegistration> {
+  const ids = ["pl0700", "pl0709", "pl0702", "pl070a", "pl0705", "pl070b"] as LanceFlightBorgId[];
+  const out: Record<string, FamilyRegistration> = {};
+  for (const id of ids) {
+    out[id] = makeSimpleRegistration(id, (a, ctx) => configureLanceFlightFamily(a, id, ctx));
+  }
+  return out;
+}
+
+function makeDeathBorgFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => configureDeathBorgFamily(actor, "pl000c", ctx),
+    cueTable: cueTableForBorg("pl000c")!,
   };
 }
 

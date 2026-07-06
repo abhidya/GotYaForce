@@ -45,6 +45,7 @@ import {
   stepRomMovement,
   type RomMovementState,
 } from "./rom/rom-movement.js";
+import { pickCombatWaypoint, waypointParamsFor, type WaypointPick } from "./rom/rom-waypoint.js";
 import type { BorgProfile } from "./stats.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
 import romAiParamsData from "./data/romAiParams.json" with { type: "json" };
@@ -75,6 +76,12 @@ interface RomAiState {
   /** Per-borg movement scratch — the actor's +0x2e5/+0x34c block consumed by the ported
    *  zz_001d058_ state machine (rom/rom-movement.ts). */
   move: RomMovementState;
+  /** +0x2e8/+0x2ec/+0x2f0 — the current move-to waypoint (rom/rom-waypoint.ts,
+   *  FUN_8002400c ring point). Null = needs a pick. */
+  wp: WaypointPick | null;
+  /** Waypoint travel budget (zz_0024824_ seed — value unresolved statically; TUNED 120f
+   *  stand-in). Expiry forces a fresh pick like the ROM's travel-timer retarget. */
+  wpTimer: number;
 }
 const AI_STATE = new WeakMap<BorgRuntime, RomAiState>();
 
@@ -100,6 +107,8 @@ function stateFor(b: BorgRuntime): RomAiState {
       lockDebounce: 0,
       targetUid: null,
       move: createRomMovementState(),
+      wp: null,
+      wpTimer: 0,
     };
     AI_STATE.set(b, s);
   }
@@ -190,7 +199,10 @@ export function stepRomAI(
     s.retargetTimer = RETARGET_FRAMES[nextRand(s) & 7] ?? 15;
     // zz_002104c_ (chunk_0002.c:6513) resets +0x2e5/+0x2e7 on retarget; we reset the
     // ported movement sub-state machine the same way so a fresh target starts at IDLE.
-    if (changedTarget) resetRomMovement(s.move);
+    if (changedTarget) {
+      resetRomMovement(s.move);
+      s.wp = null; // zz_0023bf4_ re-picks the waypoint for the new target
+    }
   }
   const target = s.targetUid ? all.find((o) => o.uid === s.targetUid) ?? null : null;
   if (!target) return input;
@@ -318,7 +330,24 @@ export function stepRomAI(
   const ownSpeed = groundRunSpeedForBorgId(self.borgId) ?? MOVE.GROUND_BASE + p.speed * MOVE.GROUND_PER_STAT;
   const kiteSlack = Math.max(AI.RANGE_SLACK, ownSpeed * AI.KITE_SLACK_SPEED_MULT);
 
-  const move = stepRomMovement(self, s.move, target, { dist: d, desiredRange: desired, rangeSlack: kiteSlack }, s.idleTimer);
+  // ---- WAYPOINT positioning (DERIVED 2026-07-06, rom/rom-waypoint.ts): between
+  // attacks the ROM does NOT walk at the target — it walks to a ring point of per-borg
+  // radius R (record +0x114) around the target at a class-jittered bearing (flankers
+  // orbit BEHIND). While an attack is QUEUED, the attack-state chase drives instead
+  // (states 1/2 close on the target to attack range — mapped to the pressRange band). ----
+  s.wpTimer -= 1;
+  const wpParams = waypointParamsFor(self.borgId);
+  const chasing = s.queuedButton !== 0;
+  if (!chasing && wpParams && (s.wp === null || s.wpTimer <= 0)) {
+    s.wp = pickCombatWaypoint(self.pos, target.pos, wpParams.classByte, borgNumberOf(self.borgId), wpParams.engageRadius, nextRand(s));
+    s.wpTimer = WAYPOINT_TRAVEL_FRAMES;
+  }
+  const steerToWp = !chasing && s.wp !== null;
+  const steerPos = steerToWp ? { pos: { x: s.wp!.x, y: s.wp!.y, z: s.wp!.z } } : target;
+  const steerDist = steerToWp ? distXZ(self.pos, s.wp!) : d;
+  const steerDesired = steerToWp ? WAYPOINT_ARRIVAL_RADIUS : desired;
+  const steerSlack = steerToWp ? WAYPOINT_ARRIVAL_SLACK : kiteSlack;
+  const move = stepRomMovement(self, s.move, steerPos, { dist: steerDist, desiredRange: steerDesired, rangeSlack: steerSlack }, s.idleTimer);
   input.moveX = move.moveX;
   input.moveZ = move.moveZ;
   // Slope/climb jump from the ported state machine (chunk_0002.c:4072-4074 bit 0x100).
@@ -349,6 +378,18 @@ export function stepRomAI(
   }
 
   return input;
+}
+
+/** Waypoint arrival dead-band (port-side — the ROM's arrival comes from its ground
+ *  probes; TUNED). Travel budget stands in for zz_0024824_'s unresolved seed. */
+const WAYPOINT_ARRIVAL_RADIUS = 60;
+const WAYPOINT_ARRIVAL_SLACK = 30;
+const WAYPOINT_TRAVEL_FRAMES = 120;
+
+/** pl#### → the runtime borg number (the +0x3e8 s16 the ROM's class switches key on). */
+function borgNumberOf(borgId: string): number {
+  const m = /^pl([0-9a-f]{4})$/i.exec(borgId);
+  return m ? parseInt(m[1]!, 16) : 0;
 }
 
 /** Second-cadence draw (+0x320 seed, table family 0x802cc138) — used here as the
