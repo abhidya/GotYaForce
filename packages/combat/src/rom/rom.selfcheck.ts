@@ -31,6 +31,12 @@ import {
   SHARED_CHARGE,
   type SharedChargeConfig,
 } from "../families/shared-charge.js";
+import {
+  configureValkrieFamily,
+  VALKRIE,
+  VALKRIE_SPAWNERS,
+  type ValkrieFamilyCtx,
+} from "../families/valkrie.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
 import { RomDriverBridge, cueTableForBorg } from "../bridge.js";
@@ -1570,6 +1576,308 @@ export function runSelfTest(): number {
     // tryStartBAttack checks hasBCharge before starting; without it, returns false.
     // (Direct actor-level check since bridge.attach requires a BorgRuntime.)
     assert(!a.hasBCharge, "borg without B-charge handler has hasBCharge == false");
+  }
+
+  // Test 50: VALKRIE cluster — table A (B ranged volley) phase flow (zz_014a200_).
+  // Phase 0 seeds the DOL-read config (5 volleys / 4f timer / 30f aim window); phase 1
+  // fires on the anim event + facing gate and invokes the per-borg chain callback
+  // (zz_0082824_ record 0x1a for pl0b00).
+  console.log("\n[rom.selfcheck] families/valkrie — table A volley phases (zz_014a200_):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      volleysLeft?: number; volleyWindow?: number; strafeAnimBase?: number;
+      bRetapInput?: boolean; volleyRecoveryTimer?: number;
+    };
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: ValkrieFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+    };
+    configureValkrieFamily(a, "pl0b00", ctx);
+    assert(a.borgNumber === 0xb00, "borgNumber stamped 0xb00 (QUICK VALKRIE)");
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 0; a.variantIndex = 0;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(a.fbPhaseSlots[0] === 1, "volley phase 0 → 1 (+0x540 = 1)");
+    assert(a.volleysLeft === 5, "volleysLeft == 5 (cfg s16[0] @0x80433bb0)");
+    assert(approxEq(a.handlerTimer, 4.0), "handlerTimer == 4 (cfg s16[2] volley timer)");
+    assert(approxEq(a.volleyWindow ?? -1, VALKRIE.VOLLEY_AIM_WINDOW),
+      "aim window == 30.0 (FLOAT_8043a3b4)");
+    // Phase 1 fire gate: anim fire event (+0x1cef) AND facing complete (+0x54a).
+    a.lockTarget = { x: 0, y: 0, z: 100 };
+    a.contactP0 = 1;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "fire event + facing → phase 2 (+0x540++)");
+    assert(a.volleysLeft === 4, "volleysLeft decremented (+0x6ec--)");
+    assert(a.strafeAnimBase === 5, "+0x54c == 5 (fire strafe-anim base)");
+    const shot = spawns.find((s) => s.addr === VALKRIE_SPAWNERS.GENERIC_SHOT);
+    assert(shot !== undefined && shot.type === 0x1a,
+      "volley shot via zz_0082824_ record 0x1a (FUN_800de4d8 chain callback)");
+    // Phase 2 repeat fire: timer expired + volleys left → chain again, timer reseeds.
+    spawns.length = 0;
+    a.handlerTimer = 0;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "repeat fire stays in phase 2");
+    assert(a.volleysLeft === 3, "repeat fire decremented volleysLeft");
+    assert(approxEq(a.handlerTimer, 4.0), "repeat fire reseeded +0x558 = 4");
+    assert(spawns.some((s) => s.type === 0x1a), "repeat fire spawned the volley shot");
+    // Phase 2 advance: timer expired + NO volleys left → phase 3 + 60f recovery.
+    a.volleysLeft = 0;
+    a.handlerTimer = 0;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 3, "volleys exhausted → phase 3 (+0x540++)");
+    assert(approxEq(a.volleyRecoveryTimer ?? -1, VALKRIE.VOLLEY_RECOVERY),
+      "+0x55c == 60.0 recovery timer (FLOAT_8043a3c4)");
+    assert(a.strafeAnimBase === 10, "+0x54c == 10 (recovery strafe-anim base)");
+    // Phase 3 buffered re-fire: B retap → BACKWARD loop (+0x540 -= 1) + fresh volley.
+    spawns.length = 0;
+    a.bRetapInput = true;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "buffered B → phase 3 loops BACK to 2 (+0x540 -= 1)");
+    assert(a.volleysLeft === 4, "re-fire reseeds volleysLeft = cfg[0] - 1");
+    assert(spawns.some((s) => s.type === 0x1a), "re-fire spawned the volley shot");
+  }
+
+  // Test 50b: VALKRIE cluster — RING VALKRIE volley config (1 shot / 20f / 5 rings).
+  console.log("\n[rom.selfcheck] families/valkrie — RING VALKRIE ring volley (FUN_80161308):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      volleysLeft?: number;
+    };
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: ValkrieFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+    };
+    configureValkrieFamily(a, "pl0b04", ctx);
+    a.grounded = true; a.dt = 1; a.maxFall = -9999;
+    a.actionIndex = 0; a.variantIndex = 0;
+    a.rootAction!(a); // phase 0
+    assert(a.volleysLeft === 1, "volleysLeft == 1 (cfg @0x80434730)");
+    assert(approxEq(a.handlerTimer, 20.0), "volley timer == 20 (cfg s16[2])");
+    a.lockTarget = { x: 0, y: 0, z: 100 };
+    a.contactP0 = 1;
+    a.rootAction!(a); // phase 1 fire
+    const rings = spawns.filter((s) => s.addr === VALKRIE_SPAWNERS.RING_CHILD);
+    assert(rings.length === 5, "5 ring children via zz_016ddb0_ (FUN_80161308 loop)");
+    assert(rings.every((s, i) => s.type === i), "ring types 0..4 in order");
+  }
+
+  // Test 51: VALKRIE cluster — table B (B melee mash) phases (zz_014a8c0_).
+  console.log("\n[rom.selfcheck] families/valkrie — table B melee phases (zz_014a8c0_):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      bRetapInput?: boolean; swingEvent?: number; bRetap?: boolean;
+    };
+    const ctx: ValkrieFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureValkrieFamily(a, "pl0b01", ctx);
+    assert(a.borgNumber === 0xb01, "borgNumber stamped 0xb01 (ICE VALKRIE)");
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 1; a.variantIndex = 0;
+    a.rootAction!(a); // phase 0 (FUN_8014a91c)
+    assert(a.fbPhaseSlots[0] === 1, "melee phase 0 → 1 (+0x540++)");
+    assert(approxEq(a.handlerTimer, VALKRIE.FACE_BUDGET), "face budget == 60 (FLOAT_8043a3c4)");
+    assert(a.streamSlot === 1, "stream cursor = seed slot 0 + 1 (+0x6ea++)");
+    // Phase 1 → 2: facing complete (lock target present) arms the 20f dash window
+    // and FUN_8014acdc derives the dash speed: dist × 16 × 0.0625 / 20 = dist / 20.
+    a.lockTarget = { x: 0, y: 0, z: 400 };
+    a.rootAction!(a); // phase 1 (FUN_8014a9f0)
+    assert(a.fbPhaseSlots[0] === 2, "facing complete → phase 2 (+0x540++)");
+    assert(approxEq(a.handlerTimer, VALKRIE.DASH_WINDOW), "dash window == 20 (FLOAT_8043a3cc)");
+    assert(approxEq(a.hSpeed, 400 / 20),
+      "dash speed == dist × (s8)+0x1d0f × 0.0625 / 20 = 20 (FUN_8014acdc)");
+    // Phase 2 → 3: in proximity (dist <= 200 via FUN_800668cc gate).
+    a.pos.z = 300; // dist 100
+    a.rootAction!(a); // phase 2 (FUN_8014aa88)
+    assert(a.fbPhaseSlots[0] === 3, "proximity ≤ 200 → phase 3 (+0x540++)");
+    // Phase 3 combo: swing re-arm event ((s8)+0x1cf0 < 0) + B retap → BACK to phase 2.
+    a.swingEvent = -1;
+    a.bRetapInput = true;
+    const slotBefore = a.streamSlot;
+    a.rootAction!(a); // phase 3 (FUN_8014ab64)
+    assert(a.fbPhaseSlots[0] === 2, "combo re-arm + retap → phase 3 loops BACK to 2 (+0x540 -= 1)");
+    assert(a.streamSlot === slotBefore + 1, "combo advanced the stream cursor (+0x6ea++)");
+    assert(a.bRetap === false, "+0x746 retap latch cleared by the combo loop");
+    // Recovery end: wall contact tears down to idle.
+    a.fbPhaseSlots[0] = 3;
+    a.swingEvent = 0;
+    a.bRetapInput = false;
+    a.wallContact = 1;
+    a.controlWord = 0x3;
+    a.rootAction!(a);
+    assert((a.controlWord & 0x3) === 0, "wall contact → +0x5e0 &= ~3 (idle teardown)");
+  }
+
+  // Test 52: VALKRIE cluster — table C (air/lunge dive melee, action 1 v4) (zz_014ad94_).
+  console.log("\n[rom.selfcheck] families/valkrie — table C air-lunge phases (zz_014ad94_):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      meleeAimPitch?: number;
+    };
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: ValkrieFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+    };
+    configureValkrieFamily(a, "pl0b02", ctx);
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 1; a.variantIndex = 4; // v4 routes to table C
+    a.pos.x = 100; a.pos.z = 0;
+    a.lockTarget = { x: 0, y: 0, z: 0 };
+    a.rootAction!(a); // phase 0 (FUN_8014ade4)
+    assert(a.fbPhaseSlots[0] === 1, "air-lunge phase 0 → 1 (+0x540++)");
+    assert(a.streamSlot === 4, "stream cursor = seed slot 3 + 1 (+0x6ea++)");
+    // Blink-away: motion = (pos − target) × 0.95 = (95,0,0); pos += motion → x = 195.
+    assert(approxEq(a.pos.x, 195.0), "pos.x == 195 (blink ×0.95, FLOAT_8043a3c8)");
+    a.rootAction!(a); // phase 1 (FUN_8014aef8) — facing complete → dive arm
+    assert(a.fbPhaseSlots[0] === 2, "facing complete → phase 2 (+0x540++)");
+    assert(approxEq(a.handlerTimer, VALKRIE.DIVE_WINDOW), "dive window == 29 (FLOAT_8043a3e0)");
+    assert(a.meleeAimPitch === 0xf, "+0x54e seeded 0xf (dive pitch countdown)");
+    assert(approxEq(a.gravityCoeff, 0), "+0x50 gravityCoeff zeroed for the dive");
+    assert(spawns.some((s) => s.addr === VALKRIE_SPAWNERS.DIVE_FX && s.type === 0),
+      "dive FX child via zz_0092dcc_(actor, 0)");
+    // Phase 2 dive: hSpeed = 30 × cos(+0x18da); level pitch → 30.
+    a.steerYaw = 0;
+    a.rootAction!(a); // phase 2 (FUN_8014afd8)
+    assert(approxEq(a.hSpeed, VALKRIE.DIVE_SPEED), "dive hSpeed == 30 (FLOAT_8043a3b4)");
+    // Phase 3 landing: grounded + (s8)+0x1cef < 0 → teardown + upper cue 7 + cooldown.
+    a.fbPhaseSlots[0] = 3;
+    a.contactP0 = -1;
+    a.controlWord = 0x3;
+    a.rootAction!(a); // phase 3 (FUN_8014b130)
+    assert((a.controlWord & 0x3) === 0, "landing → +0x5e0 &= ~3 (zz_006a750_(7) path)");
+    assert(approxEq(a.stateTimer, 2.0), "+0x694 == 1.0 + dt (FLOAT_8043a3b0 + +0x1dc8)");
+  }
+
+  // Test 53: VALKRIE cluster — table D (X special) + WIND VALKRIE combo (zz_014b22c_).
+  console.log("\n[rom.selfcheck] families/valkrie — table D X special (zz_014b22c_):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      followUpEvent?: boolean; xComboSuppressInput?: boolean;
+      swingEvent?: number; comboHitsA?: number; comboHitsB?: number;
+    };
+    const ctx: ValkrieFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureValkrieFamily(a, "pl0b03", ctx); // WIND VALKRIE — the borg-0xb03 combo arm
+    assert(a.borgNumber === 0xb03, "borgNumber stamped 0xb03 (WIND VALKRIE)");
+    a.grounded = true; a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.actionIndex = 2; a.variantIndex = 0;
+    a.pos.x = 100; a.pos.z = 0;
+    a.lockTarget = { x: 0, y: 0, z: 0 };
+    a.hSpeed = 9; a.yVel = 5; a.hDecel = 3; a.gravityCoeff = 2;
+    a.rootAction!(a); // phase 0 (FUN_8014b278)
+    assert(a.fbPhaseSlots[0] === 1, "X phase 0 → 1 (+0x540++)");
+    assert(a.streamSlot === 1, "stream cursor = seed slot 0 + 1 (+0x6ea++)");
+    assert(approxEq(a.hSpeed, 0) && approxEq(a.yVel, 0) && approxEq(a.hDecel, 0)
+      && approxEq(a.gravityCoeff, 0), "all four velocity scalars zeroed");
+    // Reposition ×0.98: motion = (100,0,0) × 0.98 = (98,0,0); pos.x = 198.
+    assert(approxEq(a.pos.x, 198.0), "pos.x == 198 (reposition ×0.98, FLOAT_8043a3e4)");
+    // WIND VALKRIE follow-up: +0x1cf2 event with no suppress → chains the next g4 slot.
+    a.swingEvent = 1;         // +0x1cf0 != 0 → hit landed
+    a.followUpEvent = true;   // +0x1cf2 != 0
+    a.rootAction!(a); // phase 1 (FUN_8014b378)
+    assert(a.comboHitsA === 2 && a.comboHitsB === 2, "+0x6f2/+0x6f3 == 2 (hit bookkeeping)");
+    assert(a.streamSlot === 2, "follow-up event chained the next g4 slot (+0x6ea++)");
+    // Suppress input (+0x5bc & 0x200) latches +0x745 and eats ONE follow-up event.
+    a.xComboSuppressInput = true;
+    a.rootAction!(a);
+    assert(a.streamSlot === 2, "suppressed follow-up did NOT chain (+0x745 latch)");
+    // Wall contact ends the move: +0x5e0 &= ~3 and hSpeed/hDecel zeroed.
+    a.followUpEvent = false;
+    a.xComboSuppressInput = false;
+    a.wallContact = 1;
+    a.controlWord = 0x3;
+    a.hSpeed = 7; a.hDecel = 7;
+    a.rootAction!(a);
+    assert((a.controlWord & 0x3) === 0, "wall contact → +0x5e0 &= ~3 (idle teardown)");
+    assert(approxEq(a.hSpeed, 0) && approxEq(a.hDecel, 0), "+0x44/+0x4c zeroed on exit");
+
+    // Non-0xb03 borg: the follow-up block is borg-gated — no chain.
+    const b = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+      followUpEvent?: boolean;
+    };
+    configureValkrieFamily(b, "pl0b00", ctx);
+    b.grounded = true; b.dt = 1; b.maxFall = -9999;
+    b.actionIndex = 2; b.variantIndex = 0;
+    b.rootAction!(b); // phase 0
+    b.followUpEvent = true;
+    const slotBefore = b.streamSlot;
+    b.rootAction!(b); // phase 1
+    assert(b.streamSlot === slotBefore, "non-0xb03 borg ignores the follow-up event");
+  }
+
+  // Test 54: VALKRIE cluster — registrations: 6 valkries + lambda composition.
+  console.log("\n[rom.selfcheck] families/valkrie — bridge registrations (8 borgs):");
+  {
+    const members: Array<{ id: string; num: number; hasX: boolean }> = [
+      { id: "pl0b00", num: 0xb00, hasX: true },
+      { id: "pl0b01", num: 0xb01, hasX: true },
+      { id: "pl0b02", num: 0xb02, hasX: true },
+      { id: "pl0b03", num: 0xb03, hasX: true },
+      { id: "pl0b04", num: 0xb04, hasX: true },
+      { id: "pl0b05", num: 0xb05, hasX: false },
+      { id: "pl0b06", num: 0xb06, hasX: true },
+      { id: "pl0b07", num: 0xb07, hasX: false },
+    ];
+    for (const { id, num, hasX } of members) {
+      const runtime = {
+        borgId: id, team: 0, uid: "t",
+        pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+        rotY: 0, grounded: true, cooldowns: {},
+      } as unknown as BorgRuntime;
+      const bridge = RomDriverBridge.attach(runtime,
+        { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+      assert(bridge !== null, `RomDriverBridge attaches for ${id}`);
+      if (!bridge) continue;
+      assert(bridge.actor.borgNumber === num,
+        `${id}: borgNumber stamped 0x${num.toString(16)}`);
+      assert(bridge.actor.rootAction !== null, `${id}: rootAction wired`);
+      const t = bridge.actor.cueTable!;
+      assert(t[44 * 2] === 61 && t[45 * 2] === 61,
+        `${id}: cue rows 44/45 → state 61 (attack trampoline)`);
+      // DEATH BORG LAMBDA has NO action 2 (tables A-C only): X press is a no-op.
+      const actor = bridge.actor;
+      actor.actionIndex = 2;
+      (actor as RomActor & { grounded?: boolean }).grounded = true;
+      actor.maxFall = -9999;
+      actor.rootAction!(actor);
+      if (hasX) {
+        assert(actor.fbPhaseSlots[0] === 1, `${id}: action 2 → table D phase 0 ran`);
+      } else {
+        assert(actor.fbPhaseSlots[0] === 0, `${id}: action 2 is a no-op (no table D)`);
+      }
+    }
+  }
+
+  // Test 55: VALKRIE cluster — DEATH BORG LAMBDA II volley record 0x71 (zz_019e89c_).
+  console.log("\n[rom.selfcheck] families/valkrie — lambda II shot record (zz_019e89c_):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean; lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    const spawns: Array<{ addr: number; type: number }> = [];
+    const ctx: ValkrieFamilyCtx = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { spawns.push({ addr, type }); },
+    };
+    configureValkrieFamily(a, "pl0b07", ctx);
+    a.grounded = true; a.dt = 1; a.maxFall = -9999;
+    a.actionIndex = 0; a.variantIndex = 0;
+    a.rootAction!(a); // phase 0
+    a.lockTarget = { x: 0, y: 0, z: 100 };
+    a.contactP0 = 1;
+    a.rootAction!(a); // phase 1 fire
+    assert(spawns.some((s) => s.addr === VALKRIE_SPAWNERS.GENERIC_SHOT && s.type === 0x71),
+      "lambda II volley shot via zz_0082824_ record 0x71 (borg-0xb07 arm)");
   }
 
   if (failures > 0) {

@@ -1,0 +1,530 @@
+[
+ {
+  "labels": [
+   "BATTLE GIRL",
+   "WIRE GIRL",
+   "BARRIER GIRL",
+   "DEATH BORG DELTA II",
+   "KILLER GIRL",
+   "CYBER GIRL SUPER",
+   "SPINNER GIRL",
+   "DEATH BORG DELTA"
+  ],
+  "borgCount": 14,
+  "shapeCount": 59,
+  "instrs": 4343
+ },
+ {
+  "labels": [
+   "CLAW ROBOT",
+   "DRILL ROBOT",
+   "BUILD ROBOT",
+   "HAMMER ROBOT",
+   "THUNDER ROBOT",
+   "MAGNET ROBOT (+)",
+   "DEATH BORG OMEGA",
+   "DEATH BORG OMEGA II"
+  ],
+  "borgCount": 14,
+  "shapeCount": 59,
+  "instrs": 3745
+ },
+ {
+  "labels": [
+   "NORMAL SAMURAI",
+   "DEMON SAMURAI",
+   "VAMPIRE KNIGHT",
+   "SONIC SAMURAI",
+   "SAMURAI SHOGUN",
+   "DEATH BORG ZETA"
+  ],
+  "borgCount": 13,
+  "shapeCount": 47,
+  "instrs": 2832
+ },
+ {
+  "labels": [
+   "SWORD KNIGHT",
+   "SPIKE KNIGHT",
+   "AXE KNIGHT",
+   "DEATH BORG GAMMA",
+   "ALIEN INSECT",
+   "SAPPHIRE KNIGHT",
+   "IMPERIAL KNIGHT"
+  ],
+  "borgCount": 12,
+  "shapeCount": 104,
+  "instrs": 6333
+ },
+ {
+  "labels": [
+   "WING SOLDIER",
+   "JET HERO",
+   "DEMON WING",
+   "BEAM WING BLUE",
+   "ANUBIS WING",
+   "DEATH BORG SIGMA"
+  ],
+  "borgCount": 11,
+  "shapeCount": 51,
+  "instrs": 2984
+ },
+ {
+  "labels": [
+   "QUICK VALKRIE",
+   "ICE VALKRIE",
+   "TORNADO VALKRIE",
+   "WIND VALKRIE",
+   "RING VALKRIE",
+   "DEATH BORG LAMBDA",
+   "SLOW VALKRIE"
+  ],
+  "borgCount": 8,
+  "shapeCount": 15,
+  "instrs": 960
+ },
+ {
+  "labels": [
+   "FLAME DRAGON"
+  ],
+  "borgCount": 6,
+  "shapeCount": 14,
+  "instrs": 507
+ },
+ {
+  "labels": [
+   "CYBER DEATH DRAGON"
+  ],
+  "borgCount": 6,
+  "shapeCount": 17,
+  "instrs": 757
+ },
+ {
+  "labels": [
+   "NORMAL NINJA",
+   "DOUBLE NINJA",
+   "DEATH BORG ALPHA"
+  ],
+  "borgCount": 5,
+  "shapeCount": 34,
+  "instrs": 2115
+ },
+ {
+  "labels": [
+   "REVOLVER GUNMAN",
+   "POWERED GUNMAN",
+   "DEATH BORG BETA II"
+  ],
+  "borgCount": 5,
+  "shapeCount": 41,
+  "instrs": 2335
+ },
+ {
+  "labels": [
+   "DEATH BORG BETA",
+   "STAR HERO",
+   "CYBER HERO",
+   "METAL HERO"
+  ],
+  "borgCount": 5,
+  "shapeCount": 71,
+  "instrs": 4806
+ },
+ {
+  "labels": [
+   "BUG WITCH",
+   "PATRA WITCH",
+   "BASTET WITCH"
+  ],
+  "borgCount": 5,
+  "shapeCount": 53,
+  "instrs": 3069
+ },
+ {
+  "labels": [
+   "ALIEN WORM"
+  ],
+  "borgCount": 4,
+  "shapeCount": 16,
+  "instrs": 770
+ },
+ {
+  "labels": [
+   "MACHINE RED"
+  ],
+  "borgCount": 4,
+  "shapeCount": 33,
+  "instrs": 2094
+ },
+ {
+  "labels": [
+   "MACHINE BLUE"
+  ],
+  "borgCount": 4,
+  "shapeCount": 10,
+  "instrs": 737
+ },
+ {
+  "labels": [
+   "CYBER MACHINE SEIRYU"
+  ],
+  "borgCount": 4,
+  "shapeCount": 25,
+  "instrs": 1475
+ },
+ {
+  "labels": [
+   "VICTORY KING"
+  ],
+  "borgCount": 4,
+  "shapeCount": 6,
+  "instrs": 578
+ },
+ {
+  "labels": [
+   "DEATH BORG NU",
+   "DEATH EYE"
+  ],
+  "borgCount": 4,
+  "shapeCount": 4,
+  "instrs": 216
+ },
+ {
+  "labels": [
+   "WIRE GUNNER"
+  ],
+  "borgCount": 3,
+  "shapeCount": 27,
+  "instrs": 1674
+ },
+ {
+  "labels": [
+   "G RED"
+  ],
+  "borgCount": 3,
+  "shapeCount": 18,
+  "instrs": 1229
+ },
+ {
+  "labels": [
+   "JELLY DIVER"
+  ],
+  "borgCount": 3,
+  "shapeCount": 32,
+  "instrs": 1738
+ },
+ {
+  "labels": [
+   "COPY MAN"
+  ],
+  "borgCount": 3,
+  "shapeCount": 3,
+  "instrs": 208
+ },
+ {
+  "labels": [
+   "ANGEL NURSE"
+  ],
+  "borgCount": 3,
+  "shapeCount": 36,
+  "instrs": 2328
+ },
+ {
+  "labels": [
+   "ARROW NINJA"
+  ],
+  "borgCount": 2,
+  "shapeCount": 18,
+  "instrs": 1063
+ },
+ {
+  "labels": [
+   "TELEPORT NINJA"
+  ],
+  "borgCount": 2,
+  "shapeCount": 28,
+  "instrs": 1831
+ },
+ {
+  "labels": [
+   "ELEMENTAL KNIGHT"
+  ],
+  "borgCount": 2,
+  "shapeCount": 35,
+  "instrs": 1889
+ },
+ {
+  "labels": [
+   "PHOENIX DRAGON"
+  ],
+  "borgCount": 2,
+  "shapeCount": 9,
+  "instrs": 446
+ },
+ {
+  "labels": [
+   "COSMIC DRAGON"
+  ],
+  "borgCount": 2,
+  "shapeCount": 26,
+  "instrs": 1112
+ },
+ {
+  "labels": [
+   "EAGLE ROBOT"
+  ],
+  "borgCount": 2,
+  "shapeCount": 13,
+  "instrs": 879
+ },
+ {
+  "labels": [
+   "KUNG-FU MASTER",
+   "TAO MASTER"
+  ],
+  "borgCount": 2,
+  "shapeCount": 42,
+  "instrs": 2817
+ },
+ {
+  "labels": [
+   "GUARD WITCH"
+  ],
+  "borgCount": 2,
+  "shapeCount": 36,
+  "instrs": 2057
+ },
+ {
+  "labels": [
+   "DEATH BORG THETA"
+  ],
+  "borgCount": 2,
+  "shapeCount": 30,
+  "instrs": 2198
+ },
+ {
+  "labels": [
+   "NORMAL TANK"
+  ],
+  "borgCount": 2,
+  "shapeCount": 10,
+  "instrs": 430
+ },
+ {
+  "labels": [
+   "BLUE STRIKER",
+   "ORANGE FIGHTER"
+  ],
+  "borgCount": 2,
+  "shapeCount": 5,
+  "instrs": 216
+ },
+ {
+  "labels": [
+   "SIRIUS"
+  ],
+  "borgCount": 2,
+  "shapeCount": 10,
+  "instrs": 557
+ },
+ {
+  "labels": [
+   "SHURIKEN NINJA"
+  ],
+  "borgCount": 1,
+  "shapeCount": 22,
+  "instrs": 1269
+ },
+ {
+  "labels": [
+   "ACCELERATION NINJA"
+  ],
+  "borgCount": 1,
+  "shapeCount": 9,
+  "instrs": 617
+ },
+ {
+  "labels": [
+   "FLAME NINJA"
+  ],
+  "borgCount": 1,
+  "shapeCount": 36,
+  "instrs": 2196
+ },
+ {
+  "labels": [
+   "CYBER NINJA"
+  ],
+  "borgCount": 1,
+  "shapeCount": 28,
+  "instrs": 1951
+ },
+ {
+  "labels": [
+   "GATLING GUNNER"
+  ],
+  "borgCount": 1,
+  "shapeCount": 18,
+  "instrs": 716
+ },
+ {
+  "labels": [
+   "BEAM GUNNER"
+  ],
+  "borgCount": 1,
+  "shapeCount": 34,
+  "instrs": 2001
+ },
+ {
+  "labels": [
+   "CHAINSAW KNIGHT"
+  ],
+  "borgCount": 1,
+  "shapeCount": 10,
+  "instrs": 580
+ },
+ {
+  "labels": [
+   "DARK KNIGHT"
+  ],
+  "borgCount": 1,
+  "shapeCount": 8,
+  "instrs": 527
+ },
+ {
+  "labels": [
+   "VICTORY JET"
+  ],
+  "borgCount": 1,
+  "shapeCount": 4,
+  "instrs": 155
+ },
+ {
+  "labels": [
+   "BEAM SAMURAI"
+  ],
+  "borgCount": 1,
+  "shapeCount": 15,
+  "instrs": 993
+ },
+ {
+  "labels": [
+   "GOLD HERO"
+  ],
+  "borgCount": 1,
+  "shapeCount": 27,
+  "instrs": 1586
+ },
+ {
+  "labels": [
+   "DEATH BORG TAU"
+  ],
+  "borgCount": 1,
+  "shapeCount": 10,
+  "instrs": 592
+ },
+ {
+  "labels": [
+   "POP HONEY"
+  ],
+  "borgCount": 1,
+  "shapeCount": 29,
+  "instrs": 2213
+ },
+ {
+  "labels": [
+   "GATLING TANK"
+  ],
+  "borgCount": 1,
+  "shapeCount": 9,
+  "instrs": 285
+ },
+ {
+  "labels": [
+   "BEAM TANK"
+  ],
+  "borgCount": 1,
+  "shapeCount": 11,
+  "instrs": 658
+ },
+ {
+  "labels": [
+   "ULTIMATE CANNON"
+  ],
+  "borgCount": 1,
+  "shapeCount": 17,
+  "instrs": 637
+ },
+ {
+  "labels": [
+   "ICBM TANK"
+  ],
+  "borgCount": 1,
+  "shapeCount": 11,
+  "instrs": 490
+ },
+ {
+  "labels": [
+   "CARRIER HELICOPTER"
+  ],
+  "borgCount": 1,
+  "shapeCount": 11,
+  "instrs": 309
+ },
+ {
+  "labels": [
+   "FLYING SAUCER"
+  ],
+  "borgCount": 1,
+  "shapeCount": 5,
+  "instrs": 216
+ },
+ {
+  "labels": [
+   "BEAM SATELLITE"
+  ],
+  "borgCount": 1,
+  "shapeCount": 5,
+  "instrs": 87
+ },
+ {
+  "labels": [
+   "DEATH SAUCER"
+  ],
+  "borgCount": 1,
+  "shapeCount": 5,
+  "instrs": 211
+ },
+ {
+  "labels": [
+   "ANTARES"
+  ],
+  "borgCount": 1,
+  "shapeCount": 6,
+  "instrs": 184
+ },
+ {
+  "labels": [
+   "DEATH BORG MU"
+  ],
+  "borgCount": 1,
+  "shapeCount": 4,
+  "instrs": 78
+ },
+ {
+  "labels": [
+   "DEATH BORG CHI"
+  ],
+  "borgCount": 1,
+  "shapeCount": 3,
+  "instrs": 204
+ },
+ {
+  "labels": [
+   "ROACH"
+  ],
+  "borgCount": 1,
+  "shapeCount": 3,
+  "instrs": 46
+ }
+]

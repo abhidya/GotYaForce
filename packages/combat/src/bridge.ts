@@ -63,6 +63,7 @@ import { createMeleeGirlStanding } from "./families/melee-girl-standing.js";
 import { createMeleeGirlLunge } from "./families/melee-girl-lunge.js";
 import { createMeleeRobot } from "./families/melee-robot.js";
 import { createMeleeSamurai, SAMURAI_MELEE_DEFAULT_CONFIG } from "./families/melee-samurai.js";
+import { configureValkrieFamily } from "./families/valkrie.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
@@ -415,9 +416,12 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // DEATH BORG SIGMA / DEATH BORG SIGMA II family (ctor 0x8019cfdc) — both members not yet in registry.
       pl0a05: makeSimpleRegistration("pl0a05", () => { /* no X-special in ROM; cue table only */ }),
       pl0a0a: makeSimpleRegistration("pl0a0a", () => { /* no X-special in ROM; cue table only */ }),
-      // DEATH BORG LAMBDA / DEATH BORG LAMBDA II family (ctor 0x8019e414) — both members not yet in registry.
-      pl0b05: makeSimpleRegistration("pl0b05", () => { /* no X-special in ROM; cue table only */ }),
-      pl0b07: makeSimpleRegistration("pl0b07", () => { /* no X-special in ROM; cue table only */ }),
+      // DEATH BORG LAMBDA / DEATH BORG LAMBDA II family (ctor 0x8019e414) — valkrie-
+      // cluster machines (families/valkrie.ts): action 0 = table-A B volley, action 1 =
+      // table-B melee / table-C air lunge. NO action 2 in ROM (tables A-C only) — the
+      // wave-B "cue table only" registration is composed with the ported rootAction.
+      pl0b05: makeSimpleRegistration("pl0b05", (a, ctx) => configureValkrieFamily(a, "pl0b05", ctx)),
+      pl0b07: makeSimpleRegistration("pl0b07", (a, ctx) => configureValkrieFamily(a, "pl0b07", ctx)),
       // DEATH BORG THETA / DEATH BORG IOTA family (ctor 0x801a10e8) — both members not yet in registry.
       pl0906: makeSimpleRegistration("pl0906", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl090b: makeSimpleRegistration("pl090b", () => { /* no X-special in ROM; cue table only */ }),
@@ -470,6 +474,18 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0f01: makeSimpleRegistration("pl0f01", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0f02: makeSimpleRegistration("pl0f02", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0f03: makeSimpleRegistration("pl0f03", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // ---- Valkrie cluster (2026-07-06): 6 valkrie families on the 4 shared phase-table
+      // machines ported in families/valkrie.ts (tables @0x8033ed68/ed78/ed88/0x804346b8;
+      // engines zz_014a200_/zz_014a8c0_/zz_014ad94_/zz_014b22c_, chunk_0038.c). Action 0 =
+      // B ranged volley, action 1 = B melee (v4 = air lunge), action 2 = X special. The
+      // per-borg volley config blocks (count/timer/shot record) are DOL-read — see the
+      // valkrie.ts header. DEATH BORG LAMBDA (pl0b05/pl0b07) shares tables A-C above.
+      pl0b00: makeSimpleRegistration("pl0b00", (a, ctx) => configureValkrieFamily(a, "pl0b00", ctx)),
+      pl0b01: makeSimpleRegistration("pl0b01", (a, ctx) => configureValkrieFamily(a, "pl0b01", ctx)),
+      pl0b02: makeSimpleRegistration("pl0b02", (a, ctx) => configureValkrieFamily(a, "pl0b02", ctx)),
+      pl0b03: makeSimpleRegistration("pl0b03", (a, ctx) => configureValkrieFamily(a, "pl0b03", ctx)),
+      pl0b04: makeSimpleRegistration("pl0b04", (a, ctx) => configureValkrieFamily(a, "pl0b04", ctx)),
+      pl0b06: makeSimpleRegistration("pl0b06", (a, ctx) => configureValkrieFamily(a, "pl0b06", ctx)),
     };
 
     // ---- Wave-C: bespoke B-melee engine wiring (2026-07-06, batch 2 — 48 borgs) ----
