@@ -18,12 +18,16 @@
 //   - level-0 attack block (+0x339 bit 0x10 via zz_001c80c_)
 //   - lock-cycle debounce 30f (FUN_80025a84 +0x30f)
 // TUNED / labeled (not decoded — carried from the previous AI where noted):
-//   - approach/strafe/retreat WAYPOINT policy (state handlers zz_001d058_… undecoded):
-//     simple approach-to-range band
+//   - MOVEMENT state machine zz_001d058_ @0x8001d058 (chunk_0002.c:4017) — PORTED into
+//     rom/rom-movement.ts: idle timer (+0x328) + sub-state (+0x2e5 IDLE→APPROACH→ARRIVED)
+//     + height gate (FLOAT_80436e20=500) + stick via FUN_80024dec × FLOAT_80436ea4=0.8.
+//     Port-side stand-ins: range dead-band replaces the ROM's airborne/grounded probe,
+//     CLIMB_JUMP_DELTA replaces the FUN_8003d964 + zz_003f320_ slope probe.
 //   - the attack ROULETTE weighting (selector slice logic undecoded): uniform pick over
 //     nonzero-range slots; slot→button mapping structured by the +0x104→0x400 anchor
 //     (slots 0-2 → B 0x200, slots 3-5 → X 0x400)
-//   - dash/boost traversal + vertical hop (port-isms from the previous AI, kept)
+//   - dash/boost traversal (port-isms from the previous AI, gated on the ported APPROACH
+//     sub-state — kept until zz_001d058_'s dash sub-functions decode)
 //   - LOS gate (zz_003e978_) and terrain-probe jump (FUN_80024f64) unwired
 //
 // RNG: deterministic LCG per borg (zz_00055fc_ stand-in) — no Math.random.
@@ -35,6 +39,12 @@ import { AI, MOVE } from "./constants.js";
 import { exactMeleeForBorgId } from "./meleeExactData.js";
 import { groundRunSpeedForBorgId } from "./movementData.js";
 import { xChargeMoveForBorgId } from "./moveRuntime.js";
+import {
+  createRomMovementState,
+  resetRomMovement,
+  stepRomMovement,
+  type RomMovementState,
+} from "./rom/rom-movement.js";
 import type { BorgProfile } from "./stats.js";
 import { emptyInput, type BorgRuntime, type PlayerInput } from "./types.js";
 import romAiParamsData from "./data/romAiParams.json" with { type: "json" };
@@ -56,12 +66,15 @@ const LOCK_CYCLE_DEBOUNCE = 30; // FUN_80025a84 +0x30f = 0x1e
 interface RomAiState {
   rng: number;
   retargetTimer: number;   // +0x32a
-  idleTimer: number;       // +0x328
+  idleTimer: number;       // +0x328 (shared: movement +0x328 AND attack pacing)
   queuedButton: 0 | 0x200 | 0x400; // +0x370
   queuedRange: number;     // +0x378
   burstTimer: number;      // hold-window frames (cadence2/+0x320 draw — see stepRomAI)
   lockDebounce: number;    // +0x30f
   targetUid: string | null; // +0x300 (the AI's own pick; mirrored into port lock)
+  /** Per-borg movement scratch — the actor's +0x2e5/+0x34c block consumed by the ported
+   *  zz_001d058_ state machine (rom/rom-movement.ts). */
+  move: RomMovementState;
 }
 const AI_STATE = new WeakMap<BorgRuntime, RomAiState>();
 
@@ -77,7 +90,17 @@ function seedFor(uid: string): number {
 function stateFor(b: BorgRuntime): RomAiState {
   let s = AI_STATE.get(b);
   if (!s) {
-    s = { rng: seedFor(b.uid), retargetTimer: 0, idleTimer: 0, queuedButton: 0, queuedRange: 0, burstTimer: 0, lockDebounce: 0, targetUid: null };
+    s = {
+      rng: seedFor(b.uid),
+      retargetTimer: 0,
+      idleTimer: 0,
+      queuedButton: 0,
+      queuedRange: 0,
+      burstTimer: 0,
+      lockDebounce: 0,
+      targetUid: null,
+      move: createRomMovementState(),
+    };
     AI_STATE.set(b, s);
   }
   return s;
@@ -162,8 +185,12 @@ export function stepRomAI(
   const targetInvalid = !currentTarget || !isEnemy(self, currentTarget);
   if (s.retargetTimer <= 0 || targetInvalid) {
     const pick = nearestEnemy(self, all);
+    const changedTarget = (pick?.uid ?? null) !== s.targetUid;
     s.targetUid = pick?.uid ?? null;
     s.retargetTimer = RETARGET_FRAMES[nextRand(s) & 7] ?? 15;
+    // zz_002104c_ (chunk_0002.c:6513) resets +0x2e5/+0x2e7 on retarget; we reset the
+    // ported movement sub-state machine the same way so a fresh target starts at IDLE.
+    if (changedTarget) resetRomMovement(s.move);
   }
   const target = s.targetUid ? all.find((o) => o.uid === s.targetUid) ?? null : null;
   if (!target) return input;
@@ -265,13 +292,12 @@ export function stepRomAI(
     }
   }
 
-  // ---- (3) steering — port of FUN_80024dec + zz_0024d1c_ (chunk_0003.c:1128/1163).
-  //  The ROM computes the stick toward the target relative to the borg's facing,
-  //  scaled by FLOAT_80436e60=54.0 then × FLOAT_80436ea4=0.8 (mode-1). The port's
-  //  stepMovement non-locked path uses yawFromXZ(moveX, moveZ) = atan2(x,z), so we
-  //  output the normalized world-space direction × 0.8 — equivalent to the ROM's
-  //  facing-relative stick after the yaw projection. ----
-  const STEER_MAGNITUDE = 0.8; // FLOAT_80436ea4
+  // ---- (3) steering — port of zz_001d058_ @0x8001d058 (chunk_0002.c:4017).
+  //  Replaces the previous world-space heuristic (which mis-projected through
+  //  stepMovement's lock-relative intent — see rom/rom-movement.ts header). The ROM's
+  //  idle-timer + sub-state machine (IDLE→APPROACH→ARRIVED) drives the stick; the
+  //  port's lock system continuously turns the borg toward its target, so the ROM's
+  //  facing-relative stick collapses to "+moveZ" in the lock frame at steady state. ----
   const desired =
     meleeDef && p.rangePref !== "ranged" && (s.queuedButton === 0 || s.queuedButton === 0x200)
       ? meleeDef.range
@@ -280,22 +306,20 @@ export function stepRomAI(
         : AI.RANGED_RANGE;
   const ownSpeed = groundRunSpeedForBorgId(self.borgId) ?? MOVE.GROUND_BASE + p.speed * MOVE.GROUND_PER_STAT;
   const kiteSlack = Math.max(AI.RANGE_SLACK, ownSpeed * AI.KITE_SLACK_SPEED_MULT);
-  const farFromDesired = d > desired + kiteSlack;
-  const tooClose = d < desired - kiteSlack && !input.attack;
 
-  if (farFromDesired || tooClose) {
-    // FUN_80024dec: direction toward target in world space.
-    const dx = target.pos.x - self.pos.x;
-    const dz = target.pos.z - self.pos.z;
-    const dist = Math.hypot(dx, dz) || 1;
-    const sign = farFromDesired ? 1 : -1;
-    input.moveX = sign * (dx / dist) * STEER_MAGNITUDE;
-    input.moveZ = sign * (dz / dist) * STEER_MAGNITUDE;
-  }
-  // Dash/boost traversal + vertical hop (ROM dash decision in zz_001d058_ undecoded
-  // sub-functions; these port-isms are retained until the full state machine ports).
+  const move = stepRomMovement(self, s.move, target, { dist: d, desiredRange: desired, rangeSlack: kiteSlack }, s.idleTimer);
+  input.moveX = move.moveX;
+  input.moveZ = move.moveZ;
+  // Slope/climb jump from the ported state machine (chunk_0002.c:4072-4074 bit 0x100).
+  if (move.wantJump) input.jump = true;
+
+  // Dash/boost traversal port-isms (the ROM's dash decision lives in undecoded
+  // sub-functions of zz_001d058_; these remain until those land). Gated on APPROACH so
+  // the borg only burns dash cooldown while actually closing distance.
+  const farFromDesired = d > desired + kiteSlack;
   if (
     farFromDesired &&
+    s.move.subState === 1 &&
     self.grounded &&
     d > desired + ownSpeed * AI.DASH_APPROACH_SPEED_MULT &&
     (self.cooldowns["dash"] ?? 0) <= 0 &&
@@ -303,8 +327,15 @@ export function stepRomAI(
   ) {
     input.dash = true;
   }
-  if (target.pos.y - self.pos.y > 40 && self.grounded) input.jump = true;
   if (!self.grounded && farFromDesired && (self.cooldowns["boostFuel"] ?? 0) > 0) input.jump = true;
+
+  // State-machine retarget signal (chunk_0002.c:4075-4078 calls zz_0023bf4_ +
+  //  zz_002104c_): force the brain's retarget clock to fire next frame and reset the
+  //  movement sub-state. This re-evaluates the target enemy and restarts the machine.
+  if (move.retarget) {
+    s.retargetTimer = 0;
+    resetRomMovement(s.move);
+  }
 
   return input;
 }
