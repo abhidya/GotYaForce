@@ -60,6 +60,15 @@ export interface StreamContext {
    *  `spawnerAddr` is the ROM spawner address, `type` its record-select argument. Hosts
    *  that haven't wired the family table leave this unset (spawn is skipped, honest no-op). */
   onFamilyProjectile?: (actor: RomActor, spawnerAddr: number, type: number) => void;
+  /** Param-tier delta — port of `apply_actor_param_tier_delta_127(actor, signedDelta)`.
+   *  Fired by family handlers that mutate the +0xb4 param tier (STAR HERO / PLANET HERO's
+   *  X-special applies +4 on a connecting dash, reverted by FUN_8010f790 at -4). The host
+   *  (bridge.ts) routes this to BorgRuntime.paramTier via applyActorParamTierDelta127. */
+  onParamTierDelta?: (actor: RomActor, signedDelta: number) => void;
+  /** Sound-cue player — port of `zz_00f036c_(actor, cueId)`. Fired by family handlers on
+   *  status changes (STAR HERO's buff application plays cue 0xa5). The host wires this to
+   *  the existing voice/sound presentation layer. */
+  onPlayCue?: (actor: RomActor, cueId: number) => void;
 }
 
 /**

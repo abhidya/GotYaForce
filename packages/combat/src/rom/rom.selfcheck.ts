@@ -11,6 +11,7 @@ import { integratePhysics } from "./physics.js";
 import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
 import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
+import { configureStarHeroFamily } from "../families/star-hero.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
@@ -238,6 +239,76 @@ export function runSelfTest(): number {
     assert(approxEq(a.yVel, 33.333), "leap jump impulse 33.333 (FLOAT-dump)");
     assert(approxEq(a.gravityCoeff, 2.0 * (-33.333 / 30.0), 1e-3),
       "gravity term = 2.0 × (−vy/30) (verify-pass-corrected, NOT 200.0)");
+  }
+
+  // Test 11: STAR HERO family — X-special phase 0 startup (FUN_80112278).
+  console.log("\n[rom.selfcheck] families/star-hero — X phase 0 startup (FUN_80112278):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureStarHeroFamily(a, "pl0804", ctx);
+    assert(a.borgNumber === 0x804, "borgNumber stamped 0x804 (STAR HERO)");
+    // Phase 0 reads pos − lockTarget into motion; phase 1 (called immediately) scales ×0.95.
+    a.pos.x = 100; a.pos.z = 0;
+    (a as RomActor & { lockTarget?: { x: number; y: number; z: number } }).lockTarget = { x: 0, y: 0, z: 0 };
+    a.actionIndex = 2;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    // Phase 0 advanced +0x540 to 1 (chunk_0031.c:557).
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced to 1 (per-frame dash update)");
+    // Ground slot 0 → +0x6ea = slot+1 = 1 (chunk_0031.c:566).
+    assert(a.streamSlot === 1, "stream cursor = ground slot + 1 (+0x6ea++)");
+    // motion = pos − target = (100,0,0); ×0.95 = (95,0,0); pos += motion → x = 195.
+    assert(approxEq(a.pos.x, 195.0), "pos.x == 195 (motion × FLOAT_80439678=0.95 added)");
+    assert(approxEq(a.motion.x, 95.0), "motion.x == 95 (scaled approach vector)");
+  }
+
+  // Test 12: STAR HERO family — X-special contact → +4 tier buff (zz_011230c_).
+  console.log("\n[rom.selfcheck] families/star-hero — contact → tier buff (zz_011230c_):");
+  {
+    const a = createRomActor();
+    let tierDelta = 0 as number | null;
+    let cuePlayed = 0 as number | null;
+    const ctx: GRedFamilyCtx & {
+      onParamTierDelta?: (actor: RomActor, delta: number) => void;
+      onPlayCue?: (actor: RomActor, cueId: number) => void;
+    } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onParamTierDelta: (_a, delta) => { tierDelta = delta; },
+      onPlayCue: (_a, cueId) => { cuePlayed = cueId; },
+    };
+    configureStarHeroFamily(a, "pl080c", ctx);
+    assert(a.borgNumber === 0x80c, "borgNumber stamped 0x80c (PLANET HERO)");
+    a.actionIndex = 2;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    // Pre-arm contact so phase 0 → phase 1's contact branch fires on the first frame.
+    a.contactP0 = 1; // +0x1cef went positive (dash connected)
+    a.parts[0]!.streamPtr = 42; a.parts[0]!.active = 1; // simulate an armed kind-0xf hitbox
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    const ext = a as RomActor & { heroBuffFrames?: number; heroBuffTailFrames?: number };
+    assert(ext.heroBuffFrames === 1200, "+0x144 == 0x4b0 (1200f buff timer armed)");
+    assert(ext.heroBuffTailFrames === 30, "+0x146 == 0x1e (30f VFX tail)");
+    assert(tierDelta === 4, "onParamTierDelta fired with +4 (tier 16→20, velocity ×2.366)");
+    assert(cuePlayed === 0xa5, "onPlayCue fired with 0xa5 (zz_00f036c_ buff sound)");
+    assert(a.contactP0 === 0, "+0x1cef cleared after buff application");
+    assert(a.parts[0]!.streamPtr === -1 && a.parts[0]!.active === 0,
+      "kind-0xf hitbox despawned (zz_00107a0_)");
+
+    // Second contact while buffed: must NOT re-buff (ROM +0x144 > 0 gate).
+    tierDelta = null; cuePlayed = null;
+    a.fbPhaseSlots[0] = 1; // re-enter phase 1 directly (phase 0 already ran)
+    a.contactP0 = 1;
+    a.parts[0]!.streamPtr = 42; a.parts[0]!.active = 1;
+    a.rootAction!(a);
+    assert(ext.heroBuffFrames === 1200, "already-buffed contact does not refresh the timer");
+    assert(tierDelta === null && cuePlayed === null,
+      "already-buffed contact does not re-apply the tier delta or cue");
   }
 
   if (failures > 0) {

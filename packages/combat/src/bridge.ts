@@ -30,6 +30,9 @@ import {
 } from "./rom/dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "./families/gred.js";
 import { configureNinjaFamily } from "./families/ninja.js";
+import { configureStarHeroFamily } from "./families/star-hero.js";
+import { HERO_X_BUFF } from "./constants.js";
+import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
 import { spawnRomProjectile } from "./projectiles.js";
 import type { Projectile } from "./types.js";
@@ -155,6 +158,10 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // shares the entire family: the ctor differs only in the +0x4b0 descriptor.
       pl0000: makeNinjaFamilyRegistration(),
       pl000a: makeNinjaFamilyRegistration(),
+      // STAR HERO family (ctor 0x8010f5ac) — cue table @0x80326cf0. PLANET HERO (pl080c)
+      // shares the entire family module (status-effects-decode §A verified chain).
+      pl0804: makeStarHeroFamilyRegistration(),
+      pl080c: makeStarHeroFamilyRegistration(),
     };
   }
   return FAMILY_REGISTRY_CACHE;
@@ -219,6 +226,16 @@ function makeNinjaFamilyRegistration(): FamilyRegistration {
       configureNinjaFamily(actor, id as "pl0000" | "pl000a", ctx);
     },
     cueTable: cueTableForBorg("pl0000")!,
+  };
+}
+
+function makeStarHeroFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id = actor.borgNumber === 0x80c ? "pl080c" : "pl0804";
+      configureStarHeroFamily(actor, id as "pl0804" | "pl080c", ctx);
+    },
+    cueTable: cueTableForBorg("pl0804")!,
   };
 }
 
@@ -311,8 +328,16 @@ export class RomDriverBridge {
         host.onFireChild?.(a, variant);
         this.onFireChild(variant);
       },
+      onParamTierDelta: (a, delta) => {
+        host.onParamTierDelta?.(a, delta);
+        this.onParamTierDelta(delta);
+      },
+      onPlayCue: (a, cueId) => {
+        host.onPlayCue?.(a, cueId);
+      },
     };
     if (host.onIndirect) wrapped.onIndirect = host.onIndirect;
+    if (host.onFamilyProjectile) wrapped.onFamilyProjectile = host.onFamilyProjectile;
     this.ctx = wrapped;
   }
 
@@ -508,6 +533,22 @@ export class RomDriverBridge {
     const yawRad = (this.actor.activeYaw / 0x10000) * Math.PI * 2;
     const proj = spawnRomProjectile(this.runtime, variant, yawRad);
     if (proj) this.pendingProjectiles.push(proj);
+  }
+
+  /** Called by family handlers (STAR HERO / PLANET HERO X-special) when they apply a
+   *  param-tier delta via `apply_actor_param_tier_delta_127`. Routes to BorgRuntime's
+   *  authoritative paramTier and keeps heroTierBuffFrames in sync so the existing
+   *  stepHitStatus revert path owns expiry (ROM postState only ticks during specials). */
+  private onParamTierDelta(signedDelta: number): void {
+    if (!this.runtime) return;
+    applyActorParamTierDelta127(this.runtime.paramTier, signedDelta);
+    if (signedDelta > 0) {
+      // Buff application: arm the heroTierBuffFrames timer (stepHitStatus reverts at 0).
+      this.runtime.heroTierBuffFrames = HERO_X_BUFF.DURATION_FRAMES;
+    } else if (signedDelta < 0) {
+      // Revert (ROM-driven): clear the timer so stepHitStatus doesn't double-revert.
+      this.runtime.heroTierBuffFrames = 0;
+    }
   }
 
   /** Fire any stream events scheduled for the given frame (from meleeAnimKinds.json).
