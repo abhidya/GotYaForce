@@ -15,6 +15,7 @@ import { configureStarHeroFamily } from "../families/star-hero.js";
 import { configureCyberMachineFamily } from "../families/cyber-machine.js";
 import { configureSwordKnightFamily } from "../families/sword-knight.js";
 import { configureDragonFamily, DRAGON_X } from "../families/dragon.js";
+import { configureCyberDragonFamily, CYBER_DRAGON_X } from "../families/cyber-dragon.js";
 import { configureWormFamily, WORM_X } from "../families/worm.js";
 import { configureWireGunnerFamily, WIRE_GUNNER_X } from "../families/wire-gunner.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
@@ -603,6 +604,160 @@ export function runSelfTest(): number {
       assert(bridge.actor.borgNumber === 0x500, "borgNumber stamped 0x500 via bridge attach");
       // cue 36 → [47, 0] (deploy state) — the Flame Dragon's deploy trampoline.
       assert(t[36 * 2] === 47, "cue row 36 → full-body state 47 (deploy)");
+    }
+  }
+
+  // Test 23a: CYBER DEATH DRAGON family — v0 ground breath phase 0 setup (FUN_800b9700).
+  // Sister port of FLAME DRAGON's test 20; same constants, different .sdata2 slots
+  // (FLOAT_804384a4/e4 vs FLOAT_80437814/30).
+  console.log("\n[rom.selfcheck] families/cyber-dragon — v0 ground breath phase 0 (FUN_800b9700):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureCyberDragonFamily(a, "pl0503", ctx);
+    assert(a.borgNumber === 0x503, "borgNumber stamped 0x503 (CYBER DEATH DRAGON)");
+    a.actionIndex = 2;
+    a.variantIndex = 0;
+    a.hSpeed = 9; a.yVel = 5; a.hDecel = 3; // nonzero to confirm the phase-0 zeroing
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced 0 → 1 (+0x540++)");
+    assert(approxEq(a.handlerTimer, CYBER_DRAGON_X.BREATH_WINDOW),
+      `handlerTimer == 180.0 (FLOAT_804384e4)`);
+    assert(approxEq(a.hSpeed, 0) && approxEq(a.yVel, 0) && approxEq(a.hDecel, 0),
+      "launch scalars zeroed (FLOAT_804384a4)");
+    assert(approxEq(a.gravityCoeff, 0),
+      "gravityCoeff zeroed (ground breath — no physics)");
+  }
+
+  // Test 23b: CYBER DEATH DRAGON family — v0 phase 1 contact consumes +0x1cef.
+  // The Cyber Death Dragon has NO per-frame child spawner (unlike FLAME DRAGON's
+  // zz_00be948_ flame-child spawn); zz_00b9c68_ just clears the contact flag and
+  // calls zz_0098dbc_(actor, 0, 6) — a shared kind-6 resolver covered by op 0x0a.
+  console.log("\n[rom.selfcheck] families/cyber-dragon — v0 phase 1 contact (zz_00b9c68_):");
+  {
+    const a = createRomActor();
+    configureCyberDragonFamily(a, "pl0506",
+      { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    assert(a.borgNumber === 0x506, "borgNumber stamped 0x506");
+    a.actionIndex = 2;
+    a.variantIndex = 0;
+    a.fbPhaseSlots[0] = 1; // already in phase 1
+    a.handlerTimer = CYBER_DRAGON_X.BREATH_WINDOW; // not expired
+    a.contactP0 = 1; // +0x1cef contact flag fired (breath hitbox connected)
+    a.rootAction!(a);
+    assert(a.contactP0 === 0, "+0x1cef cleared after consuming the contact (zz_00b9c68_)");
+    // Phase should NOT advance (handlerTimer > 0); only the contact bookkeeping ran.
+    assert(a.fbPhaseSlots[0] === 1, "phase remains 1 (breath window not expired)");
+  }
+
+  // Test 23c: CYBER DEATH DRAGON family — v1 air variant velocity drag (FUN_800b9888 tail).
+  // zz_006ed8c_(FLOAT_804384c4=0.95) scales hSpeed and yVel by 0.95 each frame, then
+  // zz_0067458_(1.0) integrates physics. Mirror of FLAME DRAGON's test 22.
+  console.log("\n[rom.selfcheck] families/cyber-dragon — v1 air breath velocity drag (FUN_800b9888):");
+  {
+    const a = createRomActor();
+    configureCyberDragonFamily(a, "pl0503",
+      { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    a.actionIndex = 2;
+    a.variantIndex = 3; // air variant (engine 0x800b9888)
+    a.fbPhaseSlots[0] = 1; // phase 1 (active breath)
+    a.handlerTimer = CYBER_DRAGON_X.BREATH_WINDOW; // not expired
+    a.hSpeed = 10.0;
+    a.yVel = 20.0;
+    a.heading = 0; a.lockYaw = 0; a.activeYaw = 0;
+    a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999;
+    a.rootAction!(a);
+    // zz_006ed8c_ with dt==FLOAT_80437670(1.0): hSpeed *= 0.95; yVel *= 0.95 (drag).
+    assert(approxEq(a.hSpeed, 10.0 * CYBER_DRAGON_X.AIR_DRAG),
+      `hSpeed *= 0.95 (FLOAT_804384c4)`);
+    assert(approxEq(a.yVel, 20.0 * CYBER_DRAGON_X.AIR_DRAG),
+      `yVel *= 0.95 (air drag pre-integration)`);
+  }
+
+  // Test 23d: CYBER DEATH DRAGON family — v2 charged +0x5dd gate (FUN_800b9ad4).
+  // Without xChargeGate == 0x11 the handler bails to ground idle (zz_006a3d0_ re-dispatch).
+  console.log("\n[rom.selfcheck] families/cyber-dragon — v2 charged gate bail (FUN_800b9ad4):");
+  {
+    const a = createRomActor();
+    configureCyberDragonFamily(a, "pl050f",
+      { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    assert(a.borgNumber === 0x50f, "borgNumber stamped 0x50f");
+    a.actionIndex = 2;
+    a.variantIndex = 4; // charged variant
+    // No xChargeGate set → defaults to 0 → bail branch.
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[0] = 0; // cue 0 → state 0 (ground idle)
+    a.controlWord = 0x3; // nonzero to confirm the clear
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 0, "phase did NOT advance (bail branch — no xChargeGate)");
+    assert(a.controlWord === 0, "+0x5e0 attack bits cleared (bail-to-idle)");
+
+    // With xChargeGate == 0x11 the charged breath arms (slot 4, group 4).
+    const b = createRomActor();
+    (b as RomActor & { xChargeGate?: number }).xChargeGate = 0x11;
+    configureCyberDragonFamily(b, "pl050f",
+      { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    b.actionIndex = 2;
+    b.variantIndex = 4;
+    b.cueTable = new Int8Array(96).fill(-1);
+    b.fbState = 61;
+    b.cueTable[44 * 2] = 61;
+    const tbl = createDefaultStateTable();
+    stepActor(b, tbl);
+    assert(b.fbPhaseSlots[0] === 1, "phase advanced 0 → 1 (xChargeGate == 0x11 accepted)");
+    assert(approxEq(b.handlerTimer, CYBER_DRAGON_X.BREATH_WINDOW),
+      "charged breath handlerTimer == 180.0");
+  }
+
+  // Test 23e: CYBER DEATH DRAGON family — bridge cue-table attach (rows 44/45 → 61).
+  console.log("\n[rom.selfcheck] families/cyber-dragon — bridge cue-table (0x802fec20):");
+  {
+    const runtime = {
+      borgId: "pl0503", team: 0, uid: "t",
+      pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+      rotY: 0, grounded: true, cooldowns: {},
+    } as unknown as BorgRuntime;
+    const bridge = RomDriverBridge.attach(runtime,
+      { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    assert(bridge !== null, "RomDriverBridge attaches for pl0503 (family registered)");
+    if (bridge) {
+      const t = bridge.actor.cueTable!;
+      assert(t[44 * 2] === 61 && t[45 * 2] === 61,
+        "cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)");
+      assert(bridge.actor.rootAction !== null, "cyber-dragon rootAction configured");
+      assert(bridge.actor.borgNumber === 0x503, "borgNumber stamped 0x503 via bridge attach");
+    }
+  }
+
+  // Test 23f: CYBER DEATH DRAGON family — all 6 members register + stamp borgNumber.
+  console.log("\n[rom.selfcheck] families/cyber-dragon — 6-member borgNumber stamp:");
+  {
+    const members: Array<{ id: "pl0503" | "pl0506" | "pl0507" | "pl050f" | "pl0512" | "pl0513"; num: number }> = [
+      { id: "pl0503", num: 0x503 },
+      { id: "pl0506", num: 0x506 },
+      { id: "pl0507", num: 0x507 },
+      { id: "pl050f", num: 0x50f },
+      { id: "pl0512", num: 0x512 },
+      { id: "pl0513", num: 0x513 },
+    ];
+    for (const { id, num } of members) {
+      const runtime = {
+        borgId: id, team: 0, uid: "t",
+        pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+        rotY: 0, grounded: true, cooldowns: {},
+      } as unknown as BorgRuntime;
+      const bridge = RomDriverBridge.attach(runtime,
+        { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+      assert(bridge !== null, `RomDriverBridge attaches for ${id}`);
+      if (bridge) {
+        assert(bridge.actor.borgNumber === num,
+          `${id}: borgNumber stamped 0x${num.toString(16)} via bridge attach`);
+        assert(bridge.actor.rootAction !== null, `${id}: rootAction wired`);
+      }
     }
   }
 

@@ -686,6 +686,29 @@ function makeDragonFamilyRegistration(): FamilyRegistration {
   };
 }
 
+// CYBER DEATH DRAGON family (ctor 0x800b8188) — cue table @0x802fec20. The X-special
+// is a BESPOKE 3-variant phase machine (ground/air/charged breath) ported in
+// families/cyber-dragon.ts; engines 0x800b96c4/0x800b9888/0x800b9a74 live in the
+// family code block (not shared-engine ranges). All 6 members (pl0503/pl0506/pl0507/
+// pl050f/pl0512/pl0513) share one module — the ctor block-copies the same +0x4b4
+// binding; only FUN_800b866c's borg-id switch (animation record select) differs.
+// Sister family to FLAME DRAGON (identical phase structure; no per-frame flame-child
+// spawner — the contact calls zz_0098dbc_ instead, a shared kind-6 attack resolver).
+function makeCyberDragonFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x506 ? "pl0506" :
+        actor.borgNumber === 0x507 ? "pl0507" :
+        actor.borgNumber === 0x50f ? "pl050f" :
+        actor.borgNumber === 0x512 ? "pl0512" :
+        actor.borgNumber === 0x513 ? "pl0513" : "pl0503";
+      configureCyberDragonFamily(actor, id as "pl0503" | "pl0506" | "pl0507" | "pl050f" | "pl0512" | "pl0513", ctx);
+    },
+    cueTable: cueTableForBorg("pl0503")!,
+  };
+}
+
 // ALIEN WORM family (ctor 0x80118cb8) — cue table @0x8032b8d8. The X-special is a
 // BESPOKE borg-switched spawn dispatcher (FUN_80118efc @ chunk_0032.c:662) ported in
 // families/worm.ts. pl0501/pl050d spawn a worm-child via FUN_8011a108 (family code
