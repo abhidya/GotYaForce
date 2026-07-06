@@ -21,12 +21,9 @@ const ENG = {
   LUNGE_VEL_MULT: 0.0625,
 } as const;
 
-/** Default base lunge speed. Set to 0 initially — the lunge MOVEMENT (forward dash)
- *  causes off-mesh drift because the shared engine lacks wall collision. The anim +
- *  hitbox + damage all work without movement. Incrementally increase once wall
- *  collision is wired. The ROM's actual value is ~50.0 (from the per-borg +0x868
- *  table, undecoded). */
-const DEFAULT_LUNGE_BASE = 0.0;
+/** Base lunge speed from ROM per-borg +0x868 table (TUNED fallback 50.0 until
+ *  extracted). The off-mesh revert in bridge.ts prevents drift through walls. */
+const DEFAULT_LUNGE_BASE = 50.0;
 
 /**
  * Port of `zz_01782dc_` — the forward-dash velocity setter. */
