@@ -265,11 +265,13 @@ export function stepRomAI(
     }
   }
 
-  // ---- (3) steering — motor DERIVED, waypoint policy TUNED (state handlers
-  // zz_001d058_… undecoded, so the approach/kite band keeps the previous AI's proven
-  // shape). Melee-B keeps meleeDef.range as the HOLD distance (the press gate above
-  // uses the wider engage window; the sim lunge covers engage → reach — using the
-  // engage range here made the CPU backstep out of its own reach mid-swing). ----
+  // ---- (3) steering — port of FUN_80024dec + zz_0024d1c_ (chunk_0003.c:1128/1163).
+  //  The ROM computes the stick toward the target relative to the borg's facing,
+  //  scaled by FLOAT_80436e60=54.0 then × FLOAT_80436ea4=0.8 (mode-1). The port's
+  //  stepMovement non-locked path uses yawFromXZ(moveX, moveZ) = atan2(x,z), so we
+  //  output the normalized world-space direction × 0.8 — equivalent to the ROM's
+  //  facing-relative stick after the yaw projection. ----
+  const STEER_MAGNITUDE = 0.8; // FLOAT_80436ea4
   const desired =
     meleeDef && p.rangePref !== "ranged" && (s.queuedButton === 0 || s.queuedButton === 0x200)
       ? meleeDef.range
@@ -279,13 +281,19 @@ export function stepRomAI(
   const ownSpeed = groundRunSpeedForBorgId(self.borgId) ?? MOVE.GROUND_BASE + p.speed * MOVE.GROUND_PER_STAT;
   const kiteSlack = Math.max(AI.RANGE_SLACK, ownSpeed * AI.KITE_SLACK_SPEED_MULT);
   const farFromDesired = d > desired + kiteSlack;
-  if (farFromDesired) {
-    input.moveZ = 1; // stick toward target (54×0.8 ≈ full deflection past the 0x1e deadzone)
-  } else if (d < desired - kiteSlack && !input.attack) {
-    input.moveZ = -1; // never backstep while holding an attack burst
+  const tooClose = d < desired - kiteSlack && !input.attack;
+
+  if (farFromDesired || tooClose) {
+    // FUN_80024dec: direction toward target in world space.
+    const dx = target.pos.x - self.pos.x;
+    const dz = target.pos.z - self.pos.z;
+    const dist = Math.hypot(dx, dz) || 1;
+    const sign = farFromDesired ? 1 : -1;
+    input.moveX = sign * (dx / dist) * STEER_MAGNITUDE;
+    input.moveZ = sign * (dz / dist) * STEER_MAGNITUDE;
   }
-  // Dash/boost traversal + vertical hop: kept port-isms (ROM dash decision undecoded;
-  // terrain-probe jump FUN_80024f64 needs a collision probe the AI can't reach yet).
+  // Dash/boost traversal + vertical hop (ROM dash decision in zz_001d058_ undecoded
+  // sub-functions; these port-isms are retained until the full state machine ports).
   if (
     farFromDesired &&
     self.grounded &&
