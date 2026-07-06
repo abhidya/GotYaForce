@@ -19,6 +19,7 @@ import {
   vecAdd,
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { createSharedMeleeGRed, GRED_MELEE_CONFIG } from "./shared-melee-gred.js";
 
 // Motion constants — every value read from boot.dol this session.
 const G_RED_CRASH = {
@@ -223,7 +224,7 @@ export function createGRedRootAction(ctx: GRedFamilyCtx): (actor: RomActor) => v
   // FUN_8018e838) are folded in.
   const actionTable: Array<((actor: RomActor) => void) | null> = [
     null,          // 0: dash attack (zz_018d288_) — TODO port
-    null,          // 1: B melee (FUN_8018dd9c) — TODO port
+    createSharedMeleeGRed(GRED_MELEE_CONFIG, ctx), // 1: B melee (zz_0177dd8_ shared engine)
     (actor) => gredXHandler(actor, ctx), // 2: X / air-B (G Crash)
     null,          // 3: B charge (FUN_8018ed4c) — TODO port
     null,          // 4: (FUN_8018ee84) — TODO identify

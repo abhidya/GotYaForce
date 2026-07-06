@@ -19,6 +19,12 @@ import { configureCyberDragonFamily, CYBER_DRAGON_X } from "../families/cyber-dr
 import { configureWormFamily, WORM_X } from "../families/worm.js";
 import { configureWireGunnerFamily, WIRE_GUNNER_X } from "../families/wire-gunner.js";
 import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
+import {
+  createSharedMeleeGRed,
+  GRED_MELEE_CONFIG,
+  SHARED_MELEE_GRED,
+  type SharedMeleeGRedConfig,
+} from "../families/shared-melee-gred.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
 import { RomDriverBridge, cueTableForBorg } from "../bridge.js";
@@ -1121,6 +1127,218 @@ export function runSelfTest(): number {
         assert(bridge.actor.borgNumber === num, `${id}: borgNumber stamped 0x${num.toString(16)} via bridge attach`);
       }
     }
+  }
+
+  // Test 34: shared-melee-gred — phase 0 stream start (FUN_80177e28).
+  // Verifies: +0x540++ (phase 0→1), +0x746/+0x745 cleared, +0x6ea = seedSlot then ++,
+  // +0x558 = 60.0 (FLOAT_8043ae20). Air-check fallback: airborne → yaw = heading.
+  console.log("\n[rom.selfcheck] shared-melee-gred — phase 0 stream start (FUN_80177e28):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean;
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    a.grounded = true;
+    a.heading = 0x2000;
+    a.lockYaw = 0x4000;
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const cfg: SharedMeleeGRedConfig = { seedSlot: 5, timerFrames: 30, proximityRange: 100 };
+    const melee = createSharedMeleeGRed(cfg, ctx);
+    melee(a); // phase 0
+    assert(a.fbPhaseSlots[0] === 1, "phase 0 → 1 (+0x540++)");
+    assert(a.streamSlot === cfg.seedSlot + 1, `stream cursor = seedSlot+1 (${cfg.seedSlot}→${a.streamSlot}, +0x6ea++)`);
+    assert(approxEq(a.handlerTimer, SHARED_MELEE_GRED.TIMER_SEED), `handlerTimer == 60.0 (FLOAT_8043ae20)`);
+    assert(approxEq(a.activeYaw, 0x4000), "grounded → activeYaw = lockYaw (bridge target yaw kept)");
+
+    // Air-check fallback: airborne → yaw snapshots to heading (the <1 branch).
+    const b = createRomActor() as RomActor & { grounded?: boolean };
+    b.grounded = false;
+    b.heading = 0x1000;
+    b.lockYaw = 0x4000;
+    melee(b);
+    assert(approxEq(b.activeYaw, 0x1000), "airborne → activeYaw = heading (+0x5ac = +0x72)");
+    assert(approxEq(b.lockYaw, 0x1000), "airborne → lockYaw = heading (+0x5ae = +0x72)");
+  }
+
+  // Test 35: shared-melee-gred — phase 1 timer expiry → phase 2 + computeLungeSpeed.
+  // Verifies the phase 1→2 transition: timer ≤ 0 OR facing complete. computeLungeSpeed
+  // (zz_01782dc_) sets hSpeed = DEFAULT_LUNGE_BASE / timerFrames.
+  console.log("\n[rom.selfcheck] shared-melee-gred — phase 1 → 2 transition (FUN_80177f10):");
+  {
+    const a = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    a.lockTarget = null; // no target → facing won't short-circuit; timer drives transition
+    a.dt = 1;
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const cfg: SharedMeleeGRedConfig = { seedSlot: 0, timerFrames: 25, proximityRange: 100 };
+    const melee = createSharedMeleeGRed(cfg, ctx);
+    melee(a); // phase 0 → 1 (handlerTimer = 60.0)
+    assert(a.fbPhaseSlots[0] === 1, "phase 0 → 1");
+    // Tick phase 1 until timer expires. With no lockTarget, facing won't fire, so the
+    // timer must reach 0. Seed handlerTimer to 1.0 to force a one-tick transition.
+    a.handlerTimer = 1.0;
+    melee(a); // phase 1 → 2 (timer ≤ 0)
+    assert(a.fbPhaseSlots[0] === 2, "phase 1 → 2 (+0x540++ on timer ≤ 0)");
+    assert(approxEq(a.handlerTimer, 25.0), "handlerTimer == cfg.timerFrames (25.0)");
+    // DEFAULT_LUNGE_BASE (50.0) / timerFrames (25) = 2.0 (from shared-engine.ts).
+    assert(approxEq(a.hSpeed, 50.0 / 25.0), "hSpeed == DEFAULT_LUNGE_BASE/timerFrames (zz_01782dc_)");
+
+    // Facing-complete short-circuit: with a target, phase 1 advances on the first tick.
+    const b = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    b.lockTarget = { x: 10, y: 0, z: 10 };
+    b.handlerTimer = 60.0; // would NOT expire; transition must come from facing
+    b.fbPhaseSlots[0] = 1;
+    melee(b);
+    assert(b.fbPhaseSlots[0] === 2, "facing-complete (target present) → phase 1 → 2");
+  }
+
+  // Test 36: shared-melee-gred — phase 2 proximity gate → phase 3 (FUN_80177fd4).
+  // Verifies the FUN_800668cc approximation: target within proximityRange → advance.
+  console.log("\n[rom.selfcheck] shared-melee-gred — phase 2 proximity → phase 3:");
+  {
+    const a = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    a.lockTarget = { x: 0, y: 0, z: 0 };
+    a.pos = { x: 50, y: 0, z: 0 }; // dist 50 < proximityRange 100
+    a.dt = 1;
+    a.timescale = 1;
+    a.tierScale = 1;
+    a.maxFall = -9999;
+    a.activeYaw = 0;
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const cfg: SharedMeleeGRedConfig = { seedSlot: 0, timerFrames: 30, proximityRange: 100 };
+    const melee = createSharedMeleeGRed(cfg, ctx);
+    a.fbPhaseSlots[0] = 2;
+    a.handlerTimer = 30.0; // not expired; transition must come from proximity
+    melee(a);
+    assert(a.fbPhaseSlots[0] === 3, "dist < proximityRange → phase 2 → 3 (FUN_800668cc gate)");
+
+    // Out-of-range + timer not expired → phase stays 2.
+    const b = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    b.lockTarget = { x: 0, y: 0, z: 0 };
+    b.pos = { x: 200, y: 0, z: 0 }; // dist 200 > proximityRange 100
+    b.dt = 1; b.timescale = 1; b.tierScale = 1; b.maxFall = -9999; b.activeYaw = 0;
+    b.fbPhaseSlots[0] = 2;
+    b.handlerTimer = 30.0;
+    melee(b);
+    assert(b.fbPhaseSlots[0] === 2, "dist > proximityRange AND timer > 0 → phase stays 2");
+  }
+
+  // Test 37: shared-melee-gred — phase 3 combo loop back to phase 2 (FUN_801780e4).
+  // Verifies the combo-continue path: +0x1cf0 high bit AND +0x746 & +0x745 both set →
+  // +0x540-- (3→2), latches cleared, timer reset, next stream slot armed, velocity re-set.
+  console.log("\n[rom.selfcheck] shared-melee-gred — phase 3 combo loop (FUN_801780e4):");
+  {
+    const a = createRomActor() as RomActor & {
+      bRetapInput?: boolean;
+      altInputPresent?: boolean;
+      swingReArm?: boolean;
+      swingChainBit?: boolean;
+      bRetap?: boolean;
+      altInput?: boolean;
+    };
+    a.dt = 1;
+    a.timescale = 1;
+    a.tierScale = 1;
+    a.maxFall = -9999;
+    a.activeYaw = 0;
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const cfg: SharedMeleeGRedConfig = { seedSlot: 0, timerFrames: 30, proximityRange: 100 };
+    const melee = createSharedMeleeGRed(cfg, ctx);
+    // Seed streamSlot at 2 (as if phase 0 used slot 0 and phase-3 restart used slot 1).
+    a.streamSlot = 2;
+    a.fbPhaseSlots[0] = 3;
+    // Combo-continue conditions: B-retap this frame, alt-input this frame, swing re-armed.
+    a.bRetapInput = true;
+    a.altInputPresent = true;
+    a.swingReArm = true;
+    a.swingChainBit = true; // bit 0 set → loop restart (not the chain callback)
+    melee(a);
+    assert(a.fbPhaseSlots[0] === 2, "combo-continue → phase 3 → 2 (+0x540--)");
+    assert(a.bRetap === false && a.altInput === false, "+0x746/+0x745 cleared after loop restart");
+    assert(approxEq(a.handlerTimer, 30.0), "handlerTimer reset to cfg.timerFrames");
+    assert(a.streamSlot === 3, "stream cursor advanced (+0x6ea++ for the next swing)");
+    assert(approxEq(a.hSpeed, 50.0 / 30.0), "hSpeed re-set by zz_01782dc_ on loop restart");
+  }
+
+  // Test 38: shared-melee-gred — phase 3 chain-callback redirect (the +0x10 path).
+  // When +0x1cf0 bit 0 is clear AND cfg.chainCallback is set, the callback fires INSTEAD
+  // of the loop restart, and the engine returns immediately (variant redirect, e.g. NEO
+  // G RED's standing finisher via FUN_8018ded0).
+  console.log("\n[rom.selfcheck] shared-melee-gred — phase 3 chain callback (+0x10):");
+  {
+    const a = createRomActor() as RomActor & {
+      bRetapInput?: boolean;
+      altInputPresent?: boolean;
+      swingReArm?: boolean;
+      swingChainBit?: boolean;
+    };
+    a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999; a.activeYaw = 0;
+    let chainFired = false;
+    const cfg: SharedMeleeGRedConfig = {
+      seedSlot: 0,
+      timerFrames: 30,
+      proximityRange: 100,
+      chainCallback: () => { chainFired = true; },
+    };
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const melee = createSharedMeleeGRed(cfg, ctx);
+    a.streamSlot = 5;
+    a.fbPhaseSlots[0] = 3;
+    a.bRetapInput = true;
+    a.altInputPresent = true;
+    a.swingReArm = true;
+    a.swingChainBit = false; // bit 0 CLEAR → chain callback path
+    melee(a);
+    assert(chainFired, "chain callback fired (+0x1cf0 & 1 == 0 path)");
+    assert(a.fbPhaseSlots[0] === 3, "phase NOT advanced (callback returned early — no loop restart)");
+    assert(a.streamSlot === 5, "stream cursor NOT advanced (callback path doesn't touch +0x6ea)");
+  }
+
+  // Test 39: shared-melee-gred — phase 3 recovery end (+0x1cee → idle).
+  // When wallContact (+0x1cee) fires and no combo-continue, the engine clears action-mode
+  // bits and dispatches cue 0 (ground idle via zz_006a474_).
+  console.log("\n[rom.selfcheck] shared-melee-gred — phase 3 recovery end (zz_006a474_):");
+  {
+    const a = createRomActor();
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[0] = 0; // cue 0 → state 0 (ground idle)
+    a.cueTable[1] = 0;
+    a.dt = 1; a.timescale = 1; a.tierScale = 1; a.maxFall = -9999; a.activeYaw = 0;
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const cfg: SharedMeleeGRedConfig = { seedSlot: 0, timerFrames: 30, proximityRange: 100 };
+    const melee = createSharedMeleeGRed(cfg, ctx);
+    a.fbPhaseSlots[0] = 3;
+    a.controlWord = 0x3; // action-mode bits set
+    a.wallContact = 1;   // +0x1cee → end the move
+    melee(a);
+    assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
+    assert(a.fbState === 0, "fbState → 0 (ground idle via cue 0 dispatch)");
+  }
+
+  // Test 40: shared-melee-gred — G RED action table slot 1 routes B-melee here.
+  // Confirms the family wiring: configureGRedFamily stamps a rootAction whose
+  // actionIndex 1 path is the shared melee engine (phase 0 stream arm).
+  console.log("\n[rom.selfcheck] families/gred — action 1 routes to shared-melee-gred:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureGRedFamily(a, "pl0615", ctx);
+    a.actionIndex = 1; // B-close
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(a.fbPhaseSlots[0] === 1, "action 1 phase 0 → 1 (shared melee engine armed)");
+    assert(approxEq(a.handlerTimer, SHARED_MELEE_GRED.TIMER_SEED), "handlerTimer == 60.0 (TIMER_SEED)");
+    assert(a.streamSlot === GRED_MELEE_CONFIG.seedSlot + 1, "stream cursor = GRED_MELEE_CONFIG.seedSlot+1");
   }
 
   if (failures > 0) {

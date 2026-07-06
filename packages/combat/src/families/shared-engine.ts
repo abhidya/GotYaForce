@@ -26,10 +26,12 @@ const ENG = {
 const DEFAULT_LUNGE_BASE = 50.0;
 
 /**
- * Port of `zz_01782dc_` — the forward-dash velocity setter. */
-function computeLungeSpeed(actor: RomActor, cfg: SharedEngineConfig): void {
-  if (cfg.timerFrames > 0) {
-    actor.hSpeed = DEFAULT_LUNGE_BASE / cfg.timerFrames;
+ * Port of `zz_01782dc_` — the forward-dash velocity setter. Shared by this file's
+ * lunge/melee machines AND the more faithful B-close port in shared-melee-gred.ts.
+ * Takes timerFrames directly so callers don't have to synthesize a full config. */
+export function computeLungeSpeed(actor: RomActor, timerFrames: number): void {
+  if (timerFrames > 0) {
+    actor.hSpeed = DEFAULT_LUNGE_BASE / timerFrames;
   }
 }
 
@@ -100,7 +102,7 @@ function createMeleePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
         actor.fbPhaseSlots[0]++;
         actor.handlerTimer = cfg.timerFrames;
-        computeLungeSpeed(actor, cfg); // ← zz_01782dc_: set forward-dash hSpeed
+        computeLungeSpeed(actor, cfg.timerFrames); // ← zz_01782dc_: set forward-dash hSpeed
       }
     },
     // Phase 2: active frames (FUN_80177fd4) — tick + yaw-only physics + contact check.
@@ -180,7 +182,7 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
         actor.fbPhaseSlots[0]++;
         actor.handlerTimer = cfg.timerFrames;
-        computeLungeSpeed(actor, cfg); // ← zz_01782dc_: set forward-dash hSpeed
+        computeLungeSpeed(actor, cfg.timerFrames); // ← zz_01782dc_: set forward-dash hSpeed
       }
     },
     // Phase 2: active + recovery. gravityCoeff stays 0 (the ROM controls vertical
