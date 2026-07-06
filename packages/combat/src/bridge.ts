@@ -36,6 +36,7 @@ import type { Projectile } from "./types.js";
 import attackHitTablesData from "./data/attackHitTables.json" with { type: "json" };
 import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
 import meleeAnimKindsData from "./data/meleeAnimKinds.json" with { type: "json" };
+import familyCueTablesFullData from "./data/familyCueTablesFull.json" with { type: "json" };
 
 const TAU = Math.PI * 2;
 const BAM_FULL = 0x10000;
@@ -140,60 +141,74 @@ export interface FamilyRegistration {
   cueTable: Int8Array;
 }
 
-const FAMILY_REGISTRY: Record<string, FamilyRegistration> = {
-  // G RED family (ctor 0x8018ccfc) — cue table @0x80365cf8, full 48-row DOL dump.
-  pl0615: makeGRedFamilyRegistration(),
-  pl0629: makeGRedFamilyRegistration(),
-  pl062a: makeGRedFamilyRegistration(),
-  // NORMAL NINJA family (ctor 0x8006f4f8) — cue table @0x802d3ff8. SASUKE (pl000a)
-  // shares the entire family: the ctor differs only in the +0x4b0 descriptor.
-  pl0000: makeNinjaFamilyRegistration(),
-  pl000a: makeNinjaFamilyRegistration(),
-};
-
-/** Family-0 cue→state table @0x802d3ff8 — full 48-row byte dump, DERIVED 2026-07-06
- *  (nn-family-decode §A11; adversarially re-dumped byte-exact). Rows 0-17 are
- *  (i+1, i+1) except 9/10/11 = (0, i+1); rows 44 AND 45 both → full-body state 61
- *  (the family root-action virtual via FUN_80065dfc — the ground records issue cue 44,
- *  the air/knockdown records cue 45). G RED @0x80365cf8 is byte-identical EXCEPT rows
- *  5:(22,22), 8:(23,23), 25:(0,31), 26:(0,32). */
-function makeFamily0BaseCueTable(): Int8Array {
-  const t = new Int8Array(96).fill(-1);
-  const set = (cue: number, fb: number, ub: number) => {
-    t[cue * 2] = fb;
-    t[cue * 2 + 1] = ub;
-  };
-  for (let cue = 0; cue <= 17; cue++) {
-    if (cue >= 9 && cue <= 11) set(cue, 0, cue + 1);
-    else set(cue, cue + 1, cue + 1);
+// Lazily built so the cue-table data consts below are initialized first (the
+// registrations read cueTableForBorg at construction time).
+let FAMILY_REGISTRY_CACHE: Record<string, FamilyRegistration> | null = null;
+function familyRegistry(): Record<string, FamilyRegistration> {
+  if (!FAMILY_REGISTRY_CACHE) {
+    FAMILY_REGISTRY_CACHE = {
+      // G RED family (ctor 0x8018ccfc) — cue table @0x80365cf8, full 48-row DOL dump.
+      pl0615: makeGRedFamilyRegistration(),
+      pl0629: makeGRedFamilyRegistration(),
+      pl062a: makeGRedFamilyRegistration(),
+      // NORMAL NINJA family (ctor 0x8006f4f8) — cue table @0x802d3ff8. SASUKE (pl000a)
+      // shares the entire family: the ctor differs only in the +0x4b0 descriptor.
+      pl0000: makeNinjaFamilyRegistration(),
+      pl000a: makeNinjaFamilyRegistration(),
+    };
   }
-  set(35, 0, 0x2b);
-  set(36, 0x2f, 0); // deploy (fb state 47)
-  set(43, 0, 0x3c);
-  set(44, 61, 0); // attack (ground records) → family root action
-  set(45, 61, 0); // attack (air/knockdown records) → same state 61
-  set(46, 0, 0x3e);
-  set(47, 0, 0x3f);
+  return FAMILY_REGISTRY_CACHE;
+}
+
+// ---- Fleet-wide DERIVED cue tables (familyCueTablesFull.json, 2026-07-06) ----
+// 119/119 family ctors' 48×2 cue→state tables dumped from boot.dol at each ctor's
+// +0x4f0 binding, byte-validated against the two hand-verified dumps (family 0 +
+// G RED, nn-family-decode-2026-07-06.md §A11). Rows 44 AND 45 → state 61 in ALL 119
+// families (the universal root-action trampoline). Three ctors carry per-borg
+// memberOverrides (variant sub-families binding a different table).
+
+interface CueTableFamilyEntry {
+  cueTable: string;
+  members: string[];
+  rows: number[][] | null;
+  memberOverrides?: Record<string, { cueTable: string; rows: number[][] | null }>;
+}
+const CUE_TABLE_FAMILIES = (familyCueTablesFullData as unknown as {
+  families: Record<string, CueTableFamilyEntry>;
+}).families;
+
+/** borgId → family ctor address (actionStreamTables.json). */
+const BORG_CTOR: Record<string, string | undefined> = (() => {
+  const data = actionStreamTablesData as unknown as { borgs: Record<string, { constructorAddress?: string }> };
+  const out: Record<string, string | undefined> = {};
+  for (const [borgId, b] of Object.entries(data.borgs || {})) out[borgId] = b.constructorAddress;
+  return out;
+})();
+
+/** The borg's REAL ROM cue table (per-borg override → family rows), as the Int8Array
+ *  shape dispatch.ts consumes. Null when the borg has no extracted family entry. */
+export function cueTableForBorg(borgId: string): Int8Array | null {
+  const ctor = BORG_CTOR[borgId];
+  if (!ctor) return null;
+  const fam = CUE_TABLE_FAMILIES[ctor];
+  if (!fam) return null;
+  const rows = fam.memberOverrides?.[borgId]?.rows ?? fam.rows;
+  if (!rows) return null;
+  const t = new Int8Array(96);
+  for (let i = 0; i < 48 && i < rows.length; i++) {
+    t[i * 2] = rows[i]![0]!;
+    t[i * 2 + 1] = rows[i]![1]!;
+  }
   return t;
 }
 
 function makeGRedFamilyRegistration(): FamilyRegistration {
-  const cueTable = makeFamily0BaseCueTable();
-  // G RED deltas vs the family-0 base (@0x80365cf8 dump).
-  cueTable[5 * 2] = 22;
-  cueTable[5 * 2 + 1] = 22;
-  cueTable[8 * 2] = 23;
-  cueTable[8 * 2 + 1] = 23;
-  cueTable[25 * 2] = 0;
-  cueTable[25 * 2 + 1] = 31;
-  cueTable[26 * 2] = 0;
-  cueTable[26 * 2 + 1] = 32;
   return {
     configure: (actor, ctx) => {
       const id = actor.borgNumber === 0x629 ? "pl0629" : actor.borgNumber === 0x62a ? "pl062a" : "pl0615";
       configureGRedFamily(actor, id as "pl0615" | "pl0629" | "pl062a", ctx);
     },
-    cueTable,
+    cueTable: cueTableForBorg("pl0615")!,
   };
 }
 
@@ -203,14 +218,14 @@ function makeNinjaFamilyRegistration(): FamilyRegistration {
       const id = actor.borgNumber === 0x00a ? "pl000a" : "pl0000";
       configureNinjaFamily(actor, id as "pl0000" | "pl000a", ctx);
     },
-    cueTable: makeFamily0BaseCueTable(),
+    cueTable: cueTableForBorg("pl0000")!,
   };
 }
 
 /** Returns true if a ROM family driver is registered for this borg-id. With the
  *  shared-engine fallback, borgs with decoded action-stream data also get a driver. */
 export function hasRomFamilyDriver(borgId: string): boolean {
-  return borgId in FAMILY_REGISTRY || borgId in ACTION_STREAM_BANKS;
+  return borgId in familyRegistry() || borgId in ACTION_STREAM_BANKS;
 }
 
 function makeDefaultCueTable(): Int8Array {
@@ -304,9 +319,11 @@ export class RomDriverBridge {
   /** Attach a bridge to a freshly-spawned BorgRuntime. Returns the bridge, or null if
    *  the borg has no ported family (caller keeps generic archetypes). */
   static attach(runtime: BorgRuntime, hostCtx: StreamContext): RomDriverBridge | null {
-    const reg = FAMILY_REGISTRY[runtime.borgId];
+    const reg = familyRegistry()[runtime.borgId];
     const actor = createRomActor();
-    actor.cueTable = reg?.cueTable ?? makeDefaultCueTable();
+    // Every borg gets its REAL family cue table when extracted (119/119 families);
+    // the hand-rolled default remains only as a last-resort fallback.
+    actor.cueTable = reg?.cueTable ?? cueTableForBorg(runtime.borgId) ?? makeDefaultCueTable();
     if (reg) {
       reg.configure(actor, hostCtx);
     } else {
@@ -395,10 +412,24 @@ export class RomDriverBridge {
     // For G RED family (custom handler): also run the ROM physics for the launch arc.
     // The custom handler sets velocities that stepMovement will integrate.
     if (this.actor.rootAction) {
+      const preX = runtime.pos.x;
+      const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
       dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex: 2, variantIndex: 0 });
       stepRomActor(this.actor, this.tables, this.ctx);
       this.syncOut(runtime);
+      // The shared-X blink-away reposition (phase 0's pos += (pos−target)×0.95) can
+      // teleport past the arena walls near stage edges — the ROM's own step runs the
+      // ground/wall collide (zz_00677b0_) right after; the port applies the host's
+      // bounds clamp + off-mesh revert here (same policy tick() documents).
+      if (this.bounds) {
+        runtime.pos.x = Math.min(this.bounds.maxX, Math.max(this.bounds.minX, runtime.pos.x));
+        runtime.pos.z = Math.min(this.bounds.maxZ, Math.max(this.bounds.minZ, runtime.pos.z));
+      }
+      if (this.offMeshCheck && !this.offMeshCheck(runtime.pos.x, runtime.pos.z)) {
+        runtime.pos.x = preX;
+        runtime.pos.z = preZ;
+      }
     }
     return true;
   }

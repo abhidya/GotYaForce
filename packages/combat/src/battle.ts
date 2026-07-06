@@ -12,6 +12,7 @@
 
 import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
+import { stepRomAI, hasRomAiParams } from "./romAi.js";
 import { RomDriverBridge } from "./bridge.js";
 import { registerGroundClamp } from "./rom/physics.js";
 import { applyHit } from "./combat.js";
@@ -542,7 +543,11 @@ class BattleImpl implements Battle {
         input = inputs[force.ownerPlayer] as PlayerInput;
       } else {
         const prof = profiles.get(b.uid);
-        input = prof ? stepAI(b, prof, all) : emptyInput();
+        input = prof
+          ? hasRomAiParams(b.borgId)
+            ? stepRomAI(b, prof, all)
+            : stepAI(b, prof, all)
+          : emptyInput();
       }
       resolved.set(b.uid, input);
     }

@@ -11,6 +11,7 @@ import { integratePhysics } from "./physics.js";
 import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
 import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
+import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
 import { RomDriverBridge } from "../bridge.js";
@@ -170,6 +171,73 @@ export function runSelfTest(): number {
       assert(t[5 * 2] === 6 && t[8 * 2] === 9, "family-0 deltas vs G RED (cue 5→6, cue 8→9)");
       assert(bridge.actor.rootAction !== null, "ninja rootAction configured");
     }
+  }
+
+  // Test 8: shared melee lunge (zz_00fed6c_) — phase flow + dash-speed formula.
+  console.log("\n[rom.selfcheck] shared-melee-lunge — dash speed max(range,dist)/frames:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const lunge = createSharedMeleeLunge(NINJA_LUNGE_CONFIG, ctx);
+    (a as RomActor & { lockTarget?: { x: number; y: number; z: number } }).lockTarget = { x: 0, y: 0, z: 400 };
+    lunge(a); // phase 0
+    assert(a.fbPhaseSlots[0] === 1, "phase 0 → 1 (aim)");
+    assert(a.streamSlot === NINJA_LUNGE_CONFIG.slotBase + 1, "stream cursor = slotBase+1 (+0x6ea++)");
+    lunge(a); // phase 1 → dash (facing instant with target)
+    assert(a.fbPhaseSlots[0] === 2, "phase 1 → 2 (dash)");
+    assert(approxEq(a.hSpeed, 400 / 20), "dash speed == max(150, 400)/20 = 20 (zz_00ff1ec_)");
+    // Close the distance → in-range transition to phase 3.
+    a.pos.z = 300; // dist 100 < range 150
+    lunge(a);
+    assert(a.fbPhaseSlots[0] === 3, "phase 2 → 3 when dist < range (FUN_800668cc gate)");
+    // B-retap → combo loop back to phase 2 with the next slot.
+    (a as RomActor & { bRetapInput?: boolean }).bRetapInput = true;
+    a.handlerTimer = 0;
+    const slotBefore = a.streamSlot;
+    lunge(a);
+    assert(a.fbPhaseSlots[0] === 2, "phase 3 retap → loop back to 2 (+0x540--)");
+    assert(a.streamSlot === slotBefore + 1, "combo loop advanced the stream cursor");
+  }
+
+  // Test 9: ninja B-combo machine A — swing bookkeeping + kunai throw.
+  console.log("\n[rom.selfcheck] families/ninja — B-combo (FUN_8006fb44) swing + kunai:");
+  {
+    const a = createRomActor();
+    let kunai = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & { onFamilyProjectile?: (x: RomActor, addr: number, type: number) => void } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { kunai = { addr, type }; },
+    };
+    configureNinjaFamily(a, "pl0000", ctx);
+    a.actionIndex = 0;
+    a.variantIndex = 0;
+    a.rootAction!(a); // phase 0
+    assert(a.fbPhaseSlots[0] === 1, "B-combo phase 0 → 1");
+    assert((a as RomActor & { swingsLeft?: number }).swingsLeft === 5, "5 swings seeded (zz_0070530_ +0x6ef)");
+    a.contactP0 = 1; // swing connected
+    a.rootAction!(a); // phase 1 → kunai + phase 2
+    assert(a.fbPhaseSlots[0] === 2, "contact → phase 2 (zz_0070558_)");
+    assert(kunai !== null && kunai!.addr === 0x8006ee14 && kunai!.type === 0,
+      "kunai thrown via zz_006ee14_ variant 0 (pl0000)");
+    assert((a as RomActor & { swingsLeft?: number }).swingsLeft === 4, "swings decremented");
+    // B held → loop restart.
+    (a as RomActor & { bHeld?: boolean }).bHeld = true;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 1, "B-held → combo loop back to phase 1 (slot-1 restart)");
+  }
+
+  // Test 10: ninja leap (action-1 v4) — corrected gravity term 2.0 × (−vy/30).
+  console.log("\n[rom.selfcheck] families/ninja — leap dive-slam constants:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureNinjaFamily(a, "pl0000", ctx);
+    a.actionIndex = 1;
+    a.variantIndex = 4;
+    a.rootAction!(a); // leap phase 0
+    assert(approxEq(a.yVel, 33.333), "leap jump impulse 33.333 (FLOAT-dump)");
+    assert(approxEq(a.gravityCoeff, 2.0 * (-33.333 / 30.0), 1e-3),
+      "gravity term = 2.0 × (−vy/30) (verify-pass-corrected, NOT 200.0)");
   }
 
   if (failures > 0) {
