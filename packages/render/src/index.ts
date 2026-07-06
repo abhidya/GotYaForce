@@ -175,11 +175,9 @@ export function prepareImportedModel(model: THREE.Object3D, options: ImportedMod
     if (options.groundY) model.position.y -= box.min.y;
   }
 
-  // TODO: reparent flattened mesh nodes under their skeleton bones. The HSD export
-  // puts Joint_N_Object_* as siblings of JOBJ_* bones. The correct mapping requires
-  // the per-model HSD joint table (undecoded). A heuristic (N % boneCount) maps to
-  // WRONG bones and deforms models. Do NOT enable until the joint table is decoded.
-  // reparentMeshesToBones(model);
+  // Rebuild the HSD joint table and reparent flattened "Joint_N_Object_*" display
+  // objects under their owning JOBJ bone (see reparentMeshesToBones for the mapping).
+  reparentMeshesToBones(model);
 
   model.traverse((object) => {
     if (!(object instanceof THREE.Mesh || object instanceof THREE.SkinnedMesh)) return;
@@ -234,37 +232,80 @@ function getRenderDiagnostics(renderer: THREE.WebGLRenderer, debugCapture: boole
   };
 }
 
-// Parked heuristic, not currently wired in (see call site above):
-// /** Reparent flattened mesh nodes under their skeleton bones. The HSD export puts
-//  *  "Joint_N_Object_*" meshes as siblings of "JOBJ_*" bones. This heuristic maps
-//  *  Joint_N → JOBJ_(N % boneCount) and preserves the world transform. */
-// function reparentMeshesToBones(model: THREE.Object3D): void {
-//   const bones: Array<{ name: string; obj: THREE.Object3D; index: number }> = [];
-//   const meshesToReparent: Array<{ node: THREE.Object3D; jointIndex: number }> = [];
-//   model.traverse((obj) => {
-//     const name = obj.name ?? "";
-//     const jobjMatch = /^JOBJ_(\d+)$/.exec(name);
-//     if (jobjMatch) {
-//       bones.push({ name, obj, index: parseInt(jobjMatch[1]!, 10) });
-//       return;
-//     }
-//     const jointMatch = /^Joint_(\d+)_Object/.exec(name);
-//     if (jointMatch) {
-//       meshesToReparent.push({ node: obj, jointIndex: parseInt(jointMatch[1]!, 10) });
-//     }
-//   });
-//   if (bones.length === 0 || meshesToReparent.length === 0) return;
-//   bones.sort((a, b) => a.index - b.index);
-//   const _m1 = new THREE.Matrix4();
-//   for (const { node, jointIndex } of meshesToReparent) {
-//     const boneIdx = jointIndex % bones.length;
-//     const targetBone = bones[boneIdx];
-//     if (!targetBone || targetBone.obj === node.parent) continue;
-//     node.updateWorldMatrix(true, false);
-//     targetBone.obj.updateWorldMatrix(true, false);
-//     _m1.copy(targetBone.obj.matrixWorld).invert().multiply(node.matrixWorld);
-//     node.matrix.copy(_m1);
-//     node.matrix.decompose(node.position, node.quaternion, node.scale);
-//     targetBone.obj.add(node);
-//   }
-// }
+/**
+ * Reparent flattened HSD mesh nodes under their controlling skeleton bones.
+ *
+ * The HSD→Collada→GLB export flattens every "Joint_N_Object_M" display object
+ * as a sibling of the JOBJ skeleton (a direct child of the scene root) instead
+ * of nesting it under its owning bone. With meshes parented to the root, only
+ * the root bone's whole-body motion reaches them; per-bone animation (weapon
+ * spin, limb swing) is invisible.
+ *
+ * HSD joints are indexed by a depth-first traversal of the JOBJ tree, and the
+ * exporter names each display object "Joint_<dfsIndex>_Object_<k>" for the bone
+ * that owns it (and each bone "JOBJ_<dfsIndex>"). We rebuild that joint table at
+ * load time by DFS-walking the JOBJ tree in preserved child order and mapping
+ * each mesh's Joint_N to the JOBJ at DFS position N. This matches the HSD joint
+ * table for every borg model without a per-model lookup and is robust to JOBJ
+ * name permutations. The mesh world transform is preserved, so the rest pose is
+ * unchanged; once parented, each mesh inherits its bone's relative animation.
+ */
+function reparentMeshesToBones(model: THREE.Object3D): void {
+  const jobjBones = new Set<THREE.Object3D>();
+  const meshesToReparent: Array<{ node: THREE.Object3D; jointIndex: number }> = [];
+  model.traverse((obj) => {
+    const name = obj.name ?? "";
+    if (/^JOBJ_\d+$/.test(name)) {
+      jobjBones.add(obj);
+      return;
+    }
+    const jointMatch = /^Joint_(\d+)_Object/.exec(name);
+    if (jointMatch) {
+      meshesToReparent.push({ node: obj, jointIndex: parseInt(jointMatch[1]!, 10) });
+    }
+  });
+  if (jobjBones.size === 0 || meshesToReparent.length === 0) return;
+
+  // The JOBJ root is the only bone with no JOBJ ancestor (it sits under the scene
+  // root, not under another bone).
+  let root: THREE.Object3D | null = null;
+  for (const bone of jobjBones) {
+    let ancestor = bone.parent;
+    let nested = false;
+    while (ancestor) {
+      if (jobjBones.has(ancestor)) {
+        nested = true;
+        break;
+      }
+      ancestor = ancestor.parent;
+    }
+    if (!nested) {
+      root = bone;
+      break;
+    }
+  }
+  if (!root) return;
+
+  // DFS the JOBJ tree in preserved child order → HSD joint index per bone.
+  const dfsIndexToBone = new Map<number, THREE.Object3D>();
+  const visit = (node: THREE.Object3D, cursor: { n: number }): void => {
+    dfsIndexToBone.set(cursor.n, node);
+    cursor.n += 1;
+    for (const child of node.children) {
+      if (jobjBones.has(child)) visit(child, cursor);
+    }
+  };
+  visit(root, { n: 0 });
+
+  const relative = new THREE.Matrix4();
+  for (const { node, jointIndex } of meshesToReparent) {
+    const targetBone = dfsIndexToBone.get(jointIndex);
+    if (!targetBone || targetBone === node.parent) continue;
+    node.updateWorldMatrix(true, false);
+    targetBone.updateWorldMatrix(true, false);
+    relative.copy(targetBone.matrixWorld).invert().multiply(node.matrixWorld);
+    node.matrix.copy(relative);
+    node.matrix.decompose(node.position, node.quaternion, node.scale);
+    targetBone.add(node);
+  }
+}
