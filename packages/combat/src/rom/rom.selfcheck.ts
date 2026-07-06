@@ -612,6 +612,73 @@ export function runSelfTest(): number {
     }
   }
 
+  // Test 25: DEMON SAMURAI family — bridge cue-table attach for all 4 members
+  // (ctor 0x801223c0, cue table @0x8032d4d8). SHARED registration: the X-special
+  // routes through zz_0149708_ (shared group-4 engine, phaseTable 0x8033ed3c); no
+  // bespoke family module. Verify each member attaches, gets the family cue table,
+  // and resolves rootAction via the shared-engine config.
+  console.log("\n[rom.selfcheck] families/samurai — bridge cue-table (0x8032d4d8):");
+  {
+    const members: Array<{ id: string; num: number }> = [
+      { id: "pl0701", num: 0x701 }, // DEAMON SAMURAI
+      { id: "pl0708", num: 0x708 }, // AKUMA SAMURAI
+      { id: "pl070c", num: 0x70c }, // DEATH BORG ZETA III
+      { id: "pl070d", num: 0x70d }, // DEATH BORG ZETA IV
+    ];
+    for (const { id, num } of members) {
+      const runtime = {
+        borgId: id, team: 0, uid: "t",
+        pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+        rotY: 0, grounded: true, cooldowns: {},
+      } as unknown as BorgRuntime;
+      const bridge = RomDriverBridge.attach(runtime, { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+      assert(bridge !== null, `RomDriverBridge attaches for ${id} (family registered)`);
+      if (bridge) {
+        const t = bridge.actor.cueTable!;
+        assert(t[44 * 2] === 61 && t[45 * 2] === 61,
+          `${id}: cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)`);
+        assert(bridge.actor.rootAction !== null, `${id}: shared-engine rootAction configured`);
+        assert(bridge.actor.borgNumber === num, `${id}: borgNumber stamped 0x${num.toString(16)} via bridge attach`);
+        // cue 36 → [47, 0] (deploy state) — same shape as Flame Dragon + Machine Red.
+        assert(t[36 * 2] === 47, `${id}: cue row 36 → full-body state 47 (deploy)`);
+      }
+    }
+  }
+
+  // Test 25: MACHINE BLUE family — bridge cue-table attach for all 4 members
+  // (ctor 0x800ce730, cue table @0x8030c9c8). SHARED registration: the X-special
+  // routes through zz_0179fcc_ (shared group-4 engine, phaseTable 0x80352b64); no
+  // bespoke family module. The action-2 leaf FUN_800cf9cc is a thin wrapper (halves
+  // steerYaw, tail-calls the shared engine). Verify each member attaches, gets the
+  // family cue table, and resolves rootAction via the shared-engine config.
+  console.log("\n[rom.selfcheck] families/machine-blue — bridge cue-table (0x8030c9c8):");
+  {
+    const members: Array<{ id: string; num: number }> = [
+      { id: "pl0601", num: 0x601 }, // MACHINE BLUE
+      { id: "pl0609", num: 0x609 }, // CYBER ATLAS
+      { id: "pl0617", num: 0x617 }, // PROTO BLUE
+      { id: "pl061d", num: 0x61d }, // PROTO ATLAS
+    ];
+    for (const { id, num } of members) {
+      const runtime = {
+        borgId: id, team: 0, uid: "t",
+        pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 },
+        rotY: 0, grounded: true, cooldowns: {},
+      } as unknown as BorgRuntime;
+      const bridge = RomDriverBridge.attach(runtime, { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+      assert(bridge !== null, `RomDriverBridge attaches for ${id} (family registered)`);
+      if (bridge) {
+        const t = bridge.actor.cueTable!;
+        assert(t[44 * 2] === 61 && t[45 * 2] === 61,
+          `${id}: cue rows 44 AND 45 → full-body state 61 (universal attack trampoline)`);
+        assert(bridge.actor.rootAction !== null, `${id}: shared-engine rootAction configured`);
+        assert(bridge.actor.borgNumber === num, `${id}: borgNumber stamped 0x${num.toString(16)} via bridge attach`);
+        // cue 36 → [47, 0] (deploy state) — same shape as Machine Red + Flame Dragon families.
+        assert(t[36 * 2] === 47, `${id}: cue row 36 → full-body state 47 (deploy)`);
+      }
+    }
+  }
+
   if (failures > 0) {
     console.error(`\n[rom.selfcheck] ${failures} FAILURES`);
     return 1;

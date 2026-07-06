@@ -205,6 +205,26 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0608: makeMachineRedFamilyRegistration(),
       pl0616: makeMachineRedFamilyRegistration(),
       pl061c: makeMachineRedFamilyRegistration(),
+      // MACHINE BLUE family (ctor 0x800ce730) — cue table @0x8030c9c8. The four
+      // machine borgs (MACHINE BLUE/CYBER ATLAS/PROTO BLUE/PROTO ATLAS) share the
+      // X-special engine zz_0179fcc_ (phaseTable 0x80352b64, group 4 seed slot 0 /
+      // air slot 1) — the same shared group-4 X-special engine family used by 12+
+      // other borgs. Action-2 leaf FUN_800cf9cc (chunk_0021.c:4080) is a thin wrapper
+      // that halves steerYaw (+0x18da >>= 1) then tail-calls the shared engine; no
+      // bespoke family phase logic, so this is a SHARED registration: cue table +
+      // shared-engine X config, no family module.
+      pl0601: makeMachineBlueFamilyRegistration(),
+      pl0609: makeMachineBlueFamilyRegistration(),
+      pl0617: makeMachineBlueFamilyRegistration(),
+      pl061d: makeMachineBlueFamilyRegistration(),
+      // DEMON SAMURAI family (ctor 0x801223c0) — cue table @0x8032d4d8. The X-special
+      // routes through the shared engine zz_0149708_ (phase table 0x8033ed3c), shared by
+      // 10 borgs across multiple families — no bespoke family module. All 4 members share
+      // ctor 0x801223c0 + group-4 seedSlot 0 (actionStreamTables).
+      pl0701: makeSamuraiFamilyRegistration(),
+      pl0708: makeSamuraiFamilyRegistration(),
+      pl070c: makeSamuraiFamilyRegistration(),
+      pl070d: makeSamuraiFamilyRegistration(),
     };
   }
   return FAMILY_REGISTRY_CACHE;
@@ -339,6 +359,32 @@ function makeMachineRedFamilyRegistration(): FamilyRegistration {
   };
 }
 
+// MACHINE BLUE family (ctor 0x800ce730) — cue table @0x8030c9c8. The X-special ROUTES
+// THROUGH THE SHARED ENGINE zz_0179fcc_ (phaseTable 0x80352b64, chunk_0044.c:4185):
+// action-2 handler FUN_800cf990 (chunk_0021.c:4071) dispatches the variant table
+// PTR_FUN_8030cef8 — all 5 variants route to leaf 0x800cf9cc, which halves steerYaw
+// (+0x18da >>= 1) then tail-calls zz_0179fcc_. The shared engine consumes the config
+// block @0x8030cf0c (seedSlot 0 ground / 1 air, group 4). pl0601/pl0609/pl0617/pl061d
+// all bind the same config (actionStreamTables.json confirms identical leaf + engine
+// + phaseTable across the 4 members). No bespoke family phase logic (contrast CYBER
+// MACHINE's ammo-gated shot deploy), so this is a SHARED registration: cue table +
+// shared-engine X config, no family module. The borgNumber stamp below is overwritten
+// by RomDriverBridge.attach (line `actor.borgNumber = borgIdToNumber(runtime.borgId)`)
+// so the per-member number (0x601/0x609/0x617/0x61d) is set correctly post-configure.
+function makeMachineBlueFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor) => {
+      actor.borgNumber = 0x601;
+      actor.rootAction = createSharedEngineRootAction({
+        xSpecial: DEFAULT_CONFIGS.dashAttack(0),
+      });
+      actor.defaultGroup = 0;
+      actor.streamSlot = 0;
+    },
+    cueTable: cueTableForBorg("pl0601")!,
+  };
+}
+
 function makeCyberMachineFamilyRegistration(): FamilyRegistration {
   return {
     configure: (actor, ctx) => {
@@ -370,6 +416,27 @@ function makeDragonFamilyRegistration(): FamilyRegistration {
       configureDragonFamily(actor, id as "pl0500" | "pl0509" | "pl050a" | "pl050c" | "pl0515" | "pl0516", ctx);
     },
     cueTable: cueTableForBorg("pl0500")!,
+  };
+}
+
+// DEMON SAMURAI family (ctor 0x801223c0) — cue table @0x8032d4d8. The X-special ROUTES
+// THROUGH THE SHARED ENGINE zz_0149708_ (phase table 0x8033ed3c, chunk_0038.c:2356):
+// action-2 handler FUN_80123390 (chunk_0033.c:1549) dispatches PTR_FUN_8032c800[+0x581]
+// whose sole entry is the leaf FUN_801233cc (chunk_0033.c:1558) — a one-line tail-call
+// to zz_0149708_. That engine is a GENERIC config-struct-driven lunge shared by 10 borgs
+// across multiple families (pl0700-070d, confirmed via actionStreamTables engine audit),
+// so this is a SHARED registration: cue table + shared-engine X config, no family module.
+// All 4 members (pl0701/pl0708/pl070c/pl070d) share ctor 0x801223c0 + group-4 seedSlot 0.
+function makeSamuraiFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor) => {
+      actor.rootAction = createSharedEngineRootAction({
+        xSpecial: DEFAULT_CONFIGS.dashAttack(0),
+      });
+      actor.defaultGroup = 0;
+      actor.streamSlot = 0;
+    },
+    cueTable: cueTableForBorg("pl0701")!,
   };
 }
 
