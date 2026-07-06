@@ -111,6 +111,12 @@ export interface RomActor {
   // ===== Family virtuals + descriptor (set by each family ctor) =====
   /** +0x4b4: family root action dispatcher (state 61 calls this; G RED = zz_018d24c_). */
   rootAction: ((actor: RomActor) => void) | null;
+  /** Port-side flag (no ROM offset): true when the family's rootAction wires a B-charge
+   *  handler at actionIndex 3. Set by family configure closures (G RED's
+   *  createGRedRootAction, shared-engine when bCharge is wired). The bridge's
+   *  tryStartBAttack reads this to decide whether to intercept B presses for the ROM
+   *  phase machine instead of falling through to the generic startShotAttack/startMeleeAttack. */
+  hasBCharge: boolean;
   /** +0x4b8: family upper-body virtual. */
   upperBody: ((actor: RomActor) => void) | null;
   /** +0x4bc: pre-state virtual (FUN_80055568:7793). */
@@ -239,7 +245,7 @@ export function createRomActor(): RomActor {
     ubCue: 0, fbCue: 0, controlWord: 0,
     actionIndex: 0, variantIndex: 0, prevActionIndex: 0,
     cmdButton: 0, cmdSubtype: 0, cmdChargedRanged: 0,
-    rootAction: null, upperBody: null, preState: null, postState: null,
+    rootAction: null, hasBCharge: false, upperBody: null, preState: null, postState: null,
     descriptor: null, commandTable: null, cueTable: null,
     familyStreamBank: null, sharedStreamBank: null,
     familyAnimDescBank: null, sharedAnimDescBank: null, soundEventTable: null,

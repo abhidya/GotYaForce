@@ -896,6 +896,11 @@ export class RomDriverBridge {
   }
   /** True while the ROM state machine is mid-special. */
   private specialActive = false;
+  /** True when the ROM phase machine owns the borg's per-frame motion (B-charge's 4-phase
+   *  zz_0179814_ machine). When true, tick() calls stepRomActor each frame and returns true
+   *  so battle.ts skips stepMovement/stepAttacks. False for X-specials (which compose with
+   *  normal movement — tick() returns false and only layers stream events). */
+  private romOwnedSpecial = false;
   private runtime: BorgRuntime | null = null;
 
   private constructor(actor: RomActor, ctx: StreamContext) {
@@ -1057,6 +1062,56 @@ export class RomDriverBridge {
     return true;
   }
 
+  /** Called from combat.ts's B-attack branch (before startShotAttack/startMeleeAttack).
+   *  Returns true if the ROM family's B-charge phase machine (zz_0179814_) handled the
+   *  press — the caller skips the generic melee/shot path. Only intercepts when the borg's
+   *  family explicitly wires a B-charge handler (RomActor.hasBCharge). Subsequent `tick`
+   *  calls advance the 4-phase machine each frame (ROM owns motion until recovery). */
+  tryStartBAttack(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean {
+    if (this.specialActive) return false;
+    if (!this.actor.hasBCharge) return false; // no ROM B-charge handler → generic path
+    this.runtime = runtime;
+    this.romOwnedSpecial = true;
+    this.armedHits = [];
+    this.streamFrame = 0;
+    // Load pre-decoded stream events for the group-4 charge choreography (anim + fireChild).
+    this.streamEvents = streamEventsFor(runtime.borgId);
+    this.specialMaxFrames = 90; // generous ceiling; the phase machine's exit clears it sooner
+    // Fire frame-0 events immediately (armHit + playAnim).
+    this.dispatchEvent(0);
+    this.streamFrame = 1;
+    runtime.cooldowns["romSpecialActive"] = 1;
+    this.specialActive = true;
+    // Arm the action-mode bits so the phase-3 exit (controlWord &= ~0x3) can signal
+    // completion. The ROM sets these on entering attack state (cue 44 → state 61).
+    this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
+    // Run phase 0 immediately (same pattern as tryStartXSpecial): syncIn → dispatch the
+    // command record (actionIndex 3 = B-charge) → stepRomActor (runs rootAction → phase 0)
+    // → syncOut → bounds/ground clamps.
+    const preX = runtime.pos.x;
+    const preZ = runtime.pos.z;
+    this.syncIn(runtime, all);
+    dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex: 3, variantIndex: 0 });
+    stepRomActor(this.actor, this.tables, this.ctx);
+    this.syncOut(runtime);
+    if (this.bounds) {
+      runtime.pos.x = Math.min(this.bounds.maxX, Math.max(this.bounds.minX, runtime.pos.x));
+      runtime.pos.z = Math.min(this.bounds.maxZ, Math.max(this.bounds.minZ, runtime.pos.z));
+    }
+    if (this.offMeshCheck && !this.offMeshCheck(runtime.pos.x, runtime.pos.z)) {
+      runtime.pos.x = preX;
+      runtime.pos.z = preZ;
+    }
+    if (this.groundClamp) {
+      const clamped = this.groundClamp(runtime.pos, runtime.vel.y);
+      if (clamped.y > runtime.pos.y) {
+        runtime.pos.y = clamped.y;
+        runtime.vel.y = Math.max(0, runtime.vel.y);
+      }
+    }
+    return true;
+  }
+
   /** Called from battle.ts before stepMovement/stepAttacks. Returns true ONLY when the
    *  ROM driver needs to exclusively own the borg's motion (G RED's G Crash fly-up
    *  arc). For shared-engine borgs, returns false — stepMovement + stepAttacks run
@@ -1065,6 +1120,53 @@ export class RomDriverBridge {
   tick(runtime: BorgRuntime, _dt: number, all: readonly BorgRuntime[]): boolean {
     if (!this.specialActive) return false;
     this.runtime = runtime;
+
+    // --- ROM-owned multi-frame machine (B-charge zz_0179814_): advance the 4-phase
+    //     state machine each tick. Phase 0 armed in tryStartBAttack; phases 1-3 advance
+    //     here via stepRomActor → rootAction → phase-table dispatch. Returns true so
+    //     battle.ts skips stepMovement/stepAttacks (the ROM owns motion + facing). ---
+    if (this.romOwnedSpecial) {
+      const preX = runtime.pos.x;
+      const preZ = runtime.pos.z;
+      this.syncIn(runtime, all);
+      // Re-dispatch the command record each frame so rootAction fires under state 61.
+      dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex: 3, variantIndex: 0 });
+      stepRomActor(this.actor, this.tables, this.ctx);
+      this.syncOut(runtime);
+      if (this.bounds) {
+        runtime.pos.x = Math.min(this.bounds.maxX, Math.max(this.bounds.minX, runtime.pos.x));
+        runtime.pos.z = Math.min(this.bounds.maxZ, Math.max(this.bounds.minZ, runtime.pos.z));
+      }
+      if (this.offMeshCheck && !this.offMeshCheck(runtime.pos.x, runtime.pos.z)) {
+        runtime.pos.x = preX;
+        runtime.pos.z = preZ;
+      }
+      if (this.groundClamp) {
+        const clamped = this.groundClamp(runtime.pos, runtime.vel.y);
+        if (clamped.y > runtime.pos.y) {
+          runtime.pos.y = clamped.y;
+          runtime.vel.y = Math.max(0, runtime.vel.y);
+        }
+      }
+      // Stream events (anim + hitbox + fireChild) for this frame.
+      this.dispatchEvent(this.streamFrame);
+      this.streamFrame++;
+      this.resolveHits(runtime, all);
+      // Completion: the phase machine's phase-3 exit clears +0x5e0's action bits
+      // (controlWord &= ~0x3). Detect that OR the max-frame safety timeout.
+      const phaseDone = (this.actor.controlWord & 0x3) === 0 && this.streamFrame > 2;
+      if (phaseDone || this.streamFrame >= this.specialMaxFrames) {
+        this.specialActive = false;
+        this.romOwnedSpecial = false;
+        this.armedHits = [];
+        this.streamEvents = null;
+        runtime.cooldowns["romSpecialActive"] = 0;
+      }
+      return true; // ROM owns this frame — skip stepMovement/stepAttacks
+    }
+
+    // --- X-special path: layer stream events on top of normal movement (tick returns
+    //     false → stepMovement + stepAttacks run normally). ---
     // Play pre-decoded stream events for this frame (anim + hitbox arming).
     this.dispatchEvent(this.streamFrame);
     this.streamFrame++;
@@ -1206,6 +1308,7 @@ export class RomDriverBridge {
    *  "hit"/"down" which overrides whatever the ROM driver was doing. */
   interrupt(): void {
     this.specialActive = false;
+    this.romOwnedSpecial = false;
     this.armedHits = [];
     if (this.actor.fbState === 61) {
       dispatchFullBodyCue(this.actor, 0);

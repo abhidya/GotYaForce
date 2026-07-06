@@ -234,6 +234,12 @@ export function createSharedEngineRootAction(
   };
 }
 
+/** Whether the shared-engine root action wires a B-charge handler at actionIndex 3.
+ *  Family configure closures call this to stamp RomActor.hasBCharge. */
+export function sharedEngineHasBCharge(table: SharedEngineActionTable): boolean {
+  return !!table.bCharge;
+}
+
 /** Default config templates for common attack shapes. These are STARTING points —
  *  each family overrides with its actual config struct data from boot.dol. */
 export const DEFAULT_CONFIGS = {

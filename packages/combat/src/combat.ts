@@ -1825,6 +1825,18 @@ export function stepAttacks(
   // --- Attack (B): asset-backed per-borg primary action, generic fallback-safe -------
   // contextTarget/meleeEngaged were computed above (they also feed the command resolution).
   if (canStartAction && (attackHeld || releasedAttack)) {
+    // ROM-family B-charge driver (zz_0179814_): if the borg's ported family wires a
+    // B-charge handler (RomActor.hasBCharge), delegate the B press to its 4-phase
+    // stream-event-driven machine instead of the generic chargeFrames/melee/shot path.
+    // Fires on the press edge (attackHeld && cooldown clear) so phase 0 (windup) starts
+    // immediately; subsequent ticks advance via romDriver.tick (romOwnedSpecial=true).
+    if (
+      attackHeld &&
+      (b.cooldowns["shot"] ?? 0) <= 0 &&
+      b.romDriver?.tryStartBAttack(b, all)
+    ) {
+      return { projectiles: out };
+    }
     const order = resolveBActionOrder(
       b,
       actionProfile,

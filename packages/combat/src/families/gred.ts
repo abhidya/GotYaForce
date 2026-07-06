@@ -20,6 +20,7 @@ import {
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { createSharedMeleeGRed, GRED_MELEE_CONFIG } from "./shared-melee-gred.js";
+import { createSharedCharge, GRED_CHARGE_CONFIG } from "./shared-charge.js";
 
 // Motion constants — every value read from boot.dol this session.
 const G_RED_CRASH = {
@@ -226,7 +227,7 @@ export function createGRedRootAction(ctx: GRedFamilyCtx): (actor: RomActor) => v
     null,          // 0: dash attack (zz_018d288_) — TODO port
     createSharedMeleeGRed(GRED_MELEE_CONFIG, ctx), // 1: B melee (zz_0177dd8_ shared engine)
     (actor) => gredXHandler(actor, ctx), // 2: X / air-B (G Crash)
-    null,          // 3: B charge (FUN_8018ed4c) — TODO port
+    createSharedCharge(GRED_CHARGE_CONFIG, ctx), // 3: B charge (zz_0179814_ shared engine)
     null,          // 4: (FUN_8018ee84) — TODO identify
   ];
   return (actor: RomActor) => {
@@ -246,6 +247,7 @@ export function configureGRedFamily(
 ): void {
   actor.borgNumber = borgId === "pl0615" ? 0x615 : borgId === "pl0629" ? 0x629 : 0x62a;
   actor.rootAction = createGRedRootAction(ctx);
+  actor.hasBCharge = true; // actionTable[3] = createSharedCharge (zz_0179814_)
   // cueTable, commandTable, descriptor, familyStreamBank are set by the spawn layer
   // from the per-family extracted data (cue-script-stream-decode §1 + commandMoveTables).
   // Defaults that match G RED's power-on state:

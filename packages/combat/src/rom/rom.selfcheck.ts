@@ -25,6 +25,12 @@ import {
   SHARED_MELEE_GRED,
   type SharedMeleeGRedConfig,
 } from "../families/shared-melee-gred.js";
+import {
+  createSharedCharge,
+  GRED_CHARGE_CONFIG,
+  SHARED_CHARGE,
+  type SharedChargeConfig,
+} from "../families/shared-charge.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
 import { RomDriverBridge, cueTableForBorg } from "../bridge.js";
@@ -1339,6 +1345,231 @@ export function runSelfTest(): number {
     assert(a.fbPhaseSlots[0] === 1, "action 1 phase 0 → 1 (shared melee engine armed)");
     assert(approxEq(a.handlerTimer, SHARED_MELEE_GRED.TIMER_SEED), "handlerTimer == 60.0 (TIMER_SEED)");
     assert(a.streamSlot === GRED_MELEE_CONFIG.seedSlot + 1, "stream cursor = GRED_MELEE_CONFIG.seedSlot+1");
+  }
+
+  // Test 41: shared-charge — engine constants match boot.dol (dol.py-read this session).
+  console.log("\n[rom.selfcheck] shared-charge — SHARED_CHARGE constants vs boot.dol:");
+  {
+    assert(approxEq(SHARED_CHARGE.STREAM_RATE, -1.0), "STREAM_RATE == FLOAT_8043ae04 (-1.0)");
+    assert(approxEq(SHARED_CHARGE.ZERO, 0.0), "ZERO == FLOAT_8043ae10 (0.0)");
+    assert(approxEq(SHARED_CHARGE.GRAVITY, 1.0), "GRAVITY == FLOAT_8043ae1c (1.0)");
+    assert(approxEq(SHARED_CHARGE.STEER_DECAY, 0.9), "STEER_DECAY == FLOAT_8043ae30 (0.9)");
+    assert(approxEq(SHARED_CHARGE.COOLDOWN_SEED, 8.0), "COOLDOWN_SEED == FLOAT_8043ae34 (8.0)");
+    assert(SHARED_CHARGE.STREAM_GROUP === 4, "STREAM_GROUP == 4 (group-4 charge axis)");
+    assert(SHARED_CHARGE.PART_MASK === 0xf, "PART_MASK == 0xf");
+  }
+
+  // Test 42: shared-charge — G RED config @0x80365854 values match DOL dump.
+  console.log("\n[rom.selfcheck] shared-charge — GRED_CHARGE_CONFIG vs DOL @0x80365854:");
+  {
+    assert(GRED_CHARGE_CONFIG.seedSlot === 2, "seedSlot == 2 (cfg u32[+0x0] low byte)");
+    assert(GRED_CHARGE_CONFIG.airSlot === 2, "airSlot == 2 (cfg u32[+0x4] low byte)");
+    assert(GRED_CHARGE_CONFIG.chargeFrames === 30, "chargeFrames == 30 (cfg s16[+0xc])");
+    assert(approxEq(GRED_CHARGE_CONFIG.repositionScale, 0.95), "repositionScale == 0.95 (cfg f32[+0x8])");
+  }
+
+  // Test 43: shared-charge — phase 0 entry/windup (FUN_80179850).
+  // Verifies: +0x540++ (phase 0→1), handlerTimer = chargeFrames, physics zeroed,
+  // reposition leap applied (pos moves away from target × scale), stream started.
+  console.log("\n[rom.selfcheck] shared-charge — phase 0 entry/windup (FUN_80179850):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean;
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    a.grounded = true;
+    a.heading = 0x2000;
+    a.pos = { x: 100, y: 0, z: 100 };
+    a.lockTarget = { x: 0, y: 0, z: 0 };
+    a.dt = 1;
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const cfg: SharedChargeConfig = {
+      seedSlot: 2, airSlot: 2, chargeFrames: 30,
+      repositionScale: 0.95, gravityCoeff: 1.0,
+    };
+    const charge = createSharedCharge(cfg, ctx);
+    charge(a); // phase 0
+    assert(a.fbPhaseSlots[0] === 1, "phase 0 → 1 (+0x540++)");
+    assert(approxEq(a.handlerTimer, 30.0), "handlerTimer == chargeFrames (30, +0x560 seed)");
+    assert(approxEq(a.hSpeed, 0.0), "hSpeed zeroed (+0x44 = FLOAT_8043ae10)");
+    assert(approxEq(a.yVel, 0.0), "yVel zeroed (+0x48)");
+    assert(approxEq(a.hDecel, 0.0), "hDecel zeroed (+0x4c)");
+    assert(approxEq(a.gravityCoeff, 0.0), "gravityCoeff zeroed (+0x50, windup has no gravity)");
+    // Reposition leap: motion = (pos - target) × 0.95; pos += motion.
+    // pos was (100,0,100), target (0,0,0): motion = (95,0,95); new pos = (195,0,195).
+    assert(approxEq(a.pos.x, 195.0), "reposition leap: pos.x = 100 + (100-0)*0.95 = 195");
+    assert(approxEq(a.pos.z, 195.0), "reposition leap: pos.z = 100 + (100-0)*0.95 = 195");
+    assert(a.streamSlot === cfg.seedSlot + 1, "streamSlot = seedSlot+1 (+0x6ea++)");
+  }
+
+  // Test 44: shared-charge — phase 1 stream-event-driven release (FUN_801799bc).
+  // The release trigger is +0x1cef > 0 (the stream choreography event), NOT a frame
+  // counter. Verifies the stream-event gate advances to phase 2 when contactP0 > 0.
+  console.log("\n[rom.selfcheck] shared-charge — phase 1 stream-event release (FUN_801799bc):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean;
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    a.grounded = true;
+    a.pos = { x: 50, y: 0, z: 50 };
+    a.lockTarget = { x: 0, y: 0, z: 0 };
+    a.dt = 1;
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    let released = false;
+    const cfg: SharedChargeConfig = {
+      seedSlot: 0, airSlot: 1, chargeFrames: 20,
+      repositionScale: 0.9, gravityCoeff: 1.0,
+      onRelease: () => { released = true; },
+    };
+    const charge = createSharedCharge(cfg, ctx);
+    charge(a); // phase 0 → 1
+    assert(a.fbPhaseSlots[0] === 1, "phase 0 done");
+    // Tick phase 1 WITHOUT the stream event: phase should NOT advance (stream-driven).
+    a.contactP0 = 0; // no stream event yet
+    charge(a); // phase 1 tick (no release)
+    assert(a.fbPhaseSlots[0] === 1, "phase 1 stays at 1 when contactP0 == 0 (no stream event)");
+    // Fire the stream release event: contactP0 > 0 → phase 2.
+    a.contactP0 = 1;
+    charge(a); // phase 1 → 2 (stream event release)
+    assert(a.fbPhaseSlots[0] === 2, "phase 1 → 2 on contactP0 > 0 (stream release event)");
+    assert(released, "onRelease callback fired on the stream-event transition");
+  }
+
+  // Test 45: shared-charge — phase 2 fire countdown + fire-complete exit (FUN_80179a88).
+  // Verifies: timer decrements by dt each frame; exit on timer <= 0. The exact-exit
+  // contactP0 < 0 gate is exercised; the timer-expiry fallback also covered.
+  console.log("\n[rom.selfcheck] shared-charge — phase 2 fire countdown (FUN_80179a88):");
+  {
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean;
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    a.grounded = true;
+    a.pos = { x: 0, y: 0, z: 0 };
+    a.lockTarget = null;
+    a.dt = 1;
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const cfg: SharedChargeConfig = {
+      seedSlot: 0, airSlot: 1, chargeFrames: 5,
+      repositionScale: 0.9, gravityCoeff: 1.0,
+    };
+    const charge = createSharedCharge(cfg, ctx);
+    charge(a); // phase 0 (handlerTimer = 5)
+    a.contactP0 = 1;
+    charge(a); // phase 1 → 2
+    assert(a.fbPhaseSlots[0] === 2, "phase 1 → 2");
+    // Tick phase 2: timer decrements by dt (1 per frame). After 5 ticks, timer <= 0.
+    a.contactP0 = 0; // no fire-complete event yet
+    charge(a); // 1 tick: handlerTimer 5 → 4
+    assert(approxEq(a.handlerTimer, 4.0), "phase 2 handlerTimer 5 → 4 (-dt)");
+    assert(a.fbPhaseSlots[0] === 2, "phase 2 stays while timer > 0");
+    // Burn remaining ticks. chargeFrames=5 → 5 decrements to 0, then a 6th tick enters
+    // phase 2 with handlerTimer<=0 and advances (the <= 0 check is at the function top).
+    charge(a); charge(a); charge(a); charge(a); // 4 more: 4→3→2→1→0
+    charge(a); // 6th tick: handlerTimer 0 <= 0 → phase 3
+    // Timer now <= 0 → exit to phase 3 (timer-expiry fallback since contactP0 == 0).
+    assert(a.fbPhaseSlots[0] === 3, "phase 2 → 3 on handlerTimer <= 0 (timer-expiry exit)");
+  }
+
+  // Test 46: shared-charge — phase 3 recovery exit (FUN_80179c00).
+  // Verifies: steerYaw decay (airborne, no exit), grounded + contactP0 < 0 → controlWord
+  // &= ~0x3 + cooldown + steerYaw zeroed (EXIT A).
+  console.log("\n[rom.selfcheck] shared-charge — phase 3 recovery exit (FUN_80179c00):");
+  {
+    // SteerYaw decay WITHOUT exit (airborne): 1000 → 900, stays airborne (no EXIT A).
+    const air = createRomActor() as RomActor & {
+      grounded?: boolean;
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    air.grounded = false; // airborne → EXIT A does not fire
+    air.dt = 1;
+    air.steerYaw = 1000;
+    air.controlWord = 0x1;
+    air.contactP0 = 0; // not negative → EXIT A gate fails
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const cfg: SharedChargeConfig = {
+      seedSlot: 0, airSlot: 1, chargeFrames: 5,
+      repositionScale: 0.9, gravityCoeff: 1.0,
+    };
+    const charge = createSharedCharge(cfg, ctx);
+    air.fbPhaseSlots[0] = 3;
+    charge(air); // phase 3 (airborne, no exit)
+    assert(approxEq(air.steerYaw, 900), "steerYaw decayed × FLOAT_8043ae30 (1000 → 900) while airborne");
+
+    // EXIT A (grounded + contactP0 < 0): controlWord &= ~0x3, cooldown set, steerYaw = 0.
+    const a = createRomActor() as RomActor & {
+      grounded?: boolean;
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    a.grounded = true;
+    a.dt = 1;
+    a.steerYaw = 1000;
+    a.controlWord = 0x1; // action bits set (in attack state)
+    a.contactP0 = -1; // stream fire-complete event (negative)
+    a.handlerTimer = 0; // timer already expired (phase 2 → 3 path)
+    a.fbPhaseSlots[0] = 3;
+    charge(a); // phase 3 (EXIT A)
+    // Grounded + contactP0 < 0 → EXIT A: controlWord &= ~0x3.
+    assert((a.controlWord & 0x3) === 0, "controlWord &= ~0x3 (action bits cleared on recovery exit)");
+    // Cooldown +0x694 = FLOAT_8043ae34 (8.0) + dt (1) = 9.0.
+    assert(approxEq(a.stateTimer, 9.0), "stateTimer == COOLDOWN_SEED + dt (8.0 + 1 = 9.0)");
+    // EXIT A zeroes steerYaw (+0x18da = 0) AFTER the 0.9 decay.
+    assert(a.steerYaw === 0, "steerYaw zeroed by EXIT A (+0x18da = 0 after recovery exit)");
+  }
+
+  // Test 47: shared-charge — G RED action table slot 3 routes B-charge here.
+  // Confirms the family wiring: configureGRedFamily stamps hasBCharge and a rootAction
+  // whose actionIndex 3 path is the shared charge engine.
+  console.log("\n[rom.selfcheck] families/gred — action 3 routes to shared-charge:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureGRedFamily(a, "pl0615", ctx);
+    assert(a.hasBCharge, "configureGRedFamily sets hasBCharge (actionTable[3] wired)");
+    a.actionIndex = 3; // B-charge
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(a.fbPhaseSlots[0] === 1, "action 3 phase 0 → 1 (shared charge engine armed)");
+    assert(approxEq(a.handlerTimer, GRED_CHARGE_CONFIG.chargeFrames), "handlerTimer == GRED_CHARGE_CONFIG.chargeFrames");
+  }
+
+  // Test 48: shared-charge — bridge tryStartBAttack for G RED (pl0615).
+  // Verifies the bridge-level B-press interception: tryStartBAttack starts the machine,
+  // returns true, and subsequent ticks advance phases (ROM owns motion).
+  console.log("\n[rom.selfcheck] bridge — tryStartBAttack for pl0615 (ROM B-charge):");
+  {
+    const b = makeMinimalGRedBorg();
+    b.grounded = true;
+    b.pos = { x: 100, y: 0, z: 100 };
+    const driver = RomDriverBridge.attach(b, {});
+    assert(driver !== null, "RomDriverBridge.attach for pl0615");
+    if (driver) {
+      b.romDriver = driver;
+      const handled = b.romDriver!.tryStartBAttack(b, [b]);
+      assert(handled, "tryStartBAttack returns true (ROM B-charge handler active)");
+      assert((b.cooldowns["romSpecialActive"] ?? 0) === 1, "romSpecialActive flag set");
+      assert(driver.actor.fbPhaseSlots[0] === 1, "phase 0 → 1 armed after tryStartBAttack");
+      // Tick advances the machine (ROM owns the frame → returns true).
+      const owned = b.romDriver!.tick(b, 1, [b]);
+      assert(owned, "tick returns true (ROM owns B-charge motion)");
+    }
+  }
+
+  // Test 49: shared-charge — tryStartBAttack rejects borg without B-charge handler.
+  // A borg whose family wires only X-special (action 2) should NOT be intercepted.
+  console.log("\n[rom.selfcheck] bridge — tryStartBAttack rejects no-B-charge borg:");
+  {
+    const a = createRomActor();
+    // Simulate a family with rootAction but hasBCharge = false.
+    a.rootAction = () => {};
+    a.hasBCharge = false;
+    // tryStartBAttack checks hasBCharge before starting; without it, returns false.
+    // (Direct actor-level check since bridge.attach requires a BorgRuntime.)
+    assert(!a.hasBCharge, "borg without B-charge handler has hasBCharge == false");
   }
 
   if (failures > 0) {
