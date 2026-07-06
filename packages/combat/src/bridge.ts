@@ -57,6 +57,8 @@ import { configureCyberGirlFamily } from "./families/cyber-girl.js";
 import { configureWireGunnerFamily } from "./families/wire-gunner.js";
 import { configureRobotFamily } from "./families/robot.js";
 import { configureSwordKnightFamily } from "./families/sword-knight.js";
+import { configureJellyDiverFamily } from "./families/jelly-diver.js";
+import { configureCopyManFamily } from "./families/copy-man.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
@@ -424,6 +426,46 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // DEATH HEAD / MACHINE HEAD family (ctor 0x801e78c0) — both members not yet in registry.
       pl0505: makeSimpleRegistration("pl0505", () => { /* X-special stream not yet decoded; cue table only */ }),
       pl0511: makeSimpleRegistration("pl0511", () => { /* X-special stream not yet decoded; cue table only */ }),
+      // ---- Wave-B: batch-register 6 three-borg families (2026-07-06) ----
+      // Each family's ctor was searched in the corpus (actionStreamTables.json) to find
+      // the X-special engine. Shared-vs-bespoke determination: leaf == engine in family
+      // code block (not a cross-family zz_0177dd8_/zz_0179d20_/etc. address) → BESPOKE.
+      // BESPOKE families get a families/<name>.ts port; the rest get cue table +
+      // shared-engine fallback (cue table + createSharedEngineRootAction).
+
+      // JELLY DIVER family (ctor 0x80114838) — BESPOKE X-special (FUN_80116808 →
+      // PTR_FUN_80434550 phase machine, chunk_0031.c). 2-phase ammo-gated borg-switched
+      // child deploy (zz_01213bc_); see families/jelly-diver.ts.
+      pl0805: makeSimpleRegistration("pl0805", (a, ctx) => configureJellyDiverFamily(a, "pl0805", ctx)),
+      pl080d: makeSimpleRegistration("pl080d", (a, ctx) => configureJellyDiverFamily(a, "pl080d", ctx)),
+      pl080e: makeSimpleRegistration("pl080e", (a, ctx) => configureJellyDiverFamily(a, "pl080e", ctx)),
+      // COPY MAN family (ctor 0x8015613c) — BESPOKE X-special (FUN_80156460 →
+      // PTR_FUN_8034267c phase machine, chunk_0040.c). 3-phase borg-switched child deploy
+      // (zz_01639c0_ / zz_00c4704_); see families/copy-man.ts.
+      pl0806: makeSimpleRegistration("pl0806", (a, ctx) => configureCopyManFamily(a, "pl0806", ctx)),
+      pl0809: makeSimpleRegistration("pl0809", (a, ctx) => configureCopyManFamily(a, "pl0809", ctx)),
+      pl080f: makeSimpleRegistration("pl080f", (a, ctx) => configureCopyManFamily(a, "pl080f", ctx)),
+      // ANGEL NURSE family (ctor 0x80079410) — BESPOKE X-special (FUN_8007bb6c →
+      // PTR_FUN_802d6668, chunk_0011.c): 6-phase homing heal/deploy machine. Too complex
+      // for batch port; registered with cue table + shared-engine fallback.
+      pl0900: makeSimpleRegistration("pl0900", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      pl0908: makeSimpleRegistration("pl0908", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      pl090d: makeSimpleRegistration("pl090d", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // DEATH BORG OMEGA II/III/IV family (ctor 0x801d4590) — no action 2 in ROM; X
+      // routes via action 0 (dash attack). Registered with cue table + shared-engine.
+      pl040b: makeSimpleRegistration("pl040b", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      pl040c: makeSimpleRegistration("pl040c", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      pl040d: makeSimpleRegistration("pl040d", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // ANUBIS WING family (ctor 0x800f49a0) — no action 2 in ROM; X routes via action 3
+      // (B charge, engine zz_0148384_). Registered with cue table + shared-engine.
+      pl0a04: makeSimpleRegistration("pl0a04", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      pl0a08: makeSimpleRegistration("pl0a08", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      pl0a09: makeSimpleRegistration("pl0a09", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // DEATH BORG NU family (ctor 0x801b3598) — no action 2 in ROM; X routes via action 0
+      // (dash attack, bespoke engine 0x801b372c). Registered with cue table + shared-engine.
+      pl0f01: makeSimpleRegistration("pl0f01", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      pl0f02: makeSimpleRegistration("pl0f02", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      pl0f03: makeSimpleRegistration("pl0f03", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
     };
   }
   return FAMILY_REGISTRY_CACHE;
