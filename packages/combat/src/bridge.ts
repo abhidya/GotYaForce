@@ -59,6 +59,10 @@ import { configureRobotFamily } from "./families/robot.js";
 import { configureSwordKnightFamily } from "./families/sword-knight.js";
 import { configureJellyDiverFamily } from "./families/jelly-diver.js";
 import { configureCopyManFamily } from "./families/copy-man.js";
+import { createMeleeGirlStanding } from "./families/melee-girl-standing.js";
+import { createMeleeGirlLunge } from "./families/melee-girl-lunge.js";
+import { createMeleeRobot } from "./families/melee-robot.js";
+import { createMeleeSamurai, SAMURAI_MELEE_DEFAULT_CONFIG } from "./families/melee-samurai.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
@@ -467,6 +471,51 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0f02: makeSimpleRegistration("pl0f02", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0f03: makeSimpleRegistration("pl0f03", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
     };
+
+    // ---- Wave-C: bespoke B-melee engine wiring (2026-07-06, batch 2 — 48 borgs) ----
+    // 4 bespoke B-melee dispatchers ported in families/melee-*.ts, each covering 12
+    // borgs' action 1 (ground B-melee):
+    //   zz_010c220_ (standing) + zz_010b7ac_ (lunge) — 12 girl/delta borgs (2 variants)
+    //   zz_00f2374_ (3-phase)                         — 12 robot/omega borgs
+    //   zz_0149178_ (config-driven lunge)            — 12 samurai/zeta borgs
+    // Each borg's existing registration (X-special/dash/charge wiring) is preserved; the
+    // bespoke melee is INJECTED at actionIndex 1 via withBespokeMelee. Borgs not yet in
+    // the registry get a cue-table-only base registration first.
+
+    // Girl group: variant <3 → standing (zz_010c220_), >=3 → lunge (zz_010b7ac_).
+    const girlMelee = (ctx: GRedFamilyCtx): ((actor: RomActor) => void) => {
+      const standing = createMeleeGirlStanding(ctx);
+      const lunge = createMeleeGirlLunge(ctx);
+      return (actor) => (actor.variantIndex >= 3 ? lunge : standing)(actor);
+    };
+    for (const id of [
+      "pl0300", "pl0301", "pl0302", "pl0304", "pl0305", "pl0307",
+      "pl0308", "pl0309", "pl030a", "pl030b", "pl030c", "pl030d",
+    ] as const) {
+      const base = FAMILY_REGISTRY_CACHE[id] ?? makeSimpleRegistration(id, () => {});
+      FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(base, girlMelee);
+    }
+
+    // Robot group: zz_00f2374_ (3-phase melee).
+    const robotMeleeFactory = (ctx: GRedFamilyCtx) => createMeleeRobot(ctx);
+    for (const id of [
+      "pl0400", "pl0401", "pl0402", "pl0403", "pl0404", "pl0405",
+      "pl0406", "pl0407", "pl0408", "pl0409", "pl040a", "pl040b",
+    ] as const) {
+      const base = FAMILY_REGISTRY_CACHE[id] ?? makeSimpleRegistration(id, () => {});
+      FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(base, robotMeleeFactory);
+    }
+
+    // Samurai group: zz_0149178_ (config-driven lunge melee).
+    const samuraiMeleeFactory = (ctx: GRedFamilyCtx) =>
+      createMeleeSamurai(ctx, SAMURAI_MELEE_DEFAULT_CONFIG);
+    for (const id of [
+      "pl0700", "pl0701", "pl0702", "pl0703", "pl0705", "pl0706",
+      "pl0708", "pl0709", "pl070a", "pl070b", "pl070c", "pl070d",
+    ] as const) {
+      const base = FAMILY_REGISTRY_CACHE[id] ?? makeSimpleRegistration(id, () => {});
+      FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(base, samuraiMeleeFactory);
+    }
   }
   return FAMILY_REGISTRY_CACHE;
 }
@@ -538,6 +587,36 @@ function composeActionTable(
   return (actor: RomActor) => {
     const fn = table[actor.actionIndex];
     if (fn) fn(actor);
+  };
+}
+
+/** Wrap an existing registration so the bespoke B-melee engine (action 1) is injected
+ *  on top of whatever rootAction the base configure closure sets. The base configure
+ *  runs first (stamping borgNumber + wiring X-special/dash/charge slots); then this
+ *  wraps rootAction to route actionIndex 1 to the bespoke melee, preserving the base
+ *  handler for all other action indices. Used by the batch-2 B-melee port to give 48
+ *  borgs their real ROM B-melee without touching each family's X-special wiring. */
+function withBespokeMelee(
+  base: FamilyRegistration,
+  melee: (ctx: GRedFamilyCtx) => (actor: RomActor) => void,
+): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      base.configure(actor, ctx);
+      const meleeHandler = melee(ctx);
+      const existing = actor.rootAction;
+      if (!existing) {
+        actor.rootAction = (a) => {
+          if (a.actionIndex === 1) { meleeHandler(a); return; }
+        };
+      } else {
+        actor.rootAction = (a) => {
+          if (a.actionIndex === 1) { meleeHandler(a); return; }
+          existing(a);
+        };
+      }
+    },
+    cueTable: base.cueTable,
   };
 }
 
