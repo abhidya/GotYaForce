@@ -72,16 +72,26 @@ function stageBaseForSlot(slot: number): THREE.Vector3 {
 const SOURCE_FPS = 60;
 const FIXED_FRAME_SECONDS = 1 / SOURCE_FPS;
 
-// ROM script animId -> baked battle-anim clip (TUNED-anim pending the tdc00..09.arc pose
-// banks, which are the canonical intro anim source; pl000amot.bin is absent from AFS).
-// The VM fires actorPlayAnim(slot, groupSel=5, animId); groupSel 5 is the ROM's +0x1d80
-// bank index for the title intro — we map it to the borg's g0 battle bank slot-for-slot.
+// ROM script animId -> baked g0-file clip — DERIVED 2026-07-06 (family-ctor-anim-bank
+// decode): the VM fires actorPlayAnim(slot, groupSel=5, animId); groupSel 5 indexes the
+// actor's +0x1d80 family stream bank's group 5, whose slot-N stream plays metadata-group-5
+// anim N, and metadata group 5 identity-maps into MOTION FILE 0 (the borg's own g0 file)
+// for N in {0..5,7} — but slot 6's stream plays meta anim 9 (g0 anim 9), for BOTH intro
+// families (G RED stream 0x803673f0 / Normal-Ninja-family stream 0x802be8d2 = `01 05 09`).
+// The baked anim_g00_sNN index IS the g0-file anim index (proven: pl0000 s14/s23 match the
+// ROM battle records (0,0x0e)/(0,0x17)). The old tdc00..09.arc theory is falsified — intro
+// anims live in the borg's own g0 motion file. Residual (labeled, not wired): id 3's ROM
+// stream carries a playback-rate operand of 30 (s16 at playAnim record+6, substituted
+// because the intro caller passes rate=-1.0); its unit (fps vs multiplier) is unpinned, so
+// clips still play at their baked rate.
 const ANIM_FILES_BY_ID: Record<number, string> = {
   0: "anim_g00_s00_idle.json",
   1: "anim_g00_s01_move.json",
+  2: "anim_g00_s02_dash_fwd.json",
   3: "anim_g00_s03_dash_back.json",
   4: "anim_g00_s04_dash_left.json",
-  6: "anim_g00_s06_jump_takeoff.json",
+  5: "anim_g00_s05_dash_right.json",
+  6: "anim_g00_s09_fly_transition.json", // ROM: group-5 slot 6 -> g0 anim 9, NOT anim 6
   7: "anim_g00_s07_jump_land.json",
 };
 

@@ -52,13 +52,16 @@ port requires the actual handler code, transcribed per family.
 | Action-stream VM | `stream-vm.ts` | **Done** — zz_004beb8_ + zz_004cd24_ + all 18 op handlers |
 | State tables | `state-tables.ts` | **Done (stubs for custom)** — 64+64 slots; factories for common shapes |
 | G RED family (X-special) | `families/gred.ts` | **Done** — 4-phase G Crash (launch→dash→descend→land) |
-| Bridge | `bridge.ts` | **Done** — BorgRuntime ↔ RomActor sync + 3-line combat.ts/battle.ts integration |
+| **Shared-engine X machine** | `families/shared-x-special.ts` | **Done (2026-07-06)** — zz_00ff2bc_ @0x800ff2bc + 3 phases, config-parameterized {groundSlot, airSlot, onHit}. Families whose X routes here need only a config block |
+| **NORMAL NINJA family (X-special)** | `families/ninja.ts` | **Done (2026-07-06)** — pl0000 + pl000a (SASUKE, same ctor/vtable/banks — descriptor-only delta) via the shared machine; on-hit backflip (10/15/−1, yaw+180°) + shuriken hook. `nn-family-decode-2026-07-06.md` |
+| Bridge | `bridge.ts` | **Done** — BorgRuntime ↔ RomActor sync + 3-line combat.ts/battle.ts integration. Cue tables for BOTH families now FULL 48-row DERIVED dumps (0x802d3ff8 / 0x80365cf8; cues 44 AND 45 → state 61) |
 | Damage | `bridge.ts` + `battle.ts` | **Done** — full `applyHit` damage-formula path wired via `hitResolver` callback (family damage records + force gauge + burst meters + source damage) |
 | Anim | `bridge.ts` | **Done** — `onPlayAnim` → BorgRuntime.meleeAnimStream for renderer clip |
 | Selfcheck | `rom.selfcheck.ts` | **Passing** — 22/22 tests (`pnpm selfcheck:rom`) |
 | Cue table extractor | `scripts/extract-family-cue-tables.mjs` | **Partial** — 17/30 families (direct lis+addi pattern); G RED cue table hardcoded in bridge.ts; indirect-load families (lwz-based) TODO |
-| G RED B-melee/dash/charge | — | **TODO** — actionIndex 0/1/3/4 of the G RED dispatcher (chunk_0047.c) |
-| Remaining ~30 families | — | **TODO** — each family is ~1 session of mechanical transcription using G RED as template |
+| G RED B-melee/dash/charge | — | **TODO** — actionIndex 0/1/3/4 of the G RED dispatcher (chunk_0047.c). NOTE (2026-07-06): G RED's command types 4/5 are mode-0xff DISABLED (descriptor 0x80365ac8+0xb8 = `01 00 00 01 ff ff`) — only type-3 B-charge is live; the action-4 table @0x80365e48 is dead data |
+| NORMAL NINJA B-combo/lunge | — | **TODO** — actions 0/1 transcribed to phase granularity in `nn-family-decode-2026-07-06.md` §3 (incl. the SHARED 4-phase melee lunge zz_00fed6c_ @0x800fed6c — port once like shared-X); actions 3/4 are command-disabled for pl0000/pl000a |
+| Remaining ~29 families | — | **TODO** — each family is ~0.5-1 session. CHECK FIRST whether the family's X routes to zz_00ff2bc_ (shared) — then it's just a config block + callback, not a full transcription |
 
 ## What works RIGHT NOW
 

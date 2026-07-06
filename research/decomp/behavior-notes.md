@@ -2876,3 +2876,79 @@ reconciliation — flagged, not resolved. Results screen: zz_00d1d24_ gathers pe
 kills/damage-dealt/taken/friendly-fire/ally-kills (+0x434/+0x420/+0x424/+0x430/+0x437) → rank
 strings. Camera: FUN_8000d560 maps the target's camera-cue +0x43d (1..9) to the policy selector
 cam+0x2e6.
+
+### (bf) Title-intro residuals CLOSED: family-ctor anim-bank binding + widget table (2026-07-06)
+
+Full decode: `title-intro-residuals-decode-2026-07-06.md` (all claims survived independent
+adversarial re-verification). Headlines: (1) the per-family ctors are resolved through
+`PTR_PTR_802d3224` (family byte = borg-id HIGH byte, variant = LOW byte) — Normal Ninja ctor
+0x8006f4f8 is a **Ghidra-missed function** (raw-disasm read) serving pl0000 AND pl000a
+(Sasuke differs only in descriptor +0x4b0); G RED ctor zz_018ccfc_ serves 0x615/0x629/0x62a.
+(2) The anim resolve chain is DERIVED end-to-end: +0x1d80 stream bank group 5 → playAnim
+(metaBank 5, metaAnim N) → +0x1d88 metadata bank (0x14-stride records, previously-missing
+hop, resolver zz_004d1f4_/parser zz_004d244_) → (motionFile 0, fileAnim N) — identity into
+the borg's own g0 file EXCEPT intro animId 6 → **g0 anim 9**. TitleIntro.ts ANIM_FILES_BY_ID
+upgraded TUNED→DERIVED (id-6 fix + ids 2/5 added); baked sNN proven = g0-file anim index.
+(3) DAT_80390ad0 widget table: stride 0x14, 98 rows, {id, kind 0..20, variant, f32 xyz} →
+dumped byte-verified to `data/title-widget-table.json`; real per-kind dispatch is
+PTR_LAB_8039132c (21 entries); the PTR_FUN_80391658/DAT_803914d4 attribution was refuted
+(different widget family). Intro spawn COORDS remain trace-gated (unchanged).
+
+### (bg) CPU AI decision brain STATICALLY ISOLATED (2026-07-06)
+
+Full decode: `cpu-ai-decode-2026-07-06.md` — supersedes index/cpu-ai-evidence.md's
+"un-isolated / write-watch needed" conclusion. The AI root is **zz_001c9d0_ @0x8001c9d0**,
+called from the per-actor input refresh FUN_80056900 when actor+0x3e6==1 (CPU flag, set at
+FUN_800541ac init from the pad-present mask — exactly the old lead). It synthesizes the
+actor-embedded VIRTUAL PAD (+0x5b4 buttons / +0x5ca stick — same fields human input copies
+into from the DAT_803c727c mirror): retarget cadence {4,8,10,12,15,30,45,60}f
+(DAT_802cfaf4), nearest-enemy select within 20000u (FUN_80025944), camera-relative stick
+(bearing − (camYaw+180°)) × 54 × 0.8, terrain-probe jump (500u steps → press 0x100),
+32-slice weighted attack roulette over six per-borg weights (record +0xf0..+0x104) → press
+0x200/0x400 through a 3-phase charge executor (zz_00234e4_) gated by range+LOS, difficulty
+cadence tables (0x802cb2f0 family, lvl0 74-86f → lvl3 34-46f idle), level-0 attack block
+(+0x339 bit 0x10), per-borg quirk overlay (FUN_8002645c). All range/steering constants
+dumped DERIVED. Dolphin plan for live confirmation lives in the doc §5 (Priority 8).
+
+### (bh) NORMAL NINJA family ported + the SHARED-ENGINE X-special machine found (2026-07-06)
+
+Full decode + port record: `nn-family-decode-2026-07-06.md` (verified workflow
+`wf_a6dd44f6-f67`, 14/16 claims dual-confirmed, 2 constant corrections folded in).
+Headlines: (1) family-0 root dispatcher FUN_8006facc → 5-entry action table
+PTR_FUN_802d3b68; charge actions 3/4 are command-DISABLED for pl0000/pl000a (descriptor
++0xb8 = `01 00 01 ff ff ff`) — and G RED's types 4/5 are disabled too (verifier extra).
+(2) **The X-special is NOT family-bespoke**: all variants route to the SHARED engine
+machine zz_00ff2bc_ @0x800ff2bc with a per-family config block (ninja: @0x80433868 =
+{groundSlot 0, airSlot 1, onHit zz_00715f8_}) — ported ONCE as
+`packages/combat/src/families/shared-x-special.ts`; the ninja callback (backflip
+hSpeed 10/yVel 15/grav −1/yaw+180° + ammo-gated shuriken zz_007db5c_ type 0 / SASUKE 3)
+lives in `families/ninja.ts`. pl000a shares the entire family (descriptor-only ctor
+delta). (3) Cue tables @0x802d3ff8 / @0x80365cf8 dumped in full — cues 44 AND 45 → state
+61 for BOTH families; bridge.ts now carries the complete DERIVED tables. (4) +0x4ec
+CLOSED: it is the command-move root (matches commandMoveTables.json byte-exact).
+(5) A second shared machine was identified for a future pass: the 4-phase melee lunge
+zz_00fed6c_ @0x800fed6c (config {slotBase, range, dashFrames, 3 decels}) used by ninja
+action-1 v0/v1 and other families. (6) Drive-by REAL BUG caught by the selfcheck suite:
+31096d1c fed ROM negative-down projectile drop values into the port's positive-down
+`Projectile.drop` — ROM-droppy bullets ROSE; fixed at the spawnProjectile boundary.
+
+### (bi) comboHits vs DOL-ladder 58-borg disagreement ROOT-CAUSED (2026-07-06)
+
+Verified dig (11/11 claims confirmed): still exactly 58/208. **83% (48) = the ASSET side
+under-counting**: 35 borgs' borg-action-assets.json inventory predates their model
+exports (generatedAt 2026-07-01 vs exports 2026-07-02 — animIndex null → comboHitsFor
+defaults 1), + 13 hit by comboHitsFor's ordering bug (`high===2 → return 2` fires before
+`broad>=6 → return 3`). All 48 are already CORRECT at runtime (actionProfiles.ts prefers
+the ladder) — fixes are raw-data hygiene (re-run the inventory + regen; reorder the
+heuristic). **3 borgs (pl0501/pl0a00/pl0a02) were a real PORT bug**: actionStreamData.ts
+stepFromKind rejected hit records with -1/-2 open-window sentinels, deleting REAL armed
+combo rungs (runtime override then REGRESSED them below both sources). FIXED 2026-07-06:
+open-window records now accepted (activeEnd = labeled TUNED OPEN_WINDOW_ACTIVE_FRAMES=8);
+ladders restored to 2/3/3 = ROM armed-rung = asset counts. **7 UNRESOLVED (do not
+"fix")**: 5 ninja-family borgs whose rung-3 slot genuinely arms no HIT kind (whiff slot —
+real in-game count needs a live trace; op 0x11 ruled out as a hidden-hit mechanism) + 2
+table-end borgs (pl0602 seeds the LAST slot with BACKWARD variant seeds — chain mechanism
+if any is not seed+N; pl0007 walks off an 11-slot table). Extraction-audit
+capped/ambiguous buckets contribute ZERO disagreements. Caveat for future readers: asset
+comboHits was never a chain-length measurement (clip-bank count capped at 3) — agreement
+on the other 150 borgs is partly coincidental.

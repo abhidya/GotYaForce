@@ -232,6 +232,15 @@ function resolveStreamArm(
 /** Build one ComboStep from a resolved (kind, animStreamRef) pair, or null if the kind has no
  *  usable hit-bin window (kept per-step so a partially-decoded ladder still returns its good
  *  steps instead of failing whole). */
+/** OPEN-WINDOW sentinel fallback: a record with activeStart >= 0 but a -1/-2 activeEnd
+ *  sentinel means "active from activeStart until the anim ends" in the ROM. The static
+ *  record can't say where the anim ends (renderer-owned clip length), so the step gets
+ *  this labeled TUNED active length instead. DERIVED mechanism, TUNED value — the
+ *  combo-reconcile root-cause pass (2026-07-06) proved rejecting these records deleted
+ *  REAL armed combo rungs on pl0501/pl0a00/pl0a02 (ladder fell below both the asset
+ *  count and the ROM's armed-rung count). */
+const OPEN_WINDOW_ACTIVE_FRAMES = 8;
+
 function stepFromKind(
   borgId: string,
   slot: number,
@@ -241,15 +250,19 @@ function stepFromKind(
 ): ComboStep | null {
   const records = attackHitRecordsForKind(borgId, kind);
   const windowed = records.find((record) => record.activeEnd >= record.activeStart && record.activeStart >= 0);
-  if (!windowed) return null;
+  // Prefer a closed window; else accept an open-window sentinel record (activeEnd -1/-2
+  // with a valid activeStart) — see OPEN_WINDOW_ACTIVE_FRAMES above.
+  const open = windowed ? null : records.find((record) => record.activeStart >= 0 && record.activeEnd < 0);
+  const chosen = windowed ?? open;
+  if (!chosen) return null;
   const reach = attackHitMaxReachForKind(borgId, kind);
   return {
     slot,
     kind,
-    activeStart: windowed.activeStart,
-    activeEnd: windowed.activeEnd,
+    activeStart: chosen.activeStart,
+    activeEnd: windowed ? windowed.activeEnd : chosen.activeStart + OPEN_WINDOW_ACTIVE_FRAMES - 1,
     reach: reach ?? 0,
-    damageRecord: familyDamageRecordForBorg(borgId, windowed.damageRecordIndex),
+    damageRecord: familyDamageRecordForBorg(borgId, chosen.damageRecordIndex),
     animStreamRef,
     sounds,
   };

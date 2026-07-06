@@ -1,0 +1,1219 @@
+{
+ "address": "0x80390ad0",
+ "description": "Title/front-end desk-diorama menu widget placement table (DAT_80390ad0). 98 rows of 0x14 bytes, terminated by a sentinel row whose first word is 0xFFFFFFFF. Walked once by zz_01dd7d4_ (title_menu_spawn_base_widgets @0x801dd7d4), which spawns one widget actor per row via zz_01dd820_ (title_menu_spawn_base_widget @0x801dd820, actor alloc zz_008893c_(2,0x39,1,1)). Extracted from boot.dol (GG4E) on 2026-07-06.",
+ "meta": {
+  "date": "2026-07-06",
+  "source": "user-data/GG4E/disc/sys/boot.dol via research/decomp/dol.py",
+  "source_address": "0x80390ad0",
+  "source_symbol": "DAT_80390ad0",
+  "row_stride_bytes": 20,
+  "row_stride_hex": "0x14",
+  "row_count": 98,
+  "table_span": {
+   "start": "0x80390ad0",
+   "last_row_end": "0x80391278",
+   "sentinel_addr": "0x80391278",
+   "sentinel_value": "0xffffffff",
+   "sentinel_row_tail": "sentinel word is followed by four zero words at 0x8039127c..0x8039128b, i.e. the terminator occupies a full 0x14-byte row slot",
+   "bytes_incl_sentinel_word": 1964,
+   "next_data_after_terminator_row": "0x8039128c: u32 powers-of-ten table {1,10,100,1000,10000,100000} (unrelated), then PTR_DAT_803912a4 (referenced by zz_01de6e8_ chunk_0058.c)"
+  },
+  "deriving_function": {
+   "walk_loop": {
+    "name": "zz_01dd7d4_ (title_menu_spawn_base_widgets)",
+    "address": "0x801dd7d4",
+    "file_line": "research/decomp/ghidra-export/chunk_0058.c:1870 (= research/decomp/organized/game/ui/front-end-menu/801dd7d4_title_menu_spawn_base_widgets.c:8)",
+    "code": "for (piVar1 = &DAT_80390ad0; -1 < *piVar1; piVar1 = piVar1 + 5) { zz_01dd820_(piVar1); }",
+    "notes": "piVar1 is int*, so piVar1+5 advances 5*4 = 0x14 bytes per row; loop stops when the row's first signed word is negative (sentinel 0xFFFFFFFF)."
+   },
+   "row_consumer": {
+    "name": "zz_01dd820_ (title_menu_spawn_base_widget)",
+    "address": "0x801dd820",
+    "file_line": "research/decomp/organized/game/ui/801dd820_title_menu_spawn_base_widget.c:9-27 (= chunk_0058.c:1877-1904)",
+    "notes": "Allocates widget actor via zz_008893c_(2,0x39,1,1); copies row fields into the actor; installs update cb FUN_801dd8d8 (@+0xc) and draw cb FUN_801de9e0 (@+0x10c)."
+   }
+  },
+  "field_map": [
+   {
+    "offset": "0x00",
+    "type": "s32",
+    "name": "id",
+    "semantics": "Non-negative object id (0..43, duplicates allowed). Doubles as loop terminator: table ends at first negative value. Copied to widget+0x144 ('*(undefined4 *)(puVar2 + 0x144) = *param_1;', zz_01dd820_ chunk_0058.c:1890). Semantic role (model index?) is an OPEN HYPOTHESIS: the widget's drawable at +0xe0 (used by draw cb FUN_801de9e0 via zz_00076d0_) has NO traced setter in chunk_0058 for THIS widget family; the previously-claimed resolver chain 'PTR_FUN_80391658[kind] -> +0xe0' was REFUTED by adversarial verify 2026-07-06 -- that table (10 entries @0x80391658) belongs to the separate zz_01deb68_ widget family (its +0x11 is a call-site literal 1..9 subtype, and it never writes +0x144). The heavy id duplication across rows (id 11 x16) still fits a shared-model index, but this is unproven."
+   },
+   {
+    "offset": "0x04",
+    "type": "u16",
+    "name": "kind",
+    "semantics": "Widget kind 0..20. Low byte copied to widget+0x11 ('puVar2[0x11] = (char)*(undefined2 *)(param_1 + 1);'). VERIFIED consumers (adversarial re-check 2026-07-06): (a) the per-kind behavior dispatch PTR_LAB_8039132c -- exactly 21 entries (kind 0..20) at 0x8039132c..0x8039137c {801dda0c, 801dda50, 801ddabc, 801ddaec, 801ddb28, 801ddc3c, 801ddd0c, 801ddde4, 801dde64, 801ddf70, 801de040, 801de09c, 801de140, 801de140 (kinds 12/13 shared), 801de248, 801de2d8, 801de30c, 801de384, 801de40c, 801de500, 801de5d8}, invoked from zz_01dd9a4_ chunk_0058.c:1961 '(*(code *)(&PTR_LAB_8039132c)[*(char *)(param_1 + 0x11)])();' (kinds 0-3 handlers are Ghidra decompile gaps -- raw-disasm only); (b) the draw-text switch in zz_01de6e8_ (cases 3, 10, 0xf, 0x12). The earlier PTR_FUN_80391658 / DAT_803914d4-stride-0x28 attribution was REFUTED -- both belong to the zz_01deb68_ widget family (FUN_801def80 is unreachable from DAT_80390ad0 widgets; its only data ref is PTR_FUN_80391648 entry [1], the state table of that other family)."
+   },
+   {
+    "offset": "0x06",
+    "type": "s16",
+    "name": "variant",
+    "semantics": "Sub-index within kind, -1..5 (0xFFFF appears in rows 13-14 and truncates to char -1 in the widget). Low byte copied to widget+0x12 ('puVar2[0x12] = (char)*(undefined2 *)((int)param_1 + 6);'). Used e.g. as a slot index in zz_01de6e8_ case 0x12: '*(char *)(param_1 + 0x12) * 0x43 + 0x79' (text row Y position) and '(DAT_80436398 + *(char *)(param_1 + 0x12) + 0x53)'; checked '== 1' in case 10. FOURTH consumer (verify-pass extra finding): the number-drawing widget path at chunk_0058.c:2606 uses variant as a decimal digit position -- 'iVar5 = param_10 / *(int *)(&DAT_8039128c + iVar2);' with iVar2 = *(char *)(param_9 + 0x12) * 4 into the powers-of-ten table at 0x8039128c."
+   },
+   {
+    "offset": "0x08",
+    "type": "f32",
+    "name": "x",
+    "semantics": "World X. Copied to widget+0x64 (0d100) working position and pristine copy at widget+0x148: 'uVar1 = param_1[2]; *(undefined4 *)(puVar2 + 100) = uVar1; *(undefined4 *)(puVar2 + 0x148) = uVar1;'"
+   },
+   {
+    "offset": "0x0c",
+    "type": "f32",
+    "name": "y",
+    "semantics": "World Y. Copied to widget+0x68 and +0x14c: 'uVar1 = param_1[3]; *(undefined4 *)(puVar2 + 0x68) = uVar1; *(undefined4 *)(puVar2 + 0x14c) = uVar1;'"
+   },
+   {
+    "offset": "0x10",
+    "type": "f32",
+    "name": "z",
+    "semantics": "World Z. Copied to widget+0x6c and +0x150: 'uVar1 = param_1[4]; *(undefined4 *)(puVar2 + 0x6c) = uVar1; *(undefined4 *)(puVar2 + 0x150) = uVar1;'"
+   }
+  ],
+  "sanity": {
+   "float_ranges": {
+    "x": [
+     -4000.0,
+     2000.0
+    ],
+    "y": [
+     -700.0,
+     630.0
+    ],
+    "z": [
+     -3900.0,
+     -250.0
+    ]
+   },
+   "no_nan_inf_denormal": true,
+   "id_range": [
+    0,
+    43
+   ],
+   "kind_range": [
+    0,
+    20
+   ],
+   "variant_values": [
+    -1,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "flags_word_pattern": "u32 at +0x04 = (kind<<16)|(variant & 0xffff). Prior context byte-samples re-explained: 0x00000001 is the id word (+0x00) of rows 1-4; 0x00010001 is a MISALIGNED read spanning +0x02..+0x05 of rows 1-4 (id low half 0x0001 followed by kind 0x0001); 0x00020002 does not occur anywhere in the table span at any alignment; -648.0 (0xc4220000) and -959.5 (0xc46fe000) do not occur anywhere in boot.dol as big-endian f32 (nearest real value: -650.0 = 0xc4228000, rows 1-4 y); -2000.0/-3900.0/-4000.0 confirmed present.",
+   "kind_histogram": {
+    "0": 2,
+    "1": 4,
+    "2": 2,
+    "3": 1,
+    "4": 4,
+    "5": 5,
+    "6": 3,
+    "7": 2,
+    "8": 5,
+    "9": 2,
+    "10": 17,
+    "11": 2,
+    "12": 4,
+    "13": 6,
+    "14": 4,
+    "15": 1,
+    "16": 4,
+    "17": 15,
+    "18": 5,
+    "19": 5,
+    "20": 5
+   }
+  },
+  "other_readers": "grep of research/decomp/ghidra-export for 'DAT_80390ad0' hits only chunk_0058.c:1870 (the walk loop). Single consumer.",
+  "verification": "All 98 rows' raw_hex byte-verified against an independent DOL re-dump (0 mismatches) by the 2026-07-06 adversarial verify pass; stride/termination/field offsets CONFIRMED; two consumer attributions corrected per the pass (see field semantics for id and kind)."
+ },
+ "rows": [
+  {
+   "index": 0,
+   "addr": "0x80390ad0",
+   "id": 0,
+   "kind": 0,
+   "variant": 0,
+   "x": 0.0,
+   "y": -700.0,
+   "z": -3900.0,
+   "raw_hex": "000000000000000000000000c42f0000c573c000"
+  },
+  {
+   "index": 1,
+   "addr": "0x80390ae4",
+   "id": 1,
+   "kind": 1,
+   "variant": 0,
+   "x": 2000.0,
+   "y": -650.0,
+   "z": -3900.0,
+   "raw_hex": "000000010001000044fa0000c4228000c573c000"
+  },
+  {
+   "index": 2,
+   "addr": "0x80390af8",
+   "id": 1,
+   "kind": 1,
+   "variant": 0,
+   "x": 0.0,
+   "y": -650.0,
+   "z": -3900.0,
+   "raw_hex": "000000010001000000000000c4228000c573c000"
+  },
+  {
+   "index": 3,
+   "addr": "0x80390b0c",
+   "id": 1,
+   "kind": 1,
+   "variant": 0,
+   "x": -2000.0,
+   "y": -650.0,
+   "z": -3900.0,
+   "raw_hex": "0000000100010000c4fa0000c4228000c573c000"
+  },
+  {
+   "index": 4,
+   "addr": "0x80390b20",
+   "id": 1,
+   "kind": 1,
+   "variant": 0,
+   "x": -4000.0,
+   "y": -650.0,
+   "z": -3900.0,
+   "raw_hex": "0000000100010000c57a0000c4228000c573c000"
+  },
+  {
+   "index": 5,
+   "addr": "0x80390b34",
+   "id": 2,
+   "kind": 0,
+   "variant": 0,
+   "x": 0.0,
+   "y": -600.0,
+   "z": -3900.0,
+   "raw_hex": "000000020000000000000000c4160000c573c000"
+  },
+  {
+   "index": 6,
+   "addr": "0x80390b48",
+   "id": 3,
+   "kind": 2,
+   "variant": 0,
+   "x": 0.0,
+   "y": 630.0,
+   "z": -3000.0,
+   "raw_hex": "000000030002000000000000441d8000c53b8000"
+  },
+  {
+   "index": 7,
+   "addr": "0x80390b5c",
+   "id": 4,
+   "kind": 2,
+   "variant": 0,
+   "x": -800.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "0000000400020000c4480000441d8000c53b7000"
+  },
+  {
+   "index": 8,
+   "addr": "0x80390b70",
+   "id": 5,
+   "kind": 3,
+   "variant": 0,
+   "x": -900.0,
+   "y": 630.0,
+   "z": -2997.0,
+   "raw_hex": "0000000500030000c4610000441d8000c53b5000"
+  },
+  {
+   "index": 9,
+   "addr": "0x80390b84",
+   "id": 6,
+   "kind": 4,
+   "variant": 0,
+   "x": -675.0,
+   "y": 630.0,
+   "z": -2996.0,
+   "raw_hex": "0000000600040000c428c000441d8000c53b4000"
+  },
+  {
+   "index": 10,
+   "addr": "0x80390b98",
+   "id": 6,
+   "kind": 4,
+   "variant": 1,
+   "x": -675.0,
+   "y": 630.0,
+   "z": -2996.0,
+   "raw_hex": "0000000600040001c428c000441d8000c53b4000"
+  },
+  {
+   "index": 11,
+   "addr": "0x80390bac",
+   "id": 6,
+   "kind": 4,
+   "variant": 2,
+   "x": -675.0,
+   "y": 630.0,
+   "z": -2996.0,
+   "raw_hex": "0000000600040002c428c000441d8000c53b4000"
+  },
+  {
+   "index": 12,
+   "addr": "0x80390bc0",
+   "id": 42,
+   "kind": 4,
+   "variant": 3,
+   "x": -857.5,
+   "y": 630.0,
+   "z": -2996.0,
+   "raw_hex": "0000002a00040003c4566000441d8000c53b4000"
+  },
+  {
+   "index": 13,
+   "addr": "0x80390bd4",
+   "id": 7,
+   "kind": 5,
+   "variant": -1,
+   "x": 315.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "000000070005ffff439d8000441d8000c53b7000"
+  },
+  {
+   "index": 14,
+   "addr": "0x80390be8",
+   "id": 8,
+   "kind": 6,
+   "variant": -1,
+   "x": 735.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "000000080006ffff4437c000441d8000c53b7000"
+  },
+  {
+   "index": 15,
+   "addr": "0x80390bfc",
+   "id": 11,
+   "kind": 5,
+   "variant": 0,
+   "x": 600.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b0005000044160000441d8000c53b7000"
+  },
+  {
+   "index": 16,
+   "addr": "0x80390c10",
+   "id": 11,
+   "kind": 5,
+   "variant": 1,
+   "x": 600.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b0005000144160000441d8000c53b7000"
+  },
+  {
+   "index": 17,
+   "addr": "0x80390c24",
+   "id": 11,
+   "kind": 5,
+   "variant": 2,
+   "x": 600.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b0005000244160000441d8000c53b7000"
+  },
+  {
+   "index": 18,
+   "addr": "0x80390c38",
+   "id": 11,
+   "kind": 5,
+   "variant": 3,
+   "x": 600.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b0005000344160000441d8000c53b7000"
+  },
+  {
+   "index": 19,
+   "addr": "0x80390c4c",
+   "id": 11,
+   "kind": 6,
+   "variant": 0,
+   "x": 920.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b0006000044660000441d8000c53b7000"
+  },
+  {
+   "index": 20,
+   "addr": "0x80390c60",
+   "id": 11,
+   "kind": 6,
+   "variant": 1,
+   "x": 920.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b0006000144660000441d8000c53b7000"
+  },
+  {
+   "index": 21,
+   "addr": "0x80390c74",
+   "id": 9,
+   "kind": 7,
+   "variant": 0,
+   "x": 80.0,
+   "y": -115.0,
+   "z": -3000.0,
+   "raw_hex": "000000090007000042a00000c2e60000c53b8000"
+  },
+  {
+   "index": 22,
+   "addr": "0x80390c88",
+   "id": 9,
+   "kind": 7,
+   "variant": 1,
+   "x": 1030.0,
+   "y": -115.0,
+   "z": -3000.0,
+   "raw_hex": "00000009000700014480c000c2e60000c53b8000"
+  },
+  {
+   "index": 23,
+   "addr": "0x80390c9c",
+   "id": 33,
+   "kind": 8,
+   "variant": 0,
+   "x": -19.5,
+   "y": -58.0,
+   "z": -250.0,
+   "raw_hex": "0000002100080000c19c0000c2680000c37a0000"
+  },
+  {
+   "index": 24,
+   "addr": "0x80390cb0",
+   "id": 43,
+   "kind": 8,
+   "variant": 1,
+   "x": -63.0,
+   "y": -58.0,
+   "z": -250.0,
+   "raw_hex": "0000002b00080001c27c0000c2680000c37a0000"
+  },
+  {
+   "index": 25,
+   "addr": "0x80390cc4",
+   "id": 34,
+   "kind": 8,
+   "variant": 2,
+   "x": -77.0,
+   "y": -58.0,
+   "z": -250.0,
+   "raw_hex": "0000002200080002c29a0000c2680000c37a0000"
+  },
+  {
+   "index": 26,
+   "addr": "0x80390cd8",
+   "id": 36,
+   "kind": 8,
+   "variant": 3,
+   "x": -48.5,
+   "y": -58.0,
+   "z": -250.0,
+   "raw_hex": "0000002400080003c2420000c2680000c37a0000"
+  },
+  {
+   "index": 27,
+   "addr": "0x80390cec",
+   "id": 38,
+   "kind": 8,
+   "variant": 4,
+   "x": -19.5,
+   "y": -58.0,
+   "z": -250.0,
+   "raw_hex": "0000002600080004c19c0000c2680000c37a0000"
+  },
+  {
+   "index": 28,
+   "addr": "0x80390d00",
+   "id": 40,
+   "kind": 9,
+   "variant": 0,
+   "x": 155.0,
+   "y": 630.0,
+   "z": -2999.0,
+   "raw_hex": "0000002800090000431b0000441d8000c53b7000"
+  },
+  {
+   "index": 29,
+   "addr": "0x80390d14",
+   "id": 41,
+   "kind": 9,
+   "variant": 1,
+   "x": -850.0,
+   "y": 450.0,
+   "z": -3000.0,
+   "raw_hex": "0000002900090001c454800043e10000c53b8000"
+  },
+  {
+   "index": 30,
+   "addr": "0x80390d28",
+   "id": 10,
+   "kind": 10,
+   "variant": 1,
+   "x": 555.0,
+   "y": 425.0,
+   "z": -3000.0,
+   "raw_hex": "0000000a000a0001440ac00043d48000c53b8000"
+  },
+  {
+   "index": 31,
+   "addr": "0x80390d3c",
+   "id": 10,
+   "kind": 10,
+   "variant": 0,
+   "x": 555.0,
+   "y": 90.0,
+   "z": -3000.0,
+   "raw_hex": "0000000a000a0000440ac00042b40000c53b8000"
+  },
+  {
+   "index": 32,
+   "addr": "0x80390d50",
+   "id": 10,
+   "kind": 10,
+   "variant": 0,
+   "x": 555.0,
+   "y": -30.0,
+   "z": -3000.0,
+   "raw_hex": "0000000a000a0000440ac000c1f00000c53b8000"
+  },
+  {
+   "index": 33,
+   "addr": "0x80390d64",
+   "id": 10,
+   "kind": 10,
+   "variant": 0,
+   "x": 555.0,
+   "y": -150.0,
+   "z": -3000.0,
+   "raw_hex": "0000000a000a0000440ac000c3160000c53b8000"
+  },
+  {
+   "index": 34,
+   "addr": "0x80390d78",
+   "id": 10,
+   "kind": 10,
+   "variant": 0,
+   "x": 555.0,
+   "y": -270.0,
+   "z": -3000.0,
+   "raw_hex": "0000000a000a0000440ac000c3870000c53b8000"
+  },
+  {
+   "index": 35,
+   "addr": "0x80390d8c",
+   "id": 10,
+   "kind": 10,
+   "variant": 0,
+   "x": 555.0,
+   "y": -390.0,
+   "z": -3000.0,
+   "raw_hex": "0000000a000a0000440ac000c3c30000c53b8000"
+  },
+  {
+   "index": 36,
+   "addr": "0x80390da0",
+   "id": 10,
+   "kind": 10,
+   "variant": 0,
+   "x": 555.0,
+   "y": -510.0,
+   "z": -3000.0,
+   "raw_hex": "0000000a000a0000440ac000c3ff0000c53b8000"
+  },
+  {
+   "index": 37,
+   "addr": "0x80390db4",
+   "id": 10,
+   "kind": 10,
+   "variant": 2,
+   "x": 555.0,
+   "y": -655.0,
+   "z": -3000.0,
+   "raw_hex": "0000000a000a0002440ac000c423c000c53b8000"
+  },
+  {
+   "index": 38,
+   "addr": "0x80390dc8",
+   "id": 12,
+   "kind": 10,
+   "variant": 0,
+   "x": 645.0,
+   "y": 305.0,
+   "z": -3000.0,
+   "raw_hex": "0000000c000a00004421400043988000c53b8000"
+  },
+  {
+   "index": 39,
+   "addr": "0x80390ddc",
+   "id": 13,
+   "kind": 10,
+   "variant": 0,
+   "x": 235.0,
+   "y": 425.0,
+   "z": -2998.0,
+   "raw_hex": "0000000d000a0000436b000043d48000c53b6000"
+  },
+  {
+   "index": 40,
+   "addr": "0x80390df0",
+   "id": 14,
+   "kind": 10,
+   "variant": 0,
+   "x": 235.0,
+   "y": 90.0,
+   "z": -2998.0,
+   "raw_hex": "0000000e000a0000436b000042b40000c53b6000"
+  },
+  {
+   "index": 41,
+   "addr": "0x80390e04",
+   "id": 15,
+   "kind": 10,
+   "variant": 0,
+   "x": 235.0,
+   "y": -30.0,
+   "z": -2998.0,
+   "raw_hex": "0000000f000a0000436b0000c1f00000c53b6000"
+  },
+  {
+   "index": 42,
+   "addr": "0x80390e18",
+   "id": 16,
+   "kind": 10,
+   "variant": 0,
+   "x": 235.0,
+   "y": -150.0,
+   "z": -2998.0,
+   "raw_hex": "00000010000a0000436b0000c3160000c53b6000"
+  },
+  {
+   "index": 43,
+   "addr": "0x80390e2c",
+   "id": 17,
+   "kind": 10,
+   "variant": 0,
+   "x": 235.0,
+   "y": -270.0,
+   "z": -2998.0,
+   "raw_hex": "00000011000a0000436b0000c3870000c53b6000"
+  },
+  {
+   "index": 44,
+   "addr": "0x80390e40",
+   "id": 18,
+   "kind": 10,
+   "variant": 0,
+   "x": 235.0,
+   "y": -390.0,
+   "z": -2998.0,
+   "raw_hex": "00000012000a0000436b0000c3c30000c53b6000"
+  },
+  {
+   "index": 45,
+   "addr": "0x80390e54",
+   "id": 19,
+   "kind": 10,
+   "variant": 0,
+   "x": 235.0,
+   "y": -510.0,
+   "z": -2998.0,
+   "raw_hex": "00000013000a0000436b0000c3ff0000c53b6000"
+  },
+  {
+   "index": 46,
+   "addr": "0x80390e68",
+   "id": 20,
+   "kind": 10,
+   "variant": 2,
+   "x": 235.0,
+   "y": -655.0,
+   "z": -2998.0,
+   "raw_hex": "00000014000a0002436b0000c423c000c53b6000"
+  },
+  {
+   "index": 47,
+   "addr": "0x80390e7c",
+   "id": 21,
+   "kind": 11,
+   "variant": 0,
+   "x": 215.0,
+   "y": 247.5,
+   "z": -3000.0,
+   "raw_hex": "00000015000b00004357000043778000c53b8000"
+  },
+  {
+   "index": 48,
+   "addr": "0x80390e90",
+   "id": 22,
+   "kind": 11,
+   "variant": 1,
+   "x": 215.0,
+   "y": 247.5,
+   "z": -2998.0,
+   "raw_hex": "00000016000b00014357000043778000c53b6000"
+  },
+  {
+   "index": 49,
+   "addr": "0x80390ea4",
+   "id": 11,
+   "kind": 12,
+   "variant": 0,
+   "x": 660.0,
+   "y": 90.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000c00004425000042b40000c53b7000"
+  },
+  {
+   "index": 50,
+   "addr": "0x80390eb8",
+   "id": 11,
+   "kind": 12,
+   "variant": 1,
+   "x": 660.0,
+   "y": 90.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000c00014425000042b40000c53b7000"
+  },
+  {
+   "index": 51,
+   "addr": "0x80390ecc",
+   "id": 11,
+   "kind": 12,
+   "variant": 2,
+   "x": 660.0,
+   "y": 90.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000c00024425000042b40000c53b7000"
+  },
+  {
+   "index": 52,
+   "addr": "0x80390ee0",
+   "id": 11,
+   "kind": 12,
+   "variant": 3,
+   "x": 660.0,
+   "y": 90.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000c00034425000042b40000c53b7000"
+  },
+  {
+   "index": 53,
+   "addr": "0x80390ef4",
+   "id": 11,
+   "kind": 13,
+   "variant": 0,
+   "x": 660.0,
+   "y": -510.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000d000044250000c3ff0000c53b7000"
+  },
+  {
+   "index": 54,
+   "addr": "0x80390f08",
+   "id": 11,
+   "kind": 13,
+   "variant": 1,
+   "x": 660.0,
+   "y": -510.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000d000144250000c3ff0000c53b7000"
+  },
+  {
+   "index": 55,
+   "addr": "0x80390f1c",
+   "id": 11,
+   "kind": 13,
+   "variant": 2,
+   "x": 660.0,
+   "y": -510.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000d000244250000c3ff0000c53b7000"
+  },
+  {
+   "index": 56,
+   "addr": "0x80390f30",
+   "id": 11,
+   "kind": 13,
+   "variant": 3,
+   "x": 660.0,
+   "y": -510.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000d000344250000c3ff0000c53b7000"
+  },
+  {
+   "index": 57,
+   "addr": "0x80390f44",
+   "id": 11,
+   "kind": 13,
+   "variant": 4,
+   "x": 660.0,
+   "y": -510.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000d000444250000c3ff0000c53b7000"
+  },
+  {
+   "index": 58,
+   "addr": "0x80390f58",
+   "id": 11,
+   "kind": 13,
+   "variant": 5,
+   "x": 660.0,
+   "y": -510.0,
+   "z": -2999.0,
+   "raw_hex": "0000000b000d000544250000c3ff0000c53b7000"
+  },
+  {
+   "index": 59,
+   "addr": "0x80390f6c",
+   "id": 23,
+   "kind": 14,
+   "variant": 0,
+   "x": 660.0,
+   "y": -30.0,
+   "z": -2999.0,
+   "raw_hex": "00000017000e000044250000c1f00000c53b7000"
+  },
+  {
+   "index": 60,
+   "addr": "0x80390f80",
+   "id": 23,
+   "kind": 14,
+   "variant": 1,
+   "x": 660.0,
+   "y": -150.0,
+   "z": -2999.0,
+   "raw_hex": "00000017000e000144250000c3160000c53b7000"
+  },
+  {
+   "index": 61,
+   "addr": "0x80390f94",
+   "id": 23,
+   "kind": 14,
+   "variant": 2,
+   "x": 660.0,
+   "y": -270.0,
+   "z": -2999.0,
+   "raw_hex": "00000017000e000244250000c3870000c53b7000"
+  },
+  {
+   "index": 62,
+   "addr": "0x80390fa8",
+   "id": 23,
+   "kind": 14,
+   "variant": 3,
+   "x": 660.0,
+   "y": -390.0,
+   "z": -2999.0,
+   "raw_hex": "00000017000e000344250000c3c30000c53b7000"
+  },
+  {
+   "index": 63,
+   "addr": "0x80390fbc",
+   "id": 31,
+   "kind": 15,
+   "variant": 0,
+   "x": 555.0,
+   "y": -115.0,
+   "z": -3000.0,
+   "raw_hex": "0000001f000f0000440ac000c2e60000c53b8000"
+  },
+  {
+   "index": 64,
+   "addr": "0x80390fd0",
+   "id": 32,
+   "kind": 16,
+   "variant": 0,
+   "x": 205.0,
+   "y": 390.0,
+   "z": -2999.0,
+   "raw_hex": "0000002000100000434d000043c30000c53b7000"
+  },
+  {
+   "index": 65,
+   "addr": "0x80390fe4",
+   "id": 32,
+   "kind": 16,
+   "variant": 1,
+   "x": 905.0,
+   "y": 390.0,
+   "z": -2999.0,
+   "raw_hex": "00000020001000014462400043c30000c53b7000"
+  },
+  {
+   "index": 66,
+   "addr": "0x80390ff8",
+   "id": 32,
+   "kind": 16,
+   "variant": 2,
+   "x": 205.0,
+   "y": -620.0,
+   "z": -2999.0,
+   "raw_hex": "0000002000100002434d0000c41b0000c53b7000"
+  },
+  {
+   "index": 67,
+   "addr": "0x8039100c",
+   "id": 32,
+   "kind": 16,
+   "variant": 3,
+   "x": 905.0,
+   "y": -620.0,
+   "z": -2999.0,
+   "raw_hex": "000000200010000344624000c41b0000c53b7000"
+  },
+  {
+   "index": 68,
+   "addr": "0x80391020",
+   "id": 24,
+   "kind": 17,
+   "variant": 0,
+   "x": 555.0,
+   "y": 365.0,
+   "z": -3000.0,
+   "raw_hex": "0000001800110000440ac00043b68000c53b8000"
+  },
+  {
+   "index": 69,
+   "addr": "0x80391034",
+   "id": 25,
+   "kind": 17,
+   "variant": 0,
+   "x": 505.0,
+   "y": 394.0,
+   "z": -2999.0,
+   "raw_hex": "000000190011000043fc800043c50000c53b7000"
+  },
+  {
+   "index": 70,
+   "addr": "0x80391048",
+   "id": 26,
+   "kind": 18,
+   "variant": 0,
+   "x": 211.0,
+   "y": 394.0,
+   "z": -2998.0,
+   "raw_hex": "0000001a001200004353000043c50000c53b6000"
+  },
+  {
+   "index": 71,
+   "addr": "0x8039105c",
+   "id": 28,
+   "kind": 19,
+   "variant": 0,
+   "x": 455.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001c0013000043e3800043dbc000c53b6000"
+  },
+  {
+   "index": 72,
+   "addr": "0x80391070",
+   "id": 29,
+   "kind": 17,
+   "variant": 0,
+   "x": 725.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001d001100004435400043dbc000c53b6000"
+  },
+  {
+   "index": 73,
+   "addr": "0x80391084",
+   "id": 30,
+   "kind": 20,
+   "variant": 0,
+   "x": 725.0,
+   "y": 439.3500061035156,
+   "z": -2997.0,
+   "raw_hex": "0000001e001400004435400043dbaccdc53b5000"
+  },
+  {
+   "index": 74,
+   "addr": "0x80391098",
+   "id": 24,
+   "kind": 17,
+   "variant": 1,
+   "x": 555.0,
+   "y": 365.0,
+   "z": -3000.0,
+   "raw_hex": "0000001800110001440ac00043b68000c53b8000"
+  },
+  {
+   "index": 75,
+   "addr": "0x803910ac",
+   "id": 25,
+   "kind": 17,
+   "variant": 1,
+   "x": 505.0,
+   "y": 394.0,
+   "z": -2999.0,
+   "raw_hex": "000000190011000143fc800043c50000c53b7000"
+  },
+  {
+   "index": 76,
+   "addr": "0x803910c0",
+   "id": 26,
+   "kind": 18,
+   "variant": 1,
+   "x": 211.0,
+   "y": 394.0,
+   "z": -2998.0,
+   "raw_hex": "0000001a001200014353000043c50000c53b6000"
+  },
+  {
+   "index": 77,
+   "addr": "0x803910d4",
+   "id": 28,
+   "kind": 19,
+   "variant": 1,
+   "x": 455.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001c0013000143e3800043dbc000c53b6000"
+  },
+  {
+   "index": 78,
+   "addr": "0x803910e8",
+   "id": 29,
+   "kind": 17,
+   "variant": 1,
+   "x": 725.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001d001100014435400043dbc000c53b6000"
+  },
+  {
+   "index": 79,
+   "addr": "0x803910fc",
+   "id": 30,
+   "kind": 20,
+   "variant": 1,
+   "x": 725.0,
+   "y": 439.3500061035156,
+   "z": -2997.0,
+   "raw_hex": "0000001e001400014435400043dbaccdc53b5000"
+  },
+  {
+   "index": 80,
+   "addr": "0x80391110",
+   "id": 24,
+   "kind": 17,
+   "variant": 2,
+   "x": 555.0,
+   "y": 365.0,
+   "z": -3000.0,
+   "raw_hex": "0000001800110002440ac00043b68000c53b8000"
+  },
+  {
+   "index": 81,
+   "addr": "0x80391124",
+   "id": 25,
+   "kind": 17,
+   "variant": 2,
+   "x": 505.0,
+   "y": 394.0,
+   "z": -2999.0,
+   "raw_hex": "000000190011000243fc800043c50000c53b7000"
+  },
+  {
+   "index": 82,
+   "addr": "0x80391138",
+   "id": 26,
+   "kind": 18,
+   "variant": 2,
+   "x": 211.0,
+   "y": 394.0,
+   "z": -2998.0,
+   "raw_hex": "0000001a001200024353000043c50000c53b6000"
+  },
+  {
+   "index": 83,
+   "addr": "0x8039114c",
+   "id": 28,
+   "kind": 19,
+   "variant": 2,
+   "x": 455.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001c0013000243e3800043dbc000c53b6000"
+  },
+  {
+   "index": 84,
+   "addr": "0x80391160",
+   "id": 29,
+   "kind": 17,
+   "variant": 2,
+   "x": 725.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001d001100024435400043dbc000c53b6000"
+  },
+  {
+   "index": 85,
+   "addr": "0x80391174",
+   "id": 30,
+   "kind": 20,
+   "variant": 2,
+   "x": 725.0,
+   "y": 439.3500061035156,
+   "z": -2997.0,
+   "raw_hex": "0000001e001400024435400043dbaccdc53b5000"
+  },
+  {
+   "index": 86,
+   "addr": "0x80391188",
+   "id": 24,
+   "kind": 17,
+   "variant": 3,
+   "x": 555.0,
+   "y": 365.0,
+   "z": -3000.0,
+   "raw_hex": "0000001800110003440ac00043b68000c53b8000"
+  },
+  {
+   "index": 87,
+   "addr": "0x8039119c",
+   "id": 25,
+   "kind": 17,
+   "variant": 3,
+   "x": 505.0,
+   "y": 394.0,
+   "z": -2999.0,
+   "raw_hex": "000000190011000343fc800043c50000c53b7000"
+  },
+  {
+   "index": 88,
+   "addr": "0x803911b0",
+   "id": 26,
+   "kind": 18,
+   "variant": 3,
+   "x": 211.0,
+   "y": 394.0,
+   "z": -2998.0,
+   "raw_hex": "0000001a001200034353000043c50000c53b6000"
+  },
+  {
+   "index": 89,
+   "addr": "0x803911c4",
+   "id": 28,
+   "kind": 19,
+   "variant": 3,
+   "x": 455.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001c0013000343e3800043dbc000c53b6000"
+  },
+  {
+   "index": 90,
+   "addr": "0x803911d8",
+   "id": 29,
+   "kind": 17,
+   "variant": 3,
+   "x": 725.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001d001100034435400043dbc000c53b6000"
+  },
+  {
+   "index": 91,
+   "addr": "0x803911ec",
+   "id": 30,
+   "kind": 20,
+   "variant": 3,
+   "x": 725.0,
+   "y": 439.3500061035156,
+   "z": -2997.0,
+   "raw_hex": "0000001e001400034435400043dbaccdc53b5000"
+  },
+  {
+   "index": 92,
+   "addr": "0x80391200",
+   "id": 24,
+   "kind": 17,
+   "variant": 4,
+   "x": 555.0,
+   "y": 365.0,
+   "z": -3000.0,
+   "raw_hex": "0000001800110004440ac00043b68000c53b8000"
+  },
+  {
+   "index": 93,
+   "addr": "0x80391214",
+   "id": 25,
+   "kind": 17,
+   "variant": 4,
+   "x": 505.0,
+   "y": 394.0,
+   "z": -2999.0,
+   "raw_hex": "000000190011000443fc800043c50000c53b7000"
+  },
+  {
+   "index": 94,
+   "addr": "0x80391228",
+   "id": 26,
+   "kind": 18,
+   "variant": 4,
+   "x": 211.0,
+   "y": 394.0,
+   "z": -2998.0,
+   "raw_hex": "0000001a001200044353000043c50000c53b6000"
+  },
+  {
+   "index": 95,
+   "addr": "0x8039123c",
+   "id": 28,
+   "kind": 19,
+   "variant": 4,
+   "x": 455.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001c0013000443e3800043dbc000c53b6000"
+  },
+  {
+   "index": 96,
+   "addr": "0x80391250",
+   "id": 29,
+   "kind": 17,
+   "variant": 4,
+   "x": 725.0,
+   "y": 439.5,
+   "z": -2998.0,
+   "raw_hex": "0000001d001100044435400043dbc000c53b6000"
+  },
+  {
+   "index": 97,
+   "addr": "0x80391264",
+   "id": 30,
+   "kind": 20,
+   "variant": 4,
+   "x": 725.0,
+   "y": 439.3500061035156,
+   "z": -2997.0,
+   "raw_hex": "0000001e001400044435400043dbaccdc53b5000"
+  }
+ ],
+ "sentinel": {
+  "addr": "0x80391278",
+  "value": "0xffffffff"
+ }
+}

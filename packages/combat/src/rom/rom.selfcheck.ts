@@ -6,10 +6,11 @@
 //  2. dispatch.dispatchCommandRecord transitions state 61 → rootAction
 //  3. The G RED family's phase-0 launch produces the documented upward impulse (Y=+4.0)
 
-import { createRomActor } from "./actor.js";
+import { createRomActor, type RomActor } from "./actor.js";
 import { integratePhysics } from "./physics.js";
 import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
+import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
 import { RomDriverBridge } from "../bridge.js";
@@ -108,6 +109,67 @@ export function runSelfTest(): number {
     assert(approxEq(a.hSpeed, 0.0), "hSpeed == 0 (vertical-only launch)");
     assert(approxEq(a.gravityCoeff, 0.0), "gravityCoeff == 0 (no gravity during launch)");
     assert(a.fbPhaseSlots[0] === 1, "phase advanced to 1 (air-dash) for next frame");
+  }
+
+  // Test 5: NINJA family — shared-X phase 0 blink-reposition + zeroed launch scalars.
+  console.log("\n[rom.selfcheck] families/ninja — shared-X phase 0 (zz_00ff30c_):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureNinjaFamily(a, "pl0000", ctx);
+    assert(a.borgNumber === 0x000, "borgNumber stamped 0x000 (NORMAL NINJA)");
+    a.pos.x = 100; a.pos.z = 0;
+    (a as RomActor & { lockTarget?: { x: number; y: number; z: number } }).lockTarget = { x: 0, y: 0, z: 0 };
+    a.hSpeed = 5; a.yVel = 3;
+    a.actionIndex = 2;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    // Reposition: motion = pos − target = (100,0,0); ×0.95; pos += motion → x = 195.
+    assert(approxEq(a.pos.x, 195.0), "pos.x == 195 (blink-away: motion = (pos−target)×0.95 added)");
+    assert(approxEq(a.hSpeed, 0) && approxEq(a.yVel, 0), "launch scalars zeroed (FLOAT_804392b4)");
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced to 1");
+    assert(a.streamSlot === 1, "stream cursor advanced past ground slot 0 (+0x6ea++)");
+  }
+
+  // Test 6: NINJA family — phase-1 contact → phase 2 + zz_00715f8_ backflip callback.
+  console.log("\n[rom.selfcheck] families/ninja — on-hit backflip (zz_00715f8_):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    let familyProj = null as { addr: number; type: number } | null;
+    (ctx as typeof ctx & { onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void }).onFamilyProjectile =
+      (_a, addr, type) => { familyProj = { addr, type }; };
+    configureNinjaFamily(a, "pl000a", ctx); // SASUKE — same family, shuriken type 3
+    assert(a.borgNumber === 0x00a, "borgNumber stamped 0x00a (SASUKE)");
+    a.actionIndex = 2;
+    a.fbPhaseSlots[0] = 1; // already in phase 1
+    a.heading = 0x4000;
+    a.contactP0 = 1; // the +0x1cef contact byte fired
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "contact advanced phase 1 → 2");
+    assert(approxEq(a.hSpeed, NINJA_X.BACKFLIP_HSPEED), "backflip hSpeed == 10.0 (FLOAT_80437748)");
+    assert(approxEq(a.yVel, NINJA_X.BACKFLIP_YVEL), "backflip yVel == 15.0 (FLOAT_80437768)");
+    assert(approxEq(a.gravityCoeff, NINJA_X.BACKFLIP_GRAVITY), "backflip gravityCoeff == -1.0 (FLOAT_804376e0)");
+    assert(a.lockYaw === ((0x4000 - 0x8000) & 0xffff), "lockYaw flipped 180° (+0x5ae = +0x72 − 0x8000)");
+    assert(familyProj !== null && familyProj!.addr === NINJA_X.SHURIKEN_SPAWNER_ADDR && familyProj!.type === 3,
+      "SASUKE shuriken spawn requested via zz_007db5c_ type 3");
+  }
+
+  // Test 7: bridge — pl0000 registry attach dispatches cue 44 AND cue 45 to state 61.
+  console.log("\n[rom.selfcheck] bridge — ninja family cue table (0x802d3ff8 rows 44/45):");
+  {
+    const runtime = { borgId: "pl0000", team: 0, uid: "t", pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 }, rotY: 0, grounded: true, cooldowns: {} } as unknown as BorgRuntime;
+    const bridge = RomDriverBridge.attach(runtime, { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    assert(bridge !== null, "RomDriverBridge attaches for pl0000 (family registered)");
+    if (bridge) {
+      const t = bridge.actor.cueTable!;
+      assert(t[44 * 2] === 61 && t[45 * 2] === 61, "cue rows 44 AND 45 → full-body state 61");
+      assert(t[5 * 2] === 6 && t[8 * 2] === 9, "family-0 deltas vs G RED (cue 5→6, cue 8→9)");
+      assert(bridge.actor.rootAction !== null, "ninja rootAction configured");
+    }
   }
 
   if (failures > 0) {

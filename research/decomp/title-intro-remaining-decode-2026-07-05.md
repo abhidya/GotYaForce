@@ -115,11 +115,11 @@ table.**
 
 | target | decoded? | residual |
 |---|---|---|
-| anim bank `+0x1d80` bind | structure DERIVED (per-family virtual ctor `PTR_PTR_802d3224`) | groupSel=5→g0 mapping needs the family-ctor body (Normal Ninja + G RED) |
+| anim bank `+0x1d80` bind | **CLOSED 2026-07-06** (`title-intro-residuals-decode-2026-07-06.md` §1): both family ctors read (NN ctor 0x8006f4f8 is a Ghidra-missed fn), full chain DERIVED incl. the +0x1d88 metadata hop; groupSel=5 → borg's own g0 file, identity EXCEPT animId 6 → g0 anim 9; TitleIntro.ts map upgraded TUNED→DERIVED | id-3 rate operand 30's unit unpinned (clips play at baked rate) |
 | actor spawn position | structure DERIVED (`global + slot*0xc + 0x1604`, f32 xyz) | values trace-gated (Dolphin watch on +0x1604/+0x1610) |
 | `zz_00088a4_` fade consumer | DERIVED (HSD 2D render-pipeline consumer) | precise alpha mapping in Sysdolphin helpers (low-value) |
 | `DAT_8038a550` overlay seed | DERIVED (32-byte screen-space rect, 640×480 frame) | — |
-| `DAT_80390ad0` widget table | PARTIAL (f32 3D positions + flags confirmed) | row stride needs FUN_801dd7d4 walk pass |
+| `DAT_80390ad0` widget table | **CLOSED 2026-07-06** (`title-intro-residuals-decode-2026-07-06.md` §2): stride 0x14, 98 rows {id, kind, variant, f32 xyz}, byte-verified dump in `data/title-widget-table.json`; per-kind dispatch = PTR_LAB_8039132c (21 entries). NOTE: this doc's §5 byte samples −648.0/−959.5/0x00020002 were misreads — see the 2026-07-06 doc §2.3 | word0 "model id" role is an open hypothesis (the +0xe0 drawable setter is untraced) |
 
 The two TUNED residuals that affect visible fidelity are both **trace-gated** (the
 spawn coords) or **family-ctor-gated** (the anim mapping). Everything structural about

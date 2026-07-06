@@ -32,6 +32,7 @@ import {
 } from "./combat.js";
 import { createBurstMeter } from "./burst.js";
 import { exactMeleeForBorgId } from "./meleeExactData.js";
+import { findVariantByKind } from "./combat.js";
 import {
   airBChargeCoverage,
   airBMoveForBorgId,
@@ -1836,8 +1837,21 @@ function assertChargeShotTiers(borgs: BorgStats[]): void {
   if (!(speed2 > speed0) || !(tier2.hitRadius > tier0.hitRadius)) {
     throw new Error("[selfcheck] tier-2 charge shot should be faster and larger than a tap shot");
   }
-  if (shotDef.bulletDrop > 0 && tier0.drop !== shotDef.bulletDrop) {
-    throw new Error(`[selfcheck] ballistic drop not applied to spawned bullet: ${tier0.drop}`);
+  // Expected drop mirrors spawnProjectile's resolution: a resolved ROM variant's drop
+  // (negated at the boundary — the ROM field is negative-down, Projectile.drop is
+  // positive-down) overrides the TUNED shotDef.bulletDrop. G RED resolves shot kind 0 →
+  // the ROM bullet variant (drop -3.0) → expected Projectile.drop = +3.0.
+  const romVariantDrop = (() => {
+    const kind = shotKindForBorgId(gRed.id);
+    const variant = kind !== null ? findVariantByKind(kind) : null;
+    return variant ? -variant.drop : null;
+  })();
+  const expectedDrop = romVariantDrop ?? (shotDef.bulletDrop > 0 ? shotDef.bulletDrop : undefined);
+  if (expectedDrop !== undefined && tier0.drop !== expectedDrop) {
+    throw new Error(`[selfcheck] ballistic drop not applied to spawned bullet: ${tier0.drop} (expected ${expectedDrop})`);
+  }
+  if ((tier0.drop ?? 0) < 0) {
+    throw new Error(`[selfcheck] spawned bullet has NEGATIVE drop (would rise): ${tier0.drop}`);
   }
   console.log(
     `[selfcheck] charge tiers OK: tap=${tier0.damage.toFixed(1)} dmg, tier1 x${r1.toFixed(2)}, tier2 x${r2.toFixed(2)} (drop=${tier0.drop ?? 0})`,

@@ -13,6 +13,133 @@ diverges from ROM in a known way; MISSING = not ported; STUB = intentional place
 
 ---
 
+## ★ 2026-07-06 session: title-intro residuals CLOSED + CPU AI brain STATICALLY ISOLATED
+
+Multi-agent verified static dig (every claim independently adversarially re-verified from
+corpus + raw DOL bytes before landing; workflow `wf_9213949b-b42`). Three deliverables:
+
+1. **Family-ctor anim-bank binding SOLVED** (`title-intro-residuals-decode-2026-07-06.md` §1,
+   behavior-notes (bf)): `PTR_PTR_802d3224`[familyByte][variantByte] → ctor. Normal Ninja ctor
+   **0x8006f4f8 is a Ghidra-missed function** (raw-disasm read; serves pl0000 + pl000a — Sasuke
+   differs ONLY in descriptor +0x4b0, so one family port covers both). G RED ctor zz_018ccfc_
+   (0x615/0x629/0x62a). Full anim chain DERIVED end-to-end incl. the previously-missing
+   **+0x1d88/+0x1d8c metadata-bank hop** (playAnim operands are (metaBank, metaAnim), NOT
+   (group,slot); resolver zz_004d1f4_, parser zz_004d244_, 0x14-stride records →
+   (motionFile, fileAnim, mirror/blend/hand-swap)). **groupSel=5 → the borg's own g0 motion
+   file, identity-mapped EXCEPT animId 6 → g0 anim 9** (both intro families). Baked `sNN` index
+   PROVEN = g0-file anim index. **TitleIntro.ts ANIM_FILES_BY_ID upgraded TUNED→DERIVED**
+   (id 6 → anim_g00_s09; ids 2/5 added; tdc-pose-bank theory falsified). Residuals: id-3 rate
+   operand 30 unit unpinned; stream-vm.ts shared-bank fallback + missing metadata hop flagged
+   for the ROM-runtime layer (actor.ts fields exist, unpopulated). NN ctor full bindings
+   recorded for the family port: root dispatcher 0x8006facc, cue table 0x802d3ff8, sound
+   0x802d3ca0, damage 0x802d4160, +0x4ec=0x802d4148 (undecoded).
+2. **DAT_80390ad0 widget table CLOSED** (§2, same doc): stride **0x14**, **98 rows**
+   {s32 id 0..43, u16 kind 0..20, s16 variant −1..5, f32 X/Y/Z}, sentinel 0xFFFFFFFF; dumped
+   to `research/decomp/data/title-widget-table.json` — **byte-verified against an independent
+   re-dump (0 mismatches)**. Real per-kind dispatch = PTR_LAB_8039132c (21 entries; kinds 0-3
+   handlers are Ghidra decompile gaps). Two of the 2026-07-05 doc's byte samples were misreads
+   (purged). Verify pass REFUTED two consumer attributions (PTR_FUN_80391658/DAT_803914d4
+   belong to the separate zz_01deb68_ widget family) — corrected in doc + JSON meta.
+3. **CPU AI decision brain FOUND STATICALLY** (`cpu-ai-decode-2026-07-06.md`, behavior-notes
+   (bg); supersedes index/cpu-ai-evidence.md's "un-isolated" conclusion): root
+   **zz_001c9d0_ @0x8001c9d0**, called per-frame from input refresh FUN_80056900 for actors
+   with CPU flag +0x3e6 (set from the pad-present mask at FUN_800541ac init). The AI writes
+   the actor-embedded **virtual pad** (+0x5b4 buttons/+0x5ca stick) directly — same fields
+   the human path fills from the DAT_803c727c mirror. Fully mapped: retarget cadence
+   {4,8,10,12,15,30,45,60}f, nearest-enemy 20000u select, **camera-relative** stick
+   ((bearing − (camYaw+180°)) × 54 × 0.8 — +0x5b0 writer found by the verify pass), terrain-
+   probe jump, 32-slice weighted attack roulette over six per-borg weights (record
+   +0xf0..+0x104) → 0x200/0x400 presses through a 3-phase range+LOS-gated executor,
+   difficulty idle-cadence tables (lvl0 74-86f → lvl3 34-46f, dumped), level-0 attack block,
+   per-borg quirk overlay, fusion 0x800 hold. All range/steering constants DERIVED. §0's
+   "CPU AI approach/kite constants tuned for the old 22-speed world" now has a full DERIVED
+   replacement spec (port not started); Priority-8 Dolphin pass is now confirmation-only
+   (plan in doc §5).
+
+**Session part 2 (same day): NORMAL NINJA family PORTED (2nd family) + shared-X layer +
+combo-reconcile root-cause + a real projectile-drop sign bug fixed** (verified workflow
+`wf_a6dd44f6-f67`; full record `nn-family-decode-2026-07-06.md` + behavior-notes (bh)/(bi)):
+
+4. **NORMAL NINJA family landed** — Tier D grows to 2/~31 families. The big architecture
+   find: pl0000's X-special routes to a **SHARED engine machine** (zz_00ff2bc_ @0x800ff2bc,
+   3 phases) parameterized by a per-family config block — ported once as
+   `families/shared-x-special.ts`; `families/ninja.ts` adds the family callback (backflip
+   10/15/−1 + yaw+180°, shuriken zz_007db5c_ type 0 / SASUKE type 3 via the new
+   `StreamContext.onFamilyProjectile` hook — host table-wiring residual). pl000a (SASUKE)
+   is covered free (ctor differs only in descriptor). Charge actions are command-disabled
+   for BOTH this family's borgs AND (verifier extra) G RED's types 4/5. Cue tables for
+   both families upgraded to FULL 48-row DERIVED dumps in bridge.ts (cues 44 AND 45 →
+   state 61). +0x4ec identified = command-move root (ctor-decode open question closed).
+   Actions 0/1 (B-combo, lunge — incl. a second shared machine zz_00fed6c_) transcribed
+   to phase granularity in the doc, not yet ported. `pnpm selfcheck:rom` green with 3 new
+   ninja test blocks.
+5. **comboHits vs ladder 58-borg disagreement ROOT-CAUSED** (behavior-notes (bi), 11/11
+   claims verified): 83% = stale asset inventory + a heuristic-ordering bug (runtime
+   already correct via the ladder override — raw-data hygiene only); **3 borgs were a real
+   port bug — FIXED**: stepFromKind now accepts −1/−2 open-window sentinel records
+   (labeled TUNED active length 8), restoring pl0501→2 / pl0a00→3 / pl0a02→3 (= ROM
+   armed-rung = asset counts); 7 borgs honestly UNRESOLVED (ninja whiff-rung + table-end
+   shapes — need a live trace; do NOT blanket-fix).
+6. **Drive-by REAL BUG fixed**: 31096d1c's ROM projectile-variant wiring fed the ROM's
+   NEGATIVE-down drop values into the port's POSITIVE-down `Projectile.drop`
+   (`vel.y -= drop`) — ROM-droppy bullets ROSE. Caught by assertChargeShotTiers (the one
+   suite 31096d1c didn't run); fixed at the spawnProjectile boundary + assert hardened.
+7. **VALIDATED**: `pnpm -r run build` clean; `pnpm selfcheck:rom` all-pass; full combat
+   selfcheck PASS; 1P challenge smoke PASS (resolvedFrame 5191→6524, expected — ROM-variant
+   bullets now actually fall + the ninja X blink-away changed spacing); 11-stage +
+   family-variant smokes PASS; projectile 36/36; xammo 32/32; menu-flow PASS. TitleIntro
+   id-6 anim fix verified live in the browser preview (correct s09 files fetched for both
+   actors, clean console/network, desk scene renders).
+
+---
+
+## ★ 2026-07-05 session (later): ROM per-family state-machine engine — architecture finding + G RED landed
+
+**Architecture finding (research/decomp/action-vm-and-gcrash-decode-2026-07-05.md): real move
+MOTION lives in per-family C state-machine handlers, not shared data tables.** Decoded the last 8
+action-script VM opcodes (0x02-0x07/0x0b/0x0c, chunk_0006.c:1996 `zz_004cd24_`, dispatch table
+`PTR_FUN_802d0da0`) — every one is a per-part STATE/FLAG/weapon-swap setter (contact latch,
+part-target flags, hand/weapon attachment swap); **none writes velocity or position**. Traced G
+RED's X-special ("G Crash") end-to-end as a 4-phase family state machine (`FUN_8018e888` chain,
+chunk_0047.c:777-970): launch (Y-impulse 4.0, `FLOAT_8043b158`) → air-dash/stream-tick → on-contact
+dash (60.0 XZ / 10.0 Y, `FLOAT_8043b148`/`_15c`) → descend/land. **This is why the existing
+generic-archetype combat.ts (one shared `projectile`/`aoe`/`melee` `SpecialActionDef` shape for
+every borg) cannot fully reproduce real per-borg move feel** — the archetypes model the shared
+data (hit windows, damage records, reach) correctly, but the actual phase-by-phase motion driver
+is unique C code per family that was never ported.
+
+**Response: started a ROM-faithful actor runtime, `packages/combat/src/rom/*`, composing
+alongside (not replacing) the existing BorgRuntime/combat.ts.** Foundation layers all DONE and
+unit-tested (`pnpm selfcheck:rom`, 22/22 — `scripts/run-rom-tests.mjs`): actor struct map
+(`actor.ts`), physics integrator (`physics.ts`, ports `FUN_80067310`), cue→state→command dispatch
+(`dispatch.ts`, `zz_006a6fc_`/`zz_006a750_`/`zz_006a104_`/`FUN_80065dfc`), the full 18-opcode
+action-stream VM (`stream-vm.ts`, `zz_004beb8_`+`zz_004cd24_`), and populated state tables
+(`state-tables.ts`, 64+64 slots). **First family ported: G RED's X-special** (`families/gred.ts`,
+the 4-phase G Crash above) — wired into the live battle sim via `bridge.ts` (BorgRuntime ↔
+RomActor field sync, composes with movement.ts/combat.ts rather than replacing them; borgs with no
+ported family keep today's generic-archetype behavior unchanged, `romDriver = null`). Cue-table
+extractor (`scripts/extract-family-cue-tables.mjs`) resolved 17/30 families' direct
+`lis`+`addi`-pattern cue tables automatically; G RED's own table is still hand-transcribed in
+`bridge.ts` pending the indirect-load (`lwz`-based) extractor path.
+
+**NOT YET PORTED (see `packages/combat/src/rom/PORTING.md` for the full tracker + per-family
+recipe):**
+- G RED's OWN other actions — B-melee/dash/B-charge (actionIndex 0/1/3/4 of the same
+  `chunk_0047.c` dispatcher) — only the X-special (actionIndex 2) is ported so far.
+- **~30 other families' state machines** (Star Hero's X dash, Sword Knight's specials, etc.) —
+  each is its own unique 3-4 phase C handler; G RED is the reference template but every other
+  family needs its own transcription pass (~0.5-1 session each once the template is proven,
+  ~15-25 sessions total for full-roster coverage). Until a family lands, its borgs keep the
+  existing generic-archetype `combat.ts` path (safe fallback, not a regression).
+- Indirect-load (`lwz`-based) cue-table extraction for the 13/30 families the automatic
+  extractor couldn't resolve.
+
+VALIDATED: `pnpm -r run build` clean, `pnpm selfcheck:rom` 22/22 (state-table dispatch, bridge
+X-press → ROM launch, physics integration, cue→state→action dispatch, G RED phase-0 launch
+impulse) — pushed main @ `31096d1c`.
+
+---
+
 ## ★ 2026-07-05 session: combat-feel-gaps wiring (research/decomp/combat-feel-gaps-decode-2026-07-05.md)
 
 Wired all 5 decode targets from the combat-feel-gaps decode pass, in feel-impact order. Every
@@ -692,6 +819,7 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Combat: knockback direction | DONE (mode 1) + yaw trim wired (T8, 2026-07-05) | modes 0/2/3/4 need sub-object data |
 | Combat: knockback **magnitude** | **WIRED end-to-end (2026-07-05, T6 + T5)** — ground (idx*7×scaleRatio) vs launch ((idx+1)*8, pitch-split by T8 trim) tables selected per-hit, real per-frame decel/gravity integration in movement.ts; T5 scale-ratio wired via existing `tierSizeScale()` (param-tier table, base uniformly 1.0 at spawn) | no TUNED residue; no per-borg base-scale data needed (decode proves base is uniformly 1.0) |
 | Combat: B/X contextual resolver | resolver DERIVED (bd), port upgradeable | fill type/subtype from testers; only pad-bit↔button label needs a dig |
+| Combat: per-family move MOTION | **NEW LAYER started 2026-07-05** (`packages/combat/src/rom/*`) — architecture proven: real motion is per-family C state machines, not shared archetype data. 1/~31 families ported (G RED X-special, `pnpm selfcheck:rom` 22/22) | port the remaining ~30 families' state machines (G RED's own B-melee/dash/charge included) — this is now the single biggest lever for "feels like the real game", see `packages/combat/src/rom/PORTING.md` |
 | Combat: ammo/refill | DONE (B cell-0 + X cell-1 wired) | — |
 | Combat: projectile penetration | wired OBSERVED_WIKI (borgs/total→persist) | trace T6 confirms engine gate; terrain-penetration + solidity still open |
 | Combat: vampire lifesteal | DONE (ported, ay) | — |
@@ -994,3 +1122,11 @@ so "disambiguated %" becomes a tracked burn-down like `tuned-burndown.md`.
 Tier A is ~6 self-contained tickets a cheap coding agent can execute now; Tier B is 4 corpus
 digs; Tier C needs the controller. Each Tier-C trace has a ready preset in
 `scripts/trace-attack-mechanics.mjs` and a scenario in `attack-mechanics-trace-plan.md`.
+
+**Tier D — NEW, added 2026-07-05, now the highest-leverage bucket:** per-family ROM state-machine
+porting (`packages/combat/src/rom/*`, tracker in `rom/PORTING.md`). The foundation (actor/physics/
+dispatch/stream-vm/state-tables) is done and unit-tested; G RED's X-special is the one family
+landed. Remaining: G RED's own B-melee/dash/B-charge actions, then ~30 other families each as a
+~0.5-1 session mechanical transcription (read the family's ctor + `FUN_*` phase chain in
+`ghidra-export/chunk_*.c`, port per the documented recipe, add a selfcheck). Each family is
+independently shippable behind the `romDriver` registry — no risk to borgs not yet ported.

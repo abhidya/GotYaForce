@@ -2473,8 +2473,9 @@ function spawnProjectiles(
 }
 
 /** Find the first projectile variant with the given HIT kind in the decoded ROM table
- *  (DAT_802f3dda). Returns null when no variant matches — callers keep TUNED values. */
-function findVariantByKind(kind: number): { hSpeed: number; drop: number; lifetimeFrames: number; scale: [number, number, number] } | null {
+ *  (DAT_802f3dda). Returns null when no variant matches — callers keep TUNED values.
+ *  Exported for selfcheck.ts's charge-tier drop expectation. */
+export function findVariantByKind(kind: number): { hSpeed: number; drop: number; lifetimeFrames: number; scale: [number, number, number] } | null {
   for (let i = 0; i < 64; i++) {
     const variant = projectileVariant(i);
     if (variant && variant.kind === kind) {
@@ -2592,7 +2593,11 @@ function spawnProjectile(
         : shotDef.visualKind ?? projectileVisualKindForProfile(p),
     // ROM variant drop (gravity per frame) overrides TUNED bulletDrop when available.
     // The ROM table has real per-variant values: -1.5 beams, -3.0 bullets, 0.0 energy.
-    ...(romDrop !== null ? { drop: romDrop } : shotDef.bulletDrop > 0 ? { drop: shotDef.bulletDrop } : {}),
+    // SIGN: the ROM field is a NEGATIVE-down velocity delta; Projectile.drop is
+    // POSITIVE-down (stepProjectiles does `vel.y -= drop`), so negate at this boundary.
+    // (Caught by assertChargeShotTiers 2026-07-06 — the 31096d1c wiring fed the raw ROM
+    // value through and made ROM-droppy bullets rise.)
+    ...(romDrop !== null ? { drop: -romDrop } : shotDef.bulletDrop > 0 ? { drop: shotDef.bulletDrop } : {}),
     // ROM variant visual scale [X,Y,Z] from DAT_802f3dda.
     ...(romScale ? { romScale } : {}),
     // OBSERVED_WIKI (moveProperties, ATK-008 consume-vs-persist): a shot whose cataloged move

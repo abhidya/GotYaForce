@@ -1,5 +1,15 @@
 # CPU AI / Targeting Evidence
 
+> **SUPERSEDED 2026-07-06 — the decision brain WAS found statically.** See
+> `research/decomp/cpu-ai-decode-2026-07-06.md`: AI root = `zz_001c9d0_` @0x8001c9d0,
+> dispatched from the per-actor input refresh `FUN_80056900` when the CPU flag
+> actor+0x3e6 is set (bound at `FUN_800541ac` init from the pad-present mask — this
+> file's 2026-07-03 lead, confirmed). The AI writes the actor-embedded virtual pad
+> (+0x5b4/+0x5ca) directly; the `set_slot_action_handler` table below remains correctly
+> ruled OUT (replay input-stream buffers). The "Dolphin write-watch needed" next step is
+> replaced by the static decode; a Dolphin pass is now only CONFIRMATION (doc §5).
+> Anchors below are kept for their still-valid per-function evidence.
+
 Generated: 2026-07-01T11:00:00.390Z
 
 ## Principle

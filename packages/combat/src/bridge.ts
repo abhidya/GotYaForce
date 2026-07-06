@@ -29,6 +29,7 @@ import {
   dispatchFullBodyCue,
 } from "./rom/dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "./families/gred.js";
+import { configureNinjaFamily } from "./families/ninja.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
 import { spawnRomProjectile } from "./projectiles.js";
 import type { Projectile } from "./types.js";
@@ -140,40 +141,69 @@ export interface FamilyRegistration {
 }
 
 const FAMILY_REGISTRY: Record<string, FamilyRegistration> = {
-  // G RED family (ctor 0x8018ccfc) — cue table from cue-script-stream-decode §1
-  // (cue 44/45 → [61, 0]; cue 5 → [22, 22]; cue 36 → [47, 0]; etc.).
+  // G RED family (ctor 0x8018ccfc) — cue table @0x80365cf8, full 48-row DOL dump.
   pl0615: makeGRedFamilyRegistration(),
   pl0629: makeGRedFamilyRegistration(),
   pl062a: makeGRedFamilyRegistration(),
+  // NORMAL NINJA family (ctor 0x8006f4f8) — cue table @0x802d3ff8. SASUKE (pl000a)
+  // shares the entire family: the ctor differs only in the +0x4b0 descriptor.
+  pl0000: makeNinjaFamilyRegistration(),
+  pl000a: makeNinjaFamilyRegistration(),
 };
 
+/** Family-0 cue→state table @0x802d3ff8 — full 48-row byte dump, DERIVED 2026-07-06
+ *  (nn-family-decode §A11; adversarially re-dumped byte-exact). Rows 0-17 are
+ *  (i+1, i+1) except 9/10/11 = (0, i+1); rows 44 AND 45 both → full-body state 61
+ *  (the family root-action virtual via FUN_80065dfc — the ground records issue cue 44,
+ *  the air/knockdown records cue 45). G RED @0x80365cf8 is byte-identical EXCEPT rows
+ *  5:(22,22), 8:(23,23), 25:(0,31), 26:(0,32). */
+function makeFamily0BaseCueTable(): Int8Array {
+  const t = new Int8Array(96).fill(-1);
+  const set = (cue: number, fb: number, ub: number) => {
+    t[cue * 2] = fb;
+    t[cue * 2 + 1] = ub;
+  };
+  for (let cue = 0; cue <= 17; cue++) {
+    if (cue >= 9 && cue <= 11) set(cue, 0, cue + 1);
+    else set(cue, cue + 1, cue + 1);
+  }
+  set(35, 0, 0x2b);
+  set(36, 0x2f, 0); // deploy (fb state 47)
+  set(43, 0, 0x3c);
+  set(44, 61, 0); // attack (ground records) → family root action
+  set(45, 61, 0); // attack (air/knockdown records) → same state 61
+  set(46, 0, 0x3e);
+  set(47, 0, 0x3f);
+  return t;
+}
+
 function makeGRedFamilyRegistration(): FamilyRegistration {
-  // G RED's cue table @0x80365cf8 (48 entries). Decoded values from
-  // cue-script-stream-decode-2026-07-04.md §1; unlisted entries default to -1 (no change).
-  const cueTable = new Int8Array(96).fill(-1);
-  cueTable[44 * 2] = 61; // attack full-body → state 61 (family virtual)
-  cueTable[44 * 2 + 1] = 0; // attack upper-body → state 0 (idle)
+  const cueTable = makeFamily0BaseCueTable();
+  // G RED deltas vs the family-0 base (@0x80365cf8 dump).
   cueTable[5 * 2] = 22;
   cueTable[5 * 2 + 1] = 22;
   cueTable[8 * 2] = 23;
   cueTable[8 * 2 + 1] = 23;
-  cueTable[36 * 2] = 47; // deploy
   cueTable[25 * 2] = 0;
   cueTable[25 * 2 + 1] = 31;
   cueTable[26 * 2] = 0;
   cueTable[26 * 2 + 1] = 32;
-  cueTable[9 * 2] = 0;
-  cueTable[9 * 2 + 1] = 10;
-  cueTable[10 * 2] = 0;
-  cueTable[10 * 2 + 1] = 11;
-  cueTable[11 * 2] = 0;
-  cueTable[11 * 2 + 1] = 12;
   return {
     configure: (actor, ctx) => {
       const id = actor.borgNumber === 0x629 ? "pl0629" : actor.borgNumber === 0x62a ? "pl062a" : "pl0615";
       configureGRedFamily(actor, id as "pl0615" | "pl0629" | "pl062a", ctx);
     },
     cueTable,
+  };
+}
+
+function makeNinjaFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id = actor.borgNumber === 0x00a ? "pl000a" : "pl0000";
+      configureNinjaFamily(actor, id as "pl0000" | "pl000a", ctx);
+    },
+    cueTable: makeFamily0BaseCueTable(),
   };
 }
 

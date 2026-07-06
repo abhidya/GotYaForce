@@ -54,6 +54,12 @@ export interface StreamContext {
   /** Op 0x11 indirect callback — the family-scripted FX hook at actor+0x4d8. Per-family
    *  registration; null when the family hasn't set the callback. */
   onIndirect?: (actor: RomActor, a: number, b: number) => void;
+  /** Family-table projectile spawn — for spawner functions with their OWN record tables
+   *  (e.g. the ninja shuriken zz_007db5c_ @0x8007db5c, table 0x802d6d68), which index a
+   *  DIFFERENT registry than op 0x09's generic variant table (DAT_802f3dda → onFireChild).
+   *  `spawnerAddr` is the ROM spawner address, `type` its record-select argument. Hosts
+   *  that haven't wired the family table leave this unset (spawn is skipped, honest no-op). */
+  onFamilyProjectile?: (actor: RomActor, spawnerAddr: number, type: number) => void;
 }
 
 /**
