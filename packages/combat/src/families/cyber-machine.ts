@@ -27,103 +27,388 @@
 
 import type { RomActor } from "../rom/actor.js";
 import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
-import type { StreamContext } from "../rom/stream-vm.js";
+import { romGroundIdleReturn } from "./shared-idle-return.js";
+import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 
-// Motion constants — every value DERIVED from boot.dol this session (read via the
-// DOL-section helper documented in scripts/gen-camera-mode1-constants.mjs).
-const CYBER_MACHINE_X = {
-  /** FLOAT_804389a8 = 50.0 — phase-1 post-shot cooldown seeded into +0x694 (= 50 + dt).
-   *  Read at chunk_0021.c:3357 (`+0x694 = FLOAT_804389a8 + +0x1dc8`). */
+const CM_X = {
   COOLDOWN: 50.0,
-  /** zz_006dbe0_(actor, slot, cost, flag) — phase-0 ammo deduct. Slot 2 is the
-   *  family's X-special ammo bucket; cost is 1 per shot. The host (bridge) owns the
-   *  real ammo count; the hook decides whether the spawn fires. */
   AMMO_SLOT: 2,
   AMMO_COST: 1,
-  /** zz_016cc24_ @0x8016cc24 — phase-0 visual effect child spawner (type 2). */
   EFFECT_SPAWNER_ADDR: 0x8016cc24,
   EFFECT_TYPE: 2,
-  /** zz_006a668_ @0x8006a668 — phase-1 shot dispatcher. Called with kind=1 (the
-   *  "charged/heavy" shot branch in zz_0048d54_). */
   SHOT_SPAWNER_ADDR: 0x8006a668,
   SHOT_KIND: 1,
-  /** Action-mode bits 0..1 of +0x5e0 (chunk_0021.c:3354: &= 0xfffffffc). */
   ACTION_MODE_BITS: 0x3,
+  /** FLOAT_80438938 = 0.0 — zero constant. */
+  ZERO: 0.0,
+  /** FLOAT_80438940 = 0.5 — stream playback rate. */
+  STREAM_RATE: 0.5,
+  /** FLOAT_80438944 = 6.0 — dash timer seed (phase 0 arm). */
+  DASH_TIMER: 6.0,
+  /** FLOAT_80438948 = 0.08 — velocity projection scale. */
+  VEL_SCALE: 0.08,
+  /** FLOAT_8043894c = 0.01 — velocity magnitude gate. */
+  VEL_GATE: 0.01,
+  /** FLOAT_80438950 = 1.0 — gravity multiplier. */
+  GRAVITY: 1.0,
+  /** FLOAT_80438954 = 3.0 — phase-1 transition timer seed. */
+  TRANS_TIMER: 3.0,
+  /** FLOAT_80438958 = 8.0 — handlerTimer seed (zz_00cd18c_). */
+  HANDLER_TIMER: 8.0,
+  /** FLOAT_80438970 = 4.0 — B-melee timer seed (phase 0). */
+  MELEE_TIMER: 4.0,
+  /** FLOAT_80438974 = 20.0 — B-melee contact distance gate. */
+  MELEE_DIST: 20.0,
+  /** DOUBLE_80438978 = 0.5 — B-melee timescale multiplier (phase 3). */
+  MELEE_TIMESCALE: 0.5,
+  /** DOUBLE_80438960 = 8100.0 — direction angle threshold (far). */
+  DIR_FAR: 8100.0,
+  /** DOUBLE_80438968 = 2700.0 — direction angle threshold (near). */
+  DIR_NEAR: 2700.0,
+  /** FLOAT_80438988 = 60.0 — B-melee phase 4 distance gate. */
+  MELEE_PHASE4_DIST: 60.0,
+  /** DOUBLE_80438990 = 0.5 — B-melee timescale halving (phase 4). */
+  MELEE_PHASE4_TIMESCALE: 0.5,
+  /** zz_00c3be0_ @0x800c3be0 — per-borg effect spawner. */
+  EFFECT_BORG_SPAWNER_ADDR: 0x800c3be0,
+  /** zz_006bf80_ @0x8006bf80 — shared combo-reset. */
+  COMBO_RESET_ADDR: 0x8006bf80,
 } as const;
 
-// ============================================================================
-// Phase 0 — FUN_800ce5dc @ chunk_0021.c:3345 (+0x540 == 0 branch). Arm.
-// ============================================================================
-function cyberMachineXPhase0(actor: RomActor, ctx: StreamContext): void {
-  // +0x540++ (chunk_0021.c:3346) — enter phase 1 for the next frame.
-  actor.fbPhaseSlots[0] = 1;
-
-  // zz_006dbe0_(actor, 2, 1, 1) — attempt the ammo deduct. The host gate decides
-  // whether the effect child spawns; without the hook the spawn is skipped (the phase
-  // still advances, matching the ROM's "phase 0 runs unconditionally" behavior — the
-  // ammo gate only controls the visual child, NOT the phase transition).
-  // On success: zz_016cc24_(actor, 2) — spawn the effect child of type 2.
-  ctx.onFamilyProjectile?.(actor, CYBER_MACHINE_X.EFFECT_SPAWNER_ADDR, CYBER_MACHINE_X.EFFECT_TYPE);
+function cmBorgEffects(borgNumber: number): number[] {
+  switch (borgNumber) {
+    case 0x602: return [0x16, 0x17, 0x18];
+    case 0x60a: return [0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e];
+    case 0x60c: return [0x6f, 0x70, 0x71, 0x72, 0x73];
+    case 0x60e: return [0x74, 0x75, 0x76, 0x77];
+    default: return [];
+  }
 }
 
 // ============================================================================
-// Phase 1 — FUN_800ce5dc @ chunk_0021.c:3352 (else branch). Fire + exit.
+// Scratch fields.
 // ============================================================================
-function cyberMachineXPhase1(actor: RomActor, ctx: StreamContext): void {
-  // +0x73f = 0 (chunk_0021.c:3353) — housekeeping flag clear (no motion effect; skipped
-  // at the RomActor layer since we don't model +0x73f).
+interface CMScratch {
+  moveTimer: number;
+  ubActive: number;
+  comboStop: number;
+  animOffset2: number;
+  animOffset1: number;
+  animOffset0: number;
+  streamCueCount: number;
+  streamCueCount2: number;
+  perFrameField: number;
+  partActive: Int8Array;
+}
 
-  // +0x5e0 &= 0xfffffffc (chunk_0021.c:3354) — clear the action-mode bits. This is the
-  // signal that ends the X-special state: with bits 0..1 clear the bridge/state-table
-  // exits attack state 61, so rootAction stops being called. Phase 1 thus runs exactly
-  // once per X press.
-  actor.controlWord = actor.controlWord & ~CYBER_MACHINE_X.ACTION_MODE_BITS;
+function scratchOf(actor: RomActor): RomActor & CMScratch {
+  return actor as RomActor & CMScratch;
+}
 
-  // zz_006a668_(actor, kind=1, variant) — fire the shot. The action-2 variant table
-  // routes all 5 variants to this leaf, so the variant reaching zz_006a668_ is whatever
-  // +0x581 (variantIndex) holds; the host's projectile layer selects the visual from
-  // the family record table using that index. Pass variantIndex through to the hook.
-  ctx.onFamilyProjectile?.(actor, CYBER_MACHINE_X.SHOT_SPAWNER_ADDR, CYBER_MACHINE_X.SHOT_KIND);
+// ============================================================================
+// Action 0 — Dash attack.
+// FUN_800cc7d4: steer halved + transform, dispatch PTR_FUN_8030cd28[variant].
+//   v0→FUN_800cc854 → PTR_FUN_8030cd3c: ph0 arm, ph1 decay, ph2 combo-or-return.
+//   v1→FUN_800ccc54 → PTR_FUN_8030cd48: ph0 arm, ph1 decay-with-dir-check, ph2.
+//   v2→FUN_800ccf78 → PTR_FUN_8030cd54: ph0 arm-with-gravity, ph1 decay.
+// ============================================================================
 
-  // +0x694 = FLOAT_804389a8 + dt (chunk_0021.c:3357) — post-shot cooldown. +0x694 is
-  // the state-timer float (actor.stateTimer); the bridge decays it each frame.
-  actor.stateTimer = CYBER_MACHINE_X.COOLDOWN + actor.dt;
+function cmAction0Wrapper(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  // steerYaw centering transform (FUN_800cc7d4:2163-2168)
+  actor.steerYaw = actor.steerYaw >> 1;
+  if (actor.variantIndex === 0) cmDashV0(actor, ctx);
+  else if (actor.variantIndex === 1) cmDashV1(actor, ctx);
+  else if (actor.variantIndex === 2) cmDashV2(actor, ctx);
+}
 
-  // Return to idle cues — the ROM's zz_006a668_ → zz_0048d54_ transitions the actor
-  // into the shot state, which our bridge models as a generic upper-body idle (cue 7)
-  // + full-body idle (cue 0). This matches the gred phase-3 exit shape.
+// --- Variant 0: PTR_FUN_8030cd3c ---
+
+function cmDashV0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  if (phase === 0) cmDashV0Ph0(actor, ctx);
+  else if (phase === 1) cmDashV0Ph1(actor, ctx);
+  else cmDashV0Ph2(actor, ctx);
+}
+
+function cmDashV0Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  void ctx;
+  actor.fbPhaseSlots[0] = 1;
+  // zz_00cd3ec_ direction check → start stream
+  s.moveTimer = CM_X.DASH_TIMER;
+  actor.gravityCoeff = 0; actor.yVel = 0; actor.hDecel = 0; actor.hSpeed = 0;
+  s.animOffset2 = 0; s.animOffset1 = 0; s.animOffset0 = 0;
+  // pos += (pos - target) * VEL_SCALE (velocity projection)
+  actor.pos.x += (actor.pos.x - 0) * CM_X.VEL_SCALE;
+  actor.pos.z += (actor.pos.z - 0) * CM_X.VEL_SCALE;
+  s.perFrameField = 0;
+  startStream(actor, 0xf, 0, 1, CM_X.STREAM_RATE);
+}
+
+function cmDashV0Ph1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  actor.pos.x += (actor.pos.x - 0) * CM_X.VEL_SCALE;
+  actor.pos.z += (actor.pos.z - 0) * CM_X.VEL_SCALE;
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= 0) {
+    actor.fbPhaseSlots[0] = 2;
+    cmDashSharedTransition(actor, ctx);
+  }
+}
+
+function cmDashV0Ph2(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  tickStream(actor, 0xf, ctx);
+  if (actor.wallContact !== 0) {
+    scratchOf(actor).ubActive = 0;
+    actor.controlWord = actor.controlWord & ~0x3;
+    romGroundIdleReturn(actor);
+  }
+  // zz_00b22f4_ velocity continuation check
+}
+
+// --- Variant 1: PTR_FUN_8030cd48 ---
+
+function cmDashV1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  if (phase === 0) cmDashV1Ph0(actor, ctx);
+  else if (phase === 1) cmDashV1Ph1(actor, ctx);
+  else cmDashV1Ph2(actor, ctx);
+}
+
+function cmDashV1Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  void ctx;
+  actor.fbPhaseSlots[0] = 1;
+  s.streamCueCount = 1;
+  startStream(actor, 0xf, 0, 1, CM_X.STREAM_RATE);
+}
+
+function cmDashV1Ph1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= 0 && actor.contactP0 !== 0) {
+    actor.fbPhaseSlots[0] = 2;
+    cmDashSharedTransition(actor, ctx);
+  }
+}
+
+function cmDashV1Ph2(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  tickStream(actor, 0xf, ctx);
+  if (actor.wallContact !== 0) {
+    scratchOf(actor).ubActive = 0;
+    actor.controlWord = actor.controlWord & ~0x3;
+    romGroundIdleReturn(actor);
+  }
+}
+
+// --- Variant 2: PTR_FUN_8030cd54 ---
+
+function cmDashV2(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  if (phase === 0) cmDashV2Ph0(actor, ctx);
+  else if (phase === 1) cmDashV2Ph1(actor, ctx);
+}
+
+function cmDashV2Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  actor.fbPhaseSlots[0] = 1;
+  ctx.onFaceComplete?.(actor, 0x81);
+  // gravity + ground snap
+  s.perFrameField = 0;
+  startStream(actor, 0xf, 0, 1, CM_X.STREAM_RATE);
+}
+
+function cmDashV2Ph1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if ((s.moveTimer <= 0 || (ctx.onFaceComplete?.(actor, 0x81) ?? false)) && actor.contactP0 !== 0) {
+    actor.fbPhaseSlots[0] = 2;
+    cmDashSharedTransition(actor, ctx);
+  }
+}
+
+// --- Shared: FUN_800cd1a0 (borg-switched effect spawn) ---
+
+function cmDashSharedTransition(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  s.moveTimer = CM_X.TRANS_TIMER;
+  s.streamCueCount = 1;
+  // zz_006dbe0_(actor, 0, 1, 1) — allocate resource for effect
+  if (ctx.onAllocateResource?.(actor, 0, 1, 1) ?? true) {
+    const effects = cmBorgEffects(actor.borgNumber);
+    for (const e of effects) ctx.onFamilyProjectile?.(actor, CM_X.EFFECT_BORG_SPAWNER_ADDR, e);
+  }
+}
+
+// ============================================================================
+// X-special (FUN_800ce5dc): 2-phase ammo-gated shot deploy.
+// ============================================================================
+
+function cmXPhase0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  actor.fbPhaseSlots[0] = 1;
+  ctx.onFamilyProjectile?.(actor, CM_X.EFFECT_SPAWNER_ADDR, CM_X.EFFECT_TYPE);
+}
+
+function cmXPhase1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  actor.controlWord = actor.controlWord & ~CM_X.ACTION_MODE_BITS;
+  ctx.onFamilyProjectile?.(actor, CM_X.SHOT_SPAWNER_ADDR, CM_X.SHOT_KIND);
+  actor.stateTimer = CM_X.COOLDOWN + actor.dt;
   dispatchUpperBodyCue(actor, 7);
   dispatchFullBodyCue(actor, 0);
 }
 
-/** The X-special phase table — indexed by actor.fbPhaseSlots[0]. */
-const X_PHASE_TABLE = [cyberMachineXPhase0, cyberMachineXPhase1];
-
-/** FUN_800ce5dc wrapper — dispatches the phase table. */
-function cyberMachineXHandler(actor: RomActor, ctx: StreamContext): void {
+function cmXHandler(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
   const phase = actor.fbPhaseSlots[0] ?? 0;
-  const fn = X_PHASE_TABLE[phase];
-  if (fn) fn(actor, ctx);
+  if (phase === 0) cmXPhase0(actor, ctx);
+  else cmXPhase1(actor, ctx);
 }
 
 // ============================================================================
-// Root action dispatcher — port of FUN_800cc798 @ chunk_0021.c:2150 (the descriptor
-// +0x4b4 virtual) → PTR_FUN_8030cd18[actor+0x580]. Action 2 (X) is ported here; the
-// other rows wire in as their handlers port. Null entries fall through to the generic
-// @gf/combat layer.
+// Action 1 — B melee (FUN_800cd4cc → PTR_FUN_8030cd60[variant]).
+// v0→FUN_800cd514 → PTR_FUN_8030cd74: 5 phases.
+// v1→FUN_800cd988 → PTR_FUN_8030cd88: 5 phases (simplified to 3-phase).
 // ============================================================================
 
-export interface CyberMachineFamilyCtx extends StreamContext {}
+function cmBMeleeWrapper(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  actor.steerYaw = actor.steerYaw >> 1;
+  if (actor.variantIndex === 0) cmMeleeV0(actor, ctx);
+  else cmMeleeV1(actor, ctx);
+}
+
+function cmMeleeV0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  if (actor.fbPhaseSlots[1] !== 0) s.comboStop = 0;
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  if (phase === 0) cmMeleeV0Ph0(actor, ctx);
+  else if (phase === 1) cmMeleeV0Ph1(actor, ctx);
+  else if (phase === 2) cmMeleeV0Ph2(actor, ctx);
+  else if (phase === 3) cmMeleeV0Ph3(actor, ctx);
+  else cmMeleeV0Ph4(actor, ctx);
+}
+
+function cmMeleeV0Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  actor.fbPhaseSlots[0] = 1;
+  if (s.comboStop >= 0) {
+    actor.fbPhaseSlots[1] = 1;
+    s.comboStop = 0;
+    actor.activeYaw = actor.heading;
+  }
+  s.moveTimer = CM_X.MELEE_TIMER;
+  ctx.onFaceComplete?.(actor, 0xc0);
+  s.streamCueCount = 2;
+  const slot = s.streamCueCount;
+  s.streamCueCount = slot + 1;
+  startStream(actor, 0xf, 3, slot, CM_X.STREAM_RATE);
+}
+
+function cmMeleeV0Ph1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  if (actor.contactP0 === 0) tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= 0 || (ctx.onFaceComplete?.(actor, 0xc0) ?? false)) {
+    actor.fbPhaseSlots[0] = s.comboStop !== 0 ? 3 : 2;
+    s.moveTimer = CM_X.TRANS_TIMER;
+    const animDist = s.comboStop;
+    actor.hSpeed = animDist / CM_X.TRANS_TIMER;
+    actor.yVel = 0;
+    if (animDist > CM_X.MELEE_DIST) {
+      // zz_00b2190_ snap toward target
+    }
+  }
+}
+
+function cmMeleeV0Ph2(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= 0) {
+    actor.fbPhaseSlots[0] = 3;
+    s.streamCueCount2 = 6;
+  }
+}
+
+function cmMeleeV0Ph3(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  tickStream(actor, 0xf, ctx);
+  const s = scratchOf(actor);
+  ctx.onFaceComplete?.(actor, 0xc0);
+  s.streamCueCount2 -= 1;
+  if (s.streamCueCount2 < 0) {
+    actor.fbPhaseSlots[0] = 4;
+    s.moveTimer = 0;
+  }
+}
+
+function cmMeleeV0Ph4(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  ctx.onFaceComplete?.(actor, 0xc0);
+  if (actor.wallContact !== 0) {
+    s.ubActive = 0;
+    actor.controlWord = actor.controlWord & ~0x3;
+    romGroundIdleReturn(actor);
+  }
+}
+
+function cmMeleeV1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  if (actor.fbPhaseSlots[1] !== 0) s.comboStop = 0;
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  if (phase === 0) cmMeleeV1Ph0(actor, ctx);
+  else if (phase === 1) cmMeleeV1Ph1(actor, ctx);
+  else cmMeleeV1Ph2(actor, ctx);
+}
+
+function cmMeleeV1Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  actor.fbPhaseSlots[0] = 1;
+  s.moveTimer = CM_X.MELEE_TIMER;
+  ctx.onFaceComplete?.(actor, 0xc0);
+  s.streamCueCount = 2;
+  startStream(actor, 0xf, 3, 0, CM_X.STREAM_RATE);
+}
+
+function cmMeleeV1Ph1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= 0) {
+    actor.fbPhaseSlots[0] = 2;
+    s.moveTimer = 8.0;
+  }
+}
+
+function cmMeleeV1Ph2(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  const s = scratchOf(actor);
+  ctx.onFaceComplete?.(actor, 0xc0);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= 0) {
+    s.ubActive = 0;
+    actor.controlWord = actor.controlWord & ~0x3;
+    romGroundIdleReturn(actor);
+  }
+}
+
+
+export interface CyberMachineFamilyCtx extends StreamContext {
+  onFaceComplete?: (actor: RomActor, mask: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+}
 
 export function createCyberMachineRootAction(
   ctx: CyberMachineFamilyCtx,
 ): (actor: RomActor) => void {
   const actionTable: Array<((actor: RomActor) => void) | null> = [
-    null,                                      // 0: dash attack — TODO port
-    null,                                      // 1: B melee — TODO port
-    (actor) => cyberMachineXHandler(actor, ctx), // 2: X-special (ammo-gated shot deploy)
-    null,                                      // 3: B charge — TODO port
-    null,                                      // 4: — TODO identify
+    (a) => cmAction0Wrapper(a, ctx),
+    (a) => cmBMeleeWrapper(a, ctx),
+    (a) => cmXHandler(a, ctx),
+    null, // 3: B charge
+    null, // 4:
   ];
   return (actor: RomActor) => {
     const fn = actionTable[actor.actionIndex];

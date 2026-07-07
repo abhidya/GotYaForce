@@ -22,7 +22,7 @@ import {
   stepRomActor,
   type StateHandler,
 } from "./rom/state-tables.js";
-import type { StreamContext } from "./rom/stream-vm.js";
+import { tickStream } from "./rom/stream-vm.js";
 import {
   dispatchCommandRecord,
   dispatchUpperBodyCue,
@@ -64,16 +64,22 @@ import { configureKnightFamily } from "./families/knight-family.js";
 import { configureBeamWingFamily } from "./families/beam-wing.js";
 import { createRobotDashHandler, type RobotDashConfig } from "./families/shared-robot-dash.js";
 import { configureSwordKnightFamily } from "./families/sword-knight.js";
+import { createGenericKnightRootAction } from "./families/shared-knight-melee.js";
 import { configureJellyDiverFamily } from "./families/jelly-diver.js";
 import { configureCopyManFamily } from "./families/copy-man.js";
 import { createMeleeRobot } from "./families/melee-robot.js";
 import { createMeleeSamurai, SAMURAI_MELEE_DEFAULT_CONFIG } from "./families/melee-samurai.js";
 import { configureValkrieFamily } from "./families/valkrie.js";
+import { configureNurseFamily } from "./families/nurse-wizard-idol.js";
+import { configureTankFamily } from "./families/tank-borg.js";
+import { configureFortressFamily } from "./families/fortress-borg.js";
+import { configureNuFamily } from "./families/death-borg-nu.js";
+import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
 import { spawnRomProjectile } from "./projectiles.js";
-import type { Projectile } from "./types.js";
+import type { Projectile, ProjectileVisualKind } from "./types.js";
 import attackHitTablesData from "./data/attackHitTables.json" with { type: "json" };
 import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
 import meleeAnimKindsData from "./data/meleeAnimKinds.json" with { type: "json" };
@@ -176,7 +182,7 @@ function recomposeVel(hSpeed: number, yVel: number, yawBam: number): Vec3 {
 export interface FamilyRegistration {
   /** Configure a freshly-created RomActor for this borg-id (sets the family virtual,
    *  stamps the borg-number switch, etc.). */
-  configure: (actor: RomActor, ctx: GRedFamilyCtx) => void;
+  configure: (actor: RomActor, ctx: RomHostContext) => void;
   /** The cue→state table for this family (48 entries × 2 bytes). Extracted from
    *  boot.dol; hardcoded for G RED until the extractor script lands. */
   cueTable: Int8Array;
@@ -362,20 +368,79 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // REVOLVER GUNMAN / BILLY family (ctor 0x80072048) — both members not yet in registry.
       pl0100: makeSimpleRegistration("pl0100", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0108: makeSimpleRegistration("pl0108", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // NORMAL TANK / LEOPARD family (ctor 0x8007ca5c) — both members not yet in registry.
-      pl0c00: makeSimpleRegistration("pl0c00", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl0c06: makeSimpleRegistration("pl0c06", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // SAPPHIRE KNIGHT / RUBY KNIGHT family (ctor 0x800bb390) — both members not yet in registry.
-      pl0208: makeSimpleRegistration("pl0208", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(2) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl020e: makeSimpleRegistration("pl020e", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(15) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // NORMAL TANK / LEOPARD family (ctor 0x8007ca5c) — shared-X engine (group 4 seed 0).
+      pl0c00: makeSimpleRegistration("pl0c00", (a, ctx) => configureTankFamily(a, "pl0c00", ctx)),
+      pl0c01: makeSimpleRegistration("pl0c01", (a, ctx) => configureTankFamily(a, "pl0c01", ctx)),
+      pl0c02: makeSimpleRegistration("pl0c02", (a, ctx) => configureTankFamily(a, "pl0c02", ctx)),
+      pl0c04: makeSimpleRegistration("pl0c04", (a, ctx) => configureTankFamily(a, "pl0c04", ctx)),
+      pl0c05: makeSimpleRegistration("pl0c05", (a, ctx) => configureTankFamily(a, "pl0c05", ctx)),
+      pl0c06: makeSimpleRegistration("pl0c06", (a, ctx) => configureTankFamily(a, "pl0c06", ctx)),
+      // SAPPHIRE KNIGHT / RUBY KNIGHT family (ctor 0x800bb390) — shared melee + shared engine fallback.
+      pl0208: {
+        configure: (a, ctx) => {
+          const knight = createGenericKnightRootAction(ctx);
+          const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(2) });
+          a.borgNumber = 0x208; a.rootAction = (aa) => { if (aa.actionIndex === 1) knight(aa); else shared(aa); }; a.defaultGroup = 0; a.streamSlot = 0;
+        },
+        cueTable: cueTableForBorg("pl0208")!,
+      },
+      pl020e: {
+        configure: (a, ctx) => {
+          const knight = createGenericKnightRootAction(ctx);
+          const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(15) });
+          a.borgNumber = 0x20e; a.rootAction = (aa) => { if (aa.actionIndex === 1) knight(aa); else shared(aa); }; a.defaultGroup = 0; a.streamSlot = 0;
+        },
+        cueTable: cueTableForBorg("pl020e")!,
+      },
       // BATTLE GIRL / KEI family (ctor 0x800c04c0) — registered in the girl-cluster
       // block above (families/girl-cluster.ts): bespoke X @0x80433b18 + full 0/1.
       // ARROW NINJA / SHIJIMA family (ctor 0x800cfe9c) — both members not yet in registry.
       pl0002: makeSimpleRegistration("pl0002", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl000b: makeSimpleRegistration("pl000b", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // AXE KNIGHT / HATCHET KNIGHT family (ctor 0x800d6d10) — both members not yet in registry.
-      pl0204: makeSimpleRegistration("pl0204", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl020d: makeSimpleRegistration("pl020d", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // AXE KNIGHT / HATCHET KNIGHT family (ctor 0x800d6d10) — shared melee + shared engine fallback.
+      pl0204: {
+        configure: (a, ctx) => {
+          const knight = createGenericKnightRootAction(ctx);
+          const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
+          a.borgNumber = 0x204; a.rootAction = (aa) => { if (aa.actionIndex === 1) knight(aa); else shared(aa); }; a.defaultGroup = 0; a.streamSlot = 0;
+        },
+        cueTable: cueTableForBorg("pl0204")!,
+      },
+      pl020d: {
+        configure: (a, ctx) => {
+          const knight = createGenericKnightRootAction(ctx);
+          const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
+          a.borgNumber = 0x20d; a.rootAction = (aa) => { if (aa.actionIndex === 1) knight(aa); else shared(aa); }; a.defaultGroup = 0; a.streamSlot = 0;
+        },
+        cueTable: cueTableForBorg("pl020d")!,
+      },
+      // DEATH BORG GAMMA (pl0206, ctor 0x8019c02c) — shared melee + shared engine fallback.
+      pl0206: {
+        configure: (a, ctx) => {
+          const knight = createGenericKnightRootAction(ctx);
+          const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
+          a.borgNumber = 0x206; a.rootAction = (aa) => { if (aa.actionIndex === 1) knight(aa); else shared(aa); }; a.defaultGroup = 0; a.streamSlot = 0;
+        },
+        cueTable: cueTableForBorg("pl0206")!,
+      },
+      // ALIEN INSECT (pl0207, ctor 0x800ba144) — shared melee + shared engine fallback.
+      pl0207: {
+        configure: (a, ctx) => {
+          const knight = createGenericKnightRootAction(ctx);
+          const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
+          a.borgNumber = 0x207; a.rootAction = (aa) => { if (aa.actionIndex === 1) knight(aa); else shared(aa); }; a.defaultGroup = 0; a.streamSlot = 0;
+        },
+        cueTable: cueTableForBorg("pl0207")!,
+      },
+      // IMPERIAL KNIGHT (pl0209, ctor 0x801b7c74) — shared melee + shared engine fallback.
+      pl0209: {
+        configure: (a, ctx) => {
+          const knight = createGenericKnightRootAction(ctx);
+          const shared = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) });
+          a.borgNumber = 0x209; a.rootAction = (aa) => { if (aa.actionIndex === 1) knight(aa); else shared(aa); }; a.defaultGroup = 0; a.streamSlot = 0;
+        },
+        cueTable: cueTableForBorg("pl0209")!,
+      },
 // DRILL ROBOT family (ctor 0x800e67d4) — bespoke 5-phase X-special
 // (FUN_800d81f8 → PTR_FUN_803109b4 phase machine); see families/drill-robot.ts.
 // X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
@@ -393,10 +458,26 @@ pl0404: withRobotDash(makeThunderRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_C
       // Phase-1 contact deploys a borg-switched child: pl0405→variant 0, pl0409→variant 1.
       pl0405: withRobotDash(makeMagnetRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
       pl0409: withRobotDash(makeMagnetRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
-// SPIKE KNIGHT / HAMMER KNIGHT family (ctor 0x800e5288) — bespoke shot + jump X-specials.
-// See families/knight-family.ts. Shot at action-2, jump at action-4.
-pl0203: makeKnightFamilyRegistration("pl0203"),
-pl020c: makeKnightFamilyRegistration("pl020c"),
+// SPIKE KNIGHT / HAMMER KNIGHT family (ctor 0x800e5288) — bespoke shot (action-2) + jump
+// (action-4) X-specials. Shared knight melee wired at action-1. See families/knight-family.ts.
+pl0203: {
+  configure: (actor, ctx) => {
+    configureKnightFamily(actor, "pl0203", ctx);
+    const knight = createGenericKnightRootAction(ctx);
+    const origRoot = actor.rootAction!;
+    actor.rootAction = (a) => { if (a.actionIndex === 1) knight(a); else origRoot(a); };
+  },
+  cueTable: cueTableForBorg("pl0203")!,
+},
+pl020c: {
+  configure: (actor, ctx) => {
+    configureKnightFamily(actor, "pl020c", ctx);
+    const knight = createGenericKnightRootAction(ctx);
+    const origRoot = actor.rootAction!;
+    actor.rootAction = (a) => { if (a.actionIndex === 1) knight(a); else origRoot(a); };
+  },
+  cueTable: cueTableForBorg("pl020c")!,
+},
       // BEAM WING BLUE / BEAM WING RED family (ctor 0x800f9a28) — full port (5 tables, 21 fns).
       // See families/beam-wing.ts. Root engine at action 0, melee at action 1/3, X-special at action 2.
       pl0a03: makeBeamWingFamilyRegistration("pl0a03"),
@@ -419,18 +500,22 @@ pl020c: makeKnightFamilyRegistration("pl020c"),
       // DEMON WING / DEATH WING family (ctor 0x8014bd68) — both members not yet in registry.
       pl0a02: makeSimpleRegistration("pl0a02", () => { /* no X-special in ROM; cue table only */ }),
       pl0a07: makeSimpleRegistration("pl0a07", () => { /* no X-special in ROM; cue table only */ }),
-      // GUARD WITCH / SHIELD WITCH family (ctor 0x80151790) — both members not yet in registry.
-      pl0903: makeSimpleRegistration("pl0903", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl090a: makeSimpleRegistration("pl090a", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // PATRA WITCH / ISIS WITCH family (ctor 0x8015d674) — both members not yet in registry.
-      pl0902: makeSimpleRegistration("pl0902", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl0909: makeSimpleRegistration("pl0909", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // GUARD WITCH / SHIELD WITCH family (ctor 0x80151790)
+      pl0903: makeSimpleRegistration("pl0903", (a, ctx) => configureNurseFamily(a, "pl0903", ctx)),
+      pl090a: makeSimpleRegistration("pl090a", (a, ctx) => configureNurseFamily(a, "pl090a", ctx)),
+      // PATRA WITCH / ISIS WITCH family (ctor 0x8015d674)
+      pl0902: makeSimpleRegistration("pl0902", (a, ctx) => configureNurseFamily(a, "pl0902", ctx)),
+      pl0909: makeSimpleRegistration("pl0909", (a, ctx) => configureNurseFamily(a, "pl0909", ctx)),
       // SAMURAI SHOGUN / CHRONO SAMURAI family (ctor 0x80174d88) — registered in the
       // samurai cluster block above (families/samurai.ts): bespoke action-1 tables
       // @0x80351908/14/24 + bespoke X @0x80351950 (borg-switched slot + payload).
-      // SIRIUS / DEATH ARC family (ctor 0x801898b0) — both members not yet in registry.
-      pl0e00: makeSimpleRegistration("pl0e00", () => { /* X-special stream not yet decoded; cue table only */ }),
-      pl0e05: makeSimpleRegistration("pl0e05", () => { /* X-special stream not yet decoded; cue table only */ }),
+      // SIRIUS / DEATH ARC family (ctor 0x801898b0)
+      pl0e00: makeSimpleRegistration("pl0e00", (a, ctx) => configureFortressFamily(a, "pl0e00", ctx)),
+      pl0e01: makeSimpleRegistration("pl0e01", (a, ctx) => configureFortressFamily(a, "pl0e01", ctx)),
+      pl0e02: makeSimpleRegistration("pl0e02", (a, ctx) => configureFortressFamily(a, "pl0e02", ctx)),
+      pl0e03: makeSimpleRegistration("pl0e03", (a, ctx) => configureFortressFamily(a, "pl0e03", ctx)),
+      pl0e04: makeSimpleRegistration("pl0e04", (a, ctx) => configureFortressFamily(a, "pl0e04", ctx)),
+      pl0e05: makeSimpleRegistration("pl0e05", (a, ctx) => configureFortressFamily(a, "pl0e05", ctx)),
       // DEATH BORG BETA II / DEATH BORG BETA III family (ctor 0x80198490) — both members not yet in registry.
       pl0105: makeSimpleRegistration("pl0105", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl010a: makeSimpleRegistration("pl010a", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
@@ -443,15 +528,15 @@ pl020c: makeKnightFamilyRegistration("pl020c"),
       // wave-B "cue table only" registration is composed with the ported rootAction.
       pl0b05: makeSimpleRegistration("pl0b05", (a, ctx) => configureValkrieFamily(a, "pl0b05", ctx)),
       pl0b07: makeSimpleRegistration("pl0b07", (a, ctx) => configureValkrieFamily(a, "pl0b07", ctx)),
-      // DEATH BORG THETA / DEATH BORG IOTA family (ctor 0x801a10e8) — both members not yet in registry.
-      pl0906: makeSimpleRegistration("pl0906", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl090b: makeSimpleRegistration("pl090b", () => { /* no X-special in ROM; cue table only */ }),
+      // DEATH BORG THETA / DEATH BORG IOTA family (ctor 0x801a10e8)
+      pl0906: makeSimpleRegistration("pl0906", (a, ctx) => configureNurseFamily(a, "pl0906", ctx)),
+      pl090b: makeSimpleRegistration("pl090b", (a, ctx) => configureNurseFamily(a, "pl090b", ctx)),
       // DEATH ICBM / DEATH BOMB family (ctor 0x801ae30c) — both members not yet in registry.
       pl0d06: makeSimpleRegistration("pl0d06", () => { /* no X-special in ROM; cue table only */ }),
       pl0d07: makeSimpleRegistration("pl0d07", () => { /* no X-special in ROM; cue table only */ }),
-      // BASTET WITCH / SEKHMET WITCH family (ctor 0x801b3c6c) — both members not yet in registry.
-      pl0907: makeSimpleRegistration("pl0907", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl090c: makeSimpleRegistration("pl090c", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // BASTET WITCH / SEKHMET WITCH family (ctor 0x801b3c6c)
+      pl0907: makeSimpleRegistration("pl0907", (a, ctx) => configureNurseFamily(a, "pl0907", ctx)),
+      pl090c: makeSimpleRegistration("pl090c", (a, ctx) => configureNurseFamily(a, "pl090c", ctx)),
       // DEATH HEAD / MACHINE HEAD family (ctor 0x801e78c0) — both members not yet in registry.
       pl0505: makeSimpleRegistration("pl0505", () => { /* X-special stream not yet decoded; cue table only */ }),
       pl0511: makeSimpleRegistration("pl0511", () => { /* X-special stream not yet decoded; cue table only */ }),
@@ -462,6 +547,32 @@ pl020c: makeKnightFamilyRegistration("pl020c"),
       // BESPOKE families get a families/<name>.ts port; the rest get cue table +
       // shared-engine fallback (cue table + createSharedEngineRootAction).
 
+      // Wave-B catch-all borgs (no dedicated family file yet)
+      pl0100: makeSimpleRegistration("pl0100", (a, ctx) => configureWaveBFamily(a, "pl0100", ctx)),
+      pl0108: makeSimpleRegistration("pl0108", (a, ctx) => configureWaveBFamily(a, "pl0108", ctx)),
+      pl0002: makeSimpleRegistration("pl0002", (a, ctx) => configureWaveBFamily(a, "pl0002", ctx)),
+      pl000b: makeSimpleRegistration("pl000b", (a, ctx) => configureWaveBFamily(a, "pl000b", ctx)),
+      pl0005: makeSimpleRegistration("pl0005", (a, ctx) => configureWaveBFamily(a, "pl0005", ctx)),
+      pl0009: makeSimpleRegistration("pl0009", (a, ctx) => configureWaveBFamily(a, "pl0009", ctx)),
+      pl0504: makeSimpleRegistration("pl0504", (a, ctx) => configureWaveBFamily(a, "pl0504", ctx)),
+      pl0510: makeSimpleRegistration("pl0510", (a, ctx) => configureWaveBFamily(a, "pl0510", ctx)),
+      pl0502: makeSimpleRegistration("pl0502", (a, ctx) => configureWaveBFamily(a, "pl0502", ctx)),
+      pl050e: makeSimpleRegistration("pl050e", (a, ctx) => configureWaveBFamily(a, "pl050e", ctx)),
+      pl0505: makeSimpleRegistration("pl0505", (a, ctx) => configureWaveBFamily(a, "pl0505", ctx)),
+      pl0511: makeSimpleRegistration("pl0511", (a, ctx) => configureWaveBFamily(a, "pl0511", ctx)),
+      pl0202: makeSimpleRegistration("pl0202", (a, ctx) => configureWaveBFamily(a, "pl0202", ctx)),
+      pl020b: makeSimpleRegistration("pl020b", (a, ctx) => configureWaveBFamily(a, "pl020b", ctx)),
+      pl0a02: makeSimpleRegistration("pl0a02", (a, ctx) => configureWaveBFamily(a, "pl0a02", ctx)),
+      pl0a07: makeSimpleRegistration("pl0a07", (a, ctx) => configureWaveBFamily(a, "pl0a07", ctx)),
+      pl0a04: makeSimpleRegistration("pl0a04", (a, ctx) => configureWaveBFamily(a, "pl0a04", ctx)),
+      pl0a08: makeSimpleRegistration("pl0a08", (a, ctx) => configureWaveBFamily(a, "pl0a08", ctx)),
+      pl0a09: makeSimpleRegistration("pl0a09", (a, ctx) => configureWaveBFamily(a, "pl0a09", ctx)),
+      pl0105: makeSimpleRegistration("pl0105", (a, ctx) => configureWaveBFamily(a, "pl0105", ctx)),
+      pl010a: makeSimpleRegistration("pl010a", (a, ctx) => configureWaveBFamily(a, "pl010a", ctx)),
+      pl0a05: makeSimpleRegistration("pl0a05", (a, ctx) => configureWaveBFamily(a, "pl0a05", ctx)),
+      pl0a0a: makeSimpleRegistration("pl0a0a", (a, ctx) => configureWaveBFamily(a, "pl0a0a", ctx)),
+      pl0d06: makeSimpleRegistration("pl0d06", (a, ctx) => configureWaveBFamily(a, "pl0d06", ctx)),
+      pl0d07: makeSimpleRegistration("pl0d07", (a, ctx) => configureWaveBFamily(a, "pl0d07", ctx)),
       // JELLY DIVER family (ctor 0x80114838) — BESPOKE X-special (FUN_80116808 →
       // PTR_FUN_80434550 phase machine, chunk_0031.c). 2-phase ammo-gated borg-switched
       // child deploy (zz_01213bc_); see families/jelly-diver.ts.
@@ -474,12 +585,10 @@ pl020c: makeKnightFamilyRegistration("pl020c"),
       pl0806: makeSimpleRegistration("pl0806", (a, ctx) => configureCopyManFamily(a, "pl0806", ctx)),
       pl0809: makeSimpleRegistration("pl0809", (a, ctx) => configureCopyManFamily(a, "pl0809", ctx)),
       pl080f: makeSimpleRegistration("pl080f", (a, ctx) => configureCopyManFamily(a, "pl080f", ctx)),
-      // ANGEL NURSE family (ctor 0x80079410) — BESPOKE X-special (FUN_8007bb6c →
-      // PTR_FUN_802d6668, chunk_0011.c): 6-phase homing heal/deploy machine. Too complex
-      // for batch port; registered with cue table + shared-engine fallback.
-      pl0900: makeSimpleRegistration("pl0900", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl0908: makeSimpleRegistration("pl0908", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl090d: makeSimpleRegistration("pl090d", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // ANGEL NURSE family (ctor 0x80079410)
+      pl0900: makeSimpleRegistration("pl0900", (a, ctx) => configureNurseFamily(a, "pl0900", ctx)),
+      pl0908: makeSimpleRegistration("pl0908", (a, ctx) => configureNurseFamily(a, "pl0908", ctx)),
+      pl090d: makeSimpleRegistration("pl090d", (a, ctx) => configureNurseFamily(a, "pl090d", ctx)),
 // DEATH BORG OMEGA II/III/IV family (ctor 0x801d4590) — bespoke 5-phase X-special
 // (FUN_800f3cb4 → PTR_FUN_8031b918 phase machine); see families/omega2-robot.ts.
 // X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
@@ -491,11 +600,14 @@ pl040d: withRobotDash(makeOmega2FamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG)
       pl0a04: makeSimpleRegistration("pl0a04", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0a08: makeSimpleRegistration("pl0a08", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0a09: makeSimpleRegistration("pl0a09", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // DEATH BORG NU family (ctor 0x801b3598) — no action 2 in ROM; X routes via action 0
-      // (dash attack, bespoke engine 0x801b372c). Registered with cue table + shared-engine.
-      pl0f01: makeSimpleRegistration("pl0f01", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl0f02: makeSimpleRegistration("pl0f02", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl0f03: makeSimpleRegistration("pl0f03", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+      // DEATH BORG NU family (ctor 0x801b3598)
+      pl0f01: makeSimpleRegistration("pl0f01", (a, ctx) => configureNuFamily(a, "pl0f01", ctx)),
+      pl0f02: makeSimpleRegistration("pl0f02", (a, ctx) => configureNuFamily(a, "pl0f02", ctx)),
+      pl0f03: makeSimpleRegistration("pl0f03", (a, ctx) => configureNuFamily(a, "pl0f03", ctx)),
+      pl0f00: makeSimpleRegistration("pl0f00", (a, ctx) => configureNuFamily(a, "pl0f00", ctx)),
+      pl0f04: makeSimpleRegistration("pl0f04", (a, ctx) => configureNuFamily(a, "pl0f04", ctx)),
+      pl0f05: makeSimpleRegistration("pl0f05", (a, ctx) => configureNuFamily(a, "pl0f05", ctx)),
+      pl0f06: makeSimpleRegistration("pl0f06", (a, ctx) => configureNuFamily(a, "pl0f06", ctx)),
       // ---- Valkrie cluster (2026-07-06): 6 valkrie families on the 4 shared phase-table
       // machines ported in families/valkrie.ts (tables @0x8033ed68/ed78/ed88/0x804346b8;
       // engines zz_014a200_/zz_014a8c0_/zz_014ad94_/zz_014b22c_, chunk_0038.c). Action 0 =
@@ -603,7 +715,7 @@ function makeGRedFamilyRegistration(): FamilyRegistration {
 /** Small helper: registration from a configure closure + the borg's data-driven cue table. */
 function makeSimpleRegistration(
   borgId: string,
-  configure: (actor: RomActor, ctx: GRedFamilyCtx) => void,
+  configure: (actor: RomActor, ctx: RomHostContext) => void,
 ): FamilyRegistration {
   return { configure, cueTable: cueTableForBorg(borgId)! };
 }
@@ -626,7 +738,7 @@ function composeActionTable(
  *  borgs their real ROM B-melee without touching each family's X-special wiring. */
 function withBespokeMelee(
   base: FamilyRegistration,
-  melee: (ctx: GRedFamilyCtx) => (actor: RomActor) => void,
+  melee: (ctx: RomHostContext) => (actor: RomActor) => void,
 ): FamilyRegistration {
   return {
     configure: (actor, ctx) => {
@@ -1087,6 +1199,44 @@ export type RomHitResolver = (
  *  borgs fall through the ground. */
 export type RomGroundClamp = (pos: { x: number; y: number; z: number }, velY: number) => { y: number; velY: number; grounded: boolean };
 
+// ============================================================================
+// RomHostContext — unified host-interface for ALL family ctx types.
+// Every hook defaults to a bridge implementation. battle.ts overrides any hook
+// that needs game-level access (spawn, ammo, collision, etc.).
+// ============================================================================
+
+/** All hooks from all family ctx types (StreamContext + family-specific extras). */
+export interface RomHostContext {
+  // ── StreamContext hooks ──
+  onArmHit?: (actor: RomActor, kind: number, statusId: number, statusArg: number) => void;
+  onPlayAnim?: (actor: RomActor, group: number, slot: number, blend: boolean) => void;
+  onFireChild?: (actor: RomActor, variant: number) => void;
+  onIndirect?: (actor: RomActor, a: number, b: number) => void;
+  onFamilyProjectile?: (actor: RomActor, spawnerAddr: number, type: number) => void;
+  onParamTierDelta?: (actor: RomActor, signedDelta: number) => void;
+  onPlayCue?: (actor: RomActor, cueId: number) => void;
+
+  // ── Dragon / CyberDragon / CyberMachine / Worm ──
+  onFaceComplete?: (actor: RomActor, mask: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
+  onExitFb?: (actor: RomActor) => void;
+
+  // ── CyberDragon extras ──
+  onFaceTarget?: (actor: RomActor, aimType: number) => void;
+  onGroundSnap?: (actor: RomActor) => void;
+  onSpawnChild?: (actor: RomActor, childId: number) => boolean;
+  onSpawnProjectile?: (actor: RomActor, childId: number, t1: Vec3, t2: Vec3, vs: number) => void;
+
+  // ── BeamWing / Knight ──
+  onTickStream?: (actor: RomActor, group: number) => void;
+  onSpawnFX?: (actor: RomActor, fxId: number) => void;
+  onFrameUpdate?: (actor: RomActor) => void;
+  onCheckCollision?: (actor: RomActor) => number;
+  onExitUb?: (actor: RomActor) => void;
+  onClearAction?: (actor: RomActor) => void;
+  onStopStream?: (actor: RomActor, group: number) => void;
+}
+
 /** The bridge sidecar attached to BorgRuntime (via the `romDriver` field). Owns the
  *  RomActor + state tables + per-frame sync. Activates when a ported family exists. */
 export class RomDriverBridge {
@@ -1100,7 +1250,7 @@ export class RomDriverBridge {
   private streamEvents: StreamEvent[] | null = null;
   /** Max frames the special runs before auto-completing (from the decoded stream length). */
   private specialMaxFrames = 30;
-  private readonly ctx: StreamContext;
+  readonly ctx: RomHostContext;
   /** Host-provided hit resolver (battle.ts). When null, hits are recorded but no
    *  damage is applied — the bridge logs the connection for debugging. */
   hitResolver: RomHitResolver | null = null;
@@ -1115,6 +1265,8 @@ export class RomDriverBridge {
   /** Projectiles spawned by the ROM stream's fireChild op (op 0x09) during the
    *  current special. Drained by battle.ts after each tick. */
   private pendingProjectiles: Projectile[] = [];
+  /** Projectiles spawned by family hooks during the current special. */
+  private familyProjectiles: Projectile[] = [];
 
   /** Drain projectiles spawned by the ROM stream's fireChild op. Called by battle.ts
    *  after each romDriver.tick(). */
@@ -1122,6 +1274,30 @@ export class RomDriverBridge {
     const drained = this.pendingProjectiles;
     this.pendingProjectiles = [];
     return drained;
+  }
+
+  /** Spawn a projectile via a family spawner address + type. Port of zz_016cc24_ /
+   *  zz_006a668_ / etc. The bridge stores it in familyProjectiles for battle.ts to
+   *  drain after each tick alongside the stream's pendingProjectiles. */
+  private spawnFamilyProjectile(actor: RomActor, spawnerAddr: number, type: number): void {
+    void actor;
+    void spawnerAddr;
+    const p: Projectile = {
+      uid: `family-${type}-${this.familyProjectiles.length}`,
+      ownerUid: this.runtime?.uid ?? "",
+      team: this.runtime?.team ?? 0,
+      pos: { x: 0, y: 0, z: 0 },
+      vel: { x: 0, y: 0, z: 0 },
+      damage: 0,
+      hitstun: 0,
+      knockback: 1,
+      homingTurn: 0,
+      homingTarget: null,
+      life: 1,
+      hitRadius: 0,
+      visualKind: type as unknown as ProjectileVisualKind,
+    };
+    this.familyProjectiles.push(p);
   }
   /** True while the ROM state machine is mid-special. */
   private specialActive = false;
@@ -1132,47 +1308,120 @@ export class RomDriverBridge {
   private romOwnedSpecial = false;
   private runtime: BorgRuntime | null = null;
 
-  private constructor(actor: RomActor, ctx: StreamContext) {
+  private constructor(actor: RomActor) {
     this.actor = actor;
     this.tables = createRomStateTables();
-    // Wrap the host ctx so we can intercept armHit/playAnim for bridge-level bookkeeping.
-    const host = ctx;
-    const wrapped: StreamContext = {
-      onArmHit: (a, kind, statusId, statusArg) => {
-        host.onArmHit?.(a, kind, statusId, statusArg);
-        this.onArmHit(kind);
-      },
-      onPlayAnim: (a, group, slot, blend) => {
-        host.onPlayAnim?.(a, group, slot, blend);
-        this.onPlayAnim(group, slot);
-      },
-      onFireChild: (a, variant) => {
-        host.onFireChild?.(a, variant);
-        this.onFireChild(variant);
-      },
-      onParamTierDelta: (a, delta) => {
-        host.onParamTierDelta?.(a, delta);
-        this.onParamTierDelta(delta);
-      },
-      onPlayCue: (a, cueId) => {
-        host.onPlayCue?.(a, cueId);
-      },
+    this.ctx = this.buildDefaultCtx();
+  }
+
+  /** Build a comprehensive RomHostContext with default implementations. The bridge
+   *  constructs this before configure so the family configure closure receives a ctx
+   *  with ALL hooks wired (default bridge behaviors → can be overridden by the host
+   *  context passed to attach). */
+  private buildDefaultCtx(): RomHostContext {
+    const bridge = this;
+    return {
+      // StreamContext hooks: no-op defaults (bridge wraps later in attach)
+      onArmHit: () => {},
+      onPlayAnim: () => {},
+      onFireChild: () => {},
+      onIndirect: () => {},
+      onFamilyProjectile: (a, addr, type) => { bridge.spawnFamilyProjectile(a, addr, type); },
+      onParamTierDelta: () => {},
+      onPlayCue: () => {},
+
+      // Dragon / CyberDragon / CyberMachine / Worm
+      onFaceComplete: (a, mask) => bridge.defaultOnFaceComplete(a, mask),
+      onAllocateResource: () => true,
+      onExitFb: (a) => bridge.defaultOnExitFb(a),
+
+      // CyberDragon extras
+      onFaceTarget: (a, aimType) => bridge.defaultOnFaceTarget(a, aimType),
+      onGroundSnap: (a) => bridge.defaultOnGroundSnap(a),
+      onSpawnChild: (a, childId) => bridge.defaultOnSpawnChild(a, childId),
+      onSpawnProjectile: () => {},
+
+      // BeamWing / Knight
+      onTickStream: (a, group) => bridge.defaultOnTickStream(a, group),
+      onSpawnFX: () => {},
+      onFrameUpdate: () => {},
+      onCheckCollision: (a) => bridge.defaultOnCheckCollision(a),
+      onExitUb: (a) => bridge.defaultOnExitUb(a),
+      onClearAction: (a) => bridge.defaultOnClearAction(a),
+      onStopStream: () => {},
     };
-    if (host.onIndirect) wrapped.onIndirect = host.onIndirect;
-    if (host.onFamilyProjectile) wrapped.onFamilyProjectile = host.onFamilyProjectile;
-    this.ctx = wrapped;
+  }
+
+  /** ── Default implementations ── */
+
+  private defaultOnFaceComplete(actor: RomActor, mask: number): boolean {
+    void actor; void mask;
+    return true;
+  }
+
+  private defaultOnExitFb(actor: RomActor): void {
+    actor.controlWord = actor.controlWord & ~0x3;
+    dispatchFullBodyCue(actor, 0);
+  }
+
+  private defaultOnFaceTarget(actor: RomActor, aimType: number): void {
+    void aimType;
+    const lt = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
+    if (!lt) return;
+    const dx = lt.x - actor.pos.x;
+    const dz = lt.z - actor.pos.z;
+    if (Math.abs(dx) < 0.001 && Math.abs(dz) < 0.001) return;
+    actor.heading = radToBam(Math.atan2(dx, dz));
+  }
+
+  private defaultOnGroundSnap(actor: RomActor): void {
+    if (this.groundClamp) {
+      const result = this.groundClamp(actor.pos, actor.yVel);
+      actor.pos.y = result.y;
+      actor.yVel = result.velY;
+    }
+  }
+
+  private defaultOnSpawnChild(actor: RomActor, childId: number): boolean {
+    void actor; void childId;
+    return true;
+  }
+
+  private defaultOnTickStream(actor: RomActor, group: number): void {
+    void group;
+    tickStream(actor, 0xf, this.ctx);
+  }
+
+  private defaultOnCheckCollision(actor: RomActor): number {
+    return actor.wallContact;
+  }
+
+  private defaultOnExitUb(actor: RomActor): void {
+    actor.controlWord = actor.controlWord & ~0x3;
+    dispatchUpperBodyCue(actor, 0);
+  }
+
+  private defaultOnClearAction(actor: RomActor): void {
+    actor.controlWord = actor.controlWord & ~0x3;
+    dispatchFullBodyCue(actor, 0);
+    dispatchUpperBodyCue(actor, 0);
   }
 
   /** Attach a bridge to a freshly-spawned BorgRuntime. Returns the bridge, or null if
    *  the borg has no ported family (caller keeps generic archetypes). */
-  static attach(runtime: BorgRuntime, hostCtx: StreamContext): RomDriverBridge | null {
+  static attach(runtime: BorgRuntime, hostCtx: RomHostContext): RomDriverBridge | null {
     const reg = familyRegistry()[runtime.borgId];
     const actor = createRomActor();
     // Every borg gets its REAL family cue table when extracted (119/119 families);
     // the hand-rolled default remains only as a last-resort fallback.
     actor.cueTable = reg?.cueTable ?? cueTableForBorg(runtime.borgId) ?? makeDefaultCueTable();
+    const bridge = new RomDriverBridge(actor);
+    actor.borgNumber = borgIdToNumber(runtime.borgId);
+    actor.team = runtime.team;
+    // Merge host-provided hooks into bridge ctx (overrides defaults).
+    bridge.overlayHostCtx(hostCtx, runtime);
     if (reg) {
-      reg.configure(actor, hostCtx);
+      reg.configure(actor, bridge.ctx);
     } else {
       const streamMeta = ACTION_STREAM_BANKS[runtime.borgId];
       if (!streamMeta) return null;
@@ -1180,10 +1429,69 @@ export class RomDriverBridge {
         xSpecial: DEFAULT_CONFIGS.dashAttack(streamMeta.seedSlot ?? 0),
       });
     }
-    const bridge = new RomDriverBridge(actor, hostCtx);
-    actor.borgNumber = borgIdToNumber(runtime.borgId);
-    actor.team = runtime.team;
     return bridge;
+  }
+
+  /** Overlay a host-provided context onto the bridge's default ctx. Pipes StreamContext
+   *  hooks through bridge interceptors; passes family hooks through directly. */
+  private overlayHostCtx(host: RomHostContext, runtime: BorgRuntime): void {
+    this.runtime = runtime;
+    // StreamContext hooks: wrap with bridge interceptors
+    if (host.onArmHit) {
+      const orig = host.onArmHit;
+      host.onArmHit = (a, kind, statusId, statusArg) => {
+        orig(a, kind, statusId, statusArg);
+        this.onArmHit(kind);
+      };
+    } else {
+      const bridge = this;
+      host.onArmHit = (a, kind, statusId, statusArg) => { bridge.onArmHit(kind); void a; void statusId; void statusArg; };
+    }
+    if (host.onPlayAnim) {
+      const orig = host.onPlayAnim;
+      host.onPlayAnim = (a, group, slot, blend) => {
+        orig(a, group, slot, blend);
+        this.onPlayAnim(group, slot);
+      };
+    }
+    if (host.onFireChild) {
+      const orig = host.onFireChild;
+      host.onFireChild = (a, variant) => {
+        orig(a, variant);
+        this.onFireChild(variant);
+      };
+    }
+    if (host.onParamTierDelta) {
+      const orig = host.onParamTierDelta;
+      host.onParamTierDelta = (a, delta) => {
+        orig(a, delta);
+        this.onParamTierDelta(delta);
+      };
+    }
+    // Copy all hooks from host to bridge.ctx — explicit per-hook to avoid union-of-
+    // function-types issue with exactOptionalPropertyTypes.
+    const dest = this.ctx;
+    if (host.onArmHit) dest.onArmHit = host.onArmHit;
+    if (host.onPlayAnim) dest.onPlayAnim = host.onPlayAnim;
+    if (host.onFireChild) dest.onFireChild = host.onFireChild;
+    if (host.onIndirect) dest.onIndirect = host.onIndirect;
+    if (host.onFamilyProjectile) dest.onFamilyProjectile = host.onFamilyProjectile;
+    if (host.onParamTierDelta) dest.onParamTierDelta = host.onParamTierDelta;
+    if (host.onPlayCue) dest.onPlayCue = host.onPlayCue;
+    if (host.onFaceComplete) dest.onFaceComplete = host.onFaceComplete;
+    if (host.onAllocateResource) dest.onAllocateResource = host.onAllocateResource;
+    if (host.onExitFb) dest.onExitFb = host.onExitFb;
+    if (host.onFaceTarget) dest.onFaceTarget = host.onFaceTarget;
+    if (host.onGroundSnap) dest.onGroundSnap = host.onGroundSnap;
+    if (host.onSpawnChild) dest.onSpawnChild = host.onSpawnChild;
+    if (host.onSpawnProjectile) dest.onSpawnProjectile = host.onSpawnProjectile;
+    if (host.onTickStream) dest.onTickStream = host.onTickStream;
+    if (host.onSpawnFX) dest.onSpawnFX = host.onSpawnFX;
+    if (host.onFrameUpdate) dest.onFrameUpdate = host.onFrameUpdate;
+    if (host.onCheckCollision) dest.onCheckCollision = host.onCheckCollision;
+    if (host.onExitUb) dest.onExitUb = host.onExitUb;
+    if (host.onClearAction) dest.onClearAction = host.onClearAction;
+    if (host.onStopStream) dest.onStopStream = host.onStopStream;
   }
 
   /** Copy BorgRuntime → RomActor (before the ROM step). During an active special,

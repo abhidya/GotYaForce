@@ -28,6 +28,7 @@ import {
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
+import { knightMeleeEntry00, knightMeleeEntry14, knightMeleeEntry28, createKnightMeleeTable00, createKnightMeleeTable14, createKnightMeleeTable28 } from "./shared-knight-melee.js";
 
 // Motion constants — every value read from boot.dol this session.
 const SWORD_KNIGHT_X = {
@@ -241,9 +242,34 @@ export function createSwordKnightRootAction(ctx: SwordKnightFamilyCtx): (actor: 
   // PTR_FUN_802d4820 — action 2 (X-special lunge-and-slam) ported; 0/1/3/4 fall through.
   // (pl020a/pl020f command tables never reach action 2 — only pl0200's command records
   // map cue 44 → actionIndex 2 — but the family module is shared across all three borgs.)
+  // Pre-create shared melee tables for each variant (SWORD KNIGHT variant dispatch
+  // mirrors PTR_zz_0074424__802d4844: variant 0→table00 seed0, 1→table14 seed3,
+  // 2→table14 seed4, 3→table28)
+  const meleeTables = [
+    createKnightMeleeTable00(ctx, 0),
+    createKnightMeleeTable14(ctx, 3),
+    createKnightMeleeTable14(ctx, 4),
+    createKnightMeleeTable28(ctx),
+  ];
+
+  /** zz_00743d0_ @ chunk_0010.c:1581 — action-1 B-melee wrapper. Halves both steerYaw
+   *  (+0x18da) and steerYaw2 (+0x18dc), reads variant from +0x581, dispatches to the
+   *  corresponding shared melee entry point. */
+  function swordKnightBMelee(actor: RomActor): void {
+    actor.steerYaw = (actor.steerYaw as any) >> 1;
+    (actor as any).steerYaw2 = ((actor as any).steerYaw2 ?? 0) >> 1;
+    const variant = ((actor as any)._581 as number) ?? 0;
+    const table: ((actor: RomActor) => void) | undefined = meleeTables[variant];
+    if (!table) return;
+    // Variant 0→entry00, 1-2→entry14 (sharedMeleeSetup), 3→entry28 (no sharedMeleeSetup)
+    if (variant === 0) { knightMeleeEntry00(actor, table); }
+    else if (variant < 3) { knightMeleeEntry14(actor, table); }
+    else { knightMeleeEntry28(actor, table); }
+  }
+
   const actionTable: Array<((actor: RomActor) => void) | null> = [
     null,                                       // 0: dash attack (FUN_80073f78) — TODO port
-    null,                                       // 1: B melee (zz_00743d0_) — TODO port
+    swordKnightBMelee,                          // 1: B melee (zz_00743d0_) — shared knight melee
     (actor) => swordKnightXHandler(actor, ctx), // 2: X-special (zz_00744fc_ → phase table)
     null,                                       // 3: — (no handler in this family's table)
     null,                                       // 4: — (no handler in this family's table)

@@ -14,6 +14,7 @@ import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
 import { stepRomAI, hasRomAiParams } from "./romAi.js";
 import { RomDriverBridge } from "./bridge.js";
+import type { RomActor } from "./rom/actor.js";
 import { registerGroundClamp } from "./rom/physics.js";
 import { applyHit } from "./combat.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
@@ -66,6 +67,7 @@ import {
   type PlayerInput,
   type RectStageBounds,
   type SpawnPoint,
+  type Projectile,
   type StageCollision,
   normalizeStageBounds,
 } from "./types.js";
@@ -365,7 +367,65 @@ class BattleImpl implements Battle {
     // fallback. The bridge's tick now COMPOSES with normal movement (returns false)
     // — it layers hitbox/anim/damage ON TOP of stepMovement, not replacing it. This
     // means AI borgs navigate normally while still getting ROM-driven X-specials.
-    const driver = RomDriverBridge.attach(b, {});
+    const battle = this;
+    const driver = RomDriverBridge.attach(b, {
+      onFaceComplete: (actor, mask) => {
+        void mask;
+        const lt = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
+        if (!lt) return true;
+        const dx = lt.x - actor.pos.x;
+        const dz = lt.z - actor.pos.z;
+        if (Math.abs(dx) < 0.001 && Math.abs(dz) < 0.001) return true;
+        const targetBam = Math.round(Math.atan2(dx, dz) / (Math.PI * 2) * 0x10000) & 0xffff;
+        const diff = ((targetBam - actor.heading + 0x8000) & 0xffff) - 0x8000;
+        const step = Math.max(256, Math.abs(diff) >> 3);
+        if (Math.abs(diff) <= step) {
+          actor.heading = targetBam;
+          return true;
+        }
+        actor.heading = (actor.heading + (diff > 0 ? step : -step)) & 0xffff;
+        return false;
+      },
+      onAllocateResource: (actor, type, count, mode) => {
+        void actor; void type; void count; void mode;
+        return true;
+      },
+      onFamilyProjectile: (_actor, addr, kind) => {
+        battle.addRomProjectile(b, addr, kind);
+      },
+      onSpawnChild: (actor, childId) => {
+        void actor;
+        battle.addRomProjectile(b, 0, childId);
+        return true;
+      },
+      onSpawnProjectile: (actor, childId, t1, t2, vs) => {
+        void actor; void childId; void t1; void t2; void vs;
+      },
+      onSpawnFX: (actor, fxId) => {
+        void actor; void fxId;
+      },
+      onFaceTarget: (actor, aimType) => {
+        void aimType;
+        const lt = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
+        if (!lt) return;
+        const dx = lt.x - actor.pos.x;
+        const dz = lt.z - actor.pos.z;
+        if (Math.abs(dx) < 0.001 && Math.abs(dz) < 0.001) return;
+        actor.heading = Math.round(Math.atan2(dx, dz) / (Math.PI * 2) * 0x10000) & 0xffff;
+      },
+      onCheckCollision: (actor) => {
+        return actor.wallContact;
+      },
+      onPlayCue: (_actor, cueId) => {
+        void cueId;
+      },
+      onPlayAnim: (_actor, group, slot, blend) => {
+        void group; void slot; void blend;
+      },
+      onArmHit: (_actor, kind, statusId, statusArg) => {
+        void kind; void statusId; void statusArg;
+      },
+    });
     if (driver) {
         driver.hitResolver = (attacker, victim, damageRecordIndex, knockbackMult) => {
           const victimProfile = this.profiles.get(victim.uid);
@@ -390,6 +450,28 @@ class BattleImpl implements Battle {
         driver.offMeshCheck = (x: number, z: number) => floorSurfaceYAt(this.collision, x, z, 100) != null;
         b.romDriver = driver;
     }
+  }
+
+  /** Spawn a projectile via the ROM family spawner. Placeholder — routes to the
+   *  bridge's native fireChild path until the family spawner tables are extracted. */
+  private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number): void {
+    void spawnerAddr;
+    const p: Projectile = {
+      uid: `rom-family-${kind}-${Date.now()}`,
+      ownerUid: b.uid,
+      team: b.team,
+      pos: { x: b.pos.x, y: b.pos.y, z: b.pos.z },
+      vel: { x: 0, y: 0, z: 0 },
+      damage: 0,
+      hitstun: 0,
+      knockback: 1,
+      homingTurn: 0,
+      homingTarget: null,
+      life: 1,
+      hitRadius: 0,
+      visualKind: "energy",
+    };
+    this.state.projectiles.push(p);
   }
 
   /** Ground-Y query for the ROM driver's ground clamp — mirrors movement.ts's

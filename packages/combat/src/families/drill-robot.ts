@@ -16,7 +16,7 @@ export const DRILL_X = {
 export interface DrillFamilyCtx {
   onPlayCue?: (actor: RomActor, cueId: number) => void;
   /** Allocate resource slot (port of zz_006dbe0_). Returns true if ok. */
-  onAllocateResource?: (actor: RomActor, type: number, count: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
   /** Spawn child projectile (port of zz_00d9fbc_). */
   onDrillProjectile?: (actor: RomActor) => boolean;
   /** Stream ticker (port of zz_004cd24_). */

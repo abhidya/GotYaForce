@@ -57,8 +57,9 @@ export const CYBER_DRAGON_X = {
 const RECOVERY_FRAMES = 30;
 
 export interface CyberDragonFamilyCtx extends StreamContext {
-  /** Spawn a child projectile by ID. Port of zz_016cc24_(actor, id). */
-  onSpawnChild?: (actor: RomActor, childId: number) => void;
+  /** Spawn a child projectile by ID. Port of zz_016cc24_(actor, id). Returns true when
+   *  the spawn succeeded (placeholder: always true). */
+  onSpawnChild?: (actor: RomActor, childId: number) => boolean;
   /** Spawn a parameterized projectile with transform and visual state. Port of
    *  zz_01deb68_(actor, childId, transform1, transform2, visualState). */
   onSpawnProjectile?: (actor: RomActor, childId: number, t1: Vec3, t2: Vec3, vs: number) => void;

@@ -22,7 +22,7 @@
 //   FLOAT_80437824 = -1.0  (stream rate)    FLOAT_80437834 = 0.95  (v1 velocity drag)
 //   FLOAT_8043782c = 1.0   (physics gravity)
 
-import type { RomActor, Vec3 } from "../rom/actor.js";
+import type { RomActor } from "../rom/actor.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
@@ -35,10 +35,16 @@ export const DRAGON_X = {
   GRAVITY: 1.0,         // FLOAT_8043782c — physics integration gravity (airborne phases)
   BREATH_WINDOW: 180.0, // FLOAT_80437830 — phase-1 active-breath timer seed (+0x558)
   AIR_DRAG: 0.95,       // FLOAT_80437834 — zz_006ed8c_ velocity scale (v1 per-frame)
+  /** FLOAT_80437820 — dash timer seed (+0x560). Value not yet extracted from boot.dol. */
+  DASH_TIMER: 8.0,
+  /** FLOAT_80437828 — air dash velocity drag coefficient. Value not yet extracted. */
+  DASH_AIR_DRAG: 0.98,
   /** zz_00be948_ @0x800be948 — the on-contact flame-child spawner. Borg-id-switched
    *  record-select (zz_0076408_:3034-3040): 0x500→0, 0x509→1, 0x50a→2, 0x50c→3,
    *  0x515→4, 0x516→5. The host (bridge) resolves the record via the family table. */
   FLAME_SPAWNER_ADDR: 0x800be948,
+  /** Stream mask for ground dash phase-2 stream start (mask==3 vs normal 0xf). */
+  AIR_DASH_PHASE2_MASK: 3,
 } as const;
 
 /** Phase-2 recovery floor — the ROM polls +0x1cee (stream-end) which our stream VM
@@ -59,7 +65,14 @@ function flameChildType(borgNumber: number): number {
   }
 }
 
-export interface DragonFamilyCtx extends StreamContext {}
+export interface DragonFamilyCtx extends StreamContext {
+  /** Face the lock target. Port of zz_006d144_(mask). Returns true when facing complete. */
+  onFaceComplete?: (actor: RomActor, mask: number) => boolean;
+  /** Allocate resource. Port of zz_006dbe0_(0,1,1). Returns true if resource available. */
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  /** Exit full-body to idle. */
+  onExitFb?: (actor: RomActor) => void;
+}
 
 /** Port of zz_0076408_ @ chunk_0010.c:3019 — per-frame contact bookkeeping shared by
  *  all three breath variants. Sets the stream-state byte, ticks the stream, and on a
@@ -73,6 +86,126 @@ function dragonContactBookkeeping(actor: RomActor, ctx: DragonFamilyCtx): void {
   if (actor.contactP0 > 0) {
     actor.contactP0 = 0; // the ROM clears +0x1cef after consuming it.
     ctx.onFamilyProjectile?.(actor, DRAGON_X.FLAME_SPAWNER_ADDR, flameChildType(actor.borgNumber));
+  }
+}
+
+// ============================================================================
+// Scratch fields — non-RomActor fields accessed at ROM offsets.
+// ============================================================================
+interface DragonScratch {
+  /** +0x560: dash move timer (float). */
+  moveTimer: number;
+  /** +0x80: u16 anim offset slot 2. */
+  animOffset2: number;
+  /** +0x7e: u16 anim offset slot 1. */
+  animOffset1: number;
+  /** +0x7c: u16 anim offset slot 0. */
+  animOffset0: number;
+  /** +0x587: cmdChargedRanged byte — cleared on contact during dash phase 2. */
+  cmdChargedRanged: number;
+  /** +0x73f: ub active byte — cleared on stream-end. */
+  ubActiveByte: number;
+}
+
+function scratchOf(actor: RomActor): RomActor & DragonScratch {
+  return actor as RomActor & DragonScratch;
+}
+
+// ============================================================================
+// Dash (action 0) — 5 variants, 2 phase tables.
+//   FUN_80075a68 → PTR_FUN_802d56e0[variant]:
+//     [0] FUN_80075aa4 (ground): PTR_FUN_802d56ec[fbPhase] (6 phases)
+//     [1] FUN_80075d20 (air):    PTR_FUN_802d5754[fbPhase] + drag + gravity.
+// ============================================================================
+
+/** Dash phase 0 (ground) — FUN_80075ae0. Zeroes physics, sets timer, faces, plays stream. */
+function dashGroundPhase0(actor: RomActor, ctx: DragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  actor.fbPhaseSlots[0] = 1;
+  s.moveTimer = DRAGON_X.DASH_TIMER;
+  actor.gravityCoeff = DRAGON_X.ZERO;
+  actor.yVel = DRAGON_X.ZERO;
+  actor.hDecel = DRAGON_X.ZERO;
+  actor.hSpeed = DRAGON_X.ZERO;
+  s.animOffset2 = 0;
+  s.animOffset1 = 0;
+  s.animOffset0 = 0;
+  ctx.onFaceComplete?.(actor, 0xc1);
+  startStream(actor, 0xf, 0, 0x2a, DRAGON_X.STREAM_RATE);
+}
+
+/** Dash phase 1 (ground) — FUN_80075b68. Ticks stream, decays timer, advances on expiry. */
+function dashGroundPhase1(actor: RomActor, ctx: DragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= DRAGON_X.ZERO || (ctx.onFaceComplete?.(actor, 0xc1) ?? false)) {
+    actor.fbPhaseSlots[0] = 2;
+    startStream(actor, 0xf, 2, 0, DRAGON_X.STREAM_RATE);
+  }
+}
+
+/** Dash phase 2 (shared by ground+air) — FUN_80075bf8. On contact: spawns flame child
+ *  via zz_00be948_. On stream-end: tri-state idle return (ground/air/charged). */
+function dashPhase2(actor: RomActor, ctx: DragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  if (actor.contactP0 > 0) {
+    actor.contactP0 = 0;
+    const ok = ctx.onAllocateResource?.(actor, 0, 1, 1) ?? true;
+    if (ok) {
+      s.cmdChargedRanged = 0;
+      ctx.onFamilyProjectile?.(actor, DRAGON_X.FLAME_SPAWNER_ADDR, flameChildType(actor.borgNumber));
+    }
+  }
+  if (actor.wallContact !== 0) {
+    s.ubActiveByte = 0;
+    actor.controlWord = actor.controlWord & ~0x3;
+    if ((actor.controlWord & 0x40) === 0) {
+      if ((actor.controlWord & 0x80) === 0) romGroundIdleReturn(actor);
+      else {
+        dispatchUpperBodyCue(actor, 0x10);
+        // zz_006a668_(...) — unported shared-engine call; labeled no-op.
+      }
+    } else {
+      romAirKnockoutReturn(actor);
+    }
+  }
+}
+
+/** Dash recovery phase — FUN_80075c74 (43 bytes, not in C export). Ticks stream and
+ *  waits for wall-contact to exit. Multiple instances fill PTR_FUN_802d56ec phases 3-6. */
+function dashRecoveryPhase(actor: RomActor, ctx: DragonFamilyCtx): void {
+  tickStream(actor, 0xf, ctx);
+  if (actor.wallContact !== 0) {
+    scratchOf(actor).ubActiveByte = 0;
+    actor.controlWord = actor.controlWord & ~0x3;
+    romGroundIdleReturn(actor);
+  }
+}
+
+// ============================================================================
+// Air dash (variant 1): FUN_80075d20 → PTR_FUN_802d5754[fbPhase] + drag + gravity.
+// Phases: FUN_80075d8c (p0), FUN_80075df0 (p1), FUN_80075bf8 (p2, shared).
+// ============================================================================
+
+/** Dash phase 0 (air) — FUN_80075d8c. Sets timer, faces (mask 0x81), plays stream slot 15. */
+function dashAirPhase0(actor: RomActor, ctx: DragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  actor.fbPhaseSlots[0] = 1;
+  s.moveTimer = DRAGON_X.DASH_TIMER;
+  ctx.onFaceComplete?.(actor, 0x81);
+  startStream(actor, 0xf, 0, 0xf, DRAGON_X.STREAM_RATE);
+}
+
+/** Dash phase 1 (air) — FUN_80075df0. Ticks stream, decays timer, advances on expiry. */
+function dashAirPhase1(actor: RomActor, ctx: DragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= DRAGON_X.ZERO || (ctx.onFaceComplete?.(actor, 0x81) ?? false)) {
+    actor.fbPhaseSlots[0] = 2;
+    startStream(actor, DRAGON_X.AIR_DASH_PHASE2_MASK, 2, 1, DRAGON_X.STREAM_RATE);
   }
 }
 
@@ -246,24 +379,43 @@ function dragonXSpecial(actor: RomActor, ctx: DragonFamilyCtx): void {
 // ============================================================================
 // Root action dispatcher — port of FUN_80075a2c @ chunk_0010.c:2563.
 // ============================================================================
-/** Action-index table (PTR_FUN_802d56d4, 3 entries). Only actionIndex 2 (X-special)
- *  is ported here. Action 1 (B melee = FUN_80075e80) is a real no-op for the Dragon
- *  family (it clears +0x5e0 bits and returns to idle — the Dragon's B is a shot, so
- *  the melee action is command-disabled); we wire it as a cancel-to-idle so the shared
- *  engine fallback never fires a spurious melee. Action 0 (dash) and 3/4 are null —
- *  they fall through to the existing generic @gf/combat logic. */
+/** Action-index table (PTR_FUN_802d56d4, 3 entries). Action 0 (dash) ported — 2 variants.
+ *  Action 1 (B melee) and action 2 (X-special) remain as before. */
 export function createDragonRootAction(ctx: DragonFamilyCtx): (actor: RomActor) => void {
-  const actionTable: Array<((actor: RomActor) => void) | null> = [
-    null,                                // 0: dash attack (FUN_80075a68) — TODO port
-    (actor) => dragonBMeleeCancel(actor), // 1: B melee no-op (FUN_80075e80)
-    (actor) => dragonXSpecial(actor, ctx), // 2: X-special (bespoke 3-variant breath)
-    null,                                // 3: B charge — TODO identify
-    null,                                // 4: —
-  ];
   return (actor: RomActor) => {
-    const fn = actionTable[actor.actionIndex];
-    if (fn) fn(actor);
+    if (actor.actionIndex === 0) {
+      // FUN_80075a68 → PTR_FUN_802d56e0[variantIndex]
+      if (actor.variantIndex === 0) runDashGroundEngine(actor, ctx);
+      else runDashAirEngine(actor, ctx);
+    } else if (actor.actionIndex === 1) {
+      dragonBMeleeCancel(actor);
+    } else if (actor.actionIndex === 2) {
+      dragonXSpecial(actor, ctx);
+    }
   };
+}
+
+/** FUN_80075aa4 — ground dash engine dispatcher (PTR_FUN_802d56ec[fbPhase]).
+ *  Phase 2 is the shared contact+wall handler; phases 3-5 are recovery. */
+function runDashGroundEngine(actor: RomActor, ctx: DragonFamilyCtx): void {
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  if (phase === 0) dashGroundPhase0(actor, ctx);
+  else if (phase === 1) dashGroundPhase1(actor, ctx);
+  else if (phase === 2) dashPhase2(actor, ctx);
+  else dashRecoveryPhase(actor, ctx);
+}
+
+/** FUN_80075d20 — air dash engine dispatcher (PTR_FUN_802d5754[fbPhase]).
+ *  Includes per-frame physics: velocity drag + gravity integration + ground clamp. */
+function runDashAirEngine(actor: RomActor, ctx: DragonFamilyCtx): void {
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  if (phase === 0) dashAirPhase0(actor, ctx);
+  else if (phase === 1) dashAirPhase1(actor, ctx);
+  else dashPhase2(actor, ctx);
+  // Per-frame physics tail (FUN_80075d20:2705-2710)
+  actor.hSpeed *= DRAGON_X.DASH_AIR_DRAG;
+  actor.yVel *= DRAGON_X.DASH_AIR_DRAG;
+  integratePhysics(DRAGON_X.GRAVITY, actor, actor.lockYaw);
 }
 
 /** Port of FUN_80075e80 @ chunk_0010.c:2762 — the Dragon B-melee no-op. Clears the
