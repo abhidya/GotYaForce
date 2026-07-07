@@ -55,6 +55,14 @@ import { configureCyberDragonFamily } from "./families/cyber-dragon.js";
 import { configureWormFamily } from "./families/worm.js";
 import { configureWireGunnerFamily } from "./families/wire-gunner.js";
 import { configureRobotFamily } from "./families/robot.js";
+import { configureMagnetRobotFamily } from "./families/magnet-robot.js";
+import { configureOmega2Family } from "./families/omega2-robot.js";
+import { configureDrillFamily } from "./families/drill-robot.js";
+import { configureThunderFamily } from "./families/thunder-robot.js";
+import { configureHammerFamily } from "./families/hammer-robot.js";
+import { configureKnightFamily } from "./families/knight-family.js";
+import { configureBeamWingFamily } from "./families/beam-wing.js";
+import { createRobotDashHandler, type RobotDashConfig } from "./families/shared-robot-dash.js";
 import { configureSwordKnightFamily } from "./families/sword-knight.js";
 import { configureJellyDiverFamily } from "./families/jelly-diver.js";
 import { configureCopyManFamily } from "./families/copy-man.js";
@@ -194,9 +202,9 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl000c: makeDeathBorgFamilyRegistration(),
       // ---- Wave-A verified shared-engine families (2026-07-06, wf_1141168b-7b5) ----
       // Aerial dive/leap-shot engine zz_00f41c4_ (shared-aerial-dive-x.ts):
-      pl0400: makeSimpleRegistration("pl0400", (a, ctx) => configureClawRobotFamily(a, "pl0400", ctx)),
-      pl040a: makeSimpleRegistration("pl040a", (a, ctx) => configureClawRobotFamily(a, "pl040a", ctx)),
-      pl0406: makeSimpleRegistration("pl0406", (a, ctx) => configureDeathBorgOmegaFamily(a, "pl0406", ctx)),
+      pl0400: withRobotDash(makeSimpleRegistration("pl0400", (a, ctx) => configureClawRobotFamily(a, "pl0400", ctx)), DEFAULT_ROBOT_DASH_CONFIG),
+      pl040a: withRobotDash(makeSimpleRegistration("pl040a", (a, ctx) => configureClawRobotFamily(a, "pl040a", ctx)), DEFAULT_ROBOT_DASH_CONFIG),
+      pl0406: withRobotDash(makeSimpleRegistration("pl0406", (a, ctx) => configureDeathBorgOmegaFamily(a, "pl0406", ctx)), DEFAULT_ROBOT_DASH_CONFIG),
       // GIRL cluster (families/girl-cluster.ts, 2026-07-06): 14 borgs / 8 families on
       // the shared action-0 B-ranged volley (variant table 0x80325a00, G-A/G-B/G-C
       // tables @0x80325a14/a20/a2c) + the 5 shared melee tables (M-1..M-5
@@ -333,9 +341,9 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // phase-1 contact spawns a borg-switched child: pl0402/pl0408 via zz_01138c0_
       // (family child-deploy), pl0407 via FUN_801b8b6c (MEGATON heavy deploy, one-shot
       // latched). All 3 members share ctor 0x80112b44 + group-4 seedSlot 0 (air 1).
-      pl0402: makeRobotFamilyRegistration(),
-      pl0407: makeRobotFamilyRegistration(),
-      pl0408: makeRobotFamilyRegistration(),
+      pl0402: withRobotDash(makeRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+      pl0407: withRobotDash(makeRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+      pl0408: withRobotDash(makeRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
       // WIRE GUNNER family (ctor 0x801301f8) — cue table @0x80336178. The three gunner
       // borgs share the bespoke X-special phase machine FUN_80131688 → zz_01316e0_
       // (direction-gated aim→fire shot deploy, group 4 slots 2/3/4); see
@@ -368,15 +376,31 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       // AXE KNIGHT / HATCHET KNIGHT family (ctor 0x800d6d10) — both members not yet in registry.
       pl0204: makeSimpleRegistration("pl0204", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl020d: makeSimpleRegistration("pl020d", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // MAGNET ROBOT (+) / MAGNET ROBOT (-) family (ctor 0x800da9fc) — both members not yet in registry.
-      pl0405: makeSimpleRegistration("pl0405", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl0409: makeSimpleRegistration("pl0409", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // SPIKE KNIGHT / HAMMER KNIGHT family (ctor 0x800e5288) — both members not yet in registry.
-      pl0203: makeSimpleRegistration("pl0203", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl020c: makeSimpleRegistration("pl020c", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // BEAM WING BLUE / BEAM WING RED family (ctor 0x800f9a28) — both members not yet in registry.
-      pl0a03: makeSimpleRegistration("pl0a03", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl0a06: makeSimpleRegistration("pl0a06", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(1) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+// DRILL ROBOT family (ctor 0x800e67d4) — bespoke 5-phase X-special
+// (FUN_800d81f8 → PTR_FUN_803109b4 phase machine); see families/drill-robot.ts.
+// X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
+pl0401: withRobotDash(makeDrillRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+// HAMMER ROBOT family (ctor 0x800e5a0c) — bespoke 5-phase X-special
+// (zz_00e5a0c_ → PTR_FUN_803188d4 phase machine); see families/hammer-robot.ts.
+// X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
+pl0403: withRobotDash(makeHammerRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+// THUNDER ROBOT family (ctor 0x800e0174) — bespoke 5-phase X-special
+// (FUN_800e0174 → PTR_FUN_80316b1c phase machine); see families/thunder-robot.ts.
+// X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
+pl0404: withRobotDash(makeThunderRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+      // MAGNET ROBOT (+) / MAGNET ROBOT (-) family (ctor 0x800da9fc) — bespoke X-special
+      // (FUN_800dafb4 → PTR_FUN_80311ca4 3-phase magnet-suck-in deploy); see families/magnet-robot.ts.
+      // Phase-1 contact deploys a borg-switched child: pl0405→variant 0, pl0409→variant 1.
+      pl0405: withRobotDash(makeMagnetRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+      pl0409: withRobotDash(makeMagnetRobotFamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+// SPIKE KNIGHT / HAMMER KNIGHT family (ctor 0x800e5288) — bespoke shot + jump X-specials.
+// See families/knight-family.ts. Shot at action-2, jump at action-4.
+pl0203: makeKnightFamilyRegistration("pl0203"),
+pl020c: makeKnightFamilyRegistration("pl020c"),
+      // BEAM WING BLUE / BEAM WING RED family (ctor 0x800f9a28) — full port (5 tables, 21 fns).
+      // See families/beam-wing.ts. Root engine at action 0, melee at action 1/3, X-special at action 2.
+      pl0a03: makeBeamWingFamilyRegistration("pl0a03"),
+      pl0a06: makeBeamWingFamilyRegistration("pl0a06"),
       // COSMIC DRAGON / SPACE DRAGON family (ctor 0x80108954) — both members not yet in registry.
       pl0504: makeSimpleRegistration("pl0504", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0510: makeSimpleRegistration("pl0510", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
@@ -456,11 +480,12 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0900: makeSimpleRegistration("pl0900", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl0908: makeSimpleRegistration("pl0908", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
       pl090d: makeSimpleRegistration("pl090d", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      // DEATH BORG OMEGA II/III/IV family (ctor 0x801d4590) — no action 2 in ROM; X
-      // routes via action 0 (dash attack). Registered with cue table + shared-engine.
-      pl040b: makeSimpleRegistration("pl040b", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl040c: makeSimpleRegistration("pl040c", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
-      pl040d: makeSimpleRegistration("pl040d", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
+// DEATH BORG OMEGA II/III/IV family (ctor 0x801d4590) — bespoke 5-phase X-special
+// (FUN_800f3cb4 → PTR_FUN_8031b918 phase machine); see families/omega2-robot.ts.
+// X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
+pl040b: withRobotDash(makeOmega2FamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+pl040c: withRobotDash(makeOmega2FamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
+pl040d: withRobotDash(makeOmega2FamilyRegistration(), DEFAULT_ROBOT_DASH_CONFIG),
       // ANUBIS WING family (ctor 0x800f49a0) — no action 2 in ROM; X routes via action 3
       // (B charge, engine zz_0148384_). Registered with cue table + shared-engine.
       pl0a04: makeSimpleRegistration("pl0a04", (a) => { a.rootAction = createSharedEngineRootAction({ xSpecial: DEFAULT_CONFIGS.dashAttack(0) }); a.defaultGroup = 0; a.streamSlot = 0; }),
@@ -615,6 +640,42 @@ function withBespokeMelee(
       } else {
         actor.rootAction = (a) => {
           if (a.actionIndex === 1) { meleeHandler(a); return; }
+          existing(a);
+        };
+      }
+    },
+    cueTable: base.cueTable,
+  };
+}
+
+/** Default robot-dash config shared by all robot-cluster borgs (pl0400..pl040d). Each
+ *  borg's ROM config block differs — these placeholders will be refined once the
+ *  per-borg DOL data is extracted. */
+const DEFAULT_ROBOT_DASH_CONFIG: RobotDashConfig = {
+  slotBase: 0,
+  rangeRow: 0,
+  ammoSlot: 0,
+  timerSeed: 60,
+  maskByte: 0,
+};
+
+/** Wrap a family registration so action 0 routes to the shared robot-dash engine
+ *  (PTR_FUN_8031b8a0 → zz_00f1e30_ ported in shared-robot-dash.ts). Preserves the
+ *  base rootAction for actions 1..4 (X-special, B-melee, charge, etc.). */
+function withRobotDash(
+  base: FamilyRegistration,
+  config: RobotDashConfig,
+): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      base.configure(actor, ctx);
+      const dashHandler = createRobotDashHandler(config);
+      const existing = actor.rootAction;
+      if (!existing) {
+        actor.rootAction = composeActionTable([dashHandler, null, null, null, null]);
+      } else {
+        actor.rootAction = (a) => {
+          if (a.actionIndex === 0) { dashHandler(a); return; }
           existing(a);
         };
       }
@@ -888,6 +949,93 @@ function makeRobotFamilyRegistration(): FamilyRegistration {
       configureRobotFamily(actor, id as "pl0402" | "pl0407" | "pl0408", ctx);
     },
     cueTable: cueTableForBorg("pl0402")!,
+  };
+}
+
+// MAGNET ROBOT family (ctor 0x800da9fc) — cue table @0x803168f8. Both members
+// (pl0405/pl0409) share the bespoke X-special 3-phase magnet-suck-in deploy
+// (FUN_800dafb4 → PTR_FUN_80311ca4 phase machine); see families/magnet-robot.ts.
+// The X handler is at action 2; action 0 gets the shared robot-dash via withRobotDash.
+function makeMagnetRobotFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id = actor.borgNumber === 0x409 ? "pl0409" as const : "pl0405" as const;
+      configureMagnetRobotFamily(actor, id, ctx);
+    },
+    cueTable: cueTableForBorg("pl0405")!,
+  };
+}
+
+// DEATH BORG OMEGA II family (ctor 0x801d4590, members pl040b/pl040c/pl040d) —
+// cue table @0x80319410. All 3 members share the bespoke 5-phase X-special
+// (FUN_800f3cb4 → PTR_FUN_8031b918 phase machine); see families/omega2-robot.ts.
+// X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
+function makeOmega2FamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x40c ? "pl040c" as const :
+        actor.borgNumber === 0x40d ? "pl040d" as const : "pl040b" as const;
+      configureOmega2Family(actor, id, ctx);
+    },
+    cueTable: cueTableForBorg("pl040b")!,
+  };
+}
+
+// DRILL ROBOT family (ctor 0x800e67d4, member pl0401) — cue table @0x803168f8.
+// X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
+function makeDrillRobotFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      configureDrillFamily(actor, "pl0401", ctx);
+    },
+    cueTable: cueTableForBorg("pl0401")!,
+  };
+}
+
+// HAMMER ROBOT family (ctor 0x800e5a0c, member pl0403) — cue table @0x803168f8.
+// Also shared by HATCHET KNIGHT (pl020c, borg 0x20c) — differs only in hitbox offset.
+// X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
+function makeHammerRobotFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      configureHammerFamily(actor, "pl0403", ctx);
+    },
+    cueTable: cueTableForBorg("pl0403")!,
+  };
+}
+
+// THUNDER ROBOT family (ctor 0x800e0174, member pl0404) — cue table @0x803168f8.
+// X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
+function makeThunderRobotFamilyRegistration(): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      configureThunderFamily(actor, "pl0404", ctx);
+    },
+    cueTable: cueTableForBorg("pl0404")!,
+  };
+}
+
+// SPIKE KNIGHT / HATCHET KNIGHT family (ctor 0x800e5288, members pl0203/pl020c) —
+// cue table @0x803168f8 (same range as the hammer-robot family, same chunk block).
+// Shot X-special at action 2, jump/stomp X-special at action 4.
+function makeKnightFamilyRegistration(borgId: "pl0203" | "pl020c"): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      configureKnightFamily(actor, borgId, ctx);
+    },
+    cueTable: cueTableForBorg(borgId)!,
+  };
+}
+
+// BEAM WING family (ctor 0x800f9a28) — full port (5 tables, 21 fns). Both borgs share
+// cue table @0x8031d4b0.
+function makeBeamWingFamilyRegistration(borgId: "pl0a03" | "pl0a06"): FamilyRegistration {
+  return {
+    configure: (actor, ctx) => {
+      configureBeamWingFamily(actor, borgId, ctx);
+    },
+    cueTable: cueTableForBorg(borgId)!,
   };
 }
 

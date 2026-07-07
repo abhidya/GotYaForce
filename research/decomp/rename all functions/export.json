@@ -1,0 +1,332 @@
+[
+  {
+    "type": "System",
+    "content": "═══════════════════════════════════════════════════════════\nLLM Provider: Custom API\nChat Model: qwen/qwen3.6-35b-a3b\nEmbedding Model: text-embedding-nomic-embed-text-v1.5\nTimeout: 1200s | Request Delay: 0.2s\n═══════════════════════════════════════════════════════════\nReady for queries.",
+    "timestamp": "2026-07-07T03:58:24.486649"
+  },
+  {
+    "type": "🚀 Smart Tool: Rename All Functions",
+    "content": "Starting OPTIMIZED bulk function analysis with mode: full_enumeration",
+    "timestamp": "2026-07-07T03:59:46.785582"
+  },
+  {
+    "type": "⚡ Performance Enhancements",
+    "content": "• Batch processing (size: 50)\n• Deferred RAG vector creation\n• Optimized AI prompts\n• Enhanced progress tracking",
+    "timestamp": "2026-07-07T03:59:46.801241"
+  },
+  {
+    "type": "📋 Step 1",
+    "content": "Retrieving list of all functions (paginated)...",
+    "timestamp": "2026-07-07T03:59:46.801241"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:46.850729"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:46.881728"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:46.910756"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:46.941031"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 1000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:46.969482"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 1200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:46.997511"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 1400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.027512"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 1600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.051571"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 1800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.067229"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 2000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.101895"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 2200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.125663"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 2400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.150832"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 2600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.174070"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 2800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.190871"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 3000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.223335"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 3200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.247335"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 3400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.272029"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 3600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.294522"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 3800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.318610"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 4000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.331185"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 4200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.371811"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 4400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.396582"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 4600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.420063"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 4800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.444028"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 5000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.468047"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 5200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.492277"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 5400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.515306"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 5600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.539131"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 5800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.562592"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 6000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.585599"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 6200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.601263"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 6400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.634756"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 6600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.664711"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 6800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.687947"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 7000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.711918"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 7200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.735102"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 7400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.763635"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 7600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.787505"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 7800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.811505"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 8000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.835243"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 8200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.859549"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 8400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.882809"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 8600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.906842"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 8800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.931487"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 9000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.955743"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 9200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:47.979064"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 9400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.004159"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 9600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.028549"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 9800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.052529"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 10000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.078553"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 10200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.102695"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 10400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.127695"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 10600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.151675"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 10800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.175689"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 11000 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.199676"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 11200 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.223158"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 11400 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.247187"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 11600 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.276349"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 11800 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.301211"
+  },
+  {
+    "type": "Step 1 Progress",
+    "content": "Found 11972 of 11972 functions...",
+    "timestamp": "2026-07-07T03:59:48.325062"
+  },
+  {
+    "type": "Step 1 Complete",
+    "content": "Found 11972 functions to process",
+    "timestamp": "2026-07-07T03:59:48.330031"
+  },
+  {
+    "type": "⚡ Parallel Processing",
+    "content": "Using 5 concurrent workers for faster processing",
+    "timestamp": "2026-07-07T03:59:48.333060"
+  }
+]

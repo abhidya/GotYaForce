@@ -220,6 +220,29 @@ export interface RomDescriptor {
   /** +0xbe/+0xbf: default hand bytes (op 0x07 fallback when stream has no hand-swap). */
   defaultHand0: number;
   defaultHand1: number;
+  // Per-borg data page fields (pl####data.bin, 432 bytes)
+  /** +0x2c: max horizontal speed (big-endian float). */
+  maxHSpeed?: number;
+  /** +0x44: ground-accel magnitude (big-endian float). */
+  groundAccel?: number;
+  /** +0x48: jump vertical impulse parameter (big-endian float). */
+  jumpImpulse?: number;
+  /** +0x50: min/turn speed (big-endian float, = guide speed-stat). */
+  minSpeed?: number;
+  /** +0x68: gravity slot A — ground/turn states (big-endian float). */
+  gravitySlotA?: number;
+  /** +0x70: gravity slot C (big-endian float). */
+  gravitySlotC?: number;
+  /** +0x9f: handler-data byte (anim/frame parameter). */
+  handlerData9f?: number;
+  /** +0x3d: handler-data byte (jump arc / timer parameter). */
+  handlerData3d?: number;
+  /** +0x68: handler-data float (gravity slot A — ground/turn). */
+  handlerData68?: number;
+  /** +0x48: handler-data float (jump vertical impulse). */
+  handlerData48?: number;
+  /** +0x2c: handler-data float (max horizontal speed). */
+  handlerData2c?: number;
 }
 
 /** Command-move table (actor+0x4ec). Already extracted fleet-wide into

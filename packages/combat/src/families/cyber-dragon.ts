@@ -33,7 +33,7 @@
 //   FLOAT_804384c8 = -1.0  (stream rate)    FLOAT_804384c4 = 0.95  (v1 velocity drag)
 //   FLOAT_804384bc = 1.0   (physics gravity)
 
-import type { RomActor } from "../rom/actor.js";
+import type { RomActor, Vec3 } from "../rom/actor.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
@@ -56,7 +56,24 @@ export const CYBER_DRAGON_X = {
  *  total duration independently. */
 const RECOVERY_FRAMES = 30;
 
-export interface CyberDragonFamilyCtx extends StreamContext {}
+export interface CyberDragonFamilyCtx extends StreamContext {
+  /** Spawn a child projectile by ID. Port of zz_016cc24_(actor, id). */
+  onSpawnChild?: (actor: RomActor, childId: number) => void;
+  /** Spawn a parameterized projectile with transform and visual state. Port of
+   *  zz_01deb68_(actor, childId, transform1, transform2, visualState). */
+  onSpawnProjectile?: (actor: RomActor, childId: number, t1: Vec3, t2: Vec3, vs: number) => void;
+  /** Return true when the actor faces the lock target. Port of zz_006d144_(mask). */
+  onFaceComplete?: (actor: RomActor, mask: number) => boolean;
+  /** Allocate resource slot — true = ok. Port of zz_006dbe0_(0,1,mode). Returns false
+   *  when the ROM would've zeroed the gate byte (no resource available). */
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  /** Exit full-body to idle. Port of zz_006a474_ / zz_006a5a4_. */
+  onExitFb?: (actor: RomActor) => void;
+  /** Face the lock target — heading steer toward +0x5e8 target. */
+  onFaceTarget?: (actor: RomActor, aimType: number) => void;
+  /** Snap to ground. Port of zz_00677b0_. */
+  onGroundSnap?: (actor: RomActor) => void;
+}
 
 /** Port of zz_00b9c68_ @ chunk_0018.c:4394 — per-frame contact bookkeeping shared by
  *  all three breath variants. Sets the stream-state byte, ticks the stream, and on a
@@ -78,6 +95,280 @@ function cyberDragonContactBookkeeping(actor: RomActor, ctx: CyberDragonFamilyCt
 }
 
 // ============================================================================
+// Scratch fields — non-RomActor fields accessed at ROM offsets.
+// ============================================================================
+interface CyberDragonScratch {
+  /** +0x542: B-shot hit spawn cursor (byte). */
+  bShotCursor: number;
+  /** +0x548: spin angle (u16 BAM). */
+  spinAngle: number;
+  /** +0x54a: arc elevation angle (u16 BAM). */
+  arcAngle: number;
+  /** +0x54c: delay counter (u16). */
+  delayCounter: number;
+  /** +0x560: move timer (float). */
+  moveTimer: number;
+  /** +0x6eb: B-shot permutation cursor (byte). */
+  permCursor: number;
+  /** +0x73f: B-shot state byte. */
+  bShotState: number;
+  /** +0x746: B-shot spawn gate (byte). */
+  spawnGate: number;
+  /** +0x709: visual byte. */
+  visualByte: number;
+  /** +0x80: u16 anim offset slot 2. */
+  animOffset2: number;
+  /** +0x7e: u16 anim offset slot 1. */
+  animOffset1: number;
+  /** +0x7c: u16 anim offset slot 0. */
+  animOffset0: number;
+  /** +0x1d0c: cue/resolve flag byte. */
+  cueFlag: number;
+  /** +0x1d0d: variant check byte. */
+  variantCheck: number;
+  /** Port-side: lock target position (not a ROM field; set by bridge). */
+  lockTarget: Vec3;
+}
+
+function scratchOf(actor: RomActor): RomActor & CyberDragonScratch {
+  return actor as RomActor & CyberDragonScratch;
+}
+
+function isSpinnerBorg(n: number): boolean { return n === 0x506 || n === 0x512; }
+function isMachineDragon(n: number): boolean { return n === 0x50f; }
+
+// ============================================================================
+// Dash (action 0) — FUN_800b8f10 → PTR_FUN_802ff380[variant] → FUN_800b8f4c
+// (ground v0-2, PTR_FUN_802ff394) / FUN_800b9130 (air v3-4, PTR_FUN_802ff3a0).
+// ============================================================================
+const DASH_TIMER = 8.0;
+
+function dashPhase0(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  actor.fbPhaseSlots[0] = 1;
+  s.spawnGate = 0;
+  s.moveTimer = DASH_TIMER;
+  ctx.onFaceTarget?.(actor, 0xc1);
+  actor.gravityCoeff = CYBER_DRAGON_X.ZERO;
+  actor.yVel = CYBER_DRAGON_X.ZERO;
+  actor.hDecel = CYBER_DRAGON_X.ZERO;
+  actor.hSpeed = CYBER_DRAGON_X.ZERO;
+  s.animOffset2 = 0;
+  s.animOffset1 = 0;
+  s.animOffset0 = 0;
+  startStream(actor, 0xf, 0, 1, CYBER_DRAGON_X.STREAM_RATE);
+}
+
+function dashPhase1(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= CYBER_DRAGON_X.ZERO || (ctx.onFaceComplete?.(actor, 0xc1) ?? false)) {
+    actor.fbPhaseSlots[0] = 2;
+    startStream(actor, 0xf, 2, 2, CYBER_DRAGON_X.STREAM_RATE);
+  }
+}
+
+function dashPhase2(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  tickStream(actor, 0xf, ctx);
+  if (actor.contactP0 > 0) {
+    actor.contactP0 = 0;
+    scratchOf(actor).bShotCursor = 0;
+    spawnBShotProjectile(actor, ctx);
+    bShotTrajectory(actor, ctx);
+  }
+  if (actor.wallContact !== 0) {
+    scratchOf(actor).bShotState = 0;
+    actor.controlWord = actor.controlWord & ~0x3;
+    romGroundIdleReturn(actor);
+  }
+}
+
+/** Dash air phase 0 — includes target-vector setup + conditional stream (FUN_800b91a0). */
+function dashAirPhase0(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  actor.fbPhaseSlots[0] = 1;
+  s.spawnGate = 0;
+  s.moveTimer = DASH_TIMER;
+  ctx.onFaceTarget?.(actor, 0x81);
+  actor.gravityCoeff = CYBER_DRAGON_X.ZERO;
+  actor.yVel = CYBER_DRAGON_X.ZERO;
+  actor.hDecel = CYBER_DRAGON_X.ZERO;
+  actor.hSpeed = CYBER_DRAGON_X.ZERO;
+  s.animOffset2 = 0;
+  s.animOffset1 = 0;
+  s.animOffset0 = 0;
+  const tgt = s.lockTarget;
+  if (tgt) { actor.motion.x = actor.pos.x - tgt.x; actor.motion.y = actor.pos.y - tgt.y; actor.motion.z = actor.pos.z - tgt.z; }
+  if ((s.cueFlag ?? 0) !== 0 || (s.variantCheck ?? 0) !== 0xf) startStream(actor, 0xf, 0, 0xf, CYBER_DRAGON_X.STREAM_RATE);
+  s.visualByte = 0x1f;
+}
+
+/** Dash air phase 1 — timer decay + face check (FUN_800b9260). Transitions to phase 2. */
+function dashAirPhase1(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  tickStream(actor, 0xf, ctx);
+  s.moveTimer -= actor.dt;
+  if (s.moveTimer <= CYBER_DRAGON_X.ZERO || (ctx.onFaceComplete?.(actor, 0x81) ?? false)) {
+    actor.fbPhaseSlots[0] = 2;
+    startStream(actor, 0xf, 3, 2, CYBER_DRAGON_X.STREAM_RATE);
+  }
+}
+
+/** Dash air phase 2 — same contact/wall behavior as ground but returns to air idle. */
+function dashAirPhase2(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  tickStream(actor, 0xf, ctx);
+  if (actor.contactP0 > 0) {
+    actor.contactP0 = 0;
+    scratchOf(actor).bShotCursor = 0;
+    spawnBShotProjectile(actor, ctx);
+    bShotTrajectory(actor, ctx);
+  }
+  if (actor.wallContact !== 0) {
+    scratchOf(actor).bShotState = 0;
+    actor.controlWord = actor.controlWord & ~0x3;
+    romAirKnockoutReturn(actor);
+  }
+}
+
+// ============================================================================
+// B-shot (action 3) — PTR_FUN_802ff310, 3 phases (FUN_800b8b50/8c44/8d6c).
+// Entry: FUN_800b8ad0 → zz_00b8af0_ → tickStream + onFaceTarget + phase dispatch.
+// ============================================================================
+const BSHOT_TIMER = 30.0;
+const YVEL_FLOOR = -15.0;
+const BSHOT_PERM_TABLE: ReadonlyArray<[number, number]> = [
+  [0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6],
+  [7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13],
+  [14, 14], [-1, -1],
+];
+
+function spawnBShotProjectile(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  const ok = ctx.onAllocateResource?.(actor, 0, 1, 1) ?? false;
+  if (!ok) return;
+  s.spawnGate = 1;
+  s.bShotCursor = (s.bShotCursor ?? 0) + 1;
+  s.spinAngle = 0x4000;
+  s.arcAngle = 0xfd00;
+  s.delayCounter = 0x14;
+  s.moveTimer = 15.0;
+  const childId = isMachineDragon(actor.borgNumber) ? 7 : 0;
+  ctx.onSpawnChild?.(actor, childId);
+}
+
+function bShotTrajectory(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  ctx.onSpawnChild?.(actor, 0);
+}
+
+function bShotPhase0(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  actor.fbPhaseSlots[0] = 1;
+  actor.hDecel = CYBER_DRAGON_X.ZERO;
+  actor.hSpeed = CYBER_DRAGON_X.ZERO;
+  actor.yVel = CYBER_DRAGON_X.ZERO;
+  actor.gravityCoeff = actor.descriptor?.handlerData6c ?? actor.gravityCoeff;
+  const tgt = s.lockTarget;
+  if (tgt) { actor.motion.x = actor.pos.x - tgt.x; actor.motion.y = actor.pos.y - tgt.y; actor.motion.z = actor.pos.z - tgt.z; }
+  integratePhysics(CYBER_DRAGON_X.GRAVITY, actor, actor.lockYaw);
+  if (actor.yVel < YVEL_FLOOR) actor.yVel = YVEL_FLOOR;
+  actor.hSpeed *= CYBER_DRAGON_X.AIR_DRAG;
+  actor.yVel *= CYBER_DRAGON_X.AIR_DRAG;
+  integratePhysics(CYBER_DRAGON_X.GRAVITY, actor, actor.lockYaw);
+  ctx.onGroundSnap?.(actor);
+  s.streamSlot = (actor.controlWord & 0x40) !== 0 ? 1 : 0;
+  const slot = s.streamSlot;
+  s.streamSlot = slot + 1;
+  startStream(actor, 0xf, 2, slot, CYBER_DRAGON_X.STREAM_RATE);
+}
+
+function bShotPhase1(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  integratePhysics(CYBER_DRAGON_X.GRAVITY, actor, actor.lockYaw);
+  if (actor.yVel < YVEL_FLOOR) actor.yVel = YVEL_FLOOR;
+  actor.hSpeed *= CYBER_DRAGON_X.AIR_DRAG;
+  actor.yVel *= CYBER_DRAGON_X.AIR_DRAG;
+  integratePhysics(CYBER_DRAGON_X.GRAVITY, actor, actor.lockYaw);
+  ctx.onGroundSnap?.(actor);
+  tickStream(actor, 0xf, ctx);
+  if (actor.contactP0 !== 0) {
+    if (isSpinnerBorg(actor.borgNumber)) {
+      if (!(ctx.onAllocateResource?.(actor, 0, 1, 1) ?? true)) {
+        s.bShotState = 0;
+        actor.controlWord = actor.controlWord & ~0x3;
+        if ((actor.controlWord & 0x40) === 0) romGroundIdleReturn(actor);
+        else romAirKnockoutReturn(actor);
+        actor.stateTimer = (actor.descriptor?.handlerData6c ?? 0) + actor.dt;
+        return;
+      }
+    }
+    s.permCursor = 0;
+    actor.handlerTimer = CYBER_DRAGON_X.ZERO;
+    actor.heading ^= 1;
+    actor.fbPhaseSlots[0] = 2;
+  }
+}
+
+function bShotPhase2(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const s = scratchOf(actor);
+  integratePhysics(CYBER_DRAGON_X.GRAVITY, actor, actor.lockYaw);
+  if (actor.yVel < YVEL_FLOOR) actor.yVel = YVEL_FLOOR;
+  actor.hSpeed *= CYBER_DRAGON_X.AIR_DRAG;
+  actor.yVel *= CYBER_DRAGON_X.AIR_DRAG;
+  integratePhysics(CYBER_DRAGON_X.GRAVITY, actor, actor.lockYaw);
+  ctx.onGroundSnap?.(actor);
+  if (actor.contactP0 === 0) tickStream(actor, 0xf, ctx);
+  if (actor.handlerTimer <= CYBER_DRAGON_X.ZERO) {
+    actor.handlerTimer = BSHOT_TIMER;
+    const col = isSpinnerBorg(actor.borgNumber) ? 1 : 0;
+    const row = BSHOT_PERM_TABLE[(s.permCursor ?? 0)] ?? [-1, -1];
+    if (row[col] === -1) {
+      actor.contactP0 = 0;
+      if (actor.wallContact !== 0) {
+        s.bShotState = 0;
+        actor.controlWord = actor.controlWord & ~0x3;
+        if ((actor.controlWord & 0x40) === 0) romGroundIdleReturn(actor);
+        else romAirKnockoutReturn(actor);
+        actor.stateTimer = (actor.descriptor?.handlerData6c ?? 0) + actor.dt;
+      }
+    } else {
+      s.permCursor = (s.permCursor ?? 0) + 1;
+      ctx.onSpawnChild?.(actor, row[0]);
+      if (row[1] >= 0) ctx.onSpawnChild?.(actor, row[1]);
+    }
+  } else {
+    actor.handlerTimer -= actor.dt;
+  }
+}
+
+/** FUN_800b9130 @ chunk_0018.c:3905 — air dash variant engine. Dispatches
+ *  PTR_FUN_802ff3a0[phase] then applies air-physics (velocity drag + integration). */
+function runDashAirEngine(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  const airPhases: Array<(a: RomActor, c: CyberDragonFamilyCtx) => void> = [
+    dashAirPhase0, dashAirPhase1, dashAirPhase2,
+  ];
+  const fn = airPhases[phase];
+  if (fn) fn(actor, ctx);
+  actor.hSpeed *= CYBER_DRAGON_X.AIR_DRAG;
+  actor.yVel *= CYBER_DRAGON_X.AIR_DRAG;
+  integratePhysics(CYBER_DRAGON_X.GRAVITY, actor, actor.lockYaw);
+}
+
+/** zz_00b8af0_ @ chunk_0018.c:3659 — B-shot engine wrapper: tick + face + phase dispatch. */
+function runBShotEngine(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
+  tickStream(actor, 0xf, ctx);
+  ctx.onFaceTarget?.(actor, 0);
+  const phase = actor.fbPhaseSlots[0] ?? 0;
+  const bShotFns: Array<(a: RomActor, c: CyberDragonFamilyCtx) => void> = [
+    bShotPhase0, bShotPhase1, bShotPhase2,
+  ];
+  const fn = bShotFns[phase];
+  if (fn) fn(actor, ctx);
+}
+
+// ============================================================================
+
 // Variant 0 — ground breath. Engine FUN_800b96c4 @ chunk_0018.c:4131 =
 //   PTR_FUN_802ff3d8[+0x540]() (3 phases, NO per-frame physics — stationary).
 // Phases: FUN_800b9700 (P0 setup) → FUN_800b9790 (P1 active) → FUN_800b9820 (P2 end).
@@ -266,10 +557,20 @@ function cyberDragonXSpecial(actor: RomActor, ctx: CyberDragonFamilyCtx): void {
  *  gameplay. Actions 1 is null in the table (no entry in actionStreamTables). */
 export function createCyberDragonRootAction(ctx: CyberDragonFamilyCtx): (actor: RomActor) => void {
   const actionTable: Array<((actor: RomActor) => void) | null> = [
-    null,                                        // 0: dash attack (FUN_800b8f10) — TODO port
+    // 0: dash attack (FUN_800b8f10) — 5 variants, 2 phase tables.
+    (actor) => {
+      const v = actor.variantIndex;
+      if (v >= 3) runDashAirEngine(actor, ctx);
+      else {
+        const phase = actor.fbPhaseSlots[0] ?? 0;
+        const fns = [dashPhase0, dashPhase1, dashPhase2];
+        const fn = fns[phase];
+        if (fn) fn(actor, ctx);
+      }
+    },
     null,                                        // 1: — (null in ROM)
     (actor) => cyberDragonXSpecial(actor, ctx),  // 2: X-special (bespoke 3-variant breath)
-    null,                                        // 3: B-shot (FUN_800b8ad0 → zz_00b8af0_) — TODO port
+    (actor) => runBShotEngine(actor, ctx),        // 3: B-shot (FUN_800b8ad0 → zz_00b8af0_)
     null,                                        // 4: family-init shim (FUN_800b9d2c) — dead data
   ];
   return (actor: RomActor) => {

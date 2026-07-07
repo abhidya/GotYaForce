@@ -22,7 +22,7 @@
 //   FLOAT_80437824 = -1.0  (stream rate)    FLOAT_80437834 = 0.95  (v1 velocity drag)
 //   FLOAT_8043782c = 1.0   (physics gravity)
 
-import type { RomActor } from "../rom/actor.js";
+import type { RomActor, Vec3 } from "../rom/actor.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
