@@ -7,6 +7,15 @@ import { fileURLToPath } from "node:url";
 const PLAYER_COMMAND_TYPES = new Set([0, 1, 2, 3, 5]);
 const COMPLETE_STATUSES = new Set(["ported", "inactive", "delegated"]);
 const ALL_STATUSES = new Set([...COMPLETE_STATUSES, "partial", "missing"]);
+const PORTED_EVIDENCE_FIELDS = [
+  "rootDispatch",
+  "variantDispatch",
+  "phaseTransitions",
+  "constants",
+  "streamBehavior",
+  "bridgeWiring",
+  "focusedTests",
+];
 
 export function stableStringify(value) {
   return `${JSON.stringify(sortValue(value), null, 2)}\n`;
@@ -33,6 +42,7 @@ export function discoverImplementationIds(sources) {
 
 export function buildAudit({ commandData, actionData, implementationIds, reviewed = { classifications: [] } }) {
   const errors = [];
+  const invalidCompleteKeys = new Set();
   const borgs = commandData?.borgs ?? {};
   const tables = commandData?.tables ?? {};
   const actionBorgs = actionData?.borgs ?? {};
@@ -51,9 +61,10 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
     if (!Number.isInteger(item.actionIndex) || item.actionIndex < 0 || item.actionIndex > 4) {
       errors.push(`invalid action index ${item.actionIndex} for ${key}`);
     }
-    if (COMPLETE_STATUSES.has(item.status) && !(item.evidence?.length > 0)) {
-      errors.push(`${item.status} classification ${key} requires evidence`);
+    if ((item.status === "ported" || item.status === "delegated") && (!Array.isArray(item.coverage) || item.coverage.length === 0)) {
+      errors.push(`${item.status} classification ${key} requires explicit member and live-variant coverage`);
     }
+    if (item.status === "inactive" && !(item.evidence?.length > 0)) errors.push(`inactive classification ${key} requires evidence`);
     if (item.status === "delegated" && !item.target) errors.push(`delegated classification ${key} requires target`);
   }
 
@@ -89,6 +100,8 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
         const slot = ensureSlot(slots, actionIndex);
         slot.rootEvidence.push(`${id}: root ${rom.root}, action table ${rom.actionTable}, handler ${action.handler}`);
         slot.live = true;
+        const variants = Object.keys(action.variants ?? {}).map(Number).filter(Number.isInteger);
+        noteLiveMember(slot, id, variants);
       }
 
       const table = tables[assignment.tableId];
@@ -110,6 +123,7 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
           else {
             slot.live = true;
             slot.commandEvidence.push(evidence);
+            noteLiveMember(slot, id, Number.isInteger(record.variantIndex) ? [record.variantIndex] : []);
           }
         }
       }
@@ -129,6 +143,11 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
           errors.push(`${key} is ROM-inactive but classified ${status}`);
         }
         if (slot.live && status === "inactive") errors.push(`${key} is ROM-live but classified inactive`);
+        if (status === "ported" || status === "delegated") {
+          const before = errors.length;
+          validateCompleteCoverage({ item: explicit, key, slot, implementationIds, errors });
+          if (errors.length !== before) invalidCompleteKeys.add(key);
+        }
       } else if (!slot.live) {
         status = "inactive";
         evidence = slot.disabledEvidence;
@@ -140,6 +159,10 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
         status,
         ...(target ? { target } : {}),
         evidence,
+        ...(explicit?.coverage ? { classificationCoverage: explicit.coverage } : {}),
+        liveCoverage: [...slot.liveMembers.entries()]
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([member, variants]) => ({ member, variants: [...variants].sort((a, b) => a - b) })),
         romEvidence: [...slot.rootEvidence, ...slot.commandEvidence, ...slot.disabledEvidence].sort(),
       };
     });
@@ -160,10 +183,12 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
     }
   }
 
+  validateDelegations(families, reviewedByKey, invalidCompleteKeys, errors);
+
   const counts = Object.fromEntries([...ALL_STATUSES].sort().map((status) => [status, 0]));
   for (const family of families) for (const slot of family.actions) counts[slot.status]++;
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     sourceArtifacts: {
       commands: "packages/combat/src/data/commandMoveTables.json",
       actions: "packages/combat/src/data/actionStreamTables.json",
@@ -177,8 +202,94 @@ export function buildAudit({ commandData, actionData, implementationIds, reviewe
 }
 
 function ensureSlot(slots, actionIndex) {
-  if (!slots.has(actionIndex)) slots.set(actionIndex, { actionIndex, live: false, rootEvidence: [], commandEvidence: [], disabledEvidence: [] });
+  if (!slots.has(actionIndex)) slots.set(actionIndex, { actionIndex, live: false, liveMembers: new Map(), rootEvidence: [], commandEvidence: [], disabledEvidence: [] });
   return slots.get(actionIndex);
+}
+
+function noteLiveMember(slot, member, variants) {
+  const live = slot.liveMembers.get(member) ?? new Set();
+  for (const variant of variants) if (Number.isInteger(variant)) live.add(variant);
+  slot.liveMembers.set(member, live);
+}
+
+function validateCompleteCoverage({ item, key, slot, implementationIds, errors }) {
+  if (!Array.isArray(item.coverage) || item.coverage.length === 0) {
+    errors.push(`${item.status} classification ${key} requires explicit member and live-variant coverage`);
+    return;
+  }
+  const coverageByMember = new Map();
+  for (const coverage of item.coverage) {
+    const member = String(coverage.member ?? "").toLowerCase();
+    if (coverageByMember.has(member)) errors.push(`${item.status} classification ${key} duplicates member coverage ${member}`);
+    coverageByMember.set(member, coverage);
+    if (!implementationIds.has(member)) errors.push(`${item.status} classification ${key} references absent implementation for ${member}`);
+    if (!Array.isArray(coverage.variants) || coverage.variants.some((variant) => !Number.isInteger(variant) || variant < 0)) {
+      errors.push(`${item.status} classification ${key} has invalid variant coverage for ${member}`);
+    }
+    if (item.status === "ported") {
+      for (const field of PORTED_EVIDENCE_FIELDS) {
+        if (!(coverage.evidence?.[field]?.length > 0)) errors.push(`ported classification ${key} member ${member} requires ${field} evidence`);
+      }
+    } else if (!(coverage.romDelegationEvidence?.length > 0)) {
+      errors.push(`delegated classification ${key} member ${member} requires ROM delegation evidence`);
+    }
+  }
+  for (const [member, variants] of slot.liveMembers) {
+    const coverage = coverageByMember.get(member);
+    if (!coverage) {
+      errors.push(`${item.status} classification ${key} does not cover live member ${member}`);
+      continue;
+    }
+    const expected = [...variants].sort((a, b) => a - b);
+    const actual = [...new Set(coverage.variants ?? [])].sort((a, b) => a - b);
+    if (JSON.stringify(expected) !== JSON.stringify(actual)) {
+      errors.push(`${item.status} classification ${key} member ${member} variants [${actual}] do not match ROM-live variants [${expected}]`);
+    }
+  }
+  for (const member of coverageByMember.keys()) {
+    if (!slot.liveMembers.has(member)) errors.push(`${item.status} classification ${key} covers non-live member ${member}`);
+  }
+}
+
+function targetKey(target) {
+  if (!target || typeof target !== "object") return null;
+  if (!Number.isInteger(target.actionIndex)) return null;
+  return `${String(target.constructorAddress).toLowerCase()}:${target.actionIndex}`;
+}
+
+function validateDelegations(families, reviewedByKey, invalidCompleteKeys, errors) {
+  const slots = new Map();
+  for (const family of families) for (const action of family.actions) slots.set(`${family.constructorAddress}:${action.actionIndex}`, action);
+  const edges = new Map();
+  for (const [key, item] of reviewedByKey) {
+    if (item.status !== "delegated") continue;
+    const target = targetKey(item.target);
+    if (!target) {
+      errors.push(`delegated classification ${key} has invalid target`);
+      continue;
+    }
+    edges.set(key, target);
+    const targetSlot = slots.get(target);
+    if (!targetSlot) errors.push(`delegated classification ${key} targets nonexistent audited slot ${target}`);
+    else if ((targetSlot.status !== "ported" && targetSlot.status !== "delegated") || invalidCompleteKeys.has(target)) {
+      errors.push(`delegated classification ${key} targets incomplete slot ${target} (${targetSlot.status})`);
+    }
+  }
+  const visiting = new Set();
+  const visited = new Set();
+  function visit(key, chain) {
+    if (visiting.has(key)) {
+      const start = chain.indexOf(key);
+      errors.push(`delegation cycle: ${[...chain.slice(start), key].join(" -> ")}`);
+      return;
+    }
+    if (visited.has(key) || !edges.has(key)) return;
+    visiting.add(key);
+    visit(edges.get(key), [...chain, key]);
+    visiting.delete(key);
+    visited.add(key);
+  }
+  for (const key of edges.keys()) visit(key, []);
 }
 
 export function markdownSummary(audit) {
