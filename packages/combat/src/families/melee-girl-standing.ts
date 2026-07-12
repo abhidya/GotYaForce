@@ -33,7 +33,7 @@ import type { RomActor } from "../rom/actor.js";
 import { integratePhysics } from "../rom/physics.js";
 import { romGroundIdleReturn } from "./shared-idle-return.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
-import { stepTargetYaw } from "../rom/helpers.js";
+import { stepAfterimage, stepTargetYaw } from "../rom/helpers.js";
 
 export const MELEE_GIRL_STANDING = {
   FACE_BUDGET: 60.0,    // FLOAT_8043956c
@@ -115,7 +115,7 @@ function phase0(a: MActor, seedSlot: number): void {
   // zz_004beb8_(-1.0, actor, 0xf, 3, (s8)+0x6ea) — NO +0x6ea increment in M-4.
   startStream(a, MELEE_GIRL_STANDING.PART_MASK, MELEE_GIRL_STANDING.STREAM_GROUP,
     a.streamSlot, MELEE_GIRL_STANDING.STREAM_RATE);
-  // +0x80c = 0 — anim-rate housekeeping (not surfaced; labeled no-op).
+  a.accumulator80c = 0;
 }
 
 // Phase 1 — FUN_8010c354 @ chunk_0030.c:1740. Face budget → swing arm.
@@ -149,11 +149,12 @@ function phase2(a: MActor, ctx: StreamContext): void {
   if (a.handlerTimer > MELEE_GIRL_STANDING.ZERO
     && rangeCheck(a, MELEE_GIRL_STANDING.PROXIMITY) < 1
     && (a.hitReact ?? 0) === 0) {
-    return;                                      // LAB_8010c4dc (afterimage no-op)
+    if (a.hSpeed > 3) stepAfterimage(a);
+    return;                                      // LAB_8010c4dc
   }
   a.fbPhaseSlots[0] += 1;                        // +0x540++
   a.fbPhaseSlots[1] = 0xff;                      // +0x541 = 0xff (lock-clear re-arm)
-  // FLOAT_80439560 (3) < +0x44 → zz_00b22f4_ afterimage (renderer no-op).
+  if (a.hSpeed > 3) stepAfterimage(a);
 }
 
 // Phase 3 — FUN_8010c508 @ chunk_0030.c:1807. Recovery.
@@ -165,7 +166,7 @@ function phase3(a: MActor, ctx: StreamContext): void {
     a.controlWord &= ~0x3;                       // +0x73f = 0; +0x5e0 &= 0xfffffffc
     romGroundIdleReturn(a);                      // zz_006a474_ @ chunk_0009.c:708
   }
-  // +0x44 > 3 → afterimage (no-op).
+  if (a.hSpeed > 3) stepAfterimage(a);
 }
 
 /** Build the M-4 standing-melee handler (dispatcher zz_010c220_ @0x8010c220). */

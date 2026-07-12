@@ -8,13 +8,16 @@ function assert(ok: unknown, message: string): asserts ok {
   if (!ok) throw new Error(`battleScene morph selfcheck: ${message}`);
 }
 
-function view(combatFormId?: string, uid = "same-uid"): BattleActorView {
+function view(combatFormId?: string, uid = "same-uid", afterimageSerial = 0): BattleActorView {
   return {
     uid, borgId: "pl0604", combatFormId, team: 0, ownerPlayer: "p1",
     alive: true, state: "idle", anim: "idle", pos: { x: 1, y: 2, z: 3 },
     vel: { x: 0, y: 0, z: 0 }, rotY: 0, lockTarget: null, allyLockTarget: null,
     dashActiveFrames: 0, chargeFrames: 0, meleeAnimStream: null, meleeSounds: null,
     lastHitImpactEffectId: undefined, lastHitAttackerTeam: undefined, slowHitTimer: 0, hasteHitTimer: 0,
+    romAfterimage: afterimageSerial > 0
+      ? { serial: afterimageSerial, pos: { x: 11, y: 12, z: 13 }, rotY: 0.25 }
+      : undefined,
   };
 }
 
@@ -88,4 +91,24 @@ export async function runBattleSceneMorphSelfcheck(): Promise<void> {
   assert(after?.borgId === "pl0605" && after.group.children.some((c) => c.name === "pl0605"), "new internal model attached");
   assert(loadedModels.join(",") === "pl0604,pl0604,pl0605", "model resolver selected two cached-form instances then internal form");
   assert(loadedClips.includes("pl0604:idle"), "base clip resolver ran for both same-form actors");
+
+  scene.sync([view("pl0605", "same-uid", 1), view(undefined, "same-form-peer")]);
+  const afterimageInternals = scene as unknown as {
+    afterimageActors: Array<{ group: THREE.Object3D; materials: THREE.Material[] }>;
+  };
+  assert(afterimageInternals.afterimageActors.length === 1,
+    "zz_00b22f4_ presentation edge creates one frozen model snapshot");
+  const ghost = afterimageInternals.afterimageActors[0]!;
+  assert(ghost.group.position.x === 11 && ghost.group.position.y === 12 && ghost.group.position.z === 13
+    && ghost.group.rotation.y === 0.25,
+    "afterimage consumes the bridge-owned sampled position and rotation");
+  assert(ghost.materials.length > 0 && ghost.materials.every((material) => material.transparent && material.opacity === 0.42),
+    "afterimage owns translucent material clones rather than mutating the live actor");
+  scene.sync([view("pl0605", "same-uid", 1), view(undefined, "same-form-peer")]);
+  assert(afterimageInternals.afterimageActors.length === 1,
+    "presentation consumes each monotonic afterimage serial exactly once");
+  scene.update(8 / 60);
+  const afterExpiryCount = afterimageInternals.afterimageActors.length as number;
+  assert(afterExpiryCount === 0,
+    "afterimage expires and disposes at the exact 8-frame helper interval");
 }

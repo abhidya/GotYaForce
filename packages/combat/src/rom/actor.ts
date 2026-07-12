@@ -18,6 +18,8 @@ export interface Vec3 { x: number; y: number; z: number; }
 /** Battle-local physics behavior used by ROM family integration. */
 export interface RomPhysicsRuntime {
   clampToGround(pos: Vec3, velY: number): { y: number; velY: number; grounded: boolean };
+  /** Battle-owned floor support query used by zz_00679d0_'s no-surface revert. */
+  isSupported?(x: number, z: number): boolean;
 }
 
 /**
@@ -49,6 +51,8 @@ export interface RomActor {
   motion: Vec3;
   /** +0x5e8: cached target position consumed even after +0xcc lock invalidation. */
   targetCache5e8: Vec3;
+  /** +0x518: host-resolved actor aim origin consumed by zz_006e514_. */
+  aimOrigin518: Vec3;
   // +0x44..+0x50: the speed-model scalars (FUN_80067310).
   /** +0x44: horizontal speed scalar (magnitude, projected via sin/cos(yaw)). */
   hSpeed: number;
@@ -84,6 +88,17 @@ export interface RomActor {
   /** +0x73f and +0x80c housekeeping fields written by these machines. */
   housekeeping73f: number;
   accumulator80c: number;
+  /** +0x7c/+0x7e/+0x80 signed pose/animation accumulators. */
+  poseAccum7c: number;
+  poseAccum7e: number;
+  poseAccum80: number;
+  /** +0x800/+0x804/+0x808: last afterimage sample position. */
+  afterimageSamplePos: Vec3;
+  /** +0xb4 and +0x7fc scale factors used by zz_00b22f4_. */
+  modelScale: number;
+  sizeScale: number;
+  /** Monotonic host/presentation edge emitted when zz_00b2190_(actor, 1) succeeds. */
+  afterimageSerial: number;
 
   // ===== Weapon/part animation host state (zz_0048d54_ @0x80048d54) =====
   /** +0x579 descriptor-owned part-enable mask. Part 1 is deliberately skipped by
@@ -362,10 +377,14 @@ export function createRomActor(): RomActor {
     physicsRuntime: null,
     pos: { x: 0, y: 0, z: 0 },
     motion: { x: 0, y: 0, z: 0 }, targetCache5e8: { x: 0, y: 0, z: 0 },
+    aimOrigin518: { x: 0, y: 0, z: 0 },
     hSpeed: 0, yVel: 0, hDecel: 0, gravityCoeff: 0,
     heading: 0, lockYaw: 0, activeYaw: 0, turnErrorYaw: 0, steerYaw: 0,
     bodyPitch: 0, aimRateScale: 1, actionSpeedRows: [0, 0, 0],
     savedGroundPos: { x: 0, y: 0, z: 0 }, housekeeping73f: 0, accumulator80c: 0,
+    poseAccum7c: 0, poseAccum7e: 0, poseAccum80: 0,
+    afterimageSamplePos: { x: 0, y: 0, z: 0 }, modelScale: 1, sizeScale: 1,
+    afterimageSerial: 0,
     weaponPartMask: 0x0f,
     weaponAnimationActiveMask: 0,
     weaponAnimationState: [0, 0, 0, 0],

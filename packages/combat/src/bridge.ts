@@ -85,6 +85,7 @@ import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared
 import { spawnRomProjectile } from "./projectiles.js";
 import { movementPhysicsForBorgId } from "./movementData.js";
 import { sourceStatsForBorgId } from "./sourceBorgStats.js";
+import { tierSizeScale } from "./timescale.js";
 import type { Projectile, ProjectileVisualKind, WeaponCell } from "./types.js";
 import attackHitTablesData from "./data/attackHitTables.json" with { type: "json" };
 import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
@@ -93,6 +94,13 @@ import familyCueTablesFullData from "./data/familyCueTablesFull.json" with { typ
 
 const TAU = Math.PI * 2;
 const BAM_FULL = 0x10000;
+const ACTOR_SIZE_NORMALIZER = 167.75999450683594; // FLOAT_80437620
+/** zz_0068004_: max(data page +0x4c, +0x50) / FLOAT_80437620. The Girl pages
+ * share 9/6 except pl0308 (25/3); values were read directly from pl####data.bin. */
+function girlDescriptorSizeScale(borgId: string): number {
+  if (borgId === "pl0308") return 25 / ACTOR_SIZE_NORMALIZER;
+  return /^pl030[0-9a-d]$/.test(borgId) ? 9 / ACTOR_SIZE_NORMALIZER : 1;
+}
 
 /** An armed hitbox window (from attackHitTables.json, looked up per kind). */
 interface ArmedHit {
@@ -1677,6 +1685,13 @@ export class RomDriverBridge implements RomFamilyDriver {
     a.pos.x = runtime.pos.x;
     a.pos.y = runtime.pos.y;
     a.pos.z = runtime.pos.z;
+    // The host's proven root transform is the current +0x20 position; until a model bone
+    // transform overrides it, this is the exact host-resolved +0x518 aim-origin surface.
+    a.aimOrigin518.x = runtime.pos.x;
+    a.aimOrigin518.y = runtime.pos.y;
+    a.aimOrigin518.z = runtime.pos.z;
+    a.modelScale = tierSizeScale(runtime);
+    a.sizeScale = girlDescriptorSizeScale(runtime.combatFormId ?? runtime.borgId);
     a.heading = radToBam(runtime.rotY);
     // Only sync velocity on the FIRST entry frame (specialActive was just set).
     // Subsequent ticks: ROM handler owns velocity; skip the copy.
@@ -1756,6 +1771,14 @@ export class RomDriverBridge implements RomFamilyDriver {
     runtime.vel.x = vel.x;
     runtime.vel.y = vel.y;
     runtime.vel.z = vel.z;
+    const previousSerial = runtime.romAfterimage?.serial ?? 0;
+    if (a.afterimageSerial !== previousSerial) {
+      runtime.romAfterimage = {
+        serial: a.afterimageSerial,
+        pos: { ...a.afterimageSamplePos },
+        rotY: bamToRad(a.heading),
+      };
+    }
   }
 
   /** Called from combat.ts's X-special branch. Returns true if the ROM family handled

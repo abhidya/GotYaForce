@@ -102,6 +102,7 @@ import {
 } from "../families/girl-cluster.js";
 import { CYBER_GIRL_X } from "../families/cyber-girl.js";
 import { createSeries3XSpecial, SERIES3_X } from "../families/shared-series3-x.js";
+import { groundSnapRevert, stepAfterimage, stepTargetPitch } from "./helpers.js";
 
 const G_RED_LAUNCH_Y = 4.0;
 
@@ -3234,6 +3235,76 @@ function runGirlClusterTests(): void {
     }
   }
   assert(bridgeErrors.length === 0, `bridge preserves the same exhaustive live/exclusion matrix (${bridgeErrors.slice(0, 3).join(", ") || "exact"})`);
+
+  {
+    const a = createRomActor();
+    a.modelScale = 2; a.sizeScale = 0.5; a.aimRateScale = 1;
+    a.pos = { x: 0, y: 0, z: 0 };
+    assert(stepAfterimage(a) && a.afterimageSerial === 1 && a.accumulator80c === 1,
+      "zz_00b22f4_ first call snapshots, emits, then increments +0x80c");
+    a.pos.x = 99;
+    assert(!stepAfterimage(a) && a.afterimageSerial === 1 && a.accumulator80c === 2,
+      "zz_00b22f4_ suppresses a near sample while +0x80c is inside the 8-frame window");
+    a.pos.x = 100;
+    assert(stepAfterimage(a) && a.afterimageSerial === 2 && a.accumulator80c === 1,
+      "zz_00b22f4_ emits at exact scaled spacing and preserves reset-before-increment ordering");
+    a.accumulator80c = 8; a.pos.x = 100;
+    assert(stepAfterimage(a) && a.afterimageSerial === 3,
+      "zz_00b22f4_ interval expiry emits even without displacement");
+  }
+  {
+    const a = createRomActor() as RomActor & { lockTarget?: { x: number; y: number; z: number } | null };
+    a.descriptor = { header: 0, mainHandBone: 0, subtypeCommand: new Int8Array(),
+      handlerData6c: 0, subtypePartCommand: new Int8Array(), buttonLiveFlag: new Int8Array(),
+      defaultHand0: 0, defaultHand1: 0, turnStep0: 0x100, turnStep1: 0x300 };
+    a.aimOrigin518 = { x: 10, y: 10, z: 10 };
+    a.lockTarget = { x: 10, y: 110, z: 110 };
+    const first = stepTargetPitch(a, 0xc0, 0);
+    const second = stepTargetPitch(a, 0xc1, 0);
+    assert(first.result === 0 && first.value === -0x100 && second.value === -0x300,
+      "zz_006e514_ selects descriptor +0xac/+0xae rates and converges signed BAM16");
+    a.lockTarget = null;
+    const lost = stepTargetPitch(a, 0xc0, 1000);
+    assert(lost.result === -1 && lost.value === 899,
+      "zz_006e514_ target loss returns -1 and truncates pitch by exact 0.9 float");
+  }
+  {
+    const a = createRomActor();
+    a.savedGroundPos = { x: 1, y: 2, z: 3 };
+    a.pos = { x: 20, y: 30, z: 40 };
+    a.physicsRuntime = {
+      isSupported: () => false,
+      clampToGround: () => { throw new Error("unsupported floor must not clamp"); },
+    };
+    assert(!groundSnapRevert(a) && a.pos.x === 1 && a.pos.y === 2 && a.pos.z === 3,
+      "zz_00679d0_ unsupported probe returns false and reverts all saved-position components");
+    a.pos = { x: 20, y: -4, z: 40 }; a.controlWord = 0x40;
+    assert(!groundSnapRevert(a) && a.pos.x === 20,
+      "zz_00679d0_ frozen-position bit preserves unsupported current position");
+    a.controlWord = 0;
+    a.physicsRuntime = {
+      isSupported: () => true,
+      clampToGround: (_pos, _velY) => ({ y: 7, velY: 0, grounded: true }),
+    };
+    assert(groundSnapRevert(a) && a.pos.y === 7 && a.yVel === 0,
+      "zz_00679d0_ supported battle floor returns grounded and commits snap state");
+  }
+  {
+    const one = makeMinimalGRedBorg(); one.borgId = "pl0300";
+    const two = makeMinimalGRedBorg(); two.uid = "girl-two"; two.borgId = "pl0308";
+    const b1 = RomDriverBridge.attach(one, {});
+    const b2 = RomDriverBridge.attach(two, {});
+    b1?.syncIn(one, [one, two]); b2?.syncIn(two, [one, two]);
+    b1!.actor.pos.x = 100; b2!.actor.pos.x = 200;
+    stepAfterimage(b1!.actor); stepAfterimage(b2!.actor);
+    b1?.syncOut(one); b2?.syncOut(two);
+    assert(one.romAfterimage?.serial === 1 && one.romAfterimage.pos.x === 100
+      && two.romAfterimage?.serial === 1 && two.romAfterimage.pos.x === 200,
+      "two Girl bridges retain independent afterimage cache and presentation ownership");
+    assert(approxEq(b1!.actor.modelScale, 1) && approxEq(b1!.actor.sizeScale, 9 / 167.75999450683594)
+      && approxEq(b2!.actor.sizeScale, 25 / 167.75999450683594),
+      "bridge syncs exact +0xb4 tier scale and Girl descriptor-derived +0x7fc scales");
+  }
 
   assert(CYBER_GIRL_X.COOLDOWN_305 === 12 && CYBER_GIRL_X.COOLDOWN_309 === 8,
     "Cyber Girl cooldown literals are exact boot.dol values 12/8");

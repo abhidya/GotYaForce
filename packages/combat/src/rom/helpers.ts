@@ -31,9 +31,9 @@ export function targetDistance(actor: RomActor): number | null {
 function targetAngles(actor: RomActor): { yaw: number; pitch: number } | null {
   const target = (actor as RomActor & RomHelperScratch).lockTarget;
   if (!target) return null;
-  const dx = target.x - actor.pos.x;
-  const dy = target.y - actor.pos.y;
-  const dz = target.z - actor.pos.z;
+  const dx = target.x - actor.aimOrigin518.x;
+  const dy = target.y - actor.aimOrigin518.y;
+  const dz = target.z - actor.aimOrigin518.z;
   const horizontal = Math.hypot(dx, dz);
   return {
     yaw: toS16(Math.round(Math.atan2(dx, dz) / (Math.PI * 2) * 0x10000)),
@@ -75,6 +75,78 @@ export function stepTargetYaw(actor: RomActor, aimType: number, offset = 0): boo
   if ((aimType & 0x40) !== 0) actor.lockYaw = actor.heading;
   if ((aimType & 0x80) !== 0) actor.heading = toS16(actor.heading);
   return ready;
+}
+
+/** Exact zz_006e514_(actor, aimType, out): descriptor-rate BAM16 pitch convergence.
+ * Returns -1 without a target, 0 while converging, and 1 on exact settlement. */
+export function stepTargetPitch(actor: RomActor, aimType: number, current: number): {
+  value: number;
+  result: -1 | 0 | 1;
+} {
+  const angles = targetAngles(actor);
+  if (!angles) {
+    return { value: toS16(Math.trunc(toS16(current) * 0.8999999761581421)), result: -1 };
+  }
+  const desired = Math.max(-0x4000, Math.min(0x4000,
+    toS16(-toS16(actor.bodyPitch) - angles.pitch)));
+  const descriptorRate = aimType & 0xf
+    ? actor.descriptor?.turnStep1
+    : actor.descriptor?.turnStep0;
+  const step = toS16(Math.trunc(toS16(descriptorRate ?? 0) * actor.dt));
+  const value = toS16(current);
+  const diff = toS16(desired - value);
+  if (Math.abs(diff) <= step) return { value: desired, result: 1 };
+  return { value: toS16(value + (diff < 0 ? -step : step)), result: 0 };
+}
+
+/** Zero the exact signed animation/pose housekeeping triplet. */
+export function resetPoseHousekeeping(actor: RomActor): void {
+  actor.poseAccum80 = 0;
+  actor.poseAccum7e = 0;
+  actor.poseAccum7c = 0;
+}
+
+/** Port of zz_00b22f4_. Returns true exactly when the variant-1 trail child is emitted. */
+export function stepAfterimage(actor: RomActor): boolean {
+  let emit = true;
+  if (actor.accumulator80c !== 0 && actor.accumulator80c < 8) {
+    const distance = Math.hypot(
+      actor.pos.x - actor.afterimageSamplePos.x,
+      actor.pos.y - actor.afterimageSamplePos.y,
+      actor.pos.z - actor.afterimageSamplePos.z,
+    );
+    emit = distance >= 100 * actor.modelScale * actor.sizeScale;
+  }
+  if (emit) {
+    actor.accumulator80c = 0;
+    actor.afterimageSamplePos.x = actor.pos.x;
+    actor.afterimageSamplePos.y = actor.pos.y;
+    actor.afterimageSamplePos.z = actor.pos.z;
+    actor.afterimageSerial = (actor.afterimageSerial + 1) >>> 0;
+  }
+  actor.accumulator80c += actor.aimRateScale;
+  return emit;
+}
+
+/** Port of zz_00679d0_: battle floor probe plus no-surface saved-position revert. */
+export function groundSnapRevert(actor: RomActor): boolean {
+  const floor = actor.physicsRuntime;
+  if (!floor) return (actor as RomActor & { grounded?: boolean }).grounded === true;
+  const supported = floor.isSupported?.(actor.pos.x, actor.pos.z) ?? true;
+  if (!supported) {
+    if ((actor.controlWord & 0x40) === 0) {
+      actor.pos.x = actor.savedGroundPos.x;
+      actor.pos.y = actor.savedGroundPos.y;
+      actor.pos.z = actor.savedGroundPos.z;
+    }
+    (actor as RomActor & { grounded?: boolean }).grounded = false;
+    return false;
+  }
+  const result = floor.clampToGround(actor.pos, actor.yVel);
+  actor.pos.y = result.y;
+  actor.yVel = result.velY;
+  (actor as RomActor & { grounded?: boolean }).grounded = result.grounded;
+  return result.grounded;
 }
 
 /** Port of zz_006ea9c_: independently converge +0x18e0 pitch and +0x18e2 yaw. */

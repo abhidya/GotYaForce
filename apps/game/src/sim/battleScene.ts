@@ -115,6 +115,15 @@ interface Actor {
   chargeGlow: { sprite: THREE.Sprite; material: THREE.SpriteMaterial } | null;
   /** Slow/haste status auras (ROM zz_013f300_), keyed by kind; live while the timer runs. */
   statusFx: { slow: StatusAura | null; haste: StatusAura | null };
+  /** Last zz_00b22f4_ edge consumed for this actor. */
+  afterimageSerial: number;
+}
+
+interface AfterimageActor {
+  group: THREE.Object3D;
+  materials: THREE.Material[];
+  age: number;
+  ttl: number;
 }
 
 /**
@@ -564,6 +573,7 @@ export class BattleScene {
   private projectileActors = new Map<string, ProjectileActor>();
   private impactActors: ImpactActor[] = [];
   private bankFxActors: BankFxActor[] = [];
+  private afterimageActors: AfterimageActor[] = [];
   private pending = new Set<string>();
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
   private impactPuffFrames: THREE.Texture[];
@@ -698,6 +708,10 @@ export class BattleScene {
       if ((slot === "shoot" || slot === "charge_shot") && slotChanged) this.spawnMuzzleFlash(actor.group.position, b.rotY, b.team);
       this.syncChargeGlow(actor, b);
       this.syncStatusFx(actor, b);
+      if (b.romAfterimage && b.romAfterimage.serial !== actor.afterimageSerial) {
+        actor.afterimageSerial = b.romAfterimage.serial;
+        this.spawnAfterimage(actor, b.romAfterimage);
+      }
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid, b.meleeSounds);
       actor.lastSeenSlot = slot;
       if (actor.ready) this.playSlot(actor, slot, b.meleeAnimStream);
@@ -734,6 +748,7 @@ export class BattleScene {
     }
     this.updateStatusAuras(dt);
     this.updateImpacts(dt);
+    this.updateAfterimages(dt);
   }
 
   /** Remove every actor (call when leaving a battle). */
@@ -746,10 +761,12 @@ export class BattleScene {
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
     for (const actor of this.impactActors) this.disposeImpactActor(actor);
     for (const actor of this.bankFxActors) this.disposeBankFxActor(actor);
+    for (const actor of this.afterimageActors) this.disposeAfterimage(actor);
     this.actors.clear();
     this.projectileActors.clear();
     this.impactActors = [];
     this.bankFxActors = [];
+    this.afterimageActors = [];
     this.pending.clear();
     this.enemyReticle.visible = false;
     this.allyMarker.visible = false;
@@ -786,6 +803,7 @@ export class BattleScene {
       isPlaceholder: true,
       chargeGlow: null,
       statusFx: { slow: null, haste: null },
+      afterimageSerial: 0,
     };
     const revision = actor.modelRevision;
     void this.attachModel(b.uid, actor, presentationId, placeholder, revision).catch((error: unknown) => {
@@ -796,6 +814,51 @@ export class BattleScene {
       }
     });
     return actor;
+  }
+
+  /** Consume zz_00b2190_'s cosmetic child as a frozen translucent model snapshot. */
+  private spawnAfterimage(
+    actor: Actor,
+    event: { pos: { x: number; y: number; z: number }; rotY: number },
+  ): void {
+    if (!actor.model) return;
+    const group = actor.model.clone(true);
+    const materials: THREE.Material[] = [];
+    group.traverse((node) => {
+      if (!(node instanceof THREE.Mesh)) return;
+      const source = Array.isArray(node.material) ? node.material : [node.material];
+      const cloned = source.map((material) => {
+        const copy = material.clone();
+        copy.transparent = true;
+        copy.opacity = 0.42;
+        copy.depthWrite = false;
+        materials.push(copy);
+        return copy;
+      });
+      node.material = Array.isArray(node.material) ? cloned : cloned[0]!;
+    });
+    group.position.set(event.pos.x, event.pos.y, event.pos.z);
+    group.rotation.y = event.rotY;
+    this.root.add(group);
+    this.afterimageActors.push({ group, materials, age: 0, ttl: 8 / 60 });
+  }
+
+  private updateAfterimages(dt: number): void {
+    for (let i = this.afterimageActors.length - 1; i >= 0; i--) {
+      const actor = this.afterimageActors[i]!;
+      actor.age += dt;
+      const opacity = Math.max(0, 0.42 * (1 - actor.age / actor.ttl));
+      for (const material of actor.materials) material.opacity = opacity;
+      if (actor.age >= actor.ttl) {
+        this.disposeAfterimage(actor);
+        this.afterimageActors.splice(i, 1);
+      }
+    }
+  }
+
+  private disposeAfterimage(actor: AfterimageActor): void {
+    this.root.remove(actor.group);
+    for (const material of actor.materials) material.dispose();
   }
 
   /**

@@ -33,7 +33,7 @@ import { dispatchUpperBodyCue } from "../rom/dispatch.js";
 import { integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
 import { romAirKnockoutReturn } from "./shared-idle-return.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
-import { stepTargetYaw, targetPitchBam } from "../rom/helpers.js";
+import { resetPoseHousekeeping, stepTargetPitch, stepTargetYaw } from "../rom/helpers.js";
 
 export const MELEE_GIRL_LUNGE = {
   FACE_BUDGET: 60.0,      // FLOAT_8043956c
@@ -118,8 +118,7 @@ function faceComplete(a: MActor): boolean {
  *  pitch; decay toward 0 without a target. +0x48 = mag × -sin(pitch) → pitch < 0
  *  aims UP. */
 function seekAimPitch(a: MActor): void {
-  const pitch = targetPitchBam(a);
-  if (pitch != null) a.meleeAimPitch = s16(-pitch);
+  a.meleeAimPitch = stepTargetPitch(a, 0xc0, a.meleeAimPitch ?? 0).value;
 }
 
 /** zz_006ed8c_(scale, actor) — velocity drag on +0x44/+0x48. */
@@ -147,7 +146,7 @@ function phase0(a: MActor, seedSlot: number): void {
   a.yVel = MELEE_GIRL_LUNGE.ZERO;                // +0x48 = 0
   a.hDecel = MELEE_GIRL_LUNGE.ZERO;              // +0x4c = 0
   a.hSpeed = MELEE_GIRL_LUNGE.ZERO;              // +0x44 = 0
-  // +0x80/+0x7e/+0x7c = 0 — aim-rate accumulators (not surfaced; labeled no-ops).
+  resetPoseHousekeeping(a);
   // zz_006d144_(0xc0) face + zz_006e514_(0xc0, &+0x54e) pitch seek.
   seekAimPitch(a);
   // Blink: motion = pos − target(+0x5e8); ×0.95 (FLOAT_8043955c); pos += motion.

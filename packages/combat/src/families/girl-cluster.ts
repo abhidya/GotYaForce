@@ -87,7 +87,7 @@
 // floor arm is dead because the caller clears bits 0..1 first); landing arms dispatch
 // zz_006a750_(a, 7) directly.
 
-import type { RomActor, RomPartState } from "../rom/actor.js";
+import type { RomActor, RomPartState, Vec3 } from "../rom/actor.js";
 import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
 import { integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
@@ -96,7 +96,14 @@ import { createMeleeGirlLunge } from "./melee-girl-lunge.js";
 import { createMeleeGirlStanding } from "./melee-girl-standing.js";
 import { createSeries3XSpecial, series3XActionSlots, type Series3FamilyCtx } from "./shared-series3-x.js";
 import { createCyberGirlRootAction } from "./cyber-girl.js";
-import { stepTargetRoll, stepTargetYaw, targetPitchBam } from "../rom/helpers.js";
+import {
+  groundSnapRevert,
+  resetPoseHousekeeping,
+  stepAfterimage,
+  stepTargetPitch,
+  stepTargetRoll,
+  stepTargetYaw,
+} from "../rom/helpers.js";
 
 /** Shared-cluster constants (FLOAT_804395xx bank, DOL-read — see header). */
 export const GIRL = {
@@ -284,9 +291,8 @@ function faceComplete(a: GActor): boolean {
 /** zz_006e514_(actor, 0xc0, &+0x54e) — aim-pitch seek (valkrie seekMeleeAimPitch
  *  approximation: snap with a target, decay without). */
 function seekAimPitch(a: GActor): void {
-  const pitch = targetPitchBam(a);
-  if (pitch == null) return;
-  a.meleeAimPitch = s16(-pitch);
+  const next = stepTargetPitch(a, 0xc0, a.meleeAimPitch ?? 0);
+  a.meleeAimPitch = next.value;
 }
 
 /** zz_006dee8_(actor, mode) — rate-limited yaw track toward the target bearing
@@ -311,6 +317,10 @@ function dashByte(a: GActor): number {
 function applyDrag(a: GActor, scale: number): void {
   a.hSpeed *= scale;
   a.yVel *= scale;
+}
+
+function vecMagnitude(v: Vec3): number {
+  return Math.hypot(v.x, v.y, v.z);
 }
 
 /** dataPage(+0x4ac)+0x6c — gravityCoeff restore. */
@@ -436,9 +446,10 @@ function rangedAPhase0(a: GActor): void {
   a.yVel = GIRL.ZERO;                             // +0x48 = 0
   a.hDecel = GIRL.ZERO;                           // +0x4c = 0
   a.hSpeed = GIRL.ZERO;                           // +0x44 = 0
-  // +0x80/+0x7e/+0x7c = 0 — aim accumulators (labeled no-ops).
+  resetPoseHousekeeping(a);
   blinkReposition(a, GIRL.DRAG);                  // motion = pos − +0x5e8; ×0.95; pos +=
-  // zz_00679d0_(actor) — ground snap (bridge). +0x80c = 0 (no-op).
+  groundSnapRevert(a);
+  a.accumulator80c = 0;
 }
 
 // Phase 1 — FUN_8010a6b0 @ chunk_0030.c:667. Aim window → first fire.
@@ -455,7 +466,8 @@ function rangedAPhase1(a: GActor, ctx: GirlFamilyCtx): void {
     volleyFire(a, ctx);                           // FUN_8010b02c
   }
   driftMotion(a, GIRL.DRAG);                      // motion ×0.95; pos += motion
-  // zz_00679d0_ snap (bridge); |motion| > 3 → zz_00b22f4_ afterimage (no-op).
+  groundSnapRevert(a);
+  if (vecMagnitude(a.motion) > GIRL.AFTERIMAGE_MIN) stepAfterimage(a);
 }
 
 // Phase 2 — FUN_8010a78c @ chunk_0030.c:702. Volley loop / recovery / exit.
@@ -501,7 +513,8 @@ function rangedAPhase2(a: GActor, ctx: GirlFamilyCtx): void {
     if (((a.inputHeld5d8 ?? 0) & 0xf0) === 0 && ((a.inputEdge5d4 ?? 0) & 1) === 0
       && a.wallContact === 0) {
       driftMotion(a, GIRL.DRAG);                  // motion ×0.95; pos += motion
-      // zz_00679d0_ snap + |motion| afterimage (no-ops).
+      groundSnapRevert(a);
+      if (vecMagnitude(a.motion) > GIRL.AFTERIMAGE_MIN) stepAfterimage(a);
       return;
     }
   }
@@ -636,7 +649,8 @@ function rangedCPhase0(a: GActor): void {
   if (p1.group !== 0 || p1.slot !== 0xd) {
     startStream(a, 0x2, 0, 0xd, GIRL.STREAM_RATE);
   }
-  seedVolleyState(a);                             // zz_010afd0_; +0x80c = 0 (no-op)
+  seedVolleyState(a);                             // zz_010afd0_
+  a.accumulator80c = 0;
 }
 
 // Phase 1 — FUN_8010af04 @ chunk_0030.c:984. Air aim → fire + knock-out arm.
@@ -656,7 +670,7 @@ function rangedCPhase1(a: GActor, ctx: GirlFamilyCtx): void {
     a.controlWord &= ~0x2;                        // +0x5e0 &= 0xfffffffd (bit 1 ONLY)
     romAirKnockoutReturn(a);                      // zz_006a5a4_ — NO +0x73f/~3 arm here
   }
-  // zz_00b22f4_ afterimage (unconditional — renderer no-op).
+  stepAfterimage(a);
 }
 
 /** Build the shared action-0 handler (FUN_8010a508 → variant table @0x80325a00). */
@@ -712,7 +726,8 @@ function swingsPhase0(a: GActor, seedSlot: number): void {
   a.hSpeed = GIRL.ZERO;                           // +0x44 = 0
   a.hDecel = GIRL.ZERO;                           // +0x4c = 0
   setupLockGate(a, rangeRow868(a), "heading");    // FUN_80066838(row868) < 1 → invalidate
-  // zz_006d144_(0xc0) — face (bridge). +0x80c = 0 (no-op).
+  faceComplete(a);
+  a.accumulator80c = 0;
 }
 
 // Phase 1 — FUN_8010b400 @ chunk_0030.c:1179. Face budget → first swing.
@@ -757,7 +772,7 @@ function swingsPhase2(a: GActor, ctx: GirlFamilyCtx): void {
     a.streamSlot = slot + 1;                      // +0x6ea++
     startStream(a, GIRL.PART_MASK, GIRL.MELEE_GROUP, slot, GIRL.STREAM_RATE);
   }
-  // +0x44 > 3 → afterimage (no-op).
+  if (a.hSpeed > GIRL.AFTERIMAGE_MIN) stepAfterimage(a);
 }
 
 // Phase 3 — FUN_8010b610 @ chunk_0030.c:1261. Combo loop (stays in phase 3).
@@ -795,7 +810,7 @@ function swingsPhase3(a: GActor, ctx: GirlFamilyCtx): void {
     a.controlWord &= ~0x3;                        // +0x73f = 0; +0x5e0 &= ~3
     romGroundIdleReturn(a);                       // zz_006a474_
   }
-  // +0x44 > 3 → afterimage (no-op).
+  if (a.hSpeed > GIRL.AFTERIMAGE_MIN) stepAfterimage(a);
 }
 
 /** Build the M-1 combo-swings handler (dispatcher zz_010b2f4_; seed 0 fleet-wide). */
@@ -831,7 +846,7 @@ function rushPhase0(a: GActor, seedSlot: number): void {
   const slot = a.streamSlot;                      // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                        // +0x6ea++
   startStream(a, GIRL.PART_MASK, GIRL.MELEE_GROUP, slot, GIRL.STREAM_RATE);
-  // +0x80c = 0 (no-op).
+  a.accumulator80c = 0;
 }
 
 // Phase 1 — FUN_8010be74 @ chunk_0030.c:1565. Face budget → rush arm.
@@ -853,7 +868,7 @@ function rushPhase1(a: GActor, ctx: GirlFamilyCtx): void {
       ctx.onFamilyProjectile?.(a, GIRL_SPAWNERS.MELEE_FX, 0); // zz_00b2190_(a, 0)
     }
   }
-  // |motion| > 3 → afterimage (no-op).
+  if (vecMagnitude(a.motion) > GIRL.AFTERIMAGE_MIN) stepAfterimage(a);
 }
 
 // Phase 2 — FUN_8010bfbc @ chunk_0030.c:1610. Rush-in.
@@ -867,7 +882,8 @@ function rushPhase2(a: GActor, ctx: GirlFamilyCtx): void {
   // Advance when: timer ≤ 0 OR FUN_80066838(200) ≥ 1 OR hit-react +0x1d9 != 0.
   if (a.handlerTimer > GIRL.ZERO && rangeCheck(a, GIRL.FX_RANGE) < 1
     && (a.hitReact ?? 0) === 0) {
-    return;                                       // LAB_8010c048 (afterimage no-op)
+    if (a.hSpeed > GIRL.AFTERIMAGE_MIN) stepAfterimage(a);
+    return;                                       // LAB_8010c048
   }
   a.fbPhaseSlots[0] += 1;                         // +0x540++
 }
@@ -902,7 +918,7 @@ function rushPhase3(a: GActor, ctx: GirlFamilyCtx): void {
     a.controlWord &= ~0x3;                        // +0x73f = 0; +0x5e0 &= ~3
     romGroundIdleReturn(a);                       // zz_006a474_
   }
-  // +0x44 > 3 → afterimage (no-op).
+  if (a.hSpeed > GIRL.AFTERIMAGE_MIN) stepAfterimage(a);
 }
 
 /** Build the M-3 rush-combo handler (dispatcher zz_010bd10_). */
@@ -937,7 +953,8 @@ function divePhase0(a: GActor, seedSlot: number): void {
   a.yVel = GIRL.ZERO;                             // +0x48 = 0
   a.hDecel = GIRL.ZERO;                           // +0x4c = 0
   a.hSpeed = GIRL.ZERO;                           // +0x44 = 0
-  // +0x80/+0x7e/+0x7c = 0 (no-ops). zz_006d144_(0xc0) face + zz_006e514_ pitch seek.
+  resetPoseHousekeeping(a);
+  faceComplete(a);
   seekAimPitch(a);
   blinkReposition(a, GIRL.BLINK_SOFT);            // ×0.98 (FLOAT_80439598)
   // zz_00677b0_(actor) — bridge clamp.
@@ -1082,14 +1099,15 @@ function sharedXPhase0(a: GActor, cfg: GirlSharedXConfig): void {
   a.yVel = GIRL.ZERO;                             // +0x48 = 0
   a.hDecel = GIRL.ZERO;                           // +0x4c = 0
   a.hSpeed = GIRL.ZERO;                           // +0x44 = 0
-  // +0x80/+0x7e/+0x7c = 0 (no-ops).
+  resetPoseHousekeeping(a);
   if ((a.controlWord & 0x40) === 0) {             // grounded → backdash seed
     a.hSpeed = cfg.groundSpeed;                   // +0x44 = cfg[2]
   }
   // FUN_80067310(1.0, actor, +0x72 − 0x8000) — BACKWARD projection off the heading.
   integratePhysics(GIRL.GRAVITY, a, s16(a.heading - 0x8000));
   // zz_00677b0_(actor) — bridge clamp.
-  // zz_004beb8_(-1.0, actor, 0xf, 4, (s8)+0x6ea, 8, 1). +0x80c = 0 (no-op).
+  // zz_004beb8_(-1.0, actor, 0xf, 4, (s8)+0x6ea, 8, 1).
+  a.accumulator80c = 0;
   startStream(a, GIRL.PART_MASK, GIRL.X_GROUP, a.streamSlot, GIRL.STREAM_RATE);
   a.fbPhaseSlots[2] = 0;                          // +0x542 payload latch (fresh move)
 }
@@ -1138,7 +1156,7 @@ function sharedXPhase1(a: GActor, cfg: GirlSharedXConfig, ctx: GirlFamilyCtx): v
       return;
     }
     if (a.wallContact === 0) {                    // +0x1cee == 0 → keep recovering
-      // airborne → zz_00b22f4_ afterimage (no-op).
+      stepAfterimage(a);
       return;
     }
   }
@@ -1177,7 +1195,7 @@ function battleXPhase0(a: GActor): void {
   a.yVel = BATTLE_X.ZERO;                         // +0x48 = 0
   a.hDecel = BATTLE_X.ZERO;                       // +0x4c = 0
   a.hSpeed = BATTLE_X.ZERO;                       // +0x44 = 0
-  // +0x80/+0x7e/+0x7c = 0 (no-ops).
+  resetPoseHousekeeping(a);
   blinkReposition(a, BATTLE_X.BLINK);             // ×0.95 (FLOAT_8043861c)
   // zz_00679d0_(actor) — ground snap (bridge).
   // zz_004beb8_(-1.0 FLOAT_80438620, actor, 0xf, 4, (s8)+0x6ea, 8, 1).
@@ -1252,7 +1270,7 @@ function barrierXPhase0(a: GActor, ctx: GirlFamilyCtx): void {
   a.yVel = BARRIER_X.ZERO;                        // +0x48 = 0
   a.hDecel = BARRIER_X.ZERO;                      // +0x4c = 0
   a.hSpeed = BARRIER_X.ZERO;                      // +0x44 = 0
-  // +0x80/+0x7e/+0x7c = 0 (no-ops).
+  resetPoseHousekeeping(a);
   // motion = pos − target(+0x5e8) — SUBTRACT ONLY (no scale/apply in phase 0; the
   // vector feeds phase 1's ×0.95 drift). No lock → zero motion (blink rule).
   if (a.lockTarget) {
@@ -1339,7 +1357,7 @@ function killerXPhase0(a: GActor): void {
   a.yVel = KILLER_X.ZERO;                         // +0x48 = 0
   a.hDecel = KILLER_X.ZERO;                       // +0x4c = 0
   a.hSpeed = KILLER_X.ZERO;                       // +0x44 = 0
-  // +0x80/+0x7e/+0x7c = 0 (no-ops).
+  resetPoseHousekeeping(a);
   blinkReposition(a, KILLER_X.DRIFT);             // ×0.95 (FLOAT_80439f38)
   // zz_00677b0_(actor) — bridge clamp.
   const slot = a.streamSlot;                      // cVar1 = +0x6ea
@@ -1382,7 +1400,8 @@ function killerXPhase2(a: GActor, ctx: GirlFamilyCtx): void {
     a.yVel = KILLER_X.SPIN_SPEED * -projectX(s16(a.steerYaw));
     a.hDecel = KILLER_X.ZERO;                     // +0x4c = 0
     a.gravityCoeff = KILLER_X.ZERO;               // +0x50 = 0
-    // +0x272 |= 4 (no-op); +0x80c = 0; +0x82 = 0 (anim byte — no-op).
+    // +0x272 |= 4 and +0x82 = 0 remain renderer flags.
+    a.accumulator80c = 0;
     ctx.onFamilyProjectile?.(a, GIRL_SPAWNERS.MELEE_FX, 0); // zz_00b2190_(a, 0)
     ctx.onPlayCue?.(a, 0xf2);                     // zz_00f036c_(actor, 0xf2)
   }

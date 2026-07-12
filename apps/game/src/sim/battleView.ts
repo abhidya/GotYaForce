@@ -40,6 +40,8 @@ export interface BattleActorView {
   slowHitTimer: number;
   /** Haste-on-hit s16 timer (ROM +0x712) — zz_013f300_(t,1) aura (orange pulsing clock). */
   hasteHitTimer: number;
+  /** Latest zz_00b22f4_ sampled transform; serial edge prevents duplicate ghosts. */
+  romAfterimage: BattleActorObservation["romAfterimage"];
 }
 
 export function battleActorView(borg: BattleActorObservation): BattleActorView {
@@ -65,5 +67,6 @@ export function battleActorView(borg: BattleActorObservation): BattleActorView {
     lastHitAttackerTeam: borg.lastHitAttackerTeam,
     slowHitTimer: borg.slowHitTimer ?? 0,
     hasteHitTimer: borg.hasteHitTimer ?? 0,
+    romAfterimage: borg.romAfterimage,
   };
 }
