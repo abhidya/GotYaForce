@@ -63,7 +63,7 @@ export const JUMP_X = {
 
 export interface KnightFamilyCtx {
   onTickStream?: (actor: RomActor, group: number) => void;
-  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
   onPlayCue?: (actor: RomActor, cueId: number) => void;
   onSpawnChild?: (actor: RomActor, childType: number) => boolean;
   onSpawnFX?: (actor: RomActor, fxId: number) => void;

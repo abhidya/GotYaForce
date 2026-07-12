@@ -4,7 +4,7 @@
 //
 // Replaces any hand-written JSON under .vitepress/data/. Never reads its own output.
 
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync, copyFileSync } from 'node:fs'
+import { cpSync, readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync, copyFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
@@ -15,6 +15,8 @@ const REPO_ROOT = join(__dirname, '..', '..')
 const RESEARCH = join(REPO_ROOT, 'research')
 const DATA_DIR = join(__dirname, '..', '.vitepress', 'data')
 const PUBLIC_DIR = join(__dirname, '..', 'public')
+const MODELS_SOURCE_DIR = join(REPO_ROOT, 'apps', 'game', 'public', 'models')
+const MODELS_PUBLIC_DIR = join(PUBLIC_DIR, 'models')
 
 const BASE = process.env.GH_PAGES_BASE ?? '/GotYaForce/'
 
@@ -25,6 +27,25 @@ const writeJson = (name, data) => {
   const out = join(DATA_DIR, name)
   writeFileSync(out, JSON.stringify(data, null, 2) + '\n', 'utf8')
   console.log(`  wrote ${name} (${(JSON.stringify(data).length / 1024).toFixed(1)} kB)`)
+}
+
+const syncModelAssets = () => {
+  if (process.env.GF_ATLAS_SKIP_MODELS === '1') {
+    console.log('  model assets skipped (GF_ATLAS_SKIP_MODELS=1)')
+    return
+  }
+
+  if (!existsSync(MODELS_SOURCE_DIR)) {
+    console.warn(`  model assets missing: ${MODELS_SOURCE_DIR}`)
+    return
+  }
+
+  if (!existsSync(PUBLIC_DIR)) mkdirSync(PUBLIC_DIR, { recursive: true })
+  console.log('  syncing model assets to public/models')
+  cpSync(MODELS_SOURCE_DIR, MODELS_PUBLIC_DIR, {
+    recursive: true,
+    force: true
+  })
 }
 
 console.log('Curating atlas data from research/ ...')
@@ -530,4 +551,5 @@ writeJson('borg-moves.json', {
   borgs: borgsWithMoves
 })
 
+syncModelAssets()
 console.log('Done. Output in docs-site/.vitepress/data/')

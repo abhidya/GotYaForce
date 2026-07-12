@@ -58,6 +58,8 @@ export interface RomActor {
   lockYaw: number;
   /** +0x5ac: active yaw (current integration target; FUN_8018e888 copies heading or lockYaw here). */
   activeYaw: number;
+  /** +0x5aa: remaining signed yaw error consumed by FUN_80066a30. */
+  turnErrorYaw: number;
   /** +0x18da: phase-2 steering yaw for the sin/cos projection in descend phases
    *  (FUN_8018eb2c:907-911; ticked by FUN_8018ec34:937-940). */
   steerYaw: number;
@@ -172,7 +174,7 @@ export interface RomActor {
   // ===== Move contact flags (the G Crash + status-effect handlers' phase triggers) =====
   /** +0x1cef: part-0 contact flag (op 0x02 sets this; G Crash phase 1 polls >0 for hit). */
   contactP0: number;
-  /** +0x1cee: wall-contact flag (G Crash phase 3 polls for ground/wall to end the move). */
+  /** +0x1cee: wall/stream-contact flag used by family handlers to end moves. */
   wallContact: number;
   /** +0x694: state-timer float (e.g. deploy lock, post-state cooldown; zz_005568c_ decays it). */
   stateTimer: number;
@@ -243,6 +245,9 @@ export interface RomDescriptor {
   handlerData48?: number;
   /** +0x2c: handler-data float (max horizontal speed). */
   handlerData2c?: number;
+  /** +0xac/+0xae: per-frame BAM16 turn steps selected by aimType low nibble. */
+  turnStep0?: number;
+  turnStep1?: number;
 }
 
 /** Command-move table (actor+0x4ec). Already extracted fleet-wide into
@@ -261,7 +266,7 @@ export function createRomActor(): RomActor {
     pos: { x: 0, y: 0, z: 0 },
     motion: { x: 0, y: 0, z: 0 },
     hSpeed: 0, yVel: 0, hDecel: 0, gravityCoeff: 0,
-    heading: 0, lockYaw: 0, activeYaw: 0, steerYaw: 0,
+    heading: 0, lockYaw: 0, activeYaw: 0, turnErrorYaw: 0, steerYaw: 0,
     borgNumber: 0, slot: 0, team: 0,
     fbPhase: 0, fbPhaseSlots: [0, 0, 0, 0],
     fbState: -1, ubState: -1, prevFbState: -1, prevUbState: -1,

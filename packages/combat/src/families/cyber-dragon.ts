@@ -67,7 +67,7 @@ export interface CyberDragonFamilyCtx extends StreamContext {
   onFaceComplete?: (actor: RomActor, mask: number) => boolean;
   /** Allocate resource slot — true = ok. Port of zz_006dbe0_(0,1,mode). Returns false
    *  when the ROM would've zeroed the gate byte (no resource available). */
-  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
   /** Exit full-body to idle. Port of zz_006a474_ / zz_006a5a4_. */
   onExitFb?: (actor: RomActor) => void;
   /** Face the lock target — heading steer toward +0x5e8 target. */

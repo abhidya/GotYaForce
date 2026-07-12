@@ -69,6 +69,11 @@ const FIELDS = [
 const U16_FIELDS = [
   ["statusImmunityA", 0xa8],
   ["statusImmunityB", 0xaa],
+  // FUN_800669d0 -> FUN_80066a30 reads descriptor +0xac + (aimType&0xf)*2.
+  // The action families in this pass use aim types 0xc0/0xc1/0x81, so slots 0/1
+  // are the exact per-frame BAM16 turn steps used by the shared aim helpers.
+  ["turnStep0", 0xac],
+  ["turnStep1", 0xae],
 ];
 
 const borgsFile = JSON.parse(fs.readFileSync(borgsPath, "utf8"));

@@ -11,6 +11,11 @@ import { integratePhysics, vecAdd, vecScale, vecSubtract } from "../rom/physics.
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn } from "./shared-idle-return.js";
 import { createSharedMeleeLunge, type SharedLungeConfig } from "./shared-melee-lunge.js";
+import {
+  isStreamTickEnabled,
+  stepTargetYaw,
+  targetPitchBam,
+} from "../rom/helpers.js";
 
 export const ARROW_NINJA_ACTION1 = {
   GRAVITY: 1.0,          // FLOAT_804389f0
@@ -42,8 +47,6 @@ export const ARROW_NINJA_SHARED_LUNGE_CONFIG: SharedLungeConfig = {
 export interface ArrowNinjaScratch {
   lockTarget?: { x: number; y: number; z: number } | null;
   rangeRows868?: readonly [number, number, number];
-  facingReady?: boolean;
-  streamTickGate?: boolean;
   /** ROM +0x1d9 nonzero: phase-3 braking input. */
   arrowBrakeEvent?: boolean;
   /** ROM +0x71c: suppresses the ground-chain recovery body. */
@@ -79,6 +82,7 @@ function groundChain(ctx: StreamContext): (actor: RomActor) => void {
         if (!actor.lockTarget || (targetDistance(actor) ?? Infinity) > rangeRow(actor)) {
           actor.activeYaw = actor.lockYaw;
         }
+        stepTargetYaw(actor, 0xc0);
         if (actor.lockTarget) {
           vecSubtract(actor.pos, actor.lockTarget, actor.motion);
           vecScale(ARROW_NINJA_ACTION1.REPOSITION, actor.motion, actor.motion);
@@ -90,11 +94,12 @@ function groundChain(ctx: StreamContext): (actor: RomActor) => void {
         return;
       }
       case 1: { // FUN_800d0e7c
-        if (actor.streamTickGate !== false) tickStream(actor, 0xf, ctx);
+        if (isStreamTickEnabled(actor)) tickStream(actor, 0xf, ctx);
         vecScale(ARROW_NINJA_ACTION1.REPOSITION, actor.motion, actor.motion);
         vecAdd(actor.pos, actor.motion, actor.pos);
         actor.handlerTimer -= actor.dt;
-        if (actor.handlerTimer <= 0 || actor.facingReady === true || actor.lockTarget != null) {
+        const facingReady = stepTargetYaw(actor, 0xc0);
+        if (actor.handlerTimer <= 0 || facingReady) {
           actor.fbPhaseSlots[0] = 2;
           actor.handlerTimer = ARROW_NINJA_ACTION1.DASH_TIMER;
           let distance = rangeRow(actor);
@@ -107,7 +112,8 @@ function groundChain(ctx: StreamContext): (actor: RomActor) => void {
         return;
       }
       case 2: { // FUN_800d0fb0
-        if (actor.contactP0 === 0 || actor.streamTickGate !== false) tickStream(actor, 0xf, ctx);
+        stepTargetYaw(actor, 0xc0);
+        if (actor.contactP0 === 0 || isStreamTickEnabled(actor)) tickStream(actor, 0xf, ctx);
         actor.handlerTimer -= actor.dt;
         const distance = targetDistance(actor);
         if (actor.handlerTimer <= 0 || (distance !== null && distance <= ARROW_NINJA_ACTION1.RANGE)) {
@@ -144,7 +150,9 @@ function groundChain(ctx: StreamContext): (actor: RomActor) => void {
 }
 
 function diveVelocity(actor: RomActor & ArrowNinjaScratch): void {
-  const angle = ((actor.divePitchBam ?? 0) & 0xffff) * Math.PI * 2 / 0x10000;
+  const pitch = actor.divePitchBam ?? targetPitchBam(actor) ?? 0;
+  actor.divePitchBam = pitch;
+  const angle = (pitch & 0xffff) * Math.PI * 2 / 0x10000;
   actor.hSpeed = ARROW_NINJA_ACTION1.AIR_DIVE_SPEED * Math.cos(angle);
   actor.yVel = -ARROW_NINJA_ACTION1.AIR_DIVE_SPEED * Math.sin(angle);
 }

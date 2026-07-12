@@ -83,17 +83,21 @@ ok(gRedBShot?.ammo.lv1 === 5 && gRedBShot.ammo.lv10 === 8 && gRedBShot.ammo.curr
 ok(gRedBShot?.commandStatus === "contextual-b", `runtime G RED B Shot commandStatus contextual-b (got ${gRedBShot?.commandStatus})`);
 ok(gRedBShot?.exactCommand === true, "runtime G RED B Shot has exact ROM command records");
 ok(gRedBShot?.commandRecords[0]?.commandType === 0, `runtime G RED B Shot command type 0 far/default (got ${gRedBShot?.commandRecords[0]?.commandType})`);
-ok(gRedBShot?.hitboxStatus === "projectile-radius", `runtime G RED B Shot hitbox projectile-radius (got ${gRedBShot?.hitboxStatus})`);
+ok(gRedBShot?.hitboxStatus === "source-shot-radius", `runtime G RED B Shot hitbox source-shot-radius (got ${gRedBShot?.hitboxStatus})`);
+ok(gRedBShot?.exactHitbox === true, "runtime G RED B Shot has exact source-backed shot radius");
 const gRedBAttack = gRedRuntimeMoves.find((move) => move.button === "B Attack");
 ok(gRedBAttack?.exactCommand === true, "runtime G RED B Attack has exact ROM command records");
 ok(gRedBAttack?.commandRecords[0]?.commandType === 1, `runtime G RED B Attack command type 1 close/proximity (got ${gRedBAttack?.commandRecords[0]?.commandType})`);
+ok(gRedBAttack?.hitboxStatus === "source-hit-record", `runtime G RED B Attack hitbox source-hit-record (got ${gRedBAttack?.hitboxStatus})`);
+ok(gRedBAttack?.exactHitbox === true, "runtime G RED B Attack has exact source-backed melee ladder hitbox");
 const gRedBCharge = gRedRuntimeMoves.find((move) => move.button === "B Charge");
 ok(gRedBCharge?.exactCommand === true, "runtime G RED B Charge has exact ROM command records");
 ok(gRedBCharge?.commandRecords[0]?.commandType === 3, `runtime G RED B Charge command type 3 (got ${gRedBCharge?.commandRecords[0]?.commandType})`);
 const gRedX = gRedRuntimeMoves.find((move) => move.button === "X");
 ok(gRedX?.exactCommand === true, "runtime G RED X has exact ROM command records");
 ok(gRedX?.commandRecords[0]?.commandType === 2, `runtime G RED X command type 2 (got ${gRedX?.commandRecords[0]?.commandType})`);
-ok(gRedX?.hitboxStatus === "generic-special-aoe", `runtime G RED X hitbox remains explicit generic-special-aoe blocker (got ${gRedX?.hitboxStatus})`);
+ok(gRedX?.hitboxStatus === "source-hit-record", `runtime G RED X hitbox source-hit-record (got ${gRedX?.hitboxStatus})`);
+ok(gRedX?.exactHitbox === true, "runtime G RED X has exact source-backed X hitbox");
 ok(usesContextualBResolver("pl0615"), "G RED participates in roster-wide contextual B resolver");
 ok(runtimeShotPenetrationForBorgId("pl0615", false) === "borgs", "runtime shot penetration reads G RED B Shot");
 ok(runtimeShotPenetrationForBorgId("pl0615", true) === "total", "runtime shot penetration reads G RED B Charge");
@@ -125,6 +129,7 @@ const runtimeCoverage = runtimeMoveCoverage();
 ok(runtimeCoverage.borgsWithMoves >= 160, `runtime coverage borgs >= 160 (got ${runtimeCoverage.borgsWithMoves})`);
 ok(runtimeCoverage.moves >= 440, `runtime coverage moves >= 440 (got ${runtimeCoverage.moves})`);
 ok(runtimeCoverage.contextualBProfiles >= 90, `runtime contextual B profiles >= 90 (got ${runtimeCoverage.contextualBProfiles})`);
+ok(runtimeCoverage.exactHitboxMoves >= 100, `runtime exact-hitbox moves >= 100 (got ${runtimeCoverage.exactHitboxMoves})`);
 
 // Penetration values are all within the enum (no stray labels leaked through).
 const validPen = new Set<Penetration | null>(["none", "borgs", "total", null]);

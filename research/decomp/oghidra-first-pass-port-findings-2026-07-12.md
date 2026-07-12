@@ -82,13 +82,30 @@ are listed explicitly at the end.
 
 Verification at capture time: combat TypeScript build passes and `pnpm selfcheck:rom` passes.
 
-## Remaining fidelity gates (do not treat as unknown mechanics)
+## Second-pass host wiring completed
 
-The ROM behavior above is known, but several inputs still cross the `BorgRuntime`/`RomActor`
-boundary and need live host wiring for frame-perfect behavior: ammo-allocation return values;
-aim-complete and barrel-ready helper results; the exact signed stream events at `+0x1cef/+0x1d0f`;
-collision/landing helper returns; descriptor bone-derived homing pitch; and Robot config callbacks
-whose addresses are known but whose host effects are only routed today. The first-pass handlers
-surface these as named scratch fields/callbacks and use conservative liveness fallbacks when the
-host has not supplied them. Future vectorized passes should focus on those helper semantics rather
-than rediscovering the phase tables or constants above.
+The previously listed host-bound gates are now executable rather than named fallbacks:
+
+- `zz_006dbe0_` checks and optionally consumes the selected live weapon cell. A query no longer
+  mutates ammo; a consuming call snapshots/decrements the cell and arms the existing refill path.
+- Descriptor offsets `+0xac/+0xae` are extracted for every movement record and drive the BAM16
+  yaw convergence helpers. Robot dual-axis aim, Eagle target-relative roll, Arrow dive pitch, and
+  the two Tank barrel solvers now derive their result from live target geometry.
+- Stream opcodes `0x02/0x03` preserve signed part-0/part-1 state. `+0x1cee` is treated as the
+  part-0 stream-completion byte—not terrain contact—and host-decoded streams now lower it at start
+  and raise it at their scheduled end. `+0x1cef/+0x1d0f` feed Robot continuation/contact gates.
+- The collision helper surface now returns grounded/airborne state independently of stream
+  completion, so full-body versus upper-body exit routing is no longer coupled to `+0x1cee`.
+- All decoded Robot config callbacks now perform their actual ammo query/consume, timer/count
+  mutation, projectile pair/type selection, rotating child-slot ownership, `0xdb` cue, continuation
+  test, and two-child exit gate. This also fixes the phase-2 branch: ammo success enters slot
+  `base+1`/phase 3; ammo denial skips to slot `base+2`/phase 4.
+- Live command records now carry their decoded action/variant through the bridge. Ported X and B
+  machines advance for multiple frames under ROM ownership; an unimplemented action is detected
+  and returned to the existing generic combat path instead of being swallowed.
+
+The remaining precision limit is geometric representation, not missing state-machine knowledge:
+the host has target vectors and scalar actor pose but not the renderer's exact per-frame bone
+matrices. Tank barrel convergence therefore uses the equivalent target yaw/pitch solver, and Robot
+attachment ownership bytes are modeled at spawn/exit-gate level while child teardown remains owned
+by the host projectile lifecycle.

@@ -69,7 +69,7 @@ export interface DragonFamilyCtx extends StreamContext {
   /** Face the lock target. Port of zz_006d144_(mask). Returns true when facing complete. */
   onFaceComplete?: (actor: RomActor, mask: number) => boolean;
   /** Allocate resource. Port of zz_006dbe0_(0,1,1). Returns true if resource available. */
-  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
   /** Exit full-body to idle. */
   onExitFb?: (actor: RomActor) => void;
 }

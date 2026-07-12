@@ -401,6 +401,10 @@ export interface ResolvedCommandState {
   recordAddress: string | null;
   /** Selected record's subtype (+0x586 model), or null. */
   subtype: number | null;
+  /** Exact action-table index encoded by the selected four-byte command record. */
+  actionIndex: number | null;
+  /** Exact per-action variant encoded by the selected four-byte command record. */
+  variantIndex: number | null;
   /** True when an exact decoded ROM record backs this command. */
   exact: boolean;
 }

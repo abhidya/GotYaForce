@@ -14,6 +14,11 @@ node ../docs-site/scripts/curate-data.mjs   # regenerate data from research/
 pnpm dev
 ```
 
+The curate step also copies extracted Borg model and animation assets from
+`apps/game/public/models` into `docs-site/public/models` so Borg detail pages can
+render the real GLB and baked animation clips. For text/data-only local work, run
+with `GF_ATLAS_SKIP_MODELS=1` to skip that heavier asset copy.
+
 ## Build
 
 ```bash

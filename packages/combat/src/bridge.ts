@@ -13,7 +13,7 @@
 // BorgRuntime keeps its vec3 `vel` model; RomActor uses the ROM's scalar hSpeed +
 // yVel model. The bridge decomposes/recomposes each sync.
 
-import type { BorgRuntime } from "./types.js";
+import type { BorgRuntime, PlayerInput } from "./types.js";
 import type { Vec3 } from "@gf/physics";
 import type { RomActor } from "./rom/actor.js";
 import { createRomActor } from "./rom/actor.js";
@@ -81,6 +81,7 @@ import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
 import { spawnRomProjectile } from "./projectiles.js";
+import { movementPhysicsForBorgId } from "./movementData.js";
 import type { Projectile, ProjectileVisualKind } from "./types.js";
 import attackHitTablesData from "./data/attackHitTables.json" with { type: "json" };
 import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
@@ -124,7 +125,19 @@ interface StreamEvent {
   slot?: number;
   mode?: number;
   blend?: boolean;
+  part?: number;
+  state?: number;
+  aux?: number;
+  variant?: number;
 }
+
+const ACTION_STREAM_DATA = actionStreamTablesData as unknown as {
+  borgs: Record<string, {
+    actions?: Record<string, {
+      variants?: Record<string, { bank?: string } | undefined>;
+    }>;
+  }>;
+};
 
 const ACTION_STREAM_BANKS: Record<string, { bank: string; group: number; seedSlot: number } | undefined> = (() => {
   const data = actionStreamTablesData as unknown as { borgs: Record<string, { actions: Record<string, { variants: Record<string, { bank: string; group: number; seedSlot: number } | undefined> }> }> };
@@ -141,14 +154,22 @@ const MELEE_ANIM_BANKS: Record<string, any> = (meleeAnimKindsData as { banks?: R
 
 /** Look up the pre-decoded stream events for a borg's X-special. Returns null when
  *  the borg has no decoded action-stream data (uncommon — 156/208 borgs have it). */
-function streamEventsFor(borgId: string): StreamEvent[] | null {
-  const meta = ACTION_STREAM_BANKS[borgId];
-  if (!meta) return null;
-  const bank = MELEE_ANIM_BANKS[meta.bank];
+function streamEventsForSlot(
+  borgId: string,
+  actionIndex: number,
+  variantIndex: number,
+  groupIndex: number,
+  slotIndex: number,
+): StreamEvent[] | null {
+  const variants = ACTION_STREAM_DATA.borgs[borgId]?.actions?.[String(actionIndex)]?.variants;
+  const leaf = variants?.[String(variantIndex)] ?? variants?.["0"];
+  const bankAddress = leaf?.bank ?? ACTION_STREAM_BANKS[borgId]?.bank;
+  if (!bankAddress) return null;
+  const bank = MELEE_ANIM_BANKS[bankAddress];
   if (!bank) return null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const group = bank.groups?.["g" + meta.group] as any;
-  const slot = group?.["s" + meta.seedSlot] as { events?: StreamEvent[] } | undefined;
+  const group = bank.groups?.["g" + groupIndex] as any;
+  const slot = group?.["s" + slotIndex] as { events?: StreamEvent[] } | undefined;
   return slot?.events ?? null;
 }
 
@@ -1198,6 +1219,14 @@ export class RomDriverBridge {
   /** Pre-decoded stream events from meleeAnimKinds.json. Played back each tick to
    *  drive anim changes + hitbox arming at the decoded ROM frames. */
   private streamEvents: StreamEvent[] | null = null;
+  /** Every zz_004beb8_ call schedules the exact decoded group/slot stream here. */
+  private streamSchedules: Array<{
+    startFrame: number;
+    endFrame: number;
+    mask: number;
+    events: StreamEvent[];
+    completed: boolean;
+  }> = [];
   /** Max frames the special runs before auto-completing (from the decoded stream length). */
   private specialMaxFrames = 30;
   readonly ctx: RomHostContext;
@@ -1256,12 +1285,40 @@ export class RomDriverBridge {
    *  so battle.ts skips stepMovement/stepAttacks. False for X-specials (which compose with
    *  normal movement — tick() returns false and only layers stream events). */
   private romOwnedSpecial = false;
+  private activeActionIndex = 0;
+  private activeVariantIndex = 0;
   private runtime: BorgRuntime | null = null;
 
   private constructor(actor: RomActor) {
     this.actor = actor;
     this.tables = createRomStateTables();
     this.ctx = this.buildDefaultCtx();
+    (actor as RomActor & {
+      onStartStream?: (group: number, slot: number, mask: number) => boolean;
+    }).onStartStream = (group, slot, mask) => this.onStartStream(group, slot, mask);
+  }
+
+  private onStartStream(group: number, slot: number, mask: number): boolean {
+    if (!this.runtime) return false;
+    const events = streamEventsForSlot(
+      this.runtime.borgId,
+      this.actor.actionIndex,
+      this.actor.variantIndex,
+      group,
+      slot,
+    );
+    if (!events) return false;
+    const maxFrame = events.reduce((max, event) =>
+      Math.max(max, typeof event.frame === "number" ? event.frame : 0), 0);
+    this.streamSchedules.push({
+      startFrame: this.streamFrame,
+      endFrame: this.streamFrame + maxFrame + 1,
+      mask,
+      events,
+      completed: false,
+    });
+    this.specialMaxFrames = Math.max(this.specialMaxFrames, this.streamFrame + maxFrame + 5);
+    return true;
   }
 
   /** Build a comprehensive RomHostContext with default implementations. The bridge
@@ -1343,7 +1400,7 @@ export class RomDriverBridge {
   }
 
   private defaultOnCheckCollision(actor: RomActor): number {
-    return actor.wallContact;
+    return (actor as RomActor & { grounded?: boolean }).grounded ? 0 : 1;
   }
 
   private defaultOnExitUb(actor: RomActor): void {
@@ -1383,6 +1440,32 @@ export class RomDriverBridge {
     // selecting shared behavior. Restore the actual runtime member afterwards so all
     // per-borg switches observe the real +0x3e8 value (e.g. MACHINE RED/BLUE variants).
     actor.borgNumber = borgIdToNumber(runtime.borgId);
+    const movement = movementPhysicsForBorgId(runtime.borgId);
+    if (movement) {
+      actor.maxHSpeed = movement.maxHSpeed;
+      actor.gravityCoeff = movement.gravityFall;
+      actor.descriptor = {
+        header: 0,
+        mainHandBone: 0,
+        subtypeCommand: new Int8Array(0),
+        handlerData6c: movement.gravityFall,
+        subtypePartCommand: new Int8Array(0),
+        buttonLiveFlag: new Int8Array(0),
+        defaultHand0: 0,
+        defaultHand1: 0,
+        maxHSpeed: movement.maxHSpeed,
+        groundAccel: movement.groundAccel,
+        jumpImpulse: movement.jumpImpulse,
+        minSpeed: movement.minTurnSpeed,
+        gravitySlotA: movement.gravityGround,
+        gravitySlotC: movement.gravityC,
+        handlerData68: movement.gravityGround,
+        handlerData48: movement.jumpImpulse,
+        handlerData2c: movement.maxHSpeed,
+        turnStep0: movement.turnStep0,
+        turnStep1: movement.turnStep1,
+      };
+    }
     return bridge;
   }
 
@@ -1482,6 +1565,22 @@ export class RomDriverBridge {
     }
   }
 
+  /** Mirror the live host buttons into the decoded actor status words consumed by
+   * continuation/exit callbacks (+0x5bc bit 0x200 and +0x5d8 high nibble). */
+  private syncActionInput(input: PlayerInput | null, fallbackHeld = false): void {
+    const held = input ? input.attack || input.special : fallbackHeld;
+    const scratch = this.actor as RomActor & {
+      inputFlags5d8?: number;
+      statusWord5bc?: number;
+      bRetapInput?: boolean;
+      streamTickEnabled?: boolean;
+    };
+    scratch.inputFlags5d8 = held ? 0x10 : 0;
+    scratch.statusWord5bc = held ? 0x200 : 0;
+    scratch.bRetapInput = input?.attack ?? fallbackHeld;
+    scratch.streamTickEnabled = true;
+  }
+
   /** Copy RomActor → BorgRuntime (after the ROM step). */
   syncOut(runtime: BorgRuntime): void {
     const a = this.actor;
@@ -1500,31 +1599,34 @@ export class RomDriverBridge {
    *  machine; subsequent `tick` calls advance it. */
   tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean {
     if (this.specialActive) return false;
+    const actionIndex = runtime.command?.actionIndex ?? 2;
+    const variantIndex = runtime.command?.variantIndex ?? 0;
     this.runtime = runtime;
     this.armedHits = [];
     this.streamFrame = 0;
     // Load pre-decoded stream events for the choreography (anim + hitbox arming).
-    this.streamEvents = streamEventsFor(runtime.borgId);
+    this.streamEvents = null;
+    this.streamSchedules = [];
     // Determine the special's duration from the decoded stream (default 30 frames).
     this.specialMaxFrames = 30;
-    if (this.streamEvents) {
-      const maxFrame = this.streamEvents.reduce((m, e) => Math.max(m, e.frame ?? 0), 0);
-      this.specialMaxFrames = Math.max(this.specialMaxFrames, maxFrame + 5);
-    }
     // Fire frame-0 events immediately (armHit + playAnim).
     this.dispatchEvent(0);
     this.streamFrame = 1;
     // Don't change runtime.state/anim — let stepAttacks/stepMovement handle those.
     // The bridge layers hitbox/anim ON TOP of normal movement, not replacing it.
-    runtime.cooldowns["romSpecialActive"] = 1;
+    this.activeActionIndex = actionIndex;
+    this.activeVariantIndex = variantIndex;
+    this.romOwnedSpecial = true;
     this.specialActive = true;
+    this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
+    this.syncActionInput(null, true);
     // For G RED family (custom handler): also run the ROM physics for the launch arc.
     // The custom handler sets velocities that stepMovement will integrate.
     if (this.actor.rootAction) {
       const preX = runtime.pos.x;
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
-      dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex: 2, variantIndex: 0 });
+      dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex, variantIndex });
       stepRomActor(this.actor, this.tables, this.ctx);
       this.syncOut(runtime);
       // The shared-X blink-away reposition (phase 0's pos += (pos−target)×0.95) can
@@ -1550,6 +1652,17 @@ export class RomDriverBridge {
         }
       }
     }
+    const handled = this.actor.fbPhaseSlots.some((phase) => phase !== 0)
+      || this.actor.parts.some((part) => part.streamPtr >= 0)
+      || this.streamSchedules.length > 0;
+    if (!handled) {
+      this.specialActive = false;
+      this.romOwnedSpecial = false;
+      this.actor.controlWord &= ~0x3;
+      this.streamSchedules = [];
+      return false;
+    }
+    runtime.cooldowns["romSpecialActive"] = 1;
     return true;
   }
 
@@ -1560,19 +1673,26 @@ export class RomDriverBridge {
    *  calls advance the 4-phase machine each frame (ROM owns motion until recovery). */
   tryStartBAttack(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean {
     if (this.specialActive) return false;
-    if (!this.actor.hasBCharge) return false; // no ROM B-charge handler → generic path
+    if (!this.actor.hasBCharge) return false;
+    if (!runtime.command?.exact || runtime.command.actionIndex === null) return false;
+    const actionIndex = runtime.command.actionIndex;
+    const variantIndex = runtime.command?.variantIndex ?? 0;
     this.runtime = runtime;
     this.romOwnedSpecial = true;
     this.armedHits = [];
     this.streamFrame = 0;
     // Load pre-decoded stream events for the group-4 charge choreography (anim + fireChild).
-    this.streamEvents = streamEventsFor(runtime.borgId);
+    this.streamEvents = null;
+    this.streamSchedules = [];
     this.specialMaxFrames = 90; // generous ceiling; the phase machine's exit clears it sooner
     // Fire frame-0 events immediately (armHit + playAnim).
     this.dispatchEvent(0);
     this.streamFrame = 1;
     runtime.cooldowns["romSpecialActive"] = 1;
     this.specialActive = true;
+    this.activeActionIndex = actionIndex;
+    this.activeVariantIndex = variantIndex;
+    this.syncActionInput(null, true);
     // Arm the action-mode bits so the phase-3 exit (controlWord &= ~0x3) can signal
     // completion. The ROM sets these on entering attack state (cue 44 → state 61).
     this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
@@ -1582,7 +1702,7 @@ export class RomDriverBridge {
     const preX = runtime.pos.x;
     const preZ = runtime.pos.z;
     this.syncIn(runtime, all);
-    dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex: 3, variantIndex: 0 });
+    dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex, variantIndex });
     stepRomActor(this.actor, this.tables, this.ctx);
     this.syncOut(runtime);
     if (this.bounds) {
@@ -1600,15 +1720,30 @@ export class RomDriverBridge {
         runtime.vel.y = Math.max(0, runtime.vel.y);
       }
     }
+    const handled = this.actor.fbPhaseSlots.some((phase) => phase !== 0)
+      || this.actor.parts.some((part) => part.streamPtr >= 0)
+      || this.streamSchedules.length > 0;
+    if (!handled) {
+      this.specialActive = false;
+      this.romOwnedSpecial = false;
+      this.actor.controlWord &= ~0x3;
+      this.streamSchedules = [];
+      runtime.cooldowns["romSpecialActive"] = 0;
+      return false;
+    }
     return true;
   }
 
   /** Called from battle.ts before stepMovement/stepAttacks. Returns true ONLY when the
-   *  ROM driver needs to exclusively own the borg's motion (G RED's G Crash fly-up
-   *  arc). For shared-engine borgs, returns false — stepMovement + stepAttacks run
-   *  normally, and the bridge's tick handles ONLY the stream events (anim/hitbox/damage)
-   *  on top. This prevents the AI drift caused by skipping navigation during specials. */
-  tick(runtime: BorgRuntime, _dt: number, all: readonly BorgRuntime[]): boolean {
+   *  ROM driver needs to exclusively own the borg's motion/action phase. Ported
+   *  multi-frame X and B-charge handlers return true until their ROM exit clears the
+   *  action bits; unhandled generic paths return false before reaching this tick. */
+  tick(
+    runtime: BorgRuntime,
+    _dt: number,
+    all: readonly BorgRuntime[],
+    input: PlayerInput | null = null,
+  ): boolean {
     if (!this.specialActive) return false;
     this.runtime = runtime;
 
@@ -1620,8 +1755,14 @@ export class RomDriverBridge {
       const preX = runtime.pos.x;
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
+      this.syncActionInput(input, true);
       // Re-dispatch the command record each frame so rootAction fires under state 61.
-      dispatchCommandRecord(this.actor, { cueId: 44, stateMode: 3, actionIndex: 3, variantIndex: 0 });
+      dispatchCommandRecord(this.actor, {
+        cueId: 44,
+        stateMode: 3,
+        actionIndex: this.activeActionIndex,
+        variantIndex: this.activeVariantIndex,
+      });
       stepRomActor(this.actor, this.tables, this.ctx);
       this.syncOut(runtime);
       if (this.bounds) {
@@ -1651,6 +1792,7 @@ export class RomDriverBridge {
         this.romOwnedSpecial = false;
         this.armedHits = [];
         this.streamEvents = null;
+        this.streamSchedules = [];
         runtime.cooldowns["romSpecialActive"] = 0;
       }
       return true; // ROM owns this frame — skip stepMovement/stepAttacks
@@ -1672,6 +1814,7 @@ export class RomDriverBridge {
       this.specialActive = false;
       this.armedHits = [];
       this.streamEvents = null;
+      this.streamSchedules = [];
       runtime.cooldowns["romSpecialActive"] = 0;
       runtime.cooldowns["special"] = 90;
     }
@@ -1746,8 +1889,33 @@ export class RomDriverBridge {
    *  This drives the anim + hitbox arming at the exact ROM frame numbers, bypassing
    *  the raw bytecode walker when the bank bytes aren't loaded. */
   private dispatchEvent(frame: number): void {
-    if (!this.streamEvents) return;
-    for (const ev of this.streamEvents) {
+    if (this.streamEvents) this.dispatchEventList(this.streamEvents, frame);
+    for (const schedule of this.streamSchedules) {
+      const localFrame = frame - schedule.startFrame;
+      if (localFrame >= 0) this.dispatchEventList(schedule.events, localFrame);
+      if (!schedule.completed && frame >= schedule.endFrame) {
+        schedule.completed = true;
+        for (let partIndex = 0; partIndex < this.actor.parts.length; partIndex++) {
+          if ((schedule.mask & (1 << partIndex)) === 0) continue;
+          // Do not complete a newer overlapping stream on the same part.
+          const newer = this.streamSchedules.some((candidate) =>
+            candidate !== schedule
+            && candidate.startFrame > schedule.startFrame
+            && candidate.startFrame <= frame
+            && (candidate.mask & (1 << partIndex)) !== 0
+            && !candidate.completed);
+          if (newer) continue;
+          const part = this.actor.parts[partIndex]!;
+          part.streamPtr = -1;
+          part.active = 0;
+          if (partIndex === 0) this.actor.wallContact = 1;
+        }
+      }
+    }
+  }
+
+  private dispatchEventList(events: readonly StreamEvent[], frame: number): void {
+    for (const ev of events) {
       const evFrame = ev.frame ?? 0;
       if (evFrame !== frame) continue;
       switch (ev.op) {
@@ -1762,6 +1930,18 @@ export class RomDriverBridge {
             this.ctx.onPlayAnim?.(this.actor, ev.group, ev.slot, ev.op === "blendAnim");
           }
           break;
+        case "fireChild":
+          if (ev.variant !== undefined) this.ctx.onFireChild?.(this.actor, ev.variant);
+          break;
+        case "partState": {
+          const partIndex = ev.part ?? 0;
+          const part = this.actor.parts[partIndex];
+          if (!part) break;
+          part.stateByte = ev.state ?? 0;
+          (part as typeof part & { c?: number }).c = ev.aux ?? 0;
+          if (partIndex === 0) this.actor.contactP0 = part.stateByte;
+          break;
+        }
       }
     }
   }
@@ -1801,6 +1981,7 @@ export class RomDriverBridge {
     this.specialActive = false;
     this.romOwnedSpecial = false;
     this.armedHits = [];
+    this.streamSchedules = [];
     if (this.actor.fbState === 61) {
       dispatchFullBodyCue(this.actor, 0);
       dispatchUpperBodyCue(this.actor, 6);

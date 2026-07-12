@@ -14,6 +14,7 @@ import FunctionExplorer from './components/FunctionExplorer.vue'
 import BorgCard from './components/BorgCard.vue'
 import BorgGrid from './components/BorgGrid.vue'
 import BorgDetail from './components/BorgDetail.vue'
+import BorgModelViewer from './components/BorgModelViewer.vue'
 import CallGraph from './components/CallGraph.vue'
 import MemoryMapSvg from './components/MemoryMapSvg.vue'
 import TypeMatrix from './components/TypeMatrix.vue'
@@ -35,6 +36,7 @@ export default {
     app.component('BorgCard', BorgCard)
     app.component('BorgGrid', BorgGrid)
     app.component('BorgDetail', BorgDetail)
+    app.component('BorgModelViewer', BorgModelViewer)
     app.component('CallGraph', CallGraph)
     app.component('MemoryMapSvg', MemoryMapSvg)
     app.component('TypeMatrix', TypeMatrix)

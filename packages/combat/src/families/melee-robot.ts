@@ -24,6 +24,7 @@
 
 import type { RomActor } from "../rom/actor.js";
 import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
+import { isStreamTickEnabled, stepTargetYaw } from "../rom/helpers.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 
@@ -53,8 +54,6 @@ interface MeleeScratch {
   faceTarget?: boolean;
   lockTarget?: { x: number; y: number; z: number } | null;
   grounded?: boolean;
-  /** +0x1b03 part-animation hold byte; undefined keeps the host liveness fallback. */
-  streamTickGate?: boolean;
   /** actor+0x868/+0x874/+0x880, selected by previous action index modulo three. */
   rangeRows868?: readonly [number, number, number];
 }
@@ -90,6 +89,7 @@ function phase0(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>)
     actor.activeYaw = actor.heading;
     actor.lockYaw = actor.heading;
   } else {
+    stepTargetYaw(actor, MELEE_ROBOT.STATE_FACE);
     actor.activeYaw = actor.lockYaw;
   }
   const slot = actor.streamSlot;
@@ -105,11 +105,9 @@ function phase0(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>)
 
 // Phase 1 — FUN_800f2498 @ chunk_0026.c:2309.
 function phase1(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>, ctx: StreamContext): void {
-  // ROM gate is +0x1b03 != 0. The bridge does not stamp it for every family yet;
-  // undefined retains the old liveness behavior, while an explicit false is exact.
-  if (actor.streamTickGate ?? true) tickStream(actor, MELEE_ROBOT.PART_MASK, ctx);
+  if (isStreamTickEnabled(actor)) tickStream(actor, MELEE_ROBOT.PART_MASK, ctx);
   actor.handlerTimer -= actor.dt;
-  const facingComplete = actor.lockTarget != null;
+  const facingComplete = stepTargetYaw(actor, MELEE_ROBOT.STATE_FACE);
   if (actor.handlerTimer <= MELEE_ROBOT.TIMER_FLOOR || facingComplete) {
     actor.fbPhaseSlots[0] += 1;
     actor.handlerTimer = cfg.activeTimer;
@@ -149,7 +147,7 @@ function phase2(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>,
   }
   integratePhysics(0, actor, actor.activeYaw);
   if (actor.faceTarget) {
-    // zz_006d144_(actor, 0xc0) — face target (bridge pre-aims lockYaw).
+    stepTargetYaw(actor, MELEE_ROBOT.STATE_FACE);
   }
   if (actor.wallContact !== 0) {
     actor.controlWord = actor.controlWord & ~0x3;

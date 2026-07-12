@@ -239,6 +239,27 @@ function decodeStream(addr, streamStarts) {
       frame = 0;
       frameKind = "start";
       events.push({ op: op === 0x01 ? "playAnim" : "blendAnim", ...lastAnim });
+    } else if (op === 0x02) {
+      // FUN_8004c7fc / action-vm decode: part-0 signed choreography bytes.
+      events.push({
+        op: "partState",
+        part: 0,
+        state: (b[2] << 24) >> 24,
+        aux: (b[3] << 24) >> 24,
+        frame,
+        frameKind,
+      });
+    } else if (op === 0x03) {
+      // Part-1 signed choreography bytes (+0x1d0f/+0x1d10). The same record may
+      // also author the +0x5e0 control byte; the runtime VM handles that side effect.
+      events.push({
+        op: "partState",
+        part: 1,
+        state: (b[1] << 24) >> 24,
+        aux: (b[2] << 24) >> 24,
+        frame,
+        frameKind,
+      });
     } else if (op === 0x0a) {
       const kind = (b[1] << 24) >> 24;
       events.push({
@@ -431,8 +452,11 @@ function decodeBank(base) {
       slotCount++;
       const { events, end, fallsThroughTo } = decodeStream(addr, streamStarts);
       const hits = events.filter((e) => e.op === "armHit" && e.kind > 0);
-      if (hits.length === 0) continue;
-      hitSlotCount++;
+      const runtimeEvents = events.filter((e) =>
+        e.op === "armHit" || e.op === "partState" || e.op === "fireChild" ||
+        e.op === "playAnim" || e.op === "blendAnim" || e.op === "wait");
+      if (runtimeEvents.length === 0) continue;
+      if (hits.length > 0) hitSlotCount++;
       eventCount += events.length;
       out[`g${g.group}`] ??= {};
       out[`g${g.group}`][`s${s}`] = {

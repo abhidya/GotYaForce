@@ -16,7 +16,7 @@ export const THUNDER_X = {
 export interface ThunderFamilyCtx {
   onPlayCue?: (actor: RomActor, cueId: number) => void;
   /** Allocate resource (port of zz_006dbe0_). */
-  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
   /** Spawn child projectile for index 0-3 (port of zz_00e058c_). */
   onThunderChild?: (actor: RomActor, index: number) => boolean;
   /** Spawn FX (port of zz_00f036c_). */

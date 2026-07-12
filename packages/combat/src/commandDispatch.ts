@@ -158,7 +158,10 @@ export function resolveLiveCommand(
   if (type === null) return null;
   const button = commandButtonForType(type, ctx);
   if (button === null) {
-    return { word, type, button: null, recordAddress: null, subtype: null, exact: false };
+    return {
+      word, type, button: null, recordAddress: null, subtype: null,
+      actionIndex: null, variantIndex: null, exact: false,
+    };
   }
   const records = commandMoveRecordsForBorgButton(borgId, button);
   const record = selectCommandRecord(records, {
@@ -171,6 +174,8 @@ export function resolveLiveCommand(
     button,
     recordAddress: record?.address ?? null,
     subtype: record?.subtype ?? null,
+    actionIndex: record?.actionIndex ?? null,
+    variantIndex: record?.variantIndex ?? null,
     exact: record !== null,
   };
 }

@@ -306,6 +306,33 @@ export function grantAmmo(b: BorgRuntime, weaponIdx: number, p: BorgProfile): vo
   if (weaponIdx === 0) b.ammo = cell.cur;
 }
 
+/** Port of zz_006dbe0_: check a weapon cell and optionally consume `count` units.
+ * `consume=false` is the ROM's param_4==0 query-only arm. */
+export function useWeaponCell(
+  b: BorgRuntime,
+  p: BorgProfile,
+  weaponIdx: number,
+  count: number,
+  consume: boolean,
+): boolean {
+  const cell = ensureWeaponCells(b, p)[weaponIdx];
+  if (!cell) return false;
+  // The browser model represents ROM cells with max<=0 as infinite/unused.
+  if (cell.max <= 0) return true;
+  if (cell.cur < count) return false;
+  if (!consume) return true;
+  cell.cur -= count;
+  if (cell.refillType === 1) {
+    cell.timer += cell.refillParam;
+  } else if (cell.refillType <= 0) {
+    if (cell.cur === 0) cell.timer = cell.refillParam;
+  } else if (cell.refillType < 4) {
+    cell.timer = 0;
+  }
+  if (weaponIdx === 0) b.ammo = cell.cur;
+  return true;
+}
+
 // ---------------------------------------------------------------------------------------
 // Source target lock state (R switch-lock, Z hold-ally-lock).
 //

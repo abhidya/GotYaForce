@@ -1591,6 +1591,10 @@ export function runSelfTest(): number {
     const b = makeMinimalGRedBorg();
     b.grounded = true;
     b.pos = { x: 100, y: 0, z: 100 };
+    b.command = {
+      word: 0, type: 3, button: "B Charge", recordAddress: "test",
+      subtype: 0, actionIndex: 3, variantIndex: 0, exact: true,
+    };
     const driver = RomDriverBridge.attach(b, {});
     assert(driver !== null, "RomDriverBridge.attach for pl0615");
     if (driver) {
@@ -2447,11 +2451,10 @@ export function runSelfTest(): number {
     actor.rootAction!(actor);
     assert(actor.fbPhaseSlots[0] === 2 && actor.stateTimer === 10,
       "action 0 phase 1 seeds the exact 10-frame second windup");
-    actor.tankBarrelsReady = true;
+    actor.stateTimer = 0;
     actor.rootAction!(actor);
     assert(actor.fbPhaseSlots[0] === 3,
       "barrel-readiness advances action 0 into the burst phase");
-    actor.tankBarrelsReady = false;
     for (let i = 0; i < 13; i++) actor.rootAction!(actor);
     assert(shots.filter(([address]) => address === NORMAL_TANK.SHOT_HELPER).length === 3,
       "short action-0 branch fires exactly three shots through zz_0082824_");
@@ -2520,7 +2523,7 @@ export function runSelfTest(): number {
       && actor.eagleAimTimer === EAGLE_ROBOT_ACTION0.AIM_TIMER,
       "PROTO EAGLE v0 enters table 0x8033195c with a 30-frame aim timer");
     actor.contactP0 = 1;
-    actor.eagleAimReady = true;
+    actor.eagleAimTimer = 0;
     actor.rootAction!(actor);
     assert(actor.fbPhaseSlots[0] === 2 && actor.handlerTimer === 2,
       "PROTO EAGLE fire transition uses its exact 2-frame repeat timer");
@@ -2571,8 +2574,8 @@ export function runSelfTest(): number {
     actor.fbPhaseSlots[0] = 2;
     actor.wallContact = 1;
     handler(actor);
-    assert(actor.fbPhaseSlots[0] === 3,
-      "ammo denial takes FUN_800f2008 failure branch (+0x540 += 1)");
+    assert(actor.fbPhaseSlots[0] === 4,
+      "ammo denial takes FUN_800f2008 failure branch (+0x540 += 2)");
   }
 
   if (failures > 0) {
@@ -2640,9 +2643,9 @@ function runBridgeTest(): void {
   // custom handler still sets velocity via syncOut.
   assert(b.vel.y > 0, `bridge syncOut produced upward vel.y (got ${b.vel.y.toFixed(3)})`);
   assert((b.cooldowns["romSpecialActive"] ?? 0) === 1, "romSpecialActive cooldown flag set");
-  // Tick now returns false (composes with normal movement, doesn't skip it).
+  // Ported multi-frame actions own motion until their ROM exit clears the action bits.
   const owned = b.romDriver!.tick(b, 1, [b]);
-  assert(!owned, "tick returns false (bridge composes with normal movement, not replacing it)");
+  assert(owned, "tick returns true while the ported X state machine owns motion");
 }
 
 function runStateTableTests(): void {

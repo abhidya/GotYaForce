@@ -1,5 +1,15 @@
 import { actionProfileForProfile, type PrimaryAttackKind } from "./actionProfiles.js";
 import {
+  chargeMoveForBorgId,
+  comboLadderForBorgId,
+  xMoveForBorgId,
+  type ExactMoveLeaf,
+} from "./actionStreamData.js";
+import {
+  shotHitRadiusForBorgId,
+  shotKindForBorgId,
+} from "./attackHitData.js";
+import {
   commandMoveRecordsForBorgButton,
   type CommandMoveRecord,
   type RuntimeCommandMoveButton,
@@ -24,6 +34,8 @@ export type RuntimeMoveCommandStatus =
   // X Charge was unimplemented; commandStatusForButton no longer returns it).
   | "x-charge-blocked";
 export type RuntimeMoveHitboxStatus =
+  | "source-shot-radius"
+  | "source-hit-record"
   | "projectile-radius"
   | "generic-melee-volume"
   | "generic-special-aoe"
@@ -113,18 +125,25 @@ export function runtimeMoveCoverage(): {
   borgsWithMoves: number;
   moves: number;
   contextualBProfiles: number;
+  exactHitboxMoves: number;
 } {
   let borgsWithMoves = 0;
   let moves = 0;
   let contextualBProfiles = 0;
+  let exactHitboxMoves = 0;
   for (const id of allMoveProfileIds()) {
     const profile = moveProfileForBorgId(id);
     if (!profile) continue;
     borgsWithMoves += 1;
     moves += profile.moves.length;
     if (usesContextualBResolver(id)) contextualBProfiles += 1;
+    for (const button of BUTTONS) {
+      if (moveByButton(id, button) && hitboxCoverageForBinding(id, button, actionForButton(button)).exact) {
+        exactHitboxMoves += 1;
+      }
+    }
   }
-  return { borgsWithMoves, moves, contextualBProfiles };
+  return { borgsWithMoves, moves, contextualBProfiles, exactHitboxMoves };
 }
 
 function allMoveProfileIds(): string[] {
@@ -150,6 +169,7 @@ function buildBinding(
   const action = actionForButton(button);
   const weaponSlot = weaponSlotForButton(button);
   const commandRecords = commandMoveRecordsForBorgButton(id, button);
+  const hitboxCoverage = hitboxCoverageForBinding(id, button, action);
   return {
     button,
     move,
@@ -161,8 +181,8 @@ function buildBinding(
     commandRecords,
     exactCommand: commandRecords.length > 0,
     actionStatus: actionProfile ? actionStatusFor(actionProfile, action) : "profile-backed",
-    hitboxStatus: hitboxStatusForAction(action),
-    exactHitbox: false,
+    hitboxStatus: hitboxCoverage.status,
+    exactHitbox: hitboxCoverage.exact,
   };
 }
 
@@ -205,6 +225,39 @@ function hitboxStatusForAction(action: RuntimeMoveAction): RuntimeMoveHitboxStat
   if (action === "melee") return "generic-melee-volume";
   if (action === "special" || action === "special-charge") return "generic-special-aoe";
   return "unmapped";
+}
+
+function hitboxCoverageForBinding(
+  id: string,
+  button: RuntimeMoveButton,
+  action: RuntimeMoveAction,
+): { status: RuntimeMoveHitboxStatus; exact: boolean } {
+  if (button === "B Shot") {
+    if (hasExactShotRadius(id)) return { status: "source-shot-radius", exact: true };
+    return { status: hitboxStatusForAction(action), exact: false };
+  }
+  if (button === "B Attack") {
+    if ((comboLadderForBorgId(id)?.length ?? 0) > 0) return { status: "source-hit-record", exact: true };
+    return { status: hitboxStatusForAction(action), exact: false };
+  }
+  if (button === "B Charge") {
+    if (hasExactHitWindow(chargeMoveForBorgId(id))) return { status: "source-hit-record", exact: true };
+    if (hasExactShotRadius(id)) return { status: "source-shot-radius", exact: true };
+    return { status: hitboxStatusForAction(action), exact: false };
+  }
+  if (button === "X" || button === "X Charge") {
+    if (hasExactHitWindow(xMoveForBorgId(id))) return { status: "source-hit-record", exact: true };
+    return { status: hitboxStatusForAction(action), exact: false };
+  }
+  return { status: hitboxStatusForAction(action), exact: false };
+}
+
+function hasExactShotRadius(id: string): boolean {
+  return shotKindForBorgId(id) !== null && shotHitRadiusForBorgId(id) !== null;
+}
+
+function hasExactHitWindow(leaf: ExactMoveLeaf | null): boolean {
+  return leaf !== null && leaf.kind !== null && leaf.activeStart !== null && leaf.activeEnd !== null;
 }
 
 function ammoFor(id: string, level: number | undefined, slot: 0 | 1 | null): RuntimeMoveAmmo {

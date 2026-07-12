@@ -1,6 +1,11 @@
 import { defineConfig } from 'vitepress'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const BASE = process.env.GH_PAGES_BASE ?? '/GotYaForce/'
+const SKIP_PUBLIC_ASSETS = process.env.GF_ATLAS_SKIP_MODELS === '1'
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const PUBLIC_DIR = join(__dirname, '..', 'public')
 
 export default defineConfig({
   title: 'Gotcha Force Research Atlas',
@@ -8,6 +13,7 @@ export default defineConfig({
   base: BASE,
   cleanUrls: true,
   lastUpdated: true,
+  vite: { publicDir: SKIP_PUBLIC_ASSETS ? false : PUBLIC_DIR },
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${BASE}favicon.svg` }],
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],

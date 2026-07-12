@@ -396,7 +396,7 @@ function cmMeleeV1Ph2(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
 
 export interface CyberMachineFamilyCtx extends StreamContext {
   onFaceComplete?: (actor: RomActor, mask: number) => boolean;
-  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
   onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
 }
 

@@ -105,6 +105,8 @@ const atlasLink = computed(() => withBase('/borgs/'))
       </div>
     </header>
 
+    <BorgModelViewer :id="borg.id" :name="borg.name" />
+
     <div class="bd-cols">
       <section class="bd-stats bd-panel">
         <div class="bd-panel-head">Core stats</div>

@@ -45,6 +45,7 @@ import {
   stepHitStatus,
   stepInvincibility,
   stepProjectiles,
+  useWeaponCell,
   stepVampireDrain,
 } from "./combat.js";
 import { challengeSideRanksForMode } from "./damageFormula.js";
@@ -387,8 +388,8 @@ class BattleImpl implements Battle {
         return false;
       },
       onAllocateResource: (actor, type, count, mode) => {
-        void actor; void type; void count; void mode;
-        return true;
+        void actor;
+        return useWeaponCell(b, prof, type, count, (mode ?? 0) !== 0);
       },
       onFamilyProjectile: (_actor, addr, kind) => {
         battle.addRomProjectile(b, addr, kind);
@@ -414,7 +415,7 @@ class BattleImpl implements Battle {
         actor.heading = Math.round(Math.atan2(dx, dz) / (Math.PI * 2) * 0x10000) & 0xffff;
       },
       onCheckCollision: (actor) => {
-        return actor.wallContact;
+        return (actor as RomActor & { grounded?: boolean }).grounded ? 0 : 1;
       },
       onPlayCue: (_actor, cueId) => {
         void cueId;
@@ -700,7 +701,7 @@ class BattleImpl implements Battle {
       // ROM-family driver (1:1 ported state machine) — when active, owns the borg's
       // motion + attacks for this frame; skip the generic stepMovement/stepAttacks.
       // See packages/combat/src/bridge.ts. Borgs without a ported family are unaffected.
-      if (b.romDriver?.tick(b, SIM.DT, this.state.borgs)) {
+      if (b.romDriver?.tick(b, SIM.DT, this.state.borgs, input)) {
         // Drain any projectiles the ROM stream's fireChild op spawned this tick.
         const romProjs = b.romDriver.drainProjectiles();
         if (romProjs.length > 0) this.state.projectiles.push(...romProjs);

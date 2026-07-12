@@ -56,7 +56,7 @@ function contactSpawnForBorg(borgNumber: number): { addr: number; type: number }
 
 export interface WormFamilyCtx extends StreamContext {
   onFaceComplete?: (actor: RomActor, mask: number) => boolean;
-  onAllocateResource?: (actor: RomActor, type: number, count: number, mode: number) => boolean;
+  onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
   onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
 }
 

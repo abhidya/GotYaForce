@@ -69,6 +69,14 @@ export interface StreamContext {
    *  status changes (STAR HERO's buff application plays cue 0xa5). The host wires this to
    *  the existing voice/sound presentation layer. */
   onPlayCue?: (actor: RomActor, cueId: number) => void;
+  /** Exact zz_006dbe0_ bridge: weapon cell check/consume. consumeMode 0 checks only;
+   *  nonzero snapshots/decrements the cell and arms its refill behavior. */
+  onAllocateResource?: (
+    actor: RomActor,
+    weaponIndex: number,
+    count: number,
+    consumeMode?: number,
+  ) => boolean;
 }
 
 /**
@@ -106,6 +114,9 @@ export function startStream(
   slot: number,
   rate: number = -1.0,
 ): void {
+  const hostScheduled = (actor as RomActor & {
+    onStartStream?: (group: number, slot: number, mask: number) => boolean;
+  }).onStartStream?.(group, slot, mask) === true;
   const effective = mask & 0xff; // actor.+0x579 is the part-enable mask; surfaced as 0xff here.
   if ((effective & 2) !== 0) {
     // Clear +0x709 (chunk_0006.c:1442-1444) — the contact-slow flag. Bridge clears it
@@ -113,7 +124,17 @@ export function startStream(
   }
   const streamStart = resolveStreamOffset(actor, group, slot);
   if (streamStart < 0) {
-    for (const part of actor.parts) resetPart(part);
+    for (let i = 0; i < actor.parts.length; i++) {
+      if ((effective & (1 << i)) === 0) continue;
+      const part = actor.parts[i]!;
+      resetPart(part);
+      if (hostScheduled) {
+        // The host owns timing from the decoded event schedule when raw stream bytes
+        // are not resident. A non-negative sentinel keeps the ROM completion byte low.
+        part.streamPtr = Number.MAX_SAFE_INTEGER;
+        part.active = 1;
+      }
+    }
     return;
   }
   for (let i = 0; i < 4; i++) {
@@ -125,6 +146,7 @@ export function startStream(
       resetPart(part);
       part.streamPtr = streamStart;
       part.active = 1;
+      if (i === 0) actor.wallContact = 0;
       (part as RomPartState & { rate: number }).rate = rate;
     }
   }
@@ -151,13 +173,21 @@ function resetPart(part: RomPartState): void {
  *  JS has no function-pointer table cost worth worrying about. Every handler's operand
  *  layout is the DERIVED decode from the disasm.
  */
-export function tickStream(actor: RomActor, mask: number, ctx: StreamContext = {}): void {
+export function tickStream(actor: RomActor, mask: number, ctx: StreamContext = {}): boolean {
+  let completed = false;
   for (let i = 0; i < 4; i++) {
     if ((mask & (1 << i)) === 0) continue;
     const part = actor.parts[i]!;
     if (part.streamPtr < 0) continue;
+    const before = part.streamPtr;
     tickPart(actor, part, ctx);
+    if (before >= 0 && part.streamPtr < 0) {
+      part.active = 0;
+      if (i === 0) actor.wallContact = 1;
+      completed = true;
+    }
   }
+  return completed;
 }
 
 function tickPart(actor: RomActor, part: RomPartState, ctx: StreamContext): void {
@@ -181,7 +211,7 @@ function tickPart(actor: RomActor, part: RomPartState, ctx: StreamContext): void
     if (opByte === 0x00) {
       // Wait op: mode at byte+2, val s16 at byte+2..+3. The ROM's full wait dispatch
       // (chunk_0006.c:2024-2081) covers modes 0/1/2/8; here we honor the common ones.
-      const mode = bank[part.streamPtr + 2]! >>> 0;
+      const mode = bank[part.streamPtr + 1]! >>> 0;
       const val = readS16(bank, part.streamPtr + 2);
       if (mode === 0 && val === -1) {
         part.streamPtr = -1; // end-of-script sentinel
@@ -242,8 +272,9 @@ function dispatchOp(
     case 0x02: { // part-0-state setter: b2→+0x1cef, b3→+0x1cf0, b4→+0x6e8, b5→+0x6e9; b1 toggles +0x582
       // The handler is part-0-gated; the offsets +0x1cef/+0x1cf0 ARE the part-0 block's
       // +0x1b/+0x1c. +0x6e8/+0x6e9 are actor-global FX-mode bytes.
-      actor.parts[0]!.stateByte = b2;
-      (actor.parts[0] as RomPartState & { c?: number }).c = b3;
+      actor.parts[0]!.stateByte = b2 >= 0x80 ? b2 - 0x100 : b2;
+      actor.contactP0 = actor.parts[0]!.stateByte;
+      (actor.parts[0] as RomPartState & { c?: number }).c = b3 >= 0x80 ? b3 - 0x100 : b3;
       const fx = actor as RomActor & { fxMode0?: number; fxMode1?: number };
       fx.fxMode0 = b2 >= 0x80 ? b2 - 0x100 : b2; // sign-extend; the ROM stores signed
       // b1 toggles +0x582 (the camera/default-group byte)
@@ -251,8 +282,10 @@ function dispatchOp(
       else if (b1 !== 0xff) actor.defaultGroup = b1 >= 0x80 ? b1 - 0x100 : b1;
       return;
     }
-    case 0x03: { // control-word setter: bits 20..27 of +0x5e0
-      const u16 = (b2 << 8) | bank[ptr + 6]!; // operand byte 6..7 u16 (halfword at +6)
+    case 0x03: { // part-1 state + control-word setter: +0x1d0f/+0x1d10, bits 20..27
+      actor.parts[1]!.stateByte = b1 >= 0x80 ? b1 - 0x100 : b1;
+      (actor.parts[1] as RomPartState & { c?: number }).c = b2 >= 0x80 ? b2 - 0x100 : b2;
+      const u16 = (bank[ptr + 6]! << 8) | bank[ptr + 7]!;
       // The ROM masks +0x5e0 to clear bits 20..27 then ORs in (u16 & 0xff00).
       actor.controlWord = (actor.controlWord & ~0x0ff00000) | (u16 & 0xff00) << 12;
       return;
@@ -277,8 +310,8 @@ function dispatchOp(
       else mode.stateMode = b3;
       return;
     }
-    case 0x09: { // fireChild: variant u16 = (b1<<8)|b2 ... actually zz_0099e70_(actor, b1|b2<<8)
-      const variant = b1 | (b2 << 8);
+    case 0x09: { // fireChild: signed byte 3 (FUN_8004c67c)
+      const variant = b3 >= 0x80 ? b3 - 0x100 : b3;
       ctx.onFireChild?.(actor, variant);
       return;
     }

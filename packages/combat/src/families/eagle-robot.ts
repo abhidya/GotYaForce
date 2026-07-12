@@ -11,6 +11,12 @@ import { integratePhysics, vecAdd, vecScale, vecSubtract } from "../rom/physics.
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 import { configureEagleFamily } from "./shared-morph-x.js";
+import {
+  allocateWeapon,
+  isStreamTickEnabled,
+  stepTargetRoll,
+  stepTargetYaw,
+} from "../rom/helpers.js";
 
 export const EAGLE_ROBOT_ACTION0 = {
   AIM_TIMER: 30.0,          // FLOAT_80439d08
@@ -33,13 +39,10 @@ export interface EagleRobotScratch {
   /** ROM +0x6ee/+0x6ef. */
   eagleStreamSeed?: number;
   eagleAmmoCount?: number;
-  /** Host surface for zz_006d0dc_/zz_006dee8_ aim completion. */
-  eagleAimReady?: boolean;
   /** ROM +0x5b4 bit 0x200 plus negative +0x1cef repeat event. */
   eagleRepeatRequested?: boolean;
   /** Directional stream selector corresponding to +0x1d10. */
   eagleDirectionIndex?: number;
-  streamTickGate?: boolean;
   housekeeping73f?: number;
 }
 
@@ -55,6 +58,7 @@ function firePair(actor: RomActor & EagleRobotScratch, ctx: StreamContext): void
   actor.eagleStreamSeed = 1;
   actor.eagleAimTimer = EAGLE_ROBOT_ACTION0.UPPER_AIM_TIMER;
   actor.handlerTimer = repeatTimer(actor);
+  if (!allocateWeapon(actor, ctx, 0, 1, true)) return;
   actor.eagleAmmoCount = Math.max(0, (actor.eagleAmmoCount ?? 1) - 1);
   if (actor.borgNumber === 0x606) {
     ctx.onFamilyProjectile?.(actor, 0x800c3be0, 0x1e);
@@ -82,6 +86,7 @@ function fullBodyBurst(ctx: StreamContext): (actor: RomActor) => void {
       case 0: { // FUN_801299e4
         actor.fbPhaseSlots[0] = 1;
         actor.eagleAimTimer = EAGLE_ROBOT_ACTION0.AIM_TIMER;
+        stepTargetYaw(actor, 0xc1);
         startStream(actor, 0xf, EAGLE_ROBOT_ACTION0.STREAM_GROUP,
           actor.eagleStreamSeed ?? 0, EAGLE_ROBOT_ACTION0.STREAM_RATE);
         actor.controlWord &= ~0xb0;
@@ -96,7 +101,8 @@ function fullBodyBurst(ctx: StreamContext): (actor: RomActor) => void {
       case 1: // FUN_80129ac4
         tickStream(actor, 0xf, ctx);
         actor.eagleAimTimer = (actor.eagleAimTimer ?? 0) - actor.dt;
-        if (actor.contactP0 !== 0 && (actor.eagleAimReady === true || (actor.eagleAimTimer ?? 0) <= 0)) {
+        const aimReady = stepTargetYaw(actor, 0xc1);
+        if (actor.contactP0 !== 0 && (aimReady || (actor.eagleAimTimer ?? 0) <= 0)) {
           actor.fbPhaseSlots[0] = 2;
           firePair(actor, ctx);
         }
@@ -136,13 +142,15 @@ function upperBodyBurst(ctx: StreamContext): (actor: RomActor) => void {
       case 0: // FUN_80129da8
         actor.fbPhaseSlots[0] = 1;
         actor.eagleAimTimer = EAGLE_ROBOT_ACTION0.UPPER_AIM_TIMER;
+        stepTargetRoll(actor, true);
         startStream(actor, 1, EAGLE_ROBOT_ACTION0.STREAM_GROUP, directionalSlot(actor),
           EAGLE_ROBOT_ACTION0.STREAM_RATE);
         return;
       case 1: // FUN_80129e58
-        if (actor.contactP0 === 0 || actor.streamTickGate !== false) tickStream(actor, 1, ctx);
+        if (actor.contactP0 === 0 || isStreamTickEnabled(actor)) tickStream(actor, 1, ctx);
         actor.eagleAimTimer = (actor.eagleAimTimer ?? 0) - actor.dt;
-        if (actor.contactP0 !== 0 && (actor.eagleAimReady === true || (actor.eagleAimTimer ?? 0) <= 0)) {
+        const aimResult = stepTargetRoll(actor, true);
+        if (actor.contactP0 !== 0 && (aimResult !== 0 || (actor.eagleAimTimer ?? 0) <= 0)) {
           actor.fbPhaseSlots[0] = 2;
           firePair(actor, ctx);
         }
@@ -174,16 +182,18 @@ function airborneBurst(ctx: StreamContext, recovery: (actor: RomActor) => void):
       case 0: // FUN_8012a170
         actor.fbPhaseSlots[0] = 1;
         actor.eagleAimTimer = EAGLE_ROBOT_ACTION0.AIM_TIMER;
+        stepTargetYaw(actor, 0x81);
         integratePhysics(EAGLE_ROBOT_ACTION0.GRAVITY, actor, actor.lockYaw);
         startStream(actor, 1, EAGLE_ROBOT_ACTION0.STREAM_GROUP,
           (actor.eagleStreamSeed ?? 0) + 6, EAGLE_ROBOT_ACTION0.STREAM_RATE);
         startStream(actor, 2, 0, 0xd, EAGLE_ROBOT_ACTION0.STREAM_RATE);
         return;
       case 1: // FUN_8012a220
-        if (actor.contactP0 === 0 || actor.streamTickGate !== false) tickStream(actor, 0xf, ctx);
+        if (actor.contactP0 === 0 || isStreamTickEnabled(actor)) tickStream(actor, 0xf, ctx);
         integratePhysics(EAGLE_ROBOT_ACTION0.GRAVITY, actor, actor.lockYaw);
         actor.eagleAimTimer = (actor.eagleAimTimer ?? 0) - actor.dt;
-        if (actor.contactP0 !== 0 && (actor.eagleAimReady === true || (actor.eagleAimTimer ?? 0) <= 0)) {
+        const aimReady = stepTargetYaw(actor, 0x81);
+        if (actor.contactP0 !== 0 && (aimReady || (actor.eagleAimTimer ?? 0) <= 0)) {
           actor.fbPhaseSlots[0] = 2;
           firePair(actor, ctx);
           actor.controlWord &= ~0x2;

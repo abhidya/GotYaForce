@@ -12,6 +12,7 @@ import { dispatchFullBodyCue } from "../rom/dispatch.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
+import { allocateWeapon, toS16 } from "../rom/helpers.js";
 
 export const NORMAL_TANK = {
   WINDUP_A: 15,
@@ -41,8 +42,8 @@ export const NORMAL_TANK = {
 export interface NormalTankScratch {
   /** Two target vectors at ROM +0xa30/+0xa90; the nearer selects barrel side. */
   tankTargetVectors?: readonly [Vec3, Vec3];
-  /** Result of zz_007da18_'s two-barrel readiness test. */
-  tankBarrelsReady?: boolean;
+  /** +0x18d4/+0x18d6 pairs for the two zz_007da18_ barrel solvers. */
+  tankBarrelAngles?: [[number, number], [number, number]];
   /** ROM +0x5b4 bit 0x200: extends a burst from three shots to five. */
   tankLongBurst?: boolean;
   /** ROM +0x144 turret pitch and zz_00853ec_(actor,2) target pitch. */
@@ -95,7 +96,37 @@ function nearestBarrel(actor: RomActor & NormalTankScratch): number {
 function fireTurretShot(actor: RomActor, side: number, ctx: StreamContext): void {
   // zz_006dbe0_(actor,0,1,1) is the ammo gate. Resource ownership remains in the
   // host; the family callback is the exact zz_0082824_(actor, side ? 2 : 3) call.
-  ctx.onFamilyProjectile?.(actor, NORMAL_TANK.SHOT_HELPER, side === 0 ? 3 : 2);
+  if (allocateWeapon(actor, ctx, 0, 1, true)) {
+    ctx.onFamilyProjectile?.(actor, NORMAL_TANK.SHOT_HELPER, side === 0 ? 3 : 2);
+  }
+}
+
+/** Port-side scalar form of zz_007da18_'s two FUN_8006cc90 barrel solvers. The ROM
+ * derives the same target yaw/pitch from the two barrel bone matrices and advances each
+ * accumulator by 0.2*dt of its remaining error. */
+function stepTankBarrels(actor: RomActor & NormalTankScratch, side: number): boolean {
+  const target = actor.tankTargetVectors?.[side];
+  if (!target) return true;
+  const dx = target.x - actor.pos.x;
+  const dy = target.y - actor.pos.y;
+  const dz = target.z - actor.pos.z;
+  const desiredYaw = toS16(Math.round(Math.atan2(dx, dz) / (Math.PI * 2) * 0x10000));
+  const desiredPitch = toS16(Math.round(-Math.atan2(dy, Math.hypot(dx, dz)) /
+    (Math.PI * 2) * 0x10000));
+  const angles = actor.tankBarrelAngles ?? [[0, 0], [0, 0]];
+  actor.tankBarrelAngles = angles;
+  const pair = angles[side]!;
+  const approach = (current: number, desired: number): [number, boolean] => {
+    const diff = toS16(desired - current);
+    const delta = Math.trunc(diff * Math.min(1, 0.2 * actor.dt));
+    if (delta === 0) return [desired, true];
+    return [toS16(current + delta), false];
+  };
+  const [yaw, yawReady] = approach(pair[0], desiredYaw);
+  const [pitch, pitchReady] = approach(pair[1], desiredPitch);
+  pair[0] = yaw;
+  pair[1] = pitch;
+  return yawReady && pitchReady;
 }
 
 /** Action 0, shared by both variant tables (the tables contain byte-identical phases). */
@@ -114,7 +145,8 @@ export function createNormalTankAction0(ctx: StreamContext): (actor: RomActor) =
         return;
       case 2: { // FUN_8007cd90 / FUN_8007d0dc
         actor.stateTimer -= actor.dt;
-        if (actor.stateTimer < 1 || actor.tankBarrelsReady === true) {
+        const side = nearestBarrel(actor);
+        if (actor.stateTimer < 1 || stepTankBarrels(actor, side)) {
           actor.fbPhaseSlots[0] = 3;
           actor.stateTimer = 0;
           actor.handlerTimer = 0; // ROM +0x54a
@@ -196,7 +228,9 @@ function fireTankX(actor: RomActor & NormalTankScratch, airborne: boolean, ctx: 
       actor.yVel = NORMAL_TANK.AIR_HORIZONTAL_SPEED;
       actor.gravityCoeff = actor.descriptor?.handlerData6c ?? NORMAL_TANK.ZERO;
     }
-    ctx.onFamilyProjectile?.(actor, 0x80084600, 2);
+    if (allocateWeapon(actor, ctx, 2, 1, true)) {
+      ctx.onFamilyProjectile?.(actor, 0x80084600, 2);
+    }
     actor.tankAimEnabled = 0;
   }
   if (!airborne && actor.contactP0 === 1) {

@@ -62,4 +62,3 @@ Flags: `too-dark` (bg + light luma both low), `too-flat` (zero directional light
 ### st49 (GREATER TRICITY AREA)
 
 - fog-clip: fog.end=25000.000 < arena collision XZ diagonal=28284.271
-

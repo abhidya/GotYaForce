@@ -79,6 +79,9 @@ export interface BorgMovementPhysics {
    *  bit blocks that flagsB status write (slow/haste, discrete or aura). Bit 0x400 is SHARED
    *  by both aura types (contact-slow and contact-haste). */
   statusImmunityB: number;
+  /** +0xac/+0xae — BAM16 turn steps used by FUN_800669d0 aim modes x0/x1. */
+  turnStep0: number;
+  turnStep1: number;
 }
 
 type MovementPhysicsFile = {

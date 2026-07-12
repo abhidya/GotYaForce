@@ -22,7 +22,9 @@
    "cameraFollowMinSlot1": "0xc8",
    "cameraFollowMaxSlot1": "0xcc",
    "statusImmunityA": "0xa8",
-   "statusImmunityB": "0xaa"
+   "statusImmunityB": "0xaa",
+   "turnStep0": "0xac",
+   "turnStep1": "0xae"
   },
   "region": "GG4E",
   "borgs": 208,
@@ -48,7 +50,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 4864
   },
   "pl0001": {
    "maxHSpeed": 8.2,
@@ -69,7 +73,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 4864
   },
   "pl0002": {
    "maxHSpeed": 12,
@@ -90,7 +96,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 4864
   },
   "pl0003": {
    "maxHSpeed": 12,
@@ -111,7 +119,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0004": {
    "maxHSpeed": 13,
@@ -132,7 +142,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0005": {
    "maxHSpeed": 13.5,
@@ -153,7 +165,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0006": {
    "maxHSpeed": 12,
@@ -174,7 +188,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0007": {
    "maxHSpeed": 13,
@@ -195,7 +211,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0008": {
    "maxHSpeed": 12,
@@ -216,7 +234,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 4864
   },
   "pl0009": {
    "maxHSpeed": 13.5,
@@ -237,7 +257,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl000a": {
    "maxHSpeed": 12,
@@ -258,7 +280,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 4864
   },
   "pl000b": {
    "maxHSpeed": 12,
@@ -279,7 +303,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl000c": {
    "maxHSpeed": 12,
@@ -300,7 +326,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 4864
   },
   "pl0100": {
    "maxHSpeed": 10,
@@ -321,7 +349,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0101": {
    "maxHSpeed": 10,
@@ -342,7 +372,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0102": {
    "maxHSpeed": 10,
@@ -363,7 +395,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0103": {
    "maxHSpeed": 12,
@@ -384,7 +418,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0104": {
    "maxHSpeed": 12,
@@ -405,7 +441,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0105": {
    "maxHSpeed": 10,
@@ -426,7 +464,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0106": {
    "maxHSpeed": 12,
@@ -447,7 +487,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0107": {
    "maxHSpeed": 12,
@@ -468,7 +510,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0108": {
    "maxHSpeed": 10,
@@ -489,7 +533,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0109": {
    "maxHSpeed": 10,
@@ -510,7 +556,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl010a": {
    "maxHSpeed": 10,
@@ -531,7 +579,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0200": {
    "maxHSpeed": 11,
@@ -552,7 +602,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0201": {
    "maxHSpeed": 5,
@@ -573,7 +625,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0202": {
    "maxHSpeed": 7.7,
@@ -594,7 +648,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0203": {
    "maxHSpeed": 8,
@@ -615,7 +671,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0204": {
    "maxHSpeed": 11,
@@ -636,7 +694,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0205": {
    "maxHSpeed": 11,
@@ -657,7 +717,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 650,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0206": {
    "maxHSpeed": 11,
@@ -678,7 +740,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0207": {
    "maxHSpeed": 7,
@@ -699,7 +763,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0208": {
    "maxHSpeed": 11,
@@ -720,7 +786,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0209": {
    "maxHSpeed": 11,
@@ -741,7 +809,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl020a": {
    "maxHSpeed": 11,
@@ -762,7 +832,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl020b": {
    "maxHSpeed": 7.7,
@@ -783,7 +855,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl020c": {
    "maxHSpeed": 8,
@@ -804,7 +878,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl020d": {
    "maxHSpeed": 11,
@@ -825,7 +901,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl020e": {
    "maxHSpeed": 11,
@@ -846,7 +924,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl020f": {
    "maxHSpeed": 11,
@@ -867,7 +947,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0300": {
    "maxHSpeed": 7.7,
@@ -888,7 +970,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0301": {
    "maxHSpeed": 7.7,
@@ -909,7 +993,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0302": {
    "maxHSpeed": 7.7,
@@ -930,7 +1016,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0303": {
    "maxHSpeed": 7.7,
@@ -951,7 +1039,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0304": {
    "maxHSpeed": 7.7,
@@ -972,7 +1062,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0305": {
    "maxHSpeed": 7.7,
@@ -993,7 +1085,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0306": {
    "maxHSpeed": 7.7,
@@ -1014,7 +1108,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0307": {
    "maxHSpeed": 8,
@@ -1035,7 +1131,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0308": {
    "maxHSpeed": 15,
@@ -1056,7 +1154,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0309": {
    "maxHSpeed": 7.7,
@@ -1077,7 +1177,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl030a": {
    "maxHSpeed": 7.7,
@@ -1098,7 +1200,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl030b": {
    "maxHSpeed": 7.7,
@@ -1119,7 +1223,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl030c": {
    "maxHSpeed": 7.7,
@@ -1140,7 +1246,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl030d": {
    "maxHSpeed": 8,
@@ -1161,7 +1269,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0400": {
    "maxHSpeed": 3.5,
@@ -1182,7 +1292,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0401": {
    "maxHSpeed": 6.25,
@@ -1203,7 +1315,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0402": {
    "maxHSpeed": 3.43,
@@ -1224,7 +1338,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0403": {
    "maxHSpeed": 3.45,
@@ -1245,7 +1361,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0404": {
    "maxHSpeed": 3.13,
@@ -1266,7 +1384,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0405": {
    "maxHSpeed": 2.39,
@@ -1287,7 +1407,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0406": {
    "maxHSpeed": 3,
@@ -1308,7 +1430,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0407": {
    "maxHSpeed": 3.43,
@@ -1329,7 +1453,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0408": {
    "maxHSpeed": 3.43,
@@ -1350,7 +1476,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0409": {
    "maxHSpeed": 2.39,
@@ -1371,7 +1499,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl040a": {
    "maxHSpeed": 3.5,
@@ -1392,7 +1522,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl040b": {
    "maxHSpeed": 3,
@@ -1413,7 +1545,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl040c": {
    "maxHSpeed": 3,
@@ -1434,7 +1568,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl040d": {
    "maxHSpeed": 3,
@@ -1455,7 +1591,9 @@
    "cameraFollowMinSlot1": 650,
    "cameraFollowMaxSlot1": 750,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0500": {
    "maxHSpeed": 2.6,
@@ -1476,7 +1614,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 7964,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0501": {
    "maxHSpeed": 2,
@@ -1497,7 +1637,9 @@
    "cameraFollowMinSlot1": 800,
    "cameraFollowMaxSlot1": 900,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0502": {
    "maxHSpeed": 12,
@@ -1518,7 +1660,9 @@
    "cameraFollowMinSlot1": 1000,
    "cameraFollowMaxSlot1": 1100,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2048,
+   "turnStep1": 2048
   },
   "pl0503": {
    "maxHSpeed": 9,
@@ -1539,7 +1683,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0504": {
    "maxHSpeed": 6.5,
@@ -1560,7 +1706,9 @@
    "cameraFollowMinSlot1": 3200,
    "cameraFollowMaxSlot1": 3700,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0505": {
    "maxHSpeed": 15,
@@ -1581,7 +1729,9 @@
    "cameraFollowMinSlot1": 1900,
    "cameraFollowMaxSlot1": 2000,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0506": {
    "maxHSpeed": 9,
@@ -1602,7 +1752,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0507": {
    "maxHSpeed": 9,
@@ -1623,7 +1775,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0509": {
    "maxHSpeed": 2.6,
@@ -1644,7 +1798,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 7964,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl050a": {
    "maxHSpeed": 2.6,
@@ -1665,7 +1821,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 7964,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl050b": {
    "maxHSpeed": 2,
@@ -1686,7 +1844,9 @@
    "cameraFollowMinSlot1": 800,
    "cameraFollowMaxSlot1": 900,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl050c": {
    "maxHSpeed": 1.3,
@@ -1707,7 +1867,9 @@
    "cameraFollowMinSlot1": 1500,
    "cameraFollowMaxSlot1": 1700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl050d": {
    "maxHSpeed": 1,
@@ -1728,7 +1890,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl050e": {
    "maxHSpeed": 6,
@@ -1749,7 +1913,9 @@
    "cameraFollowMinSlot1": 800,
    "cameraFollowMaxSlot1": 900,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2048,
+   "turnStep1": 2048
   },
   "pl050f": {
    "maxHSpeed": 4.5,
@@ -1770,7 +1936,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0510": {
    "maxHSpeed": 3.25,
@@ -1791,7 +1959,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0511": {
    "maxHSpeed": 7.5,
@@ -1812,7 +1982,9 @@
    "cameraFollowMinSlot1": 1900,
    "cameraFollowMaxSlot1": 2000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0512": {
    "maxHSpeed": 4.5,
@@ -1833,7 +2005,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0513": {
    "maxHSpeed": 4.5,
@@ -1854,7 +2028,9 @@
    "cameraFollowMinSlot1": 2200,
    "cameraFollowMaxSlot1": 2600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0515": {
    "maxHSpeed": 1.3,
@@ -1875,7 +2051,9 @@
    "cameraFollowMinSlot1": 1500,
    "cameraFollowMaxSlot1": 1700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0516": {
    "maxHSpeed": 1.3,
@@ -1896,7 +2074,9 @@
    "cameraFollowMinSlot1": 1500,
    "cameraFollowMaxSlot1": 1700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 256,
+   "turnStep1": 256
   },
   "pl0517": {
    "maxHSpeed": 1,
@@ -1917,7 +2097,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0600": {
    "maxHSpeed": 18,
@@ -1938,7 +2120,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 4096,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0601": {
    "maxHSpeed": 18,
@@ -1959,7 +2143,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 4096,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0602": {
    "maxHSpeed": 6.5,
@@ -1980,7 +2166,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1400,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0604": {
    "maxHSpeed": 18,
@@ -2001,7 +2189,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0606": {
    "maxHSpeed": 25,
@@ -2022,7 +2212,9 @@
    "cameraFollowMinSlot1": 950,
    "cameraFollowMaxSlot1": 1050,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0608": {
    "maxHSpeed": 18,
@@ -2043,7 +2235,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 4096,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0609": {
    "maxHSpeed": 18,
@@ -2064,7 +2258,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 4096,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl060a": {
    "maxHSpeed": 6.5,
@@ -2085,7 +2281,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1400,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl060c": {
    "maxHSpeed": 6.5,
@@ -2106,7 +2304,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1400,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl060e": {
    "maxHSpeed": 6.5,
@@ -2127,7 +2327,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1400,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0610": {
    "maxHSpeed": 20,
@@ -2148,7 +2350,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 4096,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0613": {
    "maxHSpeed": 18,
@@ -2169,7 +2373,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0615": {
    "maxHSpeed": 12,
@@ -2190,7 +2396,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0616": {
    "maxHSpeed": 18,
@@ -2211,7 +2419,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0617": {
    "maxHSpeed": 18,
@@ -2232,7 +2442,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0618": {
    "maxHSpeed": 18,
@@ -2253,7 +2465,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0619": {
    "maxHSpeed": 18,
@@ -2274,7 +2488,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl061a": {
    "maxHSpeed": 25,
@@ -2295,7 +2511,9 @@
    "cameraFollowMinSlot1": 950,
    "cameraFollowMaxSlot1": 1050,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl061b": {
    "maxHSpeed": 25,
@@ -2316,7 +2534,9 @@
    "cameraFollowMinSlot1": 950,
    "cameraFollowMaxSlot1": 1050,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl061c": {
    "maxHSpeed": 18,
@@ -2337,7 +2557,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl061d": {
    "maxHSpeed": 18,
@@ -2358,7 +2580,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl061e": {
    "maxHSpeed": 20,
@@ -2379,7 +2603,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl061f": {
    "maxHSpeed": 20,
@@ -2400,7 +2626,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0620": {
    "maxHSpeed": 20,
@@ -2421,7 +2649,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0621": {
    "maxHSpeed": 20,
@@ -2442,7 +2672,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0623": {
    "maxHSpeed": 20,
@@ -2463,7 +2695,9 @@
    "cameraFollowMinSlot1": 1200,
    "cameraFollowMaxSlot1": 1300,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0625": {
    "maxHSpeed": 12,
@@ -2484,7 +2718,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0627": {
    "maxHSpeed": 18,
@@ -2505,7 +2741,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0628": {
    "maxHSpeed": 18,
@@ -2526,7 +2764,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0629": {
    "maxHSpeed": 12,
@@ -2547,7 +2787,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl062a": {
    "maxHSpeed": 12,
@@ -2568,7 +2810,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0700": {
    "maxHSpeed": 11,
@@ -2589,7 +2833,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0701": {
    "maxHSpeed": 7.7,
@@ -2610,7 +2856,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0702": {
    "maxHSpeed": 11,
@@ -2631,7 +2879,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0703": {
    "maxHSpeed": 11,
@@ -2652,7 +2902,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0704": {
    "maxHSpeed": 7.7,
@@ -2673,7 +2925,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0705": {
    "maxHSpeed": 11,
@@ -2694,7 +2948,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0706": {
    "maxHSpeed": 11,
@@ -2715,7 +2971,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0707": {
    "maxHSpeed": 7.7,
@@ -2736,7 +2994,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0708": {
    "maxHSpeed": 7.7,
@@ -2757,7 +3017,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0709": {
    "maxHSpeed": 11,
@@ -2778,7 +3040,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl070a": {
    "maxHSpeed": 11,
@@ -2799,7 +3063,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl070b": {
    "maxHSpeed": 11,
@@ -2820,7 +3086,9 @@
    "cameraFollowMinSlot1": 430,
    "cameraFollowMaxSlot1": 500,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl070c": {
    "maxHSpeed": 7.7,
@@ -2841,7 +3109,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl070d": {
    "maxHSpeed": 7.7,
@@ -2862,7 +3132,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0800": {
    "maxHSpeed": 12,
@@ -2883,7 +3155,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0801": {
    "maxHSpeed": 12,
@@ -2904,7 +3178,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0802": {
    "maxHSpeed": 12,
@@ -2925,7 +3201,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0804": {
    "maxHSpeed": 7.9,
@@ -2946,7 +3224,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0805": {
    "maxHSpeed": 12,
@@ -2967,7 +3247,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0806": {
    "maxHSpeed": 12,
@@ -2988,7 +3270,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0807": {
    "maxHSpeed": 12,
@@ -3009,7 +3293,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0808": {
    "maxHSpeed": 7.9,
@@ -3030,7 +3316,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0809": {
    "maxHSpeed": 12,
@@ -3051,7 +3339,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl080a": {
    "maxHSpeed": 12,
@@ -3072,7 +3362,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl080c": {
    "maxHSpeed": 7.9,
@@ -3093,7 +3385,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl080d": {
    "maxHSpeed": 12,
@@ -3114,7 +3408,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl080e": {
    "maxHSpeed": 12,
@@ -3135,7 +3431,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl080f": {
    "maxHSpeed": 12,
@@ -3156,7 +3454,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0900": {
    "maxHSpeed": 7.2,
@@ -3177,7 +3477,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0901": {
    "maxHSpeed": 7.2,
@@ -3198,7 +3500,9 @@
    "cameraFollowMinSlot1": 480,
    "cameraFollowMaxSlot1": 580,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 5461
   },
   "pl0902": {
    "maxHSpeed": 7.2,
@@ -3219,7 +3523,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 5461
   },
   "pl0903": {
    "maxHSpeed": 7.2,
@@ -3240,7 +3546,9 @@
    "cameraFollowMinSlot1": 480,
    "cameraFollowMaxSlot1": 580,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0904": {
    "maxHSpeed": 7.2,
@@ -3261,7 +3569,9 @@
    "cameraFollowMinSlot1": 480,
    "cameraFollowMaxSlot1": 580,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0906": {
    "maxHSpeed": 7.2,
@@ -3282,7 +3592,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0907": {
    "maxHSpeed": 7.2,
@@ -3303,7 +3615,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 5461
   },
   "pl0908": {
    "maxHSpeed": 7.2,
@@ -3324,7 +3638,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0909": {
    "maxHSpeed": 7.2,
@@ -3345,7 +3661,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 5461
   },
   "pl090a": {
    "maxHSpeed": 7.2,
@@ -3366,7 +3684,9 @@
    "cameraFollowMinSlot1": 480,
    "cameraFollowMaxSlot1": 580,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl090b": {
    "maxHSpeed": 7.2,
@@ -3387,7 +3707,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl090c": {
    "maxHSpeed": 7.2,
@@ -3408,7 +3730,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 5461
   },
   "pl090d": {
    "maxHSpeed": 7.2,
@@ -3429,7 +3753,9 @@
    "cameraFollowMinSlot1": 450,
    "cameraFollowMaxSlot1": 550,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a00": {
    "maxHSpeed": 7,
@@ -3450,7 +3776,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a01": {
    "maxHSpeed": 7,
@@ -3471,7 +3799,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a02": {
    "maxHSpeed": 8,
@@ -3492,7 +3822,9 @@
    "cameraFollowMinSlot1": 850,
    "cameraFollowMaxSlot1": 950,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a03": {
    "maxHSpeed": 7,
@@ -3513,7 +3845,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a04": {
    "maxHSpeed": 8,
@@ -3534,7 +3868,9 @@
    "cameraFollowMinSlot1": 850,
    "cameraFollowMaxSlot1": 950,
    "statusImmunityA": 4096,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a05": {
    "maxHSpeed": 7,
@@ -3555,7 +3891,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a06": {
    "maxHSpeed": 7,
@@ -3576,7 +3914,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a07": {
    "maxHSpeed": 8,
@@ -3597,7 +3937,9 @@
    "cameraFollowMinSlot1": 850,
    "cameraFollowMaxSlot1": 950,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a08": {
    "maxHSpeed": 8,
@@ -3618,7 +3960,9 @@
    "cameraFollowMinSlot1": 850,
    "cameraFollowMaxSlot1": 950,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a09": {
    "maxHSpeed": 8,
@@ -3639,7 +3983,9 @@
    "cameraFollowMinSlot1": 850,
    "cameraFollowMaxSlot1": 950,
    "statusImmunityA": 4096,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0a0a": {
    "maxHSpeed": 7,
@@ -3660,7 +4006,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 700,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0b00": {
    "maxHSpeed": 12,
@@ -3681,7 +4029,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0b01": {
    "maxHSpeed": 7,
@@ -3702,7 +4052,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0b02": {
    "maxHSpeed": 7,
@@ -3723,7 +4075,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0b03": {
    "maxHSpeed": 7,
@@ -3744,7 +4098,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0b04": {
    "maxHSpeed": 7,
@@ -3765,7 +4121,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0b05": {
    "maxHSpeed": 12,
@@ -3786,7 +4144,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0b06": {
    "maxHSpeed": 12,
@@ -3807,7 +4167,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0b07": {
    "maxHSpeed": 12,
@@ -3828,7 +4190,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0c00": {
    "maxHSpeed": 8,
@@ -3849,7 +4213,9 @@
    "cameraFollowMinSlot1": 460,
    "cameraFollowMaxSlot1": 530,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0c01": {
    "maxHSpeed": 8,
@@ -3870,7 +4236,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0c02": {
    "maxHSpeed": 9,
@@ -3891,7 +4259,9 @@
    "cameraFollowMinSlot1": 460,
    "cameraFollowMaxSlot1": 530,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2048,
+   "turnStep1": 1536
   },
   "pl0c04": {
    "maxHSpeed": 4,
@@ -3912,7 +4282,9 @@
    "cameraFollowMinSlot1": 2800,
    "cameraFollowMaxSlot1": 3000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 1024,
+   "turnStep1": 1024
   },
   "pl0c05": {
    "maxHSpeed": 8,
@@ -3933,7 +4305,9 @@
    "cameraFollowMinSlot1": 1000,
    "cameraFollowMaxSlot1": 1100,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 1024
   },
   "pl0c06": {
    "maxHSpeed": 8,
@@ -3954,7 +4328,9 @@
    "cameraFollowMinSlot1": 460,
    "cameraFollowMaxSlot1": 530,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0d00": {
    "maxHSpeed": 7,
@@ -3975,7 +4351,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0d01": {
    "maxHSpeed": 7,
@@ -3996,7 +4374,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0d02": {
    "maxHSpeed": 15,
@@ -4017,7 +4397,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0d03": {
    "maxHSpeed": 15,
@@ -4038,7 +4420,9 @@
    "cameraFollowMinSlot1": 1000,
    "cameraFollowMaxSlot1": 1100,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0d04": {
    "maxHSpeed": 7,
@@ -4059,7 +4443,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0d05": {
    "maxHSpeed": 7,
@@ -4080,7 +4466,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0d06": {
    "maxHSpeed": 7,
@@ -4101,7 +4489,9 @@
    "cameraFollowMinSlot1": 900,
    "cameraFollowMaxSlot1": 1000,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0d07": {
    "maxHSpeed": 7,
@@ -4122,7 +4512,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0e00": {
    "maxHSpeed": 0,
@@ -4143,7 +4535,9 @@
    "cameraFollowMinSlot1": 5000,
    "cameraFollowMaxSlot1": 6000,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0e01": {
    "maxHSpeed": 10,
@@ -4164,7 +4558,9 @@
    "cameraFollowMinSlot1": 3000,
    "cameraFollowMaxSlot1": 3500,
    "statusImmunityA": 3868,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0e02": {
    "maxHSpeed": 10,
@@ -4185,7 +4581,9 @@
    "cameraFollowMinSlot1": 5500,
    "cameraFollowMaxSlot1": 6500,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0e03": {
    "maxHSpeed": 0,
@@ -4206,7 +4604,9 @@
    "cameraFollowMinSlot1": 5000,
    "cameraFollowMaxSlot1": 6000,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0e04": {
    "maxHSpeed": 10,
@@ -4227,7 +4627,9 @@
    "cameraFollowMinSlot1": 15000,
    "cameraFollowMaxSlot1": 16000,
    "statusImmunityA": 7966,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0e05": {
    "maxHSpeed": 0,
@@ -4248,7 +4650,9 @@
    "cameraFollowMinSlot1": 5000,
    "cameraFollowMaxSlot1": 6000,
    "statusImmunityA": 7964,
-   "statusImmunityB": 15404
+   "statusImmunityB": 15404,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0f00": {
    "maxHSpeed": 3,
@@ -4269,7 +4673,9 @@
    "cameraFollowMinSlot1": 550,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0f01": {
    "maxHSpeed": 8,
@@ -4290,7 +4696,9 @@
    "cameraFollowMinSlot1": 460,
    "cameraFollowMaxSlot1": 530,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0f02": {
    "maxHSpeed": 8,
@@ -4311,7 +4719,9 @@
    "cameraFollowMinSlot1": 460,
    "cameraFollowMaxSlot1": 530,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0f03": {
    "maxHSpeed": 8,
@@ -4332,7 +4742,9 @@
    "cameraFollowMinSlot1": 460,
    "cameraFollowMaxSlot1": 530,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0f04": {
    "maxHSpeed": 8,
@@ -4353,7 +4765,9 @@
    "cameraFollowMinSlot1": 460,
    "cameraFollowMaxSlot1": 530,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0f05": {
    "maxHSpeed": 10,
@@ -4374,7 +4788,9 @@
    "cameraFollowMinSlot1": 500,
    "cameraFollowMaxSlot1": 600,
    "statusImmunityA": 4096,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   },
   "pl0f06": {
    "maxHSpeed": 8,
@@ -4395,7 +4811,9 @@
    "cameraFollowMinSlot1": 400,
    "cameraFollowMaxSlot1": 450,
    "statusImmunityA": 0,
-   "statusImmunityB": 0
+   "statusImmunityB": 0,
+   "turnStep0": 2560,
+   "turnStep1": 3072
   }
  }
 }
