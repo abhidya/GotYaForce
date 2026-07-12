@@ -39,18 +39,13 @@ import {
 import { createAudioManager, loadAudioManifest, type GotchaAudioManager } from "@gf/audio";
 import {
   createChallengeRun,
+  createGotchaBoxSettlement,
   computeResults,
   playerIdFor,
-  registerKill,
-  rollDrops,
-  snapshotPool,
-  restorePool,
   type ChallengeRun,
   type MissionBattleConfig,
   type BattleResults,
-  type GetColorVariant,
   type GetDrop,
-  type GetPool,
 } from "@gf/missions";
 
 import {
@@ -91,7 +86,7 @@ import { BattleScene } from "./sim/battleScene.js";
 import { BORG_CATALOG, DEFAULT_LEAD } from "./sim/borgCatalog.js";
 import { createBorgPresentationAssets } from "./sim/borgPresentationAssets.js";
 import { BattleCamera, type CameraFollowTarget } from "./sim/camera.js";
-import { loadGetPool, saveGetPool, loadGetCollection, recordDrops, type CollectedGetDrop } from "./sim/getStorage.js";
+import { createBrowserGotchaBoxPersistence } from "./sim/getStorage.js";
 import {
   activeBorgForPlayer,
   battleEnergyMaxima,
@@ -700,12 +695,8 @@ const flow: Flow = {
 // only (Challenge instead logs kills for the score/kill-log side, doc §2a); applying it to
 // Challenge here is a deliberate port decision so the drop pipeline is exercised at all.
 //
-// snapshotPool()/restorePool() bracket EVERY Challenge battle (win keeps the pool progress
-// made this battle; lose or abandon reverts it, doc §2c) using a single seeded RNG stream
-// that outlives individual battles (matches the missions-package seeded-RNG convention; see
-// createChallengeRng in packages/missions/src/challenge.ts).
-let getPool: GetPool = loadGetPool();
-let getPoolBattleSnapshot: GetPool | null = null;
+// The settlement module brackets every Challenge battle and owns win/lose/abandon ordering.
+// Its injected RNG stream outlives individual battles (the missions seeded-RNG convention).
 let getRngState = (Date.now() ^ 0x47474554) >>> 0; // "GGET" xor time — session-seeded, not a save value.
 function getRng(): number {
   getRngState = (getRngState + 0x6d2b79f5) >>> 0;
@@ -714,7 +705,11 @@ function getRng(): number {
   t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
-let getCollection: CollectedGetDrop[] = loadGetCollection();
+const gotchaBox = createGotchaBoxSettlement({
+  persistence: createBrowserGotchaBoxPersistence(),
+  rng: getRng,
+  clock: Date.now,
+});
 
 function mountScreen(build: (root: HTMLElement) => MenuScreenHandle): void {
   screenHost.mount(build);
@@ -943,7 +938,7 @@ async function enterBattle(config: MissionBattleConfig): Promise<void> {
 
   // GET pool pre-battle snapshot (doc §2c): taken once per battle, right before it starts,
   // so a lose/abandon reverts exactly this battle's accrual and nothing earlier.
-  getPoolBattleSnapshot = snapshotPool(getPool);
+  gotchaBox.begin();
 
   const boot = await createBattleBootstrap({
     config,
@@ -1135,7 +1130,7 @@ function closePauseMenu(): void {
 function endBattleToMenu(): void {
   // Abandon (pause -> quit): revert the GET pool to its pre-battle snapshot, matching the
   // ROM's lose/abandon revert (doc §2c) — an abandoned battle keeps none of its accrual.
-  revertGetPoolToSnapshot();
+  gotchaBox.revert();
   teardownBattle();
   showMenu();
 }
@@ -1300,17 +1295,9 @@ function resolveBattle(): void {
   // distinction between a lose and an abandon for the revert).
   let drops: GetDrop[] = [];
   if (outcome.win) {
-    for (const defeat of session.battle.observe().defeats ?? []) {
-      if (defeat.victimTeam === 1 && defeat.killerTeam === 0) {
-        registerKill(getPool, defeat.borgId, (defeat.colorVariant ?? 0) as GetColorVariant, getRng);
-      }
-    }
-    drops = rollDrops(getPool, getRng);
-    if (drops.length > 0) recordDrops(getCollection, drops);
-    saveGetPool(getPool);
-    getPoolBattleSnapshot = null;
+    drops = gotchaBox.win(session.battle.observe().defeats);
   } else {
-    revertGetPoolToSnapshot();
+    gotchaBox.revert();
   }
 
   showResults(outcome.win ? "win" : "lose", {
@@ -1324,15 +1311,6 @@ function resolveBattle(): void {
     allyBorgsDefeated: results.allyBorgsDefeated,
     grandTotal: results.grandTotal,
   }, results, drops);
-}
-
-/** Revert the GET pool to its pre-battle snapshot (lose or abandon, doc §2c). No-op if no
- *  snapshot is pending (e.g. resolveBattle already consumed it on a win). */
-function revertGetPoolToSnapshot(): void {
-  if (!getPoolBattleSnapshot) return;
-  restorePool(getPool, getPoolBattleSnapshot);
-  saveGetPool(getPool);
-  getPoolBattleSnapshot = null;
 }
 
 function getsRowsForDrops(drops: readonly GetDrop[]): GetsRow[] {
