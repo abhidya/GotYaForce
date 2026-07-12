@@ -86,23 +86,23 @@ None. The user explicitly approved all review candidates, all existing worktree 
 
 ## Implementation Tasks
 
-- [ ] Task 1: Deepen the ROM-family runtime and remove process-global floor state.
+- [x] Task 1: Deepen the ROM-family runtime and remove process-global floor state.
   - Acceptance: Battle supplies one cohesive runtime dependency; family physics uses battle-local floor behavior; two runtime instances cannot overwrite one another; existing G RED work remains intact.
   - Verify: focused ROM selfcheck proves independent floor behavior, then `rtk pnpm selfcheck:rom`.
   - Files: `packages/combat/src/bridge.ts`, `packages/combat/src/battle.ts`, `packages/combat/src/rom/physics.ts`, relevant ROM selfcheck/types.
-- [ ] Task 2: Deepen Battle's interface and migrate state-reading callers.
+- [x] Task 2: Deepen Battle's interface and migrate state-reading callers.
   - Acceptance: deliberate read-only Battle queries/snapshots cover presentation, camera, results, and settlement facts; callers do not rely on unrestricted mutable state; `step` remains the mutation entry.
   - Verify: focused Battle selfcheck plus typecheck, 1P, HUD, and combat runners.
   - Files: `packages/combat/src/types.ts`, `packages/combat/src/battle.ts`, `apps/game/src/sim/presentation.ts`, `apps/game/src/main.ts`, focused tests.
-- [ ] Task 3: Make screen hosting own menu-input lifetime.
+- [x] Task 3: Make screen hosting own menu-input lifetime.
   - Acceptance: screen modules no longer subscribe/unsubscribe individually; host/router dispatches only to the current screen/overlay and releases it exactly once; flow verification is behavioral.
   - Verify: executable menu-host selfcheck and `rtk pnpm selfcheck:menu-flow`.
   - Files: `packages/core/src/index.ts`, `apps/game/src/ui/menuInput.ts`, screen modules, `apps/game/src/main.ts`, flow selfcheck.
-- [ ] Task 4: Deepen Challenge session/navigation and absorb battle bootstrap.
+- [x] Task 4: Deepen Challenge session/navigation and absorb battle bootstrap.
   - Acceptance: transition rules and battle preparation are executable through one game-session interface; one-caller `battleBootstrap.ts` is removed; `main.ts` adapts effects rather than owning transition validity.
   - Verify: session transition selfcheck, 1P selfcheck, challenge-stage selfcheck, typecheck.
   - Files: `apps/game/src/sim/gameSession.ts`, `apps/game/src/main.ts`, `apps/game/src/sim/battleBootstrap.ts`, focused tests.
-- [ ] Task 5: Make Gotcha-Box settlement transactional.
+- [x] Task 5: Make Gotcha-Box settlement transactional.
   - Acceptance: begin/win/loss/abandon transactions, defeat filtering, drops, collection, and persistence sit behind one interface with browser and memory adapters.
   - Verify: transaction selfcheck covers commit/revert/storage failure and the existing missions selfcheck.
   - Files: `packages/missions/src/getSystem.ts`, `apps/game/src/sim/getStorage.ts`, new settlement module, `apps/game/src/main.ts`, focused tests.

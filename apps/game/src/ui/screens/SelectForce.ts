@@ -127,6 +127,7 @@ export interface SelectForceOptions {
   slots: readonly ForceSlot[];
   selectedSlot: number;
   limit: number;
+  onSlotsSynced?: (slots: readonly ForceSlot[]) => void;
   onSelectSlot?: (slotIndex: number) => void;
   onConfirm: (slot: ForceSlot) => void;
   onEdit: (slot: ForceSlot) => void;
@@ -146,6 +147,7 @@ export function createSelectForce(
     opts.slots.length > 0 ? (opts.slots as ForceSlot[]) : [{ no: 1, name: "GOTCHA FORCE", borgIds: [] }];
   // Restore saved BOX DATA on the first mount after a page load; persist after.
   syncForceSlots(slots);
+  opts.onSlotsSynced?.(slots);
   let selectedSlot = clampSlot(opts.selectedSlot, slots.length);
   let stopLeadModel: (() => void) | null = null;
   let leadModelToken = 0;

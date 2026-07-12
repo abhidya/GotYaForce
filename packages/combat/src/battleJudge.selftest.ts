@@ -145,7 +145,7 @@ function testEnemyWipeIsPlayerWin(): void {
   assertEqual(beforeEnemy?.alive, true, "captured actor keeps its pre-step alive fact");
 }
 
-function testProjectileObservationKeepsIdentityAfterRemoval(): void {
+function testProjectileObservationAndDespawnFacts(): void {
   const battle = createBattle(
     {
       stageId: "st00",
@@ -165,18 +165,42 @@ function testProjectileObservationKeepsIdentityAfterRemoval(): void {
   battle.step(1 / 60, { p1: { ...emptyInput(), attack: true }, p2: emptyInput() });
   const projectile = battle.observe().projectiles[0];
   if (!projectile) throw new Error("read-interface test did not spawn a projectile");
-  for (let frame = 0; frame < 300 && battle.observe().projectiles.includes(projectile); frame++) {
-    battle.step(1 / 60, idle);
+  const originalPos = { ...projectile.pos };
+  const originalLife = projectile.life;
+  if (false) {
+    // @ts-expect-error Current projectile snapshots cannot mutate sim-owned position.
+    projectile.pos.x = 123456;
   }
+  let despawn = battle.observe().projectileDespawns.find((fact) => fact.uid === projectile.uid);
+  for (let frame = 0; frame < 300 && !despawn; frame++) {
+    const after = battle.step(1 / 60, idle);
+    despawn = after.projectileDespawns.find((fact) => fact.uid === projectile.uid);
+  }
+  if (!despawn) throw new Error("read-interface test projectile did not produce despawn facts");
   assertEqual(
-    battle.observe().projectiles.includes(projectile),
-    false,
-    "projectile eventually leaves the live observation list",
+    projectile.pos.x,
+    originalPos.x,
+    "old observation keeps the projectile's original x position",
+  );
+  assertEqual(projectile.pos.y, originalPos.y, "old observation keeps the projectile's original y position");
+  assertEqual(projectile.pos.z, originalPos.z, "old observation keeps the projectile's original z position");
+  assertEqual(projectile.life, originalLife, "old observation keeps the projectile's original life");
+  assertEqual(despawn.reason, "hit-target", "despawn facts report the correct hit reason");
+  assertEqual(despawn.team, projectile.team, "despawn facts retain projectile team");
+  assertEqual(
+    typeof despawn.impactEffectId,
+    "number",
+    "target-hit despawn facts retain the applied impact effect id",
   );
   assertEqual(
-    typeof projectile.despawnReason === "string",
+    Number.isFinite(despawn.pos.x) && Number.isFinite(despawn.pos.y) && Number.isFinite(despawn.pos.z),
     true,
-    "removed projectile reference retains live despawn metadata",
+    "despawn facts retain a finite final position",
+  );
+  assertEqual(
+    Number.isFinite(despawn.vel.x) && Number.isFinite(despawn.vel.y) && Number.isFinite(despawn.vel.z),
+    true,
+    "despawn facts retain finite final velocity",
   );
 }
 
@@ -245,7 +269,7 @@ export function runSelfTest(): number {
   checks = 0;
 
   testEnemyWipeIsPlayerWin();
-  testProjectileObservationKeepsIdentityAfterRemoval();
+  testProjectileObservationAndDespawnFacts();
   testPlayerWipeIsLose();
   testMutualDestructionIsLose();
   testTimeoutIsDrawMask4();

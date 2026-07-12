@@ -30,8 +30,13 @@ import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
+type DeepReadonly<T> =
+  T extends readonly (infer Item)[] ? readonly DeepReadonly<Item>[]
+    : T extends object ? { readonly [Key in keyof T]: DeepReadonly<T[Key]> }
+      : T;
+
 export interface BattleIntroOptions {
-  config: MissionBattleConfig;
+  config: DeepReadonly<MissionBattleConfig>;
   catalog: readonly ForceBorg[];
   onConfirm: () => void;
   onBack?: () => void;
@@ -126,7 +131,7 @@ export function createBattleIntro(
  * (st2x/st4x) resolve to their base arena's name; falls back to decoding the
  * `arena` (st## id) directly for non-Challenge callers.
  */
-function arenaNameFor(config: MissionBattleConfig): string | null {
+function arenaNameFor(config: DeepReadonly<MissionBattleConfig>): string | null {
   const stageByte = config.meta?.stageByte;
   if (typeof stageByte === "number") {
     const name = arenaNameForStageByte(stageByte);

@@ -75,7 +75,7 @@ export function createMemoryGotchaBoxPersistence(
  * drop rolls; loss and abandon share `revert` and restore the exact begin snapshot.
  */
 export function createGotchaBoxSettlement(options: GotchaBoxSettlementOptions): GotchaBoxSettlement {
-  const state = cloneGotchaBoxState(options.persistence.load());
+  let state = cloneGotchaBoxState(options.persistence.load());
   const clock = options.clock ?? Date.now;
   const playerTeam = options.playerTeam ?? 0;
   const victimTeam = options.victimTeam ?? 1;
@@ -94,25 +94,29 @@ export function createGotchaBoxSettlement(options: GotchaBoxSettlementOptions): 
 
     win(defeats): GetDrop[] {
       requireActive();
+      const committed = cloneGotchaBoxState(state);
       for (const defeat of defeats) {
         if (defeat.victimTeam !== victimTeam || defeat.killerTeam !== playerTeam) continue;
-        registerKill(state.pool, defeat.borgId, normalizeColorVariant(defeat.colorVariant), options.rng);
+        registerKill(committed.pool, defeat.borgId, normalizeColorVariant(defeat.colorVariant), options.rng);
       }
 
-      const drops = rollDrops(state.pool, options.rng);
+      const drops = rollDrops(committed.pool, options.rng);
       if (drops.length > 0) {
         const collectedAt = clock();
-        state.collection.push(...drops.map((drop) => ({ ...drop, collectedAt })));
+        committed.collection.push(...drops.map((drop) => ({ ...drop, collectedAt })));
       }
-      options.persistence.save(state);
+      options.persistence.save(committed);
+      state = committed;
       preBattlePool = null;
       return drops;
     },
 
     revert(): void {
       const snapshot = requireActive();
-      state.pool = snapshotPool(snapshot);
-      options.persistence.save(state);
+      const reverted = cloneGotchaBoxState(state);
+      reverted.pool = snapshotPool(snapshot);
+      options.persistence.save(reverted);
+      state = reverted;
       preBattlePool = null;
     },
   };

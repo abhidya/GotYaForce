@@ -11,7 +11,11 @@
 // duplicating them. A capsule is shown only while the production model is loading.
 
 import * as THREE from "three";
-import type { BattleProjectileObservation, ProjectileVisualKind } from "@gf/combat";
+import type {
+  BattleProjectileObservation,
+  ProjectileDespawnObservation,
+  ProjectileVisualKind,
+} from "@gf/combat";
 import { MUZZLE_OFFSET, SHOT, SPECIAL } from "@gf/combat";
 import {
   ARROW_MDL_BOUNDS,
@@ -181,13 +185,6 @@ interface ProjectileActor {
   /** Material shared by the sprite (billboards) or by BOTH crossed planes (beam rig).
    *  Unused (a dummy) for bank-mesh projectiles, which own their own `bankMaterials`. */
   material: THREE.SpriteMaterial | THREE.MeshBasicMaterial;
-  /**
-   * The sim's Projectile object. stepProjectiles mutates projectiles IN PLACE and writes
-   * `despawnReason` on this same object the frame it is dropped from the survivors list
-   * (packages/combat/src/types.ts), so holding the reference lets the despawn sweep read
-   * why the uid vanished and fire impact FX only for real impacts.
-   */
-  sim: BattleProjectileObservation;
   /** True when `node` is the velocity-oriented beam rig (needs per-frame orient/stretch). */
   beam: boolean;
   /** Per-layer materials of a bank-mesh flight visual (Projectile.flightVisual resolved —
@@ -659,6 +656,7 @@ export class BattleScene {
     projectiles: readonly BattleProjectileObservation[] = [],
     localActiveUid: string | null = null,
     meleeMode = false,
+    projectileDespawns: readonly ProjectileDespawnObservation[] = [],
   ): void {
     const live = new Set<string>();
     for (const b of borgs) {
@@ -716,7 +714,7 @@ export class BattleScene {
       }
     }
     this.syncLockMarkers(borgs, localActiveUid, meleeMode);
-    this.syncProjectiles(projectiles);
+    this.syncProjectiles(projectiles, projectileDespawns);
   }
 
   /** Advance all per-actor animation mixers. */
@@ -1002,8 +1000,12 @@ export class BattleScene {
     }
   }
 
-  private syncProjectiles(projectiles: readonly BattleProjectileObservation[]): void {
+  private syncProjectiles(
+    projectiles: readonly BattleProjectileObservation[],
+    projectileDespawns: readonly ProjectileDespawnObservation[],
+  ): void {
     const live = new Set<string>();
+    const despawnsByUid = new Map(projectileDespawns.map((despawn) => [despawn.uid, despawn]));
     for (const projectile of projectiles) {
       live.add(projectile.uid);
       let actor = this.projectileActors.get(projectile.uid);
@@ -1011,7 +1013,6 @@ export class BattleScene {
         actor = this.spawnProjectile(projectile);
         this.projectileActors.set(projectile.uid, actor);
       }
-      actor.sim = projectile; // keep the stable sim reference fresh for the despawn sweep
       actor.node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
       const fade = Math.min(1, projectile.life / PROJECTILE_FADE_FRAMES);
       if (actor.bankMaterials) {
@@ -1043,24 +1044,23 @@ export class BattleScene {
 
     for (const [uid, actor] of this.projectileActors) {
       if (!live.has(uid)) {
-        // Impact FX only for REAL impacts: stepProjectiles writes despawnReason on the
-        // projectile OBJECT the same frame it drops it from the survivors list
-        // (packages/combat/src/types.ts). Lifetime expiry (600f seed, FUN_8006f11c
+        // Impact FX only for REAL impacts. Lifetime expiry (600f seed, FUN_8006f11c
         // chunk_0009.c:3907), out-of-bounds culls, and owner-death despawns
         // (zz_00840b8_, chunk_0012.c:3216) vanish without a hit-puff.
-        const reason = actor.sim.despawnReason;
-        if (reason === "hit-target" || reason === "hit-terrain") {
-          // Use the sim's final pos: for hit-terrain it was moved to the geometry impact
+        const despawn = despawnsByUid.get(uid);
+        const reason = despawn?.reason;
+        if (despawn && (reason === "hit-target" || reason === "hit-terrain")) {
+          // Use the lifecycle fact's final pos: for hit-terrain it was moved to the geometry impact
           // point (zz_0083244_/zz_0083714_ via zz_006f268_, chunk_0009.c:3956).
-          actor.node.position.set(actor.sim.pos.x, actor.sim.pos.y, actor.sim.pos.z);
+          actor.node.position.set(despawn.pos.x, despawn.pos.y, despawn.pos.z);
           if (reason === "hit-target") {
             // Borg hit: the damage record's DERIVED contact effect (chunk_0003.c:8152-8155),
             // carried on the projectile by stepProjectiles as lastImpactEffectId.
             this.spawnHitFx(
               actor.node.position,
-              actor.sim.lastImpactEffectId,
-              actor.sim.team,
-              Math.atan2(actor.sim.vel.x, actor.sim.vel.z),
+              despawn.impactEffectId,
+              despawn.team,
+              Math.atan2(despawn.vel.x, despawn.vel.z),
             );
           } else {
             // Terrain impact: a different ROM path (terrain hit, not the damage-record effect
@@ -1070,6 +1070,23 @@ export class BattleScene {
         }
         this.disposeProjectileActor(actor);
         this.projectileActors.delete(uid);
+        despawnsByUid.delete(uid);
+      }
+    }
+
+    // A projectile may spawn and despawn between render syncs. Its lifecycle fact still carries
+    // enough final state to emit the impact without retaining a sim-owned object.
+    for (const despawn of despawnsByUid.values()) {
+      const pos = new THREE.Vector3(despawn.pos.x, despawn.pos.y, despawn.pos.z);
+      if (despawn.reason === "hit-target") {
+        this.spawnHitFx(
+          pos,
+          despawn.impactEffectId,
+          despawn.team,
+          Math.atan2(despawn.vel.x, despawn.vel.z),
+        );
+      } else if (despawn.reason === "hit-terrain") {
+        this.spawnImpact(pos);
       }
     }
   }
@@ -1120,7 +1137,7 @@ export class BattleScene {
     this.root.add(node);
     // `material` is unused for the bank-mesh path (bankMaterials drives opacity instead); a
     // throwaway MeshBasicMaterial keeps ProjectileActor's shared field non-optional.
-    return { node, material: new THREE.MeshBasicMaterial(), sim: projectile, beam: false, bankMaterials, bankLayerOpacity };
+    return { node, material: new THREE.MeshBasicMaterial(), beam: false, bankMaterials, bankLayerOpacity };
   }
 
   private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
@@ -1149,7 +1166,7 @@ export class BattleScene {
       node.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
       orientBeam(node, projectile);
       this.root.add(node);
-      return { node, material, sim: projectile, beam: true };
+      return { node, material, beam: true };
     }
     const material = new THREE.SpriteMaterial({
       map: this.projectileTextures.get(kind),
@@ -1163,7 +1180,7 @@ export class BattleScene {
     sprite.position.set(projectile.pos.x, projectile.pos.y, projectile.pos.z);
     sprite.scale.setScalar(Math.max(42, projectile.hitRadius * 1.8));
     this.root.add(sprite);
-    return { node: sprite, material, sim: projectile, beam: false };
+    return { node: sprite, material, beam: false };
   }
 
   private disposeProjectileActor(actor: ProjectileActor): void {

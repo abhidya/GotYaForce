@@ -115,10 +115,15 @@ function isCollection(value: unknown): value is CollectedGetDrop[] {
     isRecord(drop) &&
     typeof drop.borgId === "string" &&
     isIntegerInRange(drop.colorVariant, 0, 5) &&
-    (drop.kind === "unit" || drop.kind === "parts") &&
-    Number.isInteger(drop.partIndex) &&
     typeof drop.collectedAt === "number" && Number.isFinite(drop.collectedAt) &&
-    (drop.partsCount === undefined || (Number.isInteger(drop.partsCount) && drop.partsCount >= 2))
+    (
+      (drop.kind === "unit" && drop.partIndex === 0 && drop.partsCount === undefined) ||
+      (drop.kind === "parts" &&
+        typeof drop.partsCount === "number" && Number.isInteger(drop.partsCount) &&
+        drop.partsCount >= 2 && drop.partsCount <= 5 &&
+        typeof drop.partIndex === "number" && Number.isInteger(drop.partIndex) &&
+        drop.partIndex >= 1 && drop.partIndex <= drop.partsCount)
+    )
   );
 }
 

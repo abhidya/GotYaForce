@@ -168,7 +168,7 @@ function fmt(value: number) {
   color: var(--gf-muted);
   font-size: 0.66rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
 }
 
 .mode-card dd {

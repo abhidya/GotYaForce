@@ -42,9 +42,7 @@ import {
   createGotchaBoxSettlement,
   computeResults,
   playerIdFor,
-  type ChallengeRun,
   type MissionBattleConfig,
-  type BattleResults,
   type GetDrop,
 } from "@gf/missions";
 
@@ -64,7 +62,6 @@ import {
   createPauseMenu,
   createBattleHud,
   createDebugOverlay,
-  type MainMenuMode,
   type ForceSlot,
   type BattleHudHandle,
   type DebugOverlayHandle,
@@ -81,7 +78,13 @@ import {
   EXPORTED_STAGE_CATALOG,
   isExportedStageId,
 } from "./sim/adapter.js";
-import { createBattleBootstrap } from "./sim/battleBootstrap.js";
+import { initializeGotchaBoxBattle } from "./sim/gotchaBoxBattleInitialization.js";
+import {
+  createGameSession,
+  type DeepReadonly,
+  type GameSessionEffect,
+  type GameSessionEvent,
+} from "./gameSession.js";
 import { BattleScene } from "./sim/battleScene.js";
 import { BORG_CATALOG, DEFAULT_LEAD } from "./sim/borgCatalog.js";
 import { createBorgPresentationAssets } from "./sim/borgPresentationAssets.js";
@@ -319,32 +322,8 @@ function playBorgVoice(key: string): void {
   playSfx(key);
 }
 
-function selectedForce(): string[] {
-  return forceFromSlot(selectedForceSlot());
-}
-
-function forceFromSlot(slot: ForceSlot): string[] {
-  return BORG_CATALOG.forceFromSlot(slot);
-}
-
-function selectedForceSlot(): ForceSlot {
-  return flow.forceSlots[flow.selectedForceSlot] ?? flow.forceSlots[0] ?? BORG_CATALOG.defaultForceSlots[0]!;
-}
-
-function forceSlotForPlayer(playerIndex: number): ForceSlot {
-  if (playerIndex <= 0) return selectedForceSlot();
-  const slotCount = flow.forceSlots.length;
-  if (slotCount === 0) return selectedForceSlot();
-  return flow.forceSlots[(flow.selectedForceSlot + playerIndex) % slotCount] ?? selectedForceSlot();
-}
-
-function updateSelectedForceSlot(borgIds: readonly string[]): void {
-  const slot = selectedForceSlot();
-  const valid = BORG_CATALOG.rosterIndex.validIds(borgIds, { fallbackId: DEFAULT_LEAD });
-  flow.forceSlots[flow.selectedForceSlot] = {
-    ...slot,
-    borgIds: valid,
-  };
+function forceFromSlot(slot: DeepReadonly<ForceSlot>): string[] {
+  return BORG_CATALOG.forceFromSlot({ ...slot, borgIds: [...slot.borgIds] });
 }
 
 // ------------------------------------------------------------------------------------------
@@ -622,7 +601,7 @@ window.addEventListener("keydown", (e) => {
   if (isTextInputTarget(e.target)) return;
   void playPendingBgm();
   // Tab would move focus; capture it for switch-lock during battle.
-  if (e.code === "Tab" && flow.screen === "battle") e.preventDefault();
+  if (e.code === "Tab" && challengeSession.snapshot().screen === "battle") e.preventDefault();
   // Backquote toggles the ATK-015 debug overlay (sim-state readout for the focused borg).
   if (e.code === "Backquote") debugOverlay.setVisible(!debugOverlay.visible);
   keys.add(e.code);
@@ -651,42 +630,6 @@ function activeGamepad(playerIndex = 0, allowFallback = playerIndex === 0): Game
 }
 
 // ------------------------------------------------------------------------------------------
-// Challenge flow state machine
-// ------------------------------------------------------------------------------------------
-
-type Screen =
-  | "title"
-  | "menu"
-  | "difficulty"
-  | "players"
-  | "load-box"
-  | "select-force"
-  | "force"
-  | "briefing"
-  | "battle"
-  | "results"
-  | "gets"
-  | "loading";
-
-interface Flow {
-  screen: Screen;
-  budget: number;
-  playerCount: number;
-  selectedForceSlot: number;
-  forceSlots: ForceSlot[];
-  run: ChallengeRun | null;
-}
-
-const flow: Flow = {
-  screen: "loading",
-  budget: 2000,
-  playerCount: 1,
-  selectedForceSlot: 0,
-  forceSlots: BORG_CATALOG.defaultForceSlots.map((slot) => ({ ...slot, borgIds: [...slot.borgIds] })),
-  run: null,
-};
-
-// ------------------------------------------------------------------------------------------
 // Borg GET / Gotcha-Box drop pool (research/decomp/items-evidence-inventory-2026-07-05.md).
 //
 // PORT-ISM: persisted in localStorage (apps/game/src/sim/getStorage.ts); the pool/roll
@@ -711,202 +654,117 @@ const gotchaBox = createGotchaBoxSettlement({
   clock: Date.now,
 });
 
+const challengeSession = createGameSession({
+  initialForceSlots: BORG_CATALOG.defaultForceSlots,
+  forceFromSlot,
+  validForce: (borgIds) => BORG_CATALOG.rosterIndex.validIds(borgIds, { fallbackId: DEFAULT_LEAD }),
+  createRun: createChallengeRun,
+  borgs: BORG_CATALOG.roster as Parameters<typeof createChallengeRun>[0]["borgs"],
+  stageCatalog: EXPORTED_STAGE_CATALOG_ADAPTER,
+  borgStats: BORG_CATALOG.combatStats,
+  loadStageAssets: loadStage,
+});
+
 function mountScreen(build: (root: HTMLElement) => MenuScreenHandle): void {
   screenHost.mount(build);
 }
 
-/**
- * Title/desk-intro screen, per research/decomp/index/title-main-menu-flow.md: the real boot
- * path runs the frontend desk script (FUN_801c795c / G-Red desk-intro actor) before the
- * title/main-menu scene enter (title_main_menu_scene_enter -> set_global_menu_mode(9)). "Press
- * start" (click/any key) models that handoff into the existing menu hub.
- */
-function showTitleIntro(): void {
-  flow.screen = "title";
-  queueBgm(AUDIO_CUES.menuBgm);
-  mountScreen((root) =>
-    createTitleIntro(root, {
-      onEnter: () => {
-        playConfirmSfx();
-        showMenu();
-      },
-    }),
-  );
+function dispatchSession(event: GameSessionEvent): void {
+  interpretSessionEffects(challengeSession.dispatch(event));
 }
 
-function showMenu(initial: MainMenuMode = "challenge"): void {
-  flow.screen = "menu";
-  queueBgm(AUDIO_CUES.menuBgm);
-  mountScreen((root) =>
-    createMainMenu(root, {
-      initial,
-      onSelect: (mode) => {
-        if (mode === "challenge") {
-          playConfirmSfx();
-          showDifficulty();
-        } else if (mode === "edit-force") {
-          playEditSfx();
-          showForceBuilder("menu");
-        }
-      },
-    }),
-  );
-}
-
-function showDifficulty(): void {
-  flow.screen = "difficulty";
-  mountScreen((root) =>
-    createSelectDifficulty(root, {
-      onSelect: (budget) => {
-        playConfirmSfx();
-        flow.budget = budget;
-        showPlayers();
-      },
-      onBack: () => {
-        playBackSfx();
-        showMenu();
-      },
-    }),
-  );
-}
-
-function showPlayers(): void {
-  flow.screen = "players";
-  mountScreen((root) =>
-    createSelectPlayers(root, {
-      maxPlayers: 2,
-      onSelect: (count) => {
-        playConfirmSfx();
-        flow.playerCount = count;
-        showLoadBoxData();
-      },
-      onBack: () => {
-        playBackSfx();
-        showDifficulty();
-      },
-    }),
-  );
-}
-
-function showLoadBoxData(): void {
-  flow.screen = "load-box";
-  mountScreen((root) =>
-    createLoadBoxData(root, {
-      onConfirm: () => {
-        playConfirmSfx();
-        showSelectForce();
-      },
-      onSkip: () => {
-        playConfirmSfx();
-        showSelectForce();
-      },
-      onBack: () => {
-        playBackSfx();
-        showPlayers();
-      },
-    }),
-  );
-}
-
-function showSelectForce(): void {
-  flow.screen = "select-force";
-  mountScreen((root) =>
-    createSelectForce(root, {
-      catalog: FORCE_CATALOG,
-      slots: flow.forceSlots,
-      selectedSlot: flow.selectedForceSlot,
-      limit: flow.budget,
-      onSelectSlot: (slotIndex) => {
-        playSfx(AUDIO_CUES.confirm);
-        flow.selectedForceSlot = slotIndex;
-      },
-      onConfirm: (slot) => {
-        playConfirmSfx();
-        flow.selectedForceSlot = Math.max(0, flow.forceSlots.findIndex((candidate) => candidate.no === slot.no));
-        startRun();
-      },
-      onEdit: (slot) => {
-        playEditSfx();
-        flow.selectedForceSlot = Math.max(0, flow.forceSlots.findIndex((candidate) => candidate.no === slot.no));
-        showForceBuilder("select-force");
-      },
-      onBack: () => {
-        playBackSfx();
-        showLoadBoxData();
-      },
-    }),
-  );
-}
-
-function showForceBuilder(returnTo: "select-force" | "menu" = "select-force"): void {
-  flow.screen = "force";
-  mountScreen((root) =>
-    createForceBuilder(root, {
-      catalog: FORCE_CATALOG,
-      limit: flow.budget,
-      initialForce: selectedForce(),
-      onConfirm: (force) => {
-        playConfirmSfx();
-        updateSelectedForceSlot(force);
-        if (returnTo === "menu") showMenu("edit-force");
-        else showSelectForce();
-      },
-      onQuit: () => {
-        playBackSfx();
-        if (returnTo === "menu") showMenu("edit-force");
-        else showSelectForce();
-      },
-    }),
-  );
-}
-
-function startRun(): void {
-  const force = selectedForce();
-  updateSelectedForceSlot(force);
-  const humanPlayerCount = Math.max(1, Math.min(flow.playerCount, 2));
-  const playerForces = Array.from({ length: humanPlayerCount }, (_, player) => ({
-    player,
-    borgIds: player === 0 ? force : forceFromSlot(forceSlotForPlayer(player)),
-  }));
-  flow.run = createChallengeRun({
-    budget: flow.budget,
-    playerCount: humanPlayerCount,
-    playerForces,
-    borgs: BORG_CATALOG.roster as Parameters<typeof createChallengeRun>[0]["borgs"],
-  });
-  const battle = flow.run.getCurrentBattle();
-  if (!battle) {
-    showMenu();
-    return;
+function interpretSessionEffects(effects: readonly GameSessionEffect[]): void {
+  for (const effect of effects) {
+    if (effect.type === "render") renderSessionScreen();
+    else if (effect.type === "teardown-battle") teardownBattle();
+    else {
+      void enterBattle().catch((error: unknown) => {
+        console.error("[battle] failed to enter battle, returning to Select Force", error);
+        teardownBattle();
+        dispatchSession({ type: "battle-preparation-failed" });
+      });
+    }
   }
-  showBattleIntro(battle);
 }
 
-function showBattleIntro(config: MissionBattleConfig): void {
-  flow.screen = "briefing";
-  queueBgm(AUDIO_CUES.menuBgm);
-  mountScreen((root) =>
-    createBattleIntro(root, {
-      config,
-      catalog: FORCE_CATALOG,
-      onConfirm: () => {
-        playConfirmSfx();
-        // Stall-resilience: enterBattle awaits stage-asset loading (createBattleBootstrap).
-        // Previously an unguarded `void enterBattle(...)` left an unhandled rejection and a
-        // permanently blank "loading" screen if that load ever failed (e.g. a bad stage id
-        // or a network hiccup on a stage asset) — the player had no back/advance path out.
-        // Recover to Select Force with a visible message instead of trapping input.
-        void enterBattle(config).catch((error: unknown) => {
-          console.error("[battle] failed to enter battle, returning to Select Force", error);
-          showSelectForce();
-        });
-      },
-      onBack: () => {
-        playBackSfx();
-        showSelectForce();
-      },
-    }),
-  );
+function renderSessionScreen(): void {
+  const state = challengeSession.snapshot();
+  switch (state.screen) {
+    case "loading": queueBgm(AUDIO_CUES.battleBgm); screenHost.clear(); return;
+    case "title":
+      queueBgm(AUDIO_CUES.menuBgm);
+      mountScreen((root) => createTitleIntro(root, { onEnter: () => {
+        playConfirmSfx(); dispatchSession({ type: "title-enter" });
+      } }));
+      return;
+    case "menu":
+      queueBgm(AUDIO_CUES.menuBgm);
+      mountScreen((root) => createMainMenu(root, { initial: state.menuMode, onSelect: (mode) => {
+        if (mode === "challenge") { playConfirmSfx(); dispatchSession({ type: "menu-select", mode }); }
+        else if (mode === "edit-force") { playEditSfx(); dispatchSession({ type: "menu-select", mode }); }
+      } }));
+      return;
+    case "difficulty":
+      mountScreen((root) => createSelectDifficulty(root, {
+        onSelect: (budget) => { playConfirmSfx(); dispatchSession({ type: "difficulty-select", budget }); },
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    case "players":
+      mountScreen((root) => createSelectPlayers(root, { maxPlayers: 2,
+        onSelect: (playerCount) => { playConfirmSfx(); dispatchSession({ type: "players-select", playerCount }); },
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    case "load-box": {
+      const proceed = () => { playConfirmSfx(); dispatchSession({ type: "box-continue" }); };
+      mountScreen((root) => createLoadBoxData(root, { onConfirm: proceed, onSkip: proceed,
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    }
+    case "select-force": {
+      const slots = state.forceSlots.map((slot) => ({ ...slot, borgIds: [...slot.borgIds] }));
+      mountScreen((root) => createSelectForce(root, { catalog: FORCE_CATALOG, slots,
+        selectedSlot: state.selectedForceSlot, limit: state.budget,
+        onSlotsSynced: (slots) => dispatchSession({ type: "force-slots-synced", slots }),
+        onSelectSlot: (slotIndex) => { playSfx(AUDIO_CUES.confirm); dispatchSession({ type: "force-slot-selected", slotIndex }); },
+        onConfirm: (slot) => { playConfirmSfx(); dispatchSession({ type: "force-slot-confirm", slot }); },
+        onEdit: (slot) => { playEditSfx(); dispatchSession({ type: "force-slot-edit", slot }); },
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    }
+    case "force": {
+      const slot = state.forceSlots[state.selectedForceSlot] ?? state.forceSlots[0];
+      mountScreen((root) => createForceBuilder(root, { catalog: FORCE_CATALOG, limit: state.budget,
+        initialForce: slot ? forceFromSlot(slot) : [],
+        onConfirm: (borgIds) => { playConfirmSfx(); dispatchSession({ type: "force-editor-confirm", borgIds }); },
+        onQuit: () => { playBackSfx(); dispatchSession({ type: "force-editor-quit" }); },
+      }));
+      return;
+    }
+    case "briefing":
+      if (!state.pendingBattleConfig) throw new Error("Briefing requires a pending battle");
+      queueBgm(AUDIO_CUES.menuBgm);
+      mountScreen((root) => createBattleIntro(root, { config: state.pendingBattleConfig!, catalog: FORCE_CATALOG,
+        onConfirm: () => { playConfirmSfx(); dispatchSession({ type: "briefing-confirm" }); },
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    case "results": {
+      const postBattle = state.postBattle;
+      if (!postBattle) throw new Error("Results screen requires a settled battle");
+      session?.hud.destroy(); closePauseMenu();
+      const handle = createResults(ui, { onAdvance: () => dispatchSession({ type: "advance" }) });
+      handle.render(postBattle.result, postBattle.stats); screenHost.set(handle); return;
+    }
+    case "gets": {
+      const handle = createGets(ui, { onAdvance: () => dispatchSession({ type: "advance" }) });
+      handle.render(getsRowsForDrops(state.postBattle?.drops ?? [])); screenHost.set(handle); return;
+    }
+    case "battle": return;
+  }
 }
 
 // ------------------------------------------------------------------------------------------
@@ -931,53 +789,50 @@ let session: BattleSession | null = null;
 let simAccumulator = 0;
 const SIM_DT = 1 / 60;
 
-async function enterBattle(config: MissionBattleConfig): Promise<void> {
-  flow.screen = "loading";
-  queueBgm(AUDIO_CUES.battleBgm);
-  screenHost.clear();
+async function enterBattle(): Promise<void> {
+  await initializeGotchaBoxBattle(
+    () => challengeSession.prepareBattle(),
+    gotchaBox,
+    (boot) => {
+      const { battle, config, localPlayerId, localPlayerIds, stageBounds } = boot;
 
-  // GET pool pre-battle snapshot (doc §2c): taken once per battle, right before it starts,
-  // so a lose/abandon reverts exactly this battle's accrual and nothing earlier.
-  gotchaBox.begin();
+      // Energy maxima for the HUD meters (team 0 = ally, team 1 = enemy).
+      const { allyMax, enemyMax } = battleEnergyMaxima(battle);
 
-  const boot = await createBattleBootstrap({
-    config,
-    playerCount: flow.playerCount,
-    stageCatalog: EXPORTED_STAGE_CATALOG_ADAPTER,
-    borgStats: BORG_CATALOG.combatStats,
-    loadStageAssets: loadStage,
-  });
-  const { battle, localPlayerId, localPlayerIds, stageBounds } = boot;
+      // Mount the HUD.
+      const hud = createBattleHud(ui, { showBanner: false });
 
-  // Energy maxima for the HUD meters (team 0 = ally, team 1 = enemy).
-  const { allyMax, enemyMax } = battleEnergyMaxima(battle);
-
-  // Mount the HUD.
-  const hud = createBattleHud(ui, { showBanner: false });
-
-  session = {
-    battle,
-    config,
-    hud,
-    localPlayerId,
-    localPlayerIds,
-    stageBounds,
-    allyMax,
-    enemyMax,
-    paused: false,
-    pauseHandle: null,
-    resolved: false,
-  };
-  simAccumulator = 0;
-  battleScene.clear();
-  flow.screen = "battle";
-  // Prime the scene + HUD on frame 0.
-  const initialScene = battleSceneState(battle, localFocusBorg());
-  battleScene.sync(initialScene.actors, initialScene.projectiles, initialScene.focusUid);
-  const focus = localFocusBorg();
-  const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
-  battleCamera.snapTo(focus && focusPos ? cameraFollowTargetForBorg(focus, focusPos) : null);
-  updateHud();
+      session = {
+        battle,
+        config,
+        hud,
+        localPlayerId,
+        localPlayerIds,
+        stageBounds,
+        allyMax,
+        enemyMax,
+        paused: false,
+        pauseHandle: null,
+        resolved: false,
+      };
+      simAccumulator = 0;
+      battleScene.clear();
+      // Prime the scene + HUD on frame 0.
+      const initialScene = battleSceneState(battle, localFocusBorg());
+      battleScene.sync(
+        initialScene.actors,
+        initialScene.projectiles,
+        initialScene.focusUid,
+        false,
+        initialScene.projectileDespawns,
+      );
+      const focus = localFocusBorg();
+      const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
+      battleCamera.snapTo(focus && focusPos ? cameraFollowTargetForBorg(focus, focusPos) : null);
+      updateHud();
+    },
+  );
+  dispatchSession({ type: "battle-started" });
 }
 
 function localActiveUid(): string | null {
@@ -1131,8 +986,7 @@ function endBattleToMenu(): void {
   // Abandon (pause -> quit): revert the GET pool to its pre-battle snapshot, matching the
   // ROM's lose/abandon revert (doc §2c) — an abandoned battle keeps none of its accrual.
   gotchaBox.revert();
-  teardownBattle();
-  showMenu();
+  dispatchSession({ type: "battle-abandoned" });
 }
 
 function teardownBattle(): void {
@@ -1189,7 +1043,13 @@ function stepBattle(dt: number): void {
   // and the HUD, keeping the "battle mode" signal single-sourced from battleHudState.
   const presentation = currentBattlePresentation();
   const sceneState = battleSceneState(battle, presentation?.focus ?? localFocusBorg());
-  battleScene.sync(sceneState.actors, sceneState.projectiles, sceneState.focusUid, Boolean(presentation?.hud.meleeRange));
+  battleScene.sync(
+    sceneState.actors,
+    sceneState.projectiles,
+    sceneState.focusUid,
+    Boolean(presentation?.hud.meleeRange),
+    sceneState.projectileDespawns,
+  );
   updateHud();
 
   if (battle.observe().result !== "ongoing") resolveBattle();
@@ -1243,7 +1103,7 @@ function cameraFollowTargetForBorg(
 
 function updateBattleDebugDataset(): void {
   if (!ENABLE_BATTLE_DEBUG_DATASET) return;
-  if (!session || flow.screen !== "battle") {
+  if (!session || challengeSession.snapshot().screen !== "battle") {
     delete ui.dataset["gfBattleDebug"];
     return;
   }
@@ -1300,17 +1160,22 @@ function resolveBattle(): void {
     gotchaBox.revert();
   }
 
-  showResults(outcome.win ? "win" : "lose", {
-    attack: results.attack,
-    hitRatio: results.hitRatio * 100,
-    dodgeRatio: results.dodgeRatio * 100,
-    enemyBorgsDefeated: results.enemyBorgsDefeated,
-    enemyTotalCost: results.costWon,
-    playerBorgsDefeated: results.playerBorgsDefeated,
-    playerTotalCost: results.costLost,
-    allyBorgsDefeated: results.allyBorgsDefeated,
-    grandTotal: results.grandTotal,
-  }, results, drops);
+  dispatchSession({
+    type: "battle-resolved",
+    battleResults: results,
+    drops,
+    stats: {
+      attack: results.attack,
+      hitRatio: results.hitRatio * 100,
+      dodgeRatio: results.dodgeRatio * 100,
+      enemyBorgsDefeated: results.enemyBorgsDefeated,
+      enemyTotalCost: results.costWon,
+      playerBorgsDefeated: results.playerBorgsDefeated,
+      playerTotalCost: results.costLost,
+      allyBorgsDefeated: results.allyBorgsDefeated,
+      grandTotal: results.grandTotal,
+    },
+  });
 }
 
 function getsRowsForDrops(drops: readonly GetDrop[]): GetsRow[] {
@@ -1322,61 +1187,6 @@ function getsRowsForDrops(drops: readonly GetDrop[]): GetsRow[] {
   }));
 }
 
-function showResults(
-  result: "win" | "lose",
-  stats: Parameters<ReturnType<typeof createResults>["render"]>[1],
-  battleResults: BattleResults,
-  drops: readonly GetDrop[] = [],
-): void {
-  // Tear down HUD but keep the battle scene visible behind the results.
-  session?.hud.destroy();
-  closePauseMenu();
-  flow.screen = "results";
-
-  const handle = createResults(ui, {
-    onAdvance: () => {
-      if (drops.length > 0) showGets(drops, battleResults);
-      else advanceRun(battleResults);
-    },
-  });
-  handle.render(result, stats);
-  screenHost.set(handle);
-}
-
-/**
- * GETS — the post-Results Borg GET drop list (Gets.ts). Only mounted when this battle
- * rolled at least one drop; otherwise Results advances straight through (never blocks the
- * flow either way — skippable via the menu-input confirm action like every other screen).
- */
-function showGets(drops: readonly GetDrop[], battleResults: BattleResults): void {
-  flow.screen = "gets";
-  const handle = createGets(ui, {
-    onAdvance: () => {
-      advanceRun(battleResults);
-    },
-  });
-  handle.render(getsRowsForDrops(drops));
-  screenHost.set(handle);
-}
-
-function advanceRun(lastResult: BattleResults): void {
-  const run = flow.run;
-  battleScene.clear();
-  session = null;
-
-  if (!run) {
-    showMenu();
-    return;
-  }
-  const progress = run.next(lastResult);
-  if (progress.action === "advance" && progress.nextBattle) {
-    showBattleIntro(progress.nextBattle);
-  } else {
-    // "complete" (won the whole run) or "title" (lost) -> back to menu.
-    showMenu();
-  }
-}
-
 // ------------------------------------------------------------------------------------------
 // Main loop
 // ------------------------------------------------------------------------------------------
@@ -1386,13 +1196,14 @@ function advanceRun(lastResult: BattleResults): void {
 const renderClock = new THREE.Clock();
 function tick(): void {
   const dt = Math.min(renderClock.getDelta(), 0.05);
-  if (flow.screen === "battle" || flow.screen === "results") {
+  const screen = challengeSession.snapshot().screen;
+  if (screen === "battle" || screen === "results") {
     battleScene.update(dt);
-    if (flow.screen === "battle") followCamera();
+    if (screen === "battle") followCamera();
   }
   updateBattleDebugDataset();
   if (debugOverlay.visible) {
-    debugOverlay.update(flow.screen === "battle" ? localFocusBorg() : null);
+    debugOverlay.update(screen === "battle" ? localFocusBorg() : null);
   }
   controls.update();
   viewport.render();
@@ -1402,7 +1213,7 @@ function tick(): void {
 // tab is hidden. ~60 Hz target.
 startFixedStepLoop({
   step(dt) {
-    if (flow.screen === "battle") {
+    if (challengeSession.snapshot().screen === "battle") {
       pollPauseToggle();
       stepBattle(dt);
     }
@@ -1422,7 +1233,7 @@ showLoadingMessage("Loading extracted stage + model assets…");
 
 void loadInitialAssets()
   .then(() => {
-    showTitleIntro();
+    dispatchSession({ type: "boot-ready" });
   })
   .catch((error: unknown) => {
     showLoadingMessage(`Asset load failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -1431,7 +1242,6 @@ void loadInitialAssets()
 startRenderLoop({ frame: tick });
 
 function showLoadingMessage(text: string): void {
-  flow.screen = "loading";
   screenHost.clear();
   const box = document.createElement("div");
   box.style.cssText =
@@ -1442,7 +1252,9 @@ function showLoadingMessage(text: string): void {
 
 // Expose a tiny debug handle for live verification in the preview.
 (window as unknown as { __gf: unknown }).__gf = {
-  flow,
+  get navigation() {
+    return challengeSession.snapshot();
+  },
   keys,
   get input() {
     return inputFromKeys(keys, activeGamepad());
@@ -1458,11 +1270,6 @@ function showLoadingMessage(text: string): void {
     viewport.render();
     return normalized;
   },
-  startChallenge: () => showDifficulty(),
-  // Debug: jump back to the title/desk-intro screen or straight to the menu hub, for preview
-  // verification of the Slice 6 title-intro flow without a full reload.
-  showTitle: () => showTitleIntro(),
-  showMenu: () => showMenu(),
   renderDiagnostics: () => viewport.diagnostics(),
   // Read-only scene readout for preview debugging: current stage, lights, and a per-material
   // summary (color/map/side/transparent) of everything under the stage and battle roots.
@@ -1510,11 +1317,5 @@ function showLoadingMessage(text: string): void {
   three: { scene, stageRoot, battleRoot, camera, viewport },
   renderNow: () => {
     return viewport.captureFrame();
-  },
-  forceBattle: (force: string[] = [DEFAULT_LEAD]) => {
-    flow.budget = 2000;
-    flow.playerCount = 1;
-    updateSelectedForceSlot(force);
-    startRun();
   },
 };

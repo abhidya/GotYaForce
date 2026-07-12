@@ -255,7 +255,7 @@ dt {
   color: var(--gf-muted);
   font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
 }
 
 dd {
@@ -279,7 +279,7 @@ dd {
   color: var(--gf-muted);
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 .detail-grid {

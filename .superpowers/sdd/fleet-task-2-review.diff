@@ -12,7 +12,7 @@ index c5118124..9119f6ab 100644
  //
  // BorgRuntime keeps its vec3 `vel` model; RomActor uses the ROM's scalar hSpeed +
  // yVel model. The bridge decomposes/recomposes each sync.
- 
+
 -import type { BorgRuntime, PlayerInput } from "./types.js";
 +import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
  import type { Vec3 } from "@gf/physics";
@@ -31,7 +31,7 @@ index c5118124..9119f6ab 100644
 @@ -630,21 +630,21 @@ pl040d: withRobotDash(makeOmega2FamilyRegistration(), ROBOT_ACTION0_CONFIGS.pl04
      // cluster registrations above (families/girl-cluster.ts wires the full
      // M-1..M-5 variant map with the real per-family seed slots).
- 
+
      // Robot group: zz_00f2374_ (3-phase melee).
      const robotMeleeFactory = (ctx: GRedFamilyCtx) => createMeleeRobot(ctx);
      for (const id of [
@@ -42,7 +42,7 @@ index c5118124..9119f6ab 100644
 -      FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(base, robotMeleeFactory);
 +      FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(base, robotMeleeFactory, 0);
      }
- 
+
      // Samurai group: zz_0149178_ (config-driven lunge melee). Only pl0706 remains on
      // the wave-C injection — the other 12 borgs now route action-1 variants through
      // families/samurai.ts (v3/v4 → createMeleeSamurai with the DOL-read
@@ -52,7 +52,7 @@ index c5118124..9119f6ab 100644
      for (const id of ["pl0706"] as const) {
        const base = FAMILY_REGISTRY_CACHE[id] ?? makeSimpleRegistration(id, () => {});
 @@ -726,33 +726,34 @@ function composeActionTable(
- 
+
  /** Wrap an existing registration so the bespoke B-melee engine (action 1) is injected
   *  on top of whatever rootAction the base configure closure sets. The base configure
   *  runs first (stamping borgNumber + wiring X-special/dash/charge slots); then this
@@ -85,7 +85,7 @@ index c5118124..9119f6ab 100644
      cueTable: base.cueTable,
    };
  }
- 
+
  /** Wrap a family registration so action 0 routes to the shared robot-dash engine
   *  (PTR_FUN_8031b8a0 → zz_00f1e30_ ported in shared-robot-dash.ts). Preserves the
 @@ -1163,20 +1164,31 @@ export type RomHitResolver = (
@@ -93,12 +93,12 @@ index c5118124..9119f6ab 100644
    damageRecordIndex: number,
    knockbackMult: number,
  ) => void;
- 
+
  /** Host-provided ground clamp — called after the ROM physics step to snap the borg
   *  to the stage floor. Without this the ROM integrator (no collision awareness) lets
   *  borgs fall through the ground. */
  export type RomGroundClamp = (pos: { x: number; y: number; z: number }, velY: number) => { y: number; velY: number; grounded: boolean };
- 
+
 +/** Cohesive battle-owned dependency used by every ROM family driver in one battle. */
 +export interface RomBattleRuntime {
 +  readonly floor: RomPhysicsRuntime & {
@@ -115,7 +115,7 @@ index c5118124..9119f6ab 100644
  // Every hook defaults to a bridge implementation. battle.ts overrides any hook
  // that needs game-level access (spawn, ammo, collision, etc.).
  // ============================================================================
- 
+
  /** All hooks from all family ctx types (StreamContext + family-specific extras). */
  export interface RomHostContext {
    // ── StreamContext hooks ──
@@ -128,7 +128,7 @@ index c5118124..9119f6ab 100644
    onClearAction?: (actor: RomActor) => void;
    onStopStream?: (actor: RomActor, group: number) => void;
  }
- 
+
  /** The bridge sidecar attached to BorgRuntime (via the `romDriver` field). Owns the
   *  RomActor + state tables + per-frame sync. Activates when a ported family exists. */
 -export class RomDriverBridge {
@@ -182,7 +182,7 @@ index c5118124..9119f6ab 100644
    private pendingProjectiles: Projectile[] = [];
    /** Projectiles spawned by family hooks during the current special. */
    private familyProjectiles: Projectile[] = [];
- 
+
    /** Drain projectiles spawned by the ROM stream's fireChild op. Called by battle.ts
     *  after each romDriver.tick(). */
    drainProjectiles(): Projectile[] {
@@ -197,7 +197,7 @@ index c5118124..9119f6ab 100644
    private activeActionIndex = 0;
    private activeVariantIndex = 0;
    private runtime: BorgRuntime | null = null;
- 
+
 -  private constructor(actor: RomActor) {
 +  private constructor(
 +    actor: RomActor,
@@ -211,7 +211,7 @@ index c5118124..9119f6ab 100644
        onStartStream?: (group: number, slot: number, mask: number) => boolean;
      }).onStartStream = (group, slot, mask) => this.onStartStream(group, slot, mask);
    }
- 
+
    private onStartStream(group: number, slot: number, mask: number): boolean {
      if (!this.runtime) return false;
      const events = streamEventsForSlot(
@@ -222,9 +222,9 @@ index c5118124..9119f6ab 100644
        onStopStream: () => {},
      };
    }
- 
+
    /** ── Default implementations ── */
- 
+
    private defaultOnFaceComplete(actor: RomActor, mask: number): boolean {
 -    void actor; void mask;
 -    return true;
@@ -244,23 +244,23 @@ index c5118124..9119f6ab 100644
 +    actor.heading = (actor.heading + (diff > 0 ? step : -step)) & 0xffff;
 +    return false;
    }
- 
+
    private defaultOnExitFb(actor: RomActor): void {
      actor.controlWord = actor.controlWord & ~0x3;
      dispatchFullBodyCue(actor, 0);
    }
- 
+
    private defaultOnFaceTarget(actor: RomActor, aimType: number): void {
      void aimType;
      const lt = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
 @@ -1410,26 +1444,49 @@ export class RomDriverBridge {
- 
+
    private defaultOnClearAction(actor: RomActor): void {
      actor.controlWord = actor.controlWord & ~0x3;
      dispatchFullBodyCue(actor, 0);
      dispatchUpperBodyCue(actor, 0);
    }
- 
+
    /** Attach a bridge to a freshly-spawned BorgRuntime. Returns the bridge, or null if
     *  the borg has no ported family (caller keeps generic archetypes). */
    static attach(runtime: BorgRuntime, hostCtx: RomHostContext): RomDriverBridge | null {
@@ -330,7 +330,7 @@ index c5118124..9119f6ab 100644
        }
      }
    }
- 
+
    /** Mirror the live host buttons into the decoded actor status words consumed by
     * continuation/exit callbacks (+0x5bc bit 0x200 and +0x5d8 high nibble). */
    private syncActionInput(input: PlayerInput | null, fallbackHeld = false): void {
@@ -348,7 +348,7 @@ index c5118124..9119f6ab 100644
      scratch.bRetapInput = input?.attack ?? fallbackHeld;
      scratch.streamTickEnabled = true;
    }
- 
+
    /** Copy RomActor → BorgRuntime (after the ROM step). */
    syncOut(runtime: BorgRuntime): void {
      const a = this.actor;
@@ -366,14 +366,14 @@ index 422b4ca4..a2398d3f 100644
  //   FLOAT_8043909c = proximity-continue threshold
  //   FLOAT_804390a0 = recovery decel
  //   FLOAT_804390a4 = speed threshold (zz_00b22f4_ gate)
- 
+
  import type { RomActor } from "../rom/actor.js";
 -import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
  import { isStreamTickEnabled, stepTargetYaw } from "../rom/helpers.js";
  import { integratePhysics } from "../rom/physics.js";
  import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 +import { romGroundIdleReturn } from "./shared-idle-return.js";
- 
+
  export const MELEE_ROBOT = {
    TIMER_SEED: 60.0,      // FLOAT_80439090
 -  ACTIVE_TIMER: 30.0,    // FLOAT_80439094
@@ -394,12 +394,12 @@ index 422b4ca4..a2398d3f 100644
    PART_MASK: 0xf,
    STATE_FACE: 0xc0,
  } as const;
- 
+
  export interface MeleeRobotConfig {
    seedSlot?: number;
    activeTimer?: number;
  }
- 
+
  interface MeleeScratch {
    bRetap?: boolean;
    bRetapInput?: boolean;
@@ -418,14 +418,14 @@ index 422b4ca4..a2398d3f 100644
 +  /** actor+0x1d9b, cleared once the target is within 150 units. */
 +  movementTrailFlag1d9b?: number;
  }
- 
+
 -function targetDistance(actor: RomActor & MeleeScratch): number | null {
 +function geometricTargetDistance(actor: RomActor & MeleeScratch): number | null {
    const target = actor.lockTarget;
    if (!target) return null;
    return Math.hypot(target.x - actor.pos.x, target.z - actor.pos.z);
  }
- 
+
 +function targetDistance760(actor: RomActor & MeleeScratch): number {
 +  return actor.targetDistance760 ?? geometricTargetDistance(actor) ?? 0;
 +}
@@ -467,7 +467,7 @@ index 422b4ca4..a2398d3f 100644
 +    ctx.onFamilyProjectile?.(actor, MELEE_ROBOT.MELEE_FX_ADDR, 0);
 +  }
  }
- 
+
  // Phase 0 — FUN_800f23c4 @ chunk_0026.c:2277.
  function phase0(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>): void {
    actor.fbPhaseSlots[0] += 1;
@@ -494,7 +494,7 @@ index 422b4ca4..a2398d3f 100644
      MELEE_ROBOT.STREAM_RATE,
    );
  }
- 
+
  // Phase 1 — FUN_800f2498 @ chunk_0026.c:2309.
  function phase1(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>, ctx: StreamContext): void {
    if (isStreamTickEnabled(actor)) tickStream(actor, MELEE_ROBOT.PART_MASK, ctx);
@@ -512,7 +512,7 @@ index 422b4ca4..a2398d3f 100644
 +    spawnLaunchFxIfFar(actor, ctx);
    }
  }
- 
+
  // Phase 2 — FUN_800f259c @ chunk_0026.c:2346 (active + combo + recovery fused).
  function phase2(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>, ctx: StreamContext): void {
    if (actor.bRetapInput) actor.bRetap = true;
@@ -564,7 +564,7 @@ index 422b4ca4..a2398d3f 100644
 +    ctx.onFamilyProjectile?.(actor, MELEE_ROBOT.DISTANCE_TRAIL_HELPER_ADDR, 0);
    }
  }
- 
+
  export function createMeleeRobot(
    ctx: StreamContext,
    cfg: MeleeRobotConfig = {},
@@ -581,7 +581,7 @@ index 503e071d..4731ce70 100644
  import { allocateWeapon, partState, stepDualTargetAim, toS16 } from "../rom/helpers.js";
  import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
  import { romGroundIdleReturn } from "./shared-idle-return.js";
- 
+
  export const ROBOT_DASH = {
    DASH_TIMER: 30.0, // FLOAT_80439078; actor+0x560 phase-1 window
    STREAM_RATE: -1.0,
@@ -590,7 +590,7 @@ index 503e071d..4731ce70 100644
 +  AIM_DECAY: 0.96, // FLOAT_8043908c
    ACTION_MODE_BITS: 0x3,
  } as const;
- 
+
  export interface RobotDashConfig {
    slotBase: number;
    ammoSlot: number;
@@ -599,11 +599,11 @@ index 503e071d..4731ce70 100644
    /** config+4/+8/+0x10 callback addresses (kept for host routing/provenance). */
    onContactAddr?: number;
 @@ -85,54 +85,54 @@ function spawn(ctx: StreamContext, actor: RomActor, addr: number, ...types: numb
- 
+
  function slotFlags(s: RobotDashScratch): number[] {
    return s.robotSlotFlags ??= [0, 0, 0, 0];
  }
- 
+
  /** Decoded config+4 callbacks. Every callback performs its own consuming ammo check. */
  function runContactCallback(actor: RomActor, ctx: StreamContext, cfg: RobotDashConfig): void {
    const s = scratchOf(actor);
@@ -669,7 +669,7 @@ index 27965575..a81784e0 100644
  //  1. physics.integratePhysics reproduces the ROM's scalar-speed integration
  //  2. dispatch.dispatchCommandRecord transitions state 61 → rootAction
  //  3. The G RED family's phase-0 launch produces the documented upward impulse (Y=+4.0)
- 
+
  import { createRomActor, type RomActor } from "./actor.js";
  import { integratePhysics } from "./physics.js";
  import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
@@ -726,7 +726,7 @@ index 27965575..a81784e0 100644
      assert(approxEq(a.pos.z, 10.0), "yaw 0 → pos.z += 10 (cos×hSpeed)");
      assert(approxEq(a.pos.x, 0.0), "yaw 0 → pos.x unchanged (sin=0)");
    }
- 
+
 +  // Integration seam: two battle runtimes keep independent floor behavior.
 +  console.log("\n[rom.selfcheck] battle runtime — floor behavior is instance-local:");
 +  {
@@ -771,7 +771,7 @@ index 27965575..a81784e0 100644
        ran = true;
 @@ -2397,48 +2430,87 @@ export function runSelfTest(): number {
    }
- 
+
    console.log("\n[rom.selfcheck] families/melee-robot — phase 1 speed source (FUN_800f2498):");
    {
      const fx: number[] = [];
@@ -801,7 +801,7 @@ index 27965575..a81784e0 100644
 +      "locked branch uses FLOAT_80439098(2) * +0x760 / 20 and clears +0x4c");
      assert(fx[0] === 0x800b2190,
        "+0x760 > FLOAT_8043909c triggers zz_00b2190_(actor,0)");
- 
+
      const noTarget = createRomActor() as RomActor & {
        lockTarget?: null;
        rangeRows868?: readonly [number, number, number];
@@ -854,7 +854,7 @@ index 27965575..a81784e0 100644
 +    assert(combo.handlerTimer === 20 && approxEq(combo.hSpeed, 20) && combo.hDecel === 0,
 +      "combo replay restores the 20-frame timer, target speed, and deceleration clear");
    }
- 
+
    console.log("\n[rom.selfcheck] families/tank-borg - NORMAL TANK / LEOPARD bespoke actions:");
    {
      const shots: Array<[number, number]> = [];
@@ -868,7 +868,7 @@ index 27965575..a81784e0 100644
        "phase 0 advances and seeds +0x560=30");
      assert(actor.handlerTimer === 4 && actor.dashConfigByte === 5 && actor.streamSlot === 3,
        "phase 0 copies pl0407 config timer/count/stream slot");
- 
+
      actor.fbPhaseSlots[0] = 2;
      actor.wallContact = 1;
      handler(actor);
@@ -1115,7 +1115,7 @@ index 27965575..a81784e0 100644
 +        "exact B command actionIndex 0 enters the ROM dash instead of generic combat");
 +    }
    }
- 
+
    if (failures > 0) {
      console.error(`\n[rom.selfcheck] ${failures} FAILURES`);
      return 1;
@@ -1123,7 +1123,7 @@ index 27965575..a81784e0 100644
    console.log("\n[rom.selfcheck] ALL PASS — foundation composes correctly.");
    return 0;
  }
- 
+
 diff --git a/research/decomp/data/family-state-machine-classifications.reviewed.json b/research/decomp/data/family-state-machine-classifications.reviewed.json
 index 07e3bfef..27e8044d 100644
 --- a/research/decomp/data/family-state-machine-classifications.reviewed.json
@@ -2047,14 +2047,14 @@ index a155e873..c6ce027d 100644
 +++ b/research/decomp/family-state-machine-coverage.md
 @@ -1,11 +1,11 @@
  # Family state-machine coverage
- 
+
  Deterministic audit of the GG4E constructor roster, ROM command/root tables, bridge registrations, and family action tables.
- 
+
  - Constructor families: 119
  - Borg roster entries: 208
  - Action slots: 325
 -- Ported: 0; delegated: 0; inactive: 0; partial: 254; missing: 71
 +- Ported: 7; delegated: 0; inactive: 0; partial: 247; missing: 71
  - Structural errors: 0
- 
+
  Default mode checks structural validity. Strict mode additionally fails while partial or missing live slots remain. See `data/family-state-machine-coverage.json` for slot evidence.

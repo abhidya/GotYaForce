@@ -760,15 +760,26 @@ export type DeepReadonly<T> = T extends (...args: never[]) => unknown
 export type BattleActorObservation = DeepReadonly<Omit<BorgRuntime, "romDriver">>;
 export type BattleProjectileObservation = DeepReadonly<Projectile>;
 
+/** Final immutable facts for a projectile removed during this fixed step. */
+export interface ProjectileDespawnObservation {
+  readonly uid: string;
+  readonly pos: DeepReadonly<Vec3>;
+  readonly vel: DeepReadonly<Vec3>;
+  readonly team: number;
+  readonly reason: ProjectileDespawnReason;
+  readonly impactEffectId?: number;
+}
+
 /**
  * Cohesive read model for one fixed-step boundary. Arrays and nested records are typed
- * read-only. Actors are structured snapshots whose identity lasts only for this cached
- * boundary observation. Projectile elements alone retain live simulation identity so
- * presentation can read despawn metadata after an element leaves `projectiles`.
+ * read-only. Actors and current projectiles are structured snapshots whose identity lasts
+ * only for this cached boundary observation. Removed-projectile lifecycle facts are supplied
+ * separately by `projectileDespawns`.
  */
 export interface BattleObservation {
   readonly actors: readonly BattleActorObservation[];
   readonly projectiles: readonly BattleProjectileObservation[];
+  readonly projectileDespawns: readonly ProjectileDespawnObservation[];
   readonly activeUidByPlayer: Readonly<Record<string, string>>;
   readonly energy: Readonly<Record<number, number>>;
   readonly energyMax: Readonly<Record<number, number>>;

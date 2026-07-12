@@ -2,6 +2,7 @@ import type {
   Battle,
   BattleActorObservation,
   BattleProjectileObservation,
+  ProjectileDespawnObservation,
   BorgActionProfile,
   MeleeActionDef,
 } from "@gf/combat";
@@ -269,21 +270,19 @@ export function activeBorgForPlayer(battle: Battle, playerId: string): BattleAct
 }
 
 /**
- * Scene-facing battle snapshot. `projectiles` is deliberately the live sim array passed
- * VERBATIM (no clone): stepProjectiles mutates Projectile objects in place and writes
- * `despawnReason` on the OBJECT the frame it drops it from the list (packages/combat
- * types.ts), and BattleScene.syncProjectiles keeps per-uid references so it can read that
- * reason after removal and fire impact FX only for real impacts. Snapshotting/cloning the
- * projectile objects here would silently break that contract.
+ * Scene-facing fixed-step snapshot. Current projectile values are immutable boundary facts;
+ * removed-projectile effects consume the explicit lifecycle facts in `projectileDespawns`.
  */
 export function battleSceneState(battle: Battle, focus: BattleActorObservation | null): {
   actors: readonly BattleActorView[];
   projectiles: readonly BattleProjectileObservation[];
+  projectileDespawns: readonly ProjectileDespawnObservation[];
   focusUid: string | null;
 } {
   return {
     actors: battle.observe().actors.map(battleActorView),
     projectiles: battle.observe().projectiles,
+    projectileDespawns: battle.observe().projectileDespawns,
     focusUid: focus?.uid ?? null,
   };
 }

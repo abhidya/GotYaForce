@@ -61,6 +61,7 @@ import {
   type BattleActorObservation,
   type BattleConfig,
   type BattleObservation,
+  type BattleProjectileObservation,
   type BattleState,
   type BorgRuntime,
   type BurstMeterState,
@@ -69,6 +70,7 @@ import {
   type RectStageBounds,
   type SpawnPoint,
   type Projectile,
+  type ProjectileDespawnObservation,
   type StageCollision,
   normalizeStageBounds,
 } from "./types.js";
@@ -128,6 +130,7 @@ interface ForceRuntime {
 class BattleImpl implements Battle {
   private state: BattleState;
   private observationCache: BattleObservation | null = null;
+  private projectileDespawns: ProjectileDespawnObservation[] = [];
 
   private profiles = new Map<string, BorgProfile>();
   private byUid = new Map<string, BorgRuntime>();
@@ -397,9 +400,8 @@ class BattleImpl implements Battle {
     const state = this.state;
     this.observationCache = {
       actors: state.borgs.map(snapshotActor),
-      // Copy the container but deliberately preserve projectile element identity. The renderer
-      // retains those elements to read despawn metadata after a later step removes them.
-      projectiles: [...state.projectiles],
+      projectiles: state.projectiles.map(snapshotProjectile),
+      projectileDespawns: this.projectileDespawns.map((despawn) => structuredClone(despawn)),
       activeUidByPlayer: { ...state.activeUidByPlayer },
       energy: { ...state.energy },
       energyMax: { ...(state.energyMax ?? {}) },
@@ -617,6 +619,7 @@ class BattleImpl implements Battle {
     void _dt; // sim is fixed-step (SIM.DT); dt accepted for API symmetry.
     if (this.state.result !== "ongoing") return this.observe();
     this.observationCache = null;
+    this.projectileDespawns = [];
 
     // 0) Power Burst charged-flag sweep (ROM +0x103, Q4): the flag flips ONE frame AFTER the
     // clamped meter reaches METER_MAX. Deterministic check-BEFORE-fill ordering: this runs
@@ -789,8 +792,9 @@ class BattleImpl implements Battle {
     this.accountPendingDefeats();
 
     // 3) Projectiles.
+    const projectilesBeforeStep = this.state.projectiles;
     this.state.projectiles = stepProjectiles(
-      this.state.projectiles,
+      projectilesBeforeStep,
       all,
       profiles,
       this.byUid,
@@ -811,6 +815,20 @@ class BattleImpl implements Battle {
         cpuHalvingEnabled: this.isChallengeMode,
       },
     );
+    const survivingProjectileUids = new Set(this.state.projectiles.map((projectile) => projectile.uid));
+    this.projectileDespawns = projectilesBeforeStep.flatMap((projectile) => {
+      if (survivingProjectileUids.has(projectile.uid) || !projectile.despawnReason) return [];
+      return [{
+        uid: projectile.uid,
+        pos: structuredClone(projectile.pos),
+        vel: structuredClone(projectile.vel),
+        team: projectile.team,
+        reason: projectile.despawnReason,
+        ...(projectile.lastImpactEffectId !== undefined
+          ? { impactEffectId: projectile.lastImpactEffectId }
+          : {}),
+      }];
+    });
     this.accountPendingDefeats();
 
     // 4) Process any deaths -> auto-deploy next from that force.
@@ -983,6 +1001,10 @@ function snapshotActor(actor: BorgRuntime): BattleActorObservation {
   const { romDriver: _romDriver, ...observable } = actor;
   void _romDriver;
   return structuredClone(observable);
+}
+
+function snapshotProjectile(projectile: Projectile): BattleProjectileObservation {
+  return structuredClone(projectile);
 }
 
 function playableSpawnArea(collision: StageCollision | null, fallback: RectStageBounds): RectStageBounds {

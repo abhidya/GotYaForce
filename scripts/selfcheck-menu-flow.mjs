@@ -143,8 +143,8 @@ assert.match(mainSource, /createMenuScreenHost\(ui\)/);
 assert.match(mainSource, /screenHost\.mountOverlay/);
 assert.doesNotMatch(mainSource, /createScreenHost\(ui\)/);
 assert.doesNotMatch(mainSource, /pauseHandle\?\.destroy/);
-const resultsWiring = mainSource.slice(mainSource.indexOf("function showResults"), mainSource.indexOf("function showGets"));
-const getsWiring = mainSource.slice(mainSource.indexOf("function showGets"), mainSource.indexOf("function advanceRun"));
+const resultsWiring = mainSource.slice(mainSource.indexOf('case "results"'), mainSource.indexOf('case "gets"'));
+const getsWiring = mainSource.slice(mainSource.indexOf('case "gets"'), mainSource.indexOf('case "battle"'));
 assert.match(resultsWiring, /screenHost\.set\(handle\)/, "Results handle must be adopted by the host");
 assert.match(getsWiring, /screenHost\.set\(handle\)/, "Gets handle must be adopted by the host");
 

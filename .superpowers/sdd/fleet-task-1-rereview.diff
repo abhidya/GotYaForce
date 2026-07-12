@@ -12609,11 +12609,11 @@ index ce0814bd..a8d8e2aa 100644
 +++ b/scripts/audit-family-state-machines.mjs
 @@ -1,19 +1,28 @@
  #!/usr/bin/env node
- 
+
  import fs from "node:fs";
  import path from "node:path";
  import { fileURLToPath } from "node:url";
- 
+
  const PLAYER_COMMAND_TYPES = new Set([0, 1, 2, 3, 5]);
  const COMPLETE_STATUSES = new Set(["ported", "inactive", "delegated"]);
  const ALL_STATUSES = new Set([...COMPLETE_STATUSES, "partial", "missing"]);
@@ -12626,11 +12626,11 @@ index ce0814bd..a8d8e2aa 100644
 +  "bridgeWiring",
 +  "focusedTests",
 +];
- 
+
  export function stableStringify(value) {
    return `${JSON.stringify(sortValue(value), null, 2)}\n`;
  }
- 
+
  function sortValue(value) {
    if (Array.isArray(value)) return value.map(sortValue);
    if (!value || typeof value !== "object") return value;
@@ -12644,7 +12644,7 @@ index ce0814bd..a8d8e2aa 100644
    }
    return ids;
  }
- 
+
  export function buildAudit({ commandData, actionData, implementationIds, reviewed = { classifications: [] } }) {
    const errors = [];
 +  const invalidCompleteKeys = new Set();
@@ -12652,11 +12652,11 @@ index ce0814bd..a8d8e2aa 100644
    const tables = commandData?.tables ?? {};
    const actionBorgs = actionData?.borgs ?? {};
    const rosterIds = new Set(Object.keys(borgs));
- 
+
    for (const id of implementationIds) {
      if (!rosterIds.has(id)) errors.push(`implementation registration references unknown borg id ${id}`);
    }
- 
+
    const reviewedByKey = new Map();
    for (const item of reviewed.classifications ?? []) {
      const key = `${String(item.constructorAddress).toLowerCase()}:${item.actionIndex}`;
@@ -12674,7 +12674,7 @@ index ce0814bd..a8d8e2aa 100644
 +    if (item.status === "inactive" && !(item.evidence?.length > 0)) errors.push(`inactive classification ${key} requires evidence`);
      if (item.status === "delegated" && !item.target) errors.push(`delegated classification ${key} requires target`);
    }
- 
+
    const grouped = new Map();
    for (const [id, assignment] of Object.entries(borgs)) {
      const ctor = assignment.constructorAddress?.toLowerCase();
@@ -12696,7 +12696,7 @@ index ce0814bd..a8d8e2aa 100644
 +        const variants = Object.keys(action.variants ?? {}).map(Number).filter(Number.isInteger);
 +        noteLiveMember(slot, id, variants);
        }
- 
+
        const table = tables[assignment.tableId];
        if (!table) {
          errors.push(`borg ${id} references absent command table ${assignment.tableId}`);
@@ -12721,7 +12721,7 @@ index ce0814bd..a8d8e2aa 100644
          }
        }
      }
- 
+
      const actions = [...slots.values()].sort((a, b) => a.actionIndex - b.actionIndex).map((slot) => {
        const key = `${family.constructorAddress}:${slot.actionIndex}`;
        const explicit = reviewedByKey.get(key);
@@ -12759,7 +12759,7 @@ index ce0814bd..a8d8e2aa 100644
          romEvidence: [...slot.rootEvidence, ...slot.commandEvidence, ...slot.disabledEvidence].sort(),
        };
      });
- 
+
      return {
        constructorAddress: family.constructorAddress,
        members: family.members.map(({ id }) => id),
@@ -12767,7 +12767,7 @@ index ce0814bd..a8d8e2aa 100644
        actions,
      };
    });
- 
+
    for (const key of reviewedByKey.keys()) {
      const [ctor, rawIndex] = key.split(":");
      const family = families.find((entry) => entry.constructorAddress === ctor);
@@ -12775,7 +12775,7 @@ index ce0814bd..a8d8e2aa 100644
        errors.push(`reviewed classification ${key} does not reference a ROM slot`);
      }
    }
- 
+
 +  validateDelegations(families, reviewedByKey, invalidCompleteKeys, errors);
 +
    const counts = Object.fromEntries([...ALL_STATUSES].sort().map((status) => [status, 0]));
@@ -12794,13 +12794,13 @@ index ce0814bd..a8d8e2aa 100644
      families,
    };
  }
- 
+
  function ensureSlot(slots, actionIndex) {
 -  if (!slots.has(actionIndex)) slots.set(actionIndex, { actionIndex, live: false, rootEvidence: [], commandEvidence: [], disabledEvidence: [] });
 +  if (!slots.has(actionIndex)) slots.set(actionIndex, { actionIndex, live: false, liveMembers: new Map(), rootEvidence: [], commandEvidence: [], disabledEvidence: [] });
    return slots.get(actionIndex);
  }
- 
+
 +function noteLiveMember(slot, member, variants) {
 +  const live = slot.liveMembers.get(member) ?? new Set();
 +  for (const variant of variants) if (Number.isInteger(variant)) live.add(variant);
@@ -12911,7 +12911,7 @@ index 1ba1dc27..6ee22d52 100644
      reviewed: { classifications: [] },
    };
  }
- 
+
 +function portEvidence() {
 +  return Object.fromEntries([
 +    "rootDispatch", "variantDispatch", "phaseTransitions", "constants",
@@ -12946,12 +12946,12 @@ index 1ba1dc27..6ee22d52 100644
    assert.equal(inactive.status, "inactive");
    assert.match(inactive.evidence[0], /0x14/);
  });
- 
+
  test("default succeeds but strict fails when partial or missing live slots remain", () => {
    const audit = buildAudit(fixture());
 @@ -40,12 +67,82 @@ test("output is deterministic across input insertion order", () => {
  });
- 
+
  test("rejects duplicate reviewed classifications and evidence-free completion", () => {
    const input = fixture();
    input.reviewed.classifications = [
