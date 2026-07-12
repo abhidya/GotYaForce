@@ -41,6 +41,12 @@
 import type { RomActor, RomPartState } from "../rom/actor.js";
 import { dispatchUpperBodyCue, dispatchFullBodyCue } from "../rom/dispatch.js";
 import { integratePhysics, vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
+import {
+  groundSnapRevert,
+  resetPoseHousekeeping,
+  stepPartTargetPitch,
+  stepTargetYaw,
+} from "../rom/helpers.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 
 /** Machine constants — every value read from boot.dol (claim F5, dual-verified;
@@ -193,9 +199,8 @@ function series3Phase0(actor: RomActor, ctx: Series3FamilyCtx): void {
   const target = lockTargetPos(actor);
   if (!target) {
     actor.activeYaw = actor.heading;
-  } else {
-    actor.activeYaw = actor.lockYaw;
   }
+  stepTargetYaw(actor, 0xc1, 0, true);
 
   // Stream slot select: +0x6ea = 0x10 (ground) / 0x11 (airborne, +0x5e0 & 0x40).
   // NOTE: NO auto-increment (unlike the shared-X/B-ladder combo-cursor, claim N1c).
@@ -204,8 +209,7 @@ function series3Phase0(actor: RomActor, ctx: Series3FamilyCtx): void {
   const slot = airborne ? SERIES3_X.AIR_SLOT : SERIES3_X.GROUND_SLOT;
   actor.streamSlot = slot;
 
-  // zz_006e1ac_(actor, 0xc1, 1) air steering assist when airborne — steering helper
-  // owned by the bridge's aim layer; not modeled (same treatment as shared-x-special).
+  if (airborne) stepPartTargetPitch(actor, 0xc1);
 
   // Zero motion scalars +0x50/+0x48/+0x4c/+0x44 = FLOAT_80439558 (0.0) and turn rates
   // +0x80/+0x7e/+0x7c = 0 (u16 — not surfaced on RomActor; the scalar zeroes cover the
@@ -214,6 +218,7 @@ function series3Phase0(actor: RomActor, ctx: Series3FamilyCtx): void {
   actor.yVel = SERIES3_X.ZERO;
   actor.hDecel = SERIES3_X.ZERO;
   actor.gravityCoeff = SERIES3_X.ZERO;
+  resetPoseHousekeeping(actor);
 
   // BLINK-REPOSITION: motion(+0x38) = pos(+0x20) − lockTargetPos(+0x5e8);
   // motion ×= 0.95 (FLOAT_8043955c); pos += motion — the 5%-per-frame pull-away
@@ -223,9 +228,7 @@ function series3Phase0(actor: RomActor, ctx: Series3FamilyCtx): void {
   vecScale(SERIES3_X.REPOSITION_SCALE, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
 
-  // zz_00679d0_(actor): ground snap + pos-revert (revert +0x20/24/28 to prev +0x2c/30/34
-  // when snap==0 && grounded). The port's groundClamp (registered by the bridge) covers
-  // the snap; the revert-on-no-surface case is not modeled (labeled approximation).
+  groundSnapRevert(actor);
 
   // START STREAM: zz_004beb8_(rate -1.0 FLOAT_80439554, actor, partMask 0xf, group 2,
   // slot, r7=8, r8=1). The trailing (8,1) args (vs (-1,-1) in the phase-2 follow-up)
@@ -244,15 +247,13 @@ function series3Phase1(actor: RomActor, ctx: Series3FamilyCtx): void {
   // zz_004cd24_(actor, 0xf) stream tick.
   tickStream(actor, SERIES3_X.PART_MASK, ctx);
 
-  // zz_006d144_(actor, 0xc1) face — retained EVERY frame in this machine (unlike
-  // sharedXPhase1). Bridge pre-computes lockYaw; steer toward it directly.
-  if (lockTargetPos(actor)) actor.activeYaw = actor.lockYaw;
-  // Airborne: zz_006e1ac_(actor, 0xc1, 1) air steering assist (bridge-owned, unmodeled).
+  stepTargetYaw(actor, 0xc1, 0, true);
+  if (isAirborne(actor)) stepPartTargetPitch(actor, 0xc1);
 
   // Reposition continuation: motion ×= 0.95 (FLOAT_8043955c); pos += motion.
   vecScale(SERIES3_X.REPOSITION_SCALE, actor.motion, actor.motion);
   vecAdd(actor.pos, actor.motion, actor.pos);
-  // zz_00679d0_(actor) ground snap/revert — see phase-0 note.
+  groundSnapRevert(actor);
 
   // HIT TRANSITION on part-0 contact byte (s8)+0x1cef > 0: +0x540++ then the INLINE
   // BORG SWITCH on (s16)actor+0x3e8 — this switch IS the per-family "callback"; there
@@ -349,7 +350,7 @@ function series3Phase2(actor: RomActor, ctx: Series3FamilyCtx): void {
   // APPROXIMATIONS: `landed` = the bridge groundClamp's grounded flag; the 0x40 bit is
   // the phase-0 airborne snapshot; the +0x1cef<0 stream-event gate is modeled as
   // satisfied (same treatment as the meter gate above).
-  const grounded = (actor as RomActor & Series3Scratch).grounded === true;
+  const grounded = groundSnapRevert(actor);
   if (grounded && scratch.series3StartedAir === true && actor.contactP0 < 0) {
     actor.controlWord &= ~SERIES3_X.ACTION_MODE_BITS;
     dispatchUpperBodyCue(actor, 7);

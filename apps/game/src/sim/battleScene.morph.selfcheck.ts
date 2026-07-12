@@ -16,7 +16,8 @@ function view(combatFormId?: string, uid = "same-uid", afterimageSerial = 0): Ba
     dashActiveFrames: 0, chargeFrames: 0, meleeAnimStream: null, meleeSounds: null,
     lastHitImpactEffectId: undefined, lastHitAttackerTeam: undefined, slowHitTimer: 0, hasteHitTimer: 0,
     romAfterimage: afterimageSerial > 0
-      ? { serial: afterimageSerial, pos: { x: 11, y: 12, z: 13 }, rotY: 0.25 }
+      ? { serial: afterimageSerial, pos: { x: 11, y: 12, z: 13 }, effectYaw: 0.25,
+          baseScale: 0.5, effectId: 69, lifetimeFrames: 20, renderState: 0x1e }
       : undefined,
   };
 }
@@ -93,22 +94,31 @@ export async function runBattleSceneMorphSelfcheck(): Promise<void> {
   assert(loadedClips.includes("pl0604:idle"), "base clip resolver ran for both same-form actors");
 
   scene.sync([view("pl0605", "same-uid", 1), view(undefined, "same-form-peer")]);
-  const afterimageInternals = scene as unknown as {
-    afterimageActors: Array<{ group: THREE.Object3D; materials: THREE.Material[] }>;
-  };
-  assert(afterimageInternals.afterimageActors.length === 1,
-    "zz_00b22f4_ presentation edge creates one frozen model snapshot");
-  const ghost = afterimageInternals.afterimageActors[0]!;
-  assert(ghost.group.position.x === 11 && ghost.group.position.y === 12 && ghost.group.position.z === 13
-    && ghost.group.rotation.y === 0.25,
-    "afterimage consumes the bridge-owned sampled position and rotation");
-  assert(ghost.materials.length > 0 && ghost.materials.every((material) => material.transparent && material.opacity === 0.42),
-    "afterimage owns translucent material clones rather than mutating the live actor");
+  const afterimageInternals = scene as unknown as { bankFxActors: Array<{
+    node: THREE.Object3D; materials: THREE.Material[]; layerOpacity: number[]; ttl: number;
+    scaleKeys?: ReadonlyArray<readonly number[]>; alphaKeys?: ReadonlyArray<readonly number[]>;
+    romTransformFlags?: number;
+  }> };
+  const effect = afterimageInternals.bankFxActors.find((entry) => entry.ttl === 20 / 60);
+  assert(effect, "zz_00b22f4_ presentation edge creates the subtype-1 20-frame bank effect");
+  assert(effect.node.position.x === 11 && effect.node.position.y === 12 && effect.node.position.z === 13
+    && effect.node.rotation.y === 0.25,
+    "afterimage consumes the bridge-owned initialized position and random BAM yaw");
+  assert(effect.romTransformFlags === 0x1e && effect.node.scale.x === 0.5,
+    "FUN_80047aa4 consumes +0x84=0x1e as Y-rotation plus authored-scale transform flags");
+  assert(effect.scaleKeys?.[0]?.join(",") === "0,0.5,0.5,0.5"
+    && effect.scaleKeys?.[1]?.join(",") === "20,0.625,1.25,0.625"
+    && effect.alphaKeys?.[0]?.join(",") === "0,1" && effect.alphaKeys?.[1]?.join(",") === "20,0",
+    "afterimage uses exact 0x802fc588/0x802fc5b8 scale and alpha tracks");
   scene.sync([view("pl0605", "same-uid", 1), view(undefined, "same-form-peer")]);
-  assert(afterimageInternals.afterimageActors.length === 1,
+  assert(afterimageInternals.bankFxActors.filter((entry) => entry.ttl === 20 / 60).length === 1,
     "presentation consumes each monotonic afterimage serial exactly once");
-  scene.update(8 / 60);
-  const afterExpiryCount = afterimageInternals.afterimageActors.length as number;
-  assert(afterExpiryCount === 0,
-    "afterimage expires and disposes at the exact 8-frame helper interval");
+  scene.update(10 / 60);
+  assert(Math.abs(effect.node.scale.x - 0.5625) < 1e-6 && Math.abs(effect.node.scale.y - 0.875) < 1e-6
+    && effect.materials.every((material, index) =>
+      Math.abs(material.opacity - (effect.layerOpacity[index] ?? 1) * 0.5) < 1e-6),
+    "afterimage interpolates exact half-life scale/alpha values at frame 10");
+  scene.update(10 / 60);
+  assert(!afterimageInternals.bankFxActors.includes(effect),
+    "afterimage exits and disposes when FUN_800b2b20 reaches frame 20");
 }

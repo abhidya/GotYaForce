@@ -53,6 +53,8 @@ export interface RomActor {
   targetCache5e8: Vec3;
   /** +0x518: host-resolved actor aim origin consumed by zz_006e514_. */
   aimOrigin518: Vec3;
+  /** +0x8e0/+0x8f0/+0x900 plus part*0x30: renderer-authored world aim anchors. */
+  partAimAnchors: Array<Vec3 | null>;
   // +0x44..+0x50: the speed-model scalars (FUN_80067310).
   /** +0x44: horizontal speed scalar (magnitude, projected via sin/cos(yaw)). */
   hSpeed: number;
@@ -378,6 +380,7 @@ export function createRomActor(): RomActor {
     pos: { x: 0, y: 0, z: 0 },
     motion: { x: 0, y: 0, z: 0 }, targetCache5e8: { x: 0, y: 0, z: 0 },
     aimOrigin518: { x: 0, y: 0, z: 0 },
+    partAimAnchors: [null, null, null, null],
     hSpeed: 0, yVel: 0, hDecel: 0, gravityCoeff: 0,
     heading: 0, lockYaw: 0, activeYaw: 0, turnErrorYaw: 0, steerYaw: 0,
     bodyPitch: 0, aimRateScale: 1, actionSpeedRows: [0, 0, 0],

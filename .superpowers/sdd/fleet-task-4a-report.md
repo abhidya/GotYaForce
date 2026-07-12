@@ -32,3 +32,11 @@ DONE_WITH_CONCERNS. All 14 members now obey the exact command-derived live matri
 ## Scope
 
 Task-owned edits are limited to `packages/combat/src/bridge.ts`, the five Girl/shared engine files, `packages/combat/src/rom/actor.ts`, `packages/combat/src/rom/rom.selfcheck.ts`, regenerated family coverage outputs when content changed, and this report. Existing unrelated `.superpowers/sdd/task-2-report.md` and `packages/combat/src/battleJudge.selftest.ts` changes were preserved untouched. Nothing was staged or committed.
+
+## Final review addendum
+
+The final certified Girl keys are the six complete action-0 entries plus Cyber Girl action 2.
+Seven action-1 entries were demoted because their `zz_006e514_` pitch path shares the
+unresolved renderer part-row anchor. Final counts are ported 20, partial 234, missing 71.
+The afterimage path now uses exact subtype-1 efct-bank id 69 and its authored 20-frame
+scale/alpha lifecycle; no inferred actor-model ghost remains.

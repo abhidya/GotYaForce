@@ -1773,10 +1773,24 @@ export class RomDriverBridge implements RomFamilyDriver {
     runtime.vel.z = vel.z;
     const previousSerial = runtime.romAfterimage?.serial ?? 0;
     if (a.afterimageSerial !== previousSerial) {
+      const baseScale = a.modelScale * a.sizeScale;
+      const ownerYaw = bamToRad(a.lockYaw);
+      // FUN_800b2924: subtract local-forward * (FLOAT_80438398=50 * owner scales).
+      const pos = {
+        x: a.afterimageSamplePos.x - Math.sin(ownerYaw) * 50 * baseScale,
+        y: a.afterimageSamplePos.y,
+        z: a.afterimageSamplePos.z - Math.cos(ownerYaw) * 50 * baseScale,
+      };
+      // zz_00055fc_ << 8: a uniformly selected byte becomes the effect's BAM16 yaw.
+      const effectYaw = (Math.floor(Math.random() * 256) & 0xff) * (TAU / 256);
       runtime.romAfterimage = {
         serial: a.afterimageSerial,
-        pos: { ...a.afterimageSamplePos },
-        rotY: bamToRad(a.heading),
+        pos,
+        effectYaw,
+        baseScale,
+        effectId: 69,
+        lifetimeFrames: 20,
+        renderState: 0x1e,
       };
     }
   }

@@ -7,7 +7,7 @@
 //  3. The G RED family's phase-0 launch produces the documented upward impulse (Y=+4.0)
 
 import { createRomActor, type RomActor } from "./actor.js";
-import { integratePhysics } from "./physics.js";
+import { groundClamp, integratePhysics } from "./physics.js";
 import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
 import { createGRedDash, GRED_DASH } from "../families/gred-dash.js";
@@ -102,7 +102,13 @@ import {
 } from "../families/girl-cluster.js";
 import { CYBER_GIRL_X } from "../families/cyber-girl.js";
 import { createSeries3XSpecial, SERIES3_X } from "../families/shared-series3-x.js";
-import { groundSnapRevert, stepAfterimage, stepTargetPitch } from "./helpers.js";
+import {
+  groundSnapRevert,
+  stepAfterimage,
+  stepPartTargetPitch,
+  stepTargetPitch,
+  stepTargetYaw,
+} from "./helpers.js";
 
 const G_RED_LAUNCH_Y = 4.0;
 
@@ -3269,6 +3275,22 @@ function runGirlClusterTests(): void {
       "zz_006e514_ target loss returns -1 and truncates pitch by exact 0.9 float");
   }
   {
+    const a = createRomActor() as RomActor & { lockTarget?: { x: number; y: number; z: number } | null };
+    a.descriptor = { header: 0, mainHandBone: 0, subtypeCommand: new Int8Array(),
+      handlerData6c: 0, subtypePartCommand: new Int8Array(), buttonLiveFlag: new Int8Array(),
+      defaultHand0: 0, defaultHand1: 0, turnStep0: 0x100, turnStep1: 0x300 };
+    a.lockTarget = { x: 100, y: 100, z: 100 }; a.aimOrigin518 = { x: 0, y: 0, z: 0 };
+    assert(!stepTargetYaw(a, 0xc0) && a.heading === 0x100,
+      "FUN_800669d0 selects descriptor +0xac and advances signed BAM16 yaw");
+    a.lockTarget = null; a.heading = 0; a.activeYaw = 0x200;
+    assert(!stepTargetYaw(a, 0xc0, 0, true) && a.heading === 0x100,
+      "zz_006d144_ target loss retains +0x5ac while settling heading");
+    a.lockTarget = { x: 0, y: 100, z: 100 }; a.partAimAnchors[1] = { x: 0, y: 0, z: 0 };
+    a.aimRateScale = 0.5; a.steerYaw = 0;
+    assert(stepPartTargetPitch(a, 0xc1) === 0 && a.steerYaw === -0x180,
+      "zz_006e1ac_ uses descriptor +0xae times +0x768 at the part-1 anchor");
+  }
+  {
     const a = createRomActor();
     a.savedGroundPos = { x: 1, y: 2, z: 3 };
     a.pos = { x: 20, y: 30, z: 40 };
@@ -3288,6 +3310,7 @@ function runGirlClusterTests(): void {
     };
     assert(groundSnapRevert(a) && a.pos.y === 7 && a.yVel === 0,
       "zz_00679d0_ supported battle floor returns grounded and commits snap state");
+    assert(groundClamp(a), "zz_00677b0_ exposes the exact supported ground return");
   }
   {
     const one = makeMinimalGRedBorg(); one.borgId = "pl0300";
@@ -3296,11 +3319,18 @@ function runGirlClusterTests(): void {
     const b2 = RomDriverBridge.attach(two, {});
     b1?.syncIn(one, [one, two]); b2?.syncIn(two, [one, two]);
     b1!.actor.pos.x = 100; b2!.actor.pos.x = 200;
+    // Diverge heading from +0x5ae: FUN_800b2924 must use lockYaw for its 50*scale
+    // backward offset, never the actor's current heading.
+    b1!.actor.heading = 0;
+    b1!.actor.lockYaw = 0x4000;
     stepAfterimage(b1!.actor); stepAfterimage(b2!.actor);
     b1?.syncOut(one); b2?.syncOut(two);
-    assert(one.romAfterimage?.serial === 1 && one.romAfterimage.pos.x === 100
+    const b1Scale = 9 / 167.75999450683594;
+    assert(one.romAfterimage?.serial === 1
+      && approxEq(one.romAfterimage.pos.x, 100 - 50 * b1Scale)
+      && approxEq(one.romAfterimage.pos.z, 0)
       && two.romAfterimage?.serial === 1 && two.romAfterimage.pos.x === 200,
-      "two Girl bridges retain independent afterimage cache and presentation ownership");
+      "afterimage uses +0x5ae lockYaw for exact event placement and keeps independent ownership");
     assert(approxEq(b1!.actor.modelScale, 1) && approxEq(b1!.actor.sizeScale, 9 / 167.75999450683594)
       && approxEq(b2!.actor.sizeScale, 25 / 167.75999450683594),
       "bridge syncs exact +0xb4 tier scale and Girl descriptor-derived +0x7fc scales");

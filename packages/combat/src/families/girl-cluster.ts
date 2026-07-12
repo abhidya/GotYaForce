@@ -89,7 +89,7 @@
 
 import type { RomActor, RomPartState, Vec3 } from "../rom/actor.js";
 import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
-import { integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
+import { groundClamp, integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 import { startStream, tickStream } from "../rom/stream-vm.js";
 import { createMeleeGirlLunge } from "./melee-girl-lunge.js";
@@ -100,6 +100,7 @@ import {
   groundSnapRevert,
   resetPoseHousekeeping,
   stepAfterimage,
+  stepPartTargetPitch,
   stepTargetPitch,
   stepTargetRoll,
   stepTargetYaw,
@@ -284,8 +285,12 @@ function rangeRow86c(a: GActor): number {
 
 /** zz_006d144_(0xc0) / zz_006d0dc_(0xc1, 0) — face the lock target; nonzero = facing
  *  complete (bridge pre-aims lockYaw — shared-melee-gred precedent). */
-function faceComplete(a: GActor): boolean {
-  return stepTargetYaw(a, 0xc0);
+function faceComplete(
+  a: GActor,
+  aimType = 0xc0,
+  targetLoss: "active" | "heading" = "active",
+): boolean {
+  return stepTargetYaw(a, aimType, 0, targetLoss === "active");
 }
 
 /** zz_006e514_(actor, 0xc0, &+0x54e) — aim-pitch seek (valkrie seekMeleeAimPitch
@@ -439,7 +444,7 @@ function rangedAPhase0(a: GActor): void {
   a.fbPhaseSlots[0] += 1;                         // +0x540++
   // zz_004beb8_(-1.0, actor, 0xf, 2, (s8)+0x6ee, 7, 1) — slot = the +0x6ee latch.
   startStream(a, GIRL.PART_MASK, GIRL.RANGED_GROUP, a.volleySlotBase ?? 0, GIRL.STREAM_RATE);
-  // zz_006d0dc_(actor, 0xc1, 0) — face (bridge pre-aims).
+  faceComplete(a, 0xc1, "heading");              // zz_006d0dc_(actor, 0xc1, 0)
   a.controlWord &= 0xffffff4f;                    // +0x5e0 &= ~0xb0
   seedVolleyState(a);                             // zz_010afd0_
   a.gravityCoeff = GIRL.ZERO;                     // +0x50 = 0 (FLOAT_80439558)
@@ -455,7 +460,7 @@ function rangedAPhase0(a: GActor): void {
 // Phase 1 — FUN_8010a6b0 @ chunk_0030.c:667. Aim window → first fire.
 function rangedAPhase1(a: GActor, ctx: GirlFamilyCtx): void {
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
-  const faced = faceComplete(a);                  // iVar3 = zz_006d0dc_(0xc1, 0)
+  const faced = faceComplete(a, 0xc1, "heading"); // iVar3 = zz_006d0dc_(0xc1, 0)
   let skipFire = false;
   if (!faced) {
     a.window560 = (a.window560 ?? 0) - a.dt;      // +0x560 -= dt
@@ -637,10 +642,10 @@ function rangedBCPhase2(a: GActor, ctx: GirlFamilyCtx): void {
 // Phase 0 — FUN_8010ae30 @ chunk_0030.c:960. Air volley setup.
 function rangedCPhase0(a: GActor): void {
   a.fbPhaseSlots[0] += 1;                         // +0x540++
-  // zz_006d0dc_(actor, 0x81, 0) — face (bridge).
+  faceComplete(a, 0x81, "heading");              // zz_006d0dc_(actor, 0x81, 0)
   a.controlWord &= ~0x80;                         // +0x5e0 &= 0xffffff7f
   integratePhysics(GIRL.GRAVITY, a, s16(a.lockYaw)); // FUN_80067310(1.0, +0x5ae)
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   // zz_004beb8_(-1.0, actor, 1, 2, (s8)+0x6ee + 4, 7, 1).
   startStream(a, 0x1, GIRL.RANGED_GROUP, (a.volleySlotBase ?? 0) + 4, GIRL.STREAM_RATE);
   // Part-1 idle-anim upkeep: if part 1 isn't already playing group 0 slot 0xd
@@ -657,8 +662,8 @@ function rangedCPhase0(a: GActor): void {
 function rangedCPhase1(a: GActor, ctx: GirlFamilyCtx): void {
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
   integratePhysics(GIRL.GRAVITY, a, s16(a.lockYaw)); // FUN_80067310(1.0, +0x5ae)
-  // zz_00677b0_(actor) — bridge clamp.
-  const faced = faceComplete(a);                  // iVar3 = zz_006d0dc_(0x81, 0)
+  groundClamp(a);
+  const faced = faceComplete(a, 0x81, "heading"); // iVar3 = zz_006d0dc_(0x81, 0)
   let skipFire = false;
   if (!faced) {
     a.window560 = (a.window560 ?? 0) - a.dt;      // +0x560 -= dt
@@ -758,7 +763,7 @@ function swingsPhase1(a: GActor, ctx: GirlFamilyCtx): void {
 // Phase 2 — FUN_8010b51c @ chunk_0030.c:1224. Swing dash-in.
 function swingsPhase2(a: GActor, ctx: GirlFamilyCtx): void {
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
-  // zz_006d144_(0xc0) — face (bridge).
+  faceComplete(a);                                // zz_006d144_(actor, 0xc0)
   if (((a.hitReact1dd ?? 0) & 0x80) === 0) {      // +0x1dd & 0x80 → motion freeze
     applyDrag(a, GIRL.DRAG);                      // zz_006ed8c_(0.95, FLOAT_8043955c)
     integratePhysics(0, a, s16(a.lockYaw));       // zz_00670dc_(actor, +0x5ae)
@@ -792,7 +797,7 @@ function swingsPhase3(a: GActor, ctx: GirlFamilyCtx): void {
     return;
   }
   if (a.faceGate1d10 !== 0) {                     // +0x1d10 != 0 → re-face
-    // zz_006d144_(actor, 0xc0).
+    faceComplete(a);                              // zz_006d144_(actor, 0xc0)
   }
   // Dash refresh: +0x1b03 == 0 && (s8)+0x1d0f != 0 → recompute +0x44, clear the byte.
   if (a.streamHold1b03 === 0 && dashByte(a) !== 0) {
@@ -840,9 +845,9 @@ function rushPhase0(a: GActor, seedSlot: number): void {
   a.bRetap = false;                               // +0x746 = 0
   a.streamSlot = seedSlot;                        // +0x6ea = r4 seed
   setupLockGate(a, rangeRow868(a), "lockYaw");    // invalidate arm: +0x5ac = +0x5AE
-  // zz_006d144_(0xc0) — face (bridge).
+  faceComplete(a);                                // zz_006d144_(actor, 0xc0)
   blinkReposition(a, GIRL.BLINK_SOFT);            // ×0.98 (FLOAT_80439598)
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   const slot = a.streamSlot;                      // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                        // +0x6ea++
   startStream(a, GIRL.PART_MASK, GIRL.MELEE_GROUP, slot, GIRL.STREAM_RATE);
@@ -852,7 +857,7 @@ function rushPhase0(a: GActor, seedSlot: number): void {
 // Phase 1 — FUN_8010be74 @ chunk_0030.c:1565. Face budget → rush arm.
 function rushPhase1(a: GActor, ctx: GirlFamilyCtx): void {
   driftMotion(a, GIRL.BLINK_SOFT);                // motion ×0.98; pos += motion
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   if (a.contactP0 < 1) {                          // (s8)+0x1cef < 1 → tick
     tickStream(a, GIRL.PART_MASK, ctx);
   }
@@ -873,7 +878,7 @@ function rushPhase1(a: GActor, ctx: GirlFamilyCtx): void {
 
 // Phase 2 — FUN_8010bfbc @ chunk_0030.c:1610. Rush-in.
 function rushPhase2(a: GActor, ctx: GirlFamilyCtx): void {
-  // zz_006d144_(0xc0) — face (bridge).
+  faceComplete(a);                                // zz_006d144_(actor, 0xc0)
   integratePhysics(0, a, s16(a.lockYaw));         // zz_00670dc_(actor, +0x5ae) — NO drag
   if (a.contactP0 < 1) {                          // (s8)+0x1cef < 1 → tick
     tickStream(a, GIRL.PART_MASK, ctx);
@@ -910,7 +915,7 @@ function rushPhase3(a: GActor, ctx: GirlFamilyCtx): void {
     return;
   }
   if (a.faceGate1d10 !== 0) {                     // +0x1d10 != 0 → re-face
-    // zz_006d144_(actor, 0xc0).
+    faceComplete(a);                              // zz_006d144_(actor, 0xc0)
   }
   applyDrag(a, GIRL.DRAG);                        // zz_006ed8c_(0.95)
   integratePhysics(0, a, s16(a.lockYaw));         // zz_00670dc_(actor, +0x5ae)
@@ -957,7 +962,7 @@ function divePhase0(a: GActor, seedSlot: number): void {
   faceComplete(a);
   seekAimPitch(a);
   blinkReposition(a, GIRL.BLINK_SOFT);            // ×0.98 (FLOAT_80439598)
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   // zz_004beb8_(-1.0, actor, 0xf, 3, (s8)+0x6ea) — NO +0x6ea increment in M-5 P0.
   startStream(a, GIRL.PART_MASK, GIRL.MELEE_GROUP, a.streamSlot, GIRL.STREAM_RATE);
 }
@@ -968,7 +973,7 @@ function divePhase1(a: GActor, ctx: GirlFamilyCtx): void {
     tickStream(a, GIRL.PART_MASK, ctx);
   }
   driftMotion(a, GIRL.BLINK_SOFT);                // motion ×0.98; pos += motion
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   seekAimPitch(a);                                // zz_006e514_(0xc0, &+0x54e)
   a.handlerTimer -= a.dt;                         // +0x558 -= dt
   if (a.handlerTimer <= GIRL.ZERO || faceComplete(a)) {
@@ -983,13 +988,13 @@ function divePhase2(a: GActor, ctx: GirlFamilyCtx): void {
   if (a.contactP0 === 0 || a.streamHold1b03 !== 0) { // +0x1cef == 0 || +0x1b03 != 0
     tickStream(a, GIRL.PART_MASK, ctx);
   }
-  // zz_006d144_(0xc0) face + zz_006e514_ pitch seek.
+  faceComplete(a);                                // zz_006d144_(actor, 0xc0)
   seekAimPitch(a);
   const pitch = a.meleeAimPitch ?? 0;
   a.hSpeed = GIRL.RUSH_WINDOW * projectZ(pitch);  // +0x44 = 30 × cos(+0x54e)
   a.yVel = GIRL.RUSH_WINDOW * -projectX(pitch);   // +0x48 = 30 × -sin(+0x54e)
   integratePhysics(GIRL.GRAVITY, a, s16(a.activeYaw)); // FUN_80067310(1.0, +0x5ac)
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   a.handlerTimer -= a.dt;                         // +0x558 -= dt
   // Stay while: timer > 0 AND FUN_800668cc(150) < 1 AND hit-react +0x1d9 == 0.
   if (a.handlerTimer > GIRL.ZERO && rangeCheck(a, GIRL.PROXIMITY) < 1
@@ -1009,7 +1014,7 @@ function divePhase3(a: GActor, ctx: GirlFamilyCtx): void {
   }
   applyDrag(a, GIRL.RECOVERY_DRAG);               // zz_006ed8c_(0.9, FLOAT_80439540)
   integratePhysics(GIRL.GRAVITY, a, s16(a.activeYaw)); // FUN_80067310(1.0, +0x5ac)
-  const grounded = a.grounded === true;           // iVar2 = zz_00677b0_(actor)
+  const grounded = groundClamp(a);                // iVar2 = zz_00677b0_(actor)
   if (grounded && a.contactP0 < 0) {              // landed + (s8)+0x1cef < 0
     a.controlWord &= ~0x3;                        // +0x73f = 0; +0x5e0 &= ~3
     dispatchUpperBodyCue(a, 7);                   // zz_006a750_(actor, 7)
@@ -1093,7 +1098,7 @@ function sharedXPhase0(a: GActor, cfg: GirlSharedXConfig): void {
   if ((a.controlWord & 0x40) !== 0) {             // airborne → +0x6ea++
     a.streamSlot += 1;
   }
-  // zz_006d144_(0xc0) — face (bridge).
+  faceComplete(a);                                // zz_006d144_(actor, 0xc0)
   blinkReposition(a, cfg.driftScale);             // motion = pos−target; ×cfg[1]; pos +=
   a.gravityCoeff = GIRL.ZERO;                     // +0x50 = 0
   a.yVel = GIRL.ZERO;                             // +0x48 = 0
@@ -1105,7 +1110,7 @@ function sharedXPhase0(a: GActor, cfg: GirlSharedXConfig): void {
   }
   // FUN_80067310(1.0, actor, +0x72 − 0x8000) — BACKWARD projection off the heading.
   integratePhysics(GIRL.GRAVITY, a, s16(a.heading - 0x8000));
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   // zz_004beb8_(-1.0, actor, 0xf, 4, (s8)+0x6ea, 8, 1).
   a.accumulator80c = 0;
   startStream(a, GIRL.PART_MASK, GIRL.X_GROUP, a.streamSlot, GIRL.STREAM_RATE);
@@ -1135,12 +1140,15 @@ function sharedXPhase1(a: GActor, cfg: GirlSharedXConfig, ctx: GirlFamilyCtx): v
       a.steerYaw = s16(a.steerYaw) >> 1;          // +0x18da >>= 1
       a.meter1900 = s16(a.meter1900 ?? 0) >> 1;   // +0x1900 >>= 1
     } else {
+      faceComplete(a);                            // zz_006d144_(actor, 0xc0)
       // zz_006d144_(0xc0) face; grounded → +0x1900 = clamp(pitch-to-target, ±0x2000)
       // (FUN_800452a0 aim solve — bridge-owned; labeled approximation: clamp only);
       // airborne → zz_006e1ac_(0xc1, 1) (bridge aim channel).
       if ((a.controlWord & 0x40) === 0) {
         const m = Math.max(-0x2000, Math.min(0x2000, s16(a.meter1900 ?? 0)));
         a.meter1900 = m;
+      } else {
+        stepPartTargetPitch(a, 0xc1);             // zz_006e1ac_(actor, 0xc1, 1)
       }
     }
     if (a.streamHold1b03 === 0) {                 // +0x1b03 == 0 → kill the dash
@@ -1148,7 +1156,7 @@ function sharedXPhase1(a: GActor, cfg: GirlSharedXConfig, ctx: GirlFamilyCtx): v
     }
     integratePhysics(GIRL.GRAVITY, a, s16(a.heading - 0x8000)); // backward drift
     driftMotion(a, cfg.driftScale);               // motion ×cfg[1]; pos += motion
-    const grounded = a.grounded === true;         // iVar1 = zz_00677b0_(actor)
+    const grounded = groundClamp(a);              // iVar1 = zz_00677b0_(actor)
     if (grounded && a.contactP0 < 0 && (a.controlWord & 0x40) !== 0) {
       a.controlWord &= ~0x3;                      // +0x73f = 0; +0x5e0 &= ~3
       dispatchUpperBodyCue(a, 7);                 // zz_006a750_(actor, 7)
@@ -1190,14 +1198,17 @@ function battleXPhase0(a: GActor): void {
   a.fbPhaseSlots[0] += 1;                         // +0x540++
   if (!a.lockTarget) a.activeYaw = a.heading;     // +0xcc == 0 → +0x5ac = +0x72
   a.streamSlot = (a.controlWord & 0x40) !== 0 ? 1 : 0; // +0x6ea = 0 / 1 air
-  // zz_006d144_(0xc0) face; borg 0x30b airborne also zz_006e1ac_(0xc1, 1) (bridge).
+  faceComplete(a);                                // zz_006d144_(actor, 0xc0)
+  if (a.borgNumber === 0x30b && (a.controlWord & 0x40) !== 0) {
+    stepPartTargetPitch(a, 0xc1);                 // zz_006e1ac_(actor, 0xc1, 1)
+  }
   a.gravityCoeff = BATTLE_X.ZERO;                 // +0x50 = 0 (FLOAT_80438618)
   a.yVel = BATTLE_X.ZERO;                         // +0x48 = 0
   a.hDecel = BATTLE_X.ZERO;                       // +0x4c = 0
   a.hSpeed = BATTLE_X.ZERO;                       // +0x44 = 0
   resetPoseHousekeeping(a);
   blinkReposition(a, BATTLE_X.BLINK);             // ×0.95 (FLOAT_8043861c)
-  // zz_00679d0_(actor) — ground snap (bridge).
+  groundSnapRevert(a);
   // zz_004beb8_(-1.0 FLOAT_80438620, actor, 0xf, 4, (s8)+0x6ea, 8, 1).
   startStream(a, GIRL.PART_MASK, GIRL.X_GROUP, a.streamSlot, BATTLE_X.RATE);
 }
@@ -1206,7 +1217,10 @@ function battleXPhase0(a: GActor): void {
 function battleXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
   if (a.faceGate1d10 !== 0) {                     // +0x1d10 != 0 → re-face;
-    // borg 0x30b airborne also zz_006e1ac_(0xc1, 1).
+    faceComplete(a);
+    if (a.borgNumber === 0x30b && (a.controlWord & 0x40) !== 0) {
+      stepPartTargetPitch(a, 0xc1);
+    }
   }
   if (a.contactP0 > 0) {                          // (s8)+0x1cef > 0 — fire event
     a.contactP0 = 0;                              // +0x1cef = 0
@@ -1227,7 +1241,7 @@ function battleXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
     a.gravityCoeff = gravityRestore(a);           // +0x50 = dataPage+0x6c
   }
   driftMotion(a, BATTLE_X.BLINK);                 // motion ×0.95; pos += motion
-  const landed = a.grounded === true;             // iVar2 = zz_00679d0_(actor)
+  const landed = groundSnapRevert(a);             // iVar2 = zz_00679d0_(actor)
   if (landed && a.contactP0 < 0 && (a.controlWord & 0x40) !== 0) {
     a.controlWord &= ~0x3;                        // +0x73f = 0; +0x5e0 &= ~3
     dispatchUpperBodyCue(a, 7);                   // zz_006a750_(actor, 7)
@@ -1289,7 +1303,7 @@ function barrierXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
   integratePhysics(BARRIER_X.GRAVITY, a, s16(a.lockYaw)); // FUN_80067310(1.0, +0x5ae)
   driftMotion(a, BARRIER_X.DRIFT);                // motion ×0.95 (FLOAT_804394f4)
-  const grounded = a.grounded === true;           // iVar2 = zz_00677b0_(actor)
+  const grounded = groundClamp(a);                // iVar2 = zz_00677b0_(actor)
   if (grounded && (a.controlWord & 0x40) !== 0 && a.contactP0 < 0) {
     // Air-landing arm: +0x73f = 0; +0x5e0 &= ~3; cue 7; +0x694 = 8 (FLOAT_804394f8).
     a.controlWord &= ~0x3;
@@ -1352,14 +1366,14 @@ function killerXPhase0(a: GActor): void {
   a.handlerTimer = KILLER_X.FACE_BUDGET;          // +0x558 = 60 (FLOAT_80439f34)
   a.streamSlot = (a.controlWord & 0x40) !== 0 ? 4 : 2; // +0x6ea = 2 (4 air)
   setupLockGate(a, rangeRow868(a), "heading");    // FUN_80066838(row868) < 1 → invalidate
-  // zz_006d144_(0xc0) — face (bridge).
+  faceComplete(a);                                // zz_006d144_(actor, 0xc0)
   a.gravityCoeff = KILLER_X.ZERO;                 // +0x50 = 0 (FLOAT_80439f30)
   a.yVel = KILLER_X.ZERO;                         // +0x48 = 0
   a.hDecel = KILLER_X.ZERO;                       // +0x4c = 0
   a.hSpeed = KILLER_X.ZERO;                       // +0x44 = 0
   resetPoseHousekeeping(a);
   blinkReposition(a, KILLER_X.DRIFT);             // ×0.95 (FLOAT_80439f38)
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   const slot = a.streamSlot;                      // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                        // +0x6ea++
   startStream(a, GIRL.PART_MASK, GIRL.X_GROUP, slot, KILLER_X.RATE);
@@ -1369,11 +1383,11 @@ function killerXPhase0(a: GActor): void {
 // Phase 1 — FUN_8013490c @ chunk_0035.c:2651. Face budget.
 function killerXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
   driftMotion(a, KILLER_X.DRIFT);                 // motion ×0.95; pos += motion
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   if (a.streamHold1b03 !== 0) {                   // +0x1b03 != 0
     tickStream(a, GIRL.PART_MASK, ctx);
   }
-  // zz_006e1ac_(0xc0, 1) — pitch seek (bridge aim channel).
+  stepPartTargetPitch(a, 0xc0);                   // zz_006e1ac_(actor, 0xc0, 1)
   a.handlerTimer -= a.dt;                         // +0x558 -= dt
   if (a.handlerTimer <= KILLER_X.ZERO || faceComplete(a)) {
     a.fbPhaseSlots[0] += 1;                       // +0x540++
@@ -1382,9 +1396,10 @@ function killerXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
 
 // Phase 2 — FUN_801349c4 @ chunk_0035.c:2678. Wind-up → spin launch.
 function killerXPhase2(a: GActor, ctx: GirlFamilyCtx): void {
-  // zz_006d144_(0xc0) face + zz_006e1ac_(0xc0, 1) pitch (bridge).
+  faceComplete(a);                                // zz_006d144_(actor, 0xc0)
+  stepPartTargetPitch(a, 0xc0);                   // zz_006e1ac_(actor, 0xc0, 1)
   driftMotion(a, KILLER_X.DRIFT);                 // motion ×0.95; pos += motion
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
   if (a.contactP1 !== 0) {                        // +0x1cf0 != 0 — swing event
     // +0x272 |= 2 — status halfword (not surfaced; labeled no-op).
@@ -1412,7 +1427,7 @@ function killerXPhase3(a: GActor, ctx: GirlFamilyCtx): void {
   // +0x272 |= 2; +0x82 = 0 (no-ops).
   applyDrag(a, KILLER_X.DRIFT);                   // zz_006ed8c_(0.95, FLOAT_80439f38)
   integratePhysics(KILLER_X.GRAVITY, a, s16(a.lockYaw)); // FUN_80067310(1.0, +0x5ae)
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   a.tickDelay55c = (a.tickDelay55c ?? 0) - a.dt;  // +0x55c -= dt
   if ((a.tickDelay55c ?? 0) <= KILLER_X.ZERO) {
     // FUN_8016c810((f32)+0x560, actor, 7, 0) — ring-burst child; the decrementing
@@ -1446,7 +1461,7 @@ function killerXPhase4(a: GActor, ctx: GirlFamilyCtx): void {
   }
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
   integratePhysics(KILLER_X.GRAVITY, a, s16(a.lockYaw)); // FUN_80067310(1.0, +0x5ae)
-  const grounded = a.grounded === true;           // iVar1 = zz_00677b0_(actor)
+  const grounded = groundClamp(a);                // iVar1 = zz_00677b0_(actor)
   if (grounded && a.contactP0 < 0) {              // landed + (s8)+0x1cef < 0
     a.controlWord &= ~0x3;                        // +0x73f = 0; +0x5e0 &= ~3
     dispatchUpperBodyCue(a, 7);                   // zz_006a750_(actor, 7)

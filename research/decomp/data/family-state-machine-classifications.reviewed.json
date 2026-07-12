@@ -2,6 +2,89 @@
   "schemaVersion": 2,
   "classifications": [
     {
+      "constructorAddress": "0x800c04c0", "actionIndex": 0, "status": "ported",
+      "coverage": [
+        { "member": "pl0300", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["girl-cluster.ts Battle root action row 0"], "variantDispatch": ["0x80325a00 tables G-A/G-B/G-C"], "phaseTransitions": ["ranged volley exact face/fire/rearm/exit gates"], "constants": ["chunk_0030.c FLOAT_804395xx and descriptor rows"], "streamBehavior": ["group 2 masks/slots and event bytes"], "bridgeWiring": ["exhaustive Girl live bridge matrix"], "focusedTests": ["rom.selfcheck Girl cluster matrix and helper boundaries"] } },
+        { "member": "pl030b", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["girl-cluster.ts Battle/Kei root action row 0"], "variantDispatch": ["0x80325a00 tables G-A/G-B/G-C"], "phaseTransitions": ["ranged volley exact face/fire/rearm/exit gates"], "constants": ["chunk_0030.c FLOAT_804395xx and descriptor rows"], "streamBehavior": ["group 2 masks/slots and event bytes"], "bridgeWiring": ["exhaustive Girl live bridge matrix"], "focusedTests": ["rom.selfcheck Girl cluster matrix and helper boundaries"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x800c04c0", "actionIndex": 1, "status": "partial",
+      "coverage": [
+        { "member": "pl0300", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["girl-cluster.ts Battle action row 1"], "variantDispatch": ["M-1/M-4/M-3/M-2/M-5 exact variant map"], "phaseTransitions": ["exact facing timers, combo loops, dive landing returns"], "constants": ["chunk_0030.c melee FLOAT_804395xx"], "streamBehavior": ["group 3 exact seeds and contact bytes"], "bridgeWiring": ["Girl live bridge matrix"], "focusedTests": ["Girl phase and helper selfchecks"] } },
+        { "member": "pl030b", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["girl-cluster.ts Kei action row 1"], "variantDispatch": ["M-1/M-4/M-3/M-2/M-5 exact variant map"], "phaseTransitions": ["exact facing timers, combo loops, dive landing returns"], "constants": ["chunk_0030.c melee FLOAT_804395xx"], "streamBehavior": ["group 3 exact seeds and contact bytes"], "bridgeWiring": ["Girl live bridge matrix"], "focusedTests": ["Girl phase and helper selfchecks"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x80106e3c", "actionIndex": 0, "status": "ported",
+      "coverage": [ { "member": "pl0301", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Wire Girl row 0 to shared ranged"], "variantDispatch": ["G-A/G-B/G-C exact variant tables"], "phaseTransitions": ["ranged exact phase gates"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact stream slots/events"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl matrix/helper selfchecks"] } } ]
+    },
+    {
+      "constructorAddress": "0x80106e3c", "actionIndex": 1, "status": "partial",
+      "coverage": [ { "member": "pl0301", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Wire Girl row 1 melee"], "variantDispatch": ["M-1..M-5 variant table"], "phaseTransitions": ["exact melee phases and returns"], "constants": ["chunk_0030.c melee constants"], "streamBehavior": ["exact group 3 streams"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl matrix/helper selfchecks"] } } ]
+    },
+    {
+      "constructorAddress": "0x80107e7c", "actionIndex": 0, "status": "ported",
+      "coverage": [
+        { "member": "pl0302", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Barrier root row 0"], "variantDispatch": ["shared ranged tables"], "phaseTransitions": ["exact ranged phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams/events"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl selfchecks"] } },
+        { "member": "pl0306", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Barrier variant root row 0"], "variantDispatch": ["shared ranged tables"], "phaseTransitions": ["exact ranged phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams/events"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl selfchecks"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x80107e7c", "actionIndex": 1, "status": "partial",
+      "coverage": [ { "member": "pl0302", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Barrier pl0302 row 1"], "variantDispatch": ["M-1..M-5"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact melee streams"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl selfchecks"] } } ]
+    },
+    {
+      "constructorAddress": "0x8019c380", "actionIndex": 0, "status": "ported",
+      "coverage": [ { "member": "pl0303", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Delta II row 0"], "variantDispatch": ["shared ranged tables"], "phaseTransitions": ["exact ranged phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams/events"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl selfchecks"] } } ]
+    },
+    {
+      "constructorAddress": "0x80134078", "actionIndex": 0, "status": "ported",
+      "coverage": [ { "member": "pl0304", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Killer row 0"], "variantDispatch": ["shared ranged tables"], "phaseTransitions": ["exact ranged phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams/events"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl selfchecks"] } } ]
+    },
+    {
+      "constructorAddress": "0x80134078", "actionIndex": 1, "status": "partial",
+      "coverage": [
+        { "member": "pl0304", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Killer row 1"], "variantDispatch": ["Killer melee seeds and M-1..M-5"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact group 3 streams"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl selfchecks"] } },
+        { "member": "pl0308", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Shadow Girl row 1"], "variantDispatch": ["Killer melee seeds and M-1..M-5"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact group 3 streams"], "bridgeWiring": ["Girl live matrix"], "focusedTests": ["Girl selfchecks"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x8012f204", "actionIndex": 0, "status": "ported",
+      "coverage": [
+        { "member": "pl0305", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Cyber shared ranged row 0"], "variantDispatch": ["G-A/G-B/G-C"], "phaseTransitions": ["exact ranged phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } },
+        { "member": "pl0309", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Cyber shared ranged row 0"], "variantDispatch": ["G-A/G-B/G-C"], "phaseTransitions": ["exact ranged phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } },
+        { "member": "pl030a", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Cyber shared ranged row 0"], "variantDispatch": ["G-A/G-B/G-C"], "phaseTransitions": ["exact ranged phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x8012f204", "actionIndex": 1, "status": "partial",
+      "coverage": [
+        { "member": "pl0305", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Cyber melee row 1"], "variantDispatch": ["M-1..M-5"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } },
+        { "member": "pl0309", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Cyber melee row 1"], "variantDispatch": ["M-1..M-5"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } },
+        { "member": "pl030a", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Cyber melee row 1"], "variantDispatch": ["M-1..M-5"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x8012f204", "actionIndex": 2, "status": "ported",
+      "coverage": [
+        { "member": "pl0305", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["FUN_8012f6f4 to zz_012f728_"], "variantDispatch": ["three-phase Super table"], "phaseTransitions": ["exact face/snap/fire/rearm/exit"], "constants": ["FLOAT_80439e40..50"], "streamBehavior": ["group 4 slots 0/2 and followup"], "bridgeWiring": ["Cyber root via Girl matrix"], "focusedTests": ["Cyber constants and Girl matrix"] } },
+        { "member": "pl0309", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["FUN_8012f6f4 to zz_012fb20_"], "variantDispatch": ["two-phase normal table"], "phaseTransitions": ["exact face/snap-return landing/exit"], "constants": ["FLOAT_80439e40..50"], "streamBehavior": ["group 4 slots 4/5"], "bridgeWiring": ["Cyber root via Girl matrix"], "focusedTests": ["Cyber constants and Girl matrix"] } },
+        { "member": "pl030a", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["FUN_8012f6f4 to zz_012f728_"], "variantDispatch": ["three-phase Hyper table"], "phaseTransitions": ["exact face/snap/fire/rearm/exit"], "constants": ["FLOAT_80439e40..50"], "streamBehavior": ["group 4 slots 0/2 and followup"], "bridgeWiring": ["Cyber root via Girl matrix"], "focusedTests": ["Cyber constants and Girl matrix"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x801ba020", "actionIndex": 1, "status": "partial",
+      "coverage": [
+        { "member": "pl0307", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Spinner row 1"], "variantDispatch": ["M-1..M-5"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } },
+        { "member": "pl030d", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Spinner variant row 1"], "variantDispatch": ["M-1..M-5"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x801d429c", "actionIndex": 1, "status": "partial",
+      "coverage": [ { "member": "pl030c", "variants": [0,1,2,3,4], "evidence": { "rootDispatch": ["Delta row 1"], "variantDispatch": ["Delta M-1/M-4/M-2 seed map"], "phaseTransitions": ["exact melee phases"], "constants": ["chunk_0030.c constants"], "streamBehavior": ["exact streams"], "bridgeWiring": ["Girl matrix"], "focusedTests": ["Girl selfchecks"] } } ]
+    },
+    {
       "constructorAddress": "0x80125a28", "actionIndex": 0, "status": "ported",
       "coverage": [
         { "member": "pl0604", "variants": [0,1,2,3,4], "evidence": {

@@ -4198,6 +4198,74 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "exhaustive Girl live bridge matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c FLOAT_804395xx and descriptor rows"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck Girl cluster matrix and helper boundaries"
+                ],
+                "phaseTransitions": [
+                  "ranged volley exact face/fire/rearm/exit gates"
+                ],
+                "rootDispatch": [
+                  "girl-cluster.ts Battle root action row 0"
+                ],
+                "streamBehavior": [
+                  "group 2 masks/slots and event bytes"
+                ],
+                "variantDispatch": [
+                  "0x80325a00 tables G-A/G-B/G-C"
+                ]
+              },
+              "member": "pl0300",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "exhaustive Girl live bridge matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c FLOAT_804395xx and descriptor rows"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck Girl cluster matrix and helper boundaries"
+                ],
+                "phaseTransitions": [
+                  "ranged volley exact face/fire/rearm/exit gates"
+                ],
+                "rootDispatch": [
+                  "girl-cluster.ts Battle/Kei root action row 0"
+                ],
+                "streamBehavior": [
+                  "group 2 masks/slots and event bytes"
+                ],
+                "variantDispatch": [
+                  "0x80325a00 tables G-A/G-B/G-C"
+                ]
+              },
+              "member": "pl030b",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -4273,10 +4341,78 @@
             "pl030b: command 0x80302c14 (user-data/GG4E/disc/sys/boot.dol:0x800c04c0 copies actor+0x4ec root via 0x800c0548 and actor+0x4b0 via 0x800c0594)",
             "pl030b: root 0x800c086c, action table 0x80302988, handler 0x8010a508"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live bridge matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c melee FLOAT_804395xx"
+                ],
+                "focusedTests": [
+                  "Girl phase and helper selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact facing timers, combo loops, dive landing returns"
+                ],
+                "rootDispatch": [
+                  "girl-cluster.ts Battle action row 1"
+                ],
+                "streamBehavior": [
+                  "group 3 exact seeds and contact bytes"
+                ],
+                "variantDispatch": [
+                  "M-1/M-4/M-3/M-2/M-5 exact variant map"
+                ]
+              },
+              "member": "pl0300",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live bridge matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c melee FLOAT_804395xx"
+                ],
+                "focusedTests": [
+                  "Girl phase and helper selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact facing timers, combo loops, dive landing returns"
+                ],
+                "rootDispatch": [
+                  "girl-cluster.ts Kei action row 1"
+                ],
+                "streamBehavior": [
+                  "group 3 exact seeds and contact bytes"
+                ],
+                "variantDispatch": [
+                  "M-1/M-4/M-3/M-2/M-5 exact variant map"
+                ]
+              },
+              "member": "pl030b",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -8823,6 +8959,41 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl matrix/helper selfchecks"
+                ],
+                "phaseTransitions": [
+                  "ranged exact phase gates"
+                ],
+                "rootDispatch": [
+                  "Wire Girl row 0 to shared ranged"
+                ],
+                "streamBehavior": [
+                  "exact stream slots/events"
+                ],
+                "variantDispatch": [
+                  "G-A/G-B/G-C exact variant tables"
+                ]
+              },
+              "member": "pl0301",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -8863,10 +9034,45 @@
             "pl0301: command 0x80323114 (research/decomp/ghidra-export/chunk_0029.c:1927-1930)",
             "pl0301: root 0x80107278, action table 0x80322e88, handler 0x8010a508"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c melee constants"
+                ],
+                "focusedTests": [
+                  "Girl matrix/helper selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases and returns"
+                ],
+                "rootDispatch": [
+                  "Wire Girl row 1 melee"
+                ],
+                "streamBehavior": [
+                  "exact group 3 streams"
+                ],
+                "variantDispatch": [
+                  "M-1..M-5 variant table"
+                ]
+              },
+              "member": "pl0301",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -8948,6 +9154,74 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact ranged phases"
+                ],
+                "rootDispatch": [
+                  "Barrier root row 0"
+                ],
+                "streamBehavior": [
+                  "exact streams/events"
+                ],
+                "variantDispatch": [
+                  "shared ranged tables"
+                ]
+              },
+              "member": "pl0302",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact ranged phases"
+                ],
+                "rootDispatch": [
+                  "Barrier variant root row 0"
+                ],
+                "streamBehavior": [
+                  "exact streams/events"
+                ],
+                "variantDispatch": [
+                  "shared ranged tables"
+                ]
+              },
+              "member": "pl0306",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -9047,10 +9321,45 @@
             "pl0306: command 0x8038260c (user-data/GG4E/disc/sys/boot.dol:0x80107e7c copies actor+0x4ec root via 0x80107f8c and actor+0x4b0 via 0x80107f94)",
             "pl0306: root 0x801080e4, action table 0x803240f8, handler 0x8010a508"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Barrier pl0302 row 1"
+                ],
+                "streamBehavior": [
+                  "exact melee streams"
+                ],
+                "variantDispatch": [
+                  "M-1..M-5"
+                ]
+              },
+              "member": "pl0302",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -12049,6 +12358,107 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact ranged phases"
+                ],
+                "rootDispatch": [
+                  "Cyber shared ranged row 0"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "G-A/G-B/G-C"
+                ]
+              },
+              "member": "pl0305",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact ranged phases"
+                ],
+                "rootDispatch": [
+                  "Cyber shared ranged row 0"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "G-A/G-B/G-C"
+                ]
+              },
+              "member": "pl0309",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact ranged phases"
+                ],
+                "rootDispatch": [
+                  "Cyber shared ranged row 0"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "G-A/G-B/G-C"
+                ]
+              },
+              "member": "pl030a",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -12159,10 +12569,111 @@
             "pl030a: command 0x80333ebc (user-data/GG4E/disc/sys/boot.dol:0x8012f204 copies actor+0x4ec root via 0x8012f28c and actor+0x4b0 via 0x8012f2d8)",
             "pl030a: root 0x8012f5bc, action table 0x80333a60, handler 0x8010a508"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Cyber melee row 1"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "M-1..M-5"
+                ]
+              },
+              "member": "pl0305",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Cyber melee row 1"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "M-1..M-5"
+                ]
+              },
+              "member": "pl0309",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Cyber melee row 1"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "M-1..M-5"
+                ]
+              },
+              "member": "pl030a",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -12223,6 +12734,107 @@
         },
         {
           "actionIndex": 2,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Cyber root via Girl matrix"
+                ],
+                "constants": [
+                  "FLOAT_80439e40..50"
+                ],
+                "focusedTests": [
+                  "Cyber constants and Girl matrix"
+                ],
+                "phaseTransitions": [
+                  "exact face/snap/fire/rearm/exit"
+                ],
+                "rootDispatch": [
+                  "FUN_8012f6f4 to zz_012f728_"
+                ],
+                "streamBehavior": [
+                  "group 4 slots 0/2 and followup"
+                ],
+                "variantDispatch": [
+                  "three-phase Super table"
+                ]
+              },
+              "member": "pl0305",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Cyber root via Girl matrix"
+                ],
+                "constants": [
+                  "FLOAT_80439e40..50"
+                ],
+                "focusedTests": [
+                  "Cyber constants and Girl matrix"
+                ],
+                "phaseTransitions": [
+                  "exact face/snap-return landing/exit"
+                ],
+                "rootDispatch": [
+                  "FUN_8012f6f4 to zz_012fb20_"
+                ],
+                "streamBehavior": [
+                  "group 4 slots 4/5"
+                ],
+                "variantDispatch": [
+                  "two-phase normal table"
+                ]
+              },
+              "member": "pl0309",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Cyber root via Girl matrix"
+                ],
+                "constants": [
+                  "FLOAT_80439e40..50"
+                ],
+                "focusedTests": [
+                  "Cyber constants and Girl matrix"
+                ],
+                "phaseTransitions": [
+                  "exact face/snap/fire/rearm/exit"
+                ],
+                "rootDispatch": [
+                  "FUN_8012f6f4 to zz_012f728_"
+                ],
+                "streamBehavior": [
+                  "group 4 slots 0/2 and followup"
+                ],
+                "variantDispatch": [
+                  "three-phase Hyper table"
+                ]
+              },
+              "member": "pl030a",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -12315,7 +12927,7 @@
             "pl030a: command 0x80333f34 (user-data/GG4E/disc/sys/boot.dol:0x8012f204 copies actor+0x4ec root via 0x8012f28c and actor+0x4b0 via 0x8012f2d8)",
             "pl030a: root 0x8012f5bc, action table 0x80333a60, handler 0x8012f6f4"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x8012f204",
@@ -12601,6 +13213,41 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact ranged phases"
+                ],
+                "rootDispatch": [
+                  "Killer row 0"
+                ],
+                "streamBehavior": [
+                  "exact streams/events"
+                ],
+                "variantDispatch": [
+                  "shared ranged tables"
+                ]
+              },
+              "member": "pl0304",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -12641,10 +13288,78 @@
             "pl0304: command 0x80337014 (user-data/GG4E/disc/sys/boot.dol:0x80134078 copies actor+0x4ec root via 0x80134100 and actor+0x4b0 via 0x8013414c)",
             "pl0304: root 0x80134580, action table 0x80336d74, handler 0x8010a508"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Killer row 1"
+                ],
+                "streamBehavior": [
+                  "exact group 3 streams"
+                ],
+                "variantDispatch": [
+                  "Killer melee seeds and M-1..M-5"
+                ]
+              },
+              "member": "pl0304",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Shadow Girl row 1"
+                ],
+                "streamBehavior": [
+                  "exact group 3 streams"
+                ],
+                "variantDispatch": [
+                  "Killer melee seeds and M-1..M-5"
+                ]
+              },
+              "member": "pl0308",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -18143,6 +18858,41 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl live matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact ranged phases"
+                ],
+                "rootDispatch": [
+                  "Delta II row 0"
+                ],
+                "streamBehavior": [
+                  "exact streams/events"
+                ],
+                "variantDispatch": [
+                  "shared ranged tables"
+                ]
+              },
+              "member": "pl0303",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -18183,7 +18933,7 @@
             "pl0303: command 0x80372384 (user-data/GG4E/disc/sys/boot.dol:0x8019c380 copies actor+0x4ec root via 0x8019c408 and actor+0x4b0 via 0x8019c454)",
             "pl0303: root 0x8019c4d4, action table 0x80372108, handler 0x8010a508"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 3,
@@ -19722,6 +20472,74 @@
       "actions": [
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Spinner row 1"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "M-1..M-5"
+                ]
+              },
+              "member": "pl0307",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Spinner variant row 1"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "M-1..M-5"
+                ]
+              },
+              "member": "pl030d",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -19944,6 +20762,41 @@
       "actions": [
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "Girl matrix"
+                ],
+                "constants": [
+                  "chunk_0030.c constants"
+                ],
+                "focusedTests": [
+                  "Girl selfchecks"
+                ],
+                "phaseTransitions": [
+                  "exact melee phases"
+                ],
+                "rootDispatch": [
+                  "Delta row 1"
+                ],
+                "streamBehavior": [
+                  "exact streams"
+                ],
+                "variantDispatch": [
+                  "Delta M-1/M-4/M-2 seed map"
+                ]
+              },
+              "member": "pl030c",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -21251,8 +22104,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 71,
-      "partial": 241,
-      "ported": 13
+      "partial": 234,
+      "ported": 20
     }
   }
 }

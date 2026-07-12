@@ -111,7 +111,7 @@ function phase0(a: MActor, seedSlot: number): void {
     }
   }
   a.handlerTimer = MELEE_GIRL_STANDING.FACE_BUDGET; // +0x558 = 60 (FLOAT_8043956c)
-  // zz_006d144_(0xc0) — face (bridge pre-aims).
+  faceComplete(a);                               // zz_006d144_(actor, 0xc0)
   // zz_004beb8_(-1.0, actor, 0xf, 3, (s8)+0x6ea) — NO +0x6ea increment in M-4.
   startStream(a, MELEE_GIRL_STANDING.PART_MASK, MELEE_GIRL_STANDING.STREAM_GROUP,
     a.streamSlot, MELEE_GIRL_STANDING.STREAM_RATE);
@@ -138,7 +138,7 @@ function phase1(a: MActor, ctx: StreamContext): void {
 
 // Phase 2 — FUN_8010c43c @ chunk_0030.c:1774. Active dash-in.
 function phase2(a: MActor, ctx: StreamContext): void {
-  // zz_006d144_(0xc0) — face (bridge pre-aims).
+  faceComplete(a);                               // zz_006d144_(actor, 0xc0)
   applyDrag(a, MELEE_GIRL_STANDING.DRAG);        // zz_006ed8c_(0.95, FLOAT_8043955c)
   integratePhysics(0, a, s16(a.lockYaw));        // zz_00670dc_(actor, +0x5ae) — yaw-only
   if (a.contactP0 >= 0) {                        // -1 < (s8)+0x1cef → tick

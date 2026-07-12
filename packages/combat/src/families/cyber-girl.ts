@@ -27,6 +27,7 @@
 // Float constants are raw GG4E boot.dol reads at 0x80439e40..0x80439e50.
 
 import type { RomActor } from "../rom/actor.js";
+import { groundSnapRevert, resetPoseHousekeeping, stepTargetYaw } from "../rom/helpers.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
@@ -91,14 +92,14 @@ function cyberGirlSuperPhase0(actor: RomActor, ctx: CyberGirlFamilyCtx): void {
   actor.yVel = CYBER_GIRL_X.ZERO;
   actor.hDecel = CYBER_GIRL_X.ZERO;
   actor.hSpeed = CYBER_GIRL_X.ZERO;
-  // +0x80/+0x7e/+0x7c = 0 (u16 anim offsets; visual — not surfaced).
+  resetPoseHousekeeping(actor);
   // +0x6eb = 4 (stream-state byte; visual).
   // +0x6ea = ground/air slot seed: 0 ground, 2 air (+0x5e0 & 0x40 frozen/air bit).
   const air = (actor.controlWord & 0x40) !== 0;
   const slot = air ? 2 : 0;
   actor.streamCounter6eb = 4;
-  // zz_006d144_(actor, 0xc0) — face the target; the bridge pre-aims so we honor the
-  // post-face heading. Motion = pos − target (gnt4_PSVECSubtract).
+  stepTargetYaw(actor, 0xc0, 0, true); // zz_006d144_(actor, 0xc0)
+  // Motion = pos − target (gnt4_PSVECSubtract).
   actor.motion.x = actor.pos.x - actor.targetCache5e8.x;
   actor.motion.y = actor.pos.y - actor.targetCache5e8.y;
   actor.motion.z = actor.pos.z - actor.targetCache5e8.z;
@@ -114,14 +115,14 @@ function cyberGirlSuperPhase0(actor: RomActor, ctx: CyberGirlFamilyCtx): void {
 function cyberGirlSuperPhase1(actor: RomActor, ctx: CyberGirlFamilyCtx): void {
   // zz_012f854_:4418 — tick the beam stream.
   tickStream(actor, 0xf, ctx);
-  // +0x1d10 nonzero → re-face target (zz_006d144_); bridge pre-aims, no-op here.
+  if (actor.faceGate1d10 !== 0) stepTargetYaw(actor, 0xc0, 0, true);
   // gnt4_PSQUATScale(FLOAT_80439e48, motion, motion) — drag the reposition accumulator.
   actor.motion.x *= CYBER_GIRL_X.REPOS;
   actor.motion.z *= CYBER_GIRL_X.REPOS;
   // gnt4_PSVECAdd(pos, motion, pos) — apply dragged motion.
   actor.pos.x += actor.motion.x;
   actor.pos.z += actor.motion.z;
-  // zz_00679d0_(actor) — physics step (no gravity in this phase; gravityCoeff == 0).
+  groundSnapRevert(actor);
   // +0x1cee wall/stream-end contact: the ROM transitions based on (+0x144 & 0xf):
   //   0 → clear action bits + return to idle (zz_006a474_ ground / zz_006a5a4_ air)
   //   else → +0x540++ (advance to phase 2) and re-arm stream at slot (+++0x6ea)
@@ -142,8 +143,9 @@ function cyberGirlSuperPhase2(actor: RomActor, _ctx: CyberGirlFamilyCtx): void {
   actor.motion.z *= CYBER_GIRL_X.REPOS;
   actor.pos.x += actor.motion.x;
   actor.pos.z += actor.motion.z;
-  // zz_004cd24_(actor, 0xf) — tick stream.
-  // zz_00679d0_(actor) — physics (no gravity this phase).
+  groundSnapRevert(actor);
+  tickStream(actor, 0xf, _ctx);                  // zz_004cd24_(actor, 0xf)
+  if (actor.faceGate1d10 !== 0) stepTargetYaw(actor, 0xc0, 0, true);
   // +0x1cef > 0 (part-0 contact): spawn the beam child if +0x1b03 == 0.
   if (actor.contactP0 > 0) {
     if (actor.streamHold1b03 === 0) {
@@ -195,7 +197,9 @@ function cyberGirlPhase0(actor: RomActor, _ctx: CyberGirlFamilyCtx): void {
   actor.yVel = CYBER_GIRL_X.ZERO;
   actor.hDecel = CYBER_GIRL_X.ZERO;
   actor.hSpeed = CYBER_GIRL_X.ZERO;
-  // zz_006d144_(actor, 0xc0) — face target; reposition motion.
+  resetPoseHousekeeping(actor);
+  stepTargetYaw(actor, 0xc0, 0, true);            // zz_006d144_(actor, 0xc0)
+  // Reposition motion.
   // PSVECSubtract(pos, target-cache, motion), scale, then add.
   actor.motion.x = (actor.pos.x - actor.targetCache5e8.x) * CYBER_GIRL_X.REPOS;
   actor.motion.y = (actor.pos.y - actor.targetCache5e8.y) * CYBER_GIRL_X.REPOS;
@@ -203,7 +207,7 @@ function cyberGirlPhase0(actor: RomActor, _ctx: CyberGirlFamilyCtx): void {
   actor.pos.x += actor.motion.x;
   actor.pos.y += actor.motion.y;
   actor.pos.z += actor.motion.z;
-  // zz_00679d0_ — physics (gravityCoeff == 0, so just XZ integration).
+  groundSnapRevert(actor);
   // +0x6ea++ then zz_004beb8_(rate, actor, 0xf, 4, slot).
   startStream(actor, 0xf, 4, slot, CYBER_GIRL_X.STREAM_RATE);
   actor.streamSlot = slot + 1;
@@ -216,19 +220,19 @@ function cyberGirlPhase1(actor: RomActor, ctx: CyberGirlFamilyCtx): void {
     actor.contactP1 = 0;
     actor.gravityCoeff = actor.descriptor?.handlerData6c ?? 0;
   }
-  // +0x1d10 nonzero → re-face (zz_006d144_) — bridge pre-aims.
+  if (actor.faceGate1d10 !== 0) stepTargetYaw(actor, 0xc0, 0, true);
   // PSQUATScale(0.95, motion, motion) + PSVECAdd(pos, motion, pos).
   actor.motion.x *= CYBER_GIRL_X.REPOS;
   actor.motion.z *= CYBER_GIRL_X.REPOS;
   actor.pos.x += actor.motion.x;
   actor.pos.z += actor.motion.z;
-  // zz_00679d0_ — physics.
+  const landed = groundSnapRevert(actor);
   // Grounded + air-borne + contact gate: the ROM's fun_8012fc64:4589 compound test
   // (physicsResult != 0 && +0x5e0 & 0x40 && +0x1cef < 0) routes to the
   // zz_006a750_(actor, 7) transition with +0x694 cooldown. Our +0x1cef is surfaced as
   // `contactP0 < 0` (the ROM's "release/edge" sense).
   const air = (actor.controlWord & 0x40) !== 0;
-  if (air && actor.contactP0 < 0) {
+  if (landed && air && actor.contactP0 < 0) {
     actor.stateTimer = CYBER_GIRL_X.COOLDOWN_309 + actor.dt; // +0x694 = K + dt
     actor.contactP0 = 0;
     // zz_006a750_(actor, 7) — upper-body cue 7 (air idle recovery).

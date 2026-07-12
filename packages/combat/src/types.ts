@@ -158,7 +158,15 @@ export interface BorgRuntime {
   /** Battle-local posts corresponding to zz_01cb750_(0x803bfe20,&form,+0x3ec). */
   romMorphEvents?: Array<{ eventAddress: number; borgNumber: number; slot: number }>;
   /** Latest zz_00b22f4_ variant-1 presentation edge and its exact sampled transform. */
-  romAfterimage?: { serial: number; pos: Vec3; rotY: number };
+  romAfterimage?: {
+    serial: number;
+    pos: Vec3;
+    effectYaw: number;
+    baseScale: number;
+    effectId: 69;
+    lifetimeFrames: 20;
+    renderState: 0x1e;
+  };
   /**
    * Palette/color-variant id (victim struct +0x3ed in the GET kill-registration path —
    * research/decomp/items-evidence-inventory-2026-07-05.md §2a): 0=normal, 1=alt color,

@@ -90,12 +90,13 @@ export function clampVertical(actor: RomActor): void {
 
 /** Port of `zz_0068030_` — the ground/collision clamp called between position
  *  integration and velocity decay. The behavior belongs to this actor's battle. */
-export function groundClamp(actor: RomActor): void {
-  if (!actor.physicsRuntime) return;
+export function groundClamp(actor: RomActor): boolean {
+  if (!actor.physicsRuntime) return (actor as RomActor & { grounded?: boolean }).grounded === true;
   const result = actor.physicsRuntime.clampToGround(actor.pos, actor.yVel);
   actor.pos.y = result.y;
   actor.yVel = result.velY;
   (actor as RomActor & { grounded?: boolean }).grounded = result.grounded;
+  return result.grounded;
 }
 
 /**

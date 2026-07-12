@@ -30,7 +30,7 @@
 
 import type { RomActor } from "../rom/actor.js";
 import { dispatchUpperBodyCue } from "../rom/dispatch.js";
-import { integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
+import { groundClamp, integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
 import { romAirKnockoutReturn } from "./shared-idle-return.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { resetPoseHousekeeping, stepTargetPitch, stepTargetYaw } from "../rom/helpers.js";
@@ -147,7 +147,7 @@ function phase0(a: MActor, seedSlot: number): void {
   a.hDecel = MELEE_GIRL_LUNGE.ZERO;              // +0x4c = 0
   a.hSpeed = MELEE_GIRL_LUNGE.ZERO;              // +0x44 = 0
   resetPoseHousekeeping(a);
-  // zz_006d144_(0xc0) face + zz_006e514_(0xc0, &+0x54e) pitch seek.
+  faceComplete(a);                               // zz_006d144_(actor, 0xc0)
   seekAimPitch(a);
   // Blink: motion = pos − target(+0x5e8); ×0.95 (FLOAT_8043955c); pos += motion.
   if (a.lockTarget) {
@@ -159,7 +159,7 @@ function phase0(a: MActor, seedSlot: number): void {
     // motion so phases 1-3 don't drift along a stale vector (blink rule, labeled).
     a.motion.x = 0; a.motion.y = 0; a.motion.z = 0;
   }
-  // zz_00677b0_(actor) — ground collide (bridge owns the clamp).
+  groundClamp(a);
   const slot = a.streamSlot;                     // cVar1 = +0x6ea
   a.streamSlot = slot + 1;                       // +0x6ea++
   startStream(a, MELEE_GIRL_LUNGE.PART_MASK, MELEE_GIRL_LUNGE.STREAM_GROUP, slot, MELEE_GIRL_LUNGE.STREAM_RATE);
@@ -172,7 +172,7 @@ function phase1(a: MActor, ctx: StreamContext): void {
   }
   vecScale(MELEE_GIRL_LUNGE.REPOSITION, a.motion, a.motion); // ×0.95
   vecAdd(a.pos, a.motion, a.pos);
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   seekAimPitch(a);                               // zz_006e514_(0xc0, &+0x54e)
   a.handlerTimer -= a.dt;                        // +0x558 -= dt
   if (a.handlerTimer <= MELEE_GIRL_LUNGE.ZERO || faceComplete(a)) {
@@ -188,7 +188,7 @@ function phase2(a: MActor, ctx: StreamContext): void {
   if (a.streamHold1b03 !== 0) {                 // +0x1b03 != 0
     tickStream(a, MELEE_GIRL_LUNGE.PART_MASK, ctx);
   }
-  // zz_006d144_(0xc0) face + zz_006e514_ pitch seek.
+  faceComplete(a);                               // zz_006d144_(actor, 0xc0)
   seekAimPitch(a);
   const pitch = a.meleeAimPitch ?? 0;
   a.hSpeed = MELEE_GIRL_LUNGE.DIVE_MAGNITUDE * projectZ(pitch);  // +0x44 = 30 × cos(+0x54e)
@@ -200,7 +200,7 @@ function phase2(a: MActor, ctx: StreamContext): void {
     a.gravityCoeff = a.descriptor?.handlerData6c ?? 1.0; // +0x50 = dataPage(+0x4ac)+0x6c
   }
   integratePhysics(MELEE_GIRL_LUNGE.GRAVITY, a, s16(a.activeYaw)); // FUN_80067310(1.0, +0x5ac)
-  // zz_00677b0_(actor) — bridge clamp.
+  groundClamp(a);
   a.handlerTimer -= a.dt;                        // +0x558 -= dt
   // Gate: timer ≤ 0 OR FUN_800668cc(150) > 0 (in range ONLY).
   if (a.handlerTimer <= MELEE_GIRL_LUNGE.ZERO || rangeCheck(a, MELEE_GIRL_LUNGE.PROXIMITY) > 0) {
@@ -241,7 +241,7 @@ function phase3(a: MActor, ctx: StreamContext): void {
   }
   applyDrag(a, MELEE_GIRL_LUNGE.REPOSITION);     // zz_006ed8c_(0.95, FLOAT_8043955c)
   integratePhysics(MELEE_GIRL_LUNGE.GRAVITY, a, s16(a.activeYaw)); // FUN_80067310(1.0, +0x5ac)
-  const grounded = a.grounded === true;          // iVar3 = zz_00677b0_(actor)
+  const grounded = groundClamp(a);               // iVar3 = zz_00677b0_(actor)
   if (grounded && a.contactP0 < 0) {             // landed + (s8)+0x1cef < 0
     a.controlWord &= ~0x3;                       // +0x73f = 0; +0x5e0 &= 0xfffffffc
     dispatchUpperBodyCue(a, 7);                  // zz_006a750_(actor, 7)

@@ -119,13 +119,6 @@ interface Actor {
   afterimageSerial: number;
 }
 
-interface AfterimageActor {
-  group: THREE.Object3D;
-  materials: THREE.Material[];
-  age: number;
-  ttl: number;
-}
-
 /**
  * One live slow/haste status aura — the ROM's zz_013f300_(target, 0|1) effect object
  * (chunk_0037.c:421; decode: research/decomp/efct-consumers-decode-2026-07-04.md).
@@ -434,6 +427,9 @@ interface BankFxActor {
   scaleKeys?: ReadonlyArray<readonly number[]> | undefined;
   /** ROM alpha keyframes {frame,a}. When set they REPLACE the linear 1->0 fade. */
   alphaKeys?: ReadonlyArray<readonly number[]> | undefined;
+  /** ROM effect transform flags from object +0x84 when this bank actor came through
+   * FUN_80047aa4. `0x1e` = local X/Y/Z rotation plus authored scale. */
+  romTransformFlags?: number | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -573,7 +569,6 @@ export class BattleScene {
   private projectileActors = new Map<string, ProjectileActor>();
   private impactActors: ImpactActor[] = [];
   private bankFxActors: BankFxActor[] = [];
-  private afterimageActors: AfterimageActor[] = [];
   private pending = new Set<string>();
   private projectileTextures = new Map<ProjectileVisualKind, THREE.Texture>();
   private impactPuffFrames: THREE.Texture[];
@@ -710,7 +705,7 @@ export class BattleScene {
       this.syncStatusFx(actor, b);
       if (b.romAfterimage && b.romAfterimage.serial !== actor.afterimageSerial) {
         actor.afterimageSerial = b.romAfterimage.serial;
-        this.spawnAfterimage(actor, b.romAfterimage);
+        this.spawnAfterimage(b.romAfterimage);
       }
       if (slotChanged) this.assets.onSlotEnter?.(actor.borgId, slot, b.uid, b.meleeSounds);
       actor.lastSeenSlot = slot;
@@ -748,7 +743,6 @@ export class BattleScene {
     }
     this.updateStatusAuras(dt);
     this.updateImpacts(dt);
-    this.updateAfterimages(dt);
   }
 
   /** Remove every actor (call when leaving a battle). */
@@ -761,12 +755,10 @@ export class BattleScene {
     for (const actor of this.projectileActors.values()) this.disposeProjectileActor(actor);
     for (const actor of this.impactActors) this.disposeImpactActor(actor);
     for (const actor of this.bankFxActors) this.disposeBankFxActor(actor);
-    for (const actor of this.afterimageActors) this.disposeAfterimage(actor);
     this.actors.clear();
     this.projectileActors.clear();
     this.impactActors = [];
     this.bankFxActors = [];
-    this.afterimageActors = [];
     this.pending.clear();
     this.enemyReticle.visible = false;
     this.allyMarker.visible = false;
@@ -816,49 +808,26 @@ export class BattleScene {
     return actor;
   }
 
-  /** Consume zz_00b2190_'s cosmetic child as a frozen translucent model snapshot. */
+  /** Consume zz_00b2190_(owner,1) as its exact efct-bank subtype-1 child.
+   * Config 0x802fc758: texId 69, 20 frames, scale track 0x802fc588,
+   * alpha track 0x802fc5b8; render state +0x84=0x1e. */
   private spawnAfterimage(
-    actor: Actor,
-    event: { pos: { x: number; y: number; z: number }; rotY: number },
+    event: NonNullable<BattleActorView["romAfterimage"]>,
   ): void {
-    if (!actor.model) return;
-    const group = actor.model.clone(true);
-    const materials: THREE.Material[] = [];
-    group.traverse((node) => {
-      if (!(node instanceof THREE.Mesh)) return;
-      const source = Array.isArray(node.material) ? node.material : [node.material];
-      const cloned = source.map((material) => {
-        const copy = material.clone();
-        copy.transparent = true;
-        copy.opacity = 0.42;
-        copy.depthWrite = false;
-        materials.push(copy);
-        return copy;
-      });
-      node.material = Array.isArray(node.material) ? cloned : cloned[0]!;
+    const s = event.baseScale;
+    this.spawnBankFx(event.effectId, new THREE.Vector3(event.pos.x, event.pos.y, event.pos.z), {
+      ttl: event.lifetimeFrames / 60,
+      startScale: { x: s, y: s, z: s },
+      endScale: { x: 1.25 * s, y: 2.5 * s, z: 1.25 * s },
+      opacity: 1,
+      yaw: event.effectYaw,
+      scaleKeys: [
+        [0, s, s, s],
+        [20, 1.25 * s, 2.5 * s, 1.25 * s],
+      ],
+      alphaKeys: [[0, 1], [20, 0]],
+      romTransformFlags: event.renderState,
     });
-    group.position.set(event.pos.x, event.pos.y, event.pos.z);
-    group.rotation.y = event.rotY;
-    this.root.add(group);
-    this.afterimageActors.push({ group, materials, age: 0, ttl: 8 / 60 });
-  }
-
-  private updateAfterimages(dt: number): void {
-    for (let i = this.afterimageActors.length - 1; i >= 0; i--) {
-      const actor = this.afterimageActors[i]!;
-      actor.age += dt;
-      const opacity = Math.max(0, 0.42 * (1 - actor.age / actor.ttl));
-      for (const material of actor.materials) material.opacity = opacity;
-      if (actor.age >= actor.ttl) {
-        this.disposeAfterimage(actor);
-        this.afterimageActors.splice(i, 1);
-      }
-    }
-  }
-
-  private disposeAfterimage(actor: AfterimageActor): void {
-    this.root.remove(actor.group);
-    for (const material of actor.materials) material.dispose();
   }
 
   /**
@@ -1333,6 +1302,9 @@ export class BattleScene {
        *  zz_000726c_ attach the entry's matAnim at this frame). Layers without tracks keep
        *  their material diffuse. */
       matAnimFrame?: number;
+      /** Exact object+0x84 transform flags consumed by FUN_80047aa4. When present,
+       * bit 2 applies Y yaw and bit 4 applies scale; subtype-1 uses 0x1e. */
+      romTransformFlags?: number;
     },
   ): boolean {
     const layers = bankFxTemplate(texId);
@@ -1365,8 +1337,11 @@ export class BattleScene {
       layerOpacity.push(restOpacity);
     }
     node.position.copy(position);
-    if (opts.yaw !== undefined) node.rotation.y = opts.yaw;
-    node.scale.set(Math.max(start.x, 1e-4), Math.max(start.y, 1e-4), Math.max(start.z, 1e-4));
+    const flags = opts.romTransformFlags;
+    if (opts.yaw !== undefined && (flags === undefined || (flags & 0x04) !== 0)) node.rotation.y = opts.yaw;
+    if (flags === undefined || (flags & 0x10) !== 0) {
+      node.scale.set(Math.max(start.x, 1e-4), Math.max(start.y, 1e-4), Math.max(start.z, 1e-4));
+    }
     if ((opts.delay ?? 0) > 0) node.visible = false;
     this.root.add(node);
     this.bankFxActors.push({
@@ -1381,6 +1356,7 @@ export class BattleScene {
       startOpacity: opts.opacity,
       scaleKeys: opts.scaleKeys,
       alphaKeys: opts.alphaKeys,
+      romTransformFlags: flags,
     });
     return true;
   }
@@ -1941,7 +1917,7 @@ export class BattleScene {
         const material = actor.materials[m];
         if (material) material.opacity = (actor.layerOpacity[m] ?? 1) * fade;
       }
-      if (actor.scaleKeys) {
+      if (actor.scaleKeys && (actor.romTransformFlags === undefined || (actor.romTransformFlags & 0x10) !== 0)) {
         evalRomKeys(actor.scaleKeys, frame, BANK_KEY_SCRATCH);
         actor.node.scale.set(
           Math.max(BANK_KEY_SCRATCH[0] ?? 0, 1e-4),

@@ -54,9 +54,18 @@ function turnStep(actor: RomActor, aimType: number): number {
 }
 
 /** Port of zz_006660c_ + FUN_800669d0/FUN_80066a30 for aim masks c0/c1/81. */
-export function stepTargetYaw(actor: RomActor, aimType: number, offset = 0): boolean {
+export function stepTargetYaw(
+  actor: RomActor,
+  aimType: number,
+  offset = 0,
+  preserveActiveYawOnTargetLoss = false,
+): boolean {
   const angles = targetAngles(actor);
-  const desired = angles ? toS16(angles.yaw - offset) : actor.heading;
+  // zz_006d0dc_ runs zz_006660c_, which clears a lost target and settles to the
+  // current heading. zz_006d144_ instead rebuilds +0x5aa from the retained +0x5ac.
+  const desired = angles
+    ? toS16(angles.yaw - offset)
+    : preserveActiveYawOnTargetLoss ? toS16(actor.activeYaw) : actor.heading;
   let error = toS16(desired - actor.heading);
   actor.activeYaw = desired;
   actor.turnErrorYaw = error;
@@ -97,6 +106,38 @@ export function stepTargetPitch(actor: RomActor, aimType: number, current: numbe
   const diff = toS16(desired - value);
   if (Math.abs(diff) <= step) return { value: desired, result: 1 };
   return { value: toS16(value + (diff < 0 ? -step : step)), result: 0 };
+}
+
+/** zz_006e1ac_(actor, aimType, part=1): the +0x18da part-pitch channel uses
+ * +0x768 rather than +0x1dc8 for its descriptor-rate step. The recovered host
+ * target/aim-origin surface feeds the same signed BAM16 settle and target-loss rules. */
+export function stepPartTargetPitch(actor: RomActor, aimType: number): -1 | 0 | 1 {
+  const current = toS16(actor.steerYaw);
+  const target = (actor as RomActor & RomHelperScratch).lockTarget;
+  if (!target) {
+    actor.steerYaw = toS16(Math.trunc(current * 0.8999999761581421));
+    return -1;
+  }
+  // The renderer/world-cache owns +0x8e0/+0x8f0/+0x900. Until it supplies row 1,
+  // unclassified handlers deterministically fall back to the actor root.
+  const anchor = actor.partAimAnchors[1] ?? actor.pos;
+  const dx = target.x - anchor.x;
+  const dy = target.y - anchor.y;
+  const dz = target.z - anchor.z;
+  const pitch = toS16(Math.round(Math.atan2(dy, Math.hypot(dx, dz)) / (Math.PI * 2) * 0x10000));
+  const desired = Math.max(-0x4000, Math.min(0x4000,
+    toS16(-toS16(actor.bodyPitch) - pitch)));
+  const descriptorRate = aimType & 0xf
+    ? actor.descriptor?.turnStep1
+    : actor.descriptor?.turnStep0;
+  const step = toS16(Math.trunc(toS16(descriptorRate ?? 0) * actor.aimRateScale));
+  const diff = toS16(desired - current);
+  if (Math.abs(diff) <= step) {
+    actor.steerYaw = desired;
+    return 1;
+  }
+  actor.steerYaw = toS16(current + (diff < 0 ? -step : step));
+  return 0;
 }
 
 /** Zero the exact signed animation/pose housekeeping triplet. */
