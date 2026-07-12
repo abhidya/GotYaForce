@@ -11,14 +11,14 @@
  * bitmap font (bitmapText, same as PauseMenu/Results) for the "UNIT GET"/"PARTS GET" rows.
  *
  * Never blocks the flow: it is entirely skippable via the shared menu-input bus's "confirm"
- * action (same bus as every other screen — subscribeMenuInput), and the caller decides what
+ * action (routed by the shared menu-screen host), and the caller decides what
  * "advance" means (next battle / menu), matching Results' onAdvance convention.
  */
 
 import { ASSETS } from "../assets.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { el } from "../dom.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 
 export interface GetsRow {
   /** Display name (borgs.json name), e.g. "SHURIKEN NINJA". */
@@ -35,7 +35,7 @@ export interface GetsOptions {
   onAdvance?: () => void;
 }
 
-export interface GetsHandle {
+export interface GetsHandle extends MenuInputTarget {
   render: (rows: readonly GetsRow[]) => void;
   destroy: () => void;
 }
@@ -81,12 +81,10 @@ export function createGets(container: HTMLElement, opts: GetsOptions = {}): Gets
   }
 
   container.appendChild(root);
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
-
   return {
     render,
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
-      unsubscribeMenuInput();
       root.remove();
     },
   };

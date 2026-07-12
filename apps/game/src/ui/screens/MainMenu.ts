@@ -11,7 +11,7 @@
 
 import { ASSETS } from "../assets.js";
 import { el } from "../dom.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export type MainMenuMode =
@@ -62,7 +62,7 @@ export interface MainMenuOptions {
   deskImage?: string;
 }
 
-export interface MainMenuHandle {
+export interface MainMenuHandle extends MenuInputTarget {
   /** Move the highlight without confirming. */
   setSelected: (mode: MainMenuMode) => void;
   getSelected: () => MainMenuMode;
@@ -216,14 +216,12 @@ export function createMainMenu(container: HTMLElement, opts: MainMenuOptions): M
 
   setSelected(selected);
   container.appendChild(root);
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
-
   return {
     setSelected,
     getSelected: () => selected,
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
       window.clearTimeout(transitionTimer);
-      unsubscribeMenuInput();
       for (const fn of teardown) fn();
       root.remove();
     },

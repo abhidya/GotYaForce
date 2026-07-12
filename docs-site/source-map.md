@@ -31,6 +31,8 @@ zero is the next major decomp milestone. See [Progress](./progress).
 ## Function explorer
 
 11,972 functions indexed in `research/decomp/index/function-evidence-index.json`.
+The full Ghidra project and OGhidra analysis session rollup now live on the
+[Ghidra Corpus](./ghidra-corpus) page.
 Topic counts:
 
 - `movement-physics` — largest

@@ -138,6 +138,14 @@ export interface SourceTargetLockState {
   activeTargetUid: string | null;
 }
 
+/** Narrow behavior exposed by the ROM-family sidecar to combat orchestration. */
+export interface RomFamilyDriver {
+  tick(runtime: BorgRuntime, dt: number, all: readonly BorgRuntime[], input?: PlayerInput | null): boolean;
+  tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
+  tryStartBAttack(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
+  drainProjectiles(): Projectile[];
+}
+
 export interface BorgRuntime {
   uid: string;
   borgId: string;
@@ -330,11 +338,11 @@ export interface BorgRuntime {
   // statusTimescale() rebuild (FUN_8005a378, chunk_0007.c:2817-2898). All optional so existing
   // fakeRuntime()/constructors that predate this ticket keep compiling (self-heal to 0/absent).
 
-  /** ROM-family driver sidecar (bridge.ts). When present, the 1:1 ported state machine
+  /** ROM-family driver sidecar. When present, the 1:1 ported state machine
    *  owns this borg's motion for actions its family implements (currently the G RED
    *  family X-special). Null/absent for borgs whose family hasn't been ported yet —
    *  they keep the generic archetype combat logic unchanged. See packages/combat/src/rom/. */
-  romDriver?: import("./bridge.js").RomDriverBridge | null;
+  romDriver?: RomFamilyDriver | null;
 
   /** Slow-on-hit level (ROM +0x70e; discrete, flagsB&0x0004): 0 = none, else indexes the
    *  DERIVED slow table {0,0.7,0.4,0.2} in timescale.ts. Skipped for burst victims. */
@@ -728,12 +736,58 @@ export interface SlotTelemetry {
   costLost: number;
 }
 
+/** Recursively read-only view used at the Battle boundary. */
+export type DeepReadonly<T> = T extends (...args: never[]) => unknown
+  ? T
+  : T extends readonly (infer U)[]
+    ? readonly DeepReadonly<U>[]
+    : T extends object
+      ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+      : T;
+
+/**
+ * Structured actor snapshot for one fixed-step boundary. Its identity is stable only within
+ * the cached observation for that boundary; driver internals deliberately stay inside the sim.
+ */
+export type BattleActorObservation = DeepReadonly<Omit<BorgRuntime, "romDriver">>;
+export type BattleProjectileObservation = DeepReadonly<Projectile>;
+
+/**
+ * Cohesive read model for one fixed-step boundary. Arrays and nested records are typed
+ * read-only. Actors are structured snapshots whose identity lasts only for this cached
+ * boundary observation. Projectile elements alone retain live simulation identity so
+ * presentation can read despawn metadata after an element leaves `projectiles`.
+ */
+export interface BattleObservation {
+  readonly actors: readonly BattleActorObservation[];
+  readonly projectiles: readonly BattleProjectileObservation[];
+  readonly activeUidByPlayer: Readonly<Record<string, string>>;
+  readonly energy: Readonly<Record<number, number>>;
+  readonly energyMax: Readonly<Record<number, number>>;
+  readonly defeated: Readonly<Record<number, number>>;
+  readonly defeatedEnergy: Readonly<Record<number, number>>;
+  readonly burstMeterByPlayer: DeepReadonly<Record<string, BurstMeterState>>;
+  readonly telemetry: DeepReadonly<NonNullable<BattleState["telemetry"]>>;
+  readonly defeatedPlayerBorgs: number;
+  readonly defeatedAllyBorgs: number;
+  readonly defeats: readonly DeepReadonly<BattleDefeat>[];
+  readonly frame: number;
+  readonly timeRemainingFrames: number | null;
+  readonly result: BattleResult;
+  readonly winnerMask: number;
+}
+
 /** The driver object returned by createBattle. */
 export interface Battle {
-  state: BattleState;
+  /** Observe all public facts at the current fixed-step boundary. */
+  observe(): BattleObservation;
+  /** Look up the actor currently controlled by a player/force key. */
+  activeActor(playerId: string): BattleActorObservation | undefined;
+  /** Look up an observed actor by stable uid. */
+  actor(uid: string): BattleActorObservation | undefined;
   /** Advance the sim by one fixed step. `dt` is accepted for API symmetry but the sim is
    *  fixed-step (SIM.DT); pass it through for documentation/compat. */
-  step(dt: number, inputs: Record<string, PlayerInput>): void;
+  step(dt: number, inputs: Record<string, PlayerInput>): BattleObservation;
 }
 
 /** Internal: a deploy queue entry (a borg not yet on the field). */

@@ -10,4 +10,7 @@ the C source inline and inspect caller/callee counts. Original source files
 live in `research/decomp/ghidra-export/` and are served on-demand from
 `public/chunks/`.
 
+For the checked-in Ghidra project, OGhidra analysis sessions, export inventory,
+and corpus-level metrics, see the [Ghidra Corpus](./ghidra-corpus).
+
 <FunctionExplorer />

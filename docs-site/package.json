@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev",
-    "build": "vitepress build",
+    "build": "vitepress build && node scripts/sync-dist-models.mjs",
     "preview": "vitepress preview",
     "curate": "node scripts/curate-data.mjs"
   },

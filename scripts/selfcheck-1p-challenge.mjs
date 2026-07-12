@@ -36,7 +36,7 @@ const combatConfig = toCombatBattleConfig(firstBattle, {
 });
 const battle = createBattle(combatConfig, borgs);
 
-const startEnergy = { ...battle.state.energy };
+const startEnergy = { ...battle.observe().energy };
 let firstEnergyChangeFrame = -1;
 let resolvedFrame = -1;
 const maxFrames = 18000;
@@ -44,10 +44,10 @@ const maxFrames = 18000;
 for (let frame = 0; frame < maxFrames; frame += 1) {
   battle.step(1 / 60, { [PLAYER_ID]: playerInput() });
   assertSane(frame);
-  if (firstEnergyChangeFrame < 0 && energyChanged(startEnergy, battle.state.energy)) {
+  if (firstEnergyChangeFrame < 0 && energyChanged(startEnergy, battle.observe().energy)) {
     firstEnergyChangeFrame = frame;
   }
-  if (battle.state.result !== "ongoing") {
+  if (battle.observe().result !== "ongoing") {
     resolvedFrame = frame;
     break;
   }
@@ -65,16 +65,16 @@ if (firstEnergyChangeFrame < 0) {
 // depletion (10 enemy borgs) within 18000 frames needs the still-TUNED combat pacing, so:
 // resolution by depletion = PASS; still ongoing = PASS only if real attrition happened
 // (enemy energy dropped), which proves the kill/energy pipeline works end-to-end.
-const resolvedByDepletion = (battle.state.energy[0] ?? -1) === 0 || (battle.state.energy[1] ?? -1) === 0;
-if (battle.state.result !== "ongoing" && !resolvedByDepletion) {
-  throw new Error(`1P Challenge smoke failed: resolved battle without KO (result=${battle.state.result})`);
+const resolvedByDepletion = (battle.observe().energy[0] ?? -1) === 0 || (battle.observe().energy[1] ?? -1) === 0;
+if (battle.observe().result !== "ongoing" && !resolvedByDepletion) {
+  throw new Error(`1P Challenge smoke failed: resolved battle without KO (result=${battle.observe().result})`);
 }
-if (battle.state.timeRemainingFrames !== 18000) {
+if (battle.observe().timeRemainingFrames !== 18000) {
   throw new Error(
-    `1P Challenge smoke failed: frozen Challenge timer ticked (remaining=${battle.state.timeRemainingFrames})`,
+    `1P Challenge smoke failed: frozen Challenge timer ticked (remaining=${battle.observe().timeRemainingFrames})`,
   );
 }
-const enemyAttrition = (startEnergy[1] ?? 0) - (battle.state.energy[1] ?? 0);
+const enemyAttrition = (startEnergy[1] ?? 0) - (battle.observe().energy[1] ?? 0);
 if (resolvedFrame < 0 && enemyAttrition <= 0) {
   throw new Error("1P Challenge smoke failed: battle neither resolved nor produced enemy attrition");
 }
@@ -88,8 +88,8 @@ console.log(
     `startEnergy=${JSON.stringify(startEnergy)}`,
     `firstEnergyChangeFrame=${firstEnergyChangeFrame}`,
     `resolvedFrame=${resolvedFrame}`,
-    `result=${battle.state.result}`,
-    `finalEnergy=${JSON.stringify(battle.state.energy)}`,
+    `result=${battle.observe().result}`,
+    `finalEnergy=${JSON.stringify(battle.observe().energy)}`,
   ].join(" "),
 );
 
@@ -127,8 +127,8 @@ async function loadStageResources(stageId) {
 }
 
 function playerInput() {
-  const activeUid = battle.state.activeUidByPlayer[PLAYER_ID];
-  const self = battle.state.borgs.find((borg) => borg.uid === activeUid);
+  const activeUid = battle.observe().activeUidByPlayer[PLAYER_ID];
+  const self = battle.observe().actors.find((borg) => borg.uid === activeUid);
   if (!self) return emptyInput();
   const target = nearestEnemy(self);
   if (!target) return emptyInput();
@@ -150,7 +150,7 @@ function playerInput() {
 function nearestEnemy(self) {
   let best = null;
   let bestD = Infinity;
-  for (const other of battle.state.borgs) {
+  for (const other of battle.observe().actors) {
     if (!other.alive || other.team === self.team) continue;
     const d = Math.hypot(other.pos.x - self.pos.x, other.pos.z - self.pos.z);
     if (d < bestD) {
@@ -162,7 +162,7 @@ function nearestEnemy(self) {
 }
 
 function assertSane(frame) {
-  for (const borg of battle.state.borgs) {
+  for (const borg of battle.observe().actors) {
     if (!Number.isFinite(borg.hp)) throw new Error(`NaN hp on ${borg.uid} at frame ${frame}`);
     if (!Number.isFinite(borg.rotY)) throw new Error(`NaN rotY on ${borg.uid} at frame ${frame}`);
     for (const key of ["x", "y", "z"]) {
@@ -174,7 +174,7 @@ function assertSane(frame) {
       throw new Error(`1P Challenge smoke failed: ${borg.uid} left stage floor at frame ${frame} pos=${JSON.stringify(borg.pos)}`);
     }
   }
-  for (const value of Object.values(battle.state.energy)) {
+  for (const value of Object.values(battle.observe().energy)) {
     if (!Number.isFinite(value)) throw new Error(`NaN team energy at frame ${frame}`);
   }
 }

@@ -13,9 +13,9 @@
 // BorgRuntime keeps its vec3 `vel` model; RomActor uses the ROM's scalar hSpeed +
 // yVel model. The bridge decomposes/recomposes each sync.
 
-import type { BorgRuntime, PlayerInput } from "./types.js";
+import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
 import type { Vec3 } from "@gf/physics";
-import type { RomActor } from "./rom/actor.js";
+import type { RomActor, RomPhysicsRuntime } from "./rom/actor.js";
 import { createRomActor } from "./rom/actor.js";
 import {
   createRomStateTables,
@@ -68,7 +68,7 @@ import { configureSwordKnightFamily } from "./families/sword-knight.js";
 import { createGenericKnightRootAction } from "./families/shared-knight-melee.js";
 import { configureJellyDiverFamily } from "./families/jelly-diver.js";
 import { configureCopyManFamily } from "./families/copy-man.js";
-import { createMeleeRobot } from "./families/melee-robot.js";
+import { createMeleeRobot, ROBOT_MELEE_RANGE_ROWS } from "./families/melee-robot.js";
 import { createMeleeSamurai, SAMURAI_MELEE_DEFAULT_CONFIG } from "./families/melee-samurai.js";
 import { configureValkrieFamily } from "./families/valkrie.js";
 import { configureNurseFamily } from "./families/nurse-wizard-idol.js";
@@ -631,13 +631,16 @@ pl040d: withRobotDash(makeOmega2FamilyRegistration(), ROBOT_ACTION0_CONFIGS.pl04
     // M-1..M-5 variant map with the real per-family seed slots).
 
     // Robot group: zz_00f2374_ (3-phase melee).
-    const robotMeleeFactory = (ctx: GRedFamilyCtx) => createMeleeRobot(ctx);
     for (const id of [
       "pl0400", "pl0401", "pl0402", "pl0403", "pl0404", "pl0405",
       "pl0406", "pl0407", "pl0408", "pl0409", "pl040a", "pl040b",
     ] as const) {
       const base = FAMILY_REGISTRY_CACHE[id] ?? makeSimpleRegistration(id, () => {});
-      FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(base, robotMeleeFactory);
+      FAMILY_REGISTRY_CACHE[id] = withBespokeMelee(
+        base,
+        (ctx) => createMeleeRobot(ctx, { rangeRows868: ROBOT_MELEE_RANGE_ROWS[id] }),
+        0,
+      );
     }
 
     // Samurai group: zz_0149178_ (config-driven lunge melee). Only pl0706 remains on
@@ -733,6 +736,7 @@ function composeActionTable(
 function withBespokeMelee(
   base: FamilyRegistration,
   melee: (ctx: RomHostContext) => (actor: RomActor) => void,
+  variant?: number,
 ): FamilyRegistration {
   return {
     configure: (actor, ctx) => {
@@ -741,11 +745,11 @@ function withBespokeMelee(
       const existing = actor.rootAction;
       if (!existing) {
         actor.rootAction = (a) => {
-          if (a.actionIndex === 1) { meleeHandler(a); return; }
+          if (a.actionIndex === 1 && (variant === undefined || a.variantIndex === variant)) { meleeHandler(a); return; }
         };
       } else {
         actor.rootAction = (a) => {
-          if (a.actionIndex === 1) { meleeHandler(a); return; }
+          if (a.actionIndex === 1 && (variant === undefined || a.variantIndex === variant)) { meleeHandler(a); return; }
           existing(a);
         };
       }
@@ -1170,6 +1174,17 @@ export type RomHitResolver = (
  *  borgs fall through the ground. */
 export type RomGroundClamp = (pos: { x: number; y: number; z: number }, velY: number) => { y: number; velY: number; grounded: boolean };
 
+/** Cohesive battle-owned dependency used by every ROM family driver in one battle. */
+export interface RomBattleRuntime {
+  readonly floor: RomPhysicsRuntime & {
+    readonly bounds: { minX: number; maxX: number; minZ: number; maxZ: number };
+    isSupported(x: number, z: number): boolean;
+  };
+  allocateResource(owner: BorgRuntime, type: number, count: number, consume: boolean): boolean;
+  spawnProjectile(owner: BorgRuntime, spawnerAddr: number, kind: number): void;
+  resolveHit(attacker: BorgRuntime, victim: BorgRuntime, damageRecordIndex: number, knockbackMult: number): void;
+}
+
 // ============================================================================
 // RomHostContext — unified host-interface for ALL family ctx types.
 // Every hook defaults to a bridge implementation. battle.ts overrides any hook
@@ -1210,7 +1225,7 @@ export interface RomHostContext {
 
 /** The bridge sidecar attached to BorgRuntime (via the `romDriver` field). Owns the
  *  RomActor + state tables + per-frame sync. Activates when a ported family exists. */
-export class RomDriverBridge {
+export class RomDriverBridge implements RomFamilyDriver {
   readonly actor: RomActor;
   private readonly tables: { fullBody: StateHandler[]; upperBody: StateHandler[] };
   /** Armed hitbox records for the current special. */
@@ -1232,15 +1247,20 @@ export class RomDriverBridge {
   readonly ctx: RomHostContext;
   /** Host-provided hit resolver (battle.ts). When null, hits are recorded but no
    *  damage is applied — the bridge logs the connection for debugging. */
-  hitResolver: RomHitResolver | null = null;
-  /** Host-provided ground clamp (battle.ts). */
-  groundClamp: RomGroundClamp | null = null;
-  /** Stage bounds for position clamping during the ROM special (prevents drift
-   *  to stage edges since stepMovement's bounds clamp is skipped). */
-  bounds: { minX: number; maxX: number; minZ: number; maxZ: number } | null = null;
-  /** Off-mesh check: returns false when (x,z) has no collision triangle. The bridge
-   *  reverts the borg to its pre-step XZ in that case, preventing wall-through drift. */
-  offMeshCheck: ((x: number, z: number) => boolean) | null = null;
+  private get hitResolver(): RomHitResolver | null {
+    return this.battleRuntime?.resolveHit ?? null;
+  }
+  private get groundClamp(): RomGroundClamp | null {
+    const floor = this.battleRuntime?.floor;
+    return floor ? (pos, velY) => floor.clampToGround(pos, velY) : null;
+  }
+  private get bounds(): RomBattleRuntime["floor"]["bounds"] | null {
+    return this.battleRuntime?.floor.bounds ?? null;
+  }
+  private get offMeshCheck(): ((x: number, z: number) => boolean) | null {
+    const floor = this.battleRuntime?.floor;
+    return floor ? (x, z) => floor.isSupported(x, z) : null;
+  }
   /** Projectiles spawned by the ROM stream's fireChild op (op 0x09) during the
    *  current special. Drained by battle.ts after each tick. */
   private pendingProjectiles: Projectile[] = [];
@@ -1289,8 +1309,12 @@ export class RomDriverBridge {
   private activeVariantIndex = 0;
   private runtime: BorgRuntime | null = null;
 
-  private constructor(actor: RomActor) {
+  private constructor(
+    actor: RomActor,
+    private readonly battleRuntime: RomBattleRuntime | null,
+  ) {
     this.actor = actor;
+    actor.physicsRuntime = battleRuntime?.floor ?? null;
     this.tables = createRomStateTables();
     this.ctx = this.buildDefaultCtx();
     (actor as RomActor & {
@@ -1362,8 +1386,21 @@ export class RomDriverBridge {
   /** ── Default implementations ── */
 
   private defaultOnFaceComplete(actor: RomActor, mask: number): boolean {
-    void actor; void mask;
-    return true;
+    void mask;
+    const lt = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
+    if (!lt) return true;
+    const dx = lt.x - actor.pos.x;
+    const dz = lt.z - actor.pos.z;
+    if (Math.abs(dx) < 0.001 && Math.abs(dz) < 0.001) return true;
+    const targetBam = radToBam(Math.atan2(dx, dz));
+    const diff = ((targetBam - actor.heading + 0x8000) & 0xffff) - 0x8000;
+    const step = Math.max(256, Math.abs(diff) >> 3);
+    if (Math.abs(diff) <= step) {
+      actor.heading = targetBam;
+      return true;
+    }
+    actor.heading = (actor.heading + (diff > 0 ? step : -step)) & 0xffff;
+    return false;
   }
 
   private defaultOnExitFb(actor: RomActor): void {
@@ -1417,12 +1454,35 @@ export class RomDriverBridge {
   /** Attach a bridge to a freshly-spawned BorgRuntime. Returns the bridge, or null if
    *  the borg has no ported family (caller keeps generic archetypes). */
   static attach(runtime: BorgRuntime, hostCtx: RomHostContext): RomDriverBridge | null {
+    return RomDriverBridge.attachWith(runtime, hostCtx, null);
+  }
+
+  /** Production construction seam: one battle runtime supplies all external facts. */
+  static attachToBattle(runtime: BorgRuntime, battleRuntime: RomBattleRuntime): RomDriverBridge | null {
+    const hostCtx: RomHostContext = {
+      onAllocateResource: (_actor, type, count, mode) =>
+        battleRuntime.allocateResource(runtime, type, count, (mode ?? 0) !== 0),
+      onFamilyProjectile: (_actor, addr, kind) =>
+        battleRuntime.spawnProjectile(runtime, addr, kind),
+      onSpawnChild: (_actor, childId) => {
+        battleRuntime.spawnProjectile(runtime, 0, childId);
+        return true;
+      },
+    };
+    return RomDriverBridge.attachWith(runtime, hostCtx, battleRuntime);
+  }
+
+  private static attachWith(
+    runtime: BorgRuntime,
+    hostCtx: RomHostContext,
+    battleRuntime: RomBattleRuntime | null,
+  ): RomDriverBridge | null {
     const reg = familyRegistry()[runtime.borgId];
     const actor = createRomActor();
     // Every borg gets its REAL family cue table when extracted (119/119 families);
     // the hand-rolled default remains only as a last-resort fallback.
     actor.cueTable = reg?.cueTable ?? cueTableForBorg(runtime.borgId) ?? makeDefaultCueTable();
-    const bridge = new RomDriverBridge(actor);
+    const bridge = new RomDriverBridge(actor, battleRuntime);
     actor.borgNumber = borgIdToNumber(runtime.borgId);
     actor.team = runtime.team;
     // Merge host-provided hooks into bridge ctx (overrides defaults).
@@ -1555,12 +1615,19 @@ export class RomDriverBridge {
     a.maxFall = -9999;
     (a as RomActor & { grounded?: boolean }).grounded = runtime.grounded;
     const lockUid = runtime.lockTarget;
+    (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = null;
+    (a as RomActor & { targetDistance760?: number }).targetDistance760 = 0;
     if (lockUid) {
       const target = all.find((b) => b.uid === lockUid);
       if (target) {
         (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = {
           x: target.pos.x, y: target.pos.y, z: target.pos.z,
         };
+        (a as RomActor & { targetDistance760?: number }).targetDistance760 = Math.hypot(
+          target.pos.x - runtime.pos.x,
+          target.pos.y - runtime.pos.y,
+          target.pos.z - runtime.pos.z,
+        );
       }
     }
   }
@@ -1570,11 +1637,13 @@ export class RomDriverBridge {
   private syncActionInput(input: PlayerInput | null, fallbackHeld = false): void {
     const held = input ? input.attack || input.special : fallbackHeld;
     const scratch = this.actor as RomActor & {
+      inputFlags5d4?: number;
       inputFlags5d8?: number;
       statusWord5bc?: number;
       bRetapInput?: boolean;
       streamTickEnabled?: boolean;
     };
+    scratch.inputFlags5d4 = held ? 0x20 : 0;
     scratch.inputFlags5d8 = held ? 0x10 : 0;
     scratch.statusWord5bc = held ? 0x200 : 0;
     scratch.bRetapInput = input?.attack ?? fallbackHeld;

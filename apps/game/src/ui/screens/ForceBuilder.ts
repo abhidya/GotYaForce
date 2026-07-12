@@ -41,7 +41,7 @@ import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { captureCropImg } from "../captureCrop.js";
 import { el, clear } from "../dom.js";
 import { borgMiniPath } from "../assets.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
@@ -83,7 +83,7 @@ export interface ForceBuilderOptions {
   onQuit?: () => void;
 }
 
-export interface ForceBuilderHandle {
+export interface ForceBuilderHandle extends MenuInputTarget {
   getForce: () => string[];
   totalCost: () => number;
   destroy: () => void;
@@ -399,14 +399,12 @@ export function createForceBuilder(
 
   renderAll();
   container.appendChild(root);
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
-
   return {
     getForce: () => [...force],
     totalCost,
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
       for (const stop of teardown) stop();
-      unsubscribeMenuInput();
       root.remove();
     },
   };

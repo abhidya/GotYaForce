@@ -23,7 +23,7 @@ import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { captureCropImg, type CaptureCropBox } from "../captureCrop.js";
 import { el, legendItem } from "../dom.js";
 import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 const CAPTURE = new URL(
@@ -48,7 +48,7 @@ export interface SelectPlayersOptions {
   initial?: number;
 }
 
-export interface SelectPlayersHandle {
+export interface SelectPlayersHandle extends MenuInputTarget {
   getSelected: () => number;
   destroy: () => void;
 }
@@ -184,14 +184,12 @@ export function createSelectPlayers(
     camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 22, 0] },
     rotation: [-0.12, 0, 0],
   });
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
-
   return {
     getSelected: () => selected,
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
       motion?.destroy();
       stopScene();
-      unsubscribeMenuInput();
       root.remove();
     },
   };

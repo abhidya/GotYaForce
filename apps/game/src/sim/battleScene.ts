@@ -11,7 +11,7 @@
 // duplicating them. A capsule is shown only while the production model is loading.
 
 import * as THREE from "three";
-import type { Projectile, ProjectileVisualKind } from "@gf/combat";
+import type { BattleProjectileObservation, ProjectileVisualKind } from "@gf/combat";
 import { MUZZLE_OFFSET, SHOT, SPECIAL } from "@gf/combat";
 import {
   ARROW_MDL_BOUNDS,
@@ -184,7 +184,7 @@ interface ProjectileActor {
    * (packages/combat/src/types.ts), so holding the reference lets the despawn sweep read
    * why the uid vanished and fire impact FX only for real impacts.
    */
-  sim: Projectile;
+  sim: BattleProjectileObservation;
   /** True when `node` is the velocity-oriented beam rig (needs per-frame orient/stretch). */
   beam: boolean;
   /** Per-layer materials of a bank-mesh flight visual (Projectile.flightVisual resolved —
@@ -653,7 +653,7 @@ export class BattleScene {
   /** Reconcile the scene with the current list of live borgs. Call once per frame. */
   sync(
     borgs: readonly BattleActorView[],
-    projectiles: readonly Projectile[] = [],
+    projectiles: readonly BattleProjectileObservation[] = [],
     localActiveUid: string | null = null,
     meleeMode = false,
   ): void {
@@ -954,7 +954,7 @@ export class BattleScene {
     }
   }
 
-  private syncProjectiles(projectiles: readonly Projectile[]): void {
+  private syncProjectiles(projectiles: readonly BattleProjectileObservation[]): void {
     const live = new Set<string>();
     for (const projectile of projectiles) {
       live.add(projectile.uid);
@@ -1037,7 +1037,7 @@ export class BattleScene {
    * flash). Plain (0x8000-only) rows draw the bank's authored material with no matAnim sample.
    * Returns null when the texId has no drawable bank entry so the caller keeps the sprite.
    */
-  private buildBankProjectileActor(projectile: Projectile): ProjectileActor | null {
+  private buildBankProjectileActor(projectile: BattleProjectileObservation): ProjectileActor | null {
     const visual = projectile.flightVisual;
     if (!visual) return null;
     const layers = bankFxTemplate(visual.bankTexId);
@@ -1075,7 +1075,7 @@ export class BattleScene {
     return { node, material: new THREE.MeshBasicMaterial(), sim: projectile, beam: false, bankMaterials, bankLayerOpacity };
   }
 
-  private spawnProjectile(projectile: Projectile): ProjectileActor {
+  private spawnProjectile(projectile: BattleProjectileObservation): ProjectileActor {
     const bankActor = this.buildBankProjectileActor(projectile);
     if (bankActor) return bankActor;
     const kind = projectile.visualKind;
@@ -1848,7 +1848,7 @@ export class BattleScene {
  * HOMING.MIN_STEER_SPEED-style epsilon) keeps the previous orientation rather than snapping
  * to +Y. Allocation-free (module scratch vector) — runs in the per-frame sync hot loop.
  */
-function orientBeam(node: THREE.Object3D, projectile: Projectile): void {
+function orientBeam(node: THREE.Object3D, projectile: BattleProjectileObservation): void {
   const width = Math.max(42, projectile.hitRadius * 1.8); // same footprint as billboard kinds
   const speed = BEAM_DIR_SCRATCH.set(projectile.vel.x, projectile.vel.y, projectile.vel.z).length();
   node.scale.set(width, Math.max(width, speed * BEAM_STRETCH_FRAMES), width);

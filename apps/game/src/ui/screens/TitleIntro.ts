@@ -31,14 +31,14 @@ import { createTitleVm } from "../intro/titleVm.js";
 import type { TitleEffectSink, TitleVm } from "../intro/titleVm.js";
 import { createUiSceneHost } from "../sceneModel.js";
 import { el } from "../dom.js";
-import { subscribeMenuInput } from "../menuInput.js";
+import type { MenuInputTarget } from "../menuInput.js";
 
 export interface TitleIntroOptions {
   /** Called on confirm (click or Enter/Space/any key = "press start"). */
   onEnter: () => void;
 }
 
-export interface TitleIntroHandle {
+export interface TitleIntroHandle extends MenuInputTarget {
   destroy: () => void;
 }
 
@@ -530,7 +530,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
 
   // "press ANY key/click to continue" — see the long note in the prior revision; the raw
   // window keydown is kept (broader than the bus's mapped vocabulary), stopImmediatePropagation
-  // prevents a double-advance, and the bus subscription covers gamepad confirm/start.
+  // prevents a double-advance, and the host-routed target covers gamepad confirm/start.
   function onKey(ev: KeyboardEvent): void {
     vm.notifyInput(); // feed the input edge to the VM (the end opcode tests state[+0x2d])
     enter();
@@ -545,17 +545,18 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
   window.addEventListener("keydown", onKey);
   root.addEventListener("click", onClick);
   container.appendChild(root);
-  const unsubscribeMenuInput = subscribeMenuInput(() => {
-    vm.notifyInput();
-    enter();
-  });
-
   return {
+    handleMenuInput: (event) => {
+      // Keyboard remains on the raw listener so every key (not just mapped actions)
+      // has identical behavior. The semantic target supplies the gamepad path.
+      if (event.source !== "gamepad") return;
+      vm.notifyInput();
+      enter();
+    },
     destroy: () => {
       destroyed = true;
       window.removeEventListener("keydown", onKey);
       root.removeEventListener("click", onClick);
-      unsubscribeMenuInput();
       for (const fn of teardown) fn();
       root.remove();
     },

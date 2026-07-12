@@ -15,6 +15,11 @@
 
 export interface Vec3 { x: number; y: number; z: number; }
 
+/** Battle-local physics behavior used by ROM family integration. */
+export interface RomPhysicsRuntime {
+  clampToGround(pos: Vec3, velY: number): { y: number; velY: number; grounded: boolean };
+}
+
 /**
  * The actor struct, mirroring the GG4E `object+0xNNN` layout. Every offset is cited.
  *
@@ -33,6 +38,9 @@ export interface Vec3 { x: number; y: number; z: number; }
  * (FUN_80067310, chunk_0008.c:3794-3828. yaw = `+0x5ae` lock-yaw passed as param_3.)
  */
 export interface RomActor {
+  /** Port-side runtime dependency. Kept on the actor so concurrent battles cannot
+   *  overwrite one another's floor behavior. */
+  physicsRuntime: RomPhysicsRuntime | null;
   // ===== World transform (behavior-notes.md §ac, FUN_80067310) =====
   /** +0x20: world position (vec3). Live-verified 4P trace + camera chain. */
   pos: Vec3;
@@ -263,6 +271,7 @@ export interface RomCommandTable {
 /** Create a blank actor (fields default to the ROM power-on state). */
 export function createRomActor(): RomActor {
   return {
+    physicsRuntime: null,
     pos: { x: 0, y: 0, z: 0 },
     motion: { x: 0, y: 0, z: 0 },
     hSpeed: 0, yVel: 0, hDecel: 0, gravityCoeff: 0,

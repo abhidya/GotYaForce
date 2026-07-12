@@ -10,13 +10,11 @@
  * player could not navigate a single menu screen.
  *
  * FIX: one keydown listener + one polled-gamepad loop translate raw input into a small
- * set of semantic MenuAction values. Screens no longer own input; they subscribe to
- * this bus and get actions, keyboard and gamepad alike, for free. Subscription is LIFO
- * (a stack): only the top (most-recently-mounted) subscriber receives actions. Screens
- * push on mount and pop on destroy, so the currently-visible screen — and only that
- * screen — reacts, without every mounted-but-hidden screen's old listener still racing
- * for the same keydown event (the double-handling bug the per-screen listeners had
- * whenever a screen forgot to unsubscribe in time).
+ * set of semantic MenuAction values. The app's menu-screen host owns the one gameplay
+ * subscription and routes actions to its current screen or top overlay. Screens expose
+ * behavior on their handles and know nothing about subscription lifetime. The bus keeps
+ * LIFO subscription semantics for isolated consumers/debug tools, but normal gameplay
+ * needs only the host subscriber.
  *
  * Gamepad polling: setInterval, NOT requestAnimationFrame. rAF is throttled/paused in
  * background tabs, which silently killed menu gamepad input in testing (a backgrounded
@@ -50,12 +48,17 @@ export interface MenuActionEvent {
 
 export type MenuInputHandler = (event: MenuActionEvent) => void;
 
+/** A mounted menu screen that can receive semantic input from the menu-screen host. */
+export interface MenuInputTarget {
+  handleMenuInput(event: MenuActionEvent): void;
+}
+
 const GAMEPAD_POLL_MS = 16; // ~60Hz; see module doc for why this is setInterval, not rAF.
 const STICK_THRESHOLD = 0.5;
 const STICK_REPEAT_MS = 220; // suppress repeat-fire while a stick stays pushed past threshold.
 
-// LIFO subscriber stack: only the top entry receives dispatched actions. Screens
-// subscribe on mount and unsubscribe (pop themselves) on destroy.
+// LIFO subscriber stack: only the top entry receives dispatched actions. Normal gameplay
+// has one long-lived menu-screen-host subscriber.
 const subscribers: MenuInputHandler[] = [];
 
 let gamepadPollHandle: ReturnType<typeof setInterval> | null = null;
@@ -205,9 +208,8 @@ function ensureBusStarted(): void {
 
 /**
  * Subscribe to the shared menu-input bus. The MOST RECENTLY subscribed handler is the
- * only one that receives actions (LIFO) — mount order == push order, so the top of the
- * stack is always the currently-visible screen. Returns an unsubscribe function; screens
- * MUST call it from their destroy() so the previous (now-revealed) screen regains input.
+ * only one that receives actions (LIFO). Returns an idempotent unsubscribe function.
+ * The menu-screen host owns the gameplay subscription; screen modules must not call this.
  */
 export function subscribeMenuInput(handler: MenuInputHandler): () => void {
   ensureBusStarted();

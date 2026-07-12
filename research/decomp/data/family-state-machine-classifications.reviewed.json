@@ -1,4 +1,138 @@
 {
   "schemaVersion": 2,
-  "classifications": []
+  "classifications": [
+    {
+      "constructorAddress": "0x80074940", "actionIndex": 0, "status": "ported",
+      "coverage": [
+        { "member": "pl0400", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x80074ccc/table 0x802d4e9c/leaf 0x80074d08"],
+          "variantDispatch": ["actionStreamTables: v0-v4 all leaf 0x80074d08/config 0x802d4ea8"],
+          "phaseTransitions": ["shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"],
+          "constants": ["boot.dol: config 0x802d4ea8; FLOAT_80439078/_7c/_88/_8c"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl0400 withRobotDash"],
+          "focusedTests": ["rom.selfcheck.ts: pl0400 callback and v0-v4 bridge routing"] } },
+        { "member": "pl040a", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x80074ccc/table 0x802d4e9c/leaf 0x80074d08"],
+          "variantDispatch": ["actionStreamTables: v0-v4 all leaf 0x80074d08/config 0x802d4ea8"],
+          "phaseTransitions": ["shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"],
+          "constants": ["boot.dol: config 0x802d4ea8; pl040a callback borg switch"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl040a withRobotDash"],
+          "focusedTests": ["rom.selfcheck.ts: pl040a callback and v0-v4 bridge routing"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x8009b40c", "actionIndex": 0, "status": "ported",
+      "coverage": [{ "member": "pl0401", "variants": [0,1,2,3,4], "evidence": {
+        "rootDispatch": ["actionStreamTables: root 0x8009b74c/table 0x802f57e8/leaf 0x8009b788"],
+        "variantDispatch": ["actionStreamTables: v0-v4 leaf 0x8009b788/config 0x802f57f4"],
+        "phaseTransitions": ["shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"],
+        "constants": ["boot.dol: config 0x802f57f4 and FLOAT_80439078/_7c/_88/_8c"],
+        "streamBehavior": ["actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"],
+        "bridgeWiring": ["bridge.ts: pl0401 withRobotDash"],
+        "focusedTests": ["rom.selfcheck.ts: pl0401 callback and v0-v4 bridge routing"] } }]
+    },
+    {
+      "constructorAddress": "0x800d7c7c", "actionIndex": 0, "status": "ported",
+      "coverage": [{ "member": "pl0404", "variants": [0,1,2,3,4], "evidence": {
+        "rootDispatch": ["actionStreamTables: root 0x800d7f74/table 0x8031096c/leaf 0x800d7fb0"],
+        "variantDispatch": ["actionStreamTables: v0-v4 leaf 0x800d7fb0/config 0x80310978"],
+        "phaseTransitions": ["shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"],
+        "constants": ["boot.dol: config 0x80310978 and shared float bank"],
+        "streamBehavior": ["actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"],
+        "bridgeWiring": ["bridge.ts: pl0404 withRobotDash"],
+        "focusedTests": ["rom.selfcheck.ts: pl0404 callback and v0-v4 bridge routing"] } }]
+    },
+    {
+      "constructorAddress": "0x800da9fc", "actionIndex": 0, "status": "ported",
+      "coverage": [
+        { "member": "pl0405", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x800dab34/table 0x80311c48/leaf 0x800dab70"],
+          "variantDispatch": ["actionStreamTables: v0-v4 config 0x80311c54"],
+          "phaseTransitions": ["shared-robot-dash.ts: five phases plus timed callback family"],
+          "constants": ["boot.dol: config 0x80311c54 = slot0/ammo0/timer4/count5"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl0405 withRobotDash"],
+          "focusedTests": ["rom.selfcheck.ts: pl0405 timed callback and v0-v4 routing"] } },
+        { "member": "pl0409", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x800dab34/table 0x80311c48/leaf 0x800dab70"],
+          "variantDispatch": ["actionStreamTables: v0-v4 config 0x80311c68"],
+          "phaseTransitions": ["shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"],
+          "constants": ["boot.dol: config 0x80311c68 = slot3/ammo0/-1/-1"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 3/4/5; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl0409 withRobotDash"],
+          "focusedTests": ["rom.selfcheck.ts: pl0409 callback and v0-v4 routing"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x800dfc38", "actionIndex": 0, "status": "ported",
+      "coverage": [{ "member": "pl0403", "variants": [0,1,2,3,4], "evidence": {
+        "rootDispatch": ["actionStreamTables: root 0x800dfe4c/table 0x80316ac0/handler 0x800dfe88/leaf 0x800dfec4"],
+        "variantDispatch": ["actionStreamTables: v0-v4 leaf 0x800dfec4/config 0x80316ae0"],
+        "phaseTransitions": ["shared-robot-dash.ts: five phases and config+0x10 exit gate"],
+        "constants": ["boot.dol: config 0x80316ae0 and shared float bank"],
+        "streamBehavior": ["actionStreamTables: group 2 slots 0/1/2; real exit-gate selfcheck"],
+        "bridgeWiring": ["bridge.ts: pl0403 withRobotDash"],
+        "focusedTests": ["rom.selfcheck.ts: pl0403 callback/exit gate/v0-v4 routing"] } }]
+    },
+    {
+      "constructorAddress": "0x80112b44", "actionIndex": 0, "status": "ported",
+      "coverage": [
+        { "member": "pl0402", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x80112e90/table 0x80327f38/leaf 0x80112ecc"],
+          "variantDispatch": ["actionStreamTables: v0-v4 config 0x80327f48"],
+          "phaseTransitions": ["shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"],
+          "constants": ["boot.dol: config 0x80327f48"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl0402 withRobotDash preserves bespoke action 2"],
+          "focusedTests": ["rom.selfcheck.ts: pl0402 callback and v0-v4 routing"] } },
+        { "member": "pl0407", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x80112e90/table 0x80327f38/leaf 0x80112fe8"],
+          "variantDispatch": ["actionStreamTables: v0-v4 config 0x80327f5c"],
+          "phaseTransitions": ["shared-robot-dash.ts: five phases plus timed callback family"],
+          "constants": ["boot.dol: config 0x80327f5c = slot3/ammo0/timer4/count5"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 3/4/5; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl0407 withRobotDash preserves bespoke action 2"],
+          "focusedTests": ["rom.selfcheck.ts: pl0407 callback and v0-v4 routing"] } },
+        { "member": "pl0408", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x80112e90/table 0x80327f38/leaf 0x80112fe8"],
+          "variantDispatch": ["actionStreamTables: v0-v4 config 0x80327f5c"],
+          "phaseTransitions": ["shared-robot-dash.ts: five phases plus borg-switched callback"],
+          "constants": ["boot.dol: config 0x80327f5c = slot3/ammo0/timer4/count5"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 3/4/5; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl0408 withRobotDash preserves bespoke action 2"],
+          "focusedTests": ["rom.selfcheck.ts: pl0408 callback and v0-v4 routing"] } }
+      ]
+    },
+    {
+      "constructorAddress": "0x801d4590", "actionIndex": 0, "status": "ported",
+      "coverage": [
+        { "member": "pl040b", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x801d4810/table 0x8038bdf0/leaf 0x801d484c"],
+          "variantDispatch": ["actionStreamTables: v0-v4 config 0x8038bdfc"],
+          "phaseTransitions": ["shared-robot-dash.ts: five phases and two-child exit gate"],
+          "constants": ["boot.dol: config 0x8038bdfc = slot0/ammo2/-1/-1"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl040b withRobotDash"],
+          "focusedTests": ["rom.selfcheck.ts: pl040b callback and v0-v4 routing"] } },
+        { "member": "pl040c", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x801d4810/table 0x8038bdf0/leaf 0x801d484c"],
+          "variantDispatch": ["actionStreamTables: v0-v4 config 0x8038be10"],
+          "phaseTransitions": ["shared-robot-dash.ts: five phases plus timed callback family"],
+          "constants": ["boot.dol: config 0x8038be10 = slot3/ammo0/timer4/count5"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 3/4/5; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl040c withRobotDash"],
+          "focusedTests": ["rom.selfcheck.ts: pl040c callback and v0-v4 routing"] } },
+        { "member": "pl040d", "variants": [0,1,2,3,4], "evidence": {
+          "rootDispatch": ["actionStreamTables: root 0x801d4810/table 0x8038bdf0/leaf 0x801d484c"],
+          "variantDispatch": ["actionStreamTables: v0-v4 config 0x8038be24"],
+          "phaseTransitions": ["shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"],
+          "constants": ["boot.dol: config 0x8038be24 = slot6/ammo0/-1/-1"],
+          "streamBehavior": ["actionStreamTables: group 2 slots 6/7/8; real phase selfchecks"],
+          "bridgeWiring": ["bridge.ts: pl040d withRobotDash"],
+          "focusedTests": ["rom.selfcheck.ts: pl040d callback and v0-v4 routing"] } }
+      ]
+    }
+  ]
 }

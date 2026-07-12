@@ -88,24 +88,11 @@ export function clampVertical(actor: RomActor): void {
   }
 }
 
-/** Port of `zz_0068030_` — the ground/collision clamp called between the position
- *  integration and the velocity decay in FUN_80067310 (line 3805). Delegates to a
- *  host-provided ground-clamp function (set by bridge.ts from battle.ts's
- *  floorSurfaceYAt). When no clamp is registered, this is a no-op — the bridge's
- *  post-step clamp catches it, but registering here prevents fall-through DURING
- *  the integration (important for shared-engine families that apply gravity). */
-export type GroundClampFn = (pos: { x: number; y: number; z: number }, velY: number) => { y: number; velY: number; grounded: boolean };
-
-let groundClampFn: GroundClampFn | null = null;
-
-/** Register the host's ground-clamp function (called once by bridge.ts at attach). */
-export function registerGroundClamp(fn: GroundClampFn | null): void {
-  groundClampFn = fn;
-}
-
+/** Port of `zz_0068030_` — the ground/collision clamp called between position
+ *  integration and velocity decay. The behavior belongs to this actor's battle. */
 export function groundClamp(actor: RomActor): void {
-  if (!groundClampFn) return;
-  const result = groundClampFn(actor.pos, actor.yVel);
+  if (!actor.physicsRuntime) return;
+  const result = actor.physicsRuntime.clampToGround(actor.pos, actor.yVel);
   actor.pos.y = result.y;
   actor.yVel = result.velY;
   (actor as RomActor & { grounded?: boolean }).grounded = result.grounded;

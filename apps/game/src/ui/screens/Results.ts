@@ -23,7 +23,7 @@
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { captureCropImg } from "../captureCrop.js";
 import { el } from "../dom.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
@@ -58,7 +58,7 @@ export interface ResultsOptions {
   onAdvance?: () => void;
 }
 
-export interface ResultsHandle {
+export interface ResultsHandle extends MenuInputTarget {
   /** Render or re-render the panel for a win/lose with the given stats. */
   render: (result: "win" | "lose", stats: ResultStats) => void;
   destroy: () => void;
@@ -189,13 +189,11 @@ export function createResults(container: HTMLElement, opts: ResultsOptions = {})
   }
 
   container.appendChild(root);
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
-
   return {
     render,
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
       stopScene?.();
-      unsubscribeMenuInput();
       root.remove();
     },
   };

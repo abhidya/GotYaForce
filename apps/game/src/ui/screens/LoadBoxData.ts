@@ -16,7 +16,7 @@
 
 import { ASSETS } from "../assets.js";
 import { el, legendItem } from "../dom.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
 export interface LoadBoxDataOptions {
@@ -25,7 +25,7 @@ export interface LoadBoxDataOptions {
   onSkip?: () => void;
 }
 
-export interface LoadBoxDataHandle {
+export interface LoadBoxDataHandle extends MenuInputTarget {
   destroy: () => void;
 }
 
@@ -73,10 +73,9 @@ export function createLoadBoxData(
 
   container.appendChild(root);
   const stopBoxRender = mountGotchaBoxModel(box);
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
   return {
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
-      unsubscribeMenuInput();
       stopBoxRender();
       root.remove();
     },

@@ -213,7 +213,7 @@ function testBattleForceLevelsThreadIntoDeploy(): void {
     },
     [G_RED, DEATH_BORG_ALPHA],
   );
-  const gRed = battle.state.borgs.find((b) => b.borgId === "pl0615");
+  const gRed = battle.observe().actors.find((b) => b.borgId === "pl0615");
   assertTrue(gRed !== undefined, "battle deploys G RED");
   assertEqual(gRed?.maxHp, 290, "battle deploy reads borgLevels[0]=9 as G RED lv10 maxHp 290");
   assertEqual(gRed?.hp, 290, "battle deploy starts G RED at lv10 HP");

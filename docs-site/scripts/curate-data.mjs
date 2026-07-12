@@ -17,6 +17,8 @@ const DATA_DIR = join(__dirname, '..', '.vitepress', 'data')
 const PUBLIC_DIR = join(__dirname, '..', 'public')
 const MODELS_SOURCE_DIR = join(REPO_ROOT, 'apps', 'game', 'public', 'models')
 const MODELS_PUBLIC_DIR = join(PUBLIC_DIR, 'models')
+const OGHIDRA_SESSIONS_DIR = join(REPO_ROOT, 'research', 'tools', 'OGhidra', 'analysis_sessions')
+const GHIDRA_EXPORT_DIR = join(RESEARCH, 'decomp', 'ghidra-export')
 
 const BASE = process.env.GH_PAGES_BASE ?? '/GotYaForce/'
 
@@ -232,6 +234,43 @@ const fusion = readJson('research/decomp/data/fusion-pairs-802d352c.json')
 const fusionFamilyCount = fusion.families ? Object.keys(fusion.families).length : 0
 const fusionPairCount = fusion.pairTable?.entries ? fusion.pairTable.entries.length : 0
 const fusionNonNull = fusion.pairTable?.nonNullFamilies ?? 0
+const spawnIdToPlId = (spawnId) => `pl${Number(spawnId).toString(16).padStart(4, '0')}`
+const borgNameById = new Map(borgs.map((b) => [b.id, b.name]))
+const spawnRows = (spawnPools.groups || []).map((group) => {
+  const plIds = (group.ids || []).map(spawnIdToPlId)
+  const familySet = new Set((group.ids_family_variant || []).map(([family]) => family))
+  return {
+    group: group.group,
+    ptr: group.ptr,
+    count: plIds.length,
+    families: [...familySet].sort((a, b) => a - b).join(', '),
+    borgs: plIds.map((id) => borgNameById.get(id) ? `${id} ${borgNameById.get(id)}` : id).join(', '),
+    ids: plIds.join(', ')
+  }
+})
+const fusionRows = Object.values(fusion.families || {}).flatMap((family) =>
+  (family.variants || []).flatMap((variant) =>
+    (variant.pairs || []).map((pair) => {
+      const baseId = `pl${family.familyByte.toString(16).padStart(2, '0')}${variant.variant.toString(16).padStart(2, '0')}`
+      return {
+        family: family.familyByte,
+        variant: variant.variant,
+        base: borgNameById.get(baseId) ? `${baseId} ${borgNameById.get(baseId)}` : baseId,
+        partner: borgNameById.get(pair.partner.plId) ? `${pair.partner.plId} ${borgNameById.get(pair.partner.plId)}` : pair.partner.plId,
+        result: borgNameById.get(pair.result.plId) ? `${pair.result.plId} ${borgNameById.get(pair.result.plId)}` : pair.result.plId,
+        pairCount: variant.pairCount,
+        ptr: variant.subListPtr
+      }
+    })
+  )
+)
+const fusionFamilyRows = Object.values(fusion.families || {}).map((family) => ({
+  family: family.familyByte,
+  listPtr: family.listPtr,
+  variants: family.nonNullVariantCount,
+  pairs: (family.variants || []).reduce((sum, variant) => sum + (variant.pairCount || 0), 0),
+  listWords: family.listWordCount
+}))
 
 writeJson('force.json', {
   spawnPools: {
@@ -239,19 +278,105 @@ writeJson('force.json', {
     groupCount: spawnPools.count,
     description: spawnPools.description?.slice(0, 200)
   },
+  spawnRows,
   fusion: {
     address: fusion.provenance?.romConstant ?? '0x802d352c',
     familyCount: fusionFamilyCount,
-    pairCount: fusionPairCount,
+    pairCount: fusionRows.length || fusionPairCount,
     nonNullFamilies: fusionNonNull,
     unknownIds: Array.isArray(fusion.unknownIds) ? fusion.unknownIds.length : 0,
     provenance: fusion.provenance
   },
+  fusionRows,
+  fusionFamilyRows,
   colorVariants: ['normal', 'alt', 'gold', 'silver', 'crystal', 'black'],
   source: [
     'research/decomp/data/spawn-pools-80380804.json',
     'research/decomp/data/fusion-pairs-802d352c.json'
   ]
+})
+
+// ---------------------------------------------------------------------------
+// weapon-atlas.json — slim attachment/effect/projectile evidence for the atlas.
+// ---------------------------------------------------------------------------
+const weaponAttachmentMap = readJson('research/asset-inventory/weapon-attachment-map.json')
+const weaponEffectsProjectiles = readJson('research/asset-inventory/weapons-effects-projectiles.json')
+const confidenceRank = { High: 3, Medium: 2, Low: 1 }
+const weaponFamilyRows = Object.entries(weaponAttachmentMap.families || {}).map(([family, value]) => ({
+  family,
+  label: value.label || family,
+  borgCount: value.borgCount || 0,
+  sharedAssets: (value.sharedAssets || []).length,
+  topTribes: (value.byTribe || [])
+    .slice(0, 4)
+    .map((entry) => `${entry.tribe} (${entry.borgCount})`)
+    .join(', '),
+  sampleBorgs: (value.byTribe || [])
+    .flatMap((entry) => entry.borgs || [])
+    .slice(0, 8)
+    .map((borg) => `${borg.id} ${borg.name}`)
+    .join(', ')
+}))
+const weaponBorgRows = (weaponAttachmentMap.borgs || []).map((borg) => {
+  const families = Object.entries(borg.families || {})
+  const bestConfidence = families
+    .map(([, value]) => value.confidence || 'Low')
+    .sort((a, b) => (confidenceRank[b] || 0) - (confidenceRank[a] || 0))[0] || 'Low'
+  const evidenceCount = families.reduce((sum, [, value]) => sum + (value.evidenceCount || 0), 0)
+  return {
+    id: borg.id,
+    name: borg.name,
+    number: borg.number,
+    tribe: borg.tribe,
+    type: borg.type,
+    rarity: borg.stats?.rarity || '',
+    energy: borg.stats?.energy || '',
+    families: families.map(([family]) => family),
+    familyList: families.map(([family]) => family).join(', '),
+    confidence: bestConfidence,
+    evidenceCount,
+    archiveCount: (borg.archiveNames || []).length,
+    attachmentCandidates: (borg.itemAttachmentCandidates || []).length,
+    boneCandidates: (borg.attachmentBoneCandidates || []).length,
+    attackClipCandidates: borg.mot?.attackClipCandidateCount || 0,
+    runtimeTraceNeeded: Boolean(borg.runtimeTraceNeeded),
+    runtimeTraceReasons: (borg.runtimeTraceReasons || []).join('; ')
+  }
+})
+const sharedWeaponAssets = (weaponAttachmentMap.sharedAssets || []).slice(0, 80).map((asset) => ({
+  path: asset.path,
+  role: asset.role || (asset.roles || []).join(', '),
+  families: (asset.families || []).join(', '),
+  confidence: asset.confidence || 'Unknown',
+  sizeBytes: asset.sizeBytes || 0,
+  reason: asset.reason || (asset.reasons || [])[0] || ''
+}))
+writeJson('weapon-atlas.json', {
+  source: [
+    'research/asset-inventory/weapon-attachment-map.json',
+    'research/asset-inventory/weapons-effects-projectiles.json',
+    'research/asset-inventory/particle-effect-inventory.json',
+    'research/asset-inventory/pzz-member-extraction-manifest.json'
+  ],
+  summary: {
+    mappedBorgCount: weaponAttachmentMap.summary?.mappedBorgCount || 0,
+    sharedAssetCount: weaponAttachmentMap.summary?.sharedAssetCount || 0,
+    familyBorgCounts: weaponAttachmentMap.summary?.familyBorgCounts || {},
+    borgsWithDaeAttachmentCandidates: weaponAttachmentMap.summary?.borgsWithDaeAttachmentCandidates || 0,
+    runtimeTraceAttackClipCount: weaponAttachmentMap.summary?.runtimeTraceAttackClipCount || 0,
+    sourceEvidenceCount: weaponAttachmentMap.summary?.sourceEvidenceCount || 0,
+    candidateCount: weaponEffectsProjectiles.summary?.candidateCount || 0,
+    textureCount: weaponEffectsProjectiles.summary?.textureCount || 0,
+    archiveLikeFileCount: weaponEffectsProjectiles.archiveInventory?.archiveLikeFileCount || 0
+  },
+  families: weaponFamilyRows,
+  borgs: weaponBorgRows,
+  sharedAssets: sharedWeaponAssets,
+  needs: (weaponEffectsProjectiles.needsExtractionConversion || []).map((need) => ({
+    need: need.need,
+    candidateCount: need.candidateCount,
+    examples: (need.examples || []).slice(0, 5).join(', ')
+  }))
 })
 
 // ---------------------------------------------------------------------------
@@ -301,6 +426,82 @@ writeJson('evidence.json', {
     'research/decomp/data/*.json',
     'research/traces/GG4E/dolphin-gdb-trace-results.md'
   ]
+})
+
+// ---------------------------------------------------------------------------
+// mode-atlas.json — top-level game modes and their evidence hooks.
+// ---------------------------------------------------------------------------
+const modeRows = [
+  {
+    id: 'story',
+    name: 'Story / Adventure',
+    status: 'likely',
+    route: '/modes/story',
+    functions: (t['challenge-menu-flow'] || 0) + (t['force-setup'] || 0),
+    source: 'research/asset-inventory/adventure-flow-ai.json',
+    notes: 'Chapters, mission flow, recruits, partner/enemy force setup.'
+  },
+  {
+    id: 'challenge',
+    name: 'Challenge',
+    status: 'observed',
+    route: '/modes/challenge',
+    functions: (t['challenge-menu-flow'] || 0) + (t['battle-initialization'] || 0),
+    source: 'research/decomp/challenge-stage-naming-2026-07-05.md',
+    notes: 'Stage byte names, spawn pools, battle setup, challenge rotation.'
+  },
+  {
+    id: 'versus',
+    name: 'Versus',
+    status: 'likely',
+    route: '/modes/versus',
+    functions: t['battle-initialization'] || 0,
+    source: 'research/decomp/index/start-code-flow.md',
+    notes: 'Local multiplayer battle setup and quadrant HUD flow.'
+  },
+  {
+    id: 'coop',
+    name: 'Co-op',
+    status: 'likely',
+    route: '/modes/versus',
+    functions: t['battle-initialization'] || 0,
+    source: 'research/decomp/behavior-notes.md',
+    notes: 'Partner AI and cooperative force setup still need deeper traces.'
+  },
+  {
+    id: 'attract',
+    name: 'Attract Demo',
+    status: 'verified',
+    route: '/modes/attract',
+    functions: t['front-end-menu'] || 0,
+    source: 'research/decomp/index/title-main-menu-flow.md',
+    notes: 'Demo flow and stage pool identified in menu/title decode.'
+  },
+  {
+    id: 'title',
+    name: 'Title / Menu',
+    status: 'verified',
+    route: '/modes/',
+    functions: (t['front-end-menu'] || 0) + (t['global-menu-mode'] || 0),
+    source: 'research/decomp/index/title-main-menu-flow.md',
+    notes: 'Top-level dispatcher, title screen widgets, transition resources.'
+  }
+]
+writeJson('mode-atlas.json', {
+  source: [
+    'research/decomp/index/title-main-menu-flow.md',
+    'research/decomp/index/start-code-flow.md',
+    'research/asset-inventory/adventure-flow-ai.json',
+    'research/decomp/challenge-stage-naming-2026-07-05.md'
+  ],
+  summary: {
+    modes: modeRows.length,
+    verified: modeRows.filter((mode) => mode.status === 'verified').length,
+    observed: modeRows.filter((mode) => mode.status === 'observed').length,
+    likely: modeRows.filter((mode) => mode.status === 'likely').length,
+    relatedFunctions: modeRows.reduce((sum, mode) => sum + mode.functions, 0)
+  },
+  modes: modeRows
 })
 
 // ---------------------------------------------------------------------------
@@ -425,6 +626,64 @@ writeJson('stages.json', {
 })
 
 // ---------------------------------------------------------------------------
+// stage-atlas.json — joins named arenas to export, collision, and render-state evidence.
+// ---------------------------------------------------------------------------
+const stageExportPlan = readJson('research/asset-inventory/stage-export-plan.json')
+const stageLighting = readJson('research/asset-inventory/stage-lighting-render-state.json')
+const namedByArchive = new Map()
+for (const stage of stages) {
+  for (const archive of String(stage.archive || '').split('/')) {
+    namedByArchive.set(archive.trim(), stage)
+  }
+}
+const lightingById = new Map((stageLighting.stages || []).map((stage) => [stage.stageId, stage]))
+const stageAtlasRows = (stageExportPlan.stages || []).map((stage) => {
+  const named = namedByArchive.get(stage.id) || null
+  const lighting = lightingById.get(stage.id) || {}
+  const visual = stage.public?.visual || {}
+  const collision = stage.source?.collision || {}
+  const sets = stage.source?.sets || {}
+  const materials = lighting.exportedMaterialState || {}
+  return {
+    id: stage.id,
+    code: stage.code,
+    arena: named?.name || 'unmapped stage export',
+    challengeByte: named?.id || '',
+    archiveGroup: named?.archive || stage.id,
+    inChallengePool: Boolean(named?.inChallengePool),
+    status: visual.hasCompleteDaeExport && collision.hasHitFiles ? 'verified' : visual.hasCompleteDaeExport ? 'observed' : 'unknown',
+    visualPieces: visual.daeCount || materials.daeFileCount || 0,
+    nonEmptyPieces: visual.nonEmptyDaeCount || 0,
+    collisionFiles: (collision.files || []).length,
+    completeCollisionTriplet: Boolean(collision.hasCompleteHitTriplet),
+    setArcs: (sets.files || []).length,
+    jobjCount: lighting.scene?.jobjDescCount || 0,
+    pobjCount: lighting.drawState?.pobjCount || 0,
+    materialCount: materials.materialCount || 0,
+    stageArcBytes: stage.source?.stageArc?.bytes || 0,
+    pzzBytes: stage.source?.stagePzz?.bytes || 0,
+    sourcePath: stage.source?.stageArc?.path || ''
+  }
+})
+writeJson('stage-atlas.json', {
+  source: [
+    'research/decomp/challenge-stage-naming-2026-07-05.md',
+    'research/asset-inventory/stage-export-plan.json',
+    'research/asset-inventory/stage-lighting-render-state.json',
+    'research/asset-inventory/stage-geometry-collision.json'
+  ],
+  summary: {
+    namedArenas: stages.length,
+    challengePoolCount: stages.filter((s) => s.inChallengePool).length,
+    exportStageCount: stageAtlasRows.length,
+    visualStageCount: stageExportPlan.summary?.verifiedVisualStageCount || 0,
+    collisionStageCount: stageExportPlan.summary?.exportedCollisionHitStageCount || 0,
+    setArcStageCount: stageExportPlan.summary?.sourceAnySetArcCount || 0
+  },
+  rows: stageAtlasRows
+})
+
+// ---------------------------------------------------------------------------
 // functions.json — slim function index for the Function Explorer.
 // Omits callers/callees arrays (kept in the full index) to keep this ~2 MB.
 // ---------------------------------------------------------------------------
@@ -494,9 +753,118 @@ writeJson('functions-graph.json', {
 })
 
 // ---------------------------------------------------------------------------
+// ghidra-corpus.json — first-class metadata for the full Ghidra/OGhidra corpus.
+// ---------------------------------------------------------------------------
+const ghidraExportFiles = readdirSync(GHIDRA_EXPORT_DIR)
+const chunkFiles = ghidraExportFiles.filter((f) => /^chunk_\d+\.c$/.test(f)).sort()
+const ghidraIndexRows = readFileSync(join(GHIDRA_EXPORT_DIR, '_index.tsv'), 'utf8')
+  .trim()
+  .split(/\r?\n/)
+  .filter(Boolean)
+
+const topicRows = Object.entries(fnIdx.topicCounts)
+  .map(([topic, count]) => ({
+    topic,
+    functions: count,
+    pct: `${Math.round((count / fnIdx.source.functionCount) * 1000) / 10}%`
+  }))
+  .sort((a, b) => b.functions - a.functions)
+
+const anchorFunctions = allFns
+  .filter((f) => (f.topics || []).length)
+  .sort((a, b) => (b.callers || []).length - (a.callers || []).length)
+  .slice(0, 16)
+  .map((f) => ({
+    address: f.address,
+    name: f.currentFunctionName || f.symbolMapName || f.inferredName || f.address,
+    topics: (f.topics || []).join(', '),
+    callers: (f.callers || []).length,
+    callees: (f.callees || []).length,
+    source: f.sourceRef || ''
+  }))
+
+const sessions = []
+const uniqueAnalyzed = new Set()
+if (existsSync(OGHIDRA_SESSIONS_DIR)) {
+  for (const dirent of readdirSync(OGHIDRA_SESSIONS_DIR, { withFileTypes: true })) {
+    if (!dirent.isDirectory()) continue
+    const sessionPath = join(OGHIDRA_SESSIONS_DIR, dirent.name, 'session.json')
+    if (!existsSync(sessionPath)) continue
+
+    let parsed = null
+    try {
+      parsed = JSON.parse(readFileSync(sessionPath, 'utf8'))
+    } catch {
+      continue
+    }
+
+    const metadata = parsed.metadata || {}
+    const analyzed = parsed.analyzed_functions || {}
+    const analyzedAddresses = Object.keys(analyzed)
+    for (const address of analyzedAddresses) uniqueAnalyzed.add(address)
+
+    sessions.push({
+      id: metadata.session_id || dirent.name,
+      name: metadata.session_name || dirent.name,
+      createdAt: metadata.created_at || '',
+      lastModified: metadata.last_modified || '',
+      totalFunctions: metadata.total_functions || 0,
+      analyzedFunctions: metadata.analyzed_functions_count || analyzedAddresses.length,
+      actualAnalyzedFunctions: analyzedAddresses.length,
+      analysisLogEntries: Array.isArray(parsed.analysis_log) ? parsed.analysis_log.length : 0,
+      path: `research/tools/OGhidra/analysis_sessions/${dirent.name}/session.json`
+    })
+  }
+}
+sessions.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+
+const sessionFunctionRecords = sessions.reduce((sum, session) => sum + session.actualAnalyzedFunctions, 0)
+const latestSession = sessions[sessions.length - 1] || null
+const largestSession = sessions.slice().sort((a, b) => b.actualAnalyzedFunctions - a.actualAnalyzedFunctions)[0] || null
+
+writeJson('ghidra-corpus.json', {
+  source: [
+    'research/decomp/GotchaForce.gpr',
+    'research/decomp/GotchaForce.rep/',
+    'research/decomp/ghidra-export/',
+    'research/decomp/index/function-evidence-index.json',
+    'research/tools/OGhidra/analysis_sessions/',
+    'research/decomp/oghidra-first-pass-port-findings-2026-07-12.md'
+  ],
+  project: {
+    ghidraProject: 'research/decomp/GotchaForce.gpr',
+    ghidraRepository: 'research/decomp/GotchaForce.rep/',
+    bootDol: 'user-data/GG4E/disc/sys/boot.dol',
+    symbolMap: 'GG4E-CSM-20220412.map',
+    ghidraVersion: 'Ghidra 12.1.2',
+    exportDir: fnIdx.source.ghidraExportDir,
+    exportIndex: fnIdx.source.indexFile,
+    exportReadme: 'research/decomp/ghidra-export/README.md'
+  },
+  metrics: {
+    functionCount: fnIdx.source.functionCount,
+    chunkCount: chunkFiles.length,
+    indexRows: ghidraIndexRows.length,
+    sessionCount: sessions.length,
+    sessionFunctionRecords,
+    uniqueAnalyzedFunctions: uniqueAnalyzed.size,
+    uniqueAnalyzedPct: fnIdx.source.functionCount
+      ? Math.round((uniqueAnalyzed.size / fnIdx.source.functionCount) * 1000) / 10
+      : 0,
+    latestSessionId: latestSession?.id || '',
+    latestSessionAt: latestSession?.createdAt || '',
+    largestSessionId: largestSession?.id || '',
+    largestSessionFunctions: largestSession?.actualAnalyzedFunctions || 0
+  },
+  topicRows,
+  anchorFunctions,
+  sessions: sessions.slice().reverse()
+})
+
+// ---------------------------------------------------------------------------
 // Copy chunk_NNNN.c files to public/chunks/ for on-demand source fetch.
 // ---------------------------------------------------------------------------
-const chunkSrcDir = join(RESEARCH, 'decomp', 'ghidra-export')
+const chunkSrcDir = GHIDRA_EXPORT_DIR
 const chunkDstDir = join(PUBLIC_DIR, 'chunks')
 if (!existsSync(chunkDstDir)) mkdirSync(chunkDstDir, { recursive: true })
 let chunkCount = 0

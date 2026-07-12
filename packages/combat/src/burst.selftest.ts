@@ -19,7 +19,7 @@ import {
   sweepBurstCharged,
   tryActivateBurst,
 } from "./burst.js";
-import { createBattle } from "./battle.js";
+import { battleStateForSelfcheck, createBattle } from "./battle.js";
 import { applyHit } from "./combat.js";
 import { BURST } from "./constants.js";
 import { DAMAGE_RECORD_INDEX, damageRecordByIndex } from "./gauges.js";
@@ -247,9 +247,10 @@ function testBattleStepActivatesAndDrainsBurst(): void {
     },
     stats,
   );
-  const playerUid = battle.state.activeUidByPlayer["p1"];
-  const player = battle.state.borgs.find((b) => b.uid === playerUid);
-  const meter = battle.state.burstMeterByPlayer["p1"];
+  const mutable = battleStateForSelfcheck(battle);
+  const playerUid = mutable.activeUidByPlayer["p1"];
+  const player = mutable.borgs.find((b) => b.uid === playerUid);
+  const meter = mutable.burstMeterByPlayer["p1"];
   if (!player || !meter) {
     assertTrue(false, "test battle creates a player borg and meter");
     return;

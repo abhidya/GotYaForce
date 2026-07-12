@@ -19,6 +19,10 @@ The curate step also copies extracted Borg model and animation assets from
 render the real GLB and baked animation clips. For text/data-only local work, run
 with `GF_ATLAS_SKIP_MODELS=1` to skip that heavier asset copy.
 
+The build step runs a second explicit sync from `docs-site/public/models` into
+`.vitepress/dist/models`. This catches large generated model folders that
+VitePress may not copy through the normal public-asset path.
+
 ## Build
 
 ```bash

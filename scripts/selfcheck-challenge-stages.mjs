@@ -45,19 +45,19 @@ for (const stageId of officialChallengeStageIds) {
   );
 
   let firstEnergyChangeFrame = -1;
-  const startEnergy = { ...battle.state.energy };
-  for (let frame = 0; frame < FRAMES_PER_STAGE && battle.state.result === "ongoing"; frame += 1) {
+  const startEnergy = { ...battle.observe().energy };
+  for (let frame = 0; frame < FRAMES_PER_STAGE && battle.observe().result === "ongoing"; frame += 1) {
     battle.step(1 / 60, { p0: playerInput(battle) });
     assertSaneStage(stageId, stage, battle, frame);
-    if (firstEnergyChangeFrame < 0 && energyChanged(startEnergy, battle.state.energy)) {
+    if (firstEnergyChangeFrame < 0 && energyChanged(startEnergy, battle.observe().energy)) {
       firstEnergyChangeFrame = frame;
     }
   }
   summaries.push({
     stageId,
     triangles: stage.collision.triangles.length,
-    frames: battle.state.frame,
-    result: battle.state.result,
+    frames: battle.observe().frame,
+    result: battle.observe().result,
     firstEnergyChangeFrame,
   });
 }
@@ -93,11 +93,11 @@ for (const stageId of ["st2c", "st4c"]) {
     },
     borgs,
   );
-  for (let frame = 0; frame < 120 && battle.state.result === "ongoing"; frame += 1) {
+  for (let frame = 0; frame < 120 && battle.observe().result === "ongoing"; frame += 1) {
     battle.step(1 / 60, { p0: playerInput(battle) });
     assertSaneStage(stageId, stage, battle, frame);
   }
-  familyVariantSummaries.push({ stageId, triangles: stage.collision.triangles.length, frames: battle.state.frame });
+  familyVariantSummaries.push({ stageId, triangles: stage.collision.triangles.length, frames: battle.observe().frame });
 }
 console.log(
   `Challenge stage FAMILY VARIANT smoke PASS ` +
@@ -122,8 +122,8 @@ if (arenaNameForStageId("st2c") !== arenaNameForStageByte(0x0c) || arenaNameForS
 console.log(`Challenge arena name coverage PASS names=${Object.keys(STAGE_ARENA_NAMES).length} pool=${CHALLENGE_STAGE_BYTES.length}`);
 
 function playerInput(battle) {
-  const activeUid = battle.state.activeUidByPlayer.p0;
-  const self = battle.state.borgs.find((borg) => borg.uid === activeUid);
+  const activeUid = battle.observe().activeUidByPlayer.p0;
+  const self = battle.observe().actors.find((borg) => borg.uid === activeUid);
   if (!self) return emptyInput();
   const target = nearestEnemy(battle, self);
   if (!target) return emptyInput();
@@ -144,7 +144,7 @@ function playerInput(battle) {
 function nearestEnemy(battle, self) {
   let best = null;
   let bestD = Infinity;
-  for (const other of battle.state.borgs) {
+  for (const other of battle.observe().actors) {
     if (!other.alive || other.team === self.team) continue;
     const d = Math.hypot(other.pos.x - self.pos.x, other.pos.z - self.pos.z);
     if (d < bestD) {
@@ -156,7 +156,7 @@ function nearestEnemy(battle, self) {
 }
 
 function assertSaneStage(stageId, stage, battle, frame) {
-  for (const borg of battle.state.borgs) {
+  for (const borg of battle.observe().actors) {
     if (!Number.isFinite(borg.hp)) throw new Error(`${stageId}: NaN hp on ${borg.uid} at frame ${frame}`);
     for (const key of ["x", "y", "z"]) {
       if (!Number.isFinite(borg.pos[key])) throw new Error(`${stageId}: NaN pos.${key} on ${borg.uid} at frame ${frame}`);
@@ -167,7 +167,7 @@ function assertSaneStage(stageId, stage, battle, frame) {
       throw new Error(`${stageId}: ${borg.uid} left supported floor at frame ${frame} pos=${JSON.stringify(borg.pos)}`);
     }
   }
-  for (const value of Object.values(battle.state.energy)) {
+  for (const value of Object.values(battle.observe().energy)) {
     if (!Number.isFinite(value)) throw new Error(`${stageId}: NaN team energy at frame ${frame}`);
   }
 }

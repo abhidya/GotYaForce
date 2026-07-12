@@ -14,7 +14,7 @@ import { distXZ, isFiniteVec, yAtTriangleXZ } from "@gf/physics";
 
 import { actorDataCombatStatsForBorgId, actorDataCombatStatsSummary } from "./actorDataStats.js";
 import { borgSourceStatsSummary, sourceStatsForBorgId } from "./sourceBorgStats.js";
-import { createBattle, HUSK_BORG_ID } from "./battle.js";
+import { battleStateForSelfcheck, createBattle, HUSK_BORG_ID } from "./battle.js";
 import { stepAI } from "./ai.js";
 import { actionProfileForProfile, startingAmmoForProfile } from "./actionProfiles.js";
 import {
@@ -81,7 +81,7 @@ import {
   applyActorParamTierDelta63,
   resetActorParamTier,
 } from "./paramTier.js";
-import { emptyInput, type BorgRuntime, type PlayerInput, type Projectile, type StageCollision, type StageCollisionTriangle } from "./types.js";
+import { emptyInput, type BattleActorObservation, type BorgRuntime, type PlayerInput, type Projectile, type StageCollision, type StageCollisionTriangle } from "./types.js";
 import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import { typeCategoryForBorgId, typeDamageMultiplier } from "./typeDamage.js";
 import { computeSourceDamage, forceGaugeRatioIndex } from "./damageFormula.js";
@@ -114,7 +114,7 @@ function loadBorgs(): BorgStats[] {
   throw new Error("selfcheck: could not locate borgs.json");
 }
 
-function assertSane(borgs: BorgRuntime[], frame: number): void {
+function assertSane(borgs: readonly BattleActorObservation[], frame: number): void {
   for (const b of borgs) {
     if (!Number.isFinite(b.hp)) throw new Error(`NaN hp on ${b.uid} @frame ${frame}`);
     if (!Number.isFinite(b.rotY)) throw new Error(`NaN rotY on ${b.uid} @frame ${frame}`);
@@ -140,10 +140,10 @@ function assertRectBoundsClamp(borgs: BorgStats[]): void {
   const moveRight: PlayerInput = { ...emptyInput(), moveX: 1 };
   for (let f = 0; f < 90; f += 1) {
     battle.step(1 / 60, { p1: moveRight, p2: emptyInput() });
-    assertSane(battle.state.borgs, f);
+    assertSane(battle.observe().actors, f);
   }
-  const activeUid = battle.state.activeUidByPlayer["p1"];
-  const active = battle.state.borgs.find((b) => b.uid === activeUid);
+  const activeUid = battle.observe().activeUidByPlayer["p1"];
+  const active = battle.observe().actors.find((b) => b.uid === activeUid);
   if (!active) throw new Error("[selfcheck] rectangular bounds test lost active p1 borg");
   if (active.pos.x > bounds.maxX || active.pos.x < bounds.minX) {
     throw new Error(`[selfcheck] rectangular bounds clamp failed: x=${active.pos.x}`);
@@ -233,10 +233,10 @@ function assertCpuEnemyCannotWalkOffDisconnectedStage(borgs: BorgStats[]): void 
 
   for (let f = 0; f < 180; f += 1) {
     battle.step(1 / 60, { p1: emptyInput() });
-    assertSane(battle.state.borgs, f);
+    assertSane(battle.observe().actors, f);
   }
 
-  const enemy = battle.state.borgs.find((b) => b.team === 1);
+  const enemy = battle.observe().actors.find((b) => b.team === 1);
   if (!enemy) throw new Error("[selfcheck] CPU offstage regression lost enemy borg");
   if (enemy.pos.x < 20 || !hasSupportedFloorAt(collision, enemy.pos.x, enemy.pos.z, enemy.pos.y)) {
     throw new Error(`[selfcheck] CPU enemy walked off disconnected stage: pos=${JSON.stringify(enemy.pos)}`);
@@ -270,7 +270,7 @@ function assertCollisionSpawnUsesPlayableFloor(borgs: BorgStats[]): void {
     },
     borgs,
   );
-  const p1 = battle.state.borgs.find((b) => b.uid === battle.state.activeUidByPlayer["p1"]);
+  const p1 = battle.observe().actors.find((b) => b.uid === battle.observe().activeUidByPlayer["p1"]);
   if (!p1) throw new Error("[selfcheck] collision spawn test lost active p1 borg");
   if (Math.abs(p1.pos.x) > 1 || Math.abs(p1.pos.z) > 400 || Math.abs(p1.pos.y - 30) > 0.001) {
     throw new Error(`[selfcheck] collision spawn used broad bounds edge: pos=${JSON.stringify(p1.pos)}`);
@@ -297,8 +297,8 @@ function assertExactSpawnPointsOverrideRadialSpawn(borgs: BorgStats[]): void {
     },
     borgs,
   );
-  const p1 = battle.state.borgs.find((b) => b.uid === battle.state.activeUidByPlayer["p1"]);
-  const enemy = battle.state.borgs.find((b) => b.team === 1);
+  const p1 = battle.observe().actors.find((b) => b.uid === battle.observe().activeUidByPlayer["p1"]);
+  const enemy = battle.observe().actors.find((b) => b.team === 1);
   if (!p1 || !enemy) throw new Error("[selfcheck] exact spawn test lost active borgs");
   if (
     Math.abs(p1.pos.x - playerSpawn.pos.x) > 0.001 ||
@@ -344,7 +344,7 @@ function assertDisconnectedSpawnRepairsUnsupportedCenter(borgs: BorgStats[]): vo
     },
     borgs,
   );
-  const p1 = battle.state.borgs.find((b) => b.uid === battle.state.activeUidByPlayer["p1"]);
+  const p1 = battle.observe().actors.find((b) => b.uid === battle.observe().activeUidByPlayer["p1"]);
   if (!p1) throw new Error("[selfcheck] disconnected spawn test lost active p1 borg");
   if (Math.abs(p1.pos.x) < 700 || Math.abs(p1.pos.y - 30) > 0.001) {
     throw new Error(`[selfcheck] disconnected spawn fell back to unsupported center: pos=${JSON.stringify(p1.pos)}`);
@@ -500,13 +500,13 @@ function assertPlayersAutoLockByDefault(borgs: BorgStats[]): void {
     borgs,
   );
   battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
-  const activeUid = battle.state.activeUidByPlayer["p1"];
-  const active = battle.state.borgs.find((b) => b.uid === activeUid);
+  const activeUid = battle.observe().activeUidByPlayer["p1"];
+  const active = battle.observe().actors.find((b) => b.uid === activeUid);
   if (!active) throw new Error("[selfcheck] auto-lock test lost active p1 borg");
   if (!active.lockTarget) {
     throw new Error("[selfcheck] human-controlled borg did not auto-acquire a default lock target");
   }
-  const target = battle.state.borgs.find((b) => b.uid === active.lockTarget);
+  const target = battle.observe().actors.find((b) => b.uid === active.lockTarget);
   if (!target || target.team === active.team) {
     throw new Error("[selfcheck] human-controlled borg auto-locked an invalid target");
   }
@@ -575,13 +575,13 @@ function assertSourceSwitchLockDirections(borgs: BorgStats[]): void {
     borgs,
   );
 
-  const activeUid = battle.state.activeUidByPlayer["p1"];
+  const activeUid = battle.observe().activeUidByPlayer["p1"];
   const active = () => {
-    const b = battle.state.borgs.find((candidate) => candidate.uid === activeUid);
+    const b = battle.observe().actors.find((candidate) => candidate.uid === activeUid);
     if (!b) throw new Error("[selfcheck] switch-lock direction test lost active p1 borg");
     return b;
   };
-  const enemies = battle.state.borgs.filter((b) => b.team === 1).map((b) => b.uid);
+  const enemies = battle.observe().actors.filter((b) => b.team === 1).map((b) => b.uid);
   if (enemies.length !== 3) throw new Error("[selfcheck] switch-lock direction test expected 3 enemies");
   if (active().lockTarget !== enemies[0] || active().targetLockState?.enemyIndex !== 0) {
     throw new Error(`[selfcheck] switch-lock initial target/index mismatch: ${JSON.stringify(active().targetLockState)}`);
@@ -617,11 +617,11 @@ function assertAllyLockTargetsTeammate(borgs: BorgStats[]): void {
     borgs,
   );
   battle.step(1 / 60, { p1: { ...emptyInput(), allyLock: true }, p2: emptyInput() });
-  const activeUid = battle.state.activeUidByPlayer["p1"];
-  const active = battle.state.borgs.find((b) => b.uid === activeUid);
+  const activeUid = battle.observe().activeUidByPlayer["p1"];
+  const active = battle.observe().actors.find((b) => b.uid === activeUid);
   if (!active) throw new Error("[selfcheck] ally-lock test lost active p1 borg");
-  const ally = active.allyLockTarget ? battle.state.borgs.find((b) => b.uid === active.allyLockTarget) : null;
-  const enemy = active.lockTarget ? battle.state.borgs.find((b) => b.uid === active.lockTarget) : null;
+  const ally = active.allyLockTarget ? battle.observe().actors.find((b) => b.uid === active.allyLockTarget) : null;
+  const enemy = active.lockTarget ? battle.observe().actors.find((b) => b.uid === active.lockTarget) : null;
   const retainedEnemyUid = active.lockTarget;
   const retainedAllyUid = active.allyLockTarget;
   if (!ally || ally.team !== active.team || ally.uid === active.uid) {
@@ -644,7 +644,7 @@ function assertAllyLockTargetsTeammate(borgs: BorgStats[]): void {
   }
 
   battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
-  const afterRelease = battle.state.borgs.find((b) => b.uid === activeUid);
+  const afterRelease = battle.observe().actors.find((b) => b.uid === activeUid);
   if (!afterRelease) throw new Error("[selfcheck] ally-lock release test lost active p1 borg");
   if (
     afterRelease.lockTarget !== retainedEnemyUid ||
@@ -865,10 +865,10 @@ function assertProjectileVisualKinds(borgs: BorgStats[]): void {
   );
   for (let f = 0; f < STATE.SPAWN_DURATION; f += 1) {
     battle.step(1 / 60, { p1: emptyInput(), p2: emptyInput() });
-    assertSane(battle.state.borgs, f);
+    assertSane(battle.observe().actors, f);
   }
   battle.step(1 / 60, { p1: { ...emptyInput(), attack: true }, p2: emptyInput() });
-  const projectile = battle.state.projectiles[0];
+  const projectile = battle.observe().projectiles[0];
   if (!projectile) throw new Error("[selfcheck] Gatling Gunner did not spawn a projectile");
   if (projectile.visualKind !== "muzzle") {
     throw new Error(`[selfcheck] spawned Gatling Gunner projectile visualKind=${projectile.visualKind}`);
@@ -2551,12 +2551,12 @@ function assertFrozenBattleTimerNeverExpires(borgs: BorgStats[]): void {
 
   const frozen = mk(true);
   for (let f = 0; f < 90; f++) frozen.step(1 / 60, idleInputs);
-  if (frozen.state.result === "draw") {
+  if (frozen.observe().result === "draw") {
     throw new Error("[selfcheck] frozen battle timer expired: Challenge-style timer must never time out");
   }
-  if (frozen.state.timeRemainingFrames !== 30) {
+  if (frozen.observe().timeRemainingFrames !== 30) {
     throw new Error(
-      `[selfcheck] frozen battle timer ticked: timeRemainingFrames=${frozen.state.timeRemainingFrames}, want 30`,
+      `[selfcheck] frozen battle timer ticked: timeRemainingFrames=${frozen.observe().timeRemainingFrames}, want 30`,
     );
   }
 
@@ -2564,7 +2564,7 @@ function assertFrozenBattleTimerNeverExpires(borgs: BorgStats[]): void {
   let drawFrame = -1;
   for (let f = 0; f < 90; f++) {
     running.step(1 / 60, idleInputs);
-    if (running.state.result === "draw") {
+    if (running.observe().result === "draw") {
       drawFrame = f;
       break;
     }
@@ -2593,8 +2593,8 @@ function assertSpawnDeployLockDuration(borgs: BorgStats[]): void {
     },
     borgs,
   );
-  const activeUid = battle.state.activeUidByPlayer["p1"];
-  const activeNow = () => battle.state.borgs.find((b) => b.uid === activeUid);
+  const activeUid = battle.observe().activeUidByPlayer["p1"];
+  const activeNow = () => battleStateForSelfcheck(battle).borgs.find((b) => b.uid === activeUid);
   if (!activeNow()) throw new Error("[selfcheck] spawn duration test lost p1 borg");
   const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
 
@@ -2662,9 +2662,9 @@ function assertDeathAccountingAtKillEvent(borgs: BorgStats[]): void {
     },
     borgs,
   );
-  const enemy = battle.state.borgs.find((b) => b.team === 1 && b.borgId === firstEnemyId);
+  const enemy = battleStateForSelfcheck(battle).borgs.find((b) => b.team === 1 && b.borgId === firstEnemyId);
   if (!enemy) throw new Error("[selfcheck] death accounting test lost first enemy");
-  const startEnergy = battle.state.energy[1] ?? 0;
+  const startEnergy = battle.observe().energy[1] ?? 0;
   const expectedStart = firstEnemyProfile.energy + nextEnemyProfile.energy;
   if (startEnergy !== expectedStart) {
     throw new Error(`[selfcheck] unexpected starting enemy energy: ${startEnergy}, want ${expectedStart}`);
@@ -2688,32 +2688,32 @@ function assertDeathAccountingAtKillEvent(borgs: BorgStats[]): void {
 
   const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
   battle.step(1 / 60, idleInputs);
-  if ((battle.state.defeated[1] ?? 0) !== 1 || (battle.state.defeatedEnergy[1] ?? 0) !== firstEnemyProfile.energy) {
+  if ((battle.observe().defeated[1] ?? 0) !== 1 || (battle.observe().defeatedEnergy[1] ?? 0) !== firstEnemyProfile.energy) {
     throw new Error(
-      `[selfcheck] kill-event defeated counters wrong: defeated=${battle.state.defeated[1]}, energy=${battle.state.defeatedEnergy[1]}`,
+      `[selfcheck] kill-event defeated counters wrong: defeated=${battle.observe().defeated[1]}, energy=${battle.observe().defeatedEnergy[1]}`,
     );
   }
-  if ((battle.state.energy[1] ?? 0) !== nextEnemyProfile.energy) {
+  if ((battle.observe().energy[1] ?? 0) !== nextEnemyProfile.energy) {
     throw new Error(
-      `[selfcheck] enemy force energy did not drop at kill event: got ${battle.state.energy[1]}, want queued ${nextEnemyProfile.energy}`,
+      `[selfcheck] enemy force energy did not drop at kill event: got ${battle.observe().energy[1]}, want queued ${nextEnemyProfile.energy}`,
     );
   }
   const enemyStateAfterAccounting = enemy.state as BorgRuntime["state"];
   if (!enemy.alive || !enemy.defeatAccounted || enemyStateAfterAccounting !== "death") {
     throw new Error("[selfcheck] death visual state should remain alive-but-accounted until removal");
   }
-  if (battle.state.borgs.some((b) => b.team === 1 && b.borgId === nextEnemyId)) {
+  if (battle.observe().actors.some((b) => b.team === 1 && b.borgId === nextEnemyId)) {
     throw new Error("[selfcheck] next enemy deployed before death-state removal");
   }
 
   let deployed = false;
   for (let f = 0; f < STATE.DEATH_DURATION + 2; f += 1) {
     battle.step(1 / 60, idleInputs);
-    deployed = battle.state.borgs.some((b) => b.team === 1 && b.borgId === nextEnemyId);
+    deployed = battle.observe().actors.some((b) => b.team === 1 && b.borgId === nextEnemyId);
     if (deployed) break;
   }
   if (!deployed) throw new Error("[selfcheck] queued enemy did not deploy after death timer");
-  if ((battle.state.defeated[1] ?? 0) !== 1 || (battle.state.defeatedEnergy[1] ?? 0) !== firstEnemyProfile.energy) {
+  if ((battle.observe().defeated[1] ?? 0) !== 1 || (battle.observe().defeatedEnergy[1] ?? 0) !== firstEnemyProfile.energy) {
     throw new Error("[selfcheck] death timer double-counted defeated energy");
   }
   console.log("[selfcheck] kill-event force accounting is immediate; queued deploy still waits for death timer");
@@ -2749,7 +2749,7 @@ function assertHuskDeploysOnForceExhaustion(borgs: BorgStats[]): void {
   );
   const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
   const killActive = (uid: string): void => {
-    const b = battle.state.borgs.find((x) => x.uid === uid);
+    const b = battleStateForSelfcheck(battle).borgs.find((x) => x.uid === uid);
     if (!b) throw new Error(`[selfcheck] husk test lost borg ${uid}`);
     b.invincTimer = 0;
     b.state = "idle";
@@ -2764,7 +2764,7 @@ function assertHuskDeploysOnForceExhaustion(borgs: BorgStats[]): void {
     throw new Error(`[selfcheck] husk test timed out waiting for ${label}`);
   };
   const p1Active = (): BorgRuntime | undefined =>
-    battle.state.borgs.find((b) => b.ownerPlayer === "p1" && b.alive && b.hp > 0);
+    battleStateForSelfcheck(battle).borgs.find((b) => b.ownerPlayer === "p1" && b.alive && b.hp > 0);
 
   const first = p1Active();
   if (!first || first.borgId !== "pl0615") throw new Error("[selfcheck] husk test: p1 borg missing at start");
@@ -2777,15 +2777,15 @@ function assertHuskDeploysOnForceExhaustion(borgs: BorgStats[]): void {
   if (husk.hp !== 1 || husk.maxHp !== 1 || husk.ammo !== 1) {
     throw new Error(`[selfcheck] husk stats wrong: hp=${husk.hp}/${husk.maxHp}, ammo=${husk.ammo} (want 1/1, 1)`);
   }
-  if ((battle.state.energy[0] ?? 0) !== gRedProfile.energy) {
+  if ((battle.observe().energy[0] ?? 0) !== gRedProfile.energy) {
     throw new Error(
-      `[selfcheck] husk must add 0 energy: team0=${battle.state.energy[0]}, want ally-only ${gRedProfile.energy}`,
+      `[selfcheck] husk must add 0 energy: team0=${battle.observe().energy[0]}, want ally-only ${gRedProfile.energy}`,
     );
   }
-  if ((battle.state.defeated[0] ?? 0) !== 1) {
-    throw new Error(`[selfcheck] defeated[0] after real-borg death: ${battle.state.defeated[0]}, want 1`);
+  if ((battle.observe().defeated[0] ?? 0) !== 1) {
+    throw new Error(`[selfcheck] defeated[0] after real-borg death: ${battle.observe().defeated[0]}, want 1`);
   }
-  if (battle.state.result !== "ongoing") throw new Error("[selfcheck] battle ended by husk deploy");
+  if (battle.observe().result !== "ongoing") throw new Error("[selfcheck] battle ended by husk deploy");
 
   // Husk death -> another husk (respawns while the ally fights), still uncounted.
   killActive(husk.uid);
@@ -2793,20 +2793,20 @@ function assertHuskDeploysOnForceExhaustion(borgs: BorgStats[]): void {
     const active = p1Active();
     return !!active && active.borgId === HUSK_BORG_ID && active.uid !== husk.uid;
   }, "husk respawn");
-  if ((battle.state.defeated[0] ?? 0) !== 1 || (battle.state.defeatedEnergy[0] ?? 0) !== gRedProfile.energy) {
+  if ((battle.observe().defeated[0] ?? 0) !== 1 || (battle.observe().defeatedEnergy[0] ?? 0) !== gRedProfile.energy) {
     throw new Error(
-      `[selfcheck] husk death must not count: defeated=${battle.state.defeated[0]}, energy=${battle.state.defeatedEnergy[0]}`,
+      `[selfcheck] husk death must not count: defeated=${battle.observe().defeated[0]}, energy=${battle.observe().defeatedEnergy[0]}`,
     );
   }
 
   // Ally falls -> team 0 has no real force left: battle resolves, no fresh husk chain.
-  const ally = battle.state.borgs.find((b) => b.team === 0 && b.ownerPlayer === null && b.alive && b.hp > 0);
+  const ally = battle.observe().actors.find((b) => b.team === 0 && b.ownerPlayer === null && b.alive && b.hp > 0);
   if (!ally || ally.borgId !== "pl0615") throw new Error("[selfcheck] husk test lost the ally borg");
   killActive(ally.uid);
-  stepUntil(() => battle.state.result !== "ongoing", "battle resolution after ally death");
+  stepUntil(() => battle.observe().result !== "ongoing", "battle resolution after ally death");
   // step() mutates result; re-widen past the earlier "ongoing" narrowing (same pattern as
   // assertDeathAccountingAtKillEvent's state casts).
-  const finalResult: string = battle.state.result;
+  const finalResult: string = battle.observe().result;
   if (finalResult !== "lose") {
     throw new Error(`[selfcheck] expected p1 loss once all real team-0 forces fell: ${finalResult}`);
   }
@@ -3237,7 +3237,7 @@ function assertMeleeAiReachesEngageAndHits(borgs: BorgStats[]): void {
     },
     borgs,
   );
-  const p1Uid = battle.state.activeUidByPlayer["p1"];
+  const p1Uid = battle.observe().activeUidByPlayer["p1"];
   const idleInputs: Record<string, PlayerInput> = { p1: emptyInput() };
   let minDist = Infinity;
   let sawMeleeSwing = false;
@@ -3245,9 +3245,9 @@ function assertMeleeAiReachesEngageAndHits(borgs: BorgStats[]): void {
   let prevHp = Infinity;
   for (let f = 0; f < 900 && meleeHitFrame < 0; f += 1) {
     battle.step(1 / 60, idleInputs);
-    assertSane(battle.state.borgs, f);
-    const p1 = battle.state.borgs.find((x) => x.uid === p1Uid);
-    const cpu = battle.state.borgs.find((x) => x.team === 1);
+    assertSane(battle.observe().actors, f);
+    const p1 = battle.observe().actors.find((x) => x.uid === p1Uid);
+    const cpu = battle.observe().actors.find((x) => x.team === 1);
     if (!p1 || !cpu) break;
     const d = distXZ(cpu.pos, p1.pos);
     minDist = Math.min(minDist, d);
@@ -3987,7 +3987,7 @@ function assertSideWideBurstFlagsBothTeammates(): void {
   };
   const borgs = loadBorgs();
   const battle = createBattle(cfg, borgs);
-  const s = battle.state;
+  const s = battleStateForSelfcheck(battle);
   const cpuAlly = s.borgs.find((b) => b.team === 0 && b.ownerPlayer === null);
   if (!cpuAlly) throw new Error(`[selfcheck] test fixture missing the CPU-owned team-0 ally`);
   // Charge both p1/p2 meters to max + charged (bypassing the 3000-hit-connection grind).
@@ -4375,22 +4375,22 @@ export function main(): number {
   const MAX = 2400;
   for (let f = 0; f < MAX; f++) {
     battle.step(1 / 60, inputs);
-    assertSane(battle.state.borgs, f);
+    assertSane(battle.observe().actors, f);
     // also sanity-check energy values
-    for (const k of Object.keys(battle.state.energy)) {
-      const e = battle.state.energy[Number(k)];
+    for (const k of Object.keys(battle.observe().energy)) {
+      const e = battle.observe().energy[Number(k)];
       if (e !== undefined && !Number.isFinite(e)) throw new Error(`NaN energy team ${k} @frame ${f}`);
     }
-    if (battle.state.result !== "ongoing" && resolvedFrame < 0) {
+    if (battle.observe().result !== "ongoing" && resolvedFrame < 0) {
       resolvedFrame = f;
       break;
     }
   }
 
-  const s = battle.state;
+  const s = battle.observe();
   console.log(
     `[selfcheck] frame=${s.frame} result=${s.result} energy=${JSON.stringify(s.energy)} ` +
-      `aliveBorgs=${s.borgs.length} projectiles=${s.projectiles.length}`,
+      `aliveBorgs=${s.actors.length} projectiles=${s.projectiles.length}`,
   );
 
   // With an idle human and AI Death Borgs swarming, either side can win, but the AI should

@@ -20,7 +20,7 @@
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { ASSETS } from "../assets.js";
 import { el, faceButton } from "../dom.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 
 export type PauseAction = "resume" | "quit";
 
@@ -32,7 +32,7 @@ export interface PauseMenuOptions {
   initial?: PauseAction;
 }
 
-export interface PauseMenuHandle {
+export interface PauseMenuHandle extends MenuInputTarget {
   getSelected: () => PauseAction;
   destroy: () => void;
 }
@@ -112,12 +112,10 @@ export function createPauseMenu(container: HTMLElement, opts: PauseMenuOptions):
 
   select(selected);
   container.appendChild(overlay);
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
-
   return {
     getSelected: () => selected,
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
-      unsubscribeMenuInput();
       overlay.remove();
     },
   };

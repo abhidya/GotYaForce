@@ -47,6 +47,7 @@ export default defineConfig({
           { text: 'Execution Map', link: '/execution-map' },
           { text: 'Memory Map', link: '/memory-map' },
           { text: 'Source Map', link: '/source-map' },
+          { text: 'Ghidra Corpus', link: '/ghidra-corpus' },
           { text: 'Call Graph', link: '/call-graph' }
         ]
       },
@@ -139,6 +140,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/evidence/' },
             { text: 'Function Index', link: '/evidence/functions' },
+            { text: 'Ghidra Corpus', link: '/ghidra-corpus' },
             { text: 'Runtime Traces', link: '/evidence/traces' },
             { text: 'Save / GCI Format', link: '/evidence/save-gci' },
             { text: 'Disc / ISO Layout', link: '/evidence/disc-iso' },
@@ -158,7 +160,7 @@ export default defineConfig({
     },
     socialLinks: [{ icon: 'github', link: 'https://github.com/abhidya/GotYaForce' }],
     footer: {
-      message: 'Research documentation. No copyrighted game assets are hosted. All claims cite disc/code offsets and repro steps.',
+      message: 'Research documentation. Model and animation viewers are generated from the local extracted asset pipeline. Claims cite disc/code offsets and repro steps.',
       copyright: 'Gotcha Force fan research — not affiliated with Nintendo/Capcom.'
     }
   }

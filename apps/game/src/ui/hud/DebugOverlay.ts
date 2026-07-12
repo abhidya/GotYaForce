@@ -14,11 +14,11 @@
  * lastDamageTaken are intentionally deferred — see research/tasks/attack-port/NOTES-ATK-015.md.
  */
 
-import type { BorgRuntime } from "@gf/combat";
+import type { BattleActorObservation } from "@gf/combat";
 
 export interface DebugOverlayHandle {
   /** Read-only refresh from the current BorgRuntime (or null when nothing is focused/selected). */
-  update: (borg: BorgRuntime | null) => void;
+  update: (borg: BattleActorObservation | null) => void;
   /** Show/hide without tearing down the DOM node. */
   setVisible: (visible: boolean) => void;
   visible: boolean;
@@ -78,13 +78,13 @@ export function createDebugOverlay(container: HTMLElement): DebugOverlayHandle {
     pre.style.display = v ? "block" : "none";
   }
 
-  function update(borg: BorgRuntime | null): void {
+  function update(borg: BattleActorObservation | null): void {
     if (!handle.visible) return;
     if (!borg) {
       pre.textContent = "[debug] no focused borg";
       return;
     }
-    const b = borg as BorgRuntime & FutureBorgFields;
+    const b = borg as BattleActorObservation & FutureBorgFields;
     const lines: string[] = [];
 
     lines.push(`${b.borgId}  uid=${b.uid}  team=${b.team}`);

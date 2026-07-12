@@ -7,7 +7,7 @@ export const ROBOT_DASH = {
   DASH_TIMER: 30.0, // FLOAT_80439078; actor+0x560 phase-1 window
   STREAM_RATE: -1.0,
   ZERO: 0.0,
-  AIM_DECAY: 0.9,
+  AIM_DECAY: 0.96, // FLOAT_8043908c
   ACTION_MODE_BITS: 0x3,
 } as const;
 
@@ -35,8 +35,9 @@ interface RobotDashScratch {
   dashConfigByte?: number;
   dashHousekeep?: number;
   dashConfig?: RobotDashConfig;
-  aimPitchP2a?: number;
-  aimPitchP2b?: number;
+  /** actor+0x18e0/+0x18e2, the exact pair written by stepDualTargetAim. */
+  aimPitch18e0?: number;
+  aimYaw18e2?: number;
   /** actor+0x5d8 input/status bits; high nibble participates in phase-4 exit. */
   inputFlags5d8?: number;
   /** +0x5bc bit 0x200: held-action continuation status. */
@@ -76,7 +77,9 @@ function effLockTarget(actor: RomActor): Vec3 | null {
 }
 
 function streamComplete(actor: RomActor): boolean {
-  return actor.wallContact !== 0 || actor.parts[0]!.streamPtr < 0;
+  // FUN_800f2008/2118/22a8 gate directly on actor+0x1cee. The stream VM and
+  // bridge lower/raise this modeled byte at real stream start/completion.
+  return actor.wallContact !== 0;
 }
 
 function spawn(ctx: StreamContext, actor: RomActor, addr: number, ...types: number[]): void {
@@ -92,6 +95,12 @@ function runContactCallback(actor: RomActor, ctx: StreamContext, cfg: RobotDashC
   const s = scratchOf(actor);
   const addr = cfg.onContactAddr;
   if (!addr) return;
+  // Timed/count callbacks mutate +0x558/+0x6ef before their consuming ammo call.
+  const timed = addr === 0x800dabd8 || addr === 0x80113010 || addr === 0x801d49d8;
+  if (timed) {
+    actor.handlerTimer = 4;
+    s.dashConfigByte = (s.dashConfigByte ?? 0) - 1;
+  }
   if (!allocateWeapon(actor, ctx, cfg.ammoSlot, 1, true)) return;
   switch (addr) {
     case 0x80074d3c: {
@@ -112,20 +121,14 @@ function runContactCallback(actor: RomActor, ctx: StreamContext, cfg: RobotDashC
     case 0x80112f28: spawn(ctx, actor, 0x800c3be0, 0x0c, 0x0d); break;
     case 0x800d7fd8: spawn(ctx, actor, 0x800c3be0, 0x0a); break;
     case 0x800dabd8:
-      actor.handlerTimer = 4;
-      s.dashConfigByte = (s.dashConfigByte ?? 0) - 1;
       spawn(ctx, actor, 0x80082824, 0x20, 0x21);
       break;
     case 0x80113010:
-      actor.handlerTimer = 4;
-      s.dashConfigByte = (s.dashConfigByte ?? 0) - 1;
       if (actor.borgNumber === 0x408) spawn(ctx, actor, 0x80082824, 0x47, 0x48);
       else if (actor.borgNumber === 0x407) spawn(ctx, actor, 0x80082824, 0x78, 0x79);
       break;
     case 0x800dace8: spawn(ctx, actor, 0x800c3be0, 0x39, 0x3a); break;
     case 0x801d49d8:
-      actor.handlerTimer = 4;
-      s.dashConfigByte = (s.dashConfigByte ?? 0) - 1;
       spawn(ctx, actor, 0x80082824, 0x73, 0x74);
       break;
     case 0x801d4ae8: spawn(ctx, actor, 0x800c3be0, 0x5f, 0x60); break;
@@ -243,10 +246,10 @@ function robotDashPhase3(actor: RomActor, ctx: StreamContext): void {
 
 function robotDashPhase4(actor: RomActor, ctx: StreamContext): void {
   const s = scratchOf(actor);
-  const a = toS16(s.aimPitchP2a ?? 0);
-  const b = toS16(s.aimPitchP2b ?? 0);
-  s.aimPitchP2a = toS16(a * ROBOT_DASH.AIM_DECAY);
-  s.aimPitchP2b = toS16(b * ROBOT_DASH.AIM_DECAY);
+  const pitch = toS16(s.aimPitch18e0 ?? 0);
+  const yaw = toS16(s.aimYaw18e2 ?? 0);
+  s.aimPitch18e0 = toS16(pitch * ROBOT_DASH.AIM_DECAY);
+  s.aimYaw18e2 = toS16(yaw * ROBOT_DASH.AIM_DECAY);
   tickStream(actor, 1, ctx);
   const exactExit = ((s.inputFlags5d8 ?? 0) & 0xf0) !== 0;
   if (exactExit || streamComplete(actor)) {

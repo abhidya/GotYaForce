@@ -27,7 +27,7 @@ import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { captureCropImg } from "../captureCrop.js";
 import { el, legendItem } from "../dom.js";
 import { mountChallengeMenuMotion, type ChallengeMenuMotionHandle } from "../challengeMenuMotion.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 
@@ -64,7 +64,7 @@ export interface SelectDifficultyOptions {
   initial?: Difficulty;
 }
 
-export interface SelectDifficultyHandle {
+export interface SelectDifficultyHandle extends MenuInputTarget {
   getSelected: () => Difficulty;
   destroy: () => void;
 }
@@ -188,14 +188,12 @@ export function createSelectDifficulty(
     camera: { fov: 31, position: [0, 130, 900], lookAt: [0, 22, 0] },
     rotation: [-0.12, 0, 0],
   });
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
-
   return {
     getSelected: () => selected,
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
       motion?.destroy();
       stopScene();
-      unsubscribeMenuInput();
       root.remove();
     },
   };

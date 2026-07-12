@@ -21,6 +21,7 @@ import {
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { createSharedMeleeGRed, GRED_MELEE_CONFIG } from "./shared-melee-gred.js";
 import { createSharedCharge, GRED_CHARGE_CONFIG } from "./shared-charge.js";
+import { createGRedDash } from "./gred-dash.js";
 
 // Motion constants — every value read from boot.dol this session.
 const G_RED_CRASH = {
@@ -219,12 +220,13 @@ function gredXHandler(actor: RomActor, ctx: StreamContext): void {
 export interface GRedFamilyCtx extends StreamContext {}
 
 export function createGRedRootAction(ctx: GRedFamilyCtx): (actor: RomActor) => void {
+  const dash = createGRedDash(ctx);
   // The full ROM table has 5 entries indexed by +0x580; entry 2 is the X/air-B chain
   // (FUN_8018e7fc → variant table → phase table). Here we route actionIndex 2 directly
   // to the phase handler; the variant-dispatch and air-counter clear (FUN_8018e7fc /
   // FUN_8018e838) are folded in.
   const actionTable: Array<((actor: RomActor) => void) | null> = [
-    null,          // 0: dash attack (zz_018d288_) — TODO port
+    dash,          // 0: dash attack (zz_018d288_, all five variants)
     createSharedMeleeGRed(GRED_MELEE_CONFIG, ctx), // 1: B melee (zz_0177dd8_ shared engine)
     (actor) => gredXHandler(actor, ctx), // 2: X / air-B (G Crash)
     createSharedCharge(GRED_CHARGE_CONFIG, ctx), // 3: B charge (zz_0179814_ shared engine)

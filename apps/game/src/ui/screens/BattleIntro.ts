@@ -26,7 +26,7 @@ import { arenaNameForStageByte, arenaNameForStageId, type MissionBattleConfig } 
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { borgMiniPath } from "../assets.js";
 import { el, legendItem } from "../dom.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
@@ -37,7 +37,7 @@ export interface BattleIntroOptions {
   onBack?: () => void;
 }
 
-export interface BattleIntroHandle {
+export interface BattleIntroHandle extends MenuInputTarget {
   destroy: () => void;
 }
 
@@ -110,11 +110,9 @@ export function createBattleIntro(
     rotation: [-0.1, 0, 0],
     maxModels: 27,
   });
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action));
-
   return {
+    handleMenuInput: (event) => onMenuAction(event.action),
     destroy: () => {
-      unsubscribeMenuInput();
       stopBriefingScene();
       root.remove();
     },

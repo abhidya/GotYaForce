@@ -1,4 +1,10 @@
-import type { Battle, BorgActionProfile, BorgRuntime, MeleeActionDef, Projectile } from "@gf/combat";
+import type {
+  Battle,
+  BattleActorObservation,
+  BattleProjectileObservation,
+  BorgActionProfile,
+  MeleeActionDef,
+} from "@gf/combat";
 import { BURST, JUMP, MELEE, targetWithinMeleeEngage } from "@gf/combat";
 import type { BattleOutcome } from "@gf/missions";
 import type { AnimSlot } from "./battleScene.js";
@@ -20,7 +26,7 @@ export interface BattleAudioBorgSnapshot {
   borgId: string;
   hp: number;
   alive: boolean;
-  state: BorgRuntime["state"];
+  state: BattleActorObservation["state"];
   anim: string;
   lockTarget: string | null;
   allyLockTarget: string | null;
@@ -49,7 +55,7 @@ export function snapshotBattleAudio(
   actionProfileFor?: (borgId: string) => BorgActionProfile | null,
 ): BattleAudioSnapshot {
   const borgs = new Map<string, BattleAudioBorgSnapshot>();
-  for (const b of battle.state.borgs) {
+  for (const b of battle.observe().actors) {
     borgs.set(b.uid, {
       borgId: b.borgId,
       hp: b.hp,
@@ -61,12 +67,12 @@ export function snapshotBattleAudio(
       chargeFrames: b.cooldowns?.["chargeFrames"] ?? 0,
     });
   }
-  const allyEnergy = battle.state.energy[0] ?? 0;
-  const localActiveUid = battle.state.activeUidByPlayer[localPlayerId] ?? null;
+  const allyEnergy = battle.observe().energy[0] ?? 0;
+  const localActiveUid = battle.observe().activeUidByPlayer[localPlayerId] ?? null;
   // Resolve charge tier thresholds for the LOCAL borg only (the only borg whose charge cues
   // are audible, mirroring the charge_release scoping below). actionProfileForProfile caches
   // per profile upstream, so this per-step lookup is cheap and allocation-free.
-  const localBorg = localActiveUid ? battle.state.borgs.find((b) => b.uid === localActiveUid) ?? null : null;
+  const localBorg = localActiveUid ? battle.observe().actors.find((b) => b.uid === localActiveUid) ?? null : null;
   const localShot = localBorg && actionProfileFor ? actionProfileFor(localBorg.borgId)?.shot ?? null : null;
   const localChargeable = localShot?.chargeable === true;
   return {
@@ -222,7 +228,7 @@ export function battleVoiceCues(before: BattleAudioSnapshot, after: BattleAudioS
 
 export interface BattleHudPresentationInput {
   battle: Battle;
-  focus: BorgRuntime | null;
+  focus: BattleActorObservation | null;
   actionProfile: BorgActionProfile | null;
   allyMax: number;
   enemyMax: number;
@@ -242,7 +248,7 @@ export interface BattlePresentationInput {
 
 export interface BattlePresentationState {
   activeUid: string | null;
-  focus: BorgRuntime | null;
+  focus: BattleActorObservation | null;
   hud: HudState;
 }
 
@@ -253,14 +259,13 @@ export interface BattleEnergyMaxima {
 
 export function battleEnergyMaxima(battle: Battle): BattleEnergyMaxima {
   return {
-    allyMax: battle.state.energy[0] ?? 0,
-    enemyMax: battle.state.energy[1] ?? 0,
+    allyMax: battle.observe().energy[0] ?? 0,
+    enemyMax: battle.observe().energy[1] ?? 0,
   };
 }
 
-export function activeBorgForPlayer(battle: Battle, playerId: string): BorgRuntime | null {
-  const uid = battle.state.activeUidByPlayer[playerId] ?? null;
-  return uid ? battle.state.borgs.find((b) => b.uid === uid) ?? null : null;
+export function activeBorgForPlayer(battle: Battle, playerId: string): BattleActorObservation | null {
+  return battle.activeActor(playerId) ?? null;
 }
 
 /**
@@ -271,20 +276,20 @@ export function activeBorgForPlayer(battle: Battle, playerId: string): BorgRunti
  * reason after removal and fire impact FX only for real impacts. Snapshotting/cloning the
  * projectile objects here would silently break that contract.
  */
-export function battleSceneState(battle: Battle, focus: BorgRuntime | null): {
+export function battleSceneState(battle: Battle, focus: BattleActorObservation | null): {
   actors: readonly BattleActorView[];
-  projectiles: readonly Projectile[];
+  projectiles: readonly BattleProjectileObservation[];
   focusUid: string | null;
 } {
   return {
-    actors: battle.state.borgs.map(battleActorView),
-    projectiles: battle.state.projectiles,
+    actors: battle.observe().actors.map(battleActorView),
+    projectiles: battle.observe().projectiles,
     focusUid: focus?.uid ?? null,
   };
 }
 
 export function liveActorPositions<T>(battle: Battle, positionOf: (uid: string) => T | null): T[] {
-  return battle.state.borgs
+  return battle.observe().actors
     .filter((b) => b.alive)
     .map((b) => positionOf(b.uid))
     .filter((p): p is T => p !== null);
@@ -302,7 +307,7 @@ export function liveActorPositions<T>(battle: Battle, positionOf: (uid: string) 
  * team-aggregate fallbacks keep the screen non-degenerate (documented approximation).
  */
 export function battleOutcomeFromState(battle: Battle, localPlayerId?: string): BattleOutcome {
-  const st = battle.state;
+  const st = battle.observe();
   const win = st.result === "win";
   const t = st.telemetry;
   const playerId =
@@ -352,8 +357,8 @@ export function battleOutcomeFromState(battle: Battle, localPlayerId?: string): 
 }
 
 export function battlePresentationState(input: BattlePresentationInput): BattlePresentationState {
-  const activeUid = input.battle.state.activeUidByPlayer[input.localPlayerId] ?? null;
-  const active = activeUid ? input.battle.state.borgs.find((b) => b.uid === activeUid) ?? null : null;
+  const activeUid = input.battle.observe().activeUidByPlayer[input.localPlayerId] ?? null;
+  const active = activeUid ? input.battle.observe().actors.find((b) => b.uid === activeUid) ?? null : null;
   const focus = focusBorg(input.battle, active);
   return {
     activeUid,
@@ -370,21 +375,24 @@ export function battlePresentationState(input: BattlePresentationInput): BattleP
   };
 }
 
-function focusBorg(battle: Battle, active: BorgRuntime | null): BorgRuntime | null {
+function focusBorg(
+  battle: Battle,
+  active: BattleActorObservation | null,
+): BattleActorObservation | null {
   if (active?.alive) return active;
 
   // FIGHT ALONE can leave the player slot empty while a CPU ally is still alive.
   const fallbackTeam = active?.team ?? 0;
   return (
-    battle.state.borgs.find((b) => b.alive && b.team === fallbackTeam) ??
-    battle.state.borgs.find((b) => b.alive) ??
+    battle.observe().actors.find((b) => b.alive && b.team === fallbackTeam) ??
+    battle.observe().actors.find((b) => b.alive) ??
     null
   );
 }
 
 export function battleHudState(input: BattleHudPresentationInput): HudState {
   const { battle, focus, actionProfile, allyMax, enemyMax, defaultBorgId, localPlayerId } = input;
-  const st = battle.state;
+  const st = battle.observe();
 
   // Power Burst gauge (Q4 RESOLVED 2026-07-03 — research/decomp/attack-mechanics-open-
   // questions.md Q4, attack-mechanics-findings.md §S): per-PLAYER meter, ROM player struct
@@ -405,7 +413,7 @@ export function battleHudState(input: BattleHudPresentationInput): HudState {
   // reads the local ACTIVE slot, not `focus` — focus falls back to a live ally (FIGHT ALONE)
   // exactly when the banner should be up.
   const localActiveUid = st.activeUidByPlayer[localPlayerId] ?? null;
-  const localActive = localActiveUid ? st.borgs.find((b) => b.uid === localActiveUid) ?? null : null;
+  const localActive = localActiveUid ? st.actors.find((b) => b.uid === localActiveUid) ?? null : null;
   const defeated =
     st.result === "lose" || (st.result === "ongoing" && (localActive === null || !localActive.alive));
   const ammoMax = actionProfile?.shot?.ammoMax ?? 0;
@@ -515,11 +523,11 @@ const MELEE_DEF_HUD_FALLBACK: MeleeActionDef = {
  */
 function focusHasMeleeRangeTarget(
   battle: Battle,
-  focus: BorgRuntime | null,
+  focus: BattleActorObservation | null,
   actionProfile: BorgActionProfile | null,
 ): boolean {
   if (!focus?.lockTarget) return false;
-  const target = battle.state.borgs.find((b) => b.uid === focus.lockTarget && b.alive);
+  const target = battle.observe().actors.find((b) => b.uid === focus.lockTarget && b.alive);
   if (!target) return false;
   if (actionProfile && !actionProfile.melee) return false; // sim cannot select melee for this borg
   const meleeDef = actionProfile?.melee ?? MELEE_DEF_HUD_FALLBACK;

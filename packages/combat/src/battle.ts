@@ -13,9 +13,7 @@
 import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
 import { stepRomAI, hasRomAiParams } from "./romAi.js";
-import { RomDriverBridge } from "./bridge.js";
-import type { RomActor } from "./rom/actor.js";
-import { registerGroundClamp } from "./rom/physics.js";
+import { RomDriverBridge, type RomBattleRuntime } from "./bridge.js";
 import { applyHit } from "./combat.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { damageRecordByIndex, DAMAGE_RECORD_INDEX } from "./gauges.js";
@@ -60,7 +58,9 @@ import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
 import {
   emptyInput,
   type Battle,
+  type BattleActorObservation,
   type BattleConfig,
+  type BattleObservation,
   type BattleState,
   type BorgRuntime,
   type BurstMeterState,
@@ -126,7 +126,8 @@ interface ForceRuntime {
 }
 
 class BattleImpl implements Battle {
-  state: BattleState;
+  private state: BattleState;
+  private observationCache: BattleObservation | null = null;
 
   private profiles = new Map<string, BorgProfile>();
   private byUid = new Map<string, BorgRuntime>();
@@ -147,6 +148,7 @@ class BattleImpl implements Battle {
    */
   private readonly isChallengeMode: boolean;
   private readonly useRomAi: boolean;
+  private readonly romRuntime: RomBattleRuntime;
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
@@ -212,6 +214,22 @@ class BattleImpl implements Battle {
       frame: 0,
       timeRemainingFrames: this.timeLimitFrames,
       result: "ongoing",
+    };
+
+    this.romRuntime = {
+      floor: {
+        bounds: this.bounds,
+        clampToGround: (pos, velY) => this.clampRomToGround(pos, velY),
+        isSupported: (x, z) => floorSurfaceYAt(this.collision, x, z, 100) != null,
+      },
+      allocateResource: (owner, type, count, consume) => {
+        const profile = this.profiles.get(owner.uid);
+        return profile ? useWeaponCell(owner, profile, type, count, consume) : false;
+      },
+      spawnProjectile: (owner, spawnerAddr, kind) =>
+        this.addRomProjectile(owner, spawnerAddr, kind),
+      resolveHit: (attacker, victim, damageRecordIndex, knockbackMult) =>
+        this.resolveRomHit(attacker, victim, damageRecordIndex, knockbackMult),
     };
 
     // Deploy each force's first borg.
@@ -368,89 +386,78 @@ class BattleImpl implements Battle {
     // fallback. The bridge's tick now COMPOSES with normal movement (returns false)
     // — it layers hitbox/anim/damage ON TOP of stepMovement, not replacing it. This
     // means AI borgs navigate normally while still getting ROM-driven X-specials.
-    const battle = this;
-    const driver = RomDriverBridge.attach(b, {
-      onFaceComplete: (actor, mask) => {
-        void mask;
-        const lt = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-        if (!lt) return true;
-        const dx = lt.x - actor.pos.x;
-        const dz = lt.z - actor.pos.z;
-        if (Math.abs(dx) < 0.001 && Math.abs(dz) < 0.001) return true;
-        const targetBam = Math.round(Math.atan2(dx, dz) / (Math.PI * 2) * 0x10000) & 0xffff;
-        const diff = ((targetBam - actor.heading + 0x8000) & 0xffff) - 0x8000;
-        const step = Math.max(256, Math.abs(diff) >> 3);
-        if (Math.abs(diff) <= step) {
-          actor.heading = targetBam;
-          return true;
-        }
-        actor.heading = (actor.heading + (diff > 0 ? step : -step)) & 0xffff;
-        return false;
-      },
-      onAllocateResource: (actor, type, count, mode) => {
-        void actor;
-        return useWeaponCell(b, prof, type, count, (mode ?? 0) !== 0);
-      },
-      onFamilyProjectile: (_actor, addr, kind) => {
-        battle.addRomProjectile(b, addr, kind);
-      },
-      onSpawnChild: (actor, childId) => {
-        void actor;
-        battle.addRomProjectile(b, 0, childId);
-        return true;
-      },
-      onSpawnProjectile: (actor, childId, t1, t2, vs) => {
-        void actor; void childId; void t1; void t2; void vs;
-      },
-      onSpawnFX: (actor, fxId) => {
-        void actor; void fxId;
-      },
-      onFaceTarget: (actor, aimType) => {
-        void aimType;
-        const lt = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-        if (!lt) return;
-        const dx = lt.x - actor.pos.x;
-        const dz = lt.z - actor.pos.z;
-        if (Math.abs(dx) < 0.001 && Math.abs(dz) < 0.001) return;
-        actor.heading = Math.round(Math.atan2(dx, dz) / (Math.PI * 2) * 0x10000) & 0xffff;
-      },
-      onCheckCollision: (actor) => {
-        return (actor as RomActor & { grounded?: boolean }).grounded ? 0 : 1;
-      },
-      onPlayCue: (_actor, cueId) => {
-        void cueId;
-      },
-      onPlayAnim: (_actor, group, slot, blend) => {
-        void group; void slot; void blend;
-      },
-      onArmHit: (_actor, kind, statusId, statusArg) => {
-        void kind; void statusId; void statusArg;
-      },
-    });
+    const driver = RomDriverBridge.attachToBattle(b, this.romRuntime);
     if (driver) {
-        driver.hitResolver = (attacker, victim, damageRecordIndex, knockbackMult) => {
-          const victimProfile = this.profiles.get(victim.uid);
-          if (!victimProfile) return;
-          const record =
-            familyDamageRecordForBorg(attacker.borgId, damageRecordIndex) ??
-            damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
-          const attackerProfile = this.profiles.get(attacker.uid);
-          const dir = { x: victim.pos.x - attacker.pos.x, y: 0, z: victim.pos.z - attacker.pos.z };
-          applyHit(victim, victimProfile, 0, knockbackMult, dir, attacker.pos, false, record,
-            attackerProfile ? { attacker, attackerProfile, damageScale: 1, attackerSideRank: this.sideRankForTeam(attacker.team), defenderSideRank: this.sideRankForTeam(victim.team) } : undefined,
-            { burstMeters: this.state.burstMeterByPlayer, telemetry: this.state.telemetry, energyByTeam: this.state.energy, energyMaxByTeam: this.state.energyMax, cpuHalvingEnabled: this.isChallengeMode });
-        };
-        const clampFn = (pos: { x: number; y: number; z: number }, velY: number) => {
-          const groundY = this.groundYFor(pos.x, pos.z, pos.y);
-          if (pos.y <= groundY) return { y: groundY, velY: 0, grounded: true };
-          return { y: pos.y, velY, grounded: false };
-        };
-        driver.groundClamp = clampFn;
-        registerGroundClamp(clampFn);
-        driver.bounds = { minX: this.bounds.minX, maxX: this.bounds.maxX, minZ: this.bounds.minZ, maxZ: this.bounds.maxZ };
-        driver.offMeshCheck = (x: number, z: number) => floorSurfaceYAt(this.collision, x, z, 100) != null;
-        b.romDriver = driver;
+      b.romDriver = driver;
     }
+  }
+
+  observe(): BattleObservation {
+    if (this.observationCache) return this.observationCache;
+    const state = this.state;
+    this.observationCache = {
+      actors: state.borgs.map(snapshotActor),
+      // Copy the container but deliberately preserve projectile element identity. The renderer
+      // retains those elements to read despawn metadata after a later step removes them.
+      projectiles: [...state.projectiles],
+      activeUidByPlayer: { ...state.activeUidByPlayer },
+      energy: { ...state.energy },
+      energyMax: { ...(state.energyMax ?? {}) },
+      defeated: { ...state.defeated },
+      defeatedEnergy: { ...state.defeatedEnergy },
+      burstMeterByPlayer: structuredClone(state.burstMeterByPlayer),
+      telemetry: structuredClone(
+        state.telemetry ?? { damageByTeam: {}, hitsByTeam: {}, attemptsByTeam: {} },
+      ),
+      defeatedPlayerBorgs: state.defeatedPlayerBorgs ?? 0,
+      defeatedAllyBorgs: state.defeatedAllyBorgs ?? 0,
+      defeats: (state.defeats ?? []).map((defeat) => ({ ...defeat })),
+      frame: state.frame,
+      timeRemainingFrames: state.timeRemainingFrames,
+      result: state.result,
+      winnerMask: state.winnerMask ?? 0,
+    };
+    return this.observationCache;
+  }
+
+  activeActor(playerId: string): BattleActorObservation | undefined {
+    const observation = this.observe();
+    const uid = observation.activeUidByPlayer[playerId];
+    return uid ? observation.actors.find((actor) => actor.uid === uid) : undefined;
+  }
+
+  actor(uid: string): BattleActorObservation | undefined {
+    return this.observe().actors.find((actor) => actor.uid === uid);
+  }
+
+  /** Package-internal mutation seam for exact selfcheck arrangements. */
+  stateForSelfcheck(): BattleState {
+    this.observationCache = null;
+    return this.state;
+  }
+
+  private clampRomToGround(pos: Vec3, velY: number): { y: number; velY: number; grounded: boolean } {
+    const groundY = this.groundYFor(pos.x, pos.z, pos.y);
+    if (pos.y <= groundY) return { y: groundY, velY: 0, grounded: true };
+    return { y: pos.y, velY, grounded: false };
+  }
+
+  private resolveRomHit(
+    attacker: BorgRuntime,
+    victim: BorgRuntime,
+    damageRecordIndex: number,
+    knockbackMult: number,
+  ): void {
+    const victimProfile = this.profiles.get(victim.uid);
+    if (!victimProfile) return;
+    const record =
+      familyDamageRecordForBorg(attacker.borgId, damageRecordIndex) ??
+      damageRecordByIndex(DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL);
+    const attackerProfile = this.profiles.get(attacker.uid);
+    const dir = { x: victim.pos.x - attacker.pos.x, y: 0, z: victim.pos.z - attacker.pos.z };
+    applyHit(victim, victimProfile, 0, knockbackMult, dir, attacker.pos, false, record,
+      attackerProfile ? { attacker, attackerProfile, damageScale: 1, attackerSideRank: this.sideRankForTeam(attacker.team), defenderSideRank: this.sideRankForTeam(victim.team) } : undefined,
+      { burstMeters: this.state.burstMeterByPlayer, telemetry: this.state.telemetry, energyByTeam: this.state.energy, energyMaxByTeam: this.state.energyMax, cpuHalvingEnabled: this.isChallengeMode });
   }
 
   /** Spawn a projectile via the ROM family spawner. Placeholder — routes to the
@@ -606,9 +613,10 @@ class BattleImpl implements Battle {
     }
   }
 
-  step(_dt: number, inputs: Record<string, PlayerInput>): void {
+  step(_dt: number, inputs: Record<string, PlayerInput>): BattleObservation {
     void _dt; // sim is fixed-step (SIM.DT); dt accepted for API symmetry.
-    if (this.state.result !== "ongoing") return;
+    if (this.state.result !== "ongoing") return this.observe();
+    this.observationCache = null;
 
     // 0) Power Burst charged-flag sweep (ROM +0x103, Q4): the flag flips ONE frame AFTER the
     // clamped meter reaches METER_MAX. Deterministic check-BEFORE-fill ordering: this runs
@@ -836,6 +844,7 @@ class BattleImpl implements Battle {
     });
 
     this.state.frame += 1;
+    return this.observe();
   }
 
   private tickBattleTimer(): void {
@@ -965,6 +974,15 @@ class BattleImpl implements Battle {
     const playerBit = 1 << playerTeam;
     this.state.result = (mask & playerBit) !== 0 && mask <= 2 ? "win" : "lose";
   }
+}
+
+function snapshotActor(actor: BorgRuntime): BattleActorObservation {
+  // The ROM driver owns executable behavior and is intentionally absent from the public actor
+  // view. Every remaining actor field is structured data, so structuredClone gives a stable
+  // fixed-step snapshot including nested position, velocity, cooldown, and weapon-cell facts.
+  const { romDriver: _romDriver, ...observable } = actor;
+  void _romDriver;
+  return structuredClone(observable);
 }
 
 function playableSpawnArea(collision: StageCollision | null, fallback: RectStageBounds): RectStageBounds {
@@ -1097,6 +1115,15 @@ function clamp(v: number, lo: number, hi: number): number {
 export function createBattle(cfg: BattleConfig, borgStats: readonly BorgStats[]): Battle {
   const statsById = new Map<string, BorgStats>(borgStats.map((s) => [s.id, s]));
   return new BattleImpl(cfg, statsById);
+}
+
+/**
+ * Package-internal test seam. Selfchecks import this file directly; it is intentionally not
+ * re-exported from `@gf/combat` and must not be used by application code.
+ */
+export function battleStateForSelfcheck(battle: Battle): BattleState {
+  if (!(battle instanceof BattleImpl)) throw new TypeError("selfcheck seam requires BattleImpl");
+  return battle.stateForSelfcheck();
 }
 
 export { SIM };

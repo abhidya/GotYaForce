@@ -10,6 +10,7 @@ import { createRomActor, type RomActor } from "./actor.js";
 import { integratePhysics } from "./physics.js";
 import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
+import { createGRedDash, GRED_DASH } from "../families/gred-dash.js";
 import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
 import { configureStarHeroFamily } from "../families/star-hero.js";
 import { configureCyberMachineFamily } from "../families/cyber-machine.js";
@@ -46,14 +47,18 @@ import {
 } from "../families/samurai.js";
 import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
-import { RomDriverBridge, cueTableForBorg } from "../bridge.js";
+import { RomDriverBridge, cueTableForBorg, type RomBattleRuntime } from "../bridge.js";
 import { configureDeathBorgFamily } from "../families/death-borg.js";
 import {
   configureEagleJetFamily,
   EAGLE_JET_ACTION1,
   type EagleJetScratch,
 } from "../families/eagle-jet.js";
-import { createMeleeRobot } from "../families/melee-robot.js";
+import {
+  createMeleeRobot,
+  MELEE_ROBOT,
+  ROBOT_MELEE_RANGE_ROWS,
+} from "../families/melee-robot.js";
 import {
   createRobotDashHandler,
   ROBOT_ACTION0_CONFIGS,
@@ -127,6 +132,38 @@ export function runSelfTest(): number {
     integratePhysics(1.0, a, 0); // yaw 0 BAM = facing +Z
     assert(approxEq(a.pos.z, 10.0), "yaw 0 → pos.z += 10 (cos×hSpeed)");
     assert(approxEq(a.pos.x, 0.0), "yaw 0 → pos.x unchanged (sin=0)");
+  }
+
+  // Integration seam: two battle runtimes keep independent floor behavior.
+  console.log("\n[rom.selfcheck] battle runtime — floor behavior is instance-local:");
+  {
+    const makeRuntime = (uid: string) => ({ uid, borgId: "pl0000", team: 0 }) as BorgRuntime;
+    const makeBattleRuntime = (floorY: number): RomBattleRuntime => ({
+      floor: {
+        bounds: { minX: -100, maxX: 100, minZ: -100, maxZ: 100 },
+        isSupported: () => true,
+        clampToGround: (pos, velY) => pos.y <= floorY
+          ? { y: floorY, velY: 0, grounded: true }
+          : { y: pos.y, velY, grounded: false },
+      },
+      allocateResource: () => true,
+      spawnProjectile: () => {},
+      resolveHit: () => {},
+    });
+    const low = RomDriverBridge.attachToBattle(makeRuntime("low"), makeBattleRuntime(10));
+    const high = RomDriverBridge.attachToBattle(makeRuntime("high"), makeBattleRuntime(20));
+    assert(low !== null && high !== null, "independent drivers attach through battle runtime seam");
+    if (low && high) {
+      low.actor.pos.y = 0;
+      high.actor.pos.y = 0;
+      integratePhysics(0, low.actor, 0);
+      integratePhysics(0, high.actor, 0);
+      assert(low.actor.pos.y === 10, "first runtime uses its own floor");
+      assert(high.actor.pos.y === 20, "second runtime uses its own floor");
+      low.actor.pos.y = 0;
+      integratePhysics(0, low.actor, 0);
+      assert(low.actor.pos.y === 10, "second attachment does not overwrite first floor");
+    }
   }
 
   // Test 3: dispatch — command record cue 44 transitions to state 61 + runs family.
@@ -2399,23 +2436,29 @@ export function runSelfTest(): number {
   console.log("\n[rom.selfcheck] families/melee-robot — phase 1 speed source (FUN_800f2498):");
   {
     const fx: number[] = [];
-    const handler = createMeleeRobot({ onFamilyProjectile: (_a, addr) => fx.push(addr) });
+    const handler = createMeleeRobot(
+      { onFamilyProjectile: (_a, addr) => fx.push(addr) },
+      { rangeRows868: [90, 120, 150] },
+    );
     const actor = createRomActor() as RomActor & {
       lockTarget?: { x: number; y: number; z: number } | null;
       streamTickGate?: boolean;
       rangeRows868?: readonly [number, number, number];
+      targetDistance760?: number;
+      movementTrailFlag1d9b?: number;
     };
     actor.fbPhaseSlots[0] = 1;
     actor.handlerTimer = 1;
     actor.dt = 1;
     actor.pos = { x: 0, y: 0, z: 0 };
     actor.lockTarget = { x: 300, y: 0, z: 0 };
+    actor.targetDistance760 = 300;
     actor.streamTickGate = false;
     handler(actor);
-    assert(actor.fbPhaseSlots[0] === 2 && approxEq(actor.handlerTimer, 30),
-      "phase 1 expiry advances and seeds the 30-frame active window");
-    assert(approxEq(actor.hSpeed, 10) && approxEq(actor.hDecel, 0),
-      "locked branch uses +0x760 distance / 30 and clears +0x4c");
+    assert(actor.fbPhaseSlots[0] === 2 && approxEq(actor.handlerTimer, 20),
+      "phase 1 expiry advances and seeds FLOAT_80439094=20");
+    assert(approxEq(actor.hSpeed, 30) && approxEq(actor.hDecel, 0),
+      "locked branch uses FLOAT_80439098(2) * +0x760 / 20 and clears +0x4c");
     assert(fx[0] === 0x800b2190,
       "+0x760 > FLOAT_8043909c triggers zz_00b2190_(actor,0)");
 
@@ -2430,8 +2473,60 @@ export function runSelfTest(): number {
     noTarget.lockTarget = null;
     noTarget.rangeRows868 = [90, 120, 150];
     handler(noTarget);
-    assert(approxEq(noTarget.hSpeed, 5),
-      "targetless branch selects +0x868 row[prevAction%3] / 30");
+    assert(approxEq(noTarget.hSpeed, 7.5),
+      "targetless branch selects +0x868 row[prevAction%3] / 20");
+
+    actor.fbPhaseSlots[0] = 2;
+    actor.handlerTimer = 20;
+    actor.hSpeed = 10;
+    actor.yVel = 2;
+    actor.wallContact = 0;
+    fx.length = 0;
+    handler(actor);
+    assert(approxEq(actor.handlerTimer, 19) && approxEq(actor.hSpeed, 9)
+      && approxEq(actor.yVel, 1.8),
+      "phase 2 counts down and applies FLOAT_804390a0=0.9 while +0x760 > 150");
+    assert(fx.includes(MELEE_ROBOT.DISTANCE_TRAIL_HELPER_ADDR),
+      "+0x44 > FLOAT_804390a4=3 invokes zz_00b22f4_");
+
+    actor.targetDistance760 = 100;
+    actor.movementTrailFlag1d9b = 1;
+    actor.handlerTimer = 10;
+    handler(actor);
+    assert(actor.movementTrailFlag1d9b === 0,
+      "+0x760 <= 150 clears actor+0x1d9b instead of running recovery movement");
+
+    const combo = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+      targetDistance760?: number;
+      bRetap?: boolean;
+      swingReArm?: boolean;
+    };
+    combo.fbPhaseSlots[0] = 2;
+    combo.lockTarget = { x: 200, y: 0, z: 0 };
+    combo.targetDistance760 = 200;
+    combo.bRetap = true;
+    combo.swingReArm = true;
+    combo.hDecel = 7;
+    handler(combo);
+    assert(combo.handlerTimer === 20 && approxEq(combo.hSpeed, 20) && combo.hDecel === 0,
+      "combo replay restores the 20-frame timer, target speed, and deceleration clear");
+
+    const elevated = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+    };
+    elevated.fbPhaseSlots[0] = 1;
+    elevated.handlerTimer = 1;
+    elevated.lockTarget = { x: 0, y: 400, z: 300 };
+    handler(elevated);
+    assert(approxEq(elevated.hSpeed, 50),
+      "fallback +0x760 uses full 3D distance sqrt(400^2+300^2)=500");
+
+    assert(ROBOT_MELEE_RANGE_ROWS.pl0400.join(",") === "1000,1000,2500"
+      && ROBOT_MELEE_RANGE_ROWS.pl0401.join(",") === "1000,1000,2000"
+      && ROBOT_MELEE_RANGE_ROWS.pl0406.join(",") === "1000,1000,2500"
+      && ROBOT_MELEE_RANGE_ROWS.pl040b.join(",") === "1000,1000,1000",
+      "production action-1 members use DOL page +0x134/+0x140/+0x14c rows");
   }
 
   console.log("\n[rom.selfcheck] families/tank-borg - NORMAL TANK / LEOPARD bespoke actions:");
@@ -2576,6 +2671,272 @@ export function runSelfTest(): number {
     handler(actor);
     assert(actor.fbPhaseSlots[0] === 4,
       "ammo denial takes FUN_800f2008 failure branch (+0x540 += 2)");
+
+    type DashCase = {
+      id: keyof typeof ROBOT_ACTION0_CONFIGS;
+      borg: number;
+      expected: Array<[number, number]>;
+    };
+    const dashCases: DashCase[] = [
+      { id: "pl0400", borg: 0x400, expected: [[0x8007f29c, 0]] },
+      { id: "pl0401", borg: 0x401, expected: [[0x8009ad20, 0]] },
+      { id: "pl0402", borg: 0x402, expected: [[0x800c3be0, 0x0c], [0x800c3be0, 0x0d]] },
+      { id: "pl0403", borg: 0x403, expected: [[0x800e0e90, 0], [0x800e0e90, 1]] },
+      { id: "pl0404", borg: 0x404, expected: [[0x800c3be0, 0x0a]] },
+      { id: "pl0405", borg: 0x405, expected: [[0x80082824, 0x20], [0x80082824, 0x21]] },
+      { id: "pl0407", borg: 0x407, expected: [[0x80082824, 0x78], [0x80082824, 0x79]] },
+      { id: "pl0408", borg: 0x408, expected: [[0x80082824, 0x47], [0x80082824, 0x48]] },
+      { id: "pl0409", borg: 0x409, expected: [[0x800c3be0, 0x39], [0x800c3be0, 0x3a]] },
+      { id: "pl040a", borg: 0x40a, expected: [[0x8007f29c, 4]] },
+      { id: "pl040b", borg: 0x40b, expected: [[0x800e0e90, 2], [0x800e0e90, 3]] },
+      { id: "pl040c", borg: 0x40c, expected: [[0x80082824, 0x73], [0x80082824, 0x74]] },
+      { id: "pl040d", borg: 0x40d, expected: [[0x800c3be0, 0x5f], [0x800c3be0, 0x60]] },
+    ];
+    for (const test of dashCases) {
+      const shots: Array<[number, number]> = [];
+      const a = createRomActor() as RomActor & {
+        lockTarget?: { x: number; y: number; z: number } | null;
+        dashConfigByte?: number;
+      };
+      a.borgNumber = test.borg;
+      a.lockTarget = { x: 10, y: 0, z: 0 };
+      a.fbPhaseSlots[0] = 3;
+      a.parts[0].streamPtr = 0;
+      a.contactP0 = 1;
+      a.handlerTimer = ROBOT_ACTION0_CONFIGS[test.id].timerSeed;
+      a.dashConfigByte = ROBOT_ACTION0_CONFIGS[test.id].maskByte;
+      createRobotDashHandler(ROBOT_ACTION0_CONFIGS[test.id], {
+        onAllocateResource: () => true,
+        onFamilyProjectile: (_owner, addr, type) => shots.push([addr, type]),
+      })(a);
+      assert(test.expected.every(([addr, type]) => shots.some(([x, y]) => x === addr && y === type)),
+        `${test.id} executes its real config+4 callback projectile/child family`);
+    }
+
+    const deniedTimed = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+      dashConfigByte?: number;
+    };
+    deniedTimed.lockTarget = { x: 10, y: 0, z: 0 };
+    deniedTimed.fbPhaseSlots[0] = 3;
+    deniedTimed.parts[0].streamPtr = 0;
+    deniedTimed.contactP0 = 1;
+    deniedTimed.dashConfigByte = 5;
+    createRobotDashHandler(ROBOT_ACTION0_CONFIGS.pl0405, { onAllocateResource: () => false })(deniedTimed);
+    assert(deniedTimed.handlerTimer === 3 && deniedTimed.dashConfigByte === 4,
+      "timed callback mutates timer/count before denial, then config+8 decrements the timer");
+
+    const transitions = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+      dashTimer?: number;
+      statusWord5bc?: number;
+      inputFlags5d8?: number;
+      robotSlotFlags?: number[];
+      aimPitch18e0?: number;
+      aimYaw18e2?: number;
+      onStartStream?: (group: number, slot: number, mask: number) => boolean;
+    };
+    transitions.lockTarget = { x: 10, y: 0, z: 0 };
+    transitions.fbPhaseSlots[0] = 1;
+    transitions.dashTimer = 1;
+    createRobotDashHandler(ROBOT_ACTION0_CONFIGS.pl0400, {})(transitions);
+    assert(transitions.fbPhaseSlots[0] === 2,
+      "phase 1 timer expiry advances through FUN_800f1f9c");
+    transitions.parts[0].streamPtr = -1;
+    createRobotDashHandler(ROBOT_ACTION0_CONFIGS.pl0400, { onAllocateResource: () => true })(transitions);
+    assert(transitions.fbPhaseSlots[0] === 2,
+      "phase 2 does not treat an exhausted local stream pointer as +0x1cee completion");
+    transitions.wallContact = 1;
+    createRobotDashHandler(ROBOT_ACTION0_CONFIGS.pl0400, { onAllocateResource: () => true })(transitions);
+    assert(transitions.fbPhaseSlots[0] === 3,
+      "phase 2 advances only when modeled +0x1cee is raised");
+    transitions.parts[0].streamPtr = 0;
+    transitions.parts[1].stateByte = -1;
+    transitions.statusWord5bc = 0x200;
+    let repeatSlot = -1;
+    transitions.onStartStream = (_group, slot) => { repeatSlot = slot; return true; };
+    createRobotDashHandler(ROBOT_ACTION0_CONFIGS.pl0400, { onAllocateResource: () => true })(transitions);
+    assert(transitions.fbPhaseSlots[0] === 3 && repeatSlot === 1,
+      "config+8 held continuation restarts stream base+1 without advancing phase 3");
+
+    const exitGate = createRomActor() as typeof transitions;
+    exitGate.lockTarget = { x: 10, y: 0, z: 0 };
+    exitGate.fbPhaseSlots[0] = 3;
+    exitGate.parts[0].streamPtr = -1;
+    exitGate.wallContact = 1;
+    exitGate.robotSlotFlags = [1, 0, 0, 0];
+    const gated = createRobotDashHandler(ROBOT_ACTION0_CONFIGS.pl0403, {});
+    gated(exitGate);
+    assert(exitGate.fbPhaseSlots[0] === 3,
+      "config+0x10 two-child exit gate holds phase 3 while a child slot is owned");
+    exitGate.robotSlotFlags = [0, 0, 0, 0];
+    gated(exitGate);
+    assert(exitGate.fbPhaseSlots[0] === 4,
+      "config+0x10 exit gate advances once both child ownership bytes clear");
+    exitGate.aimPitch18e0 = 1000;
+    exitGate.aimYaw18e2 = -1000;
+    exitGate.inputFlags5d8 = 0x10;
+    exitGate.controlWord = 3;
+    gated(exitGate);
+    assert(exitGate.aimPitch18e0 === 960 && exitGate.aimYaw18e2 === -960
+      && (exitGate.controlWord & 3) === 0,
+      "phase 4 decays exact +0x18e0/+0x18e2 aim fields and takes high-nibble exit");
+
+    const liveDashMembers = dashCases.map(({ id }) => id);
+    for (const id of liveDashMembers) {
+      const runtime = makeMinimalGRedBorg();
+      runtime.borgId = id;
+      const driver = RomDriverBridge.attach(runtime, {});
+      assert(driver !== null, `${id} bridge registration attaches`);
+      if (!driver) continue;
+      for (let variant = 0; variant < 5; variant++) {
+        driver.actor.fbPhaseSlots[0] = 0;
+        driver.actor.actionIndex = 0;
+        driver.actor.variantIndex = variant;
+        (driver.actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = { x: 10, y: 0, z: 0 };
+        driver.actor.rootAction!(driver.actor);
+        assert(driver.actor.fbPhaseSlots[0] === 1,
+          `${id} action-0 variant ${variant} routes through zz_00f1e30_`);
+      }
+    }
+    const noDashRuntime = makeMinimalGRedBorg();
+    noDashRuntime.borgId = "pl0406";
+    const noDash = RomDriverBridge.attach(noDashRuntime, {});
+    assert(noDash !== null, "pl0406 bridge registration attaches for its live melee");
+    if (noDash) {
+      noDash.actor.actionIndex = 0;
+      noDash.actor.variantIndex = 0;
+      noDash.actor.rootAction!(noDash.actor);
+      assert(noDash.actor.fbPhaseSlots[0] === 0,
+        "pl0406 has no live action-0 leaf and is not wrapped by Robot dash");
+    }
+
+    for (const id of [
+      "pl0400", "pl0401", "pl0402", "pl0403", "pl0404", "pl0405",
+      "pl0406", "pl0407", "pl0408", "pl0409", "pl040a", "pl040b",
+    ] as const) {
+      const runtime = makeMinimalGRedBorg();
+      runtime.borgId = id;
+      const driver = RomDriverBridge.attach(runtime, {});
+      if (!driver) continue;
+      driver.actor.actionIndex = 1;
+      driver.actor.variantIndex = 0;
+      driver.actor.rootAction!(driver.actor);
+      assert(driver.actor.fbPhaseSlots[0] === 1,
+        `${id} action-1 variant 0 routes through zz_00f2374_`);
+      driver.actor.fbPhaseSlots[0] = 0;
+      driver.actor.variantIndex = 1;
+      driver.actor.rootAction!(driver.actor);
+      assert(driver.actor.fbPhaseSlots[0] === 0,
+        `${id} action-1 variant 1 is preserved for its distinct ROM machine/fallback`);
+    }
+
+    const elevatedOwner = makeMinimalGRedBorg();
+    elevatedOwner.borgId = "pl0400";
+    elevatedOwner.uid = "robot-elevated-owner";
+    elevatedOwner.grounded = true;
+    elevatedOwner.lockTarget = "robot-elevated-target";
+    elevatedOwner.command = {
+      word: 0, type: 1, button: "B", recordAddress: "robot-elevated-action1",
+      subtype: 0, actionIndex: 1, variantIndex: 0, exact: true,
+    };
+    const elevatedTarget = makeMinimalGRedBorg();
+    elevatedTarget.uid = "robot-elevated-target";
+    elevatedTarget.pos = { x: 0, y: 400, z: 300 };
+    const elevatedDriver = RomDriverBridge.attach(elevatedOwner, {});
+    assert(elevatedDriver !== null, "elevated-target Robot bridge attaches");
+    if (elevatedDriver) {
+      elevatedOwner.romDriver = elevatedDriver;
+      elevatedDriver.tryStartXSpecial(elevatedOwner, [elevatedOwner, elevatedTarget]);
+      assert(approxEq((elevatedDriver.actor as RomActor & { targetDistance760?: number }).targetDistance760 ?? 0, 500),
+        "bridge sync mirrors full 3D Euclidean target distance into actor+0x760");
+    }
+  }
+
+  console.log("\n[rom.selfcheck] G RED action 0 — five-variant dash table (zz_018d288_):");
+  {
+    type DashScratch = RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+      dashAimTimer560?: number;
+      inputFlags5d8?: number;
+      aimPitch1900?: number;
+      aimPitch18da?: number;
+      aimRoll1dfc?: number;
+      onStartStream?: (group: number, slot: number, mask: number) => boolean;
+    };
+    const shots: Array<[number, number]> = [];
+    const streams: Array<[number, number, number]> = [];
+    const ctx: GRedFamilyCtx = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, address, type) => shots.push([address, type]),
+    };
+    const actor = createRomActor() as DashScratch;
+    actor.pos = { x: 100, y: 0, z: 0 };
+    actor.lockTarget = { x: 0, y: 0, z: 0 };
+    actor.aimPitch1900 = 1000;
+    actor.aimPitch18da = 1000;
+    actor.aimRoll1dfc = 1000;
+    actor.onStartStream = (group, slot, mask) => { streams.push([group, slot, mask]); return true; };
+    configureGRedFamily(actor, "pl0615", ctx);
+    actor.actionIndex = 0;
+    actor.variantIndex = 0;
+    actor.rootAction!(actor);
+    assert(actor.fbPhaseSlots[0] === 1 && actor.dashAimTimer560 === GRED_DASH.AIM_TIMER,
+      "v0 enters table 0x803655b0 and seeds the distinct +0x560 timer to 30");
+    assert(approxEq(actor.pos.x, 195) && actor.hSpeed === 0 && actor.yVel === 0,
+      "v0 phase 0 applies ×0.95 target-relative reposition and zeroes motion scalars");
+    assert(actor.aimPitch1900 === 960 && actor.aimPitch18da === 500 && actor.aimRoll1dfc === 500,
+      "root/v0 wrappers apply exact ×0.96 and arithmetic-half aim decays");
+    assert(streams.some(([g, s, m]) => g === 2 && s === 0 && m === 0xf),
+      "v0 starts family stream group 2 at +0x6ee with mask 0xf");
+
+    actor.contactP0 = 1;
+    actor.dashAimTimer560 = 0;
+    actor.rootAction!(actor);
+    assert(actor.fbPhaseSlots[0] === 2 && actor.handlerTimer === GRED_DASH.REPEAT_G_RED,
+      "v0 stream signal advances to phase 2 and seeds G RED's +0x558 repeat timer to 12");
+    assert(shots.some(([address, type]) => address === GRED_DASH.PROJECTILE_SPAWNER && type === 0x2b),
+      "zz_018dcb0_ requests G RED projectile record 0x2b through spawner 0x800c3be0");
+
+    actor.inputFlags5d8 = 0x10;
+    actor.controlWord = 1;
+    actor.rootAction!(actor);
+    assert((actor.controlWord & 3) === 0 && actor.stateTimer === GRED_DASH.EXIT_COOLDOWN,
+      "v0 phase 2 high-nibble exit clears action mode and applies the exact 20-frame cooldown");
+
+    const v2 = createRomActor() as DashScratch;
+    const v2Streams: Array<[number, number, number]> = [];
+    v2.lockTarget = { x: 0, y: 0, z: 10 };
+    v2.onStartStream = (group, slot, mask) => { v2Streams.push([group, slot, mask]); return true; };
+    v2.variantIndex = 2;
+    createGRedDash(ctx)(v2);
+    assert(v2Streams.some(([g, s, m]) => g === 2 && s === 4 && m === 1),
+      "v1/v2/v3 share table 0x803655bc and default to group-2 slot 4, mask 1");
+
+    const v4 = createRomActor() as DashScratch;
+    const v4Streams: Array<[number, number, number]> = [];
+    v4.lockTarget = { x: 0, y: 0, z: 10 };
+    v4.onStartStream = (group, slot, mask) => { v4Streams.push([group, slot, mask]); return true; };
+    v4.variantIndex = 4;
+    createGRedDash(ctx)(v4);
+    assert(v4Streams.some(([g, s, m]) => g === 2 && s === 6 && m === 1)
+      && v4Streams.some(([g, s, m]) => g === 0 && s === 0x0d && m === 2),
+      "v4 table 0x803655c8 starts its exact dual streams: g2/s6 mask1 + g0/s13 mask2");
+
+    const runtime = makeMinimalGRedBorg();
+    runtime.grounded = true;
+    runtime.command = {
+      word: 0, type: 1, button: "B", recordAddress: "test-gred-action0",
+      subtype: 0, actionIndex: 0, variantIndex: 0, exact: true,
+    };
+    const driver = RomDriverBridge.attach(runtime, {});
+    assert(driver !== null, "bridge attaches G RED action-0 family driver");
+    if (driver) {
+      runtime.romDriver = driver;
+      const handled = driver.tryStartBAttack(runtime, [runtime]);
+      assert(handled && driver.actor.fbPhaseSlots[0] === 1,
+        "exact B command actionIndex 0 enters the ROM dash instead of generic combat");
+    }
   }
 
   if (failures > 0) {

@@ -25,7 +25,7 @@ import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { borgBannerPath, borgMiniPath } from "../assets.js";
 import { captureCropImg } from "../captureCrop.js";
 import { clear, el, legendItem } from "../dom.js";
-import { subscribeMenuInput, type MenuAction } from "../menuInput.js";
+import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
 import type { ForceBorg } from "./ForceBuilder.js";
@@ -133,7 +133,7 @@ export interface SelectForceOptions {
   onBack?: () => void;
 }
 
-export interface SelectForceHandle {
+export interface SelectForceHandle extends MenuInputTarget {
   destroy: () => void;
 }
 
@@ -291,14 +291,12 @@ export function createSelectForce(
     rotation: [-0.12, 0, 0],
     maxModels: UI_SCENE_LAYOUTS.entry00.modelCount,
   });
-  const unsubscribeMenuInput = subscribeMenuInput((event) => onMenuAction(event.action, event.dir));
-
   return {
+    handleMenuInput: (event) => onMenuAction(event.action, event.dir),
     destroy: () => {
       leadModelToken += 1; // cancel any in-flight async lead-model mount
       stopLeadModel?.();
       stopEntryScene();
-      unsubscribeMenuInput();
       root.remove();
     },
   };

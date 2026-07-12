@@ -31,6 +31,9 @@ export function ensureStyles(doc: Document = document): void {
 
 export { GF_UI_CSS };
 
+export { createMenuScreenHost } from "./menuScreenHost.js";
+export type { MenuScreenHandle, MenuScreenHost, MenuInputSource } from "./menuScreenHost.js";
+
 // ---- asset helpers ----
 export { borgUiCode, borgBannerPath, borgMiniPath, borgFacePath, ASSETS } from "./assets.js";
 

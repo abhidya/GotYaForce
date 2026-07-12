@@ -214,9 +214,9 @@ function testBattleRegressionUnaffected(): void {
       battle.step(1 / 60, { p1: input });
     }
     return JSON.stringify({
-      frame: battle.state.frame,
-      result: battle.state.result,
-      energy: battle.state.energy,
+      frame: battle.observe().frame,
+      result: battle.observe().result,
+      energy: battle.observe().energy,
     });
   }
 

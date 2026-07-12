@@ -22,7 +22,7 @@ import {
   createPublicAssetCatalog,
   type StageAssets,
 } from "@gf/assets";
-import { createScreenHost, startFixedStepLoop, startRenderLoop } from "@gf/core";
+import { startFixedStepLoop, startRenderLoop } from "@gf/core";
 import {
   createThreeAssetLoader,
   createThreeViewport,
@@ -32,7 +32,7 @@ import {
   cameraParamsForBorgId,
   emptyInput,
   type Battle,
-  type BorgRuntime,
+  type BattleActorObservation,
   type PlayerInput,
   type RectStageBounds,
 } from "@gf/combat";
@@ -55,6 +55,7 @@ import {
 
 import {
   ensureStyles,
+  createMenuScreenHost,
   createTitleIntro,
   createMainMenu,
   createSelectDifficulty,
@@ -74,6 +75,8 @@ import {
   type DebugOverlayHandle,
   type TeammateMarker,
   type GetsRow,
+  type MenuScreenHandle,
+  type PauseMenuHandle,
 } from "./ui/index.js";
 
 import {
@@ -393,7 +396,7 @@ const uiElement = document.getElementById("ui");
 const canvas = document.getElementById("app") as HTMLCanvasElement;
 if (!uiElement) throw new Error("Missing #ui");
 const ui = uiElement;
-const screenHost = createScreenHost(ui);
+const screenHost = createMenuScreenHost(ui);
 ui.style.pointerEvents = "auto"; // the UI component library uses real buttons.
 const urlParams = new URLSearchParams(window.location.search);
 const ENABLE_BATTLE_DEBUG_DATASET = urlParams.has("debugBattle");
@@ -713,7 +716,7 @@ function getRng(): number {
 }
 let getCollection: CollectedGetDrop[] = loadGetCollection();
 
-function mountScreen(build: (root: HTMLElement) => { destroy(): void }): void {
+function mountScreen(build: (root: HTMLElement) => MenuScreenHandle): void {
   screenHost.mount(build);
 }
 
@@ -925,7 +928,7 @@ interface BattleSession {
   allyMax: number;
   enemyMax: number;
   paused: boolean;
-  pauseHandle: { destroy(): void } | null;
+  pauseHandle: PauseMenuHandle | null;
   resolved: boolean;
 }
 
@@ -986,7 +989,7 @@ function localActiveUid(): string | null {
   return currentBattlePresentation()?.activeUid ?? null;
 }
 
-function localFocusBorg(): BorgRuntime | null {
+function localFocusBorg(): BattleActorObservation | null {
   return currentBattlePresentation()?.focus ?? null;
 }
 
@@ -1029,10 +1032,13 @@ const TEAMMATE_MARKER_Y_OFFSET = 125;
 const TEAMMATE_MARKER_SCREEN_MARGIN = 0.04;
 const _hudProject = new THREE.Vector3();
 
-function projectedTeammateMarkers(battle: Battle, focus: BorgRuntime | null): TeammateMarker[] {
+function projectedTeammateMarkers(
+  battle: Battle,
+  focus: BattleActorObservation | null,
+): TeammateMarker[] {
   if (!focus) return [];
   const markers: TeammateMarker[] = [];
-  for (const b of battle.state.borgs) {
+  for (const b of battle.observe().actors) {
     if (!b.alive || b.uid === focus.uid || b.team !== focus.team) continue;
     const scenePos = battleScene.positionOf(b.uid);
     _hudProject
@@ -1086,7 +1092,7 @@ function pollPauseToggle(): void {
 function pauseBattle(): void {
   if (!session || session.paused) return;
   session.paused = true;
-  session.pauseHandle = createPauseMenu(ui, {
+  session.pauseHandle = screenHost.mountOverlay((root) => createPauseMenu(root, {
     // PauseMenu treats "back"/"start" (Escape/Enter/gamepad-Start, routed through the bus) the
     // same as an explicit RESUME confirm — see PauseMenu.ts onMenuAction — so this one callback
     // covers every resume input path; playConfirmSfx here cannot double-fire against
@@ -1097,17 +1103,16 @@ function pauseBattle(): void {
     },
     onQuit: () => {
       playBackSfx();
-      session?.pauseHandle?.destroy();
+      closePauseMenu();
       if (session) session.paused = false;
       endBattleToMenu();
     },
-  });
+  }));
 }
 
 function resumeBattle(): void {
   if (!session) return;
-  session.pauseHandle?.destroy();
-  session.pauseHandle = null;
+  closePauseMenu();
   session.paused = false;
   // Swallow the in-flight pause key edge: the menuInput bus resumed the game
   // SYNCHRONOUSLY inside the keydown event (well before this polled tick). The
@@ -1120,6 +1125,13 @@ function resumeBattle(): void {
   pausePressedLast = true;
 }
 
+function closePauseMenu(): void {
+  const handle = session?.pauseHandle;
+  if (!handle) return;
+  screenHost.closeOverlay(handle);
+  if (session?.pauseHandle === handle) session.pauseHandle = null;
+}
+
 function endBattleToMenu(): void {
   // Abandon (pause -> quit): revert the GET pool to its pre-battle snapshot, matching the
   // ROM's lose/abandon revert (doc §2c) — an abandoned battle keeps none of its accrual.
@@ -1130,7 +1142,7 @@ function endBattleToMenu(): void {
 
 function teardownBattle(): void {
   session?.hud.destroy();
-  session?.pauseHandle?.destroy();
+  closePauseMenu();
   battleScene.clear();
   session = null;
 }
@@ -1175,7 +1187,7 @@ function stepBattle(dt: number): void {
     }
     simAccumulator -= SIM_DT;
     steps += 1;
-    if (battle.state.result !== "ongoing") break;
+    if (battle.observe().result !== "ongoing") break;
   }
 
   // Compute the presentation once: it drives both the world scene (reticle color = melee mode)
@@ -1185,7 +1197,7 @@ function stepBattle(dt: number): void {
   battleScene.sync(sceneState.actors, sceneState.projectiles, sceneState.focusUid, Boolean(presentation?.hud.meleeRange));
   updateHud();
 
-  if (battle.state.result !== "ongoing") resolveBattle();
+  if (battle.observe().result !== "ongoing") resolveBattle();
 }
 
 // Battle-camera framing: see apps/game/src/sim/camera.ts header for the full DERIVED-vs-TUNED
@@ -1198,7 +1210,7 @@ function followCamera(): void {
   const activeTargetUid = focus?.targetLockState?.activeTargetUid ?? focus?.lockTarget ?? null;
   const activeTargetScenePos = activeTargetUid ? battleScene.positionOf(activeTargetUid) : null;
   const activeTargetSim = activeTargetUid
-    ? session.battle.state.borgs.find((b) => b.uid === activeTargetUid) ?? null
+    ? session.battle.observe().actors.find((b) => b.uid === activeTargetUid) ?? null
     : null;
   const lockTargetPos =
     activeTargetScenePos ??
@@ -1216,7 +1228,7 @@ function followCamera(): void {
 }
 
 function cameraFollowTargetForBorg(
-  borg: BorgRuntime,
+  borg: BattleActorObservation,
   pos: THREE.Vector3,
   lock?: Pick<CameraFollowTarget, "lockTargetPos" | "lockTargetKey" | "lockCameraState">,
 ): CameraFollowTarget {
@@ -1249,7 +1261,7 @@ function updateBattleDebugDataset(): void {
     camera: [rounded(camera.position.x), rounded(camera.position.y), rounded(camera.position.z)],
     target: [rounded(controls.target.x), rounded(controls.target.y), rounded(controls.target.z)],
     bounds: session.stageBounds,
-    borgs: session.battle.state.borgs.map((b) => ({
+    borgs: session.battle.observe().actors.map((b) => ({
       uid: b.uid,
       team: b.team,
       borgId: b.borgId,
@@ -1288,7 +1300,7 @@ function resolveBattle(): void {
   // distinction between a lose and an abandon for the revert).
   let drops: GetDrop[] = [];
   if (outcome.win) {
-    for (const defeat of session.battle.state.defeats ?? []) {
+    for (const defeat of session.battle.observe().defeats ?? []) {
       if (defeat.victimTeam === 1 && defeat.killerTeam === 0) {
         registerKill(getPool, defeat.borgId, (defeat.colorVariant ?? 0) as GetColorVariant, getRng);
       }
@@ -1340,12 +1352,11 @@ function showResults(
 ): void {
   // Tear down HUD but keep the battle scene visible behind the results.
   session?.hud.destroy();
-  session?.pauseHandle?.destroy();
+  closePauseMenu();
   flow.screen = "results";
 
   const handle = createResults(ui, {
     onAdvance: () => {
-      handle.destroy();
       if (drops.length > 0) showGets(drops, battleResults);
       else advanceRun(battleResults);
     },
@@ -1363,7 +1374,6 @@ function showGets(drops: readonly GetDrop[], battleResults: BattleResults): void
   flow.screen = "gets";
   const handle = createGets(ui, {
     onAdvance: () => {
-      handle.destroy();
       advanceRun(battleResults);
     },
   });

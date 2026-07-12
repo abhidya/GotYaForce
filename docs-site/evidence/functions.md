@@ -27,7 +27,11 @@ import evidenceData from '../.vitepress/data/evidence.json'
 
 ## Source files
 
+- `research/decomp/GotchaForce.gpr` + `research/decomp/GotchaForce.rep/` — checked-in Ghidra project
+- `research/tools/OGhidra/analysis_sessions/` — saved OGhidra analysis sessions
 - `research/decomp/index/function-evidence-index.json` — 18 MB, the full index
 - `research/decomp/index/address-resolution.md` — address → symbol mapping
 - `research/decomp/index/class-map.md` — class-grouped function map
 - `research/decomp/ghidra-export/_index.tsv` — TSV of all chunks
+
+See [Ghidra Corpus](../ghidra-corpus) for the project/session rollup.

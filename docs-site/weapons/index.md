@@ -4,19 +4,14 @@ title: Weapons & Items
 
 # Weapons & items
 
-90 weapon archives (`it####_mdl.arz`) catalogued in
-`research/asset-inventory/weapon-attachment-map.json` (11 MB) and
-`research/asset-inventory/weapons-effects-projectiles.json` (4.8 MB).
+Weapon, projectile, effect, attachment-bone, and attack-clip evidence curated
+from the heavy research JSON into a small GitHub Pages atlas.
 
-::: warning Heavy data
-The full weapon table is large. The curate script does not yet copy it into
-the docs data dir to keep the static site under GitHub Pages limits. The
-authoritative source remains the research JSON files above.
-:::
+<WeaponAtlas />
 
 ## What's mapped
 
-- Weapon → borg attachment points
+- Weapon to Borg attachment points
 - Projectile spawn params (muzzle position, homing, lifetime)
 - Effect IDs cross-referenced with `impact-effect-id` decode
 - Owner-liveness despawn rules (`zz_00840b8_`, `chunk_0012.c:3216`)

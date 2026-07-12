@@ -15,6 +15,10 @@ import BorgCard from './components/BorgCard.vue'
 import BorgGrid from './components/BorgGrid.vue'
 import BorgDetail from './components/BorgDetail.vue'
 import BorgModelViewer from './components/BorgModelViewer.vue'
+import StageAtlas from './components/StageAtlas.vue'
+import WeaponAtlas from './components/WeaponAtlas.vue'
+import ForceAtlas from './components/ForceAtlas.vue'
+import ModeAtlas from './components/ModeAtlas.vue'
 import CallGraph from './components/CallGraph.vue'
 import MemoryMapSvg from './components/MemoryMapSvg.vue'
 import TypeMatrix from './components/TypeMatrix.vue'
@@ -37,6 +41,10 @@ export default {
     app.component('BorgGrid', BorgGrid)
     app.component('BorgDetail', BorgDetail)
     app.component('BorgModelViewer', BorgModelViewer)
+    app.component('StageAtlas', StageAtlas)
+    app.component('WeaponAtlas', WeaponAtlas)
+    app.component('ForceAtlas', ForceAtlas)
+    app.component('ModeAtlas', ModeAtlas)
     app.component('CallGraph', CallGraph)
     app.component('MemoryMapSvg', MemoryMapSvg)
     app.component('TypeMatrix', TypeMatrix)

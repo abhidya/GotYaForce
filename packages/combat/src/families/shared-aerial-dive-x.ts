@@ -320,7 +320,7 @@ function aerialXPhase0(actor: RomActor, cfg: SharedAerialDiveXConfig, ctx: Strea
     vecScale(SHARED_AERIAL_X.REPOSITION_SCALE, actor.motion, actor.motion);
     vecAdd(actor.pos, actor.motion, actor.pos);
   }
-  // zz_00677b0_(actor) — ground snap; owned by the bridge's clamp (registerGroundClamp).
+  // zz_00677b0_(actor) — ground snap; owned by the actor's battle-local physics runtime.
 
   // STREAM START — slot = +0x6ea, cursor++. Airborne fork (+0x5e0 & 0x40) changes ONLY
   // header args (10, 2) vs (−1, −1) to zz_004beb8_, NOT the slot (unlike zz_00ff2bc_'s

@@ -838,6 +838,74 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0400 withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x802d4ea8; FLOAT_80439078/_7c/_88/_8c"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0400 callback and v0-v4 bridge routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80074ccc/table 0x802d4e9c/leaf 0x80074d08"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 all leaf 0x80074d08/config 0x802d4ea8"
+                ]
+              },
+              "member": "pl0400",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl040a withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x802d4ea8; pl040a callback borg switch"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl040a callback and v0-v4 bridge routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80074ccc/table 0x802d4e9c/leaf 0x80074d08"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 all leaf 0x80074d08/config 0x802d4ea8"
+                ]
+              },
+              "member": "pl040a",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -913,7 +981,7 @@
             "pl040a: command 0x802d5134 (user-data/GG4E/disc/sys/boot.dol:0x80074940 copies actor+0x4ec root via 0x800749c8 and actor+0x4b0 via 0x80074a14)",
             "pl040a: root 0x80074ccc, action table 0x802d4e9c, handler 0x80074d08"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
@@ -2186,6 +2254,41 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0401 withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x802f57f4 and FLOAT_80439078/_7c/_88/_8c"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0401 callback and v0-v4 bridge routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x8009b74c/table 0x802f57e8/leaf 0x8009b788"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 leaf 0x8009b788/config 0x802f57f4"
+                ]
+              },
+              "member": "pl0401",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -2226,7 +2329,7 @@
             "pl0401: command 0x802f5aa4 (user-data/GG4E/disc/sys/boot.dol:0x8009b40c copies actor+0x4ec root via 0x8009b494 and actor+0x4b0 via 0x8009b4e0)",
             "pl0401: root 0x8009b74c, action table 0x802f57e8, handler 0x8009b788"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
@@ -6457,6 +6560,41 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0404 withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x80310978 and shared float bank"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0404 callback and v0-v4 bridge routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x800d7f74/table 0x8031096c/leaf 0x800d7fb0"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 leaf 0x800d7fb0/config 0x80310978"
+                ]
+              },
+              "member": "pl0404",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -6497,7 +6635,7 @@
             "pl0404: command 0x80310c14 (user-data/GG4E/disc/sys/boot.dol:0x800d7c7c copies actor+0x4ec root via 0x800d7d04 and actor+0x4b0 via 0x800d7d50)",
             "pl0404: root 0x800d7f74, action table 0x8031096c, handler 0x800d7fb0"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
@@ -6582,6 +6720,74 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0405 withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x80311c54 = slot0/ammo0/timer4/count5"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0405 timed callback and v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: five phases plus timed callback family"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x800dab34/table 0x80311c48/leaf 0x800dab70"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 config 0x80311c54"
+                ]
+              },
+              "member": "pl0405",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0409 withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x80311c68 = slot3/ammo0/-1/-1"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0409 callback and v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x800dab34/table 0x80311c48/leaf 0x800dab70"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 3/4/5; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 config 0x80311c68"
+                ]
+              },
+              "member": "pl0409",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -6657,7 +6863,7 @@
             "pl0409: command 0x80311f0c (user-data/GG4E/disc/sys/boot.dol:0x800da9fc copies actor+0x4ec root via 0x800daa84 and actor+0x4b0 via 0x800daad0)",
             "pl0409: root 0x800dab34, action table 0x80311c48, handler 0x800dab70"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
@@ -6921,6 +7127,41 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0403 withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x80316ae0 and shared float bank"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0403 callback/exit gate/v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: five phases and config+0x10 exit gate"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x800dfe4c/table 0x80316ac0/handler 0x800dfe88/leaf 0x800dfec4"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 0/1/2; real exit-gate selfcheck"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 leaf 0x800dfec4/config 0x80316ae0"
+                ]
+              },
+              "member": "pl0403",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -6961,7 +7202,7 @@
             "pl0403: command 0x80316d8c (user-data/GG4E/disc/sys/boot.dol:0x800dfc38 copies actor+0x4ec root via 0x800dfcc0 and actor+0x4b0 via 0x800dfd0c)",
             "pl0403: root 0x800dfe4c, action table 0x80316ac0, handler 0x800dfe88"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
@@ -9400,6 +9641,107 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0402 withRobotDash preserves bespoke action 2"
+                ],
+                "constants": [
+                  "boot.dol: config 0x80327f48"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0402 callback and v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80112e90/table 0x80327f38/leaf 0x80112ecc"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 config 0x80327f48"
+                ]
+              },
+              "member": "pl0402",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0407 withRobotDash preserves bespoke action 2"
+                ],
+                "constants": [
+                  "boot.dol: config 0x80327f5c = slot3/ammo0/timer4/count5"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0407 callback and v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: five phases plus timed callback family"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80112e90/table 0x80327f38/leaf 0x80112fe8"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 3/4/5; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 config 0x80327f5c"
+                ]
+              },
+              "member": "pl0407",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0408 withRobotDash preserves bespoke action 2"
+                ],
+                "constants": [
+                  "boot.dol: config 0x80327f5c = slot3/ammo0/timer4/count5"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl0408 callback and v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: five phases plus borg-switched callback"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80112e90/table 0x80327f38/leaf 0x80112fe8"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 3/4/5; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 config 0x80327f5c"
+                ]
+              },
+              "member": "pl0408",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -9510,7 +9852,7 @@
             "pl0408: command 0x80328204 (user-data/GG4E/disc/sys/boot.dol:0x80112b44 copies actor+0x4ec root via 0x80112bcc and actor+0x4b0 via 0x80112c18)",
             "pl0408: root 0x80112e90, action table 0x80327f38, handler 0x80112ecc"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
@@ -19231,6 +19573,107 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl040b withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x8038bdfc = slot0/ammo2/-1/-1"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl040b callback and v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: five phases and two-child exit gate"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x801d4810/table 0x8038bdf0/leaf 0x801d484c"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 0/1/2; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 config 0x8038bdfc"
+                ]
+              },
+              "member": "pl040b",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl040c withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x8038be10 = slot3/ammo0/timer4/count5"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl040c callback and v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: five phases plus timed callback family"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x801d4810/table 0x8038bdf0/leaf 0x801d484c"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 3/4/5; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 config 0x8038be10"
+                ]
+              },
+              "member": "pl040c",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl040d withRobotDash"
+                ],
+                "constants": [
+                  "boot.dol: config 0x8038be24 = slot6/ammo0/-1/-1"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts: pl040d callback and v0-v4 routing"
+                ],
+                "phaseTransitions": [
+                  "shared-robot-dash.ts: PTR_FUN_8031b8a0 five-phase handlers"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x801d4810/table 0x8038bdf0/leaf 0x801d484c"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables: group 2 slots 6/7/8; real phase selfchecks"
+                ],
+                "variantDispatch": [
+                  "actionStreamTables: v0-v4 config 0x8038be24"
+                ]
+              },
+              "member": "pl040d",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -19341,7 +19784,7 @@
             "pl040d: command 0x8038c2dc (user-data/GG4E/disc/sys/boot.dol:0x801d4590 copies actor+0x4ec root via 0x801d4618 and actor+0x4b0 via 0x801d46b4)",
             "pl040d: root 0x801d4810, action table 0x8038bdf0, handler 0x801d484c"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
@@ -20400,8 +20843,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 71,
-      "partial": 254,
-      "ported": 0
+      "partial": 247,
+      "ported": 7
     }
   }
 }
