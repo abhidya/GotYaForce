@@ -1,93 +1,139 @@
+/** Atomic browser persistence for the complete Gotcha-Box state. */
+import {
+  GOTCHA_BOX_STATE_VERSION,
+  createGotchaBoxState,
+  type CollectedGetDrop,
+  type GotchaBoxPersistence,
+  type GotchaBoxState,
+  type GetPool,
+} from "@gf/missions";
+
+export const GOTCHA_BOX_STORAGE_KEY = "gf-gotcha-box-v1";
+const LEGACY_POOL_STORAGE_KEY = "gf-get-pool-v1";
+const LEGACY_COLLECTION_STORAGE_KEY = "gf-get-collection-v1";
+
+export interface StorageLike {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+}
+
 /**
- * getStorage — browser localStorage persistence for the Borg GET / Gotcha-Box drop pool
- * and the player's collected-drops log.
- *
- * PORT-ISM: the ROM persists the GET pool in the save file (GCI); the exact save-side
- * layout is undocumented (research/decomp/items-evidence-inventory-2026-07-05.md §4 —
- * "GET-pool save persistence layout ... GCI field unknown"). localStorage is this port's
- * stand-in persistence medium, following the same pattern SelectForce.ts already uses for
- * force-slot persistence (FORCE_SLOTS_STORAGE_KEY) — validated JSON parse, try/catch around
- * every localStorage call so private-mode/storage-disabled browsers degrade to in-memory-only
- * rather than throwing. The POOL SEMANTICS themselves (what's stored, how it resets) are
- * DERIVED from the doc, not invented here — see @gf/missions getSystem.ts.
+ * Uses a cached state as the session fallback, so unavailable or failing storage never throws
+ * and later commits remain visible to this adapter instance.
  */
+export function createBrowserGotchaBoxPersistence(
+  storage: StorageLike | null = defaultStorage(),
+): GotchaBoxPersistence {
+  let cached = createGotchaBoxState();
+  let initialized = false;
 
-import { createGetPool, type GetDrop, type GetPool } from "@gf/missions";
+  return {
+    load(): GotchaBoxState {
+      if (initialized) return cloneState(cached);
+      initialized = true;
+      if (!storage) return cloneState(cached);
 
-const POOL_STORAGE_KEY = "gf-get-pool-v1";
-const COLLECTION_STORAGE_KEY = "gf-get-collection-v1";
+      try {
+        const current = storage.getItem(GOTCHA_BOX_STORAGE_KEY);
+        if (current !== null) {
+          cached = parseState(current) ?? createGotchaBoxState();
+          return cloneState(cached);
+        }
 
-function isPoolEntryShaped(v: unknown): v is GetPool["entries"][number] {
-  if (typeof v !== "object" || v === null) return false;
-  const e = v as Record<string, unknown>;
-  return typeof e["borgId"] === "string" && typeof e["colorVariant"] === "number" && typeof e["points"] === "number";
+        const legacy = parseLegacy(
+          storage.getItem(LEGACY_POOL_STORAGE_KEY),
+          storage.getItem(LEGACY_COLLECTION_STORAGE_KEY),
+        );
+        if (legacy) {
+          cached = legacy;
+          trySave(storage, cached);
+        }
+      } catch {
+        cached = createGotchaBoxState();
+      }
+      return cloneState(cached);
+    },
+
+    save(state): void {
+      cached = cloneState(state);
+      initialized = true;
+      if (storage) trySave(storage, cached);
+    },
+  };
 }
 
-/** Load the persisted GET pool, or a fresh empty pool if none/invalid is stored. */
-export function loadGetPool(): GetPool {
+function defaultStorage(): StorageLike | null {
   try {
-    const raw = window.localStorage.getItem(POOL_STORAGE_KEY);
-    if (!raw) return createGetPool();
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null || !Array.isArray((parsed as { entries?: unknown }).entries)) {
-      return createGetPool();
-    }
-    const entries = (parsed as { entries: unknown[] }).entries.filter(isPoolEntryShaped);
-    return { entries };
+    return typeof window === "undefined" ? null : window.localStorage;
   } catch {
-    return createGetPool();
+    return null;
   }
 }
 
-export function saveGetPool(pool: GetPool): void {
+function trySave(storage: StorageLike, state: GotchaBoxState): void {
   try {
-    window.localStorage.setItem(POOL_STORAGE_KEY, JSON.stringify(pool));
+    storage.setItem(GOTCHA_BOX_STORAGE_KEY, JSON.stringify(state));
   } catch {
-    // Storage may be unavailable (private mode); the in-memory pool still works this session.
+    // The adapter's cached copy continues the session when browser storage is unavailable.
   }
 }
 
-/** One collected drop record, kept for a simple "owned units / parts progress" log. */
-export interface CollectedGetDrop extends GetDrop {
-  /** Wall-clock ms timestamp when it was collected (display/debug only). */
-  collectedAt: number;
+function parseState(raw: string): GotchaBoxState | null {
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (!isRecord(value) || value.version !== GOTCHA_BOX_STATE_VERSION) return null;
+    if (!isPool(value.pool) || !isCollection(value.collection)) return null;
+    return cloneState(value as unknown as GotchaBoxState);
+  } catch {
+    return null;
+  }
 }
 
-function isCollectedDropShaped(v: unknown): v is CollectedGetDrop {
-  if (typeof v !== "object" || v === null) return false;
-  const d = v as Record<string, unknown>;
-  return (
-    typeof d["borgId"] === "string" &&
-    typeof d["colorVariant"] === "number" &&
-    (d["kind"] === "unit" || d["kind"] === "parts") &&
-    typeof d["partIndex"] === "number" &&
-    typeof d["collectedAt"] === "number"
+function parseLegacy(poolRaw: string | null, collectionRaw: string | null): GotchaBoxState | null {
+  if (poolRaw === null && collectionRaw === null) return null;
+  try {
+    const pool: unknown = poolRaw === null ? { entries: [] } : JSON.parse(poolRaw);
+    const collection: unknown = collectionRaw === null ? [] : JSON.parse(collectionRaw);
+    if (!isPool(pool) || !isCollection(collection)) return null;
+    return cloneState({ version: GOTCHA_BOX_STATE_VERSION, pool, collection });
+  } catch {
+    return null;
+  }
+}
+
+function isPool(value: unknown): value is GetPool {
+  return isRecord(value) && Array.isArray(value.entries) && value.entries.every((entry) =>
+    isRecord(entry) &&
+    typeof entry.borgId === "string" &&
+    isIntegerInRange(entry.colorVariant, 0, 5) &&
+    isIntegerInRange(entry.points, 0, 65535)
   );
 }
 
-export function loadGetCollection(): CollectedGetDrop[] {
-  try {
-    const raw = window.localStorage.getItem(COLLECTION_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(isCollectedDropShaped);
-  } catch {
-    return [];
-  }
+function isCollection(value: unknown): value is CollectedGetDrop[] {
+  return Array.isArray(value) && value.every((drop) =>
+    isRecord(drop) &&
+    typeof drop.borgId === "string" &&
+    isIntegerInRange(drop.colorVariant, 0, 5) &&
+    (drop.kind === "unit" || drop.kind === "parts") &&
+    Number.isInteger(drop.partIndex) &&
+    typeof drop.collectedAt === "number" && Number.isFinite(drop.collectedAt) &&
+    (drop.partsCount === undefined || (Number.isInteger(drop.partsCount) && drop.partsCount >= 2))
+  );
 }
 
-export function saveGetCollection(collection: readonly CollectedGetDrop[]): void {
-  try {
-    window.localStorage.setItem(COLLECTION_STORAGE_KEY, JSON.stringify(collection));
-  } catch {
-    // Storage may be unavailable (private mode); the in-memory collection still works this session.
-  }
+function isIntegerInRange(value: unknown, min: number, max: number): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= min && value <= max;
 }
 
-/** Append newly rolled drops to the persisted collection log and save both stores. */
-export function recordDrops(collection: CollectedGetDrop[], drops: readonly GetDrop[]): void {
-  const now = Date.now();
-  for (const drop of drops) collection.push({ ...drop, collectedAt: now });
-  saveGetCollection(collection);
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function cloneState(state: GotchaBoxState): GotchaBoxState {
+  return {
+    version: GOTCHA_BOX_STATE_VERSION,
+    pool: { entries: state.pool.entries.map((entry) => ({ ...entry })) },
+    collection: state.collection.map((drop) => ({ ...drop })),
+  };
 }

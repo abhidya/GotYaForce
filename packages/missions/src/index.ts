@@ -123,6 +123,21 @@ export {
   rollPartIndex,
   getDropRowForBorgId,
 } from "./getSystem.js";
+
+// --- Transactional Gotcha-Box settlement ---
+export {
+  GOTCHA_BOX_STATE_VERSION,
+  createGotchaBoxState,
+  createMemoryGotchaBoxPersistence,
+  createGotchaBoxSettlement,
+} from "./gotchaBoxSettlement.js";
+export type {
+  CollectedGetDrop,
+  GotchaBoxState,
+  GotchaBoxPersistence,
+  GotchaBoxSettlement,
+  GotchaBoxSettlementOptions,
+} from "./gotchaBoxSettlement.js";
 export type {
   GetColorVariant,
   GetDropTableRow,
