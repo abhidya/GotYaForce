@@ -20,6 +20,7 @@
     "selfcheck:rom": "node scripts/run-rom-tests.mjs",
     "selfcheck:readability-flagged-stages": "node scripts/selfcheck-readability-flagged-stages.mjs",
     "audit:move-wiring": "node scripts/audit-move-wiring.mjs",
+    "audit:family-state-machines": "node scripts/audit-family-state-machines.mjs",
     "audit:move-unblockers": "node scripts/audit-move-unblockers.mjs",
     "audit:stage-readability": "node scripts/audit-stage-readability.mjs",
     "gen:command-move-tables": "node scripts/gen-command-move-tables.mjs",
