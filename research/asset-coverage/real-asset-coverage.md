@@ -1,6 +1,6 @@
 # Real Asset Coverage Audit
 
-Generated: 2026-07-05T04:44:57.165Z
+Generated: 2026-07-12T05:06:23.251Z
 
 ## Summary
 
@@ -86,7 +86,7 @@ HIT inventory: research/asset-inventory/hit-bin-inventory.json (54 STIH stage fi
 
 Public stage manifest has 40 stage folders; 40 have complete visual DAE exports, 40 have render-state JSON, and 40 have collision bins.
 
-Runtime loader refs: apps/game/src/main.ts:478, packages/assets/src/index.ts:186, packages/assets/src/index.ts:296, packages/assets/src/index.ts:308, apps/game/src/main.ts:509, apps/game/src/main.ts:null
+Runtime loader refs: apps/game/src/main.ts:501, packages/assets/src/index.ts:186, packages/assets/src/index.ts:296, packages/assets/src/index.ts:308, apps/game/src/main.ts:532, apps/game/src/main.ts:null
 
 Runtime collision parser: @gf/formats (bounds wired, triangles wired, walls wired, ceilings wired)
 
@@ -199,14 +199,14 @@ Runtime combat profiles now bind typeCode/airJump/defense/shot/attack/speed to o
 Type damage matrix:
 - Generated from DOL tables: yes (packages/combat/src/typeDamage.generated.ts:720)
 - Runtime imports generated tables: yes (packages/combat/src/typeDamage.ts:11)
-- Damage pipeline uses multiplier: yes (packages/combat/src/damageFormula.ts:129)
+- Damage pipeline uses multiplier: yes (packages/combat/src/damageFormula.ts:216)
 - Shape: remap 16 rows; matrix 20x20; mapped borg ids 208.
 - Selfcheck covers sample multiplier: yes.
 
 Knockback direction:
 - Generated from DOL function evidence: yes (packages/physics/src/knockback.generated.ts:7)
 - Runtime imports generated constants: yes (packages/physics/src/knockback.ts:58)
-- Combat pipeline uses direction helper: yes (packages/combat/src/combat.ts:16)
+- Combat pipeline uses direction helper: yes (packages/combat/src/combat.ts:17)
 - Shape/constants: 5 modes; BAM16/radian 10430.3779296875; degenerate threshold 0.009999999776482582.
 
 Battle camera mode-1 blend:
@@ -218,7 +218,7 @@ Battle camera mode-1 blend:
 ## Borg Animation Coverage
 
 Validator report: research/asset-inventory/borg-animation-action-gaps.md
-Runtime resolver refs: apps/game/src/sim/borgPresentationAssets.ts:123, apps/game/src/sim/borgPresentationAssets.ts:173, apps/game/src/sim/borgPresentationAssets.ts:451, apps/game/src/sim/battleScene.ts:627
+Runtime resolver refs: apps/game/src/sim/borgPresentationAssets.ts:131, apps/game/src/sim/borgPresentationAssets.ts:181, apps/game/src/sim/borgPresentationAssets.ts:459, apps/game/src/sim/battleScene.ts:627
 Animation indexes parsed: 208/208; exported banks: 8633; canonical slot checks: 2704.
 Direct matches: 2704; fallbacks: 0; missing: 0; parse errors: 0.
 Fly/boost mapping: fly state resolves through exported boost labels.
@@ -243,7 +243,7 @@ Fly/boost mapping: fly state resolves through exported boost labels.
 
 Items/powerups in BattleState: no
 Runtime spawns item/drop/pickup entities: no
-Evidence refs: packages/combat/src/types.ts:555, packages/combat/src/battle.ts:240, packages/combat/src/battle.ts:569, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
+Evidence refs: packages/combat/src/types.ts:593, packages/combat/src/battle.ts:273, packages/combat/src/battle.ts:807, research/asset-inventory/particle-effect-inventory.json, research/asset-inventory/ui-hud-assets.md
 Asset leads: item model ARZ count 90, as_icon documented yes, comhit documented yes.
 Combat state has no item/drop/pickup collection yet. Do not add gameplay powerups until DOL/runtime evidence identifies drop tables and pickup effects; safest next asset work is HUD/icon/comhit inventory.
 

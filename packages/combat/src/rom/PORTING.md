@@ -67,6 +67,15 @@ port requires the actual handler code, transcribed per family.
 | Wave-A shared-engine digs (7 engines) | `research/decomp/wave-a-shared-engines-digs-2026-07-06.json` | **BANKED, UNVERIFIED** — 143 claims; verify pass required before porting (all verify agents hit the session limit) |
 | Remaining families | — | **TODO** — port the 7 dug shared engines after verification (covers ~17 more families cheaply), then bespoke transcriptions in verified waves |
 
+### 2026-07-12 OGhidra first-pass additions
+
+The session `session_1783829686_785a372e` has now been converted into executable first-pass
+ports for shared Robot action 0/melee, EAGLE JET action 1, NORMAL TANK/LEOPARD actions 0 and 2,
+ARROW NINJA/SHIJIMA action 1, and EAGLE ROBOT/PROTO EAGLE action 0. Exact tables, constants,
+projectile records, corrected analysis labels, and remaining host-bound fidelity gates are recorded
+in `research/decomp/oghidra-first-pass-port-findings-2026-07-12.md`. The combat build and full ROM
+self-check pass with focused assertions for every newly routed family.
+
 ## What works RIGHT NOW
 
 Pressing X on G RED (pl0615) in-game:

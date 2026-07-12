@@ -26,7 +26,6 @@ import type { RomActor } from "../rom/actor.js";
 import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
 import { integratePhysics } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
-import { computeLungeSpeed } from "./shared-engine.js";
 
 export const MELEE_ROBOT = {
   TIMER_SEED: 60.0,      // FLOAT_80439090
@@ -54,6 +53,31 @@ interface MeleeScratch {
   faceTarget?: boolean;
   lockTarget?: { x: number; y: number; z: number } | null;
   grounded?: boolean;
+  /** +0x1b03 part-animation hold byte; undefined keeps the host liveness fallback. */
+  streamTickGate?: boolean;
+  /** actor+0x868/+0x874/+0x880, selected by previous action index modulo three. */
+  rangeRows868?: readonly [number, number, number];
+}
+
+function targetDistance(actor: RomActor & MeleeScratch): number | null {
+  const target = actor.lockTarget;
+  if (!target) return null;
+  return Math.hypot(target.x - actor.pos.x, target.z - actor.pos.z);
+}
+
+/** FUN_800f2498 transition velocity. +0xcc==0 uses the selected +0x868 row;
+ *  +0xcc!=0 uses FLOAT_80439098(1.0) * +0x760, both divided by +0x558(30). */
+function setTransitionSpeed(actor: RomActor & MeleeScratch, timer: number): number {
+  if (timer <= 0) return 0;
+  const dist = targetDistance(actor);
+  if (dist !== null) {
+    actor.hSpeed = dist / timer;
+    return dist;
+  }
+  const row = ((actor.prevActionIndex % 3) + 3) % 3;
+  const range = actor.rangeRows868?.[row] ?? 50.0;
+  actor.hSpeed = range / timer;
+  return range;
 }
 
 // Phase 0 — FUN_800f23c4 @ chunk_0026.c:2277.
@@ -81,13 +105,19 @@ function phase0(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>)
 
 // Phase 1 — FUN_800f2498 @ chunk_0026.c:2309.
 function phase1(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>, ctx: StreamContext): void {
-  tickStream(actor, MELEE_ROBOT.PART_MASK, ctx);
+  // ROM gate is +0x1b03 != 0. The bridge does not stamp it for every family yet;
+  // undefined retains the old liveness behavior, while an explicit false is exact.
+  if (actor.streamTickGate ?? true) tickStream(actor, MELEE_ROBOT.PART_MASK, ctx);
   actor.handlerTimer -= actor.dt;
   const facingComplete = actor.lockTarget != null;
   if (actor.handlerTimer <= MELEE_ROBOT.TIMER_FLOOR || facingComplete) {
     actor.fbPhaseSlots[0] += 1;
     actor.handlerTimer = cfg.activeTimer;
-    computeLungeSpeed(actor, cfg.activeTimer);
+    const speedSource = setTransitionSpeed(actor, cfg.activeTimer);
+    actor.hDecel = MELEE_ROBOT.TIMER_FLOOR;
+    if (speedSource > MELEE_ROBOT.SPEED_THRESHOLD) {
+      ctx.onFamilyProjectile?.(actor, 0x800b2190, 0);
+    }
   }
 }
 
@@ -98,7 +128,7 @@ function phase2(actor: RomActor & MeleeScratch, cfg: Required<MeleeRobotConfig>,
   if (actor.swingReArm && actor.bRetap) {
     actor.bRetap = false;
     actor.handlerTimer = cfg.activeTimer;
-    computeLungeSpeed(actor, cfg.activeTimer);
+    setTransitionSpeed(actor, cfg.activeTimer);
     const slot = actor.streamSlot;
     actor.streamSlot = slot + 1;
     startStream(

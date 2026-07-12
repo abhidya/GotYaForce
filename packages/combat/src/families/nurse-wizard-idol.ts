@@ -15,7 +15,6 @@
 import type { RomActor } from "../rom/actor.js";
 import type { StreamContext } from "../rom/stream-vm.js";
 import { createSharedXSpecial, type SharedXConfig } from "./shared-x-special.js";
-import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./shared-engine.js";
 
 /** Per-borg X-special config (ground slot, air slot, on-hit). Determined from
  *  actionStreamTables.json group-4 seeds. Null = borg has no group-4 X stream. */
@@ -26,7 +25,7 @@ interface XConfig {
 }
 
 /** ActionStreamTables-derived X configs for each pl09 borg. */
-const NURSE_X_CONFIGS: Record<string, XConfig> = {
+const NURSE_X_CONFIGS = {
   // ctor 0x80079410 (family bank 0x802c2660) — group 4 slots are runtime-conditional
   pl0900: { groundSlot: null, airSlot: null, hasX: false },
   pl0908: { groundSlot: null, airSlot: null, hasX: false },
@@ -47,7 +46,7 @@ const NURSE_X_CONFIGS: Record<string, XConfig> = {
   // ctor 0x801b3c6c (bank 0x80381b40)
   pl0907: { groundSlot: 0, airSlot: 1, hasX: true },
   pl090c: { groundSlot: 0, airSlot: 1, hasX: true },
-};
+} as const satisfies Record<string, XConfig>;
 
 /** Borg-number map (hex string → number). Used for projectile variant dispatch. */
 const NURSE_BORG_NUMBERS: Record<string, number> = {
@@ -78,7 +77,7 @@ export function createNurseFamilyRootAction(
   borgId: NurseFamilyBorgId,
   ctx: StreamContext,
 ): (actor: RomActor) => void {
-  const cfg = NURSE_X_CONFIGS[borgId];
+  const cfg: XConfig = NURSE_X_CONFIGS[borgId];
   let xHandler: ((actor: RomActor) => void) | null = null;
 
   if (cfg.hasX && cfg.groundSlot !== null) {

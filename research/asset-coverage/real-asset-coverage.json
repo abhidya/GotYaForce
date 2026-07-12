@@ -1,6 +1,6 @@
 {
   "generatedBy": "scripts/audit-real-asset-coverage.mjs",
-  "generatedAt": "2026-07-05T04:44:57.165Z",
+  "generatedAt": "2026-07-12T05:06:23.251Z",
   "region": "GG4E",
   "scope": "Audit only. Reads exporter scripts/manifests/runtime screens and writes research/asset-coverage outputs. Does not edit runtime files.",
   "summary": {
@@ -900,11 +900,11 @@
         "fallback": "packages/missions/src/combat-config.ts:27"
       },
       "mainRefs": {
-        "loadStage": "apps/game/src/main.ts:478",
+        "loadStage": "apps/game/src/main.ts:501",
         "fetchStageManifest": "packages/assets/src/index.ts:186",
         "loadStageCollision": "packages/assets/src/index.ts:296",
         "parseStageHitGrid": "packages/assets/src/index.ts:308",
-        "loadDefaultArena": "apps/game/src/main.ts:509",
+        "loadDefaultArena": "apps/game/src/main.ts:532",
         "loadConvertedStage": "apps/game/src/main.ts:null"
       },
       "collisionBounds": {
@@ -2417,7 +2417,7 @@
     "mappedBorgIds": 208,
     "sourceRef": "packages/combat/src/typeDamage.generated.ts:720",
     "runtimeRef": "packages/combat/src/typeDamage.ts:11",
-    "pipelineRef": "packages/combat/src/damageFormula.ts:129"
+    "pipelineRef": "packages/combat/src/damageFormula.ts:216"
   },
   "knockbackEvidence": {
     "generatedModule": "packages/physics/src/knockback.generated.ts",
@@ -2429,7 +2429,7 @@
     "degenerateThreshold": 0.009999999776482582,
     "sourceRef": "packages/physics/src/knockback.generated.ts:7",
     "runtimeRef": "packages/physics/src/knockback.ts:58",
-    "pipelineRef": "packages/combat/src/combat.ts:16"
+    "pipelineRef": "packages/combat/src/combat.ts:17"
   },
   "cameraEvidence": {
     "generatedModule": "apps/game/src/sim/camera.generated.ts",
@@ -2547,9 +2547,9 @@
       }
     ],
     "runtimeResolverRefs": {
-      "slotLabels": "apps/game/src/sim/borgPresentationAssets.ts:123",
-      "slotFallbacks": "apps/game/src/sim/borgPresentationAssets.ts:173",
-      "pickAnimBank": "apps/game/src/sim/borgPresentationAssets.ts:451",
+      "slotLabels": "apps/game/src/sim/borgPresentationAssets.ts:131",
+      "slotFallbacks": "apps/game/src/sim/borgPresentationAssets.ts:181",
+      "pickAnimBank": "apps/game/src/sim/borgPresentationAssets.ts:459",
       "battleSceneSlotMapping": "apps/game/src/sim/battleScene.ts:627"
     },
     "boostFlyMapped": true
@@ -2558,9 +2558,9 @@
     "battleStateHasItems": false,
     "battleRuntimeSpawnsDrops": false,
     "evidenceRefs": {
-      "battleState": "packages/combat/src/types.ts:555",
-      "deployNextBorg": "packages/combat/src/battle.ts:240",
-      "deathProcessing": "packages/combat/src/battle.ts:569",
+      "battleState": "packages/combat/src/types.ts:593",
+      "deployNextBorg": "packages/combat/src/battle.ts:273",
+      "deathProcessing": "packages/combat/src/battle.ts:807",
       "particleInventory": "research/asset-inventory/particle-effect-inventory.json",
       "hudInventory": "research/asset-inventory/ui-hud-assets.md"
     },

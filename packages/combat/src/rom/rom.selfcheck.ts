@@ -48,6 +48,32 @@ import { createRomStateTables, stepRomActor } from "./state-tables.js";
 import type { StreamContext } from "./stream-vm.js";
 import { RomDriverBridge, cueTableForBorg } from "../bridge.js";
 import { configureDeathBorgFamily } from "../families/death-borg.js";
+import {
+  configureEagleJetFamily,
+  EAGLE_JET_ACTION1,
+  type EagleJetScratch,
+} from "../families/eagle-jet.js";
+import { createMeleeRobot } from "../families/melee-robot.js";
+import {
+  createRobotDashHandler,
+  ROBOT_ACTION0_CONFIGS,
+  ROBOT_DASH,
+} from "../families/shared-robot-dash.js";
+import {
+  configureTankFamily,
+  NORMAL_TANK,
+  type NormalTankScratch,
+} from "../families/tank-borg.js";
+import {
+  ARROW_NINJA_ACTION1,
+  configureArrowNinjaFamily,
+  type ArrowNinjaScratch,
+} from "../families/arrow-ninja.js";
+import {
+  configureEagleRobotFamily,
+  EAGLE_ROBOT_ACTION0,
+  type EagleRobotScratch,
+} from "../families/eagle-robot.js";
 import type { BorgRuntime } from "../types.js";
 
 const G_RED_LAUNCH_Y = 4.0;
@@ -2335,6 +2361,218 @@ export function runSelfTest(): number {
       && approxEq(SAMURAI_LUNGE_ROM_CONFIG.decel ?? 0, 0.92)
       && approxEq(SAMURAI_LUNGE_ROM_CONFIG.repositionScale ?? 0, 0.95),
       "SAMURAI_LUNGE_ROM_CONFIG matches the DOL bytes @0x80308020 (+4 siblings)");
+  }
+
+  console.log("\n[rom.selfcheck] families/eagle-jet — action 1 (FUN_8012b458):");
+  {
+    const actor = createRomActor() as RomActor & EagleJetScratch;
+    const played: number[] = [];
+    configureEagleJetFamily(actor, { onPlayCue: (_a, cue) => played.push(cue) });
+    actor.cueTable = new Int8Array(48 * 2).fill(-1);
+    actor.cueTable[EAGLE_JET_ACTION1.EXIT_CUE * 2] = 0;
+    actor.actionIndex = 1;
+    actor.dt = 1;
+    actor.controlWord = 0x3;
+    actor.rootAction!(actor);
+    assert(actor.borgNumber === 0x61b, "EAGLE JET ctor stamps borg number 0x61b");
+    assert(actor.fbPhaseSlots[0] === 1 && approxEq(actor.handlerTimer, 45),
+      "action-1 entry seeds +0x540=1 and +0x558=45.0");
+    assert(actor.effectMode6e8 === EAGLE_JET_ACTION1.FX_MODE,
+      "action-1 writes +0x6e8=0x83");
+    assert(actor.retiredHitboxKind === 0x7f
+      && actor.preparedPartSlots?.join(",") === "4,5"
+      && played[0] === 0x20,
+      "entry retires kind-0x7f, prepares parts 4/5, and plays cue 0x20");
+
+    actor.handlerTimer = 1;
+    actor.rootAction!(actor);
+    assert(approxEq(actor.stateTimer, 17),
+      "timer expiry ports zz_006a53c_(actor,0x10): cooldown=16+dt");
+    assert((actor.controlWord & 0x3) === 0 && actor.fbCue === 0x1b,
+      "timer expiry clears action bits and dispatches full-body cue 0x1b");
+  }
+
+  console.log("\n[rom.selfcheck] families/melee-robot — phase 1 speed source (FUN_800f2498):");
+  {
+    const fx: number[] = [];
+    const handler = createMeleeRobot({ onFamilyProjectile: (_a, addr) => fx.push(addr) });
+    const actor = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+      streamTickGate?: boolean;
+      rangeRows868?: readonly [number, number, number];
+    };
+    actor.fbPhaseSlots[0] = 1;
+    actor.handlerTimer = 1;
+    actor.dt = 1;
+    actor.pos = { x: 0, y: 0, z: 0 };
+    actor.lockTarget = { x: 300, y: 0, z: 0 };
+    actor.streamTickGate = false;
+    handler(actor);
+    assert(actor.fbPhaseSlots[0] === 2 && approxEq(actor.handlerTimer, 30),
+      "phase 1 expiry advances and seeds the 30-frame active window");
+    assert(approxEq(actor.hSpeed, 10) && approxEq(actor.hDecel, 0),
+      "locked branch uses +0x760 distance / 30 and clears +0x4c");
+    assert(fx[0] === 0x800b2190,
+      "+0x760 > FLOAT_8043909c triggers zz_00b2190_(actor,0)");
+
+    const noTarget = createRomActor() as RomActor & {
+      lockTarget?: null;
+      rangeRows868?: readonly [number, number, number];
+    };
+    noTarget.fbPhaseSlots[0] = 1;
+    noTarget.handlerTimer = 1;
+    noTarget.dt = 1;
+    noTarget.prevActionIndex = 2;
+    noTarget.lockTarget = null;
+    noTarget.rangeRows868 = [90, 120, 150];
+    handler(noTarget);
+    assert(approxEq(noTarget.hSpeed, 5),
+      "targetless branch selects +0x868 row[prevAction%3] / 30");
+  }
+
+  console.log("\n[rom.selfcheck] families/tank-borg - NORMAL TANK / LEOPARD bespoke actions:");
+  {
+    const shots: Array<[number, number]> = [];
+    const actor = createRomActor() as RomActor & NormalTankScratch;
+    configureTankFamily(actor, "pl0c00", {
+      onFamilyProjectile: (_a, address, type) => shots.push([address, type]),
+    });
+    actor.cueTable = new Int8Array(48 * 2).fill(-1);
+    actor.cueTable[NORMAL_TANK.ACTION0_EXIT_CUE * 2] = 0;
+    actor.actionIndex = 0;
+    actor.dt = 1;
+    actor.rootAction!(actor);
+    assert(actor.fbPhaseSlots[0] === 1 && actor.stateTimer === 15,
+      "action 0 phase 0 seeds the exact 15-frame first windup");
+    actor.rootAction!(actor);
+    assert(actor.fbPhaseSlots[0] === 2 && actor.stateTimer === 10,
+      "action 0 phase 1 seeds the exact 10-frame second windup");
+    actor.tankBarrelsReady = true;
+    actor.rootAction!(actor);
+    assert(actor.fbPhaseSlots[0] === 3,
+      "barrel-readiness advances action 0 into the burst phase");
+    actor.tankBarrelsReady = false;
+    for (let i = 0; i < 13; i++) actor.rootAction!(actor);
+    assert(shots.filter(([address]) => address === NORMAL_TANK.SHOT_HELPER).length === 3,
+      "short action-0 branch fires exactly three shots through zz_0082824_");
+    assert(actor.fbPhaseSlots[0] === 4 && actor.stateTimer === 30,
+      "short burst advances to the exact 30-frame recovery");
+
+    const air = createRomActor() as RomActor & NormalTankScratch;
+    configureTankFamily(air, "pl0c06", {});
+    air.actionIndex = 2;
+    air.variantIndex = 1;
+    air.dt = 1;
+    air.rootAction!(air);
+    assert(air.fbPhaseSlots[0] === 1 && air.handlerTimer === 30
+      && (air.controlWord & 0x40) !== 0,
+      "action 2 variant 1 enters the airborne subtable and seeds 30-frame aim");
+    air.tankYawReady = true;
+    air.tankDesiredPitch = 0;
+    air.tankTurretPitch = 0;
+    air.rootAction!(air);
+    air.rootAction!(air);
+    assert(approxEq(air.hSpeed, 9.7) && approxEq(air.hDecel, -0.3),
+      "air-fire phase seeds hSpeed=10/hDecel=-0.3, then its wrapper integrates once");
+  }
+
+  console.log("\n[rom.selfcheck] families/arrow-ninja - action 1 variant routing:");
+  {
+    const actor = createRomActor() as RomActor & ArrowNinjaScratch;
+    actor.lockTarget = { x: 100, y: 0, z: 0 };
+    configureArrowNinjaFamily(actor, "pl0002", {});
+    actor.actionIndex = 1;
+    actor.variantIndex = 1;
+    actor.rootAction!(actor);
+    assert(actor.borgNumber === 0x002 && actor.fbPhaseSlots[0] === 1,
+      "pl0002 action-1 v1 routes to FUN_800d0d64 ground-chain phase 0");
+    assert(actor.handlerTimer === ARROW_NINJA_ACTION1.AIM_TIMER && actor.streamSlot === 4,
+      "ground-chain entry seeds 60-frame aim and consumes group-3 slot 3");
+
+    const diveFx: number[] = [];
+    const dive = createRomActor() as RomActor & ArrowNinjaScratch;
+    configureArrowNinjaFamily(dive, "pl000b", {
+      onFamilyProjectile: (_a, address) => diveFx.push(address),
+    });
+    dive.actionIndex = 1;
+    dive.variantIndex = 3;
+    dive.rootAction!(dive);
+    assert(dive.borgNumber === 0x00b && dive.fbPhaseSlots[0] === 1
+      && dive.handlerTimer === ARROW_NINJA_ACTION1.AIR_DIVE_SPEED,
+      "pl000b action-1 v3 routes to FUN_800d11cc and seeds the 30-frame dive");
+    assert(diveFx[0] === 0x80092dcc,
+      "air-dive entry routes the exact zz_0092dcc_(actor,0) effect callback");
+  }
+
+  console.log("\n[rom.selfcheck] families/eagle-robot - action 0 variant tables:");
+  {
+    const shots: Array<[number, number]> = [];
+    const actor = createRomActor() as RomActor & EagleRobotScratch;
+    actor.lockTarget = { x: 10, y: 0, z: 0 };
+    actor.eagleAmmoCount = 2;
+    configureEagleRobotFamily(actor, "pl061a", {
+      onFamilyProjectile: (_a, address, type) => shots.push([address, type]),
+    });
+    actor.actionIndex = 0;
+    actor.variantIndex = 0;
+    actor.rootAction!(actor);
+    assert(actor.borgNumber === 0x61a && actor.fbPhaseSlots[0] === 1
+      && actor.eagleAimTimer === EAGLE_ROBOT_ACTION0.AIM_TIMER,
+      "PROTO EAGLE v0 enters table 0x8033195c with a 30-frame aim timer");
+    actor.contactP0 = 1;
+    actor.eagleAimReady = true;
+    actor.rootAction!(actor);
+    assert(actor.fbPhaseSlots[0] === 2 && actor.handlerTimer === 2,
+      "PROTO EAGLE fire transition uses its exact 2-frame repeat timer");
+    assert(shots.some(([a, t]) => a === 0x80082824 && t === 0x6e)
+      && shots.some(([a, t]) => a === 0x80082824 && t === 0x6f),
+      "PROTO EAGLE fires ROM projectile records 0x6e and 0x6f");
+
+    const eagle = createRomActor() as RomActor & EagleRobotScratch;
+    configureEagleRobotFamily(eagle, "pl0606", {});
+    eagle.actionIndex = 0;
+    eagle.variantIndex = 4;
+    eagle.rootAction!(eagle);
+    assert(eagle.fbPhaseSlots[0] === 1 && eagle.eagleAimTimer === 30,
+      "EAGLE ROBOT v4 enters airborne table 0x80331974");
+  }
+
+  console.log("\n[rom.selfcheck] shared-robot action 0 — DOL configs + phase routing (zz_00f1e30_):");
+  {
+    assert(ROBOT_DASH.DASH_TIMER === 30,
+      "+0x560 phase window is FLOAT_80439078=30.0");
+    assert(ROBOT_ACTION0_CONFIGS.pl0407.slotBase === 3
+      && ROBOT_ACTION0_CONFIGS.pl0407.timerSeed === 4
+      && ROBOT_ACTION0_CONFIGS.pl0407.maskByte === 5,
+      "pl0407 config matches DOL block 0x80327f5c");
+    assert(ROBOT_ACTION0_CONFIGS.pl040b.ammoSlot === 2
+      && ROBOT_ACTION0_CONFIGS.pl040d.slotBase === 6,
+      "Omega-II uses ammo cell 2 and Omega-IV starts at stream slot 6");
+
+    const ctx = {
+      onAllocateResource: () => false,
+    } as StreamContext & {
+      onAllocateResource: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
+    };
+    const handler = createRobotDashHandler(ROBOT_ACTION0_CONFIGS.pl0407, ctx);
+    const actor = createRomActor() as RomActor & {
+      lockTarget?: { x: number; y: number; z: number } | null;
+      dashTimer?: number;
+      dashConfigByte?: number;
+    };
+    actor.lockTarget = { x: 10, y: 0, z: 0 };
+    actor.ubState = 1;
+    handler(actor);
+    assert(actor.fbPhaseSlots[0] === 1 && actor.dashTimer === 30,
+      "phase 0 advances and seeds +0x560=30");
+    assert(actor.handlerTimer === 4 && actor.dashConfigByte === 5 && actor.streamSlot === 3,
+      "phase 0 copies pl0407 config timer/count/stream slot");
+
+    actor.fbPhaseSlots[0] = 2;
+    actor.wallContact = 1;
+    handler(actor);
+    assert(actor.fbPhaseSlots[0] === 3,
+      "ammo denial takes FUN_800f2008 failure branch (+0x540 += 1)");
   }
 
   if (failures > 0) {

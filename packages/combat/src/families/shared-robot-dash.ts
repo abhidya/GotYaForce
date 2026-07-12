@@ -3,7 +3,7 @@ import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js
 import { romGroundIdleReturn } from "./shared-idle-return.js";
 
 export const ROBOT_DASH = {
-  DASH_TIMER: 20.0,
+  DASH_TIMER: 30.0, // FLOAT_80439078; actor+0x560 phase-1 window
   STREAM_RATE: -1.0,
   ZERO: 0.0,
   AIM_DECAY: 0.9,
@@ -12,10 +12,13 @@ export const ROBOT_DASH = {
 
 export interface RobotDashConfig {
   slotBase: number;
-  rangeRow: number;
   ammoSlot: number;
   timerSeed: number;
   maskByte: number;
+  /** config+4/+8/+0x10 callback addresses (kept for host routing/provenance). */
+  onContactAddr?: number;
+  onContinueAddr?: number;
+  onExitGateAddr?: number;
   onPhase3Hit?: (actor: RomActor) => void;
   onPhase3LockCheck?: (actor: RomActor) => boolean;
   onPhase3WallContact?: (actor: RomActor) => boolean;
@@ -33,7 +36,26 @@ interface RobotDashScratch {
   dashConfig?: RobotDashConfig;
   aimPitchP2a?: number;
   aimPitchP2b?: number;
+  /** actor+0x5d8 input/status bits; high nibble participates in phase-4 exit. */
+  inputFlags5d8?: number;
 }
+
+/** DOL-read 0x14-byte config blocks passed to zz_00f1e30_. */
+export const ROBOT_ACTION0_CONFIGS = {
+  pl0400: { slotBase: 0, ammoSlot: 0, timerSeed: -1, maskByte: -1, onContactAddr: 0x80074d3c, onContinueAddr: 0x80074de0 },
+  pl0401: { slotBase: 0, ammoSlot: 0, timerSeed: -1, maskByte: -1, onContactAddr: 0x8009b7bc, onContinueAddr: 0x8009b82c },
+  pl0402: { slotBase: 0, ammoSlot: 0, timerSeed: -1, maskByte: -1, onContactAddr: 0x80112f28, onContinueAddr: 0x80112f80 },
+  pl0403: { slotBase: 0, ammoSlot: 0, timerSeed: -1, maskByte: -1, onContactAddr: 0x800dfeec, onExitGateAddr: 0x800dff98 },
+  pl0404: { slotBase: 0, ammoSlot: 0, timerSeed: -1, maskByte: -1, onContactAddr: 0x800d7fd8, onContinueAddr: 0x800d8024 },
+  pl0405: { slotBase: 0, ammoSlot: 0, timerSeed: 4, maskByte: 5, onContactAddr: 0x800dabd8, onContinueAddr: 0x800dac44 },
+  pl0407: { slotBase: 3, ammoSlot: 0, timerSeed: 4, maskByte: 5, onContactAddr: 0x80113010, onContinueAddr: 0x801130ac },
+  pl0408: { slotBase: 3, ammoSlot: 0, timerSeed: 4, maskByte: 5, onContactAddr: 0x80113010, onContinueAddr: 0x801130ac },
+  pl0409: { slotBase: 3, ammoSlot: 0, timerSeed: -1, maskByte: -1, onContactAddr: 0x800dace8, onContinueAddr: 0x800dad40 },
+  pl040a: { slotBase: 0, ammoSlot: 0, timerSeed: -1, maskByte: -1, onContactAddr: 0x80074d3c, onContinueAddr: 0x80074de0 },
+  pl040b: { slotBase: 0, ammoSlot: 2, timerSeed: -1, maskByte: -1, onContactAddr: 0x801d48cc, onExitGateAddr: 0x801d4978 },
+  pl040c: { slotBase: 3, ammoSlot: 0, timerSeed: 4, maskByte: 5, onContactAddr: 0x801d49d8, onContinueAddr: 0x801d4a44 },
+  pl040d: { slotBase: 6, ammoSlot: 0, timerSeed: -1, maskByte: -1, onContactAddr: 0x801d4ae8, onContinueAddr: 0x801d4b40 },
+} as const satisfies Record<string, RobotDashConfig>;
 
 function scratchOf(actor: RomActor): RomActor & RobotDashScratch {
   return actor as RomActor & RobotDashScratch;
@@ -55,7 +77,7 @@ function isStreamActive(actor: RomActor): boolean {
   return actor.parts.some(p => p.active !== 0);
 }
 
-function robotDashPhase0(actor: RomActor): void {
+function robotDashPhase0(actor: RomActor, ctx: StreamContext): void {
   const s = scratchOf(actor);
   actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 0) + 1;
   s.dashTimer = ROBOT_DASH.DASH_TIMER;
@@ -63,37 +85,30 @@ function robotDashPhase0(actor: RomActor): void {
   actor.handlerTimer = cfg.timerSeed;
   s.dashConfigByte = cfg.maskByte;
   actor.streamSlot = cfg.slotBase;
-  const target = effLockTarget(actor);
-  const rangeRows: number[] = [800.0, 1000.0, 1200.0, 1500.0];
-  const range = rangeRows[cfg.rangeRow % rangeRows.length] ?? 800.0;
-  if (target) {
-    const dx = target.x - actor.pos.x;
-    const dz = target.z - actor.pos.z;
-    if (Math.hypot(dx, dz) > range) {
-      s.dashTargetInvalid = true;
-    }
-  } else {
-    s.dashTargetInvalid = true;
-  }
+  if (!effLockTarget(actor)) s.dashTargetInvalid = true;
   s.dashStreamMask = actor.ubState === 1 ? 0xf : 1;
   startStream(actor, s.dashStreamMask, 2, cfg.slotBase, ROBOT_DASH.STREAM_RATE);
+  void ctx;
 }
 
-function robotDashPhase1(actor: RomActor): void {
+function robotDashPhase1(actor: RomActor, ctx: StreamContext): void {
   const s = scratchOf(actor);
-  tickStream(actor, 1, {} as StreamContext);
+  tickStream(actor, 1, ctx);
   s.dashTimer = (s.dashTimer ?? ROBOT_DASH.DASH_TIMER) - actor.dt;
   if (s.dashTimer <= ROBOT_DASH.ZERO) {
     actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 1) + 1;
   }
 }
 
-function robotDashPhase2(actor: RomActor): void {
+function robotDashPhase2(actor: RomActor, ctx: StreamContext): void {
   const s = scratchOf(actor);
-  tickStream(actor, 1, {} as StreamContext);
+  tickStream(actor, 1, ctx);
   if (actor.wallContact !== 0) {
     const cfg = s.dashConfig!;
-    const ammoOk = true;
+    const resourceCtx = ctx as StreamContext & {
+      onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
+    };
+    const ammoOk = resourceCtx.onAllocateResource?.(actor, cfg.ammoSlot, 1, 0) ?? true;
     if (ammoOk) {
       actor.fbPhaseSlots[0] = (actor.fbPhaseSlots[0] ?? 2) + 2;
       s.dashStreamMask = actor.ubState === 1 ? 0xf : 1;
@@ -105,13 +120,16 @@ function robotDashPhase2(actor: RomActor): void {
   }
 }
 
-function robotDashPhase3(actor: RomActor): void {
+function robotDashPhase3(actor: RomActor, ctx: StreamContext): void {
   const s = scratchOf(actor);
-  tickStream(actor, 1, {} as StreamContext);
+  tickStream(actor, 1, ctx);
   if (actor.contactP0 > 0) {
     actor.contactP0 = 0;
     s.dashContactFlag = 1;
     s.dashConfig!.onPhase3Hit?.(actor);
+    if (s.dashConfig!.onContactAddr) {
+      ctx.onFamilyProjectile?.(actor, s.dashConfig!.onContactAddr, 0);
+    }
   }
   const lockValid = !s.dashTargetInvalid;
   if (lockValid && s.dashConfig!.onPhase3LockCheck?.(actor)) {
@@ -129,14 +147,16 @@ function robotDashPhase3(actor: RomActor): void {
   }
 }
 
-function robotDashPhase4(actor: RomActor): void {
+function robotDashPhase4(actor: RomActor, ctx: StreamContext): void {
   const s = scratchOf(actor);
   const a = toS16(s.aimPitchP2a ?? 0);
   const b = toS16(s.aimPitchP2b ?? 0);
   s.aimPitchP2a = toS16(a * ROBOT_DASH.AIM_DECAY);
   s.aimPitchP2b = toS16(b * ROBOT_DASH.AIM_DECAY);
-  tickStream(actor, 1, {} as StreamContext);
-  if (!isStreamActive(actor) || actor.wallContact !== 0) {
+  tickStream(actor, 1, ctx);
+  const exactExit = s.inputFlags5d8 === undefined ? false : (s.inputFlags5d8 & 0xf0) !== 0;
+  const livenessExit = s.inputFlags5d8 === undefined && !isStreamActive(actor);
+  if (exactExit || livenessExit || actor.wallContact !== 0) {
     s.dashHousekeep = 0;
     actor.controlWord &= ~ROBOT_DASH.ACTION_MODE_BITS;
     romGroundIdleReturn(actor);
@@ -145,6 +165,7 @@ function robotDashPhase4(actor: RomActor): void {
 
 export function createRobotDashHandler(
   cfg: RobotDashConfig,
+  ctx: StreamContext = {},
 ): (actor: RomActor) => void {
   return (actor: RomActor) => {
     const s = scratchOf(actor);
@@ -162,11 +183,11 @@ export function createRobotDashHandler(
     }
     const phase = actor.fbPhaseSlots[0] ?? 0;
     switch (phase) {
-      case 0: robotDashPhase0(actor); break;
-      case 1: robotDashPhase1(actor); break;
-      case 2: robotDashPhase2(actor); break;
-      case 3: robotDashPhase3(actor); break;
-      case 4: robotDashPhase4(actor); break;
+      case 0: robotDashPhase0(actor, ctx); break;
+      case 1: robotDashPhase1(actor, ctx); break;
+      case 2: robotDashPhase2(actor, ctx); break;
+      case 3: robotDashPhase3(actor, ctx); break;
+      case 4: robotDashPhase4(actor, ctx); break;
     }
   };
 }
