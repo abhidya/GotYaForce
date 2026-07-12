@@ -288,6 +288,7 @@ function initScene() {
     canvas: canvas.value,
     antialias: true,
     alpha: false,
+    preserveDrawingBuffer: true,
     powerPreference: 'high-performance',
   })
   renderer.outputColorSpace = THREE.SRGBColorSpace
