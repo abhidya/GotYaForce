@@ -115,6 +115,9 @@ export interface RomActor {
   /** +0x1bd4 + part*0x40 through +0x1c05 + part*0x40. Raw bytes preserve the
    *  engine-owned record layout without inventing renderer semantics. */
   weaponAnimationBlocks: [Uint8Array, Uint8Array, Uint8Array, Uint8Array];
+  /** +0x1aec/+0x1af0/+0x1af4 plus part*0x40. This timing record precedes and is
+   *  distinct from the raw descriptor block rooted at +0x1bd4. */
+  weaponAnimationTiming: [RomWeaponAnimationTiming, RomWeaponAnimationTiming, RomWeaponAnimationTiming, RomWeaponAnimationTiming];
 
   // ===== Target visibility/eligibility (zz_006bf80_ @0x8006bf80) =====
   /** +0x3e5 = 1 << +0x3e4. */
@@ -263,6 +266,10 @@ export interface RomActor {
   inputHeld5d8: number;
   /** +0x694: state-timer float (e.g. deploy lock, post-state cooldown; zz_005568c_ decays it). */
   stateTimer: number;
+  /** +0x1d9c/+0x1db2/+0x1db3 reset by zz_006a668_ before arming shot channels. */
+  shotScalar1d9c: number;
+  shotByte1db2: number;
+  shotByte1db3: number;
   /** +0x558: handler-local timer (G Crash phase 2 seeds 120.0; phase 3 counts down). */
   handlerTimer: number;
 
@@ -306,6 +313,15 @@ export interface RomWeaponAnimationParams {
   /** Exact zz_004d1f4_ result used by zz_004d244_; null means the host has not
    *  loaded an animation descriptor and the copier leaves descriptor bytes alone. */
   descriptor: Uint8Array | null;
+}
+
+export interface RomWeaponAnimationTiming {
+  /** +0x1aec: param_10 + 1. */
+  duration: number;
+  /** +0x1af0: actor +0x1dc8. */
+  dt: number;
+  /** +0x1af4: dt / duration. */
+  rate: number;
 }
 
 export interface RomVisibilityTarget {
@@ -397,6 +413,7 @@ export function createRomActor(): RomActor {
       descriptor: null,
     },
     weaponAnimationBlocks: [new Uint8Array(0x38), new Uint8Array(0x38), new Uint8Array(0x38), new Uint8Array(0x38)],
+    weaponAnimationTiming: [makeBlankWeaponTiming(), makeBlankWeaponTiming(), makeBlankWeaponTiming(), makeBlankWeaponTiming()],
     visibilityBit: 1, visibilityTarget: null, visibilityRoster: [],
     borgMirror94: 0, carriedSlot96: 0, carriedVariant97: 0, identityVariant: 0,
     borgNumber: 0, slot: 0, team: 0,
@@ -416,10 +433,14 @@ export function createRomActor(): RomActor {
     contactP0: 0, wallContact: 0, childMask144: 0, contactP1: 0,
     dashStrength1d0f: 0, faceGate1d10: 0, streamHold1b03: 0, streamCounter6eb: 0,
     statusWord5b4: 0, inputEdge5d4: 0, inputHeld5d8: 0,
-    stateTimer: 0, handlerTimer: 0,
+    stateTimer: 0, shotScalar1d9c: 0, shotByte1db2: 0, shotByte1db3: 0, handlerTimer: 0,
   };
 }
 
 function makeBlankPart(): RomPartState {
   return { streamPtr: -1, frameClock: 0, prevTarget: 0, curTarget: 0, animTime: 0, active: 0, stateByte: 0 };
+}
+
+function makeBlankWeaponTiming(): RomWeaponAnimationTiming {
+  return { duration: 0, dt: 0, rate: 0 };
 }

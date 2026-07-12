@@ -740,11 +740,16 @@ export function armWeaponPartAnimation(actor: RomActor, duration = 1): void {
     writeF32BE(block, 0x08, 1);
     writeF32BE(block, 0x0c, p.baseRate);
     copyWeaponAnimationDescriptor(actor, partIndex, block);
+    // zz_0048d54_ writes these after zz_004d244_ returns, so +0x37 must
+    // override the descriptor byte copied above (chunk_0005.c:4599/4604).
+    block[0x36] = 0;
+    block[0x37] = 0xff;
     actor.weaponAnimationState[partIndex] = 5;
     // +0x1aec = duration+1; +0x1af0 = dt; +0x1af4 = dt/(duration+1).
-    writeF32BE(block, 0x18, duration + 1);
-    writeF32BE(block, 0x1c, actor.dt);
-    writeF32BE(block, 0x20, actor.dt / (duration + 1));
+    const timing = actor.weaponAnimationTiming[partIndex]!;
+    timing.duration = duration + 1;
+    timing.dt = actor.dt;
+    timing.rate = actor.dt / timing.duration;
   }
 }
 

@@ -13,7 +13,7 @@ import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
 import { createGRedDash, GRED_DASH } from "../families/gred-dash.js";
 import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
 import { configureStarHeroFamily } from "../families/star-hero.js";
-import { configureCyberMachineFamily } from "../families/cyber-machine.js";
+import { configureCyberMachineFamily, type CyberMachineFamilyCtx } from "../families/cyber-machine.js";
 import { configureSwordKnightFamily } from "../families/sword-knight.js";
 import { configureDragonFamily, DRAGON_X } from "../families/dragon.js";
 import { configureCyberDragonFamily, CYBER_DRAGON_X } from "../families/cyber-dragon.js";
@@ -553,10 +553,9 @@ export function runSelfTest(): number {
   {
     const a = createRomActor();
     let effectSpawn = null as { addr: number; type: number } | null;
-    const ctx: GRedFamilyCtx & {
-      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
-    } = {
+    const ctx: GRedFamilyCtx & CyberMachineFamilyCtx = {
       onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onAllocateResource: () => true,
       onFamilyProjectile: (_a, addr, type) => { effectSpawn = { addr, type }; },
     };
     configureCyberMachineFamily(a, "pl0602", ctx);
@@ -577,9 +576,7 @@ export function runSelfTest(): number {
   {
     const a = createRomActor();
     const spawns: Array<{ addr: number; type: number }> = [];
-    const ctx: GRedFamilyCtx & {
-      onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
-    } = {
+    const ctx: GRedFamilyCtx & CyberMachineFamilyCtx = {
       onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
       onFamilyProjectile: (_a: RomActor, addr: number, type: number) => { spawns.push({ addr, type }); },
     };
@@ -589,13 +586,87 @@ export function runSelfTest(): number {
     a.controlWord = 0x3; // action-mode bits set
     a.dt = 1;
     a.actionIndex = 2;
+    a.ubCue = 7;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[7 * 2] = 23;
+    a.fbState = 61;
+    a.fbCue = 44;
+    a.housekeeping73f = 9;
+    a.shotScalar1d9c = 7;
+    a.shotByte1db2 = 8;
+    a.shotByte1db3 = 9;
+    for (const block of a.weaponAnimationBlocks) block.fill(0x5a, 0x18, 0x24);
+    a.fbPhaseSlots = [1, 2, 3, 4];
     a.rootAction!(a);
-    // Shot fired via zz_006a668_(actor, kind=1) — the last spawn in the list (after
-    // phase 0's effect spawn is skipped because we entered at phase 1).
-    const shot = spawns.find((s) => s.addr === 0x8006a668);
-    assert(shot !== undefined && shot.type === 1, "shot fired via zz_006a668_ kind 1");
+    assert(spawns.length === 0, "zz_006a668_ does not synthesize a projectile-child callback");
     assert(approxEq(a.stateTimer, 51.0), "+0x694 = FLOAT_804389a8(50) + dt(1) = 51");
+    assert(a.housekeeping73f === 0, "+0x73f cleared before shot dispatch");
+    assert(a.shotScalar1d9c === 0 && a.shotByte1db2 === 0 && a.shotByte1db3 === 0,
+      "zz_006a668_ resets +0x1d9c/+0x1db2/+0x1db3");
+    assert(a.fbCue === 7 && a.prevFbState === 61 && a.fbState === 23,
+      "zz_006a6fc_(actor,+0x5e4) dispatches current upper-body cue to full body");
+    assert(a.fbPhaseSlots.every((phase) => phase === 0),
+      "zz_006a6fc_ resets +0x540..+0x543 after the cue transition");
+    assert(a.weaponAnimationActiveMask === 0x0d && a.weaponAnimationState.join(",") === "5,0,5,5",
+      "zz_0048d54_ arms exact non-part-1 shot channels");
+    for (const part of [0, 2, 3]) {
+      const block = a.weaponAnimationBlocks[part]!;
+      assert(block[0x36] === 0 && block[0x37] === 0xff,
+        `zz_0048d54_ part ${part} final tail bytes are +0x36=0/+0x37=0xff`);
+      assert(block.slice(0x18, 0x24).every((byte) => byte === 0x5a),
+        `zz_0048d54_ part ${part} timing writes do not corrupt +0x1bd4 raw block`);
+      const timing = a.weaponAnimationTiming[part]!;
+      assert(timing.duration === 2 && timing.dt === 1 && approxEq(timing.rate, 0.5),
+        `zz_0048d54_ part ${part} writes distinct +0x1aec/+0x1af0/+0x1af4 timing record`);
+    }
     assert((a.controlWord & 0x3) === 0, "action-mode bits cleared (+0x5e0 &= ~3)");
+  }
+
+  // Test 18b: all 80 live member/action/variant routes select the exact ROM leaf.
+  console.log("\n[rom.selfcheck] families/cyber-machine — exhaustive 4x4x5 dispatch matrix:");
+  {
+    const ids = ["pl0602", "pl060a", "pl060c", "pl060e"] as const;
+    const expected = [
+      [0x800cc854, 0x800ccc54, 0x800ccc54, 0x800ccc54, 0x800ccf78],
+      [0x800cd514, 0x800cd988, 0x800cd988, 0x800cdbf8, 0x800cdbf8],
+      [0x800ce5dc, 0x800ce5dc, 0x800ce5dc, 0x800ce5dc, 0x800ce5dc],
+      [0x800ce184, 0x800ce184, 0x800ce184, 0x800ce184, 0x800ce184],
+    ];
+    let routes = 0;
+    for (const id of ids) for (let action = 0; action < 4; action += 1) {
+      for (let variant = 0; variant < 5; variant += 1) {
+        const a = createRomActor();
+        let leaf = 0;
+        configureCyberMachineFamily(a, id, {
+          onAllocateResource: () => false,
+          onCyberMachineHandler: (_actor, address) => { leaf = address; },
+        });
+        a.actionIndex = action;
+        a.variantIndex = variant;
+        a.rootAction!(a);
+        assert(leaf === expected[action]![variant], `${id} action ${action} variant ${variant} -> exact leaf`);
+        routes += 1;
+      }
+    }
+    assert(routes === 80, "all 80 live Cyber Machine member/action/variant routes covered");
+  }
+
+  // Test 18c: ammo denial still advances phase but suppresses zz_016cc24_.
+  console.log("\n[rom.selfcheck] families/cyber-machine — X ammo-denial gate:");
+  {
+    const a = createRomActor();
+    let spawned = false;
+    configureCyberMachineFamily(a, "pl060a", {
+      onAllocateResource: (_actor, slot, count, mode) => {
+        assert(slot === 2 && count === 1 && mode === 1, "zz_006dbe0_(actor,2,1,1) exact arguments");
+        return false;
+      },
+      onFamilyProjectile: () => { spawned = true; },
+    });
+    a.actionIndex = 2;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 1, "denied X still advances +0x540 to phase 1");
+    assert(!spawned, "denied ammo suppresses zz_016cc24_ child");
   }
 
   // Test 19: CYBER MACHINE family — bridge cue-table attach (rows 44/45 → state 61).

@@ -17,17 +17,17 @@
 //     (zz_006dbe0_(actor, 2, 1, 1)); on success spawn the visual effect child via
 //     zz_016cc24_(actor, 2). Advance +0x540 to 1.
 //   phase 1 (else branch): clear +0x73f, clear the action-mode bits (+0x5e0 &= ~3),
-//     fire the shot via zz_006a668_(actor, kind=1, variant), then seed the post-shot
+//     release/arm shot channels via zz_006a668_(actor, kind=1), then seed the post-shot
 //     cooldown +0x694 = FLOAT_804389a8 + dt. After the bits clear, the actor exits the
 //     attack state — phase 1 runs exactly once per X press.
 //
-// The actual damage is delivered by the kind-1 shot fired through the host's projectile
-// layer (zz_006a668_ → zz_0048d54_ → zz_004a754_ armed-channel loop). With the host
-// hook unwired, the spawn is an honest no-op (the phase machine still advances).
+// zz_006a668_ performs channel/timer state changes, zz_0048d54_ raw-record setup, and
+// zz_006a6fc_ cue dispatch. It does not directly spawn a projectile child.
 
 import type { RomActor } from "../rom/actor.js";
-import { dispatchFullBodyCue, dispatchUpperBodyCue } from "../rom/dispatch.js";
+import { dispatchFullBodyCue } from "../rom/dispatch.js";
 import { romGroundIdleReturn } from "./shared-idle-return.js";
+import { armWeaponPartAnimation } from "./shared-aimed-shot-x.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 
 const CM_X = {
@@ -36,7 +36,6 @@ const CM_X = {
   AMMO_COST: 1,
   EFFECT_SPAWNER_ADDR: 0x8016cc24,
   EFFECT_TYPE: 2,
-  SHOT_SPAWNER_ADDR: 0x8006a668,
   SHOT_KIND: 1,
   ACTION_MODE_BITS: 0x3,
   /** FLOAT_80438938 = 0.0 — zero constant. */
@@ -116,9 +115,17 @@ function scratchOf(actor: RomActor): RomActor & CMScratch {
 function cmAction0Wrapper(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
   // steerYaw centering transform (FUN_800cc7d4:2163-2168)
   actor.steerYaw = actor.steerYaw >> 1;
-  if (actor.variantIndex === 0) cmDashV0(actor, ctx);
-  else if (actor.variantIndex === 1) cmDashV1(actor, ctx);
-  else if (actor.variantIndex === 2) cmDashV2(actor, ctx);
+  // PTR_FUN_8030cd28 = [800cc854, 800ccc54, 800ccc54, 800ccc54, 800ccf78].
+  if (actor.variantIndex === 0) {
+    ctx.onCyberMachineHandler?.(actor, 0x800cc854);
+    cmDashV0(actor, ctx);
+  } else if (actor.variantIndex >= 1 && actor.variantIndex <= 3) {
+    ctx.onCyberMachineHandler?.(actor, 0x800ccc54);
+    cmDashV1(actor, ctx);
+  } else if (actor.variantIndex === 4) {
+    ctx.onCyberMachineHandler?.(actor, 0x800ccf78);
+    cmDashV2(actor, ctx);
+  }
 }
 
 // --- Variant 0: PTR_FUN_8030cd3c ---
@@ -135,12 +142,19 @@ function cmDashV0Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
   void ctx;
   actor.fbPhaseSlots[0] = 1;
   // zz_00cd3ec_ direction check → start stream
-  s.moveTimer = CM_X.DASH_TIMER;
+  // +0x560 is first seeded to 6, then zz_00cd18c_ immediately replaces it with
+  // 3 and seeds +0x558 to 8. Preserve the final observable state.
+  s.moveTimer = CM_X.TRANS_TIMER;
+  actor.handlerTimer = CM_X.HANDLER_TIMER;
   actor.gravityCoeff = 0; actor.yVel = 0; actor.hDecel = 0; actor.hSpeed = 0;
   s.animOffset2 = 0; s.animOffset1 = 0; s.animOffset0 = 0;
-  // pos += (pos - target) * VEL_SCALE (velocity projection)
-  actor.pos.x += (actor.pos.x - 0) * CM_X.VEL_SCALE;
-  actor.pos.z += (actor.pos.z - 0) * CM_X.VEL_SCALE;
+  // +0x38 = (+0x20 - +0x5e8), then scale and add to +0x20.
+  actor.motion.x = (actor.pos.x - actor.targetCache5e8.x) * CM_X.VEL_SCALE;
+  actor.motion.y = (actor.pos.y - actor.targetCache5e8.y) * CM_X.VEL_SCALE;
+  actor.motion.z = (actor.pos.z - actor.targetCache5e8.z) * CM_X.VEL_SCALE;
+  actor.pos.x += actor.motion.x;
+  actor.pos.y += actor.motion.y;
+  actor.pos.z += actor.motion.z;
   s.perFrameField = 0;
   startStream(actor, 0xf, 0, 1, CM_X.STREAM_RATE);
 }
@@ -148,8 +162,12 @@ function cmDashV0Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
 function cmDashV0Ph1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
   const s = scratchOf(actor);
   tickStream(actor, 0xf, ctx);
-  actor.pos.x += (actor.pos.x - 0) * CM_X.VEL_SCALE;
-  actor.pos.z += (actor.pos.z - 0) * CM_X.VEL_SCALE;
+  actor.motion.x *= CM_X.VEL_SCALE;
+  actor.motion.y *= CM_X.VEL_SCALE;
+  actor.motion.z *= CM_X.VEL_SCALE;
+  actor.pos.x += actor.motion.x;
+  actor.pos.y += actor.motion.y;
+  actor.pos.z += actor.motion.z;
   s.moveTimer -= actor.dt;
   if (s.moveTimer <= 0) {
     actor.fbPhaseSlots[0] = 2;
@@ -181,6 +199,8 @@ function cmDashV1Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
   void ctx;
   actor.fbPhaseSlots[0] = 1;
   s.streamCueCount = 1;
+  s.moveTimer = CM_X.TRANS_TIMER;
+  actor.handlerTimer = CM_X.HANDLER_TIMER;
   startStream(actor, 0xf, 0, 1, CM_X.STREAM_RATE);
 }
 
@@ -217,6 +237,8 @@ function cmDashV2Ph0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
   ctx.onFaceComplete?.(actor, 0x81);
   // gravity + ground snap
   s.perFrameField = 0;
+  s.moveTimer = CM_X.TRANS_TIMER;
+  actor.handlerTimer = CM_X.HANDLER_TIMER;
   startStream(actor, 0xf, 0, 1, CM_X.STREAM_RATE);
 }
 
@@ -249,21 +271,30 @@ function cmDashSharedTransition(actor: RomActor, ctx: CyberMachineFamilyCtx): vo
 
 function cmXPhase0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
   actor.fbPhaseSlots[0] = 1;
-  ctx.onFamilyProjectile?.(actor, CM_X.EFFECT_SPAWNER_ADDR, CM_X.EFFECT_TYPE);
+  // FUN_800ce5dc only deploys the child when zz_006dbe0_(actor,2,1,1) succeeds.
+  if (ctx.onAllocateResource?.(actor, CM_X.AMMO_SLOT, CM_X.AMMO_COST, 1) ?? false) {
+    ctx.onFamilyProjectile?.(actor, CM_X.EFFECT_SPAWNER_ADDR, CM_X.EFFECT_TYPE);
+  }
 }
 
-function cmXPhase1(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+function cmXPhase1(actor: RomActor): void {
+  actor.housekeeping73f = 0;
   actor.controlWord = actor.controlWord & ~CM_X.ACTION_MODE_BITS;
-  ctx.onFamilyProjectile?.(actor, CM_X.SHOT_SPAWNER_ADDR, CM_X.SHOT_KIND);
+  // zz_006a668_(actor, 1): reset shot-channel state, arm zz_0048d54_'s exact
+  // non-part-1 animation records, then mirror the current upper-body cue to full body.
+  actor.shotScalar1d9c = 0;
+  actor.shotByte1db2 = 0;
+  actor.shotByte1db3 = 0;
+  armWeaponPartAnimation(actor, CM_X.SHOT_KIND);
+  dispatchFullBodyCue(actor, actor.ubCue);
   actor.stateTimer = CM_X.COOLDOWN + actor.dt;
-  dispatchUpperBodyCue(actor, 7);
-  dispatchFullBodyCue(actor, 0);
 }
 
 function cmXHandler(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  ctx.onCyberMachineHandler?.(actor, 0x800ce5dc);
   const phase = actor.fbPhaseSlots[0] ?? 0;
   if (phase === 0) cmXPhase0(actor, ctx);
-  else cmXPhase1(actor, ctx);
+  else cmXPhase1(actor);
 }
 
 // ============================================================================
@@ -274,8 +305,19 @@ function cmXHandler(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
 
 function cmBMeleeWrapper(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
   actor.steerYaw = actor.steerYaw >> 1;
-  if (actor.variantIndex === 0) cmMeleeV0(actor, ctx);
-  else cmMeleeV1(actor, ctx);
+  // PTR_FUN_8030cd60 = [800cd514, 800cd988, 800cd988, 800cdbf8, 800cdbf8].
+  if (actor.variantIndex === 0) {
+    ctx.onCyberMachineHandler?.(actor, 0x800cd514);
+    cmMeleeV0(actor, ctx);
+  } else if (actor.variantIndex === 1 || actor.variantIndex === 2) {
+    ctx.onCyberMachineHandler?.(actor, 0x800cd988);
+    cmMeleeV1(actor, ctx);
+  } else if (actor.variantIndex === 3 || actor.variantIndex === 4) {
+    // The 800cdbf8 five-phase branch depends on exact target-distance, collision,
+    // stream-event, and movement helpers not yet surfaced by the host. Preserve the
+    // ROM route instead of executing the old (incorrect) 800cd988 approximation.
+    ctx.onCyberMachineHandler?.(actor, 0x800cdbf8);
+  }
 }
 
 function cmMeleeV0(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
@@ -398,6 +440,16 @@ export interface CyberMachineFamilyCtx extends StreamContext {
   onFaceComplete?: (actor: RomActor, mask: number) => boolean;
   onAllocateResource?: (actor: RomActor, type: number, count: number, mode?: number) => boolean;
   onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void;
+  /** Focused evidence hook reporting the actual leaf selected by ROM pointer tables. */
+  onCyberMachineHandler?: (actor: RomActor, address: number) => void;
+}
+
+function cmPairedCharge(actor: RomActor, ctx: CyberMachineFamilyCtx): void {
+  // FUN_800ce138 writes mode 2 to actor+0x594 and (actor+0x4a4)+0x594 before
+  // selecting the common 800ce184 leaf for every live variant. The paired-actor
+  // object and its five-phase collision/stream host helpers are not yet represented;
+  // expose the exact route and keep this action explicitly partial.
+  ctx.onCyberMachineHandler?.(actor, 0x800ce184);
 }
 
 export function createCyberMachineRootAction(
@@ -407,8 +459,7 @@ export function createCyberMachineRootAction(
     (a) => cmAction0Wrapper(a, ctx),
     (a) => cmBMeleeWrapper(a, ctx),
     (a) => cmXHandler(a, ctx),
-    null, // 3: B charge
-    null, // 4:
+    (a) => cmPairedCharge(a, ctx),
   ];
   return (actor: RomActor) => {
     const fn = actionTable[actor.actionIndex];
