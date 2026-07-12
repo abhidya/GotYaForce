@@ -96,6 +96,7 @@ import { createMeleeGirlLunge } from "./melee-girl-lunge.js";
 import { createMeleeGirlStanding } from "./melee-girl-standing.js";
 import { createSeries3XSpecial, series3XActionSlots, type Series3FamilyCtx } from "./shared-series3-x.js";
 import { createCyberGirlRootAction } from "./cyber-girl.js";
+import { stepTargetRoll, stepTargetYaw, targetPitchBam } from "../rom/helpers.js";
 
 /** Shared-cluster constants (FLOAT_804395xx bank, DOL-read — see header). */
 export const GIRL = {
@@ -119,20 +120,6 @@ export const GIRL = {
   MELEE_GROUP: 3,
   X_GROUP: 4,
   PART_MASK: 0xf,
-  /** actor+0x868/+0x86c row default when the ctor data-page copy isn't stamped
-   *  (samurai SAMURAI.DEFAULT_RANGE_ROW precedent — TUNED fallback). */
-  DEFAULT_RANGE_ROW: 1000.0,
-  /** (s8)+0x1d0f dash-strength default when the host hasn't stamped the stream byte:
-   *  16 × 0.0625 = 1.0 (samurai/valkrie DEFAULT_DASH_STRENGTH precedent — TUNED). */
-  DEFAULT_DASH_STRENGTH: 16,
-  /** LIVENESS (TUNED): the volley fire event (s8)+0x1cef is stream-authored and
-   *  host-stamped; unstamped it would deadlock G-A/G-B/G-C phase 1 (the +0x540++
-   *  fire is gated SOLELY on it). Frame budget after which the fire is forced. */
-  FIRE_EVENT_BUDGET: 20,
-  /** LIVENESS (TUNED): the ranged phase-2 exit is gated on host-stamped input words
-   *  (+0x5d8 held / +0x5d4 edge) and the +0x1cee stream-end byte; with none stamped
-   *  the recovery would drift forever. Frame budget after which the exit is forced. */
-  RANGED_EXIT_BUDGET: 120,
 } as const;
 
 /** ROM spawner/helper addresses routed through ctx.onFamilyProjectile. */
@@ -257,9 +244,6 @@ interface GirlScratch {
   barrierMode146?: number;
   /** +0x760/+0x764 distance mirror. */
   curTargetDist?: number;
-  /** LIVENESS budgets (port-side, TUNED — see GIRL.FIRE_EVENT_BUDGET/RANGED_EXIT_BUDGET). */
-  girlFireBudget?: number;
-  girlExitBudget?: number;
 }
 
 type GActor = RomActor & GirlScratch;
@@ -285,29 +269,24 @@ function rangeCheck(a: GActor, range: number): number {
 }
 
 function rangeRow868(a: GActor): number {
-  return a.rangeRow868 ?? GIRL.DEFAULT_RANGE_ROW;
+  return a.actionSpeedRows[0];
 }
 function rangeRow86c(a: GActor): number {
-  return a.rangeRow86c ?? GIRL.DEFAULT_RANGE_ROW;
+  return a.actionSpeedRows[1];
 }
 
 /** zz_006d144_(0xc0) / zz_006d0dc_(0xc1, 0) — face the lock target; nonzero = facing
  *  complete (bridge pre-aims lockYaw — shared-melee-gred precedent). */
 function faceComplete(a: GActor): boolean {
-  return a.lockTarget != null;
+  return stepTargetYaw(a, 0xc0);
 }
 
 /** zz_006e514_(actor, 0xc0, &+0x54e) — aim-pitch seek (valkrie seekMeleeAimPitch
  *  approximation: snap with a target, decay without). */
 function seekAimPitch(a: GActor): void {
-  const t = a.lockTarget;
-  if (!t) {
-    a.meleeAimPitch = s16(Math.trunc((a.meleeAimPitch ?? 0) * 0.9));
-    return;
-  }
-  const hd = Math.hypot(t.x - a.pos.x, t.z - a.pos.z);
-  const pitchRad = Math.atan2(-(t.y - a.pos.y), Math.max(hd, 1e-6));
-  a.meleeAimPitch = s16(Math.round((pitchRad / (Math.PI * 2)) * 0x10000));
+  const pitch = targetPitchBam(a);
+  if (pitch == null) return;
+  a.meleeAimPitch = s16(-pitch);
 }
 
 /** zz_006dee8_(actor, mode) — rate-limited yaw track toward the target bearing
@@ -315,19 +294,17 @@ function seekAimPitch(a: GActor): void {
  *  −1 (out of cone); locked in-cone → snap +0x1dfc and return 0x8444 "aligned"
  *  (the bridge pre-aims — rate limit modeled as instant). */
 function aimTrack(a: GActor): number {
-  const t = a.lockTarget;
-  if (!t) return -1;
-  const bearing = Math.round((Math.atan2(t.x - a.pos.x, t.z - a.pos.z) / (Math.PI * 2)) * 0x10000);
-  const delta = s16(bearing - a.heading);
-  if (delta > 0x4800 || delta < -0x4800) return -1;
-  a.aimYawTrack = Math.max(-0x4000, Math.min(0x4000, delta));
-  return 0x8444;
+  const helper = a as GActor & { aimRoll1dfc?: number };
+  helper.aimRoll1dfc = a.aimYawTrack ?? 0;
+  const result = stepTargetRoll(helper, true);
+  a.aimYawTrack = helper.aimRoll1dfc ?? 0;
+  return result;
 }
 
 /** (s8)+0x1d0f read with the liveness/gameplay fallback (samurai dashByte precedent
  *  — labeled TUNED; sites that merely test the SIGN keep the plain `?? 0` read). */
 function dashByte(a: GActor): number {
-  return a.dashStrength ?? GIRL.DEFAULT_DASH_STRENGTH;
+  return a.dashStrength1d0f;
 }
 
 /** zz_006ed8c_(scale, actor) — velocity drag on +0x44/+0x48. */
@@ -354,13 +331,9 @@ function setupLockGate(a: GActor, row: number, activeFrom: "heading" | "lockYaw"
 /** Blink-reposition from the +0x5e8 target cache: motion = pos − target; ×scale;
  *  pos += motion. No lock → zero the motion (blink rule — never a stale vector). */
 function blinkReposition(a: GActor, scale: number): void {
-  if (a.lockTarget) {
-    vecSubtract(a.pos, a.lockTarget, a.motion);
-    vecScale(scale, a.motion, a.motion);
-    vecAdd(a.pos, a.motion, a.pos);
-  } else {
-    a.motion.x = 0; a.motion.y = 0; a.motion.z = 0;
-  }
+  vecSubtract(a.pos, a.targetCache5e8, a.motion);
+  vecScale(scale, a.motion, a.motion);
+  vecAdd(a.pos, a.motion, a.pos);
 }
 
 /** motion ×= scale; pos += motion (the per-frame drift continuation). */
@@ -412,12 +385,11 @@ function volleyFire(a: GActor, ctx: GirlFamilyCtx): void {
   a.handlerTimer = VOLLEY_INTERVALS[low] ?? 5;    // +0x558 = interval[low]
   a.tickDelay55c = VOLLEY_TICK_DELAY;             // +0x55c = 0
   a.volleySlotBase = 1;                           // +0x6ee = 1
-  a.girlFireBudget = GIRL.FIRE_EVENT_BUDGET;      // port-side liveness reset (TUNED)
   if ((a.volleysLeft ?? 0) <= 0) return;          // '\0' < +0x6ef gate
   a.meter1900 = 0;                                // +0x1900 = 0
   // zz_0046698_ / FUN_800452a0 / zz_0046dd4_ — the +0x1900 shot-pitch aim solver
   // (reads the +0xa24 part-transform bank). Bridge owns aiming — labeled no-op.
-  const ok = ctx.tryConsumeAmmo ? ctx.tryConsumeAmmo(a, 0, 1) : true; // zz_006dbe0_(a,0,1,1)
+  const ok = ctx.onAllocateResource?.(a, 0, 1, 1) ?? false; // zz_006dbe0_(a,0,1,1)
   if (ok) {
     switch (a.borgNumber) {                       // (s16)+0x3e8 switch
       case 0x300: ctx.onFamilyProjectile?.(a, GIRL_SPAWNERS.BLAST, 0x0b); break;
@@ -441,17 +413,13 @@ function volleyFire(a: GActor, ctx: GirlFamilyCtx): void {
     a.volleysLeft = (a.volleysLeft ?? 0) - 1;     // +0x6ef--
   }
   // (s16)+0x774 (slot-0 ammo count, raw read) < 1 → +0x6ef = 0.
-  const count = ctx.getAmmoCount ? ctx.getAmmoCount(a, 0) : 1; // UNWIRED → treat > 0
-  if (count < 1) a.volleysLeft = 0;
+  if (!(ctx.onAllocateResource?.(a, 0, 1, 0) ?? false)) a.volleysLeft = 0;
 }
 
-/** The (s8)+0x1cef fire-event read with the LIVENESS budget (labeled TUNED — see
- *  GIRL.FIRE_EVENT_BUDGET). The ROM's gate is `+0x1cef != 0 && +0x1b03 == 0`. */
+/** Exact ROM fire-event gate: `(s8)+0x1cef != 0 && +0x1b03 == 0`. */
 function volleyFireEvent(a: GActor): boolean {
-  if (a.streamTickGate) return false;             // +0x1b03 != 0 holds the fire
-  if (a.contactP0 !== 0) return true;             // (s8)+0x1cef != 0
-  a.girlFireBudget = (a.girlFireBudget ?? GIRL.FIRE_EVENT_BUDGET) - a.dt;
-  return (a.girlFireBudget ?? 0) <= 0;            // TUNED fallback — no deadlock
+  if (a.streamHold1b03 !== 0) return false;        // +0x1b03 != 0 holds the fire
+  return a.contactP0 !== 0;                       // (s8)+0x1cef != 0
 }
 
 // --- G-A (variant 0, table @0x80325a14) ---
@@ -471,8 +439,6 @@ function rangedAPhase0(a: GActor): void {
   // +0x80/+0x7e/+0x7c = 0 — aim accumulators (labeled no-ops).
   blinkReposition(a, GIRL.DRAG);                  // motion = pos − +0x5e8; ×0.95; pos +=
   // zz_00679d0_(actor) — ground snap (bridge). +0x80c = 0 (no-op).
-  a.girlFireBudget = GIRL.FIRE_EVENT_BUDGET;      // port-side liveness seed (TUNED)
-  a.girlExitBudget = GIRL.RANGED_EXIT_BUDGET;
 }
 
 // Phase 1 — FUN_8010a6b0 @ chunk_0030.c:667. Aim window → first fire.
@@ -501,7 +467,7 @@ function rangedAPhase2(a: GActor, ctx: GirlFamilyCtx): void {
   }
   let exit = false;
   if (a.handlerTimer <= GIRL.ZERO) {              // +0x558 ≤ 0 — re-fire point
-    const ok = ctx.getAmmoCount ? ctx.getAmmoCount(a, 0) > 0 : true; // zz_006dbe0_(a,0,1,0) peek
+    const ok = ctx.onAllocateResource?.(a, 0, 1, 0) ?? false; // zz_006dbe0_(a,0,1,0) peek
     if (!ok) {
       exit = true;                                // goto LAB_8010a8f8
     } else {
@@ -531,11 +497,9 @@ function rangedAPhase2(a: GActor, ctx: GirlFamilyCtx): void {
   }
   if (!exit) {
     // Keep drifting while no held input (+0x5d8 & 0xf0), no edge bit (+0x5d4 & 1),
-    // and no stream end (+0x1cee). LIVENESS (TUNED): girlExitBudget forces the exit
-    // when none of the host-stamped words ever fire.
-    a.girlExitBudget = (a.girlExitBudget ?? GIRL.RANGED_EXIT_BUDGET) - a.dt;
+    // and no stream end (+0x1cee).
     if (((a.inputHeld5d8 ?? 0) & 0xf0) === 0 && ((a.inputEdge5d4 ?? 0) & 1) === 0
-      && a.wallContact === 0 && (a.girlExitBudget ?? 0) > 0) {
+      && a.wallContact === 0) {
       driftMotion(a, GIRL.DRAG);                  // motion ×0.95; pos += motion
       // zz_00679d0_ snap + |motion| afterimage (no-ops).
       return;
@@ -559,14 +523,12 @@ function rangedBPhase0(a: GActor): void {
   if ((cw & 0x80) !== 0) slot = 6;
   if ((cw & 0x10) !== 0) slot = 2;
   if ((cw & 0x20) !== 0) {
-    slot = (a.faceGate ?? 0) + 8;                 // (s8)+0x1d10 + 8
+    slot = a.faceGate1d10 + 8;                    // (s8)+0x1d10 + 8
     if (a.ubState === 0x0f) slot = 0;             // +0x5db == 0xf
   }
   // zz_004beb8_(-1.0, actor, 1, 2, slot + (s8)+0x6ee, 7, 1) — part-0 mask ONLY.
   startStream(a, 0x1, GIRL.RANGED_GROUP, slot + (a.volleySlotBase ?? 0), GIRL.STREAM_RATE);
   seedVolleyState(a);                             // zz_010afd0_
-  a.girlFireBudget = GIRL.FIRE_EVENT_BUDGET;      // port-side liveness seed (TUNED)
-  a.girlExitBudget = GIRL.RANGED_EXIT_BUDGET;
 }
 
 // Phase 1 — FUN_8010aa98 @ chunk_0030.c:821. Yaw track → fire.
@@ -600,7 +562,7 @@ function rangedBCPhase2(a: GActor, ctx: GirlFamilyCtx): void {
   }
   let exit = false;
   if (a.handlerTimer <= GIRL.ZERO) {
-    const ok = ctx.getAmmoCount ? ctx.getAmmoCount(a, 0) > 0 : true; // ammo peek
+    const ok = ctx.onAllocateResource?.(a, 0, 1, 0) ?? false; // ammo peek
     if (!ok) {
       exit = true;                                // goto LAB_8010ad7c
     } else {
@@ -631,7 +593,7 @@ function rangedBCPhase2(a: GActor, ctx: GirlFamilyCtx): void {
         }
         if ((cw & 0x20) !== 0) {
           a.variantIndex = 2;                     // +0x581 = 2
-          let slot = (a.faceGate ?? 0) + 9;       // (s8)+0x1d10 + 9
+          let slot = a.faceGate1d10 + 9;          // (s8)+0x1d10 + 9
           if (a.ubState === 0x0f) slot = 1;       // +0x5db == 0xf
           startStream(a, 0x1, GIRL.RANGED_GROUP, slot, GIRL.STREAM_RATE);
           return;
@@ -645,10 +607,8 @@ function rangedBCPhase2(a: GActor, ctx: GirlFamilyCtx): void {
   }
   if (!exit) {
     // Keep holding while no held input (+0x5d8 & 0xf0) and no stream end (+0x1cee).
-    // LIVENESS (TUNED): girlExitBudget forces the exit (see GIRL.RANGED_EXIT_BUDGET).
-    a.girlExitBudget = (a.girlExitBudget ?? GIRL.RANGED_EXIT_BUDGET) - a.dt;
     if (((a.inputHeld5d8 ?? 0) & 0xf0) === 0 && a.wallContact === 0
-      && (a.girlExitBudget ?? 0) > 0) {
+    ) {
       return;
     }
   }
@@ -677,8 +637,6 @@ function rangedCPhase0(a: GActor): void {
     startStream(a, 0x2, 0, 0xd, GIRL.STREAM_RATE);
   }
   seedVolleyState(a);                             // zz_010afd0_; +0x80c = 0 (no-op)
-  a.girlFireBudget = GIRL.FIRE_EVENT_BUDGET;      // port-side liveness seed (TUNED)
-  a.girlExitBudget = GIRL.RANGED_EXIT_BUDGET;
 }
 
 // Phase 1 — FUN_8010af04 @ chunk_0030.c:984. Air aim → fire + knock-out arm.
@@ -808,7 +766,7 @@ function swingsPhase3(a: GActor, ctx: GirlFamilyCtx): void {
   if (a.bRetapInput) a.bRetap = true;             // +0x5d4 & 0x40 → +0x746 = 1
   // COMBO: (s8)+0x1cf0 < 0 (swing re-arm) AND +0x746 — restarts the next g3 slot
   // and STAYS in phase 3 (no phase change, samurai S-B shape).
-  if ((a.swingEvent ?? 0) < 0 && a.bRetap) {
+  if (a.contactP1 < 0 && a.bRetap) {
     a.bRetap = false;                             // +0x746 = 0
     if (GIRL.FX_RANGE < targetDistance(a)) {      // 200 < +0x764
       ctx.onFamilyProjectile?.(a, GIRL_SPAWNERS.MELEE_FX, 0); // zz_00b2190_(a, 0)
@@ -818,18 +776,18 @@ function swingsPhase3(a: GActor, ctx: GirlFamilyCtx): void {
     startStream(a, GIRL.PART_MASK, GIRL.MELEE_GROUP, slot, GIRL.STREAM_RATE);
     return;
   }
-  if ((a.faceGate ?? 0) !== 0) {                  // +0x1d10 != 0 → re-face (bridge)
+  if (a.faceGate1d10 !== 0) {                     // +0x1d10 != 0 → re-face
     // zz_006d144_(actor, 0xc0).
   }
   // Dash refresh: +0x1b03 == 0 && (s8)+0x1d0f != 0 → recompute +0x44, clear the byte.
-  if (!a.streamTickGate && dashByte(a) !== 0) {   // unstamped → 16 (TUNED fallback)
+  if (a.streamHold1b03 === 0 && dashByte(a) !== 0) {
     if (!a.lockTarget) {                          // +0xcc == 0
       a.hSpeed = GIRL.ZERO;                       // +0x44 = 0
     } else {
       a.hSpeed = targetDistance(a) * dashByte(a) * GIRL.DASH_BYTE_SCALE;
     }
     a.hSpeed /= GIRL.ACTIVE_WINDOW;               // +0x44 /= 20
-    a.dashStrength = 0;                           // +0x1d0f = 0
+    a.dashStrength1d0f = 0;                       // +0x1d0f = 0
   }
   applyDrag(a, GIRL.DRAG);                        // zz_006ed8c_(0.95)
   integratePhysics(0, a, s16(a.lockYaw));         // zz_00670dc_(actor, +0x5ae)
@@ -918,7 +876,7 @@ function rushPhase2(a: GActor, ctx: GirlFamilyCtx): void {
 function rushPhase3(a: GActor, ctx: GirlFamilyCtx): void {
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
   if (a.bRetapInput) a.bRetap = true;             // +0x5d4 & 0x40 → +0x746 = 1
-  if ((a.swingEvent ?? 0) < 0 && a.bRetap) {      // combo re-arm
+  if (a.contactP1 < 0 && a.bRetap) {              // combo re-arm
     a.bRetap = false;                             // +0x746 = 0
     if (GIRL.FX_RANGE < targetDistance(a)) {      // 200 < +0x764
       ctx.onFamilyProjectile?.(a, GIRL_SPAWNERS.MELEE_FX, 0); // zz_00b2190_(a, 0)
@@ -935,7 +893,7 @@ function rushPhase3(a: GActor, ctx: GirlFamilyCtx): void {
     startStream(a, GIRL.PART_MASK, GIRL.MELEE_GROUP, slot, GIRL.STREAM_RATE);
     return;
   }
-  if ((a.faceGate ?? 0) !== 0) {                  // +0x1d10 != 0 → re-face (bridge)
+  if (a.faceGate1d10 !== 0) {                     // +0x1d10 != 0 → re-face
     // zz_006d144_(actor, 0xc0).
   }
   applyDrag(a, GIRL.DRAG);                        // zz_006ed8c_(0.95)
@@ -989,7 +947,7 @@ function divePhase0(a: GActor, seedSlot: number): void {
 
 // Phase 1 — FUN_8010c720 @ chunk_0030.c:1883. Face budget → dive start.
 function divePhase1(a: GActor, ctx: GirlFamilyCtx): void {
-  if (a.streamTickGate) {                         // +0x1b03 != 0
+  if (a.streamHold1b03 !== 0) {                   // +0x1b03 != 0
     tickStream(a, GIRL.PART_MASK, ctx);
   }
   driftMotion(a, GIRL.BLINK_SOFT);                // motion ×0.98; pos += motion
@@ -1005,7 +963,7 @@ function divePhase1(a: GActor, ctx: GirlFamilyCtx): void {
 
 // Phase 2 — FUN_8010c7e8 @ chunk_0030.c:1913. Pitch-projected dive.
 function divePhase2(a: GActor, ctx: GirlFamilyCtx): void {
-  if (a.contactP0 === 0 || a.streamTickGate) {    // +0x1cef == 0 || +0x1b03 != 0
+  if (a.contactP0 === 0 || a.streamHold1b03 !== 0) { // +0x1cef == 0 || +0x1b03 != 0
     tickStream(a, GIRL.PART_MASK, ctx);
   }
   // zz_006d144_(0xc0) face + zz_006e514_ pitch seek.
@@ -1027,8 +985,8 @@ function divePhase2(a: GActor, ctx: GirlFamilyCtx): void {
 // Phase 3 — FUN_8010c8e0 @ chunk_0030.c:1949. Recovery / landing.
 function divePhase3(a: GActor, ctx: GirlFamilyCtx): void {
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
-  if ((a.dashStrength ?? 0) < 0) {                // (s8)+0x1d0f < 0 → altitude cap
-    a.dashStrength = 0;                           // +0x1d0f = 0
+  if (a.dashStrength1d0f < 0) {                   // (s8)+0x1d0f < 0 → altitude cap
+    a.dashStrength1d0f = 0;                       // +0x1d0f = 0
     if (a.yVel > GIRL.ZERO) a.yVel = GIRL.ZERO;   // +0x48 clamp ≤ 0
     a.gravityCoeff = gravityRestore(a);           // +0x50 = dataPage(+0x4ac)+0x6c
   }
@@ -1084,7 +1042,7 @@ export interface GirlSharedXConfig {
 /** FUN_80134714 @ chunk_0035.c:2568 — zz_006dbe0_(a,2,1,1) ammo deduct →
  *  zz_016cc24_(a, 1) armed-shot deploy (part mask 1). */
 function killerSharedXPayload(actor: RomActor, ctx: GirlFamilyCtx): boolean {
-  const ok = ctx.tryConsumeAmmo ? ctx.tryConsumeAmmo(actor, 2, 1) : true;
+  const ok = ctx.onAllocateResource?.(actor, 2, 1, 1) ?? false;
   if (!ok) return false;
   ctx.onFamilyProjectile?.(actor, GIRL_SPAWNERS.ARMED_SHOT, 1);
   return true;
@@ -1092,7 +1050,7 @@ function killerSharedXPayload(actor: RomActor, ctx: GirlFamilyCtx): boolean {
 
 /** FUN_80108530 @ chunk_0029.c:2919 — same shape, zz_016cc24_(a, 0xf) (all parts). */
 function barrierSharedXPayload(actor: RomActor, ctx: GirlFamilyCtx): boolean {
-  const ok = ctx.tryConsumeAmmo ? ctx.tryConsumeAmmo(actor, 2, 1) : true;
+  const ok = ctx.onAllocateResource?.(actor, 2, 1, 1) ?? false;
   if (!ok) return false;
   ctx.onFamilyProjectile?.(actor, GIRL_SPAWNERS.ARMED_SHOT, 0xf);
   return true;
@@ -1141,7 +1099,7 @@ function sharedXPhase1(a: GActor, cfg: GirlSharedXConfig, ctx: GirlFamilyCtx): v
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
   // Once-per-move payload: +0x1b03 == 0 && +0x542 == 0 → +0x542 = 0xff, then
   // cfg+0xc(actor) != 0 → +0x542 = 1.
-  if (!a.streamTickGate && (a.fbPhaseSlots[2] ?? 0) === 0) {
+  if (a.streamHold1b03 === 0 && (a.fbPhaseSlots[2] ?? 0) === 0) {
     a.fbPhaseSlots[2] = -1;                       // +0x542 = 0xff
     if (cfg.payload && cfg.payload(a, ctx)) {
       a.fbPhaseSlots[2] = 1;                      // +0x542 = 1
@@ -1151,11 +1109,11 @@ function sharedXPhase1(a: GActor, cfg: GirlSharedXConfig, ctx: GirlFamilyCtx): v
   if (a.contactP0 >= 1 && (a.fbPhaseSlots[2] ?? 0) < 0) {
     a.stateTimer = GIRL.RUSH_WINDOW + a.dt;       // +0x694 = 30 (FLOAT_8043957c) + dt
   } else {
-    if ((a.swingEvent ?? 0) < 0) {                // (s8)+0x1cf0 < 0 → gravity restore
-      a.swingEvent = 0;                           // +0x1cf0 = 0
+    if (a.contactP1 < 0) {                        // (s8)+0x1cf0 < 0 → gravity restore
+      a.contactP1 = 0;                            // +0x1cf0 = 0
       a.gravityCoeff = gravityRestore(a);         // +0x50 = dataPage+0x6c
     }
-    if ((a.faceGate ?? 0) === 0) {                // +0x1d10 == 0 → meter decay
+    if (a.faceGate1d10 === 0) {                   // +0x1d10 == 0 → meter decay
       a.steerYaw = s16(a.steerYaw) >> 1;          // +0x18da >>= 1
       a.meter1900 = s16(a.meter1900 ?? 0) >> 1;   // +0x1900 >>= 1
     } else {
@@ -1167,7 +1125,7 @@ function sharedXPhase1(a: GActor, cfg: GirlSharedXConfig, ctx: GirlFamilyCtx): v
         a.meter1900 = m;
       }
     }
-    if (!a.streamTickGate) {                      // +0x1b03 == 0 → kill the dash
+    if (a.streamHold1b03 === 0) {                 // +0x1b03 == 0 → kill the dash
       a.hSpeed = GIRL.ZERO;                       // +0x44 = 0
     }
     integratePhysics(GIRL.GRAVITY, a, s16(a.heading - 0x8000)); // backward drift
@@ -1229,12 +1187,12 @@ function battleXPhase0(a: GActor): void {
 // Phase 1 — FUN_800c0b44.
 function battleXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
-  if ((a.faceGate ?? 0) !== 0) {                  // +0x1d10 != 0 → re-face (bridge);
+  if (a.faceGate1d10 !== 0) {                     // +0x1d10 != 0 → re-face;
     // borg 0x30b airborne also zz_006e1ac_(0xc1, 1).
   }
   if (a.contactP0 > 0) {                          // (s8)+0x1cef > 0 — fire event
     a.contactP0 = 0;                              // +0x1cef = 0
-    const ok = ctx.tryConsumeAmmo ? ctx.tryConsumeAmmo(a, 2, 1) : true; // zz_006dbe0_(a,2,1,1)
+    const ok = ctx.onAllocateResource?.(a, 2, 1, 1) ?? false; // zz_006dbe0_(a,2,1,1)
     if (!ok) {                                    // no ammo → LAB_800c0cc4 exit
       battleXExit(a);
       return;
@@ -1245,8 +1203,8 @@ function battleXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
       ctx.onFamilyProjectile?.(a, GIRL_SPAWNERS.BATTLE_X_CHILD, 1); // zz_00fe668_(a,1,1)
     }
   }
-  if ((a.dashStrength ?? 0) < 0) {                // (s8)+0x1d0f < 0 → altitude cap
-    a.dashStrength = 0;                           // +0x1d0f = 0
+  if (a.dashStrength1d0f < 0) {                   // (s8)+0x1d0f < 0 → altitude cap
+    a.dashStrength1d0f = 0;                       // +0x1d0f = 0
     if (a.yVel > BATTLE_X.ZERO) a.yVel = BATTLE_X.ZERO; // +0x48 clamp ≤ 0
     a.gravityCoeff = gravityRestore(a);           // +0x50 = dataPage+0x6c
   }
@@ -1326,22 +1284,22 @@ function barrierXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
     const mode = a.barrierMode146 ?? 0;           // (s8)+0x146 child-link byte
     if (mode === 1) {
       // Barrier alive → re-arm it: ammo deduct then +0x146 = 2.
-      const ok = ctx.tryConsumeAmmo ? ctx.tryConsumeAmmo(a, 2, 1) : true;
+      const ok = ctx.onAllocateResource?.(a, 2, 1, 1) ?? false;
       if (ok) {
         a.barrierMode146 = 2;                     // +0x146 = 2
         // FUN_800061a8(actor, 0x11) — screen/rumble FX helper @0x800061a8 (unported,
         // labeled no-op).
       }
     } else if (mode === 0) {
-      const ok = ctx.tryConsumeAmmo ? ctx.tryConsumeAmmo(a, 2, 1) : true;
+      const ok = ctx.onAllocateResource?.(a, 2, 1, 1) ?? false;
       if (ok) {
         ctx.onFamilyProjectile?.(a, GIRL_SPAWNERS.BARRIER_CHILD, 0); // FUN_800a6108(a, 0)
         // FUN_800061a8(actor, 0x11) — labeled no-op.
       }
     }
   }
-  if ((a.dashStrength ?? 0) < 0) {                // (s8)+0x1d0f < 0
-    a.dashStrength = 0;                           // +0x1d0f = 0
+  if (a.dashStrength1d0f < 0) {                   // (s8)+0x1d0f < 0
+    a.dashStrength1d0f = 0;                       // +0x1d0f = 0
     a.gravityCoeff = gravityRestore(a);           // +0x50 = dataPage+0x6c
   }
   if (a.wallContact !== 0) {                      // +0x1cee != 0 → exit
@@ -1394,7 +1352,7 @@ function killerXPhase0(a: GActor): void {
 function killerXPhase1(a: GActor, ctx: GirlFamilyCtx): void {
   driftMotion(a, KILLER_X.DRIFT);                 // motion ×0.95; pos += motion
   // zz_00677b0_(actor) — bridge clamp.
-  if (a.streamTickGate) {                         // +0x1b03 != 0
+  if (a.streamHold1b03 !== 0) {                   // +0x1b03 != 0
     tickStream(a, GIRL.PART_MASK, ctx);
   }
   // zz_006e1ac_(0xc0, 1) — pitch seek (bridge aim channel).
@@ -1410,7 +1368,7 @@ function killerXPhase2(a: GActor, ctx: GirlFamilyCtx): void {
   driftMotion(a, KILLER_X.DRIFT);                 // motion ×0.95; pos += motion
   // zz_00677b0_(actor) — bridge clamp.
   tickStream(a, GIRL.PART_MASK, ctx);             // zz_004cd24_(actor, 0xf)
-  if ((a.swingEvent ?? 0) !== 0) {                // +0x1cf0 != 0 — swing event
+  if (a.contactP1 !== 0) {                        // +0x1cf0 != 0 — swing event
     // +0x272 |= 2 — status halfword (not surfaced; labeled no-op).
     // FUN_800061a8(actor, 9) — screen/rumble FX (unported, labeled no-op).
   }
@@ -1515,6 +1473,39 @@ const GIRL_BORG_NUMBERS: Record<GirlClusterBorgId, number> = {
   pl030a: 0x30a, pl030b: 0x30b, pl030c: 0x30c, pl030d: 0x30d,
 };
 
+/** Exact command-derived live routing. Slots outside this matrix stay on the host's
+ * generic fallback and must never enter a Girl handler. */
+export function isGirlClusterLiveSlot(
+  borgId: GirlClusterBorgId,
+  actionIndex: number,
+  variantIndex: number,
+): boolean {
+  const baseVariant = variantIndex >= 0 && variantIndex <= 4;
+  switch (borgId) {
+    case "pl0300": case "pl030b":
+      return baseVariant && actionIndex >= 0 && actionIndex <= 2;
+    case "pl0301":
+      return baseVariant && (actionIndex === 0 || actionIndex === 1 || actionIndex === 3);
+    case "pl0302":
+      return baseVariant && actionIndex >= 0 && actionIndex <= 3;
+    case "pl0306":
+      return (baseVariant && (actionIndex === 0 || actionIndex === 2))
+        || (actionIndex === 3 && (variantIndex === 7 || variantIndex === 13));
+    case "pl0305": case "pl0309": case "pl030a":
+      return baseVariant && actionIndex >= 0 && actionIndex <= 2;
+    case "pl0304":
+      return baseVariant && actionIndex >= 0 && actionIndex <= 2;
+    case "pl0308":
+      return baseVariant && (actionIndex === 1 || actionIndex === 2);
+    case "pl0303":
+      return baseVariant && (actionIndex === 0 || actionIndex === 3);
+    case "pl0307": case "pl030d":
+      return baseVariant && (actionIndex === 1 || actionIndex === 2);
+    case "pl030c":
+      return baseVariant && actionIndex === 1;
+  }
+}
+
 /** Per-family melee seed slots (the leaf thunks' r4 immediates — see header). */
 interface GirlMeleeSeeds { standing: number; rush: number; lunge: number; dive: number; }
 const GIRL_MELEE_SEEDS: GirlMeleeSeeds = { standing: 8, rush: 5, lunge: 4, dive: 7 };
@@ -1582,11 +1573,11 @@ export function configureGirlClusterFamily(
   let melee: ((a: RomActor) => void) | null = null;
   if (num === 0x30c) melee = createDeltaMeleeAction(ctx);
   else if (num === 0x304 || num === 0x308) melee = createGirlMeleeAction(KILLER_MELEE_SEEDS, ctx);
-  else if (num !== 0x303) melee = createGirlMeleeAction(GIRL_MELEE_SEEDS, ctx);
+  else if (num !== 0x303 && num !== 0x306) melee = createGirlMeleeAction(GIRL_MELEE_SEEDS, ctx);
 
   // Whether the family root's action table has the shared ranged handler at row 0
   // (actionStreamTables: spinner @0x801ba33c and delta @0x801d447c lack it).
-  const hasRanged = num !== 0x307 && num !== 0x30d && num !== 0x30c;
+  const hasRanged = num !== 0x307 && num !== 0x30d && num !== 0x30c && num !== 0x308;
 
   // Action 2 (X) per borg.
   let x2: ((a: RomActor) => void) | null = null;
@@ -1611,6 +1602,7 @@ export function configureGirlClusterFamily(
   }
 
   actor.rootAction = (ra: RomActor) => {
+    if (!isGirlClusterLiveSlot(borgId, ra.actionIndex, ra.variantIndex)) return;
     switch (ra.actionIndex) {
       case 0: if (hasRanged) ranged(ra); break;
       case 1: melee?.(ra); break;

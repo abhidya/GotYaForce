@@ -33,6 +33,7 @@ import type { RomActor } from "../rom/actor.js";
 import { integratePhysics } from "../rom/physics.js";
 import { romGroundIdleReturn } from "./shared-idle-return.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { stepTargetYaw } from "../rom/helpers.js";
 
 export const MELEE_GIRL_STANDING = {
   FACE_BUDGET: 60.0,    // FLOAT_8043956c
@@ -46,8 +47,6 @@ export const MELEE_GIRL_STANDING = {
   PART_MASK: 0xf,
   /** zz_00b2190_ @0x800b2190 — melee trail FX child (samurai MELEE_FX precedent). */
   MELEE_FX_ADDR: 0x800b2190,
-  /** actor+0x868 row default (samurai DEFAULT_RANGE_ROW precedent — TUNED fallback). */
-  DEFAULT_RANGE_ROW: 1000.0,
 } as const;
 
 export interface MeleeGirlStandingConfig {
@@ -88,7 +87,7 @@ function rangeCheck(a: MActor, range: number): number {
 }
 
 function faceComplete(a: MActor): boolean {
-  return a.lockTarget != null;
+  return stepTargetYaw(a, 0xc0);
 }
 
 /** zz_006ed8c_(scale, actor). */
@@ -102,7 +101,7 @@ function phase0(a: MActor, seedSlot: number): void {
   a.fbPhaseSlots[0] += 1;                        // +0x540++
   a.streamSlot = seedSlot;                       // +0x6ea = r4 seed
   // FUN_80066838(row868) < 1 → invalidate; the +0x5ac source forks on +0x5e0 & 0x20.
-  if (rangeCheck(a, a.rangeRow868 ?? MELEE_GIRL_STANDING.DEFAULT_RANGE_ROW) < 1) {
+  if (rangeCheck(a, a.actionSpeedRows[0]) < 1) {
     a.fbPhaseSlots[1] = 1;                       // +0x541 = 1
     a.lockTarget = null;                         // +0xcc = 0
     if ((a.controlWord & 0x20) === 0) {
@@ -125,7 +124,7 @@ function phase1(a: MActor, ctx: StreamContext): void {
   if (a.handlerTimer <= MELEE_GIRL_STANDING.ZERO || faceComplete(a)) {
     a.fbPhaseSlots[0] += 1;                      // +0x540++
     a.handlerTimer = MELEE_GIRL_STANDING.ACTIVE_WINDOW; // +0x558 = 20 (FLOAT_80439568)
-    let f = a.rangeRow868 ?? MELEE_GIRL_STANDING.DEFAULT_RANGE_ROW; // row868 default
+    let f = a.actionSpeedRows[0];                 // actor+0x868 descriptor row
     if (a.lockTarget && f < targetDistance(a)) { // +0xcc != 0 && row < +0x764
       f = targetDistance(a);
     }

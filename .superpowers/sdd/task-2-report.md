@@ -36,6 +36,34 @@ live simulation identity across boundaries.
 
 - `rtk pnpm selfcheck:challenge-stages` — PASS; 11 base stages, `st2c`/`st4c` family variants,
   and 18-name arena coverage.
+
+## Final review: projectile snapshots and lifecycle facts
+
+Removed every live projectile alias from `BattleObservation`. Current projectiles are now deep
+fixed-step snapshots. A new read-only `projectileDespawns` collection records projectiles removed
+by each step with uid, final position/velocity, team, reason, and impact effect when present.
+Presentation and `BattleScene` consume those lifecycle facts for target/terrain effects, including
+projectiles that spawn and despawn between render syncs; no renderer object retains sim state.
+Persistent projectiles still expose `hitConfirmedThisFrame` and its current-boundary impact facts.
+
+Judge coverage now proves an old current-projectile observation remains stable across later steps,
+despawn facts carry the correct hit reason/final facts/effect/team, public types reject mutation,
+and even a cast-based mutation of the caller snapshot cannot alter sim-owned state.
+
+Also normalized trailing whitespace without removing the five requested artifacts, marked Tasks
+1–5 complete in `research/architecture-deepening-spec.md`, and verified no trailing whitespace
+remains in the named files.
+
+Final-review verification (exact commands/results):
+
+- `rtk proxy pnpm typecheck` — PASS (exit 0).
+- `rtk test node scripts/run-judge-tests.mjs` — PASS, 39/39 checks.
+- `rtk test node scripts/run-projectile-tests.mjs` — PASS, 36/36 checks.
+- `rtk pnpm selfcheck:battle-scene-morph` — PASS.
+- `rtk pnpm selfcheck:game-session` — PASS.
+- `rtk pnpm selfcheck:1p` — PASS; stage `st00`, first energy change frame 554, final smoke energy `1250/590`.
+- `rtk pnpm --filter game build` — PASS; Vite built 193 modules (existing large-chunk warning only).
+- `rtk proxy git diff origin/main --check` — PASS (no output).
 - `rtk test node packages/combat/dist/selfcheck.js` — FAIL in an unrelated existing Task 1
   expectation: `assertGRedChargeStreamUnresolvedKeepsFallback` expects the G RED B-charge leaf
   to be unresolved, but the current shared checkout resolves it to group 4/slot 1. The failure

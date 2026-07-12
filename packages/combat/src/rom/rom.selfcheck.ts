@@ -92,6 +92,16 @@ import {
   TITAN_MORPH_CONFIG,
 } from "../families/shared-morph-x.js";
 import type { BorgRuntime } from "../types.js";
+import {
+  configureGirlClusterFamily,
+  createGirlSharedX,
+  isGirlClusterLiveSlot,
+  KILLER_SHARED_X_CONFIG,
+  BARRIER_SHARED_X_CONFIG,
+  type GirlClusterBorgId,
+} from "../families/girl-cluster.js";
+import { CYBER_GIRL_X } from "../families/cyber-girl.js";
+import { createSeries3XSpecial, SERIES3_X } from "../families/shared-series3-x.js";
 
 const G_RED_LAUNCH_Y = 4.0;
 
@@ -3164,12 +3174,110 @@ export function runSelfTest(): number {
     }
   }
 
+  runGirlClusterTests();
+
   if (failures > 0) {
     console.error(`\n[rom.selfcheck] ${failures} FAILURES`);
     return 1;
   }
   console.log("\n[rom.selfcheck] ALL PASS — foundation composes correctly.");
   return 0;
+}
+
+function runGirlClusterTests(): void {
+  console.log("\n[rom.selfcheck] Girl cluster — exhaustive live routing and exact phase branches:");
+  const ids: GirlClusterBorgId[] = [
+    "pl0300", "pl0301", "pl0302", "pl0303", "pl0304", "pl0305", "pl0306",
+    "pl0307", "pl0308", "pl0309", "pl030a", "pl030b", "pl030c", "pl030d",
+  ];
+  const ctx: StreamContext = {
+    onAllocateResource: () => true,
+    onFamilyProjectile: () => {},
+  };
+  const routeErrors: string[] = [];
+  let liveCount = 0;
+  for (const id of ids) {
+    for (let action = 0; action <= 4; action += 1) {
+      for (let variant = 0; variant <= 13; variant += 1) {
+        const expected = isGirlClusterLiveSlot(id, action, variant);
+        if (expected) liveCount += 1;
+        const a = createRomActor();
+        a.actionSpeedRows = [100, 100, 100];
+        configureGirlClusterFamily(a, id, ctx);
+        a.actionIndex = action;
+        a.variantIndex = variant;
+        a.rootAction?.(a);
+        const routed = a.fbPhaseSlots.some((phase) => phase !== 0)
+          || a.parts.some((part) => part.streamPtr >= 0);
+        if (routed !== expected) routeErrors.push(`${id}/a${action}/v${variant}:${routed}`);
+      }
+    }
+  }
+  assert(liveCount === 182, `command matrix contains 182 live member/action/variant slots (got ${liveCount})`);
+  assert(routeErrors.length === 0, `all live slots route and all exclusions fall through (${routeErrors.slice(0, 3).join(", ") || "exact"})`);
+
+  const bridgeErrors: string[] = [];
+  for (const id of ids) {
+    for (let action = 0; action <= 4; action += 1) {
+      for (let variant = 0; variant <= 13; variant += 1) {
+        const runtime = makeMinimalGRedBorg();
+        runtime.borgId = id;
+        runtime.command = {
+          word: 0, type: action, button: "X", recordAddress: "girl-matrix", subtype: 0,
+          actionIndex: action, variantIndex: variant, exact: true,
+        };
+        const driver = RomDriverBridge.attach(runtime, { onAllocateResource: () => true });
+        const routed = driver?.tryStartXSpecial(runtime, [runtime]) ?? false;
+        const expected = isGirlClusterLiveSlot(id, action, variant);
+        if (routed !== expected) bridgeErrors.push(`${id}/a${action}/v${variant}:${routed}`);
+      }
+    }
+  }
+  assert(bridgeErrors.length === 0, `bridge preserves the same exhaustive live/exclusion matrix (${bridgeErrors.slice(0, 3).join(", ") || "exact"})`);
+
+  assert(CYBER_GIRL_X.COOLDOWN_305 === 12 && CYBER_GIRL_X.COOLDOWN_309 === 8,
+    "Cyber Girl cooldown literals are exact boot.dol values 12/8");
+  assert(KILLER_SHARED_X_CONFIG.seedSlot === 0 && BARRIER_SHARED_X_CONFIG.seedSlot === 2,
+    "shared-X configs preserve distinct Killer/Barrier seed slots");
+  for (const cfg of [KILLER_SHARED_X_CONFIG, BARRIER_SHARED_X_CONFIG]) {
+    const a = createRomActor();
+    a.controlWord = 0x40;
+    createGirlSharedX(cfg, ctx)(a);
+    assert(a.streamSlot === cfg.seedSlot + 1 && a.fbPhaseSlots[0] === 1,
+      `shared-X config 0x${cfg.romConfig.toString(16)} takes its airborne slot branch`);
+  }
+
+  {
+    const spawned: number[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => false,
+      onFamilyProjectile: (_a, _addr, type) => spawned.push(type),
+    };
+    const a = createRomActor();
+    a.borgNumber = 0x303; a.fbPhaseSlots[0] = 1; a.contactP0 = 1; a.controlWord = 1;
+    createSeries3XSpecial(sctx)(a);
+    assert(spawned.length === 0 && a.stateTimer === SERIES3_X.COOLDOWN_EXIT + a.dt,
+      "Delta-II on-hit ammo failure takes immediate common exit");
+  }
+  {
+    const a = createRomActor();
+    a.borgNumber = 0x301; a.fbPhaseSlots[0] = 1;
+    const handler = createSeries3XSpecial(ctx);
+    for (let i = 0; i < 180; i += 1) handler(a);
+    assert(a.fbPhaseSlots[0] === 1, "series-3 phase 1 has no synthetic whiff timer");
+    a.fbPhaseSlots[0] = 2; a.wallContact = 0; a.contactP0 = 0; a.dashStrength1d0f = 0;
+    for (let i = 0; i < 180; i += 1) handler(a);
+    assert(a.fbPhaseSlots[0] === 2 && a.controlWord === 0,
+      "series-3 phase 2 has no synthetic recovery exit");
+    a.steerYaw = 100; a.contactP0 = -1; a.dashStrength1d0f = -1;
+    a.descriptor = { header: 0, mainHandBone: 0, subtypeCommand: new Int8Array(),
+      handlerData6c: 3, subtypePartCommand: new Int8Array(), buttonLiveFlag: new Int8Array(),
+      defaultHand0: 0, defaultHand1: 0 };
+    handler(a);
+    assert(a.steerYaw === Math.trunc(100 * SERIES3_X.METER_18DA_DECAY)
+      && a.gravityCoeff === 3 && a.dashStrength1d0f === 0,
+      `series-3 phase 2 consumes exact negative event bytes (steer=${a.steerYaw}, gravity=${a.gravityCoeff}, event=${a.dashStrength1d0f})`);
+  }
 }
 
 // Test 5: state tables — full-body state 1 (idle-stream) ticks without error and

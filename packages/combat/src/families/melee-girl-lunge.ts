@@ -33,6 +33,7 @@ import { dispatchUpperBodyCue } from "../rom/dispatch.js";
 import { integratePhysics, projectX, projectZ, vecAdd, vecScale, vecSubtract } from "../rom/physics.js";
 import { romAirKnockoutReturn } from "./shared-idle-return.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { stepTargetYaw, targetPitchBam } from "../rom/helpers.js";
 
 export const MELEE_GIRL_LUNGE = {
   FACE_BUDGET: 60.0,      // FLOAT_8043956c
@@ -50,9 +51,6 @@ export const MELEE_GIRL_LUNGE = {
   /** zz_0092dcc_ @0x80092dcc — dive FX child (samurai SAMURAI_SPAWNERS.DIVE_FX
    *  precedent; fired at the phase 1→2 dive start and on each phase-3 combo). */
   DIVE_FX_ADDR: 0x80092dcc,
-  /** actor+0x868 row default when the ctor data-page copy isn't stamped (samurai
-   *  SAMURAI.DEFAULT_RANGE_ROW precedent — TUNED fallback). */
-  DEFAULT_RANGE_ROW: 1000.0,
 } as const;
 
 export interface MeleeGirlLungeConfig {
@@ -112,7 +110,7 @@ function rangeCheck(a: MActor, range: number): number {
 /** zz_006d144_(actor, 0xc0) — face the lock target; nonzero = facing complete
  *  (bridge pre-aims lockYaw — shared-melee-gred precedent). */
 function faceComplete(a: MActor): boolean {
-  return a.lockTarget != null;
+  return stepTargetYaw(a, 0xc0);
 }
 
 /** zz_006e514_(actor, 0xc0, &+0x54e) — aim-pitch seek toward the lock target.
@@ -120,14 +118,8 @@ function faceComplete(a: MActor): boolean {
  *  pitch; decay toward 0 without a target. +0x48 = mag × -sin(pitch) → pitch < 0
  *  aims UP. */
 function seekAimPitch(a: MActor): void {
-  const t = a.lockTarget;
-  if (!t) {
-    a.meleeAimPitch = s16(Math.trunc((a.meleeAimPitch ?? 0) * 0.9));
-    return;
-  }
-  const hd = Math.hypot(t.x - a.pos.x, t.z - a.pos.z);
-  const pitchRad = Math.atan2(-(t.y - a.pos.y), Math.max(hd, 1e-6));
-  a.meleeAimPitch = s16(Math.round((pitchRad / (Math.PI * 2)) * 0x10000));
+  const pitch = targetPitchBam(a);
+  if (pitch != null) a.meleeAimPitch = s16(-pitch);
 }
 
 /** zz_006ed8c_(scale, actor) — velocity drag on +0x44/+0x48. */
@@ -141,7 +133,7 @@ function phase0(a: MActor, seedSlot: number): void {
   a.fbPhaseSlots[0] += 1;                        // +0x540++
   // FUN_80066838(row86c — COLUMN 1) < 1 → invalidate: +0x541 = 1, +0xcc = 0,
   // +0x5ae = +0x72, +0x5ac = +0x72.
-  if (rangeCheck(a, a.rangeRow86c ?? MELEE_GIRL_LUNGE.DEFAULT_RANGE_ROW) < 1) {
+  if (rangeCheck(a, a.actionSpeedRows[1]) < 1) {
     a.fbPhaseSlots[1] = 1;
     a.lockTarget = null;
     a.lockYaw = a.heading;
@@ -176,7 +168,7 @@ function phase0(a: MActor, seedSlot: number): void {
 
 // Phase 1 — FUN_8010b94c @ chunk_0030.c:1378. Face budget → dive start.
 function phase1(a: MActor, ctx: StreamContext): void {
-  if (a.streamTickGate) {                        // +0x1b03 != 0
+  if (a.streamHold1b03 !== 0) {                 // +0x1b03 != 0
     tickStream(a, MELEE_GIRL_LUNGE.PART_MASK, ctx);
   }
   vecScale(MELEE_GIRL_LUNGE.REPOSITION, a.motion, a.motion); // ×0.95
@@ -194,7 +186,7 @@ function phase1(a: MActor, ctx: StreamContext): void {
 
 // Phase 2 — FUN_8010ba14 @ chunk_0030.c:1408. Pitch-projected dive.
 function phase2(a: MActor, ctx: StreamContext): void {
-  if (a.streamTickGate) {                        // +0x1b03 != 0
+  if (a.streamHold1b03 !== 0) {                 // +0x1b03 != 0
     tickStream(a, MELEE_GIRL_LUNGE.PART_MASK, ctx);
   }
   // zz_006d144_(0xc0) face + zz_006e514_ pitch seek.
@@ -222,7 +214,7 @@ function phase3(a: MActor, ctx: StreamContext): void {
   tickStream(a, MELEE_GIRL_LUNGE.PART_MASK, ctx);
   if (a.bRetapInput) a.bRetap = true;            // +0x5d4 & 0x40 → +0x746 = 1
   // COMBO: (s8)+0x1cf0 < 0 (swing re-arm) AND +0x746 → 3 → 2 backward loop.
-  if ((a.swingEvent ?? 0) < 0 && a.bRetap) {
+  if (a.contactP1 < 0 && a.bRetap) {
     a.fbPhaseSlots[0] -= 1;                      // +0x540 += -1
     a.bRetap = false;                            // +0x746 = 0
     a.handlerTimer = MELEE_GIRL_LUNGE.DIVE_WINDOW; // +0x558 = 20 (FLOAT_80439568)
@@ -232,10 +224,10 @@ function phase3(a: MActor, ctx: StreamContext): void {
     startStream(a, MELEE_GIRL_LUNGE.PART_MASK, MELEE_GIRL_LUNGE.STREAM_GROUP, slot, MELEE_GIRL_LUNGE.STREAM_RATE);
     return;
   }
-  if ((a.dashStrength ?? 0) > 0) {               // (s8)+0x1d0f > 0 → dash refresh
-    a.dashStrength = 0;                          // +0x1d0f = 0
+  if (a.dashStrength1d0f > 0) {                  // (s8)+0x1d0f > 0 → dash refresh
+    a.dashStrength1d0f = 0;                      // +0x1d0f = 0
     if (!a.lockTarget) {                         // +0xcc == 0
-      a.hSpeed = (a.rangeRow868 ?? MELEE_GIRL_LUNGE.DEFAULT_RANGE_ROW)
+      a.hSpeed = a.actionSpeedRows[0]
         / MELEE_GIRL_LUNGE.DIVE_WINDOW;          // +0x44 = row868 / 20
     } else {
       // +0x44 = (2.5 × +0x760) / 20 (DOUBLE_80439588 / DOUBLE_80439590).
@@ -243,8 +235,8 @@ function phase3(a: MActor, ctx: StreamContext): void {
         / MELEE_GIRL_LUNGE.DASH_REFRESH_DEN;
     }
   }
-  if ((a.dashStrength ?? 0) < 0) {               // negative byte → altitude cap
-    a.dashStrength = 0;                          // +0x1d0f = 0
+  if (a.dashStrength1d0f < 0) {                  // negative byte → altitude cap
+    a.dashStrength1d0f = 0;                      // +0x1d0f = 0
     if (a.yVel > MELEE_GIRL_LUNGE.ZERO) a.yVel = MELEE_GIRL_LUNGE.ZERO; // +0x48 clamp ≤ 0
     a.gravityCoeff = a.descriptor?.handlerData6c ?? 1.0; // +0x50 = dataPage+0x6c
   }

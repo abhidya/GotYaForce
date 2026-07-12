@@ -24,24 +24,19 @@
 // (actor, 7)) — its beam child is fired by the stream's op 0x09 (fireChild), so the
 // bridge's onFireChild resolver owns the spawn (no explicit family-spawner call).
 //
-// Float constants (FLOAT_80439e40..e50): values inferred from usage context — the ROM
-// uses FLOAT_80439e40 to ZERO the launch scalars (→0.0), FLOAT_80439e44 as the stream
-// playback rate (→-1.0, the engine-wide default passed to zz_004beb8_), FLOAT_80439e48
-// as the PSQUATScale reposition multiplier (→0.95, the same drag coefficient the
-// shared-X engine + ninja big-shuriken use), and FLOAT_80439e4c/_e50 as the post-state
-// cooldown seed (→4.0, matching the worm/coyote-style +0x694 = K + dt shape).
+// Float constants are raw GG4E boot.dol reads at 0x80439e40..0x80439e50.
 
 import type { RomActor } from "../rom/actor.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
 
-/** Values inferred from the chunk_0034.c usage context (see file header). */
+/** Exact boot.dol words: 00000000/bf800000/3f733333/41400000/41000000. */
 export const CYBER_GIRL_X = {
   ZERO: 0.0,            // FLOAT_80439e40 — zeros launch vel / gravityCoeff (+0x44/48/4c/50)
   STREAM_RATE: -1.0,    // FLOAT_80439e44 — zz_004beb8_ playback rate (engine default)
   REPOS: 0.95,          // FLOAT_80439e48 — PSQUATScale motion multiplier (pull toward target)
-  COOLDOWN_305: 4.0,    // FLOAT_80439e4c — pl0305/pl030a +0x694 cooldown seed (K + dt)
-  COOLDOWN_309: 4.0,    // FLOAT_80439e50 — pl0309 +0x694 cooldown seed (K + dt)
+  COOLDOWN_305: 12.0,   // FLOAT_80439e4c
+  COOLDOWN_309: 8.0,    // FLOAT_80439e50
   /** zz_013212c_ @0x8013212c — the on-contact beam-child spawner (pl0305/pl030a phase 2).
    *  Record-select keyed on borg number AND the polling +0x144 bit (loop 0..3):
    *    0x305 → iVar1      (records 0..3)
@@ -54,9 +49,12 @@ export const CYBER_GIRL_X = {
  *  loops iVar1 0..3 testing `+0x144 & (1 << iVar1)`; our port approximates by reading
  *  the low nibble of a surfaced `beamRow` scratch field (host-set from the lock-target
  *  row select). Falls back to 0 (the first row) when unset. */
-function beamRowFor(actor: RomActor): number {
-  const scratch = actor as RomActor & { beamRow?: number };
-  return scratch.beamRow ?? 0;
+function beamRowFor(actor: RomActor): number | null {
+  const mask = actor.childMask144 & 0xf;
+  for (let row = 0; row < 4; row += 1) {
+    if ((mask & (1 << row)) !== 0) return row;
+  }
+  return null;
 }
 
 /** Borg-id → beam-child record index for zz_013212c_ (FUN_8012f958:4474-4479 switch). */
@@ -98,17 +96,17 @@ function cyberGirlSuperPhase0(actor: RomActor, ctx: CyberGirlFamilyCtx): void {
   // +0x6ea = ground/air slot seed: 0 ground, 2 air (+0x5e0 & 0x40 frozen/air bit).
   const air = (actor.controlWord & 0x40) !== 0;
   const slot = air ? 2 : 0;
+  actor.streamCounter6eb = 4;
   // zz_006d144_(actor, 0xc0) — face the target; the bridge pre-aims so we honor the
   // post-face heading. Motion = pos − target (gnt4_PSVECSubtract).
-  const t = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-  if (t) {
-    actor.motion.x = (actor.pos.x - t.x) - (actor.pos.x - t.x) * CYBER_GIRL_X.REPOS;
-    actor.motion.z = (actor.pos.z - t.z) - (actor.pos.z - t.z) * CYBER_GIRL_X.REPOS;
-  }
+  actor.motion.x = actor.pos.x - actor.targetCache5e8.x;
+  actor.motion.y = actor.pos.y - actor.targetCache5e8.y;
+  actor.motion.z = actor.pos.z - actor.targetCache5e8.z;
   // zz_004beb8_(rate, actor, mask 0xf, group 4, slot) — start the beam stream.
   // ROM reads +0x6ea THEN increments it before the call; the incremented value is the
   // FOLLOW-UP slot (phase 1 re-arm uses it). We surface the pre-increment slot here.
   startStream(actor, 0xf, 4, slot, CYBER_GIRL_X.STREAM_RATE);
+  actor.streamSlot = slot + 1;
   // ROM tail-calls zz_012f854_ (phase 1) in the same frame — mirror that inline.
   cyberGirlSuperPhase1(actor, ctx);
 }
@@ -128,15 +126,13 @@ function cyberGirlSuperPhase1(actor: RomActor, ctx: CyberGirlFamilyCtx): void {
   //   0 → clear action bits + return to idle (zz_006a474_ ground / zz_006a5a4_ air)
   //   else → +0x540++ (advance to phase 2) and re-arm stream at slot (+++0x6ea)
   if (actor.wallContact !== 0) {
-    const cmdBits = (actor as RomActor & { cmdBits144?: number }).cmdBits144 ?? 0;
-    if ((cmdBits & 0xf) === 0) {
+    if ((actor.childMask144 & 0xf) === 0) {
       cyberGirlReturnToIdle(actor, /*air*/ (actor.controlWord & 0x40) !== 0);
       return;
     }
     actor.fbPhaseSlots[0] = 2;
     // Re-arm stream at the incremented slot (the ROM's +0x6ea++ from phase 0).
-    const nextSlot = ((actor as RomActor & { slot6ea?: number }).slot6ea ?? 1);
-    startStream(actor, 0xf, 4, nextSlot, CYBER_GIRL_X.STREAM_RATE);
+    startStream(actor, 0xf, 4, actor.streamSlot, CYBER_GIRL_X.STREAM_RATE);
   }
 }
 
@@ -150,13 +146,21 @@ function cyberGirlSuperPhase2(actor: RomActor, _ctx: CyberGirlFamilyCtx): void {
   // zz_00679d0_(actor) — physics (no gravity this phase).
   // +0x1cef > 0 (part-0 contact): spawn the beam child if +0x1b03 == 0.
   if (actor.contactP0 > 0) {
-    const b03 = (actor as RomActor & { b03?: number }).b03 ?? 0;
-    if (b03 === 0) {
+    if (actor.streamHold1b03 === 0) {
       actor.contactP0 = 0; // ROM clears +0x1cef after consuming.
-      // +0x6eb-- (swing counter); zz_013212c_(actor, type, +0x144) — beam spawn.
-      const row = beamRowFor(actor) & 3;
-      _ctx.onFamilyProjectile?.(actor, CYBER_GIRL_X.BEAM_SPAWNER_ADDR, beamChildType(actor.borgNumber, row));
+      actor.streamCounter6eb -= 1;
+      const row = beamRowFor(actor);
+      if (row != null) {
+        _ctx.onFamilyProjectile?.(actor, CYBER_GIRL_X.BEAM_SPAWNER_ADDR, beamChildType(actor.borgNumber, row));
+      }
     }
+  }
+  if (actor.contactP0 < 0) {
+    if ((actor.statusWord5b4 & 0x400) !== 0
+      && (actor.childMask144 & 0xf) !== 0 && actor.streamCounter6eb > 0) {
+      startStream(actor, 0xf, 4, actor.streamSlot, CYBER_GIRL_X.STREAM_RATE);
+    }
+    actor.gravityCoeff = actor.descriptor?.handlerData6c ?? 0;
   }
   // +0x1cee wall/stream-end → clear + return to idle with cooldown.
   if (actor.wallContact !== 0) {
@@ -192,24 +196,26 @@ function cyberGirlPhase0(actor: RomActor, _ctx: CyberGirlFamilyCtx): void {
   actor.hDecel = CYBER_GIRL_X.ZERO;
   actor.hSpeed = CYBER_GIRL_X.ZERO;
   // zz_006d144_(actor, 0xc0) — face target; reposition motion.
-  const t = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
-  if (t) {
-    // PSVECSubtract(pos, target, motion) then PSQUATScale(0.95, motion, motion).
-    actor.motion.x = (actor.pos.x - t.x) * CYBER_GIRL_X.REPOS - (actor.pos.x - t.x);
-    actor.motion.z = (actor.pos.z - t.z) * CYBER_GIRL_X.REPOS - (actor.pos.z - t.z);
-    // PSVECAdd(pos, motion, pos) — apply the scaled delta toward target.
-    actor.pos.x += actor.motion.x;
-    actor.pos.z += actor.motion.z;
-  }
+  // PSVECSubtract(pos, target-cache, motion), scale, then add.
+  actor.motion.x = (actor.pos.x - actor.targetCache5e8.x) * CYBER_GIRL_X.REPOS;
+  actor.motion.y = (actor.pos.y - actor.targetCache5e8.y) * CYBER_GIRL_X.REPOS;
+  actor.motion.z = (actor.pos.z - actor.targetCache5e8.z) * CYBER_GIRL_X.REPOS;
+  actor.pos.x += actor.motion.x;
+  actor.pos.y += actor.motion.y;
+  actor.pos.z += actor.motion.z;
   // zz_00679d0_ — physics (gravityCoeff == 0, so just XZ integration).
   // +0x6ea++ then zz_004beb8_(rate, actor, 0xf, 4, slot).
   startStream(actor, 0xf, 4, slot, CYBER_GIRL_X.STREAM_RATE);
+  actor.streamSlot = slot + 1;
 }
 
 function cyberGirlPhase1(actor: RomActor, ctx: CyberGirlFamilyCtx): void {
   // FUN_8012fc64:4577 — tick stream.
   tickStream(actor, 0xf, ctx);
-  // +0x1cf0 < 0 → clear + restore gravityCoeff from descriptor +0x6c (unsurfaced; no-op).
+  if (actor.contactP1 < 0) {
+    actor.contactP1 = 0;
+    actor.gravityCoeff = actor.descriptor?.handlerData6c ?? 0;
+  }
   // +0x1d10 nonzero → re-face (zz_006d144_) — bridge pre-aims.
   // PSQUATScale(0.95, motion, motion) + PSVECAdd(pos, motion, pos).
   actor.motion.x *= CYBER_GIRL_X.REPOS;

@@ -47,6 +47,8 @@ export interface RomActor {
   /** +0x38: motion delta / accumulator (vec3). Used by family handlers (e.g. G Crash
    *  phase 0 writes `pos -= target; pos *= 0.95`; phase 2 uses +0x38 as a magnitude). */
   motion: Vec3;
+  /** +0x5e8: cached target position consumed even after +0xcc lock invalidation. */
+  targetCache5e8: Vec3;
   // +0x44..+0x50: the speed-model scalars (FUN_80067310).
   /** +0x44: horizontal speed scalar (magnitude, projected via sin/cos(yaw)). */
   hSpeed: number;
@@ -225,6 +227,23 @@ export interface RomActor {
   contactP0: number;
   /** +0x1cee: wall/stream-contact flag used by family handlers to end moves. */
   wallContact: number;
+  /** +0x144: live low-nibble child/beam ownership mask polled by Cyber Girl. */
+  childMask144: number;
+  /** +0x1cf0: signed part-1/contact event byte. */
+  contactP1: number;
+  /** +0x1d0f: signed stream-authored dash-strength byte. */
+  dashStrength1d0f: number;
+  /** +0x1d10: signed stream-authored face/reseek byte. */
+  faceGate1d10: number;
+  /** +0x1b03: stream/animation hold byte. */
+  streamHold1b03: number;
+  /** +0x6eb: signed per-move stream/repeat counter. */
+  streamCounter6eb: number;
+  /** +0x5b4: live action status word. */
+  statusWord5b4: number;
+  /** +0x5d4/+0x5d8: raw edge and held input words. */
+  inputEdge5d4: number;
+  inputHeld5d8: number;
   /** +0x694: state-timer float (e.g. deploy lock, post-state cooldown; zz_005568c_ decays it). */
   stateTimer: number;
   /** +0x558: handler-local timer (G Crash phase 2 seeds 120.0; phase 3 counts down). */
@@ -342,7 +361,7 @@ export function createRomActor(): RomActor {
   return {
     physicsRuntime: null,
     pos: { x: 0, y: 0, z: 0 },
-    motion: { x: 0, y: 0, z: 0 },
+    motion: { x: 0, y: 0, z: 0 }, targetCache5e8: { x: 0, y: 0, z: 0 },
     hSpeed: 0, yVel: 0, hDecel: 0, gravityCoeff: 0,
     heading: 0, lockYaw: 0, activeYaw: 0, turnErrorYaw: 0, steerYaw: 0,
     bodyPitch: 0, aimRateScale: 1, actionSpeedRows: [0, 0, 0],
@@ -372,7 +391,10 @@ export function createRomActor(): RomActor {
     parts: [makeBlankPart(), makeBlankPart(), makeBlankPart(), makeBlankPart()],
     maxRise: 0, maxFall: 0, maxHSpeed: 0, stepHeight: 0,
     timescale: 1, tierScale: 1, dt: 1,
-    contactP0: 0, wallContact: 0, stateTimer: 0, handlerTimer: 0,
+    contactP0: 0, wallContact: 0, childMask144: 0, contactP1: 0,
+    dashStrength1d0f: 0, faceGate1d10: 0, streamHold1b03: 0, streamCounter6eb: 0,
+    statusWord5b4: 0, inputEdge5d4: 0, inputHeld5d8: 0,
+    stateTimer: 0, handlerTimer: 0,
   };
 }
 

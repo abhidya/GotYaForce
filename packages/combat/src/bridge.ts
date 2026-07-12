@@ -1711,6 +1711,9 @@ export class RomDriverBridge implements RomFamilyDriver {
           target.pos.y - runtime.pos.y,
           target.pos.z - runtime.pos.z,
         );
+        a.targetCache5e8.x = target.pos.x;
+        a.targetCache5e8.y = target.pos.y;
+        a.targetCache5e8.z = target.pos.z;
         // zz_006d0dc_ -> FUN_800669d0 consumes the live target bearing as BAM16.
         // Height participates in pitch seeking, while yaw is atan2(horizontal x,z).
         const targetYaw = radToBam(Math.atan2(target.pos.x - runtime.pos.x, target.pos.z - runtime.pos.z));
@@ -1736,6 +1739,10 @@ export class RomDriverBridge implements RomFamilyDriver {
     scratch.statusWord5bc = held ? 0x200 : 0;
     scratch.bRetapInput = input?.attack ?? fallbackHeld;
     scratch.streamTickEnabled = true;
+    this.actor.inputEdge5d4 = input?.attack || input?.special ? 0x41 : 0;
+    this.actor.inputHeld5d8 = held ? 0x10 : 0;
+    this.actor.statusWord5b4 = held ? 0x200 : 0;
+    this.actor.streamHold1b03 = 0;
   }
 
   /** Copy RomActor → BorgRuntime (after the ROM step). */

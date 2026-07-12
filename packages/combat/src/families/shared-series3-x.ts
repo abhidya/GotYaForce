@@ -95,30 +95,10 @@ export const SERIES3_X = {
   ACTION_MODE_BITS: 0x3,
 } as const;
 
-const DEFAULT_WHIFF_FRAMES = 60;   // phase-1 stream-end wait (port budget, see below)
-const DEFAULT_RECOVERY_FRAMES = 60; // phase-2 +0x1cee stream-end wait (port budget)
-
-/** Host hooks beyond the base StreamContext. Both are NEW host hooks the dig's
- *  portImplications call out (bridge wiring pending); each has an honest fallback. */
-export interface Series3FamilyCtx extends StreamContext {
-  /** zz_006dbe0_(actor, slot, cost, 1) — the atomic ammo check+deduct gating the
-   *  pl0303 on-hit blast. Returns true when the deduct succeeded. UNWIRED FALLBACK:
-   *  treated as success (labeled approximation — the payload fires and the move is
-   *  NOT cancelled; the ROM cancels via FUN_8010d28c on empty). */
-  tryConsumeAmmo?: (actor: RomActor, slot: number, cost: number) => boolean;
-  /** Raw (s16)+0x784 slot-2 ammo COUNT read (no deduct) gating the 0x307/0x30d
-   *  phase-2 follow-up stream. UNWIRED FALLBACK: treated as > 0 (labeled
-   *  approximation — the follow-up always re-fires on contact). */
-  getAmmoCount?: (actor: RomActor, slot: number) => number;
-}
+export interface Series3FamilyCtx extends StreamContext {}
 
 /** Port-side pacing knobs for the stream-end waits the VM can't signal yet. */
-export interface Series3XOptions {
-  /** Phase-1 frames before the whiff path advances to recovery (see phase 1 note). */
-  whiffFrames?: number;
-  /** Phase-2 frames before the +0x1cee stream-end common exit fires. */
-  recoveryFrames?: number;
-}
+export interface Series3XOptions {}
 
 // ---------------------------------------------------------------------------
 // Scratch fields (offsets not yet surfaced on RomActor; bridge may mirror them)
@@ -181,7 +161,7 @@ function bamFromVector(x: number, z: number): number {
 // then dispatches the GLOBAL variant table 0x80325ab8[+0x581] — all 5 entries are
 // 0x8010ce60, so the variant index is behaviorally irrelevant (claim M2).
 // ============================================================================
-function series3Handler(actor: RomActor, ctx: Series3FamilyCtx, opts: Series3XOptions): void {
+function series3Handler(actor: RomActor, ctx: Series3FamilyCtx): void {
   const scratch = actor as RomActor & Series3Scratch;
   const meter = scratch.meter1900 ?? 0;
   scratch.meter1900 = Math.trunc(meter * SERIES3_X.METER_1900_DECAY) | 0; // s16 trunc
@@ -193,8 +173,8 @@ function series3Handler(actor: RomActor, ctx: Series3FamilyCtx, opts: Series3XOp
   const phase = actor.fbPhaseSlots[0] ?? 0;
   switch (phase) {
     case 0: series3Phase0(actor, ctx); break;
-    case 1: series3Phase1(actor, ctx, opts); break;
-    case 2: series3Phase2(actor, ctx, opts); break;
+    case 1: series3Phase1(actor, ctx); break;
+    case 2: series3Phase2(actor, ctx); break;
     // Table entry [3] @0x80325ad8 is NULL in the ROM.
     default: break;
   }
@@ -239,11 +219,9 @@ function series3Phase0(actor: RomActor, ctx: Series3FamilyCtx): void {
   // motion ×= 0.95 (FLOAT_8043955c); pos += motion — the 5%-per-frame pull-away
   // (same shape as shared-X / G Crash). Guarded on target presence like shared-x
   // (the ROM reads +0x5e8 unconditionally; targetless entries have a stale vector).
-  if (target) {
-    vecSubtract(actor.pos, target, actor.motion);
-    vecScale(SERIES3_X.REPOSITION_SCALE, actor.motion, actor.motion);
-    vecAdd(actor.pos, actor.motion, actor.pos);
-  }
+  vecSubtract(actor.pos, actor.targetCache5e8, actor.motion);
+  vecScale(SERIES3_X.REPOSITION_SCALE, actor.motion, actor.motion);
+  vecAdd(actor.pos, actor.motion, actor.pos);
 
   // zz_00679d0_(actor): ground snap + pos-revert (revert +0x20/24/28 to prev +0x2c/30/34
   // when snap==0 && grounded). The port's groundClamp (registered by the bridge) covers
@@ -255,7 +233,6 @@ function series3Phase0(actor: RomActor, ctx: Series3FamilyCtx): void {
   // has no equivalent parameters, so they are documented but not modeled.
   startStream(actor, SERIES3_X.PART_MASK, SERIES3_X.STREAM_GROUP, slot, SERIES3_X.STREAM_RATE);
 
-  actor.handlerTimer = 0; // port bookkeeping only — the ROM writes NO timers (N1b)
   scratch.series3GravityRestored = false;
   void ctx;
 }
@@ -263,7 +240,7 @@ function series3Phase0(actor: RomActor, ctx: Series3FamilyCtx): void {
 // ============================================================================
 // Phase 1 — FUN_8010cfbc @0x8010cfbc. Tick + face + reposition + hit transition.
 // ============================================================================
-function series3Phase1(actor: RomActor, ctx: Series3FamilyCtx, opts: Series3XOptions): void {
+function series3Phase1(actor: RomActor, ctx: Series3FamilyCtx): void {
   // zz_004cd24_(actor, 0xf) stream tick.
   tickStream(actor, SERIES3_X.PART_MASK, ctx);
 
@@ -282,19 +259,8 @@ function series3Phase1(actor: RomActor, ctx: Series3FamilyCtx, opts: Series3XOpt
   // is no config pointer (claims M4/C1).
   if (actor.contactP0 > 0) {
     actor.fbPhaseSlots[0] = 2; // +0x540++
-    actor.handlerTimer = 0;    // port recovery budget seed (see phase 2)
     series3XOnHit(actor, ctx);
     return;
-  }
-
-  // NO whiff exit exists in the ROM's phase 1 (N1e): if +0x1cef never fires, only the
-  // stream VM's external +0x540 advance / +0x1cee end byte moves the machine — the
-  // identical caveat gred.ts / shared-x-special.ts document. Port approximation: a
-  // handlerTimer frame budget stands in for the stream-end signal.
-  actor.handlerTimer += actor.dt;
-  if (actor.handlerTimer >= (opts.whiffFrames ?? DEFAULT_WHIFF_FRAMES)) {
-    actor.fbPhaseSlots[0] = 2;
-    actor.handlerTimer = 0;
   }
 }
 
@@ -313,9 +279,9 @@ export function series3XOnHit(actor: RomActor, ctx: Series3FamilyCtx): void {
     // Ammo gate zz_006dbe0_(actor, 2, 1, 1): nonzero → zz_0082824_(actor, 0x3b);
     // zero (no ammo) → FUN_8010d28c IMMEDIATE EXIT — the ammo failure CANCELS the
     // move (a behavior shared-x has no analog for). Unwired-hook fallback: success.
-    const ok = ctx.tryConsumeAmmo
-      ? ctx.tryConsumeAmmo(actor, SERIES3_X.AMMO_SLOT, SERIES3_X.AMMO_COST)
-      : true; // APPROXIMATION: ammo hook unwired → treat as available
+    const ok = ctx.onAllocateResource?.(
+      actor, SERIES3_X.AMMO_SLOT, SERIES3_X.AMMO_COST, 1,
+    ) ?? false;
     if (ok) {
       ctx.onFamilyProjectile?.(actor, SERIES3_X.BLAST_SPAWNER_ADDR, SERIES3_X.BLAST_REC_PL0303);
     } else {
@@ -330,16 +296,15 @@ export function series3XOnHit(actor: RomActor, ctx: Series3FamilyCtx): void {
 // Phase 2 — FUN_8010d0d0 @0x8010d0d0. Recovery: meter decay, famB follow-up stream,
 // gravity restore, physics, landing/stream-end exits.
 // ============================================================================
-function series3Phase2(actor: RomActor, ctx: Series3FamilyCtx, opts: Series3XOptions): void {
+function series3Phase2(actor: RomActor, ctx: Series3FamilyCtx): void {
   const scratch = actor as RomActor & Series3Scratch;
 
   // (1) Meter decay: if (s8)+0x1cef < 0 → +0x18da = (s16)trunc(+0x18da × 0.9)
   // (FLOAT_80439540). +0x18da is the field actor.ts surfaces as steerYaw (G RED uses
   // the same offset as an aim pitch); in THIS machine it is a consumer-less meter (U1).
-  // APPROXIMATION: the +0x1cef<0 stream-event gate isn't surfaced by the VM — the
-  // decay is applied every phase-2 frame (ninja precedent: model stream-event gates
-  // as unconditionally satisfied).
-  actor.steerYaw = Math.trunc(actor.steerYaw * SERIES3_X.METER_18DA_DECAY) | 0;
+  if (actor.contactP0 < 0) {
+    actor.steerYaw = Math.trunc(actor.steerYaw * SERIES3_X.METER_18DA_DECAY) | 0;
+  }
 
   // (2) Stream tick — all borgs tick zz_004cd24_(actor, 0xf); borgs 0x307/0x30d
   // additionally re-fire a FOLLOW-UP STREAM mid-recovery each time part-1 contact
@@ -347,10 +312,10 @@ function series3Phase2(actor: RomActor, ctx: Series3FamilyCtx, opts: Series3XOpt
   // NO deduct) > 0 — a repeating multi-hit mechanic (claims M5/F3).
   tickStream(actor, SERIES3_X.PART_MASK, ctx);
   if (actor.borgNumber === 0x307 || actor.borgNumber === 0x30d) {
-    const ammoCount = ctx.getAmmoCount
-      ? ctx.getAmmoCount(actor, SERIES3_X.AMMO_SLOT)
-      : 1; // APPROXIMATION: count hook unwired → treat as > 0
-    if (readContactP1(actor) > 0 && ammoCount > 0) {
+    const hasAmmo = ctx.onAllocateResource?.(
+      actor, SERIES3_X.AMMO_SLOT, SERIES3_X.AMMO_COST, 0,
+    ) ?? false;
+    if (readContactP1(actor) > 0 && hasAmmo) {
       clearContactP1(actor); // +0x1cf0 = 0
       const slot = isAirborne(actor)
         ? SERIES3_X.FOLLOWUP_AIR_SLOT
@@ -364,10 +329,8 @@ function series3Phase2(actor: RomActor, ctx: Series3FamilyCtx, opts: Series3XOpt
 
   // (3) Gravity restore: on stream-event byte (s8)+0x1d0f < 0 the ROM clears it and
   // restores +0x50 = *(descriptor(+0x4ac) + 0x6c) — the per-borg gravity coeff.
-  // APPROXIMATION: +0x1d0f isn't surfaced by the VM; restore once on the first
-  // phase-2 frame instead (phase 0 zeroed gravityCoeff, so without this the actor
-  // would never fall). descriptor.handlerData6c IS desc+0x6c (rom/actor.ts).
-  if (!scratch.series3GravityRestored) {
+  if (actor.dashStrength1d0f < 0) {
+    actor.dashStrength1d0f = 0;
     scratch.series3GravityRestored = true;
     actor.gravityCoeff = actor.descriptor?.handlerData6c ?? SERIES3_X.GRAVITY;
   }
@@ -387,18 +350,15 @@ function series3Phase2(actor: RomActor, ctx: Series3FamilyCtx, opts: Series3XOpt
   // the phase-0 airborne snapshot; the +0x1cef<0 stream-event gate is modeled as
   // satisfied (same treatment as the meter gate above).
   const grounded = (actor as RomActor & Series3Scratch).grounded === true;
-  if (grounded && scratch.series3StartedAir === true) {
+  if (grounded && scratch.series3StartedAir === true && actor.contactP0 < 0) {
     actor.controlWord &= ~SERIES3_X.ACTION_MODE_BITS;
     dispatchUpperBodyCue(actor, 7);
     actor.stateTimer = SERIES3_X.COOLDOWN_LANDING + actor.dt; // +0x694 = 8.0 + dt
     return;
   }
 
-  // (7) Stream-end byte +0x1cee != 0 → FUN_8010d28c common exit. actor.wallContact
-  // mirrors +0x1cee; a handlerTimer frame budget stands in for banks that aren't
-  // byte-loaded yet (labeled approximation, per the established port convention).
-  actor.handlerTimer += actor.dt;
-  if (actor.wallContact !== 0 || actor.handlerTimer >= (opts.recoveryFrames ?? DEFAULT_RECOVERY_FRAMES)) {
+  // (7) Stream-end byte +0x1cee != 0 → FUN_8010d28c common exit.
+  if (actor.wallContact !== 0) {
     series3CommonExit(actor);
   }
 }
@@ -451,7 +411,8 @@ export function createSeries3XSpecial(
   ctx: Series3FamilyCtx,
   opts: Series3XOptions = {},
 ): (actor: RomActor) => void {
-  return (actor: RomActor) => series3Handler(actor, ctx, opts);
+  void opts;
+  return (actor: RomActor) => series3Handler(actor, ctx);
 }
 
 /** The six borgs the ROM routes through this machine (registry @0x802d2ec0, claim W3:

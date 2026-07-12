@@ -171,7 +171,19 @@ function testProjectileObservationAndDespawnFacts(): void {
     // @ts-expect-error Current projectile snapshots cannot mutate sim-owned position.
     projectile.pos.x = 123456;
   }
-  let despawn = battle.observe().projectileDespawns.find((fact) => fact.uid === projectile.uid);
+  const nextBoundary = battle.step(1 / 60, idle);
+  const callerSnapshot = nextBoundary.projectiles.find((current) => current.uid === projectile.uid);
+  if (!callerSnapshot) throw new Error("read-interface projectile disappeared before alias check");
+  // Bypass the public readonly type deliberately: corrupting a caller-owned snapshot must not
+  // reach the mutable projectile inside BattleImpl.
+  (callerSnapshot as { pos: { x: number } }).pos.x = 123456;
+  const afterCallerMutation = battle.step(1 / 60, idle);
+  const simOwnedX =
+    afterCallerMutation.projectiles.find((current) => current.uid === projectile.uid)?.pos.x ??
+    afterCallerMutation.projectileDespawns.find((fact) => fact.uid === projectile.uid)?.pos.x;
+  assertEqual(simOwnedX === 123456, false, "caller snapshot mutation cannot alter sim-owned projectile state");
+
+  let despawn = afterCallerMutation.projectileDespawns.find((fact) => fact.uid === projectile.uid);
   for (let frame = 0; frame < 300 && !despawn; frame++) {
     const after = battle.step(1 / 60, idle);
     despawn = after.projectileDespawns.find((fact) => fact.uid === projectile.uid);
