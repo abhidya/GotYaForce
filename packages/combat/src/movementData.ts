@@ -82,6 +82,9 @@ export interface BorgMovementPhysics {
   /** +0xac/+0xae — BAM16 turn steps used by FUN_800669d0 aim modes x0/x1. */
   turnStep0: number;
   turnStep1: number;
+  actionSpeed0: number;
+  actionSpeed1: number;
+  actionSpeed2: number;
 }
 
 type MovementPhysicsFile = {

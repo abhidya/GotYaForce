@@ -77,6 +77,12 @@ export interface StreamContext {
     count: number,
     consumeMode?: number,
   ) => boolean;
+  /** zz_006bf80_ @0x8006bf80. Kept as a hook so bridge integration can flush the
+   *  mutated +0x5e6 masks back to battle-owned runtimes atomically. */
+  onRefreshTargetVisibility?: (actor: RomActor) => void;
+  /** Host half of zz_006a8c0_ + zz_017a608_: descriptor/model/weapon refresh and
+   *  zz_01cb750_ event publication after the actor mirrors are committed. */
+  onMorph?: (actor: RomActor, newBorgId: number, previousBorgId: number) => void;
 }
 
 /**
@@ -117,7 +123,7 @@ export function startStream(
   const hostScheduled = (actor as RomActor & {
     onStartStream?: (group: number, slot: number, mask: number) => boolean;
   }).onStartStream?.(group, slot, mask) === true;
-  const effective = mask & 0xff; // actor.+0x579 is the part-enable mask; surfaced as 0xff here.
+  const effective = mask & actor.weaponPartMask;
   if ((effective & 2) !== 0) {
     // Clear +0x709 (chunk_0006.c:1442-1444) — the contact-slow flag. Bridge clears it
     // on the BorgRuntime status word.

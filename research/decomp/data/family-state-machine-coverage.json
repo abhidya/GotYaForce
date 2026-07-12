@@ -11116,6 +11116,74 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0604 makeMorphAimedComposite/createTitanPantherGunAction0; actor.ts visibility/part surfaces"
+                ],
+                "constants": [
+                  "boot.dol FUN_80125de8: records 0x2b/0x2c; actor +0x579/+0x1b03 and visibility +0x3e5/+0x5e6 fields"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Titan/Panther aimed-shot + morph families: pl0604 exact five-pair loop/exit, ammo success/denial, visibility, records, v0-v4 bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts: exact five-volley timer/cursor, ammo gate, exit and cooldown ordering"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80125dac/table 0x8032f41c/leaf 0x80125de8"
+                ],
+                "streamBehavior": [
+                  "ROM leaf has no zz_004beb8_ stream; exact zz_0048d54_ part-animation and zz_006bf80_ visibility behavior is ported"
+                ],
+                "variantDispatch": [
+                  "shared-aimed-shot-x.ts: createTitanPantherGunAction0; v0-v4 share the root firing loop"
+                ]
+              },
+              "member": "pl0604",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts: pl0618 makeMorphAimedComposite/createTitanPantherGunAction0; prototype action 2 remains separate fallback"
+                ],
+                "constants": [
+                  "boot.dol FUN_80125de8: records 0x4b/0x4c; actor +0x579/+0x1b03 and visibility +0x3e5/+0x5e6 fields"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Titan/Panther aimed-shot + morph families: pl0618 action-0 ammo success/denial, visibility, records, v0-v4 bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts: exact five-volley timer/cursor, ammo gate, exit and cooldown ordering"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80125dac/table 0x8032f41c/leaf 0x80125de8"
+                ],
+                "streamBehavior": [
+                  "ROM leaf has no zz_004beb8_ stream; exact zz_0048d54_ part-animation and zz_006bf80_ visibility behavior is ported"
+                ],
+                "variantDispatch": [
+                  "shared-aimed-shot-x.ts: createTitanPantherGunAction0; v0-v4 share the prototype firing loop"
+                ]
+              },
+              "member": "pl0618",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -11191,10 +11259,78 @@
             "pl0618: command 0x8032f864 (user-data/GG4E/disc/sys/boot.dol:0x80125a28 copies actor+0x4ec root via 0x80125b38 and actor+0x4b0 via 0x80125b40)",
             "pl0618: root 0x80125dac, action table 0x8032f41c, handler 0x80125de8"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts createTitanPantherAction1('titan'); movementPhysics actionSpeedRows copied to RomActor"
+                ],
+                "constants": [
+                  "boot.dol configs: timers 20/0, launch 40, reposition 0.95, transition 1/0.25, recovery 0.9; pl0604data2 page0 action rows [1000,600,1000]"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Titan action-1 variants 0-4, five lunge phases, descriptor speed rows, full bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts: phase table 0x80352b08 plus repaired five-phase table 0x80352b18"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80125dac/table 0x8032f41c/handler 0x80125fdc; leaves 0x80126018/0x8012604c/0x80126080"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables bank 0x8032e8e0: group 3 slots 0/3/4 mask 0xf; decoded completion events drive phases"
+                ],
+                "variantDispatch": [
+                  "v0-v2 engine 0x80177dd8 configs 0x8032f440/0x8032f458; v3-v4 engine 0x80178394 config 0x8032f470"
+                ]
+              },
+              "member": "pl0604",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts createTitanPantherAction1('titan') for pl0618; movementPhysics actionSpeedRows copied to RomActor"
+                ],
+                "constants": [
+                  "boot.dol configs: timers 20/0, launch 40, reposition 0.95, transition 1/0.25, recovery 0.9; pl0618 descriptor action rows [1000,600,1000]"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Proto Titan action-1 variants 0-4, five lunge phases, descriptor speed rows, full bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts: phase table 0x80352b08 plus repaired five-phase table 0x80352b18"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80125dac/table 0x8032f41c/handler 0x80125fdc; leaves 0x80126018/0x8012604c/0x80126080"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables bank 0x8032e8e0: group 3 slots 0/3/4 mask 0xf; decoded completion events drive phases"
+                ],
+                "variantDispatch": [
+                  "v0-v2 engine 0x80177dd8 configs 0x8032f440/0x8032f458; v3-v4 engine 0x80178394 config 0x8032f470"
+                ]
+              },
+              "member": "pl0618",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -11234,7 +11370,7 @@
             "pl0618: command 0x8032f87c (user-data/GG4E/disc/sys/boot.dol:0x80125a28 copies actor+0x4ec root via 0x80125b38 and actor+0x4b0 via 0x80125b40)",
             "pl0618: root 0x80125dac, action table 0x8032f41c, handler 0x80125fdc"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 2,
@@ -11260,6 +11396,74 @@
         },
         {
           "actionIndex": 3,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts createSharedAimedShotX TITAN_ROBOT_X_CONFIG; exact weapon-2 consume hook and actor pitch/ground fields"
+                ],
+                "constants": [
+                  "boot.dol config ground/air slots 1/2; descriptor +0xae=3072, actor +0x768, +0x1d0f part-state alias, Titan backdash/motion constants"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Titan aimed callback denial/success, elevated/offset BAM16 handler+bridge facing, exact seek/gravity reload, v0-v4 action-3 bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts createSharedAimedShotX: callback gate, launch/seek, part completion, recovery/exit"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80125dac/table 0x8032f41c/leaf 0x801260f0"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables bank 0x8032e8e0 group4 ground slot1/air slot2 mask0xf; +0x1cee/+0x1d0f completion gates"
+                ],
+                "variantDispatch": [
+                  "v0-v4 engine 0x80179fcc/phase table 0x80352b64/config 0x8032f498"
+                ]
+              },
+              "member": "pl0604",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts createSharedAimedShotX TITAN_ROBOT_X_CONFIG for pl0618; exact weapon-2 consume hook"
+                ],
+                "constants": [
+                  "boot.dol config ground/air slots 1/2; descriptor +0xae=3072, actor +0x768, +0x1d0f part-state alias, Titan projectile callback records"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Proto Titan aimed callback denial/success, live target-facing bridge coverage, and v0-v4 action-3 bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts createSharedAimedShotX: callback gate, launch/seek, part completion, recovery/exit"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x80125dac/table 0x8032f41c/leaf 0x801260f0"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables bank 0x8032e8e0 group4 ground slot1/air slot2 mask0xf; +0x1cee/+0x1d0f completion gates"
+                ],
+                "variantDispatch": [
+                  "v0-v4 engine 0x80179fcc/phase table 0x80352b64/config 0x8032f498"
+                ]
+              },
+              "member": "pl0618",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -11335,7 +11539,7 @@
             "pl0618: command 0x8032f8f4 (user-data/GG4E/disc/sys/boot.dol:0x80125a28 copies actor+0x4ec root via 0x80125b38 and actor+0x4b0 via 0x80125b40)",
             "pl0618: root 0x80125dac, action table 0x8032f41c, handler 0x801260f0"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x80125a28",
@@ -16911,6 +17115,74 @@
       "actions": [
         {
           "actionIndex": 0,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts pl0613 makeMorphAimedComposite/createTitanPantherGunAction0; actor.ts visibility/part surfaces"
+                ],
+                "constants": [
+                  "boot.dol FUN_8018c7d8 records 0x32/0x33; actor +0x579/+0x1b03 and visibility fields"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts pl0613 action-0 ammo success/denial, visibility, records, v0-v4 bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts exact five-volley timer/cursor, ammo gate, exit and cooldown ordering"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x8018c79c/table 0x8036546c/leaf 0x8018c7d8"
+                ],
+                "streamBehavior": [
+                  "ROM leaf has no zz_004beb8_ stream; exact part-animation and visibility behavior is ported"
+                ],
+                "variantDispatch": [
+                  "shared-aimed-shot-x.ts createTitanPantherGunAction0; v0-v4 share the root firing loop"
+                ]
+              },
+              "member": "pl0613",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts pl0627 makeMorphAimedComposite/createTitanPantherGunAction0; prototype action 2 remains fallback"
+                ],
+                "constants": [
+                  "boot.dol FUN_8018c7d8 records 0x4d/0x4e; actor +0x579/+0x1b03 and visibility fields"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts pl0627 action-0 ammo success/denial, visibility, records, v0-v4 bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts exact five-volley timer/cursor, ammo gate, exit and cooldown ordering"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x8018c79c/table 0x8036546c/leaf 0x8018c7d8"
+                ],
+                "streamBehavior": [
+                  "ROM leaf has no zz_004beb8_ stream; exact part-animation and visibility behavior is ported"
+                ],
+                "variantDispatch": [
+                  "shared-aimed-shot-x.ts createTitanPantherGunAction0; v0-v4 share the prototype firing loop"
+                ]
+              },
+              "member": "pl0627",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -16986,10 +17258,78 @@
             "pl0627: command 0x8036516c (user-data/GG4E/disc/sys/boot.dol:0x8018c2b0 copies actor+0x4ec root via 0x8018c3c0 and actor+0x4b0 via 0x8018c3c8)",
             "pl0627: root 0x8018c79c, action table 0x8036546c, handler 0x8018c7d8"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 1,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts createTitanPantherAction1('panther'); movementPhysics actionSpeedRows copied to RomActor"
+                ],
+                "constants": [
+                  "boot.dol configs: timers20/0 launch40 reposition0.95 transition1/0.25 recovery0.9; pl0613data2 page0 rows [1000,1200,1000]"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Panther action-1 variants0-4, five phases including v4 0.25 launch scale, descriptor rows, bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts phase table 0x80352b08 plus repaired five-phase table 0x80352b18"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x8018c79c/table 0x8036546c/handler 0x8018c9cc; leaves 0x8018ca08..0x8018cacc"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables bank 0x803641c0 group3 slots 2/0/5/6/7 mask0xf; decoded completion drives phases"
+                ],
+                "variantDispatch": [
+                  "v0-v2 engine 0x80177dd8 configs 0x80365490/0x803654a8/0x803654c0; v3-v4 engine 0x80178394 configs 0x803654d8/0x803654f4"
+                ]
+              },
+              "member": "pl0613",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts createTitanPantherAction1('panther') for pl0627; movementPhysics actionSpeedRows copied to RomActor"
+                ],
+                "constants": [
+                  "boot.dol configs: timers20/0 launch40 reposition0.95 transition1/0.25 recovery0.9; pl0627 rows [1000,1200,1000]"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Proto Panther action-1 variants0-4, five phases including v4 scale, descriptor rows, bridge matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts phase table 0x80352b08 plus repaired five-phase table 0x80352b18"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root 0x8018c79c/table 0x8036546c/handler 0x8018c9cc; leaves 0x8018ca08..0x8018cacc"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables bank 0x803641c0 group3 slots 2/0/5/6/7 mask0xf; decoded completion drives phases"
+                ],
+                "variantDispatch": [
+                  "v0-v2 engine 0x80177dd8 configs 0x80365490/0x803654a8/0x803654c0; v3-v4 engine 0x80178394 configs 0x803654d8/0x803654f4"
+                ]
+              },
+              "member": "pl0627",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -17029,7 +17369,7 @@
             "pl0627: command 0x80365184 (user-data/GG4E/disc/sys/boot.dol:0x8018c2b0 copies actor+0x4ec root via 0x8018c3c0 and actor+0x4b0 via 0x8018c3c8)",
             "pl0627: root 0x8018c79c, action table 0x8036546c, handler 0x8018c9cc"
           ],
-          "status": "partial"
+          "status": "ported"
         },
         {
           "actionIndex": 2,
@@ -17055,6 +17395,74 @@
         },
         {
           "actionIndex": 3,
+          "classificationCoverage": [
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts createSharedAimedShotX PANTHER_ROBOT_X_CONFIG; exact weapon-2 hook and both fist ownership bytes"
+                ],
+                "constants": [
+                  "boot.dol config runtime slots1/2; descriptor+0xae=3072, actor+0x768, +0x1d0f, ownership +0x144/+0x145 |=0xc0"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Panther callback denial/success, elevated/offset BAM16 facing, both ownership bytes, exact seek/gravity, v0-v4 action-3 matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts callback gate, Panther setup/rise, launch/seek, part completion, recovery/exit"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root0x8018c79c/table0x8036546c/leaf0x8018cb48"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables bank0x803641c0 group4 runtime slots1/2 mask0xf; +0x1cee/+0x1d0f gates"
+                ],
+                "variantDispatch": [
+                  "v0-v4 engine0x80179fcc/phase table0x80352b64/config0x8036551c"
+                ]
+              },
+              "member": "pl0613",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "evidence": {
+                "bridgeWiring": [
+                  "bridge.ts createSharedAimedShotX PANTHER_ROBOT_X_CONFIG for pl0627; exact weapon-2 hook and ownership bytes"
+                ],
+                "constants": [
+                  "boot.dol config runtime slots1/2; descriptor+0xae=3072, actor+0x768, +0x1d0f, ownership +0x144/+0x145 |=0xc0"
+                ],
+                "focusedTests": [
+                  "rom.selfcheck.ts Proto Panther callback denial/success, both ownership bytes, v0-v4 action-3 matrix"
+                ],
+                "phaseTransitions": [
+                  "shared-aimed-shot-x.ts callback gate, Panther setup/rise, launch/seek, part completion, recovery/exit"
+                ],
+                "rootDispatch": [
+                  "actionStreamTables: root0x8018c79c/table0x8036546c/leaf0x8018cb48"
+                ],
+                "streamBehavior": [
+                  "actionStreamTables bank0x803641c0 group4 runtime slots1/2 mask0xf; +0x1cee/+0x1d0f gates"
+                ],
+                "variantDispatch": [
+                  "v0-v4 engine0x80179fcc/phase table0x80352b64/config0x8036551c"
+                ]
+              },
+              "member": "pl0627",
+              "variants": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          ],
           "evidence": [],
           "liveCoverage": [
             {
@@ -17130,7 +17538,7 @@
             "pl0627: command 0x803651fc (user-data/GG4E/disc/sys/boot.dol:0x8018c2b0 copies actor+0x4ec root via 0x8018c3c0 and actor+0x4b0 via 0x8018c3c8)",
             "pl0627: root 0x8018c79c, action table 0x8036546c, handler 0x8018cb48"
           ],
-          "status": "partial"
+          "status": "ported"
         }
       ],
       "constructorAddress": "0x8018c2b0",
@@ -20843,8 +21251,8 @@
       "delegated": 0,
       "inactive": 0,
       "missing": 71,
-      "partial": 247,
-      "ported": 7
+      "partial": 241,
+      "ported": 13
     }
   }
 }

@@ -3,6 +3,8 @@ import type { BattleActorObservation, Vec3 } from "@gf/combat";
 export interface BattleActorView {
   uid: string;
   borgId: string;
+  /** Current render/descriptor form; original borgId remains results ownership identity. */
+  combatFormId: string | undefined;
   team: number;
   ownerPlayer: BattleActorObservation["ownerPlayer"];
   alive: boolean;
@@ -44,6 +46,7 @@ export function battleActorView(borg: BattleActorObservation): BattleActorView {
   return {
     uid: borg.uid,
     borgId: borg.borgId,
+    combatFormId: borg.combatFormId,
     team: borg.team,
     ownerPlayer: borg.ownerPlayer,
     alive: borg.alive,

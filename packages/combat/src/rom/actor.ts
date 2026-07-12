@@ -71,6 +71,47 @@ export interface RomActor {
   /** +0x18da: phase-2 steering yaw for the sin/cos projection in descend phases
    *  (FUN_8018eb2c:907-911; ticked by FUN_8018ec34:937-940). */
   steerYaw: number;
+  /** +0x70 body pitch used by zz_006e1d0_'s exact target equation. */
+  bodyPitch: number;
+  /** +0x768 seek-rate scale, initialized to 1.0 by FUN_800562b8. */
+  aimRateScale: number;
+  /** +0x868/+0x874/+0x880 action-speed rows copied from descriptor +0x134/+0x140/+0x14c. */
+  actionSpeedRows: [number, number, number];
+  /** +0x2c/+0x30/+0x34 saved grounded position used by zz_00679d0_ revert. */
+  savedGroundPos: Vec3;
+  /** +0x73f and +0x80c housekeeping fields written by these machines. */
+  housekeeping73f: number;
+  accumulator80c: number;
+
+  // ===== Weapon/part animation host state (zz_0048d54_ @0x80048d54) =====
+  /** +0x579 descriptor-owned part-enable mask. Part 1 is deliberately skipped by
+   *  zz_0048d54_; startStream also intersects its requested mask with this byte. */
+  weaponPartMask: number;
+  /** +0x1d9a mask of part-animation blocks armed by the most recent helper call. */
+  weaponAnimationActiveMask: number;
+  /** +0x1b03 + part*0x40. The helper writes 5 for each armed non-part-1 block. */
+  weaponAnimationState: [number, number, number, number];
+  /** +0x1b20..+0x1b45 inputs consumed by zz_0048d54_. */
+  weaponAnimationParams: RomWeaponAnimationParams;
+  /** +0x1bd4 + part*0x40 through +0x1c05 + part*0x40. Raw bytes preserve the
+   *  engine-owned record layout without inventing renderer semantics. */
+  weaponAnimationBlocks: [Uint8Array, Uint8Array, Uint8Array, Uint8Array];
+
+  // ===== Target visibility/eligibility (zz_006bf80_ @0x8006bf80) =====
+  /** +0x3e5 = 1 << +0x3e4. */
+  visibilityBit: number;
+  /** +0xcc refreshed target pointer and the six battle actors whose +0x5e6 masks
+   *  the helper updates. The bridge supplies battle-local objects. */
+  visibilityTarget: RomVisibilityTarget | null;
+  visibilityRoster: RomVisibilityTarget[];
+
+  // ===== Form-change mirrors (zz_006a8c0_ @0x8006a8c0) =====
+  /** +0x94 borg-number mirror; +0x96/+0x97 carry +0x3e4/+0x3e7. */
+  borgMirror94: number;
+  carriedSlot96: number;
+  carriedVariant97: number;
+  /** +0x3e7 identity/palette byte carried through a morph. */
+  identityVariant: number;
 
   // ===== Identity (behavior-notes.md §z) =====
   /** +0x3e8: borg number (0x615 = G RED, 0x629 = NEO G RED, etc.). */
@@ -210,6 +251,34 @@ export interface RomPartState {
   active: number;
   /** +0x1b: state byte (op 0x02 writes here per part). */
   stateByte: number;
+  /** +0x144/+0x145 ownership/display byte used by Panther's detached fists. */
+  ownershipFlags?: number;
+}
+
+export interface RomWeaponAnimationParams {
+  /** +0x1b20, +0x1b28, +0x1b2c, +0x1b30. */
+  baseRate: number;
+  descriptorWord: number;
+  endFrame: number;
+  startFrame: number;
+  /** +0x1b3c/+0x1b3d and +0x1b43..+0x1b45. */
+  group: number;
+  slot: number;
+  durationAdjust: number;
+  toggle: number;
+  tailByte: number;
+  /** Exact zz_004d1f4_ result used by zz_004d244_; null means the host has not
+   *  loaded an animation descriptor and the copier leaves descriptor bytes alone. */
+  descriptor: Uint8Array | null;
+}
+
+export interface RomVisibilityTarget {
+  /** target +0x83; zero is eligible. */
+  eligibility83: number;
+  /** target +0x5e0; high bit excludes it from the re-add branch. */
+  controlWord: number;
+  /** target +0x5e6 visibility mask. */
+  visibilityMask5e6: number;
 }
 
 /** Family descriptor (actor+0x4b0). Layout partial — fields surface as family handlers
@@ -276,6 +345,19 @@ export function createRomActor(): RomActor {
     motion: { x: 0, y: 0, z: 0 },
     hSpeed: 0, yVel: 0, hDecel: 0, gravityCoeff: 0,
     heading: 0, lockYaw: 0, activeYaw: 0, turnErrorYaw: 0, steerYaw: 0,
+    bodyPitch: 0, aimRateScale: 1, actionSpeedRows: [0, 0, 0],
+    savedGroundPos: { x: 0, y: 0, z: 0 }, housekeeping73f: 0, accumulator80c: 0,
+    weaponPartMask: 0x0f,
+    weaponAnimationActiveMask: 0,
+    weaponAnimationState: [0, 0, 0, 0],
+    weaponAnimationParams: {
+      baseRate: 0, descriptorWord: 0, endFrame: 0, startFrame: 0,
+      group: 0, slot: 0, durationAdjust: 0, toggle: 0, tailByte: 0,
+      descriptor: null,
+    },
+    weaponAnimationBlocks: [new Uint8Array(0x38), new Uint8Array(0x38), new Uint8Array(0x38), new Uint8Array(0x38)],
+    visibilityBit: 1, visibilityTarget: null, visibilityRoster: [],
+    borgMirror94: 0, carriedSlot96: 0, carriedVariant97: 0, identityVariant: 0,
     borgNumber: 0, slot: 0, team: 0,
     fbPhase: 0, fbPhaseSlots: [0, 0, 0, 0],
     fbState: -1, ubState: -1, prevFbState: -1, prevUbState: -1,

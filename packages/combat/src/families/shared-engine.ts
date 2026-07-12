@@ -22,17 +22,14 @@ const ENG = {
   LUNGE_VEL_MULT: 0.0625,
 } as const;
 
-/** Base lunge speed from ROM per-borg +0x868 table (TUNED fallback 50.0 until
- *  extracted). The off-mesh revert in bridge.ts prevents drift through walls. */
-const DEFAULT_LUNGE_BASE = 50.0;
-
 /**
  * Port of `zz_01782dc_` — the forward-dash velocity setter. Shared by this file's
  * lunge/melee machines AND the more faithful B-close port in shared-melee-gred.ts.
  * Takes timerFrames directly so callers don't have to synthesize a full config. */
 export function computeLungeSpeed(actor: RomActor, timerFrames: number): void {
   if (timerFrames > 0) {
-    actor.hSpeed = DEFAULT_LUNGE_BASE / timerFrames;
+    const row = ((actor.prevActionIndex % 3) + 3) % 3;
+    actor.hSpeed = actor.actionSpeedRows[row]! / timerFrames;
   }
 }
 
@@ -58,6 +55,14 @@ export interface SharedEngineConfig {
   chainCallback?: (actor: RomActor) => void;
   /** +0x14: alt chain callback — called when +0x1dd & 0x80 and not +0x745. */
   altChainCallback?: (actor: RomActor) => void;
+  /** zz_0178394 config +0x10: phase-2 launch velocity magnitude. */
+  launchVelocity?: number;
+  /** zz_0178394 config +0x14: scale applied to all four velocity scalars on P2->P3. */
+  transitionScale?: number;
+  /** zz_0178394 config +0x18: zz_006ed8c_ damping used in phases 3 and 4. */
+  recoveryDamping?: number;
+  /** zz_0178394 config s16 +0x0a: phase-3 timer seed. */
+  recoveryFrames?: number;
 }
 
 /** Per-action config set: one config per actionIndex entry. The rootAction
@@ -148,11 +153,22 @@ function createMeleePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
 // ============================================================================
 
 function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: StreamContext) => void> {
+  const scratch = (actor: RomActor) => actor as RomActor & {
+    lockTarget?: { x: number; y: number; z: number } | null;
+    grounded?: boolean;
+    streamTickGate?: boolean;
+    aimPitch54e?: number;
+  };
+  const damp = (actor: RomActor, factor: number) => {
+    const amount = (1 - factor) * actor.dt;
+    actor.hSpeed -= actor.hSpeed * amount;
+    actor.yVel -= actor.yVel * amount;
+  };
   return [
     // Phase 0: setup (zz_01783e4_) — zero velocity, reposition from target, start stream.
     (actor, ctx) => {
       actor.fbPhaseSlots[0]++;
-      actor.handlerTimer = ENG.LUNGE_TIMER;
+      actor.handlerTimer = ENG.LUNGE_TIMER; // FLOAT_8043ae00 = 30
       // Zero the velocity scalars (the lunge starts from standstill).
       actor.hSpeed = 0;
       actor.yVel = 0;
@@ -162,7 +178,7 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       actor.lockYaw = actor.heading;
       actor.streamSlot = cfg.seedSlot;
       // Reposition: motion = (pos - target) × scale; pos += motion.
-      const target = (actor as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget;
+      const target = scratch(actor).lockTarget;
       if (target && cfg.repositionScale !== 0) {
         vecSubtract(actor.pos, target, actor.motion);
         vecScale(cfg.repositionScale, actor.motion, actor.motion);
@@ -170,12 +186,15 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       }
       startStream(actor, 0xf, 3, actor.streamSlot, ENG.STREAM_RATE);
       actor.streamSlot++;
+      // zz_006e514_/zz_006e1ac_ populate +0x54e. The bridge's +0x18da pitch
+      // channel is the exact surfaced source for the flag-2 path.
+      scratch(actor).aimPitch54e = actor.steerYaw;
       void ctx;
     },
     // Phase 1: tick + reposition continuation + timer (FUN_80178574).
     //   Calls zz_01782dc_ at the transition to set the forward-dash velocity.
     (actor, ctx) => {
-      tickStream(actor, 0xf, ctx);
+      if (scratch(actor).streamTickGate !== false) tickStream(actor, 0xf, ctx);
       if (cfg.repositionScale !== 0) {
         vecScale(cfg.repositionScale, actor.motion, actor.motion);
         vecAdd(actor.pos, actor.motion, actor.pos);
@@ -183,34 +202,52 @@ function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: St
       actor.handlerTimer -= actor.dt;
       if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
         actor.fbPhaseSlots[0]++;
-        actor.handlerTimer = cfg.timerFrames;
-        computeLungeSpeed(actor, cfg.timerFrames); // ← zz_01782dc_: set forward-dash hSpeed
+        actor.handlerTimer = cfg.timerFrames; // cfg s16 +0x08
       }
     },
-    // Phase 2: active + recovery. gravityCoeff stays 0 (the ROM controls vertical
-    //   motion explicitly per-phase during specials, NOT via the gravity field).
-    //   If the borg went airborne, apply a small descent to bring it back down.
+    // Phase 2 FUN_80178684: stream/aim tick, launch-vector integration, then seed P3.
     (actor, ctx) => {
       tickStream(actor, 0xf, ctx);
-      // Descent: if airborne and yVel > 0 (rising), apply downward bias.
-      if (!(actor as RomActor & { grounded?: boolean }).grounded && actor.yVel > -2.0) {
-        actor.yVel -= 0.5 * actor.dt;
-      }
-      integratePhysics(0, actor, actor.activeYaw);
+      const pitch = scratch(actor).aimPitch54e ?? actor.steerYaw;
+      const rad = (pitch / 0x10000) * Math.PI * 2;
+      const velocity = cfg.launchVelocity ?? 0;
+      actor.hSpeed = velocity * Math.cos(rad);
+      actor.yVel = -velocity * Math.sin(rad);
+      integratePhysics(1, actor, actor.lockYaw);
       actor.handlerTimer -= actor.dt;
-      if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
-        // Exit per the lunge tail FUN_80178908 (chunk_0044.c:3465-3476): grounded +
-        // part-0 contact → zz_006a750_(7) + 1f cooldown; wall contact → the real
-        // zz_006a5a4_ call. The timer-expiry CONDITION here remains the port's
-        // labeled stream-end approximation; the cue outcome now matches the decomp
-        // (the old full-0 + upper-6 mapping was refuted).
-        actor.controlWord = actor.controlWord & ~0x3;
-        if ((actor as RomActor & { grounded?: boolean }).grounded === true) {
-          dispatchUpperBodyCue(actor, 7); // zz_006a750_(actor, 7) @:3468
-          actor.stateTimer = 1.0 + actor.dt; // +0x694 = FLOAT_8043ae1c + dt @:3469
-        } else {
-          romAirKnockoutReturn(actor); // zz_006a5a4_ @:3475
-        }
+      const target = scratch(actor).lockTarget;
+      const inRange = target ? Math.hypot(target.x - actor.pos.x, target.z - actor.pos.z) <= cfg.proximityRange : false;
+      if (actor.handlerTimer <= ENG.TIMER_FLOOR || inRange) {
+        actor.fbPhaseSlots[0]++;
+        actor.handlerTimer = cfg.recoveryFrames ?? 0; // cfg s16 +0x0a
+        const scale = cfg.transitionScale ?? 1;
+        actor.hSpeed *= scale;
+        actor.hDecel *= scale;
+        actor.yVel *= scale;
+        actor.gravityCoeff *= scale;
+      }
+    },
+    // Phase 3 FUN_80178808: damp/integrate until cfg+0x0a expires.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      damp(actor, cfg.recoveryDamping ?? 1);
+      integratePhysics(1, actor, actor.lockYaw);
+      actor.handlerTimer -= actor.dt;
+      if (actor.handlerTimer <= 0) actor.fbPhaseSlots[0]++;
+    },
+    // Phase 4 FUN_80178908: stream/combo tail and exact grounded/wall exits.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      if (actor.contactP0 < 0) actor.steerYaw = actor.steerYaw >> 1;
+      damp(actor, cfg.recoveryDamping ?? 1);
+      integratePhysics(1, actor, actor.lockYaw);
+      if (scratch(actor).grounded === true && actor.contactP0 < 0) {
+        actor.controlWord &= ~0x3;
+        dispatchUpperBodyCue(actor, 7);
+        actor.stateTimer = 1.0 + actor.dt;
+      } else if (actor.wallContact !== 0) {
+        actor.controlWord &= ~0x3;
+        romAirKnockoutReturn(actor);
       }
     },
   ];

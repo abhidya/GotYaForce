@@ -56,6 +56,9 @@ const FIELDS = [
   ["gravityGround", 0x68],
   ["gravityFall", 0x6c],
   ["gravityC", 0x70],
+  ["actionSpeed0", 0x134],
+  ["actionSpeed1", 0x140],
+  ["actionSpeed2", 0x14c],
   ["cameraHeightSlot0", 0xb8],
   ["cameraHeightSlot1", 0xbc],
   ["cameraFollowMinSlot0", 0xc0],
@@ -79,6 +82,14 @@ const U16_FIELDS = [
 const borgsFile = JSON.parse(fs.readFileSync(borgsPath, "utf8"));
 const roster = Array.isArray(borgsFile) ? borgsFile : borgsFile.borgs;
 const ids = [...new Set(roster.map((b) => String(b.id).toLowerCase()))].sort();
+
+// Non-selectable forms selected in-place by zz_006a8c0_. Their descriptor pages are
+// concatenated after the selectable robot's page in the same PZZ member (data2 = 2 pages).
+// Keep them out of borgs.json while still generating the normal movement schema they use.
+const INTERNAL_MORPH_FORMS = {
+  pl0605: { sourceBorgId: "pl0604", pageIndex: 1, role: "internal-morph-form" },
+  pl0614: { sourceBorgId: "pl0613", pageIndex: 1, role: "internal-morph-form" },
+};
 
 let manifestRecords = [];
 try {
@@ -106,6 +117,14 @@ function readDataBin(borgId) {
   return { buf: Buffer.from(member.payload), source: `pzz[${record.memberIndex}]` };
 }
 
+function descriptorPage(data, pageIndex) {
+  const pageSize = 432;
+  const start = pageIndex * pageSize;
+  return data.buf.length >= start + pageSize
+    ? { ...data, buf: data.buf.subarray(start, start + pageSize) }
+    : null;
+}
+
 const out = {};
 const missing = [];
 let fromPzz = 0;
@@ -130,6 +149,23 @@ for (const id of ids) {
   out[id] = entry;
 }
 
+for (const [id, form] of Object.entries(INTERNAL_MORPH_FORMS)) {
+  const source = readDataBin(form.sourceBorgId);
+  const data = source ? descriptorPage(source, form.pageIndex) : null;
+  if (!data) {
+    missing.push(id);
+    continue;
+  }
+  const entry = {};
+  for (const [name, offset] of FIELDS) {
+    entry[name] = Math.round(data.buf.readFloatBE(offset) * 1e6) / 1e6;
+  }
+  for (const [name, offset] of U16_FIELDS) {
+    entry[name] = data.buf.readUInt16BE(offset);
+  }
+  out[id] = entry;
+}
+
 const payload = {
   _meta: {
     source: "user-data/<region>/afs_data/root/pl####data.bin (+ .pzz members via extraction manifest)",
@@ -141,6 +177,7 @@ const payload = {
     ),
     region,
     borgs: Object.keys(out).length,
+    internalMorphForms: INTERNAL_MORPH_FORMS,
     missing,
   },
   borgs: out,

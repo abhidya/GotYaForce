@@ -64,6 +64,8 @@ import {
 } from "../rom/physics.js";
 import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
 import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
+import { createSharedMeleeGRed, type SharedMeleeGRedConfig } from "./shared-melee-gred.js";
+import { createSharedEngineRootAction, type SharedEngineConfig } from "./shared-engine.js";
 
 /** Machine constants — every value read from boot.dol (dig claims MACHINE-P0/P1/P2). */
 export const AIMED_SHOT_X = {
@@ -105,14 +107,7 @@ export const AIMED_SHOT_X = {
  *  by actor f32 +0x768 (zz_006e1d0_) or by dt +0x1dc8 (zz_006e848_). Neither the
  *  descriptor rate field nor +0x768 is surfaced on RomDescriptor/RomActor yet, so a
  *  fixed BAM/frame rate stands in (TUNED: 0x400 ≈ 5.6°/frame; scaled by dt). */
-const AIM_SEEK_STEP_APPROX = 0x400;
 
-/** Whiff fallback frames for the phase-1 contact wait (+0x1cef is a stream-event byte;
- *  banks aren't byte-loaded — same labeled approximation as shared-x-special.ts). */
-const DEFAULT_WHIFF_FRAMES = 60;
-/** Frame budget for phase 2's +0x1cee stream-end/landing wait (same approximation
- *  posture: handlerTimer budget stands in for the unsurfaced stream-event byte). */
-const DEFAULT_RECOVER_FRAMES = 45;
 
 /** Per-family config for the aimed-shot X machine (the ROM's r4 config block). */
 export interface SharedAimedShotConfig {
@@ -137,10 +132,6 @@ export interface SharedAimedShotConfig {
    *  fam2/fam3's wrappers (0x80126110/0x8018cb68) halve only when +0x5e0 & 0x40 is
    *  clear (grounded). */
   pitchHalveAlways: boolean;
-  /** Whiff fallback frames for phase 1 (port approximation, see DEFAULT_WHIFF_FRAMES). */
-  whiffFrames?: number;
-  /** Phase-2 recovery budget frames (port approximation for the +0x1cee wait). */
-  recoverFrames?: number;
 }
 
 /** Host-scratch fields the bridge mirrors onto the actor (same convention as
@@ -192,7 +183,7 @@ function pitchToTargetBam(actor: RomActor): number | null {
   const dy = t.y - actor.pos.y;
   const dz = t.z - actor.pos.z;
   const rad = Math.atan2(dy, Math.hypot(dx, dz));
-  return Math.round((-rad / TAU) * 0x10000);
+  return -toS16(actor.bodyPitch) + Math.round((-rad / TAU) * 0x10000);
 }
 
 /** Face the lock target — zz_006d144_(actor, 0xc1) (fam1) / zz_006d0dc_(actor, 0xc1, 0)
@@ -201,9 +192,11 @@ function pitchToTargetBam(actor: RomActor): number | null {
  *  the bridge's aim-smoothing responsibility). zz_006d144_'s no-target branch writes
  *  the steer-delta u16 +0x5aa = +0x5ac − +0x72 (unsurfaced — no-op here). */
 function faceLockTarget(actor: RomActor): void {
-  if (lockTargetPos(actor)) {
-    actor.activeYaw = actor.lockYaw;
-  }
+  const target = lockTargetPos(actor);
+  if (!target) return;
+  const yaw = Math.round((Math.atan2(target.x - actor.pos.x, target.z - actor.pos.z) / TAU) * 0x10000);
+  actor.lockYaw = toS16(yaw);
+  actor.activeYaw = actor.lockYaw;
 }
 
 /** Port of zz_006e848_ @0x8006e848 (via one-liner zz_006e820_ @0x8006e820) — the
@@ -219,7 +212,7 @@ function seekAimPitch18e0(actor: RomActor): void {
   const clamp = AIMED_SHOT_X.PITCH_TARGET_CLAMP_18E0;
   const t = Math.max(-clamp, Math.min(clamp, target));
   const cur = toS16(scratch.aimPitch18e0 ?? 0);
-  const step = Math.max(1, Math.round(AIM_SEEK_STEP_APPROX * actor.dt));
+  const step = Math.max(1, Math.round((actor.descriptor?.turnStep1 ?? 0) * actor.dt));
   const diff = t - cur;
   scratch.aimPitch18e0 = Math.abs(diff) <= step ? t : cur + Math.sign(diff) * step;
 }
@@ -239,7 +232,7 @@ function seekAimPitch18da(actor: RomActor): void {
   const clamp = AIMED_SHOT_X.PITCH_TARGET_CLAMP_18DA;
   const t = Math.max(-clamp, Math.min(clamp, target));
   const cur = toS16(actor.steerYaw);
-  const step = Math.max(1, Math.round(AIM_SEEK_STEP_APPROX * actor.dt));
+  const step = Math.max(1, Math.round((actor.descriptor?.turnStep1 ?? 0) * actor.aimRateScale));
   const diff = t - cur;
   actor.steerYaw = Math.abs(diff) <= step ? t : cur + Math.sign(diff) * step;
 }
@@ -297,6 +290,12 @@ function aimedShotPhase0(actor: RomActor, cfg: SharedAimedShotConfig, ctx: Strea
   // +0x5e0&0x40 clear). PORT APPROXIMATION: the host ground clamp models the snap;
   // the revert-from-last-grounded-copy (+0x2c/+0x30/+0x34) branch is unmodeled.
   groundClamp(actor);
+  const scratch = actor as RomActor & AimedShotScratch;
+  if (scratch.grounded === false && (actor.controlWord & 0x40) === 0) {
+    actor.pos.x = actor.savedGroundPos.x;
+    actor.pos.y = actor.savedGroundPos.y;
+    actor.pos.z = actor.savedGroundPos.z;
+  }
 
   // Stream slot select: +0x6ea = cfg groundSlot, or cfg airSlot when +0x5e0 & 0x40.
   // NO post-increment of +0x6ea (unlike the zz_00ff2bc_ machine's combo cursor).
@@ -307,7 +306,8 @@ function aimedShotPhase0(actor: RomActor, cfg: SharedAimedShotConfig, ctx: Strea
   // +0x80c = 0.0 — unsurfaced accumulator; honest no-op. No +0x558/+0x560 timers are
   // written anywhere in this machine (the handlerTimer below is the port's whiff budget).
   actor.handlerTimer = 0;
-  (actor as RomActor & AimedShotScratch).aimedShotGravReloaded = false;
+  actor.accumulator80c = 0;
+  scratch.aimedShotGravReloaded = false;
   void ctx;
 }
 
@@ -337,14 +337,8 @@ function aimedShotPhase1(actor: RomActor, cfg: SharedAimedShotConfig, ctx: Strea
   }
   // |motion| > FLOAT_8043ae38 (3.0) → zz_00b22f4_ afterimage (FX, renderer-side).
 
-  // WHIFF fallback (port approximation, same rationale as shared-x-special.ts):
-  // +0x1cef is a stream-event byte; without byte-loaded banks the VM can't fire it,
-  // so advance to recovery (WITHOUT onHit) after the labeled frame budget.
-  actor.handlerTimer += actor.dt;
-  if (actor.handlerTimer >= (cfg.whiffFrames ?? DEFAULT_WHIFF_FRAMES)) {
-    actor.fbPhaseSlots[0] = 2;
-    actor.handlerTimer = 0;
-  }
+  // No timer fallback: the bridge replays the decoded part-state event that owns
+  // +0x1cef. A whiff remains in this phase until the authored stream says otherwise.
 }
 
 // ============================================================================
@@ -365,7 +359,8 @@ function aimedShotPhase2(actor: RomActor, cfg: SharedAimedShotConfig, ctx: Strea
   // phase-2 entry (the event fires early in every recovery stream, and nothing else
   // writes +0x50 during phase 2, so the post-event steady state is identical).
   const scratch = actor as RomActor & AimedShotScratch;
-  if (!scratch.aimedShotGravReloaded) {
+  if (actor.parts[1].stateByte < 0) {
+    actor.parts[1].stateByte = 0;
     scratch.aimedShotGravReloaded = true;
     if (actor.descriptor) actor.gravityCoeff = actor.descriptor.handlerData6c;
   }
@@ -387,12 +382,7 @@ function aimedShotPhase2(actor: RomActor, cfg: SharedAimedShotConfig, ctx: Strea
   //                              then exit only if +0x1cee != 0;
   //   airborne               → exit only if +0x1cee != 0;
   //   grounded && +0x1cef < 0 → exit immediately.
-  // PORT APPROXIMATION: +0x1cee is a stream-end/landing event; a handlerTimer frame
-  // budget stands in for it (same posture as the other shared-machine ports).
-  actor.handlerTimer += actor.dt;
-  const streamEnded =
-    actor.wallContact !== 0 ||
-    actor.handlerTimer >= (cfg.recoverFrames ?? DEFAULT_RECOVER_FRAMES);
+  const streamEnded = actor.wallContact !== 0;
   let exitNow: boolean;
   if (grounded && actor.contactP0 >= 0) {
     dampLanding(actor, AIMED_SHOT_X.LANDING_DAMP);
@@ -405,6 +395,7 @@ function aimedShotPhase2(actor: RomActor, cfg: SharedAimedShotConfig, ctx: Strea
 
   if (exitNow) {
     // EXIT BLOCK: +0x73f = 0 (unsurfaced housekeeping byte — no-op); +0x5e0 &= ~3.
+    actor.housekeeping73f = 0;
     actor.controlWord &= ~0x3;
     if (!grounded) {
       // Real zz_006a5a4_ call (FUN_8017a208, chunk_0044.c:4302) — upper cue 6 (the
@@ -582,10 +573,11 @@ export function titanRobotXOnHit(actor: RomActor, ctx: StreamContext): void {
     ctx.onFamilyProjectile?.(actor, TITAN_ROBOT_X.SPAWNER_182FCC_ADDR, 1);
     spawned = true;
   } else if (actor.borgNumber === 0x618) {
-    // zz_006dbe0_(actor, 2, 1, 1) — host ammo gate (approximated as passing).
-    ctx.onFamilyProjectile?.(actor, TITAN_ROBOT_X.SPAWNER_182FCC_ADDR, 2);
-    ctx.onFamilyProjectile?.(actor, TITAN_ROBOT_X.SPAWNER_182FCC_ADDR, 3);
-    spawned = true;
+    if (ctx.onAllocateResource?.(actor, 2, 1, 1) ?? false) {
+      ctx.onFamilyProjectile?.(actor, TITAN_ROBOT_X.SPAWNER_182FCC_ADDR, 2);
+      ctx.onFamilyProjectile?.(actor, TITAN_ROBOT_X.SPAWNER_182FCC_ADDR, 3);
+      spawned = true;
+    }
   }
   if (spawned) {
     actor.hSpeed = TITAN_ROBOT_X.BACKDASH_HSPEED;
@@ -657,16 +649,19 @@ export function pantherRobotXOnHit(actor: RomActor, ctx: StreamContext): void {
   actor.lockYaw = (actor.heading - 0x8000) & 0xffff; // +0x5ae = +0x72 − 0x8000
   let spawned = false;
   if (actor.borgNumber === 0x613) {
-    // +0x144 |= 0xc0 (part flag, unsurfaced) …
+    actor.parts[0].ownershipFlags = (actor.parts[0].ownershipFlags ?? 0) | 0xc0;
     ctx.onFamilyProjectile?.(actor, PANTHER_ROBOT_X.SPAWNER_1B2B64_ADDR, 8);
-    // +0x145 |= 0xc0 …
+    actor.parts[1].ownershipFlags = (actor.parts[1].ownershipFlags ?? 0) | 0xc0;
     ctx.onFamilyProjectile?.(actor, PANTHER_ROBOT_X.SPAWNER_1B2B64_ADDR, 9);
     spawned = true;
   } else if (actor.borgNumber === 0x627) {
-    // zz_006dbe0_(actor, 2, 1, 1) — host ammo gate (approximated as passing).
-    ctx.onFamilyProjectile?.(actor, PANTHER_ROBOT_X.SPAWNER_1B2B64_ADDR, 10);
-    ctx.onFamilyProjectile?.(actor, PANTHER_ROBOT_X.SPAWNER_1B2B64_ADDR, 0xb);
-    spawned = true;
+    if (ctx.onAllocateResource?.(actor, 2, 1, 1) ?? false) {
+      actor.parts[0].ownershipFlags = (actor.parts[0].ownershipFlags ?? 0) | 0xc0;
+      ctx.onFamilyProjectile?.(actor, PANTHER_ROBOT_X.SPAWNER_1B2B64_ADDR, 10);
+      actor.parts[1].ownershipFlags = (actor.parts[1].ownershipFlags ?? 0) | 0xc0;
+      ctx.onFamilyProjectile?.(actor, PANTHER_ROBOT_X.SPAWNER_1B2B64_ADDR, 0xb);
+      spawned = true;
+    }
   }
   if (spawned) {
     // zz_00f036c_(actor, 0x105) — 2D SFX via the existing sound-cue hook.
@@ -686,6 +681,189 @@ export const PANTHER_ROBOT_X_CONFIG: SharedAimedShotConfig = {
   onHit: pantherRobotXOnHit,
   pitchHalveAlways: false, // wrapper 0x8018cb68 halves only when +0x5e0&0x40 clear
 };
+
+// ============================================================================
+// Constructor actions 0/1. These are live for command variants 0..4 on all four
+// members. Action 0 is the family gun loop; action 1's +0x581 table selects one of
+// the shared melee/lunge wrappers below. Config words were read directly from
+// 0x8032f440..0x8032f48b and 0x80365490..0x8036550f.
+// ============================================================================
+
+const FAMILY_GUN = {
+  TIMER: 6.0,
+  AIM_DECAY: 0.9599999785423279,
+  SHOT_SPAWNER: 0x80082824,
+} as const;
+
+function writeF32BE(bytes: Uint8Array, offset: number, value: number): void {
+  new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).setFloat32(offset, value, false);
+}
+
+function writeU32BE(bytes: Uint8Array, offset: number, value: number): void {
+  new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).setUint32(offset, value >>> 0, false);
+}
+
+/** zz_004d244_ @0x8004d244, restricted to the parts exercised by zz_0048d54_. */
+function copyWeaponAnimationDescriptor(actor: RomActor, partIndex: number, block: Uint8Array): void {
+  const descriptor = actor.weaponAnimationParams.descriptor;
+  if (!descriptor || descriptor.length < 1) return;
+  block[0x32] = descriptor[0] ?? 0;
+  const base = partIndex === 0 ? 4 : partIndex === 2 ? 0x14 : -1;
+  if (base < 0 || descriptor.length <= base + 4) return;
+  block[0x2a] = descriptor[base] ?? 0;
+  block[0x2b] = descriptor[base + 1] ?? 0;
+  const flags = descriptor[base + 2] ?? 0;
+  block[0x26] = 0;
+  block[0x27] = descriptor[base + 3] ?? 0;
+  block[0x37] = descriptor[base + 4] ?? 0;
+  if ((flags & 3) === 3) block[0x30] = (block[0x30] ?? 0) ^ 1;
+  else if ((flags & 1) !== 0) block[0x30] = 0;
+  else if ((flags & 2) !== 0) block[0x30] = 1;
+  block[0x2c] = (flags & 4) !== 0 ? 1 : 0;
+}
+
+/** zz_0048d54_ @0x80048d54 for the param_10=1 path used unconditionally by
+ * Titan/Panther action 0. This deliberately exposes raw host state only. */
+export function armWeaponPartAnimation(actor: RomActor, duration = 1): void {
+  const p = actor.weaponAnimationParams;
+  actor.weaponAnimationActiveMask = 0;
+  for (let partIndex = 0; partIndex < 4; partIndex++) {
+    if (partIndex === 1 || (actor.weaponPartMask & (1 << partIndex)) === 0) continue;
+    actor.weaponAnimationActiveMask |= 1 << partIndex;
+    const block = actor.weaponAnimationBlocks[partIndex]!;
+    block[0x31] = p.tailByte & 0xff;
+    block[0x28] = p.group & 0xff;
+    block[0x29] = p.slot & 0xff;
+    block[0x30] = p.toggle & 0xff;
+    writeF32BE(block, 0x10, 1);
+    writeU32BE(block, 0x14, p.descriptorWord);
+    writeF32BE(block, 0x08, 1);
+    writeF32BE(block, 0x0c, p.baseRate);
+    copyWeaponAnimationDescriptor(actor, partIndex, block);
+    actor.weaponAnimationState[partIndex] = 5;
+    // +0x1aec = duration+1; +0x1af0 = dt; +0x1af4 = dt/(duration+1).
+    writeF32BE(block, 0x18, duration + 1);
+    writeF32BE(block, 0x1c, actor.dt);
+    writeF32BE(block, 0x20, actor.dt / (duration + 1));
+  }
+}
+
+/** zz_006bf80_ @0x8006bf80 after zz_006bda8_ has refreshed +0xcc. */
+export function refreshTargetVisibility(actor: RomActor): void {
+  const bit = actor.visibilityBit & 0xff;
+  for (const target of actor.visibilityRoster) target.visibilityMask5e6 &= ~bit;
+  const target = actor.visibilityTarget;
+  if (target && target.eligibility83 === 0 && (target.controlWord & 0x80000000) === 0) {
+    target.visibilityMask5e6 |= bit;
+  }
+}
+
+interface FamilyGunScratch {
+  gunAim191e?: number;
+  inputFlags5d4?: number;
+  inputFlags5d8?: number;
+}
+
+/** FUN_80125de8 / FUN_8018c7d8. Both functions are instruction-identical except
+ * for their literal pools and borg-switched projectile records. */
+export function createTitanPantherGunAction0(ctx: StreamContext): (actor: RomActor) => void {
+  return (actor) => {
+    const s = actor as RomActor & FamilyGunScratch;
+    if (actor.fbPhaseSlots[0] === 0) {
+      actor.fbPhaseSlots[0] = 1;
+      actor.streamSlot = 5;
+      actor.handlerTimer = 0;
+    }
+
+    // The ROM seeks +0x191e toward the target bearing by at most 0x400 per tick,
+    // decaying it by 0.96 when the target lies outside the +/-0x4800 cone.
+    const target = lockTargetPos(actor);
+    if (target) {
+      const targetYaw = Math.round((Math.atan2(target.x - actor.pos.x, target.z - actor.pos.z) / TAU) * 0x10000);
+      const cone = toS16(targetYaw - actor.heading);
+      if (cone >= -0x4800 && cone <= 0x4800) {
+        const cur = toS16(s.gunAim191e ?? 0);
+        const delta = Math.max(-0x400, Math.min(0x400, toS16(cone - cur)));
+        s.gunAim191e = toS16(cur + delta);
+      } else {
+        s.gunAim191e = Math.trunc(toS16(s.gunAim191e ?? 0) * FAMILY_GUN.AIM_DECAY);
+      }
+    } else {
+      s.gunAim191e = Math.trunc(toS16(s.gunAim191e ?? 0) * FAMILY_GUN.AIM_DECAY);
+    }
+
+    const held = (((s.inputFlags5d8 ?? 0) & 0xf0) !== 0) || (((s.inputFlags5d4 ?? 0) & 1) !== 0);
+    if (actor.streamSlot < 5 && !held) {
+      actor.controlWord &= ~0x3;
+      dispatchUpperBodyCue(actor, 6);
+      actor.stateTimer = FAMILY_GUN.TIMER + actor.dt;
+      return;
+    }
+    if (actor.handlerTimer > 0) {
+      actor.handlerTimer -= actor.dt;
+      armWeaponPartAnimation(actor, 1);
+      return;
+    }
+    actor.handlerTimer = FAMILY_GUN.TIMER;
+    actor.streamSlot--;
+    if (actor.streamSlot < 0) {
+      actor.controlWord &= ~0x3;
+      dispatchUpperBodyCue(actor, 6);
+      actor.stateTimer = FAMILY_GUN.TIMER + actor.dt;
+      return;
+    }
+    if (ctx.onAllocateResource?.(actor, 0, 1, 1) ?? false) {
+      refreshTargetVisibility(actor);
+      ctx.onRefreshTargetVisibility?.(actor);
+      const records = actor.borgNumber === 0x604 ? [0x2b, 0x2c]
+        : actor.borgNumber === 0x618 ? [0x4b, 0x4c]
+        : actor.borgNumber === 0x613 ? [0x32, 0x33]
+        : actor.borgNumber === 0x627 ? [0x4d, 0x4e]
+        : [];
+      for (const record of records) ctx.onFamilyProjectile?.(actor, FAMILY_GUN.SHOT_SPAWNER, record);
+    }
+    armWeaponPartAnimation(actor, 1);
+  };
+}
+
+function meleeConfig(seedSlot: number): SharedMeleeGRedConfig {
+  return { seedSlot, proximityRange: 300, timerFrames: 20, decel: 0.949999988079071 };
+}
+function lungeConfig(seedSlot: number, transitionScale: number): SharedEngineConfig {
+  return {
+    seedSlot,
+    proximityRange: 300,
+    timerFrames: 20,
+    recoveryFrames: 0,
+    repositionScale: 0.949999988079071,
+    launchVelocity: 40,
+    transitionScale,
+    recoveryDamping: 0.8999999761581421,
+  };
+}
+/** PTR_FUN_8032f42c / PTR_FUN_8036547c variant dispatch for action 1. */
+export function createTitanPantherAction1(family: "titan" | "panther", ctx: StreamContext): (actor: RomActor) => void {
+  const configs = family === "titan"
+    ? [meleeConfig(0), meleeConfig(0), meleeConfig(3), lungeConfig(4, 1), lungeConfig(4, 1)]
+    : [meleeConfig(2), meleeConfig(0), meleeConfig(5), lungeConfig(6, 1), lungeConfig(7, 0.25)];
+  const handlers = configs.map((cfg, variant) => {
+    const halvePitch = family === "panther" || variant < 3;
+    const engine = variant < 3
+      ? createSharedMeleeGRed(cfg as SharedMeleeGRedConfig, ctx)
+      : createSharedEngineRootAction({ xSpecial: cfg as SharedEngineConfig });
+    return (actor: RomActor) => {
+      if (halvePitch) actor.steerYaw = toS16(actor.steerYaw) >> 1;
+      if (variant < 3) engine(actor);
+      else {
+        const saved = actor.actionIndex;
+        actor.actionIndex = 2;
+        engine(actor);
+        actor.actionIndex = saved;
+      }
+    };
+  });
+  return (actor) => handlers[actor.variantIndex]?.(actor);
+}
 
 // ============================================================================
 // Root actions + configure entry points.

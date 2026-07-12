@@ -117,15 +117,7 @@ export interface SharedMorphXConfig {
    *  only the VEHICLE family (ctor 0x8015b420) has any: its wrappers halve gun-heat
    *  fields before `bl zz_017a374_` (raw disasm 0x8015bba4-0x8015bbb8 etc.). */
   preEngine?: (actor: RomActor) => void;
-  /** Stream-end stand-in: frames before phase 1 fires the morph when the +0x1cee
-   *  event never arrives. The ROM's stream VM raises +0x1cee at transform-stream
-   *  end; our banks aren't byte-loaded yet (same labeled approximation as
-   *  shared-x-special.ts / gred.ts), so a handlerTimer frame budget stands in.
-   *  TUNED (default 60). */
-  morphFrames?: number;
 }
-
-const DEFAULT_MORPH_FRAMES = 60;
 
 /** Port-side host hooks (beyond StreamContext). The ROM has no config callback —
  *  these exist because the model/descriptor swap lives host-side. */
@@ -283,14 +275,9 @@ function morphXPhase1(
   // (e) MORPH TRANSITION on s8 +0x1cee != 0 (lbz/extsb. @0x8017a578 — the STREAM-END
   // event byte, NOT the +0x1cef contact byte; the engine never tests +0x1cef).
   // actor.wallContact IS +0x1cee (actor.ts names it for its G Crash wall use; this
-  // machine reads the same byte as the stream/part end event — verifier-flagged
-  // naming conflict, one underlying channel). The VM doesn't raise stream-end events
-  // yet (banks not byte-loaded), so the labeled handlerTimer frame budget stands in
-  // alongside the surfaced byte.
-  actor.handlerTimer += actor.dt;
-  const streamEnded =
-    actor.wallContact !== 0 ||
-    actor.handlerTimer >= (cfg.morphFrames ?? DEFAULT_MORPH_FRAMES);
+  // machine reads the same byte as the stream/part end event. The bridge's decoded
+  // stream scheduler raises this exact byte when the authored stream completes.
+  const streamEnded = actor.wallContact !== 0;
   if (!streamEnded) return;
   actor.wallContact = 0;
   actor.handlerTimer = 0;
@@ -308,6 +295,9 @@ function morphXPhase1(
   const previousForm = actor.borgNumber;
   const newForm = scratch.morphPendingForm ?? cfg.groundForm;
   actor.borgNumber = newForm;
+  actor.borgMirror94 = newForm;
+  actor.carriedSlot96 = actor.slot;
+  actor.carriedVariant97 = actor.identityVariant;
   scratch.morphFormCount = (scratch.morphFormCount ?? 0) + 1;
   scratch.morphFormId = newForm; // labeled host surface for the pending visual swap
 
@@ -321,6 +311,7 @@ function morphXPhase1(
   hooks.onMorph?.(actor, newForm, previousForm);
 
   // +0x73f = 0 (housekeeping byte, unported) ; +0x5e0 &= ~3 (rlwinm @0x8017a5a8).
+  actor.housekeeping73f = 0;
   actor.controlWord &= ~0x3;
 
   // Exit select (lha 6(r31) @0x8017a5b4, cmpw vs +0x548):

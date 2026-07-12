@@ -77,6 +77,9 @@ export type AnimSlot =
 interface Actor {
   group: THREE.Group;
   borgId: string;
+  /** Monotonic guard against an older async model load attaching after a form swap. */
+  modelRevision: number;
+  model: THREE.Object3D | null;
   mixer: THREE.AnimationMixer | null;
   /** Cached actions per slot for this actor. */
   actions: Partial<Record<AnimSlot, THREE.AnimationAction>>;
@@ -665,6 +668,8 @@ export class BattleScene {
         actor = this.spawn(b);
         this.actors.set(b.uid, actor);
       }
+      const presentationId = b.combatFormId ?? b.borgId;
+      if (actor.borgId !== presentationId) this.reloadPresentation(b.uid, actor, presentationId, b.team);
       // Position + facing (sim units map 1:1 to the existing world scale).
       actor.group.position.set(b.pos.x, b.pos.y, b.pos.z);
       actor.group.rotation.y = b.rotY;
@@ -758,6 +763,7 @@ export class BattleScene {
   }
 
   private spawn(b: BattleActorView): Actor {
+    const presentationId = b.combatFormId ?? b.borgId;
     const group = new THREE.Group();
     group.position.set(b.pos.x, b.pos.y, b.pos.z);
     group.rotation.y = b.rotY;
@@ -768,7 +774,9 @@ export class BattleScene {
     this.root.add(group);
     const actor: Actor = {
       group,
-      borgId: b.borgId,
+      borgId: presentationId,
+      modelRevision: 0,
+      model: null,
       mixer: null,
       actions: {},
       streamActions: {},
@@ -781,10 +789,13 @@ export class BattleScene {
       chargeGlow: null,
       statusFx: { slow: null, haste: null },
     };
-    void this.attachModel(b.uid, actor, b.borgId, placeholder).catch((error: unknown) => {
-      this.root.remove(group);
-      this.actors.delete(b.uid);
-      throw error;
+    const revision = actor.modelRevision;
+    void this.attachModel(b.uid, actor, presentationId, placeholder, revision).catch((error: unknown) => {
+      if (this.actors.get(b.uid) === actor && actor.modelRevision === revision) {
+        this.root.remove(group);
+        this.actors.delete(b.uid);
+        throw error;
+      }
     });
     return actor;
   }
@@ -847,17 +858,54 @@ export class BattleScene {
     actor: Actor,
     borgId: string,
     placeholder: THREE.Object3D,
+    revision: number,
   ): Promise<void> {
     const model = await this.assets.loadModel(borgId);
     // The actor may have been despawned while loading.
-    if (!this.actors.has(uid)) return;
+    if (this.actors.get(uid) !== actor || actor.modelRevision !== revision || actor.borgId !== borgId) {
+      disposeMesh(model);
+      return;
+    }
     actor.group.remove(placeholder);
     disposeMesh(placeholder);
     actor.group.add(model);
+    actor.model = model;
     actor.mixer = new THREE.AnimationMixer(model);
     actor.current = null;
     actor.isPlaceholder = false;
     actor.ready = true;
+  }
+
+  /** Same-UID form reload: dispose the old model/mixer/clip actions, then attach the new
+   *  form while leaving the actor group (world transform and UID ownership) in place. */
+  private reloadPresentation(uid: string, actor: Actor, borgId: string, team: number): void {
+    actor.modelRevision += 1;
+    actor.mixer?.stopAllAction();
+    if (actor.model) {
+      actor.mixer?.uncacheRoot(actor.model);
+      actor.group.remove(actor.model);
+      disposeMesh(actor.model);
+    }
+    actor.borgId = borgId;
+    actor.model = null;
+    actor.mixer = null;
+    actor.actions = {};
+    actor.streamActions = {};
+    actor.current = null;
+    actor.lastSeenSlot = null;
+    actor.lastMeleeClipKey = null;
+    actor.ready = false;
+    actor.isPlaceholder = true;
+    const placeholder = this.makePlaceholder(team);
+    actor.group.add(placeholder);
+    const revision = actor.modelRevision;
+    void this.attachModel(uid, actor, borgId, placeholder, revision).catch((error: unknown) => {
+      if (this.actors.get(uid) === actor && actor.modelRevision === revision) {
+        this.root.remove(actor.group);
+        this.actors.delete(uid);
+        throw error;
+      }
+    });
   }
 
   private playSlot(actor: Actor, slot: AnimSlot, meleeAnimStream?: { group: number; slot: number } | null): void {

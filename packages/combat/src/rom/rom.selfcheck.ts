@@ -79,6 +79,18 @@ import {
   EAGLE_ROBOT_ACTION0,
   type EagleRobotScratch,
 } from "../families/eagle-robot.js";
+import {
+  createSharedAimedShotX,
+  createTitanPantherAction1,
+  createTitanPantherGunAction0,
+  titanRobotXOnSteer,
+  TITAN_ROBOT_X_CONFIG,
+  PANTHER_ROBOT_X_CONFIG,
+} from "../families/shared-aimed-shot-x.js";
+import {
+  createSharedMorphXSpecial,
+  TITAN_MORPH_CONFIG,
+} from "../families/shared-morph-x.js";
 import type { BorgRuntime } from "../types.js";
 
 const G_RED_LAUNCH_Y = 4.0;
@@ -1251,6 +1263,7 @@ export function runSelfTest(): number {
       lockTarget?: { x: number; y: number; z: number } | null;
     };
     a.lockTarget = null; // no target → facing won't short-circuit; timer drives transition
+    a.actionSpeedRows = [50, 50, 50]; // explicit fixture for descriptor +0x134/+0x140/+0x14c
     a.dt = 1;
     const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
     const cfg: SharedMeleeGRedConfig = { seedSlot: 0, timerFrames: 25, proximityRange: 100 };
@@ -1291,6 +1304,7 @@ export function runSelfTest(): number {
     a.tierScale = 1;
     a.maxFall = -9999;
     a.activeYaw = 0;
+    a.actionSpeedRows = [50, 50, 50];
     const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
     const cfg: SharedMeleeGRedConfig = { seedSlot: 0, timerFrames: 30, proximityRange: 100 };
     const melee = createSharedMeleeGRed(cfg, ctx);
@@ -1330,6 +1344,7 @@ export function runSelfTest(): number {
     a.tierScale = 1;
     a.maxFall = -9999;
     a.activeYaw = 0;
+    a.actionSpeedRows = [50, 50, 50];
     const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
     const cfg: SharedMeleeGRedConfig = { seedSlot: 0, timerFrames: 30, proximityRange: 100 };
     const melee = createSharedMeleeGRed(cfg, ctx);
@@ -2936,6 +2951,216 @@ export function runSelfTest(): number {
       const handled = driver.tryStartBAttack(runtime, [runtime]);
       assert(handled && driver.actor.fbPhaseSlots[0] === 1,
         "exact B command actionIndex 0 enters the ROM dash instead of generic combat");
+    }
+  }
+
+  // Titan/Panther constructor families: real handlers, callback gates, and bridge seam.
+  {
+    console.log("\n[rom.selfcheck] Titan/Panther aimed-shot + morph families:");
+    for (const [family, borg, expected] of [
+      ["titan", 0x604, [0x2b, 0x2c]], ["titan", 0x618, [0x4b, 0x4c]],
+      ["panther", 0x613, [0x32, 0x33]], ["panther", 0x627, [0x4d, 0x4e]],
+    ] as const) {
+      const shots: number[] = [];
+      const a = createRomActor();
+      a.borgNumber = borg;
+      a.weaponPartMask = 0x0d;
+      a.visibilityBit = 0x04;
+      const target = { eligibility83: 0, controlWord: 0, visibilityMask5e6: 0xff };
+      const other = { eligibility83: 0, controlWord: 0, visibilityMask5e6: 0xff };
+      a.visibilityRoster = [target, other];
+      a.visibilityTarget = target;
+      createTitanPantherGunAction0({
+        onAllocateResource: () => true,
+        onFamilyProjectile: (_actor, _addr, type) => shots.push(type),
+      })(a);
+      assert(shots.join(",") === expected.join(","), `${family} action 0 fires exact records for 0x${borg.toString(16)}`);
+      assert(a.weaponAnimationActiveMask === 0x0d
+        && a.weaponAnimationState.join(",") === "5,0,5,5",
+      `${family} action 0 stamps +0x579/+0x1b03 non-part-1 animation state`);
+      assert(target.visibilityMask5e6 === 0xff && other.visibilityMask5e6 === 0xfb,
+        `${family} action 0 success clears all +0x5e6 masks then re-adds +0x3e5 only to eligible +0xcc target`);
+      const denied = createRomActor();
+      denied.borgNumber = borg;
+      denied.visibilityBit = 2;
+      const deniedTarget = { eligibility83: 0, controlWord: 0, visibilityMask5e6: 0xff };
+      denied.visibilityRoster = [deniedTarget]; denied.visibilityTarget = deniedTarget;
+      createTitanPantherGunAction0({ onAllocateResource: () => false })(denied);
+      assert(denied.visibilityRoster[0]!.visibilityMask5e6 === 0xff
+        && denied.weaponAnimationActiveMask === 0x0d,
+      `${family} action 0 ammo failure skips zz_006bf80_/spawn but still runs zz_0048d54_`);
+      for (let variant = 0; variant < 5; variant++) {
+        const m = createRomActor();
+        m.variantIndex = variant;
+        const streams: Array<[number, number]> = [];
+        (m as RomActor & { onStartStream?: (g: number, s: number) => boolean }).onStartStream = (g, s) => { streams.push([g, s]); return true; };
+        createTitanPantherAction1(family, {})(m);
+        assert(m.fbPhaseSlots[0] === 1 && streams.length > 0,
+          `${family} action 1 variant ${variant} enters its exact shared phase table`);
+        if (variant >= 3) {
+          m.handlerTimer = 0;
+          createTitanPantherAction1(family, {})(m); // P1 -> P2
+          createTitanPantherAction1(family, {})(m); // P2 -> P3 (targetless timer=20 first)
+          m.handlerTimer = 0;
+          createTitanPantherAction1(family, {})(m); // P2 -> P3
+          if (family === "panther" && variant === 4) {
+            assert(approxEq(m.hSpeed, 10), "Panther v4 config +0x14 scales launch 40 by exact 0.25");
+          }
+          createTitanPantherAction1(family, {})(m); // P3 -> P4 (+0x0a=0)
+          assert(m.fbPhaseSlots[0] === 4, `${family} action 1 variant ${variant} traverses 0x80178394's five-phase table`);
+        }
+      }
+    }
+
+    for (const [name, borg, cfg] of [["Titan", 0x618, TITAN_ROBOT_X_CONFIG], ["Panther", 0x627, PANTHER_ROBOT_X_CONFIG]] as const) {
+      for (const allow of [false, true]) {
+        const a = createRomActor();
+        a.borgNumber = borg;
+        a.heading = 0x1234;
+        a.contactP0 = 1;
+        a.fbPhaseSlots[0] = 1;
+        const spawned: number[] = [];
+        createSharedAimedShotX(cfg, {
+          onAllocateResource: () => allow,
+          onFamilyProjectile: (_actor, _addr, type) => spawned.push(type),
+        })(a);
+        assert(spawned.length === (allow ? 2 : 0), `${name} prototype aimed callback ${allow ? "accepts" : "denies"} ammo exactly`);
+        if (name === "Panther" && allow) {
+          assert(a.parts[0].ownershipFlags === 0xc0 && a.parts[1].ownershipFlags === 0xc0,
+            "Panther aimed success surfaces both fist ownership bytes");
+        }
+      }
+    }
+
+    {
+      const a = createRomActor();
+      a.borgNumber = 0x604; a.controlWord = 1;
+      (a as RomActor & { inputFlags5d8?: number }).inputFlags5d8 = 0x10;
+      const records: number[] = [];
+      const gun = createTitanPantherGunAction0({
+        onAllocateResource: () => true,
+        onFamilyProjectile: (_actor, _spawner, record) => records.push(record),
+      });
+      for (let frame = 0; frame < 100 && (a.controlWord & 3) !== 0; frame++) gun(a);
+      assert(records.length === 10
+        && records.filter((record) => record === 0x2b).length === 5
+        && records.filter((record) => record === 0x2c).length === 5,
+        "Titan action 0 runs exactly five volleys (five projectile pairs) before exit");
+      assert(a.streamSlot === -1 && (a.controlWord & 3) === 0,
+        "Titan five-volley loop decrements cursor 5→-1 and exits without a sixth pair");
+    }
+
+    {
+      const a = createRomActor();
+      a.pos.x = 0; a.pos.y = 0; a.pos.z = 0;
+      (a as RomActor & { lockTarget?: { x: number; y: number; z: number } }).lockTarget = { x: 10, y: 75, z: 10 };
+      titanRobotXOnSteer(a);
+      assert(a.lockYaw === 0x2000 && a.activeYaw === 0x2000,
+        "action-3 handler derives exact BAM16 yaw 0x2000 from offset/elevated live target");
+    }
+
+    {
+      const runtime = makeMinimalGRedBorg(); runtime.borgId = "pl0604"; runtime.uid = "facing-self";
+      runtime.lockTarget = "facing-target";
+      const target = makeMinimalGRedBorg(); target.uid = "facing-target";
+      target.pos = { x: 10, y: 80, z: 10 };
+      const driver = RomDriverBridge.attach(runtime, {});
+      driver?.syncIn(runtime, [runtime, target]);
+      assert(driver?.actor.lockYaw === 0x2000 && driver.actor.activeYaw === 0x2000,
+        "bridge sync derives exact BAM16 yaw from offset/elevated synchronized target");
+      target.pos = { x: -10, y: 120, z: 0 };
+      driver?.syncIn(runtime, [runtime, target]);
+      assert(driver?.actor.lockYaw === -0x4000 && driver.actor.activeYaw === -0x4000,
+        "bridge refreshes lockYaw/activeYaw when live target bearing changes on a later tick");
+    }
+
+    const morph = createRomActor();
+    morph.slot = 3; morph.identityVariant = 5;
+    createSharedMorphXSpecial(TITAN_MORPH_CONFIG, {})(morph);
+    assert(morph.fbPhaseSlots[0] === 1, "base Titan action 2 enters shared morph phase 0");
+    morph.wallContact = 1;
+    let morphEvent: [number, number] | null = null;
+    createSharedMorphXSpecial(TITAN_MORPH_CONFIG, {}, {
+      onMorph: (_actor, next, previous) => { morphEvent = [next, previous]; },
+    })(morph);
+    assert(morph.borgNumber === 0x605 && morph.borgMirror94 === 0x605
+      && morph.carriedSlot96 === 3 && morph.carriedVariant97 === 5,
+    "base Titan morph commits +0x3e8/+0x94 and carries +0x3e4/+0x3e7 to +0x96/+0x97");
+    assert(morphEvent?.[0] === 0x605, "base Titan morph emits its host lifecycle callback after actor mirrors commit");
+
+    for (const [id, expectedForm] of [["pl0604", "pl0605"], ["pl0613", "pl0614"]] as const) {
+      const runtime = makeMinimalGRedBorg(); runtime.borgId = id; runtime.grounded = true;
+      runtime.uid = `${id}-stable-uid`; runtime.hp = 123; runtime.maxHp = 450; runtime.team = 1;
+      runtime.ownerPlayer = "morph-owner";
+      runtime.command = { word: 0, type: 2, button: "X", recordAddress: "morph-live", subtype: 0, actionIndex: 2, variantIndex: 0, exact: true };
+      const driver = RomDriverBridge.attach(runtime, {});
+      assert(driver?.tryStartXSpecial(runtime, [runtime]) === true, `${id} live morph starts through bridge`);
+      if (driver) {
+        driver.tick(runtime, 1 / 60, [runtime], null);
+        assert(driver.actor.wallContact === 0, `${id} authored stream remains active before its completion boundary`);
+        driver.tick(runtime, 1 / 60, [runtime], null);
+        assert(driver.actor.wallContact === 1, `${id} decoded stream scheduler raises authored +0x1cee completion`);
+        driver.tick(runtime, 1 / 60, [runtime], null);
+        assert(runtime.combatFormId === expectedForm && runtime.borgId === id,
+          `${id} authored stream completion drives normal bridge tick into the internal form`);
+        assert(runtime.uid === `${id}-stable-uid` && runtime.hp === 123 && runtime.maxHp === 450
+          && runtime.team === 1 && runtime.ownerPlayer === "morph-owner",
+          `${id} morph preserves UID, HP, team, owner and original borg identity`);
+        const expected = id === "pl0604"
+          ? { speed: 12, gravity: -0.6, ammo: 5, refill: 180 }
+          : { speed: 20, gravity: -0.6, ammo: 10, refill: 300 };
+        assert(driver.actor.maxHSpeed === expected.speed && approxEq(driver.actor.gravityCoeff, expected.gravity)
+          && runtime.weaponCells?.[0]?.cur === expected.ammo
+          && runtime.weaponCells[0]?.refillParam === expected.refill,
+          `${id} morph atomically refreshes exact descriptor movement and FUN_800562b8 weapon cell`);
+        assert(runtime.romMorphEvents?.at(-1)?.borgNumber === parseInt(expectedForm.slice(2), 16),
+          `${id} morph posts zz_01cb750_ event`);
+      }
+    }
+
+    for (const [id, rows] of [
+      ["pl0604", [1000, 600, 1000]], ["pl0618", [1000, 600, 1000]],
+      ["pl0613", [1000, 1200, 1000]], ["pl0627", [1000, 1200, 1000]],
+    ] as const) {
+      const runtime = makeMinimalGRedBorg(); runtime.borgId = id;
+      const driver = RomDriverBridge.attach(runtime, {});
+      assert(driver?.actor.actionSpeedRows.join(",") === rows.join(","), `${id} production actor loads exact descriptor +0x134/+0x140/+0x14c rows`);
+    }
+    {
+      const a = createRomActor();
+      a.borgNumber = 0x604; a.controlWord = 0x40; a.bodyPitch = 4000; a.aimRateScale = 0.5;
+      a.descriptor = { header: 0, mainHandBone: 0, subtypeCommand: new Int8Array(), handlerData6c: -0.81,
+        subtypePartCommand: new Int8Array(), buttonLiveFlag: new Int8Array(), defaultHand0: 0, defaultHand1: 0,
+        turnStep1: 3072 };
+      (a as RomActor & { lockTarget?: { x: number; y: number; z: number } }).lockTarget = { x: 0, y: 0, z: 10 };
+      createSharedAimedShotX(TITAN_ROBOT_X_CONFIG, {})(a);
+      assert(a.steerYaw === -1536, "aimed seek uses exact (-bodyPitch-atan) target and descriptor+0xae * actor+0x768 step");
+      a.fbPhaseSlots[0] = 2; a.parts[1].stateByte = -1; a.gravityCoeff = 0;
+      createSharedAimedShotX(TITAN_ROBOT_X_CONFIG, {})(a);
+      assert(a.parts[1].stateByte === 0 && approxEq(a.gravityCoeff, -0.81), "+0x1d0f aliases signed part-1 state and gates gravity reload exactly");
+    }
+
+    for (const [id, action, shouldHandle] of [
+      ["pl0604", 2, true], ["pl0618", 2, false], ["pl0613", 2, true], ["pl0627", 2, false],
+      ["pl0604", 0, true], ["pl0618", 1, true], ["pl0613", 3, true], ["pl0627", 3, true],
+    ] as const) {
+      const runtime = makeMinimalGRedBorg();
+      runtime.borgId = id;
+      runtime.command = { word: 0, type: action, button: "X", recordAddress: "family-test", subtype: 0, actionIndex: action, variantIndex: 0, exact: true };
+      const driver = RomDriverBridge.attach(runtime, { onAllocateResource: () => true });
+      const handled = driver?.tryStartXSpecial(runtime, [runtime]) ?? false;
+      assert(handled === shouldHandle, `${id} bridge action ${action} ${shouldHandle ? "routes" : "preserves fallback"}`);
+    }
+    for (const id of ["pl0604", "pl0618", "pl0613", "pl0627"] as const) {
+      for (const action of [0, 1, 3] as const) {
+        for (let variant = 0; variant < 5; variant++) {
+          const runtime = makeMinimalGRedBorg();
+          runtime.borgId = id;
+          runtime.command = { word: 0, type: action, button: "X", recordAddress: "family-matrix", subtype: 0, actionIndex: action, variantIndex: variant, exact: true };
+          const driver = RomDriverBridge.attach(runtime, { onAllocateResource: () => true });
+          assert((driver?.tryStartXSpecial(runtime, [runtime]) ?? false), `${id} action ${action} variant ${variant} bridge routes`);
+        }
+      }
     }
   }
 

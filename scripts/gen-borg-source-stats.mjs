@@ -80,6 +80,10 @@ function slotsForRow(row) {
 const profiles = {};
 const missingRows = [];
 const hpMismatches = [];
+const INTERNAL_MORPH_FORMS = {
+  pl0605: { family: "06", variant: "05", role: "internal-morph-form", sourceBorgId: "pl0604" },
+  pl0614: { family: "06", variant: "14", role: "internal-morph-form", sourceBorgId: "pl0613" },
+};
 
 for (const borg of borgs) {
   const id = String(borg.id).toLowerCase();
@@ -106,6 +110,21 @@ for (const borg of borgs) {
     maxHp,
     weaponSlots: slotsForRow(row),
     rows,
+  };
+}
+
+
+for (const [id, form] of Object.entries(INTERNAL_MORPH_FORMS)) {
+  const allRows = source.tables[form.family]?.variants?.[form.variant];
+  const row = allRows?.[baseRowOffset];
+  if (!row) {
+    missingRows.push(id);
+    continue;
+  }
+  profiles[id] = {
+    maxHp: row[0],
+    weaponSlots: slotsForRow(row),
+    rows: allRows.map((r) => ({ maxHp: r[0], weaponSlots: slotsForRow(r) })),
   };
 }
 
@@ -138,6 +157,7 @@ const out = {
   verification: {
     borgsJsonRows: borgs.length,
     runtimeProfiles: Object.keys(profiles).length,
+    internalMorphForms: INTERNAL_MORPH_FORMS,
     missingRows,
     hpMismatches,
   },

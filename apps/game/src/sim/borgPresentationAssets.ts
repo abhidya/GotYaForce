@@ -25,6 +25,20 @@ export interface BorgPresentationAssetsOptions {
   defaultLeadId: string;
 }
 
+/** SkeletonUtils intentionally shares mesh resources. BattleScene owns and disposes each
+ * returned instance, so clone geometry/materials once more to make that ownership real. */
+export function cloneDisposableModel(assetLoader: ThreeAssetLoader, source: THREE.Object3D): THREE.Object3D {
+  const clone = assetLoader.cloneModel(source);
+  clone.traverse((node) => {
+    if (!(node instanceof THREE.Mesh)) return;
+    node.geometry = node.geometry.clone();
+    node.material = Array.isArray(node.material)
+      ? node.material.map((material) => material.clone())
+      : node.material.clone();
+  });
+  return clone;
+}
+
 export function createBorgPresentationAssets(options: BorgPresentationAssetsOptions): BorgPresentationAssets {
   const { assetLoader, defaultLeadId } = options;
 let modelManifest: readonly ModelManifestEntry[] = [];
@@ -52,6 +66,13 @@ type AnimBank = {
 type AnimIndex = {
   borg: string;
   banks: AnimBank[];
+};
+
+// Internal forms are deliberately absent from borgs.json. Models come from the PZZ's
+// member-5 b_mdl archive; animations are the base MOT's authored group-2 banks.
+const INTERNAL_MORPH_PRESENTATION: Readonly<Record<string, { animationId: string }>> = {
+  pl0605: { animationId: "pl0604" },
+  pl0614: { animationId: "pl0613" },
 };
 
 function buildClip(json: BakedClip): THREE.AnimationClip {
@@ -89,6 +110,7 @@ function buildClip(json: BakedClip): THREE.AnimationClip {
 
 /** Resolve the production model url for a borg id (pl0615 has a special path; others come from the library). */
 function modelUrlFor(id: string): string {
+  if (INTERNAL_MORPH_PRESENTATION[id]) return `/models/${id}/model_00.glb`;
   if (id === defaultLeadId) return "/models/pl0615/model_00.glb";
   if (!libraryIds.has(id)) throw new Error(`No production model is registered for ${id}`);
   const entry = modelManifest.find((e) => e.id === id);
@@ -123,7 +145,7 @@ async function loadBorgModel(id: string): Promise<THREE.Object3D> {
     });
   }
   const source = await sourceP;
-  return assetLoader.cloneModel(source);
+  return cloneDisposableModel(assetLoader, source);
 }
 
 const animIndexCache = new Map<string, Promise<AnimIndex | null>>();
@@ -433,8 +455,16 @@ const PREFERRED_LABELS: Partial<Record<string, Partial<Record<AnimSlot, string[]
 async function loadAnimIndex(id: string): Promise<AnimIndex | null> {
   let p = animIndexCache.get(id);
   if (!p) {
-    p = fetch(`/models/${id}/anim_index.json`)
+    const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
+    p = fetch(`/models/${sourceId}/anim_index.json`)
       .then((r) => (r.ok ? (r.json() as Promise<AnimIndex>) : null))
+      .then((index) => index ? {
+        ...index,
+        borg: id,
+        // Only the group-2 bank identity is ROM-proven for internal forms. Do not let
+        // generic label heuristics select the base robot's group-0/1/4 animations.
+        banks: INTERNAL_MORPH_PRESENTATION[id] ? index.banks.filter((bank) => bank.group === 2) : index.banks,
+      } : null)
       .catch(() => null);
     animIndexCache.set(id, p);
   }
@@ -507,7 +537,8 @@ async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.Animation
     p = loadAnimIndex(id)
       .then((index) => {
         const bank = index ? pickAnimBank(index, slot) : null;
-        return bank ? fetch(`/models/${id}/${bank.file}`) : null;
+        const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
+        return bank ? fetch(`/models/${sourceId}/${bank.file}`) : null;
       })
       .then((r) => (r?.ok ? (r.json() as Promise<BakedClip>) : null))
       .then((json) => (json ? buildClip(json) : null))
@@ -527,7 +558,8 @@ async function loadBorgClipByStreamRef(
     p = loadAnimIndex(id)
       .then((index) => {
         const bank = index?.banks.find((b) => b.group === ref.group && b.slot === ref.slot) ?? null;
-        return bank ? fetch(`/models/${id}/${bank.file}`) : null;
+        const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
+        return bank ? fetch(`/models/${sourceId}/${bank.file}`) : null;
       })
       .then((r) => (r?.ok ? (r.json() as Promise<BakedClip>) : null))
       .then((json) => (json ? buildClip(json) : null))

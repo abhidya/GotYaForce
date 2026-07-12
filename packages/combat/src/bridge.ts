@@ -15,7 +15,7 @@
 
 import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
 import type { Vec3 } from "@gf/physics";
-import type { RomActor, RomPhysicsRuntime } from "./rom/actor.js";
+import type { RomActor, RomPhysicsRuntime, RomVisibilityTarget } from "./rom/actor.js";
 import { createRomActor } from "./rom/actor.js";
 import {
   createRomStateTables,
@@ -39,6 +39,8 @@ import {
   createSharedAimedShotX,
   TITAN_ROBOT_X_CONFIG,
   PANTHER_ROBOT_X_CONFIG,
+  createTitanPantherGunAction0,
+  createTitanPantherAction1,
 } from "./families/shared-aimed-shot-x.js";
 import {
   createSharedMorphXSpecial,
@@ -82,7 +84,8 @@ import { applyActorParamTierDelta127 } from "./paramTier.js";
 import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
 import { spawnRomProjectile } from "./projectiles.js";
 import { movementPhysicsForBorgId } from "./movementData.js";
-import type { Projectile, ProjectileVisualKind } from "./types.js";
+import { sourceStatsForBorgId } from "./sourceBorgStats.js";
+import type { Projectile, ProjectileVisualKind, WeaponCell } from "./types.js";
 import attackHitTablesData from "./data/attackHitTables.json" with { type: "json" };
 import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
 import meleeAnimKindsData from "./data/meleeAnimKinds.json" with { type: "json" };
@@ -277,10 +280,10 @@ function familyRegistry(): Record<string, FamilyRegistration> {
         a.streamSlot = 0;
       }),
       // Titan/Panther robots: morph at [2] + aimed-shot at [3] (two engines composed).
-      pl0604: makeMorphAimedComposite("pl0604", 0x604, TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG),
-      pl0618: makeMorphAimedComposite("pl0618", 0x618, TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG),
-      pl0613: makeMorphAimedComposite("pl0613", 0x613, PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG),
-      pl0627: makeMorphAimedComposite("pl0627", 0x627, PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG),
+      pl0604: makeMorphAimedComposite("pl0604", 0x604, "titan", TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG, true),
+      pl0618: makeMorphAimedComposite("pl0618", 0x618, "titan", TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG, false),
+      pl0613: makeMorphAimedComposite("pl0613", 0x613, "panther", PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG, true),
+      pl0627: makeMorphAimedComposite("pl0627", 0x627, "panther", PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG, false),
 // Eagle Robot / Proto Eagle bespoke action 0; pl0606 composes its shared morph X.
 pl0606: makeSimpleRegistration("pl0606", (a, ctx) => configureEagleRobotFamily(a, "pl0606", ctx)),
 pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a, "pl061a", ctx)),
@@ -788,16 +791,18 @@ function withRobotDash(
 function makeMorphAimedComposite(
   borgId: string,
   borgNumber: number,
+  family: "titan" | "panther",
   morphCfg: Parameters<typeof createSharedMorphXSpecial>[0],
   aimedCfg: Parameters<typeof createSharedAimedShotX>[0],
+  morphLive: boolean,
 ): FamilyRegistration {
   return {
     configure: (actor, ctx) => {
       actor.borgNumber = borgNumber;
       actor.rootAction = composeActionTable([
-        null,
-        null,
-        createSharedMorphXSpecial(morphCfg, ctx, {}),
+        createTitanPantherGunAction0(ctx),
+        createTitanPantherAction1(family, ctx),
+        morphLive ? createSharedMorphXSpecial(morphCfg, ctx, ctx.onMorph ? { onMorph: ctx.onMorph } : {}) : null,
         createSharedAimedShotX(aimedCfg, ctx),
         null,
       ]);
@@ -1183,6 +1188,8 @@ export interface RomBattleRuntime {
   allocateResource(owner: BorgRuntime, type: number, count: number, consume: boolean): boolean;
   spawnProjectile(owner: BorgRuntime, spawnerAddr: number, kind: number): void;
   resolveHit(attacker: BorgRuntime, victim: BorgRuntime, damageRecordIndex: number, knockbackMult: number): void;
+  /** Optional observer for zz_01cb750_'s form-change event. */
+  postMorphEvent?(owner: BorgRuntime, borgNumber: number, slot: number): void;
 }
 
 // ============================================================================
@@ -1201,6 +1208,8 @@ export interface RomHostContext {
   onFamilyProjectile?: (actor: RomActor, spawnerAddr: number, type: number) => void;
   onParamTierDelta?: (actor: RomActor, signedDelta: number) => void;
   onPlayCue?: (actor: RomActor, cueId: number) => void;
+  onRefreshTargetVisibility?: (actor: RomActor) => void;
+  onMorph?: (actor: RomActor, newBorgId: number, previousBorgId: number) => void;
 
   // ── Dragon / CyberDragon / CyberMachine / Worm ──
   onFaceComplete?: (actor: RomActor, mask: number) => boolean;
@@ -1305,9 +1314,8 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  so battle.ts skips stepMovement/stepAttacks. False for X-specials (which compose with
    *  normal movement — tick() returns false and only layers stream events). */
   private romOwnedSpecial = false;
-  private activeActionIndex = 0;
-  private activeVariantIndex = 0;
   private runtime: BorgRuntime | null = null;
+  private visibilityBindings: Array<{ runtime: BorgRuntime; state: RomVisibilityTarget }> = [];
 
   private constructor(
     actor: RomActor,
@@ -1360,6 +1368,8 @@ export class RomDriverBridge implements RomFamilyDriver {
       onFamilyProjectile: (a, addr, type) => { bridge.spawnFamilyProjectile(a, addr, type); },
       onParamTierDelta: () => {},
       onPlayCue: () => {},
+      onRefreshTargetVisibility: (a) => bridge.flushVisibilityState(a),
+      onMorph: (a, next, previous) => bridge.applyMorphLifecycle(a, next, previous),
 
       // Dragon / CyberDragon / CyberMachine / Worm
       onFaceComplete: (a, mask) => bridge.defaultOnFaceComplete(a, mask),
@@ -1384,6 +1394,55 @@ export class RomDriverBridge implements RomFamilyDriver {
   }
 
   /** ── Default implementations ── */
+
+  private flushVisibilityState(actor: RomActor): void {
+    void actor;
+    for (const binding of this.visibilityBindings) {
+      binding.runtime.targetVisibilityMask5e6 = binding.state.visibilityMask5e6 & 0xff;
+    }
+  }
+
+  private applyMorphLifecycle(actor: RomActor, newBorgNumber: number, previousBorgNumber: number): void {
+    void previousBorgNumber;
+    const runtime = this.runtime;
+    if (!runtime) return;
+    const formId = `pl${(newBorgNumber & 0xffff).toString(16).padStart(4, "0")}`;
+    const movement = movementPhysicsForBorgId(formId);
+    const stats = sourceStatsForBorgId(formId);
+    if (!movement || !stats) {
+      throw new Error(`incomplete internal morph form data for ${formId}`);
+    }
+    const descriptor = {
+        header: 0, mainHandBone: 0, subtypeCommand: new Int8Array(0),
+        handlerData6c: movement.gravityFall, subtypePartCommand: new Int8Array(0),
+        buttonLiveFlag: new Int8Array(0), defaultHand0: 0, defaultHand1: 0,
+        maxHSpeed: movement.maxHSpeed, groundAccel: movement.groundAccel,
+        jumpImpulse: movement.jumpImpulse, minSpeed: movement.minTurnSpeed,
+        gravitySlotA: movement.gravityGround, gravitySlotC: movement.gravityC,
+        handlerData68: movement.gravityGround, handlerData48: movement.jumpImpulse,
+        handlerData2c: movement.maxHSpeed, turnStep0: movement.turnStep0,
+        turnStep1: movement.turnStep1,
+      };
+    const cells: WeaponCell[] = stats.weaponSlots.map((slot) => ({
+      cur: slot.ammoCount, max: slot.ammoCount, refillType: slot.chargeType,
+      refillParam: slot.chargeCount, timer: slot.chargeType === 1 ? 0 : slot.chargeCount,
+    }));
+    cells.push({ cur: 0, max: 0, refillType: 0, refillParam: 0, timer: 0 });
+
+    // One synchronous commit: no observer can see form id with stale descriptor/ammo.
+    actor.maxHSpeed = movement.maxHSpeed;
+    actor.gravityCoeff = movement.gravityFall;
+    actor.actionSpeedRows = [movement.actionSpeed0, movement.actionSpeed1, movement.actionSpeed2];
+    actor.descriptor = descriptor;
+    runtime.weaponCells = cells;
+    runtime.ammo = cells[0]!.max <= 0 ? Number.POSITIVE_INFINITY : cells[0]!.cur;
+    runtime.combatFormId = formId;
+    runtime.meleeAnimStream = null;
+    (runtime.romMorphEvents ??= []).push({
+      eventAddress: 0x801cb750, borgNumber: newBorgNumber, slot: actor.slot,
+    });
+    this.battleRuntime?.postMorphEvent?.(runtime, newBorgNumber, actor.slot);
+  }
 
   private defaultOnFaceComplete(actor: RomActor, mask: number): boolean {
     void mask;
@@ -1504,6 +1563,7 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (movement) {
       actor.maxHSpeed = movement.maxHSpeed;
       actor.gravityCoeff = movement.gravityFall;
+      actor.actionSpeedRows = [movement.actionSpeed0, movement.actionSpeed1, movement.actionSpeed2];
       actor.descriptor = {
         header: 0,
         mainHandBone: 0,
@@ -1575,6 +1635,8 @@ export class RomDriverBridge implements RomFamilyDriver {
     if (host.onFamilyProjectile) dest.onFamilyProjectile = host.onFamilyProjectile;
     if (host.onParamTierDelta) dest.onParamTierDelta = host.onParamTierDelta;
     if (host.onPlayCue) dest.onPlayCue = host.onPlayCue;
+    if (host.onRefreshTargetVisibility) dest.onRefreshTargetVisibility = host.onRefreshTargetVisibility;
+    if (host.onMorph) dest.onMorph = host.onMorph;
     if (host.onFaceComplete) dest.onFaceComplete = host.onFaceComplete;
     if (host.onAllocateResource) dest.onAllocateResource = host.onAllocateResource;
     if (host.onExitFb) dest.onExitFb = host.onExitFb;
@@ -1596,6 +1658,22 @@ export class RomDriverBridge implements RomFamilyDriver {
    *  phase machine's impulses with stale BorgRuntime.vel from before the special). */
   syncIn(runtime: BorgRuntime, all: readonly BorgRuntime[]): void {
     const a = this.actor;
+    const slot = Math.max(0, all.indexOf(runtime));
+    a.slot = slot;
+    a.visibilityBit = (1 << slot) & 0xff;
+    a.identityVariant = runtime.colorVariant ?? 0;
+    this.visibilityBindings = all.slice(0, 6).map((candidate) => {
+      const state: RomVisibilityTarget = {
+        eligibility83: candidate.targetEligibility83 ?? (candidate.alive ? 0 : 1),
+        controlWord: candidate.alive ? 0 : 0x80000000,
+        visibilityMask5e6: candidate.targetVisibilityMask5e6 ?? 0,
+      };
+      return { runtime: candidate, state };
+    });
+    a.visibilityRoster = this.visibilityBindings.map((binding) => binding.state);
+    a.visibilityTarget = runtime.lockTarget
+      ? this.visibilityBindings.find((binding) => binding.runtime.uid === runtime.lockTarget)?.state ?? null
+      : null;
     a.pos.x = runtime.pos.x;
     a.pos.y = runtime.pos.y;
     a.pos.z = runtime.pos.z;
@@ -1614,6 +1692,11 @@ export class RomDriverBridge implements RomFamilyDriver {
     a.tierScale = 1;
     a.maxFall = -9999;
     (a as RomActor & { grounded?: boolean }).grounded = runtime.grounded;
+    if (runtime.grounded) {
+      a.savedGroundPos.x = runtime.pos.x;
+      a.savedGroundPos.y = runtime.pos.y;
+      a.savedGroundPos.z = runtime.pos.z;
+    }
     const lockUid = runtime.lockTarget;
     (a as RomActor & { lockTarget?: { x: number; y: number; z: number } | null }).lockTarget = null;
     (a as RomActor & { targetDistance760?: number }).targetDistance760 = 0;
@@ -1628,6 +1711,11 @@ export class RomDriverBridge implements RomFamilyDriver {
           target.pos.y - runtime.pos.y,
           target.pos.z - runtime.pos.z,
         );
+        // zz_006d0dc_ -> FUN_800669d0 consumes the live target bearing as BAM16.
+        // Height participates in pitch seeking, while yaw is atan2(horizontal x,z).
+        const targetYaw = radToBam(Math.atan2(target.pos.x - runtime.pos.x, target.pos.z - runtime.pos.z));
+        a.lockYaw = targetYaw;
+        a.activeYaw = targetYaw;
       }
     }
   }
@@ -1683,8 +1771,6 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.streamFrame = 1;
     // Don't change runtime.state/anim — let stepAttacks/stepMovement handle those.
     // The bridge layers hitbox/anim ON TOP of normal movement, not replacing it.
-    this.activeActionIndex = actionIndex;
-    this.activeVariantIndex = variantIndex;
     this.romOwnedSpecial = true;
     this.specialActive = true;
     this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
@@ -1759,8 +1845,6 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.streamFrame = 1;
     runtime.cooldowns["romSpecialActive"] = 1;
     this.specialActive = true;
-    this.activeActionIndex = actionIndex;
-    this.activeVariantIndex = variantIndex;
     this.syncActionInput(null, true);
     // Arm the action-mode bits so the phase-3 exit (controlWord &= ~0x3) can signal
     // completion. The ROM sets these on entering attack state (cue 44 → state 61).
@@ -1825,13 +1909,9 @@ export class RomDriverBridge implements RomFamilyDriver {
       const preZ = runtime.pos.z;
       this.syncIn(runtime, all);
       this.syncActionInput(input, true);
-      // Re-dispatch the command record each frame so rootAction fires under state 61.
-      dispatchCommandRecord(this.actor, {
-        cueId: 44,
-        stateMode: 3,
-        actionIndex: this.activeActionIndex,
-        variantIndex: this.activeVariantIndex,
-      });
+      // State 61 and the command fields remain live after the entry dispatch. Re-dispatching
+      // cue 44 here would reset +0x540..+0x543 every frame, trapping every multi-phase ROM
+      // machine in phase 0 and preventing an authored +0x1cee completion from being consumed.
       stepRomActor(this.actor, this.tables, this.ctx);
       this.syncOut(runtime);
       if (this.bounds) {

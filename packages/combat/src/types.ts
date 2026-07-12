@@ -149,6 +149,14 @@ export interface RomFamilyDriver {
 export interface BorgRuntime {
   uid: string;
   borgId: string;
+  /** Current descriptor/model form after an in-place ROM morph. `borgId` remains the
+   *  original combatant identity for force progression/results ownership. */
+  combatFormId?: string;
+  /** Exact target-host bytes surfaced for zz_006bf80_. */
+  targetEligibility83?: number;
+  targetVisibilityMask5e6?: number;
+  /** Battle-local posts corresponding to zz_01cb750_(0x803bfe20,&form,+0x3ec). */
+  romMorphEvents?: Array<{ eventAddress: number; borgNumber: number; slot: number }>;
   /**
    * Palette/color-variant id (victim struct +0x3ed in the GET kill-registration path —
    * research/decomp/items-evidence-inventory-2026-07-05.md §2a): 0=normal, 1=alt color,
