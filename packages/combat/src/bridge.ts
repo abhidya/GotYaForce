@@ -51,6 +51,12 @@ import {
 import { configureSatelliteFamily } from "./families/satellite.js";
 import { configureStarHeroFamily } from "./families/star-hero.js";
 import { configureCyberMachineFamily } from "./families/cyber-machine.js";
+import {
+  configureMachineRedFamily,
+  configureMachineBlueFamily,
+  type MachineRedBorgId,
+  type MachineBlueBorgId,
+} from "./families/machine-red-blue.js";
 import { configureDragonFamily } from "./families/dragon.js";
 import { configureCyberDragonFamily } from "./families/cyber-dragon.js";
 import { configureWormFamily } from "./families/worm.js";
@@ -357,8 +363,8 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // MACHINE RED family (ctor 0x800c91bc) — cue table @0x8030a248. The four machine
       // borgs (MACHINE RED/CYBER MARS/PROTO RED/PROTO MARS) share the X-special engine
       // zz_0179d20_ (phaseTable 0x804347a8, group 4 seed slot 0) — the same shared
-      // X-special engine used by 12+ other borgs. No bespoke family phase logic, so this
-      // is a SHARED registration: cue table + shared-engine X config, no family module.
+      // X-special engine has its own two-entry table and family callback. The dedicated
+      // module preserves those boundaries instead of aliasing a similar dash engine.
       pl0600: makeMachineRedFamilyRegistration(),
       pl0608: makeMachineRedFamilyRegistration(),
       pl0616: makeMachineRedFamilyRegistration(),
@@ -369,8 +375,8 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // air slot 1) — the same shared group-4 X-special engine family used by 12+
       // other borgs. Action-2 leaf FUN_800cf9cc (chunk_0021.c:4080) is a thin wrapper
       // that halves steerYaw (+0x18da >>= 1) then tail-calls the shared engine; no
-      // bespoke family phase logic, so this is a SHARED registration: cue table +
-      // shared-engine X config, no family module.
+      // action 3/4 hardpoint handlers are constructor-specific; the dedicated module
+      // owns the full live routing table and delegates only the proven shared X leaf.
       pl0601: makeMachineBlueFamilyRegistration(),
       pl0609: makeMachineBlueFamilyRegistration(),
       pl0617: makeMachineBlueFamilyRegistration(),
@@ -927,17 +933,16 @@ function makeSwordKnightFamilyRegistration(): FamilyRegistration {
 // cross-family group-4 X-special engine reused by 12+ borgs across the roster (per the
 // actionStreamTables.json engines header). All 5 action-2 variants route to leaf
 // 0x800cba10 with config @0x8030a66c (seedSlot 0), so every member uses the same config.
-// No bespoke family phase logic (contrast CYBER MACHINE's ammo-gated shot deploy), so
-// this is a SHARED registration: cue table + shared-engine X config, no family module.
+// The dedicated module ports that exact two-phase engine and its family callback;
+// actions 0/1 retain their distinct leaves for conservative fallback.
 function makeMachineRedFamilyRegistration(): FamilyRegistration {
   return {
-    configure: (actor) => {
-      actor.borgNumber = 0x600;
-      actor.rootAction = createSharedEngineRootAction({
-        xSpecial: DEFAULT_CONFIGS.dashAttack(0),
-      });
-      actor.defaultGroup = 0;
-      actor.streamSlot = 0;
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x608 ? "pl0608" :
+        actor.borgNumber === 0x616 ? "pl0616" :
+        actor.borgNumber === 0x61c ? "pl061c" : "pl0600";
+      configureMachineRedFamily(actor, id as MachineRedBorgId, ctx);
     },
     cueTable: cueTableForBorg("pl0600")!,
   };
@@ -950,20 +955,19 @@ function makeMachineRedFamilyRegistration(): FamilyRegistration {
 // (+0x18da >>= 1) then tail-calls zz_0179fcc_. The shared engine consumes the config
 // block @0x8030cf0c (seedSlot 0 ground / 1 air, group 4). pl0601/pl0609/pl0617/pl061d
 // all bind the same config (actionStreamTables.json confirms identical leaf + engine
-// + phaseTable across the 4 members). No bespoke family phase logic (contrast CYBER
-// MACHINE's ammo-gated shot deploy), so this is a SHARED registration: cue table +
-// shared-engine X config, no family module. The borgNumber stamp below is overwritten
+// + phaseTable across the 4 members). Actions 3/4 are constructor-specific hardpoint
+// deploy handlers, so the dedicated module owns the root while delegating action 2
+// only to the proven shared engine. The borgNumber stamp below is overwritten
 // by RomDriverBridge.attach (line `actor.borgNumber = borgIdToNumber(runtime.borgId)`)
 // so the per-member number (0x601/0x609/0x617/0x61d) is set correctly post-configure.
 function makeMachineBlueFamilyRegistration(): FamilyRegistration {
   return {
-    configure: (actor) => {
-      actor.borgNumber = 0x601;
-      actor.rootAction = createSharedEngineRootAction({
-        xSpecial: DEFAULT_CONFIGS.dashAttack(0),
-      });
-      actor.defaultGroup = 0;
-      actor.streamSlot = 0;
+    configure: (actor, ctx) => {
+      const id =
+        actor.borgNumber === 0x609 ? "pl0609" :
+        actor.borgNumber === 0x617 ? "pl0617" :
+        actor.borgNumber === 0x61d ? "pl061d" : "pl0601";
+      configureMachineBlueFamily(actor, id as MachineBlueBorgId, ctx);
     },
     cueTable: cueTableForBorg("pl0601")!,
   };

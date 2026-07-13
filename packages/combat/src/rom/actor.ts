@@ -249,6 +249,9 @@ export interface RomActor {
   wallContact: number;
   /** +0x144: live low-nibble child/beam ownership mask polled by Cyber Girl. */
   childMask144: number;
+  /** +0x14c..+0x14f: per-hardpoint attachment flags. Machine Blue's action 3/4
+   * handlers test bit 0 before dispatching zz_013212c_ for that hardpoint. */
+  attachmentFlags14c: [number, number, number, number];
   /** +0x1cf0: signed part-1/contact event byte. */
   contactP1: number;
   /** +0x1d0f: signed stream-authored dash-strength byte. */
@@ -430,7 +433,8 @@ export function createRomActor(): RomActor {
     parts: [makeBlankPart(), makeBlankPart(), makeBlankPart(), makeBlankPart()],
     maxRise: 0, maxFall: 0, maxHSpeed: 0, stepHeight: 0,
     timescale: 1, tierScale: 1, dt: 1,
-    contactP0: 0, wallContact: 0, childMask144: 0, contactP1: 0,
+    contactP0: 0, wallContact: 0, childMask144: 0,
+    attachmentFlags14c: [0, 0, 0, 0], contactP1: 0,
     dashStrength1d0f: 0, faceGate1d10: 0, streamHold1b03: 0, streamCounter6eb: 0,
     statusWord5b4: 0, inputEdge5d4: 0, inputHeld5d8: 0,
     stateTimer: 0, shotScalar1d9c: 0, shotByte1db2: 0, shotByte1db3: 0, handlerTimer: 0,

@@ -474,15 +474,15 @@ export function machineBlueXOnSteer(actor: RomActor): void {
 
 /** onHit FUN_800cfa38 @0x800cfa38: face-away + ammo-gated borg-switched spawns +
  *  backdash. The ammo gate zz_006dbe0_(actor, 2, 1, 1) wraps ALL FOUR borgs; the host
- *  (BorgRuntime) owns the real ammo count — modeled as passing (honest approximation,
- *  same posture as robot.ts/cyber-machine.ts). NOTE (verifier extra finding): the
+ *  (BorgRuntime) owns the real ammo count and exposes it through the exact
+ *  `onAllocateResource` seam. NOTE (verifier extra finding): the
  *  backdash fires whenever the GATE passes, even if the projectile allocation fails —
  *  the velocity writes are NOT tied to spawn success. */
 export function machineBlueXOnHit(actor: RomActor, ctx: StreamContext): void {
   // +0x5ae = +0x72 − 0x8000 — motion yaw faces away 180°.
   actor.lockYaw = (actor.heading - 0x8000) & 0xffff;
-  // zz_006dbe0_(actor, 2, 1, 1) — host ammo gate (approximated as passing).
-  const gatePassed = true;
+  // zz_006dbe0_(actor, 2, 1, 1) — exact host-owned ammo gate.
+  const gatePassed = ctx.onAllocateResource?.(actor, 2, 1, 1) ?? false;
   if (gatePassed) {
     switch (actor.borgNumber) {
       case 0x601:

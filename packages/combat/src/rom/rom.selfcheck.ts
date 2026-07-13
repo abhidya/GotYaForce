@@ -103,6 +103,16 @@ import {
 import { CYBER_GIRL_X } from "../families/cyber-girl.js";
 import { createSeries3XSpecial, SERIES3_X } from "../families/shared-series3-x.js";
 import {
+  configureMachineRedFamily,
+  configureMachineBlueFamily,
+  MACHINE_RED_ROUTES,
+  MACHINE_BLUE_ROUTES,
+  MACHINE_RED_X,
+  MACHINE_BLUE_DEPLOY,
+  type MachineRedBorgId,
+  type MachineBlueBorgId,
+} from "../families/machine-red-blue.js";
+import {
   groundSnapRevert,
   stepAfterimage,
   stepPartTargetPitch,
@@ -1181,6 +1191,131 @@ export function runSelfTest(): number {
   // Test 29: WIRE GUNNER family — X phase 0 ground arm (direction slot select, zz_004beb8_).
   // zz_01316e0_:609-625 — +0x540 == 0 branch: advance phase, pick slot from controlWord
   // direction bits (default 2 / side 0x10 → 4 / up 0x40 → 3), startStream(g4, slot).
+  console.log("\n[rom.selfcheck] families/machine-red-blue — exhaustive live route matrix:");
+  {
+    const reds: MachineRedBorgId[] = ["pl0600", "pl0608", "pl0616", "pl061c"];
+    const blues: MachineBlueBorgId[] = ["pl0601", "pl0609", "pl0617", "pl061d"];
+    let route: number | null = null;
+    const ctx = { onMachineRoute: (_a: RomActor, leaf: number) => { route = leaf; } };
+    for (const id of reds) for (let action = 0; action < 3; action++) {
+      for (let variant = 0; variant < MACHINE_RED_ROUTES.variants[action]!.length; variant++) {
+        const a = createRomActor();
+        configureMachineRedFamily(a, id, ctx);
+        a.actionIndex = action; a.variantIndex = variant; route = null; a.rootAction!(a);
+        assert(route === MACHINE_RED_ROUTES.variants[action]![variant], `${id} a${action}v${variant} exact Red leaf`);
+      }
+    }
+    for (const id of blues) {
+      const maxAction = id === "pl0609" || id === "pl061d" ? 4 : 2;
+      for (let action = 0; action <= maxAction; action++) {
+        for (let variant = 0; variant < MACHINE_BLUE_ROUTES.variants[action]!.length; variant++) {
+          const a = createRomActor();
+          configureMachineBlueFamily(a, id, ctx);
+          a.actionIndex = action; a.variantIndex = variant; route = null; a.rootAction!(a);
+          assert(route === MACHINE_BLUE_ROUTES.variants[action]![variant], `${id} a${action}v${variant} exact Blue leaf`);
+        }
+      }
+    }
+  }
+
+  console.log("\n[rom.selfcheck] families/machine-red — zz_0179d20 setup/callback:");
+  {
+    for (const [id, expected] of [["pl0600", 0], ["pl0608", 0x0c], ["pl0616", 0x0d], ["pl061c", 0x0e]] as const) {
+      const a = createRomActor() as RomActor & { lockTarget?: { x: number; y: number; z: number } };
+      const spawns: Array<[number, number]> = [];
+      configureMachineRedFamily(a, id, { onAllocateResource: () => true, onFamilyProjectile: (_x, addr, type) => spawns.push([addr, type]) });
+      a.actionIndex = 2; a.variantIndex = 4; a.pos.x = 10; a.lockTarget = { x: 0, y: 0, z: 0 };
+      a.rootAction!(a);
+      assert(a.fbPhaseSlots[0] === 1 && a.streamSlot === 1, `${id}: exact two-phase engine/slot cursor`);
+      assert(approxEq(a.pos.x, 19.49999988079071), `${id}: config 0x8030a670 scale`);
+      assert(a.yVel === MACHINE_RED_X.RISE_YVEL, `${id}: exact +4 Y callback`);
+      assert(spawns[0]?.[0] === MACHINE_RED_X.PROJECTILE_SPAWNER && spawns[0]?.[1] === expected, `${id}: exact projectile type`);
+    }
+    const denied = createRomActor();
+    configureMachineRedFamily(denied, "pl0600", { onAllocateResource: () => false });
+    denied.actionIndex = 2; denied.variantIndex = 0; denied.rootAction!(denied);
+    assert(denied.fbPhaseSlots[1] === 1, "Red X ammo failure increments +0x541");
+
+    const phase1 = createRomActor() as RomActor & { lockTarget?: { x: number; y: number; z: number } };
+    configureMachineRedFamily(phase1, "pl0600", { onAllocateResource: () => true });
+    phase1.actionIndex = 2; phase1.variantIndex = 0; phase1.rootAction!(phase1);
+    phase1.steerYaw = 101; phase1.contactP0 = -1; phase1.faceGate1d10 = 0;
+    phase1.rootAction!(phase1);
+    assert(phase1.steerYaw === 50, "Red phase 1 negative contact arithmetic-halves +0x18da");
+    phase1.descriptor = { handlerData6c: 3, turnStep0: 0x100, turnStep1: 0x200 } as NonNullable<RomActor["descriptor"]>;
+    phase1.dashStrength1d0f = -1; phase1.contactP0 = 0; phase1.wallContact = 0;
+    phase1.rootAction!(phase1);
+    assert(phase1.dashStrength1d0f === 0 && phase1.gravityCoeff === 3,
+      "Red phase 1 consumes negative +0x1d0f and reloads descriptor gravity");
+    phase1.wallContact = 1; phase1.hSpeed = 9; phase1.rootAction!(phase1);
+    assert(phase1.hSpeed === 0 && (phase1.controlWord & 3) === 0,
+      "Red phase 1 +0x1cee path clears action mode and takes air return");
+
+    const normalExit = createRomActor();
+    configureMachineRedFamily(normalExit, "pl0600", { onAllocateResource: () => true });
+    normalExit.actionIndex = 2; normalExit.variantIndex = 0; normalExit.rootAction!(normalExit);
+    normalExit.contactP0 = 1; normalExit.fbPhaseSlots[1] = 1; normalExit.rootAction!(normalExit);
+    assert(normalExit.stateTimer === MACHINE_RED_X.COOLDOWN + normalExit.dt,
+      "Red phase 1 normal contact/+0x541 exit seeds exact 30+dt cooldown");
+  }
+
+  console.log("\n[rom.selfcheck] families/machine-blue — hardpoint deploy boundaries:");
+  {
+    const first = createRomActor(); const firstSpawns: number[] = []; const firstRecords: number[] = [];
+    configureMachineBlueFamily(first, "pl061d", {
+      onMachineHardpointDeploy: (_a, addr, _type, index) => { assert(addr === MACHINE_BLUE_DEPLOY.SPAWNER, "uses zz_013212c_"); firstRecords.push(index); },
+      onFamilyProjectile: (_a, _addr, type) => firstSpawns.push(type),
+    });
+    first.actionIndex = 3; first.variantIndex = 2; first.attachmentFlags14c = [0, 1, 1, 0]; first.rootAction!(first);
+    assert(firstSpawns.join(",") === "11", "FUN_800cfb94 fires first active Atlas hardpoint only");
+    assert(firstRecords.join(",") === "1", "FUN_800cfb94 preserves third-argument record identity +0x14c+1");
+
+    const all = createRomActor(); const allSpawns: number[] = [];
+    configureMachineBlueFamily(all, "pl0609", { onFamilyProjectile: (_a, _addr, type) => allSpawns.push(type) });
+    all.actionIndex = 4; all.variantIndex = 4; all.attachmentFlags14c = [1, 0, 1, 1]; all.rootAction!(all);
+    assert(allSpawns.join(",") === "2,4,5", "FUN_800cfdf0 fires every active hardpoint");
+
+    const stateful = createRomActor() as RomActor & { lockTarget?: { x: number; y: number; z: number } };
+    const statefulSpawns: number[] = [];
+    configureMachineBlueFamily(stateful, "pl0609", { onFamilyProjectile: (_a, _addr, type) => statefulSpawns.push(type) });
+    stateful.actionIndex = 4; stateful.variantIndex = 0; stateful.attachmentFlags14c = [1, 1, 0, 0];
+    stateful.lockTarget = { x: 0, y: 0, z: 0 }; stateful.pos.x = 10; stateful.contactP0 = 1; stateful.rootAction!(stateful);
+    assert(stateful.fbPhaseSlots[0] === 1 && stateful.streamSlot === 2, "FUN_800cfc74 starts group-4 slot 2");
+    assert(stateful.contactP0 === 0 && statefulSpawns.join(",") === "2,3", "FUN_800cfc74 consumes contact and fires all active hardpoints");
+    stateful.wallContact = 1; stateful.rootAction!(stateful);
+    assert(stateful.stateTimer === MACHINE_BLUE_DEPLOY.STATEFUL_COOLDOWN + stateful.dt,
+      "FUN_800cfc74 completion seeds exact 4+dt cooldown");
+
+    for (const id of ["pl0601", "pl0617"] as const) for (const action of [3, 4]) {
+      const excluded = createRomActor(); let routed = false; let fired = false;
+      configureMachineBlueFamily(excluded, id, {
+        onMachineRoute: () => { routed = true; },
+        onFamilyProjectile: () => { fired = true; },
+      });
+      excluded.actionIndex = action; excluded.variantIndex = 0;
+      excluded.attachmentFlags14c = [1, 1, 1, 1]; excluded.rootAction!(excluded);
+      assert(!routed && !fired && excluded.fbPhaseSlots[0] === 0,
+        `${id} action ${action} is excluded and falls through without mutation`);
+    }
+
+    const aimed = createRomActor() as RomActor & { lockTarget?: { x: number; y: number; z: number } };
+    const aimedSpawns: number[] = []; let ammoArgs = "";
+    configureMachineBlueFamily(aimed, "pl0601", {
+      onAllocateResource: (_a, weapon, count, mode) => { ammoArgs = `${weapon},${count},${mode}`; return true; },
+      onFamilyProjectile: (_a, _addr, type) => aimedSpawns.push(type),
+    });
+    aimed.actionIndex = 2; aimed.variantIndex = 0; aimed.lockTarget = { x: 0, y: 0, z: 0 };
+    aimed.pos.x = 10; aimed.rootAction!(aimed);
+    assert(aimed.fbPhaseSlots[0] === 1 && aimed.streamSlot === 0,
+      "Machine Blue action 2 enters aimed-shot phase 1 at ground slot 0");
+    aimed.contactP0 = 1; aimed.rootAction!(aimed);
+    assert(aimed.fbPhaseSlots[0] === 2 && ammoArgs === "2,1,1",
+      "Machine Blue action 2 contact takes phase 2 through exact ammo gate");
+    assert(aimed.hSpeed === 40 && aimed.yVel === 20 && aimed.hDecel === -1,
+      "Machine Blue action 2 success seeds exact 40/20/-1 backdash");
+    assert(aimedSpawns.join(",") === "7,8", "Machine Blue pl0601 action 2 spawns exact records 7/8");
+  }
+
   console.log("\n[rom.selfcheck] families/wire-gunner — X phase 0 ground arm (zz_01316e0_):");
   {
     const a = createRomActor();
