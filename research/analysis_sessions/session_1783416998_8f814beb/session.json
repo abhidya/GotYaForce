@@ -1,0 +1,158 @@
+{
+  "metadata": {
+    "session_name": "Analysis_1783416989",
+    "session_id": "session_1783416998_8f814beb",
+    "binary_path": null,
+    "binary_hash": null,
+    "created_at": "2026-07-07T05:36:38.496815",
+    "last_modified": "2026-07-07T05:36:38.526817",
+    "total_functions": 0,
+    "analyzed_functions_count": 12,
+    "session_description": null,
+    "tags": []
+  },
+  "analyzed_functions": {
+    "80003100": {
+      "address": "80003100",
+      "old_name": "__check_pad3",
+      "new_name": "__check_pad3",
+      "behavior_summary": "**Function Analysis:**\nThe function reads a global status variable (`DAT_800030e4`) and applies a fixed bitmask (`0xeef`) to verify that a specific set of hardware or subsystem flags are all simultaneously set. If the bitwise AND operation yields exactly `0xeef`, it triggers a dependent setup routine (`zz_02048b8_` with zeroed parameters). The function is invoked during the system boot sequence (`start`) and is registered in a dispatch/initialization table (`PTR___check_pad3_80005544`), indicating it operates as a conditional gate within a hardware initialization chain. The naming convention (`pad`) and bitmask pattern strongly suggest it validates the readiness or connection state of an input device (game controller) or a specific hardware module before allowing further driver initialization to proceed.\n\n**Behavior Summary:**\nReads a global status register, validates that required hardware flags are set via a fixed bitmask, and conditionally invokes a setup routine if the target device or subsystem is ready. It acts as a readiness gatekeeper within the system's initialization dispatch sequence.\n\n**Suggested Name:** verifyPadHardwareReadiness\n**Rationale:** The function explicitly performs a bitwise status validation against a fixed mask (`0xeef`) to determine if a hardware subsystem (likely a gamepad/input device, given the \"pad\" naming convention in console/embedded codebases) is fully initialized or connected. If the required flags are met, it triggers a dependent initialization routine. \"verifyPadHardwareReadiness\" precisely captures the conditional bitmask validation, the hardware/domain context, and its architectural role as a readiness gate in the boot sequence, clearly distinguishing it from generic checks, memory padding operations, or unrelated status queries.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "80003154": {
+      "address": "80003154",
+      "old_name": "start",
+      "new_name": "start",
+      "behavior_summary": "**Function Analysis:**\nThis function serves as the early-stage system initialization entry point, strongly indicating a Nintendo GameCube/Wii application or system software context based on naming conventions (`gnt4___init_hardware_bl`, `InitMetroTRK_BBA`, `__check_pad3`, and `DAT_800000xx` global data layout). It performs low-level hardware and runtime setup without accepting parameters or returning values. Key operations include: initializing CPU registers (`__init_registers`), configuring hardware and user boot loaders (`gnt4___init_hardware_bl`, `gnt4___init_user_bl`), conditionally enabling the MetroTRK debug runtime (`InitMetroTRK_BBA`), processing initialization memory tables by applying offset adjustments to pointer arrays, and verifying peripheral/controller state (`__check_pad3`). The function orchestrates the transition from raw hardware state to a configured execution environment, preparing debug infrastructure and boot loader tables before handing control to the main application.\n\n**Behavior Summary:**\nOrchestrates early-stage system startup by initializing CPU registers, hardware and user boot loaders, and the MetroTRK debug runtime. It processes initialization memory tables, applies address offsets, verifies peripheral states, and configures the execution environment before transferring control to the primary application loop.\n\n**Suggested Name:** initializeBootLoaderAndDebugRuntime\n**Rationale:** The function explicitly bridges two critical initialization domains: boot loader configuration (`gnt4___init_hardware_bl`, `gnt4___init_user_bl`) and debug infrastructure setup (`InitMetroTRK_BBA`), alongside low-level register and memory table preparation. This name precisely captures the dual initialization scope using domain-specific terminology relevant to Nintendo system software, clearly distinguishing it from generic entry points or main-loop functions while adhering to the required action-verb and noun structure.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "80003140": {
+      "address": "80003140",
+      "old_name": "__set_debug_bba",
+      "new_name": "__set_debug_bba",
+      "behavior_summary": "**Function Analysis:**\nThe target function contains a single executable statement: `DAT_80436498 = 1;`. This operation unconditionally assigns the integer value `1` to a global memory location, effectively acting as a boolean flag setter. Although the decompiled signature declares no parameters, the caller (`start`) invokes it with three arguments (`uVar1`, `(int)uVar8`, `2`), indicating a likely decompiler signature inference failure common in embedded/console firmware (often caused by function pointers, inline assembly, or non-standard calling conventions). The original name `__set_debug_bba` and the global variable's address pattern strongly suggest this belongs to a Nintendo/GameCube-era codebase where \"BBA\" typically refers to the Broadband Adapter hardware peripheral. The function is conditionally triggered during the system initialization phase (`start`) when a specific mode identifier (`iVar2 == 4`) is detected, confirming its role in activating diagnostic or debug capabilities for that subsystem. No complex data transformation, allocation, or I/O occurs; it is a direct global state mutation.\n\n**Behavior Summary:**\nThis function unconditionally sets a global diagnostic flag to `1` during system startup. It is conditionally invoked when the initialization routine detects a debug mode identifier, serving to activate debug capabilities for the targeted hardware subsystem. The operation is a direct memory write with no return value or complex data transformation.\n\n**Suggested Name:** enableBbaDebugFlag\n**Rationale:** The name precisely captures the function's core operation (`enable`), the target subsystem (`Bba`), and the specific data structure being modified (`DebugFlag`). It replaces the generic verb \"set\" with \"enable,\" which semantically aligns with toggling a control flag to `1` for diagnostic purposes. The inclusion of \"Bba\" preserves the original domain context while the suffix \"DebugFlag\" clarifies that the operation targets a boolean-style control variable rather than a complex initialization routine. This distinguishes it from general hardware setup functions and accurately reflects its lightweight, flag-toggling role within the startup sequence. The name adheres to camelCase formatting, uses exactly three words, and avoids prohibited generic terms while remaining highly specific to the observed memory operation and firmware context.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "800032b0": {
+      "address": "800032b0",
+      "old_name": "__init_registers",
+      "new_name": "__init_registers",
+      "behavior_summary": "**Function Analysis:**\nThe target function is currently implemented as a minimal stub that accepts no parameters and returns a constant `0` (typed as `undefined8`, which in decompiled binaries typically represents a status code, pointer, or 64-bit return value). Despite its empty body, its original name `__init_registers` and its placement as the very first call in the `start` entry point strongly indicate its architectural role: initializing CPU or hardware registers during the earliest phase of program execution. In embedded systems, bootloaders, and low-level firmware, such routines are responsible for establishing the initial execution environment, configuring control registers, setting up stack pointers, or clearing reserved states before higher-level hardware initialization (e.g., `gnt4___init_hardware_bl`) proceeds. The function is structurally positioned as a prerequisite setup routine, and its current `return 0` likely serves as a temporary placeholder or stub awaiting architecture-specific assembly implementation.\n\n**Behavior Summary:**\nThis function serves as a placeholder for early-stage CPU or hardware register initialization during program startup. Invoked immediately at the entry point before subsequent hardware setup routines, it is designed to establish the initial execution environment. Currently unimplemented, it returns a constant zero status code to indicate successful stub execution.\n\n**Suggested Name:** initializeCpuRegisters\n**Rationale:** The name explicitly conveys the intended low-level operation (initializing) and specifies the exact target domain (CPU registers) rather than relying on generic terms like \"init\" or \"registers\". It aligns precisely with the function's position in the `start` entry point, where CPU state must be established before peripheral or hardware-specific initialization. The verb \"initialize\" accurately reflects the setup phase, while \"CpuRegisters\" distinguishes it from memory, I/O, or configuration registers, matching the embedded boot context and decompiled naming conventions. This name satisfies domain-aware specificity, uses a precise action verb, and adheres to the 2-5 word camelCase requirement.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "8000314c": {
+      "address": "8000314c",
+      "old_name": "zz_000314c_",
+      "new_name": "zz_000314c_",
+      "behavior_summary": "**Function Analysis:**\nThe target function is a trivial accessor that accepts no parameters and returns a single byte (`undefined1`) directly from a global data variable (`DAT_80436498`). It performs no arithmetic, branching, memory manipulation, or data transformation. Its sole operation is a direct memory read and return. Given its invocation within the `start` function\u2014which handles low-level hardware initialization (`gnt4___init_hardware_bl`), debug setup (`__set_debug_bba`), and boot sequence branching\u2014this byte almost certainly represents a boot configuration flag, hardware revision identifier, or system initialization state. In embedded/console firmware architectures, such pure getters are intentionally used to expose read-only or early-initialized global state to the startup routine without violating encapsulation or exposing raw global addresses.\n\n**Behavior Summary:**\nThis function acts as a direct getter for a global byte-sized variable, returning its current value without modification or validation. It is invoked during system startup to retrieve configuration or state data that influences hardware initialization paths and debug setup routines.\n\n**Suggested Name:** retrieveBootConfigurationByte\n**Rationale:** The name precisely captures the function's role as a direct data retrieval operation (`retrieve`) for a single-byte value (`Byte`) that logically corresponds to boot-time configuration or system state (`BootConfiguration`), based on its usage within the `start` initialization routine. It avoids generic accessor terms like `getData` or `getValue` by explicitly stating the domain context (boot/configuration) and exact data type (byte), aligning with embedded firmware patterns where such getters dictate hardware setup and debug initialization paths. The camelCase format and 3-word length adhere to the specified constraints while maximizing descriptive accuracy and distinguishing it from unrelated state readers.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "80003340": {
+      "address": "80003340",
+      "old_name": "zz_0003340_",
+      "new_name": "zz_0003340_",
+      "behavior_summary": "**Function Analysis:**\nThe function implements a table-driven memory management routine executed during early program startup. It processes two distinct arrays of pointers: the first loop iterates over source/destination/size triplets, conditionally executing `gnt4_memcpy` when the source and destination addresses differ, followed by a post-copy callback (`zz_0003424_`). The second loop iterates over a separate table of memory regions and systematically zeroes them out using `gnt4_memset`. The `gnt4_` prefix indicates a custom SDK or hardware abstraction layer, typical in console or embedded game development. The null-terminated iteration pattern, conditional data copying, and subsequent buffer zeroing are characteristic of static data patching, memory relocation, or system buffer initialization routines. Although declared as `void`, the caller captures a return value, suggesting it may actually return a status code or pointer to the final memory state, a common decompiler artifact in boot-time routines.\n\n**Behavior Summary:**\nThe function processes two null-terminated tables of memory regions: it conditionally copies data between buffers while invoking a post-copy handler, then systematically zeroes out a separate list of memory regions. Executed during early program initialization, it serves as a table-driven memory patching and buffer reset routine.\n\n**Suggested Name:** applyMemoryPatchesAndClearBuffers\n**Rationale:** This name precisely captures the function's two-phase table-driven operation: conditionally applying data patches via `gnt4_memcpy` and subsequently clearing/zeroing memory regions. It distinguishes the function from generic memory handlers by explicitly naming the core actions (patching and clearing) and aligns with its role in early system initialization, where static data updates and buffer resets are standard boot-time tasks. The camelCase format adheres to the requirements while maintaining technical specificity.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "80003400": {
+      "address": "80003400",
+      "old_name": "gnt4-__init_hardware-bl",
+      "new_name": "gnt4-__init_hardware-bl",
+      "behavior_summary": "**Function Analysis:**\nThe target function is a void entry-point routine invoked early in the `start()` function, which serves as the firmware/bootloader execution entry point. It acts as a sequencer that linearly invokes three platform-specific hardware initialization routines: `gnt4___OSPSInit_bl` (likely On-Chip Power State/Supply initialization), `gnt4___OSFPRInit_bl` (likely On-Chip Frequency/Power Register initialization), and `gnt4___OSCacheInit_bl` (CPU Cache initialization). The function takes no parameters, returns nothing, and follows a strict one-way configuration flow typical of early-boot hardware bring-up. It bridges the gap between low-level register setup (`__init_registers()`) and higher-level firmware logic, ensuring critical power, clocking, and memory subsystems are properly configured before the system transitions to normal operation.\n\n**Behavior Summary:**\nThis function orchestrates the early-stage initialization of critical GNT4 platform hardware subsystems, specifically power management, frequency/power registers, and CPU cache, immediately after register setup during the bootloader execution phase. It serves as a dedicated hardware bring-up sequencer that prepares the silicon environment for subsequent firmware execution.\n\n**Suggested Name:** initializeGnt4BootPowerCacheSubsystems\n**Rationale:** The name precisely captures the platform context (`Gnt4`), the execution phase (`Boot`), and the specific hardware domains being configured (`PowerCacheSubsystems`). It replaces the generic `init_hardware` with domain-specific terminology that directly reflects the actual callees (OSPS for power/state, OSFPR for frequency/power registers, OSCache for cache). The verb `initialize` accurately describes the one-way configuration flow, and the structure adheres to the 2-5 word camelCase requirement while avoiding vague terms like `process` or `handle`. This name clearly distinguishes the function from generic hardware init routines by explicitly denoting its boot-phase scope and targeted subsystems.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "80003424": {
+      "address": "80003424",
+      "old_name": "zz_0003424_",
+      "new_name": "zz_0003424_",
+      "behavior_summary": "**Function Analysis:**\nThe function performs low-level CPU cache maintenance on a specified memory region. It begins by aligning the base address (`param_1`) down to a 16-byte boundary using a bitwise AND mask (`0xfffffff1`), then adjusts the size parameter (`param_2`) to account for the alignment offset. The core logic executes a `do-while` loop that iterates through the memory range in 8-byte increments. Within each iteration, it calls `dataCacheBlockStore` to flush dirty data from the data cache, `sync(0)` to enforce memory ordering, and `instructionCacheBlockInvalidate` to purge stale instructions from the instruction cache. After the loop completes, it calls `instructionSynchronize()` to ensure all pending instruction fetches are updated. The caller (`zz_0003340_`) invokes this routine immediately after a `gnt4_memcpy` operation, indicating its role in ensuring memory coherence after data or executable code has been written to RAM. This pattern is characteristic of post-copy cache coherence routines commonly found in console/low-level systems programming.\n\n**Behavior Summary:**\nThe function aligns a memory address to a cache line boundary and iteratively flushes the data cache while invalidating the instruction cache across a contiguous memory range. It guarantees CPU cache coherence following memory writes, particularly after code or data copies that may be subsequently executed.\n\n**Suggested Name:** flushAndInvalidateCacheRange\n**Rationale:** This name precisely captures the dual cache operations (flushing the data cache and invalidating the instruction cache) performed across a specified memory region. It distinguishes the function from generic memory synchronization or alignment routines by explicitly naming its cache maintenance purpose, aligning with low-level systems programming conventions for post-copy coherence. The camelCase format and 4-word length adhere to the specified constraints while remaining highly specific to the architectural operation.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "80003458": {
+      "address": "80003458",
+      "old_name": "TRK_memset",
+      "new_name": "TRK_memset",
+      "behavior_summary": "**Function Analysis:**\nThe function `TRK_memset` operates as a framework-specific wrapper for memory initialization. Although the decompiled signature only exposes one parameter (`param_1`), the caller `TRKResetBuffer` invokes it with three arguments (`destination`, `fill_value`, `size`), indicating a standard `memset`-like signature where the decompiler failed to capture stack-based parameters. Internally, the function delegates to `TRK_fill_mem()` to perform the actual memory operation and returns the original destination pointer, adhering to standard C library conventions for pointer chaining. Within `TRKResetBuffer`, it is specifically invoked to zero out a 0x880-byte memory region located at offset `0x10` within a larger buffer structure, conditional on a reset flag (`param_2 == 0`). This confirms its role as a targeted memory clearing utility tailored to the TRK architecture's buffer management routines.\n\n**Behavior Summary:**\nThis function serves as a TRK framework wrapper that delegates to an internal memory filler routine to zero out a specified contiguous memory region, returning the destination pointer for standard chaining compatibility. It is primarily utilized during buffer reset operations to clear large data blocks while preserving the original memory address for subsequent pointer arithmetic or return value handling.\n\n**Suggested Name:** zeroTrkBufferRegion\n**Rationale:** The name explicitly identifies the core operation (`zero`), the framework domain (`Trk`), and the precise target data structure (`BufferRegion`). It accurately reflects the function's usage in `TRKResetBuffer` to clear a fixed-size memory block (0x880 bytes) at a specific offset, distinguishing it from generic memory allocation, copying, or initialization routines. The camelCase format and three-word length adhere to the constraints while providing maximum clarity and domain specificity, ensuring developers immediately understand its purpose as a targeted buffer zeroing utility within the TRK codebase.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "80003488": {
+      "address": "80003488",
+      "old_name": "TRK_memcpy",
+      "new_name": "TRK_memcpy",
+      "behavior_summary": "**Function Analysis:**\nThe function implements a low-level, byte-by-byte memory copy routine. It accepts three integer parameters representing a destination address (`param_1`), a source address (`param_2`), and a byte count (`param_3`). The code adjusts both pointers by subtracting 1 initially (a common decompiler artifact or framework-specific pointer arithmetic), increments the length by 1, and enters a loop that decrements the counter while incrementing both pointers and copying one byte per iteration until the counter reaches zero. Examination of the callers reveals this routine is exclusively used within a `TRK_` (likely Trace/Debug or Task Runner Kit) framework to transfer fixed-size (12-byte/`0xC`) event structures between caller buffers and an internal event queue, as well as to copy variable-length segments in a buffer-reading routine. The function lacks bounds checking or alignment optimizations, indicating it is a lightweight, framework-specific utility for raw data block transfer rather than a standard library implementation.\n\n**Behavior Summary:**\nThis function performs a sequential, byte-by-byte memory copy operation tailored for framework-internal data transfer. It is primarily invoked to move fixed-size event payloads between application buffers and a system event queue, and to extract variable-length data from device or driver buffers. The routine operates without alignment or size validation, serving as a lightweight data movement primitive within the TRK event handling architecture.\n\n**Suggested Name:** copyEventPayloadBlock\n**Rationale:** The name precisely captures both the operation (`copy`) and the domain-specific data unit (`EventPayloadBlock`). While the underlying code is a generic memory copy, the contextual analysis of all three callers demonstrates it is exclusively used to transfer 12-byte event structures or buffer segments within the TRK framework. \"EventPayloadBlock\" distinguishes this function from standard library `memcpy` or generic `copyMemory` routines by explicitly highlighting its architectural purpose: moving discrete event data blocks. The naming adheres to the required action-verb + domain-noun structure, uses camelCase, stays within the 2-5 word limit, and provides immediate clarity regarding its role in the program's event-driven data flow.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "800053e0": {
+      "address": "800053e0",
+      "old_name": "__TRK_reset",
+      "new_name": "__TRK_reset",
+      "behavior_summary": "**Function Analysis:**\nThe target function `__TRK_reset` is a parameterless, void-returning routine that delegates its entire logic to a single internal call: `zz_02048b8_(0,0,0)`. The three zero arguments strongly indicate a state-clearing or default-initialization pattern, commonly used to zero out a structure, reset counters, or clear flags in embedded and game SDK architectures. The `TRK` prefix is a standard abbreviation in console/game development (particularly Nintendo SDKs) for \"Track\", \"Tracker\", or \"Track Buffer\". Examining Caller 1 (`zz_022ead4_`), we see a 64-byte local buffer (`local_48`) being explicitly zeroed, populated with specific control values (`0x80`, `0x40`, `0`), passed to a setup routine (`zz_0231858_`), and immediately followed by a call to `__TRK_reset()`. This sequence indicates that `__TRK_reset()` is invoked during an initialization or reconfiguration phase to ensure the tracked subsystem or context starts in a clean, deterministic state before subsequent operations proceed. The function acts as a thin wrapper that abstracts the actual zeroing/reset logic into a lower-level helper.\n\n**Behavior Summary:**\nThe function serves as a state resetter for a subsystem or tracker (abbreviated as TRK) by delegating to an internal routine with zeroed parameters. It is invoked during initialization sequences to clear internal counters, flags, or buffer references, ensuring the tracked resource begins in a known default condition.\n\n**Suggested Name:** resetTrackContext\n**Rationale:** The name precisely captures the function's role as a reset mechanism for a \"TRK\" (Track/Tracker) subsystem. \"reset\" accurately reflects the zero-parameter delegation pattern typical of state initialization routines, while \"TrackContext\" specifies the domain context implied by the `TRK` prefix and the caller's buffer setup sequence. It avoids generic terms like \"handle\" or \"process\", clearly distinguishes this function as a state-clearing routine rather than a data processor or allocator, and aligns with the 2-5 word length constraint while maintaining high specificity for reverse engineering and codebase maintenance.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    },
+    "8000540c": {
+      "address": "8000540c",
+      "old_name": "gnt4-memset",
+      "new_name": "gnt4-memset",
+      "behavior_summary": "**Function Analysis:**\nThe function `gnt4_memset` implements a standard memory fill operation with the exact signature of the C library `memset` (`void *memset(void *s, int c, size_t n)`). It accepts a target memory pointer (`__s`), a byte value to write (`__c`), and a length in bytes (`__n`). Internally, it delegates the actual byte-writing task to `gnt4___fill_mem_bl()`, which strongly indicates an optimized, architecture-specific block-fill routine (the `_bl` suffix likely denotes \"block\"). The function returns the original pointer `__s`, preserving standard `memset` semantics for chaining and compatibility. The `gnt4_` prefix and the surrounding caller context (e.g., `gnt4_OSDisableScheduler_bl`, `gnt4___OSSyncSram_bl`, `gnt4___OSLockSram_bl`) confirm this belongs to a console runtime or embedded OS memory management layer. It is primarily used for initializing, zeroing, or overwriting contiguous hardware buffers, scheduler state structures, and SRAM regions during system initialization or synchronization routines.\n\n**Behavior Summary:**\nThis function acts as a thin wrapper for a low-level memory fill operation, delegating the actual byte-writing task to an internal block-fill routine while maintaining standard `memset` semantics. It overwrites a contiguous memory region with a specified byte value and returns the original pointer for chaining. The routine is integral to the runtime's buffer management, supporting OS-level tasks such as scheduler state clearing, SRAM synchronization, and hardware buffer initialization.\n\n**Suggested Name:** fillMemoryBlock\n**Rationale:** The name precisely captures the function's core operation of filling a contiguous memory region with a specified byte value, directly reflecting the internal `gnt4___fill_mem_bl()` call and standard `memset` semantics. It avoids generic terms like \"handle\" or \"process\" by using the explicit action verb \"fill\" and the domain-specific noun \"Block\", clearly distinguishing it from allocation, deallocation, or data transformation routines. The naming aligns with low-level memory management conventions while remaining concise and descriptive of its exact purpose in the runtime architecture.",
+      "analysis_timestamp": 1783416998.4988177,
+      "function_hash": null,
+      "ai_confidence": null,
+      "processing_time": null
+    }
+  },
+  "rag_vectors": [],
+  "ui_state": {
+    "analyzed_functions_panel_expanded": true,
+    "last_selected_function": null,
+    "filter_settings": {}
+  },
+  "analysis_log": [
+    {
+      "timestamp": 1783416998.5268176,
+      "action": "session_saved",
+      "functions_count": 12,
+      "rag_vectors_count": 0
+    }
+  ],
+  "performance_stats": {
+    "total_processing_time": 0.0,
+    "average_function_time": 0.0,
+    "rag_vector_count": 0,
+    "functions_count": 12,
+    "rag_count": 0,
+    "save_timestamp": 1783416998.4988177
+  }
+}
