@@ -2,14 +2,280 @@
 
 Authoritative per-subsystem tracker: current port state, ROM/decomp source mapping, and the
 ranked next action to reach 1:1. Maintained alongside `behavior-notes.md` (the lab notebook,
-sections (a)–(ax)) and `attack-mechanics-findings.md`. Last synthesized 2026-07-03 from two
-full subsystem surveys + the session's mechanics mapping.
+sections (a)–(ax)) and `attack-mechanics-findings.md`. Last synthesized 2026-07-20 from the
+2026-07-06 → 2026-07-20 family-port wave + the OGhidra coverage-scan landing.
 
 **Confidence vocabulary** (same as the ledger): `DERIVED_ROM` / `DERIVED_TRACE` /
 `CONFIRMED_ASSET` / `OBSERVED_WIKI` / `TUNED` / `BLOCKED` / `CHECKED_CLOSED`.
 
 **How to read the status column:** DONE = ported and faithful to evidence; PARTIAL = works but
 diverges from ROM in a known way; MISSING = not ported; STUB = intentional placeholder.
+
+---
+
+## ★ 2026-07-20 session: OGhidra coverage scanner v1 LIVE + Ghidra function gaps force-closed (5→0)
+
+First deterministic coverage-gap detection over the OGhidra/Ghidra-MCP function set vs the DOL
+and the port's citation graph. Two new tools (currently **uncommitted in the workspace**, paths
+stable), plus a v2 design doc:
+
+- **`scripts/ogh-scan-coverage.ps1`** — PowerShell 5.1 driver joining THREE signals: (1) live
+  OGhidra MCP `/list_functions` dump (ground-truth Ghidra FunctionManager set), (2) DOL prologue
+  scan (`stwu r1,-N(r1)` preceded by `blr/bclr/bctr/bcctr` — what Ghidra SHOULD have defined),
+  (3) citation harvest across `research/`/`packages/`/`scripts/` for `0x80xxxxxx` literals — what
+  the port actually references. Output: `research/decomp/ogh-coverage-<date>.json` keyed by gap
+  category (`ghidra_missing_true_gaps`, `ghidra_missing_candidates`, `cited_not_in_mcp_all`).
+  **No hardcoded address lists** — the driver is rule-driven end to end.
+- **`scripts/force_create_missing_functions.java`** — Ghidra headless script (`analyzeHeadless
+  GotchaForce -process boot.dol -noanalysis -postScript …`) that consumes the latest coverage
+  report's `ghidra_missing_true_gaps`, merges the 3 Borg template ctors (`0x8007ca5c` NORMAL
+  TANK/LEOPARD, `0x800cfe9c` ARROW NINJA/SHIJIMA, `0x80129608` EAGLE ROBOT/PROTO EAGLE — reached
+  via function-pointer tables, no prologue, invisible to signal 2), runs `DisassembleCommand` +
+  `CreateFunctionCmd` per address, and saves the program.
+- **`research/decomp/ogh-coverage-tool-design.md`** (799 lines) — v2 design (implementation-
+  ready): six detection signals, a 4-bucket gap taxonomy, `--apply` auto-fix restricted to
+  `ghidra_missing_true_gaps` only (target FP rate **0**), and an explicit validation criterion
+  — "removing every `0x80xxxxxx` literal from the v2 codebase and re-running must still surface
+  exactly the 3 template ctors." v1 stays as fallback during migration.
+
+**Coverage snapshot (`ogh-coverage-2026-07-20.json`):** `mcp_functions: 11980`,
+`dol_prologue_entries: 9889`, **`dol_entries_not_in_mcp: 0`** (every DOL prologue is in the MCP
+set — Ghidra has disassembled every function the DOL says exists), `cited_addresses: 54262`,
+`cited_in_mcp: 11980` (every MCP function is cited somewhere — no dead analysis),
+`cited_not_in_mcp: 42282` (almost all `.data`/`.rodata`/`.sdata` addresses cited as constants,
+not functions — surfaced for awareness, non-actionable as gaps).
+
+**Force-create run:** the v1 baseline reported **5** entries in `ghidra_missing_true_gaps`; the
+headless script force-created all **8** merged addresses (the 5 gaps + the 3 template ctors):
+`0x8000d694`, `0x8000d7d0`, `0x801aadb4`, `0x8024cdc0`, `0x8024ceec`, `0x8007ca5c`, `0x800cfe9c`,
+`0x80129608`. Re-running the scanner against the saved Ghidra project now reports
+**`ghidra_missing_true_gaps: []`** (5 → 0). The 3 template ctors are the same addresses the
+2026-07-12 OGhidra first-pass ported family handlers for TANK/ARROW NINJA/EAGLE ROBOT against —
+their force-creation means those families' code is now disassembled in Ghidra, not just pointer-
+referenced.
+
+---
+
+## ★ 2026-07-18 session: qwen35b-a3-mtp decompiled-function analysis banked (35 sessions, ~2.08M lines, ~50% first-pass coverage)
+
+**Commit `cc8e58fe`:** 35 OGhidra analysis sessions checked in under
+`research/tools/OGhidra/analysis_sessions/session_<ts>_<hash>/session.json` — **~2,079,084
+lines** across the 35 session files (largest single session: `session_1784383187_d5104c60` at
+131,064 lines; the smallest non-trivial one at 158 lines). Model: **qwen35b-a3-mtp**. The session
+set covers roughly **50%** of the decompiled function corpus in a first pass — the other half
+remains for a second wave.
+
+The 2026-07-12 OGhidra first-pass family port (next entry) is the downstream consumer of session
+**`session_1783829686_785a372e`** (85,779 lines) — that session's findings were converted into
+the executable port modules and the `oghidra-first-pass-port-findings-2026-07-12.md` doc. The
+remaining 34 sessions are banked raw pending their own port/consume passes.
+
+---
+
+## ★ 2026-07-12 session part 3: OGhidra first-pass family ports — 5 modules live (Robot/Eagle Jet/Tank/Arrow Ninja/Eagle Robot) + host-wiring second pass
+
+**Commit `fe237adf` ("Port OGhidra first-pass family actions"):** converts the
+`session_1783829686_785a372e` analysis into five executable family modules + focused selfchecks,
+all routing real ROM phase tables (findings doc: `oghidra-first-pass-port-findings-2026-07-12.md`,
+111 lines). The four previously-undisassembled Borg template constructors — `0x8007ca5c`,
+`0x800cfe9c`, `0x80129608`, plus EAGLE JET's `FUN_8012b458` — are now reachable in the port:
+
+- **Shared Robot action 0** (`families/shared-robot-dash.ts`, zz_00f1e30_ @0x800f1e30): five-phase
+  engine on table `0x8031b8a0`, **30-frame** dash window (`FLOAT_80439078`, correcting the
+  earlier 20-frame port). Per-Borg 20-byte config `{s16 slotBase, s16 ammoSlot, callback@+4,
+  callback@+8, s16 timerSeed, s16 count/mask, callback@+16}` decoded — pl0405/07/08/0c use
+  timer/count `4/5`, pl0407/08 start at stream slot 3, pl040b consumes ammo slot 2, pl040d starts
+  at slot 6, pl0406 has no action-0 leaf and is excluded. Phase-4 exit gated by `actor+0x5d8 &
+  0xf0` (NOT the analysis session's "Gotcha meter decay" gloss on `0x800f22a8`).
+- **Shared Robot melee** (`families/melee-robot.ts`, FUN_800f2498): lunge speed = `target-distance
+  (+0x760) / 30` with a target, else `+0x868[previousAction % 3] / 30` row (was: flat `50 /
+  timer`). Horizontal decel explicitly cleared at transition; distances above the ROM threshold
+  trigger `zz_00b2190_(actor, 0)`.
+- **EAGLE JET action 1** (`families/eagle-jet.ts`, FUN_8012b458): single code-driven handler (not
+  a phase table). **45-frame** hold, writes effect mode `0x83`, retires hit kind `0x7f`, prepares
+  part slots 4/5, plays cue `0x20`; expiry runs `zz_006a53c_(actor, 0x10)` cleanup (cooldown
+  `16 + dt`, clear action bits, dispatch full-body cue `0x1b`).
+- **NORMAL TANK / LEOPARD actions 0+2** (`families/tank-borg.ts`, ctor 0x8007ca5c): action 0's
+  two variant tables are byte-equivalent five-phase machines (**15f windup, 10f windup, barrel-
+  ready wait, burst, 30f recovery**); burst fires every **5 frames** (3 shots normal, 5 with
+  `+0x5b4 & 0x200`), nearer vector at `+0xa30/+0xa90` selects projectile record 3 or 2. Action 2
+  is NOT the shared X-special — variant 0 uses the 8-entry table `0x802d6aac`, variant 1 enters
+  the 4-entry airborne subtable `0x802d6abc` directly; exact constants aim 30 / rate -1 /
+  airborne seed 10.0 / decel -0.3 / pitch clamp `[-0x3800, 0x1800]` / turn `0x180` / snap `0xc0`.
+- **ARROW NINJA / SHIJIMA action 1** (`families/arrow-ninja.ts`, ctor 0x800cfe9c): variant table
+  `0x8030de28` routes v0 → shared lunge `zz_00fed6c_`, v1/v2 → phase table `0x8030de54`, v3/v4 →
+  phase table `0x8030de64`. v1/v2 = rising ground chain (60f aim, 0.95 reposition, 20f approach,
+  range 150, H/V launch seeds 40/30, 0.9 recovery brake). v3/v4 = homing air dive (group-3 slot
+  2, 30f/30-speed seed, range cutoff 250, deliberate phase-increment-by-two that normally skips
+  table entry 2).
+- **EAGLE ROBOT / PROTO EAGLE action 0** (`families/eagle-robot.ts`, ctor 0x80129608): variant
+  table `0x80331948` routes v0 → `0x8033195c`, v1-v3 → `0x80331968`, v4 → airborne `0x80331974`.
+  Shared constants aim 30 / upper-aim 20 / rate -1 / reposition 0.95 / gravity 1. Fire helper
+  seeds `+0x6ee=1`, decrements ammo, and uses different repeat timing: EAGLE ROBOT **16 frames**,
+  PROTO EAGLE **2 frames**. EAGLE ROBOT fires child records `0x1e/0x1f` via `zz_00c3be0_`; PROTO
+  EAGLE fires `0x6e/0x6f` via `zz_0082824_`. pl0606 composes this action 0 with its already-ported
+  shared morph action 2; pl061a registered for action 0 without falsely routing its bespoke
+  action 2 through the morph engine.
+
+**Commit `01e0cd8e` ("Continue source-backed combat gaps") — second-pass host wiring:** the
+previously-named host-bound gates are now executable rather than named fallbacks. `zz_006dbe0_`
+checks and optionally consumes the live weapon cell (query no longer mutates ammo; consuming
+snapshots/decrements and arms the refill path). Descriptor offsets `+0xac/+0xae` extracted for
+every movement record and drive the BAM16 yaw convergence helpers (Robot dual-axis aim, Eagle
+target-relative roll, Arrow dive pitch, Tank barrel solvers now derive from live target geometry).
+Stream opcodes `0x02/0x03` preserve signed part-0/part-1 state; `+0x1cee` is treated as the
+part-0 stream-completion byte (NOT terrain contact) — host-decoded streams lower it at start and
+raise it at their scheduled end; `+0x1cef/+0x1d0f` feed Robot continuation/contact gates. The
+collision helper returns grounded/airborne independent of stream completion, so full-body vs
+upper-body exit routing is decoupled from `+0x1cee`. All decoded Robot config callbacks perform
+their actual ammo query/consume, timer/count mutation, projectile pair/type selection, rotating
+child-slot ownership, `0xdb` cue, continuation test, and two-child exit gate (fixes the phase-2
+branch: ammo success → slot `base+1`/phase 3; ammo denial → slot `base+2`/phase 4). Live command
+records carry their decoded action/variant through the bridge; ported X and B machines advance
+for multiple frames under ROM ownership, and an unimplemented action is detected and returned to
+the existing generic combat path instead of being swallowed.
+
+**Remaining precision limit (documented honestly):** geometric representation, not missing
+state-machine knowledge. The host has target vectors and scalar actor pose but not the renderer's
+exact per-frame bone matrices. Tank barrel convergence uses the equivalent target yaw/pitch
+solver; Robot attachment ownership bytes are modeled at spawn/exit-gate level while child teardown
+remains owned by the host projectile lifecycle. `data/meleeAnimKinds.json` grew by ~594k lines
+this commit (host-decoded stream events for the newly-routed families); `data/inferred-knowledge.json` (+10,740 lines) banks the session's structured findings for future consumption.
+
+---
+
+## ★ 2026-07-12 session part 2: Girl cluster (14 borgs / 8 families) + Titan/Panther + Machine Red/Blue + Cyber Machine bespoke wave
+
+Four commits (`bf41dc2a` → `4ebb84f8` → `f3a0e064` → `8c695680` → `076619eb`) land the bespoke
+family wave driven by the SDD fleet-task briefs (`.superpowers/sdd/fleet-task-4a/4b/4c-*`).
+`rom.selfcheck.ts` grew by **~840 asserts** across the wave; `battleScene.morph.selfcheck.ts`
+(+160 lines) covers the new morph-target render path.
+
+**Girl cluster (`families/girl-cluster.ts`, 8 constructors / 14 borgs):** BATTLE GIRL pl0300/030b
+KEI (ctor 0x800c04c0, root 0x800c086c), WIRE GIRL pl0301 (0x80106e3c/0x80107278), BARRIER GIRL
+pl0302/0306 (0x80107e7c/0x801080e4), DEATH BORG DELTA II pl0303 (0x8019c380/0x8019c4d4), KILLER
+GIRL pl0304/0308 SHADOW GIRL (0x80134078/0x80134580), CYBER GIRL SUPER pl0305/0309/030a
+(0x8012f204/0x8012f5bc), SPINNER GIRL pl0307/030d (0x801ba020/0x801ba33c), DEATH BORG DELTA
+pl030c (0x801d429c/0x801d447c). Per-family phase tables transcribed exactly — e.g. KILLER GIRL
+pl0304 cfg @0x80336d94 `{0, 0.95, 6.0932398, FUN_80134714}` (thunk zz_01346ec_); BARRIER GIRL
+pl0306 cfg @0x8032411c `{2, 0.95, 6.0932398, FUN_80108530}` (thunk FUN_80108508). **Boundary
+correction at BARRIER GIRL pl0302 @0x804344d8:** TWO actor phases (engine FUN_80108250 → table),
+not the single-phase gloss. **KILLER GIRL pl0308 @0x80336da4:** 5 phases CONFIRMED
+(`FUN_801347c0` chunk_0035.c:2603). Shared melee machines `melee-girl-lunge.ts` /
+`melee-girl-standing.ts` and `cyber-girl.ts` + `shared-series3-x.ts` compose under per-borg slot
+layouts. Runtime helpers landed in `rom/helpers.ts` (+45 lines: `stepPartTargetPitch`,
+`stepTargetYaw`, `toS16`) and `rom/actor.ts` (+19 fields incl. afterimage sample/effect serial).
+The afterimage resolver (`FUN_800b2924` + `zz_00055fc_<<8`) now derives `pos = samplePos -
+forward × 50 × ownerScale` (`FLOAT_80438398`) and a uniformly-selected byte → BAM16 effect yaw,
+replacing the previous identity-copy.
+
+**Titan + Panther (`shared-aimed-shot-x.ts` + bridge composite, 4 borgs):** pl0604/0618 (TITAN)
+and pl0613/0627 (PANTHER) action tables upgraded from morph-only to the full composite
+`[action-0 gun, action-1 family-specific, morph[2] (live for pl0604/0613, suppressed for
+pl0618/0627), aimed-shot[3]]`. New `createTitanPantherGunAction0` + `createTitanPantherAction1
+("titan"|"panther", …)` route the family-specific action 1. The base-type borg (pl0604 TITAN,
+pl0613 PANTHER) gets the live morph at slot 2; the alt-type (pl0618, pl0627) skips morph. Model
+assets for pl0605 (TITAN morph target) and pl0614 (PANTHER morph target) re-exported via
+`scripts/export-internal-morph-models.mjs` (new), with `movementPhysics.json`/`borgSourceStats.json`
+regenerated (+693/+736 lines).
+
+**Cyber Machine state boundaries (`families/cyber-machine.ts`, `8c695680`):** phase entry/exit
+conditions corrected — `actor+0x5d8 & 0xf0` (the same gate the OGhidra Robot port found) now
+scopes the full-body exit, and the upper-body vs full-body split is no longer coupled to
+`+0x1cee`. `shared-aimed-shot-x.ts` (+11 lines) gains the cyber-machine config block.
+
+**Machine Red + Blue (`families/machine-red-blue.ts` NEW, 250 lines, `076619eb`):** ctor routing
+for Machine Red (0x800c91bc) and Machine Blue (0x800ce730) — these share visual themes, NOT
+action tables, so neither aliases to `DEFAULT_CONFIGS`. Full boot.dol pointer tables retained as
+executable documentation: `MACHINE_RED_ROUTES` {root 0x800c94d4, actionTable 0x8030a558,
+actions[3], variants[3][6]} and `MACHINE_BLUE_ROUTES` {root 0x800cea5c, actionTable 0x8030ce34,
+actions[5], variants[5][5]}. 8 borgs covered: pl0600/08/16/1c (Red) + pl0601/09/17/1d (Blue).
+`MachineFamilyCtx` exposes `onMachineRoute` and `onMachineHardpointDeploy` (the `zz_013212c_`
+third-argument identity `actor+0x14c+index` — bridge-owned byte, affected actions stay partial
+until the callee's mutation contract is decoded). Action 3/4 gated off for pl0609/pl061d (the
+only variants without those slots).
+
+**Fleet coverage delta:** the `family-state-machine-coverage.md` audit now reports **20 ported
+action slots** (was 9 family modules / 46 borgs at the 2026-07-06 baseline), 234 partial, 71
+missing, 0 structural errors — 325 action slots total across 119 ctor families / 208 roster
+borgs.
+
+---
+
+## ★ 2026-07-12 session part 1: Gotcha Box settlement transactional API + family state-machine coverage gate + evidence discipline
+
+**Gotcha Box settlement (`packages/missions/src/gotchaBoxSettlement.ts`, 127 lines, commits
+`8bcbc94e` + `ce20f299`):** the GET/drop pipeline (landed 2026-07-05 as an in-flow integration)
+is now a proper transactional API with copy-in/copy-out isolation. `GotchaBoxSettlement {
+begin(), win(defeats): GetDrop[], revert() }` — `begin()` snapshots the pre-battle pool, `win()`
+commits accrued pool progress (registers only defeats with `victimTeam` = enemy team, rolls
+drops, and persists even when no drop rolls — pool progress survives), `revert()` restores the
+exact begin snapshot (shared by loss + abandon). `GotchaBoxState { version: 1, pool,
+collection: CollectedGetDrop[] }` with `cloneGotchaBoxState` + `createMemoryGotchaBoxPersistence`
+adapters. New selfcheck `gotchaBoxSettlement.selfcheck.ts` (124 lines). `apps/game/src/main.ts`
+wiring simplified (−35 lines, +13: the previous inline begin/win/revert logic delegates to the
+new API).
+
+**Family state-machine coverage gate (`5cfa264e`):** new `pnpm audit:family-state-machines`
+script (`scripts/audit-family-state-machines.mjs`, 227 lines) + `family-state-machine-coverage.md`
+(+ `data/family-state-machine-coverage.json`, 14401 lines). The audit joins `commandMoveTables.json`
+(borg→ctor→table assignments) × `actionStreamTables.json` (per-(borg,action,variant) handler
+addresses) × a reviewed-classifications overlay (`family-state-machine-classifications.reviewed.json`),
+then validates: every implementation registration references a known borg id; every borg has a
+ctor; ctor addresses agree between command and action tables; classification status is one of
+{ported, delegated, inactive, partial, missing}; **ported/delegated/inactive classifications
+REQUIRE non-empty evidence** (enforced as a structural error otherwise).
+
+**Evidence discipline tightened (`9bb23bd8` "fix(combat): require complete family port evidence"):**
+the audit's evidence requirement is now a hard gate — **6008 new lines** of evidence records
+added to `family-state-machine-coverage.json` to back every existing "ported" claim.
+`audit-family-state-machines.test.mjs` (+99 lines) pins the validator.
+
+**Project tooling / docs-site (`09ac60b4`, `113f9634`, `bcbc06a6`, `6590eb4e`):** docs-site gains
+four atlas components (`ForceAtlas.vue`, `ModeAtlas.vue`, `StageAtlas.vue`, `WeaponAtlas.vue`) +
+`BorgModelViewer.vue` (764 lines), a new `docs-site/ghidra-corpus.md` (180 lines), and refreshed
+desktop/mobile screenshots. New `scripts/selfcheck-game-session.mjs` (253 lines) +
+`scripts/selfcheck-get-storage.mjs` (148 lines) wired into `package.json`.
+`apps/game/src/gameSession.ts` (+439 lines) and `ui/menuScreenHost.ts` (+108 lines) refactor the
+menu/screen flow.
+
+**Fleet-task scaffolding (`1eedd57a`, `c1cc643b`):** the `.superpowers/sdd/fleet-task-*` brief /
+report / review trail records the decomposition that drove the Girl + Titan/Panther + Machine
+Red/Blue + Cyber Machine wave above (commits `09ac60b4` → `076619eb` are the realization of those
+briefs). Honest scope: these two commits are pure task-state checkpoints, no port code.
+
+**Intermediate fleet progress (2026-07-06 → 2026-07-09, same window, not previously synthesized
+above the 2026-07-06 part-4 entry):**
+- **`5d09fe3c` (2026-07-06)** — **Samurai cluster (13 borgs)** in `families/samurai.ts` +
+  `families/melee-samurai.ts`: NORMAL/ZETA/DEMON/VAMPIRE/SONIC/SHOGUN/CHRONO SAMURAI + DEATH BORG
+  ZETA I-IV (pl0700-070d minus pl0706). Shared 5-phase ranged (S-A @0x8033ed0c) + 3-phase melee
+  mash (S-B @0x8033ed20); per-family specials (NORMAL/ZETA rising slash — code clone, ONE float
+  delta leap gravity -2.37 vs -4.0; DEMON 7-phase hover-dive; VAMPIRE 5-phase; SONIC v2 + own X;
+  SHOGUN sky-dive/heavy-slash/X with **CHRONO time-stop via new `onTimeStop` hook**). Wave-C
+  lunge table reused with the real DOL config @0x80308020. **Idle-return sweep:** the valkrie
+  verify proved `zz_006a474_/4f4/5a4` were mis-transcribed as "full cue 0 + upper 6/7" across 13
+  files; canonical decomp-verified helpers now live in `families/shared-idle-return.ts` (ground =
+  upper cue 0 + velocity zeroing; air-idle = cue 0x12; air-knockout = cue 6), every site fixed
+  only after confirming its ROM machine actually calls the helper. `rom.selfcheck.ts` **610
+  asserts ALL PASS** (Tests 56-62 added, Test 39 rewritten).
+- **`7e582ace` (2026-07-06)** — **Valkrie cluster (8 borgs)** in `families/valkrie.ts` (951
+  lines): QUICK/ICE/TORNADO/WIND/RING/SLOW VALKRIE (pl0b00-04, pl0b06) + DEATH BORG LAMBDA/II
+  (pl0b05/07). Four shared 4-phase machines from chunk_0038.c (tables 0x8033ed68/78/88 +
+  0x804346b8); WIND VALKRIE-only g4 follow-up gate (borgNumber 0xb03); RING VALKRIE 5-ring
+  config outlier `[1 shot, 20f]`; per-borg chain-callback records. Also: the **bespoke-engine
+  port plan** from DOL code fingerprinting — the 418 "bespoke engines" are 58 tiny wrapper shapes;
+  real scope = **1123 unported phase-function shapes (~69.5k instrs)** in 60 batches
+  (`research/tasks/bespoke-engine-port-plan.md` + machine-readable queues).
+- **`646367aa` (2026-07-07)** — beam-wing, drill-robot, hammer-robot, knight-family,
+  magnet-robot, omega2-robot, thunder-robot family scaffolds (+3406 lines) with
+  `scripts/deobfuscate.py` (193 lines) + `scripts/test-lmstudio.py` (97 lines) for the
+  LLM-assisted rename pipeline.
+- **`b8dca76a` (2026-07-07)** — cyber-machine, dragon, nurse-wizard-idol, shared-knight-melee,
+  wave-b-catch-all, worm, fortress-borg, death-borg-nu, tank-borg, sword-knight family
+  bodies (+2172 lines).
+- **`1b51d3fe` (2026-07-09)** — LLM-rename pass expanded `research/decomp/rename all
+  functions/export.json` by **+13,350 lines** (the function-name corpus OGhidra sessions now
+  consume as seed labels).
 
 ---
 
@@ -911,7 +1177,7 @@ Everything else in the tables below is DONE or an intentional CHECKED_CLOSED. Th
 | Combat: knockback direction | DONE (mode 1) + yaw trim wired (T8, 2026-07-05) | modes 0/2/3/4 need sub-object data |
 | Combat: knockback **magnitude** | **WIRED end-to-end (2026-07-05, T6 + T5)** — ground (idx*7×scaleRatio) vs launch ((idx+1)*8, pitch-split by T8 trim) tables selected per-hit, real per-frame decel/gravity integration in movement.ts; T5 scale-ratio wired via existing `tierSizeScale()` (param-tier table, base uniformly 1.0 at spawn) | no TUNED residue; no per-borg base-scale data needed (decode proves base is uniformly 1.0) |
 | Combat: B/X contextual resolver | resolver DERIVED (bd), port upgradeable | fill type/subtype from testers; only pad-bit↔button label needs a dig |
-| Combat: per-family move MOTION | **NEW LAYER started 2026-07-05** (`packages/combat/src/rom/*`) — architecture proven: real motion is per-family C state machines, not shared archetype data. 1/~31 families ported (G RED X-special, `pnpm selfcheck:rom` 22/22) | port the remaining ~30 families' state machines (G RED's own B-melee/dash/charge included) — this is now the single biggest lever for "feels like the real game", see `packages/combat/src/rom/PORTING.md` |
+| Combat: per-family move MOTION | **WAVE LANDED 2026-07-06 → 2026-07-12** (`packages/combat/src/rom/*` + `families/*.ts`, 52 modules) — architecture proven and now broadly populated: real motion is per-family C state machines, not shared archetype data. **20 ported action slots** across 119 ctor families / 208 borgs (325 slots total: 20 ported, 234 partial, 71 missing, 0 structural errors per `audit:family-state-machines`). Girl cluster (14 borgs / 8 ctors), Titan/Panther (4 borgs composite), Machine Red/Blue (8 borgs), Cyber Machine, plus OGhidra first-pass Robot/Eagle Jet/Tank/Arrow Ninja/Eagle Robot modules all live; samurai (13 borgs) + valkrie (8 borgs) clusters banked 2026-07-06. `pnpm selfcheck:rom` grew from 22 → **610+ asserts** across the wave | port the remaining ~51 missing/partial families' state machines; consume the 34 unbanked OGhidra analysis sessions; **CHRONO time-stop hook + Machine Red/Blue `zz_013212c_` hardpoint deploy callback** are the known partial-action residues. See `packages/combat/src/rom/PORTING.md` |
 | Combat: ammo/refill | DONE (B cell-0 + X cell-1 wired) | — |
 | Combat: projectile penetration | wired OBSERVED_WIKI (borgs/total→persist) | trace T6 confirms engine gate; terrain-penetration + solidity still open |
 | Combat: vampire lifesteal | DONE (ported, ay) | — |
@@ -1215,10 +1481,29 @@ Tier A is ~6 self-contained tickets a cheap coding agent can execute now; Tier B
 digs; Tier C needs the controller. Each Tier-C trace has a ready preset in
 `scripts/trace-attack-mechanics.mjs` and a scenario in `attack-mechanics-trace-plan.md`.
 
-**Tier D — NEW, added 2026-07-05, now the highest-leverage bucket:** per-family ROM state-machine
-porting (`packages/combat/src/rom/*`, tracker in `rom/PORTING.md`). The foundation (actor/physics/
-dispatch/stream-vm/state-tables) is done and unit-tested; G RED's X-special is the one family
-landed. Remaining: G RED's own B-melee/dash/B-charge actions, then ~30 other families each as a
-~0.5-1 session mechanical transcription (read the family's ctor + `FUN_*` phase chain in
-`ghidra-export/chunk_*.c`, port per the documented recipe, add a selfcheck). Each family is
-independently shippable behind the `romDriver` registry — no risk to borgs not yet ported.
+**Tier D — added 2026-07-05, the highest-leverage bucket (2026-07-12 wave update):** per-family
+ROM state-machine porting (`packages/combat/src/rom/*`, tracker in `rom/PORTING.md`). The
+foundation (actor/physics/dispatch/stream-vm/state-tables) is done and unit-tested. **DONE since
+the baseline:** G RED's full action ladder (B-melee/dash/B-charge via `gred-dash.ts` /
+`shared-melee-gred.ts` / `shared-charge.ts`), NORMAL NINJA (+ actions 0/1), Sword Knight, Wire
+Gunner, Robot, Dragon, Cyber Machine, Worm (Machine Red/Blue + Alien Worm), Star Hero, the 8
+shared X-melee engines (shared-x-special, shared-melee-lunge, shared-aerial-dive-x, shared-
+series3-x, shared-flight-x, shared-charge3, shared-aimed-shot-x, shared-morph-x, satellite),
+**plus the 2026-07-06 → 2026-07-12 wave**: samurai cluster (13 borgs / `samurai.ts`), valkrie
+cluster (8 borgs / `valkrie.ts`), Girl cluster (14 borgs / 8 ctors / `girl-cluster.ts` +
+`cyber-girl.ts` + `melee-girl-lunge.ts` + `melee-girl-standing.ts`), Titan/Panther composites
+(4 borgs), Machine Red/Blue (8 borgs / `machine-red-blue.ts`), and the OGhidra first-pass
+families (shared Robot action 0/melee, EAGLE JET, NORMAL TANK/LEOPARD, ARROW NINJA/SHIJIMA,
+EAGLE ROBOT/PROTO EAGLE). **Current audit (2026-07-20): 20 ported action slots / 234 partial /
+71 missing out of 325 across 119 ctor families.** Remaining: the ~51 missing/partial families
+each as a ~0.5-1 session mechanical transcription (read the family's ctor + `FUN_*` phase chain
+in `ghidra-export/chunk_*.c`, port per the documented recipe, add a selfcheck); the 34 unbanked
+OGhidra analysis sessions (~50% corpus coverage already in hand) are the cheap fuel. Each family
+is independently shippable behind the `romDriver` registry — no risk to borgs not yet ported.
+
+**Tier E — added 2026-07-20, decomp tooling (unblocks Tier D throughput):** OGhidra coverage-gap
+detection (`scripts/ogh-scan-coverage.ps1`) + Ghidra force-create (`scripts/force_create_missing_
+functions.java`) close the function-disassembly gap (`ghidra_missing_true_gaps: 5 → 0`,
+`dol_entries_not_in_mcp: 0`); v2 design (`ogh-coverage-tool-design.md`) ready. The
+`audit:family-state-machines` npm script + evidence-gate (`9bb23bd8`) keep the ported-claims
+honest as the family count grows.
