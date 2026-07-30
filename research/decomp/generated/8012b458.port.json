@@ -1,0 +1,1968 @@
+{
+  "artifact_schema": 1,
+  "producer": {
+    "application": "RustyOGhidra",
+    "task_mode": "port_1to1",
+    "prompt_revision": "port-1to1-artifact-v1",
+    "model_provider": "custom_api",
+    "model_name": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-IQ3_S",
+    "structured_output_mode": "json_schema"
+  },
+  "program": {
+    "program_name": "boot.dol",
+    "sha256": null,
+    "image_base": "0x80000000",
+    "language": "PowerPC:BE:32"
+  },
+  "function": {
+    "address": "0x8012b458",
+    "original_name": "FUN_8012b458",
+    "current_name": "manageBorgChargeTimer",
+    "size": 252,
+    "body_hash": "a78787fd4abc06593f355767c9ae714ebae007f1a728ee6c0c5c56066e848e9b"
+  },
+  "evidence": {
+    "records": [
+      {
+        "id": "function:0x8012b458",
+        "kind": "function_metadata",
+        "tier": "authoritative",
+        "address": "0x8012b458",
+        "content": "Function: manageBorgChargeTimer at 8012b458\nSignature: undefined __stdcall manageBorgChargeTimer(int param_1)\nEntry: 8012b458\nBody: 8012b458 - 8012b553",
+        "sha256": null
+      },
+      {
+        "id": "decompile:0x8012b458",
+        "kind": "decompile",
+        "tier": "authoritative",
+        "address": "0x8012b458",
+        "content": "[Total Lines: 33] [Showing Lines: 1-33]\nvoid manageBorgChargeTimer(int param_1)\n\n{\n  float fVar1;\n  float fVar2;\n  \n  *(undefined1 *)(param_1 + 0x6e8) = 0x83;\n  fVar2 = FLOAT_80439d80;\n  fVar1 = FLOAT_80439d7c;\n  if (*(char *)(param_1 + 0x540) == '\\0') {\n    *(undefined1 *)(param_1 + 0x540) = 1;\n    *(float *)(param_1 + 0x558) = fVar2;\n    zz_00107a0_(param_1,0x7f);\n    zz_00f036c_(param_1,0x20);\n    if (*(short *)(param_1 + 1000) == 0x607) {\n      zz_016c7ec_(param_1,1,0);\n      zz_016c7ec_(param_1,2,0);\n    }\n    else if (*(short *)(param_1 + 1000) == 0x61b) {\n      zz_016c7ec_(param_1,4,0);\n      zz_016c7ec_(param_1,5,0);\n    }\n  }\n  else {\n    *(float *)(param_1 + 0x558) = *(float *)(param_1 + 0x558) - *(float *)(param_1 + 0x1dc8);\n    if (*(float *)(param_1 + 0x558) <= fVar1) {\n      *(undefined1 *)(param_1 + 0x73f) = 0;\n      *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\n      zz_006a53c_(param_1,0x10);\n    }\n  }\n  return;\n}",
+        "sha256": "5391328b31cefda38dfef52d0f0a99f2058d80d892b6bc55c51f5bbfca7bfd66"
+      },
+      {
+        "id": "instruction:0x8012b458",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b458",
+        "content": "8012b458: stwu r1,-0x10(r1) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b45c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b45c",
+        "content": "8012b45c: mfspr r0,LR ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b460",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b460",
+        "content": "8012b460: stw r0,0x14(r1) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b464",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b464",
+        "content": "8012b464: li r0,-0x7d ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b468",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b468",
+        "content": "8012b468: stw r31,0xc(r1) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b46c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b46c",
+        "content": "8012b46c: or r31,r3,r3 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b470",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b470",
+        "content": "8012b470: stb r0,0x6e8(r3) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b474",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b474",
+        "content": "8012b474: lbz r4,0x540(r3) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b478",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b478",
+        "content": "8012b478: extsb. r0,r4 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b47c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b47c",
+        "content": "8012b47c: bne 0x8012b500 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b480",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b480",
+        "content": "8012b480: addi r0,r4,0x1 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b484",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b484",
+        "content": "8012b484: lfs f0,-0x4ca0(r2) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b488",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b488",
+        "content": "8012b488: stb r0,0x540(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b48c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b48c",
+        "content": "8012b48c: li r4,0x7f ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b490",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b490",
+        "content": "8012b490: stfs f0,0x558(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b494",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b494",
+        "content": "8012b494: bl 0x800107a0 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b498",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b498",
+        "content": "8012b498: or r3,r31,r31 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b49c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b49c",
+        "content": "8012b49c: li r4,0x20 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4a0",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4a0",
+        "content": "8012b4a0: bl 0x800f036c ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4a4",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4a4",
+        "content": "8012b4a4: lha r0,0x3e8(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4a8",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4a8",
+        "content": "8012b4a8: cmpwi r0,0x607 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4ac",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4ac",
+        "content": "8012b4ac: bne 0x8012b4d4 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4b0",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4b0",
+        "content": "8012b4b0: or r3,r31,r31 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4b4",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4b4",
+        "content": "8012b4b4: li r4,0x1 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4b8",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4b8",
+        "content": "8012b4b8: li r5,0x0 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4bc",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4bc",
+        "content": "8012b4bc: bl 0x8016c7ec ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4c0",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4c0",
+        "content": "8012b4c0: or r3,r31,r31 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4c4",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4c4",
+        "content": "8012b4c4: li r4,0x2 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4c8",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4c8",
+        "content": "8012b4c8: li r5,0x0 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4cc",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4cc",
+        "content": "8012b4cc: bl 0x8016c7ec ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4d0",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4d0",
+        "content": "8012b4d0: b 0x8012b540 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4d4",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4d4",
+        "content": "8012b4d4: cmpwi r0,0x61b ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4d8",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4d8",
+        "content": "8012b4d8: bne 0x8012b540 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4dc",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4dc",
+        "content": "8012b4dc: or r3,r31,r31 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4e0",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4e0",
+        "content": "8012b4e0: li r4,0x4 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4e4",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4e4",
+        "content": "8012b4e4: li r5,0x0 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4e8",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4e8",
+        "content": "8012b4e8: bl 0x8016c7ec ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4ec",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4ec",
+        "content": "8012b4ec: or r3,r31,r31 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4f0",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4f0",
+        "content": "8012b4f0: li r4,0x5 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4f4",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4f4",
+        "content": "8012b4f4: li r5,0x0 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4f8",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4f8",
+        "content": "8012b4f8: bl 0x8016c7ec ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b4fc",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b4fc",
+        "content": "8012b4fc: b 0x8012b540 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b500",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b500",
+        "content": "8012b500: lfs f2,0x558(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b504",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b504",
+        "content": "8012b504: lfs f1,0x1dc8(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b508",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b508",
+        "content": "8012b508: lfs f0,-0x4ca4(r2) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b50c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b50c",
+        "content": "8012b50c: fsubs f1,f2,f1 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b510",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b510",
+        "content": "8012b510: stfs f1,0x558(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b514",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b514",
+        "content": "8012b514: lfs f1,0x558(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b518",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b518",
+        "content": "8012b518: fcmpo cr0,f1,f0 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b51c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b51c",
+        "content": "8012b51c: cror eq,lt,eq ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b520",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b520",
+        "content": "8012b520: bne 0x8012b540 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b524",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b524",
+        "content": "8012b524: li r0,0x0 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b528",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b528",
+        "content": "8012b528: li r4,0x10 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b52c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b52c",
+        "content": "8012b52c: stb r0,0x73f(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b530",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b530",
+        "content": "8012b530: lwz r0,0x5e0(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b534",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b534",
+        "content": "8012b534: rlwinm r0,r0,0x0,0x0,0x1d ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b538",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b538",
+        "content": "8012b538: stw r0,0x5e0(r31) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b53c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b53c",
+        "content": "8012b53c: bl 0x8006a53c ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b540",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b540",
+        "content": "8012b540: lwz r0,0x14(r1) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b544",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b544",
+        "content": "8012b544: lwz r31,0xc(r1) ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b548",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b548",
+        "content": "8012b548: mtspr LR,r0 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b54c",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b54c",
+        "content": "8012b54c: addi r1,r1,0x10 ",
+        "sha256": null
+      },
+      {
+        "id": "instruction:0x8012b550",
+        "kind": "instruction",
+        "tier": "authoritative",
+        "address": "0x8012b550",
+        "content": "8012b550: blr ",
+        "sha256": null
+      },
+      {
+        "id": "callee:0x800107a0",
+        "kind": "callee",
+        "tier": "authoritative",
+        "address": "0x800107a0",
+        "content": [
+          "8012b494: bl 0x800107a0 "
+        ],
+        "sha256": null
+      },
+      {
+        "id": "callee:0x8006a53c",
+        "kind": "callee",
+        "tier": "authoritative",
+        "address": "0x8006a53c",
+        "content": [
+          "8012b53c: bl 0x8006a53c "
+        ],
+        "sha256": null
+      },
+      {
+        "id": "callee:0x800f036c",
+        "kind": "callee",
+        "tier": "authoritative",
+        "address": "0x800f036c",
+        "content": [
+          "8012b4a0: bl 0x800f036c "
+        ],
+        "sha256": null
+      },
+      {
+        "id": "callee:0x8016c7ec",
+        "kind": "callee",
+        "tier": "authoritative",
+        "address": "0x8016c7ec",
+        "content": [
+          "8012b4bc: bl 0x8016c7ec ",
+          "8012b4cc: bl 0x8016c7ec ",
+          "8012b4e8: bl 0x8016c7ec ",
+          "8012b4f8: bl 0x8016c7ec "
+        ],
+        "sha256": null
+      },
+      {
+        "id": "decompile:0x800107a0",
+        "kind": "decompile",
+        "tier": "authoritative",
+        "address": "0x800107a0",
+        "content": "[Total Lines: 13] [Showing Lines: 1-13]\nvoid zz_00107a0_(int param_1,undefined1 param_2)\n\n{\n  uint uVar1;\n  \n  uVar1 = zz_0010514_((int)*(char *)(param_1 + 0x3e4));\n  if (((uVar1 & 0x20) == 0) && (PTR_DAT_80433934[0x1f] == '\\0')) {\n    *(undefined1 *)(param_1 + 0x43d) = 0x81;\n    *(undefined1 *)(param_1 + 0x6f8) = param_2;\n    *(undefined1 *)(param_1 + 0x6f9) = 0xff;\n  }\n  return;\n}",
+        "sha256": "7be7ecef37d4a18853d6265227177708063b3c4ee4c154e00168c0d085c16e67"
+      },
+      {
+        "id": "decompile:0x8006a53c",
+        "kind": "decompile",
+        "tier": "authoritative",
+        "address": "0x8006a53c",
+        "content": "[Total Lines: 13] [Showing Lines: 1-13]\nvoid zz_006a53c_(int param_1,uint param_2)\n\n{\n  if (0 < (int)param_2) {\n    *(float *)(param_1 + 0x694) =\n         (float)((double)CONCAT44(0x43300000,param_2 ^ 0x80000000) - DOUBLE_80437650) +\n         *(float *)(param_1 + 0x1dc8);\n  }\n  *(undefined1 *)(param_1 + 0x73f) = 0;\n  *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\n  zz_006a6fc_(param_1,0x1b);\n  return;\n}",
+        "sha256": "d2d7ef79362139a3528e5243f4608086ac7737588a70efd8569de4a9f6ce5f36"
+      },
+      {
+        "id": "decompile:0x800f036c",
+        "kind": "decompile",
+        "tier": "authoritative",
+        "address": "0x800f036c",
+        "content": "[Total Lines: 11] [Showing Lines: 1-11]\nvoid zz_00f036c_(int param_1,undefined4 param_2)\n\n{\n  if (param_1 == 0) {\n    zz_00efb3c_(param_2,0,0x7f,0x40,0x2000);\n  }\n  else {\n    zz_00f04b4_(param_2,param_1 + 0x20,(int)*(char *)(param_1 + 0x96));\n  }\n  return;\n}",
+        "sha256": "1a865f647ebe75d259f45d5ded964571d320e997a61bbed61aa1b14acb74358e"
+      },
+      {
+        "id": "decompile:0x8016c7ec",
+        "kind": "decompile",
+        "tier": "authoritative",
+        "address": "0x8016c7ec",
+        "content": "[Total Lines: 6] [Showing Lines: 1-6]\nvoid zz_016c7ec_(void)\n\n{\n  initBorgInstanceWithLifecycleCallback((double)FLOAT_8043ac38);\n  return;\n}",
+        "sha256": "9a2057480fcff42ccc22b1bf3a5ca707f33e6b6f9a63bd5a5310e5954b76872e"
+      },
+      {
+        "id": "data:0x80439d7c",
+        "kind": "raw_bytes",
+        "tier": "authoritative",
+        "address": "0x80439d7c",
+        "content": {
+          "f32_be": 0.0,
+          "raw": "80439d7c: 00 00 00 00                                      |....|",
+          "raw_hex": "00000000",
+          "s32_be": 0,
+          "u32_be": "0x00000000"
+        },
+        "sha256": null
+      },
+      {
+        "id": "data:0x80439d80",
+        "kind": "raw_bytes",
+        "tier": "authoritative",
+        "address": "0x80439d80",
+        "content": {
+          "f32_be": 45.0,
+          "raw": "80439d80: 42 34 00 00                                      |B4..|",
+          "raw_hex": "42340000",
+          "s32_be": 1110704128,
+          "u32_be": "0x42340000"
+        },
+        "sha256": null
+      },
+      {
+        "id": "data-reference:unknown:0",
+        "kind": "data_reference",
+        "tier": "authoritative",
+        "address": null,
+        "content": "To Stack[-0x10] [WRITE]",
+        "sha256": null
+      }
+    ],
+    "unavailable": []
+  },
+  "analysis": {
+    "classification": null,
+    "summary": "The function manages a Borg charge timer state machine. It initializes a timer if the state byte at offset 0x540 is zero, setting the timer value to 45.0 and invoking helper functions to configure the instance. If the timer is already active, it decrements the timer by a delta value at offset 0x1dc8. If the timer drops below or equals zero, it resets the state, clears specific flags at offset 0x5e0, and calls a cleanup helper. The function handles specific hardware IDs (0x607, 0x61b) to configure instance lifecycle callbacks.",
+    "claims": [
+      {
+        "id": "claim:entry_setup",
+        "kind": "stack_prologue",
+        "value": {
+          "offset": "-16",
+          "width": 32
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b458",
+          "instruction:0x8012b45c",
+          "instruction:0x8012b460",
+          "instruction:0x8012b468"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:param_save",
+        "kind": "register_allocation",
+        "value": {
+          "register": "r31",
+          "source": "param_1"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b46c"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:state_check",
+        "kind": "conditional_branch",
+        "value": {
+          "source": "param_1 + 0x540",
+          "width": 8,
+          "condition": "equal_zero",
+          "target_label": "INIT_PATH",
+          "false_target": "DECREMENT_PATH"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b474",
+          "instruction:0x8012b478",
+          "instruction:0x8012b47c"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:init_set_state",
+        "kind": "memory_write",
+        "value": {
+          "address": "param_1 + 0x540",
+          "value": 1,
+          "width": 8
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b480",
+          "instruction:0x8012b488"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:init_set_timer",
+        "kind": "memory_write",
+        "value": {
+          "address": "param_1 + 0x558",
+          "value": 45.0,
+          "width": 32
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "data:0x80439d80",
+          "instruction:0x8012b484",
+          "instruction:0x8012b490"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:call_configure",
+        "kind": "call",
+        "value": {
+          "callee": "0x800107a0",
+          "args": [
+            "param_1",
+            127
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b494",
+          "instruction:0x8012b498",
+          "instruction:0x8012b49c",
+          "decompile:0x8012b458"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:call_set_param",
+        "kind": "call",
+        "value": {
+          "callee": "0x800f036c",
+          "args": [
+            "param_1",
+            32
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4a0",
+          "instruction:0x8012b498",
+          "instruction:0x8012b49c"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:id_check_607",
+        "kind": "conditional_branch",
+        "value": {
+          "source": "param_1 + 0x3e8",
+          "width": 16,
+          "condition": "equal",
+          "value": 1543,
+          "target_label": "ID_607_PATH",
+          "false_target": "ID_61B_CHECK"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4a4",
+          "instruction:0x8012b4a8",
+          "instruction:0x8012b4ac"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:call_lifecycle_1",
+        "kind": "call",
+        "value": {
+          "callee": "0x8016c7ec",
+          "args": [
+            "param_1",
+            1,
+            0
+          ]
+        },
+        "confidence": 0.8,
+        "evidence_refs": [
+          "instruction:0x8012b4bc",
+          "instruction:0x8012b4b0",
+          "instruction:0x8012b4b4",
+          "instruction:0x8012b4b8"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:call_lifecycle_2",
+        "kind": "call",
+        "value": {
+          "callee": "0x8016c7ec",
+          "args": [
+            "param_1",
+            2,
+            0
+          ]
+        },
+        "confidence": 0.8,
+        "evidence_refs": [
+          "instruction:0x8012b4cc",
+          "instruction:0x8012b4c0",
+          "instruction:0x8012b4c4",
+          "instruction:0x8012b4c8"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:id_check_61b",
+        "kind": "conditional_branch",
+        "value": {
+          "source": "param_1 + 0x3e8",
+          "width": 16,
+          "condition": "equal",
+          "value": 1563,
+          "target_label": "ID_61B_PATH",
+          "false_target": "MERGE_EXIT"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4d4",
+          "instruction:0x8012b4d8"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:call_lifecycle_3",
+        "kind": "call",
+        "value": {
+          "callee": "0x8016c7ec",
+          "args": [
+            "param_1",
+            4,
+            0
+          ]
+        },
+        "confidence": 0.8,
+        "evidence_refs": [
+          "instruction:0x8012b4e8",
+          "instruction:0x8012b4dc",
+          "instruction:0x8012b4e0",
+          "instruction:0x8012b4e4"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:call_lifecycle_4",
+        "kind": "call",
+        "value": {
+          "callee": "0x8016c7ec",
+          "args": [
+            "param_1",
+            5,
+            0
+          ]
+        },
+        "confidence": 0.8,
+        "evidence_refs": [
+          "instruction:0x8012b4f8",
+          "instruction:0x8012b4ec",
+          "instruction:0x8012b4f0",
+          "instruction:0x8012b4f4"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:decrement_timer",
+        "kind": "arithmetic",
+        "value": {
+          "operation": "sub",
+          "target": "param_1 + 0x558",
+          "lhs": "param_1 + 0x558",
+          "rhs": "param_1 + 0x1dc8",
+          "width": 32
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b500",
+          "instruction:0x8012b504",
+          "instruction:0x8012b50c",
+          "instruction:0x8012b510"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:timer_threshold_check",
+        "kind": "conditional_branch",
+        "value": {
+          "lhs": "param_1 + 0x558",
+          "rhs": 0.0,
+          "condition": "lte",
+          "target_label": "TIMER_EXPIRED",
+          "false_target": "MERGE_EXIT"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "data:0x80439d7c",
+          "instruction:0x8012b514",
+          "instruction:0x8012b508",
+          "instruction:0x8012b518",
+          "instruction:0x8012b51c",
+          "instruction:0x8012b520"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:reset_state_flag",
+        "kind": "memory_write",
+        "value": {
+          "address": "param_1 + 0x73f",
+          "value": 0,
+          "width": 8
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b524",
+          "instruction:0x8012b52c"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:clear_flags",
+        "kind": "memory_write",
+        "value": {
+          "address": "param_1 + 0x5e0",
+          "mask": "0xfffffffc",
+          "operation": "and"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b530",
+          "instruction:0x8012b534",
+          "instruction:0x8012b538",
+          "decompile:0x8012b458"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:call_cleanup",
+        "kind": "call",
+        "value": {
+          "callee": "0x8006a53c",
+          "args": [
+            "param_1",
+            16
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b53c",
+          "instruction:0x8012b528"
+        ],
+        "verification": "verified"
+      },
+      {
+        "id": "claim:epilogue",
+        "kind": "stack_epilogue",
+        "value": {
+          "offset": "16",
+          "width": 32
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b540",
+          "instruction:0x8012b544",
+          "instruction:0x8012b548",
+          "instruction:0x8012b54c",
+          "instruction:0x8012b550"
+        ],
+        "verification": "verified"
+      }
+    ],
+    "hypotheses": [
+      "The function name 'manageBorgChargeTimer' accurately describes the control flow of initializing and decrementing a timer value.",
+      "The helper at 0x8016c7ec takes three arguments (param_1, index, value) despite its decompile showing no arguments, likely due to register passing conventions or decompile limitations.",
+      "The value 0x607 (1543) and 0x61b (1563) at offset 0x3e8 represent specific Borg instance IDs or types requiring different lifecycle configurations.",
+      "The timer delta at offset 0x1dc8 represents the time elapsed since the last update."
+    ],
+    "unknowns": [
+      "The exact semantic meaning of the flags cleared at offset 0x5e0.",
+      "The specific behavior of the helper functions 0x800107a0, 0x800f036c, and 0x8006a53c beyond their argument passing."
+    ],
+    "dependencies": [
+      {
+        "address": "0x800107a0",
+        "name": "zz_00107a0_",
+        "status": "unresolved",
+        "reason": "Helper function called with specific configuration arguments."
+      },
+      {
+        "address": "0x800f036c",
+        "name": "zz_00f036c_",
+        "status": "unresolved",
+        "reason": "Helper function called with parameter configuration."
+      },
+      {
+        "address": "0x8016c7ec",
+        "name": "zz_016c7ec_",
+        "status": "unresolved",
+        "reason": "Helper function called with instance index and value; decompile signature mismatch."
+      },
+      {
+        "address": "0x8006a53c",
+        "name": "zz_006a53c_",
+        "status": "unresolved",
+        "reason": "Helper function called on timer expiration."
+      }
+    ],
+    "suitability": "low_level_port"
+  },
+  "port_ir": {
+    "kind": "function",
+    "entry": [
+      {
+        "type": "label",
+        "id": "ENTRY",
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "call",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": "0x800107a0",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 127
+          }
+        ],
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "call",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": "0x800f036c",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 32
+          }
+        ],
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "branch_if_eq",
+        "id": null,
+        "offset": null,
+        "source": {
+          "type": "memory",
+          "address": {
+            "type": "param",
+            "name": "param_1"
+          },
+          "offset": "1000",
+          "width": 16
+        },
+        "value": 1543,
+        "target_label": "ID_607_PATH",
+        "false_target": "ID_61B_CHECK",
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      }
+    ],
+    "update": [
+      {
+        "type": "label",
+        "id": "ID_607_PATH",
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "call",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 1
+          },
+          {
+            "type": "literal",
+            "value": 0
+          }
+        ],
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "call",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 2
+          },
+          {
+            "type": "literal",
+            "value": 0
+          }
+        ],
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "jump",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": "MERGE_EXIT",
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "label",
+        "id": "ID_61B_CHECK",
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "branch_if_eq",
+        "id": null,
+        "offset": null,
+        "source": {
+          "type": "memory",
+          "address": {
+            "type": "param",
+            "name": "param_1"
+          },
+          "offset": "1000",
+          "width": 16
+        },
+        "value": 1563,
+        "target_label": "ID_61B_PATH",
+        "false_target": "MERGE_EXIT",
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "label",
+        "id": "ID_61B_PATH",
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "call",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 4
+          },
+          {
+            "type": "literal",
+            "value": 0
+          }
+        ],
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "call",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 5
+          },
+          {
+            "type": "literal",
+            "value": 0
+          }
+        ],
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "jump",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": "MERGE_EXIT",
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "label",
+        "id": "DECREMENT_PATH",
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "arithmetic",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null,
+        "operation": "sub",
+        "target_label_or_var": "temp_timer",
+        "lhs_var": {
+          "type": "memory",
+          "address": {
+            "type": "param",
+            "name": "param_1"
+          },
+          "offset": "888"
+        },
+        "rhs_var": {
+          "type": "memory",
+          "address": {
+            "type": "param",
+            "name": "param_1"
+          },
+          "offset": "7656"
+        }
+      },
+      {
+        "type": "memory_write",
+        "id": null,
+        "offset": "888",
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null,
+        "address": {
+          "type": "param",
+          "name": "param_1"
+        },
+        "value_var": "temp_timer"
+      },
+      {
+        "type": "branch_if_lte",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": "TIMER_EXPIRED",
+        "false_target": "MERGE_EXIT",
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": "temp_timer",
+        "rhs": 0.0,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "label",
+        "id": "TIMER_EXPIRED",
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "memory_write",
+        "id": null,
+        "offset": "1855",
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null,
+        "address": {
+          "type": "param",
+          "name": "param_1"
+        },
+        "value_literal": 0
+      },
+      {
+        "type": "arithmetic",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null,
+        "operation": "and",
+        "target_label_or_var": "temp_flags",
+        "lhs_var": {
+          "type": "memory",
+          "address": {
+            "type": "param",
+            "name": "param_1"
+          },
+          "offset": "1504"
+        },
+        "rhs_literal": 4294967292
+      },
+      {
+        "type": "memory_write",
+        "id": null,
+        "offset": "1504",
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null,
+        "address": {
+          "type": "param",
+          "name": "param_1"
+        },
+        "value_var": "temp_flags"
+      },
+      {
+        "type": "call",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": "0x8006a53c",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 16
+          }
+        ],
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": true
+      },
+      {
+        "type": "label",
+        "id": "MERGE_EXIT",
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      }
+    ],
+    "exit": [
+      {
+        "type": "label",
+        "id": "RETURN",
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      },
+      {
+        "type": "return",
+        "id": null,
+        "offset": null,
+        "source": null,
+        "value": null,
+        "target_label": null,
+        "false_target": null,
+        "callee": null,
+        "args": null,
+        "target": null,
+        "lhs": null,
+        "rhs": null,
+        "mask": null,
+        "width": null,
+        "signed": null,
+        "fallthrough": null
+      }
+    ]
+  },
+  "verification": {
+    "checks": [
+      {
+        "name": "schema-version",
+        "passed": true,
+        "detail": "artifact_schema must be 1"
+      },
+      {
+        "name": "normalized-function-address",
+        "passed": true,
+        "detail": "function address must be canonical"
+      },
+      {
+        "name": "claims-present",
+        "passed": true,
+        "detail": "analysis must contain at least one claim"
+      },
+      {
+        "name": "dependencies-explicit",
+        "passed": true,
+        "detail": "every dependency must carry an explicit resolution status"
+      },
+      {
+        "name": "claim-evidence:claim:entry_setup",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:entry_setup",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:entry_setup",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:param_save",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:param_save",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:param_save",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:state_check",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:state_check",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:state_check",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:init_set_state",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:init_set_state",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:init_set_state",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:init_set_timer",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:init_set_timer",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:init_set_timer",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:call_configure",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:call_configure",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:call_configure",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:call_set_param",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:call_set_param",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:call_set_param",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:id_check_607",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:id_check_607",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:id_check_607",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:call_lifecycle_1",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:call_lifecycle_1",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:call_lifecycle_1",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:call_lifecycle_2",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:call_lifecycle_2",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:call_lifecycle_2",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:id_check_61b",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:id_check_61b",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:id_check_61b",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:call_lifecycle_3",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:call_lifecycle_3",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:call_lifecycle_3",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:call_lifecycle_4",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:call_lifecycle_4",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:call_lifecycle_4",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:decrement_timer",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:decrement_timer",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:decrement_timer",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:timer_threshold_check",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:timer_threshold_check",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:timer_threshold_check",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:reset_state_flag",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:reset_state_flag",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:reset_state_flag",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:clear_flags",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:clear_flags",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:clear_flags",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:call_cleanup",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:call_cleanup",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:call_cleanup",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      },
+      {
+        "name": "claim-evidence:claim:epilogue",
+        "passed": true,
+        "detail": "every claim must cite existing evidence records"
+      },
+      {
+        "name": "claim-authority:claim:epilogue",
+        "passed": true,
+        "detail": "mechanical claims require authoritative, verified-derived, or observed evidence"
+      },
+      {
+        "name": "claim-mechanics:claim:epilogue",
+        "passed": true,
+        "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence"
+      }
+    ],
+    "status": "verified",
+    "integration_status": "blocked"
+  }
+}

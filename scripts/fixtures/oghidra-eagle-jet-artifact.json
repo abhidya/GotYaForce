@@ -1,0 +1,172 @@
+{
+  "artifact_schema": 1,
+  "producer": {
+    "application": "RustyOGhidra",
+    "task_mode": "port_1to1",
+    "prompt_revision": "port-1to1-artifact-v1",
+    "model_provider": "fixture",
+    "model_name": "qwen-test",
+    "structured_output_mode": "fixture"
+  },
+  "program": {
+    "program_name": "boot.dol",
+    "sha256": null,
+    "image_base": "0x80000000",
+    "language": "PowerPC:BE:32"
+  },
+  "function": {
+    "address": "0x8012b458",
+    "original_name": "FUN_8012b458",
+    "current_name": "FUN_8012b458",
+    "size": 252,
+    "body_hash": "25f4579a18cfa26e08dbe5e239c91fbed4e6b51af0998fcac5a3debe41220949"
+  },
+  "evidence": {
+    "records": [
+      {
+        "id": "decompile:0x8012b458",
+        "kind": "decompile",
+        "tier": "authoritative",
+        "address": "0x8012b458",
+        "content": "actor+0x6e8=0x83; actor+0x558=45.0; call 0x800107a0 arg 0x7f; call 0x800f036c arg 0x20; borg 0x607 slots 1,2; borg 0x61b slots 4,5; actor+0x558 -= actor+0x1dc8; timer <= 0.0; call 0x8006a53c arg 0x10",
+        "sha256": null
+      },
+      {
+        "id": "decompile:0x8006a53c",
+        "kind": "decompile",
+        "tier": "authoritative",
+        "address": "0x8006a53c",
+        "content": "actor+0x694=16_plus_dt; actor+0x5e0 &= 0xfffffffc; call 0x8006a6fc arg 0x1b",
+        "sha256": null
+      },
+      {
+        "id": "data:0x80439d80",
+        "kind": "raw_bytes",
+        "tier": "authoritative",
+        "address": "0x80439d80",
+        "content": {
+          "raw_hex": "42340000",
+          "u32_be": "0x42340000",
+          "f32_be": 45.0
+        },
+        "sha256": null
+      }
+    ],
+    "unavailable": []
+  },
+  "analysis": {
+    "classification": "code_driven_state_handler",
+    "summary": "Eagle Jet action 1 uses a 45-frame code-driven timer.",
+    "claims": [
+      {
+        "id": "effect-mode",
+        "kind": "memory_write",
+        "value": { "offset": "0x6e8", "value": "0x83", "frequency": "every_tick" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458"],
+        "verification": "verified"
+      },
+      {
+        "id": "timer-seed",
+        "kind": "timer_constant",
+        "value": { "offset": "0x558", "value": 45.0, "source_address": "0x80439d80" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458", "data:0x80439d80"],
+        "verification": "verified"
+      },
+      {
+        "id": "retire-hitbox",
+        "kind": "helper_call",
+        "value": { "callee": "0x800107a0", "argument": "0x7f" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458"],
+        "verification": "verified"
+      },
+      {
+        "id": "sound-cue",
+        "kind": "helper_call",
+        "value": { "callee": "0x800f036c", "argument": "0x20" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458"],
+        "verification": "verified"
+      },
+      {
+        "id": "parts-607",
+        "kind": "conditional_helper_calls",
+        "value": { "borg_id": "0x607", "part_slots": [1, 2], "value": 0 },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458"],
+        "verification": "verified"
+      },
+      {
+        "id": "parts-61b",
+        "kind": "conditional_helper_calls",
+        "value": { "borg_id": "0x61b", "part_slots": [4, 5], "value": 0 },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458"],
+        "verification": "verified"
+      },
+      {
+        "id": "timer-decrement",
+        "kind": "memory_update",
+        "value": { "offset": "0x558", "delta_offset": "0x1dc8", "operation": "subtract_f32" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458"],
+        "verification": "verified"
+      },
+      {
+        "id": "expiry",
+        "kind": "comparison",
+        "value": { "timer_offset": "0x558", "operator": "<=", "floor": 0.0 },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458"],
+        "verification": "verified"
+      },
+      {
+        "id": "cleanup-call",
+        "kind": "helper_call",
+        "value": { "callee": "0x8006a53c", "argument": "0x10" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8012b458"],
+        "verification": "verified"
+      },
+      {
+        "id": "cleanup-cooldown",
+        "kind": "memory_write",
+        "value": { "offset": "0x694", "value": "16_plus_dt" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8006a53c"],
+        "verification": "verified"
+      },
+      {
+        "id": "cleanup-bits",
+        "kind": "memory_update",
+        "value": { "offset": "0x5e0", "operation": "and", "mask": "0xfffffffc" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8006a53c"],
+        "verification": "verified"
+      },
+      {
+        "id": "cleanup-cue",
+        "kind": "helper_call",
+        "value": { "callee": "0x8006a6fc", "argument": "0x1b" },
+        "confidence": 1.0,
+        "evidence_refs": ["decompile:0x8006a53c"],
+        "verification": "verified"
+      }
+    ],
+    "hypotheses": [],
+    "unknowns": [],
+    "dependencies": [
+      { "address": "0x800107a0", "name": "retire_hitbox", "status": "resolved", "reason": null },
+      { "address": "0x8006a53c", "name": "cleanup", "status": "resolved", "reason": null }
+    ],
+    "suitability": "typed_handwritten_integration"
+  },
+  "port_ir": null,
+  "verification": {
+    "checks": [],
+    "status": "verified",
+    "integration_status": "candidate"
+  }
+}

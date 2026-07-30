@@ -1,0 +1,162 @@
+Produce one strict JSON object for a source-derived port artifact. Do not use Markdown fences and
+do not add prose outside the JSON.
+
+Target: FUN_8012b458 at 0x8012b458, an action handler used by EAGLE JET.
+Model provenance name: unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-IQ3_S
+
+Rules:
+- Authoritative records may support mechanical claims. The historical summary is advisory only.
+- Adjudicate conflicts yourself. In particular, determine whether 0x7f is a duration or a helper
+  argument and identify the actual timer seed.
+- Preserve offsets, widths, branch direction, comparison operators, helper arguments, and the
+  difference between behavior performed by the target and behavior performed by its cleanup callee.
+- Do not invent semantic field names. Put interpretations in hypotheses.
+- Use exactly the stable claim IDs below. If evidence cannot support one, omit it and explain why
+  in unknowns. The `value` for a recovered claim must use exactly the contracted JSON shape.
+
+Claim contract:
+{
+  "fx_mode_6e8": {
+    "offset": "0x6e8",
+    "value": "0x83",
+    "frequency": "every_tick"
+  },
+  "timer_seed_558": {
+    "offset": "0x558",
+    "value": 45.0,
+    "source_address": "0x80439d80"
+  },
+  "retire_hitbox_7f": {
+    "callee": "0x800107a0",
+    "argument": "0x7f"
+  },
+  "sound_cue_20": {
+    "callee": "0x800f036c",
+    "argument": "0x20"
+  },
+  "prepared_parts_61b": {
+    "borg_id": "0x061b",
+    "part_slots": [
+      4,
+      5
+    ],
+    "value": 0
+  },
+  "timer_decrement": {
+    "offset": "0x558",
+    "delta_offset": "0x1dc8",
+    "operation": "subtract_f32"
+  },
+  "expiry_compare": {
+    "timer_offset": "0x558",
+    "operator": "<=",
+    "floor": 0.0
+  },
+  "exit_cleanup_call": {
+    "callee": "0x8006a53c",
+    "argument": "0x10"
+  },
+  "cleanup_cooldown": {
+    "offset": "0x694",
+    "value": "16_plus_dt"
+  },
+  "cleanup_action_bits": {
+    "offset": "0x5e0",
+    "operation": "and",
+    "mask": "0xfffffffc"
+  },
+  "cleanup_cue": {
+    "callee": "0x8006a6fc",
+    "argument": "0x1b"
+  }
+}
+
+Required object shape:
+{
+  "artifact_schema": 1,
+  "producer": {
+    "application": "OGhidra-local-poc",
+    "task_mode": "port_1to1",
+    "prompt_revision": "eagle-jet-poc-v1",
+    "model_name": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-IQ3_S"
+  },
+  "program": { "name": "boot.dol", "sha256": "...", "image_base": "0x80000000", "language": "PowerPC:BE:32" },
+  "function": { "address": "0x8012b458", "original_name": "FUN_8012b458" },
+  "evidence_refs": ["..."],
+  "analysis": {
+    "classification": "code_driven_state_handler",
+    "summary": "...",
+    "claims": [
+      {
+        "id": "stable id from contract",
+        "kind": "mechanical_observation",
+        "value": {},
+        "confidence": 0.0,
+        "evidence_refs": ["authoritative record id"],
+        "verification": "pending"
+      }
+    ],
+    "hypotheses": [],
+    "unknowns": [],
+    "dependencies": [],
+    "suitability": "typed_handwritten_integration"
+  },
+  "port_ir": {
+    "kind": "per_frame_state_handler",
+    "entry": [],
+    "update": [],
+    "exit": []
+  },
+  "verification": { "status": "unverified", "checks": [] }
+}
+
+Evidence bundle:
+{
+  "program": {
+    "name": "boot.dol",
+    "sha256": "21454a8880c6254616662710d6ec626e43d853999da2cdfad700030960a94836",
+    "image_base": "0x80000000",
+    "language": "PowerPC:BE:32"
+  },
+  "records": [
+    {
+      "id": "decompile:8012b458",
+      "tier": "authoritative",
+      "kind": "ghidra_decompile",
+      "content": "// ==== 8012b458  FUN_8012b458 ====\n\nvoid FUN_8012b458(int param_1)\n\n{\n  float fVar1;\n  float fVar2;\n  \n  *(undefined1 *)(param_1 + 0x6e8) = 0x83;\n  fVar2 = FLOAT_80439d80;\n  fVar1 = FLOAT_80439d7c;\n  if (*(char *)(param_1 + 0x540) == '\\0') {\n    *(undefined1 *)(param_1 + 0x540) = 1;\n    *(float *)(param_1 + 0x558) = fVar2;\n    zz_00107a0_(param_1,0x7f);\n    zz_00f036c_(param_1,0x20);\n    if (*(short *)(param_1 + 1000) == 0x607) {\n      zz_016c7ec_(param_1,1,0);\n      zz_016c7ec_(param_1,2,0);\n    }\n    else if (*(short *)(param_1 + 1000) == 0x61b) {\n      zz_016c7ec_(param_1,4,0);\n      zz_016c7ec_(param_1,5,0);\n    }\n  }\n  else {\n    *(float *)(param_1 + 0x558) = *(float *)(param_1 + 0x558) - *(float *)(param_1 + 0x1dc8);\n    if (*(float *)(param_1 + 0x558) <= fVar1) {\n      *(undefined1 *)(param_1 + 0x73f) = 0;\n      *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\n      zz_006a53c_(param_1,0x10);\n    }\n  }\n  return;\n}"
+    },
+    {
+      "id": "decompile:8006a53c",
+      "tier": "authoritative",
+      "kind": "ghidra_decompile",
+      "content": "// ==== 8006a53c  zz_006a53c_ ====\n\nvoid zz_006a53c_(int param_1,uint param_2)\n\n{\n  if (0 < (int)param_2) {\n    *(float *)(param_1 + 0x694) =\n         (float)((double)CONCAT44(0x43300000,param_2 ^ 0x80000000) - DOUBLE_80437650) +\n         *(float *)(param_1 + 0x1dc8);\n  }\n  *(undefined1 *)(param_1 + 0x73f) = 0;\n  *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\n  zz_006a6fc_(param_1,0x1b);\n  return;\n}"
+    },
+    {
+      "id": "dol-f32:80439d7c",
+      "tier": "authoritative",
+      "kind": "dol_big_endian_f32",
+      "content": {
+        "raw_hex": "00000000",
+        "u32_be": "0x00000000",
+        "f32_be": 0.0
+      }
+    },
+    {
+      "id": "dol-f32:80439d80",
+      "tier": "authoritative",
+      "kind": "dol_big_endian_f32",
+      "content": {
+        "raw_hex": "42340000",
+        "u32_be": "0x42340000",
+        "f32_be": 45.0
+      }
+    },
+    {
+      "id": "historical-summary:8012b458",
+      "tier": "advisory",
+      "kind": "prior_llm_summary",
+      "content": "**Function Analysis:**\nThe function implements a timer-based state transition logic, specifically for a \"charge\" or \"wind-up\" duration.\n1.  **Initialization (Charge Start):** It checks `param_1 + 0x540` (a status flag). If this flag is clear (`== '\\0'`), it sets the flag to 1 (indicating the process has started), saves the current global time (`FLOAT_80439d80`) to `param_1 + 0x558` (the timer base), and calls `zz_00107a0_` with argument `0x7f` (127) and `zz_00f036c_` with argument `0x20` (32). The argument `0x7f` likely represents the duration in frames or units. It then checks `param_1 + 0x640` (offset 1000) for specific Borg types (e.g., `0x607`, `0x61b`) and calls `zz_016c7ec_` to initialize specific attack slots (indices 1, 2 or 4, 5) to state 0.\n2.  **Decrement (Charge Running):** If the flag is already set, it decrements the timer at `param_1 + 0x558` by the delta time stored at `param_1 + 0x1dc8`.\n3.  **Completion (Charge End):** If the timer drops below `FLOAT_80439d7c` (likely 0.0 or a threshold), it clears the flag at `param_1 + 0x540` (ending the charge state), clears the lower 2 bits of the status word at `param_1 + 0x5e0` (likely clearing a specific action bit like \"Charging\"), and calls `zz_006a53c_` with `0x10` (likely resetting the action state to Idle or Neutral).\n\n**Behavior Summary:**\nThis function manages a timed \"wind-up\" or \"charge\" phase for a Borg. It initializes the timer and prepares attack slots when the charge begins, decrements the timer by delta time each frame, and triggers a state reset (clearing charge flags and resetting action state) when the duration expires.\n\n**Suggested Name:** manageBorgChargeTimer\n**Rationale:** The function explicitly handles a timer (`param_1 + 0x558`) that is initialized with a duration (`0x7f`) and decremented by delta time (`param_1 + 0x1dc8`). The use of `zz_016c7ec_` to initialize specific attack slots suggests this is tied to a charged attack. The name `manageBorgChargeTimer` accurately reflects the lifecycle: initialization, countdown, and expiration handling. It avoids guessing the specific attack type (e.g., \"ChargeShot\") because the offset `0x640` checks for multiple Borg IDs, implying this logic is shared or generic for charging mechanics. The cleared bits in `0x5e0` and the reset call `zz_006a53c_` confirm it terminates the charge state.",
+      "warning": "Discovery lead only. It may contain confident semantic or numeric errors."
+    }
+  ]
+}

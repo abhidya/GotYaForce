@@ -1,0 +1,261 @@
+{
+  "artifact_schema": 1,
+  "function": "0x8012b458",
+  "passed": true,
+  "checks_passed": 46,
+  "checks_total": 46,
+  "checks": [
+    {
+      "name": "schema-version",
+      "passed": true,
+      "detail": "artifact_schema must be 1"
+    },
+    {
+      "name": "normalized-address",
+      "passed": true,
+      "detail": "function address must be 0x8012b458"
+    },
+    {
+      "name": "program-identity",
+      "passed": true,
+      "detail": "artifact must preserve the evidence bundle's boot.dol SHA-256"
+    },
+    {
+      "name": "claim-present:fx_mode_6e8",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:fx_mode_6e8",
+      "passed": true,
+      "detail": "expected {\"frequency\": \"every_tick\", \"offset\": \"0x6e8\", \"value\": \"0x83\"}; got {\"frequency\": \"every_tick\", \"offset\": \"0x6e8\", \"value\": \"0x83\"}"
+    },
+    {
+      "name": "claim-evidence:fx_mode_6e8",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:timer_seed_558",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:timer_seed_558",
+      "passed": true,
+      "detail": "expected {\"offset\": \"0x558\", \"source_address\": \"0x80439d80\", \"value\": 45.0}; got {\"offset\": \"0x558\", \"source_address\": \"0x80439d80\", \"value\": 45.0}"
+    },
+    {
+      "name": "claim-evidence:timer_seed_558",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:retire_hitbox_7f",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:retire_hitbox_7f",
+      "passed": true,
+      "detail": "expected {\"argument\": \"0x7f\", \"callee\": \"0x800107a0\"}; got {\"argument\": \"0x7f\", \"callee\": \"0x800107a0\"}"
+    },
+    {
+      "name": "claim-evidence:retire_hitbox_7f",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:sound_cue_20",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:sound_cue_20",
+      "passed": true,
+      "detail": "expected {\"argument\": \"0x20\", \"callee\": \"0x800f036c\"}; got {\"argument\": \"0x20\", \"callee\": \"0x800f036c\"}"
+    },
+    {
+      "name": "claim-evidence:sound_cue_20",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:prepared_parts_607",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:prepared_parts_607",
+      "passed": true,
+      "detail": "expected {\"borg_id\": \"0x0607\", \"part_slots\": [1, 2], \"value\": 0}; got {\"borg_id\": \"0x0607\", \"part_slots\": [1, 2], \"value\": 0}"
+    },
+    {
+      "name": "claim-evidence:prepared_parts_607",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:prepared_parts_61b",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:prepared_parts_61b",
+      "passed": true,
+      "detail": "expected {\"borg_id\": \"0x061b\", \"part_slots\": [4, 5], \"value\": 0}; got {\"borg_id\": \"0x061b\", \"part_slots\": [4, 5], \"value\": 0}"
+    },
+    {
+      "name": "claim-evidence:prepared_parts_61b",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:timer_decrement",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:timer_decrement",
+      "passed": true,
+      "detail": "expected {\"delta_offset\": \"0x1dc8\", \"offset\": \"0x558\", \"operation\": \"subtract_f32\"}; got {\"delta_offset\": \"0x1dc8\", \"offset\": \"0x558\", \"operation\": \"subtract_f32\"}"
+    },
+    {
+      "name": "claim-evidence:timer_decrement",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:expiry_compare",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:expiry_compare",
+      "passed": true,
+      "detail": "expected {\"floor\": 0.0, \"operator\": \"<=\", \"timer_offset\": \"0x558\"}; got {\"floor\": 0.0, \"operator\": \"<=\", \"timer_offset\": \"0x558\"}"
+    },
+    {
+      "name": "claim-evidence:expiry_compare",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:exit_cleanup_call",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:exit_cleanup_call",
+      "passed": true,
+      "detail": "expected {\"argument\": \"0x10\", \"callee\": \"0x8006a53c\"}; got {\"argument\": \"0x10\", \"callee\": \"0x8006a53c\"}"
+    },
+    {
+      "name": "claim-evidence:exit_cleanup_call",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:cleanup_cooldown",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:cleanup_cooldown",
+      "passed": true,
+      "detail": "expected {\"offset\": \"0x694\", \"value\": \"16_plus_dt\"}; got {\"offset\": \"0x694\", \"value\": \"16_plus_dt\"}"
+    },
+    {
+      "name": "claim-evidence:cleanup_cooldown",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:cleanup_action_bits",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:cleanup_action_bits",
+      "passed": true,
+      "detail": "expected {\"mask\": \"0xfffffffc\", \"offset\": \"0x5e0\", \"operation\": \"and\"}; got {\"mask\": \"0xfffffffc\", \"offset\": \"0x5e0\", \"operation\": \"and\"}"
+    },
+    {
+      "name": "claim-evidence:cleanup_action_bits",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "claim-present:cleanup_cue",
+      "passed": true,
+      "detail": "required Eagle Jet mechanical claim"
+    },
+    {
+      "name": "claim-value:cleanup_cue",
+      "passed": true,
+      "detail": "expected {\"argument\": \"0x1b\", \"callee\": \"0x8006a6fc\"}; got {\"argument\": \"0x1b\", \"callee\": \"0x8006a6fc\"}"
+    },
+    {
+      "name": "claim-evidence:cleanup_cue",
+      "passed": true,
+      "detail": "claim must cite only known authoritative evidence records"
+    },
+    {
+      "name": "historical-0x7f-misread-rejected",
+      "passed": true,
+      "detail": "0x7f is zz_00107a0_ argument, not the 45-frame timer seed"
+    },
+    {
+      "name": "no-unsupported-fully-integrated",
+      "passed": true,
+      "detail": "model output must remain unverified until deterministic checks finish"
+    },
+    {
+      "name": "port-ir-init-update-exclusive",
+      "passed": true,
+      "detail": "the initialization branch must return and must not fall through into timer decrement"
+    },
+    {
+      "name": "port-ir-entry-routes-both-paths",
+      "passed": true,
+      "detail": "phase 0 must route to INIT and the false path must route explicitly to DECREMENT"
+    },
+    {
+      "name": "port-ir-borg-branches-use-loaded-id",
+      "passed": true,
+      "detail": "both Borg comparisons must name the loaded borg_id operand"
+    },
+    {
+      "name": "port-ir-borg-branches-mutually-exclusive",
+      "passed": true,
+      "detail": "unmatched, 0x607, and 0x61b initialization paths must not fall through into each other"
+    },
+    {
+      "name": "port-ir-expiry-operands-and-paths",
+      "passed": true,
+      "detail": "expiry must encode current_timer <= zero with explicit true and false targets"
+    }
+  ],
+  "attempts": [
+    {
+      "attempt": 4,
+      "reused_saved_response": true,
+      "syntax_repairs": [],
+      "passed": true,
+      "checks_passed": 46,
+      "checks_total": 46
+    }
+  ],
+  "handwritten_port_comparison": {
+    "passed": true,
+    "checks": {
+      "duration_45": true,
+      "fx_mode_83": true,
+      "hitbox_7f": true,
+      "cue_20": true,
+      "cleanup_10": true,
+      "exit_cue_1b": true,
+      "parts_4_5": true
+    }
+  }
+}

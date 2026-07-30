@@ -1,0 +1,375 @@
+{
+  "attempts": 1,
+  "checks": [
+    {
+      "detail": "artifact_schema must be 1",
+      "name": "schema-version",
+      "passed": true
+    },
+    {
+      "detail": "function address must be canonical",
+      "name": "normalized-function-address",
+      "passed": true
+    },
+    {
+      "detail": "analysis must contain at least one claim",
+      "name": "claims-present",
+      "passed": true
+    },
+    {
+      "detail": "every dependency must carry an explicit resolution status",
+      "name": "dependencies-explicit",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:entry_setup",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:entry_setup",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:entry_setup",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:param_save",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:param_save",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:param_save",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:state_check",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:state_check",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:state_check",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:init_set_state",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:init_set_state",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:init_set_state",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:init_set_timer",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:init_set_timer",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:init_set_timer",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:call_configure",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:call_configure",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:call_configure",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:call_set_param",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:call_set_param",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:call_set_param",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:id_check_607",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:id_check_607",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:id_check_607",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:call_lifecycle_1",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:call_lifecycle_1",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:call_lifecycle_1",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:call_lifecycle_2",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:call_lifecycle_2",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:call_lifecycle_2",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:id_check_61b",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:id_check_61b",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:id_check_61b",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:call_lifecycle_3",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:call_lifecycle_3",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:call_lifecycle_3",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:call_lifecycle_4",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:call_lifecycle_4",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:call_lifecycle_4",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:decrement_timer",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:decrement_timer",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:decrement_timer",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:timer_threshold_check",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:timer_threshold_check",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:timer_threshold_check",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:reset_state_flag",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:reset_state_flag",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:reset_state_flag",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:clear_flags",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:clear_flags",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:clear_flags",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:call_cleanup",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:call_cleanup",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:call_cleanup",
+      "passed": true
+    },
+    {
+      "detail": "every claim must cite existing evidence records",
+      "name": "claim-evidence:claim:epilogue",
+      "passed": true
+    },
+    {
+      "detail": "mechanical claims require authoritative, verified-derived, or observed evidence",
+      "name": "claim-authority:claim:epilogue",
+      "passed": true
+    },
+    {
+      "detail": "claimed addresses, offsets, and numeric literals must occur in cited evidence",
+      "name": "claim-mechanics:claim:epilogue",
+      "passed": true
+    }
+  ],
+  "checks_failed": 0,
+  "checks_passed": 61,
+  "claim_prunings": [
+    {
+      "claim_id": "claim:init_byte_write",
+      "reason": "deterministic evidence validation rejected the model claim",
+      "value": "{\"address\": \"param_1 + 0x6e8\", \"value\": 0, \"width\": 8}"
+    }
+  ],
+  "evidence_enrichments": [
+    {
+      "claim_id": "claim:call_configure",
+      "evidence_id": "decompile:0x8012b458",
+      "reason": "authoritative record contains the claim anchor and every missing literal"
+    },
+    {
+      "claim_id": "claim:clear_flags",
+      "evidence_id": "decompile:0x8012b458",
+      "reason": "authoritative record contains the claim anchor and every missing literal"
+    }
+  ],
+  "passed": true,
+  "syntax": "pydantic-v2",
+  "syntax_repairs": [
+    {
+      "from": "offset: ",
+      "kind": "operation_field_punctuation:update.12",
+      "to": "offset"
+    },
+    {
+      "from": "target_label: ",
+      "kind": "operation_field_punctuation:update.13",
+      "to": "target_label"
+    },
+    {
+      "from": "false_target: ",
+      "kind": "operation_field_punctuation:update.13",
+      "to": "false_target"
+    },
+    {
+      "from": "lhs_var",
+      "kind": "operation_field_alias:update.13",
+      "to": "lhs"
+    },
+    {
+      "from": "rhs_literal",
+      "kind": "operation_field_alias:update.13",
+      "to": "rhs"
+    },
+    {
+      "from": "offset: ",
+      "kind": "operation_field_punctuation:update.15",
+      "to": "offset"
+    },
+    {
+      "from": "offset: ",
+      "kind": "operation_field_punctuation:update.17",
+      "to": "offset"
+    },
+    {
+      "from": "implicit list-order fallthrough",
+      "kind": "explicit_fallthrough:update.18",
+      "to": "MERGE_EXIT"
+    }
+  ]
+}

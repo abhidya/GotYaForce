@@ -1,0 +1,382 @@
+{
+  "artifact_schema": 1,
+  "producer": {
+    "application": "OGhidra-local-poc",
+    "task_mode": "port_1to1",
+    "prompt_revision": "eagle-jet-poc-v1",
+    "model_name": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-IQ3_S"
+  },
+  "program": {
+    "name": "boot.dol",
+    "sha256": "21454a8880c6254616662710d6ec626e43d853999da2cdfad700030960a94836",
+    "image_base": "0x80000000",
+    "language": "PowerPC:BE:32"
+  },
+  "function": {
+    "address": "0x8012b458",
+    "original_name": "FUN_8012b458"
+  },
+  "evidence_refs": [
+    "decompile:8012b458",
+    "decompile:8006a53c",
+    "dol-f32:80439d7c",
+    "dol-f32:80439d80"
+  ],
+  "analysis": {
+    "classification": "code_driven_state_handler",
+    "summary": "The function implements a timer-based state machine for a Borg entity. On initialization (flag at 0x540 is zero), it sets the flag, loads the timer base from global address 0x80439d80, calls helper zz_00107a0_ with argument 0x7f, calls helper zz_00f036c_ with argument 0x20, and initializes part slots based on the Borg ID at offset 0x640. On subsequent ticks, it decrements the timer at 0x558 by the delta at 0x1dc8. If the timer falls below or equals the value at 0x80439d7c (0.0), it clears the status byte at 0x73f, clears the lower two bits of the action word at 0x5e0, and calls the cleanup routine zz_006a53c_ with argument 0x10. The cleanup routine further updates a cooldown value at 0x694 and calls zz_006a6fc_ with argument 0x1b.",
+    "claims": [
+      {
+        "id": "fx_mode_6e8",
+        "kind": "mechanical_observation",
+        "value": {
+          "offset": "0x6e8",
+          "value": "0x83",
+          "frequency": "every_tick"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "timer_seed_558",
+        "kind": "mechanical_observation",
+        "value": {
+          "offset": "0x558",
+          "value": 45.0,
+          "source_address": "0x80439d80"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458",
+          "dol-f32:80439d80"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "retire_hitbox_7f",
+        "kind": "mechanical_observation",
+        "value": {
+          "callee": "0x800107a0",
+          "argument": "0x7f"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "sound_cue_20",
+        "kind": "mechanical_observation",
+        "value": {
+          "callee": "0x800f036c",
+          "argument": "0x20"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "prepared_parts_61b",
+        "kind": "mechanical_observation",
+        "value": {
+          "borg_id": "0x061b",
+          "part_slots": [
+            4,
+            5
+          ],
+          "value": 0
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "timer_decrement",
+        "kind": "mechanical_observation",
+        "value": {
+          "offset": "0x558",
+          "delta_offset": "0x1dc8",
+          "operation": "subtract_f32"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "expiry_compare",
+        "kind": "mechanical_observation",
+        "value": {
+          "timer_offset": "0x558",
+          "operator": "<=",
+          "floor": 0.0
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458",
+          "dol-f32:80439d7c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "exit_cleanup_call",
+        "kind": "mechanical_observation",
+        "value": {
+          "callee": "0x8006a53c",
+          "argument": "0x10"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "cleanup_cooldown",
+        "kind": "mechanical_observation",
+        "value": {
+          "offset": "0x694",
+          "value": "16_plus_dt"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8006a53c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "cleanup_action_bits",
+        "kind": "mechanical_observation",
+        "value": {
+          "offset": "0x5e0",
+          "operation": "and",
+          "mask": "0xfffffffc"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8012b458",
+          "decompile:8006a53c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "cleanup_cue",
+        "kind": "mechanical_observation",
+        "value": {
+          "callee": "0x8006a6fc",
+          "argument": "0x1b"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "decompile:8006a53c"
+        ],
+        "verification": "pending"
+      }
+    ],
+    "hypotheses": [
+      "The argument 0x7f passed to zz_00107a0_ is a duration or hitbox parameter, not a timer seed, as the timer seed is explicitly loaded from global memory 0x80439d80.",
+      "The value 0x83 written to offset 0x6e8 every tick likely represents a fixed animation or effect state ID.",
+      "The cleanup routine zz_006a53c_ performs a cooldown update at 0x694 using a constant 16.0 (0x43300000) plus the delta time, distinct from the main timer logic."
+    ],
+    "unknowns": [],
+    "dependencies": [
+      "0x800107a0",
+      "0x800f036c",
+      "0x8006a53c",
+      "0x8006a6fc",
+      "0x80439d7c",
+      "0x80439d80"
+    ],
+    "suitability": "typed_handwritten_integration"
+  },
+  "port_ir": {
+    "kind": "per_frame_state_handler",
+    "entry": [
+      {
+        "type": "write_byte",
+        "offset": "0x6e8",
+        "value": 0x83
+      },
+      {
+        "type": "load_f32",
+        "target": "fVar2",
+        "source": "0x80439d80"
+      },
+      {
+        "type": "load_f32",
+        "target": "fVar1",
+        "source": "0x80439d7c"
+      },
+      {
+        "type": "branch_if_zero",
+        "offset": "0x540",
+        "target_label": "INIT"
+      }
+    ],
+    "update": [
+      {
+        "type": "label",
+        "id": "INIT"
+      },
+      {
+        "type": "write_byte",
+        "offset": "0x540",
+        "value": 1
+      },
+      {
+        "type": "write_f32",
+        "offset": "0x558",
+        "value": "fVar2"
+      },
+      {
+        "type": "call",
+        "callee": "0x800107a0",
+        "args": [
+          "param_1",
+          0x7f
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x800f036c",
+        "args": [
+          "param_1",
+          0x20
+        ]
+      },
+      {
+        "type": "load_short",
+        "target": "borg_id",
+        "offset": "0x640"
+      },
+      {
+        "type": "branch_if_eq",
+        "value": 0x607,
+        "target_label": "BORG_607"
+      },
+      {
+        "type": "branch_if_eq",
+        "value": 0x61b,
+        "target_label": "BORG_61B"
+      },
+      {
+        "type": "label",
+        "id": "BORG_607"
+      },
+      {
+        "type": "call",
+        "callee": "0x80016c7ec",
+        "args": [
+          "param_1",
+          1,
+          0
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x80016c7ec",
+        "args": [
+          "param_1",
+          2,
+          0
+        ]
+      },
+      {
+        "type": "label",
+        "id": "BORG_61B"
+      },
+      {
+        "type": "call",
+        "callee": "0x80016c7ec",
+        "args": [
+          "param_1",
+          4,
+          0
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x80016c7ec",
+        "args": [
+          "param_1",
+          5,
+          0
+        ]
+      },
+      {
+        "type": "label",
+        "id": "DECREMENT"
+      },
+      {
+        "type": "load_f32",
+        "target": "delta",
+        "offset": "0x1dc8"
+      },
+      {
+        "type": "load_f32",
+        "target": "current_timer",
+        "offset": "0x558"
+      },
+      {
+        "type": "store_f32",
+        "offset": "0x558",
+        "value": "current_timer - delta"
+      },
+      {
+        "type": "load_f32",
+        "target": "threshold",
+        "offset": "0x558"
+      },
+      {
+        "type": "branch_if_lte",
+        "value": "fVar1",
+        "target_label": "EXPIRE"
+      },
+      {
+        "type": "label",
+        "id": "EXPIRE"
+      },
+      {
+        "type": "write_byte",
+        "offset": "0x73f",
+        "value": 0
+      },
+      {
+        "type": "load_uint",
+        "target": "action_bits",
+        "offset": "0x5e0"
+      },
+      {
+        "type": "store_uint",
+        "offset": "0x5e0",
+        "value": "action_bits & 0xfffffffc"
+      },
+      {
+        "type": "call",
+        "callee": "0x8006a53c",
+        "args": [
+          "param_1",
+          0x10
+        ]
+      }
+    ],
+    "exit": [
+      {
+        "type": "return"
+      }
+    ]
+  },
+  "verification": {
+    "status": "unverified",
+    "checks": []
+  }
+}
