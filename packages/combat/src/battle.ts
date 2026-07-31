@@ -48,6 +48,7 @@ import {
   stepVampireDrain,
 } from "./combat.js";
 import { challengeSideRanksForMode } from "./damageFormula.js";
+import { setBootConfigByte } from "./bootGlobals.js";
 import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { stepStatus } from "./status.js";
@@ -172,6 +173,7 @@ class BattleImpl implements Battle {
     // rom-waypoint.ts ring positioning + rom-movement.ts state machine + cadence/range
     // executor). `useRomAi: false` opts back into the legacy heuristic stepAI.
     this.useRomAi = cfg.useRomAi !== false;
+    setBootConfigByte(cfg.bootConfigByte ?? 0);
     resetProjectileCounter();
 
     let cpuIdx = 0;
