@@ -23,6 +23,39 @@ export function setBootConfigByte(value: number): void {
 }
 
 /**
+ * gnt4___init_hardware_bl @0x80003400 — Early hardware initialization sequence.
+ *
+ * Original decomp:
+ *   void gnt4___init_hardware_bl(void) {
+ *     gnt4___OSPSInit_bl();
+ *     gnt4___OSFPRInit_bl();
+ *     gnt4___OSCacheInit_bl();
+ *     return;
+ *   }
+ *
+ * Normalized disassembly:
+ *   mfmsr r0
+ *   ori r0,r0,0x2000
+ *   mtmsr r0,0
+ *   mfspr r31,lr
+ *   bl 0x801ff548  // gnt4___OSPSInit_bl
+ *   bl 0x801feaf0  // gnt4___OSFPRInit_bl
+ *   bl 0x80200934  // gnt4___OSCacheInit_bl
+ *   mtspr lr,r31
+ *   blr
+ *
+ * Called from start() @0x8000316c (chunk_0000.c) during early boot,
+ * after __init_registers() and before zz_0003340_().
+ *
+ * In the browser port, this is a no-op (no GameCube hardware to initialize).
+ */
+export function gnt4___init_hardware_bl(): void {
+  // Browser has no GameCube hardware — all three init functions are no-ops.
+  // The original calls gnt4___OSPSInit_bl(), gnt4___OSFPRInit_bl(), and gnt4___OSCacheInit_bl()
+  // in sequence to initialize power/performance state, floating-point registers, and caches.
+}
+
+/**
  * zz_000314c_ @0x8000314c — read the boot configuration byte.
  *
  * Original decomp:
