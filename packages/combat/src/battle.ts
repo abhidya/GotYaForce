@@ -42,6 +42,7 @@ import {
   stepGaugeWindows,
   stepHitStatus,
   stepInvincibility,
+  stepPrng,
   stepProjectiles,
   useWeaponCell,
   stepVampireDrain,
@@ -658,6 +659,10 @@ class BattleImpl implements Battle {
     }
 
     this.stepPowerBurstInputs(resolved);
+
+    // Advance the ROM PRNG global (zz_0005630_ @0x80005630): DAT_804360c4 = (DAT_804360c4*3)
+    // with carry-propagated low byte; called once per frame by the ROM's main loop.
+    stepPrng();
 
     // 2) Lock-on resolution + facing context, then movement, then attacks.
     for (const b of all) {
