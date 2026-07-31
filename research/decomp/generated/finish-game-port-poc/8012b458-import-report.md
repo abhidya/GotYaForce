@@ -8,7 +8,7 @@
 - OGhidra integration status before the trusted importer profile: blocked
 - GotYaForce importer profile: candidate
 - Generated candidate: `packages/combat/src/generated/oghidra/fn_8012b458.generated.ts`
-- Safe to integrate automatically: **no** (human review is always required)
+- Eligible for automatic verification: **yes**
 
 ## Recovered Eagle Jet facts
 
@@ -33,7 +33,7 @@
 
 ## Import decision
 
-A compilable isolated candidate was emitted. Production registration was not changed.
+A compilable isolated candidate was emitted. Production registration remains unchanged until automatic compile, differential, ROM, and browser gates pass.
 
 ## Automatic compilation and behavior verification
 
@@ -43,4 +43,4 @@ A compilable isolated candidate was emitted. Production registration was not cha
 - Handwritten scenarios: 0
 - Passed scenarios: 12/12
 - Independent oracle: existing GotYaForce family implementation
-- Machine-readable result: `research/decomp/generated/8012b458-auto-verification.json`
+- Machine-readable result: `research/decomp/generated/finish-game-port-poc/8012b458-auto-verification.json`

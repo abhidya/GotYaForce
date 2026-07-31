@@ -1,0 +1,68 @@
+{
+  "run_schema": 1,
+  "run_mode": "fresh",
+  "total_stages": 8,
+  "objective": "Finish the GotYaForce browser port autonomously",
+  "scope": {
+    "kind": "vertical_slice",
+    "function_address": "0x8012b458",
+    "production_family": "Eagle Jet"
+  },
+  "queue": [
+    {
+      "address": "0x8012b458",
+      "family": "Eagle Jet",
+      "status": "queued"
+    }
+  ],
+  "local_model": null,
+  "session": {
+    "path": null,
+    "role": "none",
+    "vectors_required": false
+  },
+  "status": "running",
+  "started_at": "2026-07-31T00:27:25.857Z",
+  "updated_at": "2026-07-31T00:27:25.864Z",
+  "current_stage": "local_model",
+  "stages": {
+    "local_model": {
+      "label": "Generate a fresh artifact with local Qwen and live Ghidra",
+      "status": "running",
+      "started_at": "2026-07-31T00:27:25.864Z"
+    },
+    "artifact": {
+      "label": "Validate local-Qwen artifact provenance",
+      "status": "pending"
+    },
+    "generate": {
+      "label": "Generate the production candidate",
+      "status": "pending"
+    },
+    "automatic_verify": {
+      "label": "Compile and run artifact-derived differential tests",
+      "status": "pending"
+    },
+    "promote": {
+      "label": "Promote the verified candidate into the production runtime",
+      "status": "pending"
+    },
+    "combat": {
+      "label": "Build combat and run the complete ROM replay suite",
+      "status": "pending"
+    },
+    "web_build": {
+      "label": "Build the production browser game",
+      "status": "pending"
+    },
+    "browser": {
+      "label": "Launch Chrome and execute the production browser bundle",
+      "status": "pending"
+    }
+  },
+  "promotion": {
+    "address": "0x8012b458",
+    "status": "not_started",
+    "rolled_back": false
+  }
+}

@@ -11,6 +11,12 @@
 import type { RomActor } from "../rom/actor.js";
 import { dispatchFullBodyCue } from "../rom/dispatch.js";
 import type { StreamContext } from "../rom/stream-vm.js";
+import {
+  tryStepFun8012b458,
+  type GeneratedEagleJetActor,
+  type GeneratedEagleJetHost,
+} from "../generated/oghidra/fn_8012b458.generated.js";
+import { OGHIDRA_PROMOTED_PORTS } from "../generated/oghidra/promotion-registry.generated.js";
 
 export const EAGLE_JET_ACTION1 = {
   DURATION: 45.0,          // FLOAT_80439d80 (DOL-read)
@@ -35,7 +41,7 @@ export interface EagleJetScratch {
   retiredHitboxKind?: number;
 }
 
-export function createEagleJetAction1(ctx: StreamContext): (actor: RomActor) => void {
+export function createEagleJetAction1Reference(ctx: StreamContext): (actor: RomActor) => void {
   return (actor: RomActor): void => {
     const a = actor as RomActor & EagleJetScratch;
     a.effectMode6e8 = EAGLE_JET_ACTION1.FX_MODE;
@@ -59,6 +65,53 @@ export function createEagleJetAction1(ctx: StreamContext): (actor: RomActor) => 
     actor.controlWord &= ~0x3;
     dispatchFullBodyCue(actor, EAGLE_JET_ACTION1.EXIT_CUE);
   };
+}
+
+function createEagleJetAction1Generated(ctx: StreamContext): (actor: RomActor) => void {
+  return (actor: RomActor): void => {
+    const scratch = actor as RomActor & EagleJetScratch;
+    const generatedActor: GeneratedEagleJetActor = {
+      borgNumber: actor.borgNumber,
+      phase: actor.fbPhaseSlots[0] ?? 0,
+      timer: actor.handlerTimer,
+      dt: actor.dt,
+      effectMode: scratch.effectMode6e8 ?? 0,
+      cooldown: actor.stateTimer,
+      housekeeping: scratch.housekeeping73f ?? 0,
+      controlWord: actor.controlWord,
+    };
+    const prepared: number[] = [];
+    const host: GeneratedEagleJetHost = {
+      retireHitbox(_generatedActor, kind) {
+        scratch.retiredHitboxKind = kind;
+      },
+      playCue(_generatedActor, cue) {
+        ctx.onPlayCue?.(actor, cue);
+      },
+      preparePart(_generatedActor, slot) {
+        prepared.push(slot);
+      },
+      dispatchFullBodyCue(_generatedActor, cue) {
+        dispatchFullBodyCue(actor, cue);
+        generatedActor.phase = actor.fbPhaseSlots[0] ?? 0;
+      },
+    };
+
+    tryStepFun8012b458(generatedActor, host);
+    actor.fbPhaseSlots[0] = generatedActor.phase;
+    actor.handlerTimer = generatedActor.timer;
+    actor.stateTimer = generatedActor.cooldown;
+    actor.controlWord = generatedActor.controlWord;
+    scratch.effectMode6e8 = generatedActor.effectMode;
+    scratch.housekeeping73f = generatedActor.housekeeping;
+    if (prepared.length > 0) scratch.preparedPartSlots = prepared;
+  };
+}
+
+export function createEagleJetAction1(ctx: StreamContext): (actor: RomActor) => void {
+  return OGHIDRA_PROMOTED_PORTS["0x8012b458"]
+    ? createEagleJetAction1Generated(ctx)
+    : createEagleJetAction1Reference(ctx);
 }
 
 export function configureEagleJetFamily(actor: RomActor, ctx: StreamContext): void {

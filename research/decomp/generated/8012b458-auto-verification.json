@@ -1,0 +1,710 @@
+{
+  "verification_schema": 1,
+  "function_address": "0x8012b458",
+  "artifact_body_hash": "a78787fd4abc06593f355767c9ae714ebae007f1a728ee6c0c5c56066e848e9b",
+  "candidate": "packages/combat/src/generated/oghidra/fn_8012b458.generated.ts",
+  "scenario_source": "artifact-boundary-matrix",
+  "handwritten_scenarios": 0,
+  "compile": {
+    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-5Ofncs/candidate packages/combat/src/generated/oghidra/fn_8012b458.generated.ts",
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "oracle": "existing GotYaForce family implementation",
+  "behavior": {
+    "status": "passed",
+    "passed": 12,
+    "failed": 0,
+    "scenarios": [
+      {
+        "id": "entry-dt-0.25",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 0.25,
+          "effectMode": 85,
+          "cooldown": 9,
+          "housekeeping": 7,
+          "controlWord": 0,
+          "phase": 0,
+          "timer": 10
+        },
+        "expected": {
+          "state": {
+            "phase": 1,
+            "timer": 45,
+            "effectMode": 131,
+            "cooldown": 9,
+            "housekeeping": 7,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [
+              127
+            ],
+            "playedCues": [
+              32
+            ],
+            "preparedParts": [
+              [
+                4,
+                0
+              ],
+              [
+                5,
+                0
+              ]
+            ],
+            "fullBodyCues": []
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 1,
+            "timer": 45,
+            "effectMode": 131,
+            "cooldown": 9,
+            "housekeeping": 7,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [
+              127
+            ],
+            "playedCues": [
+              32
+            ],
+            "preparedParts": [
+              [
+                4,
+                0
+              ],
+              [
+                5,
+                0
+              ]
+            ],
+            "fullBodyCues": []
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-above-dt-0.25",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 0.25,
+          "effectMode": 85,
+          "cooldown": 9,
+          "housekeeping": 7,
+          "controlWord": 0,
+          "phase": 1,
+          "timer": 0.5
+        },
+        "expected": {
+          "state": {
+            "phase": 1,
+            "timer": 0.25,
+            "effectMode": 131,
+            "cooldown": 9,
+            "housekeeping": 7,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": []
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 1,
+            "timer": 0.25,
+            "effectMode": 131,
+            "cooldown": 9,
+            "housekeeping": 7,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": []
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-exact-dt-0.25",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 0.25,
+          "effectMode": 85,
+          "cooldown": 9,
+          "housekeeping": 7,
+          "controlWord": 0,
+          "phase": 1,
+          "timer": 0.25
+        },
+        "expected": {
+          "state": {
+            "phase": 0,
+            "timer": 0,
+            "effectMode": 131,
+            "cooldown": 16.25,
+            "housekeeping": 0,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 0,
+            "timer": 0,
+            "effectMode": 131,
+            "cooldown": 16.25,
+            "housekeeping": 0,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-below-dt-0.25",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 0.25,
+          "effectMode": 85,
+          "cooldown": 9,
+          "housekeeping": 7,
+          "controlWord": 0,
+          "phase": 1,
+          "timer": 0.125
+        },
+        "expected": {
+          "state": {
+            "phase": 0,
+            "timer": -0.125,
+            "effectMode": 131,
+            "cooldown": 16.25,
+            "housekeeping": 0,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 0,
+            "timer": -0.125,
+            "effectMode": 131,
+            "cooldown": 16.25,
+            "housekeeping": 0,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "entry-dt-1",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 1,
+          "effectMode": 86,
+          "cooldown": 10,
+          "housekeeping": 8,
+          "controlWord": 3,
+          "phase": 0,
+          "timer": 11
+        },
+        "expected": {
+          "state": {
+            "phase": 1,
+            "timer": 45,
+            "effectMode": 131,
+            "cooldown": 10,
+            "housekeeping": 8,
+            "controlWord": 3
+          },
+          "effects": {
+            "retiredHitboxKinds": [
+              127
+            ],
+            "playedCues": [
+              32
+            ],
+            "preparedParts": [
+              [
+                4,
+                0
+              ],
+              [
+                5,
+                0
+              ]
+            ],
+            "fullBodyCues": []
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 1,
+            "timer": 45,
+            "effectMode": 131,
+            "cooldown": 10,
+            "housekeeping": 8,
+            "controlWord": 3
+          },
+          "effects": {
+            "retiredHitboxKinds": [
+              127
+            ],
+            "playedCues": [
+              32
+            ],
+            "preparedParts": [
+              [
+                4,
+                0
+              ],
+              [
+                5,
+                0
+              ]
+            ],
+            "fullBodyCues": []
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-above-dt-1",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 1,
+          "effectMode": 86,
+          "cooldown": 10,
+          "housekeeping": 8,
+          "controlWord": 3,
+          "phase": 1,
+          "timer": 2
+        },
+        "expected": {
+          "state": {
+            "phase": 1,
+            "timer": 1,
+            "effectMode": 131,
+            "cooldown": 10,
+            "housekeeping": 8,
+            "controlWord": 3
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": []
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 1,
+            "timer": 1,
+            "effectMode": 131,
+            "cooldown": 10,
+            "housekeeping": 8,
+            "controlWord": 3
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": []
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-exact-dt-1",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 1,
+          "effectMode": 86,
+          "cooldown": 10,
+          "housekeeping": 8,
+          "controlWord": 3,
+          "phase": 1,
+          "timer": 1
+        },
+        "expected": {
+          "state": {
+            "phase": 0,
+            "timer": 0,
+            "effectMode": 131,
+            "cooldown": 17,
+            "housekeeping": 0,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 0,
+            "timer": 0,
+            "effectMode": 131,
+            "cooldown": 17,
+            "housekeeping": 0,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-below-dt-1",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 1,
+          "effectMode": 86,
+          "cooldown": 10,
+          "housekeeping": 8,
+          "controlWord": 3,
+          "phase": 1,
+          "timer": 0.5
+        },
+        "expected": {
+          "state": {
+            "phase": 0,
+            "timer": -0.5,
+            "effectMode": 131,
+            "cooldown": 17,
+            "housekeeping": 0,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 0,
+            "timer": -0.5,
+            "effectMode": 131,
+            "cooldown": 17,
+            "housekeeping": 0,
+            "controlWord": 0
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "entry-dt-2",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 2,
+          "effectMode": 87,
+          "cooldown": 11,
+          "housekeeping": 9,
+          "controlWord": 4294967295,
+          "phase": 0,
+          "timer": 12
+        },
+        "expected": {
+          "state": {
+            "phase": 1,
+            "timer": 45,
+            "effectMode": 131,
+            "cooldown": 11,
+            "housekeeping": 9,
+            "controlWord": 4294967295
+          },
+          "effects": {
+            "retiredHitboxKinds": [
+              127
+            ],
+            "playedCues": [
+              32
+            ],
+            "preparedParts": [
+              [
+                4,
+                0
+              ],
+              [
+                5,
+                0
+              ]
+            ],
+            "fullBodyCues": []
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 1,
+            "timer": 45,
+            "effectMode": 131,
+            "cooldown": 11,
+            "housekeeping": 9,
+            "controlWord": 4294967295
+          },
+          "effects": {
+            "retiredHitboxKinds": [
+              127
+            ],
+            "playedCues": [
+              32
+            ],
+            "preparedParts": [
+              [
+                4,
+                0
+              ],
+              [
+                5,
+                0
+              ]
+            ],
+            "fullBodyCues": []
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-above-dt-2",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 2,
+          "effectMode": 87,
+          "cooldown": 11,
+          "housekeeping": 9,
+          "controlWord": 4294967295,
+          "phase": 1,
+          "timer": 4
+        },
+        "expected": {
+          "state": {
+            "phase": 1,
+            "timer": 2,
+            "effectMode": 131,
+            "cooldown": 11,
+            "housekeeping": 9,
+            "controlWord": 4294967295
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": []
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 1,
+            "timer": 2,
+            "effectMode": 131,
+            "cooldown": 11,
+            "housekeeping": 9,
+            "controlWord": 4294967295
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": []
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-exact-dt-2",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 2,
+          "effectMode": 87,
+          "cooldown": 11,
+          "housekeeping": 9,
+          "controlWord": 4294967295,
+          "phase": 1,
+          "timer": 2
+        },
+        "expected": {
+          "state": {
+            "phase": 0,
+            "timer": 0,
+            "effectMode": 131,
+            "cooldown": 18,
+            "housekeeping": 0,
+            "controlWord": 4294967292
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 0,
+            "timer": 0,
+            "effectMode": 131,
+            "cooldown": 18,
+            "housekeeping": 0,
+            "controlWord": 4294967292
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "passed": true,
+        "error": null
+      },
+      {
+        "id": "update-below-dt-2",
+        "source": "artifact-boundary-matrix",
+        "input": {
+          "borgNumber": 1563,
+          "dt": 2,
+          "effectMode": 87,
+          "cooldown": 11,
+          "housekeeping": 9,
+          "controlWord": 4294967295,
+          "phase": 1,
+          "timer": 1
+        },
+        "expected": {
+          "state": {
+            "phase": 0,
+            "timer": -1,
+            "effectMode": 131,
+            "cooldown": 18,
+            "housekeeping": 0,
+            "controlWord": 4294967292
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "actual": {
+          "state": {
+            "phase": 0,
+            "timer": -1,
+            "effectMode": 131,
+            "cooldown": 18,
+            "housekeeping": 0,
+            "controlWord": 4294967292
+          },
+          "effects": {
+            "retiredHitboxKinds": [],
+            "playedCues": [],
+            "preparedParts": [],
+            "fullBodyCues": [
+              27
+            ]
+          }
+        },
+        "passed": true,
+        "error": null
+      }
+    ],
+    "blocker": null
+  },
+  "status": "passed",
+  "oracle_compile": {
+    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-5Ofncs/oracle --rootDir packages/combat/src packages/combat/src/families/eagle-jet.ts packages/combat/src/rom/actor.ts",
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+}

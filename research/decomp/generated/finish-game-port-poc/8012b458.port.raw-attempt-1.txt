@@ -1,0 +1,672 @@
+{
+  "analysis": {
+    "summary": "Function `manageBorgChargeTimer` manages a Borg unit's charge timer state. It initializes the timer if the status byte at offset 0x540 is zero, setting it to a max value (45.0) and triggering initialization calls. If the timer is active, it decrements by a delta value; if the result drops below or equals zero, it resets the timer state and triggers a completion/cleanup call. The function also handles specific hardware IDs (0x607, 0x61b) to trigger instance lifecycle callbacks.",
+    "claims": [
+      {
+        "id": "C_INIT_STATUS",
+        "kind": "store",
+        "value": {
+          "offset": "0x6e8",
+          "value": 131,
+          "width": 8,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b464",
+          "instruction:0x8012b470"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_STATUS_ZERO",
+        "kind": "branch_if_eq",
+        "value": {
+          "source": "status_byte",
+          "value": 0,
+          "target_label": "INIT_BLOCK",
+          "false_target": "DECREMENT_BLOCK"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b474",
+          "instruction:0x8012b478",
+          "instruction:0x8012b47c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_SET_STATUS_ACTIVE",
+        "kind": "store",
+        "value": {
+          "offset": "0x540",
+          "value": 1,
+          "width": 8,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b480",
+          "instruction:0x8012b488"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_LOAD_MAX_TIMER",
+        "kind": "load_constant",
+        "value": {
+          "address": "0x80439d80",
+          "value": 45.0,
+          "width": 32,
+          "type": "float"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b484",
+          "data:0x80439d80"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_STORE_MAX_TIMER",
+        "kind": "store",
+        "value": {
+          "offset": "0x558",
+          "width": 32,
+          "type": "float"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b490"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_INIT_1",
+        "kind": "call",
+        "value": {
+          "callee": "0x800107a0",
+          "args": [
+            "param_1",
+            127
+          ]
+        },
+        "confidence": 0.9,
+        "evidence_refs": [
+          "instruction:0x8012b48c",
+          "instruction:0x8012b494"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_INIT_2",
+        "kind": "call",
+        "value": {
+          "callee": "0x800f036c",
+          "args": [
+            "param_1",
+            32
+          ]
+        },
+        "confidence": 0.9,
+        "evidence_refs": [
+          "instruction:0x8012b498",
+          "instruction:0x8012b49c",
+          "instruction:0x8012b4a0"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_HW_ID_607",
+        "kind": "branch_if_eq",
+        "value": {
+          "source": "hw_id",
+          "value": 1543,
+          "target_label": "HW_ID_607_BLOCK",
+          "false_target": "CHECK_HW_ID_61B"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4a4",
+          "instruction:0x8012b4a8",
+          "instruction:0x8012b4ac"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_LIFECYCLE_1",
+        "kind": "call",
+        "value": {
+          "callee": "0x8016c7ec",
+          "args": [
+            "param_1",
+            1,
+            0
+          ]
+        },
+        "confidence": 0.9,
+        "evidence_refs": [
+          "instruction:0x8012b4b0",
+          "instruction:0x8012b4b4",
+          "instruction:0x8012b4b8",
+          "instruction:0x8012b4bc"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_LIFECYCLE_2",
+        "kind": "call",
+        "value": {
+          "callee": "0x8016c7ec",
+          "args": [
+            "param_1",
+            2,
+            0
+          ]
+        },
+        "confidence": 0.9,
+        "evidence_refs": [
+          "instruction:0x8012b4c0",
+          "instruction:0x8012b4c4",
+          "instruction:0x8012b4c8",
+          "instruction:0x8012b4cc"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_HW_ID_61B",
+        "kind": "branch_if_eq",
+        "value": {
+          "source": "hw_id",
+          "value": 1563,
+          "target_label": "HW_ID_61B_BLOCK",
+          "false_target": "EXIT_BLOCK"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4d4",
+          "instruction:0x8012b4d8"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_LIFECYCLE_3",
+        "kind": "call",
+        "value": {
+          "callee": "0x8016c7ec",
+          "args": [
+            "param_1",
+            4,
+            0
+          ]
+        },
+        "confidence": 0.9,
+        "evidence_refs": [
+          "instruction:0x8012b4dc",
+          "instruction:0x8012b4e0",
+          "instruction:0x8012b4e4",
+          "instruction:0x8012b4e8"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_LIFECYCLE_4",
+        "kind": "call",
+        "value": {
+          "callee": "0x8016c7ec",
+          "args": [
+            "param_1",
+            5,
+            0
+          ]
+        },
+        "confidence": 0.9,
+        "evidence_refs": [
+          "instruction:0x8012b4ec",
+          "instruction:0x8012b4f0",
+          "instruction:0x8012b4f4",
+          "instruction:0x8012b4f8"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_LOAD_CURRENT_TIMER",
+        "kind": "load",
+        "value": {
+          "offset": "0x558",
+          "width": 32,
+          "type": "float"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b500"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_LOAD_DELTA",
+        "kind": "load",
+        "value": {
+          "offset": "0x1dc8",
+          "width": 32,
+          "type": "float"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b504"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_SUBTRACT_DELTA",
+        "kind": "store",
+        "value": {
+          "offset": "0x558",
+          "width": 32,
+          "type": "float",
+          "operation": "sub"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b50c",
+          "instruction:0x8012b510"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_LOAD_MIN_TIMER",
+        "kind": "load_constant",
+        "value": {
+          "address": "0x80439d7c",
+          "value": 0.0,
+          "width": 32,
+          "type": "float"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b508",
+          "data:0x80439d7c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_TIMER_EXPIRED",
+        "kind": "branch_if_lte",
+        "value": {
+          "lhs": "current_timer",
+          "rhs": 0.0,
+          "target_label": "EXPIRE_BLOCK",
+          "false_target": "EXIT_BLOCK"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b514",
+          "instruction:0x8012b518",
+          "instruction:0x8012b51c",
+          "instruction:0x8012b520"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_RESET_STATUS",
+        "kind": "store",
+        "value": {
+          "offset": "0x73f",
+          "value": 0,
+          "width": 8,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b524",
+          "instruction:0x8012b52c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CLEAR_FLAGS",
+        "kind": "store",
+        "value": {
+          "offset": "0x5e0",
+          "mask": 4294967292,
+          "width": 32,
+          "operation": "and"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b530",
+          "instruction:0x8012b534",
+          "instruction:0x8012b538"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_EXPIRE",
+        "kind": "call",
+        "value": {
+          "callee": "0x8006a53c",
+          "args": [
+            "param_1",
+            16
+          ]
+        },
+        "confidence": 0.9,
+        "evidence_refs": [
+          "instruction:0x8012b528",
+          "instruction:0x8012b53c"
+        ],
+        "verification": "pending"
+      }
+    ],
+    "hypotheses": [
+      "param_1 is a pointer to a Borg instance structure.",
+      "Offset 0x540 is the active/initialized flag for the charge timer.",
+      "Offset 0x558 holds the current float value of the charge timer.",
+      "Offset 0x1dc8 holds the decrement delta per tick/frame.",
+      "Offset 0x6e8 is a status byte written with 0x83 on entry, possibly indicating 'charging' or 'active' state.",
+      "Offset 0x73f is a secondary status flag cleared upon timer expiration.",
+      "Offset 0x5e0 contains flags where the lower 2 bits are cleared upon expiration.",
+      "Offsets 1000 (0x3E8) holds a hardware ID used to select specific lifecycle callbacks.",
+      "zz_016c7ec_ is a generic lifecycle callback dispatcher taking instance, type, and arg."
+    ],
+    "unknowns": [
+      "Exact semantic meaning of status byte 0x83 at offset 0x6e8.",
+      "Exact semantic meaning of flags cleared at offset 0x5e0.",
+      "Specific behavior of zz_016c7ec_ beyond 'lifecycle callback'."
+    ],
+    "dependencies": [
+      {
+        "status": "unresolved",
+        "address": "0x800107a0",
+        "name": "zz_00107a0_"
+      },
+      {
+        "status": "unresolved",
+        "address": "0x8006a53c",
+        "name": "zz_006a53c_"
+      },
+      {
+        "status": "unresolved",
+        "address": "0x800f036c",
+        "name": "zz_00f036c_"
+      },
+      {
+        "status": "unresolved",
+        "address": "0x8016c7ec",
+        "name": "zz_016c7ec_"
+      }
+    ],
+    "suitability": "low_level_port"
+  },
+  "port_ir": {
+    "kind": "function",
+    "entry": [
+      {
+        "type": "label",
+        "id": "ENTRY"
+      },
+      {
+        "type": "store",
+        "offset": "0x6e8",
+        "value": 131,
+        "width": 8,
+        "signed": false
+      },
+      {
+        "type": "load",
+        "source": "param_1",
+        "offset_offset": "0x540",
+        "id_var": "status_byte"
+      },
+      {
+        "type": "branch_if_eq",
+        "source": "status_byte",
+        "value": 0,
+        "target_label": "INIT_BLOCK",
+        "false_target": "DECREMENT_BLOCK"
+      }
+    ],
+    "update": [
+      {
+        "type": "label",
+        "id": "INIT_BLOCK"
+      },
+      {
+        "type": "store",
+        "offset": "0x540",
+        "value": 1,
+        "width": 8,
+        "signed": false
+      },
+      {
+        "type": "load_constant",
+        "address": "0x80439d80",
+        "id_var": "max_timer"
+      },
+      {
+        "type": "store",
+        "offset": "0x558",
+        "source": "max_timer",
+        "width": 32,
+        "type_float": true
+      },
+      {
+        "type": "call",
+        "callee": "0x800107a0",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 127,
+            "width": 8
+          }
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x800f036c",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 32,
+            "width": 32
+          }
+        ]
+      },
+      {
+        "type": "load",
+        "source": "param_1",
+        "offset_offset": "0x3e8",
+        "id_var": "hw_id"
+      },
+      {
+        "type": "branch_if_eq",
+        "source": "hw_id",
+        "value": 1543,
+        "target_label": "HW_ID_607_BLOCK",
+        "false_target": "CHECK_HW_ID_61B"
+      },
+      {
+        "type": "label",
+        "id": "HW_ID_607_BLOCK"
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 1,
+            "width": 32
+          },
+          {
+            "value": 0,
+            "width": 32
+          }
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 2,
+            "width": 32
+          },
+          {
+            "value": 0,
+            "width": 32
+          }
+        ]
+      },
+      {
+        "type": "jump",
+        "target_label": "EXIT_BLOCK"
+      },
+      {
+        "type": "label",
+        "id": "CHECK_HW_ID_61B"
+      },
+      {
+        "type": "branch_if_eq",
+        "source": "hw_id",
+        "value": 1563,
+        "target_label": "HW_ID_61B_BLOCK",
+        "false_target": "EXIT_BLOCK"
+      },
+      {
+        "type": "label",
+        "id": "HW_ID_61B_BLOCK"
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 4,
+            "width": 32
+          },
+          {
+            "value": 0,
+            "width": 32
+          }
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 5,
+            "width": 32
+          },
+          {
+            "value": 0,
+            "width": 32
+          }
+        ]
+      },
+      {
+        "type": "jump",
+        "target_label": "EXIT_BLOCK"
+      },
+      {
+        "type": "label",
+        "id": "DECREMENT_BLOCK"
+      },
+      {
+        "type": "load",
+        "source": "param_1",
+        "offset_offset": "0x558",
+        "id_var": "current_timer"
+      },
+      {
+        "type": "load",
+        "source": "param_1",
+        "offset_offset": "0x1dc8",
+        "id_var": "delta"
+      },
+      {
+        "type": "store",
+        "offset": "0x558",
+        "operation": "sub",
+        "lhs_source": "current_timer",
+        "rhs_source": "delta",
+        "width\": 32, ":", "
+      },
+      {
+        "type": "load_constant",
+        "address": "0x80439d7c",
+        "id_var": "min_timer"
+      },
+      {
+        "type": "branch_if_lte",
+        "lhs_source": "current_timer",
+        "rhs_value": 0.0,
+        "target_label\": ":", "
+      },
+      {
+        "type": "label",
+        "id": "EXPIRE_BLOCK"
+      },
+      {
+        "type": "store",
+        "offset": "0x73f",
+        "value": 0,
+        "width": 8,
+        "signed": false
+      },
+      {
+        "type": "load",
+        "source": "param_1",
+        "offset_offset": "0x5e0",
+        "id_var": "flags"
+      },
+      {
+        "type": "store",
+        "offset": "0x5e0",
+        "operation": "and",
+        "source_source": "flags",
+        "mask_value": 4294967296,
+        "width\": 32, ":", "
+      },
+      {
+        "type": "call",
+        "callee": "0x8006a53c",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 16,
+            "width": 32
+          }
+        ]
+      }
+    ],
+    "exit": [
+      {
+        "type": "label",
+        "id": "EXIT_BLOCK"
+      },
+      {
+        "type": "return"
+      }
+    ]
+  }
+}
+

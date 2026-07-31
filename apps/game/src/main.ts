@@ -1319,3 +1319,7 @@ function showLoadingMessage(text: string): void {
     return viewport.captureFrame();
   },
 };
+
+// Stable browser-smoke signal used by the autonomous port controller. It proves that the
+// production bundle executed far enough to install the live verification handle.
+document.documentElement.dataset.gfRuntime = "loaded";

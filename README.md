@@ -120,34 +120,73 @@ cross-references, and raw constants; Pydantic validates the model output before 
 TypeScript.
 
 ```powershell
-# From research/tools/OGhidra, with GhidraMCP and the configured local model running
-.\.venv\Scripts\python.exe main.py export-port `
-  --address 0x8012b458 `
-  --ghidra-backend http `
-  --output port_artifacts/8012b458.port.json
+# Full production vertical slice using the retained local-Qwen artifact
+pnpm port:finish:poc
 
-# From the GotYaForce root
-pnpm import:oghidra-port `
-  --artifact research/decomp/generated/8012b458.port.json
+# Same flow with fresh live-Ghidra collection and local-Qwen inference
+pnpm port:finish:poc:fresh
 
-# Rebuild, compile, and compare the generated function with the reference
-pnpm verify:oghidra-port
+# Explicitly rescore and resume retained Qwen responses
+pnpm port:finish:poc:resume
 ```
 
+The same controller is available inside OGhidra:
+
+```powershell
+cd research/tools/OGhidra
+.\.venv\Scripts\python.exe main.py --ui
+```
+
+Choose **Analysis → Finish Game Port**. The menu action starts or attaches to a durable run and
+opens its pipeline, port queue, and live log. The dashboard provides safe-boundary pause/resume,
+stop-with-rollback, and production browser-preview controls. Closing the dashboard or OGhidra
+does not terminate the detached port process.
+
+The dashboard also reports elapsed time, a stage-aware ETA learned from completed runs of the
+same mode, stages/minute, local-model API and structured-output calls, exact Ghidra collection
+calls, and Qwen tokens/second. When an OpenAI-compatible endpoint omits token usage, OGhidra
+calculates a deterministic token estimate and labels it **estimated**. Until a comparable run
+exists, ETA is shown as **Calibrating** instead of extrapolating across unlike stages.
+
+If a saved analysis session is active in the current OGhidra window, the controller passes its
+`session.json` to the exporter as advisory context. No vector load is required. Fresh
+decompilation, disassembly, references, and bytes remain authoritative; session summaries and
+vectors can help discovery but cannot establish a 1:1 claim.
+
 An unverified artifact, missing fact, or unresolved dependency generates an isolated function
-that returns `false`; the existing generic combat path remains authoritative. A verified import
-still requires human review before production registration. Raw model responses, evidence,
-prompts, and validation reports are retained beside each artifact. The importer exits with code
-`2` when it deliberately emits this fallback, making the blocked result visible to CI.
+that returns `false`; the existing generic combat path remains authoritative. Raw model responses,
+evidence, prompts, and validation reports are retained beside each artifact. The importer exits
+with code `2` when it deliberately emits this fallback, making the blocked result visible to CI.
+
+For a trusted importer profile, the import command also compiles the generated TypeScript,
+derives boundary scenarios from the artifact, compares the candidate with an independent
+GotYaForce oracle, and writes `*-auto-verification.json`. The verifier contains no handwritten
+scenario list or copied expected outputs. The autonomous POC then promotes a green candidate,
+builds combat, runs the ROM replay suite, builds the production game, and executes it in Chrome.
+Any downstream failure rolls the promotion back.
 
 The current Eagle Jet proof of concept runs Qwen 3.6 35B-A3B against live Ghidra evidence for
-`0x8012b458`. Its retained claims pass 61/61 deterministic checks; one incorrect model claim is
-recorded and pruned, all 12 importer facts are recovered from authoritative evidence, and the
-generated function matches the reference across five runtime scenarios. See the
+`0x8012b458`. In the latest fresh run, three retained Qwen responses scored 9/12, 12/12, and 12/12
+required port facts. The controller selected attempt 3, passed 64 deterministic evidence/schema
+checks, compiled, matched the existing implementation across 12 automatically derived boundary
+scenarios, passed the full ROM replay suite, built the production browser game, and executed it in
+Chrome.
+
+Qwen output is mandatory: removing the validated Qwen mechanics while leaving all Ghidra evidence
+intact produces 0/12 importer facts and blocks generation. Ghidra corroborates the model's
+mechanics; it does not silently replace them. If Qwen's optional port IR is malformed, the
+controller may discard that IR only when its validated claims still cover every required fact.
+See the
 [`artifact`](research/decomp/generated/8012b458.port.json),
 [`validation report`](research/decomp/generated/8012b458.port.validation.json),
+[`automatic verification`](research/decomp/generated/8012b458-auto-verification.json),
 [`import report`](research/decomp/generated/8012b458-import-report.md), and
-[`generated candidate`](packages/combat/src/generated/oghidra/fn_8012b458.generated.ts).
+[`generated candidate`](packages/combat/src/generated/oghidra/fn_8012b458.generated.ts). The
+[fresh-run artifact](research/decomp/generated/finish-game-port-poc/8012b458.port.json) and
+[persistent run state](research/decomp/generated/finish-game-port-poc/run-state.json) retain the
+76-check live run. The
+[full autonomous design](research/tools/OGhidra/docs/scalable-verified-port-design.md) explains
+how this proven single-function transaction scales to a one-button whole-game run.
 
 ## Repository map
 
@@ -185,6 +224,9 @@ pnpm atlas:build
 pnpm test:oghidra-port
 pnpm import:oghidra-port --artifact <artifact.json>
 pnpm verify:oghidra-port
+pnpm port:finish:poc
+pnpm port:finish:poc:fresh
+pnpm port:finish:poc:resume
 ```
 
 The family audit defaults to structural validation. It is expected to report partial and missing

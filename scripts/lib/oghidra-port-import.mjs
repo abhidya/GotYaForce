@@ -161,6 +161,11 @@ export function extractEagleJetFacts(payload) {
 
   const claims = payload.analysis.claims;
   const find = (predicate) => claims.find((claim) => claim.verification === "verified" && predicate(claim));
+  const hasClaim = (predicate) => Boolean(find(predicate));
+  const hasCallClaim = (callee, args) => hasClaim((claim) => {
+    if (!claimHas(claim, "callee", callee)) return false;
+    return args.every((argument) => claimHasArgument(claim, argument));
+  });
   const operations = portOperations(payload);
   const block607 = findBranchBlock(operations, 0x607);
   const block61b = findBranchBlock(operations, 0x61B);
@@ -217,84 +222,132 @@ export function extractEagleJetFacts(payload) {
       || /call 0x8006a53c arg 0x10/.test(mainEvidence)
     ),
   };
-  const cleanupCall = Boolean(find((claim) =>
-    claimHas(claim, "callee", 0x8006A53C) && claimHasArgument(claim, 0x10))
-    || evidenceProfile.cleanup);
-  return {
-    effectMode: Boolean(find((claim) =>
-      claimHas(claim, "offset", 0x6E8) && claimHas(claim, "value", 0x83))
-      || evidenceProfile.effectMode),
-    timerSeed: Boolean(
-      find((claim) => claimHas(claim, "offset", 0x558) && claimHas(claim, "value", 45))
+  const qwenProfile = {
+    effectMode: hasClaim((claim) =>
+      claimHas(claim, "offset", 0x6E8) && claimHas(claim, "value", 0x83)),
+    timerSeed: (
+      hasClaim((claim) =>
+        claimHas(claim, "value", 45) || claimHas(claim, "address", 0x80439D80))
+      && hasClaim((claim) => claimHas(claim, "offset", 0x558))
+    ),
+    retireHitbox: hasCallClaim(0x800107A0, [0x7F]),
+    soundCue: hasCallClaim(0x800F036C, [0x20]),
+    parts607: (
+      hasClaim((claim) => claimHas(claim, "borg_id", 0x607) && claimHasSlots(claim, [1, 2]))
       || (
-        operations.some((operation) =>
-          operation?.type === "load_float_const"
+        hasClaim((claim) => claimHas(claim, "value", 0x607))
+        && hasCallClaim(0x8016C7EC, [1, 0])
+        && hasCallClaim(0x8016C7EC, [2, 0])
+      )
+    ),
+    parts61b: (
+      hasClaim((claim) => claimHas(claim, "borg_id", 0x61B) && claimHasSlots(claim, [4, 5]))
+      || (
+        hasClaim((claim) => claimHas(claim, "value", 0x61B))
+        && hasCallClaim(0x8016C7EC, [4, 0])
+        && hasCallClaim(0x8016C7EC, [5, 0])
+      )
+    ),
+    timerDecrement: (
+      (
+        hasClaim((claim) =>
+          claimHas(claim, "offset", 0x558)
           && (
-            canonicalScalar(operation.value) === 45
-            || canonicalScalar(operation.offset) === 0x80439D80
+            claimHas(claim, "operation", "sub")
+            || claimHas(claim, "operation", "subtract_f32")
           ))
-        && operations.some((operation) =>
-          operation?.type === "store_float"
-          && canonicalScalar(operation.offset) === 0x558)
+        && hasClaim((claim) =>
+          claimHas(claim, "offset", 0x1DC8)
+          || claimHas(claim, "delta_offset", 0x1DC8))
       )
-      || evidenceProfile.timerSeed,
     ),
-    retireHitbox: Boolean(find((claim) =>
-      claimHas(claim, "callee", 0x800107A0) && claimHasArgument(claim, 0x7F))
-      || evidenceProfile.retireHitbox),
-    soundCue: Boolean(find((claim) =>
-      claimHas(claim, "callee", 0x800F036C) && claimHasArgument(claim, 0x20))
-      || evidenceProfile.soundCue),
-    parts607: Boolean(
-      find((claim) => claimHas(claim, "borg_id", 0x607) && claimHasSlots(claim, [1, 2]))
-      || blockHasCalls(block607, 0x8016C7EC, [[1, 0], [2, 0]])
-      || evidenceProfile.parts607,
-    ),
-    parts61b: Boolean(
-      find((claim) => claimHas(claim, "borg_id", 0x61B) && claimHasSlots(claim, [4, 5]))
-      || blockHasCalls(block61b, 0x8016C7EC, [[4, 0], [5, 0]])
-      || evidenceProfile.parts61b,
-    ),
-    timerDecrement: Boolean(
-      find((claim) =>
-        claimHas(claim, "offset", 0x558)
-        && (claimHas(claim, "delta_offset", 0x1DC8) || claimHas(claim, "source_offset", 0x1DC8)))
+    expiryCompare: hasClaim((claim) =>
+      (
+        claim.kind === "branch_if_lte"
+        && (claimHas(claim, "rhs", 0) || claimHas(claim, "value", 0))
+      )
       || (
-        operations.some((operation) =>
-          operation?.type === "load_float" && canonicalScalar(operation.offset) === 0x558)
-        && operations.some((operation) =>
-          operation?.type === "load_float" && canonicalScalar(operation.offset) === 0x1DC8)
-        && operations.some((operation) => ["sub_float", "float_subtract"].includes(operation?.type))
+        claimHas(claim, "operator", "<=")
+        && claimHas(claim, "floor", 0)
+        && claimHas(claim, "timer_offset", 0x558)
+      )),
+    cleanup: hasCallClaim(0x8006A53C, [0x10]),
+    cleanupBits: hasClaim((claim) =>
+      claimHas(claim, "offset", 0x5E0) && claimHas(claim, "mask", 0xFFFFFFFC)),
+  };
+  const cleanupCall = qwenProfile.cleanup && evidenceProfile.cleanup;
+  // Evidence-only recovery is deliberately forbidden. Qwen must identify the mechanic in a
+  // validated claim or operation; authoritative evidence then corroborates its exact details.
+  return {
+    effectMode: qwenProfile.effectMode && evidenceProfile.effectMode,
+    timerSeed: qwenProfile.timerSeed && evidenceProfile.timerSeed,
+    retireHitbox: qwenProfile.retireHitbox && evidenceProfile.retireHitbox,
+    soundCue: qwenProfile.soundCue && evidenceProfile.soundCue,
+    parts607: (
+      (
+        qwenProfile.parts607
+        || (
+          blockHasCalls(block607, 0x8016C7EC, [[1, 0], [2, 0]])
+          && operations.some((operation) =>
+            operation?.type === "branch_if_eq" && canonicalScalar(operation.value) === 0x607)
+        )
       )
-      || evidenceProfile.timerDecrement
+      && evidenceProfile.parts607
     ),
-    expiryCompare: Boolean(
-      find((claim) =>
-        (claimHas(claim, "timer_offset", 0x558) || claimHas(claim, "offset", 0x558))
-        && (claimHas(claim, "operator", "<=") || claimHas(claim, "comparison", "lte"))
-        && (claimHas(claim, "floor", 0) || claimHas(claim, "threshold", 0)))
-      || operations.some((operation) => operation?.type === "branch_if_lte")
-      || evidenceProfile.expiryCompare,
+    parts61b: (
+      (
+        qwenProfile.parts61b
+        || (
+          blockHasCalls(block61b, 0x8016C7EC, [[4, 0], [5, 0]])
+          && operations.some((operation) =>
+            operation?.type === "branch_if_eq" && canonicalScalar(operation.value) === 0x61B)
+        )
+      )
+      && evidenceProfile.parts61b
+    ),
+    timerDecrement: (
+      (
+        qwenProfile.timerDecrement
+        || (
+          operations.some((operation) =>
+            operation?.type === "load_float" && canonicalScalar(operation.offset) === 0x558)
+          && operations.some((operation) =>
+            operation?.type === "load_float" && canonicalScalar(operation.offset) === 0x1DC8)
+          && operations.some((operation) => ["sub_float", "float_subtract"].includes(operation?.type))
+        )
+      )
+      && evidenceProfile.timerDecrement
+    ),
+    expiryCompare: (
+      (qwenProfile.expiryCompare || operations.some((operation) => operation?.type === "branch_if_lte"))
+      && evidenceProfile.expiryCompare
     ),
     cleanup: cleanupCall,
     cleanupCooldown: Boolean(
-      find((claim) => claimHas(claim, "offset", 0x694) && claimHas(claim, "value", "16_plus_dt"))
-      || (
-        cleanupCall
-        && cleanupEvidence.includes("0x694")
-        && cleanupEvidence.includes("param_2")
-        && cleanupEvidence.includes("0x1dc8")
+      cleanupCall
+      && (
+        (
+          cleanupEvidence.includes("0x694")
+          && cleanupEvidence.includes("param_2")
+          && cleanupEvidence.includes("0x1dc8")
+        )
+        || cleanupEvidence.includes("actor+0x694=16_plus_dt")
       )
-      || cleanupEvidence.includes("actor+0x694=16_plus_dt")
     ),
     cleanupBits: Boolean(
-      find((claim) => claimHas(claim, "offset", 0x5E0) && claimHas(claim, "mask", 0xFFFFFFFC))
-      || (cleanupEvidence.includes("0x5e0") && cleanupEvidence.includes("0xfffffffc"))
+      qwenProfile.cleanupBits
+      && cleanupCall
+      && (
+        (cleanupEvidence.includes("0x5e0") && cleanupEvidence.includes("0xfffffffc"))
+        || evidenceProfile.cleanup
+      )
     ),
     cleanupCue: Boolean(
-      find((claim) => claimHas(claim, "callee", 0x8006A6FC) && claimHasArgument(claim, 0x1B))
-      || (cleanupEvidence.includes("zz_006a6fc_") && cleanupEvidence.includes("0x1b"))
-      || cleanupEvidence.includes("call 0x8006a6fc arg 0x1b")
+      cleanupCall
+      && (
+        (cleanupEvidence.includes("zz_006a6fc_") && cleanupEvidence.includes("0x1b"))
+        || cleanupEvidence.includes("call 0x8006a6fc arg 0x1b")
+      )
     ),
   };
 }
@@ -392,7 +445,25 @@ function writeDeterministic(target, content, force) {
   fs.writeFileSync(target, content, "utf8");
 }
 
+function writeReportDeterministic(target, content, force) {
+  const marker = "\n## Automatic compilation and behavior verification\n";
+  if (!fs.existsSync(target)) {
+    writeDeterministic(target, content, force);
+    return;
+  }
+  const existing = fs.readFileSync(target, "utf8");
+  const markerIndex = existing.indexOf(marker);
+  const automaticSection = markerIndex >= 0 ? existing.slice(markerIndex).trimStart() : "";
+  const combined = automaticSection
+    ? `${content.trimEnd()}\n\n${automaticSection}`
+    : content;
+  writeDeterministic(target, combined, force);
+}
+
 function renderReport(payload, facts, blockers, generatedPath) {
+  const displayedGeneratedPath = path.isAbsolute(generatedPath)
+    ? path.relative(process.cwd(), generatedPath).replaceAll("\\", "/")
+    : generatedPath.replaceAll("\\", "/");
   const factRows = Object.entries(facts)
     .map(([name, passed]) => `| ${name} | ${passed ? "recovered" : "missing"} |`)
     .join("\n");
@@ -408,8 +479,8 @@ function renderReport(payload, facts, blockers, generatedPath) {
 - Artifact verification: ${payload.verification.status}
 - OGhidra integration status before the trusted importer profile: ${payload.verification.integration_status ?? "not_assessed"}
 - GotYaForce importer profile: ${blockers.length === 0 ? "candidate" : "blocked"}
-- Generated candidate: \`${generatedPath}\`
-- Safe to integrate automatically: **no** (human review is always required)
+- Generated candidate: \`${displayedGeneratedPath}\`
+- Eligible for automatic verification: **${blockers.length === 0 ? "yes" : "no"}**
 
 ## Recovered Eagle Jet facts
 
@@ -424,7 +495,7 @@ ${blockerText}
 ## Import decision
 
 ${blockers.length === 0
-    ? "A compilable isolated candidate was emitted. Production registration was not changed."
+    ? "A compilable isolated candidate was emitted. Production registration remains unchanged until automatic compile, differential, ROM, and browser gates pass."
     : "A fallback candidate returning `false` was emitted so the existing generic combat path remains authoritative."}
 `;
 }
@@ -467,7 +538,7 @@ export function importArtifact({
     : renderFallback(payload, blockers);
   const report = renderReport(payload, facts, blockers, generatedPath);
   writeDeterministic(generatedPath, candidate, force);
-  writeDeterministic(reportPath, report, force);
+  writeReportDeterministic(reportPath, report, force);
   return {
     functionAddress: payload.function.address,
     generatedPath,

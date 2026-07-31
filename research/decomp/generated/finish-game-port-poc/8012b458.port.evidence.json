@@ -1,0 +1,668 @@
+{
+  "collection_metrics": {
+    "tool_call_breakdown": {
+      "callers": 1,
+      "decompile": 1,
+      "decompile:0x800107a0": 1,
+      "decompile:0x8006a53c": 1,
+      "decompile:0x800f036c": 1,
+      "decompile:0x8016c7ec": 1,
+      "disassembly": 1,
+      "function_metadata": 1,
+      "program_metadata": 1,
+      "raw_bytes:0x80439d7c": 1,
+      "raw_bytes:0x80439d80": 1,
+      "references_from": 1
+    },
+    "tool_calls": 12
+  },
+  "evidence": {
+    "records": [
+      {
+        "address": "0x8012b458",
+        "content": "Function: manageBorgChargeTimer at 8012b458\nSignature: undefined __stdcall manageBorgChargeTimer(int param_1)\nEntry: 8012b458\nBody: 8012b458 - 8012b553",
+        "id": "function:0x8012b458",
+        "kind": "function_metadata",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b458",
+        "content": "[Total Lines: 33] [Showing Lines: 1-33]\nvoid manageBorgChargeTimer(int param_1)\n\n{\n  float fVar1;\n  float fVar2;\n  \n  *(undefined1 *)(param_1 + 0x6e8) = 0x83;\n  fVar2 = FLOAT_80439d80;\n  fVar1 = FLOAT_80439d7c;\n  if (*(char *)(param_1 + 0x540) == '\\0') {\n    *(undefined1 *)(param_1 + 0x540) = 1;\n    *(float *)(param_1 + 0x558) = fVar2;\n    zz_00107a0_(param_1,0x7f);\n    zz_00f036c_(param_1,0x20);\n    if (*(short *)(param_1 + 1000) == 0x607) {\n      zz_016c7ec_(param_1,1,0);\n      zz_016c7ec_(param_1,2,0);\n    }\n    else if (*(short *)(param_1 + 1000) == 0x61b) {\n      zz_016c7ec_(param_1,4,0);\n      zz_016c7ec_(param_1,5,0);\n    }\n  }\n  else {\n    *(float *)(param_1 + 0x558) = *(float *)(param_1 + 0x558) - *(float *)(param_1 + 0x1dc8);\n    if (*(float *)(param_1 + 0x558) <= fVar1) {\n      *(undefined1 *)(param_1 + 0x73f) = 0;\n      *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\n      zz_006a53c_(param_1,0x10);\n    }\n  }\n  return;\n}",
+        "id": "decompile:0x8012b458",
+        "kind": "decompile",
+        "sha256": "5391328b31cefda38dfef52d0f0a99f2058d80d892b6bc55c51f5bbfca7bfd66",
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b458",
+        "content": "8012b458: stwu r1,-0x10(r1) ",
+        "id": "instruction:0x8012b458",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b45c",
+        "content": "8012b45c: mfspr r0,LR ",
+        "id": "instruction:0x8012b45c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b460",
+        "content": "8012b460: stw r0,0x14(r1) ",
+        "id": "instruction:0x8012b460",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b464",
+        "content": "8012b464: li r0,-0x7d ",
+        "id": "instruction:0x8012b464",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b468",
+        "content": "8012b468: stw r31,0xc(r1) ",
+        "id": "instruction:0x8012b468",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b46c",
+        "content": "8012b46c: or r31,r3,r3 ",
+        "id": "instruction:0x8012b46c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b470",
+        "content": "8012b470: stb r0,0x6e8(r3) ",
+        "id": "instruction:0x8012b470",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b474",
+        "content": "8012b474: lbz r4,0x540(r3) ",
+        "id": "instruction:0x8012b474",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b478",
+        "content": "8012b478: extsb. r0,r4 ",
+        "id": "instruction:0x8012b478",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b47c",
+        "content": "8012b47c: bne 0x8012b500 ",
+        "id": "instruction:0x8012b47c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b480",
+        "content": "8012b480: addi r0,r4,0x1 ",
+        "id": "instruction:0x8012b480",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b484",
+        "content": "8012b484: lfs f0,-0x4ca0(r2) ",
+        "id": "instruction:0x8012b484",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b488",
+        "content": "8012b488: stb r0,0x540(r31) ",
+        "id": "instruction:0x8012b488",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b48c",
+        "content": "8012b48c: li r4,0x7f ",
+        "id": "instruction:0x8012b48c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b490",
+        "content": "8012b490: stfs f0,0x558(r31) ",
+        "id": "instruction:0x8012b490",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b494",
+        "content": "8012b494: bl 0x800107a0 ",
+        "id": "instruction:0x8012b494",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b498",
+        "content": "8012b498: or r3,r31,r31 ",
+        "id": "instruction:0x8012b498",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b49c",
+        "content": "8012b49c: li r4,0x20 ",
+        "id": "instruction:0x8012b49c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4a0",
+        "content": "8012b4a0: bl 0x800f036c ",
+        "id": "instruction:0x8012b4a0",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4a4",
+        "content": "8012b4a4: lha r0,0x3e8(r31) ",
+        "id": "instruction:0x8012b4a4",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4a8",
+        "content": "8012b4a8: cmpwi r0,0x607 ",
+        "id": "instruction:0x8012b4a8",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4ac",
+        "content": "8012b4ac: bne 0x8012b4d4 ",
+        "id": "instruction:0x8012b4ac",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4b0",
+        "content": "8012b4b0: or r3,r31,r31 ",
+        "id": "instruction:0x8012b4b0",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4b4",
+        "content": "8012b4b4: li r4,0x1 ",
+        "id": "instruction:0x8012b4b4",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4b8",
+        "content": "8012b4b8: li r5,0x0 ",
+        "id": "instruction:0x8012b4b8",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4bc",
+        "content": "8012b4bc: bl 0x8016c7ec ",
+        "id": "instruction:0x8012b4bc",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4c0",
+        "content": "8012b4c0: or r3,r31,r31 ",
+        "id": "instruction:0x8012b4c0",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4c4",
+        "content": "8012b4c4: li r4,0x2 ",
+        "id": "instruction:0x8012b4c4",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4c8",
+        "content": "8012b4c8: li r5,0x0 ",
+        "id": "instruction:0x8012b4c8",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4cc",
+        "content": "8012b4cc: bl 0x8016c7ec ",
+        "id": "instruction:0x8012b4cc",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4d0",
+        "content": "8012b4d0: b 0x8012b540 ",
+        "id": "instruction:0x8012b4d0",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4d4",
+        "content": "8012b4d4: cmpwi r0,0x61b ",
+        "id": "instruction:0x8012b4d4",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4d8",
+        "content": "8012b4d8: bne 0x8012b540 ",
+        "id": "instruction:0x8012b4d8",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4dc",
+        "content": "8012b4dc: or r3,r31,r31 ",
+        "id": "instruction:0x8012b4dc",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4e0",
+        "content": "8012b4e0: li r4,0x4 ",
+        "id": "instruction:0x8012b4e0",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4e4",
+        "content": "8012b4e4: li r5,0x0 ",
+        "id": "instruction:0x8012b4e4",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4e8",
+        "content": "8012b4e8: bl 0x8016c7ec ",
+        "id": "instruction:0x8012b4e8",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4ec",
+        "content": "8012b4ec: or r3,r31,r31 ",
+        "id": "instruction:0x8012b4ec",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4f0",
+        "content": "8012b4f0: li r4,0x5 ",
+        "id": "instruction:0x8012b4f0",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4f4",
+        "content": "8012b4f4: li r5,0x0 ",
+        "id": "instruction:0x8012b4f4",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4f8",
+        "content": "8012b4f8: bl 0x8016c7ec ",
+        "id": "instruction:0x8012b4f8",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b4fc",
+        "content": "8012b4fc: b 0x8012b540 ",
+        "id": "instruction:0x8012b4fc",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b500",
+        "content": "8012b500: lfs f2,0x558(r31) ",
+        "id": "instruction:0x8012b500",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b504",
+        "content": "8012b504: lfs f1,0x1dc8(r31) ",
+        "id": "instruction:0x8012b504",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b508",
+        "content": "8012b508: lfs f0,-0x4ca4(r2) ",
+        "id": "instruction:0x8012b508",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b50c",
+        "content": "8012b50c: fsubs f1,f2,f1 ",
+        "id": "instruction:0x8012b50c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b510",
+        "content": "8012b510: stfs f1,0x558(r31) ",
+        "id": "instruction:0x8012b510",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b514",
+        "content": "8012b514: lfs f1,0x558(r31) ",
+        "id": "instruction:0x8012b514",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b518",
+        "content": "8012b518: fcmpo cr0,f1,f0 ",
+        "id": "instruction:0x8012b518",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b51c",
+        "content": "8012b51c: cror eq,lt,eq ",
+        "id": "instruction:0x8012b51c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b520",
+        "content": "8012b520: bne 0x8012b540 ",
+        "id": "instruction:0x8012b520",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b524",
+        "content": "8012b524: li r0,0x0 ",
+        "id": "instruction:0x8012b524",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b528",
+        "content": "8012b528: li r4,0x10 ",
+        "id": "instruction:0x8012b528",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b52c",
+        "content": "8012b52c: stb r0,0x73f(r31) ",
+        "id": "instruction:0x8012b52c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b530",
+        "content": "8012b530: lwz r0,0x5e0(r31) ",
+        "id": "instruction:0x8012b530",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b534",
+        "content": "8012b534: rlwinm r0,r0,0x0,0x0,0x1d ",
+        "id": "instruction:0x8012b534",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b538",
+        "content": "8012b538: stw r0,0x5e0(r31) ",
+        "id": "instruction:0x8012b538",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b53c",
+        "content": "8012b53c: bl 0x8006a53c ",
+        "id": "instruction:0x8012b53c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b540",
+        "content": "8012b540: lwz r0,0x14(r1) ",
+        "id": "instruction:0x8012b540",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b544",
+        "content": "8012b544: lwz r31,0xc(r1) ",
+        "id": "instruction:0x8012b544",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b548",
+        "content": "8012b548: mtspr LR,r0 ",
+        "id": "instruction:0x8012b548",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b54c",
+        "content": "8012b54c: addi r1,r1,0x10 ",
+        "id": "instruction:0x8012b54c",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8012b550",
+        "content": "8012b550: blr ",
+        "id": "instruction:0x8012b550",
+        "kind": "instruction",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x800107a0",
+        "content": [
+          "8012b494: bl 0x800107a0 "
+        ],
+        "id": "callee:0x800107a0",
+        "kind": "callee",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8006a53c",
+        "content": [
+          "8012b53c: bl 0x8006a53c "
+        ],
+        "id": "callee:0x8006a53c",
+        "kind": "callee",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x800f036c",
+        "content": [
+          "8012b4a0: bl 0x800f036c "
+        ],
+        "id": "callee:0x800f036c",
+        "kind": "callee",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8016c7ec",
+        "content": [
+          "8012b4bc: bl 0x8016c7ec ",
+          "8012b4cc: bl 0x8016c7ec ",
+          "8012b4e8: bl 0x8016c7ec ",
+          "8012b4f8: bl 0x8016c7ec "
+        ],
+        "id": "callee:0x8016c7ec",
+        "kind": "callee",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x800107a0",
+        "content": "[Total Lines: 13] [Showing Lines: 1-13]\nvoid zz_00107a0_(int param_1,undefined1 param_2)\n\n{\n  uint uVar1;\n  \n  uVar1 = zz_0010514_((int)*(char *)(param_1 + 0x3e4));\n  if (((uVar1 & 0x20) == 0) && (PTR_DAT_80433934[0x1f] == '\\0')) {\n    *(undefined1 *)(param_1 + 0x43d) = 0x81;\n    *(undefined1 *)(param_1 + 0x6f8) = param_2;\n    *(undefined1 *)(param_1 + 0x6f9) = 0xff;\n  }\n  return;\n}",
+        "id": "decompile:0x800107a0",
+        "kind": "decompile",
+        "sha256": "7be7ecef37d4a18853d6265227177708063b3c4ee4c154e00168c0d085c16e67",
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8006a53c",
+        "content": "[Total Lines: 13] [Showing Lines: 1-13]\nvoid zz_006a53c_(int param_1,uint param_2)\n\n{\n  if (0 < (int)param_2) {\n    *(float *)(param_1 + 0x694) =\n         (float)((double)CONCAT44(0x43300000,param_2 ^ 0x80000000) - DOUBLE_80437650) +\n         *(float *)(param_1 + 0x1dc8);\n  }\n  *(undefined1 *)(param_1 + 0x73f) = 0;\n  *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\n  zz_006a6fc_(param_1,0x1b);\n  return;\n}",
+        "id": "decompile:0x8006a53c",
+        "kind": "decompile",
+        "sha256": "d2d7ef79362139a3528e5243f4608086ac7737588a70efd8569de4a9f6ce5f36",
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x800f036c",
+        "content": "[Total Lines: 11] [Showing Lines: 1-11]\nvoid zz_00f036c_(int param_1,undefined4 param_2)\n\n{\n  if (param_1 == 0) {\n    zz_00efb3c_(param_2,0,0x7f,0x40,0x2000);\n  }\n  else {\n    zz_00f04b4_(param_2,param_1 + 0x20,(int)*(char *)(param_1 + 0x96));\n  }\n  return;\n}",
+        "id": "decompile:0x800f036c",
+        "kind": "decompile",
+        "sha256": "1a865f647ebe75d259f45d5ded964571d320e997a61bbed61aa1b14acb74358e",
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x8016c7ec",
+        "content": "[Total Lines: 6] [Showing Lines: 1-6]\nvoid zz_016c7ec_(void)\n\n{\n  initBorgInstanceWithLifecycleCallback((double)FLOAT_8043ac38);\n  return;\n}",
+        "id": "decompile:0x8016c7ec",
+        "kind": "decompile",
+        "sha256": "9a2057480fcff42ccc22b1bf3a5ca707f33e6b6f9a63bd5a5310e5954b76872e",
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x80439d7c",
+        "content": {
+          "f32_be": 0.0,
+          "raw": "80439d7c: 00 00 00 00                                      |....|",
+          "raw_hex": "00000000",
+          "s32_be": 0,
+          "u32_be": "0x00000000"
+        },
+        "id": "data:0x80439d7c",
+        "kind": "raw_bytes",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": "0x80439d80",
+        "content": {
+          "f32_be": 45.0,
+          "raw": "80439d80: 42 34 00 00                                      |B4..|",
+          "raw_hex": "42340000",
+          "s32_be": 1110704128,
+          "u32_be": "0x42340000"
+        },
+        "id": "data:0x80439d80",
+        "kind": "raw_bytes",
+        "sha256": null,
+        "tier": "authoritative"
+      },
+      {
+        "address": null,
+        "content": "To Stack[-0x10] [WRITE]",
+        "id": "data-reference:unknown:0",
+        "kind": "data_reference",
+        "sha256": null,
+        "tier": "authoritative"
+      }
+    ],
+    "unavailable": []
+  },
+  "function": {
+    "address": "0x8012b458",
+    "body_hash": "a78787fd4abc06593f355767c9ae714ebae007f1a728ee6c0c5c56066e848e9b",
+    "current_name": "manageBorgChargeTimer",
+    "original_name": "FUN_8012b458",
+    "size": 252
+  },
+  "program": {
+    "image_base": "0x80000000",
+    "language": "PowerPC:BE:32",
+    "program_name": "boot.dol",
+    "sha256": null
+  }
+}
