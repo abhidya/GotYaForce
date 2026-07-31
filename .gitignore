@@ -57,6 +57,11 @@ research/decomp/organized/
 # Live Dolphin capture scratch output.
 hp_log.csv
 
+# Local-model transcripts and autonomous port runtime/checkpoint state.
+# The browser source changes are durable; these files are regenerated per run.
+logs/llm_interactions_*.json
+research/decomp/generated/finish-game-port/
+
 # Dolphin savestates stay local: they embed the emulated RAM image (boot.dol code +
 # loaded disc assets), i.e. ROM-derived bytes — see the never-commit rule.
 *.sav

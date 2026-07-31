@@ -1,1 +1,0 @@
-HTTPError: 502 Server Error: Bad Gateway for url: http://127.0.0.1:8888/v1/chat/completions
