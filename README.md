@@ -165,6 +165,11 @@ scenario list or copied expected outputs. The autonomous POC then promotes a gre
 builds combat, runs the ROM replay suite, builds the production game, and executes it in Chrome.
 Any downstream failure rolls the promotion back.
 
+Schema-valid but importer-incomplete Qwen responses are retained and automatically repaired with
+deterministic missing-fact feedback. Candidate TypeScript is generated in the run directory;
+production source and its registry change together only after compile and differential gates pass.
+Rollback restores both files.
+
 The current Eagle Jet proof of concept runs Qwen 3.6 35B-A3B against live Ghidra evidence for
 `0x8012b458`. In the latest fresh run, three retained Qwen responses scored 9/12, 12/12, and 12/12
 required port facts. The controller selected attempt 3, passed 64 deterministic evidence/schema

@@ -7,7 +7,7 @@
 - Artifact verification: verified
 - OGhidra integration status before the trusted importer profile: blocked
 - GotYaForce importer profile: candidate
-- Generated candidate: `packages/combat/src/generated/oghidra/fn_8012b458.generated.ts`
+- Generated candidate: `research/decomp/generated/finish-game-port-poc/fn_8012b458.generated.ts`
 - Eligible for automatic verification: **yes**
 
 ## Recovered Eagle Jet facts

@@ -1,0 +1,32 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "0x80003488",
+    "name": "TRK_memcpy",
+    "metadata": "Function: TRK_memcpy at 80003488\nSignature: undefined TRK_memcpy(void)\nEntry: 80003488\nBody: 80003488 - 800034ab",
+    "thunk": false
+  },
+  "decompiler": {
+    "c": null,
+    "completed": false,
+    "deferred": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "subi r4,r4,0x1",
+    "subi r6,r3,0x1",
+    "addi r5,r5,0x1",
+    "b 0x800034a0",
+    "lbzu r0,0x1(r4)",
+    "stbu r0,0x1(r6)",
+    "subic. r5,r5,0x1",
+    "bne 0x80003498",
+    "blr"
+  ],
+  "calls": [],
+  "fingerprints": {
+    "normalized_disassembly": "b6806f7af8f8f92014ddb759e3ae78190cc4f4dec8a7ec46489ebfa4436eae9d",
+    "normalized_pcode": null
+  }
+}

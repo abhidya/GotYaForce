@@ -1,0 +1,51 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "0x800032b0",
+    "name": "__init_registers",
+    "metadata": "Function: __init_registers at 800032b0\nSignature: undefined __init_registers(void)\nEntry: 800032b0\nBody: 800032b0 - 8000331f",
+    "thunk": false
+  },
+  "decompiler": {
+    "c": null,
+    "completed": false,
+    "deferred": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "li r0,0x0",
+    "li r3,0x0",
+    "li r4,0x0",
+    "li r5,0x0",
+    "li r6,0x0",
+    "li r7,0x0",
+    "li r8,0x0",
+    "li r9,0x0",
+    "li r10,0x0",
+    "li r11,0x0",
+    "li r12,0x0",
+    "li r14,0x0",
+    "li r15,0x0",
+    "li r16,0x0",
+    "li r17,0x0",
+    "li r18,0x0",
+    "li r19,0x0",
+    "li r20,0x0",
+    "li r21,0x0",
+    "li r22,0x0",
+    "li r23,0x0",
+    "li r24,0x0",
+    "li r25,0x0",
+    "li r26,0x0",
+    "li r27,0x0",
+    "li r28,0x0",
+    "li r29,0x0",
+    "li r30,0x0"
+  ],
+  "calls": [],
+  "fingerprints": {
+    "normalized_disassembly": "37d8713d3469fd01695a524a1df88425500c15ad4f107737f35867630dd38f96",
+    "normalized_pcode": null
+  }
+}

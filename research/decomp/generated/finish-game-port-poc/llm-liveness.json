@@ -1,13 +1,14 @@
 {
-  "api_calls": 1,
+  "api_calls": 0,
   "structured_tool_calls": 0,
   "prompt_tokens": 0,
   "completion_tokens": 0,
-  "duration_seconds": 0.0,
+  "duration_seconds": 0,
+  "tokens_per_second": 0,
   "token_source": "unavailable",
-  "active": true,
-  "status": "generating",
-  "request_started_at": "2026-07-30T20:27:38.736094",
-  "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-  "updated_at": "2026-07-30T20:27:38.736094"
+  "active": false,
+  "status": "waiting_for_qwen",
+  "model": null,
+  "run_id": "2026-07-31T00:55:27.297Z",
+  "updated_at": "2026-07-31T00:55:27.298Z"
 }

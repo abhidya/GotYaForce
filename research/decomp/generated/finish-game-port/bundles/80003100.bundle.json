@@ -1,0 +1,41 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "0x80003100",
+    "name": "__check_pad3",
+    "metadata": "Function: __check_pad3 at 80003100\nSignature: undefined __check_pad3(void)\nEntry: 80003100\nBody: 80003100 - 8000313f",
+    "thunk": false
+  },
+  "decompiler": {
+    "c": null,
+    "completed": false,
+    "deferred": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "mfspr r0,lr",
+    "lis r3,-0x8000",
+    "stw r0,0x4(r1)",
+    "stwu r1,-0x8(r1)",
+    "lhz r0,0x30e4(r3)",
+    "andi. r0,r0,0xeef",
+    "cmpwi r0,0xeef",
+    "bne 0x80003130",
+    "li r3,0x0",
+    "li r4,0x0",
+    "li r5,0x0",
+    "bl 0x802048b8",
+    "lwz r0,0xc(r1)",
+    "addi r1,r1,0x8",
+    "mtspr lr,r0",
+    "blr"
+  ],
+  "calls": [
+    "0x802048b8"
+  ],
+  "fingerprints": {
+    "normalized_disassembly": "c930045e1f8c2d69861c6dedf1e3a76165fc4ffb1201e0d50f1880c8cafb5b93",
+    "normalized_pcode": null
+  }
+}

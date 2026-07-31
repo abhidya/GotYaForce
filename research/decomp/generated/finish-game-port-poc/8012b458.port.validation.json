@@ -331,6 +331,23 @@
       "value": "{\"false_target\": \"DECREMENT_BLOCK\", \"source\": \"status_byte\", \"target_label\": \"INIT_BLOCK\", \"value\": 0}"
     }
   ],
+  "collection_metrics": {
+    "tool_call_breakdown": {
+      "callers": 1,
+      "decompile": 1,
+      "decompile:0x800107a0": 1,
+      "decompile:0x8006a53c": 1,
+      "decompile:0x800f036c": 1,
+      "decompile:0x8016c7ec": 1,
+      "disassembly": 1,
+      "function_metadata": 1,
+      "program_metadata": 1,
+      "raw_bytes:0x80439d7c": 1,
+      "raw_bytes:0x80439d80": 1,
+      "references_from": 1
+    },
+    "tool_calls": 12
+  },
   "evidence_enrichments": [
     {
       "claim_id": "C_INIT_STATUS",
@@ -343,6 +360,7 @@
       "reason": "authoritative record contains the claim anchor and every missing literal"
     }
   ],
+  "model_metrics": {},
   "passed": true,
   "syntax": "pydantic-v2",
   "syntax_repairs": [

@@ -1,0 +1,5 @@
+The prior schema-valid artifact was rejected because these importer facts were absent: effectMode, timerSeed, parts607, parts61b, timerDecrement, expiryCompare, cleanupBits.
+Represent every source-supported branch family, helper-call argument group, timer update/compare,
+and cleanup side effect as explicit grouped claims and/or valid port IR.
+Resolve no value from this requirement text: derive addresses, constants, offsets, masks, and
+comparison direction only from the supplied authoritative evidence.

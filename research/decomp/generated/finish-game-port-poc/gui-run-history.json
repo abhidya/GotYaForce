@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "runs": [
+    {
+      "started_at": "2026-07-31T00:50:48.652Z",
+      "completed_at": "2026-07-31T00:52:34.208Z",
+      "run_mode": "resume",
+      "stage_durations_seconds": {
+        "local_model": 19.053,
+        "artifact": 0.017,
+        "generate": 0.02,
+        "automatic_verify": 2.363,
+        "promote": 0.003,
+        "combat": 2.051,
+        "web_build": 61.667,
+        "browser": 20.369
+      }
+    },
+    {
+      "started_at": "2026-07-31T00:55:27.297Z",
+      "completed_at": "2026-07-31T00:57:05.832Z",
+      "run_mode": "resume",
+      "stage_durations_seconds": {
+        "local_model": 18.315,
+        "artifact": 0.016,
+        "generate": 0.017,
+        "automatic_verify": 2.346,
+        "promote": 0.003,
+        "combat": 1.978,
+        "web_build": 55.651,
+        "browser": 20.174
+      }
+    }
+  ]
+}

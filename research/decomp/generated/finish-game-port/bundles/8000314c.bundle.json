@@ -1,0 +1,25 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "0x8000314c",
+    "name": "zz_000314c_",
+    "metadata": "Function: zz_000314c_ at 8000314c\nSignature: undefined zz_000314c_(void)\nEntry: 8000314c\nBody: 8000314c - 80003153",
+    "thunk": false
+  },
+  "decompiler": {
+    "c": null,
+    "completed": false,
+    "deferred": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "lbz r3,-0x5108(r13)",
+    "blr"
+  ],
+  "calls": [],
+  "fingerprints": {
+    "normalized_disassembly": "f9c5bfa0b1ba843ff87311a4e1a9c7c55754b35a2931c828a24d4052aeaba987",
+    "normalized_pcode": null
+  }
+}

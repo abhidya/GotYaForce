@@ -1,0 +1,586 @@
+{
+  "analysis": {
+    "summary": "Function manageBorgChargeTimer (0x8012b458) implements a state machine for a timed charge action. It initializes a timer and attack slots if the charge flag is clear, or decrements the timer by delta time if set. Upon expiration (timer <= 0), it clears the charge flag, masks the action state, and triggers a reset via zz_006a53c_.",
+    "claims": [
+      {
+        "id": "C_INIT_FLAG_STORE",
+        "kind": "memory_store",
+        "value": {
+          "offset": 0,
+          "target_offset": 1768,
+          "width": 8,
+          "value": 131
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b464",
+          "instruction:0x8012b470"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_LOAD_CONSTANTS",
+        "kind": "load_constants",
+        "value": {
+          "constants": [
+            {
+              "offset": 0,
+              "target_offset": 1368,
+              "width": 32,
+              "value": 45.0
+            },
+            {
+              "offset": 0,
+              "target_offset": 1364,
+              "width": 32,
+              "value": 0.0
+            }
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b484",
+          "instruction:0x8012b508",
+          "data:0x80439d80",
+          "data:0x80439d7c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_CHARGE_FLAG",
+        "kind": "conditional_branch",
+        "value": {
+          "false_target": "BLOCK_ELSE",
+          "source": "param_1 + 0x540",
+          "target_label": "BLOCK_IF"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b474",
+          "instruction:0x8012b478",
+          "instruction:0x8012b47c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_SET_CHARGE_FLAG",
+        "kind": "memory_store",
+        "value": {
+          "offset": 0,
+          "target_offset": 1344,
+          "width": 8,
+          "value": 1
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b480",
+          "instruction:0x8012b488"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_STORE_TIMER_BASE",
+        "kind": "memory_store",
+        "value": {
+          "offset": 0,
+          "target_offset": 1368,
+          "width": 32,
+          "value": "FLOAT_80439d80"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b490",
+          "data:0x80439d80"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_ZZ_00107A0",
+        "kind": "call",
+        "value": {
+          "args": [
+            "param_1",
+            127
+          ],
+          "callee": "0x800107a0"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b494",
+          "instruction:0x8012b48c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_ZZ_00F036C",
+        "kind": "call",
+        "value": {
+          "args": [
+            "param_1",
+            32
+          ],
+          "callee": "0x800f036c"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4a0",
+          "instruction:0x8012b49c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_BORG_TYPE_607",
+        "kind": "conditional_branch",
+        "value": {
+          "false_target": "BLOCK_ELSE_IF",
+          "source": "param_1 + 0x3e8",
+          "target_label": "BLOCK_MATCH_607"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4a4",
+          "instruction:0x8012b4a8",
+          "instruction:0x8012b4ac"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_ZZ_016C7EC_1",
+        "kind": "call",
+        "value": {
+          "args": [
+            "param_1",
+            1,
+            0
+          ],
+          "callee": "0x8016c7ec"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4bc",
+          "instruction:0x8012b4b4",
+          "instruction:0x8012b4b8"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_ZZ_016C7EC_2",
+        "kind": "call",
+        "value": {
+          "args": [
+            "param_1",
+            2,
+            0
+          ],
+          "callee": "0x8016c7ec"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4cc",
+          "instruction:0x8012b4c4",
+          "instruction:0x8012b4c8"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_BORG_TYPE_61B",
+        "kind": "conditional_branch",
+        "value": {
+          "false_target": "BLOCK_ELSE",
+          "source": "param_1 + 0x3e8",
+          "target_label": "BLOCK_MATCH_61B"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4d4",
+          "instruction:0x8012b4d8"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_ZZ_016C7EC_3",
+        "kind": "call",
+        "value": {
+          "args": [
+            "param_1",
+            4,
+            0
+          ],
+          "callee": "0x8016c7ec"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4e8",
+          "instruction:0x8012b4e0",
+          "instruction:0x8012b4e4"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_ZZ_016C7EC_4",
+        "kind": "call",
+        "value": {
+          "args": [
+            "param_1",
+            5,
+            0
+          ],
+          "callee": "0x8016c7ec"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4f8",
+          "instruction:0x8012b4f0",
+          "instruction:0x8012b4f4"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_DECREMENT_TIMER",
+        "kind": "arithmetic_update",
+        "value": {
+          "lhs": "param_1 + 0x558",
+          "mask": null,
+          "operation": "sub",
+          "rhs": "param_1 + 0x1dc8",
+          "target_offset": 1368,
+          "width": 32
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b500",
+          "instruction:0x8012b504",
+          "instruction:0x8012b50c",
+          "instruction:0x8012b510"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_COMPARE_TIMER_THRESHOLD",
+        "kind": "conditional_branch",
+        "value": {
+          "false_target": "BLOCK_RETURN",
+          "lhs": "param_1 + 0x558",
+          "rhs": 0.0,
+          "target_label": "BLOCK_EXPIRED"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b514",
+          "instruction:0x8012b518",
+          "instruction:0x8012b51c",
+          "instruction:0x8012b520"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CLEAR_STATUS_FLAG",
+        "kind": "memory_store",
+        "value": {
+          "offset": 0,
+          "target_offset": 1855,
+          "width": 8,
+          "value": 0
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b524",
+          "instruction:0x8012b52c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_MASK_ACTION_STATE",
+        "kind": "memory_store",
+        "value": {
+          "mask": 4294967292,
+          "offset": 0,
+          "operation": "and",
+          "target_offset": 1504,
+          "width": 32
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b530",
+          "instruction:0x8012b534",
+          "instruction:0x8012b538"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_ZZ_006A53C",
+        "kind": "call",
+        "value": {
+          "args": [
+            "param_1",
+            16
+          ],
+          "callee": "0x8006a53c"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b53c",
+          "instruction:0x8012b528"
+        ],
+        "verification": "pending"
+      }
+    ],
+    "hypotheses": [
+      "param_1 + 0x540 is a boolean flag indicating if the charge action has started.",
+      "param_1 + 0x558 stores the remaining time or base time for the charge.",
+      "param_1 + 0x1dc8 stores the delta time per frame.",
+      "param_1 + 0x3e8 stores the Borg entity type ID.",
+      "zz_016c7ec_ initializes specific attack slots (indices 1,2 or 4,5) for the charge.",
+      "zz_006a53c_ resets the action state to idle/neutral upon expiration."
+    ],
+    "unknowns": [
+      "Exact semantic meaning of zz_00107a0_ and zz_00f036c_ arguments beyond numeric values.",
+      "Specific game logic handled by zz_006a53c_ with argument 0x10."
+    ],
+    "dependencies": [
+      {
+        "status": "unresolved",
+        "address": "0x800107a0",
+        "name": "zz_00107a0_"
+      },
+      {
+        "status": "unresolved",
+        "address": "0x8006a53c",
+        "name": "zz_006a53c_"
+      },
+      {
+        "status": "unresolved",
+        "address": "0x800f036c",
+        "name": "zz_00f036c_"
+      },
+      {
+        "status": "unresolved",
+        "address": "0x8016c7ec",
+        "name": "zz_016c7ec_"
+      }
+    ],
+    "suitability": "low_level_port"
+  },
+  "port_ir": {
+    "kind": "function",
+    "entry": [
+      {
+        "type": "label",
+        "id": "BLOCK_ENTRY"
+      },
+      {
+        "type": "memory_store",
+        "offset": null,
+        "target_offset": 1768,
+        "width\": 8, value: 131, id: ":"C_INIT_FLAG_STORE"
+      },
+      {
+        "type": "branch_if_zero",
+        "source": "param_1 + 0x540",
+        "target_label": "BLOCK_IF",
+        "false_target": "BLOCK_ELSE"
+      }
+    ],
+    "update": [
+      {
+        "type": "label",
+        "id": "BLOCK_IF"
+      },
+      {
+        "type": "memory_store",
+        "offset": null,
+        "target_offset": 1344,
+        "width\": 8, value: 1, id: ":"C_SET_CHARGE_FLAG"
+      },
+      {
+        "type": "memory_store",
+        "offset": null,
+        "target_offset": 1368,
+        "width\": 32, value: 45.0, id: ":"C_STORE_TIMER_BASE"
+      },
+      {
+        "type": "call",
+        "callee": "0x800107a0",
+        "args": [
+          {
+            "source": "param_1"
+          },
+           {
+            "value": 127
+          }
+        ],
+        "id: ":"C_CALL_ZZ_00107A0"
+      },
+      {
+        "type": "call",
+        "callee": "0x800f036c",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 32
+          }
+        ],
+        "id: ":"C_CALL_ZZ_00F036C"
+      },
+      {
+        "type": "branch_if_eq",
+        "source": "param_1 + 0x3e8",
+        "value": 1543,
+        "target_label": "BLOCK_MATCH_607",
+        "false_target": "BLOCK_ELSE_IF"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_MATCH_607"
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 1
+          },
+          {
+            "value": 0
+          }
+        ],
+        "id: ":"C_CALL_ZZ_016C7EC_1"
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          }
+        ],
+        "id: ":"C_CALL_ZZ_016C7EC_2"
+      },
+      {
+        "type": "jump",
+        "target_label": "BLOCK_RETURN"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_ELSE_IF"
+      },
+      {
+        "type": "branch_if_eq",
+        "source": "param_1 + 0x3e8",
+        "value": 1563,
+        "target_label": "BLOCK_MATCH_61B",
+        "false_target": "BLOCK_ELSE"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_MATCH_61B"
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 4
+          },
+          {
+            "value": 0
+          }
+        ],
+        "id: ":"C_CALL_ZZ_016C7EC_3"
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 5
+          },
+          {
+            "value": 0
+          }
+        ],
+        "id: ":"C_CALL_ZZ_016C7EC_4"
+      },
+      {
+        "type": "jump",
+        "target_label": "BLOCK_RETURN"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_ELSE"
+      },
+      {
+        "type": "arithmetic_update",
+        "lhs": "param_1 + 0x558",
+        "rhs": "param_1 + 0x1dc8",
+        "operation": "sub",
+        "target_offset": 1368,
+        "width\": 32, id: ":"C_DECREMENT_TIMER"
+      },
+      {
+        "type": "branch_if_lte",
+        "lhs": "param_1 + 0x558",
+        "rhs": 0.0,
+        "target_label ": "BLOCK_EXPIRED",
+        "false_target ": "BLOCK_RETURN"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_EXPIRED"
+      },
+      {
+        "type": "memory_store",
+        "offset": null,
+        "target_offset": 1855,
+        "width\": 8, value: 0, id: ":"C_CLEAR_STATUS_FLAG"
+      },
+      {
+        "type": "arithmetic_update",
+        "lhs": "param_1 + 0x5e0",
+        "rhs": 4294967292,
+        "operation": "and",
+        "target_offset": 1504,
+        "width\": 32, id: ":"C_MASK_ACTION_STATE"
+      },
+      {
+        "type": "call",
+        "callee": "0x8006a53c",
+        "args": [
+          {
+            "source": "param_1"
+          },
+          {
+            "value": 16
+          }
+        ],
+        "id: ":"C_CALL_ZZ_006A53C"
+      }
+    ],
+    "exit": [
+      {
+        "type": "label",
+        "id": "BLOCK_RETURN"
+      },
+      {
+        "type": "return"
+      }
+    ]
+  }
+}

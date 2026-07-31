@@ -1,0 +1,26 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "0x80003140",
+    "name": "__set_debug_bba",
+    "metadata": "Function: __set_debug_bba at 80003140\nSignature: undefined __set_debug_bba(void)\nEntry: 80003140\nBody: 80003140 - 8000314b",
+    "thunk": false
+  },
+  "decompiler": {
+    "c": null,
+    "completed": false,
+    "deferred": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "li r0,0x1",
+    "stb r0,-0x5108(r13)",
+    "blr"
+  ],
+  "calls": [],
+  "fingerprints": {
+    "normalized_disassembly": "4e23ae8236151c922717f532cc20c31712354fed7c8410234230f795361a2efa",
+    "normalized_pcode": null
+  }
+}

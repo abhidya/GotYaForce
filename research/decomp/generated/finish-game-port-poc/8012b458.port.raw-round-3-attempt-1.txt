@@ -1,0 +1,631 @@
+{
+  "analysis": {
+    "summary": "The function manageBorgChargeTimer implements a state machine for a timed charge action. It initializes the timer and attack slots if the charge flag (offset 0x540) is clear, otherwise it decrements the timer by delta time (offset 0x1dc8). Upon expiry (timer <= 0.0), it clears the charge flag, masks the status word (offset 0x5e0) to clear lower bits, and calls a cleanup routine. Specific Borg IDs (0x607, 0x61b) trigger initialization of specific attack slots via zz_016c7ec_.",
+    "claims": [
+      {
+        "id": "C_INIT_FLAG_STORE",
+        "kind": "memory_store",
+        "value": {
+          "offset": "0x6e8",
+          "value": 131,
+          "width": 8,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b464",
+          "instruction:0x8012b470"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_LOAD_TIMER_BASE",
+        "kind": "memory_load",
+        "value": {
+          "offset": "0x558",
+          "width": 32,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b490"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_CHARGE_FLAG",
+        "kind": "conditional_branch",
+        "value": {
+          "offset": "0x540",
+          "width": 8,
+          "signed": true,
+          "comparison": "eq",
+          "value": 0,
+          "target_label": "BLOCK_CHARGE_START",
+          "false_target": "BLOCK_CHARGE_UPDATE"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b474",
+          "instruction:0x8012b478",
+          "instruction:0x8012b47c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_SET_CHARGE_FLAG",
+        "kind": "memory_store",
+        "value": {
+          "offset": "0x540",
+          "value": 1,
+          "width": 8,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b480",
+          "instruction:0x8012b488"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_STORE_TIMER_SEED",
+        "kind": "memory_store",
+        "value": {
+          "offset": "0x558",
+          "value": 45.0,
+          "width": 32,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b484",
+          "instruction:0x8012b490"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_INIT_1",
+        "kind": "call",
+        "value": {
+          "callee": "0x800107a0",
+          "args": [
+            "param_1",
+            127
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b494"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_INIT_2",
+        "kind": "call",
+        "value": {
+          "callee": "0x800f036c",
+          "args": [
+            "param_1",
+            32
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4a0"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_BORG_ID_607",
+        "kind": "conditional_branch",
+        "value": {
+          "offset": "0x3e8",
+          "width": 16,
+          "signed": true,
+          "comparison": "eq",
+          "value": 1543,
+          "target_label": "BLOCK_BORG_607",
+          "false_target": "BLOCK_CHECK_61B"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4a4",
+          "instruction:0x8012b4a8",
+          "instruction:0x8012b4ac"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_SLOT_1_2",
+        "kind": "call_group",
+        "value": {
+          "callee": "0x8016c7ec",
+          "calls": [
+            {
+              "args": [
+                "param_1",
+                1,
+                0
+              ]
+            },
+            {
+              "args": [
+                "param_1",
+                2,
+                0
+              ]
+            }
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4bc",
+          "instruction:0x8012b4cc"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CHECK_BORG_ID_61B",
+        "kind": "conditional_branch",
+        "value": {
+          "offset": "0x3e8",
+          "width": 16,
+          "signed": true,
+          "comparison": "eq",
+          "value": 1563,
+          "target_label": "BLOCK_BORG_61B",
+          "false_target": "BLOCK_EXIT"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4d4",
+          "instruction:0x8012b4d8"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_SLOT_4_5",
+        "kind": "call_group",
+        "value": {
+          "callee": "0x8016c7ec",
+          "calls": [
+            {
+              "args": [
+                "param_1",
+                4,
+                0
+              ]
+            },
+            {
+              "args": [
+                "param_1",
+                5,
+                0
+              ]
+            }
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b4e8",
+          "instruction:0x8012b4f8"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_LOAD_CURRENT_TIMER",
+        "kind": "memory_load",
+        "value": {
+          "offset": "0x558",
+          "width": 32,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b500"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_LOAD_DELTA_TIME",
+        "kind": "memory_load",
+        "value": {
+          "offset": "0x1dc8",
+          "width": 32,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b504"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_DECREMENT_TIMER",
+        "kind": "arithmetic_op",
+        "value": {
+          "operation": "sub",
+          "lhs": "timer_current",
+          "rhs": "delta_time",
+          "width": 32,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b50c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_STORE_UPDATED_TIMER",
+        "kind": "memory_store",
+        "value": {
+          "offset": "0x558",
+          "width": 32,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b510"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_COMPARE_EXPIRY",
+        "kind": "conditional_branch",
+        "value": {
+          "lhs": "timer_current",
+          "rhs": 0.0,
+          "comparison": "lte",
+          "target_label": "BLOCK_CHARGE_EXPIRED",
+          "false_target": "BLOCK_EXIT"
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b514",
+          "instruction:0x8012b518",
+          "instruction:0x8012b51c",
+          "instruction:0x8012b520"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CLEAR_EXPIRY_FLAG",
+        "kind": "memory_store",
+        "value": {
+          "offset": "0x73f",
+          "value": 0,
+          "width": 8,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b524",
+          "instruction:0x8012b52c"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_MASK_STATUS_BITS",
+        "kind": "memory_store",
+        "value": {
+          "offset": "0x5e0",
+          "mask": 4294967292,
+          "width": 32,
+          "signed": false
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b530",
+          "instruction:0x8012b534",
+          "instruction:0x8012b538"
+        ],
+        "verification": "pending"
+      },
+      {
+        "id": "C_CALL_CLEANUP",
+        "kind": "call",
+        "value": {
+          "callee": "0x8006a53c",
+          "args": [
+            "param_1",
+            16
+          ]
+        },
+        "confidence": 1.0,
+        "evidence_refs": [
+          "instruction:0x8012b53c"
+        ],
+        "verification": "pending"
+      }
+    ],
+    "hypotheses": [
+      "param_1 + 0x540 is a boolean flag indicating if the charge action has been initiated.",
+      "param_1 + 0x558 stores the remaining time or current timer value for the charge.",
+      "param_1 + 0x1dc8 stores the delta time per frame/update cycle.",
+      "FLOAT_80439d7c (0.0) is the threshold for timer expiry.",
+      "param_1 + 0x3e8 contains the Borg entity ID used to select specific attack slot initialization logic.",
+      "zz_016c7ec_ initializes specific attack slots (indices 1,2 or 4,5) with state 0."
+    ],
+    "unknowns": [
+      "The exact semantic meaning of the cleanup argument 0x10 passed to zz_006a53c_.",
+      "The internal logic of zz_00107a0_, zz_00f036c_, and zz_006a53c_ beyond their arguments."
+    ],
+    "dependencies": [
+      {
+        "status": "unresolved",
+        "address": "0x800107a0",
+        "name": "zz_00107a0_",
+        "reason": "Helper function called during initialization."
+      },
+      {
+        "status": "unresolved",
+        "address": "0x800f036c",
+        "name": "zz_00f036c_",
+        "reason": "Helper function called during initialization."
+      },
+      {
+        "status": "unresolved",
+        "address": "0x8016c7ec",
+        "name": "zz_016c7ec_",
+        "reason": "Helper function called to initialize attack slots."
+      },
+      {
+        "status": "unresolved",
+        "address": "0x8006a53c",
+        "name": "zz_006a53c_",
+        "reason": "Helper function called during cleanup/expiry."
+      }
+    ],
+    "suitability": "low_level_port"
+  },
+  "port_ir": {
+    "kind": "function",
+    "entry": [
+      {
+        "type": "label",
+        "id": "BLOCK_ENTRY"
+      },
+      {
+        "type": "memory_store",
+        "offset": "0x6e8",
+        "value": 131,
+        "width": 8,
+        "signed": false
+      },
+      {
+        "type": "branch_if_eq",
+        "source": "param_1+0x540",
+        "value": 0,
+        "target_label": "BLOCK_CHARGE_START",
+        "false_target": "BLOCK_CHARGE_UPDATE"
+      }
+    ],
+    "update": [
+      {
+        "type": "label",
+        "id": "BLOCK_CHARGE_START"
+      },
+      {
+        "type": "memory_store",
+        "offset": "0x540",
+        "value": 1,
+        "width": 8,
+        "signed": false
+      },
+      {
+        "type": "memory_store",
+        "offset": "0x558",
+        "value": 45.0,
+        "width": 32,
+        "signed": false
+      },
+      {
+        "type": "call",
+        "callee": "0x800107a0",
+        "args": [
+          	{
+            "type": "param",
+            "name": "param_1"
+          },
+          	{
+            "type": "literal",
+            "value": 127,
+            "width": 8
+          }
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x800f036c",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 32,
+            "width": 8
+          }
+        ]
+      },
+      {
+        "type": "branch_if_eq",
+        "source": "param_1+0x3e8",
+        "value": 1543,
+        "target_label": "BLOCK_BORG_607",
+        "false_target": "BLOCK_CHECK_61B"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_BORG_607"
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 1,
+            "width": 8
+          },
+          {
+            "type": "literal",
+            "value": 0,
+            "width": 8
+          }
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 2,
+            "width": 8
+          },
+          {
+            "type": "literal",
+            "value": 0,
+            "width": 8
+          }
+        ]
+      },
+      {
+        "type": "jump",
+        "target_label": "BLOCK_EXIT"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_CHECK_61B"
+      },
+      {
+        "type": "branch_if_eq",
+        "source": "param_1+0x3e8",
+        "value": 1563,
+        "target_label": "BLOCK_BORG_61B",
+        "false_target": "BLOCK_EXIT"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_BORG_61B"
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 4,
+            "width": 8
+          },
+          {
+            "type": "literal",
+            "value": 0,
+            "width": 8
+          }
+        ]
+      },
+      {
+        "type": "call",
+        "callee": "0x8016c7ec",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 5,
+            "width": 8
+          },
+          {
+            "type": "literal",
+            "value": 0,
+            "width": 8
+          }
+        ]
+      },
+      {
+        "type": "jump",
+        "target_label": "BLOCK_EXIT"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_CHARGE_UPDATE"
+      },
+      {
+        "type": "arithmetic_op",
+        "operation": "sub",
+        "lhs_offset": "0x558",
+        "rhs_offset": "0x1dc8",
+        "width_offset": "0x558",
+        "signed_offset": "0x558"
+      },
+      {
+        "type": "branch_if_lte",
+        "lhs": "param_1+0x558",
+        "rhs": 0.0,
+        "target_label ": "BLOCK_CHARGE_EXPIRED",
+        "false_target ": "BLOCK_EXIT"
+      },
+      {
+        "type": "label",
+        "id": "BLOCK_CHARGE_EXPIRED"
+      },
+      {
+        "type": "memory_store",
+        "offset": "0x73f",
+        "value": 0,
+        "width": 8,
+        "signed": false
+      },
+      {
+        "type": "memory_store",
+        "offset": "0x5e0",
+        "mask": 4294967292,
+        "width": 32,
+        "signed": false
+      },
+      {
+        "type": "call",
+        "callee": "0x8006a53c",
+        "args": [
+          {
+            "type": "param",
+            "name": "param_1"
+          },
+          {
+            "type": "literal",
+            "value": 16,
+            "width": 8
+          }
+        ]
+      }
+    ],
+    "exit": [
+      {
+        "type": "label",
+        "id": "BLOCK_EXIT"
+      },
+      {
+        "type": "return"
+      }
+    ]
+  }
+}

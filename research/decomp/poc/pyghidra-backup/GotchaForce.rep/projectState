@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PROJECT>
+    <PROJECT_DATA_XML_NAME NAME="DISPLAY_DATA">
+        <SAVE_STATE>
+            <ARRAY NAME="EXPANDED_PATHS" TYPE="string">
+                <A VALUE="GotchaForce:" />
+            </ARRAY>
+            <STATE NAME="SHOW_TABLE" TYPE="boolean" VALUE="false" />
+        </SAVE_STATE>
+    </PROJECT_DATA_XML_NAME>
+    <TOOL_MANAGER ACTIVE_WORKSPACE="Workspace">
+        <WORKSPACE NAME="Workspace" ACTIVE="true">
+            <RUNNING_TOOL TOOL_NAME="CodeBrowser">
+                <ROOT_NODE X_POS="635" Y_POS="0" WIDTH="650" HEIGHT="685" EX_STATE="1">
+                    <SPLIT_NODE WIDTH="100" HEIGHT="100" DIVIDER_LOCATION="0" ORIENTATION="VERTICAL">
+                        <SPLIT_NODE WIDTH="638" HEIGHT="512" DIVIDER_LOCATION="902" ORIENTATION="VERTICAL">
+                            <SPLIT_NODE WIDTH="638" HEIGHT="458" DIVIDER_LOCATION="890" ORIENTATION="VERTICAL">
+                                <SPLIT_NODE WIDTH="638" HEIGHT="404" DIVIDER_LOCATION="744" ORIENTATION="VERTICAL">
+                                    <SPLIT_NODE WIDTH="1621" HEIGHT="816" DIVIDER_LOCATION="148" ORIENTATION="VERTICAL">
+                                        <COMPONENT_NODE TOP_INFO="0">
+                                            <COMPONENT_INFO NAME="Entropy" OWNER="EntropyPlugin" TITLE="Entropy" ACTIVE="false" GROUP="Header" INSTANCE_ID="3207819926581772885" />
+                                            <COMPONENT_INFO NAME="Overview" OWNER="OverviewPlugin" TITLE="Overview" ACTIVE="false" GROUP="Header" INSTANCE_ID="3207819926581772883" />
+                                        </COMPONENT_NODE>
+                                        <SPLIT_NODE WIDTH="638" HEIGHT="298" DIVIDER_LOCATION="158" ORIENTATION="HORIZONTAL">
+                                            <SPLIT_NODE WIDTH="100" HEIGHT="298" DIVIDER_LOCATION="640" ORIENTATION="VERTICAL">
+                                                <SPLIT_NODE WIDTH="100" HEIGHT="188" DIVIDER_LOCATION="502" ORIENTATION="VERTICAL">
+                                                    <COMPONENT_NODE TOP_INFO="0">
+                                                        <COMPONENT_INFO NAME="Program Tree" OWNER="ProgramTreePlugin" TITLE="Program Trees" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249761106295964" />
+                                                    </COMPONENT_NODE>
+                                                    <COMPONENT_NODE TOP_INFO="0">
+                                                        <COMPONENT_INFO NAME="Symbol Tree" OWNER="SymbolTreePlugin" TITLE="Symbol Tree" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249761106295959" />
+                                                    </COMPONENT_NODE>
+                                                </SPLIT_NODE>
+                                                <COMPONENT_NODE TOP_INFO="0">
+                                                    <COMPONENT_INFO NAME="DataTypes Provider" OWNER="DataTypeManagerPlugin" TITLE="Data Type Manager" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249786060307584" />
+                                                </COMPONENT_NODE>
+                                            </SPLIT_NODE>
+                                            <SPLIT_NODE WIDTH="534" HEIGHT="298" DIVIDER_LOCATION="728" ORIENTATION="VERTICAL">
+                                                <SPLIT_NODE WIDTH="1386" HEIGHT="638" DIVIDER_LOCATION="705" ORIENTATION="VERTICAL">
+                                                    <SPLIT_NODE WIDTH="534" HEIGHT="214" DIVIDER_LOCATION="562" ORIENTATION="HORIZONTAL">
+                                                        <COMPONENT_NODE TOP_INFO="0">
+                                                            <COMPONENT_INFO NAME="Listing" OWNER="CodeBrowserPlugin" TITLE="Listing:  boot.dol" ACTIVE="true" GROUP="Core" INSTANCE_ID="3744249784302894216" />
+                                                        </COMPONENT_NODE>
+                                                        <COMPONENT_NODE TOP_INFO="0">
+                                                            <COMPONENT_INFO NAME="Decompiler" OWNER="DecompilePlugin" TITLE="Decompile: start" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249761106295965" />
+                                                            <COMPONENT_INFO NAME="Bytes" OWNER="ByteViewerPlugin" TITLE="Bytes: boot.dol" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249761106295967" />
+                                                            <COMPONENT_INFO NAME="Data Window" OWNER="DataWindowPlugin" TITLE="Defined Data" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249786060307598" />
+                                                            <COMPONENT_INFO NAME="Defined Strings" OWNER="ViewStringsPlugin" TITLE="Defined Strings" ACTIVE="false" GROUP="Default" INSTANCE_ID="3207819980101091905" />
+                                                            <COMPONENT_INFO NAME="Equates Table" OWNER="EquateTablePlugin" TITLE="Equates Table" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249784302894213" />
+                                                            <COMPONENT_INFO NAME="External Programs" OWNER="ReferencesPlugin" TITLE="External Programs" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249784302894218" />
+                                                            <COMPONENT_INFO NAME="Functions Window" OWNER="FunctionWindowPlugin" TITLE="Functions" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249784302894221" />
+                                                            <COMPONENT_INFO NAME="Relocation Table" OWNER="RelocationTablePlugin" TITLE="Relocation Table" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249786060307602" />
+                                                        </COMPONENT_NODE>
+                                                    </SPLIT_NODE>
+                                                    <SPLIT_NODE WIDTH="1386" HEIGHT="189" DIVIDER_LOCATION="495" ORIENTATION="HORIZONTAL">
+                                                        <COMPONENT_NODE TOP_INFO="0">
+                                                            <COMPONENT_INFO NAME="Data Type Preview" OWNER="DataTypePreviewPlugin" TITLE="Data Type Preview" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249785668140186" />
+                                                        </COMPONENT_NODE>
+                                                        <COMPONENT_NODE TOP_INFO="0">
+                                                            <COMPONENT_INFO NAME="Virtual Disassembler - Current Instruction" OWNER="DisassembledViewPlugin" TITLE="Disassembled View" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249784302894212" />
+                                                        </COMPONENT_NODE>
+                                                    </SPLIT_NODE>
+                                                </SPLIT_NODE>
+                                                <COMPONENT_NODE TOP_INFO="1">
+                                                    <COMPONENT_INFO NAME="Console" OWNER="ConsolePlugin" TITLE="Console" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249761106295966" />
+                                                    <COMPONENT_INFO NAME="Bookmarks" OWNER="BookmarkPlugin" TITLE="Bookmarks" ACTIVE="true" GROUP="Core.Bookmarks" INSTANCE_ID="3744249761106295963" />
+                                                </COMPONENT_NODE>
+                                            </SPLIT_NODE>
+                                        </SPLIT_NODE>
+                                    </SPLIT_NODE>
+                                    <COMPONENT_NODE TOP_INFO="0">
+                                        <COMPONENT_INFO NAME="Function Call Trees" OWNER="CallTreePlugin" TITLE="Function Call Trees: start" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249761106295960" />
+                                    </COMPONENT_NODE>
+                                </SPLIT_NODE>
+                                <COMPONENT_NODE TOP_INFO="0">
+                                    <COMPONENT_INFO NAME="Domain Events" OWNER="DomainEventDisplayPlugin" TITLE="Domain Object Event Display" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249784302894214" />
+                                </COMPONENT_NODE>
+                            </SPLIT_NODE>
+                            <COMPONENT_NODE TOP_INFO="0">
+                                <COMPONENT_INFO NAME="Plugin Event Display" OWNER="EventDisplayPlugin" TITLE="Plugin Event Display" ACTIVE="true" GROUP="Default" INSTANCE_ID="3744249784302894211" />
+                            </COMPONENT_NODE>
+                        </SPLIT_NODE>
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Database Viewer" OWNER="DbViewerPlugin" TITLE="Database Viewer" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249815363812494" />
+                        </COMPONENT_NODE>
+                    </SPLIT_NODE>
+                    <WINDOW_NODE X_POS="217" Y_POS="20" WIDTH="1033" HEIGHT="630">
+                        <SPLIT_NODE WIDTH="1021" HEIGHT="549" DIVIDER_LOCATION="616" ORIENTATION="HORIZONTAL">
+                            <COMPONENT_NODE TOP_INFO="0">
+                                <COMPONENT_INFO NAME="Script Manager" OWNER="GhidraScriptMgrPlugin" TITLE="Script Manager" ACTIVE="false" GROUP="Script Group" INSTANCE_ID="3744249761106295961" />
+                            </COMPONENT_NODE>
+                            <COMPONENT_NODE TOP_INFO="0">
+                                <COMPONENT_INFO NAME="Script Editor" OWNER="GhidraScriptMgrPlugin" TITLE="DumpAllDecompiledJ.java" ACTIVE="false" GROUP="Script Group" INSTANCE_ID="3738995287705412312" />
+                            </COMPONENT_NODE>
+                        </SPLIT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="423" Y_POS="144" WIDTH="927" HEIGHT="370">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Memory Map" OWNER="MemoryMapPlugin" TITLE="Memory Map" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249761106295941" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="24" Y_POS="8" WIDTH="1020" HEIGHT="630">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Function Graph" OWNER="FunctionGraphPlugin" TITLE="Function Graph" ACTIVE="false" GROUP="Function Graph" INSTANCE_ID="3744249786060307604" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="550" Y_POS="206" WIDTH="655" HEIGHT="509">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Register Manager" OWNER="RegisterPlugin" TITLE="Register Manager" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249784302894220" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="20" Y_POS="30" WIDTH="1230" HEIGHT="666">
+                        <SPLIT_NODE WIDTH="1218" HEIGHT="562" DIVIDER_LOCATION="573" ORIENTATION="HORIZONTAL">
+                            <COMPONENT_NODE TOP_INFO="0">
+                                <COMPONENT_INFO NAME="Symbol Table" OWNER="SymbolTablePlugin" TITLE="Symbol Table" ACTIVE="false" GROUP="symbolTable" INSTANCE_ID="3744249786060307599" />
+                            </COMPONENT_NODE>
+                            <COMPONENT_NODE TOP_INFO="0">
+                                <COMPONENT_INFO NAME="Symbol References" OWNER="SymbolTablePlugin" TITLE="Symbol References" ACTIVE="false" GROUP="symbolTable" INSTANCE_ID="3744249786060307600" />
+                            </COMPONENT_NODE>
+                        </SPLIT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="-1" Y_POS="-1" WIDTH="0" HEIGHT="0">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Checksum Generator" OWNER="ComputeChecksumsPlugin" TITLE="Checksum Generator" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249784302894215" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="-1" Y_POS="-1" WIDTH="0" HEIGHT="0">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Function Tags" OWNER="FunctionTagPlugin" TITLE="Function Tags" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249786060307585" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="-1" Y_POS="-1" WIDTH="0" HEIGHT="0">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Comment Window" OWNER="CommentWindowPlugin" TITLE="Comments" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249786060307597" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="-1" Y_POS="-1" WIDTH="0" HEIGHT="0">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Python" OWNER="InterpreterPanelPlugin" TITLE="Python" ACTIVE="false" GROUP="Default" INSTANCE_ID="3207819978370941531" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="232" Y_POS="100" WIDTH="816" HEIGHT="481">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Bundle Manager" OWNER="GhidraScriptMgrPlugin" TITLE="Bundle Manager" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249761106295962" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="132" Y_POS="0" WIDTH="1016" HEIGHT="630">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Source Files and Transforms" OWNER="SourceFilesTablePlugin" TITLE="Source Files and Transforms" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249784302894219" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="0" Y_POS="0" WIDTH="0" HEIGHT="0">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Defined Strings" OWNER="DefinedStringsPlugin" TITLE="Defined Strings" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249786060307601" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="195" Y_POS="109" WIDTH="412" HEIGHT="481">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="PyGhidra" OWNER="PyGhidra" TITLE="PyGhidra" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249786060307596" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="0" Y_POS="0" WIDTH="0" HEIGHT="0">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Function Call Graph" OWNER="FunctionCallGraphPlugin" TITLE="Function Call Graph" ACTIVE="false" GROUP="Function Call Graph" INSTANCE_ID="3744249785668140187" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="434" Y_POS="207" WIDTH="412" HEIGHT="266">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Location References Provider" OWNER="LocationReferencesPlugin" TITLE="References to zz_003d344_ - 1 locations" ACTIVE="false" GROUP="Default" INSTANCE_ID="3738994608047809221" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="181" Y_POS="122" WIDTH="918" HEIGHT="436">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="BSimFeatureVisualizer" OWNER="BSimFeatureVisualizerPlugin" TITLE="BSimFeatureVisualizer" ACTIVE="false" GROUP="Default" INSTANCE_ID="3739304422506922359" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="0" Y_POS="0" WIDTH="0" HEIGHT="0">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Window Locations" OWNER="WindowLocationPlugin" TITLE="Window Locations" ACTIVE="false" GROUP="Default" INSTANCE_ID="3744249761106295942" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                    <WINDOW_NODE X_POS="132" Y_POS="0" WIDTH="1016" HEIGHT="630">
+                        <COMPONENT_NODE TOP_INFO="0">
+                            <COMPONENT_INFO NAME="Graph" OWNER="DefaultGraphDisplay" TITLE="AST Data Flow Graph For start" ACTIVE="false" GROUP="ProgramGraph" INSTANCE_ID="3742403969089126105" />
+                        </COMPONENT_NODE>
+                    </WINDOW_NODE>
+                </ROOT_NODE>
+                <DATA_STATE>
+                    <PLUGIN NAME="NavigationHistoryPlugin">
+                        <XML NAME="HISTORY_LIST_0">
+                            <SAVE_STATE>
+                                <STATE NAME="CURRENT_LOC_INDEX" TYPE="int" VALUE="1" />
+                                <STATE NAME="LOCATION_COUNT" TYPE="int" VALUE="2" />
+                                <STATE NAME="MEMENTO_CLASS0" TYPE="string" VALUE="ghidra.app.plugin.core.gotoquery.DefaultNavigatableLocationMemento" />
+                                <STATE NAME="MEMENTO_CLASS1" TYPE="string" VALUE="ghidra.app.plugin.core.gotoquery.DefaultNavigatableLocationMemento" />
+                                <XML NAME="MEMENTO_DATA0">
+                                    <SAVE_STATE>
+                                        <XML NAME="MEMENTO0">
+                                            <SAVE_STATE>
+                                                <STATE NAME="Block Num" TYPE="int" VALUE="0" />
+                                                <STATE NAME="Block Offset" TYPE="string" VALUE="0" />
+                                                <STATE NAME="INDEX" TYPE="int" VALUE="0" />
+                                                <STATE NAME="MEMENTO_CLASS" TYPE="string" VALUE="ghidra.app.plugin.core.byteviewer.ByteViewerLocationMemento" />
+                                                <STATE NAME="NAV_ID" TYPE="long" VALUE="3744249761106295967" />
+                                                <STATE NAME="PROGRAM_ID" TYPE="long" VALUE="3738993366672237252" />
+                                                <STATE NAME="PROGRAM_PATH_" TYPE="string" VALUE="GotchaForce:/boot.dol" />
+                                                <STATE NAME="X_OFFSET" TYPE="int" VALUE="0" />
+                                                <STATE NAME="Y_OFFSET" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_ADDRESS" TYPE="string" VALUE="80000000" />
+                                                <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="80000000" />
+                                                <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.app.plugin.core.byteviewer.ByteViewerProgramLocation" />
+                                                <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                                            </SAVE_STATE>
+                                        </XML>
+                                        <XML NAME="MEMENTO1">
+                                            <SAVE_STATE>
+                                                <STATE NAME="CURSOR_OFFSET" TYPE="int" VALUE="0" />
+                                                <STATE NAME="MEMENTO_CLASS" TYPE="string" VALUE="ghidra.app.plugin.core.codebrowser.CodeViewerLocationMemento" />
+                                                <STATE NAME="NAV_ID" TYPE="long" VALUE="3744249784302894216" />
+                                                <STATE NAME="PROGRAM_ID" TYPE="long" VALUE="3738993366672237252" />
+                                                <STATE NAME="PROGRAM_PATH_" TYPE="string" VALUE="GotchaForce:/boot.dol" />
+                                                <STATE NAME="_ADDRESS" TYPE="string" VALUE="80000000" />
+                                                <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="80000000" />
+                                                <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.program.util.MemoryBlockStartFieldLocation" />
+                                                <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                                                <ARRAY NAME="_COMMENT" TYPE="string">
+                                                    <A VALUE="//" />
+                                                    <A VALUE="// OSGlobals" />
+                                                    <A VALUE="// Operating System Globals" />
+                                                    <A VALUE="// ram:80000000-ram:800030ff" />
+                                                    <A VALUE="//" />
+                                                </ARRAY>
+                                                <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_TYPE" TYPE="int" VALUE="-1" />
+                                            </SAVE_STATE>
+                                        </XML>
+                                        <STATE NAME="MEMENTO_CLASS" TYPE="string" VALUE="ghidra.app.plugin.core.gotoquery.DefaultNavigatableLocationMemento" />
+                                        <STATE NAME="NUM_MEMENTOS" TYPE="int" VALUE="2" />
+                                        <STATE NAME="PROGRAM_ID" TYPE="long" VALUE="3738993366672237252" />
+                                        <STATE NAME="PROGRAM_PATH_" TYPE="string" VALUE="GotchaForce:/boot.dol" />
+                                        <STATE NAME="_ADDRESS" TYPE="string" VALUE="80000000" />
+                                        <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="80000000" />
+                                        <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                                        <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.program.util.MemoryBlockStartFieldLocation" />
+                                        <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                                        <ARRAY NAME="_COMMENT" TYPE="string">
+                                            <A VALUE="//" />
+                                            <A VALUE="// OSGlobals" />
+                                            <A VALUE="// Operating System Globals" />
+                                            <A VALUE="// ram:80000000-ram:800030ff" />
+                                            <A VALUE="//" />
+                                        </ARRAY>
+                                        <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                                        <STATE NAME="_TYPE" TYPE="int" VALUE="-1" />
+                                    </SAVE_STATE>
+                                </XML>
+                                <XML NAME="MEMENTO_DATA1">
+                                    <SAVE_STATE>
+                                        <XML NAME="MEMENTO0">
+                                            <SAVE_STATE>
+                                                <STATE NAME="Block Num" TYPE="int" VALUE="1" />
+                                                <STATE NAME="Block Offset" TYPE="string" VALUE="268" />
+                                                <STATE NAME="INDEX" TYPE="int" VALUE="798" />
+                                                <STATE NAME="MEMENTO_CLASS" TYPE="string" VALUE="ghidra.app.plugin.core.byteviewer.ByteViewerLocationMemento" />
+                                                <STATE NAME="NAV_ID" TYPE="long" VALUE="3744249761106295967" />
+                                                <STATE NAME="PROGRAM_ID" TYPE="long" VALUE="3738993366672237252" />
+                                                <STATE NAME="PROGRAM_PATH_" TYPE="string" VALUE="GotchaForce:/boot.dol" />
+                                                <STATE NAME="X_OFFSET" TYPE="int" VALUE="-10" />
+                                                <STATE NAME="Y_OFFSET" TYPE="int" VALUE="-10" />
+                                                <STATE NAME="_ADDRESS" TYPE="string" VALUE="8000320c" />
+                                                <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="8000320c" />
+                                                <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.app.plugin.core.byteviewer.ByteViewerProgramLocation" />
+                                                <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                                            </SAVE_STATE>
+                                        </XML>
+                                        <XML NAME="MEMENTO1">
+                                            <SAVE_STATE>
+                                                <STATE NAME="CURSOR_OFFSET" TYPE="int" VALUE="90" />
+                                                <STATE NAME="MEMENTO_CLASS" TYPE="string" VALUE="ghidra.app.plugin.core.codebrowser.CodeViewerLocationMemento" />
+                                                <STATE NAME="NAV_ID" TYPE="long" VALUE="3744249784302894216" />
+                                                <STATE NAME="PROGRAM_ID" TYPE="long" VALUE="3738993366672237252" />
+                                                <STATE NAME="PROGRAM_PATH_" TYPE="string" VALUE="GotchaForce:/boot.dol" />
+                                                <STATE NAME="_ADDRESS" TYPE="string" VALUE="8000320c" />
+                                                <STATE NAME="_ADDR_REP" TYPE="string" VALUE="8000320c" />
+                                                <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="8000320c" />
+                                                <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.program.util.AddressFieldLocation" />
+                                                <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                                                <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                                            </SAVE_STATE>
+                                        </XML>
+                                        <STATE NAME="MEMENTO_CLASS" TYPE="string" VALUE="ghidra.app.plugin.core.gotoquery.DefaultNavigatableLocationMemento" />
+                                        <STATE NAME="NUM_MEMENTOS" TYPE="int" VALUE="2" />
+                                        <STATE NAME="PROGRAM_ID" TYPE="long" VALUE="3738993366672237252" />
+                                        <STATE NAME="PROGRAM_PATH_" TYPE="string" VALUE="GotchaForce:/boot.dol" />
+                                        <STATE NAME="_ADDRESS" TYPE="string" VALUE="8000320c" />
+                                        <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="8000320c" />
+                                        <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                                        <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.program.util.ProgramLocation" />
+                                        <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                                        <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                                    </SAVE_STATE>
+                                </XML>
+                                <STATE NAME="NAV_ID" TYPE="long" VALUE="-1" />
+                            </SAVE_STATE>
+                        </XML>
+                        <STATE NAME="LIST_COUNT" TYPE="int" VALUE="1" />
+                    </PLUGIN>
+                    <PLUGIN NAME="ProgramTreePlugin">
+                        <STATE NAME="Current Viewname" TYPE="string" VALUE="Program Tree" />
+                        <ARRAY NAME="GroupNameProgram Tree0" TYPE="string">
+                            <A VALUE="boot.dol" />
+                        </ARRAY>
+                        <STATE NAME="NavigationToggleState" TYPE="boolean" VALUE="false" />
+                        <STATE NAME="NumberOfGroupsProgram Tree" TYPE="int" VALUE="1" />
+                        <STATE NAME="NumberOfViews" TYPE="int" VALUE="1" />
+                        <STATE NAME="TreeName-0" TYPE="string" VALUE="Program Tree" />
+                    </PLUGIN>
+                    <PLUGIN NAME="DecompilePlugin">
+                        <STATE NAME="INDEX" TYPE="int" VALUE="32" />
+                        <STATE NAME="NAV_ID" TYPE="long" VALUE="3744249761106295965" />
+                        <STATE NAME="Num Disconnected" TYPE="int" VALUE="0" />
+                        <STATE NAME="Y_OFFSET" TYPE="int" VALUE="-3" />
+                        <STATE NAME="_ADDRESS" TYPE="string" VALUE="8000320c" />
+                        <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="8000320c" />
+                        <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                        <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.program.util.ProgramLocation" />
+                        <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                        <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                    </PLUGIN>
+                    <PLUGIN NAME="ByteViewerPlugin">
+                        <STATE NAME="Block Column" TYPE="int" VALUE="0" />
+                        <STATE NAME="Block Num" TYPE="int" VALUE="1" />
+                        <STATE NAME="Block Offset" TYPE="string" VALUE="268" />
+                        <STATE NAME="Index" TYPE="int" VALUE="798" />
+                        <STATE NAME="NAV_ID" TYPE="long" VALUE="3744249761106295967" />
+                        <STATE NAME="Num Disconnected" TYPE="int" VALUE="0" />
+                        <STATE NAME="X Offset" TYPE="int" VALUE="0" />
+                        <STATE NAME="Y Offset" TYPE="int" VALUE="-10" />
+                    </PLUGIN>
+                    <PLUGIN NAME="ProgramManagerPlugin">
+                        <STATE NAME="CURRENT_FILE" TYPE="string" VALUE="boot.dol" />
+                        <STATE NAME="LOCATION_0" TYPE="string" VALUE="/D:/GotYaForce/research/decomp/poc/pyghidra-backup/" />
+                        <STATE NAME="NUM_PROGRAMS" TYPE="int" VALUE="1" />
+                        <STATE NAME="PATHNAME_0" TYPE="string" VALUE="/boot.dol" />
+                        <STATE NAME="PROJECT_NAME_0" TYPE="string" VALUE="GotchaForce" />
+                        <STATE NAME="VERSION_0" TYPE="int" VALUE="-1" />
+                        <STATE NAME="_ADDRESS" TYPE="string" VALUE="8000320c" />
+                        <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="8000320c" />
+                        <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                        <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.program.util.ProgramLocation" />
+                        <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                        <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                    </PLUGIN>
+                    <PLUGIN NAME="FunctionGraphPlugin">
+                        <SAVE_STATE NAME="COMPLEX_LAYOUT_NAME" KEY="COMPLEX_LAYOUT_NAME" TYPE="SaveState">
+                            <STATE NAME="LAYOUT_CLASS_NAME" TYPE="string" VALUE="ghidra.app.plugin.core.functiongraph.graph.layout.DecompilerNestedLayoutProvider" />
+                            <STATE NAME="LAYOUT_NAME" TYPE="string" VALUE="Nested Code Layout" />
+                        </SAVE_STATE>
+                        <STATE NAME="DISPLAY_POPUPS" TYPE="boolean" VALUE="true" />
+                        <STATE NAME="DISPLAY_SATELLITE" TYPE="boolean" VALUE="true" />
+                        <STATE NAME="DOCK_SATELLITE" TYPE="boolean" VALUE="true" />
+                        <STATE NAME="DOCK_SATELLITE_POSITION" TYPE="string" VALUE="LOWER_RIGHT" />
+                        <STATE NAME="Disconnected Count" TYPE="int" VALUE="0" />
+                        <ENUM NAME="EDGE_HOVER_HIGHLIGHT" TYPE="enum" CLASS="ghidra.app.plugin.core.functiongraph.EdgeDisplayType" VALUE="ScopedFlowsFromVertex" />
+                        <ENUM NAME="EDGE_SELECTION_HIGHLIGHT" TYPE="enum" CLASS="ghidra.app.plugin.core.functiongraph.EdgeDisplayType" VALUE="AllCycles" />
+                        <STATE NAME="NAV_ID" TYPE="long" VALUE="3744249786060307604" />
+                    </PLUGIN>
+                    <PLUGIN NAME="CodeBrowserPlugin">
+                        <STATE NAME="INDEX" TYPE="int" VALUE="12800" />
+                        <STATE NAME="NAV_ID" TYPE="long" VALUE="3744249784302894216" />
+                        <STATE NAME="Num Disconnected" TYPE="int" VALUE="0" />
+                        <STATE NAME="Y_OFFSET" TYPE="int" VALUE="-18" />
+                        <STATE NAME="_ADDRESS" TYPE="string" VALUE="8000320c" />
+                        <STATE NAME="_ADDR_REP" TYPE="string" VALUE="8000320c" />
+                        <STATE NAME="_BYTE_ADDR" TYPE="string" VALUE="8000320c" />
+                        <STATE NAME="_CHAR_OFFSET" TYPE="int" VALUE="0" />
+                        <STATE NAME="_CLASSNAME" TYPE="string" VALUE="ghidra.program.util.AddressFieldLocation" />
+                        <STATE NAME="_COLUMN" TYPE="int" VALUE="0" />
+                        <STATE NAME="_ROW" TYPE="int" VALUE="0" />
+                    </PLUGIN>
+                </DATA_STATE>
+            </RUNNING_TOOL>
+        </WORKSPACE>
+    </TOOL_MANAGER>
+</PROJECT>

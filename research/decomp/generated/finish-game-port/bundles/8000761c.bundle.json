@@ -1,0 +1,24 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "0x8000761c",
+    "name": "zz_000761c_",
+    "metadata": "No program loaded",
+    "thunk": false
+  },
+  "decompiler": {
+    "c": null,
+    "completed": false,
+    "deferred": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "no program loaded"
+  ],
+  "calls": [],
+  "fingerprints": {
+    "normalized_disassembly": "cdd046741164f0176af3a5dedd8449666353a2850fa823dddeed4fd70b38434a",
+    "normalized_pcode": null
+  }
+}

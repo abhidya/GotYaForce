@@ -1,0 +1,36 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "0x80003400",
+    "name": "gnt4-__init_hardware-bl",
+    "metadata": "Function: gnt4-__init_hardware-bl at 80003400\nSignature: undefined gnt4-__init_hardware-bl(void)\nEntry: 80003400\nBody: 80003400 - 80003423",
+    "thunk": false
+  },
+  "decompiler": {
+    "c": null,
+    "completed": false,
+    "deferred": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "mfmsr r0",
+    "ori r0,r0,0x2000",
+    "mtmsr r0,0",
+    "mfspr r31,lr",
+    "bl 0x801ff548",
+    "bl 0x801feaf0",
+    "bl 0x80200934",
+    "mtspr lr,r31",
+    "blr"
+  ],
+  "calls": [
+    "0x801feaf0",
+    "0x801ff548",
+    "0x80200934"
+  ],
+  "fingerprints": {
+    "normalized_disassembly": "1cf219491f35c45f2c46324a6ffc014f9d93efd0cd4f3f18993e3b1c4d9158ef",
+    "normalized_pcode": null
+  }
+}

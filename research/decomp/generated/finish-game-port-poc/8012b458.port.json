@@ -653,6 +653,14 @@
         "address": null,
         "content": "To Stack[-0x10] [WRITE]",
         "sha256": null
+      },
+      {
+        "id": "session-summary:0x8012b458",
+        "kind": "session_summary",
+        "tier": "advisory",
+        "address": "0x8012b458",
+        "content": "**Function Analysis:**\nThe function implements a timer-based state transition logic, specifically for a \"charge\" or \"wind-up\" duration.\n1.  **Initialization (Charge Start):** It checks `param_1 + 0x540` (a status flag). If this flag is clear (`== '\\0'`), it sets the flag to 1 (indicating the process has started), saves the current global time (`FLOAT_80439d80`) to `param_1 + 0x558` (the timer base), and calls `zz_00107a0_` with argument `0x7f` (127) and `zz_00f036c_` with argument `0x20` (32). The argument `0x7f` likely represents the duration in frames or units. It then checks `param_1 + 0x640` (offset 1000) for specific Borg types (e.g., `0x607`, `0x61b`) and calls `zz_016c7ec_` to initialize specific attack slots (indices 1, 2 or 4, 5) to state 0.\n2.  **Decrement (Charge Running):** If the flag is already set, it decrements the timer at `param_1 + 0x558` by the delta time stored at `param_1 + 0x1dc8`.\n3.  **Completion (Charge End):** If the timer drops below `FLOAT_80439d7c` (likely 0.0 or a threshold), it clears the flag at `param_1 + 0x540` (ending the charge state), clears the lower 2 bits of the status word at `param_1 + 0x5e0` (likely clearing a specific action bit like \"Charging\"), and calls `zz_006a53c_` with `0x10` (likely resetting the action state to Idle or Neutral).\n\n**Behavior Summary:**\nThis function manages a timed \"wind-up\" or \"charge\" phase for a Borg. It initializes the timer and prepares attack slots when the charge begins, decrements the timer by delta time each frame, and triggers a state reset (clearing charge flags and resetting action state) when the duration expires.\n\n**Suggested Name:** manageBorgChargeTimer\n**Rationale:** The function explicitly handles a timer (`param_1 + 0x558`) that is initialized with a duration (`0x7f`) and decremented by delta time (`param_1 + 0x1dc8`). The use of `zz_016c7ec_` to initialize specific attack slots suggests this is tied to a charged attack. The name `manageBorgChargeTimer` accurately reflects the lifecycle: initialization, countdown, and expiration handling. It avoids guessing the specific attack type (e.g., \"ChargeShot\") because the offset `0x640` checks for multiple Borg IDs, implying this logic is shared or generic for charging mechanics. The cleared bits in `0x5e0` and the reset call `zz_006a53c_` confirm it terminates the charge state.",
+        "sha256": null
       }
     ],
     "unavailable": []

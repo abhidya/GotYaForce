@@ -1,0 +1,13 @@
+{
+  "api_calls": 0,
+  "structured_tool_calls": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "duration_seconds": 0.0,
+  "token_source": "unavailable",
+  "active": false,
+  "status": "idle",
+  "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-IQ3_S",
+  "run_id": "2026-07-31T01:13:58.860400Z",
+  "updated_at": "2026-07-30T21:13:59.072654"
+}

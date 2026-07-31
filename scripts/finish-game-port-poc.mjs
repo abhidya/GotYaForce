@@ -28,7 +28,7 @@ const refreshedArtifact = path.join(runRoot, "8012b458.port.json");
 const artifactPath = refreshArtifact
   ? refreshedArtifact
   : (fs.existsSync(refreshedArtifact) ? refreshedArtifact : canonicalArtifact);
-const generatedPath = path.join(
+const productionGeneratedPath = path.join(
   root,
   "packages",
   "combat",
@@ -37,6 +37,7 @@ const generatedPath = path.join(
   "oghidra",
   "fn_8012b458.generated.ts",
 );
+const generatedPath = path.join(runRoot, "fn_8012b458.generated.ts");
 const registryPath = path.join(
   root,
   "packages",
@@ -51,12 +52,14 @@ const verificationPath = path.join(runRoot, "8012b458-auto-verification.json");
 const statePath = path.join(runRoot, "run-state.json");
 const controlPath = path.join(runRoot, "control.json");
 const checkpointEvidencePath = path.join(runRoot, "8012b458.port.evidence.json");
+const livenessPath = path.join(runRoot, "llm-liveness.json");
+const requirementsPath = path.join(runRoot, "8012b458.integration-requirements.txt");
 const previousState = fs.existsSync(statePath)
   ? JSON.parse(fs.readFileSync(statePath, "utf8"))
   : null;
 const checkpointResponses = fs.existsSync(runRoot)
   ? fs.readdirSync(runRoot)
-    .filter((name) => /^8012b458\.port\.raw-attempt-\d+\.txt$/.test(name))
+    .filter((name) => /^8012b458\.port\.raw-(?:round-\d+-)?attempt-\d+\.txt$/.test(name))
     .map((name) => path.join(runRoot, name))
     .sort()
   : [];
@@ -144,6 +147,24 @@ const state = {
     rolled_back: false,
   },
 };
+fs.writeFileSync(
+  livenessPath,
+  `${JSON.stringify({
+    api_calls: 0,
+    structured_tool_calls: 0,
+    prompt_tokens: 0,
+    completion_tokens: 0,
+    duration_seconds: 0,
+    tokens_per_second: 0,
+    token_source: "unavailable",
+    active: false,
+    status: forceCheckpointResume || !refreshArtifact ? "checkpoint_replay" : "waiting_for_qwen",
+    model: null,
+    run_id: state.started_at,
+    updated_at: new Date().toISOString(),
+  }, null, 2)}\n`,
+  "utf8",
+);
 
 function saveState() {
   state.updated_at = new Date().toISOString();
@@ -288,7 +309,8 @@ function runPortExporter(arguments_, environment = {}) {
       encoding: "utf8",
       env: {
         ...process.env,
-        OGHIDRA_PORT_LIVENESS_PATH: path.join(runRoot, "llm-liveness.json"),
+        OGHIDRA_PORT_LIVENESS_PATH: livenessPath,
+        OGHIDRA_PORT_RUN_ID: state.started_at,
         ...environment,
       },
       windowsHide: true,
@@ -330,11 +352,48 @@ function scoreAndReplayQwenResponses(responsePaths, responseModel) {
         attempt: Number(attempt),
         responsePath,
         score: Object.values(facts).filter(Boolean).length,
+        missing: Object.entries(facts)
+          .filter(([, recovered]) => !recovered)
+          .map(([name]) => name),
       });
     }
     scored.sort((left, right) => right.score - left.score || right.attempt - left.attempt);
     const selected = scored[0];
     if (!selected) throw new Error("no retained Qwen response passed deterministic validation");
+    if (selected.score !== 12) {
+      let best = {
+        ...selected,
+        response: fs.readFileSync(selected.responsePath, "utf8"),
+      };
+      let repairResult = null;
+      for (let round = 1; best.score < 12 && round <= 8; round += 1) {
+        writeIntegrationRequirements(best.missing, best.response);
+        repairResult = runPortExporter([
+          "--address", "0x8012b458",
+          "--output", artifactPath,
+          "--evidence-file", checkpointEvidencePath,
+          "--model", responseModel,
+          "--requirements-file", requirementsPath,
+        ]);
+        if (repairResult.status !== 0) continue;
+        retainRoundResponses(round);
+        const readiness = artifactReadiness();
+        if (readiness.score > best.score) {
+          best = {
+            ...readiness,
+            response: latestRawResponse(),
+          };
+        }
+      }
+      if (best.score === 12 && repairResult?.status === 0) {
+        return `repaired retained Qwen response to ${best.score}/12 importer facts; ${
+          requireSuccessfulExport(repairResult, "repaired Qwen checkpoint")
+        }`;
+      }
+      throw new Error(
+        `best retained Qwen response covered ${best.score}/12 importer facts after bounded repair`,
+      );
+    }
     const result = runPortExporter([
       "--address", "0x8012b458",
       "--output", artifactPath,
@@ -354,6 +413,76 @@ function scoreAndReplayQwenResponses(responsePaths, responseModel) {
   }
 }
 
+function artifactReadiness() {
+  const candidate = JSON.parse(fs.readFileSync(artifactPath, "utf8"));
+  const facts = extractEagleJetFacts(candidate);
+  const missing = Object.entries(facts)
+    .filter(([, recovered]) => !recovered)
+    .map(([name]) => name);
+  return { facts, missing, score: Object.values(facts).filter(Boolean).length };
+}
+
+function retainRoundResponses(round) {
+  for (const source of fs.readdirSync(runRoot)
+    .filter((name) => /^8012b458\.port\.raw-attempt-\d+\.txt$/.test(name))) {
+    const attempt = source.match(/attempt-(\d+)/)?.[1] ?? "unknown";
+    fs.copyFileSync(
+      path.join(runRoot, source),
+      path.join(runRoot, `8012b458.port.raw-round-${round}-attempt-${attempt}.txt`),
+    );
+  }
+}
+
+function latestRawResponse() {
+  const attempts = fs.readdirSync(runRoot)
+    .filter((name) => /^8012b458\.port\.raw-attempt-\d+\.txt$/.test(name))
+    .sort((left, right) => {
+      const leftAttempt = Number(left.match(/attempt-(\d+)/)?.[1] ?? 0);
+      const rightAttempt = Number(right.match(/attempt-(\d+)/)?.[1] ?? 0);
+      return leftAttempt - rightAttempt;
+    });
+  const latest = attempts.at(-1);
+  if (!latest) throw new Error("successful local-model export did not retain a raw response");
+  return fs.readFileSync(path.join(runRoot, latest), "utf8");
+}
+
+function writeIntegrationRequirements(missing = [], seedResponse = null) {
+  const shapeGuidance = {
+    timerSeed: "Use separate claims for the timer destination offset and the source literal/data address.",
+    parts607: "Represent the branch discriminator and both helper slot/value argument pairs.",
+    parts61b: "Represent the branch discriminator and both helper slot/value argument pairs.",
+    timerDecrement: "Represent subtraction with both the timer destination and delta-source offsets.",
+    cleanupBits: "Represent the cleanup control-word offset and bit mask in the same grouped claim.",
+  };
+  const feedback = missing.length > 0
+    ? `The prior schema-valid artifact was rejected because these importer facts were absent: ${missing.join(", ")}.`
+    : "This function has a trusted downstream importer profile.";
+  const repairGuidance = missing
+    .map((name) => shapeGuidance[name])
+    .filter(Boolean);
+  const seed = seedResponse
+    ? [
+      "",
+      "Repair the prior schema-valid response below. Preserve its supported claims and add or reshape",
+      "only the missing mechanics. Return the complete artifact response, not a patch:",
+      seedResponse,
+    ]
+    : [];
+  fs.writeFileSync(
+    requirementsPath,
+    [
+      feedback,
+      ...repairGuidance,
+      "Represent every source-supported branch family, helper-call argument group, timer update/compare,",
+      "and cleanup side effect as explicit grouped claims and/or valid port IR.",
+      "Resolve no value from this requirement text: derive addresses, constants, offsets, masks, and",
+      "comparison direction only from the supplied authoritative evidence.",
+      ...seed,
+    ].join("\n") + "\n",
+    "utf8",
+  );
+}
+
 function runFreshLocalModelExport() {
   if (resumeFreshCheckpoint) {
     const configuredModel = fs.existsSync(canonicalArtifact)
@@ -370,6 +499,7 @@ function runFreshLocalModelExport() {
   }
 
   const generationStartedAt = Date.now();
+  writeIntegrationRequirements();
   let effectiveModel = fs.existsSync(canonicalArtifact)
     ? JSON.parse(fs.readFileSync(canonicalArtifact, "utf8")).producer?.model_name
     : "unsloth/Qwen3.6-35B-A3B-MTP-GGUF";
@@ -377,6 +507,7 @@ function runFreshLocalModelExport() {
     "--address", "0x8012b458",
     "--ghidra-backend", "http",
     "--output", artifactPath,
+    "--requirements-file", requirementsPath,
   ]);
   const failureOutput = `${result.stdout}\n${result.stderr}`;
   if (
@@ -396,23 +527,59 @@ function runFreshLocalModelExport() {
           "--ghidra-backend", "http",
           "--output", artifactPath,
           "--model", baseModel,
+          "--requirements-file", requirementsPath,
         ],
       );
-      if (result.status === 0) {
-        return `selected loaded local-model ID ${baseModel}; ${
-          requireSuccessfulExport(result, "fresh local-Qwen export")
-        }`;
+    }
+  }
+  if (result.status === 0) {
+    retainRoundResponses(1);
+    let readiness = artifactReadiness();
+    let best = {
+      ...readiness,
+      response: latestRawResponse(),
+    };
+    for (let round = 2; best.score < 12 && round <= 8; round += 1) {
+      writeIntegrationRequirements(best.missing, best.response);
+      result = runPortExporter([
+        "--address", "0x8012b458",
+        "--output", artifactPath,
+        "--evidence-file", checkpointEvidencePath,
+        "--model", effectiveModel,
+        "--requirements-file", requirementsPath,
+      ]);
+      if (result.status !== 0) break;
+      retainRoundResponses(round);
+      readiness = artifactReadiness();
+      if (readiness.score > best.score) {
+        best = {
+          ...readiness,
+          response: latestRawResponse(),
+        };
       }
+    }
+    if (result.status === 0 && best.score === 12) {
+      return `selected loaded local-model ID ${effectiveModel}; ${best.score}/12 importer facts; ${
+        requireSuccessfulExport(result, "fresh local-Qwen export")
+      }`;
     }
   }
   if (result.status !== 0) {
     const currentResponses = fs.readdirSync(runRoot)
-      .filter((name) => /^8012b458\.port\.raw-attempt-\d+\.txt$/.test(name))
+      .filter((name) => /^8012b458\.port\.raw-(?:round-\d+-)?attempt-\d+\.txt$/.test(name))
       .map((name) => path.join(runRoot, name))
       .filter((responsePath) => fs.statSync(responsePath).mtimeMs >= generationStartedAt);
     if (currentResponses.length > 0) {
       return scoreAndReplayQwenResponses(currentResponses, effectiveModel);
     }
+  }
+  if (result.status === 0) {
+    const readiness = artifactReadiness();
+    throw new Error(
+      `fresh Qwen artifact remained importer-incomplete after bounded retries: ${
+        readiness.missing.join(", ")
+      }`,
+    );
   }
   return requireSuccessfulExport(result, "fresh local-Qwen export");
 }
@@ -565,7 +732,21 @@ async function browserSmoke() {
 }
 
 const originalRegistry = fs.readFileSync(registryPath, "utf8");
+const originalGenerated = fs.existsSync(productionGeneratedPath)
+  ? fs.readFileSync(productionGeneratedPath, "utf8")
+  : null;
 let promoted = false;
+
+function rollbackPromotion() {
+  fs.writeFileSync(registryPath, originalRegistry, "utf8");
+  if (originalGenerated === null) {
+    fs.rmSync(productionGeneratedPath, { force: true });
+  } else {
+    fs.writeFileSync(productionGeneratedPath, originalGenerated, "utf8");
+  }
+  state.promotion.status = "rolled_back";
+  state.promotion.rolled_back = true;
+}
 
 try {
   if (refreshArtifact) {
@@ -631,8 +812,9 @@ try {
   );
 
   await startStage("promote", "Promote the verified candidate into the production runtime");
-  fs.writeFileSync(registryPath, promotionSource(true), "utf8");
+  fs.copyFileSync(generatedPath, productionGeneratedPath);
   promoted = true;
+  fs.writeFileSync(registryPath, promotionSource(true), "utf8");
   state.promotion.status = "promoted";
   setQueueStatus("integrated");
   saveState();
@@ -683,9 +865,7 @@ try {
     state.current_stage = null;
     state.stopped_at = new Date().toISOString();
     if (promoted) {
-      fs.writeFileSync(registryPath, originalRegistry, "utf8");
-      state.promotion.status = "rolled_back";
-      state.promotion.rolled_back = true;
+      rollbackPromotion();
     }
     saveState();
     process.stderr.write("Port run stopped at a safe stage boundary.\n");
@@ -695,9 +875,7 @@ try {
   failStage(stage, error);
   state.queue[0].status = "blocked";
   if (promoted) {
-    fs.writeFileSync(registryPath, originalRegistry, "utf8");
-    state.promotion.status = "rolled_back";
-    state.promotion.rolled_back = true;
+    rollbackPromotion();
     saveState();
     process.stderr.write("Promotion rolled back after downstream failure.\n");
   }

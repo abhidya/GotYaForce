@@ -1,10 +1,13 @@
 {
-  "pid": 21040,
-  "mode": "fresh",
+  "pid": 6160,
+  "mode": "resume",
   "command": [
     "C:\\Users\\manny\\AppData\\Local\\pnpm\\bin\\pnpm.cmd",
-    "port:finish:poc:fresh"
+    "port:finish:poc:resume"
   ],
-  "started_at": "2026-07-30T20:27:23",
-  "log": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port-poc\\gui-controller.log"
+  "started_at": "2026-07-30T20:55:25",
+  "log": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port-poc\\gui-controller.log",
+  "session_path": "D:\\GotYaForce\\research\\tools\\OGhidra\\analysis_sessions\\session_1784598555_d3f63cbf\\session.json",
+  "session_role": "advisory",
+  "vectors_required": false
 }

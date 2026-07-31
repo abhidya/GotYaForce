@@ -1,0 +1,22 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "0x800053e0",
+    "name": "__TRK_reset",
+    "metadata": "Request failed: [WinError 10061] No connection could be made because the target machine actively refused it",
+    "thunk": false
+  },
+  "decompiler": {
+    "c": null,
+    "completed": false,
+    "deferred": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [],
+  "calls": [],
+  "fingerprints": {
+    "normalized_disassembly": null,
+    "normalized_pcode": null
+  }
+}

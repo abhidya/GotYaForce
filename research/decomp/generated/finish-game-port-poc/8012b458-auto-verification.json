@@ -2,11 +2,11 @@
   "verification_schema": 1,
   "function_address": "0x8012b458",
   "artifact_body_hash": "a78787fd4abc06593f355767c9ae714ebae007f1a728ee6c0c5c56066e848e9b",
-  "candidate": "packages/combat/src/generated/oghidra/fn_8012b458.generated.ts",
+  "candidate": "research/decomp/generated/finish-game-port-poc/fn_8012b458.generated.ts",
   "scenario_source": "artifact-boundary-matrix",
   "handwritten_scenarios": 0,
   "compile": {
-    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-Uv0kL4/candidate packages/combat/src/generated/oghidra/fn_8012b458.generated.ts",
+    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-q4P785/candidate research/decomp/generated/finish-game-port-poc/fn_8012b458.generated.ts",
     "passed": true,
     "exitCode": 0,
     "stdout": "",
@@ -701,7 +701,7 @@
   },
   "status": "passed",
   "oracle_compile": {
-    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-Uv0kL4/oracle --rootDir packages/combat/src packages/combat/src/families/eagle-jet.ts packages/combat/src/rom/actor.ts",
+    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-q4P785/oracle --rootDir packages/combat/src packages/combat/src/families/eagle-jet.ts packages/combat/src/rom/actor.ts",
     "passed": true,
     "exitCode": 0,
     "stdout": "",

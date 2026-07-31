@@ -1,0 +1,60 @@
+{
+  "run_schema": 2,
+  "run_mode": "resume",
+  "objective": "Finish the GotYaForce browser port autonomously",
+  "scope": {
+    "kind": "whole_program"
+  },
+  "session": {
+    "path": null,
+    "role": "none",
+    "vectors_required": false
+  },
+  "status": "stopped",
+  "started_at": "2026-07-31T01:13:58.860400Z",
+  "updated_at": "2026-07-31T01:14:59.095132Z",
+  "current_stage": "bundles",
+  "total_stages": 5,
+  "stages": {
+    "inventory": {
+      "label": "Inventory all Ghidra functions",
+      "status": "passed",
+      "finished_at": "2026-07-31T01:14:07.940115Z",
+      "detail": "11972 functions restored"
+    },
+    "bundles": {
+      "label": "Extract and fingerprint structured bundles",
+      "status": "running",
+      "started_at": "2026-07-31T01:14:08.149265Z"
+    },
+    "groups": {
+      "label": "Build exact equivalence groups and dependency order",
+      "status": "pending"
+    },
+    "units": {
+      "label": "Generate, verify, and integrate canonical units",
+      "status": "pending"
+    },
+    "acceptance": {
+      "label": "Build and run complete-game acceptance gates",
+      "status": "pending"
+    }
+  },
+  "queue": [],
+  "progress": {
+    "phase": "bundles",
+    "completed_work": 110,
+    "total_work": 11972,
+    "percent": 0.9188105579685933,
+    "items_per_second": 2.151972282597124,
+    "eta_seconds": 5512.152779999682,
+    "eta_source": "observed_unit_rate"
+  },
+  "promotion": {
+    "status": "not_started",
+    "rolled_back": false
+  },
+  "manifest": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\whole-program-manifest.json",
+  "stop_reason": "stop requested at a durable scheduler boundary",
+  "stopped_at": "2026-07-31T01:14:59.095132Z"
+}
