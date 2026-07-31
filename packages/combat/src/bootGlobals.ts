@@ -268,11 +268,13 @@ function gnt4___fill_mem_bl(dest: Uint8Array, value: number, n: number): void {
 
   const uVar4 = value & 0xff;
   // pbVar3 starts at dest - 1 (Ghidra: pbVar3 = (byte *)(param_1 + -1))
-  let pbVar3Idx = 0; // will be incremented before first write
+  // We track pbVar3 as an index into dest, starting at -1
+  let pbVar3Idx = -1;
 
   if (n > 0x1f) {
     // Align to 4-byte boundary
-    let uVar1 = ((~pbVar3Idx) & 3);
+    // uVar1 = ~(uint)pbVar3 & 3
+    let uVar1 = (~pbVar3Idx) & 3;
     if (uVar1 !== 0) {
       n -= uVar1;
       do {
@@ -288,49 +290,27 @@ function gnt4___fill_mem_bl(dest: Uint8Array, value: number, n: number): void {
       fillWord = fillWord | (fillWord << 8) | ((uVar4 & 0xff) << 16) | (fillWord << 24);
     }
 
-    // Fill in 32-bit chunks (8 uint32s = 32 bytes per iteration)
-    // puVar2 = (uint *)(pbVar3 + -3), so first write is at pbVar3Idx - 3 + 1 = pbVar3Idx - 2
-    // But we need to track as uint32 array offset
+    // puVar2 = (uint *)(pbVar3 + -3)
+    // pbVar3Idx is now at the aligned position, so puVar2 starts at pbVar3Idx - 3
     let puVar2Idx = pbVar3Idx - 3; // as uint32 offset
     let uVar1Count = n >> 5; // n / 32
     while (uVar1Count !== 0) {
       // Write 8 uint32s: indices 1-7 relative to puVar2, then advance by 8
-      dest[(puVar2Idx + 1) * 4] = fillWord & 0xff;
-      dest[(puVar2Idx + 1) * 4 + 1] = (fillWord >> 8) & 0xff;
-      dest[(puVar2Idx + 1) * 4 + 2] = (fillWord >> 16) & 0xff;
-      dest[(puVar2Idx + 1) * 4 + 3] = (fillWord >> 24) & 0xff;
-
-      dest[(puVar2Idx + 2) * 4] = fillWord & 0xff;
-      dest[(puVar2Idx + 2) * 4 + 1] = (fillWord >> 8) & 0xff;
-      dest[(puVar2Idx + 2) * 4 + 2] = (fillWord >> 16) & 0xff;
-      dest[(puVar2Idx + 2) * 4 + 3] = (fillWord >> 24) & 0xff;
-
-      dest[(puVar2Idx + 3) * 4] = fillWord & 0xff;
-      dest[(puVar2Idx + 3) * 4 + 1] = (fillWord >> 8) & 0xff;
-      dest[(puVar2Idx + 3) * 4 + 2] = (fillWord >> 16) & 0xff;
-      dest[(puVar2Idx + 3) * 4 + 3] = (fillWord >> 24) & 0xff;
-
-      dest[(puVar2Idx + 4) * 4] = fillWord & 0xff;
-      dest[(puVar2Idx + 4) * 4 + 1] = (fillWord >> 8) & 0xff;
-      dest[(puVar2Idx + 4) * 4 + 2] = (fillWord >> 16) & 0xff;
-      dest[(puVar2Idx + 4) * 4 + 3] = (fillWord >> 24) & 0xff;
-
-      dest[(puVar2Idx + 5) * 4] = fillWord & 0xff;
-      dest[(puVar2Idx + 5) * 4 + 1] = (fillWord >> 8) & 0xff;
-      dest[(puVar2Idx + 5) * 4 + 2] = (fillWord >> 16) & 0xff;
-      dest[(puVar2Idx + 5) * 4 + 3] = (fillWord >> 24) & 0xff;
-
-      dest[(puVar2Idx + 6) * 4] = fillWord & 0xff;
-      dest[(puVar2Idx + 6) * 4 + 1] = (fillWord >> 8) & 0xff;
-      dest[(puVar2Idx + 6) * 4 + 2] = (fillWord >> 16) & 0xff;
-      dest[(puVar2Idx + 6) * 4 + 3] = (fillWord >> 24) & 0xff;
-
-      dest[(puVar2Idx + 7) * 4] = fillWord & 0xff;
-      dest[(puVar2Idx + 7) * 4 + 1] = (fillWord >> 8) & 0xff;
-      dest[(puVar2Idx + 7) * 4 + 2] = (fillWord >> 16) & 0xff;
-      dest[(puVar2Idx + 7) * 4 + 3] = (fillWord >> 24) & 0xff;
-
+      // puVar2[1] through puVar2[7], then puVar2 += 8, then *puVar2 = uVar4
+      for (let i = 1; i <= 7; i++) {
+        const idx = (puVar2Idx + i) * 4;
+        dest[idx] = fillWord & 0xff;
+        dest[idx + 1] = (fillWord >> 8) & 0xff;
+        dest[idx + 2] = (fillWord >> 16) & 0xff;
+        dest[idx + 3] = (fillWord >> 24) & 0xff;
+      }
       puVar2Idx += 8;
+      // *puVar2 = uVar4
+      const idx = puVar2Idx * 4;
+      dest[idx] = fillWord & 0xff;
+      dest[idx + 1] = (fillWord >> 8) & 0xff;
+      dest[idx + 2] = (fillWord >> 16) & 0xff;
+      dest[idx + 3] = (fillWord >> 24) & 0xff;
       uVar1Count--;
     }
 
@@ -338,10 +318,11 @@ function gnt4___fill_mem_bl(dest: Uint8Array, value: number, n: number): void {
     let uVar1Rem = (n >> 2) & 7;
     while (uVar1Rem !== 0) {
       puVar2Idx++;
-      dest[puVar2Idx * 4] = fillWord & 0xff;
-      dest[puVar2Idx * 4 + 1] = (fillWord >> 8) & 0xff;
-      dest[puVar2Idx * 4 + 2] = (fillWord >> 16) & 0xff;
-      dest[puVar2Idx * 4 + 3] = (fillWord >> 24) & 0xff;
+      const idx = puVar2Idx * 4;
+      dest[idx] = fillWord & 0xff;
+      dest[idx + 1] = (fillWord >> 8) & 0xff;
+      dest[idx + 2] = (fillWord >> 16) & 0xff;
+      dest[idx + 3] = (fillWord >> 24) & 0xff;
       uVar1Rem--;
     }
 
