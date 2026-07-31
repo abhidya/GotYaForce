@@ -1,0 +1,2149 @@
+Implement this single original GG4E execution unit in GotYaForce.
+
+Original evidence is authoritative. Do not invent missing transitions, constants, timers,
+or ownership. Preserve unrelated behavior. Make the smallest production change that closes
+a concrete destination gap and add/update a focused test only when needed.
+
+Return exactly one JSON object matching the supplied schema. For action="edit", `diff`
+must be a plain bounded unified diff with `diff --git`, `---`, `+++`, and exact context.
+Never return complete file contents, Markdown fences, placeholders, generated reports,
+shell commands, or edits outside apps/game, packages, and scripts.
+
+Unit evidence:
+{
+  "schema": 1,
+  "status": "ready",
+  "unit_id": "state-machine-80091ab0",
+  "kind": "state_dispatcher",
+  "root_addresses": [
+    "0x80091ab0"
+  ],
+  "state_field": {
+    "offset": "0x581",
+    "width": 1,
+    "signedness": "signed"
+  },
+  "function_pointer_tables": [
+    {
+      "address": "0x802db448",
+      "dispatcher_address": "0x80091ab0",
+      "state_field": {
+        "offset": "0x581",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x802db448",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x802db44c",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 2,
+          "entry_address": "0x802db450",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 3,
+          "entry_address": "0x802db454",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 4,
+          "entry_address": "0x802db458",
+          "handler_address": "0x80091aec",
+          "function_name": "FUN_80091aec",
+          "raw_bytes": "80091aec"
+        }
+      ]
+    },
+    {
+      "address": "0x80433970",
+      "dispatcher_address": "0x80091e34",
+      "state_field": {
+        "offset": "0x545",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x80433970",
+          "handler_address": "0x80091ec4",
+          "function_name": "FUN_80091ec4",
+          "raw_bytes": "80091ec4"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x80433974",
+          "handler_address": "0x80091f08",
+          "function_name": "FUN_80091f08",
+          "raw_bytes": "80091f08"
+        }
+      ]
+    },
+    {
+      "address": "0x802db45c",
+      "dispatcher_address": "0x80091aec",
+      "state_field": {
+        "offset": "0x544",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x802db45c",
+          "handler_address": "0x80091b34",
+          "function_name": "FUN_80091b34",
+          "raw_bytes": "80091b34"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x802db460",
+          "handler_address": "0x80091c34",
+          "function_name": "FUN_80091c34",
+          "raw_bytes": "80091c34"
+        },
+        {
+          "index": 2,
+          "entry_address": "0x802db464",
+          "handler_address": "0x80091d00",
+          "function_name": "FUN_80091d00",
+          "raw_bytes": "80091d00"
+        }
+      ]
+    }
+  ],
+  "handlers": [
+    {
+      "address": "0x80091e34",
+      "name": "zz_0091e34_",
+      "decompile": "\r\nvoid zz_0091e34_(int param_1)\r\n\r\n{\r\n  zz_0092480_();\r\n  (*(code *)(&PTR_FUN_80433970)[*(char *)(param_1 + 0x545)])(param_1);\r\n  (*(code *)(&PTR_FUN_80433968)[*(char *)(param_1 + 0x544)])(param_1);\r\n  (*(code *)(&PTR_FUN_802db468)[*(char *)(param_1 + 0x540)])(param_1);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 5] [Showing: 1-5]",
+        "From 80091b68 in FUN_80091b34 [UNCONDITIONAL_CALL]",
+        "From 802db448 [DATA]",
+        "From 802db44c [DATA]",
+        "From 802db450 [DATA]",
+        "From 802db454 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091e34",
+          "name": "zz_0091e34_",
+          "prototype": "undefined zz_0091e34_(void)",
+          "body_ranges": [
+            [
+              "80091e34",
+              "80091ec3"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid zz_0091e34_(int param_1)\r\n\r\n{\r\n  zz_0092480_();\r\n  (*(code *)(&PTR_FUN_80433970)[*(char *)(param_1 + 0x545)])(param_1);\r\n  (*(code *)(&PTR_FUN_80433968)[*(char *)(param_1 + 0x544)])(param_1);\r\n  (*(code *)(&PTR_FUN_802db468)[*(char *)(param_1 + 0x540)])(param_1);\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "stw r0,0x14(r1)",
+          "stw r31,0xc(r1)",
+          "or r31,r3,r3",
+          "bl 0x80092480",
+          "lbz r0,0x545(r31)",
+          "subi r4,r13,0x7c30",
+          "or r3,r31,r31",
+          "extsb r0,r0",
+          "rlwinm r0,r0,0x2,0x0,0x1d",
+          "lwzx r12,r4,r0",
+          "mtspr ctr,r12",
+          "bctrl",
+          "lbz r0,0x544(r31)",
+          "subi r4,r13,0x7c38",
+          "or r3,r31,r31",
+          "extsb r0,r0",
+          "rlwinm r0,r0,0x2,0x0,0x1d",
+          "lwzx r12,r4,r0",
+          "mtspr ctr,r12",
+          "bctrl",
+          "lbz r0,0x540(r31)",
+          "lis r3,-0x7fd2",
+          "subi r4,r3,0x4b98",
+          "or r3,r31,r31",
+          "extsb r0,r0",
+          "rlwinm r0,r0,0x2,0x0,0x1d",
+          "lwzx r12,r4,r0",
+          "mtspr ctr,r12",
+          "bctrl",
+          "lwz r0,0x14(r1)",
+          "lwz r31,0xc(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "CALL|out=|in0=(ram, 0x80092480, 8)",
+          "INT_ADD|out=(unique, 0x1000002f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x545, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000002f, 4)",
+          "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+          "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+          "PTRSUB|out=(unique, 0x1000001f, 4)|in0=(const, 0x0, 4)|in1=(const, 0x80433970, 4)",
+          "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x1000001f, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+          "CALLIND|out=|in0=(unique, 0x10000033, 4)|in1=(register, 0xc, 4)",
+          "CAST|out=(unique, 0x10000033, 4)|in0=(register, 0x30, 4)",
+          "INT_ADD|out=(unique, 0x10000037, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000037, 4)",
+          "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+          "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+          "PTRSUB|out=(unique, 0x1000001b, 4)|in0=(const, 0x0, 4)|in1=(const, 0x80433968, 4)",
+          "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x1000001b, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+          "CALLIND|out=|in0=(unique, 0x1000003b, 4)|in1=(register, 0xc, 4)",
+          "CAST|out=(unique, 0x1000003b, 4)|in0=(register, 0x30, 4)",
+          "INT_ADD|out=(unique, 0x1000003f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x540, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000003f, 4)",
+          "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+          "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+          "PTRSUB|out=(unique, 0x10000017, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802db468, 4)",
+          "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000017, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+          "CALLIND|out=|in0=(unique, 0x10000043, 4)|in1=(register, 0xc, 4)",
+          "CAST|out=(unique, 0x10000043, 4)|in0=(register, 0x30, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)"
+        ],
+        "calls": [
+          "80092480"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "953bb0ca53cc9a70ed3780ad7248b64a456d18c4b27a03c82fad614518b0a89b",
+          "normalized_pcode": "87188cf85a9784c6def689af25251d1b2e30d853b2b1be20eb16a7ba76c4061d"
+        }
+      }
+    },
+    {
+      "address": "0x80091aec",
+      "name": "FUN_80091aec",
+      "decompile": "\r\nvoid FUN_80091aec(int param_1)\r\n\r\n{\r\n  *(short *)(param_1 + 0x18da) = *(short *)(param_1 + 0x18da) >> 1;\r\n  (*(code *)(&PTR_FUN_802db45c)[*(char *)(param_1 + 0x544)])();\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 802db458 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091aec",
+          "name": "FUN_80091aec",
+          "prototype": "undefined FUN_80091aec(void)",
+          "body_ranges": [
+            [
+              "80091aec",
+              "80091b33"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091aec(int param_1)\r\n\r\n{\r\n  *(short *)(param_1 + 0x18da) = *(short *)(param_1 + 0x18da) >> 1;\r\n  (*(code *)(&PTR_FUN_802db45c)[*(char *)(param_1 + 0x544)])();\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "lis r4,-0x7fd2",
+          "stw r0,0x14(r1)",
+          "subi r4,r4,0x4ba4",
+          "lha r0,0x18da(r3)",
+          "srawi r0,r0,0x1",
+          "sth r0,0x18da(r3)",
+          "lbz r0,0x544(r3)",
+          "extsb r0,r0",
+          "rlwinm r0,r0,0x2,0x0,0x1d",
+          "lwzx r12,r4,r0",
+          "mtspr ctr,r12",
+          "bctrl",
+          "lwz r0,0x14(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "INT_ADD|out=(unique, 0x1000000e, 4)|in0=(register, 0xc, 4)|in1=(const, 0x18da, 4)",
+          "LOAD|out=(unique, 0x49100, 2)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000e, 4)",
+          "INT_SRIGHT|out=(register, 0x2, 2)|in0=(unique, 0x49100, 2)|in1=(const, 0x1, 2)",
+          "INT_ADD|out=(unique, 0x10000012, 4)|in0=(register, 0xc, 4)|in1=(const, 0x18da, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x2, 2)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000012, 4)",
+          "INT_ADD|out=(unique, 0x10000016, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000016, 4)",
+          "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+          "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+          "PTRSUB|out=(unique, 0x10000006, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802db45c, 4)",
+          "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000006, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+          "CALLIND|out=|in0=(unique, 0x1000001a, 4)",
+          "CAST|out=(unique, 0x1000001a, 4)|in0=(register, 0x30, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)"
+        ],
+        "calls": [],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "d7091f66775696a8ad6cbb69bd76fd174b1ad07970f834cf29bc3bb5c1c9b0f7",
+          "normalized_pcode": "297e3977b42a6da0d46f4321fd8c45b3332672df6daa1bf56c9ee0a3a30fcd6b"
+        }
+      }
+    },
+    {
+      "address": "0x80091ec4",
+      "name": "FUN_80091ec4",
+      "decompile": "\r\nvoid FUN_80091ec4(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  dVar1 = (double)FLOAT_80437c84;\r\n  *(char *)(param_1 + 0x545) = *(char *)(param_1 + 0x545) + '\\x01';\r\n  zz_004beb8_(dVar1,param_1,4,2,0x1a,4,2);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 80433970 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091ec4",
+          "name": "FUN_80091ec4",
+          "prototype": "undefined FUN_80091ec4(void)",
+          "body_ranges": [
+            [
+              "80091ec4",
+              "80091f07"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091ec4(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  dVar1 = (double)FLOAT_80437c84;\r\n  *(char *)(param_1 + 0x545) = *(char *)(param_1 + 0x545) + '\\x01';\r\n  zz_004beb8_(dVar1,param_1,4,2,0x1a,4,2);\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "lfs f1,-0x6d9c(r2)",
+          "li r4,0x4",
+          "stw r0,0x14(r1)",
+          "li r5,0x2",
+          "li r7,0x4",
+          "li r8,0x2",
+          "lbz r6,0x545(r3)",
+          "addi r0,r6,0x1",
+          "li r6,0x1a",
+          "stb r0,0x545(r3)",
+          "bl 0x8004beb8",
+          "lwz r0,0x14(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(ram, 0x80437c84, 4)",
+          "INT_ADD|out=(unique, 0x10000005, 4)|in0=(register, 0xc, 4)|in1=(const, 0x545, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000005, 4)",
+          "INT_ADD|out=(register, 0x3, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x1, 1)",
+          "INT_ADD|out=(unique, 0x10000009, 4)|in0=(register, 0xc, 4)|in1=(const, 0x545, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x3, 1)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x14, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000009, 4)",
+          "CALL|out=|in0=(ram, 0x8004beb8, 8)|in1=(register, 0x4008, 8)|in2=(register, 0xc, 4)|in3=(const, 0x4, 4)|in4=(const, 0x2, 4)|in5=(const, 0x1a, 4)|in6=(const, 0x4, 4)|in7=(const, 0x2, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x17, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)",
+          "COPY|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)"
+        ],
+        "calls": [
+          "8004beb8"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "2d728094b96a3a42b0b6c137aea983bd8cbaa051f6fa3a3904e82416a5abcbb4",
+          "normalized_pcode": "e1249696787254d91ac64af656c229ab1a30969e68f8c11f6db155f4ca9afa28"
+        }
+      }
+    },
+    {
+      "address": "0x80091f08",
+      "name": "FUN_80091f08",
+      "decompile": "\r\nvoid FUN_80091f08(undefined4 param_1)\r\n\r\n{\r\n  zz_004cd24_(param_1,4);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 80433974 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091f08",
+          "name": "FUN_80091f08",
+          "prototype": "undefined FUN_80091f08(void)",
+          "body_ranges": [
+            [
+              "80091f08",
+              "80091f2b"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091f08(undefined4 param_1)\r\n\r\n{\r\n  zz_004cd24_(param_1,4);\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "li r4,0x4",
+          "stw r0,0x14(r1)",
+          "bl 0x8004cd24",
+          "lwz r0,0x14(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "CALL|out=|in0=(ram, 0x8004cd24, 8)|in1=(register, 0xc, 4)|in2=(const, 0x4, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)"
+        ],
+        "calls": [
+          "8004cd24"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "a4932eb73011d2327fe63beaae7ea8c387a2e81a6ad1a3e6fc6284031acdea69",
+          "normalized_pcode": "0c69d526c2c3dadd7114a73b843fbe21d0220d928b6c4a724d8519177373d232"
+        }
+      }
+    },
+    {
+      "address": "0x80091b34",
+      "name": "FUN_80091b34",
+      "decompile": "\r\nvoid FUN_80091b34(int param_1)\r\n\r\n{\r\n  float fVar1;\r\n  \r\n  fVar1 = FLOAT_80437c80;\r\n  if ((*(char *)(param_1 + 0x7ce) == '\\x0f') || (*(char *)(param_1 + 0x7ce) == '\\x10')) {\r\n    *(undefined4 *)(param_1 + 0x44) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x58);\r\n    *(undefined4 *)(param_1 + 0x4c) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x5c);\r\n    *(float *)(param_1 + 0x48) = fVar1;\r\n    *(undefined4 *)(param_1 + 0x50) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x70);\r\n    zz_0091dc0_(param_1);\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  else {\r\n    *(undefined1 *)(param_1 + 0x581) = 2;\r\n    zz_0091e34_();\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 802db45c [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091b34",
+          "name": "FUN_80091b34",
+          "prototype": "undefined FUN_80091b34(void)",
+          "body_ranges": [
+            [
+              "80091b34",
+              "80091bbf"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091b34(int param_1)\r\n\r\n{\r\n  float fVar1;\r\n  \r\n  fVar1 = FLOAT_80437c80;\r\n  if ((*(char *)(param_1 + 0x7ce) == '\\x0f') || (*(char *)(param_1 + 0x7ce) == '\\x10')) {\r\n    *(undefined4 *)(param_1 + 0x44) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x58);\r\n    *(undefined4 *)(param_1 + 0x4c) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x5c);\r\n    *(float *)(param_1 + 0x48) = fVar1;\r\n    *(undefined4 *)(param_1 + 0x50) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x70);\r\n    zz_0091dc0_(param_1);\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  else {\r\n    *(undefined1 *)(param_1 + 0x581) = 2;\r\n    zz_0091e34_();\r\n  }\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "stw r0,0x14(r1)",
+          "stw r31,0xc(r1)",
+          "or r31,r3,r3",
+          "lbz r0,0x7ce(r3)",
+          "extsb r0,r0",
+          "cmpwi r0,0xf",
+          "beq 0x80091b70",
+          "cmpwi r0,0x10",
+          "beq 0x80091b70",
+          "li r0,0x2",
+          "stb r0,0x581(r31)",
+          "bl 0x80091e34",
+          "b 0x80091bac",
+          "lwz r4,0x4ac(r31)",
+          "or r3,r31,r31",
+          "lfs f0,-0x6da0(r2)",
+          "lfs f1,0x58(r4)",
+          "stfs f1,0x44(r31)",
+          "lwz r4,0x4ac(r31)",
+          "lfs f1,0x5c(r4)",
+          "stfs f1,0x4c(r31)",
+          "stfs f0,0x48(r31)",
+          "lwz r4,0x4ac(r31)",
+          "lfs f0,0x70(r4)",
+          "stfs f0,0x50(r31)",
+          "bl 0x80091dc0",
+          "or r3,r31,r31",
+          "bl 0x80091bc0",
+          "lwz r0,0x14(r1)",
+          "lwz r31,0xc(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "COPY|out=(unique, 0x10000033, 4)|in0=(ram, 0x80437c80, 4)",
+          "INT_ADD|out=(unique, 0x10000037, 4)|in0=(register, 0xc, 4)|in1=(const, 0x7ce, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000037, 4)",
+          "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0xf, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091b70, 1)|in1=(unique, 0x27f00, 1)",
+          "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x10, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091b70, 1)|in1=(unique, 0x27f00, 1)",
+          "INT_ADD|out=(unique, 0x10000063, 4)|in0=(register, 0xc, 4)|in1=(const, 0x581, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x2, 1)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x31, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000063, 4)",
+          "CALL|out=|in0=(ram, 0x80091e34, 8)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x34, 4)",
+          "BRANCH|out=|in0=(ram, 0x80091bac, 1)",
+          "INT_ADD|out=(unique, 0x1000003b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4ac, 4)",
+          "LOAD|out=(register, 0x10, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000003b, 4)",
+          "INT_ADD|out=(unique, 0x1000003f, 4)|in0=(register, 0x10, 4)|in1=(const, 0x58, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000003f, 4)",
+          "INT_ADD|out=(unique, 0x10000043, 4)|in0=(register, 0xc, 4)|in1=(const, 0x44, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x48700, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x4a, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000043, 4)",
+          "INT_ADD|out=(unique, 0x10000047, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4ac, 4)",
+          "LOAD|out=(register, 0x10, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000047, 4)",
+          "INT_ADD|out=(unique, 0x1000004b, 4)|in0=(register, 0x10, 4)|in1=(const, 0x5c, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004b, 4)",
+          "INT_ADD|out=(unique, 0x1000004f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4c, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x48700, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x53, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004f, 4)",
+          "INT_ADD|out=(unique, 0x10000053, 4)|in0=(register, 0xc, 4)|in1=(const, 0x48, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x10000033, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x56, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000053, 4)",
+          "INT_ADD|out=(unique, 0x10000057, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4ac, 4)",
+          "LOAD|out=(register, 0x10, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000057, 4)",
+          "INT_ADD|out=(unique, 0x1000005b, 4)|in0=(register, 0x10, 4)|in1=(const, 0x70, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005b, 4)",
+          "INT_ADD|out=(unique, 0x1000005f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x50, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x48700, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x5f, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005f, 4)",
+          "CALL|out=|in0=(ram, 0x80091dc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x62, 4)",
+          "CALL|out=|in0=(ram, 0x80091bc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x66, 4)",
+          "MULTIEQUAL|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(ram, 0x80437c80, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)",
+          "COPY|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)"
+        ],
+        "calls": [
+          "80091bc0",
+          "80091dc0",
+          "80091e34"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "e357cff14ed2cecb8b6fe5b850ddfc54d40f7d67465c61ad6d36044925ec271b",
+          "normalized_pcode": "561c664080f04f2f3c1031a58dcd3da9a50e8ff00470c2ca69f8d2e1b02dcd35"
+        }
+      }
+    },
+    {
+      "address": "0x80091c34",
+      "name": "FUN_80091c34",
+      "decompile": "\r\nvoid FUN_80091c34(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(char *)(param_1 + 0x1cee) == '\\0') && (FLOAT_80437c80 < *(float *)(param_1 + 0x558))) {\r\n    *(float *)(param_1 + 0x558) = *(float *)(param_1 + 0x558) - *(float *)(param_1 + 0x1dc8);\r\n    return;\r\n  }\r\n  if (*(char *)(param_1 + 0x6ec) < '\\x01') {\r\n    dVar1 = (double)FLOAT_80437c84;\r\n    *(char *)(param_1 + 0x544) = *(char *)(param_1 + 0x544) + '\\x01';\r\n    zz_004beb8_(dVar1,param_1,1,2,0x11,0xffffffff,0xffffffff);\r\n  }\r\n  else {\r\n    zz_0092534_(param_1);\r\n    zz_004beb8_((double)FLOAT_80437c84,param_1,1,2,0x10,0xffffffff,0xffffffff);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 0] [Showing: 0 items - offset 0 exceeds total]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091c34",
+          "name": "FUN_80091c34",
+          "prototype": "undefined FUN_80091c34(void)",
+          "body_ranges": [
+            [
+              "80091c34",
+              "80091cff"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091c34(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(char *)(param_1 + 0x1cee) == '\\0') && (FLOAT_80437c80 < *(float *)(param_1 + 0x558))) {\r\n    *(float *)(param_1 + 0x558) = *(float *)(param_1 + 0x558) - *(float *)(param_1 + 0x1dc8);\r\n    return;\r\n  }\r\n  if (*(char *)(param_1 + 0x6ec) < '\\x01') {\r\n    dVar1 = (double)FLOAT_80437c84;\r\n    *(char *)(param_1 + 0x544) = *(char *)(param_1 + 0x544) + '\\x01';\r\n    zz_004beb8_(dVar1,param_1,1,2,0x11,0xffffffff,0xffffffff);\r\n  }\r\n  else {\r\n    zz_0092534_(param_1);\r\n    zz_004beb8_((double)FLOAT_80437c84,param_1,1,2,0x10,0xffffffff,0xffffffff);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "li r4,0x7",
+          "stw r0,0x14(r1)",
+          "stw r31,0xc(r1)",
+          "or r31,r3,r3",
+          "bl 0x8004cd24",
+          "or r3,r31,r31",
+          "bl 0x80091dc0",
+          "lbz r0,0x1cee(r31)",
+          "extsb. r0,r0",
+          "bne 0x80091c78",
+          "lfs f1,0x558(r31)",
+          "lfs f0,-0x6da0(r2)",
+          "fcmpo cr0,f1,f0",
+          "cror eq,lt,eq",
+          "bne 0x80091ce0",
+          "lbz r0,0x6ec(r31)",
+          "extsb. r0,r0",
+          "ble 0x80091cb0",
+          "or r3,r31,r31",
+          "bl 0x80092534",
+          "lfs f1,-0x6d9c(r2)",
+          "or r3,r31,r31",
+          "li r4,0x1",
+          "li r5,0x2",
+          "li r6,0x10",
+          "li r7,-0x1",
+          "li r8,-0x1",
+          "bl 0x8004beb8",
+          "b 0x80091cec",
+          "lbz r5,0x544(r31)",
+          "or r3,r31,r31",
+          "lfs f1,-0x6d9c(r2)",
+          "li r4,0x1",
+          "addi r0,r5,0x1",
+          "li r5,0x2",
+          "stb r0,0x544(r31)",
+          "li r6,0x11",
+          "li r7,-0x1",
+          "li r8,-0x1",
+          "bl 0x8004beb8",
+          "b 0x80091cec",
+          "lfs f0,0x1dc8(r31)",
+          "fsubs f0,f1,f0",
+          "stfs f0,0x558(r31)",
+          "lwz r0,0x14(r1)",
+          "lwz r31,0xc(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "CALL|out=|in0=(ram, 0x8004cd24, 8)|in1=(register, 0xc, 4)|in2=(const, 0x7, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0xc, 4)",
+          "CALL|out=|in0=(ram, 0x80091dc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x10, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x10, 4)",
+          "INT_ADD|out=(unique, 0x1000005f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1cee, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005f, 4)",
+          "INT_EQUAL|out=(unique, 0x1f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x0, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091c78, 1)|in1=(unique, 0x1f00, 1)",
+          "INT_ADD|out=(unique, 0x10000063, 4)|in0=(register, 0xc, 4)|in1=(const, 0x558, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000063, 4)",
+          "FLOAT_LESS|out=(unique, 0x2cb00, 1)|in0=(ram, 0x80437c80, 4)|in1=(unique, 0x48700, 4)",
+          "CBRANCH|out=|in0=(ram, 0x80091ce0, 1)|in1=(unique, 0x2cb00, 1)",
+          "INT_ADD|out=(unique, 0x1000006f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x6ec, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000006f, 4)",
+          "INT_SLESS|out=(unique, 0x1e00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x1, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091cb0, 1)|in1=(unique, 0x1e00, 1)",
+          "CALL|out=|in0=(ram, 0x80092534, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x8d, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x8d, 4)",
+          "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(ram, 0x80437c84, 4)",
+          "CALL|out=|in0=(ram, 0x8004beb8, 8)|in1=(register, 0x4008, 8)|in2=(register, 0xc, 4)|in3=(const, 0x1, 4)|in4=(const, 0x2, 4)|in5=(const, 0x10, 4)|in6=(const, 0xffffffff, 4)|in7=(const, 0xffffffff, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x9a, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x9a, 4)",
+          "BRANCH|out=|in0=(ram, 0x80091cec, 1)",
+          "INT_ADD|out=(unique, 0x10000073, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000073, 4)",
+          "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(ram, 0x80437c84, 4)",
+          "INT_ADD|out=(register, 0x3, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x1, 1)",
+          "INT_ADD|out=(unique, 0x10000077, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x3, 1)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0xaf, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0xaf, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000077, 4)",
+          "CALL|out=|in0=(ram, 0x8004beb8, 8)|in1=(register, 0x4008, 8)|in2=(register, 0xc, 4)|in3=(const, 0x1, 4)|in4=(const, 0x2, 4)|in5=(const, 0x11, 4)|in6=(const, 0xffffffff, 4)|in7=(const, 0xffffffff, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0xb5, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0xb5, 4)",
+          "BRANCH|out=|in0=(ram, 0x80091cec, 1)",
+          "INT_ADD|out=(unique, 0x10000067, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1dc8, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000067, 4)",
+          "FLOAT_SUB|out=(unique, 0x1000004d, 4)|in0=(unique, 0x48700, 4)|in1=(unique, 0x48700, 4)",
+          "INT_ADD|out=(unique, 0x1000006b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x558, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x1000004d, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0xde, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0xde, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000006b, 4)",
+          "MULTIEQUAL|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(ram, 0x80437c80, 4)",
+          "MULTIEQUAL|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(ram, 0x80437c84, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)",
+          "COPY|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)",
+          "COPY|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)",
+          "COPY|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)",
+          "COPY|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)"
+        ],
+        "calls": [
+          "8004beb8",
+          "8004cd24",
+          "80091dc0",
+          "80092534"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "c0cf6eb269b8a3208b1a7472f416f41bbc581882be62bfec4c02e00f162c14f4",
+          "normalized_pcode": "39f8fa3accf1c653084388036ebad38c49a094a01a163d16903962c14ca5cfae"
+        }
+      }
+    },
+    {
+      "address": "0x80091d00",
+      "name": "FUN_80091d00",
+      "decompile": "\r\nvoid FUN_80091d00(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(uint *)(param_1 + 0x5d4) & 0x20) == 0) {\r\n    if (*(char *)(param_1 + 0x1cee) != '\\0') {\r\n      *(undefined1 *)(param_1 + 0x73f) = 0;\r\n      *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\r\n      zz_006a6fc_(param_1,0x10);\r\n      dVar1 = (double)FLOAT_80437c88;\r\n      *(undefined1 *)(param_1 + 0x540) = 1;\r\n      zz_004beb8_(dVar1,param_1,1,0,0xb,0xffffffff,0xffffffff);\r\n      zz_006a750_(param_1,0x10);\r\n      *(undefined1 *)(param_1 + 0x544) = 2;\r\n      *(undefined1 *)(param_1 + 0x588) = 1;\r\n    }\r\n  }\r\n  else {\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 0] [Showing: 0 items - offset 0 exceeds total]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091d00",
+          "name": "FUN_80091d00",
+          "prototype": "undefined FUN_80091d00(void)",
+          "body_ranges": [
+            [
+              "80091d00",
+              "80091dbf"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091d00(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(uint *)(param_1 + 0x5d4) & 0x20) == 0) {\r\n    if (*(char *)(param_1 + 0x1cee) != '\\0') {\r\n      *(undefined1 *)(param_1 + 0x73f) = 0;\r\n      *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\r\n      zz_006a6fc_(param_1,0x10);\r\n      dVar1 = (double)FLOAT_80437c88;\r\n      *(undefined1 *)(param_1 + 0x540) = 1;\r\n      zz_004beb8_(dVar1,param_1,1,0,0xb,0xffffffff,0xffffffff);\r\n      zz_006a750_(param_1,0x10);\r\n      *(undefined1 *)(param_1 + 0x544) = 2;\r\n      *(undefined1 *)(param_1 + 0x588) = 1;\r\n    }\r\n  }\r\n  else {\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "li r4,0x7",
+          "stw r0,0x14(r1)",
+          "stw r31,0xc(r1)",
+          "or r31,r3,r3",
+          "bl 0x8004cd24",
+          "or r3,r31,r31",
+          "bl 0x80091dc0",
+          "lwz r0,0x5d4(r31)",
+          "rlwinm. r0,r0,0x0,0x1a,0x1a",
+          "beq 0x80091d3c",
+          "or r3,r31,r31",
+          "bl 0x80091bc0",
+          "b 0x80091dac",
+          "lbz r0,0x1cee(r31)",
+          "extsb. r0,r0",
+          "beq 0x80091dac",
+          "li r0,0x0",
+          "or r3,r31,r31",
+          "stb r0,0x73f(r31)",
+          "li r4,0x10",
+          "lwz r0,0x5e0(r31)",
+          "rlwinm r0,r0,0x0,0x0,0x1d",
+          "stw r0,0x5e0(r31)",
+          "bl 0x8006a6fc",
+          "li r0,0x1",
+          "lfs f1,-0x6d98(r2)",
+          "stb r0,0x540(r31)",
+          "or r3,r31,r31",
+          "li r4,0x1",
+          "li r5,0x0",
+          "li r6,0xb",
+          "li r7,-0x1",
+          "li r8,-0x1",
+          "bl 0x8004beb8",
+          "or r3,r31,r31",
+          "li r4,0x10",
+          "bl 0x8006a750",
+          "li r3,0x2",
+          "li r0,0x1",
+          "stb r3,0x544(r31)",
+          "stb r0,0x588(r31)",
+          "lwz r0,0x14(r1)",
+          "lwz r31,0xc(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "CALL|out=|in0=(ram, 0x8004cd24, 8)|in1=(register, 0xc, 4)|in2=(const, 0x7, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0xc, 4)",
+          "CALL|out=|in0=(ram, 0x80091dc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x10, 4)",
+          "INT_ADD|out=(unique, 0x1000004b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x5d4, 4)",
+          "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004b, 4)",
+          "INT_AND|out=(unique, 0x10000030, 4)|in0=(register, 0x0, 4)|in1=(const, 0x20, 4)",
+          "INT_EQUAL|out=(unique, 0x1000003a, 1)|in0=(unique, 0x10000030, 4)|in1=(const, 0x0, 4)",
+          "CBRANCH|out=|in0=(ram, 0x80091d3c, 1)|in1=(unique, 0x1000003a, 1)",
+          "CALL|out=|in0=(ram, 0x80091bc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x3d, 4)",
+          "BRANCH|out=|in0=(ram, 0x80091dac, 1)",
+          "INT_ADD|out=(unique, 0x1000004f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1cee, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004f, 4)",
+          "INT_NOTEQUAL|out=(unique, 0x1f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x0, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091dac, 1)|in1=(unique, 0x1f00, 1)",
+          "INT_ADD|out=(unique, 0x10000053, 4)|in0=(register, 0xc, 4)|in1=(const, 0x73f, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x6e, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000053, 4)",
+          "INT_ADD|out=(unique, 0x10000057, 4)|in0=(register, 0xc, 4)|in1=(const, 0x5e0, 4)",
+          "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000057, 4)",
+          "INT_AND|out=(unique, 0x1000003c, 4)|in0=(register, 0x0, 4)|in1=(const, 0xfffffffc, 4)",
+          "INT_ADD|out=(unique, 0x1000005b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x5e0, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x1000003c, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x79, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005b, 4)",
+          "CALL|out=|in0=(ram, 0x8006a6fc, 8)|in1=(register, 0xc, 4)|in2=(const, 0x10, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x7c, 4)",
+          "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(ram, 0x80437c88, 4)",
+          "INT_ADD|out=(unique, 0x1000005f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x540, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x1, 1)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x83, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005f, 4)",
+          "CALL|out=|in0=(ram, 0x8004beb8, 8)|in1=(register, 0x4008, 8)|in2=(register, 0xc, 4)|in3=(const, 0x1, 4)|in4=(const, 0x0, 4)|in5=(const, 0xb, 4)|in6=(const, 0xffffffff, 4)|in7=(const, 0xffffffff, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x8c, 4)",
+          "CALL|out=|in0=(ram, 0x8006a750, 8)|in1=(register, 0xc, 4)|in2=(const, 0x10, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x91, 4)",
+          "INT_ADD|out=(unique, 0x10000063, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x2, 1)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x95, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000063, 4)",
+          "INT_ADD|out=(unique, 0x10000067, 4)|in0=(register, 0xc, 4)|in1=(const, 0x588, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x1, 1)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x97, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000067, 4)",
+          "MULTIEQUAL|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(ram, 0x80437c88, 4)|in2=(ram, 0x80437c88, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)",
+          "COPY|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)"
+        ],
+        "calls": [
+          "8004beb8",
+          "8004cd24",
+          "8006a6fc",
+          "8006a750",
+          "80091bc0",
+          "80091dc0"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "8131a0aad1991d9a6e9105f765c6ad1e071da5790966dd42e6ab87d05e84c2a6",
+          "normalized_pcode": "d332d332cfe94da0ee3507b515ae31499ee04fd465a640f81aa624c0510615c3"
+        }
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "handler_address": "0x80091ec4",
+      "state_offset": "0x545",
+      "expression": "*(char *)(param_1 + 0x545) + '\\x01'",
+      "to_value": null,
+      "evidence": "*(char *)(param_1 + 0x545) = *(char *)(param_1 + 0x545) + '\\x01';",
+      "confidence": "derived"
+    },
+    {
+      "handler_address": "0x80091c34",
+      "state_offset": "0x544",
+      "expression": "*(char *)(param_1 + 0x544) + '\\x01'",
+      "to_value": null,
+      "evidence": "*(char *)(param_1 + 0x544) = *(char *)(param_1 + 0x544) + '\\x01';",
+      "confidence": "derived"
+    },
+    {
+      "handler_address": "0x80091d00",
+      "state_offset": "0x544",
+      "expression": "2",
+      "to_value": "2",
+      "evidence": "*(undefined1 *)(param_1 + 0x544) = 2;",
+      "confidence": "derived"
+    }
+  ],
+  "callers": [
+    "[Total: 1] [Showing: 1-1]",
+    "From 802db43c [DATA]"
+  ],
+  "callees": [
+    "[Total: 1] [Showing: 1-1]",
+    "To Stack[-0x10] [WRITE]"
+  ],
+  "global_reads": [],
+  "global_writes": [],
+  "constants": [],
+  "raw_constant_bits": [],
+  "update_order": [],
+  "existing_destination_code": [
+    "deterministic audit status: missing",
+    "implemented family members: []",
+    "presentation-only asset mapping exists for pl0a00"
+  ],
+  "evidence": [
+    {
+      "kind": "decompile",
+      "source": "decompile:0x80091ab0",
+      "detail": "\r\nvoid FUN_80091ab0(int param_1)\r\n\r\n{\r\n  (*(code *)(&PTR_zz_0091e34__802db448)[*(char *)(param_1 + 0x581)])();\r\n  return;\r\n}\r\n\r\n",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db448",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db44c",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db450",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db454",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db458",
+      "detail": "80091aec -> 0x80091aec FUN_80091aec",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x80433970",
+      "detail": "80091ec4 -> 0x80091ec4 FUN_80091ec4",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x80433974",
+      "detail": "80091f08 -> 0x80091f08 FUN_80091f08",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db45c",
+      "detail": "80091b34 -> 0x80091b34 FUN_80091b34",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db460",
+      "detail": "80091c34 -> 0x80091c34 FUN_80091c34",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db464",
+      "detail": "80091d00 -> 0x80091d00 FUN_80091d00",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "destination_audit",
+      "source": "research/decomp/data/family-state-machine-coverage.json:0x80091824:0",
+      "detail": "{\"action_index\": 0, \"audit_evidence\": [\"pl0a00: command 0x802db270 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db274 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db278 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db27c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db280 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db284 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db288 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db28c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db290 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db294 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db298 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db29c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2ac (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2bc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2cc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: root 0x80091a74, action table 0x802db43c, handler 0x80091ab0\"], \"borg_id\": \"pl0a00\", \"constructor_address\": \"0x80091824\", \"implementation_members\": [], \"members\": [\"pl0a00\"], \"move_properties\": [], \"name\": null, \"rom_action\": {\"handler\": \"0x80091ab0\", \"variantTable\": \"0x802db448\", \"variants\": {\"0\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db270\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=0; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"1\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db280\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=1; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"2\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db290\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=2; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"3\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db2a0\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=3; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"4\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": [{\"flags\": {}, \"group\": 2, \"slot\": 26}, {\"flags\": {\"0x40\": 0}, \"group\": 2, \"slot\": 4294967295}], \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db2b0\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=4; stream call(s): 0x80091ef4(m0x4,g2,s26,->v2) 0x80092314(m0x2,g2,snull,->v2) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0,->v2) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0,->v2)\", \"group\": null, \"leaf\": \"0x80091aec\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}}}, \"status\": \"missing\"}",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "destination_audit",
+      "source": "research/decomp/data/family-state-machine-coverage.json:0x80091824:0",
+      "detail": "{\"action_index\": 0, \"audit_evidence\": [\"pl0a00: command 0x802db270 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db274 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db278 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db27c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db280 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db284 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db288 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db28c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db290 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db294 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db298 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db29c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2ac (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2bc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2cc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: root 0x80091a74, action table 0x802db43c, handler 0x80091ab0\"], \"borg_id\": \"pl0a00\", \"constructor_address\": \"0x80091824\", \"implementation_members\": [], \"members\": [\"pl0a00\"], \"move_properties\": [{\"ammo\": {\"lv1\": 10, \"lv10\": null}, \"button\": \"B Shot\", \"effect\": null, \"explodes\": false, \"flair\": null, \"name\": \"Arrow Shot\", \"penetration\": \"none\", \"refill\": \"all_at_once\", \"solidity\": \"nonsolid\"}, {\"ammo\": null, \"button\": \"B Attack\", \"effect\": null, \"explodes\": null, \"flair\": null, \"name\": \"Wing Sword\", \"penetration\": null, \"refill\": null, \"solidity\": \"nonsolid\"}, {\"ammo\": null, \"button\": \"X\", \"effect\": null, \"explodes\": null, \"flair\": null, \"name\": \"Fly\", \"penetration\": null, \"refill\": null, \"solidity\": null}], \"name\": \"Wing Soldier\", \"rom_action\": {\"handler\": \"0x80091ab0\", \"variantTable\": \"0x802db448\", \"variants\": {\"0\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db270\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=0; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2
+
+Relevant destination source:
+--- packages/combat/src/bridge.ts ---
+// Bridge between the existing @gf/combat `BorgRuntime` (the canonical game state —
+// HP, lock-on, ammo, gauges, status, projectiles, results telemetry) and the ROM
+// `RomActor` runtime (the 1:1 ported state machine). The existing layer stays
+// authoritative for everything EXCEPT the action/motion that a ported ROM family
+// owns; the bridge syncs fields both ways each frame.
+//
+// INTEGRATION (3 lines, minimal surgery on the existing code):
+//   battle.ts  before stepMovement/stepAttacks:
+//     if (b.romDriver?.tick(b, dt, all, ctx)) continue;   // ROM owned this frame
+//   combat.ts  X-special branch, before spawnSpecialProjectiles:
+//     if (b.romDriver?.tryStartXSpecial(b, all, ctx)) return { projectiles: out };
+//
+// BorgRuntime keeps its vec3 `vel` model; RomActor uses the ROM's scalar hSpeed +
+// yVel model. The bridge decomposes/recomposes each sync.
+
+import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
+import type { Vec3 } from "@gf/physics";
+import type { RomActor, RomPhysicsRuntime, RomVisibilityTarget } from "./rom/actor.js";
+import { createRomActor } from "./rom/actor.js";
+import {
+  createRomStateTables,
+  stepRomActor,
+  type StateHandler,
+} from "./rom/state-tables.js";
+import { tickStream } from "./rom/stream-vm.js";
+import {
+  dispatchCommandRecord,
+  dispatchUpperBodyCue,
+  dispatchFullBodyCue,
+} from "./rom/dispatch.js";
+import { configureGRedFamily, type GRedFamilyCtx } from "./families/gred.js";
+import { configureNinjaFamily } from "./families/ninja.js";
+import { configureDeathBorgFamily } from "./families/death-borg.js";
+import { configureClawRobotFamily, configureDeathBorgOmegaFamily } from "./families/shared-aerial-dive-x.js";
+import { configureSamuraiClusterFamily, type SamuraiClusterBorgId } from "./families/samurai.js";
+import { configureGirlClusterFamily, type GirlClusterBorgId } from "./families/girl-cluster.js";
+import { createFamily1Charge3Action, createFamily2Charge3Action } from "./families/shared-charge3.js";
+import {
+  createSharedAimedShotX,
+  TITAN_ROBOT_X_CONFIG,
+  PANTHER_ROBOT_X_CONFIG,
+  createTitanPantherGunAction0,
+  createTitanPantherAction1,
+} from "./families/shared-aimed-shot-x.js";
+import {
+  createSharedMorphXSpecial,
+  TITAN_MORPH_CONFIG,
+  PANTHER_MORPH_CONFIG,
+  VICTORY_MACHINE_MORPH_CONFIG,
+} from "./families/shared-morph-x.js";
+import { configureSatelliteFamily } from "./families/satellite.js";
+import { configureStarHeroFamily } from "./families/star-hero.js";
+import { configureCyberMachineFamily } from "./families/cyber-machine.js";
+import {
+  configureMachineRedFamily,
+  configureMachineBlueFamily,
+  type MachineRedBorgId,
+  type MachineBlueBorgId,
+} from "./families/machine-red-blue.js";
+import { configureDragonFamily } from "./families/dragon.js";
+import { configureCyberDragonFamily } from "./families/cyber-dragon.js";
+import { configureWormFamily } from "./families/worm.js";
+import { configureWireGunnerFamily } from "./families/wire-gunner.js";
+import { configureRobotFamily } from "./families/robot.js";
+import { configureMagnetRobotFamily } from "./families/magnet-robot.js";
+import { configureOmega2Family } from "./families/omega2-robot.js";
+import { configureDrillFamily } from "./families/drill-robot.js";
+import { configureThunderFamily } from "./families/thunder-robot.js";
+import { configureHammerFamily } from "./families/hammer-robot.js";
+import { configureKnightFamily } from "./families/knight-family.js";
+import { configureBeamWingFamily } from "./families/beam-wing.js";
+import { configureEagleJetFamily } from "./families/eagle-jet.js";
+import { configureEagleRobotFamily } from "./families/eagle-robot.js";
+import { createRobotDashHandler, ROBOT_ACTION0_CONFIGS, type RobotDashConfig } from "./families/shared-robot-dash.js";
+import { configureSwordKnightFamily } from "./families/sword-knight.js";
+import { createGenericKnightRootAction } from "./families/shared-knight-melee.js";
+import { configureJellyDiverFamily } from "./families/jelly-diver.js";
+import { configureCopyManFamily } from "./families/copy-man.js";
+import { createMeleeRobot, ROBOT_MELEE_RANGE_ROWS } from "./families/melee-robot.js";
+import { createMeleeSamurai, SAMURAI_MELEE_DEFAULT_CONFIG } from "./families/melee-samurai.js";
+import { configureValkrieFamily } from "./families/valkrie.js";
+import { configureNurseFamily } from "./families/nurse-wizard-idol.js";
+import { configureTankFamily } from "./families/tank-borg.js";
+import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
+import { configureFortressFamily } from "./families/fortress-borg.js";
+import { configureNuFamily } from "./families/death-borg-nu.js";
+import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
+import { HERO_X_BUFF } from "./constants.js";
+import { applyActorParamTierDelta127 } from "./paramTier.js";
+import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
+import { spawnRomProjectile } from "./projectiles.js";
+import { movementPhysicsForBorgId } from "./movementData.js";
+import { sourceStatsForBorgId } from "./sourceBorgStats.js";
+import { tierSizeScale } from "./timescale.js";
+import type { Projectile, ProjectileVisualKind, WeaponCell } from "./types.js";
+import attackHitTablesData from "./data/attackHitTables.json" with { type: "json" };
+import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
+import meleeAnimKindsData from "./data/meleeAnimKinds.json" with { type: "json" };
+import familyCueTablesFullData from "./data/familyCueTablesFull.json" with { type: "json" };
+
+const TAU = Math.PI * 2;
+const BAM_FULL = 0x10000;
+const ACTOR_SIZE_NORMALIZER = 167.75999450683594; // FLOAT_80437620
+/** zz_0068004_: max(data page +0x4c, +0x50) / FLOAT_80437620. The Girl pages
+ * share 9/6 except pl0308 (25/3); values were read directly from pl####data.bin. */
+function girlDescriptorSizeScale(borgId: string): number {
+  if (borgId === "pl0308") return 25 / ACTOR_SIZE_NORMALIZER;
+  return /^pl030[0-9a-d]$/.test(borgId) ? 9 / ACTOR_SIZE_NORMALIZER : 1;
+}
+
+/** An armed hitbox window (from attackHitTables.json, looked up per kind). */
+interface ArmedHit {
+  activeStart: number;
+  activeEnd: number;
+  reach: number;
+  damageRecordIndex: number;
+  /** Uids already struck by this window (one hit per target per window). */
+  struck: Set<string>;
+}
+
+// Lazy-loaded per-borg hit-table data (attackHitTables.json). Loaded once, cached.
+const HIT_TABLES: Record<string, { kinds: Record<string, number[]>; records: Record<string, unknown> }> =
+  (attackHitTablesData as { borgs: Record<string, { kinds: Record<string, number[]>; records: Record<string, unknown> }> }).borgs;
+function hitTablesFor(borgId: string): { kinds: Record<string, number[]>; records: Record<string, unknown> } | null {
+  return HIT_TABLES[borgId] ?? null;
+}
+
+// --- Pre-decoded stream events (meleeAnimKinds.json) ---
+// The stream banks' bytecode is already decoded into frame-keyed events by
+// scripts/gen-melee-anim-kinds.mjs. The bridge plays these back directly, bypassing
+// the raw bytecode walker when familyStreamBank is null (which it is for all families
+// until the bank-byte extractor lands). This gives every family working anim + hitbox
+// arming from the ALREADY-DECODED data.
+
+interface StreamEvent {
+  op: string;
+  frame?: number;
+  kind?: number;
+  statusId?: number;
+  statusArg?: number;
+  group?: number;
+  slot?: number;
+  mode?: number;
+  blend?: boolean;
+  part?: number;
+  state?: number;
+  aux?: number;
+  variant?: number;
+}
+
+const ACTION_STREAM_DATA = actionStreamTablesData as unknown as {
+  borgs: Record<string, {
+    actions?: Record<string, {
+      variants?: Record<string, { bank?: string } | undefined>;
+    }>;
+  }>;
+};
+
+const ACTION_STREAM_BANKS: Record<string, { bank: string; group: number; seedSlot: number } | undefined> = (() => {
+  const data = actionStreamTablesData as unknown as { borgs: Record<string, { actions: Record<string, { variants: Record<string, { bank: string; group: number; seedSlot: number } | undefined> }> }> };
+  const out: Record<string, { bank: string; group: number; seedSlot: number } | undefined> = {};
+  for (const [borgId, b] of Object.entries(data.borgs || {})) {
+    const xLeaf = b.actions?.["2"]?.variants?.["0"];
+    if (xLeaf) out[borgId] = { bank: xLeaf.bank, group: xLeaf.group, seedSlot: xLeaf.seedSlot ?? 0 };
+  }
+  return out;
+})();
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MELEE_ANIM_BANKS: Record<string, any> = (meleeAnimKindsData as { banks?: Record<string, unknown> }).banks ?? {};
+
+/** Look up the pre-decoded stream events for a borg's X-special. Returns null when
+ *  the borg has no decoded action-stream data (uncommon — 156/208 borgs have it). */
+function streamEventsForSlot(
+  borgId: string,
+  actionIndex: number,
+  variantIndex: number,
+  groupIndex: number,
+  slotIndex: number,
+): StreamEvent[] | null {
+  const variants = ACTION_STREAM_DATA.borgs[borgId]?.actions?.[String(actionIndex)]?.variants;
+  const leaf = variants?.[String(variantIndex)] ?? variants?.["0"];
+  const bankAddress = leaf?.bank ?? ACTION_STREAM_BANKS[borgId]?.bank;
+  if (!bankAddress) return null;
+  const bank = MELEE_ANIM_BANKS[bankAddress];
+  if (!bank) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const group = bank.groups?.["g" + groupIndex] as any;
+  const slot = group?.["s" + slotIndex] as { events?: StreamEvent[] } | undefined;
+  return slot?.events ?? null;
+}
+
+/** BorgRuntime.rotY is in radians (atan2(x,z) convention, +Z forward); RomActor.heading
+ *  is BAM16 (0..0xFFFF, 0 = +Z forward). */
+function radToBam(rad: number): number {
+  let bam = Math.round((rad / TAU) * BAM_FULL);
+  bam &= 0xffff;
+  if (bam >= 0x8000) bam -= 0x10000;
+  return bam;
+}
+function bamToRad(bam: number): number {
+  let s = bam & 0xffff;
+  if (s & 0x8000) s -= 0x10000;
+  return (s / BAM_FULL) * TAU;
+}
+
+/** Decompose BorgRuntime.vel (vec3) into RomActor's scalar hSpeed + yVel model. */
+function decomposeVel(vel: Vec3): { hSpeed: number; yVel: number } {
+  return { hSpeed: Math.hypot(vel.x, vel.z), yVel: vel.y };
+}
+/** Recompose RomActor's hSpeed (yaw-projected) + yVel back into BorgRuntime.vel. */
+function recomposeVel(hSpeed: number, yVel: number, yawBam: number): Vec3 {
+  const rad = bamToRad(yawBam);
+  // Match physics.ts: pos.x += hSpeed × sin(yaw); pos.z += hSpeed × cos(yaw).
+  // The sign of hSpeed carries direction (the ROM allows negative hSpeed for reverse).
+  return { x: Math.sin(rad) * hSpeed, y: yVel, z: Math.cos(rad) * hSpeed };
+}
+
+/** Per-family registry. Maps borg-id → factory that wires the RomActor + cue table.
+ *  Returns null for borgs whose family hasn't been ported yet (they keep the generic
+ *  archetype logic). */
+export interface FamilyRegistration {
+  /** Configure a freshly-created RomActor for this borg-id (sets the family virtual,
+   *  stamps the borg-number switch, etc.). */
+  configure: (actor: RomActor, ctx: RomHostContext) => void;
+  /** The cue→state table for this family (48 entries × 2 bytes). Extracted from
+   *  boot.dol; hardcoded for G RED until the extractor script lands. */
+  cueTable: Int8Array;
+}
+
+// Lazily built so the cue-table data consts below are initialized first (the
+// registrations read cueTableForBorg at construction time).
+let FAMILY_REGISTRY_CACHE: Record<string, FamilyRegistration> | null = null;
+function familyRegistry(): Record<string, FamilyRegistration> {
+  if (!FAMILY_REGISTRY_CACHE) {
+    FAMILY_REGISTRY_CACHE = {
+      // G RED family (ctor 0x8018ccfc) — cue table @0x80365cf8, full 48-row DOL dump.
+      pl0615: makeGRedFamilyRegistration(),
+      pl0629: makeGRedFamilyRegistration(),
+      pl062a: makeGRedFamilyRegistration(),
+      // NORMAL NINJA family (ctor 0x8006f4f8) — cue table @0x802d3ff8. SASUKE (pl000a)
+      // shares the entire family: the ctor differs only in the +0x4b0 descriptor.
+      pl0000: makeNinjaFamilyRegistration(),
+      pl000a: makeNinjaFamilyRegistration(),
+      // DEATH BORG ALPHA family (ctor 0x8019e9a4) — third family on the shared-X
+      // machine (config @0x80435750). pl000c ONLY: pl0008's X command is descriptor-
+      // disabled in the ROM (+0xba mode 0xff) — it keeps the generic fallback.
+      pl000c: makeDeathBorgFamilyRegistration(),
+      // ---- Wave-A verified shared-engine families (2026-07-06, wf_1141168b-7b5) ----
+      // Aerial dive/leap-shot engine zz_00f41c4_ (shared-aerial-dive-x.ts):
+      pl0400: withRobotDash(makeSimpleRegistration("pl0400", (a, ctx) => configureClawRobotFamily(a, "pl0400", ctx)), ROBOT_ACTION0_CONFIGS.pl0400),
+      pl040a: withRobotDash(makeSimpleRegistration("pl040a", (a, ctx) => configureClawRobotFamily(a, "pl040a", ctx)), ROBOT_ACTION0_CONFIGS.pl040a),
+      pl0406: makeSimpleRegistration("pl0406", (a, ctx) => configureDeathBorgOmegaFamily(a, "pl0406", ctx)),
+      // GIRL cluster (families/girl-cluster.ts, 2026-07-06): 14 borgs / 8 families on
+      // the shared action-0 B-ranged volley (variant table 0x80325a00, G-A/G-B/G-C
+      // tables @0x80325a14/a20/a2c) + the 5 shared melee tables (M-1..M-5
+      // @0x80325a68..aa8, per-family seed slots) + per-family X machines
+      // (battle @0x80433b18, barrier @0x804344d8, killer @0x80336da4, shared cfg X
+      // @0x80434508; cyber-girl.ts + shared-series3-x.ts machines REUSED). Supersedes
+      // the earlier series-3-only registrations (pl0301/0302/0303/0306/0307/030d),
+      // the cyber-girl-only registrations (pl0305/0309/030a), the wave-B shared-engine
+      // fallbacks (pl0300/030b, pl0304/0308), and the wave-C girlMelee injection.
+      ...girlClusterRegistrations(),
+      // Samurai cluster (families/samurai.ts, 2026-07-06): 13 borgs / 6 families on
+      // the shared S-A ranged dash-slash (table 0x8033ed0c) + S-B close slash (table
+      // 0x8033ed20) + per-family action-1 v2 machines + zz_0149178_ lunge (v3/v4, ROM
+      // config) + X (shared lance flight zz_0149708_; SONIC/SHOGUN bespoke tables).
+      ...samuraiClusterRegistrations(),
+      // Charge-3 release engine zz_0177a3c_ + morph engine zz_017a374_ composites:
+      pl0619: makeSimpleRegistration("pl0619", (a, ctx) => {
+        a.borgNumber = 0x619;
+        a.rootAction = composeActionTable([null, null, null, createFamily1Charge3Action(ctx), null]);
+        a.defaultGroup = 0;
+        a.streamSlot = 0;
+      }),
+      pl061f: makeSimpleRegistration("pl061f", (a, ctx) => {
+        // VICTORY TANK: charge3 at [3]; its morph branch is a DEAD borg branch (verified) —
+        // action 2 keeps the generic fallback.
+        a.borgNumber = 0x61f;
+        a.rootAction = composeActionTable([null, null, null, createFamily2Charge3Action(ctx), null]);
+        a.defaultGroup = 0;
+        a.streamSlot = 0;
+      }),
+      pl0625: makeSimpleRegistration("pl0625", (a, ctx) => {
+        // VICTORY MACHINE: morph at [2] + charge3 at [3].
+        a.borgNumber = 0x625;
+        a.rootAction = composeActionTable([
+          null, null,
+          createSharedMorphXSpecial(VICTORY_MACHINE_MORPH_CONFIG, ctx, {}),
+          createFamily2Charge3Action(ctx),
+          null,
+        ]);
+        a.defaultGroup = 0;
+        a.streamSlot = 0;
+      }),
+      // Titan/Panther robots: morph at [2] + aimed-shot at [3] (two engines composed).
+      pl0604: makeMorphAimedComposite("pl0604", 0x604, "titan", TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG, true),
+      pl0618: makeMorphAimedComposite("pl0618", 0x618, "titan", TITAN_MORPH_CONFIG, TITAN_ROBOT_X_CONFIG, false),
+      pl0613: makeMorphAimedComposite("pl0613", 0x613, "panther", PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG, true),
+      pl0627: makeMorphAimedComposite("pl0627", 0x627, "panther", PANTHER_MORPH_CONFIG, PANTHER_ROBOT_X_CONFIG, false),
+// Eagle Robot / Proto Eagle bespoke action 0; pl0606 composes its shared morph X.
+pl0606: makeSimpleRegistration("pl0606", (a, ctx) => configureEagleRobotFamily(a, "pl0606", ctx)),
+pl061a: makeSimpleRegistration("pl061a", (a, ctx) => co
+
+--- packages/combat/src/families/shared-engine.ts ---
+// Shared attack engines — port of zz_0177dd8_ (standard melee, chunk_0044.c:3001) and
+// zz_0178394_ (lunge/dash-attack, chunk_0044.c:3206). These are the GENERIC
+// config-struct-driven engines that the MAJORITY of the roster's variant functions
+// tail-call (the `lis r4, ...; addi r4, r4, ...; bl 0x80177dd8` pattern documented
+// in cue-script-stream-decode §3).
+//
+// Once ported, any family whose variant functions use these engines gets real
+// ROM-driven attacks by just providing the config struct data — no per-family code.
+
+import type { RomActor } from "../rom/actor.js";
+import { integratePhysics, vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
+import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { dispatchUpperBodyCue } from "../rom/dispatch.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
+
+const ENG = {
+  STREAM_RATE: -1.0,
+  TIMER_FLOOR: 0.0,
+  MELEE_TIMER: 60.0,
+  LUNGE_TIMER: 30.0,
+  EXTRA_VEL: 0.5,
+  LUNGE_VEL_MULT: 0.0625,
+} as const;
+
+/**
+ * Port of `zz_01782dc_` — the forward-dash velocity setter. Shared by this file's
+ * lunge/melee machines AND the more faithful B-close port in shared-melee-gred.ts.
+ * Takes timerFrames directly so callers don't have to synthesize a full config. */
+export function computeLungeSpeed(actor: RomActor, timerFrames: number): void {
+  if (timerFrames > 0) {
+    const row = ((actor.prevActionIndex % 3) + 3) % 3;
+    actor.hSpeed = actor.actionSpeedRows[row]! / timerFrames;
+  }
+}
+
+/** The config struct that each family's variant function loads into r4 before
+ *  tail-calling the shared engine. Layout matches the ROM's struct at the address
+ *  the `lis+addi` pair computes. */
+export interface SharedEngineConfig {
+  /** +0x0: seed slot byte — the first stream slot to play (config[0] → +0x6ea).
+   *  Combo follow-ups increment this. */
+  seedSlot: number;
+  /** +0x4: float — proximity/velocity parameter passed to FUN_800668cc (the "is
+   *  target in range" check that gates the active-frame advance). */
+  proximityRange: number;
+  /** +0x8: u32 — timer seed (frames) for the active window. Copied into +0x558
+   *  at phase start; decremented per frame; expiry advances the phase. */
+  timerFrames: number;
+  /** +0xc: float — reposition scale (the lunge engine's "push from target" factor).
+   *  Applied as motion = (pos - target) × scale; pos += motion (same pattern as
+   *  G RED's G Crash). 0 = no repositioning (standard melee). */
+  repositionScale: number;
+  /** +0x10: chain callback — called when the combo-continue condition is met
+   *  (+0x1cf0 & +0x746 & +0x745). Re-issues a command via zz_006a3d0_. */
+  chainCallback?: (actor: RomActor) => void;
+  /** +0x14: alt chain callback — called when +0x1dd & 0x80 and not +0x745. */
+  altChainCallback?: (actor: RomActor) => void;
+  /** zz_0178394 config +0x10: phase-2 launch velocity magnitude. */
+  launchVelocity?: number;
+  /** zz_0178394 config +0x14: scale applied to all four velocity scalars on P2->P3. */
+  transitionScale?: number;
+  /** zz_0178394 config +0x18: zz_006ed8c_ damping used in phases 3 and 4. */
+  recoveryDamping?: number;
+  /** zz_0178394 config s16 +0x0a: phase-3 timer seed. */
+  recoveryFrames?: number;
+}
+
+/** Per-action config set: one config per actionIndex entry. The rootAction
+ *  dispatcher reads +0x580 and dispatches to the matching engine + config. */
+export interface SharedEngineActionTable {
+  /** actionIndex 0: dash attack (uses the lunge engine). */
+  dash?: SharedEngineConfig;
+  /** actionIndex 1: B melee (uses the standard melee engine). */
+  bMelee?: SharedEngineConfig;
+  /** actionIndex 2: X / air-B (uses the lunge engine for rush attacks, or null
+   *  to defer to a custom family handler like G RED's). */
+  xSpecial?: SharedEngineConfig | null;
+  /** actionIndex 3: B charge (uses the charge engine). */
+  bCharge?: SharedEngineConfig;
+}
+
+// ============================================================================
+// Standard melee engine (zz_0177dd8_) — group-3 stream + timer-gated active window.
+// ============================================================================
+
+/** Build the 4-phase table for the standard melee engine. */
+function createMeleePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: StreamContext) => void> {
+  return [
+    // Phase 0: setup (FUN_80177e28) — start stream, set timer.
+    (actor, ctx) => {
+      actor.fbPhaseSlots[0]++;
+      actor.streamSlot = cfg.seedSlot;
+      // Air-check + yaw snapshot (FUN_80066838 — stubbed: always grounded path).
+      actor.activeYaw = actor.heading;
+      actor.lockYaw = actor.heading;
+      // Start stream group 3 (melee strikes), slot = seedSlot.
+      const slot = actor.streamSlot;
+      startStream(actor, 0xf, 3, slot, ENG.STREAM_RATE);
+      actor.streamSlot = slot + 1; // combo follow-up ++ (+0x6ea)
+      actor.handlerTimer = ENG.MELEE_TIMER;
+      void ctx;
+    },
+    // Phase 1: pre-active tick (FUN_80177f10) — tick stream, timer--, on 0 → phase 2.
+    //   Calls zz_01782dc_ at the transition to set the forward-dash velocity.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      actor.handlerTimer -= actor.dt;
+      if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
+        actor.fbPhaseSlots[0]++;
+        actor.handlerTimer = cfg.timerFrames;
+        computeLungeSpeed(actor, cfg.timerFrames); // ← zz_01782dc_: set forward-dash hSpeed
+      }
+    },
+    // Phase 2: active frames (FUN_80177fd4) — tick + yaw-only physics + contact check.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      // Yaw-only physics (zz_00670dc_ = no gravity, just hSpeed projection).
+      integratePhysics(0, actor, actor.activeYaw); // gravity=0 → yaw-only XZ movement
+      actor.handlerTimer -= actor.dt;
+      if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
+        actor.fbPhaseSlots[0]++;
+      }
+    },
+    // Phase 3: combo/recovery (FUN_801780e4) — tick, combo check, restart or end.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      integratePhysics(0, actor, actor.activeYaw);
+      // Combo check: if contact flag set and combo window open, restart at phase 2.
+      const combo = actor as RomActor & { comboFlag?: number };
+      if (actor.contactP0 > 0 && (combo.comboFlag ?? 0) > 0) {
+        if (cfg.chainCallback) {
+          cfg.chainCallback(actor);
+          return;
+        }
+        // Default: replay the stream at the next slot (combo follow-up).
+        actor.fbPhaseSlots[0] = 2;
+        actor.handlerTimer = cfg.timerFrames;
+        startStream(actor, 0xf, 3, actor.streamSlot, ENG.STREAM_RATE);
+        actor.streamSlot++;
+      } else {
+        // Recovery: return to idle — real zz_006a474_ call (FUN_801780e4 wall/stream
+        // end, chunk_0044.c:3172; decomp-verified helper — the old full-0 + upper-6
+        // mapping was refuted).
+        actor.controlWord = actor.controlWord & ~0x3;
+        romGroundIdleReturn(actor);
+      }
+    },
+  ];
+}
+
+// ============================================================================
+// Lunge / dash-attack engine (zz_0178394_) — zero velocity + reposition + stream.
+// ============================================================================
+
+function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: StreamContext) => void> {
+  const scratch = (actor: RomActor) => actor as RomActor & {
+    lockTarget?: { x: number; y: number; z: number } | null;
+    grounded?: boolean;
+    streamTickGate?: boolean;
+    aimPitch54e?: number;
+  };
+  const damp = (actor: RomActor, factor: number) => {
+    const amount = (1 - factor) * actor.dt;
+    actor.hSpeed -= actor.hSpeed * amount;
+    actor.yVel -= actor.yVel * amount;
+  };
+  return [
+    // Phase 0: setup (zz_01783e4_) — zero velocity, reposition from target, start stream.
+    (actor, ctx) => {
+      actor.fbPhaseSlots[0]++;
+      actor.handlerTimer = ENG.LUNGE_TIMER; // FLOAT_8043ae00 = 30
+      // Zero the velocity scalars (the lunge starts from standstill).
+      actor.hSpeed = 0;
+      actor.yVel = 0;
+      actor.hDecel = 0;
+      actor.gravityCoeff = 0;
+      actor.activeYaw = actor.heading;
+      actor.lockYaw = actor.heading;
+      actor.streamSlot = cfg.seedSlot;
+      // Reposition: motion = (pos - target) × scale; pos += motion.
+      const target = scratch(actor).lockTarget;
+      if (target && cfg.repositionScale !== 0) {
+        vecSubtract(actor.pos, target, actor.motion);
+        vecScale(cfg.repositionScale, actor.motion, actor.motion);
+        vecAdd(actor.pos, actor.motion, actor.pos);
+      }
+      startStream(actor, 0xf, 3, actor.streamSlot, ENG.STREAM_RATE);
+      actor.streamSlot++;
+      // zz_006e514_/zz_006e1ac_ populate +0x54e. The bridge's +0x18da pitch
+      // channel is the exact surfaced source for the flag-2 path.
+      scratch(actor).aimPitch54e = actor.steerYaw;
+      void ctx;
+    },
+    // Phase 1: tick + reposition continuation + timer (FUN_80178574).
+    //   Calls zz_01782dc_ at the transition to set the forward-dash velocity.
+    (actor, ctx) => {
+      if (scratch(actor).streamTickGate !== false) tickStream(actor, 0xf, ctx);
+      if (cfg.repositionScale !== 0) {
+        vecScale(cfg.repositionScale, actor.motion, actor.motion);
+        vecAdd(actor.pos, actor.motion, actor.pos);
+      }
+      actor.handlerTimer -= actor.dt;
+      if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
+        actor.fbPhaseSlots[0]++;
+        actor.handlerTimer = cfg.timerFrames; // cfg s16 +0x08
+      }
+    },
+    // Phase 2 FUN_80178684: stream/aim tick, launch-vector integration, then seed P3.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      const pitch = scratch(actor).aimPitch54e ?? actor.steerYaw;
+      const rad = (pitch / 0x10000) * Math.PI * 2;
+      const velocity = cfg.launchVelocity ?? 0;
+      actor.hSpeed = velocity * Math.cos(rad);
+      actor.yVel = -velocity * Math.sin(rad);
+      integratePhysics(1, actor, actor.lockYaw);
+      actor.handlerTimer -= actor.dt;
+      const target = scratch(actor).lockTarget;
+      const inRange = target ? Math.hypot(target.x - actor.pos.x, target.z - actor.pos.z) <= cfg.proximityRange : false;
+      if (actor.handlerTimer <= ENG.TIMER_FLOOR || inRange) {
+        actor.fbPhaseSlots[0]++;
+        actor.handlerTimer = cfg.recoveryFrames ?? 0; // cfg s16 +0x0a
+        const scale = cfg.transitionScale ?? 1;
+        actor.hSpeed *= scale;
+        actor.hDecel *= scale;
+        actor.yVel *= scale;
+        actor.gravityCoeff *= scale;
+      }
+    },
+    // Phase 3 FUN_80178808: damp/integrate until cfg+0x0a expires.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      damp(actor, cfg.recoveryDamping ?? 1);
+      integratePhysics(1, actor, actor.lockYaw);
+      actor.handlerTimer -= actor.dt;
+      if (actor.handlerTimer <= 0) actor.fbPhaseSlots[0]++;
+    },
+    // Phase 4 FUN_80178908: stream/combo tail and exact grounded/wall exits.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      if (actor.contactP0 < 0) actor.steerYaw = actor.steerYaw >> 1;
+      damp(actor, cfg.recoveryDamping ?? 1);
+      integratePhysics(1, actor, actor.lockYaw);
+      if (scratch(actor).grounded === true && actor.contactP0 < 0) {
+        actor.controlWord &= ~0x3;
+        dispatchUpperBodyCue(actor, 7);
+        actor.stateTimer = 1.0 + actor.dt;
+      } else if (actor.wallContact !== 0) {
+        actor.controlWord &= ~0x3;
+        romAirKnockoutReturn(actor);
+      }
+    },
+  ];
+}
+
+// ============================================================================
+// Factory: build a rootAction dispatcher from a shared-engine action table.
+// ============================================================================
+
+/** Create a rootAction function for a family that uses the shared engines.
+ *  ActionIndex → engine(config). Null entries fall through to the existing generic
+ *  @gf/combat logic. */
+export function createSharedEngineRootAction(
+  table: SharedEngineActionTable,
+): (actor: RomActor) => void {
+  const entries: Array<{ phases: Array<(a: RomActor, ctx: StreamContext) => void>; ctx: StreamContext } | null> = [];
+  // Build per-action phase tables. Each entry carries its phase array + the shared ctx
+  // (the ctx is threaded when the bridge calls stepRomActor).
+  if (table.dash) entries[0] = { phases: createLungePhases(table.dash), ctx: {} };
+  if (table.bMelee) entries[1] = { phases: createMeleePhases(table.bMelee), ctx: {} };
+  // entries[2] (X) — null means defer to a custom handler (G RED) or generic code.
+  if (table.xSpecial === null) entries[2] = null;
+  else if (table.xSpecial) entries[2] = { phases: createLungePhases(table.xSpecial), ctx: {} };
+  if (table.bCharge) entries[3] = { phases: createMeleePhases(table.bCharge), ctx: {} };
+
+  return (actor: RomActor) => {
+    const entry = entries[actor.actionIndex];
+    if (!entry) return; // null → fall through to generic code
+    const phase = actor.fbPhaseSlots[0] ?? 0;
+    const fn = entry.phases[phase];
+    if (fn) fn(actor, entry.ctx);
+  };
+}
+
+/** Whether the shared-engine root action wires a B-charge handler at actionIndex 3.
+ *  Family configure closures call this to stamp RomActor.hasBCharge. */
+export function sharedEngineHasBCharge(table: SharedEngineActionTable): boolean {
+  return !!table.bCharge;
+}
+
+/** Default config templates for common attack shapes. These are STARTING points —
+ *  each family overrides with its actual config struct data from boot.dol. */
+export const DEFAULT_CONFIGS = {
+  /** Standard ground melee: group 3, no reposition, 60f window. */
+  groundMelee: (seedSlot: number): SharedEngineConfig => ({
+    seedSlot,
+    proximityRange: 100,
+    timerFrames: 30,
+    repositionScale: 0,
+  }),
+  /** Dash attack / X-rush: reposition toward target, shorter window.
+   *  NOTE: repositionScale=0 until zz_01782dc_ (the forward-dash velocity setter) is
+   *  ported — without it the borg gets pushed back but never dashes forward. */
+  dashAttack: (seedSlot: number, _scale = 0): SharedEngineConfig => ({
+    seedSlot,
+    proximityRange: 200,
+    timerFrames: 20,
+    repositionScale: 0,
+  }),
+  /** Charge release: longer windup, burst damage. */
+  chargeRelease: (seedSlot: number): SharedEngineConfig => ({
+    seedSlot,
+    proximityRange: 150,
+    timerFrames: 40,
+    repositionScale: 0.3,
+  }),
+} as const;
+
+
+--- packages/combat/src/families/wave-b-catch-all.ts ---
+// Wave-B catch-all family module
+// Provides lightweight family registrations for borgs that share common ROM engines
+// but lack dedicated family files. Covers: Gun Borg (pl0100/0108), Ninja (pl0005/0009),
+// Dragon (pl0504/0510/0502/050e), Knight (pl0202/020b), Wing (pl0a02/0a07/0a04/0a08/0a09),
+// Death Borg (pl0105/010a/0a05/0a0a), and Air/Death (pl0d06/0d07/0505/0511).
+
+import type { RomActor } from "../rom/actor.js";
+import type { StreamContext } from "../rom/stream-vm.js";
+import { createSharedXSpecial, type SharedXConfig } from "./shared-x-special.js";
+
+// ------------------------------------------------------------------
+// Per-borg X config (groundSlot, airSlot, hasX) derived from actionStreamTables.json
+// ------------------------------------------------------------------
+
+interface BorgConfig {
+  hasX: boolean;
+  groundSlot: number | null;
+  airSlot: number | null;
+}
+
+const BORG_CONFIGS = {
+  // Gun Borg — shared engine fallback (no decoded group-4 stream)
+  pl0100: { hasX: false, groundSlot: null, airSlot: null },
+  pl0108: { hasX: false, groundSlot: null, airSlot: null },
+  // Ninja — some have X streams
+  pl0005: { hasX: false, groundSlot: null, airSlot: null },
+  pl0009: { hasX: true, groundSlot: 4, airSlot: 4 },
+  // Dragon
+  pl0504: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0510: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0502: { hasX: false, groundSlot: null, airSlot: null },
+  pl050e: { hasX: false, groundSlot: null, airSlot: null },
+  pl0505: { hasX: false, groundSlot: null, airSlot: null },
+  pl0511: { hasX: false, groundSlot: null, airSlot: null },
+  // Knight
+  pl0202: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl020b: { hasX: true, groundSlot: 2, airSlot: 2 },
+  // Wing
+  pl0a02: { hasX: false, groundSlot: null, airSlot: null },
+  pl0a07: { hasX: false, groundSlot: null, airSlot: null },
+  pl0a04: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0a08: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0a09: { hasX: true, groundSlot: 0, airSlot: 0 },
+  // Death Borg misc
+  pl0105: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl010a: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0a05: { hasX: false, groundSlot: null, airSlot: null },
+  pl0a0a: { hasX: false, groundSlot: null, airSlot: null },
+  // Air/Death misc
+  pl0d06: { hasX: false, groundSlot: null, airSlot: null },
+  pl0d07: { hasX: false, groundSlot: null, airSlot: null },
+} as const satisfies Record<string, BorgConfig>;
+
+const BORG_NUMBERS: Record<string, number> = {
+  pl0100: 0x100, pl0108: 0x108,
+  pl0005: 0x005, pl0009: 0x009, pl0504: 0x504, pl0510: 0x510,
+  pl0502: 0x502, pl050e: 0x50e, pl0202: 0x202, pl020b: 0x20b,
+  pl0a02: 0xa02, pl0a07: 0xa07, pl0a04: 0xa04, pl0a08: 0xa08,
+  pl0a09: 0xa09, pl0105: 0x105, pl010a: 0x10a, pl0a05: 0xa05,
+  pl0a0a: 0xa0a, pl0d06: 0xd06, pl0d07: 0xd07, pl0505: 0x505,
+  pl0511: 0x511,
+};
+
+export type WaveBBorgId = keyof typeof BORG_CONFIGS;
+
+function onHitFallBack(actor: RomActor, ctx: StreamContext): void {
+  // Generic fallback on-hit: small backflip
+  actor.lockYaw = (actor.heading - 0x8000) & 0xffff;
+  actor.activeYaw = actor.lockYaw;
+  actor.hSpeed = 8.0;
+  actor.hDecel = 0.0;
+  actor.yVel = 10.0;
+  actor.gravityCoeff = -0.6;
+  void ctx;
+}
+
+export function createWaveBRootAction(borgId: WaveBBorgId, ctx: StreamContext): (actor: RomActor) => void {
+  const cfg: BorgConfig = BORG_CONFIGS[borgId];
+  if (!cfg.hasX || cfg.groundSlot === null) {
+    // No X stream — generic combat layer owns all actions
+    return () => {};
+  }
+  const xConfig: SharedXConfig = {
+    groundSlot: cfg.groundSlot,
+    airSlot: cfg.airSlot ?? cfg.groundSlot,
+    onHit: onHitFallBack,
+  };
+  const xHandler = createSharedXSpecial(xConfig, ctx);
+  return (actor: RomActor) => {
+    if (actor.actionIndex === 2) xHandler(actor);
+  };
+}
+
+export function configureWaveBFamily(actor: RomActor, borgId: WaveBBorgId, ctx: StreamContext): void {
+  actor.borgNumber = BORG_NUMBERS[borgId] ?? 0;
+  actor.rootAction = createWaveBRootAction(borgId, ctx);
+  actor.defaultGroup = 0;
+  actor.streamSlot = 0;
+}
+
+
+--- packages/combat/src/rom/rom.selfcheck.ts ---
+// Selfcheck for the ROM-faithful actor runtime foundation.
+// Run: pnpm build (combat) then node scripts/run-rom-tests.mjs
+//
+// Verifies the three foundation pieces compose correctly:
+//  1. physics.integratePhysics reproduces the ROM's scalar-speed integration
+//  2. dispatch.dispatchCommandRecord transitions state 61 → rootAction
+//  3. The G RED family's phase-0 launch produces the documented upward impulse (Y=+4.0)
+
+import { createRomActor, type RomActor } from "./actor.js";
+import { groundClamp, integratePhysics } from "./physics.js";
+import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
+import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
+import { createGRedDash, GRED_DASH } from "../families/gred-dash.js";
+import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
+import { configureStarHeroFamily } from "../families/star-hero.js";
+import { configureCyberMachineFamily, type CyberMachineFamilyCtx } from "../families/cyber-machine.js";
+import { configureSwordKnightFamily } from "../families/sword-knight.js";
+import { configureDragonFamily, DRAGON_X } from "../families/dragon.js";
+import { configureCyberDragonFamily, CYBER_DRAGON_X } from "../families/cyber-dragon.js";
+import { configureWormFamily, WORM_X } from "../families/worm.js";
+import { configureWireGunnerFamily, WIRE_GUNNER_X } from "../families/wire-gunner.js";
+import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
+import {
+  createSharedMeleeGRed,
+  GRED_MELEE_CONFIG,
+  SHARED_MELEE_GRED,
+  type SharedMeleeGRedConfig,
+} from "../families/shared-melee-gred.js";
+import {
+  createSharedCharge,
+  GRED_CHARGE_CONFIG,
+  SHARED_CHARGE,
+  type SharedChargeConfig,
+} from "../families/shared-charge.js";
+import {
+  configureValkrieFamily,
+  VALKRIE,
+  VALKRIE_SPAWNERS,
+  type ValkrieFamilyCtx,
+} from "../families/valkrie.js";
+import {
+  configureSamuraiClusterFamily,
+  SAMURAI,
+  SAMURAI_SPAWNERS,
+  SAMURAI_LUNGE_ROM_CONFIG,
+  type SamuraiFamilyCtx,
+} from "../families/samurai.js";
+import { createRomStateTables, stepRomActor } from "./state-tables.js";
+import type { StreamContext } from "./stream-vm.js";
+import { RomDriverBridge, cueTableForBorg, type RomBattleRuntime } from "../bridge.js";
+import { configureDeathBorgFamily } from "../families/death-borg.js";
+import {
+  configureEagleJetFamily,
+  EAGLE_JET_ACTION1,
+  type EagleJetScratch,
+} from "../families/eagle-jet.js";
+import {
+  createMeleeRobot,
+  MELEE_ROBOT,
+  ROBOT_MELEE_RANGE_ROWS,
+} from "../families/melee-robot.js";
+import {
+  createRobotDashHandler,
+  ROBOT_ACTION0_CONFIGS,
+  ROBOT_DASH,
+} from "../families/shared-robot-dash.js";
+import {
+  configureTankFamily,
+  NORMAL_TANK,
+  type NormalTankScratch,
+} from "../families/tank-borg.js";
+import {
+  ARROW_NINJA_ACTION1,
+  configureArrowNinjaFamily,
+  type ArrowNinjaScratch,
+} from "../families/arrow-ninja.js";
+import {
+  configureEagleRobotFamily,
+  EAGLE_ROBOT_ACTION0,
+  type EagleRobotScratch,
+} from "../families/eagle-robot.js";
+import {
+  createSharedAimedShotX,
+  createTitanPantherAction1,
+  createTitanPantherGunAction0,
+  titanRobotXOnSteer,
+  TITAN_ROBOT_X_CONFIG,
+  PANTHER_ROBOT_X_CONFIG,
+} from "../families/shared-aimed-shot-x.js";
+import {
+  createSharedMorphXSpecial,
+  TITAN_MORPH_CONFIG,
+} from "../families/shared-morph-x.js";
+import type { BorgRuntime } from "../types.js";
+import {
+  configureGirlClusterFamily,
+  createGirlSharedX,
+  isGirlClusterLiveSlot,
+  KILLER_SHARED_X_CONFIG,
+  BARRIER_SHARED_X_CONFIG,
+  type GirlClusterBorgId,
+} from "../families/girl-cluster.js";
+import { CYBER_GIRL_X } from "../families/cyber-girl.js";
+import { createSeries3XSpecial, SERIES3_X } from "../families/shared-series3-x.js";
+import {
+  configureMachineRedFamily,
+  configureMachineBlueFamily,
+  MACHINE_RED_ROUTES,
+  MACHINE_BLUE_ROUTES,
+  MACHINE_RED_X,
+  MACHINE_BLUE_DEPLOY,
+  type MachineRedBorgId,
+  type MachineBlueBorgId,
+} from "../families/machine-red-blue.js";
+import {
+  groundSnapRevert,
+  stepAfterimage,
+  stepPartTargetPitch,
+  stepTargetPitch,
+  stepTargetYaw,
+} from "./helpers.js";
+
+const G_RED_LAUNCH_Y = 4.0;
+
+function approxEq(a: number, b: number, eps = 1e-4): boolean {
+  return Math.abs(a - b) <= eps;
+}
+
+let failures = 0;
+function assert(cond: boolean, msg: string): void {
+  if (cond) {
+    console.log(`  ok  ${msg}`);
+  } else {
+    console.error(`  FAIL  ${msg}`);
+    failures++;
+  }
+}
+
+export function runSelfTest(): number {
+  failures = 0;
+
+  // Test 1: physics integrator — upward impulse with no gravity produces linear rise.
+  console.log("[rom.selfcheck] physics.integratePhysics — Y=+4 impulse, no gravity:");
+  {
+    const a = createRomActor();
+    a.yVel = 4.0;
+    a.hDecel = 0;
+    a.gravityCoeff = 0;
+    a.timescale = 1;
+    a.tierScale = 1;
+    a.dt = 1;
+    a.maxFall = -9999;
+    integratePhysics(1.0, a, 0);
+    assert(approxEq(a.pos.y, 4.0), "frame 1 pos.y == 4.0 (linear rise)");
+    assert(approxEq(a.yVel, 4.0), "yVel unchanged (gravityCoeff=0 → no decay)");
+    integratePhysics(1.0, a, 0);
+    assert(approxEq(a.pos.y, 8.0), "frame 2 pos.y == 8.0 (continues linearly)");
+  }
+
+  // Test 2: physics integrator — hSpeed projects via yaw.
+  console.log("\n[rom.selfcheck] physics.integratePhysics — hSpeed × cos/sin(yaw):");
+  {
+    const a = createRomActor();
+    a.hSpeed = 10.0;
+    a.hDecel = 0;
+    a.gravityCoeff = 0;
+    a.timescale = 1;
+    a.tierScale = 1;
+    a.dt = 1;
+    a.maxFall = -9999;
+    integratePhysics(1.0, a, 0); // yaw 0 BAM = facing +Z
+    assert(approxEq(a.pos.z, 10.0), "yaw 0 → pos.z += 10 (cos×hSpeed)");
+    assert(approxEq(a.pos.x, 0.0), "yaw 0 → pos.x unchanged (sin=0)");
+  }
+
+  // Integration seam: two battle runtimes keep independent floor behavior.
+  console.log("\n[rom.selfcheck] battle runtime — floor behavior is instance-local:");
+  {
+    const makeRuntime = (uid: string) => ({ uid, borgId: "pl0000", team: 0 }) as BorgRuntime;
+    const makeBattleRuntime = (floorY: number): RomBattleRuntime => ({
+      floor: {
+        bounds: { minX: -100, maxX: 100, minZ: -100, maxZ: 100 },
+        isSupported: () => true,
+        clampToGround: (pos, velY) => pos.y <= floorY
+          ? { y: floorY, velY: 0, grounded: true }
+          : { y: pos.y, velY, grounded: false },
+      },
+      allocateResource: () => true,
+      spawnProjectile: () => {},
+      resolveHit: () => {},
+    });
+    const low = RomDriverBridge.attachToBattle(makeRuntime("low"), makeBattleRuntime(10));
+    const high = RomDriverBridge.attachToBattle(makeRuntime("high"), makeBattleRuntime(20));
+    assert(low !== null && high !== null, "independent drivers attach through battle runtime seam");
+    if (low && high) {
+      low.actor.pos.y = 0;
+      high.actor.pos.y = 0;
+      integratePhysics(0, low.actor, 0);
+      integratePhysics(0, high.actor, 0);
+      assert(low.actor.pos.y === 10, "first runtime uses its own floor");
+      assert(high.actor.pos.y === 20, "second runtime uses its own floor");
+      low.actor.pos.y = 0;
+      integratePhysics(0, low.actor, 0);
+      assert(low.actor.pos.y === 10, "second attachment does not overwrite first floor");
+    }
+  }
+
+  // Test 3: dispatch — command record cue 44 transitions to state 61 + runs family.
+  console.log("\n[rom.selfcheck] dispatch — cue 44 → state 61 → rootAction:");
+  {
+    const a = createRomActor();
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.cueTable[44 * 2 + 1] = 0;
+    let ran = false;
+    a.rootAction = () => {
+      ran = true;
+    };
+    const ok = dispatchCommandRecord(a, { cueId: 44, stateMode: 3, actionIndex: 2, variantIndex: 0 });
+    assert(ok, "dispatchCommandRecord returned true for cue 44");
+    assert(a.fbState === 61, "fbState transitioned to 61 (attack)");
+    assert(a.actionIndex === 2, "actionIndex stamped to 2 (X / air-B)");
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(ran, "rootAction was invoked via state 61");
+  }
+
+  // Test 4: G RED family — phase 0 launch sets the documented impulse.
+  console.log("\n[rom.selfcheck] families/gred — phase 0 launch impulse (Y=+4.0):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = {
+      onArmHit: () => {},
+      onPlayAnim: () => {},
+      onFireChild: () => {},
+    };
+    configureGRedFamily(a, "pl0615", ctx);
+    a.actionIndex = 2;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(approxEq(a.yVel, G_RED_LAUNCH_Y), `yVel == ${G_RED_LAUNCH_Y} (documented launch impulse)`);
+    assert(approxEq(a.hSpeed, 0.0), "hSpeed == 0 (vertical-only launch)");
+    assert(approxEq(a.gravityCoeff, 0.0), "gravityCoeff == 0 (no gravity during launch)");
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced to 1 (air-dash) for next frame");
+  }
+
+  // Test 5: NINJA family — shared-X phase 0 blink-reposition + zeroed launch scalars.
+  console.log("\n[rom.selfcheck] families/ninja — shared-X phase 0 (zz_00ff30c_):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    configureNinjaFamily(a, "pl0000", ctx);
+    assert(a.borgNumber === 0x000, "borgNumber stamped 0x000 (NORMAL NINJA)");
+    a.pos.x = 100; a.pos.z = 0;
+    (a as RomActor & { lockTarget?: { x: number; y: number; z: number } }).lockTarget = { x: 0, y: 0, z: 0 };
+    a.hSpeed = 5; a.yVel = 3;
+    a.actionIndex = 2;
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.fbState = 61;
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    // Reposition: motion = pos − target = (100,0,0); ×0.95; pos += motion → x = 195.
+    assert(approxEq(a.pos.x, 195.0), "pos.x == 195 (blink-away: motion = (pos−target)×0.95 added)");
+    assert(approxEq(a.hSpeed, 0) && approxEq(a.yVel, 0), "launch scalars zeroed (FLOAT_804392b4)");
+    assert(a.fbPhaseSlots[0] === 1, "phase advanced to 1");
+    assert(a.streamSlot === 1, "stream cursor advanced past ground slot 0 (+0x6ea++)");
+  }
+
+  // Test 6: NINJA family — phase-1 contact → phase 2 + zz_00715f8_ backflip callback.
+  console.log("\n[rom.selfcheck] families/ninja — on-hit backflip (zz_00715f8_):");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    let familyProj = null as { addr: number; type: number } | null;
+    (ctx as typeof ctx & { onFamilyProjectile?: (actor: RomActor, addr: number, type: number) => void }).onFamilyProjectile =
+      (_a, addr, type) => { familyProj = { addr, type }; };
+    configureNinjaFamily(a, "pl000a", ctx); // SASUKE — same family, shuriken type 3
+    assert(a.borgNumber === 0x00a, "borgNumber stamped 0x00a (SASUKE)");
+    a.actionIndex = 2;
+    a.fbPhaseSlots[0] = 1; // already in phase 1
+    a.heading = 0x4000;
+    a.contactP0 = 1; // the +0x1cef contact byte fired
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "contact advanced phase 1 → 2");
+    assert(approxEq(a.hSpeed, NINJA_X.BACKFLIP_HSPEED), "backflip hSpeed == 10.0 (FLOAT_80437748)");
+    assert(approxEq(a.yVel, NINJA_X.BACKFLIP_YVEL), "backflip yVel == 15.0 (FLOAT_80437768)");
+    assert(approxEq(a.gravityCoeff, NINJA_X.BACKFLIP_GRAVITY), "backflip gravityCoeff == -1.0 (FLOAT_804376e0)");
+    assert(a.lockYaw === ((0x4000 - 0x8000) & 0xffff), "lockYaw flipped 180° (+0x5ae = +0x72 − 0x8000)");
+    assert(familyProj !== null && familyProj!.addr === NINJA_X.SHURIKEN_SPAWNER_ADDR && familyProj!.type === 3,
+      "SASUKE shuriken spawn requested via zz_007db5c_ type 3");
+  }
+
+  // Test 7: bridge — pl0000 registry attach dispatches cue 44 AND cue 45 to state 61.
+  console.log("\n[rom.selfcheck] bridge — ninja family cue table (0x802d3ff8 rows 44/45):");
+  {
+    const runtime = { borgId: "pl0000", team: 0, uid: "t", pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 }, rotY: 0, grounded: true, cooldowns: {} } as unknown as BorgRuntime;
+    const bridge = RomDriverBridge.attach(runtime, { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} });
+    assert(bridge !== null, "RomDriverBridge attaches for pl0000 (family registered)");
+    if (bridge) {
+      const t = bridge.actor.cueTable!;
+      assert(t[44 * 2] === 61 && t[45 * 2] === 61, "cue rows 44 AND 45 → full-body state 61");
+      assert(t[5 * 2] === 6 && t[8 * 2] === 9, "family-0 deltas vs G RED (cue 5→6, cue 8→9)");
+      assert(bridge.actor.rootAction !== null, "ninja rootAction configured");
+    }
+  }
+
+  // Test 7b: DEATH BORG ALPHA II — shared-X third family (verified Wave-A config dig).
+  console.log("\n[rom.selfcheck] families/death-borg — on-hit pop + type-5 shot (zz_01a0458_):");
+  {
+    const a = createRomActor();
+    let proj = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & { onFamilyProjectile?: (x: RomActor, addr: number, type: number) => void } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { proj = { addr, type }; },
+    };
+    configureDeathBorgFamily(a, "pl000c", ctx);
+    assert(a.borgNumber === 0x00c, "borgNumber stamped 0x00c (DEATH BORG ALPHA II)");
+    a.actionIndex = 2;
+    a.fbPhaseSlots[0] = 1;
+    a.heading = 0x2000;
+    a.contactP0 = 1;
+    a.rootAction!(a);
+    assert(a.fbPhaseSlots[0] === 2, "contact advanced phase 1 → 2 (shared machine)");
+    assert(approxEq(a.hSpeed, 10.0) && approxEq(a.yVel, 15.0) && approxEq(a.gravityCoeff, -1.0),
+      "pop constants 10/15/−1 (FLOAT_8043b51c/_8043b538/_8043b4cc)");
+    assert(proj !== null && proj!.type === 5, "type-5 shot requested (record 5 @0x802d6e80, borg-0xc gated)");
+    const bridgeCue = cueTableForBorg("pl000c");
+    assert(bridgeCue !== null && bridgeCue[44 * 2] === 61, "pl000c cue 44 → state 61 (data-driven table)");
+  }
+
+  // Test 8: shared melee lunge (zz_00fed6c_) — phase flow + dash-speed formula.
+  console.log("\n[rom.selfcheck] shared-melee-lunge — dash speed max(range,dist)/frames:");
+  {
+    const a = createRomActor();
+    const ctx: GRedFamilyCtx = { onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {} };
+    const lunge = createSharedMeleeLunge(NINJA_LUNGE_CONFIG, ctx);
+    (a as RomActor & { lockTarget?: { x: number; y: number; z: number } }).lockTarget = { x: 0, y: 0, z: 400 };
+    lunge(a); // phase 0
+    assert(a.fbPhaseSlots[0] === 1, "phase 0 → 1 (aim)");
+    assert(a.streamSlot === NINJA_LUNGE_CONFIG.slotBase + 1, "stream cursor = slotBase+1 (+0x6ea++)");
+    lunge(a); // phase 1 → dash (facing instant with target)
+    assert(a.fbPhaseSlots[0] === 2, "phase 1 → 2 (dash)");
+    assert(approxEq(a.hSpeed, 400 / 20), "dash speed == max(150, 400)/20 = 20 (zz_00ff1ec_)");
+    // Close the distance → in-range transition to phase 3.
+    a.pos.z = 300; // dist 100 < range 150
+    lunge(a);
+    assert(a.fbPhaseSlots[0] === 3, "phase 2 → 3 when dist < range (FUN_800668cc gate)");
+    // B-retap → combo loop back to phase 2 with the next slot.
+    (a as RomActor & { bRetapInput?: boolean }).bRetapInput = true;
+    a.handlerTimer = 0;
+    const slotBefore = a.streamSlot;
+    lunge(a);
+    assert(a.fbPhaseSlots[0] === 2, "phase 3 retap → loop back to 2 (+0x540--)");
+    assert(a.streamSlot === slotBefore + 1, "combo loop advanced the stream cursor");
+  }
+
+  // Test 9: ninja B-combo machine A — swing bookkeeping + kunai throw.
+  console.log("\n[rom.selfcheck] families/ninja — B-combo (FUN_8006fb44) swing + kunai:");
+  {
+    const a = createRomActor();
+    let kunai = null as { addr: number; type: number } | null;
+    const ctx: GRedFamilyCtx & { onFamilyProjectile?: (x: RomActor, addr: number, type: number) => void } = {
+      onArmHit: () => {}, onPlayAnim: () => {}, onFireChild: () => {},
+      onFamilyProjectile: (_a, addr, type) => { kunai = { addr, type }; },
+    };
+    configureNinjaFamily(a, "pl0000", ctx);
+    a.actionIndex = 0

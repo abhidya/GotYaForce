@@ -1,0 +1,1216 @@
+Implement this single original GG4E execution unit in GotYaForce.
+
+Original evidence is authoritative. Do not invent missing transitions, constants, timers,
+or ownership. Preserve unrelated behavior. Make the smallest production change that closes
+a concrete destination gap and add/update a focused test only when needed.
+
+Return exactly one JSON object matching the supplied schema. For action="edit", `diff`
+must be a plain bounded unified diff with `diff --git`, `---`, `+++`, and exact context.
+Never return complete file contents, Markdown fences, placeholders, generated reports,
+shell commands, or edits outside apps/game, packages, and scripts.
+
+Unit evidence:
+{
+  "unit_id": "state-machine-80091ab0",
+  "kind": "state_dispatcher",
+  "root_addresses": [
+    "0x80091ab0"
+  ],
+  "state_field": {
+    "offset": "0x581",
+    "width": 1,
+    "signedness": "signed"
+  },
+  "function_pointer_tables": [
+    {
+      "address": "0x802db448",
+      "dispatcher_address": "0x80091ab0",
+      "state_field": {
+        "offset": "0x581",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x802db448",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x802db44c",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 2,
+          "entry_address": "0x802db450",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 3,
+          "entry_address": "0x802db454",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 4,
+          "entry_address": "0x802db458",
+          "handler_address": "0x80091aec",
+          "function_name": "FUN_80091aec",
+          "raw_bytes": "80091aec"
+        }
+      ]
+    },
+    {
+      "address": "0x80433970",
+      "dispatcher_address": "0x80091e34",
+      "state_field": {
+        "offset": "0x545",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x80433970",
+          "handler_address": "0x80091ec4",
+          "function_name": "FUN_80091ec4",
+          "raw_bytes": "80091ec4"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x80433974",
+          "handler_address": "0x80091f08",
+          "function_name": "FUN_80091f08",
+          "raw_bytes": "80091f08"
+        }
+      ]
+    },
+    {
+      "address": "0x802db45c",
+      "dispatcher_address": "0x80091aec",
+      "state_field": {
+        "offset": "0x544",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x802db45c",
+          "handler_address": "0x80091b34",
+          "function_name": "FUN_80091b34",
+          "raw_bytes": "80091b34"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x802db460",
+          "handler_address": "0x80091c34",
+          "function_name": "FUN_80091c34",
+          "raw_bytes": "80091c34"
+        },
+        {
+          "index": 2,
+          "entry_address": "0x802db464",
+          "handler_address": "0x80091d00",
+          "function_name": "FUN_80091d00",
+          "raw_bytes": "80091d00"
+        }
+      ]
+    }
+  ],
+  "handlers": [
+    {
+      "address": "0x80091e34",
+      "name": "zz_0091e34_",
+      "decompile": "\r\nvoid zz_0091e34_(int param_1)\r\n\r\n{\r\n  zz_0092480_();\r\n  (*(code *)(&PTR_FUN_80433970)[*(char *)(param_1 + 0x545)])(param_1);\r\n  (*(code *)(&PTR_FUN_80433968)[*(char *)(param_1 + 0x544)])(param_1);\r\n  (*(code *)(&PTR_FUN_802db468)[*(char *)(param_1 + 0x540)])(param_1);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 5] [Showing: 1-5]",
+        "From 80091b68 in FUN_80091b34 [UNCONDITIONAL_CALL]",
+        "From 802db448 [DATA]",
+        "From 802db44c [DATA]",
+        "From 802db450 [DATA]",
+        "From 802db454 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ]
+    },
+    {
+      "address": "0x80091aec",
+      "name": "FUN_80091aec",
+      "decompile": "\r\nvoid FUN_80091aec(int param_1)\r\n\r\n{\r\n  *(short *)(param_1 + 0x18da) = *(short *)(param_1 + 0x18da) >> 1;\r\n  (*(code *)(&PTR_FUN_802db45c)[*(char *)(param_1 + 0x544)])();\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 802db458 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ]
+    },
+    {
+      "address": "0x80091ec4",
+      "name": "FUN_80091ec4",
+      "decompile": "\r\nvoid FUN_80091ec4(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  dVar1 = (double)FLOAT_80437c84;\r\n  *(char *)(param_1 + 0x545) = *(char *)(param_1 + 0x545) + '\\x01';\r\n  zz_004beb8_(dVar1,param_1,4,2,0x1a,4,2);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 80433970 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ]
+    },
+    {
+      "address": "0x80091f08",
+      "name": "FUN_80091f08",
+      "decompile": "\r\nvoid FUN_80091f08(undefined4 param_1)\r\n\r\n{\r\n  zz_004cd24_(param_1,4);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 80433974 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ]
+    },
+    {
+      "address": "0x80091b34",
+      "name": "FUN_80091b34",
+      "decompile": "\r\nvoid FUN_80091b34(int param_1)\r\n\r\n{\r\n  float fVar1;\r\n  \r\n  fVar1 = FLOAT_80437c80;\r\n  if ((*(char *)(param_1 + 0x7ce) == '\\x0f') || (*(char *)(param_1 + 0x7ce) == '\\x10')) {\r\n    *(undefined4 *)(param_1 + 0x44) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x58);\r\n    *(undefined4 *)(param_1 + 0x4c) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x5c);\r\n    *(float *)(param_1 + 0x48) = fVar1;\r\n    *(undefined4 *)(param_1 + 0x50) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x70);\r\n    zz_0091dc0_(param_1);\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  else {\r\n    *(undefined1 *)(param_1 + 0x581) = 2;\r\n    zz_0091e34_();\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 802db45c [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ]
+    },
+    {
+      "address": "0x80091c34",
+      "name": "FUN_80091c34",
+      "decompile": "\r\nvoid FUN_80091c34(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(char *)(param_1 + 0x1cee) == '\\0') && (FLOAT_80437c80 < *(float *)(param_1 + 0x558))) {\r\n    *(float *)(param_1 + 0x558) = *(float *)(param_1 + 0x558) - *(float *)(param_1 + 0x1dc8);\r\n    return;\r\n  }\r\n  if (*(char *)(param_1 + 0x6ec) < '\\x01') {\r\n    dVar1 = (double)FLOAT_80437c84;\r\n    *(char *)(param_1 + 0x544) = *(char *)(param_1 + 0x544) + '\\x01';\r\n    zz_004beb8_(dVar1,param_1,1,2,0x11,0xffffffff,0xffffffff);\r\n  }\r\n  else {\r\n    zz_0092534_(param_1);\r\n    zz_004beb8_((double)FLOAT_80437c84,param_1,1,2,0x10,0xffffffff,0xffffffff);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 0] [Showing: 0 items - offset 0 exceeds total]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ]
+    },
+    {
+      "address": "0x80091d00",
+      "name": "FUN_80091d00",
+      "decompile": "\r\nvoid FUN_80091d00(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(uint *)(param_1 + 0x5d4) & 0x20) == 0) {\r\n    if (*(char *)(param_1 + 0x1cee) != '\\0') {\r\n      *(undefined1 *)(param_1 + 0x73f) = 0;\r\n      *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\r\n      zz_006a6fc_(param_1,0x10);\r\n      dVar1 = (double)FLOAT_80437c88;\r\n      *(undefined1 *)(param_1 + 0x540) = 1;\r\n      zz_004beb8_(dVar1,param_1,1,0,0xb,0xffffffff,0xffffffff);\r\n      zz_006a750_(param_1,0x10);\r\n      *(undefined1 *)(param_1 + 0x544) = 2;\r\n      *(undefined1 *)(param_1 + 0x588) = 1;\r\n    }\r\n  }\r\n  else {\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 0] [Showing: 0 items - offset 0 exceeds total]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "handler_address": "0x80091ec4",
+      "state_offset": "0x545",
+      "expression": "*(char *)(param_1 + 0x545) + '\\x01'",
+      "to_value": null,
+      "evidence": "*(char *)(param_1 + 0x545) = *(char *)(param_1 + 0x545) + '\\x01';",
+      "confidence": "derived"
+    },
+    {
+      "handler_address": "0x80091c34",
+      "state_offset": "0x544",
+      "expression": "*(char *)(param_1 + 0x544) + '\\x01'",
+      "to_value": null,
+      "evidence": "*(char *)(param_1 + 0x544) = *(char *)(param_1 + 0x544) + '\\x01';",
+      "confidence": "derived"
+    },
+    {
+      "handler_address": "0x80091d00",
+      "state_offset": "0x544",
+      "expression": "2",
+      "to_value": "2",
+      "evidence": "*(undefined1 *)(param_1 + 0x544) = 2;",
+      "confidence": "derived"
+    }
+  ],
+  "callers": [
+    "[Total: 1] [Showing: 1-1]",
+    "From 802db43c [DATA]"
+  ],
+  "callees": [
+    "[Total: 1] [Showing: 1-1]",
+    "To Stack[-0x10] [WRITE]"
+  ],
+  "destination_gap": {
+    "borg_id": "pl0a00",
+    "name": "Wing Soldier",
+    "constructor_address": "0x80091824",
+    "action_index": 0,
+    "status": "missing",
+    "members": [
+      "pl0a00"
+    ],
+    "implementation_members": [],
+    "move_properties": [
+      {
+        "name": "Arrow Shot",
+        "button": "B Shot",
+        "flair": null,
+        "solidity": "nonsolid",
+        "penetration": "none",
+        "refill": "all_at_once",
+        "explodes": false,
+        "ammo": {
+          "lv1": 10,
+          "lv10": null
+        },
+        "effect": null
+      },
+      {
+        "name": "Wing Sword",
+        "button": "B Attack",
+        "flair": null,
+        "solidity": "nonsolid",
+        "penetration": null,
+        "refill": null,
+        "explodes": null,
+        "ammo": null,
+        "effect": null
+      },
+      {
+        "name": "Fly",
+        "button": "X",
+        "flair": null,
+        "solidity": null,
+        "penetration": null,
+        "refill": null,
+        "explodes": null,
+        "ammo": null,
+        "effect": null
+      }
+    ],
+    "rom_action": {
+      "handler": "0x80091ab0",
+      "variantTable": "0x802db448",
+      "variants": {
+        "0": {
+          "leaf": "0x80091e34",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": null,
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db270",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=0; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)"
+        },
+        "1": {
+          "leaf": "0x80091e34",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": null,
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db280",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=1; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)"
+        },
+        "2": {
+          "leaf": "0x80091e34",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": null,
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db290",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=2; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)"
+        },
+        "3": {
+          "leaf": "0x80091e34",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": null,
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db2a0",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=3; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)"
+        },
+        "4": {
+          "leaf": "0x80091aec",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": [
+            {
+              "flags": {},
+              "group": 2,
+              "slot": 26
+            },
+            {
+              "flags": {
+                "0x40": 0
+              },
+              "group": 2,
+              "slot": 4294967295
+            }
+          ],
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db2b0",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=4; stream call(s): 0x80091ef4(m0x4,g2,s26,->v2) 0x80092314(m0x2,g2,snull,->v2) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0,->v2) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0,->v2)"
+        }
+      }
+    },
+    "audit_evidence": [
+      "pl0a00: command 0x802db270 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db274 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db278 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db27c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db280 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db284 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db288 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db28c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db290 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db294 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db298 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db29c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2a0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2a4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2a8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2ac (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2b0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2b4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2b8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2bc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2c0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2c4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2c8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2cc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: root 0x80091a74, action table 0x802db43c, handler 0x80091ab0"
+    ]
+  },
+  "existing_destination_code": [
+    "deterministic audit status: missing",
+    "implemented family members: []",
+    "presentation-only asset mapping exists for pl0a00"
+  ],
+  "evidence": [
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db448",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db44c",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db450",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db454",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db458",
+      "detail": "80091aec -> 0x80091aec FUN_80091aec",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x80433970",
+      "detail": "80091ec4 -> 0x80091ec4 FUN_80091ec4",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x80433974",
+      "detail": "80091f08 -> 0x80091f08 FUN_80091f08",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db45c",
+      "detail": "80091b34 -> 0x80091b34 FUN_80091b34",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db460",
+      "detail": "80091c34 -> 0x80091c34 FUN_80091c34",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db464",
+      "detail": "80091d00 -> 0x80091d00 FUN_80091d00",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "destination_audit",
+      "source": "research/decomp/data/family-state-machine-coverage.json:0x80091824:0",
+      "detail": "{\"action_index\": 0, \"audit_evidence\": [\"pl0a00: command 0x802db270 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db274 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db278 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db27c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db280 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db284 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db288 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db28c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db290 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db294 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db298 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db29c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2ac (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2bc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2cc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: root 0x80091a74, action table 0x802db43c, handler 0x80091ab0\"], \"borg_id\": \"pl0a00\", \"constructor_address\": \"0x80091824\", \"implementation_members\": [], \"members\": [\"pl0a00\"], \"move_properties\": [], \"name\": null, \"rom_action\": {\"handler\": \"0x80091ab0\", \"variantTable\": \"0x802db448\", \"variants\": {\"0\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db270\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=0; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"1\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db280\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=1; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"2\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db290\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=2; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"3\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db2a0\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=3; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"4\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": [{\"flags\": {}, \"group\": 2, \"slot\": 26}, {\"flags\": {\"0x40\": 0}, \"group\": 2, \"slot\": 4294967295}], \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db2b0\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=4; stream call(s): 0x80091ef4(m0x4,g2,s26,->v2) 0x80092314(m0x2,g2,snull,->v2) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0,->v2) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0,->v2)\", \"group\": null, \"leaf\": \"0x80091aec\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}}}, \"status\": \"missing\"}",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "destination_audit",
+      "source": "research/decomp/data/family-state-machine-coverage.json:0x80091824:0",
+      "detail": "{\"action_index\": 0, \"audit_evidence\": [\"pl0a00: command 0x802db270 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db274 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db278 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db27c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db280 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db284 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db288 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db28c (user-data/GG4E/disc/sys/boot.dol:0x80091824 cop
+
+Relevant destination source:
+--- packages/combat/src/bridge.ts ---
+// Bridge between the existing @gf/combat `BorgRuntime` (the canonical game state —
+// HP, lock-on, ammo, gauges, status, projectiles, results telemetry) and the ROM
+// `RomActor` runtime (the 1:1 ported state machine). The existing layer stays
+// authoritative for everything EXCEPT the action/motion that a ported ROM family
+// owns; the bridge syncs fields both ways each frame.
+//
+// INTEGRATION (3 lines, minimal surgery on the existing code):
+//   battle.ts  before stepMovement/stepAttacks:
+//     if (b.romDriver?.tick(b, dt, all, ctx)) continue;   // ROM owned this frame
+//   combat.ts  X-special branch, before spawnSpecialProjectiles:
+//     if (b.romDriver?.tryStartXSpecial(b, all, ctx)) return { projectiles: out };
+//
+// BorgRuntime keeps its vec3 `vel` model; RomActor uses the ROM's scalar hSpeed +
+// yVel model. The bridge decomposes/recomposes each sync.
+
+import type { BorgRuntime, PlayerInput, RomFamilyDriver } from "./types.js";
+import type { Vec3 } from "@gf/physics";
+import type { RomActor, RomPhysicsRuntime, RomVisibilityTarget } from "./rom/actor.js";
+import { createRomActor } from "./rom/actor.js";
+import {
+  createRomStateTables,
+  stepRomActor,
+  type StateHandler,
+} from "./rom/state-tables.js";
+import { tickStream } from "./rom/stream-vm.js";
+import {
+  dispatchCommandRecord,
+  dispatchUpperBodyCue,
+  dispatchFullBodyCue,
+} from "./rom/dispatch.js";
+import { configureGRedFamily, type GRedFamilyCtx } from "./families/gred.js";
+import { configureNinjaFamily } from "./families/ninja.js";
+import { configureDeathBorgFamily } from "./families/death-borg.js";
+import { configureClawRobotFamily, configureDeathBorgOmegaFamily } from "./families/shared-aerial-dive-x.js";
+import { configureSamuraiClusterFamily, type SamuraiClusterBorgId } from "./families/samurai.js";
+import { configureGirlClusterFamily, type GirlClusterBorgId } from "./families/girl-cluster.js";
+import { createFamily1Charge3Action, createFamily2Charge3Action } from "./families/shared-charge3.js";
+import {
+  createSharedAimedShotX,
+  TITAN_ROBOT_X_CONFIG,
+  PANTHER_ROBOT_X_CONFIG,
+  createTitanPantherGunAction0,
+  createTitanPantherAction1,
+} from "./families/shared-aimed-shot-x.js";
+import {
+  createSharedMorphXSpecial,
+  TITAN_MORPH_CONFIG,
+  PANTHER_MORPH_CONFIG,
+  VICTORY_MACHINE_MORPH_CONFIG,
+} from "./families/shared-morph-x.js";
+import { configureSatelliteFamily } from "./families/satellite.js";
+import { configureStarHeroFamily } from "./families/star-hero.js";
+import { configureCyberMachineFamily } from "./families/cyber-machine.js";
+import {
+  configureMachineRedFamily,
+  configureMachineBlueFamily,
+  type MachineRedBorgId,
+  type MachineBlueBorgId,
+} from "./families/machine-red-blue.js";
+import { configureDragonFamily } from "./families/dragon.js";
+import { configureCyberDragonFamily } from "./families/cyber-dragon.js";
+import { configureWormFamily } from "./families/worm.js";
+import { configureWireGunnerFamily } from "./families/wire-gunner.js";
+import { configureRobotFamily } from "./families/robot.js";
+import { configureMagnetRobotFamily } from "./families/magnet-robot.js";
+import { configureOmega2Family } from "./families/omega2-robot.js";
+import { configureDrillFamily } from "./families/drill-robot.js";
+import { configureThunderFamily } from "./families/thunder-robot.js";
+import { configureHammerFamily } from "./families/hammer-robot.js";
+import { configureKnightFamily } from "./families/knight-family.js";
+import { configureBeamWingFamily } from "./families/beam-wing.js";
+import { configureEagleJetFamily } from "./families/eagle-jet.js";
+import { configureEagleRobotFamily } from "./families/eagle-robot.js";
+import { createRobotDashHandler, ROBOT_ACTION0_CONFIGS, type RobotDashConfig } from "./families/shared-robot-dash.js";
+import { configureSwordKnightFamily } from "./families/sword-knight.js";
+import { createGenericKnightRootAction } from "./families/shared-knight-melee.js";
+import { configureJellyDiverFamily } from "./families/jelly-diver.js";
+import { configureCopyManFamily } from "./families/copy-man.js";
+import { createMeleeRobot, ROBOT_MELEE_RANGE_ROWS } from "./families/melee-robot.js";
+import { createMeleeSamurai, SAMURAI_MELEE_DEFAULT_CONFIG } from "./families/melee-samurai.js";
+import { configureValkrieFamily } from "./families/valkrie.js";
+import { configureNurseFamily } from "./families/nurse-wizard-idol.js";
+import { configureTankFamily } from "./families/tank-borg.js";
+import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
+import { configureFortressFamily } from "./families/fortress-borg.js";
+import { configureNuFamily } from "./families/death-borg-nu.js";
+import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
+import { HERO_X_BUFF } from "./constants.js";
+import { applyActorParamTierDelta127 } from "./paramTier.js";
+import { createSharedEngineRootAction, DEFAULT_CONFIGS } from "./families/shared-engine.js";
+import { spawnRomProjectile } from "./projectiles.js";
+import { movementPhysicsForBorgId } from "./movementData.js";
+import { sourceStatsForBorgId } from "./sourceBorgStats.js";
+import { tierSizeScale } from "./timescale.js";
+import type { Projectile, ProjectileVisualKind, WeaponCell } from "./types.js";
+import attackHitTablesData from "./data/attackHitTables.json" with { type: "json" };
+import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
+import meleeAnimKindsData from "./data/meleeAnimKinds.json" with { type: "json" };
+import familyCueTablesFullData from "./data/familyCueTablesFull.json" with { type: "json" };
+
+const TAU = Math.PI * 2;
+const BAM_FULL = 0x10000;
+const ACTOR_SIZE_NORMALIZER = 167.75999450683594; // FLOAT_80437620
+/** zz_0068004_: max(data page +0x4c, +0x50) / FLOAT_80437620. The Girl pages
+ * share 9/6 except pl0308 (25/3); values were read directly from pl####data.bin. */
+function girlDescriptorSizeScale(borgId: string): number {
+  if (borgId === "pl0308") return 25 / ACTOR_SIZE_NORMALIZER;
+  return /^pl030[0-9a-d]$/.test(borgId) ? 9 / ACTOR_SIZE_NORMALIZER : 1;
+}
+
+/** An armed hitbox window (from attackHitTables.json, looked up per kind). */
+interface ArmedHit {
+  activeStart: number;
+  activeEnd: number;
+  reach: number;
+  damageRecordIndex: number;
+  /** Uids already struck by this window (one hit per target per window). */
+  struck: Set<string>;
+}
+
+// Lazy-loaded per-borg hit-table data (attackHitTables.json). Loaded once, cached.
+const HIT_TABLES: Record<string, { kinds: Record<string, number[]>; records: Record<string, unknown> }> =
+  (attackHitTablesData as { borgs: Record<string, { kinds: Record<string, number[]>; records: Record<string, unknown> }> }).borgs;
+function hitTablesFor(borgId: string): { kinds: Record<string, number[]>; records: Record<string, unknown> } | null {
+  return HIT_TABLES[borgId] ?? null;
+}
+
+// --- Pre-decoded stream events (meleeAnimKinds.json) ---
+// The stream banks' bytecode is already decoded into frame-keyed events by
+// scripts/gen-melee-anim-kinds.mjs. The bridge plays these back directly, bypassing
+// the raw bytecode walker when familyStreamBank is null (which it is for all families
+// until the bank-byte extractor lands). This gives every family working anim + hitbox
+// arming from the ALREADY-DECODED data.
+
+interface StreamEvent {
+  op: string;
+  frame?: number;
+  kind?: number;
+  statusId?: number;
+  statusArg?: number;
+  group?: number;
+  slot?: number;
+  mode?: number;
+  blend?: boolean;
+  part?: number;
+  state?: number;
+  aux?: number;
+  variant?: number;
+}
+
+const ACTION_STREAM_DATA = actionStreamTablesData as unknown as {
+  borgs: Record<string, {
+    actions?: Record<string, {
+      variants?: Record<string, { bank?: string } | undefined>;
+    }>;
+  }>;
+};
+
+const ACTION_STREAM_BANKS: Record<string, { bank: string; group: number; seedSlot: number } | undefined> = (() => {
+  const data = actionStreamTablesData as unknown as { borgs: Record<string, { actions: Record<string, { variants: Record<string, { bank:
+
+--- packages/combat/src/families/shared-engine.ts ---
+// Shared attack engines — port of zz_0177dd8_ (standard melee, chunk_0044.c:3001) and
+// zz_0178394_ (lunge/dash-attack, chunk_0044.c:3206). These are the GENERIC
+// config-struct-driven engines that the MAJORITY of the roster's variant functions
+// tail-call (the `lis r4, ...; addi r4, r4, ...; bl 0x80177dd8` pattern documented
+// in cue-script-stream-decode §3).
+//
+// Once ported, any family whose variant functions use these engines gets real
+// ROM-driven attacks by just providing the config struct data — no per-family code.
+
+import type { RomActor } from "../rom/actor.js";
+import { integratePhysics, vecSubtract, vecScale, vecAdd } from "../rom/physics.js";
+import { startStream, tickStream, type StreamContext } from "../rom/stream-vm.js";
+import { dispatchUpperBodyCue } from "../rom/dispatch.js";
+import { romAirKnockoutReturn, romGroundIdleReturn } from "./shared-idle-return.js";
+
+const ENG = {
+  STREAM_RATE: -1.0,
+  TIMER_FLOOR: 0.0,
+  MELEE_TIMER: 60.0,
+  LUNGE_TIMER: 30.0,
+  EXTRA_VEL: 0.5,
+  LUNGE_VEL_MULT: 0.0625,
+} as const;
+
+/**
+ * Port of `zz_01782dc_` — the forward-dash velocity setter. Shared by this file's
+ * lunge/melee machines AND the more faithful B-close port in shared-melee-gred.ts.
+ * Takes timerFrames directly so callers don't have to synthesize a full config. */
+export function computeLungeSpeed(actor: RomActor, timerFrames: number): void {
+  if (timerFrames > 0) {
+    const row = ((actor.prevActionIndex % 3) + 3) % 3;
+    actor.hSpeed = actor.actionSpeedRows[row]! / timerFrames;
+  }
+}
+
+/** The config struct that each family's variant function loads into r4 before
+ *  tail-calling the shared engine. Layout matches the ROM's struct at the address
+ *  the `lis+addi` pair computes. */
+export interface SharedEngineConfig {
+  /** +0x0: seed slot byte — the first stream slot to play (config[0] → +0x6ea).
+   *  Combo follow-ups increment this. */
+  seedSlot: number;
+  /** +0x4: float — proximity/velocity parameter passed to FUN_800668cc (the "is
+   *  target in range" check that gates the active-frame advance). */
+  proximityRange: number;
+  /** +0x8: u32 — timer seed (frames) for the active window. Copied into +0x558
+   *  at phase start; decremented per frame; expiry advances the phase. */
+  timerFrames: number;
+  /** +0xc: float — reposition scale (the lunge engine's "push from target" factor).
+   *  Applied as motion = (pos - target) × scale; pos += motion (same pattern as
+   *  G RED's G Crash). 0 = no repositioning (standard melee). */
+  repositionScale: number;
+  /** +0x10: chain callback — called when the combo-continue condition is met
+   *  (+0x1cf0 & +0x746 & +0x745). Re-issues a command via zz_006a3d0_. */
+  chainCallback?: (actor: RomActor) => void;
+  /** +0x14: alt chain callback — called when +0x1dd & 0x80 and not +0x745. */
+  altChainCallback?: (actor: RomActor) => void;
+  /** zz_0178394 config +0x10: phase-2 launch velocity magnitude. */
+  launchVelocity?: number;
+  /** zz_0178394 config +0x14: scale applied to all four velocity scalars on P2->P3. */
+  transitionScale?: number;
+  /** zz_0178394 config +0x18: zz_006ed8c_ damping used in phases 3 and 4. */
+  recoveryDamping?: number;
+  /** zz_0178394 config s16 +0x0a: phase-3 timer seed. */
+  recoveryFrames?: number;
+}
+
+/** Per-action config set: one config per actionIndex entry. The rootAction
+ *  dispatcher reads +0x580 and dispatches to the matching engine + config. */
+export interface SharedEngineActionTable {
+  /** actionIndex 0: dash attack (uses the lunge engine). */
+  dash?: SharedEngineConfig;
+  /** actionIndex 1: B melee (uses the standard melee engine). */
+  bMelee?: SharedEngineConfig;
+  /** actionIndex 2: X / air-B (uses the lunge engine for rush attacks, or null
+   *  to defer to a custom family handler like G RED's). */
+  xSpecial?: SharedEngineConfig | null;
+  /** actionIndex 3: B charge (uses the charge engine). */
+  bCharge?: SharedEngineConfig;
+}
+
+// ============================================================================
+// Standard melee engine (zz_0177dd8_) — group-3 stream + timer-gated active window.
+// ============================================================================
+
+/** Build the 4-phase table for the standard melee engine. */
+function createMeleePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: StreamContext) => void> {
+  return [
+    // Phase 0: setup (FUN_80177e28) — start stream, set timer.
+    (actor, ctx) => {
+      actor.fbPhaseSlots[0]++;
+      actor.streamSlot = cfg.seedSlot;
+      // Air-check + yaw snapshot (FUN_80066838 — stubbed: always grounded path).
+      actor.activeYaw = actor.heading;
+      actor.lockYaw = actor.heading;
+      // Start stream group 3 (melee strikes), slot = seedSlot.
+      const slot = actor.streamSlot;
+      startStream(actor, 0xf, 3, slot, ENG.STREAM_RATE);
+      actor.streamSlot = slot + 1; // combo follow-up ++ (+0x6ea)
+      actor.handlerTimer = ENG.MELEE_TIMER;
+      void ctx;
+    },
+    // Phase 1: pre-active tick (FUN_80177f10) — tick stream, timer--, on 0 → phase 2.
+    //   Calls zz_01782dc_ at the transition to set the forward-dash velocity.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      actor.handlerTimer -= actor.dt;
+      if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
+        actor.fbPhaseSlots[0]++;
+        actor.handlerTimer = cfg.timerFrames;
+        computeLungeSpeed(actor, cfg.timerFrames); // ← zz_01782dc_: set forward-dash hSpeed
+      }
+    },
+    // Phase 2: active frames (FUN_80177fd4) — tick + yaw-only physics + contact check.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      // Yaw-only physics (zz_00670dc_ = no gravity, just hSpeed projection).
+      integratePhysics(0, actor, actor.activeYaw); // gravity=0 → yaw-only XZ movement
+      actor.handlerTimer -= actor.dt;
+      if (actor.handlerTimer <= ENG.TIMER_FLOOR) {
+        actor.fbPhaseSlots[0]++;
+      }
+    },
+    // Phase 3: combo/recovery (FUN_801780e4) — tick, combo check, restart or end.
+    (actor, ctx) => {
+      tickStream(actor, 0xf, ctx);
+      integratePhysics(0, actor, actor.activeYaw);
+      // Combo check: if contact flag set and combo window open, restart at phase 2.
+      const combo = actor as RomActor & { comboFlag?: number };
+      if (actor.contactP0 > 0 && (combo.comboFlag ?? 0) > 0) {
+        if (cfg.chainCallback) {
+          cfg.chainCallback(actor);
+          return;
+        }
+        // Default: replay the stream at the next slot (combo follow-up).
+        actor.fbPhaseSlots[0] = 2;
+        actor.handlerTimer = cfg.timerFrames;
+        startStream(actor, 0xf, 3, actor.streamSlot, ENG.STREAM_RATE);
+        actor.streamSlot++;
+      } else {
+        // Recovery: return to idle — real zz_006a474_ call (FUN_801780e4 wall/stream
+        // end, chunk_0044.c:3172; decomp-verified helper — the old full-0 + upper-6
+        // mapping was refuted).
+        actor.controlWord = actor.controlWord & ~0x3;
+        romGroundIdleReturn(actor);
+      }
+    },
+  ];
+}
+
+// ============================================================================
+// Lunge / dash-attack engine (zz_0178394_) — zero velocity + reposition + stream.
+// ============================================================================
+
+function createLungePhases(cfg: SharedEngineConfig): Array<(a: RomActor, ctx: StreamContext) => void> {
+  const scratch = (actor: RomActor) => actor as RomActor & {
+    lockTarget?: { x: number; y: number; z: number } | null;
+    grounded?: boolean;
+    streamTickGate?: boolean;
+    aimPitch54e?: number;
+  };
+  const damp = (actor: RomActor, factor: number) => {
+    const amount = (1 - factor) * actor.dt;
+    actor.hSpeed -= actor.hSpeed * amount;
+    actor.yVel -= actor.yVel * amount;
+  };
+  return [
+    // Phase 0: setup (zz_01783e4_) — zero velocity, reposition from target, start stream.
+    (actor, ctx) => {
+      actor.fbPhaseSlots[0]++;
+      actor.handlerTimer = ENG.LUNGE_TIMER; // FLOAT_8043ae00 = 30
+      // Zero the velocity scalars (the lunge starts from 
+
+--- packages/combat/src/families/wave-b-catch-all.ts ---
+// Wave-B catch-all family module
+// Provides lightweight family registrations for borgs that share common ROM engines
+// but lack dedicated family files. Covers: Gun Borg (pl0100/0108), Ninja (pl0005/0009),
+// Dragon (pl0504/0510/0502/050e), Knight (pl0202/020b), Wing (pl0a02/0a07/0a04/0a08/0a09),
+// Death Borg (pl0105/010a/0a05/0a0a), and Air/Death (pl0d06/0d07/0505/0511).
+
+import type { RomActor } from "../rom/actor.js";
+import type { StreamContext } from "../rom/stream-vm.js";
+import { createSharedXSpecial, type SharedXConfig } from "./shared-x-special.js";
+
+// ------------------------------------------------------------------
+// Per-borg X config (groundSlot, airSlot, hasX) derived from actionStreamTables.json
+// ------------------------------------------------------------------
+
+interface BorgConfig {
+  hasX: boolean;
+  groundSlot: number | null;
+  airSlot: number | null;
+}
+
+const BORG_CONFIGS = {
+  // Gun Borg — shared engine fallback (no decoded group-4 stream)
+  pl0100: { hasX: false, groundSlot: null, airSlot: null },
+  pl0108: { hasX: false, groundSlot: null, airSlot: null },
+  // Ninja — some have X streams
+  pl0005: { hasX: false, groundSlot: null, airSlot: null },
+  pl0009: { hasX: true, groundSlot: 4, airSlot: 4 },
+  // Dragon
+  pl0504: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0510: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0502: { hasX: false, groundSlot: null, airSlot: null },
+  pl050e: { hasX: false, groundSlot: null, airSlot: null },
+  pl0505: { hasX: false, groundSlot: null, airSlot: null },
+  pl0511: { hasX: false, groundSlot: null, airSlot: null },
+  // Knight
+  pl0202: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl020b: { hasX: true, groundSlot: 2, airSlot: 2 },
+  // Wing
+  pl0a02: { hasX: false, groundSlot: null, airSlot: null },
+  pl0a07: { hasX: false, groundSlot: null, airSlot: null },
+  pl0a04: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0a08: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0a09: { hasX: true, groundSlot: 0, airSlot: 0 },
+  // Death Borg misc
+  pl0105: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl010a: { hasX: true, groundSlot: 0, airSlot: 0 },
+  pl0a05: { hasX: false, groundSlot: null, airSlot: null },
+  pl0a0a: { hasX: false, groundSlot: null, airSlot: null },
+  // Air/Death misc
+  pl0d06: { hasX: false, groundSlot: null, airSlot: null },
+  pl0d07: { hasX: false, groundSlot: null, airSlot: null },
+} as const satisfies Record<string, BorgConfig>;
+
+const BORG_NUMBERS: Record<string, number> = {
+  pl0100: 0x100, pl0108: 0x108,
+  pl0005: 0x005, pl0009: 0x009, pl0504: 0x504, pl0510: 0x510,
+  pl0502: 0x502, pl050e: 0x50e, pl0202: 0x202, pl020b: 0x20b,
+  pl0a02: 0xa02, pl0a07: 0xa07, pl0a04: 0xa04, pl0a08: 0xa08,
+  pl0a09: 0xa09, pl0105: 0x105, pl010a: 0x10a, pl0a05: 0xa05,
+  pl0a0a: 0xa0a, pl0d06: 0xd06, pl0d07: 0xd07, pl0505: 0x505,
+  pl0511: 0x511,
+};
+
+export type WaveBBorgId = keyof typeof BORG_CONFIGS;
+
+function onHitFallBack(actor: RomActor, ctx: StreamContext): void {
+  // Generic fallback on-hit: small backflip
+  actor.lockYaw = (actor.heading - 0x8000) & 0xffff;
+  actor.activeYaw = actor.lockYaw;
+  actor.hSpeed = 8.0;
+  actor.hDecel = 0.0;
+  actor.yVel = 10.0;
+  actor.gravityCoeff = -0.6;
+  void ctx;
+}
+
+export function createWaveBRootAction(borgId: WaveBBorgId, ctx: StreamContext): (actor: RomActor) => void {
+  const cfg: BorgConfig = BORG_CONFIGS[borgId];
+  if (!cfg.hasX || cfg.groundSlot === null) {
+    // No X stream — generic combat layer owns all actions
+    return () => {};
+  }
+  const xConfig: SharedXConfig = {
+    groundSlot: cfg.groundSlot,
+    airSlot: cfg.airSlot ?? cfg.groundSlot,
+    onHit: onHitFallBack,
+  };
+  const xHandler = createSharedXSpecial(xConfig, ctx);
+  return (actor: RomActor) => {
+    if (actor.actionIndex === 2) xHandler(actor);
+  };
+}
+
+export function configureWaveBFamily(actor: RomActor, borgId: WaveBBorgId, ctx: StreamContext): void {
+  actor.borgNumber = BORG_NUMBERS[borgId] ?? 0;
+  actor.rootAction = createWaveBRootAction(borgId, ctx);
+  actor.defaultGroup = 0;
+  actor.streamSlot = 0;
+}
+
+
+--- packages/combat/src/rom/rom.selfcheck.ts ---
+// Selfcheck for the ROM-faithful actor runtime foundation.
+// Run: pnpm build (combat) then node scripts/run-rom-tests.mjs
+//
+// Verifies the three foundation pieces compose correctly:
+//  1. physics.integratePhysics reproduces the ROM's scalar-speed integration
+//  2. dispatch.dispatchCommandRecord transitions state 61 → rootAction
+//  3. The G RED family's phase-0 launch produces the documented upward impulse (Y=+4.0)
+
+import { createRomActor, type RomActor } from "./actor.js";
+import { groundClamp, integratePhysics } from "./physics.js";
+import { dispatchCommandRecord, createDefaultStateTable, stepActor } from "./dispatch.js";
+import { configureGRedFamily, type GRedFamilyCtx } from "../families/gred.js";
+import { createGRedDash, GRED_DASH } from "../families/gred-dash.js";
+import { configureNinjaFamily, NINJA_X } from "../families/ninja.js";
+import { configureStarHeroFamily } from "../families/star-hero.js";
+import { configureCyberMachineFamily, type CyberMachineFamilyCtx } from "../families/cyber-machine.js";
+import { configureSwordKnightFamily } from "../families/sword-knight.js";
+import { configureDragonFamily, DRAGON_X } from "../families/dragon.js";
+import { configureCyberDragonFamily, CYBER_DRAGON_X } from "../families/cyber-dragon.js";
+import { configureWormFamily, WORM_X } from "../families/worm.js";
+import { configureWireGunnerFamily, WIRE_GUNNER_X } from "../families/wire-gunner.js";
+import { createSharedMeleeLunge, NINJA_LUNGE_CONFIG } from "../families/shared-melee-lunge.js";
+import {
+  createSharedMeleeGRed,
+  GRED_MELEE_CONFIG,
+  SHARED_MELEE_GRED,
+  type SharedMeleeGRedConfig,
+} from "../families/shared-melee-gred.js";
+import {
+  createSharedCharge,
+  GRED_CHARGE_CONFIG,
+  SHARED_CHARGE,
+  type SharedChargeConfig,
+} from "../families/shared-charge.js";
+import {
+  configureValkrieFamily,
+  VALKRIE,
+  VALKRIE_SPAWNERS,
+  type ValkrieFamilyCtx,
+} from "../families/valkrie.js";
+import {
+  configureSamuraiClusterFamily,
+  SAMURAI,
+  SAMURAI_SPAWNERS,
+  SAMURAI_LUNGE_ROM_CONFIG,
+  type SamuraiFamilyCtx,
+} from "../families/samurai.js";
+import { createRomStateTables, stepRomActor } from "./state-tables.js";
+import type { StreamContext } from "./stream-vm.js";
+import { RomDriverBridge, cueTableForBorg, type RomBattleRuntime } from "../bridge.js";
+import { configureDeathBorgFamily } from "../families/death-borg.js";
+import {
+  configureEagleJetFamily,
+  EAGLE_JET_ACTION1,
+  type EagleJetScratch,
+} from "../families/eagle-jet.js";
+import {
+  createMeleeRobot,
+  MELEE_ROBOT,
+  ROBOT_MELEE_RANGE_ROWS,
+} from "../families/melee-robot.js";
+import {
+  createRobotDashHandler,
+  ROBOT_ACTION0_CONFIGS,
+  ROBOT_DASH,
+} from "../families/shared-robot-dash.js";
+import {
+  configureTankFamily,
+  NORMAL_TANK,
+  type NormalTankScratch,
+} from "../families/tank-borg.js";
+import {
+  ARROW_NINJA_ACTION1,
+  configureArrowNinjaFamily,
+  type ArrowNinjaScratch,
+} from "../families/arrow-ninja.js";
+import {
+  configureEagleRobotFamily,
+  EAGLE_ROBOT_ACTION0,
+  type EagleRobotScratch,
+} from "../families/eagle-robot.js";
+import {
+  createSharedAimedShotX,
+  createTitanPantherAction1,
+  createTitanPantherGunAction0,
+  titanRobotXOnSteer,
+  TITAN_ROBOT_X_CONFIG,
+  PANTHER_ROBOT_X_CONFIG,
+} from "../families/shared-aimed-shot-x.js";
+import {
+  createSharedMorphXSpecial,
+  TITAN_MORPH_CONFIG,
+} from "../families/shared-morph-x.js";
+import type { BorgRuntime } from "../types.js";
+import {
+  configureGirlClusterFamily,
+  createGirlSharedX,
+  isGirlClusterLiveSlot,
+  KILLER_SHARED_X_CONFIG,
+  BARRIER_SHARED_X_CONFIG,
+  type GirlClusterBorgId,
+} from "../families/girl-cluster.js";
+import { CYBER_GIRL_X } from "../families/cyber-girl.js";
+import { createSeries3XSpecial, SERIES3_X } from "../families/shared-series3-x.js";
+import {
+  configureMachineRedFamily,
+  configureMachineBlueFamily,
+  MACHINE_RED_ROUTES,
+  MACHINE_BLUE_ROUTES,
+  MACHINE_RED_X,
+  MACHINE_BLUE_DEPLOY,
+  type MachineRedBorgId,
+  type MachineBlueBorgId,
+} from "../families/machine-red-blue.js";
+import {
+  groundSnapRevert,
+  stepAfterimage,
+  stepPartTargetPitch,
+  stepTargetPitch,
+  stepTargetYaw,
+} from "./helpers.js";
+
+const G_RED_LAUNCH_Y = 4.0;
+
+function approxEq(a: number, b: number, eps = 1e-4): boolean {
+  return Math.abs(a - b) <= eps;
+}
+
+let failures = 0;
+function assert(cond: boolean, msg: string): void {
+  if (cond) {
+    console.log(`  ok  ${msg}`);
+  } else {
+    console.error(`  FAIL  ${msg}`);
+    failures++;
+  }
+}
+
+export function runSelfTest(): number {
+  failures = 0;
+
+  // Test 1: physics integrator — upward impulse with no gravity produces linear rise.
+  console.log("[rom.selfcheck] physics.integratePhysics — Y=+4 impulse, no gravity:");
+  {
+    const a = createRomActor();
+    a.yVel = 4.0;
+    a.hDecel = 0;
+    a.gravityCoeff = 0;
+    a.timescale = 1;
+    a.tierScale = 1;
+    a.dt = 1;
+    a.maxFall = -9999;
+    integratePhysics(1.0, a, 0);
+    assert(approxEq(a.pos.y, 4.0), "frame 1 pos.y == 4.0 (linear rise)");
+    assert(approxEq(a.yVel, 4.0), "yVel unchanged (gravityCoeff=0 → no decay)");
+    integratePhysics(1.0, a, 0);
+    assert(approxEq(a.pos.y, 8.0), "frame 2 pos.y == 8.0 (continues linearly)");
+  }
+
+  // Test 2: physics integrator — hSpeed projects via yaw.
+  console.log("\n[rom.selfcheck] physics.integratePhysics — hSpeed × cos/sin(yaw):");
+  {
+    const a = createRomActor();
+    a.hSpeed = 10.0;
+    a.hDecel = 0;
+    a.gravityCoeff = 0;
+    a.timescale = 1;
+    a.tierScale = 1;
+    a.dt = 1;
+    a.maxFall = -9999;
+    integratePhysics(1.0, a, 0); // yaw 0 BAM = facing +Z
+    assert(approxEq(a.pos.z, 10.0), "yaw 0 → pos.z += 10 (cos×hSpeed)");
+    assert(approxEq(a.pos.x, 0.0), "yaw 0 → pos.x unchanged (sin=0)");
+  }
+
+  // Integration seam: two battle runtimes keep independent floor behavior.
+  console.log("\n[rom.selfcheck] battle runtime — floor behavior is instance-local:");
+  {
+    const makeRuntime = (uid: string) => ({ uid, borgId: "pl0000", team: 0 }) as BorgRuntime;
+    const makeBattleRuntime = (floorY: number): RomBattleRuntime => ({
+      floor: {
+        bounds: { minX: -100, maxX: 100, minZ: -100, maxZ: 100 },
+        isSupported: () => true,
+        clampToGround: (pos, velY) => pos.y <= floorY
+          ? { y: floorY, velY: 0, grounded: true }
+          : { y: pos.y, velY, grounded: false },
+      },
+      allocateResource: () => true,
+      spawnProjectile: () => {},
+      resolveHit: () => {},
+    });
+    const low = RomDriverBridge.attachToBattle(makeRuntime("low"), makeBattleRuntime(10));
+    const high = RomDriverBridge.attachToBattle(makeRuntime("high"), makeBattleRuntime(20));
+    assert(low !== null && high !== null, "independent drivers attach through battle runtime seam");
+    if (low && high) {
+      low.actor.pos.y = 0;
+      high.actor.pos.y = 0;
+      integratePhysics(0, low.actor, 0);
+      integratePhysics(0, high.actor, 0);
+      assert(low.actor.pos.y === 10, "first runtime uses its own floor");
+      assert(high.actor.pos.y === 20, "second runtime uses its own floor");
+      low.actor.pos.y = 0;
+      integratePhysics(0, low.actor, 0);
+      assert(low.actor.pos.y === 10, "second attachment does not overwrite first floor");
+    }
+  }
+
+  // Test 3: dispatch — command record cue 44 transitions to state 61 + runs family.
+  console.log("\n[rom.selfcheck] dispatch — cue 44 → state 61 → rootAction:");
+  {
+    const a = createRomActor();
+    a.cueTable = new Int8Array(96).fill(-1);
+    a.cueTable[44 * 2] = 61;
+    a.cueTable[44 * 2 + 1] = 0;
+    let ran = false;
+    a.rootAction = () => {
+      ran = true;
+    };
+    const ok = dispatchCommandRecord(a, { cueId: 44, stateMode: 3, actionIndex: 2, variantIndex: 0 });
+    assert(ok, "dispatchCommandRecord returned true for cue 44");
+    assert(a.fbState === 61, "fbState transitioned to 61 (attack)");
+    assert(a.actionIndex === 2, "actionIndex stamped to 2 (X / air-B)");
+    const table = createDefaultStateTable();
+    stepActor(a, table);
+    assert(ran, "rootAction was invoked via state 61");
+ 

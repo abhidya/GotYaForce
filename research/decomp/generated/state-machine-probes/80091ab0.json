@@ -1,0 +1,1257 @@
+{
+  "schema": 1,
+  "status": "ready",
+  "unit_id": "state-machine-80091ab0",
+  "kind": "state_dispatcher",
+  "root_addresses": [
+    "0x80091ab0"
+  ],
+  "state_field": {
+    "offset": "0x581",
+    "width": 1,
+    "signedness": "signed"
+  },
+  "function_pointer_tables": [
+    {
+      "address": "0x802db448",
+      "dispatcher_address": "0x80091ab0",
+      "state_field": {
+        "offset": "0x581",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x802db448",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x802db44c",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 2,
+          "entry_address": "0x802db450",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 3,
+          "entry_address": "0x802db454",
+          "handler_address": "0x80091e34",
+          "function_name": "zz_0091e34_",
+          "raw_bytes": "80091e34"
+        },
+        {
+          "index": 4,
+          "entry_address": "0x802db458",
+          "handler_address": "0x80091aec",
+          "function_name": "FUN_80091aec",
+          "raw_bytes": "80091aec"
+        }
+      ]
+    },
+    {
+      "address": "0x80433970",
+      "dispatcher_address": "0x80091e34",
+      "state_field": {
+        "offset": "0x545",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x80433970",
+          "handler_address": "0x80091ec4",
+          "function_name": "FUN_80091ec4",
+          "raw_bytes": "80091ec4"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x80433974",
+          "handler_address": "0x80091f08",
+          "function_name": "FUN_80091f08",
+          "raw_bytes": "80091f08"
+        }
+      ]
+    },
+    {
+      "address": "0x802db45c",
+      "dispatcher_address": "0x80091aec",
+      "state_field": {
+        "offset": "0x544",
+        "width": 1,
+        "signedness": "signed"
+      },
+      "pointer_size": 4,
+      "endianness": "big",
+      "entries": [
+        {
+          "index": 0,
+          "entry_address": "0x802db45c",
+          "handler_address": "0x80091b34",
+          "function_name": "FUN_80091b34",
+          "raw_bytes": "80091b34"
+        },
+        {
+          "index": 1,
+          "entry_address": "0x802db460",
+          "handler_address": "0x80091c34",
+          "function_name": "FUN_80091c34",
+          "raw_bytes": "80091c34"
+        },
+        {
+          "index": 2,
+          "entry_address": "0x802db464",
+          "handler_address": "0x80091d00",
+          "function_name": "FUN_80091d00",
+          "raw_bytes": "80091d00"
+        }
+      ]
+    }
+  ],
+  "handlers": [
+    {
+      "address": "0x80091e34",
+      "name": "zz_0091e34_",
+      "decompile": "\r\nvoid zz_0091e34_(int param_1)\r\n\r\n{\r\n  zz_0092480_();\r\n  (*(code *)(&PTR_FUN_80433970)[*(char *)(param_1 + 0x545)])(param_1);\r\n  (*(code *)(&PTR_FUN_80433968)[*(char *)(param_1 + 0x544)])(param_1);\r\n  (*(code *)(&PTR_FUN_802db468)[*(char *)(param_1 + 0x540)])(param_1);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 5] [Showing: 1-5]",
+        "From 80091b68 in FUN_80091b34 [UNCONDITIONAL_CALL]",
+        "From 802db448 [DATA]",
+        "From 802db44c [DATA]",
+        "From 802db450 [DATA]",
+        "From 802db454 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091e34",
+          "name": "zz_0091e34_",
+          "prototype": "undefined zz_0091e34_(void)",
+          "body_ranges": [
+            [
+              "80091e34",
+              "80091ec3"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid zz_0091e34_(int param_1)\r\n\r\n{\r\n  zz_0092480_();\r\n  (*(code *)(&PTR_FUN_80433970)[*(char *)(param_1 + 0x545)])(param_1);\r\n  (*(code *)(&PTR_FUN_80433968)[*(char *)(param_1 + 0x544)])(param_1);\r\n  (*(code *)(&PTR_FUN_802db468)[*(char *)(param_1 + 0x540)])(param_1);\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "stw r0,0x14(r1)",
+          "stw r31,0xc(r1)",
+          "or r31,r3,r3",
+          "bl 0x80092480",
+          "lbz r0,0x545(r31)",
+          "subi r4,r13,0x7c30",
+          "or r3,r31,r31",
+          "extsb r0,r0",
+          "rlwinm r0,r0,0x2,0x0,0x1d",
+          "lwzx r12,r4,r0",
+          "mtspr ctr,r12",
+          "bctrl",
+          "lbz r0,0x544(r31)",
+          "subi r4,r13,0x7c38",
+          "or r3,r31,r31",
+          "extsb r0,r0",
+          "rlwinm r0,r0,0x2,0x0,0x1d",
+          "lwzx r12,r4,r0",
+          "mtspr ctr,r12",
+          "bctrl",
+          "lbz r0,0x540(r31)",
+          "lis r3,-0x7fd2",
+          "subi r4,r3,0x4b98",
+          "or r3,r31,r31",
+          "extsb r0,r0",
+          "rlwinm r0,r0,0x2,0x0,0x1d",
+          "lwzx r12,r4,r0",
+          "mtspr ctr,r12",
+          "bctrl",
+          "lwz r0,0x14(r1)",
+          "lwz r31,0xc(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "CALL|out=|in0=(ram, 0x80092480, 8)",
+          "INT_ADD|out=(unique, 0x1000002f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x545, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000002f, 4)",
+          "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+          "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+          "PTRSUB|out=(unique, 0x1000001f, 4)|in0=(const, 0x0, 4)|in1=(const, 0x80433970, 4)",
+          "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x1000001f, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+          "CALLIND|out=|in0=(unique, 0x10000033, 4)|in1=(register, 0xc, 4)",
+          "CAST|out=(unique, 0x10000033, 4)|in0=(register, 0x30, 4)",
+          "INT_ADD|out=(unique, 0x10000037, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000037, 4)",
+          "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+          "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+          "PTRSUB|out=(unique, 0x1000001b, 4)|in0=(const, 0x0, 4)|in1=(const, 0x80433968, 4)",
+          "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x1000001b, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+          "CALLIND|out=|in0=(unique, 0x1000003b, 4)|in1=(register, 0xc, 4)",
+          "CAST|out=(unique, 0x1000003b, 4)|in0=(register, 0x30, 4)",
+          "INT_ADD|out=(unique, 0x1000003f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x540, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000003f, 4)",
+          "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+          "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+          "PTRSUB|out=(unique, 0x10000017, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802db468, 4)",
+          "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000017, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+          "CALLIND|out=|in0=(unique, 0x10000043, 4)|in1=(register, 0xc, 4)",
+          "CAST|out=(unique, 0x10000043, 4)|in0=(register, 0x30, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)"
+        ],
+        "calls": [
+          "80092480"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "953bb0ca53cc9a70ed3780ad7248b64a456d18c4b27a03c82fad614518b0a89b",
+          "normalized_pcode": "87188cf85a9784c6def689af25251d1b2e30d853b2b1be20eb16a7ba76c4061d"
+        }
+      }
+    },
+    {
+      "address": "0x80091aec",
+      "name": "FUN_80091aec",
+      "decompile": "\r\nvoid FUN_80091aec(int param_1)\r\n\r\n{\r\n  *(short *)(param_1 + 0x18da) = *(short *)(param_1 + 0x18da) >> 1;\r\n  (*(code *)(&PTR_FUN_802db45c)[*(char *)(param_1 + 0x544)])();\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 802db458 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091aec",
+          "name": "FUN_80091aec",
+          "prototype": "undefined FUN_80091aec(void)",
+          "body_ranges": [
+            [
+              "80091aec",
+              "80091b33"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091aec(int param_1)\r\n\r\n{\r\n  *(short *)(param_1 + 0x18da) = *(short *)(param_1 + 0x18da) >> 1;\r\n  (*(code *)(&PTR_FUN_802db45c)[*(char *)(param_1 + 0x544)])();\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "lis r4,-0x7fd2",
+          "stw r0,0x14(r1)",
+          "subi r4,r4,0x4ba4",
+          "lha r0,0x18da(r3)",
+          "srawi r0,r0,0x1",
+          "sth r0,0x18da(r3)",
+          "lbz r0,0x544(r3)",
+          "extsb r0,r0",
+          "rlwinm r0,r0,0x2,0x0,0x1d",
+          "lwzx r12,r4,r0",
+          "mtspr ctr,r12",
+          "bctrl",
+          "lwz r0,0x14(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "INT_ADD|out=(unique, 0x1000000e, 4)|in0=(register, 0xc, 4)|in1=(const, 0x18da, 4)",
+          "LOAD|out=(unique, 0x49100, 2)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000e, 4)",
+          "INT_SRIGHT|out=(register, 0x2, 2)|in0=(unique, 0x49100, 2)|in1=(const, 0x1, 2)",
+          "INT_ADD|out=(unique, 0x10000012, 4)|in0=(register, 0xc, 4)|in1=(const, 0x18da, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x2, 2)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000012, 4)",
+          "INT_ADD|out=(unique, 0x10000016, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000016, 4)",
+          "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+          "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+          "PTRSUB|out=(unique, 0x10000006, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802db45c, 4)",
+          "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000006, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+          "CALLIND|out=|in0=(unique, 0x1000001a, 4)",
+          "CAST|out=(unique, 0x1000001a, 4)|in0=(register, 0x30, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)"
+        ],
+        "calls": [],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "d7091f66775696a8ad6cbb69bd76fd174b1ad07970f834cf29bc3bb5c1c9b0f7",
+          "normalized_pcode": "297e3977b42a6da0d46f4321fd8c45b3332672df6daa1bf56c9ee0a3a30fcd6b"
+        }
+      }
+    },
+    {
+      "address": "0x80091ec4",
+      "name": "FUN_80091ec4",
+      "decompile": "\r\nvoid FUN_80091ec4(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  dVar1 = (double)FLOAT_80437c84;\r\n  *(char *)(param_1 + 0x545) = *(char *)(param_1 + 0x545) + '\\x01';\r\n  zz_004beb8_(dVar1,param_1,4,2,0x1a,4,2);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 80433970 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091ec4",
+          "name": "FUN_80091ec4",
+          "prototype": "undefined FUN_80091ec4(void)",
+          "body_ranges": [
+            [
+              "80091ec4",
+              "80091f07"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091ec4(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  dVar1 = (double)FLOAT_80437c84;\r\n  *(char *)(param_1 + 0x545) = *(char *)(param_1 + 0x545) + '\\x01';\r\n  zz_004beb8_(dVar1,param_1,4,2,0x1a,4,2);\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "lfs f1,-0x6d9c(r2)",
+          "li r4,0x4",
+          "stw r0,0x14(r1)",
+          "li r5,0x2",
+          "li r7,0x4",
+          "li r8,0x2",
+          "lbz r6,0x545(r3)",
+          "addi r0,r6,0x1",
+          "li r6,0x1a",
+          "stb r0,0x545(r3)",
+          "bl 0x8004beb8",
+          "lwz r0,0x14(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(ram, 0x80437c84, 4)",
+          "INT_ADD|out=(unique, 0x10000005, 4)|in0=(register, 0xc, 4)|in1=(const, 0x545, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000005, 4)",
+          "INT_ADD|out=(register, 0x3, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x1, 1)",
+          "INT_ADD|out=(unique, 0x10000009, 4)|in0=(register, 0xc, 4)|in1=(const, 0x545, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x3, 1)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x14, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000009, 4)",
+          "CALL|out=|in0=(ram, 0x8004beb8, 8)|in1=(register, 0x4008, 8)|in2=(register, 0xc, 4)|in3=(const, 0x4, 4)|in4=(const, 0x2, 4)|in5=(const, 0x1a, 4)|in6=(const, 0x4, 4)|in7=(const, 0x2, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x17, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)",
+          "COPY|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)"
+        ],
+        "calls": [
+          "8004beb8"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "2d728094b96a3a42b0b6c137aea983bd8cbaa051f6fa3a3904e82416a5abcbb4",
+          "normalized_pcode": "e1249696787254d91ac64af656c229ab1a30969e68f8c11f6db155f4ca9afa28"
+        }
+      }
+    },
+    {
+      "address": "0x80091f08",
+      "name": "FUN_80091f08",
+      "decompile": "\r\nvoid FUN_80091f08(undefined4 param_1)\r\n\r\n{\r\n  zz_004cd24_(param_1,4);\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 80433974 [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091f08",
+          "name": "FUN_80091f08",
+          "prototype": "undefined FUN_80091f08(void)",
+          "body_ranges": [
+            [
+              "80091f08",
+              "80091f2b"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091f08(undefined4 param_1)\r\n\r\n{\r\n  zz_004cd24_(param_1,4);\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "li r4,0x4",
+          "stw r0,0x14(r1)",
+          "bl 0x8004cd24",
+          "lwz r0,0x14(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "CALL|out=|in0=(ram, 0x8004cd24, 8)|in1=(register, 0xc, 4)|in2=(const, 0x4, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)"
+        ],
+        "calls": [
+          "8004cd24"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "a4932eb73011d2327fe63beaae7ea8c387a2e81a6ad1a3e6fc6284031acdea69",
+          "normalized_pcode": "0c69d526c2c3dadd7114a73b843fbe21d0220d928b6c4a724d8519177373d232"
+        }
+      }
+    },
+    {
+      "address": "0x80091b34",
+      "name": "FUN_80091b34",
+      "decompile": "\r\nvoid FUN_80091b34(int param_1)\r\n\r\n{\r\n  float fVar1;\r\n  \r\n  fVar1 = FLOAT_80437c80;\r\n  if ((*(char *)(param_1 + 0x7ce) == '\\x0f') || (*(char *)(param_1 + 0x7ce) == '\\x10')) {\r\n    *(undefined4 *)(param_1 + 0x44) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x58);\r\n    *(undefined4 *)(param_1 + 0x4c) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x5c);\r\n    *(float *)(param_1 + 0x48) = fVar1;\r\n    *(undefined4 *)(param_1 + 0x50) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x70);\r\n    zz_0091dc0_(param_1);\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  else {\r\n    *(undefined1 *)(param_1 + 0x581) = 2;\r\n    zz_0091e34_();\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 1] [Showing: 1-1]",
+        "From 802db45c [DATA]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091b34",
+          "name": "FUN_80091b34",
+          "prototype": "undefined FUN_80091b34(void)",
+          "body_ranges": [
+            [
+              "80091b34",
+              "80091bbf"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091b34(int param_1)\r\n\r\n{\r\n  float fVar1;\r\n  \r\n  fVar1 = FLOAT_80437c80;\r\n  if ((*(char *)(param_1 + 0x7ce) == '\\x0f') || (*(char *)(param_1 + 0x7ce) == '\\x10')) {\r\n    *(undefined4 *)(param_1 + 0x44) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x58);\r\n    *(undefined4 *)(param_1 + 0x4c) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x5c);\r\n    *(float *)(param_1 + 0x48) = fVar1;\r\n    *(undefined4 *)(param_1 + 0x50) = *(undefined4 *)(*(int *)(param_1 + 0x4ac) + 0x70);\r\n    zz_0091dc0_(param_1);\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  else {\r\n    *(undefined1 *)(param_1 + 0x581) = 2;\r\n    zz_0091e34_();\r\n  }\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "stw r0,0x14(r1)",
+          "stw r31,0xc(r1)",
+          "or r31,r3,r3",
+          "lbz r0,0x7ce(r3)",
+          "extsb r0,r0",
+          "cmpwi r0,0xf",
+          "beq 0x80091b70",
+          "cmpwi r0,0x10",
+          "beq 0x80091b70",
+          "li r0,0x2",
+          "stb r0,0x581(r31)",
+          "bl 0x80091e34",
+          "b 0x80091bac",
+          "lwz r4,0x4ac(r31)",
+          "or r3,r31,r31",
+          "lfs f0,-0x6da0(r2)",
+          "lfs f1,0x58(r4)",
+          "stfs f1,0x44(r31)",
+          "lwz r4,0x4ac(r31)",
+          "lfs f1,0x5c(r4)",
+          "stfs f1,0x4c(r31)",
+          "stfs f0,0x48(r31)",
+          "lwz r4,0x4ac(r31)",
+          "lfs f0,0x70(r4)",
+          "stfs f0,0x50(r31)",
+          "bl 0x80091dc0",
+          "or r3,r31,r31",
+          "bl 0x80091bc0",
+          "lwz r0,0x14(r1)",
+          "lwz r31,0xc(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "COPY|out=(unique, 0x10000033, 4)|in0=(ram, 0x80437c80, 4)",
+          "INT_ADD|out=(unique, 0x10000037, 4)|in0=(register, 0xc, 4)|in1=(const, 0x7ce, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000037, 4)",
+          "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0xf, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091b70, 1)|in1=(unique, 0x27f00, 1)",
+          "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x10, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091b70, 1)|in1=(unique, 0x27f00, 1)",
+          "INT_ADD|out=(unique, 0x10000063, 4)|in0=(register, 0xc, 4)|in1=(const, 0x581, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x2, 1)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x31, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000063, 4)",
+          "CALL|out=|in0=(ram, 0x80091e34, 8)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x34, 4)",
+          "BRANCH|out=|in0=(ram, 0x80091bac, 1)",
+          "INT_ADD|out=(unique, 0x1000003b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4ac, 4)",
+          "LOAD|out=(register, 0x10, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000003b, 4)",
+          "INT_ADD|out=(unique, 0x1000003f, 4)|in0=(register, 0x10, 4)|in1=(const, 0x58, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000003f, 4)",
+          "INT_ADD|out=(unique, 0x10000043, 4)|in0=(register, 0xc, 4)|in1=(const, 0x44, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x48700, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x4a, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000043, 4)",
+          "INT_ADD|out=(unique, 0x10000047, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4ac, 4)",
+          "LOAD|out=(register, 0x10, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000047, 4)",
+          "INT_ADD|out=(unique, 0x1000004b, 4)|in0=(register, 0x10, 4)|in1=(const, 0x5c, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004b, 4)",
+          "INT_ADD|out=(unique, 0x1000004f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4c, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x48700, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x53, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004f, 4)",
+          "INT_ADD|out=(unique, 0x10000053, 4)|in0=(register, 0xc, 4)|in1=(const, 0x48, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x10000033, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x56, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000053, 4)",
+          "INT_ADD|out=(unique, 0x10000057, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4ac, 4)",
+          "LOAD|out=(register, 0x10, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000057, 4)",
+          "INT_ADD|out=(unique, 0x1000005b, 4)|in0=(register, 0x10, 4)|in1=(const, 0x70, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005b, 4)",
+          "INT_ADD|out=(unique, 0x1000005f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x50, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x48700, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x5f, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005f, 4)",
+          "CALL|out=|in0=(ram, 0x80091dc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x62, 4)",
+          "CALL|out=|in0=(ram, 0x80091bc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x66, 4)",
+          "MULTIEQUAL|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(ram, 0x80437c80, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)",
+          "COPY|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)"
+        ],
+        "calls": [
+          "80091bc0",
+          "80091dc0",
+          "80091e34"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "e357cff14ed2cecb8b6fe5b850ddfc54d40f7d67465c61ad6d36044925ec271b",
+          "normalized_pcode": "561c664080f04f2f3c1031a58dcd3da9a50e8ff00470c2ca69f8d2e1b02dcd35"
+        }
+      }
+    },
+    {
+      "address": "0x80091c34",
+      "name": "FUN_80091c34",
+      "decompile": "\r\nvoid FUN_80091c34(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(char *)(param_1 + 0x1cee) == '\\0') && (FLOAT_80437c80 < *(float *)(param_1 + 0x558))) {\r\n    *(float *)(param_1 + 0x558) = *(float *)(param_1 + 0x558) - *(float *)(param_1 + 0x1dc8);\r\n    return;\r\n  }\r\n  if (*(char *)(param_1 + 0x6ec) < '\\x01') {\r\n    dVar1 = (double)FLOAT_80437c84;\r\n    *(char *)(param_1 + 0x544) = *(char *)(param_1 + 0x544) + '\\x01';\r\n    zz_004beb8_(dVar1,param_1,1,2,0x11,0xffffffff,0xffffffff);\r\n  }\r\n  else {\r\n    zz_0092534_(param_1);\r\n    zz_004beb8_((double)FLOAT_80437c84,param_1,1,2,0x10,0xffffffff,0xffffffff);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 0] [Showing: 0 items - offset 0 exceeds total]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091c34",
+          "name": "FUN_80091c34",
+          "prototype": "undefined FUN_80091c34(void)",
+          "body_ranges": [
+            [
+              "80091c34",
+              "80091cff"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091c34(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(char *)(param_1 + 0x1cee) == '\\0') && (FLOAT_80437c80 < *(float *)(param_1 + 0x558))) {\r\n    *(float *)(param_1 + 0x558) = *(float *)(param_1 + 0x558) - *(float *)(param_1 + 0x1dc8);\r\n    return;\r\n  }\r\n  if (*(char *)(param_1 + 0x6ec) < '\\x01') {\r\n    dVar1 = (double)FLOAT_80437c84;\r\n    *(char *)(param_1 + 0x544) = *(char *)(param_1 + 0x544) + '\\x01';\r\n    zz_004beb8_(dVar1,param_1,1,2,0x11,0xffffffff,0xffffffff);\r\n  }\r\n  else {\r\n    zz_0092534_(param_1);\r\n    zz_004beb8_((double)FLOAT_80437c84,param_1,1,2,0x10,0xffffffff,0xffffffff);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "li r4,0x7",
+          "stw r0,0x14(r1)",
+          "stw r31,0xc(r1)",
+          "or r31,r3,r3",
+          "bl 0x8004cd24",
+          "or r3,r31,r31",
+          "bl 0x80091dc0",
+          "lbz r0,0x1cee(r31)",
+          "extsb. r0,r0",
+          "bne 0x80091c78",
+          "lfs f1,0x558(r31)",
+          "lfs f0,-0x6da0(r2)",
+          "fcmpo cr0,f1,f0",
+          "cror eq,lt,eq",
+          "bne 0x80091ce0",
+          "lbz r0,0x6ec(r31)",
+          "extsb. r0,r0",
+          "ble 0x80091cb0",
+          "or r3,r31,r31",
+          "bl 0x80092534",
+          "lfs f1,-0x6d9c(r2)",
+          "or r3,r31,r31",
+          "li r4,0x1",
+          "li r5,0x2",
+          "li r6,0x10",
+          "li r7,-0x1",
+          "li r8,-0x1",
+          "bl 0x8004beb8",
+          "b 0x80091cec",
+          "lbz r5,0x544(r31)",
+          "or r3,r31,r31",
+          "lfs f1,-0x6d9c(r2)",
+          "li r4,0x1",
+          "addi r0,r5,0x1",
+          "li r5,0x2",
+          "stb r0,0x544(r31)",
+          "li r6,0x11",
+          "li r7,-0x1",
+          "li r8,-0x1",
+          "bl 0x8004beb8",
+          "b 0x80091cec",
+          "lfs f0,0x1dc8(r31)",
+          "fsubs f0,f1,f0",
+          "stfs f0,0x558(r31)",
+          "lwz r0,0x14(r1)",
+          "lwz r31,0xc(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "CALL|out=|in0=(ram, 0x8004cd24, 8)|in1=(register, 0xc, 4)|in2=(const, 0x7, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0xc, 4)",
+          "CALL|out=|in0=(ram, 0x80091dc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x10, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x10, 4)",
+          "INT_ADD|out=(unique, 0x1000005f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1cee, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005f, 4)",
+          "INT_EQUAL|out=(unique, 0x1f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x0, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091c78, 1)|in1=(unique, 0x1f00, 1)",
+          "INT_ADD|out=(unique, 0x10000063, 4)|in0=(register, 0xc, 4)|in1=(const, 0x558, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000063, 4)",
+          "FLOAT_LESS|out=(unique, 0x2cb00, 1)|in0=(ram, 0x80437c80, 4)|in1=(unique, 0x48700, 4)",
+          "CBRANCH|out=|in0=(ram, 0x80091ce0, 1)|in1=(unique, 0x2cb00, 1)",
+          "INT_ADD|out=(unique, 0x1000006f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x6ec, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000006f, 4)",
+          "INT_SLESS|out=(unique, 0x1e00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x1, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091cb0, 1)|in1=(unique, 0x1e00, 1)",
+          "CALL|out=|in0=(ram, 0x80092534, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x8d, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x8d, 4)",
+          "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(ram, 0x80437c84, 4)",
+          "CALL|out=|in0=(ram, 0x8004beb8, 8)|in1=(register, 0x4008, 8)|in2=(register, 0xc, 4)|in3=(const, 0x1, 4)|in4=(const, 0x2, 4)|in5=(const, 0x10, 4)|in6=(const, 0xffffffff, 4)|in7=(const, 0xffffffff, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0x9a, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0x9a, 4)",
+          "BRANCH|out=|in0=(ram, 0x80091cec, 1)",
+          "INT_ADD|out=(unique, 0x10000073, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000073, 4)",
+          "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(ram, 0x80437c84, 4)",
+          "INT_ADD|out=(register, 0x3, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x1, 1)",
+          "INT_ADD|out=(unique, 0x10000077, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x3, 1)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0xaf, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0xaf, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000077, 4)",
+          "CALL|out=|in0=(ram, 0x8004beb8, 8)|in1=(register, 0x4008, 8)|in2=(register, 0xc, 4)|in3=(const, 0x1, 4)|in4=(const, 0x2, 4)|in5=(const, 0x11, 4)|in6=(const, 0xffffffff, 4)|in7=(const, 0xffffffff, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0xb5, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0xb5, 4)",
+          "BRANCH|out=|in0=(ram, 0x80091cec, 1)",
+          "INT_ADD|out=(unique, 0x10000067, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1dc8, 4)",
+          "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000067, 4)",
+          "FLOAT_SUB|out=(unique, 0x1000004d, 4)|in0=(unique, 0x48700, 4)|in1=(unique, 0x48700, 4)",
+          "INT_ADD|out=(unique, 0x1000006b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x558, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x1000004d, 4)",
+          "INDIRECT|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(const, 0xde, 4)",
+          "INDIRECT|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(const, 0xde, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000006b, 4)",
+          "MULTIEQUAL|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)|in1=(ram, 0x80437c80, 4)",
+          "MULTIEQUAL|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)|in1=(ram, 0x80437c84, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)",
+          "COPY|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)",
+          "COPY|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)",
+          "COPY|out=(ram, 0x80437c80, 4)|in0=(ram, 0x80437c80, 4)",
+          "COPY|out=(ram, 0x80437c84, 4)|in0=(ram, 0x80437c84, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)"
+        ],
+        "calls": [
+          "8004beb8",
+          "8004cd24",
+          "80091dc0",
+          "80092534"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "c0cf6eb269b8a3208b1a7472f416f41bbc581882be62bfec4c02e00f162c14f4",
+          "normalized_pcode": "39f8fa3accf1c653084388036ebad38c49a094a01a163d16903962c14ca5cfae"
+        }
+      }
+    },
+    {
+      "address": "0x80091d00",
+      "name": "FUN_80091d00",
+      "decompile": "\r\nvoid FUN_80091d00(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(uint *)(param_1 + 0x5d4) & 0x20) == 0) {\r\n    if (*(char *)(param_1 + 0x1cee) != '\\0') {\r\n      *(undefined1 *)(param_1 + 0x73f) = 0;\r\n      *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\r\n      zz_006a6fc_(param_1,0x10);\r\n      dVar1 = (double)FLOAT_80437c88;\r\n      *(undefined1 *)(param_1 + 0x540) = 1;\r\n      zz_004beb8_(dVar1,param_1,1,0,0xb,0xffffffff,0xffffffff);\r\n      zz_006a750_(param_1,0x10);\r\n      *(undefined1 *)(param_1 + 0x544) = 2;\r\n      *(undefined1 *)(param_1 + 0x588) = 1;\r\n    }\r\n  }\r\n  else {\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+      "callers": [
+        "[Total: 0] [Showing: 0 items - offset 0 exceeds total]"
+      ],
+      "callees": [
+        "[Total: 1] [Showing: 1-1]",
+        "To Stack[-0x10] [WRITE]"
+      ],
+      "bundle": {
+        "bundle_schema": 1,
+        "identity": {
+          "address": "80091d00",
+          "name": "FUN_80091d00",
+          "prototype": "undefined FUN_80091d00(void)",
+          "body_ranges": [
+            [
+              "80091d00",
+              "80091dbf"
+            ]
+          ],
+          "thunk": false,
+          "inline": false,
+          "no_return": false
+        },
+        "decompiler": {
+          "c": "\r\nvoid FUN_80091d00(int param_1)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  zz_004cd24_(param_1,7);\r\n  zz_0091dc0_(param_1);\r\n  if ((*(uint *)(param_1 + 0x5d4) & 0x20) == 0) {\r\n    if (*(char *)(param_1 + 0x1cee) != '\\0') {\r\n      *(undefined1 *)(param_1 + 0x73f) = 0;\r\n      *(uint *)(param_1 + 0x5e0) = *(uint *)(param_1 + 0x5e0) & 0xfffffffc;\r\n      zz_006a6fc_(param_1,0x10);\r\n      dVar1 = (double)FLOAT_80437c88;\r\n      *(undefined1 *)(param_1 + 0x540) = 1;\r\n      zz_004beb8_(dVar1,param_1,1,0,0xb,0xffffffff,0xffffffff);\r\n      zz_006a750_(param_1,0x10);\r\n      *(undefined1 *)(param_1 + 0x544) = 2;\r\n      *(undefined1 *)(param_1 + 0x588) = 1;\r\n    }\r\n  }\r\n  else {\r\n    zz_0091bc0_(param_1);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+          "completed": true,
+          "warnings": [],
+          "errors": []
+        },
+        "normalized_disassembly": [
+          "stwu r1,-0x10(r1)",
+          "mfspr r0,lr",
+          "li r4,0x7",
+          "stw r0,0x14(r1)",
+          "stw r31,0xc(r1)",
+          "or r31,r3,r3",
+          "bl 0x8004cd24",
+          "or r3,r31,r31",
+          "bl 0x80091dc0",
+          "lwz r0,0x5d4(r31)",
+          "rlwinm. r0,r0,0x0,0x1a,0x1a",
+          "beq 0x80091d3c",
+          "or r3,r31,r31",
+          "bl 0x80091bc0",
+          "b 0x80091dac",
+          "lbz r0,0x1cee(r31)",
+          "extsb. r0,r0",
+          "beq 0x80091dac",
+          "li r0,0x0",
+          "or r3,r31,r31",
+          "stb r0,0x73f(r31)",
+          "li r4,0x10",
+          "lwz r0,0x5e0(r31)",
+          "rlwinm r0,r0,0x0,0x0,0x1d",
+          "stw r0,0x5e0(r31)",
+          "bl 0x8006a6fc",
+          "li r0,0x1",
+          "lfs f1,-0x6d98(r2)",
+          "stb r0,0x540(r31)",
+          "or r3,r31,r31",
+          "li r4,0x1",
+          "li r5,0x0",
+          "li r6,0xb",
+          "li r7,-0x1",
+          "li r8,-0x1",
+          "bl 0x8004beb8",
+          "or r3,r31,r31",
+          "li r4,0x10",
+          "bl 0x8006a750",
+          "li r3,0x2",
+          "li r0,0x1",
+          "stb r3,0x544(r31)",
+          "stb r0,0x588(r31)",
+          "lwz r0,0x14(r1)",
+          "lwz r31,0xc(r1)",
+          "mtspr lr,r0",
+          "addi r1,r1,0x10",
+          "blr"
+        ],
+        "normalized_pcode": [
+          "CALL|out=|in0=(ram, 0x8004cd24, 8)|in1=(register, 0xc, 4)|in2=(const, 0x7, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0xc, 4)",
+          "CALL|out=|in0=(ram, 0x80091dc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x10, 4)",
+          "INT_ADD|out=(unique, 0x1000004b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x5d4, 4)",
+          "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004b, 4)",
+          "INT_AND|out=(unique, 0x10000030, 4)|in0=(register, 0x0, 4)|in1=(const, 0x20, 4)",
+          "INT_EQUAL|out=(unique, 0x1000003a, 1)|in0=(unique, 0x10000030, 4)|in1=(const, 0x0, 4)",
+          "CBRANCH|out=|in0=(ram, 0x80091d3c, 1)|in1=(unique, 0x1000003a, 1)",
+          "CALL|out=|in0=(ram, 0x80091bc0, 8)|in1=(register, 0xc, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x3d, 4)",
+          "BRANCH|out=|in0=(ram, 0x80091dac, 1)",
+          "INT_ADD|out=(unique, 0x1000004f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1cee, 4)",
+          "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004f, 4)",
+          "INT_NOTEQUAL|out=(unique, 0x1f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x0, 1)",
+          "CBRANCH|out=|in0=(ram, 0x80091dac, 1)|in1=(unique, 0x1f00, 1)",
+          "INT_ADD|out=(unique, 0x10000053, 4)|in0=(register, 0xc, 4)|in1=(const, 0x73f, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x6e, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000053, 4)",
+          "INT_ADD|out=(unique, 0x10000057, 4)|in0=(register, 0xc, 4)|in1=(const, 0x5e0, 4)",
+          "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000057, 4)",
+          "INT_AND|out=(unique, 0x1000003c, 4)|in0=(register, 0x0, 4)|in1=(const, 0xfffffffc, 4)",
+          "INT_ADD|out=(unique, 0x1000005b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x5e0, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x1000003c, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x79, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005b, 4)",
+          "CALL|out=|in0=(ram, 0x8006a6fc, 8)|in1=(register, 0xc, 4)|in2=(const, 0x10, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x7c, 4)",
+          "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(ram, 0x80437c88, 4)",
+          "INT_ADD|out=(unique, 0x1000005f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x540, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x1, 1)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x83, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000005f, 4)",
+          "CALL|out=|in0=(ram, 0x8004beb8, 8)|in1=(register, 0x4008, 8)|in2=(register, 0xc, 4)|in3=(const, 0x1, 4)|in4=(const, 0x0, 4)|in5=(const, 0xb, 4)|in6=(const, 0xffffffff, 4)|in7=(const, 0xffffffff, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x8c, 4)",
+          "CALL|out=|in0=(ram, 0x8006a750, 8)|in1=(register, 0xc, 4)|in2=(const, 0x10, 4)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x91, 4)",
+          "INT_ADD|out=(unique, 0x10000063, 4)|in0=(register, 0xc, 4)|in1=(const, 0x544, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x2, 1)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x95, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000063, 4)",
+          "INT_ADD|out=(unique, 0x10000067, 4)|in0=(register, 0xc, 4)|in1=(const, 0x588, 4)",
+          "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x1, 1)",
+          "INDIRECT|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(const, 0x97, 4)",
+          "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000067, 4)",
+          "MULTIEQUAL|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)|in1=(ram, 0x80437c88, 4)|in2=(ram, 0x80437c88, 4)",
+          "RETURN|out=|in0=(const, 0x0, 4)",
+          "COPY|out=(ram, 0x80437c88, 4)|in0=(ram, 0x80437c88, 4)"
+        ],
+        "calls": [
+          "8004beb8",
+          "8004cd24",
+          "8006a6fc",
+          "8006a750",
+          "80091bc0",
+          "80091dc0"
+        ],
+        "data_references": [],
+        "fingerprints": {
+          "instruction_shape": "8131a0aad1991d9a6e9105f765c6ad1e071da5790966dd42e6ab87d05e84c2a6",
+          "normalized_pcode": "d332d332cfe94da0ee3507b515ae31499ee04fd465a640f81aa624c0510615c3"
+        }
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "handler_address": "0x80091ec4",
+      "state_offset": "0x545",
+      "expression": "*(char *)(param_1 + 0x545) + '\\x01'",
+      "to_value": null,
+      "evidence": "*(char *)(param_1 + 0x545) = *(char *)(param_1 + 0x545) + '\\x01';",
+      "confidence": "derived"
+    },
+    {
+      "handler_address": "0x80091c34",
+      "state_offset": "0x544",
+      "expression": "*(char *)(param_1 + 0x544) + '\\x01'",
+      "to_value": null,
+      "evidence": "*(char *)(param_1 + 0x544) = *(char *)(param_1 + 0x544) + '\\x01';",
+      "confidence": "derived"
+    },
+    {
+      "handler_address": "0x80091d00",
+      "state_offset": "0x544",
+      "expression": "2",
+      "to_value": "2",
+      "evidence": "*(undefined1 *)(param_1 + 0x544) = 2;",
+      "confidence": "derived"
+    }
+  ],
+  "callers": [
+    "[Total: 1] [Showing: 1-1]",
+    "From 802db43c [DATA]"
+  ],
+  "callees": [
+    "[Total: 1] [Showing: 1-1]",
+    "To Stack[-0x10] [WRITE]"
+  ],
+  "global_reads": [],
+  "global_writes": [],
+  "constants": [],
+  "raw_constant_bits": [],
+  "update_order": [],
+  "existing_destination_code": [
+    "deterministic audit status: missing",
+    "implemented family members: []",
+    "presentation-only asset mapping exists for pl0a00"
+  ],
+  "evidence": [
+    {
+      "kind": "decompile",
+      "source": "decompile:0x80091ab0",
+      "detail": "\r\nvoid FUN_80091ab0(int param_1)\r\n\r\n{\r\n  (*(code *)(&PTR_zz_0091e34__802db448)[*(char *)(param_1 + 0x581)])();\r\n  return;\r\n}\r\n\r\n",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db448",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db44c",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db450",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db454",
+      "detail": "80091e34 -> 0x80091e34 zz_0091e34_",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db458",
+      "detail": "80091aec -> 0x80091aec FUN_80091aec",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x80433970",
+      "detail": "80091ec4 -> 0x80091ec4 FUN_80091ec4",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x80433974",
+      "detail": "80091f08 -> 0x80091f08 FUN_80091f08",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db45c",
+      "detail": "80091b34 -> 0x80091b34 FUN_80091b34",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db460",
+      "detail": "80091c34 -> 0x80091c34 FUN_80091c34",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "raw_table_entry",
+      "source": "raw:0x802db464",
+      "detail": "80091d00 -> 0x80091d00 FUN_80091d00",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "destination_audit",
+      "source": "research/decomp/data/family-state-machine-coverage.json:0x80091824:0",
+      "detail": "{\"action_index\": 0, \"audit_evidence\": [\"pl0a00: command 0x802db270 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db274 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db278 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db27c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db280 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db284 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db288 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db28c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db290 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db294 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db298 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db29c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2ac (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2bc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2cc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: root 0x80091a74, action table 0x802db43c, handler 0x80091ab0\"], \"borg_id\": \"pl0a00\", \"constructor_address\": \"0x80091824\", \"implementation_members\": [], \"members\": [\"pl0a00\"], \"move_properties\": [], \"name\": null, \"rom_action\": {\"handler\": \"0x80091ab0\", \"variantTable\": \"0x802db448\", \"variants\": {\"0\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db270\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=0; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"1\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db280\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=1; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"2\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db290\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=2; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"3\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db2a0\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=3; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"4\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": [{\"flags\": {}, \"group\": 2, \"slot\": 26}, {\"flags\": {\"0x40\": 0}, \"group\": 2, \"slot\": 4294967295}], \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db2b0\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=4; stream call(s): 0x80091ef4(m0x4,g2,s26,->v2) 0x80092314(m0x2,g2,snull,->v2) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0,->v2) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0,->v2)\", \"group\": null, \"leaf\": \"0x80091aec\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}}}, \"status\": \"missing\"}",
+      "confidence": "confirmed"
+    },
+    {
+      "kind": "destination_audit",
+      "source": "research/decomp/data/family-state-machine-coverage.json:0x80091824:0",
+      "detail": "{\"action_index\": 0, \"audit_evidence\": [\"pl0a00: command 0x802db270 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db274 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db278 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db27c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db280 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db284 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db288 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db28c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db290 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db294 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db298 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db29c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2a8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2ac (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2b8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2bc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2c8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: command 0x802db2cc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)\", \"pl0a00: root 0x80091a74, action table 0x802db43c, handler 0x80091ab0\"], \"borg_id\": \"pl0a00\", \"constructor_address\": \"0x80091824\", \"implementation_members\": [], \"members\": [\"pl0a00\"], \"move_properties\": [{\"ammo\": {\"lv1\": 10, \"lv10\": null}, \"button\": \"B Shot\", \"effect\": null, \"explodes\": false, \"flair\": null, \"name\": \"Arrow Shot\", \"penetration\": \"none\", \"refill\": \"all_at_once\", \"solidity\": \"nonsolid\"}, {\"ammo\": null, \"button\": \"B Attack\", \"effect\": null, \"explodes\": null, \"flair\": null, \"name\": \"Wing Sword\", \"penetration\": null, \"refill\": null, \"solidity\": \"nonsolid\"}, {\"ammo\": null, \"button\": \"X\", \"effect\": null, \"explodes\": null, \"flair\": null, \"name\": \"Fly\", \"penetration\": null, \"refill\": null, \"solidity\": null}], \"name\": \"Wing Soldier\", \"rom_action\": {\"handler\": \"0x80091ab0\", \"variantTable\": \"0x802db448\", \"variants\": {\"0\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db270\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=0; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"1\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db280\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=1; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"2\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db290\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=2; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"3\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": null, \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db2a0\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=3; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)\", \"group\": null, \"leaf\": \"0x80091e34\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}, \"4\": {\"additionalStreams\": null, \"airSeedSlot\": null, \"airSeedSource\": null, \"bank\": null, \"chainCallback\": null, \"childSpawns\": null, \"comboFollowUps\": null, \"conditional\": [{\"flags\": {}, \"group\": 2, \"slot\": 26}, {\"flags\": {\"0x40\": 0}, \"group\": 2, \"slot\": 4294967295}], \"config\": {\"address\": \"0x802db468\", \"kind\": \"pointer\"}, \"discoveredVia\": \"command record type 0 @0x802db2b0\", \"engine\": \"0x80091e34\", \"evidence\": \"emulated 0x80091a74 with +0x580=0 +0x581=4; stream call(s): 0x80091ef4(m0x4,g2,s26,->v2) 0x80092314(m0x2,g2,snull,->v2) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0,->v2) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0,->v2)\", \"group\": null, \"leaf\": \"0x80091aec\", \"phaseTable\": \"0x802db468\", \"seedSlot\": null, \"seedSource\": null, \"slotCandidates\": null}}}, \"status\": \"missing\"}",
+      "confidence": "confirmed"
+    }
+  ],
+  "unknowns": [],
+  "destination_gap": {
+    "borg_id": "pl0a00",
+    "name": "Wing Soldier",
+    "constructor_address": "0x80091824",
+    "action_index": 0,
+    "status": "missing",
+    "members": [
+      "pl0a00"
+    ],
+    "implementation_members": [],
+    "move_properties": [
+      {
+        "name": "Arrow Shot",
+        "button": "B Shot",
+        "flair": null,
+        "solidity": "nonsolid",
+        "penetration": "none",
+        "refill": "all_at_once",
+        "explodes": false,
+        "ammo": {
+          "lv1": 10,
+          "lv10": null
+        },
+        "effect": null
+      },
+      {
+        "name": "Wing Sword",
+        "button": "B Attack",
+        "flair": null,
+        "solidity": "nonsolid",
+        "penetration": null,
+        "refill": null,
+        "explodes": null,
+        "ammo": null,
+        "effect": null
+      },
+      {
+        "name": "Fly",
+        "button": "X",
+        "flair": null,
+        "solidity": null,
+        "penetration": null,
+        "refill": null,
+        "explodes": null,
+        "ammo": null,
+        "effect": null
+      }
+    ],
+    "rom_action": {
+      "handler": "0x80091ab0",
+      "variantTable": "0x802db448",
+      "variants": {
+        "0": {
+          "leaf": "0x80091e34",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": null,
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db270",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=0; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)"
+        },
+        "1": {
+          "leaf": "0x80091e34",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": null,
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db280",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=1; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)"
+        },
+        "2": {
+          "leaf": "0x80091e34",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": null,
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db290",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=2; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)"
+        },
+        "3": {
+          "leaf": "0x80091e34",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": null,
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db2a0",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=3; stream call(s): 0x80091ef4(m0x4,g2,s26) 0x80092314(m0x2,g2,snull) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0)"
+        },
+        "4": {
+          "leaf": "0x80091aec",
+          "engine": "0x80091e34",
+          "phaseTable": "0x802db468",
+          "config": {
+            "kind": "pointer",
+            "address": "0x802db468"
+          },
+          "bank": null,
+          "group": null,
+          "seedSlot": null,
+          "slotCandidates": null,
+          "seedSource": null,
+          "airSeedSlot": null,
+          "airSeedSource": null,
+          "additionalStreams": null,
+          "comboFollowUps": null,
+          "conditional": [
+            {
+              "flags": {},
+              "group": 2,
+              "slot": 26
+            },
+            {
+              "flags": {
+                "0x40": 0
+              },
+              "group": 2,
+              "slot": 4294967295
+            }
+          ],
+          "childSpawns": null,
+          "chainCallback": null,
+          "discoveredVia": "command record type 0 @0x802db2b0",
+          "evidence": "emulated 0x80091a74 with +0x580=0 +0x581=4; stream call(s): 0x80091ef4(m0x4,g2,s26,->v2) 0x80092314(m0x2,g2,snull,->v2) 0x80091f7c(m0x1,g2,snull,+0x5e0:0x40=0,->v2) 0x80091f7c(m0x1,g2,s4294967295,+0x5e0:0x40=0,->v2)"
+        }
+      }
+    },
+    "audit_evidence": [
+      "pl0a00: command 0x802db270 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db274 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db278 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db27c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db280 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db284 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db288 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db28c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db290 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db294 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db298 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db29c (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2a0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2a4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2a8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2ac (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2b0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2b4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2b8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2bc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2c0 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2c4 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2c8 (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: command 0x802db2cc (user-data/GG4E/disc/sys/boot.dol:0x80091824 copies actor+0x4ec root via 0x800918ac and actor+0x4b0 via 0x800918f8)",
+      "pl0a00: root 0x80091a74, action table 0x802db43c, handler 0x80091ab0"
+    ]
+  },
+  "destination_context_paths": [
+    "packages/combat/src/bridge.ts",
+    "packages/combat/src/families/shared-engine.ts",
+    "packages/combat/src/families/wave-b-catch-all.ts",
+    "packages/combat/src/rom/rom.selfcheck.ts"
+  ]
+}
