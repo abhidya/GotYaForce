@@ -16,6 +16,7 @@
     "selfcheck:challenge-stages": "node scripts/selfcheck-challenge-stages.mjs",
     "selfcheck:menu-flow": "node scripts/selfcheck-menu-flow.mjs",
     "selfcheck:game-session": "node scripts/selfcheck-game-session.mjs",
+    "smoke:browser": "node scripts/smoke-browser-game.mjs",
     "selfcheck:get-settlement": "pnpm --filter @gf/missions build && node packages/missions/dist/gotchaBoxSettlement.selfcheck.js && node scripts/selfcheck-get-storage.mjs",
     "selfcheck:hud": "node scripts/selfcheck-hud.mjs",
     "selfcheck:xammo": "node scripts/run-xammo-tests.mjs",

@@ -10,9 +10,9 @@
     "role": "none",
     "vectors_required": false
   },
-  "status": "paused",
+  "status": "stopped",
   "started_at": "2026-07-31T01:30:04.722823Z",
-  "updated_at": "2026-07-31T01:35:51.420124Z",
+  "updated_at": "2026-07-31T01:49:45.255682Z",
   "current_stage": "bundles",
   "total_stages": 5,
   "stages": {
@@ -54,5 +54,7 @@
     "status": "not_started",
     "rolled_back": false
   },
-  "manifest": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\whole-program-manifest.json"
+  "manifest": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\whole-program-manifest.json",
+  "stop_reason": "stop requested at a durable scheduler boundary",
+  "stopped_at": "2026-07-31T01:49:45.255682Z"
 }
