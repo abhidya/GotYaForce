@@ -46,7 +46,7 @@ export function stepPrng(): number {
   const highByte = (state >> 8) & 0xff;
   hi = highByte;
   lo = (lo + highByte) & 0xff;
-  return lo;
+  return (hi * 0x100 + lo) & 0xffff;
 }
 
 export function resetPrng(h: number, l: number): void {
