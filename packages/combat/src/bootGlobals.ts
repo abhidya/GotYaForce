@@ -393,7 +393,7 @@ export function zz_0003340_(): void {
     const size = triplet.size;
 
     // Only copy if dest != src (preserves the ROM's comparison)
-    if (dest !== src && dest !== null && src !== null) {
+    if (dest !== null && src !== null && dest !== src) {
       gnt4_memcpy(dest, src, size);
       // zz_0003424_ expects a memory address (number) and size (number)
       // In the browser port we pass 0 as a dummy address since it's a no-op
