@@ -1,0 +1,95 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8001d464",
+    "name": "zz_001d464_",
+    "prototype": "undefined zz_001d464_(void)",
+    "body_ranges": [
+      [
+        "8001d464",
+        "8001d4e3"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_001d464_(int param_1)\r\n\r\n{\r\n  int iVar1;\r\n  \r\n  *(undefined1 *)(param_1 + 0x346) = 0;\r\n  iVar1 = zz_00694c0_();\r\n  if ((iVar1 == 0) || (iVar1 = zz_002115c_(param_1), iVar1 == 0)) {\r\n    if (*(short *)(param_1 + 0x328) < 1) {\r\n      zz_0023bf4_(param_1);\r\n      zz_002104c_(param_1);\r\n    }\r\n    else {\r\n      *(short *)(param_1 + 0x328) = *(short *)(param_1 + 0x328) + -1;\r\n    }\r\n  }\r\n  else {\r\n    zz_0021148_(param_1);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "li r0,0x0",
+    "stw r31,0xc(r1)",
+    "or r31,r3,r3",
+    "stb r0,0x346(r3)",
+    "bl 0x800694c0",
+    "cmpwi r3,0x0",
+    "beq 0x8001d4a8",
+    "or r3,r31,r31",
+    "bl 0x8002115c",
+    "cmpwi r3,0x0",
+    "beq 0x8001d4a8",
+    "or r3,r31,r31",
+    "bl 0x80021148",
+    "b 0x8001d4d0",
+    "lha r3,0x328(r31)",
+    "cmpwi r3,0x0",
+    "bgt 0x8001d4c8",
+    "or r3,r31,r31",
+    "bl 0x80023bf4",
+    "or r3,r31,r31",
+    "bl 0x8002104c",
+    "b 0x8001d4d0",
+    "subi r0,r3,0x1",
+    "sth r0,0x328(r31)",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000043, 4)|in0=(register, 0xc, 4)|in1=(const, 0x346, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000043, 4)",
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x800694c0, 8)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8001d4a8, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x8002115c, 8)|in1=(register, 0xc, 4)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8001d4a8, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=|in0=(ram, 0x80021148, 8)|in1=(register, 0xc, 4)",
+    "BRANCH|out=|in0=(ram, 0x8001d4d0, 1)",
+    "INT_ADD|out=(unique, 0x10000047, 4)|in0=(register, 0xc, 4)|in1=(const, 0x328, 4)",
+    "LOAD|out=(unique, 0x49100, 2)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000047, 4)",
+    "INT_SLESS|out=(unique, 0x27c00, 1)|in0=(unique, 0x49100, 2)|in1=(const, 0x1, 2)",
+    "CBRANCH|out=|in0=(ram, 0x8001d4c8, 1)|in1=(unique, 0x27c00, 1)",
+    "CALL|out=|in0=(ram, 0x80023bf4, 8)|in1=(register, 0xc, 4)",
+    "CALL|out=|in0=(ram, 0x8002104c, 8)|in1=(register, 0xc, 4)",
+    "BRANCH|out=|in0=(ram, 0x8001d4d0, 1)",
+    "INT_ADD|out=(register, 0x2, 2)|in0=(unique, 0x49100, 2)|in1=(const, 0xffff, 2)",
+    "INT_ADD|out=(unique, 0x1000004b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x328, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x2, 2)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000004b, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "8002104c",
+    "80021148",
+    "8002115c",
+    "80023bf4",
+    "800694c0"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "5a46a36652430b60273cc07f6ee3dacc6edb88c15f28bfca066e3e62c3516333",
+    "normalized_pcode": "0737cb656681cbbc4c628f1514b04ddcecdb3883e0126d74d7c38099920180a0"
+  }
+}

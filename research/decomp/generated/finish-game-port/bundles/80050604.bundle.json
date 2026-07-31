@@ -1,0 +1,67 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80050604",
+    "name": "zz_0050604_",
+    "prototype": "undefined zz_0050604_(void)",
+    "body_ranges": [
+      [
+        "80050604",
+        "8005063f"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0050604_(void)\r\n\r\n{\r\n  zz_0050560_(6);\r\n  zz_0050560_(7);\r\n  DAT_80436170 = DAT_80436174;\r\n  DAT_80436178 = DAT_8043617c;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "li r3,0x6",
+    "stw r0,0x14(r1)",
+    "bl 0x80050560",
+    "li r3,0x7",
+    "bl 0x80050560",
+    "lwz r3,-0x542c(r13)",
+    "lwz r0,-0x5424(r13)",
+    "stw r3,-0x5430(r13)",
+    "stw r0,-0x5428(r13)",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x80050560, 8)|in1=(const, 0x6, 4)",
+    "INDIRECT|out=(ram, 0x80436170, 4)|in0=(ram, 0x80436170, 4)|in1=(const, 0x9, 4)",
+    "INDIRECT|out=(ram, 0x80436174, 4)|in0=(ram, 0x80436174, 4)|in1=(const, 0x9, 4)",
+    "INDIRECT|out=(ram, 0x80436178, 4)|in0=(ram, 0x80436178, 4)|in1=(const, 0x9, 4)",
+    "INDIRECT|out=(ram, 0x8043617c, 4)|in0=(ram, 0x8043617c, 4)|in1=(const, 0x9, 4)",
+    "CALL|out=|in0=(ram, 0x80050560, 8)|in1=(const, 0x7, 4)",
+    "INDIRECT|out=(ram, 0x80436170, 4)|in0=(ram, 0x80436170, 4)|in1=(const, 0xd, 4)",
+    "INDIRECT|out=(ram, 0x80436174, 4)|in0=(ram, 0x80436174, 4)|in1=(const, 0xd, 4)",
+    "INDIRECT|out=(ram, 0x80436178, 4)|in0=(ram, 0x80436178, 4)|in1=(const, 0xd, 4)",
+    "INDIRECT|out=(ram, 0x8043617c, 4)|in0=(ram, 0x8043617c, 4)|in1=(const, 0xd, 4)",
+    "COPY|out=(ram, 0x80436170, 4)|in0=(ram, 0x80436174, 4)",
+    "COPY|out=(ram, 0x80436178, 4)|in0=(ram, 0x8043617c, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80436170, 4)|in0=(ram, 0x80436170, 4)",
+    "COPY|out=(ram, 0x80436174, 4)|in0=(ram, 0x80436174, 4)",
+    "COPY|out=(ram, 0x80436178, 4)|in0=(ram, 0x80436178, 4)",
+    "COPY|out=(ram, 0x8043617c, 4)|in0=(ram, 0x8043617c, 4)"
+  ],
+  "calls": [
+    "80050560"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "1cb4fbc0b1b8080b112b9b0c7cd3382e3f10ac4ba13ea62e83d350ac5ac61f9b",
+    "normalized_pcode": "7f3c787d39b76e8eba2a532cfd2bb2773142e44c97927287a1b6fa40279043b9"
+  }
+}

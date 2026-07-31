@@ -1,0 +1,39 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80057fc8",
+    "name": "zz_0057fc8_",
+    "prototype": "undefined zz_0057fc8_(void)",
+    "body_ranges": [
+      [
+        "80057fc8",
+        "80057fcf"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0057fc8_(int param_1,undefined2 param_2)\r\n\r\n{\r\n  *(undefined2 *)(param_1 + 0x72) = param_2;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "sth r4,0x72(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000000, 4)|in0=(register, 0xc, 4)|in1=(const, 0x72, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x12, 2)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000000, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "10d12173c0d69467e3c56863f419dc1714ca9f9ada829f50adcc682d5e0618e1",
+    "normalized_pcode": "048b0cba5701d5cc69da963e0fd98c3a6f7d8a85b43a2db84bcfc2aee32ebf70"
+  }
+}

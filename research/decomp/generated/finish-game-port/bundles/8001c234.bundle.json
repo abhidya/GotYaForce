@@ -1,0 +1,85 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8001c234",
+    "name": "FUN_8001c234",
+    "prototype": "undefined FUN_8001c234(void)",
+    "body_ranges": [
+      [
+        "8001c234",
+        "8001c293"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_8001c234(int param_1)\r\n\r\n{\r\n  gnt4_PSMTXTrans_bl((double)*(float *)(param_1 + 0x20),(double)*(float *)(param_1 + 0x24),\r\n                     (double)*(float *)(param_1 + 0x28),param_1 + 0x114);\r\n  zz_00457d4_(0x79,param_1 + 0x114,param_1 + 0x114,(int)*(short *)(param_1 + 0x72));\r\n  zz_00456a0_(param_1 + 0x114,param_1 + 0x114,param_1 + 0x58);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "or r31,r3,r3",
+    "lfs f1,0x20(r3)",
+    "addi r3,r31,0x114",
+    "lfs f2,0x24(r31)",
+    "lfs f3,0x28(r31)",
+    "bl 0x8020b478",
+    "addi r4,r31,0x114",
+    "lha r6,0x72(r31)",
+    "or r5,r4,r4",
+    "li r3,0x79",
+    "bl 0x800457d4",
+    "addi r3,r31,0x114",
+    "addi r5,r31,0x58",
+    "or r4,r3,r3",
+    "bl 0x800456a0",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x1000000f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x20, 4)",
+    "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(unique, 0x48700, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000f, 4)",
+    "INT_ADD|out=(register, 0xc, 4)|in0=(register, 0xc, 4)|in1=(const, 0x114, 4)",
+    "INT_ADD|out=(unique, 0x10000013, 4)|in0=(register, 0xc, 4)|in1=(const, 0x24, 4)",
+    "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "FLOAT2FLOAT|out=(register, 0x4010, 8)|in0=(unique, 0x48700, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000013, 4)",
+    "INT_ADD|out=(unique, 0x10000017, 4)|in0=(register, 0xc, 4)|in1=(const, 0x28, 4)",
+    "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "FLOAT2FLOAT|out=(register, 0x4018, 8)|in0=(unique, 0x48700, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000017, 4)",
+    "CALL|out=|in0=(ram, 0x8020b478, 8)|in1=(register, 0x4008, 8)|in2=(register, 0x4010, 8)|in3=(register, 0x4018, 8)|in4=(register, 0xc, 4)",
+    "INT_ADD|out=(register, 0x10, 4)|in0=(register, 0xc, 4)|in1=(const, 0x114, 4)",
+    "INT_ADD|out=(unique, 0x1000001b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x72, 4)",
+    "LOAD|out=(unique, 0x49100, 2)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_SEXT|out=(register, 0x18, 4)|in0=(unique, 0x49100, 2)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000001b, 4)",
+    "CALL|out=|in0=(ram, 0x800457d4, 8)|in1=(const, 0x79, 4)|in2=(register, 0x10, 4)|in3=(register, 0x10, 4)|in4=(register, 0x18, 4)",
+    "INT_ADD|out=(register, 0xc, 4)|in0=(register, 0xc, 4)|in1=(const, 0x114, 4)",
+    "INT_ADD|out=(register, 0x14, 4)|in0=(register, 0xc, 4)|in1=(const, 0x58, 4)",
+    "CALL|out=|in0=(ram, 0x800456a0, 8)|in1=(register, 0xc, 4)|in2=(register, 0xc, 4)|in3=(register, 0x14, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "800456a0",
+    "800457d4",
+    "8020b478"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "893d6d53c28dcc524e7e2131a4b649c35f721644abb1e0315043b429529577f8",
+    "normalized_pcode": "3cea8c5985ceeba23e0cba62638e6f2a12cafe9b27f820d4c3c9702f8c84f41c"
+  }
+}

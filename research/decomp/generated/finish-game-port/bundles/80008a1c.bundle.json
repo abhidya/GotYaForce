@@ -1,24 +1,71 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x80008a1c",
+    "address": "80008a1c",
     "name": "zz_0008a1c_",
-    "metadata": "No program loaded",
-    "thunk": false
+    "prototype": "undefined zz_0008a1c_(void)",
+    "body_ranges": [
+      [
+        "80008a1c",
+        "80008a6f"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\n/* WARNING: Removing unreachable block (ram,0x80008a48) */\r\n\r\ndouble zz_0008a1c_(void)\r\n\r\n{\r\n  float fVar1;\r\n  \r\n  fVar1 = FLOAT_80436a74;\r\n  if (*(int *)(DAT_80436210 + 0x84) != 0) {\r\n    fVar1 = *(float *)(*(int *)(DAT_80436210 + 0x84) + 0xc);\r\n  }\r\n  return (double)fVar1;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
   "normalized_disassembly": [
-    "no program loaded"
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "lwz r3,-0x5390(r13)",
+    "lwz r31,0x84(r3)",
+    "cmplwi r31,0x0",
+    "bne 0x80008a44",
+    "lfs f1,-0x7fac(r2)",
+    "b 0x80008a5c",
+    "bne 0x80008a58",
+    "subi r3,r2,0x7fa8",
+    "li r4,0xab",
+    "subi r5,r2,0x7fa0",
+    "bl 0x80264290",
+    "lfs f1,0xc(r31)",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
   ],
-  "calls": [],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000026, 4)|in0=(ram, 0x80436210, 4)|in1=(const, 0x84, 4)",
+    "LOAD|out=(register, 0x7c, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000026, 4)",
+    "INT_NOTEQUAL|out=(unique, 0x2af00, 1)|in0=(register, 0x7c, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80008a44, 1)|in1=(unique, 0x2af00, 1)",
+    "COPY|out=(unique, 0x10000022, 4)|in0=(ram, 0x80436a74, 4)",
+    "FLOAT2FLOAT|out=(register, 0x4008, 8)|in0=(unique, 0x48700, 4)",
+    "INT_ADD|out=(unique, 0x1000002a, 4)|in0=(register, 0x7c, 4)|in1=(const, 0xc, 4)",
+    "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "COPY|out=(unique, 0x1000001e, 4)|in0=(unique, 0x48700, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000002a, 4)",
+    "MULTIEQUAL|out=(unique, 0x48700, 4)|in0=(unique, 0x1000001e, 4)|in1=(unique, 0x10000022, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0x4008, 8)",
+    "COPY|out=(ram, 0x80436210, 4)|in0=(ram, 0x80436210, 4)",
+    "COPY|out=(ram, 0x80436a74, 4)|in0=(ram, 0x80436a74, 4)"
+  ],
+  "calls": [
+    "80264290"
+  ],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": "cdd046741164f0176af3a5dedd8449666353a2850fa823dddeed4fd70b38434a",
-    "normalized_pcode": null
+    "instruction_shape": "fb1c7cf48d2399c52ba4694e2222afde23c67abb900d5ba5e71af16917a12043",
+    "normalized_pcode": "11f0e7be991defd7e915ee473e53b9cfb9365687f0c771be134cbd5114c26c50"
   }
 }

@@ -1,0 +1,66 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80027a44",
+    "name": "FUN_80027a44",
+    "prototype": "undefined FUN_80027a44(void)",
+    "body_ranges": [
+      [
+        "80027a44",
+        "80027a77"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_80027a44(int param_1)\r\n\r\n{\r\n  if (*(char *)(param_1 + 0x3e6) == '\\0') {\r\n    *(undefined1 *)(param_1 + 0x334) = 0x20;\r\n    return;\r\n  }\r\n  *(undefined *)(param_1 + 0x334) = (&DAT_802cfaa0)[*(char *)(param_1 + 0x438)];\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "lbz r0,0x3e6(r3)",
+    "extsb. r0,r0",
+    "bne 0x80027a5c",
+    "li r0,0x20",
+    "stb r0,0x334(r3)",
+    "blr",
+    "lbz r0,0x438(r3)",
+    "lis r4,-0x7fd3",
+    "subi r4,r4,0x560",
+    "extsb r0,r0",
+    "lbzx r0,r4,r0",
+    "stb r0,0x334(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x1000000f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x3e6, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000f, 4)",
+    "INT_EQUAL|out=(unique, 0x1f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x0, 1)",
+    "CBRANCH|out=|in0=(ram, 0x80027a5c, 1)|in1=(unique, 0x1f00, 1)",
+    "INT_ADD|out=(unique, 0x1000001b, 4)|in0=(register, 0xc, 4)|in1=(const, 0x334, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x20, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000001b, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "INT_ADD|out=(unique, 0x10000013, 4)|in0=(register, 0xc, 4)|in1=(const, 0x438, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000013, 4)",
+    "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+    "PTRADD|out=(unique, 0x47e00, 4)|in0=(unique, 0x1000000b, 4)|in1=(register, 0x0, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47f00, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x47e00, 4)",
+    "PTRSUB|out=(unique, 0x1000000b, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802cfaa0, 4)",
+    "INT_ADD|out=(unique, 0x10000017, 4)|in0=(register, 0xc, 4)|in1=(const, 0x334, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x47f00, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000017, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "78017f2cf9e26d156ce426dcb5a8afffabd30222e9e8159cc811df6eb826634c",
+    "normalized_pcode": "354ff650aad673e0c237d01da8b9794f44fdeb067483ee85241a6c6b8a955277"
+  }
+}

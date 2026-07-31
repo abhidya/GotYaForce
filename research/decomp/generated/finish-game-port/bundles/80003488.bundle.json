@@ -1,15 +1,22 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x80003488",
+    "address": "80003488",
     "name": "TRK_memcpy",
-    "metadata": "Function: TRK_memcpy at 80003488\nSignature: undefined TRK_memcpy(void)\nEntry: 80003488\nBody: 80003488 - 800034ab",
-    "thunk": false
+    "prototype": "undefined TRK_memcpy(void)",
+    "body_ranges": [
+      [
+        "80003488",
+        "800034ab"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\nvoid TRK_memcpy(int param_1,int param_2,int param_3)\r\n\r\n{\r\n  undefined1 *puVar1;\r\n  undefined1 *puVar2;\r\n  \r\n  puVar1 = (undefined1 *)(param_2 + -1);\r\n  puVar2 = (undefined1 *)(param_1 + -1);\r\n  param_3 = param_3 + 1;\r\n  while( true ) {\r\n    param_3 = param_3 + -1;\r\n    if (param_3 == 0) break;\r\n    puVar1 = puVar1 + 1;\r\n    puVar2 = puVar2 + 1;\r\n    *puVar2 = *puVar1;\r\n  }\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
@@ -24,9 +31,29 @@
     "bne 0x80003498",
     "blr"
   ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x1000000b, 4)|in0=(register, 0x10, 4)|in1=(const, 0xffffffff, 4)",
+    "CAST|out=(register, 0x10, 4)|in0=(unique, 0x1000000b, 4)",
+    "INT_ADD|out=(unique, 0x1000000f, 4)|in0=(register, 0xc, 4)|in1=(const, 0xffffffff, 4)",
+    "CAST|out=(register, 0x18, 4)|in0=(unique, 0x1000000f, 4)",
+    "INT_ADD|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(const, 0x1, 4)",
+    "BRANCH|out=|in0=(ram, 0x800034a0, 1)",
+    "PTRADD|out=(unique, 0x17900, 4)|in0=(register, 0x10, 4)|in1=(const, 0x1, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47800, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17900, 4)",
+    "PTRADD|out=(unique, 0x17900, 4)|in0=(register, 0x18, 4)|in1=(const, 0x1, 4)|in2=(const, 0x1, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17900, 4)|in2=(unique, 0x47800, 1)",
+    "INT_ADD|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(const, 0xffffffff, 4)",
+    "INT_EQUAL|out=(unique, 0x1f00, 1)|in0=(register, 0x14, 4)|in1=(const, 0x0, 4)",
+    "MULTIEQUAL|out=(register, 0x10, 4)|in0=(register, 0x10, 4)|in1=(unique, 0x17900, 4)",
+    "MULTIEQUAL|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(register, 0x14, 4)",
+    "MULTIEQUAL|out=(register, 0x18, 4)|in0=(register, 0x18, 4)|in1=(unique, 0x17900, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80003498, 1)|in1=(unique, 0x1f00, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
   "calls": [],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": "b6806f7af8f8f92014ddb759e3ae78190cc4f4dec8a7ec46489ebfa4436eae9d",
-    "normalized_pcode": null
+    "instruction_shape": "aa6a0d52fd98fdacd91407cd0204abd5f9f0839cf97d9b38791a719853caa100",
+    "normalized_pcode": "fd7df1d3c5bd8cafcacecf852522c0dda4fe8b5e117ea63defe5021193b2acd0"
   }
 }

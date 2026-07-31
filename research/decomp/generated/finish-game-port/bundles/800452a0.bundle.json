@@ -1,0 +1,62 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800452a0",
+    "name": "FUN_800452a0",
+    "prototype": "undefined FUN_800452a0(void)",
+    "body_ranges": [
+      [
+        "800452a0",
+        "800452e3"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\n/* WARNING: Removing unreachable block (ram,0x800452cc) */\r\n/* WARNING: Removing unreachable block (ram,0x800452c4) */\r\n/* WARNING: Removing unreachable block (ram,0x800452b0) */\r\n\r\nint FUN_800452a0(void)\r\n\r\n{\r\n  double dVar1;\r\n  \r\n  dVar1 = (double)gnt4_atan2_bl();\r\n  return (int)(short)(FLOAT_8043707c * (float)dVar1 * 1.0);\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x20(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x24(r1)",
+    "stfd f31,0x10(r1)",
+    "psq_st f31,0x18(r1),0x0,gqr0",
+    "bl 0x8023cb78",
+    "frsp f1,f1",
+    "lfs f0,-0x79a4(r2)",
+    "fmuls f31,f0,f1",
+    "psq_st f31,0x8(r1),0x1,gqr5",
+    "lha r3,0x8(r1)",
+    "psq_l f31,0x18(r1),0x0,gqr0",
+    "lwz r0,0x24(r1)",
+    "lfd f31,0x10(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x20",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=(unique, 0x10000021, 8)|in0=(ram, 0x8023cb78, 8)",
+    "INDIRECT|out=(ram, 0x8043707c, 4)|in0=(ram, 0x8043707c, 4)|in1=(const, 0x40, 4)",
+    "CAST|out=(register, 0x4008, 8)|in0=(unique, 0x10000021, 8)",
+    "FLOAT2FLOAT|out=(unique, 0x42900, 4)|in0=(register, 0x4008, 8)",
+    "FLOAT_MULT|out=(unique, 0x10000009, 4)|in0=(ram, 0x8043707c, 4)|in1=(unique, 0x42900, 4)",
+    "TRUNC|out=(unique, 0x7da00, 2)|in0=(unique, 0x10000015, 4)",
+    "FLOAT_MULT|out=(unique, 0x10000015, 4)|in0=(unique, 0x10000009, 4)|in1=(const, 0x3f800000, 4)",
+    "INT_SEXT|out=(register, 0xc, 4)|in0=(unique, 0x7da00, 2)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)",
+    "COPY|out=(ram, 0x8043707c, 4)|in0=(ram, 0x8043707c, 4)"
+  ],
+  "calls": [
+    "8023cb78"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "1bcec034e112e9195e3ad29075ffe1eb1eb1aca81e64077cb5cc7494df529fa3",
+    "normalized_pcode": "277830088d90dda386d36eacdc0e1de6b0f4e801c65016efa5eb4bb32946b52e"
+  }
+}

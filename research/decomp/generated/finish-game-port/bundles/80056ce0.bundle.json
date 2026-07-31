@@ -1,0 +1,68 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80056ce0",
+    "name": "zz_0056ce0_",
+    "prototype": "undefined zz_0056ce0_(void)",
+    "body_ranges": [
+      [
+        "80056ce0",
+        "80056d27"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0056ce0_(int param_1)\r\n\r\n{\r\n  (**(code **)((&PTR_PTR_802d3224)[*(char *)(param_1 + 1000)] + (uint)*(byte *)(param_1 + 0x3e9) * 4\r\n              ))();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "lis r4,-0x7fd3",
+    "stw r0,0x14(r1)",
+    "addi r4,r4,0x3224",
+    "lbz r5,0x3e8(r3)",
+    "lbz r0,0x3e9(r3)",
+    "extsb r5,r5",
+    "rlwinm r5,r5,0x2,0x0,0x1d",
+    "rlwinm r0,r0,0x2,0x0,0x1d",
+    "lwzx r4,r4,r5",
+    "lwzx r12,r4,r0",
+    "mtspr ctr,r12",
+    "bctrl",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000020, 4)|in0=(register, 0xc, 4)|in1=(const, 0x3e8, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000020, 4)",
+    "INT_ADD|out=(unique, 0x10000024, 4)|in0=(register, 0xc, 4)|in1=(const, 0x3e9, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_ZEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000024, 4)",
+    "INT_SEXT|out=(register, 0x14, 4)|in0=(unique, 0x47600, 1)",
+    "INT_MULT|out=(unique, 0x10000008, 4)|in0=(register, 0x0, 4)|in1=(const, 0x4, 4)",
+    "LOAD|out=(register, 0x10, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+    "PTRSUB|out=(unique, 0x10000018, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802d3224, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000018, 4)|in1=(register, 0x14, 4)|in2=(const, 0x4, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(register, 0x10, 4)|in1=(unique, 0x10000008, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x10000028, 4)",
+    "CAST|out=(unique, 0x10000028, 4)|in0=(unique, 0x4ec00, 4)",
+    "CALLIND|out=|in0=(register, 0x30, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "3c8c50d92fbac00aa95841d26ca3fbaaa88f99d50b73f88d431fd850cdc34ba4",
+    "normalized_pcode": "6a286929af9aafdf22a59bb06422b0facf101136b8cab295a7628ae3e887ccff"
+  }
+}

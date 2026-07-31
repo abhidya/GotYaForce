@@ -1,0 +1,43 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800529ec",
+    "name": "zz_00529ec_",
+    "prototype": "undefined zz_00529ec_(void)",
+    "body_ranges": [
+      [
+        "800529ec",
+        "800529fb"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_00529ec_(void)\r\n\r\n{\r\n  *(undefined1 *)(DAT_80436198 + 0xd) = 0;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "lwz r3,-0x5408(r13)",
+    "li r0,0x0",
+    "stb r0,0xd(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000000, 4)|in0=(ram, 0x80436198, 4)|in1=(const, 0xd, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "INDIRECT|out=(ram, 0x80436198, 4)|in0=(ram, 0x80436198, 4)|in1=(const, 0x4, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000000, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80436198, 4)|in0=(ram, 0x80436198, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "5021b015b0b23c2270f8aa749ee0c070326d0c0fb777670ab0b21acefcc506cc",
+    "normalized_pcode": "3baf34da4ddfe1d25a5baa9534cbe7bfccc94e2c82ed21664180a3392a14c7e6"
+  }
+}

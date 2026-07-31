@@ -1,0 +1,55 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80057fac",
+    "name": "zz_0057fac_",
+    "prototype": "undefined zz_0057fac_(void)",
+    "body_ranges": [
+      [
+        "80057fac",
+        "80057fc7"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0057fac_(int param_1,undefined4 *param_2)\r\n\r\n{\r\n  undefined4 uVar1;\r\n  \r\n  uVar1 = param_2[1];\r\n  *(undefined4 *)(param_1 + 0x20) = *param_2;\r\n  *(undefined4 *)(param_1 + 0x24) = uVar1;\r\n  *(undefined4 *)(param_1 + 0x28) = param_2[2];\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "lwz r5,0x0(r4)",
+    "lwz r0,0x4(r4)",
+    "stw r5,0x20(r3)",
+    "stw r0,0x24(r3)",
+    "lwz r0,0x8(r4)",
+    "stw r0,0x28(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "LOAD|out=(register, 0x14, 4)|in0=(const, 0x1a1, 4)|in1=(register, 0x10, 4)",
+    "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(register, 0x10, 4)|in1=(const, 0x1, 4)|in2=(const, 0x4, 4)",
+    "INT_ADD|out=(unique, 0x10000008, 4)|in0=(register, 0xc, 4)|in1=(const, 0x20, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x14, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000008, 4)",
+    "INT_ADD|out=(unique, 0x1000000c, 4)|in0=(register, 0xc, 4)|in1=(const, 0x24, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x0, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000c, 4)",
+    "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(register, 0x10, 4)|in1=(const, 0x2, 4)|in2=(const, 0x4, 4)",
+    "INT_ADD|out=(unique, 0x10000010, 4)|in0=(register, 0xc, 4)|in1=(const, 0x28, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x0, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000010, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "30cbd9dce44d23e766153d39cc78ab7e6f848a1246bb0213599a0f4237d6e496",
+    "normalized_pcode": "98fc6abe214ee31b8086fbe843b6c69ac8f69dbe277308a7440d146964a15701"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800165cc",
+    "name": "zz_00165cc_",
+    "prototype": "undefined zz_00165cc_(void)",
+    "body_ranges": [
+      [
+        "800165cc",
+        "800165eb"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_00165cc_(void)\r\n\r\n{\r\n  zz_00165ec_();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "bl 0x800165ec",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x800165ec, 8)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "800165ec"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "ec2bbc031547f2e3d2ccada4b7d1254dcc709c51428961a3f37924815b875ab9",
+    "normalized_pcode": "46af460542a62e0e7db3600d9c5bd2bcf284f980f1f17cd81f3a3a31caa2fbd0"
+  }
+}

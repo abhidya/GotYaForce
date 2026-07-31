@@ -1,24 +1,49 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x80008998",
+    "address": "80008998",
     "name": "cCameraManager::HasCamera(cBaseCamera",
-    "metadata": "No program loaded",
-    "thunk": false
+    "prototype": "undefined cCameraManager::HasCamera(cBaseCamera(void)",
+    "body_ranges": [
+      [
+        "80008998",
+        "800089bf"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\nvoid cCameraManager__HasCamera_cBaseCamera(undefined4 param_1)\r\n\r\n{\r\n  gnt4_HSD_CObjGetInterest_bl(DAT_80436210,param_1);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
   "normalized_disassembly": [
-    "no program loaded"
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "or r4,r3,r3",
+    "stw r0,0x14(r1)",
+    "lwz r3,-0x5390(r13)",
+    "bl 0x8024712c",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
   ],
-  "calls": [],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x8024712c, 8)|in1=(ram, 0x80436210, 4)|in2=(register, 0xc, 4)",
+    "INDIRECT|out=(ram, 0x80436210, 4)|in0=(ram, 0x80436210, 4)|in1=(const, 0xb, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80436210, 4)|in0=(ram, 0x80436210, 4)"
+  ],
+  "calls": [
+    "8024712c"
+  ],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": "cdd046741164f0176af3a5dedd8449666353a2850fa823dddeed4fd70b38434a",
-    "normalized_pcode": null
+    "instruction_shape": "93f46dacce5e973922f6896848e60f8132723dc6c1a2f55ede74cab32ae2ad54",
+    "normalized_pcode": "22920d8213b4d2f79fec97135108938eb9b2aa61b45ce85c9649724d3750f080"
   }
 }

@@ -1,0 +1,60 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80041b20",
+    "name": "zz_0041b20_",
+    "prototype": "undefined zz_0041b20_(void)",
+    "body_ranges": [
+      [
+        "80041b20",
+        "80041b57"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0041b20_(int param_1)\r\n\r\n{\r\n  zz_004be08_(*(undefined4 *)(&DAT_803c4d7c + *(char *)(param_1 + 0x3e4) * 4));\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "lbz r0,0x3e4(r3)",
+    "lis r3,-0x7fc4",
+    "addi r3,r3,0x4d7c",
+    "extsb r0,r0",
+    "rlwinm r0,r0,0x2,0x0,0x1d",
+    "lwzx r3,r3,r0",
+    "bl 0x8004be08",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x1000000a, 4)|in0=(register, 0xc, 4)|in1=(const, 0x3e4, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000a, 4)",
+    "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+    "INT_MULT|out=(unique, 0x66200, 4)|in0=(register, 0x0, 4)|in1=(const, 0x4, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000006, 4)|in1=(unique, 0x66200, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(register, 0xc, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x1000000e, 4)",
+    "PTRSUB|out=(unique, 0x10000006, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803c4d7c, 4)",
+    "CAST|out=(unique, 0x1000000e, 4)|in0=(unique, 0x4ec00, 4)",
+    "CALL|out=|in0=(ram, 0x8004be08, 8)|in1=(register, 0xc, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "8004be08"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "f8bc2dbef88bf01b8e627369431c0d9d9a88fbca05b75d734d6c50e99ed95fea",
+    "normalized_pcode": "3a13de93a41d1c3204563c6052f9570ad798077a2035d8d8bfe314f95e8a0376"
+  }
+}

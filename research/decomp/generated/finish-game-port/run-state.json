@@ -10,22 +10,22 @@
     "role": "none",
     "vectors_required": false
   },
-  "status": "stopped",
-  "started_at": "2026-07-31T01:13:58.860400Z",
-  "updated_at": "2026-07-31T01:14:59.095132Z",
+  "status": "paused",
+  "started_at": "2026-07-31T01:30:04.722823Z",
+  "updated_at": "2026-07-31T01:35:51.420124Z",
   "current_stage": "bundles",
   "total_stages": 5,
   "stages": {
     "inventory": {
       "label": "Inventory all Ghidra functions",
       "status": "passed",
-      "finished_at": "2026-07-31T01:14:07.940115Z",
+      "finished_at": "2026-07-31T01:30:09.054266Z",
       "detail": "11972 functions restored"
     },
     "bundles": {
       "label": "Extract and fingerprint structured bundles",
       "status": "running",
-      "started_at": "2026-07-31T01:14:08.149265Z"
+      "started_at": "2026-07-31T01:30:09.278267Z"
     },
     "groups": {
       "label": "Build exact equivalence groups and dependency order",
@@ -43,18 +43,16 @@
   "queue": [],
   "progress": {
     "phase": "bundles",
-    "completed_work": 110,
+    "completed_work": 1100,
     "total_work": 11972,
-    "percent": 0.9188105579685933,
-    "items_per_second": 2.151972282597124,
-    "eta_seconds": 5512.152779999682,
+    "percent": 9.188105579685933,
+    "items_per_second": 3.3185707217590283,
+    "eta_seconds": 3276.109178181754,
     "eta_source": "observed_unit_rate"
   },
   "promotion": {
     "status": "not_started",
     "rolled_back": false
   },
-  "manifest": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\whole-program-manifest.json",
-  "stop_reason": "stop requested at a durable scheduler boundary",
-  "stopped_at": "2026-07-31T01:14:59.095132Z"
+  "manifest": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\whole-program-manifest.json"
 }

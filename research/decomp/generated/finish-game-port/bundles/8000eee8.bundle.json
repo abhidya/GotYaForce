@@ -1,0 +1,57 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8000eee8",
+    "name": "FUN_8000eee8",
+    "prototype": "undefined FUN_8000eee8(void)",
+    "body_ranges": [
+      [
+        "8000eee8",
+        "8000ef1f"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_8000eee8(int param_1)\r\n\r\n{\r\n  (*(code *)(&PTR_FUN_804335c8)[*(char *)(param_1 + 0x19)])();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "subi r5,r13,0x7fd8",
+    "stw r0,0x14(r1)",
+    "lbz r0,0x19(r3)",
+    "extsb r0,r0",
+    "rlwinm r0,r0,0x2,0x0,0x1d",
+    "lwzx r12,r5,r0",
+    "mtspr ctr,r12",
+    "bctrl",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x1000000e, 4)|in0=(register, 0xc, 4)|in1=(const, 0x19, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000e, 4)",
+    "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+    "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+    "PTRSUB|out=(unique, 0x10000006, 4)|in0=(const, 0x0, 4)|in1=(const, 0x804335c8, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000006, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+    "CALLIND|out=|in0=(unique, 0x10000012, 4)",
+    "CAST|out=(unique, 0x10000012, 4)|in0=(register, 0x30, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "fc7fe69618c42f7e4e286e9d73efd95a6eaf2eb1961338f444a387b927f329f4",
+    "normalized_pcode": "db0dc2a9b1854b877ba5b845d6ea30e7e51b5be6e255840cdcc6e35584bc1a6e"
+  }
+}

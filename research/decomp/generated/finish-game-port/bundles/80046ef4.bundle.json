@@ -1,0 +1,48 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80046ef4",
+    "name": "zz_0046ef4_",
+    "prototype": "undefined zz_0046ef4_(void)",
+    "body_ranges": [
+      [
+        "80046ef4",
+        "80046f07"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0046ef4_(int param_1)\r\n\r\n{\r\n  *(float *)(param_1 + 0x1d60) = *(float *)(param_1 + 0x1d60) * FLOAT_8043709c;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "lfs f1,0x1d60(r3)",
+    "lfs f0,-0x7984(r2)",
+    "fmuls f0,f1,f0",
+    "stfs f0,0x1d60(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000010, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1d60, 4)",
+    "LOAD|out=(unique, 0x48700, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000010, 4)",
+    "FLOAT_MULT|out=(unique, 0x10000004, 4)|in0=(unique, 0x48700, 4)|in1=(ram, 0x8043709c, 4)",
+    "INT_ADD|out=(unique, 0x10000014, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1d60, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(unique, 0x10000004, 4)",
+    "INDIRECT|out=(ram, 0x8043709c, 4)|in0=(ram, 0x8043709c, 4)|in1=(const, 0x2c, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000014, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x8043709c, 4)|in0=(ram, 0x8043709c, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "5028f94194214a9897f5a6b0b0db3937291df70591dd837011b9ba5739e92b7a",
+    "normalized_pcode": "b4c421c2cc2f7c56ee022dc6858328c709e3407753b26152f4019e3e1dbad293"
+  }
+}

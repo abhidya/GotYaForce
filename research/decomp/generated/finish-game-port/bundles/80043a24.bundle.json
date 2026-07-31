@@ -1,0 +1,62 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80043a24",
+    "name": "zz_0043a24_",
+    "prototype": "undefined zz_0043a24_(void)",
+    "body_ranges": [
+      [
+        "80043a24",
+        "80043a63"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0043a24_(int param_1)\r\n\r\n{\r\n  zz_0197ad8_((&DAT_803bb32c)[*(int *)(&DAT_802d0a00 + param_1 * 8) * 2]);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "lis r5,-0x7fd3",
+    "lis r4,-0x7fc4",
+    "stw r0,0x14(r1)",
+    "rlwinm r0,r3,0x3,0x0,0x1c",
+    "addi r5,r5,0xa00",
+    "subi r3,r4,0x4cd4",
+    "lwzx r0,r5,r0",
+    "rlwinm r0,r0,0x3,0x0,0x1c",
+    "lwzx r3,r3,r0",
+    "bl 0x80197ad8",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_MULT|out=(unique, 0x66200, 4)|in0=(register, 0xc, 4)|in1=(const, 0x8, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000007, 4)|in1=(unique, 0x66200, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x10000017, 4)",
+    "PTRSUB|out=(unique, 0x10000007, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802d0a00, 4)",
+    "CAST|out=(unique, 0x10000017, 4)|in0=(unique, 0x4ec00, 4)",
+    "LOAD|out=(register, 0xc, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+    "PTRSUB|out=(unique, 0x1000000b, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803bb32c, 4)",
+    "INT_MULT|out=(unique, 0x1000000f, 4)|in0=(register, 0x0, 4)|in1=(const, 0x2, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x1000000b, 4)|in1=(unique, 0x1000000f, 4)|in2=(const, 0x4, 4)",
+    "CALL|out=|in0=(ram, 0x80197ad8, 8)|in1=(register, 0xc, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "80197ad8"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "8b2c58aca9353a269ec5fc8b1176391d414c549bdc6a01ed6f10b7e2f7ec06d8",
+    "normalized_pcode": "288ba9fb9f179fbcb6bdfb0bea17a61bfa3315329895db8728042043ed40f409"
+  }
+}

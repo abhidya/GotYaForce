@@ -1,0 +1,60 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800455b0",
+    "name": "FUN_800455b0",
+    "prototype": "undefined FUN_800455b0(void)",
+    "body_ranges": [
+      [
+        "800455b0",
+        "800455fb"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_800455b0(undefined4 param_1,undefined4 param_2)\r\n\r\n{\r\n  undefined1 auStack_38 [48];\r\n  \r\n  gnt4_PSMTXTrans_bl(auStack_38);\r\n  gnt4_PSMTXConcat_bl(param_1,auStack_38,param_2);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x40(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x44(r1)",
+    "stw r31,0x3c(r1)",
+    "or r31,r4,r4",
+    "stw r30,0x38(r1)",
+    "or r30,r3,r3",
+    "addi r3,r1,0x8",
+    "bl 0x8020b478",
+    "or r3,r30,r30",
+    "or r5,r31,r31",
+    "addi r4,r1,0x8",
+    "bl 0x8020af5c",
+    "lwz r0,0x44(r1)",
+    "lwz r31,0x3c(r1)",
+    "lwz r30,0x38(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x40",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "PTRSUB|out=(register, 0xc, 4)|in0=(register, 0x4, 4)|in1=(const, 0xffffffc8, 4)",
+    "CALL|out=|in0=(ram, 0x8020b478, 8)|in1=(register, 0xc, 4)",
+    "PTRSUB|out=(register, 0x10, 4)|in0=(register, 0x4, 4)|in1=(const, 0xffffffc8, 4)",
+    "CALL|out=|in0=(ram, 0x8020af5c, 8)|in1=(register, 0xc, 4)|in2=(register, 0x10, 4)|in3=(register, 0x10, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "8020af5c",
+    "8020b478"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "e60206081217bba3467a588c56a25db1c5f912487c9bfe0a19d6ec5747592544",
+    "normalized_pcode": "14af64dad1c515264db4bc37f9feef324ac243ee800fa8648431ccffca290a16"
+  }
+}

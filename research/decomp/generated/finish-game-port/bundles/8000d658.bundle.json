@@ -1,0 +1,59 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8000d658",
+    "name": "zz_000d658_",
+    "prototype": "undefined zz_000d658_(void)",
+    "body_ranges": [
+      [
+        "8000d658",
+        "8000d693"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_000d658_(int param_1)\r\n\r\n{\r\n  (**(code **)(&DAT_802c3900 + *(char *)(param_1 + 0x2e6) * 4))();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "lis r5,-0x7fd4",
+    "stw r0,0x14(r1)",
+    "addi r5,r5,0x3900",
+    "lbz r0,0x2e6(r3)",
+    "extsb r0,r0",
+    "rlwinm r0,r0,0x2,0x0,0x1d",
+    "lwzx r12,r5,r0",
+    "mtspr ctr,r12",
+    "bctrl",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x1000000a, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2e6, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000a, 4)",
+    "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x47600, 1)",
+    "INT_MULT|out=(unique, 0x66200, 4)|in0=(register, 0x0, 4)|in1=(const, 0x4, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000006, 4)|in1=(unique, 0x66200, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x1000000e, 4)",
+    "PTRSUB|out=(unique, 0x10000006, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802c3900, 4)",
+    "CAST|out=(unique, 0x1000000e, 4)|in0=(unique, 0x4ec00, 4)",
+    "CALLIND|out=|in0=(register, 0x30, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "60839fd169a0b4480f89aef8b2e2ac86fd9ce237a71b39ef3937cd899dd792bb",
+    "normalized_pcode": "11e7d42c6886b0fab95c84fd318aaf127bb91a63d42caba62edec2b008fc0900"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8002111c",
+    "name": "zz_002111c_",
+    "prototype": "undefined zz_002111c_(void)",
+    "body_ranges": [
+      [
+        "8002111c",
+        "80021133"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_002111c_(int param_1)\r\n\r\n{\r\n  *(undefined1 *)(param_1 + 0x2e4) = 4;\r\n  *(undefined1 *)(param_1 + 0x2e5) = 0;\r\n  *(undefined1 *)(param_1 + 0x2e6) = 0;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "li r4,0x4",
+    "li r0,0x0",
+    "stb r4,0x2e4(r3)",
+    "stb r0,0x2e5(r3)",
+    "stb r0,0x2e6(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000000, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2e4, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x4, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000000, 4)",
+    "INT_ADD|out=(unique, 0x10000004, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2e5, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000004, 4)",
+    "INT_ADD|out=(unique, 0x10000008, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2e6, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000008, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "29315f36f6376c2c75da426e8552ded368e4c1caf86f8832ad3a88f49a9c8163",
+    "normalized_pcode": "0e67f6330e3d34e3ea733003c5e810c786b2505f37277e548c7a3ac1123096f1"
+  }
+}

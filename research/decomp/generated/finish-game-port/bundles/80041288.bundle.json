@@ -1,0 +1,57 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80041288",
+    "name": "zz_0041288_",
+    "prototype": "undefined zz_0041288_(void)",
+    "body_ranges": [
+      [
+        "80041288",
+        "800412c3"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0041288_(void)\r\n\r\n{\r\n  int iVar1;\r\n  \r\n  iVar1 = 0;\r\n  do {\r\n    zz_00410bc_(iVar1);\r\n    iVar1 = iVar1 + 1;\r\n  } while (iVar1 < 6);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "li r31,0x0",
+    "or r3,r31,r31",
+    "bl 0x800410bc",
+    "addi r31,r31,0x1",
+    "cmpwi r31,0x6",
+    "blt 0x8004129c",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "COPY|out=(register, 0x7c, 4)|in0=(const, 0x0, 4)",
+    "MULTIEQUAL|out=(register, 0x7c, 4)|in0=(register, 0x7c, 4)|in1=(register, 0x7c, 4)",
+    "CALL|out=|in0=(ram, 0x800410bc, 8)|in1=(register, 0x7c, 4)",
+    "INT_ADD|out=(register, 0x7c, 4)|in0=(register, 0x7c, 4)|in1=(const, 0x1, 4)",
+    "INT_SLESS|out=(unique, 0x27a00, 1)|in0=(register, 0x7c, 4)|in1=(const, 0x6, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8004129c, 1)|in1=(unique, 0x27a00, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "800410bc"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "2026d8e9b727b223aae94571a923dcc5dde8838c38dfe23022da38c7023b8d43",
+    "normalized_pcode": "bfa0556d377717d9b594745b1e4469273ffc20ab95b247ca5e82a274e7af87d4"
+  }
+}

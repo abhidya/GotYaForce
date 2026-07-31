@@ -1,0 +1,85 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8004437c",
+    "name": "zz_004437c_",
+    "prototype": "undefined zz_004437c_(void)",
+    "body_ranges": [
+      [
+        "8004437c",
+        "800443eb"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_004437c_(int param_1)\r\n\r\n{\r\n  int iVar1;\r\n  \r\n  iVar1 = DAT_80436238 + *(int *)(&DAT_80433698 + param_1 * 4);\r\n  zz_000af84_(0xaa9,iVar1);\r\n  DAT_803bb33c = 0;\r\n  DAT_803bb340 = iVar1;\r\n  zz_000a154_(zz_0040edc_,1);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "subi r4,r13,0x7f08",
+    "stw r0,0x14(r1)",
+    "rlwinm r0,r3,0x2,0x0,0x1d",
+    "li r3,0xaa9",
+    "stw r31,0xc(r1)",
+    "lwz r5,-0x5368(r13)",
+    "lwzx r0,r4,r0",
+    "add r31,r5,r0",
+    "or r4,r31,r31",
+    "bl 0x8000af84",
+    "lis r4,-0x7fc4",
+    "lis r3,-0x7ffc",
+    "subi r4,r4,0x4cd4",
+    "li r0,0x0",
+    "addi r5,r4,0x10",
+    "stw r31,0x14(r4)",
+    "addi r3,r3,0xedc",
+    "li r4,0x1",
+    "stw r0,0x0(r5)",
+    "crxor 4*cr1+eq,4*cr1+eq,4*cr1+eq",
+    "bl 0x8000a154",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_MULT|out=(unique, 0x66200, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x1000000f, 4)|in1=(unique, 0x66200, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x10000017, 4)",
+    "PTRSUB|out=(unique, 0x1000000f, 4)|in0=(const, 0x0, 4)|in1=(const, 0x80433698, 4)",
+    "CAST|out=(unique, 0x10000017, 4)|in0=(unique, 0x4ec00, 4)",
+    "INT_ADD|out=(register, 0x7c, 4)|in0=(ram, 0x80436238, 4)|in1=(register, 0x0, 4)",
+    "CALL|out=|in0=(ram, 0x8000af84, 8)|in1=(const, 0xaa9, 4)|in2=(register, 0x7c, 4)",
+    "INDIRECT|out=(ram, 0x803bb33c, 4)|in0=(ram, 0x803bb33c, 4)|in1=(const, 0x18, 4)",
+    "INDIRECT|out=(ram, 0x803bb340, 4)|in0=(ram, 0x803bb340, 4)|in1=(const, 0x18, 4)",
+    "INDIRECT|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)|in1=(const, 0x18, 4)",
+    "COPY|out=(ram, 0x803bb33c, 4)|in0=(const, 0x0, 4)",
+    "CALL|out=|in0=(ram, 0x8000a154, 8)|in1=(unique, 0x1000000b, 4)|in2=(const, 0x1, 4)",
+    "INDIRECT|out=(ram, 0x803bb33c, 4)|in0=(ram, 0x803bb33c, 4)|in1=(const, 0x39, 4)",
+    "INDIRECT|out=(ram, 0x803bb340, 4)|in0=(unique, 0x10000013, 4)|in1=(const, 0x39, 4)",
+    "INDIRECT|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)|in1=(const, 0x39, 4)",
+    "PTRSUB|out=(unique, 0x1000000b, 4)|in0=(const, 0x0, 4)|in1=(const, 0x80040edc, 4)",
+    "COPY|out=(unique, 0x10000013, 4)|in0=(register, 0x7c, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x803bb33c, 4)|in0=(ram, 0x803bb33c, 4)",
+    "COPY|out=(ram, 0x803bb340, 4)|in0=(ram, 0x803bb340, 4)",
+    "COPY|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)"
+  ],
+  "calls": [
+    "8000a154",
+    "8000af84"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "680b19515b91d2b15de44a45f769dd08feca30213ad47b3b1d52a381e8a21deb",
+    "normalized_pcode": "5b048f4afee1a7a0183771b17ea0509412c6123ce32bd5e8e9882537d9cba9c5"
+  }
+}

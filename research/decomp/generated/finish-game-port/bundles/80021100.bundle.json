@@ -1,0 +1,53 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80021100",
+    "name": "zz_0021100_",
+    "prototype": "undefined zz_0021100_(void)",
+    "body_ranges": [
+      [
+        "80021100",
+        "8002111b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0021100_(int param_1)\r\n\r\n{\r\n  *(undefined1 *)(param_1 + 0x2e4) = 3;\r\n  *(undefined1 *)(param_1 + 0x2e5) = 0;\r\n  *(undefined1 *)(param_1 + 0x2e6) = 0;\r\n  *(undefined1 *)(param_1 + 0x2e7) = 0;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "li r4,0x3",
+    "li r0,0x0",
+    "stb r4,0x2e4(r3)",
+    "stb r0,0x2e5(r3)",
+    "stb r0,0x2e6(r3)",
+    "stb r0,0x2e7(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000000, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2e4, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x3, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000000, 4)",
+    "INT_ADD|out=(unique, 0x10000004, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2e5, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000004, 4)",
+    "INT_ADD|out=(unique, 0x10000008, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2e6, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000008, 4)",
+    "INT_ADD|out=(unique, 0x1000000c, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2e7, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000c, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "9423ad2e5081b539942f0204b192a9779c4b06c24740b3567a98961d627ddce3",
+    "normalized_pcode": "0a51f09d5d4910b675c2ad717cdb02523f5b7384e383f7bee116894dfdafc596"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800528b4",
+    "name": "zz_00528b4_",
+    "prototype": "undefined zz_00528b4_(void)",
+    "body_ranges": [
+      [
+        "800528b4",
+        "80052903"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_00528b4_(void)\r\n\r\n{\r\n  zz_0005668_(0);\r\n  zz_00058d0_(0,1);\r\n  zz_008c154_();\r\n  zz_0050800_(6,0);\r\n  zz_0050800_(7,0);\r\n  zz_0050604_();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "li r3,0x0",
+    "stw r0,0x14(r1)",
+    "bl 0x80005668",
+    "li r3,0x0",
+    "li r4,0x1",
+    "bl 0x800058d0",
+    "bl 0x8008c154",
+    "li r3,0x6",
+    "li r4,0x0",
+    "bl 0x80050800",
+    "li r3,0x7",
+    "li r4,0x0",
+    "bl 0x80050800",
+    "bl 0x80050604",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x80005668, 8)|in1=(const, 0x0, 4)",
+    "CALL|out=|in0=(ram, 0x800058d0, 8)|in1=(const, 0x0, 4)|in2=(const, 0x1, 4)",
+    "CALL|out=|in0=(ram, 0x8008c154, 8)",
+    "CALL|out=|in0=(ram, 0x80050800, 8)|in1=(const, 0x6, 4)|in2=(const, 0x0, 4)",
+    "CALL|out=|in0=(ram, 0x80050800, 8)|in1=(const, 0x7, 4)|in2=(const, 0x0, 4)",
+    "CALL|out=|in0=(ram, 0x80050604, 8)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "80005668",
+    "800058d0",
+    "80050604",
+    "80050800",
+    "8008c154"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "e0295286412c30680515197fd2f071d3b697168138be1daf02f1e4a5e87395f2",
+    "normalized_pcode": "9a7da1b341bb0877b78ef36a109dc2c0547bb7afd661d10db301b0972b76fc66"
+  }
+}

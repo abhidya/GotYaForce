@@ -1,0 +1,42 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80052da8",
+    "name": "Wiper::CutHasOccured(",
+    "prototype": "undefined Wiper::CutHasOccured((void)",
+    "body_ranges": [
+      [
+        "80052da8",
+        "80052db3"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nundefined1 Wiper__CutHasOccured_(void)\r\n\r\n{\r\n  return *(undefined1 *)(DAT_80436198 + 5);\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "lwz r3,-0x5408(r13)",
+    "lbz r3,0x5(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000000, 4)|in0=(ram, 0x80436198, 4)|in1=(const, 0x5, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "COPY|out=(register, 0xf, 1)|in0=(unique, 0x47600, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000000, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xf, 1)",
+    "COPY|out=(ram, 0x80436198, 4)|in0=(ram, 0x80436198, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "bcbd0bbe1b712410f6b0f71d4cdff2cc13acfd1c43fb945c26d2922fe8a65294",
+    "normalized_pcode": "9c759198d3feba8cf117885e7cccd38b506f4bc048b70e74cf0c7358ff2156fb"
+  }
+}

@@ -1,15 +1,22 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x80003140",
+    "address": "80003140",
     "name": "__set_debug_bba",
-    "metadata": "Function: __set_debug_bba at 80003140\nSignature: undefined __set_debug_bba(void)\nEntry: 80003140\nBody: 80003140 - 8000314b",
-    "thunk": false
+    "prototype": "undefined __set_debug_bba(void)",
+    "body_ranges": [
+      [
+        "80003140",
+        "8000314b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\nvoid __set_debug_bba(void)\r\n\r\n{\r\n  DAT_80436498 = 1;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
@@ -18,9 +25,15 @@
     "stb r0,-0x5108(r13)",
     "blr"
   ],
+  "normalized_pcode": [
+    "COPY|out=(ram, 0x80436498, 1)|in0=(const, 0x1, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80436498, 1)|in0=(ram, 0x80436498, 1)"
+  ],
   "calls": [],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": "4e23ae8236151c922717f532cc20c31712354fed7c8410234230f795361a2efa",
-    "normalized_pcode": null
+    "instruction_shape": "7f80632f67ea0de90149308b6aa2f9e32d9b851499a5c932db40ffa4311cfd7b",
+    "normalized_pcode": "5540fa360ec55ae339503b9b8a5d7961078ef4051a77711bf1585feb265bed03"
   }
 }

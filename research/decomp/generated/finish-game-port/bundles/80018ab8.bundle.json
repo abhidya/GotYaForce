@@ -1,0 +1,81 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80018ab8",
+    "name": "zz_0018ab8_",
+    "prototype": "undefined zz_0018ab8_(void)",
+    "body_ranges": [
+      [
+        "80018ab8",
+        "80018b0f"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nint zz_0018ab8_(int param_1,int param_2)\r\n\r\n{\r\n  if ((param_1 == 1) && ((param_2 - 4U < 2 || (param_2 == 6)))) {\r\n    return 0x7fffffff;\r\n  }\r\n  if (param_1 < 7) {\r\n    if (param_1 == -1) {\r\n      return -1;\r\n    }\r\n    if ((-2 < param_1) && (3 < param_1)) {\r\n      return param_1;\r\n    }\r\n  }\r\n  else if (param_1 == 0xb) {\r\n    return 0xb;\r\n  }\r\n  return 0;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "cmpwi r3,0x1",
+    "bne 0x80018ae0",
+    "subi r0,r4,0x4",
+    "cmplwi r0,0x1",
+    "ble 0x80018ad4",
+    "cmpwi r4,0x6",
+    "bne 0x80018ae0",
+    "lis r3,-0x8000",
+    "subi r3,r3,0x1",
+    "blr",
+    "cmpwi r3,0x7",
+    "bge 0x80018b00",
+    "cmpwi r3,-0x1",
+    "beqlr",
+    "blt 0x80018b08",
+    "cmpwi r3,0x4",
+    "bgelr",
+    "b 0x80018b08",
+    "cmpwi r3,0xb",
+    "beqlr",
+    "li r3,0x0",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x1, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80018ae0, 1)|in1=(unique, 0x27f00, 1)",
+    "INT_SUB|out=(register, 0x0, 4)|in0=(register, 0x10, 4)|in1=(const, 0x4, 4)",
+    "INT_LESS|out=(unique, 0x2ac00, 1)|in0=(register, 0x0, 4)|in1=(const, 0x2, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80018ad4, 1)|in1=(unique, 0x2ac00, 1)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0x10, 4)|in1=(const, 0x6, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80018ae0, 1)|in1=(unique, 0x27f00, 1)",
+    "COPY|out=(register, 0xc, 4)|in0=(const, 0x7fffffff, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)",
+    "INT_SLESS|out=(unique, 0x27a00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x7, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80018b00, 1)|in1=(unique, 0x27a00, 1)",
+    "INT_SLESS|out=(unique, 0x27a00, 1)|in0=(const, 0xfffffffe, 4)|in1=(register, 0xc, 4)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0xffffffff, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80018af0, 1)|in1=(unique, 0x27f00, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)",
+    "COPY|out=(register, 0xc, 4)|in0=(const, 0xffffffff, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80018b08, 1)|in1=(unique, 0x27a00, 1)",
+    "INT_SLESS|out=(unique, 0x27a00, 1)|in0=(const, 0x3, 4)|in1=(register, 0xc, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80018afc, 1)|in1=(unique, 0x27a00, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0xb, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80018b08, 1)|in1=(unique, 0x27f00, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)",
+    "COPY|out=(register, 0xc, 4)|in0=(const, 0xb, 4)",
+    "COPY|out=(register, 0xc, 4)|in0=(const, 0x0, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "e63321a14c87c622212d15d34353dc760d88067cd7b7400ef2f88e5d92a619b1",
+    "normalized_pcode": "77d7a23a6a2f900b5ce10282b8130b606eca36dd543f7dd862254a741c37967f"
+  }
+}

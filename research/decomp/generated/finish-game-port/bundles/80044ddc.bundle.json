@@ -1,0 +1,50 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80044ddc",
+    "name": "zz_0044ddc_",
+    "prototype": "undefined zz_0044ddc_(void)",
+    "body_ranges": [
+      [
+        "80044ddc",
+        "80044e07"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0044ddc_(void)\r\n\r\n{\r\n  zz_0197ad8_(DAT_803bb364);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "lis r3,-0x7fc4",
+    "stw r0,0x14(r1)",
+    "subi r3,r3,0x4cd4",
+    "lwz r3,0x38(r3)",
+    "bl 0x80197ad8",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x80197ad8, 8)|in1=(ram, 0x803bb364, 4)",
+    "INDIRECT|out=(ram, 0x803bb364, 4)|in0=(ram, 0x803bb364, 4)|in1=(const, 0xc, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x803bb364, 4)|in0=(ram, 0x803bb364, 4)"
+  ],
+  "calls": [
+    "80197ad8"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "c53d1bf200e16e3ad45aec9a4b17acd911b76fe4f2bb2af8ed04d041b148cfe4",
+    "normalized_pcode": "c01feaa2d7ab6027406ef1f7c69859f86063386e12e508ae0fe9791fe84de7b1"
+  }
+}

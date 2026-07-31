@@ -1,0 +1,50 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80040910",
+    "name": "zz_0040910_",
+    "prototype": "undefined zz_0040910_(void)",
+    "body_ranges": [
+      [
+        "80040910",
+        "8004093f"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0040910_(void)\r\n\r\n{\r\n  gnt4_memset(&DAT_803bb168,0,0x1c4);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "lis r3,-0x7fc4",
+    "li r4,0x0",
+    "stw r0,0x14(r1)",
+    "subi r3,r3,0x4e98",
+    "li r5,0x1c4",
+    "bl 0x8000540c",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x8000540c, 8)|in1=(unique, 0x10000005, 4)|in2=(const, 0x0, 4)|in3=(const, 0x1c4, 4)",
+    "PTRSUB|out=(unique, 0x10000005, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803bb168, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "8000540c"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "9c7eac996b7f9a3ef98d5b878471fdcf92b5046f832774d44ef3ea761d335f09",
+    "normalized_pcode": "e2faaa367f28db512c0dfaeafdf66f9bcbc0dfae937112b21551a52154c8962b"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8003fdb8",
+    "name": "zz_003fdb8_",
+    "prototype": "undefined zz_003fdb8_(void)",
+    "body_ranges": [
+      [
+        "8003fdb8",
+        "8003fdef"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_003fdb8_(void)\r\n\r\n{\r\n  int iVar1;\r\n  \r\n  iVar1 = zz_0088190_();\r\n  if (iVar1 != 0) {\r\n    PTR_DAT_80433938[1] = PTR_DAT_80433938[1] + '\\x01';\r\n  }\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "bl 0x80088190",
+    "cmpwi r3,0x0",
+    "beq 0x8003fde0",
+    "lwz r4,-0x7c68(r13)",
+    "lbz r3,0x1(r4)",
+    "addi r0,r3,0x1",
+    "stb r0,0x1(r4)",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x80088190, 8)",
+    "INDIRECT|out=(ram, 0x80433938, 4)|in0=(ram, 0x80433938, 4)|in1=(const, 0x8, 4)",
+    "INT_NOTEQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8003fde0, 1)|in1=(unique, 0x27f00, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433938, 4)|in1=(const, 0x1, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_ADD|out=(register, 0x3, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x1, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433938, 4)|in1=(const, 0x1, 4)|in2=(const, 0x1, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x3, 1)",
+    "INDIRECT|out=(ram, 0x80433938, 4)|in0=(ram, 0x80433938, 4)|in1=(const, 0x21, 4)",
+    "MULTIEQUAL|out=(ram, 0x80433938, 4)|in0=(ram, 0x80433938, 4)|in1=(ram, 0x80433938, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80433938, 4)|in0=(ram, 0x80433938, 4)"
+  ],
+  "calls": [
+    "80088190"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "01768040c32a6c045a465b1ed1206850797de76f62a416b7b6607992e0841e26",
+    "normalized_pcode": "59f862fdb7fbb347a2362f40138260ef838b955671a2c4d646c7eb2ea6ca93a6"
+  }
+}

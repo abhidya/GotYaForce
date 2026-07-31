@@ -1,0 +1,48 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80045010",
+    "name": "zz_0045010_",
+    "prototype": "undefined zz_0045010_(void)",
+    "body_ranges": [
+      [
+        "80045010",
+        "8004503b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0045010_(void)\r\n\r\n{\r\n  zz_000b124_(0x1e4,0xb22800);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "lis r4,0xb2",
+    "li r3,0x1e4",
+    "stw r0,0x14(r1)",
+    "addi r4,r4,0x2800",
+    "bl 0x8000b124",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x8000b124, 8)|in1=(const, 0x1e4, 4)|in2=(const, 0xb22800, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "8000b124"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "661e6fdbdbe2ce9a2bf0ddf545adfb2d619382e37407a2ba124163d0987338ff",
+    "normalized_pcode": "8a08b268a1f41cda551901097e2469e88d90cb075eaba8050b28be7a3449f447"
+  }
+}

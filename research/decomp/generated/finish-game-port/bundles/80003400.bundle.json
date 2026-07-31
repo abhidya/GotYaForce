@@ -1,15 +1,22 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x80003400",
+    "address": "80003400",
     "name": "gnt4-__init_hardware-bl",
-    "metadata": "Function: gnt4-__init_hardware-bl at 80003400\nSignature: undefined gnt4-__init_hardware-bl(void)\nEntry: 80003400\nBody: 80003400 - 80003423",
-    "thunk": false
+    "prototype": "undefined gnt4-__init_hardware-bl(void)",
+    "body_ranges": [
+      [
+        "80003400",
+        "80003423"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\nvoid gnt4___init_hardware_bl(void)\r\n\r\n{\r\n  gnt4___OSPSInit_bl();\r\n  gnt4___OSFPRInit_bl();\r\n  gnt4___OSCacheInit_bl();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
@@ -24,13 +31,20 @@
     "mtspr lr,r31",
     "blr"
   ],
-  "calls": [
-    "0x801feaf0",
-    "0x801ff548",
-    "0x80200934"
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x801ff548, 8)",
+    "CALL|out=|in0=(ram, 0x801feaf0, 8)",
+    "CALL|out=|in0=(ram, 0x80200934, 8)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
   ],
+  "calls": [
+    "801feaf0",
+    "801ff548",
+    "80200934"
+  ],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": "1cf219491f35c45f2c46324a6ffc014f9d93efd0cd4f3f18993e3b1c4d9158ef",
-    "normalized_pcode": null
+    "instruction_shape": "95a3dd5685ad46f3ec6a1eb655e175e43681ddffa22d991b68d5bd136b3fd56e",
+    "normalized_pcode": "4ee8aa4fe6447a355a550f03c8ad0c85355228353344883ad3a00ad5ac0e3eb2"
   }
 }

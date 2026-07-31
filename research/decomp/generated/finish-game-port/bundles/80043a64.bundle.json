@@ -1,0 +1,74 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80043a64",
+    "name": "zz_0043a64_",
+    "prototype": "undefined zz_0043a64_(void)",
+    "body_ranges": [
+      [
+        "80043a64",
+        "80043acf"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0043a64_(void)\r\n\r\n{\r\n  int iVar1;\r\n  \r\n  iVar1 = DAT_80436238 + 0xce000;\r\n  zz_000af84_(0x16,iVar1);\r\n  zz_000a154_(zz_008bed8_,4,iVar1,&DAT_803c012c,&DAT_803c010c,&DAT_803c0100);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "li r3,0x16",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "lwz r4,-0x5368(r13)",
+    "addis r31,r4,0xd",
+    "subi r31,r31,0x2000",
+    "or r4,r31,r31",
+    "bl 0x8000af84",
+    "lis r3,-0x7ff7",
+    "lis r6,-0x7fc4",
+    "lis r5,-0x7fc4",
+    "lis r4,-0x7fc4",
+    "addi r7,r5,0x10c",
+    "subi r3,r3,0x4128",
+    "addi r8,r4,0x100",
+    "addi r6,r6,0x12c",
+    "or r5,r31,r31",
+    "li r4,0x4",
+    "crxor 4*cr1+eq,4*cr1+eq,4*cr1+eq",
+    "bl 0x8000a154",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(register, 0x7c, 4)|in0=(ram, 0x80436238, 4)|in1=(const, 0xce000, 4)",
+    "CALL|out=|in0=(ram, 0x8000af84, 8)|in1=(const, 0x16, 4)|in2=(register, 0x7c, 4)",
+    "INDIRECT|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)|in1=(const, 0x11, 4)",
+    "CALL|out=|in0=(ram, 0x8000a154, 8)|in1=(unique, 0x1000000a, 4)|in2=(const, 0x4, 4)|in3=(register, 0x7c, 4)|in4=(unique, 0x10000016, 4)|in5=(unique, 0x10000012, 4)|in6=(unique, 0x1000000e, 4)",
+    "INDIRECT|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)|in1=(const, 0x31, 4)",
+    "PTRSUB|out=(unique, 0x1000000a, 4)|in0=(const, 0x0, 4)|in1=(const, 0x8008bed8, 4)",
+    "PTRSUB|out=(unique, 0x1000000e, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803c0100, 4)",
+    "PTRSUB|out=(unique, 0x10000012, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803c010c, 4)",
+    "PTRSUB|out=(unique, 0x10000016, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803c012c, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)"
+  ],
+  "calls": [
+    "8000a154",
+    "8000af84"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "f3c5b69b928f3a5e0863c7be5383058934f4e0f1b1c2de683da6e0938b178e64",
+    "normalized_pcode": "db72aba85163e600803323e7ec81f763068724351f3429b8eedde0c7cefd0358"
+  }
+}

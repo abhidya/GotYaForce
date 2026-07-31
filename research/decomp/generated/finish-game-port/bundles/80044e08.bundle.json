@@ -1,0 +1,35 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80044e08",
+    "name": "zz_0044e08_",
+    "prototype": "undefined zz_0044e08_(void)",
+    "body_ranges": [
+      [
+        "80044e08",
+        "80044e0b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0044e08_(void)\r\n\r\n{\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "blr"
+  ],
+  "normalized_pcode": [
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "b55caa8891875a08ac8f334aeead9ca9082b0cc834f6d2e3b472bf909f99bfcb",
+    "normalized_pcode": "9d7a2d65d95f7322561991735dd788c76a0b98e6f2210dfb88a2ab6a6d46b999"
+  }
+}

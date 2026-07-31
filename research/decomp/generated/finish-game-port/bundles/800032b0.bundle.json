@@ -1,15 +1,22 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x800032b0",
+    "address": "800032b0",
     "name": "__init_registers",
-    "metadata": "Function: __init_registers at 800032b0\nSignature: undefined __init_registers(void)\nEntry: 800032b0\nBody: 800032b0 - 8000331f",
-    "thunk": false
+    "prototype": "undefined __init_registers(void)",
+    "body_ranges": [
+      [
+        "800032b0",
+        "8000331f"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\nundefined8 __init_registers(void)\r\n\r\n{\r\n  return 0;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
@@ -43,9 +50,14 @@
     "li r29,0x0",
     "li r30,0x0"
   ],
+  "normalized_pcode": [
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(VARIABLE, 0x0, 8)",
+    "COPY|out=(VARIABLE, 0x0, 8)|in0=(const, 0x0, 8)"
+  ],
   "calls": [],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": "37d8713d3469fd01695a524a1df88425500c15ad4f107737f35867630dd38f96",
-    "normalized_pcode": null
+    "instruction_shape": "47fba05a1cfb40fd0e3fdf23e5f458b4302a0f5942632bf0206afd4616741af6",
+    "normalized_pcode": "7ec1fb6a31a3fdc7caa994ed406a4f0f53d0adc56d7c19c046ab2c3371b4fe49"
   }
 }

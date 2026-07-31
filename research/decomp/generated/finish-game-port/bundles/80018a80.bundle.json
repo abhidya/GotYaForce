@@ -1,0 +1,66 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80018a80",
+    "name": "zz_0018a80_",
+    "prototype": "undefined zz_0018a80_(void)",
+    "body_ranges": [
+      [
+        "80018a80",
+        "80018ab7"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0018a80_(void)\r\n\r\n{\r\n  DAT_804360f4 = gnt4_DVDGetDriveStatus_bl();\r\n  DAT_804360f8 = DAT_804360f4;\r\n  DAT_80436100 = DAT_804360f4;\r\n  DAT_80436104 = DAT_804360f4;\r\n  DAT_804360fc = 0;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "bl 0x8020f81c",
+    "li r0,0x0",
+    "stw r3,-0x54ac(r13)",
+    "stw r3,-0x54a8(r13)",
+    "stw r3,-0x54a0(r13)",
+    "stw r3,-0x549c(r13)",
+    "stw r0,-0x54a4(r13)",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x8020f81c, 8)",
+    "INDIRECT|out=(ram, 0x804360f4, 4)|in0=(ram, 0x804360f4, 4)|in1=(const, 0x8, 4)",
+    "INDIRECT|out=(ram, 0x804360f8, 4)|in0=(ram, 0x804360f8, 4)|in1=(const, 0x8, 4)",
+    "INDIRECT|out=(ram, 0x804360fc, 4)|in0=(ram, 0x804360fc, 4)|in1=(const, 0x8, 4)",
+    "INDIRECT|out=(ram, 0x80436100, 4)|in0=(ram, 0x80436100, 4)|in1=(const, 0x8, 4)",
+    "INDIRECT|out=(ram, 0x80436104, 4)|in0=(ram, 0x80436104, 4)|in1=(const, 0x8, 4)",
+    "COPY|out=(ram, 0x804360f4, 4)|in0=(register, 0xc, 4)",
+    "COPY|out=(ram, 0x804360f8, 4)|in0=(register, 0xc, 4)",
+    "COPY|out=(ram, 0x80436100, 4)|in0=(register, 0xc, 4)",
+    "COPY|out=(ram, 0x80436104, 4)|in0=(register, 0xc, 4)",
+    "COPY|out=(ram, 0x804360fc, 4)|in0=(const, 0x0, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x804360f4, 4)|in0=(ram, 0x804360f4, 4)",
+    "COPY|out=(ram, 0x804360f8, 4)|in0=(ram, 0x804360f8, 4)",
+    "COPY|out=(ram, 0x804360fc, 4)|in0=(ram, 0x804360fc, 4)",
+    "COPY|out=(ram, 0x80436100, 4)|in0=(ram, 0x80436100, 4)",
+    "COPY|out=(ram, 0x80436104, 4)|in0=(ram, 0x80436104, 4)"
+  ],
+  "calls": [
+    "8020f81c"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "1f884c78ede71515284b70335daa761593ef4113b108ae8ff3c8009b5748d8d5",
+    "normalized_pcode": "f28d82f89bfc5fe45b19875f4d54a771fc4deb618f2edbf21006ddd09a3bcf42"
+  }
+}

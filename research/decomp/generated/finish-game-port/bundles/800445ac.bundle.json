@@ -1,0 +1,98 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800445ac",
+    "name": "zz_00445ac_",
+    "prototype": "undefined zz_00445ac_(void)",
+    "body_ranges": [
+      [
+        "800445ac",
+        "8004462f"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_00445ac_(int param_1)\r\n\r\n{\r\n  gnt4_memset(&DAT_803bb354,0,8);\r\n  DAT_803bb358 = DAT_80436238 + *(int *)(&DAT_802d0b64 + param_1 * 8);\r\n  zz_00f19f8_(DAT_803bb358,*(undefined4 *)(&DAT_802d0b60 + param_1 * 8),DAT_80436160,1);\r\n  zz_0040edc_(&DAT_803bb354);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "lis r4,-0x7fc4",
+    "li r5,0x8",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "stw r30,0x8(r1)",
+    "or r30,r3,r3",
+    "subi r3,r4,0x4cd4",
+    "li r4,0x0",
+    "addi r31,r3,0x28",
+    "or r3,r31,r31",
+    "bl 0x8000540c",
+    "lis r3,-0x7fd3",
+    "rlwinm r0,r30,0x3,0x0,0x1c",
+    "addi r4,r3,0xb60",
+    "lwz r7,-0x5368(r13)",
+    "add r3,r4,r0",
+    "lwzx r4,r4,r0",
+    "lwz r0,0x4(r3)",
+    "li r6,0x1",
+    "lwz r5,-0x5440(r13)",
+    "add r3,r7,r0",
+    "stw r3,0x4(r31)",
+    "bl 0x800f19f8",
+    "or r3,r31,r31",
+    "bl 0x80040edc",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "lwz r30,0x8(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x8000540c, 8)|in1=(unique, 0x10000018, 4)|in2=(const, 0x0, 4)|in3=(const, 0x8, 4)",
+    "INDIRECT|out=(ram, 0x803bb358, 4)|in0=(ram, 0x803bb358, 4)|in1=(const, 0x13, 4)",
+    "INDIRECT|out=(ram, 0x80436160, 4)|in0=(ram, 0x80436160, 4)|in1=(const, 0x13, 4)",
+    "INDIRECT|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)|in1=(const, 0x13, 4)",
+    "PTRSUB|out=(unique, 0x10000018, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803bb354, 4)",
+    "INT_MULT|out=(unique, 0x66200, 4)|in0=(register, 0xc, 4)|in1=(const, 0x8, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000010, 4)|in1=(unique, 0x66200, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(register, 0x10, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x10000020, 4)",
+    "PTRSUB|out=(unique, 0x10000010, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802d0b60, 4)",
+    "CAST|out=(unique, 0x10000020, 4)|in0=(unique, 0x4ec00, 4)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(unique, 0x10000014, 4)|in1=(unique, 0x66200, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(register, 0x0, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x10000024, 4)",
+    "PTRSUB|out=(unique, 0x10000014, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802d0b64, 4)",
+    "CAST|out=(unique, 0x10000024, 4)|in0=(unique, 0x17500, 4)",
+    "INT_ADD|out=(register, 0xc, 4)|in0=(ram, 0x80436238, 4)|in1=(register, 0x0, 4)",
+    "CALL|out=|in0=(ram, 0x800f19f8, 8)|in1=(register, 0xc, 4)|in2=(register, 0x10, 4)|in3=(ram, 0x80436160, 4)|in4=(const, 0x1, 4)",
+    "INDIRECT|out=(ram, 0x803bb358, 4)|in0=(register, 0xc, 4)|in1=(const, 0x2b, 4)",
+    "INDIRECT|out=(ram, 0x80436160, 4)|in0=(ram, 0x80436160, 4)|in1=(const, 0x2b, 4)",
+    "INDIRECT|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)|in1=(const, 0x2b, 4)",
+    "CALL|out=|in0=(ram, 0x80040edc, 8)|in1=(unique, 0x1000001c, 4)",
+    "INDIRECT|out=(ram, 0x803bb358, 4)|in0=(ram, 0x803bb358, 4)|in1=(const, 0x2f, 4)",
+    "INDIRECT|out=(ram, 0x80436160, 4)|in0=(ram, 0x80436160, 4)|in1=(const, 0x2f, 4)",
+    "INDIRECT|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)|in1=(const, 0x2f, 4)",
+    "PTRSUB|out=(unique, 0x1000001c, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803bb354, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x803bb358, 4)|in0=(ram, 0x803bb358, 4)",
+    "COPY|out=(ram, 0x80436160, 4)|in0=(ram, 0x80436160, 4)",
+    "COPY|out=(ram, 0x80436238, 4)|in0=(ram, 0x80436238, 4)"
+  ],
+  "calls": [
+    "8000540c",
+    "80040edc",
+    "800f19f8"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "d1bff0fb818383395389082f8547f518795f1a8d3e8c84d47b55271b50b2a4cc",
+    "normalized_pcode": "37ce228e83a08083f61a4e528e04cfabef6ca53924901dad1eaebedc27594152"
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800598bc",
+    "name": "FUN_800598bc",
+    "prototype": "undefined FUN_800598bc(void)",
+    "body_ranges": [
+      [
+        "800598bc",
+        "8005993b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_800598bc(undefined4 param_1)\r\n\r\n{\r\n  int iVar1;\r\n  \r\n  iVar1 = FUN_800699d8();\r\n  if ((((iVar1 == 0) && (iVar1 = FUN_80069814(param_1), iVar1 == 0)) &&\r\n      (iVar1 = FUN_800692bc(param_1), iVar1 == 0)) &&\r\n     ((iVar1 = FUN_800696f4(param_1), iVar1 == 0 && (iVar1 = FUN_8006965c(param_1), iVar1 == 0)))) {\r\n    FUN_80069624(param_1);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "or r31,r3,r3",
+    "bl 0x800699d8",
+    "cmpwi r3,0x0",
+    "bne 0x80059928",
+    "or r3,r31,r31",
+    "bl 0x80069814",
+    "cmpwi r3,0x0",
+    "bne 0x80059928",
+    "or r3,r31,r31",
+    "bl 0x800692bc",
+    "cmpwi r3,0x0",
+    "bne 0x80059928",
+    "or r3,r31,r31",
+    "bl 0x800696f4",
+    "cmpwi r3,0x0",
+    "bne 0x80059928",
+    "or r3,r31,r31",
+    "bl 0x8006965c",
+    "cmpwi r3,0x0",
+    "bne 0x80059928",
+    "or r3,r31,r31",
+    "bl 0x80069624",
+    "cmpwi r3,0x0",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x800699d8, 8)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80059928, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x80069814, 8)|in1=(register, 0xc, 4)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80059928, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x800692bc, 8)|in1=(register, 0xc, 4)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80059928, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x800696f4, 8)|in1=(register, 0xc, 4)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80059928, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x8006965c, 8)|in1=(register, 0xc, 4)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80059928, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=|in0=(ram, 0x80069624, 8)|in1=(register, 0xc, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "800692bc",
+    "80069624",
+    "8006965c",
+    "800696f4",
+    "80069814",
+    "800699d8"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "e70cf28424640650d8c3c5ec365c7d120a3fa4cf871a5d908b44eb07155caa12",
+    "normalized_pcode": "0993fbad7f39b69dfa9611b9ad93d683d6e34e3312b607186759309882b28cdd"
+  }
+}

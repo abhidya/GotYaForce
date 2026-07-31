@@ -1,0 +1,49 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80018270",
+    "name": "zz_0018270_",
+    "prototype": "undefined zz_0018270_(void)",
+    "body_ranges": [
+      [
+        "80018270",
+        "80018287"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0018270_(void)\r\n\r\n{\r\n  DAT_804360c7 = PTR_DAT_8043393c[0x12];\r\n  DAT_804360c6 = PTR_DAT_8043393c[0x13];\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "lwz r3,-0x7c64(r13)",
+    "lbz r0,0x12(r3)",
+    "stb r0,-0x54d9(r13)",
+    "lbz r0,0x13(r3)",
+    "stb r0,-0x54da(r13)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x8043393c, 4)|in1=(const, 0x12, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "COPY|out=(ram, 0x804360c7, 1)|in0=(unique, 0x47600, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x8043393c, 4)|in1=(const, 0x13, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "COPY|out=(ram, 0x804360c6, 1)|in0=(unique, 0x47600, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x8043393c, 4)|in0=(ram, 0x8043393c, 4)",
+    "COPY|out=(ram, 0x804360c6, 1)|in0=(ram, 0x804360c6, 1)",
+    "COPY|out=(ram, 0x804360c7, 1)|in0=(ram, 0x804360c7, 1)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "6d39831f8ffea933e355498af869adc731eff286e7e4e2c7cadb216c1b0c3719",
+    "normalized_pcode": "0b2e73ddd4ddb3c5e059428a606060ccc928d48886032c5d196086a5ccaf3e0f"
+  }
+}

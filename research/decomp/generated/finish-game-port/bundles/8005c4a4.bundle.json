@@ -1,0 +1,47 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8005c4a4",
+    "name": "FUN_8005c4a4",
+    "prototype": "undefined FUN_8005c4a4(void)",
+    "body_ranges": [
+      [
+        "8005c4a4",
+        "8005c4c7"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nundefined4 FUN_8005c4a4(void)\r\n\r\n{\r\n  zz_005f00c_();\r\n  return 0;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "bl 0x8005f00c",
+    "lwz r0,0x14(r1)",
+    "li r3,0x0",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x8005f00c, 8)",
+    "COPY|out=(register, 0xc, 4)|in0=(const, 0x0, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)"
+  ],
+  "calls": [
+    "8005f00c"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "ab54d199c395af0479eb8d4e94ebb26c09f4c5b896a92714e35878abf1b85610",
+    "normalized_pcode": "937ff1d199fbe406b280533dcf97a3265b15b538d897cb1d4943c3737a2e8181"
+  }
+}

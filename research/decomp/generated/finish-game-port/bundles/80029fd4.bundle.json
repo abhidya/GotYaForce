@@ -1,0 +1,102 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80029fd4",
+    "name": "zz_0029fd4_",
+    "prototype": "undefined zz_0029fd4_(void)",
+    "body_ranges": [
+      [
+        "80029fd4",
+        "8002a06b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0029fd4_(void)\r\n\r\n{\r\n  int iVar1;\r\n  int iVar2;\r\n  \r\n  iVar2 = 0;\r\n  do {\r\n    iVar1 = 4;\r\n    if (((int)(char)PTR_DAT_80433930[2] & 1 << iVar2) != 0) {\r\n      iVar1 = iVar2;\r\n    }\r\n    zz_0098084_(&DAT_803bb440,iVar2,(&PTR_DAT_802cfda0)[iVar1]);\r\n    iVar2 = iVar2 + 1;\r\n  } while (iVar2 < 4);\r\n  gnt4_GXInvalidateTexAll_bl();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x20(r1)",
+    "mfspr r0,lr",
+    "lis r4,-0x7fc4",
+    "lis r3,-0x7fd3",
+    "stw r0,0x24(r1)",
+    "stw r31,0x1c(r1)",
+    "subi r31,r3,0x260",
+    "stw r30,0x18(r1)",
+    "li r30,0x1",
+    "stw r29,0x14(r1)",
+    "subi r29,r4,0x4bc0",
+    "stw r28,0x10(r1)",
+    "li r28,0x0",
+    "lwz r5,-0x7c70(r13)",
+    "slw r0,r30,r28",
+    "or r3,r29,r29",
+    "or r4,r28,r28",
+    "lbz r5,0x2(r5)",
+    "li r6,0x4",
+    "extsb r5,r5",
+    "and. r0,r5,r0",
+    "beq 0x8002a030",
+    "or r6,r28,r28",
+    "rlwinm r0,r6,0x2,0x0,0x1d",
+    "lwzx r5,r31,r0",
+    "bl 0x80098084",
+    "addi r28,r28,0x1",
+    "cmpwi r28,0x4",
+    "blt 0x8002a008",
+    "bl 0x80229358",
+    "lwz r0,0x24(r1)",
+    "lwz r31,0x1c(r1)",
+    "lwz r30,0x18(r1)",
+    "lwz r29,0x14(r1)",
+    "lwz r28,0x10(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x20",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "COPY|out=(register, 0x70, 4)|in0=(const, 0x0, 4)",
+    "MULTIEQUAL|out=(register, 0x70, 4)|in0=(register, 0x70, 4)|in1=(register, 0x70, 4)",
+    "MULTIEQUAL|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(ram, 0x80433930, 4)",
+    "INT_LEFT|out=(register, 0x0, 4)|in0=(const, 0x1, 4)|in1=(register, 0x70, 4)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "COPY|out=(register, 0x18, 4)|in0=(const, 0x4, 4)",
+    "INT_SEXT|out=(register, 0x14, 4)|in0=(unique, 0x10000030, 1)",
+    "CAST|out=(unique, 0x10000030, 1)|in0=(unique, 0x47600, 1)",
+    "INT_AND|out=(register, 0x0, 4)|in0=(register, 0x14, 4)|in1=(register, 0x0, 4)",
+    "INT_NOTEQUAL|out=(unique, 0x1f00, 1)|in0=(register, 0x0, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8002a030, 1)|in1=(unique, 0x1f00, 1)",
+    "COPY|out=(unique, 0x10000028, 4)|in0=(register, 0x18, 4)",
+    "COPY|out=(unique, 0x1000002c, 4)|in0=(register, 0x70, 4)",
+    "MULTIEQUAL|out=(register, 0x18, 4)|in0=(unique, 0x10000028, 4)|in1=(unique, 0x1000002c, 4)",
+    "LOAD|out=(register, 0x14, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+    "PTRSUB|out=(unique, 0x1000001c, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802cfda0, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x1000001c, 4)|in1=(register, 0x18, 4)|in2=(const, 0x4, 4)",
+    "CALL|out=|in0=(ram, 0x80098084, 8)|in1=(unique, 0x10000020, 4)|in2=(register, 0x70, 4)|in3=(register, 0x14, 4)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x4b, 4)",
+    "PTRSUB|out=(unique, 0x10000020, 4)|in0=(const, 0x0, 4)|in1=(const, 0x803bb440, 4)",
+    "INT_ADD|out=(register, 0x70, 4)|in0=(register, 0x70, 4)|in1=(const, 0x1, 4)",
+    "INT_SLESS|out=(unique, 0x27a00, 1)|in0=(register, 0x70, 4)|in1=(const, 0x4, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8002a008, 1)|in1=(unique, 0x27a00, 1)",
+    "CALL|out=|in0=(ram, 0x80229358, 8)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x60, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)"
+  ],
+  "calls": [
+    "80098084",
+    "80229358"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "7bf00fa4bb2bf4d837dd5aa6984bc7b4ddba5b497781b91804fab0e48083a24a",
+    "normalized_pcode": "a747975e52f37382cd49a77dbee9fbcaad236754ca1ee3b6f3a1f349577b913a"
+  }
+}

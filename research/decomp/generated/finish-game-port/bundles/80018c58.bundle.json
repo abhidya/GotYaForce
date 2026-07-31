@@ -1,0 +1,54 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80018c58",
+    "name": "PlatAudio::IsSFXPlaying(unsigned",
+    "prototype": "undefined PlatAudio::IsSFXPlaying(unsigned(void)",
+    "body_ranges": [
+      [
+        "80018c58",
+        "80018c87"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nuint PlatAudio__IsSFXPlaying_unsigned(void)\r\n\r\n{\r\n  int iVar1;\r\n  \r\n  iVar1 = gnt4_DVDCheckDisk_bl();\r\n  return (1U - iVar1 | iVar1 - 1U) >> 0x1f;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "bl 0x8020fc7c",
+    "subfic r4,r3,0x1",
+    "subi r0,r3,0x1",
+    "or r0,r4,r0",
+    "rlwinm r3,r0,0x1,0x1f,0x1f",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x8020fc7c, 8)",
+    "INT_SUB|out=(register, 0x10, 4)|in0=(const, 0x1, 4)|in1=(register, 0xc, 4)",
+    "INT_SUB|out=(register, 0x0, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1, 4)",
+    "INT_OR|out=(register, 0x0, 4)|in0=(register, 0x10, 4)|in1=(register, 0x0, 4)",
+    "INT_RIGHT|out=(unique, 0x66400, 4)|in0=(register, 0x0, 4)|in1=(const, 0x1f, 1)",
+    "COPY|out=(register, 0xc, 4)|in0=(unique, 0x66400, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)"
+  ],
+  "calls": [
+    "8020fc7c"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "1f8a8c7332b7f8eb41ad7064febf911ac7515b49b9613a6cfcfb5db85dc198dc",
+    "normalized_pcode": "359f91daed72671571ec1466129ea2ad2cb4be2d58698f896663a5a7c593b931"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80059ba0",
+    "name": "FUN_80059ba0",
+    "prototype": "undefined FUN_80059ba0(void)",
+    "body_ranges": [
+      [
+        "80059ba0",
+        "80059bdf"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_80059ba0(undefined4 param_1)\r\n\r\n{\r\n  int iVar1;\r\n  \r\n  iVar1 = FUN_800699d8();\r\n  if (iVar1 == 0) {\r\n    FUN_80069814(param_1);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "or r31,r3,r3",
+    "bl 0x800699d8",
+    "cmpwi r3,0x0",
+    "bne 0x80059bcc",
+    "or r3,r31,r31",
+    "bl 0x80069814",
+    "cmpwi r3,0x0",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x800699d8, 8)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80059bcc, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=|in0=(ram, 0x80069814, 8)|in1=(register, 0xc, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "80069814",
+    "800699d8"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "072ce8e2a27b5d2bdbf14fa71a6de3092876304a8289b3f24c2e71a850bbd85d",
+    "normalized_pcode": "bd88f120dfc998c585dcc4a5ff4c8c0fe3a02d5bcc430e43bb7d947a55a71c67"
+  }
+}

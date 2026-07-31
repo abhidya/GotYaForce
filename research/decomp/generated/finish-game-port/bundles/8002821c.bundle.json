@@ -1,0 +1,70 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8002821c",
+    "name": "FUN_8002821c",
+    "prototype": "undefined FUN_8002821c(void)",
+    "body_ranges": [
+      [
+        "8002821c",
+        "80028263"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_8002821c(void)\r\n\r\n{\r\n  zz_008c098_();\r\n  (*(code *)(&PTR_initChallengeFlowStateAndDispatch_802cfdc4)[(char)PTR_DAT_80433930[0x32]])();\r\n  zz_0027ae8_();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "bl 0x8008c098",
+    "lwz r4,-0x7c70(r13)",
+    "lis r3,-0x7fd3",
+    "subi r3,r3,0x23c",
+    "lbz r0,0x32(r4)",
+    "extsb r0,r0",
+    "rlwinm r0,r0,0x2,0x0,0x1d",
+    "lwzx r12,r3,r0",
+    "mtspr ctr,r12",
+    "bctrl",
+    "bl 0x80027ae8",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x8008c098, 8)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x8, 4)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x32, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_SEXT|out=(register, 0x0, 4)|in0=(unique, 0x10000018, 1)",
+    "CAST|out=(unique, 0x10000018, 1)|in0=(unique, 0x47600, 1)",
+    "LOAD|out=(register, 0x30, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x4ec00, 4)",
+    "PTRSUB|out=(unique, 0x10000010, 4)|in0=(const, 0x0, 4)|in1=(const, 0x802cfdc4, 4)",
+    "PTRADD|out=(unique, 0x4ec00, 4)|in0=(unique, 0x10000010, 4)|in1=(register, 0x0, 4)|in2=(const, 0x4, 4)",
+    "CALLIND|out=|in0=(unique, 0x10000019, 4)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x1b, 4)",
+    "CAST|out=(unique, 0x10000019, 4)|in0=(register, 0x30, 4)",
+    "CALL|out=|in0=(ram, 0x80027ae8, 8)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x1e, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)"
+  ],
+  "calls": [
+    "80027ae8",
+    "8008c098"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "41ef99147f124ba2bf5cd2cd6eadc1d3da5fd5d849f1095659d5ddbc4f923082",
+    "normalized_pcode": "d2d4d7b1178248f1b58e291b0e288b1f2eeeb120e3dfc0db8069bb5e4d5ac028"
+  }
+}

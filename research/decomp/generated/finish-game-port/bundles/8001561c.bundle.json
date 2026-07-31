@@ -1,0 +1,69 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8001561c",
+    "name": "zz_001561c_",
+    "prototype": "undefined zz_001561c_(void)",
+    "body_ranges": [
+      [
+        "8001561c",
+        "80015687"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_001561c_(int param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)\r\n\r\n{\r\n  zz_0014d38_();\r\n  *(undefined1 *)(param_1 + 0x180) = 0;\r\n  FUN_80015194(param_1,param_2,param_3,param_4);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x20(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x24(r1)",
+    "stw r31,0x1c(r1)",
+    "or r31,r6,r6",
+    "stw r30,0x18(r1)",
+    "or r30,r5,r5",
+    "stw r29,0x14(r1)",
+    "or r29,r4,r4",
+    "stw r28,0x10(r1)",
+    "or r28,r3,r3",
+    "bl 0x80014d38",
+    "li r0,0x0",
+    "or r3,r28,r28",
+    "stb r0,0x180(r28)",
+    "or r4,r29,r29",
+    "or r5,r30,r30",
+    "or r6,r31,r31",
+    "bl 0x80015194",
+    "lwz r0,0x24(r1)",
+    "lwz r31,0x1c(r1)",
+    "lwz r30,0x18(r1)",
+    "lwz r29,0x14(r1)",
+    "lwz r28,0x10(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x20",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x80014d38, 8)",
+    "INT_ADD|out=(unique, 0x1000000a, 4)|in0=(register, 0xc, 4)|in1=(const, 0x180, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000a, 4)",
+    "CALL|out=|in0=(ram, 0x80015194, 8)|in1=(register, 0xc, 4)|in2=(register, 0x10, 4)|in3=(register, 0x14, 4)|in4=(register, 0x18, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "80014d38",
+    "80015194"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "7562147a33ff6256ed9b698dfc873703745e377fb36ff4ca328ceea66a777ec0",
+    "normalized_pcode": "c83e0f68d88526c542c1e4059b9ba8b9e3d334d2ae2765f8a794c52c266671aa"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8000a144",
+    "name": "zz_000a144_",
+    "prototype": "undefined zz_000a144_(void)",
+    "body_ranges": [
+      [
+        "8000a144",
+        "8000a153"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_000a144_(void)\r\n\r\n{\r\n  DAT_804360cc = 0;\r\n  DAT_804360c8 = 0;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "li r0,0x0",
+    "stw r0,-0x54d4(r13)",
+    "stw r0,-0x54d8(r13)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "COPY|out=(ram, 0x804360cc, 4)|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x804360c8, 4)|in0=(const, 0x0, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x804360c8, 4)|in0=(ram, 0x804360c8, 4)",
+    "COPY|out=(ram, 0x804360cc, 4)|in0=(ram, 0x804360cc, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "afc219762578098c6d6271e537b26e0a4b092cbee1e9b3e037d19f7ddb7421c0",
+    "normalized_pcode": "7da94ef3ab1bdb27916d509e9f74127df3698819e5fb2bb022bbb6b8679c64f4"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8000993c",
+    "name": "zz_000993c_",
+    "prototype": "undefined zz_000993c_(void)",
+    "body_ranges": [
+      [
+        "8000993c",
+        "80009957"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_000993c_(void)\r\n\r\n{\r\n  DAT_803bb140 = 0;\r\n  DAT_803bb144 = 0;\r\n  DAT_803bb148 = 0;\r\n  DAT_803bb14c = 0;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "li r0,0x0",
+    "lis r3,-0x7fc4",
+    "stwu r0,-0x4ec0(r3)",
+    "stw r0,0x4(r3)",
+    "stw r0,0x8(r3)",
+    "stw r0,0xc(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "COPY|out=(ram, 0x803bb140, 4)|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x803bb144, 4)|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x803bb148, 4)|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x803bb14c, 4)|in0=(const, 0x0, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x803bb140, 4)|in0=(ram, 0x803bb140, 4)",
+    "COPY|out=(ram, 0x803bb144, 4)|in0=(ram, 0x803bb144, 4)",
+    "COPY|out=(ram, 0x803bb148, 4)|in0=(ram, 0x803bb148, 4)",
+    "COPY|out=(ram, 0x803bb14c, 4)|in0=(ram, 0x803bb14c, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "37bcf7ab89b87c1cbcdca0a0acc72500bc7a0d4833b64c9f88b6bd29819e28b4",
+    "normalized_pcode": "a8dc75e939fc1ea5d6ddaba76f9a978687287b2666a5ffde0ab0e21df4a938b6"
+  }
+}

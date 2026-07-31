@@ -1,22 +1,50 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x8000540c",
+    "address": "8000540c",
     "name": "gnt4-memset",
-    "metadata": "Request failed: [WinError 10061] No connection could be made because the target machine actively refused it",
-    "thunk": false
+    "prototype": "void * __stdcall gnt4-memset(void * __s, int __c, size_t __n)",
+    "body_ranges": [
+      [
+        "8000540c",
+        "8000543b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\nvoid * gnt4_memset(void *__s,int __c,size_t __n)\r\n\r\n{\r\n  gnt4___fill_mem_bl();\r\n  return __s;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
-  "normalized_disassembly": [],
-  "calls": [],
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "or r31,r3,r3",
+    "bl 0x8000543c",
+    "lwz r0,0x14(r1)",
+    "or r3,r31,r31",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x8000543c, 8)",
+    "COPY|out=(register, 0xc, 4)|in0=(register, 0xc, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)"
+  ],
+  "calls": [
+    "8000543c"
+  ],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": null,
-    "normalized_pcode": null
+    "instruction_shape": "cffd3edeed111e4faadc11cf77a785ae0e372661d4f754a504b164482bcbebc9",
+    "normalized_pcode": "c4ecff3eba87b994f8996b8de35859ec50ab5c82854ce75688285e44ec15ce4e"
   }
 }

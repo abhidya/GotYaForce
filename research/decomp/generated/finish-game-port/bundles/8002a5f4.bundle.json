@@ -1,0 +1,62 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8002a5f4",
+    "name": "zz_002a5f4_",
+    "prototype": "undefined zz_002a5f4_(void)",
+    "body_ranges": [
+      [
+        "8002a5f4",
+        "8002a637"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_002a5f4_(undefined1 param_1,undefined1 param_2,undefined1 param_3,undefined1 param_4)\r\n\r\n{\r\n  DAT_804362a8 = CONCAT31(CONCAT21(CONCAT11(param_1,param_2),param_3),param_4);\r\n  zz_0253a34_();\r\n  DAT_803f8ec8 = DAT_804362a8;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "subi r7,r13,0x52f8",
+    "stw r0,0x14(r1)",
+    "stb r3,-0x52f8(r13)",
+    "stb r4,0x1(r7)",
+    "stb r5,0x2(r7)",
+    "stb r6,0x3(r7)",
+    "bl 0x80253a34",
+    "lis r3,-0x7fc0",
+    "lwz r0,-0x52f8(r13)",
+    "subi r3,r3,0x7180",
+    "stw r0,0x48(r3)",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "PIECE|out=(unique, 0x10000010, 2)|in0=(register, 0xf, 1)|in1=(register, 0x13, 1)",
+    "PIECE|out=(unique, 0x10000014, 3)|in0=(unique, 0x10000010, 2)|in1=(register, 0x17, 1)",
+    "PIECE|out=(ram, 0x804362a8, 4)|in0=(unique, 0x10000014, 3)|in1=(register, 0x1b, 1)",
+    "CALL|out=|in0=(ram, 0x80253a34, 8)",
+    "INDIRECT|out=(ram, 0x803f8ec8, 4)|in0=(ram, 0x803f8ec8, 4)|in1=(const, 0x11, 4)",
+    "INDIRECT|out=(ram, 0x804362a8, 4)|in0=(ram, 0x804362a8, 4)|in1=(const, 0x11, 4)",
+    "COPY|out=(ram, 0x803f8ec8, 4)|in0=(ram, 0x804362a8, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x803f8ec8, 4)|in0=(ram, 0x803f8ec8, 4)",
+    "COPY|out=(ram, 0x804362a8, 4)|in0=(ram, 0x804362a8, 4)"
+  ],
+  "calls": [
+    "80253a34"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "6f37e482adeaa3718af55031ac6cf0bb1c8a389af926b5137c4524b09aaec70c",
+    "normalized_pcode": "ab3af4eed85d567b45d83276f10207081c01a73725997beb43e6212a63801915"
+  }
+}

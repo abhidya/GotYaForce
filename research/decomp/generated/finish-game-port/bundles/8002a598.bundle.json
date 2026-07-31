@@ -1,0 +1,89 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8002a598",
+    "name": "FUN_8002a598",
+    "prototype": "undefined FUN_8002a598(void)",
+    "body_ranges": [
+      [
+        "8002a598",
+        "8002a5f3"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nundefined4 FUN_8002a598(void)\r\n\r\n{\r\n  DAT_804361f0 = DAT_804361f0 + 1;\r\n  zz_002a76c_();\r\n  zz_002a704_();\r\n  if ((((int)(char)PTR_DAT_80433930[0x2b] & 0x40U) != 0) &&\r\n     (((int)(char)PTR_DAT_80433930[0x2b] & 0x80U) == 0)) {\r\n    PTR_DAT_80433930[0x2b] = PTR_DAT_80433930[0x2b] | 0x10;\r\n  }\r\n  return 0;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "lwz r3,-0x53b0(r13)",
+    "addi r0,r3,0x1",
+    "stw r0,-0x53b0(r13)",
+    "bl 0x8002a76c",
+    "bl 0x8002a704",
+    "lwz r3,-0x7c70(r13)",
+    "lbz r4,0x2b(r3)",
+    "extsb r4,r4",
+    "rlwinm. r0,r4,0x0,0x19,0x19",
+    "beq 0x8002a5e0",
+    "rlwinm. r0,r4,0x0,0x18,0x18",
+    "bne 0x8002a5e0",
+    "lbz r0,0x2b(r3)",
+    "ori r0,r0,0x10",
+    "stb r0,0x2b(r3)",
+    "lwz r0,0x14(r1)",
+    "li r3,0x0",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(register, 0x0, 4)|in0=(ram, 0x804361f0, 4)|in1=(const, 0x1, 4)",
+    "CALL|out=|in0=(ram, 0x8002a76c, 8)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0xd, 4)",
+    "INDIRECT|out=(ram, 0x804361f0, 4)|in0=(register, 0x0, 4)|in1=(const, 0xd, 4)",
+    "CALL|out=|in0=(ram, 0x8002a704, 8)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x10, 4)",
+    "INDIRECT|out=(ram, 0x804361f0, 4)|in0=(ram, 0x804361f0, 4)|in1=(const, 0x10, 4)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2b, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_SEXT|out=(register, 0x10, 4)|in0=(unique, 0x1000003e, 1)",
+    "CAST|out=(unique, 0x1000003e, 1)|in0=(unique, 0x47600, 1)",
+    "INT_AND|out=(unique, 0x1000001c, 4)|in0=(register, 0x10, 4)|in1=(const, 0x40, 4)",
+    "INT_NOTEQUAL|out=(unique, 0x10000026, 1)|in0=(unique, 0x1000001c, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8002a5e0, 1)|in1=(unique, 0x10000026, 1)",
+    "INT_AND|out=(unique, 0x10000028, 4)|in0=(register, 0x10, 4)|in1=(const, 0x80, 4)",
+    "INT_EQUAL|out=(unique, 0x10000032, 1)|in0=(unique, 0x10000028, 4)|in1=(const, 0x0, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8002a5e0, 1)|in1=(unique, 0x10000032, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2b, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_OR|out=(register, 0x3, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x10, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2b, 4)|in2=(const, 0x1, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x3, 1)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x6b, 4)",
+    "INDIRECT|out=(ram, 0x804361f0, 4)|in0=(ram, 0x804361f0, 4)|in1=(const, 0x6b, 4)",
+    "MULTIEQUAL|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(ram, 0x80433930, 4)|in2=(ram, 0x80433930, 4)",
+    "MULTIEQUAL|out=(ram, 0x804361f0, 4)|in0=(ram, 0x804361f0, 4)|in1=(ram, 0x804361f0, 4)|in2=(ram, 0x804361f0, 4)",
+    "COPY|out=(register, 0xc, 4)|in0=(const, 0x0, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)",
+    "COPY|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)",
+    "COPY|out=(ram, 0x804361f0, 4)|in0=(ram, 0x804361f0, 4)"
+  ],
+  "calls": [
+    "8002a704",
+    "8002a76c"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "1b85a39d675dba9fe8a82c45791ae9545ef3c7f2c85abfb8c68264667471ee93",
+    "normalized_pcode": "de79a1645280f81ae43c9244912b208288e1a00c03abb0580ee2fc7d9a3b6c6a"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8002a84c",
+    "name": "zz_002a84c_",
+    "prototype": "undefined zz_002a84c_(void)",
+    "body_ranges": [
+      [
+        "8002a84c",
+        "8002a85f"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_002a84c_(void)\r\n\r\n{\r\n  PTR_DAT_80433930[0x2b] = PTR_DAT_80433930[0x2b] | 0x48;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "lwz r3,-0x7c70(r13)",
+    "lbz r0,0x2b(r3)",
+    "ori r0,r0,0x48",
+    "stb r0,0x2b(r3)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2b, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_OR|out=(register, 0x3, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x48, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2b, 4)|in2=(const, 0x1, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x3, 1)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x7, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "49d3d4d8457cc204bd01fd40d71a403e8cf3d55ed9bf64e721c74c40d44f181d",
+    "normalized_pcode": "a2e767c5614baa2d933845ac7026cb24963e86dab942ffc0d8f9688ec6e3d36a"
+  }
+}

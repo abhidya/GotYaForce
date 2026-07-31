@@ -1,0 +1,53 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80029408",
+    "name": "FUN_80029408",
+    "prototype": "undefined FUN_80029408(void)",
+    "body_ranges": [
+      [
+        "80029408",
+        "80029433"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_80029408(void)\r\n\r\n{\r\n  PTR_DAT_80433934[0x45] = 4;\r\n  zz_00529ec_();\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "li r0,0x4",
+    "lwz r3,-0x7c6c(r13)",
+    "stb r0,0x45(r3)",
+    "bl 0x800529ec",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433934, 4)|in1=(const, 0x45, 4)|in2=(const, 0x1, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x4, 1)",
+    "INDIRECT|out=(ram, 0x80433934, 4)|in0=(ram, 0x80433934, 4)|in1=(const, 0xa, 4)",
+    "CALL|out=|in0=(ram, 0x800529ec, 8)",
+    "INDIRECT|out=(ram, 0x80433934, 4)|in0=(ram, 0x80433934, 4)|in1=(const, 0xd, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80433934, 4)|in0=(ram, 0x80433934, 4)"
+  ],
+  "calls": [
+    "800529ec"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "4c40e361df8d0e8330c8f23ce3bd57bff5f478bd904bd953bb20ef7f099b4705",
+    "normalized_pcode": "08b8b92287f20e4aad58629cfae275a813596911eb435cf833fee1a7b819a1d6"
+  }
+}

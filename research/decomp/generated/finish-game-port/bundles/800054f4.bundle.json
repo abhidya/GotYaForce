@@ -1,24 +1,93 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x800054f4",
+    "address": "800054f4",
     "name": "gnt4-memcpy",
-    "metadata": "No program loaded",
-    "thunk": false
+    "prototype": "void * __stdcall gnt4-memcpy(void * __dest, void * __src, size_t __n)",
+    "body_ranges": [
+      [
+        "800054f4",
+        "80005543"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\nvoid * gnt4_memcpy(void *__dest,void *__src,size_t __n)\r\n\r\n{\r\n  undefined1 *puVar1;\r\n  int iVar2;\r\n  undefined1 *puVar3;\r\n  \r\n  if (__dest <= __src) {\r\n    puVar1 = (undefined1 *)((int)__src + -1);\r\n    puVar3 = (undefined1 *)((int)__dest + -1);\r\n    iVar2 = __n + 1;\r\n    while( true ) {\r\n      iVar2 = iVar2 + -1;\r\n      if (iVar2 == 0) break;\r\n      puVar1 = puVar1 + 1;\r\n      puVar3 = puVar3 + 1;\r\n      *puVar3 = *puVar1;\r\n    }\r\n    return __dest;\r\n  }\r\n  puVar1 = (undefined1 *)((int)__src + __n);\r\n  puVar3 = (undefined1 *)((int)__dest + __n);\r\n  iVar2 = __n + 1;\r\n  while( true ) {\r\n    iVar2 = iVar2 + -1;\r\n    if (iVar2 == 0) break;\r\n    puVar1 = puVar1 + -1;\r\n    puVar3 = puVar3 + -1;\r\n    *puVar3 = *puVar1;\r\n  }\r\n  return __dest;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
   "normalized_disassembly": [
-    "no program loaded"
+    "cmplw r4,r3",
+    "blt 0x80005520",
+    "subi r4,r4,0x1",
+    "subi r6,r3,0x1",
+    "addi r5,r5,0x1",
+    "b 0x80005514",
+    "lbzu r0,0x1(r4)",
+    "stbu r0,0x1(r6)",
+    "subic. r5,r5,0x1",
+    "bne 0x8000550c",
+    "blr",
+    "add r4,r4,r5",
+    "add r6,r3,r5",
+    "addi r5,r5,0x1",
+    "b 0x80005538",
+    "lbzu r0,-0x1(r4)",
+    "stbu r0,-0x1(r6)",
+    "subic. r5,r5,0x1",
+    "bne 0x80005530",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_LESSEQUAL|out=(unique, 0x29200, 1)|in0=(register, 0xc, 4)|in1=(register, 0x10, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80005520, 1)|in1=(unique, 0x29200, 1)",
+    "INT_ADD|out=(unique, 0x10000031, 4)|in0=(unique, 0x1000002d, 4)|in1=(const, 0xffffffff, 4)",
+    "CAST|out=(unique, 0x1000002d, 4)|in0=(register, 0x10, 4)",
+    "CAST|out=(register, 0x10, 4)|in0=(unique, 0x10000031, 4)",
+    "INT_ADD|out=(unique, 0x10000039, 4)|in0=(unique, 0x10000035, 4)|in1=(const, 0xffffffff, 4)",
+    "CAST|out=(unique, 0x10000035, 4)|in0=(register, 0xc, 4)",
+    "CAST|out=(register, 0x18, 4)|in0=(unique, 0x10000039, 4)",
+    "INT_ADD|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(const, 0x1, 4)",
+    "BRANCH|out=|in0=(ram, 0x80005514, 1)",
+    "PTRADD|out=(unique, 0x17900, 4)|in0=(register, 0x10, 4)|in1=(const, 0x1, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47800, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17900, 4)",
+    "PTRADD|out=(unique, 0x17900, 4)|in0=(register, 0x18, 4)|in1=(const, 0x1, 4)|in2=(const, 0x1, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17900, 4)|in2=(unique, 0x47800, 1)",
+    "INT_ADD|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(const, 0xffffffff, 4)",
+    "INT_EQUAL|out=(unique, 0x1f00, 1)|in0=(register, 0x14, 4)|in1=(const, 0x0, 4)",
+    "MULTIEQUAL|out=(register, 0x10, 4)|in0=(register, 0x10, 4)|in1=(unique, 0x17900, 4)",
+    "MULTIEQUAL|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(register, 0x14, 4)",
+    "MULTIEQUAL|out=(register, 0x18, 4)|in0=(register, 0x18, 4)|in1=(unique, 0x17900, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8000550c, 1)|in1=(unique, 0x1f00, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)",
+    "INT_ADD|out=(unique, 0x10000021, 4)|in0=(unique, 0x1000001d, 4)|in1=(register, 0x14, 4)",
+    "CAST|out=(unique, 0x1000001d, 4)|in0=(register, 0x10, 4)",
+    "CAST|out=(register, 0x10, 4)|in0=(unique, 0x10000021, 4)",
+    "INT_ADD|out=(unique, 0x10000029, 4)|in0=(unique, 0x10000025, 4)|in1=(register, 0x14, 4)",
+    "CAST|out=(unique, 0x10000025, 4)|in0=(register, 0xc, 4)",
+    "CAST|out=(register, 0x18, 4)|in0=(unique, 0x10000029, 4)",
+    "INT_ADD|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(const, 0x1, 4)",
+    "BRANCH|out=|in0=(ram, 0x80005538, 1)",
+    "PTRADD|out=(unique, 0x17900, 4)|in0=(register, 0x10, 4)|in1=(const, 0xffffffff, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47800, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17900, 4)",
+    "PTRADD|out=(unique, 0x17900, 4)|in0=(register, 0x18, 4)|in1=(const, 0xffffffff, 4)|in2=(const, 0x1, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17900, 4)|in2=(unique, 0x47800, 1)",
+    "INT_ADD|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(const, 0xffffffff, 4)",
+    "INT_EQUAL|out=(unique, 0x1f00, 1)|in0=(register, 0x14, 4)|in1=(const, 0x0, 4)",
+    "MULTIEQUAL|out=(register, 0x10, 4)|in0=(register, 0x10, 4)|in1=(unique, 0x17900, 4)",
+    "MULTIEQUAL|out=(register, 0x14, 4)|in0=(register, 0x14, 4)|in1=(register, 0x14, 4)",
+    "MULTIEQUAL|out=(register, 0x18, 4)|in0=(register, 0x18, 4)|in1=(unique, 0x17900, 4)",
+    "CBRANCH|out=|in0=(ram, 0x80005530, 1)|in1=(unique, 0x1f00, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xc, 4)"
   ],
   "calls": [],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": "cdd046741164f0176af3a5dedd8449666353a2850fa823dddeed4fd70b38434a",
-    "normalized_pcode": null
+    "instruction_shape": "1959ad0b30d857ad4ecae551034a95ee5c4c67cc54381893381c47f9a273b9f6",
+    "normalized_pcode": "5b73768b92cfebf76605e737c04853fe82fdf7ebf06a2aeebdc81008b8d78ecd"
   }
 }

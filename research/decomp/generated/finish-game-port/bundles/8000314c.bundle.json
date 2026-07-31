@@ -1,15 +1,22 @@
 {
   "bundle_schema": 1,
   "identity": {
-    "address": "0x8000314c",
+    "address": "8000314c",
     "name": "zz_000314c_",
-    "metadata": "Function: zz_000314c_ at 8000314c\nSignature: undefined zz_000314c_(void)\nEntry: 8000314c\nBody: 8000314c - 80003153",
-    "thunk": false
+    "prototype": "undefined zz_000314c_(void)",
+    "body_ranges": [
+      [
+        "8000314c",
+        "80003153"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
   },
   "decompiler": {
-    "c": null,
-    "completed": false,
-    "deferred": true,
+    "c": "\r\nundefined1 zz_000314c_(void)\r\n\r\n{\r\n  return DAT_80436498;\r\n}\r\n\r\n",
+    "completed": true,
     "warnings": [],
     "errors": []
   },
@@ -17,9 +24,15 @@
     "lbz r3,-0x5108(r13)",
     "blr"
   ],
+  "normalized_pcode": [
+    "COPY|out=(register, 0xf, 1)|in0=(ram, 0x80436498, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)|in1=(register, 0xf, 1)",
+    "COPY|out=(ram, 0x80436498, 1)|in0=(ram, 0x80436498, 1)"
+  ],
   "calls": [],
+  "data_references": [],
   "fingerprints": {
-    "normalized_disassembly": "f9c5bfa0b1ba843ff87311a4e1a9c7c55754b35a2931c828a24d4052aeaba987",
-    "normalized_pcode": null
+    "instruction_shape": "0f1ce6e9bd147d71a4e931e23ee7a4e9ecdeaee6fc0cdc3f0e4d2b443f2913e5",
+    "normalized_pcode": "0802e5a716f440ced700770edf352e375e40714ead9a1f48737e31df3709ed26"
   }
 }

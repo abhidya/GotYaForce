@@ -1,0 +1,66 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800164e0",
+    "name": "zz_00164e0_",
+    "prototype": "undefined zz_00164e0_(void)",
+    "body_ranges": [
+      [
+        "800164e0",
+        "80016527"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_00164e0_(int param_1)\r\n\r\n{\r\n  undefined4 uVar1;\r\n  int iVar2;\r\n  \r\n  iVar2 = *(int *)(param_1 + 0x144);\r\n  zz_00076d0_(iVar2,param_1 + 0x114);\r\n  uVar1 = zz_0011ce0_(*(undefined4 *)(iVar2 + 0x14));\r\n  zz_0009958_(iVar2,uVar1);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "addi r4,r3,0x114",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "lwz r31,0x144(r3)",
+    "or r3,r31,r31",
+    "bl 0x800076d0",
+    "lwz r3,0x14(r31)",
+    "bl 0x80011ce0",
+    "or r4,r3,r3",
+    "or r3,r31,r31",
+    "bl 0x80009958",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(register, 0x10, 4)|in0=(register, 0xc, 4)|in1=(const, 0x114, 4)",
+    "INT_ADD|out=(unique, 0x1000000f, 4)|in0=(register, 0xc, 4)|in1=(const, 0x144, 4)",
+    "LOAD|out=(register, 0x7c, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000f, 4)",
+    "CALL|out=|in0=(ram, 0x800076d0, 8)|in1=(register, 0x7c, 4)|in2=(register, 0x10, 4)",
+    "INT_ADD|out=(unique, 0x10000013, 4)|in0=(register, 0x7c, 4)|in1=(const, 0x14, 4)",
+    "LOAD|out=(register, 0xc, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000013, 4)",
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x80011ce0, 8)|in1=(register, 0xc, 4)",
+    "CALL|out=|in0=(ram, 0x80009958, 8)|in1=(register, 0x7c, 4)|in2=(register, 0xc, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "800076d0",
+    "80009958",
+    "80011ce0"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "ec6d55a05540b5404362b91fc1369de1175439a9eec5c9e9f21d2b0d9638dfb4",
+    "normalized_pcode": "3ab13fa0b1bccf1a162132560633a9a52ed6bd18d9bd509580bb1613a56c7924"
+  }
+}

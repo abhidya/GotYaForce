@@ -1,0 +1,61 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "80046698",
+    "name": "zz_0046698_",
+    "prototype": "undefined zz_0046698_(void)",
+    "body_ranges": [
+      [
+        "80046698",
+        "800466db"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_0046698_(int param_1)\r\n\r\n{\r\n  if (*(char *)(param_1 + 0x4a0) != '\\x02') {\r\n    zz_0046754_();\r\n    zz_0046bd0_(param_1,0);\r\n  }\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "or r31,r3,r3",
+    "lbz r0,0x4a0(r3)",
+    "cmpwi r0,0x2",
+    "beq 0x800466c8",
+    "bl 0x80046754",
+    "or r3,r31,r31",
+    "li r4,0x0",
+    "bl 0x80046bd0",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000017, 4)|in0=(register, 0xc, 4)|in1=(const, 0x4a0, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000017, 4)",
+    "INT_NOTEQUAL|out=(unique, 0x27f00, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x2, 1)",
+    "CBRANCH|out=|in0=(ram, 0x800466c8, 1)|in1=(unique, 0x27f00, 1)",
+    "CALL|out=|in0=(ram, 0x80046754, 8)",
+    "CALL|out=|in0=(ram, 0x80046bd0, 8)|in1=(register, 0xc, 4)|in2=(const, 0x0, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "80046754",
+    "80046bd0"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "8686d23285aea740dc7083a553fa5319dd65c09bd7f9205c21e74c2c15c56b7c",
+    "normalized_pcode": "57dea118283af2f8603e5574ef5c74abfad30fa452045d21140f14f3e24bebc0"
+  }
+}

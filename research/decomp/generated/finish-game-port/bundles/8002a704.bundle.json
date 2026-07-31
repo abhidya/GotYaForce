@@ -1,0 +1,83 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8002a704",
+    "name": "zz_002a704_",
+    "prototype": "undefined zz_002a704_(void)",
+    "body_ranges": [
+      [
+        "8002a704",
+        "8002a76b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_002a704_(void)\r\n\r\n{\r\n  int iVar1;\r\n  byte bVar2;\r\n  \r\n  bVar2 = 0;\r\n  iVar1 = gnt4_OSGetResetButtonState_bl();\r\n  if (iVar1 == 1) {\r\n    bVar2 = 0x20;\r\n  }\r\n  else if ((PTR_DAT_80433930[0x2b] & 0x20) != 0) {\r\n    bVar2 = 0x40;\r\n  }\r\n  PTR_DAT_80433930[0x2b] = PTR_DAT_80433930[0x2b] | bVar2;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "li r31,0x0",
+    "bl 0x80204c94",
+    "cmpwi r3,0x1",
+    "bne 0x8002a730",
+    "ori r0,r31,0x20",
+    "extsb r31,r0",
+    "b 0x8002a748",
+    "lwz r3,-0x7c70(r13)",
+    "lbz r0,0x2b(r3)",
+    "rlwinm. r0,r0,0x0,0x1a,0x1a",
+    "beq 0x8002a748",
+    "ori r0,r31,0x40",
+    "extsb r31,r0",
+    "lwz r3,-0x7c70(r13)",
+    "lbz r0,0x2b(r3)",
+    "or r0,r0,r31",
+    "stb r0,0x2b(r3)",
+    "lwz r31,0xc(r1)",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "COPY|out=(register, 0x7f, 1)|in0=(const, 0x0, 1)",
+    "CALL|out=(register, 0xc, 4)|in0=(ram, 0x80204c94, 8)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0xb, 4)",
+    "INT_EQUAL|out=(unique, 0x27f00, 1)|in0=(register, 0xc, 4)|in1=(const, 0x1, 4)",
+    "CBRANCH|out=|in0=(ram, 0x8002a730, 1)|in1=(unique, 0x27f00, 1)",
+    "COPY|out=(register, 0x7f, 1)|in0=(const, 0x20, 1)",
+    "BRANCH|out=|in0=(ram, 0x8002a748, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2b, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_AND|out=(unique, 0x10000020, 1)|in0=(unique, 0x47600, 1)|in1=(const, 0x20, 1)",
+    "INT_NOTEQUAL|out=(unique, 0x10000022, 1)|in0=(unique, 0x10000020, 1)|in1=(const, 0x0, 1)",
+    "CBRANCH|out=|in0=(ram, 0x8002a748, 1)|in1=(unique, 0x10000022, 1)",
+    "COPY|out=(register, 0x7f, 1)|in0=(const, 0x40, 1)",
+    "MULTIEQUAL|out=(register, 0x7f, 1)|in0=(register, 0x7f, 1)|in1=(register, 0x7f, 1)|in2=(register, 0x7f, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2b, 4)|in2=(const, 0x1, 4)",
+    "LOAD|out=(unique, 0x47600, 1)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "INT_OR|out=(register, 0x3, 1)|in0=(unique, 0x47600, 1)|in1=(register, 0x7f, 1)",
+    "PTRADD|out=(unique, 0x17500, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x2b, 4)|in2=(const, 0x1, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(register, 0x3, 1)",
+    "INDIRECT|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)|in1=(const, 0x28, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80433930, 4)|in0=(ram, 0x80433930, 4)"
+  ],
+  "calls": [
+    "80204c94"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "e374d6cc4c47952f544046ee25ec0548766c6e2de60e658d632966345ae9f957",
+    "normalized_pcode": "2fd289d35d1833c2e01fe5c450c6e8086a6f83f684ea0c0099b54183b28a1698"
+  }
+}

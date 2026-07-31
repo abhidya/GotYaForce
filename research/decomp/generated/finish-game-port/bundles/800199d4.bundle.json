@@ -1,0 +1,62 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "800199d4",
+    "name": "FUN_800199d4",
+    "prototype": "undefined FUN_800199d4(void)",
+    "body_ranges": [
+      [
+        "800199d4",
+        "80019a13"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid FUN_800199d4(int param_1)\r\n\r\n{\r\n  zz_00076d0_(*(undefined4 *)(param_1 + 0xe0),param_1 + 0x114);\r\n  zz_00097b4_(*(undefined4 *)(param_1 + 0xe0),0x44);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "stw r0,0x14(r1)",
+    "stw r31,0xc(r1)",
+    "or r31,r3,r3",
+    "addi r4,r31,0x114",
+    "lwz r3,0xe0(r3)",
+    "bl 0x800076d0",
+    "lwz r3,0xe0(r31)",
+    "li r4,0x44",
+    "bl 0x800097b4",
+    "lwz r0,0x14(r1)",
+    "lwz r31,0xc(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(register, 0x10, 4)|in0=(register, 0xc, 4)|in1=(const, 0x114, 4)",
+    "INT_ADD|out=(unique, 0x1000000a, 4)|in0=(register, 0xc, 4)|in1=(const, 0xe0, 4)",
+    "LOAD|out=(register, 0xc, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000a, 4)",
+    "CALL|out=|in0=(ram, 0x800076d0, 8)|in1=(register, 0xc, 4)|in2=(register, 0x10, 4)",
+    "INT_ADD|out=(unique, 0x1000000e, 4)|in0=(register, 0xc, 4)|in1=(const, 0xe0, 4)",
+    "LOAD|out=(register, 0xc, 4)|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000e, 4)",
+    "CALL|out=|in0=(ram, 0x800097b4, 8)|in1=(register, 0xc, 4)|in2=(const, 0x44, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "800076d0",
+    "800097b4"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "d34dbe761ca30c8d47169a605d2d1f29ca4230e4d1e49324c32454fe18bcd428",
+    "normalized_pcode": "7aaf052a0efda70f1759c236838c6af3a7fb01563c84218c1ebc27f30b880133"
+  }
+}

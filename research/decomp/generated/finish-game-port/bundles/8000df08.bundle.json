@@ -1,0 +1,60 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8000df08",
+    "name": "zz_000df08_",
+    "prototype": "undefined zz_000df08_(void)",
+    "body_ranges": [
+      [
+        "8000df08",
+        "8000df27"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_000df08_(int param_1,int param_2)\r\n\r\n{\r\n  *(undefined1 *)(param_1 + 0x18) = 0;\r\n  *(undefined1 *)(param_1 + 0x19) = 0;\r\n  *(undefined1 *)(param_1 + 0x1a) = 0;\r\n  *(undefined1 *)(param_1 + 0x1b) = 0;\r\n  *(undefined1 *)(param_2 + 0x43d) = 0;\r\n  *(undefined1 *)(param_2 + 0x6f8) = 0;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "li r0,0x0",
+    "stb r0,0x18(r3)",
+    "stb r0,0x19(r3)",
+    "stb r0,0x1a(r3)",
+    "stb r0,0x1b(r3)",
+    "stb r0,0x43d(r4)",
+    "stb r0,0x6f8(r4)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "INT_ADD|out=(unique, 0x10000000, 4)|in0=(register, 0xc, 4)|in1=(const, 0x18, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000000, 4)",
+    "INT_ADD|out=(unique, 0x10000004, 4)|in0=(register, 0xc, 4)|in1=(const, 0x19, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000004, 4)",
+    "INT_ADD|out=(unique, 0x10000008, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1a, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000008, 4)",
+    "INT_ADD|out=(unique, 0x1000000c, 4)|in0=(register, 0xc, 4)|in1=(const, 0x1b, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x1000000c, 4)",
+    "INT_ADD|out=(unique, 0x10000010, 4)|in0=(register, 0x10, 4)|in1=(const, 0x43d, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000010, 4)",
+    "INT_ADD|out=(unique, 0x10000014, 4)|in0=(register, 0x10, 4)|in1=(const, 0x6f8, 4)",
+    "STORE|out=|in0=(const, 0x1a1, 4)|in1=(unique, 0x17500, 4)|in2=(const, 0x0, 1)",
+    "CAST|out=(unique, 0x17500, 4)|in0=(unique, 0x10000014, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "5d76e3522b9f780edef94dd861e82169bd60389fdc2a3463e46f6f3c88f8a589",
+    "normalized_pcode": "f23e63b9af0e6b7c6266a81d7b0f9f2c7c1ff2f9149d9d3f52879826fd7094ed"
+  }
+}

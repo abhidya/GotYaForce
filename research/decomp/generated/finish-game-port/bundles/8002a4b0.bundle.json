@@ -1,0 +1,46 @@
+{
+  "bundle_schema": 1,
+  "identity": {
+    "address": "8002a4b0",
+    "name": "zz_002a4b0_",
+    "prototype": "undefined zz_002a4b0_(void)",
+    "body_ranges": [
+      [
+        "8002a4b0",
+        "8002a4d3"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_002a4b0_(void)\r\n\r\n{\r\n  gnt4_HSD_StartRender_bl(0);\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "normalized_disassembly": [
+    "stwu r1,-0x10(r1)",
+    "mfspr r0,lr",
+    "li r3,0x0",
+    "stw r0,0x14(r1)",
+    "bl 0x802541cc",
+    "lwz r0,0x14(r1)",
+    "mtspr lr,r0",
+    "addi r1,r1,0x10",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "CALL|out=|in0=(ram, 0x802541cc, 8)|in1=(const, 0x0, 4)",
+    "RETURN|out=|in0=(const, 0x0, 4)"
+  ],
+  "calls": [
+    "802541cc"
+  ],
+  "data_references": [],
+  "fingerprints": {
+    "instruction_shape": "36e763c5969f118b7166cdd3e554a47e06741f99a4c7222168dc6d2a9fe52e9e",
+    "normalized_pcode": "4fe17de899912ab307a02a386ad9823411a2895bda80d79af000722f6e0be8d2"
+  }
+}
