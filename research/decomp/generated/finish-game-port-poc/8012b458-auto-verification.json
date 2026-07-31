@@ -6,7 +6,7 @@
   "scenario_source": "artifact-boundary-matrix",
   "handwritten_scenarios": 0,
   "compile": {
-    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-q4P785/candidate research/decomp/generated/finish-game-port-poc/fn_8012b458.generated.ts",
+    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-qDWTLi/candidate research/decomp/generated/finish-game-port-poc/fn_8012b458.generated.ts",
     "passed": true,
     "exitCode": 0,
     "stdout": "",
@@ -701,7 +701,7 @@
   },
   "status": "passed",
   "oracle_compile": {
-    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-q4P785/oracle --rootDir packages/combat/src packages/combat/src/families/eagle-jet.ts packages/combat/src/rom/actor.ts",
+    "command": "node node_modules/typescript/bin/tsc --target ES2022 --module NodeNext --moduleResolution NodeNext --outDir .tmp/oghidra-auto-verify/8012b458-qDWTLi/oracle --rootDir packages/combat/src packages/combat/src/families/eagle-jet.ts packages/combat/src/rom/actor.ts",
     "passed": true,
     "exitCode": 0,
     "stdout": "",

@@ -1,0 +1,15 @@
+{
+  "api_calls": 1,
+  "structured_tool_calls": 1,
+  "prompt_tokens": 7312,
+  "completion_tokens": 44,
+  "duration_seconds": 93.37307229998987,
+  "token_source": "estimated",
+  "active": false,
+  "status": "completed",
+  "request_started_at": "2026-07-31T04:58:31.646109",
+  "tokens_per_second": 0.4712279345230967,
+  "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+  "run_id": "prompt-poc:0x800055e0",
+  "updated_at": "2026-07-31T05:00:05.023342"
+}

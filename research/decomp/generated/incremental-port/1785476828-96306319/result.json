@@ -1,0 +1,8 @@
+{
+  "status": "failed",
+  "base_commit": "3a28382bb342c72fa3ed27b0f98a89bbe5ed05c4",
+  "commits": [],
+  "worktree": null,
+  "push_command": null,
+  "error": "RuntimeError: The content for this response was already consumed"
+}

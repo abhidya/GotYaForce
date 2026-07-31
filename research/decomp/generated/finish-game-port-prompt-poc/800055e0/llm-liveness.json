@@ -1,0 +1,14 @@
+{
+  "api_calls": 1,
+  "structured_tool_calls": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "duration_seconds": 0.0,
+  "token_source": "unavailable",
+  "active": true,
+  "status": "generating",
+  "request_started_at": "2026-07-31T04:52:31.015406",
+  "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+  "run_id": "prompt-poc:0x800055e0",
+  "updated_at": "2026-07-31T04:52:31.015406"
+}

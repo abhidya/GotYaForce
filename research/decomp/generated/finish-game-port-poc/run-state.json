@@ -17,70 +17,70 @@
   ],
   "local_model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-IQ3_S",
   "session": {
-    "path": "D:\\GotYaForce\\research\\tools\\OGhidra\\analysis_sessions\\session_1784598555_d3f63cbf\\session.json",
-    "role": "advisory",
+    "path": null,
+    "role": "none",
     "vectors_required": false
   },
   "status": "completed",
-  "started_at": "2026-07-31T00:55:27.297Z",
-  "updated_at": "2026-07-31T00:57:05.832Z",
+  "started_at": "2026-07-31T08:32:59.502Z",
+  "updated_at": "2026-07-31T08:34:49.079Z",
   "current_stage": null,
   "stages": {
     "local_model": {
       "label": "Score and resume retained local-Qwen responses",
       "status": "passed",
-      "started_at": "2026-07-31T00:55:27.307Z",
+      "started_at": "2026-07-31T08:32:59.512Z",
       "detail": "selected retained Qwen attempt 3 (12/12 required facts); {\r\n  \"artifact\": \"D:\\\\GotYaForce\\\\research\\\\decomp\\\\generated\\\\finish-game-port-poc\\\\8012b458.port.json\",\r\n  \"function\": \"0x8012b458\",\r\n  \"model\": \"unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-IQ3_S\",\r\n  \"structured_output_mode\": \"json_schema\",\r\n  \"attempts\": 1,\r\n  \"passed\": true,\r\n  \"checks_passed\": 64,\r\n  \"checks_failed\": 0,\r\n  \"model_metrics\": {},\r\n  \"collection_metrics\": {\r\n    \"tool_call_breakdown\": {\r\n      \"callers\": 1,\r\n      \"decompile\": 1,\r\n      \"decompile:0x800107a0\": 1,\r\n      \"decompile:0x8006a53c\": 1,\r\n      \"decompile:0x800f036c\": 1,\r\n      \"decompile:0x8016c7ec\": 1,\r\n      \"disassembly\": 1,\r\n      \"function_metadata\": 1,\r\n      \"program_metadata\": 1,\r\n      \"raw_bytes:0x80439d7c\": 1,\r\n      \"raw_bytes:0x80439d80\": 1,\r\n      \"references_from\": 1\r\n    },\r\n    \"tool_calls\": 12\r\n  }\r\n}",
-      "finished_at": "2026-07-31T00:55:45.622Z"
+      "finished_at": "2026-07-31T08:33:13.341Z"
     },
     "artifact": {
       "label": "Validate local-Qwen artifact provenance",
       "status": "passed",
-      "started_at": "2026-07-31T00:55:45.623Z",
+      "started_at": "2026-07-31T08:33:13.342Z",
       "detail": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF:UD-IQ3_S; 64 evidence checks",
-      "finished_at": "2026-07-31T00:55:45.639Z"
+      "finished_at": "2026-07-31T08:33:13.358Z"
     },
     "generate": {
       "label": "Generate the production candidate",
       "status": "passed",
-      "started_at": "2026-07-31T00:55:45.640Z",
+      "started_at": "2026-07-31T08:33:13.366Z",
       "detail": "12 verified facts; no blockers",
-      "finished_at": "2026-07-31T00:55:45.657Z"
+      "finished_at": "2026-07-31T08:33:13.390Z"
     },
     "automatic_verify": {
       "label": "Compile and run artifact-derived differential tests",
       "status": "passed",
-      "started_at": "2026-07-31T00:55:45.658Z",
+      "started_at": "2026-07-31T08:33:13.723Z",
       "detail": "compile passed; 12/12 generated scenarios; 0 handwritten",
-      "finished_at": "2026-07-31T00:55:48.004Z"
+      "finished_at": "2026-07-31T08:33:15.837Z"
     },
     "promote": {
       "label": "Promote the verified candidate into the production runtime",
       "status": "passed",
-      "started_at": "2026-07-31T00:55:48.005Z",
+      "started_at": "2026-07-31T08:33:15.838Z",
       "detail": "0x8012b458 enabled in the generated production registry",
-      "finished_at": "2026-07-31T00:55:48.008Z"
+      "finished_at": "2026-07-31T08:33:15.854Z"
     },
     "combat": {
       "label": "Build combat and run the complete ROM replay suite",
       "status": "passed",
-      "started_at": "2026-07-31T00:55:48.008Z",
+      "started_at": "2026-07-31T08:33:15.855Z",
       "detail": "pnpm --filter @gf/combat build; ROM selfcheck ALL PASS",
-      "finished_at": "2026-07-31T00:55:49.986Z"
+      "finished_at": "2026-07-31T08:33:16.976Z"
     },
     "web_build": {
       "label": "Build the production browser game",
       "status": "passed",
-      "started_at": "2026-07-31T00:55:49.987Z",
+      "started_at": "2026-07-31T08:33:16.976Z",
       "detail": "pnpm --filter game build; production bundle emitted",
-      "finished_at": "2026-07-31T00:56:45.638Z"
+      "finished_at": "2026-07-31T08:34:28.978Z"
     },
     "browser": {
       "label": "Launch Chrome and execute the production browser bundle",
       "status": "passed",
-      "started_at": "2026-07-31T00:56:45.658Z",
+      "started_at": "2026-07-31T08:34:28.979Z",
       "detail": "chrome.exe; data-gf-runtime=loaded",
-      "finished_at": "2026-07-31T00:57:05.832Z"
+      "finished_at": "2026-07-31T08:34:49.078Z"
     }
   },
   "promotion": {
@@ -88,5 +88,5 @@
     "status": "promoted",
     "rolled_back": false
   },
-  "completed_at": "2026-07-31T00:57:05.832Z"
+  "completed_at": "2026-07-31T08:34:49.079Z"
 }

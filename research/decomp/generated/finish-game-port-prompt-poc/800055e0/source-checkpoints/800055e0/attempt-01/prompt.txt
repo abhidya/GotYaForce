@@ -1,0 +1,593 @@
+Implement this original GameCube function 1:1 in the existing GotYaForce browser game.
+
+Product result:
+- Implement observable gameplay behavior in the real browser runtime, not an isolated report or dead candidate.
+- Preserve exact control flow, constants, comparisons, field effects, helper calls, and timing supported by evidence.
+- Modify the existing ownership/integration point so the behavior is reachable during normal play.
+- Preserve unrelated behavior and the repository's current TypeScript architecture.
+- Add or update automatic tests when the supplied source shows an appropriate test surface.
+
+Patch protocol:
+- For an existing file, return ordered exact find/replace edits. Each find string must occur exactly once.
+- Use complete content only when creating a new file.
+- Keep edits minimal; do not reproduce an entire existing file.
+- Use action="exclude" with no files only for platform/toolchain code that has no browser-game behavior.
+- For action="edit", return at least one file and wire it into the existing runtime.
+- Do not emit placeholders, TODOs, fallbacks, documentation, shell commands, or generated reports.
+This exact body also represents these original addresses: ['0x800055e0']
+Repair attempt: 1/8
+
+Authoritative Ghidra bundle:
+{
+  "identity": {
+    "address": "800055e0",
+    "name": "zz_00055e0_",
+    "prototype": "undefined zz_00055e0_(void)",
+    "body_ranges": [
+      [
+        "800055e0",
+        "800055fb"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid zz_00055e0_(void)\r\n\r\n{\r\n  DAT_804360c7 = 1;\r\n  DAT_804360c6 = 0xc3;\r\n  DAT_804360c4 = 0x1c3;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "calls": [],
+  "data_references": [],
+  "normalized_disassembly": [
+    "li r4,0x1",
+    "li r3,0xc3",
+    "li r0,0x1c3",
+    "stb r4,-0x54d9(r13)",
+    "stb r3,-0x54da(r13)",
+    "sth r0,-0x54dc(r13)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "COPY|out=(ram, 0x804360c7, 1)|in0=(const, 0x1, 1)",
+    "COPY|out=(ram, 0x804360c6, 1)|in0=(const, 0xc3, 1)",
+    "COPY|out=(ram, 0x804360c4, 2)|in0=(const, 0x1c3, 2)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x804360c4, 2)|in0=(ram, 0x804360c4, 2)",
+    "COPY|out=(ram, 0x804360c6, 1)|in0=(ram, 0x804360c6, 1)",
+    "COPY|out=(ram, 0x804360c7, 1)|in0=(ram, 0x804360c7, 1)"
+  ],
+  "fingerprints": {
+    "instruction_shape": "206c846a96d3ee2cadfee6bb928b96998838c362cbffb73cf20b56c13dc1252a",
+    "normalized_pcode": "cbcd3ea07e3247d1277b7720281cf8aa37bb200e003c9179808ca02cd2d3ce21"
+  }
+}
+
+Fresh sibling decompiles, Ghidra tool evidence, and research leads:
+{
+  "sibling_functions": {
+    "callers": [
+      {
+        "address": "0x8001825c",
+        "decompiler": "[Total Lines: 8] [Showing Lines: 1-8]\nvoid zz_0018238_(void)\n\n{\n  PTR_DAT_8043393c[0x12] = DAT_804360c7;\n  PTR_DAT_8043393c[0x13] = DAT_804360c6;\n  zz_00055e0_();\n  return;\n}"
+      },
+      {
+        "address": "0x8003fd58",
+        "decompiler": "[Total Lines: 36] [Showing Lines: 1-36]\nvoid zz_003fc84_(void)\n\n{\n  PTR_DAT_80433938[1] = PTR_DAT_80433938[1] + '\\x01';\n  if (DAT_804361c4 != 0) {\n    PTR_DAT_80433938[1] = PTR_DAT_80433938[1] + '\\x01';\n  }\n  zz_00059b8_();\n  zz_002a5f4_(0,0,0,0);\n  DAT_803c0fd8 = DAT_803c1098;\n  DAT_803c0fc0 = DAT_803c1080;\n  DAT_803c0fdc = DAT_803c109c;\n  DAT_803c0fe0 = DAT_803c10a0;\n  DAT_803c0fe4 = DAT_803c10a4;\n  DAT_803c0fe8 = DAT_803c10a8;\n  DAT_803c0fec = DAT_803c10ac;\n  DAT_803c0ff0 = DAT_803c10b0;\n  DAT_803c0fc4 = DAT_803c1084;\n  DAT_803c0fc8 = DAT_803c1088;\n  DAT_803c0fcc = DAT_803c108c;\n  DAT_803c0fd0 = DAT_803c1090;\n  DAT_803c0fd4 = DAT_803c1094;\n  zz_000584c_();\n  zz_00055e0_();\n  zz_0027a78_();\n  zz_000bb70_();\n  zz_0197854_(6);\n  zz_0088398_(DAT_80436238 + 0x9ebc00,0x60000,1);\n  zz_01ae92c_();\n  zz_0080124_(0,1);\n  gnt4_HSD_VISetBlack_bl(0);\n  gnt4_VIFlush_bl();\n  gnt4_VIWaitForRetrace();\n  gnt4_VIWaitForRetrace();\n  return;\n}"
+      },
+      {
+        "address": "0x8000338c",
+        "decompiler": "[Total Lines: 20] [Showing Lines: 1-20]\nvoid zz_0003340_(void)\n\n{\n  undefined **ppuVar1;\n  undefined *__n;\n  undefined *__dest;\n  \n  for (ppuVar1 = &PTR___check_pad3_80005544; __n = ppuVar1[2], __n != (undefined *)0x0;\n      ppuVar1 = ppuVar1 + 3) {\n    __dest = ppuVar1[1];\n    if (__dest != *ppuVar1) {\n      gnt4_memcpy(__dest,*ppuVar1,(size_t)__n);\n      zz_0003424_(__dest,__n);\n    }\n  }\n  for (ppuVar1 = &PTR_DAT_800055b0; ppuVar1[1] != (undefined *)0x0; ppuVar1 = ppuVar1 + 2) {\n    gnt4_memset(*ppuVar1,0,(size_t)ppuVar1[1]);\n  }\n  return;\n}"
+      }
+    ],
+    "callees": []
+  },
+  "research_corpus": {
+    "exact": "",
+    "semantic": "## DECODE_NOTE: 2b. Accrual \u2014 `zz_018214c_` @0x8018214c (`chunk_0045.c:4727-4762`)\n\n# [research/decomp/items-evidence-inventory-2026-07-05.md] 2b. Accrual \u2014 `zz_018214c_` @0x8018214c (`chunk_0045.c:4727-4762`)\n### 2b. Accrual \u2014 `zz_018214c_` @0x8018214c (`chunk_0045.c:4727-4762`)\n\n- Pool: `DAT_80436354 + 0x1518`, up to **1536** packed u32 entries, count at `+0x2d18`,\n  each stored XOR `0xFFFFFFFF` (light obfuscation):\n  `variant<<28 | borgId<<16 | points(low 16)`.\n- Lookup by exact (variant, borgId) high half; appends a new entry if absent.\n- Increment per kill: `(rng8() & 0xF) + 1` = **random 1..16 points** via the global 8-bit\n  RNG `zz_00055fc_` @0x800055fc (`chunk_0000.c:373-386`: state DAT_804360c6/c7,\n  `next = (((hi<<8|lo)*3)>>8)&0xFF` family). Saturates below 0x10000.\n- Matches OBSERVED_WIKI exactly: \"GET counter increments by a random value between 1 and\n  16\" (`re-wiki-gotcha-force.md:66`).\n\n## DECODE_NOTE: 3. VERDICT: IMPLEMENTABLE (static evidence only)\n\n# [research/decomp/items-evidence-inventory-2026-07-05.md] 3. VERDICT: IMPLEMENTABLE (static evidence only)\n## 3. VERDICT: IMPLEMENTABLE (static evidence only)\n\nMinimal source-backed item runtime = the Borg GET drop pipeline. Pieces + evidence:\n\n1. **Drop table data** \u2014 extract `DAT_8035b2dc` (197 \u00d7 8 s16) from boot.dol\n   \u2192 `packages/combat/src/data/borgGetDropTable.json` (DERIVED). Evidence: \u00a72d.\n2. **Per-(borgId,colorVariant) points pool** (cap 1536 entries, points cap 0xFFFF)\n   on the adventure/meta state. Evidence: \u00a72b pool layout.\n3. **Kill hook** (adventure battles only): on cross-team kill of a scoring actor, add\n   `rand1..16` points for (victimBorgId, victimVariant); credit attached co-unit too;\n   special-case CYBER DEATH DRAGON \u2192 DEATH HEAD + CYBER DRAGON. Evidence: \u00a72a.\n   (The port's kill accounting `packages/combat/src/battle.ts` accountPendingDefeats is\n   the natural hook point \u2014 same event as zz_002f8dc_.)\n4. **Snapshot/restore**: snapshot pool at battle start; restore on lose/abandon; keep on\n   win. Evidence: \u00a72c.\n5. **Post-battle roll loop**: repeatedly take the first pool entry (insertion order)\n   with points \u2265 threshold[variant]; reset its points to 0; emit UNIT (kind 1) or a\n   random part 1..N (kind 2..5); stop when no entry qualifies. Evidence: \u00a72d.\n6. **RNG**: ROM uses the global 8-bit RNG (\u00a72b). For 1:1 parity port `zz_00055fc_`\n   verbatim (`(( (hi<<8|lo) *3 )>>8)` byte generator, seeds DAT_804360c6/c7); otherwise\n   document as the port's RNG with identical ranges (1..16, part 1..N uniform-ish via\n   `(r>>4) mod N`)."
+  },
+  "evidence_tools_used": [
+    "get_xrefs_to",
+    "get_xrefs_from",
+    "decompile_function_by_address",
+    "gf_context.resolve_for_code",
+    "research_vector_store.get_relevant_knowledge"
+  ]
+}
+
+Advisory saved-session analysis:
+This can suggest names or intent, but it may be stale or wrong. Resolve conflicts in favor of fresh
+Ghidra evidence and current browser source.
+{
+  "address": "800055e0",
+  "old_name": "zz_00055e0_",
+  "new_name": "zz_00055e0_",
+  "behavior_summary": "**Function Analysis:**\nThe target function performs direct assignments of three constant values (`1`, `0xc3`, `0x1c3`) to global variables (`DAT_804360c7`, `DAT_804360c6`, `DAT_804360c4`). It contains no parameters, loops, or conditional branches, functioning purely as a state initializer. Contextual analysis of Caller 2 (`zz_003fc84_`) reveals it is invoked alongside PlayStation 2 graphics driver routines (`gnt4_VIWaitForRetrace`, `gnt4_VIFlush_bl`, `gnt4_HSD_VISetBlack_bl`), strongly indicating a video/display subsystem domain. The assigned hexadecimal values correspond to typical hardware configuration parameters such as video timing, sync offsets, or display mode flags. The function serves as a dedicated configuration setter for video interface parameters, preparing hardware state before display operations commence.\n\n**Behavior Summary:**\nThis function initializes three global variables with fixed hexadecimal and decimal constants to establish video display configuration parameters. It is invoked during graphics subsystem setup sequences to prepare hardware timing or mode settings before display operations commence.\n\n**Suggested Name:** configureVideoDisplayParams\n**Rationale:** The name precisely captures the function's role as a configuration setter for video/display parameters, aligning with the PlayStation 2 graphics driver context observed in its callers. \"configure\" accurately reflects the assignment of hardware-related constants, while \"VideoDisplayParams\" specifies the domain and data type, distinguishing it from generic state setters or memory initializers. It avoids vague terms like \"init\" or \"setup\" by explicitly stating the configuration target and purpose, meeting the requirement for domain-aware, highly specific naming.",
+  "analysis_timestamp": 1784598555.5984004,
+  "function_hash": null,
+  "ai_confidence": null,
+  "processing_time": null
+}
+
+Relevant current browser source excerpts:
+Line windows are selected around matches. Use exact find/replace edits so unseen portions remain intact.
+--- packages/combat/src/combat.ts ---
+// lines 1-42
+// Combat: lock-on, melee (B), ranged shot (B for ranged borgs), special (X), projectiles
+// with homing, damage = f(attack/shot, defense), hitstun -> "hit", knockdown -> "down" ->
+// wake with invincTimer=60 (the decomp countdown, ported exactly), cooldowns + ammo/reload.
+//
+// Invincibility port (behavior-notes.md s4a, struct+0x720): each frame, if timer>0 subtract
+// 1.0 and clamp at 0. Entering the wake state sets it to 60. See stepInvincibility().
+
+import {
+  add,
+  angleTrimByteToBam16,
+  candidateTrianglesForSegment,
+  clamp,
+  distXZ,
+  floorSurfaceYAt,
+  forwardFromYaw,
+  isFiniteVec,
+  knockbackDirectionFromPositions,
+  len,
+  normalize,
+  scale,
+  sub,
+  yawFromXZ,
+  type StageCollisionTriangle,
+  type Vec3,
+} from "@gf/physics";
+import {
+  AMMO,
+  CHARGE,
+  COMBO,
+  CONTACT_DAMAGE,
+  DAMAGE,
+  HEAL,
+  HEAL_VAMPIRE_BORG_IDS,
+  HERO_X_BUFF,
+  HIT_STATUS,
+  HOMING,
+  KNOCKBACK,
+  MASH,
+  MELEE,
+  MUZZLE_OFFSET,
+  REACTION,
+  SHOT,
+// lines 44-123
+  STAGGER,
+  STATE,
+  DEPLOY,
+  WAKE_UP_INVINCIBILITY_FRAMES,
+} from "./constants.js";
+import {
+  DAMAGE_RECORD_INDEX,
+  REACTION_FORCE_STAGGER_MASK,
+  damageRecordByIndex,
+  knockbackGroundSpeedForRecord,
+  knockbackScaleRatio,
+  knockbackVelocityForRecord,
+  type DamageRecord,
+} from "./gauges.js";
+import {
+  actionProfileForProfile,
+  weaponOneCellSourceForBorgId,
+  type BorgActionProfile,
+  type MeleeActionDef,
+  type ShotActionDef,
+  type SpecialActionDef,
+  type SwordBeamDef,
+} from "./actionProfiles.js";
+import type { BorgProfile } from "./stats.js";
+import { runtimeShotPenetrationForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
+import { projectileVariant } from "./projectiles.js";
+import { AttackCommandType } from "./command.js";
+import {
+  contextualBGatesForBorgId,
+  resolveLiveCommand,
+  type ContextualBGates,
+} from "./commandDispatch.js";
+import {
+  attackHitRecordsForKind,
+  attackHitTableForBorgId,
+  shotFlightVisualForBorgId,
+  shotHitRadiusForBorgId,
+  shotKindForBorgId,
+} from "./attackHitData.js";
+import { familyDamageRecordForBorg } from "./familyDamageData.js";
+import { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
+import {
+  airBMoveForBorgId,
+  chargeMoveForBorgId,
+  comboLadderForBorgId,
+  xMoveForBorgId,
+  type ComboStep,
+  type ExactMoveLeaf,
+} from "./actionStreamData.js";
+import { computeSourceDamage, forceGaugeRatioIndex } from "./damageFormula.js";
+import { applyStatusFromRecord } from "./status.js";
+import { creditBurstFill } from "./burst.js";
+import { statusImmunityMasksForBorgId } from "./movementData.js";
+import { applyActorParamTierDelta127 } from "./paramTier.js";
+import { tierSizeScale } from "./timescale.js";
+import type {
+  BorgRuntime,
+  BurstMeterState,
+  Projectile,
+  ProjectileVisualKind,
+  RectStageBounds,
+  SlotTelemetry,
+  SourceTargetLockMode,
+  StageCollision,
+  WeaponCell,
+} from "./types.js";
+import projectileVisualFamilies from "./data/projectileVisualFamilies.json" with { type: "json" };
+import reactionAnimLengthsData from "./data/reactionAnimLengths.json" with { type: "json" };
+
+type ReactionAnimLengthRow = { ground?: number; launch?: number };
+const REACTION_ANIM_LENGTHS = (reactionAnimLengthsData as { borgs: Record<string, ReactionAnimLengthRow> }).borgs;
+
+export interface ProjectileContext {
+  bounds: RectStageBounds;
+  collision: StageCollision | null;
+}
+
+// ---------------------------------------------------------------------------------------
+// Invincibility timer — DIRECT PORT of the decompiled countdown (behavior-notes.md s4a).
+// ---------------------------------------------------------------------------------------
+// lines 136-215
+}
+
+// ---------------------------------------------------------------------------------------
+// Cooldowns — tick every named cooldown down by 1 each frame.
+// ---------------------------------------------------------------------------------------
+export function stepCooldowns(b: BorgRuntime): void {
+  for (const k of Object.keys(b.cooldowns)) {
+    const v = b.cooldowns[k] ?? 0;
+  // jumpHeld / switchLockHeld / switchLockPrevHeld / allyLockHeld / hyperHeld / attackHeld / specialHeld are 0/1
+    // press latches, boostFuel is a fuel gauge, chargeFrames / xChargeFrames are hold-charge
+    // accumulators (hold-B shot charge and hold-X special charge respectively), comboStep is
+    // the current melee-chain index, mashCount (ATK-017) is a press-edge COUNTER (not a
+    // countdown timer) that combat.ts's mash-counting code owns entirely (increments on press
+    // edges during an active swing, resets on swing start), and meleeAirSwing is a 0/1 latch
+    // set at swing start (startMeleeAttack) recording whether THIS swing began airborne with a
+    // resolved air-B leaf — read by stepAttacks' swing-resolution block for the swing's whole
+    // duration even if the borg lands mid-swing — none of these decay 1/frame like the
+    // countdown timers this loop drives, so all are skipped here.
+    if (
+      k === "jumpHeld" ||
+      k === "boostFuel" ||
+      k === "switchLockHeld" ||
+      k === "switchLockPrevHeld" ||
+      k === "allyLockHeld" ||
+      k === "hyperHeld" ||
+      k === "attackHeld" ||
+      k === "specialHeld" ||
+      k === "chargeFrames" ||
+      k === "xChargeFrames" ||
+      k === "comboStep" ||
+      k === "mashCount" ||
+      k === "meleeAirSwing"
+    )
+      continue;
+    if (v > 0) b.cooldowns[k] = v - 1;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+// Ammo / weapon cells (ATK-009, findings.md mechanic P; row source
+// research/decomp/data/borg-hp-stat-rows-802f2988.json, live-verified G RED/pl0615 -> ammo 5).
+//
+// ROM shape: 3 weapon cells (struct+0x774/+0x77c/+0x784, stride 8; aux max/refillType/
+// refillParam at struct+0x78c stride 8). Weapon 0 drives the B shot path and mirrors
+// BorgRuntime.ammo for compat. Weapon 1 is now bound to the X/special ammo path per the
+// official B/X counter split; weapon 2 has no reco
+--- packages/combat/src/selfcheck.ts ---
+// lines 1-54
+// Self-test for the deterministic battle core. Runnable via node after a tsc transpile, or
+// directly with a TS-aware loader. Creates a 1v3 battle, steps ~600 frames with an idle
+// human player + AI opponents, and asserts: no NaN anywhere, and the battle resolves.
+//
+// Run (from repo root), after building, e.g.:
+//   D:/GotYaForce/tools/node/node.exe path/to/selfcheck.js
+// or transpile this file and run it. main() returns an exit code.
+
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+import { distXZ, isFiniteVec, yAtTriangleXZ } from "@gf/physics";
+
+import { actorDataCombatStatsForBorgId, actorDataCombatStatsSummary } from "./actorDataStats.js";
+import { borgSourceStatsSummary, sourceStatsForBorgId } from "./sourceBorgStats.js";
+import { battleStateForSelfcheck, createBattle, HUSK_BORG_ID } from "./battle.js";
+import { stepAI } from "./ai.js";
+import { actionProfileForProfile, startingAmmoForProfile } from "./actionProfiles.js";
+import {
+  X_CHARGE,
+  applyHit,
+  isInvincible,
+  projectileVisualKindForProfile,
+  reactionAnimLengthFrames,
+  sourceInitialEnemyLock,
+  stepAttacks,
+  stepCooldowns,
+  stepGaugeWindows,
+  stepHitStatus,
+  stepProjectiles,
+} from "./combat.js";
+import { createBurstMeter } from "./burst.js";
+import { exactMeleeForBorgId } from "./meleeExactData.js";
+import { findVariantByKind } from "./combat.js";
+import { stepRomAI, hasRomAiParams } from "./romAi.js";
+import {
+  airBChargeCoverage,
+  airBMoveForBorgId,
+  chargeMoveForBorgId,
+  comboLadderForBorgId,
+  xMoveForBorgId,
+  xMoveCoverage,
+} from "./actionStreamData.js";
+import {
+  attackHitTableForBorgId,
+  hasSafeShapeShotAttribution,
+  shotFlightVisualForBorgId,
+  shotFlightVisualForTableRow,
+  shotHitRadiusForBorgId,
+  shotKindForBorgId,
+} from "./attackHitData.js";
+import { moveByButton } from "./moveProperties.js";
+import { runtimeMoveBindingForBorgId, xChargeMoveForBorgId } from "./moveRuntime.js";
+// lines 59-138
+  HERO_X_BUFF,
+  JUMP,
+  MELEE,
+  REACTION as REACTION_MODULE,
+  STAGGER,
+  STATE,
+  WAKE_UP_INVINCIBILITY_FRAMES,
+} from "./constants.js";
+import { DAMAGE_RECORD_INDEX, damageRecordByIndex, gaugeInitForBorgId, knockbackScaleRatio, type DamageRecord } from "./gauges.js";
+import {
+  cameraParamsForBorgId,
+  defaultCameraSlotForBorgId,
+  dashPhysicsForBorgId,
+  statusImmunityMasksForBorgId,
+} from "./movementData.js";
+import { familyDamageRecordForBorg } from "./familyDamageData.js";
+import { actorVelocityScale, isFrozen, tierSizeScale, tierVelocityScale } from "./timescale.js";
+import { stepMovement } from "./movement.js";
+import {
+  PARAM_TIER_RESET,
+  PARAM_TIER_TIMER_FRAMES,
+  applyActorParamTierDelta127,
+  applyActorParamTierDelta63,
+  resetActorParamTier,
+} from "./paramTier.js";
+import { emptyInput, type BattleActorObservation, type BorgRuntime, type PlayerInput, type Projectile, type StageCollision, type StageCollisionTriangle } from "./types.js";
+import { buildProfile, type BorgProfile, type BorgStats } from "./stats.js";
+import { typeCategoryForBorgId, typeDamageMultiplier } from "./typeDamage.js";
+import { computeSourceDamage, forceGaugeRatioIndex } from "./damageFormula.js";
+import damageFormulaData from "./data/damageFormula.json" with { type: "json" };
+import reactionAnimLengthsData from "./data/reactionAnimLengths.json" with { type: "json" };
+
+const REACTION_LENGTHS_META = (reactionAnimLengthsData as {
+  _meta: {
+    coverage: { totalRoster: number; groundResolved: number; launchResolved: number };
+  };
+})._meta;
+
+function loadBorgs(): BorgStats[] {
+  const here = dirname(fileURLToPath(import.meta.url));
+  // selfcheck.js lives in packages/combat/dist (or src); borgs.json is in packages/assets/data.
+  const candidates = [
+    resolve(here, "../../assets/data/borgs.json"),
+    resolve(here, "../../../assets/data/borgs.json"),
+    resolve(here, "../../../packages/assets/data/borgs.json"),
+  ];
+  for (const c of candidates) {
+    try {
+      const raw = readFileSync(c, "utf8");
+      const json = JSON.parse(raw) as { borgs: BorgStats[] };
+      return json.borgs;
+    } catch {
+      // try next
+    }
+  }
+  throw new Error("selfcheck: could not locate borgs.json");
+}
+
+function assertSane(borgs: readonly BattleActorObservation[], frame: number): void {
+  for (const b of borgs) {
+    if (!Number.isFinite(b.hp)) throw new Error(`NaN hp on ${b.uid} @frame ${frame}`);
+    if (!Number.isFinite(b.rotY)) throw new Error(`NaN rotY on ${b.uid} @frame ${frame}`);
+    if (!Number.isFinite(b.invincTimer)) throw new Error(`NaN invincTimer on ${b.uid} @frame ${frame}`);
+    if (!isFiniteVec(b.pos)) throw new Error(`NaN pos on ${b.uid} @frame ${frame}`);
+    if (!isFiniteVec(b.vel)) throw new Error(`NaN vel on ${b.uid} @frame ${frame}`);
+  }
+}
+
+function assertRectBoundsClamp(borgs: BorgStats[]): void {
+  const bounds = { minX: -30, maxX: 40, minZ: -20, maxZ: 50 };
+  const battle = createBattle(
+    {
+      stageId: "st00",
+      forces: [
+        { team: 0, ownerPlayer: "p1", borgIds: ["pl0615"] },
+        { team: 1, ownerPlayer: "p2", borgIds: ["pl0008"] },
+      ],
+      bounds,
+    },
+    borgs,
+// lines 140-219
+  const moveRight: PlayerInput = { ...emptyInput(), moveX: 1 };
+  for (let f = 0; f < 90; f += 1) {
+    battle.step(1 / 60, { p1: moveRight, p2: emptyInput() });
+    assertSane(battle.observe().actors, f);
+  }
+  const activeUid = battle.observe().activeUidByPlayer["p1"];
+  const active = battle.observe().actors.find((b) => b.uid === activeUid);
+  if (!active) throw new Error("[selfcheck] rectangular bounds test lost active p1 borg");
+  if (active.pos.x > bounds.maxX || active.pos.x < bounds.minX) {
+    throw new Error(`[selfcheck] rectangular bounds clamp failed: x=${active.pos.x}`);
+  }
+  console.log(`[selfcheck] rectangular STIH-style bounds clamp kept p1 at x=${active.pos.x}`);
+}
+
+function assertTriangleFloorGrounding(borgs: BorgStats[]): void {
+  const profile = buildProfile(borgById(borgs, "pl0
+--- packages/combat/src/types.ts ---
+// lines 29-108
+  /** A — jump / air-jump / hold for boost flight. */
+  jump: boolean;
+  /** B — melee / contextual attack. */
+  attack: boolean;
+  /** X — special attack. */
+  special: boolean;
+  /** Acquire / hold lock-on for non-player callers; human-controlled borgs auto-lock by default. */
+  lockOn: boolean;
+  /** R — cycle lock-on target forward/source request +0x73c=2. */
+  switchLock: boolean;
+  /** L — cycle lock-on target backward/source request +0x73c=3. */
+  switchLockPrev: boolean;
+  /** Hold Z — ally lock-on request; release restores the retained enemy lock. Ally charge behavior is still unknown. */
+  allyLock: boolean;
+  /** Reserved/prototype; Challenge battle core ignores manual switching until original proof exists. */
+  switchBorg: boolean;
+  /** Step/dodge (stick-action). */
+  dash: boolean;
+  /** Y — Hyper/Power Burst arm/activate input. Evidence: `FUN_80069814` chunk_0009.c:104-115
+   *  (Y-family bit in transformed word +0x5d4 sets +0x6fb = 6, a 6-frame arm window). */
+  hyper: boolean;
+}
+
+export function emptyInput(): PlayerInput {
+  return {
+    moveX: 0,
+    moveZ: 0,
+    jump: false,
+    attack: false,
+    special: false,
+    lockOn: false,
+    switchLock: false,
+    switchLockPrev: false,
+    allyLock: false,
+    switchBorg: false,
+    dash: false,
+    hyper: false,
+  };
+}
+
+/** Main borg state (maps to decomp struct+0x544 action enum: idle/move/attack/damage/down/death). */
+export type BorgState =
+  | "idle"
+  | "move"
+  | "jump"
+  | "fly"
+  | "attack"
+  | "special"
+  | "hit"
+  | "down"
+  | "death"
+  | "spawn";
+
+/** Live, per-frame runtime state of one borg instance. */
+export interface ActorParamTier {
+  /** `actor+0x74a`, reset by C `reset_actor_param_tier` to 0x10. */
+  tier: number;
+  /** `actor+0x74e`, signed byte accumulator touched by `apply_actor_param_tier_delta_63`. */
+  deltaAccum: number;
+  /** `actor+0x750`, set to 900 by `apply_actor_param_tier_delta_63` when accumulator is nonzero. */
+  timerFrames: number;
+}
+
+/** ROM refill-type enum for a weapon cell's aux `+0x790` field (ATK-009, findings mechanic P):
+ *  `type <= 0` = all-at-once (cur stays 0 until the refill timer expires, then jumps to max);
+ *  `type === 1` = gradual (fractional grant toward max every frame the timer is running);
+ *  `type 2/3` = "special" — the ROM initializes a constant timer for these but the per-frame
+ *  consumer semantics are unread (chunk_0009.c:2909-2973 only handles cases 1 and <=0), so the
+ *  port treats 2/3 the same as all-at-once until decoded further. */
+export type WeaponRefillType = number;
+
+/**
+ * One ROM weapon-cell (struct+0x774 + weaponIdx*8, aux struct+0x78c + weaponIdx*8; ATK-009,
+ * findings.md mechanic P; row source `research/decomp/data/borg-hp-stat-rows-802f2988.json`,
+ * live-verified G RED/pl0615 -> ammo 5). Weapon 0 mirrors `BorgRuntime.ammo`.
+ */
+export interface WeaponCell {
+  /** Current ammo (struct+0x774/+0x77c/+0x784). */
+  cur: number;
+  /** Ammo max (struct aux +0x78e/…). `0` = infinite: firing is never blocked and cur is not
+// lines 132-211
+  cameraState: SourceCameraState;
+  /** Source target-list index byte for enemy cycling (+0x73d). */
+  enemyIndex: number;
+  /** Source target-list index byte for ally cycling (+0x73e). */
+  allyIndex: number;
+  /** Runtime equivalent of actor+0x508 for the currently active lock family. */
+  activeTargetUid: string | null;
+}
+
+/** Narrow behavior exposed by the ROM-family sidecar to combat orchestration. */
+export interface RomFamilyDriver {
+  tick(runtime: BorgRuntime, dt: number, all: readonly BorgRuntime[], input?: PlayerInput | null): boolean;
+  tryStartXSpecial(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
+  tryStartBAttack(runtime: BorgRuntime, all: readonly BorgRuntime[]): boolean;
+  drainProjectiles(): Projectile[];
+}
+
+export interface BorgRuntime {
+  uid: string;
+  borgId: string;
+  /** Current descriptor/model form after an in-place ROM morph. `borgId` remains the
+   *  original combatant identity for force progression/results ownership. */
+  combatFormId?: string;
+  /** Exact target-host bytes surfaced for zz_006bf80_. */
+  targetEligibility83?: number;
+  targetVisibilityMask5e6?: number;
+  /** Battle-local posts corresponding to zz_01cb750_(0x803bfe20,&form,+0x3ec). */
+  romMorphEvents?: Array<{ eventAddress: number; borgNumber: number; slot: number }>;
+  /** Latest zz_00b22f4_ variant-1 presentation edge and its exact sampled transform. */
+  romAfterimage?: {
+    serial: number;
+    pos: Vec3;
+    effectYaw: number;
+    baseScale: number;
+    effectId: 69;
+    lifetimeFrames: 20;
+    renderState: 0x1e;
+  };
+  /**
+   * Palette/color-variant id (victim struct +0x3ed in the GET kill-registration path —
+   * research/decomp/items-evidence-inventory-2026-07-05.md §2a): 0=normal, 1=alt color,
+   * 2=gold, 3=silver, 4=crystal, 5=black. The port has no color-variant selection pipeline
+   * yet (borg spawns are always the default palette), so this is always 0 today — TUNED
+   * placeholder wired for the GET drop system (@gf/missions getSystem.ts) to read per-kill.
+   * Optional so existing fakes/constructors self-heal to undefined (treated as 0/normal).
+   */
+  colorVariant?: number;
+  team: number;
+  /** Owning player id, or null for CPU-controlled. */
+  ownerPlayer: string | null;
+  hp: number;
+  maxHp: number;
+  /** World position (struct+0x44 vec3, flat ground plane). */
+  pos: Vec3;
+  /** Facing yaw in radians (struct+0x72 heading; +Z forward). */
+  rotY: number;
+  /** Velocity (struct+0x58-ish vec3). */
+  vel: Vec3;
+  grounded: boolean;
+  /** Remaining mid-air jumps. */
+  airJumps: number;
+  state: BorgState;
+  /** Frames spent in the current state. */
+  stateTime: number;
+  /** Current animation label (cosmetic; render reads it). */
+  anim: string;
+  /**
+   * 3-phase deploy progress (ROM +0x558 state-table slots 0-2, behavior-notes.md (af); constants
+   * D

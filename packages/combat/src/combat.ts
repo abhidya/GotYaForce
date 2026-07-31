@@ -80,6 +80,8 @@ import {
   shotHitRadiusForBorgId,
   shotKindForBorgId,
 } from "./attackHitData.js";
+
+export { stepPrng, resetPrng } from "./prng.js";
 import { familyDamageRecordForBorg } from "./familyDamageData.js";
 import { exactMeleeForBorgId, type ExactMeleeAttack } from "./meleeExactData.js";
 import {

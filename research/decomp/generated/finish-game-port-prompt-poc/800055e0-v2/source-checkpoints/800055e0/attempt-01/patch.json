@@ -1,0 +1,8 @@
+{
+  "provider": "custom_api",
+  "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
+  "structured_mode": "tool_call",
+  "summary": "Exclude zz_00055e0_ (video/RNG init) as platform/runtime code with no direct browser-game behavior.",
+  "action": "exclude",
+  "files": []
+}

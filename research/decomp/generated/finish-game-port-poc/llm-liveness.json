@@ -7,8 +7,8 @@
   "tokens_per_second": 0,
   "token_source": "unavailable",
   "active": false,
-  "status": "waiting_for_qwen",
+  "status": "checkpoint_replay",
   "model": null,
-  "run_id": "2026-07-31T00:55:27.297Z",
-  "updated_at": "2026-07-31T00:55:27.298Z"
+  "run_id": "2026-07-31T08:32:59.502Z",
+  "updated_at": "2026-07-31T08:32:59.502Z"
 }
