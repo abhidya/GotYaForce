@@ -1,13 +1,15 @@
 {
-  "api_calls": 0,
-  "structured_tool_calls": 0,
-  "prompt_tokens": 0,
-  "completion_tokens": 0,
-  "duration_seconds": 0.0,
-  "token_source": "unavailable",
-  "active": false,
-  "status": "idle",
+  "api_calls": 228,
+  "structured_tool_calls": 1,
+  "prompt_tokens": 165777,
+  "completion_tokens": 18074,
+  "duration_seconds": 3055.4903556999925,
+  "token_source": "estimated",
+  "active": true,
+  "status": "generating",
+  "tokens_per_second": 5.915253493202195,
+  "request_started_at": "2026-07-31T00:01:23.326990",
   "model": "unsloth/Qwen3.6-35B-A3B-MTP-GGUF",
-  "run_id": "2026-07-31T01:30:04.722823Z",
-  "updated_at": "2026-07-30T21:30:04.728793"
+  "run_id": "2026-07-31T03:07:32.716675Z",
+  "updated_at": "2026-07-31T00:01:23.326990"
 }

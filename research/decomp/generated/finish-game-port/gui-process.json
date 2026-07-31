@@ -1,14 +1,14 @@
 {
-  "pid": 23472,
-  "mode": "resume",
+  "pid": 6304,
+  "mode": "fresh",
   "command": [
     "D:\\GotYaForce\\research\\tools\\OGhidra\\.venv\\Scripts\\python.exe",
     "D:\\GotYaForce\\research\\tools\\OGhidra\\main.py",
     "finish-port",
     "--mode",
-    "resume"
+    "fresh"
   ],
-  "started_at": "2026-07-30T21:30:03",
+  "started_at": "2026-07-30T23:07:31",
   "log": "D:\\GotYaForce\\research\\decomp\\generated\\finish-game-port\\gui-controller.log",
   "session_path": null,
   "session_role": "none",

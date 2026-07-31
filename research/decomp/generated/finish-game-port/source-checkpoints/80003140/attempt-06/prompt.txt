@@ -1,0 +1,2720 @@
+Port this original GameCube function into the existing GotYaForce browser game.
+
+This is source implementation, not a report. Return complete source-file contents.
+Modify existing gameplay integration points so the behavior is reachable in the running browser game.
+Add or update automatic tests in the returned files when needed.
+Use action="exclude" with no files only for platform/toolchain code that has no browser-game behavior.
+For action="edit", return at least one complete file and wire it into the existing runtime.
+Do not emit placeholders, TODOs, fallbacks, documentation, shell commands, or generated reports.
+Preserve unrelated behavior and follow the repository's existing TypeScript architecture.
+This exact body also represents these original addresses: ['0x80003140']
+Repair attempt: 6/8
+
+The previous patch failed these automatic gates. Modify the actual source to fix every error:
+HTTPError: 400 Client Error: Bad Request for url: http://127.0.0.1:8888/v1/chat/completions
+
+Authoritative Ghidra bundle:
+{
+  "identity": {
+    "address": "80003140",
+    "name": "__set_debug_bba",
+    "prototype": "undefined __set_debug_bba(void)",
+    "body_ranges": [
+      [
+        "80003140",
+        "8000314b"
+      ]
+    ],
+    "thunk": false,
+    "inline": false,
+    "no_return": false
+  },
+  "decompiler": {
+    "c": "\r\nvoid __set_debug_bba(void)\r\n\r\n{\r\n  DAT_80436498 = 1;\r\n  return;\r\n}\r\n\r\n",
+    "completed": true,
+    "warnings": [],
+    "errors": []
+  },
+  "calls": [],
+  "data_references": [],
+  "normalized_disassembly": [
+    "li r0,0x1",
+    "stb r0,-0x5108(r13)",
+    "blr"
+  ],
+  "normalized_pcode": [
+    "COPY|out=(ram, 0x80436498, 1)|in0=(const, 0x1, 1)",
+    "RETURN|out=|in0=(const, 0x0, 4)",
+    "COPY|out=(ram, 0x80436498, 1)|in0=(ram, 0x80436498, 1)"
+  ],
+  "fingerprints": {
+    "instruction_shape": "7f80632f67ea0de90149308b6aa2f9e32d9b851499a5c932db40ffa4311cfd7b",
+    "normalized_pcode": "5540fa360ec55ae339503b9b8a5d7961078ef4051a77711bf1585feb265bed03"
+  }
+}
+
+Relevant current browser source:
+--- packages/render/node_modules/@types/three/examples/jsm/environments/DebugEnvironment.d.ts ---
+import { Scene } from "three";
+
+export class DebugEnvironment extends Scene {
+    constructor();
+}
+
+--- packages/render/node_modules/@types/three/examples/jsm/utils/UVsDebug.d.ts ---
+import { BufferGeometry } from "three";
+
+export function UVsDebug(geometry: BufferGeometry, size?: number): HTMLCanvasElement;
+
+--- apps/game/src/ui/hud/DebugOverlay.ts ---
+/**
+ * DebugOverlay — a minimal, toggleable read-only readout of BorgRuntime sim fields for the
+ * currently-focused borg. Built for ATK-015 (research/tasks/attack-port/ATK-015-debug-overlay-fields.md)
+ * so trace sessions (T1-T10) can eyeball sim state against Dolphin side-by-side.
+ *
+ * Deliberately dead simple: one absolutely-positioned monospace <pre>, no framework, no SVG,
+ * plain textContent updates from the render loop. Read-only over BattleState — never mutates
+ * the borg/battle it reads (see the `update()` body below; it only reads `b.*` and formats
+ * strings).
+ *
+ * Fields not yet present on BorgRuntime today (burstArmFrames/burstActive/statusId/statusTimer/
+ * movementContext — landing in later ATK tickets) are feature-detected with `in` checks so this
+ * compiles and degrades gracefully both before and after those tickets land. lastDamageDealt/
+ * lastDamageTaken are intentionally deferred — see research/tasks/attack-port/NOTES-ATK-015.md.
+ */
+
+import type { BattleActorObservation } from "@gf/combat";
+
+export interface DebugOverlayHandle {
+  /** Read-only refresh from the current BorgRuntime (or null when nothing is focused/selected). */
+  update: (borg: BattleActorObservation | null) => void;
+  /** Show/hide without tearing down the DOM node. */
+  setVisible: (visible: boolean) => void;
+  visible: boolean;
+  destroy: () => void;
+}
+
+/** Loosely-typed view of BorgRuntime fields that later ATK tickets may add. Feature-detected
+ *  with `in` at read time — never assumed present. */
+interface FutureBorgFields {
+  burstArmFrames?: number;
+  burstActive?: boolean;
+  statusId?: string | number | null;
+  statusTimer?: number;
+  movementContext?: unknown;
+  lastDamageDealt?: number;
+  lastDamageTaken?: number;
+}
+
+function fmt(n: number | undefined | null, digits = 1): string {
+  if (n === undefined || n === null || !Number.isFinite(n)) return "-";
+  return n.toFixed(digits);
+}
+
+export function createDebugOverlay(container: HTMLElement): DebugOverlayHandle {
+  const pre = document.createElement("pre");
+  pre.className = "gf-debug-overlay";
+  Object.assign(pre.style, {
+    position: "absolute",
+    top: "8px",
+    left: "8px",
+    margin: "0",
+    padding: "8px 10px",
+    background: "rgba(0, 0, 0, 0.72)",
+    color: "#7CFC7C",
+    font: "12px/1.4 'Consolas', 'Menlo', monospace",
+    whiteSpace: "pre",
+    pointerEvents: "none",
+    zIndex: "50",
+    borderRadius: "4px",
+    maxWidth: "46ch",
+  } satisfies Partial<CSSStyleDeclaration>);
+  pre.textContent = "";
+  pre.style.display = "none";
+  container.appendChild(pre);
+
+  const handle: DebugOverlayHandle = {
+    update,
+    setVisible,
+    visible: false,
+    destroy: () => {
+      pre.remove();
+    },
+  };
+
+  function setVisible(v: boolean): void {
+    handle.visible = v;
+    pre.style.display = v ? "block" : "none";
+  }
+
+  function update(borg: BattleActorObservation | null): void {
+    if (!handle.visible) return;
+    if (!borg) {
+      pre.textContent = "[debug] no focused borg";
+      return;
+    }
+    const b = borg as BattleActorObservation & FutureBorgFields;
+    const lines: string[] = [];
+
+    lines.push(`${b.borgId}  uid=${b.uid}  team=${b.team}`);
+    lines.push(`state       ${b.state}  (t=${b.stateTime})`);
+    lines.push(`balance     ${fmt(b.balanceGauge, 0)} / ${fmt(b.balanceGaugeMax, 0)}`);
+    lines.push(`down        ${fmt(b.downGauge, 0)} / base ${fmt(b.downGaugeBase, 0)}`);
+    lines.push(
+      `combo       accum=${fmt(b.comboAccum, 0)} rank=${fmt(b.comboRank, 0)} window=${fmt(b.comboWindow, 0)}`,
+    );
+    lines.push(`invinc      ${fmt(b.invincTimer, 0)}`);
+
+    // Ammo: weapon cells if present (future ticket), else the single pool + reload cooldown.
+    if ("weaponCells" in b) {
+      lines.push(`ammo(cells) ${JSON.stringify((b as unknown as { weaponCells: unknown }).weaponCells)}`);
+    } else {
+      const reload = b.cooldowns?.["reload"] ?? 0;
+      lines.push(`ammo        ${fmt(b.ammo, 0)}  reload=${fmt(reload, 0)}`);
+    }
+
+    // Fields other ATK tickets will add; feature-detect so this compiles before and after.
+    if ("burstArmFrames" in b || "burstActive" in b) {
+      const armFrames = "burstArmFrames" in b ? fmt(b.burstArmFrames, 0) : "-";
+      const active = "burstActive" in b ? String(Boolean(b.burstActive)) : "-";
+      lines.push(`burst       arm=${armFrames} active=${active}`);
+    }
+    if ("statusId" in b || "statusTimer" in b) {
+      const id = "statusId" in b ? String(b.statusId ?? "none") : "-";
+      const timer = "statusTimer" in b ? fmt(b.statusTimer, 0) : "-";
+      lines.push(`status      id=${id} timer=${timer}`);
+    }
+    if ("movementContext" in b) {
+      lines.push(`moveCtx     ${JSON.stringify(b.movementContext)}`);
+    }
+    if ("lastDamageDealt" in b || "lastDamageTaken" in b) {
+      const dealt = "lastDamageDealt" in b ? fmt(b.lastDamageDealt, 0) : "-";
+      const taken = "lastDamageTaken" in b ? fmt(b.lastDamageTaken, 0) : "-";
+      lines.push(`lastDamage  dealt=${dealt} taken=${taken}`);
+    }
+
+    pre.textContent = lines.join("\n");
+  }
+
+  return handle;
+}
+
+--- packages/render/src/index.ts ---
+import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { clone as cloneSkinnedObject } from "three/examples/jsm/utils/SkeletonUtils.js";
+
+export interface ThreeViewportOptions {
+  backend?: "webgl";
+  antialias?: boolean;
+  /**
+   * Keeps the backbuffer readable for screenshot verification. Leave off during play;
+   * it costs memory/bandwidth on several WebGL drivers.
+   */
+  debugCapture?: boolean;
+  /** @deprecated Use debugCapture. */
+  preserveDrawingBuffer?: boolean;
+  pixelRatioLimit?: number;
+  camera?: {
+    fov: number;
+    near: number;
+    far: number;
+    position: [number, number, number];
+  };
+  clearColor?: number;
+}
+
+export interface RenderDiagnostics {
+  backend: "webgl";
+  debugCapture: boolean;
+  pixelRatio: number;
+  viewport: { width: number; height: number };
+  render: {
+    frame: number;
+    calls: number;
+    triangles: number;
+    lines: number;
+    points: number;
+  };
+  memory: {
+    geometries: number;
+    textures: number;
+  };
+  programs: number | null;
+}
+
+export interface ThreeViewport {
+  backend: "webgl";
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
+  controls: OrbitControls;
+  resize(width?: number, height?: number): void;
+  render(): void;
+  diagnostics(): RenderDiagnostics;
+  captureFrame(type?: string, quality?: number): string;
+}
+
+export function createThreeViewport(canvas: HTMLCanvasElement, options: ThreeViewportOptions = {}): ThreeViewport {
+  const backend = options.backend ?? "webgl";
+  if (backend !== "webgl") throw new Error(`Unsupported render backend: ${backend}`);
+  const debugCapture = options.debugCapture ?? options.preserveDrawingBuffer ?? false;
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: options.antialias ?? true,
+    preserveDrawingBuffer: debugCapture,
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, options.pixelRatioLimit ?? 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  // GX (GameCube) has NO tone mapping: TEV output goes to the framebuffer directly, so the
+  // exported HSD light/fog/vertex colors were authored against a linear->sRGB pipeline with no
+  // filmic curve. The previous ACESFilmicToneMapping was a port-ism that compressed/darkened
+  // every stage and actor material below its authored color (the "dark/flat arena" defect).
+  renderer.toneMapping = THREE.NoToneMapping;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(options.clearColor ?? 0x101820);
+
+  const cameraOptions = options.camera ?? {
+    fov: 45,
+    near: 0.1,
+    far: 100000,
+    position: [0, 900, 1800],
+  };
+  const camera = new THREE.PerspectiveCamera(
+    cameraOptions.fov,
+    window.innerWidth / window.innerHeight,
+    cameraOptions.near,
+    cameraOptions.far,
+  );
+  camera.position.set(...cameraOptions.position);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.target.set(0, 80, 0);
+
+  return {
+    backend,
+    renderer,
+    scene,
+    camera,
+    controls,
+    resize(width = window.innerWidth, height = window.innerHeight) {
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    },
+    render() {
+      renderer.render(scene, camera);
+    },
+    diagnostics() {
+      return getRenderDiagnostics(renderer, debugCapture);
+    },
+    captureFrame(type = "image/png", quality) {
+      renderer.render(scene, camera);
+      return renderer.domElement.toDataURL(type, quality);
+    },
+  };
+}
+
+export interface ThreeAssetLoaderOptions {
+  manager?: THREE.LoadingManager;
+  enableFileCache?: boolean;
+}
+
+export interface ThreeAssetLoader {
+  readonly manager: THREE.LoadingManager;
+  loadGlbScene(url: string): Promise<THREE.Object3D>;
+  cloneModel(source: THREE.Object3D): THREE.Object3D;
+}
+
+export function createThreeAssetLoader(options: ThreeAssetLoaderOptions = {}): ThreeAssetLoader {
+  if (options.enableFileCache) THREE.Cache.enabled = true;
+
+  const manager = options.manager ?? new THREE.LoadingManager();
+  const gltf = new GLTFLoader(manager);
+
+  return {
+    manager,
+    async loadGlbScene(url) {
+      if (!/\.glb(?:[?#].*)?$/i.test(url)) throw new Error(`Runtime model must be GLB: ${url}`);
+      const result = await gltf.loadAsync(url);
+      return result.scene;
+    },
+    cloneModel(source) {
+      return cloneSkinnedObject(source);
+    },
+  };
+}
+
+export type MeshCullingPolicy = "auto" | "disabled" | "skinned-disabled";
+
+export interface ImportedModelOptions {
+  centerXZ?: boolean;
+  groundY?: boolean;
+  materialSide?: THREE.Side;
+  metalness?: number;
+  culling?: MeshCullingPolicy;
+  /** Alpha-discard threshold applied to BLEND-mode (transparent) materials only. GLTF BLEND
+   *  materials keep depthWrite on by default, so fully-invisible texels of alpha-textured
+   *  props (flags/fences/foliage planes) still write depth and cut rectangular holes into
+   *  whatever renders behind them. A small alphaTest discards those texels. */
+  transparentAlphaTest?: number;
+}
+
+export function prepareImportedModel(model: THREE.Object3D, options: ImportedModelOptions = {}): void {
+  if (options.centerXZ || options.groundY) {
+    model.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(model);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    if (options.centerXZ) {
+      model.position.x -= center.x;
+      model.position.z -= center.z;
+    }
+    if (options.groundY) model.position.y -= box.min.y;
+  }
+
+  // Rebuild the HSD joint table and reparent flattened "Joint_N_Object_*" display
+  // objects under their owning JOBJ bone (see reparentMeshesToBones for the mapping).
+  reparentMeshesToBones(model);
+
+  model.traverse((object) => {
+    if (!(object instanceof THREE.Mesh || object instanceof THREE.SkinnedMesh)) return;
+    applyCullingPolicy(object, options.culling ?? "auto");
+    if (!object.geometry.boundingSphere) object.geometry.computeBoundingSphere();
+    if (!object.geometry.boundingBox) object.geometry.computeBoundingBox();
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    for (const material of materials) {
+      if (options.materialSide !== undefined) material.side = options.materialSide;
+      if (options.metalness !== undefined && "metalness" in material) {
+        (material as THREE.MeshStandardMaterial).metalness = options.metalness;
+      }
+      if (options.transparentAlphaTest !== undefined && material.transparent) {
+        material.alphaTest = options.transparentAlphaTest;
+        material.needsUpdate = true;
+      }
+    }
+  });
+}
+
+function applyCullingPolicy(mesh: THREE.Mesh | THREE.SkinnedMesh, policy: MeshCullingPolicy): void {
+  if (policy === "disabled") {
+    mesh.frustumCulled = false;
+  } else if (policy === "skinned-disabled") {
+    mesh.frustumCulled = !(mesh instanceof THREE.SkinnedMesh);
+  } else {
+    mesh.frustumCulled = true;
+  }
+}
+
+function getRenderDiagnostics(renderer: THREE.WebGLRenderer, debugCapture: boolean): RenderDiagnostics {
+  const size = new THREE.Vector2();
+  renderer.getSize(size);
+  const info = renderer.info as THREE.WebGLInfo & { programs?: unknown[] | null };
+  return {
+    backend: "webgl",
+    debugCapture,
+    pixelRatio: renderer.getPixelRatio(),
+    viewport: { width: size.x, height: size.y },
+    render: {
+      frame: info.render.frame,
+      calls: info.render.calls,
+      triangles: info.render.triangles,
+      lines: info.render.lines,
+      points: info.render.points,
+    },
+    memory: {
+      geometries: info.memory.geometries,
+      textures: info.memory.textures,
+    },
+    programs: info.programs ? info.programs.length : null,
+  };
+}
+
+/**
+ * Reparent flattened HSD mesh nodes under their controlling skeleton bones.
+ *
+ * The HSD→Collada→GLB export flattens every "Joint_N_Object_M" display object
+ * as a sibling of the JOBJ skeleton (a direct child of the scene root) instead
+ * of nesting it under its owning bone. With meshes parented to the root, only
+ * the root bone's whole-body motion reaches them; per-bone animation (weapon
+ * spin, limb swing) is invisible.
+ *
+ * HSD joints are indexed by a depth-first traversal of the JOBJ tree, and the
+ * exporter names each display object "Joint_<dfsIndex>_Object_<k>" for the bone
+ * that owns it (and each bone "JOBJ_<dfsIndex>"). We rebuild that joint table at
+ * load time by DFS-walking the JOBJ tree in preserved child order and mapping
+ * each mesh's Joint_N to the JOBJ at DFS position N. This matches the HSD joint
+ * table for every borg model without a per-model lookup and is robust to JOBJ
+ * name permutations. The mesh world transform is preserved, so the rest pose is
+ * unchanged; once parented, each mesh inherits its bone's relative animation.
+ */
+function reparentMeshesToBones(model: THREE.Object3D): void {
+  const jobjBones = new Set<THREE.Object3D>();
+  const meshesToReparent: Array<{ node: THREE.Object3D; jointIndex: number }> = [];
+  model.traverse((obj) => {
+    const name = obj.name ?? "";
+    if (/^JOBJ_\d+$/.test(name)) {
+      jobjBones.add(obj);
+      return;
+    }
+    const jointMatch = /^Joint_(\d+)_Object/.exec(name);
+    if (jointMatch) {
+      meshesToReparent.push({ node: obj, jointIndex: parseInt(jointMatch[1]!, 10) });
+    }
+  });
+  if (jobjBones.size === 0 || meshesToReparent.length === 0) return;
+
+  // The JOBJ root is the only bone with no JOBJ ancestor (it sits under the scene
+  // root, not under another bone).
+  let root: THREE.Object3D | null = null;
+  for (const bone of jobjBones) {
+    let ancestor = bone.parent;
+    let nested = false;
+    while (ancestor) {
+      if (jobjBones.has(ancestor)) {
+        nested = true;
+        break;
+      }
+      ancestor = ancestor.parent;
+    }
+    if (!nested) {
+      root = bone;
+      break;
+    }
+  }
+  if (!root) return;
+
+  // DFS the JOBJ tree in preserved child order → HSD joint index per bone.
+  const dfsIndexToBone = new Map<number, THREE.Object3D>();
+  const visit = (node: THREE.Object3D, cursor: { n: number }): void => {
+    dfsIndexToBone.set(cursor.n, node);
+    cursor.n += 1;
+    for (const child of node.children) {
+      if (jobjBones.has(child)) visit(child, cursor);
+    }
+  };
+  visit(root, { n: 0 });
+
+  const relative = new THREE.Matrix4();
+  for (const { node, jointIndex } of meshesToReparent) {
+    const targetBone = dfsIndexToBone.get(jointIndex);
+    if (!targetBone || targetBone === node.parent) continue;
+    node.updateWorldMatrix(true, false);
+    targetBone.updateWorldMatrix(true, false);
+    relative.copy(targetBone.matrixWorld).invert().multiply(node.matrixWorld);
+    node.matrix.copy(relative);
+    node.matrix.decompose(node.position, node.quaternion, node.scale);
+    targetBone.add(node);
+  }
+}
+
+--- apps/game/src/main.ts ---
+// Gotcha Force (web) — entry point.
+//
+// This wires the three finished systems into a playable CHALLENGE-mode loop:
+//   A) @gf/combat   — the deterministic battle sim (createBattle / battle.step).
+//   B) @gf/missions — CHALLENGE run/progression (createChallengeRun / computeResults).
+//   C) apps/game/src/ui — the framework-free screen + HUD components.
+//
+// Screen flow:
+//   MainMenu -> (challenge) -> SelectDifficulty -> SelectPlayers -> LoadBoxData
+//     -> SelectForce -> ForceBuilder/edit -> BattleIntro -> BATTLE
+//     -> Results -> next battle / back to menu
+//   MainMenu -> (edit-force) -> ForceBuilder -> back to menu
+//   PauseMenu overlays the battle on Start/Esc.
+//
+// The existing three.js scene, stage rendering, lighting, camera, the centralized
+// render asset loader, and the baked-clip builder are REUSED. The netcode `ws` hooks are
+// preserved (defined but dormant) so multiplayer can be wired next.
+
+import * as THREE from "three";
+
+import {
+  createPublicAssetCatalog,
+  type StageAssets,
+} from "@gf/assets";
+import { startFixedStepLoop, startRenderLoop } from "@gf/core";
+import {
+  createThreeAssetLoader,
+  createThreeViewport,
+  prepareImportedModel,
+} from "@gf/render";
+import {
+  cameraParamsForBorgId,
+  emptyInput,
+  type Battle,
+  type BattleActorObservation,
+  type PlayerInput,
+  type RectStageBounds,
+} from "@gf/combat";
+import { createAudioManager, loadAudioManifest, type GotchaAudioManager } from "@gf/audio";
+import {
+  createChallengeRun,
+  createGotchaBoxSettlement,
+  computeResults,
+  playerIdFor,
+  type MissionBattleConfig,
+  type GetDrop,
+} from "@gf/missions";
+
+import {
+  ensureStyles,
+  createMenuScreenHost,
+  createTitleIntro,
+  createMainMenu,
+  createSelectDifficulty,
+  createSelectPlayers,
+  createLoadBoxData,
+  createSelectForce,
+  createForceBuilder,
+  createBattleIntro,
+  createResults,
+  createGets,
+  createPauseMenu,
+  createBattleHud,
+  createDebugOverlay,
+  type ForceSlot,
+  type BattleHudHandle,
+  type DebugOverlayHandle,
+  type TeammateMarker,
+  type GetsRow,
+  type MenuScreenHandle,
+  type PauseMenuHandle,
+} from "./ui/index.js";
+
+import {
+  EXPORTED_STAGE_CATALOG_ADAPTER,
+  inputFromKeys,
+  DEFAULT_ARENA_STAGE,
+  EXPORTED_STAGE_CATALOG,
+  isExportedStageId,
+} from "./sim/adapter.js";
+import { initializeGotchaBoxBattle } from "./sim/gotchaBoxBattleInitialization.js";
+import {
+  createGameSession,
+  type DeepReadonly,
+  type GameSessionEffect,
+  type GameSessionEvent,
+} from "./gameSession.js";
+import { BattleScene } from "./sim/battleScene.js";
+import { BORG_CATALOG, DEFAULT_LEAD } from "./sim/borgCatalog.js";
+import { createBorgPresentationAssets } from "./sim/borgPresentationAssets.js";
+import { BattleCamera, type CameraFollowTarget } from "./sim/camera.js";
+import { createBrowserGotchaBoxPersistence } from "./sim/getStorage.js";
+import {
+  activeBorgForPlayer,
+  battleEnergyMaxima,
+  battleOutcomeFromState,
+  battlePresentationState,
+  battleSceneState,
+  battleAudioEvents,
+  battleVoiceCues,
+  liveActorPositions as battleLiveActorPositions,
+  snapshotBattleAudio,
+  type BattleEventCue,
+} from "./sim/presentation.js";
+
+// ------------------------------------------------------------------------------------------
+// Data
+// ------------------------------------------------------------------------------------------
+
+const FORCE_CATALOG = BORG_CATALOG.forceCatalog;
+
+// Exported ADX->OGG cues from poq_adx_usa.afs. Exact Challenge cue semantics
+// still need DOL trace confirmation, so these are conservative asset-backed
+// defaults rather than claimed final music IDs.
+//
+// Menu SFX note (2026-07-02): the earlier decision to mute confirm/back/edit was based on the
+// se00_* exports being 3-12s clips. That turned out to be an EXPORT BUG, not a property of the
+// source audio: the ADX headers in poq_adx_usa.afs give 0.47-1.86s for AFS members 33..37, and
+// the re-exported OGGs match. With genuinely short one-shot cues available, menu SFX are wired
+// again — still TUNED (which SE plays for which menu event is not ROM-traced), but no longer
+// wrong-length. See research/game-design/AUDIO-PORT-STATUS.md for the full event->file map.
+const AUDIO_CUES = {
+  menuBgm: "bgm00",
+  battleBgm: "bgm01",
+  confirm: "se00_03",
+  back: "se00_04",
+  edit: "se00_04",
+} as const;
+// Combat SFX default ON since the export-duration fix; ?noCombatSfx=1 is the debugging opt-out
+// (replaces the old opt-in ?tunedCombatSfx=1 gate, whose rationale — 12s clips — is gone).
+const DISABLE_COMBAT_SFX = new URLSearchParams(window.location.search).has("noCombatSfx");
+
+// "land" is not a BattleEventCue/AnimSlot: it is synthesized from the air->ground slot edge in
+// onSlotEnter below so the DERIVED landing sample (id 0x1e) has an event to hang off.
+type CombatSfxCue = BattleEventCue | "land";
+
+// Battle event -> SFX cue mapping. Split DERIVED / TUNED per event:
+//
+// DERIVED (se_<hex> keys): REAL GameCube combat samples. The decomp recovered 11 combat events
+// with literal soundIds (research/decomp/data/combat-se-ids.json; dispatcher zz_00efb3c_ decodes
+// id as bank=id>>7, sample=id&0x7f). Those ids resolve through the battle soundbanks
+// snd_com01/02/03 (afs_data.afs members 2839..2847: TSBD id table -> CHD tone/DSP header ->
+// DPK GC DSP-ADPCM data; bank->slot order proven by the DOL bank table DAT_802d0bec @ boot.dol
+// 0x2cdbec). scripts/export-combat-se.py decodes them to audio/se/se_<id>.ogg with an id-keyed
+// manifest that initAudio() merges into the audio manager.
+//
+// TUNED (se00_* keys): events with NO recovered literal id keep the older waveform-guess
+// assignments (poq_adx_usa.afs members 33..37, see AUDIO-PORT-STATUS.md). Per combat-se-ids.json
+// these are genuinely un-derivable from code constants: melee swings / per-move whooshes are
+// PATH-B animation-data sounds (soundIds live in per-move animation blobs at actor+0x4e8, not in
+// code), death audio comes from the death reaction ANIMATION's embedded events (cue id 9 is an
+// anim selector, not a soundId), and charge/lockon/alert have no traced ids at all.
+//
+// Exported but deliberately unwired: se_013 (heavy-borg-family crash variant of se_010 — the
+// real branch is on borg family, which the port does not model here yet), se_026 (actor-vs-actor
+// body bump — no bump event in the sim), se_09b (grab/throw connect — no throw mechanic yet).
+// Guard-break ids 0x00/0x80/0x100 turned out to be TSB-muted (volume byte 0) in all three real
+// banks — the "layered break stinger" plays silence on hardware — so there is no break sample to
+// wire (scripts/export-combat-se.py HONEST NOTES).
+const COMBAT_SFX: Partial<Record<CombatSfxCue, string>> = {
+  // melee/melee_alt are FALLBACKS only since the PATH-B extraction (2026-07-04): swings whose
+  // stream resolved authored per-anim sound events play those instead (playAuthoredSwingSounds
+  // below; research/decomp/anim-sound-op-decode-2026-07-04.md decodes the actor+0x4e8 table).
+  melee: "se00_03", // TUNED fallback for borgs without extracted authored swing audio
+  melee_alt: "se00_03", // TUNED: same
+  shoot: "se_008", // DERIVED: projectile-spawn id 0x08 (zz_006ee14_, fired from weapon-FIRE handler)
+  special: "se00_02", // TUNED
+  // TUNED: hold-B charge build-up (edge-detected in presentation.ts battleAudioEvents when
+  // chargeFrames leaves 0). se00_02's "slow build then burst" waveform (AUDIO-PORT-STATUS.md)
+  // is the only exported cue whose envelope reads as a build-up, so the hold reuses it.
+  charge_start: "se00_02",
+  // TUNED: charge tier-1/tier-2 crossings (thresholds read from the borg's action profile in
+  // presentation.ts, NOT hardcoded here). The short tonal se00_04 doubles as the tier-up
+  // "tick"; no dedicated tier chime exists in the exported set.
+  charge_tier1: "se00_04",
+  charge_tier2: "se00_04",
+  charge_release: "se00_02",
+  // DERIVED: knockback crash impact id 0x10 (FUN_8005a580, light/default borg families). The
+  // heavy-family variant 0x13 is exported as se_013 but unwired until the port models families.
+  hit: "se_010",
+  down: "se_0dd", // DERIVED: knockdown thud id 0xdd (state slot 30; ROM plays it pitched via zz_00f061c_)
+  death: "se00_01", // TUNED: death audio is a reaction-animation data cue, not a literal id
+  dash: "se_0f2", // DERIVED: dash/boost/warp-launch id 0xf2 (start_forced_move_to_point et al.)
+  dash_fwd: "se_0f2",
+  dash_back: "se_0f2",
+  dash_left: "se_0f2",
+  dash_right: "se_0f2",
+  jump: "se_025", // DERIVED: launch-state id 0x25 (FUN_80061338) — jump was previously unmapped
+  spawn: "se_0f2", // DERIVED: 0xf2 is also the deploy/warp-entrance launch (FUN_8005e868, state slot 33)
+  land: "se_01e", // DERIVED id 0x1e (landing/footfall states); the TRIGGER edge below is TUNED presentation
+  lockon: "se00_04", // TUNED
+  alert: "se00_02", // TUNED
+};
+
+// Rate limits are keyed by EVENT (not by file), so e.g. a damage-taken cue is not swallowed by a
+// just-played melee swing that happens to share the same sample.
+const COMBAT_SFX_MIN_GAP_MS: Partial<Record<CombatSfxCue, number>> = {
+  melee: 220,
+  melee_alt: 220,
+  shoot: 180,
+  special: 450,
+  // charge_start can only re-fire after a release zeroes chargeFrames; the gap guards a
+  // rapid tap-tap-tap on a chargeable trigger from stacking the 1.07s build-up clip.
+  charge_start: 450,
+  // Tier crossings fire at most once per hold each (chargeFrames is capped at tier2);
+  // the small gap only de-dupes a tier1 tick against an immediately following tier2 when
+  // thresholds sit close together on some profile.
+  charge_tier1: 300,
+  charge_tier2: 300,
+  charge_release: 450,
+  hit: 180,
+  down: 450,
+  death: 700,
+  dash: 400,
+  dash_fwd: 400,
+  dash_back: 400,
+  dash_left: 400,
+  dash_right: 400,
+  jump: 300,
+  spawn: 500,
+  land: 250,
+  lockon: 150,
+  alert: 1500,
+};
+const lastCombatSfxAt = new Map<string, number>();
+
+function playCombatSfx(cue: CombatSfxCue): void {
+  if (DISABLE_COMBAT_SFX) return;
+  const key = COMBAT_SFX[cue];
+  if (!key) return;
+  const now = performance.now();
+  const minGap = COMBAT_SFX_MIN_GAP_MS[cue] ?? 250;
+  const last = lastCombatSfxAt.get(cue) ?? -Infinity;
+  if (now - last < minGap) return;
+  lastCombatSfxAt.set(cue, now);
+  playSfx(key);
+}
+
+function playBattleEventSfx(cue: BattleEventCue): void {
+  // Authored-audio suppression (DERIVED data, TUNED routing): when the LOCAL borg's current
+  // swing/charged release/X-special carries ROM-authored PATH-B sound events
+  // (BorgRuntime.meleeSounds, research/decomp/anim-sound-op-decode-2026-07-04.md), the
+  // slot-enter path below (onSlotEnter -> AUTHORED_SWING_SLOTS) plays those exact samples —
+  // skip the generic TUNED cue here so the same swing/release/special doesn't double-play (the
+  // sim edge fires in the same tick as the slot edge).
+  //
+  // This checks the SAME set (AUTHORED_SWING_SLOTS, defined below) rather than re-listing cue
+  // names here: battleAudioEvents currently only ever emits "melee"/"charge_release" (never the
+  // literal "melee_alt"/"charge_shot" members of the shared AnimSlot/BattleEventCue union), so a
+  // hardcoded 2-or-3-name check here looked complete but silently stopped covering
+  // AUTHORED_SWING_SLOTS the moment "special" (X-special) was added to that set — exactly the
+  // gap selfcheck-audio-wiring.mjs's parity check exists to catch. Sharing one Set makes the two
+  // call sites impossible to drift apart again.
+  if (AUTHORED_SWING_SLOTS.has(cue) && localActiveBorgHasAuthoredSwingAudio()) return;
+  playCombatSfx(cue);
+}
+
+function localActiveBorgHasAuthoredSwingAudio(): boolean {
+  if (!session) return false;
+  const active = activeBorgForPlayer(session.battle, session.localPlayerId);
+  return (active?.meleeSounds?.length ?? 0) > 0;
+}
+
+// Authored PATH-B swing audio (research/decomp/anim-sound-op-decode-2026-07-04.md): each
+// melee swing / charged release's action-script stream plays an anim whose descriptor binds
+// a list of {frame, soundId} events (ROM actor+0x4e8 table). The sim resolves them per swing
+// (BorgRuntime.meleeSounds, DERIVED end-to-end) and the slot-enter edge schedules each event
+// at its anim-clock frame (60fps). TUNED residue, labeled honestly: the schedule hangs off
+// the renderer's slot edge + wall clock (not the ROM part-anim clock), mode-1 events play the
+// base id only (no anim-rate id±1 variant select), and positional modes play flat.
+// "special" (X-special) added alongside melee/melee_alt/charge_shot: startSpecialAttack
+// (packages/combat combat.ts) resolves the SAME xLeaf.sounds -> BorgRuntime.meleeSounds bridge
+// for the X-move as the melee/charge paths use, so it was missing authored audio (falling
+// through to the "special" slot-edge fallback below) until this fix — see the matching
+// suppression-list fix in playBattleEventSfx above.
+const AUTHORED_SWING_SLOTS: ReadonlySet<string> = new Set(["melee", "melee_alt", "charge_shot", "special"]);
+/** Per-SAMPLE floor so 8 simultaneous AI swings can't stack the same whoosh into clipping;
+ *  keys live in lastCombatSfxAt's se_* keyspace, disjoint from the per-EVENT cue keys. */
+const AUTHORED_SE_MIN_GAP_MS = 150;
+/** Defensive cap: swing sound frames are single-digit-to-~21 in the extracted data; anything
+ *  wildly larger would be a data bug, not a real cue. */
+const AUTHORED_MAX_DELAY_MS = 2000;
+
+function seKeyForSoundId(id: number): string {
+  return `se_${id.toString(16).padStart(3, "0")}`;
+}
+
+function playAuthoredSwingSounds(sounds: readonly { frame: number; id: number }[]): void {
+  if (DISABLE_COMBAT_SFX) return;
+  for (const sound of sounds) {
+    const delayMs = Math.min((sound.frame * 1000) / 60, AUTHORED_MAX_DELAY_MS);
+    window.setTimeout(() => {
+      const key = seKeyForSoundId(sound.id);
+      const now = performance.now();
+      if (now - (lastCombatSfxAt.get(key) ?? -Infinity) < AUTHORED_SE_MIN_GAP_MS) return;
+      lastCombatSfxAt.set(key, now);
+      playSfx(key);
+    }, delayMs);
+  }
+}
+
+// Landing-cue edge detection state (see onSlotEnter below): a borg whose anim slot goes from an
+// airborne slot to a grounded one just touched down. Keyed by actor uid; stale entries from a
+// previous battle are harmless (worst case one spurious rate-limited land tick on re-entry).
+const LANDING_FROM_SLOTS: ReadonlySet<string> = new Set(["jump", "fall", "fly"]);
+const LANDING_TO_SLOTS: ReadonlySet<string> = new Set(["idle", "move"]);
+const lastAnimSlotByUid = new Map<string, string>();
+
+// Per-borg VOICE cues (behavior-notes (az)): deploy shout / death cry keyed on the borg family.
+// The family→voice-group mapping is DERIVED from the asset naming; the deploy=00 / death=01 role
+// binding is TUNED (no traced voice table). Rate-limited per voice key so a rapid deploy→KO→deploy
+// cycle can't stack the same clip on itself. playSfx transparently resolves voice-type manifest
+// keys (the audio manager falls back to its voice map) and swallows a missing/blocked key.
+const VOICE_MIN_GAP_MS = 500;
+const lastVoiceAt = new Map<string, number>();
+
+function playBorgVoice(key: string): void {
+  if (DISABLE_COMBAT_SFX) return;
+  const now = performance.now();
+  if (now - (lastVoiceAt.get(key) ?? -Infinity) < VOICE_MIN_GAP_MS) return;
+  lastVoiceAt.set(key, now);
+  playSfx(key);
+}
+
+function forceFromSlot(slot: DeepReadonly<ForceSlot>): string[] {
+  return BORG_CATALOG.forceFromSlot({ ...slot, borgIds: [...slot.borgIds] });
+}
+
+// ------------------------------------------------------------------------------------------
+// three.js scene (preserved from the original app)
+// ------------------------------------------------------------------------------------------
+
+// DERIVED: fov/near/far/fog/ambient/light values below are read directly from st00_mdl.arc's
+// scene CObj/LObj/Fog tables (research/asset-inventory/stage-lighting-render-state.md — Camera
+// section: eye/interest/near=10/far=80000/fov=43.191872; Fog section: start=900/end=40000).
+// Per-stage render-state replaces fov/near/far at runtime; this object only seeds the scene
+// before the first stage finishes loading. Camera *position* (as opposed to fov/near/far) is NOT derived
+// from this table — that's the separate follow-camera logic in sim/camera.ts.
+const DEFAULT_RENDER_STATE = {
+  fogColor: 0xfff6e5,
+  fogNear: 900,
+  fogFar: 40000,
+  fov: 43.191872,
+  near: 10,
+  far: 80000,
+  ambientColor: 0xd8d0c2,
+  lightColor: 0xfff0e6,
+  lightPosition: new THREE.Vector3(-385.512512, 956.0448, -377.986603),
+};
+
+type StageColorRecord = { rgbHex?: string };
+type ExtractedStageLight = {
+  role?: string;
+  color?: StageColorRecord;
+  intensity?: number;
+  position?: { position?: number[] } | null;
+};
+type LegacyStageLights = {
+  ambient?: { colorRgbHex?: string; intensity?: number };
+  directional?: { colorRgbHex?: string; intensity?: number; position?: number[] };
+};
+
+type StageRenderState = {
+  camera?: { fovDegrees?: number; near?: number; far?: number };
+  fog?: { colorRgbHex?: string; color?: StageColorRecord; start?: number; end?: number };
+  lights?: ExtractedStageLight[] | LegacyStageLights;
+};
+
+const uiElement = document.getElementById("ui");
+const canvas = document.getElementById("app") as HTMLCanvasElement;
+if (!uiElement) throw new Error("Missing #ui");
+const ui = uiElement;
+const screenHost = createMenuScreenHost(ui);
+ui.style.pointerEvents = "auto"; // the UI component library uses real buttons.
+const urlParams = new URLSearchParams(window.location.search);
+const ENABLE_BATTLE_DEBUG_DATASET = urlParams.has("debugBattle");
+const ENABLE_RENDER_DEBUG = urlParams.has("debugRender") || urlParams.has("capture");
+
+// ATK-015: minimal read-only debug overlay (sim state readout for the focused borg). Mounted
+// once at startup, hidden by default; toggled with the backtick key or ?debugOverlay=1. See
+// apps/game/src/ui/hud/DebugOverlay.ts and research/tasks/attack-port/ATK-015-debug-overlay-fields.md.
+const debugOverlay: DebugOverlayHandle = createDebugOverlay(ui);
+if (urlParams.has("debugOverlay")) debugOverlay.setVisible(true);
+
+const viewport = createThreeViewport(canvas, {
+  debugCapture: ENABLE_RENDER_DEBUG,
+  clearColor: DEFAULT_RENDER_STATE.fogColor,
+  camera: {
+    fov: DEFAULT_RENDER_STATE.fov,
+    near: DEFAULT_RENDER_STATE.near,
+    far: DEFAULT_RENDER_STATE.far,
+    position: [950, 520, 1320],
+  },
+});
+const { scene, camera, controls } = viewport;
+const renderAssets = createThreeAssetLoader({
+  enableFileCache: true,
+});
+scene.fog = new THREE.Fog(DEFAULT_RENDER_STATE.fogColor, DEFAULT_RENDER_STATE.fogNear, DEFAULT_RENDER_STATE.fogFar);
+
+import {
+  createStageLightingRig,
+  resolveStageLighting,
+  applyResolvedStageLighting,
+  type StageRenderState as LightingStageRenderState,
+} from "./stages/lighting";
+import { applyStageReadabilityOverrides } from "./stages/readabilityOverrides";
+// Real per-stage lighting rig (supports N directionals — stff carries 2); replaces the old
+// single ambient+directional pair. Values/validation: research/game-design/STAGE-LIGHTING-PORT.md.
+const stageLighting = createStageLightingRig(scene);
+
+const stageRoot = new THREE.Group();
+scene.add(stageRoot);
+
+// Battle actors (sim-driven borg models) live under their own group.
+const battleRoot = new THREE.Group();
+scene.add(battleRoot);
+
+const assetCatalog = createPublicAssetCatalog();
+const borgPresentationAssets = createBorgPresentationAssets({
+  assetLoader: renderAssets,
+  defaultLeadId: DEFAULT_LEAD,
+});
+const battleScene = new BattleScene(battleRoot, {
+  loadModel: borgPresentationAssets.loadModel,
+  loadClip: borgPresentationAssets.loadClip,
+  loadClipByStreamRef: borgPresentationAssets.loadClipByStreamRef,
+  // Audio glue: edge-triggered per-slot cue for every actor (dash/melee/hit/down/death/...).
+  // Overlaps with the sim-level edges in emitBattleAudioEdges by design; the per-event
+  // min-gap map in playCombatSfx dedupes the two sources. The air->ground slot edge
+  // synthesizes the "land" cue: the SAMPLE is the DERIVED landing id 0x1e (se_01e), but the
+  // trigger edge itself is TUNED presentation (the ROM fires it from landing state slot 31
+  // and grounded-recovery handlers, which the port's slot machine does not model 1:1).
+  onSlotEnter: (_borgId, slot, uid, meleeSounds) => {
+    const prev = lastAnimSlotByUid.get(uid);
+    lastAnimSlotByUid.set(uid, slot);
+    if (prev !== undefined && LANDING_FROM_SLOTS.has(prev) && LANDING_TO_SLOTS.has(slot)) {
+      playCombatSfx("land");
+    }
+    // Authored per-swing audio (DERIVED — see playAuthoredSwingSounds): replaces the TUNED
+    // slot cue for THIS swing/release only; borgs without authored sounds keep the fallback.
+    if (AUTHORED_SWING_SLOTS.has(slot) && meleeSounds && meleeSounds.length > 0) {
+      playAuthoredSwingSounds(meleeSounds);
+      return;
+    }
+    playCombatSfx(slot);
+  },
+});
+// Billboard basis for the status-aura clock hands (ROM FUN_8013f790 camera-facing draw path).
+battleScene.setCamera(camera);
+const battleCamera = new BattleCamera({ camera, controlsTarget: controls.target });
+
+// ------------------------------------------------------------------------------------------
+// Stage loading (preserved)
+// ------------------------------------------------------------------------------------------
+
+function applyStageRenderState(stageId: string, rs: StageRenderState): void {
+  // Delegates to the canonical module (validated 40/40 against on-disk render-state.json;
+  // identical output for 39 stages, stff additionally gains its second directional). The
+  // local StageRenderState type is a looser shape of the module's; same on-disk data.
+  //
+  // resolve -> readability override -> apply, rather than the single-call convenience wrapper,
+  // so the 3 audit-flagged stages (see readabilityOverrides.ts) get their fog-far clamp BEFORE
+  // it reaches the scene/rig. Authored render-state stays the only input for the other 37
+  // stages: applyStageReadabilityOverrides is a referential no-op when a stage has no entry.
+  const resolved = resolveStageLighting(rs as LightingStageRenderState);
+  const withOverrides = applyStageReadabilityOverrides(stageId, resolved);
+  applyResolvedStageLighting(scene, stageLighting, withOverrides);
+  camera.fov = withOverrides.camera.fovDegrees;
+  camera.near = withOverrides.camera.near;
+  camera.far = withOverrides.camera.far;
+  camera.updateProjectionMatrix();
+}
+
+let loadedStageId: string | null = null;
+let loadedStageAssets: StageAssets<StageRenderState> | null = null;
+
+async function loadStage(stageId: string): Promise<StageAssets<StageRenderState>> {
+  if (!isExportedStageId(stageId)) throw new Error(`Stage is not exported: ${stageId}`);
+  if (loadedStageId === stageId && loadedStageAssets) return loadedStageAssets;
+  stageRoot.clear();
+  const assets = await assetCatalog.loadStageAssets<StageRenderState>(stageId);
+  applyStageRenderState(stageId, assets.renderState);
+  const models = await Promise.all(assets.modelUrls.map((u) => renderAssets.loadGlbScene(u)));
+  for (const model of models) {
+    prepareImportedModel(model, {
+      // HSD stage exports include large single-sided planes/inside-facing pieces, but the
+      // runtime GLB pipeline does not preserve per-material cull-mode flags yet. Render stages
+      // double-sided like the borg/UI HSD imports so arena surfaces stay readable from the
+      // battle camera instead of disappearing or blacking out at gameplay angles.
+      materialSide: THREE.DoubleSide,
+      metalness: 0,
+      culling: "auto",
+      // TUNED threshold (HSD PEDesc alpha-compare state is undecoded): discard near-invisible
+      // texels of BLEND-mode stage props so their invisible quad corners stop writing depth
+      // and punching holes into geometry behind them.
+      transparentAlphaTest: 0.1,
+    });
+    stageRoot.add(model);
+  }
+  loadedStageId = stageId;
+  loadedStageAssets = assets;
+  return loadedStageAssets;
+}
+
+async function loadInitialAssets(): Promise<void> {
+  const manifest = await assetCatalog.loadModelManifest();
+  borgPresentationAssets.setModelManifest(manifest);
+  await loadStage(DEFAULT_ARENA_STAGE);
+}
+
+// ------------------------------------------------------------------------------------------
+// Netcode hooks (preserved, dormant). Multiplayer is wired next; do not delete.
+// ------------------------------------------------------------------------------------------
+
+let ws: WebSocket | null = null;
+function closeSocket(): void {
+  ws?.close();
+  ws = null;
+}
+void closeSocket; // referenced so the dormant hook isn't tree-shaken/flagged.
+
+// ------------------------------------------------------------------------------------------
+// Audio
+// ------------------------------------------------------------------------------------------
+
+let audioManagerPromise: Promise<GotchaAudioManager | null> | null = null;
+let activeBgmKey: string | null = null;
+let pendingBgmKey: string | null = null;
+
+function initAudio(): Promise<GotchaAudioManager | null> {
+  if (!audioManagerPromise) {
+    audioManagerPromise = (async () => {
+      const manifest = await loadAudioManifest();
+      // Merge the DERIVED combat-SE manifest (real GameCube soundbank samples, id-keyed
+      // se_<hex> cues, exported by scripts/export-combat-se.py from afs_data.afs
+      // snd_com01/02/03). Optional: when absent, the se_* COMBAT_SFX entries simply
+      // resolve to nothing and playSfx swallows them.
+      try {
+        const se = await loadAudioManifest("/audio/se/manifest.json");
+        manifest.files = [...manifest.files, ...se.files];
+      } catch {
+        // combat-SE manifest not exported; fall through with the base manifest only
+      }
+      return createAudioManager({ manifest });
+    })().catch(() => null);
+  }
+  return audioManagerPromise;
+}
+
+function queueBgm(key: string): void {
+  pendingBgmKey = key;
+  void playPendingBgm();
+}
+
+async function playPendingBgm(): Promise<void> {
+  const key = pendingBgmKey;
+  if (!key) return;
+  if (key === activeBgmKey) {
+    pendingBgmKey = null;
+    return;
+  }
+  const audio = await initAudio();
+  if (!audio) return;
+  try {
+    await audio.playBgm(key);
+    activeBgmKey = key;
+    if (pendingBgmKey === key) pendingBgmKey = null;
+  } catch {
+    // Browsers reject autoplay before the first user gesture. Keep pending and
+    // retry from the next key/click/touch event.
+  }
+}
+
+function playSfx(key: string | null): void {
+  if (!key) return;
+  void initAudio().then((audio) => {
+    if (!audio) return;
+    void audio.playSfx(key).catch(() => undefined);
+  });
+}
+
+function playConfirmSfx(): void {
+  playSfx(AUDIO_CUES.confirm);
+}
+
+function playBackSfx(): void {
+  playSfx(AUDIO_CUES.back);
+}
+
+function playEditSfx(): void {
+  playSfx(AUDIO_CUES.edit);
+}
+
+// ------------------------------------------------------------------------------------------
+// Input
+// ------------------------------------------------------------------------------------------
+
+const keys = new Set<string>();
+window.addEventListener("keydown", (e) => {
+  if (isTextInputTarget(e.target)) return;
+  void playPendingBgm();
+  // Tab would move focus; capture it for switch-lock during battle.
+  if (e.code === "Tab" && challengeSession.snapshot().screen === "battle") e.preventDefault();
+  // Backquote toggles the ATK-015 debug overlay (sim-state readout for the focused borg).
+  if (e.code === "Backquote") debugOverlay.setVisible(!debugOverlay.visible);
+  keys.add(e.code);
+});
+window.addEventListener("keyup", (e) => keys.delete(e.code));
+window.addEventListener("pointerdown", () => {
+  void playPendingBgm();
+});
+
+function isTextInputTarget(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLSelectElement ||
+    target instanceof HTMLTextAreaElement
+  );
+}
+
+const NO_KEYS: ReadonlySet<string> = new Set();
+
+function activeGamepad(playerIndex = 0, allowFallback = playerIndex === 0): Gamepad | null {
+  const pads = navigator.getGamepads?.();
+  if (!pads) return null;
+  const exact = pads[playerIndex];
+  if (exact?.connected) return exact;
+  return allowFallback ? pads.find((g) => g?.connected) ?? null : null;
+}
+
+// ------------------------------------------------------------------------------------------
+// Borg GET / Gotcha-Box drop pool (research/decomp/items-evidence-inventory-2026-07-05.md).
+//
+// PORT-ISM: persisted in localStorage (apps/game/src/sim/getStorage.ts); the pool/roll
+// SEMANTICS are DERIVED (@gf/missions getSystem.ts). Wired into the CHALLENGE flow only —
+// Adventure mode isn't wired into this app yet, and the ROM's own GET accrual is Adventure-
+// only (Challenge instead logs kills for the score/kill-log side, doc §2a); applying it to
+// Challenge here is a deliberate port decision so the drop pipeline is exercised at all.
+//
+// The settlement module brackets every Challenge battle and owns win/lose/abandon ordering.
+// Its injected RNG stream outlives individual battles (the missions seeded-RNG convention).
+let getRngState = (Date.now() ^ 0x47474554) >>> 0; // "GGET" xor time — session-seeded, not a save value.
+function getRng(): number {
+  getRngState = (getRngState + 0x6d2b79f5) >>> 0;
+  let t = getRngState;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+const gotchaBox = createGotchaBoxSettlement({
+  persistence: createBrowserGotchaBoxPersistence(),
+  rng: getRng,
+  clock: Date.now,
+});
+
+const challengeSession = createGameSession({
+  initialForceSlots: BORG_CATALOG.defaultForceSlots,
+  forceFromSlot,
+  validForce: (borgIds) => BORG_CATALOG.rosterIndex.validIds(borgIds, { fallbackId: DEFAULT_LEAD }),
+  createRun: createChallengeRun,
+  borgs: BORG_CATALOG.roster as Parameters<typeof createChallengeRun>[0]["borgs"],
+  stageCatalog: EXPORTED_STAGE_CATALOG_ADAPTER,
+  borgStats: BORG_CATALOG.combatStats,
+  loadStageAssets: loadStage,
+});
+
+function mountScreen(build: (root: HTMLElement) => MenuScreenHandle): void {
+  screenHost.mount(build);
+}
+
+function dispatchSession(event: GameSessionEvent): void {
+  interpretSessionEffects(challengeSession.dispatch(event));
+}
+
+function interpretSessionEffects(effects: readonly GameSessionEffect[]): void {
+  for (const effect of effects) {
+    if (effect.type === "render") renderSessionScreen();
+    else if (effect.type === "teardown-battle") teardownBattle();
+    else {
+      void enterBattle().catch((error: unknown) => {
+        console.error("[battle] failed to enter battle, returning to Select Force", error);
+        teardownBattle();
+        dispatchSession({ type: "battle-preparation-failed" });
+      });
+    }
+  }
+}
+
+function renderSessionScreen(): void {
+  const state = challengeSession.snapshot();
+  switch (state.screen) {
+    case "loading": queueBgm(AUDIO_CUES.battleBgm); screenHost.clear(); return;
+    case "title":
+      queueBgm(AUDIO_CUES.menuBgm);
+      mountScreen((root) => createTitleIntro(root, { onEnter: () => {
+        playConfirmSfx(); dispatchSession({ type: "title-enter" });
+      } }));
+      return;
+    case "menu":
+      queueBgm(AUDIO_CUES.menuBgm);
+      mountScreen((root) => createMainMenu(root, { initial: state.menuMode, onSelect: (mode) => {
+        if (mode === "challenge") { playConfirmSfx(); dispatchSession({ type: "menu-select", mode }); }
+        else if (mode === "edit-force") { playEditSfx(); dispatchSession({ type: "menu-select", mode }); }
+      } }));
+      return;
+    case "difficulty":
+      mountScreen((root) => createSelectDifficulty(root, {
+        onSelect: (budget) => { playConfirmSfx(); dispatchSession({ type: "difficulty-select", budget }); },
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    case "players":
+      mountScreen((root) => createSelectPlayers(root, { maxPlayers: 2,
+        onSelect: (playerCount) => { playConfirmSfx(); dispatchSession({ type: "players-select", playerCount }); },
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    case "load-box": {
+      const proceed = () => { playConfirmSfx(); dispatchSession({ type: "box-continue" }); };
+      mountScreen((root) => createLoadBoxData(root, { onConfirm: proceed, onSkip: proceed,
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    }
+    case "select-force": {
+      const slots = state.forceSlots.map((slot) => ({ ...slot, borgIds: [...slot.borgIds] }));
+      mountScreen((root) => createSelectForce(root, { catalog: FORCE_CATALOG, slots,
+        selectedSlot: state.selectedForceSlot, limit: state.budget,
+        onSlotsSynced: (slots) => dispatchSession({ type: "force-slots-synced", slots }),
+        onSelectSlot: (slotIndex) => { playSfx(AUDIO_CUES.confirm); dispatchSession({ type: "force-slot-selected", slotIndex }); },
+        onConfirm: (slot) => { playConfirmSfx(); dispatchSession({ type: "force-slot-confirm", slot }); },
+        onEdit: (slot) => { playEditSfx(); dispatchSession({ type: "force-slot-edit", slot }); },
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    }
+    case "force": {
+      const slot = state.forceSlots[state.selectedForceSlot] ?? state.forceSlots[0];
+      mountScreen((root) => createForceBuilder(root, { catalog: FORCE_CATALOG, limit: state.budget,
+        initialForce: slot ? forceFromSlot(slot) : [],
+        onConfirm: (borgIds) => { playConfirmSfx(); dispatchSession({ type: "force-editor-confirm", borgIds }); },
+        onQuit: () => { playBackSfx(); dispatchSession({ type: "force-editor-quit" }); },
+      }));
+      return;
+    }
+    case "briefing":
+      if (!state.pendingBattleConfig) throw new Error("Briefing requires a pending battle");
+      queueBgm(AUDIO_CUES.menuBgm);
+      mountScreen((root) => createBattleIntro(root, { config: state.pendingBattleConfig!, catalog: FORCE_CATALOG,
+        onConfirm: () => { playConfirmSfx(); dispatchSession({ type: "briefing-confirm" }); },
+        onBack: () => { playBackSfx(); dispatchSession({ type: "back" }); },
+      }));
+      return;
+    case "results": {
+      const postBattle = state.postBattle;
+      if (!postBattle) throw new Error("Results screen requires a settled battle");
+      session?.hud.destroy(); closePauseMenu();
+      const handle = createResults(ui, { onAdvance: () => dispatchSession({ type: "advance" }) });
+      handle.render(postBattle.result, postBattle.stats); screenHost.set(handle); return;
+    }
+    case "gets": {
+      const handle = createGets(ui, { onAdvance: () => dispatchSession({ type: "advance" }) });
+      handle.render(getsRowsForDrops(state.postBattle?.drops ?? [])); screenHost.set(handle); return;
+    }
+    case "battle": return;
+  }
+}
+
+// ------------------------------------------------------------------------------------------
+// Battle
+// ------------------------------------------------------------------------------------------
+
+interface BattleSession {
+  battle: Battle;
+  config: MissionBattleConfig;
+  hud: BattleHudHandle;
+  localPlayerId: string;
+  localPlayerIds: string[];
+  stageBounds: RectStageBounds;
+  allyMax: number;
+  enemyMax: number;
+  paused: boolean;
+  pauseHandle: PauseMenuHandle | null;
+  resolved: boolean;
+}
+
+let session: BattleSession | null = null;
+let simAccumulator = 0;
+const SIM_DT = 1 / 60;
+
+async function enterBattle(): Promise<void> {
+  await initializeGotchaBoxBattle(
+    () => challengeSession.prepareBattle(),
+    gotchaBox,
+    (boot) => {
+      const { battle, config, localPlayerId, localPlayerIds, stageBounds } = boot;
+
+      // Energy maxima for the HUD meters (team 0 = ally, team 1 = enemy).
+      const { allyMax, enemyMax } = battleEnergyMaxima(battle);
+
+      // Mount the HUD.
+      const hud = createBattleHud(ui, { showBanner: false });
+
+      session = {
+        battle,
+        config,
+        hud,
+        localPlayerId,
+        localPlayerIds,
+        stageBounds,
+        allyMax,
+        enemyMax,
+        paused: false,
+        pauseHandle: null,
+        resolved: false,
+      };
+      simAccumulator = 0;
+      battleScene.clear();
+      // Prime the scene + HUD on frame 0.
+      const initialScene = battleSceneState(battle, localFocusBorg());
+      battleScene.sync(
+        initialScene.actors,
+        initialScene.projectiles,
+        initialScene.focusUid,
+        false,
+        initialScene.projectileDespawns,
+      );
+      const focus = localFocusBorg();
+      const focusPos = focus ? battleScene.positionOf(focus.uid) : null;
+      battleCamera.snapTo(focus && focusPos ? cameraFollowTargetForBorg(focus, focusPos) : null);
+      updateHud();
+    },
+  );
+  dispatchSession({ type: "battle-started" });
+}
+
+function localActiveUid(): string | null {
+  return currentBattlePresentation()?.activeUid ?? null;
+}
+
+function localFocusBorg(): BattleActorObservation | null {
+  return currentBattlePresentation()?.focus ?? null;
+}
+
+function currentBattlePresentation(): ReturnType<typeof battlePresentationState> | null {
+  if (!session) return null;
+  return battlePresentationState({
+    battle: session.battle,
+    localPlayerId: session.localPlayerId,
+    allyMax: session.allyMax,
+    enemyMax: session.enemyMax,
+    defaultBorgId: DEFAULT_LEAD,
+    actionProfileFor: (borgId) => BORG_CATALOG.actionProfileFor(borgId),
+  });
+}
+
+function updateHud(): void {
+  if (!session) return;
+  const presentation = currentBattlePresentation();
+  if (presentation) {
+    const teammates = projectedTeammateMarkers(session.battle, presentation.focus);
+    // Player tag ("1P"/"2P") from the local player's index in localPlayerIds — only surfaced
+    // in multi-local sessions (future multi-viewport work); single-player HUD stays
+    // capture-faithful with no tag. Conditional-spread keeps the keys absent (not undefined)
+    // under exactOptionalPropertyTypes, matching battleHudState's optional-field style.
+    const playerIndex = session.localPlayerIds.indexOf(session.localPlayerId);
+    const playerLabel =
+      session.localPlayerIds.length > 1 && playerIndex >= 0 ? `${playerIndex + 1}P` : undefined;
+    const extras = {
+      ...(teammates.length > 0 ? { teammates } : {}),
+      ...(playerLabel !== undefined ? { playerLabel } : {}),
+    };
+    session.hud.update(
+      teammates.length > 0 || playerLabel !== undefined ? { ...presentation.hud, ...extras } : presentation.hud,
+    );
+  }
+}
+
+const TEAMMATE_MARKER_LIMIT = 3;
+const TEAMMATE_MARKER_Y_OFFSET = 125;
+const TEAMMATE_MARKER_SCREEN_MARGIN = 0.04;
+const _hudProject = new THREE.Vector3();
+
+function projectedTeammateMarkers(
+  battle: Battle,
+  focus: BattleActorObservation | null,
+): TeammateMarker[] {
+  if (!focus) return [];
+  const markers: TeammateMarker[] = [];
+  for (const b of battle.observe().actors) {
+    if (!b.alive || b.uid === focus.uid || b.team !== focus.team) continue;
+    const scenePos = battleScene.positionOf(b.uid);
+    _hudProject
+      .set(
+        scenePos?.x ?? b.pos.x,
+        (scenePos?.y ?? b.pos.y) + TEAMMATE_MARKER_Y_OFFSET,
+        scenePos?.z ?? b.pos.z,
+      )
+      .project(camera);
+    const x01 = (_hudProject.x + 1) * 0.5;
+    const y01 = (1 - _hudProject.y) * 0.5;
+    if (
+      _hudProject.z < -1 ||
+      _hudProject.z > 1 ||
+      x01 < -TEAMMATE_MARKER_SCREEN_MARGIN ||
+      x01 > 1 + TEAMMATE_MARKER_SCREEN_MARGIN ||
+      y01 < -TEAMMATE_MARKER_SCREEN_MARGIN ||
+      y01 > 1 + TEAMMATE_MARKER_SCREEN_MARGIN
+    ) {
+      continue;
+    }
+    markers.push({
+      label: b.ownerPlayer === null ? "CPU" : "ALLY",
+      hp01: Math.max(0, Math.min(1, b.hp / Math.max(1, b.maxHp))),
+      x01: Math.max(0, Math.min(1, x01)),
+      y01: Math.max(0, Math.min(1, y01)),
+    });
+    if (markers.length >= TEAMMATE_MARKER_LIMIT) break;
+  }
+  return markers;
+}
+
+// Pause handling (Start/Esc).
+//
+// Only the PAUSE-OPEN edge is polled here. Once paused, PauseMenu is mounted and subscribes
+// to the shared menuInput bus (menuInput.ts), which maps the same Escape/Enter/gamepad-Start
+// press to a "back"/"start" action and resumes via its own onResume callback below — so a
+// direct resumeBattle() call here as well would double-dispatch resume for one keypress (and,
+// now that onResume/onQuit play menu SFX, would have double-played the confirm/back cue too).
+let pausePressedLast = false;
+function pollPauseToggle(): void {
+  if (!session || session.resolved) return;
+  const pad = activeGamepad();
+  const startPressed = keys.has("Escape") || keys.has("Enter") || (pad?.buttons[9]?.pressed ?? false);
+  if (startPressed && !pausePressedLast && !session.paused) {
+    pauseBattle();
+  }
+  pausePressedLast = startPressed;
+}
+
+function pauseBattle(): void {
+  if (!session || session.paused) return;
+  session.paused = true;
+  session.pauseHandle = screenHost.mountOverlay((root) => createPauseMenu(root, {
+    // PauseMenu treats "back"/"start" (Escape/Enter/gamepad-Start, routed through the bus) the
+    // same as an explicit RESUME confirm — see PauseMenu.ts onMenuAction — so this one callback
+    // covers every resume input path; playConfirmSfx here cannot double-fire against
+    // pollPauseToggle above, which no longer calls resumeBattle directly.
+    onResume: () => {
+      playConfirmSfx();
+      resumeBattle();
+    },
+    onQuit: () => {
+      playBackSfx();
+      closePauseMenu();
+      if (session) session.paused = false;
+      endBattleToMenu();
+    },
+  }));
+}
+
+function resumeBattle(): void {
+  if (!session) return;
+  closePauseMenu();
+  session.paused = false;
+  // Swallow the in-flight pause key edge: the menuInput bus resumed the game
+  // SYNCHRONOUSLY inside the keydown event (well before this polled tick). The
+  // physical key is still in `keys`, so without marking it consumed here the
+  // next pollPauseToggle tick sees startPressed=true, pausePressedLast=false,
+  // session.paused=false → a rising edge → re-pauses immediately. That traps
+  // the player in the pause menu (Escape/Enter/gamepad-Start toggle the menu
+  // off then right back on). Claiming the press was "previous-frame" makes the
+  // next poll see no rising edge until the key is actually released.
+  pausePressedLast = true;
+}
+
+function closePauseMenu(): void {
+  const handle = session?.pauseHandle;
+  if (!handle) return;
+  screenHost.closeOverlay(handle);
+  if (session?.pauseHandle === handle) session.pauseHandle = null;
+}
+
+function endBattleToMenu(): void {
+  // Abandon (pause -> quit): revert the GET pool to its pre-battle snapshot, matching the
+  // ROM's lose/abandon revert (doc §2c) — an abandoned battle keeps none of its accrual.
+  gotchaBox.revert();
+  dispatchSession({ type: "battle-abandoned" });
+}
+
+function teardownBattle(): void {
+  session?.hud.destroy();
+  closePauseMenu();
+  battleScene.clear();
+  session = null;
+}
+
+// The sim advances on a wall-clock interval (NOT requestAnimationFrame) so a
+// battle keeps progressing even when the tab is backgrounded (rAF is throttled
+// to ~0 Hz while hidden). dt is clamped so returning from a long background gap
+// fast-forwards a bounded number of frames instead of one giant spike.
+function stepBattle(dt: number): void {
+  if (!session || session.paused || session.resolved) return;
+  const { battle } = session;
+
+  simAccumulator += Math.min(dt, 0.25);
+  // Fixed 60 Hz; collect local input once and apply for each sub-step.
+  const inputs: Record<string, PlayerInput> = {};
+  for (let playerIndex = 0; playerIndex < session.localPlayerIds.length; playerIndex += 1) {
+    const playerId = session.localPlayerIds[playerIndex] ?? playerIdFor(playerIndex);
+    const active = activeBorgForPlayer(battle, playerId);
+    const keySource = playerIndex === 0 ? keys : NO_KEYS;
+    const pad = activeGamepad(playerIndex, session.localPlayerIds.length === 1 && playerIndex === 0);
+    inputs[playerId] = active ? inputFromKeys(keySource, pad) : emptyInput();
+  }
+
+  let steps = 0;
+  while (simAccumulator >= SIM_DT && steps < 15) {
+    // The profile accessor lets the snapshot capture the local borg's charge tier thresholds
+    // (chargeTier1Frames/chargeTier2Frames) for the charge_start/tier-up cues — read from the
+    // combat package's action profiles, never hardcoded app-side.
+    const audioBefore = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax, (id) =>
+      BORG_CATALOG.actionProfileFor(id),
+    );
+    battle.step(SIM_DT, inputs);
+    const audioAfter = snapshotBattleAudio(battle, session.localPlayerId, session.allyMax, (id) =>
+      BORG_CATALOG.actionProfileFor(id),
+    );
+    for (const cue of battleAudioEvents(audioBefore, audioAfter)) {
+      playBattleEventSfx(cue);
+    }
+    // Per-borg voice cues (deploy shout / death cry), (az) — TUNED role binding.
+    for (const voiceKey of battleVoiceCues(audioBefore, audioAfter)) {
+      playBorgVoice(voiceKey);
+    }
+    simAccumulator -= SIM_DT;
+    steps += 1;
+    if (battle.observe().result !== "ongoing") break;
+  }
+
+  // Compute the presentation once: it drives both the world scene (reticle color = melee mode)
+  // and the HUD, keeping the "battle mode" signal single-sourced from battleHudState.
+  const presentation = currentBattlePresentation();
+  const sceneState = battleSceneState(battle, presentation?.focus ?? localFocusBorg());
+  battleScene.sync(
+    sceneState.actors,
+    sceneState.projectiles,
+    sceneState.focusUid,
+    Boolean(presentation?.hud.meleeRange),
+    sceneState.projectileDespawns,
+  );
+  updateHud();
+
+  if (battle.observe().result !== "ongoing") resolveBattle();
+}
+
+// Battle-camera framing: see apps/game/src/sim/camera.ts header for the full DERIVED-vs-TUNED
+// breakdown (ram-trace-analysis.md §3.1 height-offset/distance/smoothing evidence, plus a TUNED
+// multi-actor widen-to-fit heuristic since no ROM multi-actor framing algorithm was found).
+function followCamera(): void {
+  if (!session) return;
+  const focus = localFocusBorg();
+  const target = focus ? battleScene.positionOf(focus.uid) : null;
+  const activeTargetUid = focus?.targetLockState?.activeTargetUid ?? focus?.lockTarget ?? null;
+  const activeTargetScenePos = activeTargetUid ? battleScene.positionOf(activeTargetUid) : null;
+  const activeTargetSim = activeTargetUid
+    ? session.battle.observe().actors.find((b) => b.uid === activeTargetUid) ?? null
+    : null;
+  const lockTargetPos =
+    activeTargetScenePos ??
+    (activeTargetSim ? new THREE.Vector3(activeTargetSim.pos.x, activeTargetSim.pos.y, activeTargetSim.pos.z) : null);
+  const primary =
+    focus && target
+      ? cameraFollowTargetForBorg(focus, target, {
+          lockTargetPos,
+          lockTargetKey: activeTargetUid,
+          lockCameraState: focus.targetLockState?.cameraState ?? 2,
+        })
+      : null;
+  const positions = battleLiveActorPositions(session.battle, (uid) => battleScene.positionOf(uid));
+  battleCamera.update(primary, positions, session.stageBounds);
+}
+
+function cameraFollowTargetForBorg(
+  borg: BattleActorObservation,
+  pos: THREE.Vector3,
+  lock?: Pick<CameraFollowTarget, "lockTargetPos" | "lockTargetKey" | "lockCameraState">,
+): CameraFollowTarget {
+  const cameraParams = cameraParamsForBorgId(borg.borgId);
+  if (!cameraParams) {
+    throw new Error(`Missing source camera params for ${borg.borgId}`);
+  }
+  return {
+    pos,
+    cameraParams,
+    rotY: borg.rotY,
+    lockTargetPos: lock?.lockTargetPos ?? null,
+    lockTargetKey: lock?.lockTargetKey ?? null,
+    lockCameraState: lock?.lockCameraState ?? 2,
+  };
+}
+
+function updateBattleDebugDataset(): void {
+  if (!ENABLE_BATTLE_DEBUG_DATASET) return;
+  if (!session || challengeSession.snapshot().screen !== "battle") {
+    delete ui.dataset["gfBattleDebug"];
+    return;
+  }
+  const activeUid = localActiveUid();
+  const focusUid = localFocusBorg()?.uid ?? null;
+  const rounded = (v: number): number => Math.round(v * 10) / 10;
+  ui.dataset["gfBattleDebug"] = JSON.stringify({
+    activeUid,
+    focusUid,
+    camera: [rounded(camera.position.x), rounded(camera.position.y), rounded(camera.position.z)],
+    target: [rounded(controls.target.x), rounded(controls.target.y), rounded(controls.target.z)],
+    bounds: session.stageBounds,
+    borgs: session.battle.observe().actors.map((b) => ({
+      uid: b.uid,
+      team: b.team,
+      borgId: b.borgId,
+      alive: b.alive,
+      hp: b.hp,
+      state: b.state,
+      pos: [rounded(b.pos.x), rounded(b.pos.y), rounded(b.pos.z)],
+      vel: [rounded(b.vel.x), rounded(b.vel.y), rounded(b.vel.z)],
+      lockTarget: b.lockTarget,
+      allyLockTarget: b.allyLockTarget,
+      targetPointerUid: b.targetLockState?.activeTargetUid ?? null,
+      targetListIndex:
+        b.targetLockState?.mode === "ally" ? b.targetLockState.allyIndex : b.targetLockState?.enemyIndex ?? -1,
+      lockMode: b.targetLockState?.mode ?? "enemy",
+      sourceTargetState: b.targetLockState?.sourceState ?? 0,
+      lockCameraState: b.targetLockState?.cameraState ?? 2,
+      movementFrame: b.targetLockState?.activeTargetUid
+        ? `${b.targetLockState.mode}:${b.targetLockState.activeTargetUid}`
+        : "no-lock",
+    })),
+  });
+}
+
+function resolveBattle(): void {
+  if (!session || session.resolved) return;
+  session.resolved = true;
+  // DERIVED results (results-scoring-decode-2026-07-04.md): outcome = the local player's
+  // slot counters; computeResults applies the decoded ROM rows/grand-total formula.
+  const outcome = battleOutcomeFromState(session.battle, session.localPlayerId);
+  const results = computeResults(outcome);
+
+  // GET pool (research/decomp/items-evidence-inventory-2026-07-05.md §2a/§2c): a WIN
+  // registers every enemy kill into the pool (team 0 = player side, team 1 = enemy in every
+  // Challenge battle — toCombatBattleConfig's team mapping) and rolls drops; a LOSE reverts
+  // the pool to its pre-battle snapshot exactly like an abandon (§2c — the ROM makes no
+  // distinction between a lose and an abandon for the revert).
+  let drops: GetDrop[] = [];
+  if (outcome.win) {
+    drops = gotchaBox.win(session.battle.observe().defeats);
+  } else {
+    gotchaBox.revert();
+  }
+
+  dispatchSession({
+    type: "battle-resolved",
+    battleResults: results,
+    drops,
+    stats: {
+      attack: results.attack,
+      hitRatio: results.hitRatio * 100,
+      dodgeRatio: results.dodgeRatio * 100,
+      enemyBorgsDefeated: results.enemyBorgsDefeated,
+      enemyTotalCost: results.costWon,
+      playerBorgsDefeated: results.playerBorgsDefeated,
+      playerTotalCost: results.costLost,
+      allyBorgsDefeated: results.allyBorgsDefeated,
+      grandTotal: results.grandTotal,
+    },
+  });
+}
+
+function getsRowsForDrops(drops: readonly GetDrop[]): GetsRow[] {
+  return drops.map((drop) => ({
+    name: BORG_CATALOG.forceById.get(drop.borgId)?.name ?? drop.borgId,
+    kind: drop.kind,
+    partIndex: drop.partIndex,
+    ...(drop.partsCount !== undefined ? { partsCount: drop.partsCount } : {}),
+  }));
+}
+
+// ------------------------------------------------------------------------------------------
+// Main loop
+// ------------------------------------------------------------------------------------------
+
+// Render loop (requestAnimationFrame): drives animation mixers, the follow
+// camera, and the WebGL render. Sim stepping is handled by the interval below.
+const renderClock = new THREE.Clock();
+function tick(): void {
+  const dt = Math.min(renderClock.getDelta(), 0.05);
+  const screen = challengeSession.snapshot().screen;
+  if (screen === "battle" || screen === "results") {
+    battleScene.update(dt);
+    if (screen === "battle") followCamera();
+  }
+  updateBattleDebugDataset();
+  if (debugOverlay.visible) {
+    debugOverlay.update(screen === "battle" ? localFocusBorg() : null);
+  }
+  controls.update();
+  viewport.render();
+}
+
+// Sim loop (setInterval): fixed-cadence wall-clock stepping, runs even when the
+// tab is hidden. ~60 Hz target.
+startFixedStepLoop({
+  step(dt) {
+    if (challengeSession.snapshot().screen === "battle") {
+      pollPauseToggle();
+      stepBattle(dt);
+    }
+  },
+});
+
+window.addEventListener("resize", () => {
+  viewport.resize();
+});
+
+// ------------------------------------------------------------------------------------------
+// Boot
+// ------------------------------------------------------------------------------------------
+
+ensureStyles();
+showLoadingMessage("Loading extracted stage + model assets…");
+
+void loadInitialAssets()
+  .then(() => {
+    dispatchSession({ type: "boot-ready" });
+  })
+  .catch((error: unknown) => {
+    showLoadingMessage(`Asset load failed: ${error instanceof Error ? error.message : String(error)}`);
+  });
+
+startRenderLoop({ frame: tick });
+
+function showLoadingMessage(text: string): void {
+  screenHost.clear();
+  const box = document.createElement("div");
+  box.style.cssText =
+    "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#bfeeff;font:600 16px 'Trebuchet MS',system-ui,sans-serif;text-align:center;text-shadow:0 1px 3px #000;";
+  box.textContent = text;
+  ui.appendChild(box);
+}
+
+// Expose a tiny debug handle for live verification in the preview.
+(window as unknown as { __gf: unknown }).__gf = {
+  get navigation() {
+    return challengeSession.snapshot();
+  },
+  keys,
+  get input() {
+    return inputFromKeys(keys, activeGamepad());
+  },
+  get session() {
+    return session;
+  },
+  stages: EXPORTED_STAGE_CATALOG,
+  loadStage: async (stageId: string) => {
+    const normalized = stageId.trim().toLowerCase();
+    if (!isExportedStageId(normalized)) throw new Error(`Stage is not exported: ${stageId}`);
+    await loadStage(normalized);
+    viewport.render();
+    return normalized;
+  },
+  renderDiagnostics: () => viewport.diagnostics(),
+  // Read-only scene readout for preview debugging: current stage, lights, and a per-material
+  // summary (color/map/side/transparent) of everything under the stage and battle roots.
+  sceneInfo: () => {
+    const summarize = (root: THREE.Object3D, label: string) => {
+      const mats: Record<string, unknown>[] = [];
+      root.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        for (const m of list) {
+          const std = m as THREE.MeshStandardMaterial;
+          mats.push({
+            label,
+            mesh: mesh.name || "(unnamed)",
+            type: m.type,
+            color: std.color ? `#${std.color.getHexString()}` : null,
+            map: !!std.map,
+            metalness: std.metalness,
+            roughness: std.roughness,
+            transparent: m.transparent,
+            opacity: m.opacity,
+            visible: mesh.visible,
+          });
+        }
+      });
+      return mats;
+    };
+    return {
+      stageId: loadedStageId,
+      background: scene.background instanceof THREE.Color ? `#${scene.background.getHexString()}` : String(scene.background),
+      fog: scene.fog ? { color: `#${(scene.fog as THREE.Fog).color.getHexString()}`, near: (scene.fog as THREE.Fog).near, far: (scene.fog as THREE.Fog).far } : null,
+      lights: [stageLighting.ambient, ...stageLighting.directionals].map((l) => ({
+        type: l.type,
+        color: `#${l.color.getHexString()}`,
+        intensity: l.intensity,
+        visible: l.visible,
+      })),
+      toneMapping: viewport.renderer.toneMapping,
+      stageMaterials: summarize(stageRoot, "stage"),
+      battleMaterials: summarize(battleRoot, "battle"),
+    };
+  },
+  // Raw three.js handles for interactive preview debugging only.
+  three: { scene, stageRoot, battleRoot, camera, viewport },
+  renderNow: () => {
+    return viewport.captureFrame();
+  },
+};
+
+// Stable browser-smoke signal used by the autonomous port controller. It proves that the
+// production bundle executed far enough to install the live verification handle.
+document.documentElement.dataset.gfRuntime = "loaded";
+
+--- apps/game/src/ui/index.ts ---
+/**
+ * Gotcha Force UI component library — barrel export.
+ *
+ * Framework-free TypeScript DOM components that reproduce the REAL game screens
+ * (Challenge-mode flow) from the captured references in
+ * apps/game/reference/captures/. Each component mounts into a container
+ * HTMLElement and returns a handle with update()/destroy() (and per-screen
+ * getters); selections are surfaced via callbacks.
+ *
+ * Quick start:
+ *   import { ensureStyles, createMainMenu } from "./ui/index.js";
+ *   ensureStyles();                       // inject the scoped gf- styles once
+ *   const menu = createMainMenu(root, { onSelect: (mode) => ... });
+ *
+ * Styles: ensureStyles() injects the scoped `gf-` CSS. If your bundler handles
+ * CSS imports you can instead `import "./ui/styles.css"`.
+ */
+
+import { GF_UI_CSS } from "./styles.generated.js";
+
+const STYLE_ID = "gf-ui-styles";
+
+/** Inject the scoped `gf-` stylesheet into the document once. Idempotent. */
+export function ensureStyles(doc: Document = document): void {
+  if (doc.getElementById(STYLE_ID)) return;
+  const style = doc.createElement("style");
+  style.id = STYLE_ID;
+  style.textContent = GF_UI_CSS;
+  doc.head.appendChild(style);
+}
+
+export { GF_UI_CSS };
+
+export { createMenuScreenHost } from "./menuScreenHost.js";
+export type { MenuScreenHandle, MenuScreenHost, MenuInputSource } from "./menuScreenHost.js";
+
+// ---- asset helpers ----
+export { borgUiCode, borgBannerPath, borgMiniPath, borgFacePath, ASSETS } from "./assets.js";
+
+// ---- screens ----
+export { createTitleIntro } from "./screens/TitleIntro.js";
+export type { TitleIntroOptions, TitleIntroHandle } from "./screens/TitleIntro.js";
+
+export { createMainMenu } from "./screens/MainMenu.js";
+export type { MainMenuMode, MainMenuOptions, MainMenuHandle } from "./screens/MainMenu.js";
+
+export { createSelectDifficulty } from "./screens/SelectDifficulty.js";
+export type { Difficulty, SelectDifficultyOptions, SelectDifficultyHandle } from "./screens/SelectDifficulty.js";
+
+export { createSelectPlayers } from "./screens/SelectPlayers.js";
+export type { SelectPlayersOptions, SelectPlayersHandle } from "./screens/SelectPlayers.js";
+
+export { createLoadBoxData } from "./screens/LoadBoxData.js";
+export type { LoadBoxDataOptions, LoadBoxDataHandle } from "./screens/LoadBoxData.js";
+
+export { createSelectForce } from "./screens/SelectForce.js";
+export type { ForceSlot, SelectForceOptions, SelectForceHandle } from "./screens/SelectForce.js";
+
+export { createForceBuilder } from "./screens/ForceBuilder.js";
+export type { ForceBorg, ForceBuilderOptions, ForceBuilderHandle } from "./screens/ForceBuilder.js";
+
+export { createBattleIntro } from "./screens/BattleIntro.js";
+export type { BattleIntroOptions, BattleIntroHandle } from "./screens/BattleIntro.js";
+
+export { createResults } from "./screens/Results.js";
+export type { ResultStats, ResultsOptions, ResultsHandle } from "./screens/Results.js";
+
+export { createGets } from "./screens/Gets.js";
+export type { GetsRow, GetsOptions, GetsHandle } from "./screens/Gets.js";
+
+export { createPauseMenu } from "./screens/PauseMenu.js";
+export type { PauseAction, PauseMenuOptions, PauseMenuHandle } from "./screens/PauseMenu.js";
+
+// ---- HUD ----
+export { createBattleHud } from "./hud/BattleHud.js";
+export type { HudState, BattleHudOptions, BattleHudHandle, TeammateMarker } from "./hud/BattleHud.js";
+
+export { createDebugOverlay } from "./hud/DebugOverlay.js";
+export type { DebugOverlayHandle } from "./hud/DebugOverlay.js";
+
+--- apps/game/src/ui/menuInput.ts ---
+/**
+ * menuInput — a single shared menu-input bus for all non-battle screens.
+ *
+ * PROBLEM this replaces: every screen (SelectDifficulty, SelectPlayers, LoadBoxData,
+ * SelectForce, ForceBuilder, BattleIntro, Results, PauseMenu, MainMenu, TitleIntro)
+ * registered its OWN `window.addEventListener("keydown", ...)` with slightly different
+ * key sets (some accept Space for confirm, some don't; some accept "s"/"b" letter
+ * mnemonics, some don't), and NONE of them read the gamepad — gamepad input only ever
+ * worked inside battle (see main.ts inputFromKeys/activeGamepad). A controller-only
+ * player could not navigate a single menu screen.
+ *
+ * FIX: one keydown listener + one polled-gamepad loop translate raw input into a small
+ * set of semantic MenuAction values. The app's menu-screen host owns the one gameplay
+ * subscription and routes actions to its current screen or top overlay. Screens expose
+ * behavior on their handles and know nothing about subscription lifetime. The bus keeps
+ * LIFO subscription semantics for isolated consumers/debug tools, but normal gameplay
+ * needs only the host subscriber.
+ *
+ * Gamepad polling: setInterval, NOT requestAnimationFrame. rAF is throttled/paused in
+ * background tabs, which silently killed menu gamepad input in testing (a backgrounded
+ * tab that regains focus would otherwise "lose" buffered presses, or simply never see
+ * them at all while hidden). A plain wall-clock interval keeps polling regardless of
+ * tab visibility, matching the sim's own startFixedStepLoop rationale in main.ts.
+ */
+
+export type MenuAction =
+  | "up"
+  | "down"
+  | "left"
+  | "right"
+  | "confirm"
+  | "back"
+  | "edit"
+  | "switch"
+  | "start";
+
+/** Optional metadata carried alongside some actions. */
+export interface MenuActionEvent {
+  action: MenuAction;
+  /**
+   * For "switch" (L/R cycling): -1 = L / previous, 1 = R / next. Screens that only
+   * care about "some switch happened" (rare) can ignore this field.
+   */
+  dir?: -1 | 1;
+  /** Input source, for debugging/selfcheck only. */
+  source: "keyboard" | "gamepad";
+}
+
+export type MenuInputHandler = (event: MenuActionEvent) => void;
+
+/** A mounted menu screen that can receive semantic input from the menu-screen host. */
+export interface MenuInputTarget {
+  handleMenuInput(event: MenuActionEvent): void;
+}
+
+const GAMEPAD_POLL_MS = 16; // ~60Hz; see module doc for why this is setInterval, not rAF.
+const STICK_THRESHOLD = 0.5;
+const STICK_REPEAT_MS = 220; // suppress repeat-fire while a stick stays pushed past threshold.
+
+// LIFO subscriber stack: only the top entry receives dispatched actions. Normal gameplay
+// has one long-lived menu-screen-host subscriber.
+const subscribers: MenuInputHandler[] = [];
+
+let gamepadPollHandle: ReturnType<typeof setInterval> | null = null;
+let keydownHandler: ((ev: KeyboardEvent) => void) | null = null;
+
+// Gamepad edge-detection state, keyed by pad index. Standard mapping:
+//   button0 = confirm (A), button1 = back (B), button2 = edit (X), button9 = start
+//   dpad: button12=up, 13=down, 14=left, 15=right
+//   left stick: axes[0]/[1], threshold 0.5, with repeat suppression (not per-frame edge)
+interface PadEdgeState {
+  buttonsPressed: boolean[];
+  stickX: 0 | -1 | 1;
+  stickY: 0 | -1 | 1;
+  lastStickFireAt: number;
+}
+const padStates = new Map<number, PadEdgeState>();
+
+function isTextInputTarget(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLSelectElement ||
+    target instanceof HTMLTextAreaElement
+  );
+}
+
+function dispatch(action: MenuAction, source: "keyboard" | "gamepad", dir?: -1 | 1): void {
+  const top = subscribers[subscribers.length - 1];
+  if (!top) return;
+  // exactOptionalPropertyTypes: only include `dir` when a caller actually passed one,
+  // rather than assigning `dir: undefined` (which the type explicitly disallows).
+  top(dir === undefined ? { action, source } : { action, source, dir });
+}
+
+function keyToAction(ev: KeyboardEvent): { action: MenuAction; dir?: -1 | 1 } | null {
+  switch (ev.code) {
+    case "ArrowUp":
+      return { action: "up" };
+    case "ArrowDown":
+      return { action: "down" };
+    case "ArrowLeft":
+      return { action: "left" };
+    case "ArrowRight":
+      return { action: "right" };
+    case "Enter":
+    case "Space":
+    case "KeyA":
+      return { action: "confirm" };
+    case "Escape":
+    case "KeyB":
+      return { action: "back" };
+    case "KeyX":
+      return { action: "edit" };
+    case "KeyQ":
+    case "BracketLeft":
+      return { action: "switch", dir: -1 };
+    case "KeyE":
+    case "BracketRight":
+      return { action: "switch", dir: 1 };
+    case "KeyP":
+      return { action: "start" };
+    default:
+      return null;
+  }
+}
+
+function onWindowKeydown(ev: KeyboardEvent): void {
+  if (isTextInputTarget(ev.target)) return;
+  const mapped = keyToAction(ev);
+  if (!mapped) return;
+  dispatch(mapped.action, "keyboard", mapped.dir);
+  ev.preventDefault();
+}
+
+function padEdgeStateFor(index: number): PadEdgeState {
+  let state = padStates.get(index);
+  if (!state) {
+    state = { buttonsPressed: [], stickX: 0, stickY: 0, lastStickFireAt: 0 };
+    padStates.set(index, state);
+  }
+  return state;
+}
+
+function pollGamepads(): void {
+  if (subscribers.length === 0) return; // no screen listening; skip the work
+  const pads = navigator.getGamepads?.();
+  if (!pads) return;
+  const now = performance.now();
+  for (let i = 0; i < pads.length; i += 1) {
+    const pad = pads[i];
+    if (!pad?.connected) {
+      padStates.delete(i);
+      continue;
+    }
+    const state = padEdgeStateFor(i);
+
+    // Face/shoulder buttons: fire once per press (rising edge).
+    const wasPressed = (idx: number) => state.buttonsPressed[idx] ?? false;
+    const isPressed = (idx: number) => pad.buttons[idx]?.pressed ?? false;
+    const fireOnPress = (idx: number, action: MenuAction, dir?: -1 | 1): void => {
+      const now_ = isPressed(idx);
+      if (now_ && !wasPressed(idx)) dispatch(action, "gamepad", dir);
+      state.buttonsPressed[idx] = now_;
+    };
+
+    fireOnPress(0, "confirm");
+    fireOnPress(1, "back");
+    fireOnPress(2, "edit");
+    fireOnPress(9, "start");
+    fireOnPress(12, "up");
+    fireOnPress(13, "down");
+    fireOnPress(14, "left", -1);
+    fireOnPress(15, "right", 1);
+    // Shoulder buttons double as "switch" (L/R force cycling), matching main.ts's
+    // switchLock/switchLockPrev shoulder mapping.
+    fireOnPress(4, "switch", -1);
+    fireOnPress(5, "switch", 1);
+
+    // Left stick: threshold + repeat suppression rather than per-frame edge, so
+    // holding the stick over doesn't spam actions every 16ms poll.
+    const ax = pad.axes[0] ?? 0;
+    const ay = pad.axes[1] ?? 0;
+    const nextStickX: 0 | -1 | 1 = ax <= -STICK_THRESHOLD ? -1 : ax >= STICK_THRESHOLD ? 1 : 0;
+    const nextStickY: 0 | -1 | 1 = ay <= -STICK_THRESHOLD ? -1 : ay >= STICK_THRESHOLD ? 1 : 0;
+
+    if (nextStickX !== 0 && (nextStickX !== state.stickX || now - state.lastStickFireAt >= STICK_REPEAT_MS)) {
+      dispatch(nextStickX < 0 ? "left" : "right", "gamepad");
+      state.lastStickFireAt = now;
+    }
+    if (nextStickY !== 0 && (nextStickY !== state.stickY || now - state.lastStickFireAt >= STICK_REPEAT_MS)) {
+      dispatch(nextStickY < 0 ? "up" : "down", "gamepad");
+      state.lastStickFireAt = now;
+    }
+    state.stickX = nextStickX;
+    state.stickY = nextStickY;
+  }
+}
+
+function ensureBusStarted(): void {
+  if (!keydownHandler) {
+    keydownHandler = onWindowKeydown;
+    window.addEventListener("keydown", keydownHandler);
+  }
+  if (!gamepadPollHandle) {
+    gamepadPollHandle = setInterval(pollGamepads, GAMEPAD_POLL_MS);
+  }
+}
+
+/**
+ * Subscribe to the shared menu-input bus. The MOST RECENTLY subscribed handler is the
+ * only one that receives actions (LIFO). Returns an idempotent unsubscribe function.
+ * The menu-screen host owns the gameplay subscription; screen modules must not call this.
+ */
+export function subscribeMenuInput(handler: MenuInputHandler): () => void {
+  ensureBusStarted();
+  subscribers.push(handler);
+  let unsubscribed = false;
+  return () => {
+    if (unsubscribed) return;
+    unsubscribed = true;
+    const idx = subscribers.lastIndexOf(handler);
+    if (idx >= 0) subscribers.splice(idx, 1);
+  };
+}
+
+/**
+ * Debug/selfcheck hook: read-only view of the bus's live state. Not used by gameplay
+ * code; exists so a browser-console/selfcheck harness can assert the stack behaves
+ * (e.g. "exactly one subscriber while a screen is mounted").
+ */
+export const menuInputDebug = {
+  subscriberCount(): number {
+    return subscribers.length;
+  },
+  /** Synchronously simulate an action as if it came from the given source (test hook). */
+  simulate(action: MenuAction, dir?: -1 | 1): void {
+    dispatch(action, "keyboard", dir);
+  },
+  isPolling(): boolean {
+    return gamepadPollHandle !== null;
+  },
+};
+
+--- packages/render/node_modules/@types/three/src/renderers/WebGLRenderer.d.ts ---
+import { Camera } from "../cameras/Camera.js";
+import { ColorSpace, CullFace, ShadowMapType, ToneMapping, WebGLCoordinateSystem } from "../constants.js";
+import { TypedArray } from "../core/BufferAttribute.js";
+import { BufferGeometry } from "../core/BufferGeometry.js";
+import { Object3D } from "../core/Object3D.js";
+import { Material } from "../materials/Material.js";
+import { Box2 } from "../math/Box2.js";
+import { Box3 } from "../math/Box3.js";
+import { Color, ColorRepresentation } from "../math/Color.js";
+import { Plane } from "../math/Plane.js";
+import { Vector2 } from "../math/Vector2.js";
+import { Vector3 } from "../math/Vector3.js";
+import { Vector4 } from "../math/Vector4.js";
+import { Scene } from "../scenes/Scene.js";
+import { Data3DTexture } from "../textures/Data3DTexture.js";
+import { DataArrayTexture } from "../textures/DataArrayTexture.js";
+import { OffscreenCanvas, Texture } from "../textures/Texture.js";
+import { WebGLCapabilities, WebGLCapabilitiesParameters } from "./webgl/WebGLCapabilities.js";
+import { WebGLExtensions } from "./webgl/WebGLExtensions.js";
+import { WebGLInfo } from "./webgl/WebGLInfo.js";
+import { WebGLProgram } from "./webgl/WebGLProgram.js";
+import { WebGLProperties } from "./webgl/WebGLProperties.js";
+import { WebGLRenderLists } from "./webgl/WebGLRenderLists.js";
+import { WebGLShadowMap } from "./webgl/WebGLShadowMap.js";
+import { WebGLState } from "./webgl/WebGLState.js";
+import { WebGLRenderTarget } from "./WebGLRenderTarget.js";
+import { WebXRManager } from "./webxr/WebXRManager.js";
+
+export interface Renderer {
+    domElement: HTMLCanvasElement;
+
+    render(scene: Object3D, camera: Camera): void;
+    setSize(width: number, height: number, updateStyle?: boolean): void;
+}
+
+export interface WebGLRendererParameters extends WebGLCapabilitiesParameters {
+    /**
+     * A Canvas where the renderer draws its output.
+     */
+    canvas?: HTMLCanvasElement | OffscreenCanvas | undefined;
+
+    /**
+     * A WebGL Rendering Context.
+     * (https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext)
+     * Default is null
+     */
+    context?: WebGLRenderingContext | undefined;
+
+    /**
+     * default is false.
+     */
+    alpha?: boolean | undefined;
+
+    /**
+     * default is true.
+     */
+    premultipliedAlpha?: boolean | undefined;
+
+    /**
+     * default is false.
+     */
+    antialias?: boolean | undefined;
+
+    /**
+     * default is false.
+     */
+    stencil?: boolean | undefined;
+
+    /**
+     * default is false.
+     */
+    preserveDrawingBuffer?: boolean | undefined;
+
+    /**
+     * Can be "high-performance", "low-power" or "default"
+     */
+    powerPreference?: string | undefined;
+
+    /**
+     * default is true.
+     */
+    depth?: boolean | undefined;
+
+    /**
+     * default is false.
+     */
+    failIfMajorPerformanceCaveat?: boolean | undefined;
+}
+
+export interface WebGLDebug {
+    /**
+     * Enables error checking and reporting when shader programs are being compiled.
+     */
+    checkShaderErrors: boolean;
+
+    /**
+     * A callback function that can be used for custom error reporting. The callback receives the WebGL context, an
+     * instance of WebGLProgram as well two instances of WebGLShader representing the vertex and fragment shader.
+     * Assigning a custom function disables the default error reporting.
+     * @default `null`
+     */
+    onShaderError:
+        | ((
+            gl: WebGLRenderingContext,
+            program: WebGLProgram,
+            glVertexShader: WebGLShader,
+            glFragmentShader: WebGLShader,
+        ) => void)
+        | null;
+}
+
+/**
+ * The WebGL renderer displays your beautifully crafted scenes using WebGL, if your device supports it.
+ * This renderer has way better performance than CanvasRenderer.
+ *
+ * see {@link https://github.com/mrdoob/three.js/blob/master/src/renderers/WebGLRenderer.js|src/renderers/WebGLRenderer.js}
+ */
+export class WebGLRenderer implements Renderer {
+    /**
+     * parameters is an optional object with properties defining the renderer's behavior.
+     * The constructor also accepts no parameters at all.
+     * In all cases, it will assume sane defaults when parameters are missing.
+     */
+    constructor(parameters?: WebGLRendererParameters);
+
+    /**
+     * A Canvas where the renderer draws its output.
+     * This is automatically created by the renderer in the constructor (if not provided already); you just need to add it to your page.
+     * @default document.createElementNS( 'http://www.w3.org/1999/xhtml', 'canvas' )
+     */
+    domElement: HTMLCanvasElement;
+
+    /**
+     * Defines whether the renderer should automatically clear its output before rendering.
+     * @default true
+     */
+    autoClear: boolean;
+
+    /**
+     * If autoClear is true, defines whether the renderer should clear the color buffer. Default is true.
+     * @default true
+     */
+    autoClearColor: boolean;
+
+    /**
+     * If autoClear is true, defines whether the renderer should clear the depth buffer. Default is true.
+     * @default true
+     */
+    autoClearDepth: boolean;
+
+    /**
+     * If autoClear is true, defines whether the renderer should clear the stencil buffer. Default is true.
+     * @default true
+     */
+    autoClearStencil: boolean;
+
+    /**
+     * Debug configurations.
+     * @default { checkShaderErrors: true }
+     */
+    debug: WebGLDebug;
+
+    /**
+     * Defines whether the renderer should sort objects. Default is true.
+     * @default true
+     */
+    sortObjects: boolean;
+
+    /**
+     * @default []
+     */
+    clippingPlanes: Plane[];
+
+    /**
+     * @default false
+     */
+    localClippingEnabled: boolean;
+
+    extensions: WebGLExtensions;
+
+    /**
+     * Color space used for output to HTMLCanvasElement. Supported values are
+     * {@link SRGBColorSpace} and {@link LinearSRGBColorSpace}.
+     * @default THREE.SRGBColorSpace.
+     */
+    get outputColorSpace(): ColorSpace;
+    set outputColorSpace(colorSpace: ColorSpace);
+
+    get coordinateSystem(): typeof WebGLCoordinateSystem;
+
+    /**
+     * @default THREE.NoToneMapping
+     */
+    toneMapping: ToneMapping;
+
+    /**
+     * @default 1
+     */
+    toneMappingExposure: number;
+
+    info: WebGLInfo;
+
+    shadowMap: WebGLShadowMap;
+
+    pixelRatio: number;
+
+    capabilities: WebGLCapabilities;
+    properties: WebGLProperties;
+    renderLists: WebGLRenderLists;
+    state: WebGLState;
+
+    xr: WebXRManager;
+
+    /**
+     * Return the WebGL context.
+     */
+    getContext(): WebGLRenderingContext | WebGL2RenderingContext;
+    getContextAttributes(): any;
+    forceContextLoss(): void;
+    forceContextRestore(): void;
+
+    /**
+     * @deprecated Use {@link WebGLCapabilities#getMaxAnisotropy .capabilities.getMaxAnisotropy()} instead.
+     */
+    getMaxAnisotropy(): number;
+
+    /**
+     * @deprecated Use {@link WebGLCapabilities#precision .capabilities.precision} instead.
+     */
+    getPrecision(): string;
+
+    getPixelRatio(): number;
+    setPixelRatio(value: number): void;
+
+    getDrawingBufferSize(target: Vector2): Vector2;
+    setDrawingBufferSize(width: number, height: number, pixelRatio: number): void;
+
+    getSize(target: Vector2): Vector2;
+
+    /**
+     * Resizes the output canvas to (width, height), and also sets the viewport to fit that size, starting in (0, 0).
+     */
+    setSize(width: number, height: number, updateStyle?: boolean): void;
+
+    getCurrentViewport(target: Vector4): Vector4;
+
+    /**
+     * Copies the viewport into target.
+     */
+    getViewport(target: Vector4): Vector4;
+
+    /**
+     * Sets the viewport to render from (x, y) to (x + width, y + height).
+     * (x, y) is the lower-left corner of the region.
+     */
+    setViewport(x: Vector4 | number, y?: number, width?: number, height?: number): void;
+
+    /**
+     * Copies the scissor area into target.
+     */
+    getScissor(target: Vector4): Vector4;
+
+    /**
+     * Sets the scissor area from (x, y) to (x + width, y + height).
+     */
+    setScissor(x: Vector4 | number, y?: number, width?: number, height?: number): void;
+
+    /**
+     * Returns true if scissor test is enabled; returns false otherwise.
+     */
+    getScissorTest(): boolean;
+
+    /**
+     * Enable the scissor test. When this is enabled, only the pixels within the defined scissor area will be affected by further renderer actions.
+     */
+    setScissorTest(enable: boolean): void;
+
+    /**
+     * Sets the custom opaque sort function for the WebGLRenderLists. Pass null to use the default painterSortStable function.
+     */
+    setOpaqueSort(method: (a: any, b: any) => number): void;
+
+    /**
+     * Sets the custom transparent sort function for the WebGLRenderLists. Pass null to use the default reversePainterSortStable function.
+     */
+    setTransparentSort(method: (a: any, b: any) => number): void;
+
+    /**
+     * Returns a THREE.Color instance with the current clear color.
+     */
+    getClearColor(target: Color): Color;
+
+    /**
+     * Sets the clear color, using color for the color and alpha for the opacity.
+     */
+    setClearColor(color: ColorRepresentation, alpha?: number): void;
+
+    /**
+     * Returns a float with the current clear alpha. Ranges from 0 to 1.
+     */
+    getClearAlpha(): number;
+
+    setClearAlpha(alpha: number): void;
+
+    /**
+     * Tells the renderer to clear its color, depth or stencil drawing buffer(s).
+     * Arguments default to true
+     */
+    clear(color?: boolean, depth?: boolean, stencil?: boolean): void;
+
+    clearColor(): void;
+    clearDepth(): void;
+    clearStencil(): void;
+    clearTarget(renderTarget: WebGLRenderTarget, color: boolean, depth: boolean, stencil: boolean): void;
+
+    /**
+     * @deprecated Use {@link WebGLState#reset .state.reset()} instead.
+     */
+    resetGLState(): void;
+    dispose(): void;
+
+    renderBufferDirect(
+        camera: Camera,
+        scene: Scene,
+        geometry: BufferGeometry,
+        material: Material,
+        object: Object3D,
+        geometryGroup: any,
+    ): void;
+
+    /**
+     * A build in function that can be used instead of requestAnimationFrame. For WebXR projects this function must be used.
+     * @param callback The function will be called every available frame. If `null` is passed it will stop any already ongoing animation.
+     */
+    setAnimationLoop(callback: XRFrameRequestCallback | null): void;
+
+    /**
+     * @deprecated Use {@link WebGLRenderer#setAnimationLoop .setAnimationLoop()} instead.
+     */
+    animate(callback: () => void): void;
+
+    /**
+     * Compiles all materials in the scene with the camera. This is useful to precompile shaders before the first
+     * rendering. If you want to add a 3D object to an existing scene, use the third optional parameter for applying the
+     * target scene.
+     * Note that the (target) scene's lighting should be configured before calling this method.
+     */
+    compile: (scene: Object3D, camera: Camera, targetScene?: Scene | null) => Set<Material>;
+
+    /**
+     * Asynchronous version of {@link compile}(). The method returns a Promise that resolves when the given scene can be
+     * rendered without unnecessary stalling due to shader compilation.
+     * This method makes use of the KHR_parallel_shader_compile WebGL extension.
+     */
+    compileAsync: (scene: Object3D, camera: Camera, targetScene?: Scene | null) => Promise<Object3D>;
+
+    /**
+     * Render a scene or an object using a camera.
+     * The render is done to a previously specified {@link WebGLRenderTarget#renderTarget .renderTarget} set by calling
+     * {@link WebGLRenderer#setRenderTarget .setRenderTarget} or to the canvas as usual.
+     *
+     * By default render buffers are cleared before rendering but you can prevent this by setting the property
+     * {@link WebGLRenderer#autoClear autoClear} to false. If you want to prevent only certain buffers being cleared
+     * you can set either the {@link WebGLRenderer#autoClearColor autoClearColor},
+     * {@link WebGLRenderer#autoClearStencil autoClearStencil} or {@link WebGLRenderer#autoClearDepth autoClearDepth}
+     * properties to false. To forcibly clear one ore more buffers call {@link WebGLRenderer#clear .clear}.
+     */
+    render(scene: Object3D, camera: Camera): void;
+
+    /**
+     * Returns the current active cube face.
+     */
+    getActiveCubeFace(): number;
+
+    /**
+     * Returns the current active mipmap level.
+     */
+    getActiveMipmapLevel(): number;
+
+    /**
+     * Returns the current render target. If no render target is set, null is returned.
+     */
+    getRenderTarget(): WebGLRenderTarget | null;
+
+    /**
+     * @deprecated Use {@link WebGLRenderer#getRenderTarget .getRenderTarget()} instead.
+     */
+    getCurrentRenderTarget(): WebGLRenderTarget | null;
+
+    /**
+     * Sets the active render target.
+     *
+     * @param renderTarget The {@link WebGLRenderTarget renderTarget} that needs to be activated. When `null` is given, the canvas is set as the active render target instead.
+     * @param activeCubeFace Specifies the active cube side (PX 0, NX 1, PY 2, NY 3, PZ 4, NZ 5) of {@link WebGLCubeRenderTarget}.
+     * @param activeMipmapLevel Specifies the active mipmap level.
+     */
+    setRenderTarget(
+        renderTarget: WebGLRenderTarget | WebGLRenderTarget<Texture[]> | null,
+        activeCubeFace?: number,
+        activeMipmapLevel?: number,
+    ): void;
+
+    readRenderTargetPixels(
+        renderTarget: WebGLRenderTarget | WebGLRenderTarget<Texture[]>,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        buffer: TypedArray,
+        activeCubeFaceIndex?: number,
+    ): void;
+
+    readRenderTargetPixelsAsync(
+        renderTarget: WebGLRenderTarget | WebGLRenderTarget<Texture[]>,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        buffer: TypedArray,
+        activeCubeFaceIndex?: number,
+    ): Promise<TypedArray>;
+
+    /**
+     * Copies a region of the currently bound framebuffer into the selected mipmap level of the selected texture.
+     * This region is defined by the size of the destination texture's mip level, offset by the input position.
+     *
+     * @param texture Specifies the destination texture.
+     * @param position Specifies the pixel offset from which to copy out of the framebuffer.
+     * @param level Specifies the destination mipmap level of the texture.
+     */
+    copyFramebufferToTexture(texture: Texture, position?: Vector2 | null, level?: number): void;
+
+    /**
+     * Copies the pixels of a texture in the bounds `srcRegion` in the destination texture starting from the given
+     * position.
+     *
+     * @param srcTexture Specifies the source texture.
+     * @param dstTexture Specifies the destination texture.
+     * @param srcRegion Specifies the bounds
+     * @param dstPosition Specifies the pixel offset into the dstTexture where the copy will occur.
+     * @param level Specifies the destination mipmap level of the texture.
+     */
+    copyTextureToTexture(
+        srcTexture: Texture,
+        dstTexture: Texture,
+        srcRegion?: Box2 | null,
+        dstPosition?: Vector2 | null,
+        level?: number,
+    ): void;
+
+    /**
+     * Copies the pixels of a texture in the bounds `srcRegion` in the destination texture starting from the given
+     * position.
+     *
+     * @param srcTexture Specifies the source texture.
+     * @param dstTexture Specifies the destination texture.
+     * @param srcRegion Specifies the bounds
+     * @param dstPosition Specifies the pixel offset into the dstTexture where the copy will occur.
+     * @param level Specifies the destination mipmap level of the texture.
+     */
+    copyTextureToTexture3D(
+        srcTexture: Texture,
+        dstTexture: Data3DTexture | DataArrayTexture,
+        srcRegion?: Box3 | null,
+        dstPosition?: Vector3 | null,
+        level?: number,
+    ): void;
+
+    /**
+     * Initializes the given WebGLRenderTarget memory. Useful for initializing a render target so data can be copied
+     * into it using {@link WebGLRenderer.copyTextureToTexture} before it has been rendered to.
+     * @param target
+     */
+    initRenderTarget(target: WebGLRenderTarget): void;
+
+    /**
+     * Initializes the given texture. Can be used to preload a texture rather than waiting until first render (which can cause noticeable lags due to decode and GPU upload overhead).
+     *
+     * @param texture The texture to Initialize.
+     */
+    initTexture(texture: Texture): void;
+
+    /**
+     * Can be used to reset the internal WebGL state.
+     */
+    resetState(): void;
+
+    /**
+     * @deprecated Use {@link WebGLRenderer#xr .xr} instead.
+     */
+    vr: boolean;
+
+    /**
+     * @deprecated Use {@link WebGLShadowMap#enabled .shadowMap.enabled} instead.
+     */
+    shadowMapEnabled: boolean;
+
+    /**
+     * @deprecated Use {@link WebGLShadowMap#type .shadowMap.type} instead.
+     */
+    shadowMapType: ShadowMapType;
+
+    /**
+     * @deprecated Use {@link WebGLShadowMap#cullFace .shadowMap.cullFace} instead.
+     */
+    shadowMapCullFace: CullFace;
+
+    /**
+     * @deprecated Use {@link WebGLExtensions#get .extensions.get( 'OES_texture_float' )} instead.
+     */
+    supportsFloatTextures(): any;
+
+    /**
+     * @deprecated Use {@link WebGLExtensions#get .extensions.get( 'OES_texture_half_float' )} instead.
+     */
+    supportsHalfFloatTextures(): any;
+
+    /**
+     * @deprecated Use {@link WebGLExtensions#get .extensions.get( 'OES_standard_derivatives' )} instead.
+     */
+    supportsStandardDerivatives(): any;
+
+    /**
+     * @deprecated Use {@link WebGLExtensions#get .extensions.get( 'WEBGL_compressed_texture_s3tc' )} instead.
+     */
+    supportsCompressedTextureS3TC(): any;
+
+    /**
+     * @deprecated Use {@link WebGLExtensions#get .extensions.get( 'WEBGL_compressed_texture_pvrtc' )} instead.
+     */
+    supportsCompressedTexturePVRTC(): any;
+
+    /**
+     * @deprecated Use {@link WebGLExtensions#get .extensions.get( 'EXT_blend_minmax' )} instead.
+     */
+    supportsBlendMinMax(): any;
+
+    /**
+     * @deprecated Use {@link WebGLCapabilities#vertexTextures .capabilities.vertexTextures} instead.
+     */
+    supportsVertexTextures(): any;
+
+    /**
+     * @deprecated Use {@link WebGLExtensions#get .extensions.get( 'ANGLE_instanced_arrays' )} instead.
+     */
+    supportsInstancedArrays(): any;
+
+    /**
+     * @deprecated Use {@link WebGLRenderer#setScissorTest .setScissorTest()} instead.
+     */
+    enableScissorTest(boolean: any): any;
+}
+
