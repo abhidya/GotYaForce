@@ -205,7 +205,163 @@ function gnt4_memcpy(dest: Uint8Array, src: Uint8Array, n: number): void {
 }
 
 /**
- * gnt4_memset @0x8000540c — Portable memset implementation.
+ * gnt4___fill_mem_bl @0x8000543c — Optimized block-fill routine.
+ *
+ * Original decomp:
+ *   void gnt4___fill_mem_bl(int param_1, byte param_2, uint param_3)
+ *   {
+ *     uint uVar1;
+ *     uint *puVar2;
+ *     byte *pbVar3;
+ *     uint uVar4;
+ *     uVar4 = (uint)param_2;
+ *     pbVar3 = (byte *)(param_1 + -1);
+ *     if (0x1f < param_3) {
+ *       uVar1 = ~(uint)pbVar3 & 3;
+ *       if (uVar1 != 0) {
+ *         param_3 = param_3 - uVar1;
+ *         do {
+ *           uVar1 = uVar1 - 1;
+ *           pbVar3 = pbVar3 + 1;
+ *           *pbVar3 = param_2;
+ *         } while (uVar1 != 0);
+ *       }
+ *       if (uVar4 != 0) {
+ *         uVar4 = uVar4 | uVar4 << 8 | (uint)param_2 << 0x18 | uVar4 << 0x10;
+ *       }
+ *       puVar2 = (uint *)(pbVar3 + -3);
+ *       for (uVar1 = param_3 >> 5; uVar1 != 0; uVar1 = uVar1 - 1) {
+ *         puVar2[1] = uVar4;
+ *         puVar2[2] = uVar4;
+ *         puVar2[3] = uVar4;
+ *         puVar2[4] = uVar4;
+ *         puVar2[5] = uVar4;
+ *         puVar2[6] = uVar4;
+ *         puVar2[7] = uVar4;
+ *         puVar2 = puVar2 + 8;
+ *         *puVar2 = uVar4;
+ *       }
+ *       for (uVar1 = param_3 >> 2 & 7; uVar1 != 0; uVar1 = uVar1 - 1) {
+ *         puVar2 = puVar2 + 1;
+ *         *puVar2 = uVar4;
+ *       }
+ *       pbVar3 = (byte *)((int)puVar2 + 3);
+ *       param_3 = param_3 & 3;
+ *     }
+ *     if (param_3 != 0) {
+ *       do {
+ *         param_3 = param_3 - 1;
+ *         pbVar3 = pbVar3 + 1;
+ *         *pbVar3 = (byte)uVar4;
+ *       } while (param_3 != 0);
+ *       return;
+ *     }
+ *     return;
+ *   }
+ *
+ * This is the core block-fill routine called by gnt4_memset.
+ * It handles unaligned starts, word-aligned bulk fills (8 uint32s per iteration),
+ * and trailing bytes.
+ */
+function gnt4___fill_mem_bl(dest: Uint8Array, value: number, n: number): void {
+  if (n <= 0) return;
+
+  const uVar4 = value & 0xff;
+  // pbVar3 starts at dest - 1 (Ghidra: pbVar3 = (byte *)(param_1 + -1))
+  let pbVar3Idx = 0; // will be incremented before first write
+
+  if (n > 0x1f) {
+    // Align to 4-byte boundary
+    let uVar1 = ((~pbVar3Idx) & 3);
+    if (uVar1 !== 0) {
+      n -= uVar1;
+      do {
+        uVar1--;
+        pbVar3Idx++;
+        dest[pbVar3Idx] = value & 0xff;
+      } while (uVar1 !== 0);
+    }
+
+    // Build 32-bit fill word
+    let fillWord = uVar4;
+    if (fillWord !== 0) {
+      fillWord = fillWord | (fillWord << 8) | ((uVar4 & 0xff) << 16) | (fillWord << 24);
+    }
+
+    // Fill in 32-bit chunks (8 uint32s = 32 bytes per iteration)
+    // puVar2 = (uint *)(pbVar3 + -3), so first write is at pbVar3Idx - 3 + 1 = pbVar3Idx - 2
+    // But we need to track as uint32 array offset
+    let puVar2Idx = pbVar3Idx - 3; // as uint32 offset
+    let uVar1Count = n >> 5; // n / 32
+    while (uVar1Count !== 0) {
+      // Write 8 uint32s: indices 1-7 relative to puVar2, then advance by 8
+      dest[(puVar2Idx + 1) * 4] = fillWord & 0xff;
+      dest[(puVar2Idx + 1) * 4 + 1] = (fillWord >> 8) & 0xff;
+      dest[(puVar2Idx + 1) * 4 + 2] = (fillWord >> 16) & 0xff;
+      dest[(puVar2Idx + 1) * 4 + 3] = (fillWord >> 24) & 0xff;
+
+      dest[(puVar2Idx + 2) * 4] = fillWord & 0xff;
+      dest[(puVar2Idx + 2) * 4 + 1] = (fillWord >> 8) & 0xff;
+      dest[(puVar2Idx + 2) * 4 + 2] = (fillWord >> 16) & 0xff;
+      dest[(puVar2Idx + 2) * 4 + 3] = (fillWord >> 24) & 0xff;
+
+      dest[(puVar2Idx + 3) * 4] = fillWord & 0xff;
+      dest[(puVar2Idx + 3) * 4 + 1] = (fillWord >> 8) & 0xff;
+      dest[(puVar2Idx + 3) * 4 + 2] = (fillWord >> 16) & 0xff;
+      dest[(puVar2Idx + 3) * 4 + 3] = (fillWord >> 24) & 0xff;
+
+      dest[(puVar2Idx + 4) * 4] = fillWord & 0xff;
+      dest[(puVar2Idx + 4) * 4 + 1] = (fillWord >> 8) & 0xff;
+      dest[(puVar2Idx + 4) * 4 + 2] = (fillWord >> 16) & 0xff;
+      dest[(puVar2Idx + 4) * 4 + 3] = (fillWord >> 24) & 0xff;
+
+      dest[(puVar2Idx + 5) * 4] = fillWord & 0xff;
+      dest[(puVar2Idx + 5) * 4 + 1] = (fillWord >> 8) & 0xff;
+      dest[(puVar2Idx + 5) * 4 + 2] = (fillWord >> 16) & 0xff;
+      dest[(puVar2Idx + 5) * 4 + 3] = (fillWord >> 24) & 0xff;
+
+      dest[(puVar2Idx + 6) * 4] = fillWord & 0xff;
+      dest[(puVar2Idx + 6) * 4 + 1] = (fillWord >> 8) & 0xff;
+      dest[(puVar2Idx + 6) * 4 + 2] = (fillWord >> 16) & 0xff;
+      dest[(puVar2Idx + 6) * 4 + 3] = (fillWord >> 24) & 0xff;
+
+      dest[(puVar2Idx + 7) * 4] = fillWord & 0xff;
+      dest[(puVar2Idx + 7) * 4 + 1] = (fillWord >> 8) & 0xff;
+      dest[(puVar2Idx + 7) * 4 + 2] = (fillWord >> 16) & 0xff;
+      dest[(puVar2Idx + 7) * 4 + 3] = (fillWord >> 24) & 0xff;
+
+      puVar2Idx += 8;
+      uVar1Count--;
+    }
+
+    // Fill remaining uint32s (up to 7)
+    let uVar1Rem = (n >> 2) & 7;
+    while (uVar1Rem !== 0) {
+      puVar2Idx++;
+      dest[puVar2Idx * 4] = fillWord & 0xff;
+      dest[puVar2Idx * 4 + 1] = (fillWord >> 8) & 0xff;
+      dest[puVar2Idx * 4 + 2] = (fillWord >> 16) & 0xff;
+      dest[puVar2Idx * 4 + 3] = (fillWord >> 24) & 0xff;
+      uVar1Rem--;
+    }
+
+    // pbVar3 = (byte *)((int)puVar2 + 3)
+    pbVar3Idx = puVar2Idx * 4 + 3;
+    n = n & 3;
+  }
+
+  // Handle trailing bytes
+  if (n !== 0) {
+    do {
+      n--;
+      pbVar3Idx++;
+      dest[pbVar3Idx] = uVar4;
+    } while (n !== 0);
+  }
+}
+
+/**
+ * gnt4_memset @0x8000540c — Thin wrapper around gnt4___fill_mem_bl.
  *
  * Original decomp:
  *   void *gnt4_memset(void *__s, int __c, size_t __n) {
@@ -213,11 +369,26 @@ function gnt4_memcpy(dest: Uint8Array, src: Uint8Array, n: number): void {
  *     return __s;
  *   }
  *
- * In the browser port, we use the native fill method.
+ * Normalized disassembly:
+ *   stwu r1,-0x10(r1)
+ *   mfspr r0,lr
+ *   stw r0,0x14(r1)
+ *   stw r31,0xc(r1)
+ *   or r31,r3,r3
+ *   bl 0x8000543c
+ *   lwz r0,0x14(r1)
+ *   or r3,r31,r31
+ *   lwz r31,0xc(r1)
+ *   mtspr lr,r0
+ *   addi r1,r1,0x10
+ *   blr
+ *
+ * Returns the original pointer (dest) for chaining compatibility.
  */
-function gnt4_memset(dest: Uint8Array, value: number, n: number): void {
-  if (n <= 0) return;
-  dest.fill(value, 0, n);
+function gnt4_memset(dest: Uint8Array, value: number, n: number): Uint8Array {
+  if (n <= 0) return dest;
+  gnt4___fill_mem_bl(dest, value, n);
+  return dest;
 }
 
 /**
