@@ -65,18 +65,21 @@ export function getRng8(): [number, number] {
 /**
  * Advance the 8-bit RNG (zz_00055fc_ @0x800055fc).
  *
- * ROM behavior:
- *   next = (((hi<<8|lo)*3)>>8) & 0xFF
- *   lo = next
- *   hi = (hi*3 + carry) & 0xFF
+ * ROM behavior (chunk_0000.c:373-386):
+ *   state = (DAT_804360c7 * 0x100 + DAT_804360c6) * 3
+ *   new_hi = (state >> 8) & 0xff
+ *   result = (DAT_804360c6 + new_hi) & 0xff
+ *   DAT_804360c7 = new_hi
+ *   DAT_804360c6 = result
+ *   return result
  *
- * Returns the new low byte (the RNG result).
+ * Used by GET accrual (zz_018214c_): (stepRng8() & 0xF) + 1 → random 1..16 points.
  */
 export function stepRng8(): number {
   const state = (_rng8_hi * 0x100 + _rng8_lo) * 3;
-  const next = (state >> 8) & 0xff;
-  const carry = (_rng8_hi * 3) & 0xff;
-  _rng8_lo = next;
-  _rng8_hi = carry;
-  return next;
+  const newHi = (state >> 8) & 0xff;
+  const result = (_rng8_lo + newHi) & 0xff;
+  _rng8_hi = newHi;
+  _rng8_lo = result;
+  return result;
 }
