@@ -475,6 +475,12 @@ export interface BattleConfig {
    *  policy is DERIVED: rom-waypoint.ts + rom-movement.ts). Set false to opt back into
    *  the legacy heuristic stepAI. */
   useRomAi?: boolean;
+  /**
+   * Boot configuration byte (DAT_80436498) — port of zz_000314c_ @0x8000314c.
+   * The original ROM reads this byte at startup; value 1 enables MetroTRK debugger.
+   * In the browser port this is exposed as a battle-level config for testing/debugging.
+   */
+  bootConfigByte?: number;
 }
 
 export type BattleResult = "ongoing" | "win" | "lose" | "draw";
