@@ -175,7 +175,7 @@ const PTR_DAT_800055B0: MemClearPair[] = [];
  *
  * In the browser port, this is a no-op (no hardware cache to sync).
  */
-function zz_0003424_(dest: Uint8Array | null, size: number): void {
+function zz_0003424_(dest: number, size: number): void {
   // Browser has no hardware cache — this is a no-op.
   void dest;
   void size;
@@ -243,7 +243,9 @@ export function zz_0003340_(): void {
     // Only copy if dest != src (preserves the ROM's comparison)
     if (dest !== src && dest !== null && src !== null) {
       gnt4_memcpy(dest, src, size);
-      zz_0003424_(dest, size);
+      // zz_0003424_ expects a memory address (number) and size (number)
+      // In the browser port we pass 0 as a dummy address since it's a no-op
+      zz_0003424_(0, size);
     }
   }
 
