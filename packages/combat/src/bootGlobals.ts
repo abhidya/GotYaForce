@@ -15,6 +15,14 @@
 let _bootConfigByte: number = 0;
 
 /**
+ * DAT_804360c0 — audio cue global.
+ * The original ROM writes to this at 0x80005984 via `zz_0005984_` (a thin setter).
+ * Called during boot/setup sequences (zz_0180820_, FUN_000c0358, zz_00059b8_)
+ * with argument 0 to clear/reset the audio cue state.
+ */
+let _audioCue: number = 0;
+
+/**
  * Set the boot configuration byte (DAT_80436498).
  * Called once at application bootstrap; the battle system reads it via getBootConfigByte().
  */
@@ -69,6 +77,26 @@ export function gnt4___init_hardware_bl(): void {
  *
  * The caller at 0x8000328c checks: if (zz_000314c_() == 1) InitMetroTRK_BBA();
  */
+/**
+ * zz_0005984_ @0x80005984 — Set the audio cue global (DAT_804360c0).
+ *
+ * Original decomp:
+ *   void zz_0005984_(undefined4 param_1) {
+ *     DAT_804360c0 = param_1;
+ *     return;
+ *   }
+ *
+ * Normalized disassembly:
+ *   stw r3,-0x54e0(r13)
+ *   blr
+ *
+ * Called from zz_0180820_ (0x8018083c), FUN_000c0358 (0x800c0378),
+ * and zz_00059b8_ (0x80005aac) during boot/setup sequences with arg 0.
+ */
+export function zz_0005984_(cue: number): void {
+  _audioCue = cue;
+}
+
 export function getBootConfigByte(): number {
   return _bootConfigByte;
 }
@@ -77,6 +105,14 @@ export function getBootConfigByte(): number {
  * Check whether MetroTRK debugger initialization should be triggered.
  * Mirrors the caller's gate: `if (zz_000314c_() == 1) InitMetroTRK_BBA();`
  */
+/**
+ * Get the current audio cue value (DAT_804360c0).
+ * Used by the title VM's setAudioCue opcode (0x0c) to read back the cue.
+ */
+export function getAudioCue(): number {
+  return _audioCue;
+}
+
 export function isMetroTRKEnabled(): boolean {
   return getBootConfigByte() === 1;
 }
