@@ -113,6 +113,11 @@ import {
   FIGHTER_ORANGE_DUAL_SPAWNER,
   type FighterScratch,
 } from "../families/fighter-craft.js";
+import { runPhoenixDragonSelfTests } from "../families/phoenix-dragon.js";
+import { runSiriusSelfTests } from "../families/sirius.js";
+import { runVehicleSelfTests } from "../families/vehicle-borg.js";
+import { runVictoryJetSelfTests } from "../families/victory-jet.js";
+import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
   configureGirlClusterFamily,
@@ -3412,6 +3417,7 @@ export function runSelfTest(): number {
   runGirlClusterTests();
   runDeathBorgNuClusterTests();
   runFighterCraftTests();
+  runSubagentPortTests();
 
   if (failures > 0) {
     console.error(`\n[rom.selfcheck] ${failures} FAILURES`);
@@ -3825,6 +3831,18 @@ function runFighterCraftTests(): void {
     assert(shots.length === 0 && a.fbPhaseSlots[0] === 3,
       "ammo gate (zz_006dbe0_ → false) suppresses action-0 spawn but phase still advances");
   }
+}
+
+/** Aggregator for the subagent-ported family self-tests (phoenix-dragon, sirius,
+ *  vehicle-borg, victory-jet, death-borg-chi). Each family module exports its own
+ *  runXxxSelfTests(assert); this wires them into the main selfcheck flow. */
+function runSubagentPortTests(): void {
+  console.log("\n[rom.selfcheck] Subagent-ported families — phoenix-dragon / sirius / vehicle / victory-jet / death-borg-chi:");
+  runPhoenixDragonSelfTests(assert);
+  runSiriusSelfTests(assert);
+  runVehicleSelfTests(assert);
+  runVictoryJetSelfTests(assert);
+  runDeathBorgChiSelfTests(assert);
 }
 
 function runGirlClusterTests(): void {

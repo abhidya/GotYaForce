@@ -87,10 +87,14 @@ import {
   configureDeathBorgMuFamily,
   configureDeathBorgNuFamily,
   configureDeathEyeFamily,
-  configureNuFamily,
   configureRoachFamily,
 } from "./families/death-borg-nu.js";
 import { configureFighterFamily } from "./families/fighter-craft.js";
+import { configurePhoenixDragonFamily } from "./families/phoenix-dragon.js";
+import { configureSiriusFamily } from "./families/sirius.js";
+import { configureVehicleFamily } from "./families/vehicle-borg.js";
+import { configureVictoryJetFamily } from "./families/victory-jet.js";
+import { configureDeathBorgChiFamily } from "./families/death-borg-chi.js";
 import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
@@ -545,18 +549,21 @@ pl020c: {
       // samurai cluster block above (families/samurai.ts): bespoke action-1 tables
       // @0x80351908/14/24 + bespoke X @0x80351950 (borg-switched slot + payload).
       // SIRIUS / DEATH ARC family (ctor 0x801898b0)
-      pl0e00: makeSimpleRegistration("pl0e00", (a, ctx) => configureFortressFamily(a, "pl0e00", ctx)),
-      pl0e01: makeSimpleRegistration("pl0e01", (a, ctx) => configureFortressFamily(a, "pl0e01", ctx)),
-      pl0e02: makeSimpleRegistration("pl0e02", (a, ctx) => configureFortressFamily(a, "pl0e02", ctx)),
-      pl0e03: makeSimpleRegistration("pl0e03", (a, ctx) => configureFortressFamily(a, "pl0e03", ctx)),
+      pl0e00: makeSimpleRegistration("pl0e00", (a, ctx) => configureSiriusFamily(a, "pl0e00", ctx)),
+      pl0e01: makeSimpleRegistration("pl0e01", (a, ctx) => configureVehicleFamily(a, "pl0e01", ctx)),
+      pl0e02: makeSimpleRegistration("pl0e02", (a, ctx) => configureVehicleFamily(a, "pl0e02", ctx)),
+      pl0e03: makeSimpleRegistration("pl0e03", (a, ctx) => configureVehicleFamily(a, "pl0e03", ctx)),
       pl0e04: makeSimpleRegistration("pl0e04", (a, ctx) => configureFortressFamily(a, "pl0e04", ctx)),
-      pl0e05: makeSimpleRegistration("pl0e05", (a, ctx) => configureFortressFamily(a, "pl0e05", ctx)),
+      pl0e05: makeSimpleRegistration("pl0e05", (a, ctx) => configureSiriusFamily(a, "pl0e05", ctx)),
       // BLUE STRIKER (pl0d00, ctor 0x800f7580) + ORANGE FIGHTER (pl0d04, ctor
       // 0x800f7660) fighter-craft family — shared 4-action root dispatching 4 phase
       // tables (@0x8031d130/d140/d14c/d158); see families/fighter-craft.ts. Borg-gated
       // phases route d00 to action 1 (hardpoint spawn) and d04 to action 2 (dual-port).
       pl0d00: makeSimpleRegistration("pl0d00", (a, ctx) => configureFighterFamily(a, "pl0d00", ctx)),
       pl0d04: makeSimpleRegistration("pl0d04", (a, ctx) => configureFighterFamily(a, "pl0d04", ctx)),
+      // VICTORY JET (pl0620, ctor 0x8015bd74) — bespoke action-3 spawn machine
+      // (table @0x80346284); see families/victory-jet.ts.
+      pl0620: makeSimpleRegistration("pl0620", (a, ctx) => configureVictoryJetFamily(a, ctx)),
       // DEATH BORG LAMBDA / DEATH BORG LAMBDA II family (ctor 0x8019e414) — valkrie-
       // cluster machines (families/valkrie.ts): action 0 = table-A B volley, action 1 =
       // table-B melee / table-C air lunge. NO action 2 in ROM (tables A-C only) — the
@@ -585,8 +592,8 @@ pl020c: {
       pl0009: makeSimpleRegistration("pl0009", (a, ctx) => configureWaveBFamily(a, "pl0009", ctx)),
       pl0504: makeSimpleRegistration("pl0504", (a, ctx) => configureWaveBFamily(a, "pl0504", ctx)),
       pl0510: makeSimpleRegistration("pl0510", (a, ctx) => configureWaveBFamily(a, "pl0510", ctx)),
-      pl0502: makeSimpleRegistration("pl0502", (a, ctx) => configureWaveBFamily(a, "pl0502", ctx)),
-      pl050e: makeSimpleRegistration("pl050e", (a, ctx) => configureWaveBFamily(a, "pl050e", ctx)),
+      pl0502: makeSimpleRegistration("pl0502", (a, ctx) => configurePhoenixDragonFamily(a, "pl0502", ctx)),
+      pl050e: makeSimpleRegistration("pl050e", (a, ctx) => configurePhoenixDragonFamily(a, "pl050e", ctx)),
       pl0505: makeSimpleRegistration("pl0505", (a, ctx) => configureWaveBFamily(a, "pl0505", ctx)),
       pl0511: makeSimpleRegistration("pl0511", (a, ctx) => configureWaveBFamily(a, "pl0511", ctx)),
       pl0202: makeSimpleRegistration("pl0202", (a, ctx) => configureWaveBFamily(a, "pl0202", ctx)),
@@ -637,7 +644,7 @@ pl040d: withRobotDash(makeOmega2FamilyRegistration(), ROBOT_ACTION0_CONFIGS.pl04
       pl0f02: makeSimpleRegistration("pl0f02", (a, ctx) => configureDeathBorgNuFamily(a, "pl0f02", ctx)),
       pl0f03: makeSimpleRegistration("pl0f03", (a, ctx) => configureDeathBorgNuFamily(a, "pl0f03", ctx)),
       pl0f00: makeSimpleRegistration("pl0f00", (a, ctx) => configureDeathBorgMuFamily(a, ctx)),
-      pl0f04: makeSimpleRegistration("pl0f04", (a, ctx) => configureNuFamily(a, "pl0f04", ctx)),
+      pl0f04: makeSimpleRegistration("pl0f04", (a, ctx) => configureDeathBorgChiFamily(a, ctx)),
       pl0f05: makeSimpleRegistration("pl0f05", (a, ctx) => configureRoachFamily(a, ctx)),
       pl0f06: makeSimpleRegistration("pl0f06", (a, ctx) => configureDeathEyeFamily(a, ctx)),
       // ---- Valkrie cluster (2026-07-06): 6 valkrie families on the 4 shared phase-table
