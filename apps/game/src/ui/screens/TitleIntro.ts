@@ -6,68 +6,132 @@
  * desk-intro bytecode from `DAT_8038a3ec` and fires engine effects through a
  * `TitleEffectSink`; this component IMPLEMENTS that sink over three.js + DOM so the VM
  * actually drives: desk-archive attach, actor anim/start/reset (G RED slot 0 + Sasuke
- * slot 1), fade/overlay/light-bar layers, screen-color tint, widget/audio triggers.
+ * slot 1), selected COBJ timelines, overlay/light-bar layers, screen-color tint, and
+ * widget/audio triggers.
  *
- * Scene: both desk actors are composited INTO the authored tl00 diorama through its ONE
- * authored HSD camera (DERIVED, research/decomp/tl00-scene-camera-2026-07-04.md). The
- * ROM loads `tl00_mdl.arc` + the actor archives together; opcode `0x0b` is the attach
- * cue. Actor world placement is TUNED pending the `tdc00..09.arc` anim/pose-bank decode
- * (those hold the real ROM coords); the structure is source-shaped.
+ * Scene: the source initializes stage id 0x11 (`stff`) and loads `tl00_mdl.arc` plus
+ * tdc00..09 before opcode 0x0b attaches the scene. The renderer therefore uses tl00's
+ * authored camera/lights, the complete tl00 diorama, and the ten stff models created by
+ * `zz_01c84a8_`; their movement is ported from 0x801c87dc..0x801c8c54.
  *
  * Per research/decomp/index/title-main-menu-flow.md: `DAT_8038a4ec` is a flat u16[6]
  * borg-id array — slot 0 = 0x0615 (G RED pl0615), slot 1 = 0x000a (Sasuke pl000a).
  */
 
 import * as THREE from "three";
-import {
-  fallGravityForBorgId,
-  groundRunSpeedForBorgId,
-  jumpVelocityForBorgId,
-} from "@gf/combat";
 import { createThreeAssetLoader } from "@gf/render";
 import { prepareImportedModel } from "@gf/render";
 
 import { createTitleVm } from "../intro/titleVm.js";
 import type { TitleEffectSink, TitleVm } from "../intro/titleVm.js";
+import { createTitlePropController } from "../intro/titlePropController.js";
 import { createUiSceneHost } from "../sceneModel.js";
 import { el } from "../dom.js";
+import { bitmapText, setBitmapText } from "../bitmapText.js";
 import type { MenuInputTarget } from "../menuInput.js";
+
+/**
+ * Source-strict mode: when a VM command cannot be satisfied from source data
+ * (missing animation clip, unresolved cue, unexported drawable), the boot must
+ * STOP VISIBLY instead of silently degrading to handcrafted choreography. This
+ * realizes the fidelity contract: either the original data drives the screen, or
+ * the gap is loud. Enabled when <html data-gf-source-strict> is set (dev/audit).
+ * In default mode the gap is still surfaced as a console error + DOM flag so it
+ * is never silently swallowed. */
+const SOURCE_STRICT = document.documentElement.dataset["gfSourceStrict"] !== undefined;
+function sourceMissing(reason: string, detail?: unknown): void {
+  console.error(`[title][source-missing] ${reason}`, detail ?? "");
+  if (SOURCE_STRICT) throw new Error(`[title][source-missing] ${reason}`);
+}
+export function __titleSourceStrictForTest(): boolean { return SOURCE_STRICT; }
 
 export interface TitleIntroOptions {
   /** Called on confirm (click or Enter/Space/any key = "press start"). */
   onEnter: () => void;
+  /** Source sound-id boundary. Opcode 0x15 emits the original u16 id. */
+  onSound: (soundId: number) => void;
 }
 
 export interface TitleIntroHandle extends MenuInputTarget {
   destroy: () => void;
 }
 
-/** Native captured title/desk frame (instant paint + fallback if the 3D scene fails). */
-const TITLE_CAPTURE_URL = new URL(
-  "../../../reference/captures/title-main-menu.png",
-  import.meta.url,
-).href;
+type TdcSceneState = {
+  archive: string;
+  resourceSlot: number;
+  eye: readonly [number, number, number];
+  target: readonly [number, number, number];
+  fov: number;
+  endFrame: number;
+  lightProfile: "base" | "character-base" | "character";
+  fog: boolean;
+};
 
-// Authored tl00 scene camera (DERIVED, tl00-scene-camera-2026-07-04.md probe), already
-// converted through the exporter's 180° Y-rotation (x->-x, z->-z).
-const SCENE_CAMERA_EYE = new THREE.Vector3(-5, 3557.153, 3145.1);
-const SCENE_CAMERA_TARGET = new THREE.Vector3(-5, 3557.153, 12625);
+type TdcCameraFrame = {
+  eye: [number, number, number];
+  target: [number, number, number];
+  roll: number;
+  fov: number;
+  near: number;
+  far: number;
+};
 
-// TUNED stage placement (pending tdc00..09.arc decode for the real ROM actor coords).
-// The authored camera sits at desk-surface height, so the stage surface IS that Y; actors
-// stand on it, in front of the camera along its +Z gaze, separated in X.
-const STAGE_SURFACE_Y = SCENE_CAMERA_EYE.y;
-const STAGE_FORWARD_FROM_CAMERA = 700;
-const STAGE_X_SPREAD = 240;
+type TdcCameraAnimation = {
+  archive: string;
+  endFrame: number;
+  frames: TdcCameraFrame[];
+};
 
-function stageBaseForSlot(slot: number): THREE.Vector3 {
-  const xOffset = slot === 0 ? -STAGE_X_SPREAD : STAGE_X_SPREAD;
-  return new THREE.Vector3(
-    SCENE_CAMERA_EYE.x + xOffset,
-    STAGE_SURFACE_Y,
-    SCENE_CAMERA_EYE.z + STAGE_FORWARD_FROM_CAMERA,
-  );
-}
+/**
+ * Exact COBJ state from the ten `tdc00..09.arc` scene_data roots. `zz_0042a58_`
+ * installs these at resource slots 12..21; opcode 0x06 selects that resource slot.
+ * Values were decoded with HSDRaw directly from the staged GG4E archives.
+ */
+const TDC_SCENE_STATES: readonly TdcSceneState[] = [
+  { archive: "tdc00.arc", resourceSlot: 12, eye: [8, 364.89, 2595.134], target: [8, 2999.996, -6720.233], fov: 41.539, endFrame: 39, lightProfile: "base", fog: true },
+  { archive: "tdc01.arc", resourceSlot: 13, eye: [510.75385, -1446.8043, 4509.2744], target: [1595.9144, -925.9938, -8486.236], fov: 22.029018, endFrame: 23, lightProfile: "base", fog: false },
+  { archive: "tdc02.arc", resourceSlot: 14, eye: [-331.3965, -1403.9352, 4802.8525], target: [-1287.339, -1386.3909, 4724.9507], fov: 74.598076, endFrame: 60, lightProfile: "base", fog: false },
+  { archive: "tdc03.arc", resourceSlot: 15, eye: [25.054, -1349.234, 5708.005], target: [14.29, -478.701, -8859.972], fov: 43.616, endFrame: 49, lightProfile: "character-base", fog: false },
+  { archive: "tdc04.arc", resourceSlot: 16, eye: [555.695, -955.354, 3740.292], target: [587.045, 723.92, -804.43], fov: 41.539, endFrame: 49, lightProfile: "base", fog: false },
+  { archive: "tdc05.arc", resourceSlot: 17, eye: [81.82487, 519.5118, 2341.2292], target: [84.95857, 314.86435, 1105.1302], fov: 41.538998, endFrame: 80, lightProfile: "base", fog: true },
+  { archive: "tdc06.arc", resourceSlot: 18, eye: [143.903, -1436.151, 4276.268], target: [-300.04, -1429.335, 4313.441], fov: 64.440994, endFrame: 31, lightProfile: "character-base", fog: false },
+  { archive: "tdc07.arc", resourceSlot: 19, eye: [-465.22455, -1003.881, 3706.802], target: [-2528.7058, -569.87103, -3034.9438], fov: 22.830599, endFrame: 49, lightProfile: "character-base", fog: true },
+  { archive: "tdc08.arc", resourceSlot: 20, eye: [0, -1450, 5005.535], target: [-1800, -1300, 2000], fov: 20, endFrame: 29, lightProfile: "character", fog: false },
+  { archive: "tdc09.arc", resourceSlot: 21, eye: [0, -1450, 5000], target: [1800, -1300, 2000], fov: 20, endFrame: 29, lightProfile: "base", fog: false },
+] as const;
+
+const TL00_BASE_SCENE_STATE: TdcSceneState = {
+  archive: "tl00_mdl.arc",
+  resourceSlot: -1,
+  eye: [5, 3557.153, -3145.1],
+  target: [5, 3557.153, -12625],
+  fov: 41.538998,
+  endFrame: 1999,
+  lightProfile: "base",
+  fog: false,
+};
+
+const BASE_DIRECTIONS = [
+  { color: [128, 128, 128] as const, position: [-2.7812777, 1.9665543, 1.140989] as const },
+  { color: [128, 128, 128] as const, position: [0.9624716, 2.0371425, -0.698656] as const },
+  { color: [255, 255, 255] as const, position: [1, 1, 1] as const },
+  { color: [153, 153, 153] as const, position: [-1, -1, -1] as const },
+] as const;
+const CHARACTER_DIRECTIONS = [
+  { color: [255, 255, 255] as const, position: [0.5, 1, 1] as const },
+  { color: [128, 128, 153] as const, position: [-0.5, -1, -1] as const },
+] as const;
+
+/**
+ * The paired character close-ups encode their subject anchors directly: tdc08 targets
+ * (-1800,-1300,2000), tdc09 targets (1800,-1300,2000), and both camera eyes sit on the
+ * floor plane at Y=-1450. Keep the actors on that authored floor plane while aiming the
+ * cameras 150 units above their roots, exactly matching those two COBJ records.
+ */
+const INTRO_ACTOR_ANCHORS = [
+  [-1800, -1450, 2000],
+  [1800, -1450, 2000],
+] as const;
 
 const SOURCE_FPS = 60;
 const FIXED_FRAME_SECONDS = 1 / SOURCE_FPS;
@@ -102,8 +166,8 @@ type BakedClip = {
   bones: Array<{ i: number; pos?: number[]; rot?: number[]; scl?: number[] }>;
 };
 
-/** Same bake->AnimationClip conversion as sim/borgPresentationAssets.ts. Bone-root X/Z
- * is stripped because the actor body is advanced by source movement physics below. */
+/** Same bake->AnimationClip conversion as sim/borgPresentationAssets.ts. Root translation
+ * is intentionally retained: the recovered g0 animation is the choreography source. */
 function buildClip(json: BakedClip): THREE.AnimationClip {
   const fps = json.fps ?? 60;
   const times = Float32Array.from({ length: json.frameCount }, (_, frame) => frame / fps);
@@ -111,14 +175,9 @@ function buildClip(json: BakedClip): THREE.AnimationClip {
   for (const bone of json.bones) {
     const node = `JOBJ_${bone.i}`;
     if (bone.pos?.length === json.frameCount * 3) {
-      const values = Float32Array.from(bone.pos);
-      if (bone.i === 0) {
-        for (let i = 0; i < values.length; i += 3) {
-          values[i] = 0;
-          values[i + 2] = 0;
-        }
-      }
-      tracks.push(new THREE.VectorKeyframeTrack(`${node}.position`, times, values));
+      tracks.push(
+        new THREE.VectorKeyframeTrack(`${node}.position`, times, Float32Array.from(bone.pos)),
+      );
     }
     if (bone.rot?.length === json.frameCount * 4) {
       tracks.push(new THREE.QuaternionKeyframeTrack(`${node}.quaternion`, times, Float32Array.from(bone.rot)));
@@ -143,93 +202,35 @@ async function loadActorClips(borgId: string): Promise<Map<number, THREE.Animati
   return new Map(clips);
 }
 
-type SourceActorPhysics = {
-  runSpeed: number;
-  jumpVelocity: number;
-  gravity: number;
-  dashSpeed: number;
-};
-
-type ActorMotionState = {
-  position: THREE.Vector3;
-  velocity: THREE.Vector3;
-  grounded: boolean;
-};
-
-// Local-space choreography (TUNED): the anim ids the VM plays get a small synthesized
-// travel vector so the montage reads on the desk. Both partners use the same choreography,
-// separated by their stage X offset.
-const RUN_DIRECTION = new THREE.Vector3(0.45, 0, -0.9).normalize();
-const DASH_BACK_DIRECTION = new THREE.Vector3(-0.25, 0, 1).normalize();
-const DASH_LEFT_DIRECTION = new THREE.Vector3(-1, 0, 0);
-const ACTOR_YAW = -0.24;
-const LOCAL_START = new THREE.Vector3(0, 0, 0);
-
-function sourceActorPhysicsForBorgId(borgId: string): SourceActorPhysics {
-  const runSpeed = groundRunSpeedForBorgId(borgId) ?? 12;
-  return {
-    runSpeed,
-    jumpVelocity: jumpVelocityForBorgId(borgId),
-    gravity: fallGravityForBorgId(borgId),
-    dashSpeed: runSpeed,
-  };
-}
-
-function createInitialActorMotion(): ActorMotionState {
-  return { position: LOCAL_START.clone(), velocity: new THREE.Vector3(0, 0, 0), grounded: true };
-}
-
-function applyPlanarVelocity(target: THREE.Vector3, direction: THREE.Vector3, speed: number): void {
-  target.set(direction.x * speed, target.y, direction.z * speed);
-}
-
-/** Synthesize a local travel vector for a played anim id (TUNED choreography). */
-function applyActorAnimMotion(animId: number, motion: ActorMotionState, physics: SourceActorPhysics): void {
-  switch (animId) {
-    case 0:
-      motion.velocity.set(0, 0, 0);
-      motion.grounded = true;
-      motion.position.y = 0;
-      break;
-    case 1:
-      applyPlanarVelocity(motion.velocity, RUN_DIRECTION, physics.runSpeed);
-      break;
-    case 6:
-      applyPlanarVelocity(motion.velocity, RUN_DIRECTION, physics.runSpeed);
-      motion.velocity.y = physics.jumpVelocity;
-      motion.grounded = false;
-      break;
-    case 3:
-      applyPlanarVelocity(motion.velocity, DASH_BACK_DIRECTION, physics.dashSpeed);
-      break;
-    case 4:
-      applyPlanarVelocity(motion.velocity, DASH_LEFT_DIRECTION, physics.dashSpeed);
-      break;
-    case 7:
-      motion.velocity.x = 0;
-      motion.velocity.z = 0;
-      if (motion.position.y <= physics.gravity * 3) {
-        motion.position.y = 0;
-        motion.velocity.y = 0;
-        motion.grounded = true;
-      }
-      break;
-    default:
-      break;
-  }
-}
-
 interface ActorRenderState {
   slot: number;
   borgId: string;
-  physics: SourceActorPhysics;
-  motion: ActorMotionState;
-  stageBase: THREE.Vector3;
   group: THREE.Group;
   modelRoot: THREE.Group;
   mixer: THREE.AnimationMixer;
   clips: Map<number, THREE.AnimationClip>;
   activeAction: THREE.AnimationAction | null;
+}
+
+interface PropRenderState {
+  index: number;
+  group: THREE.Group;
+  motionNode: THREE.Object3D;
+  baseY: number;
+  baseYaw: number;
+  lastOpacity: number;
+}
+
+function setObjectOpacity(object: THREE.Object3D, opacity: number): void {
+  object.traverse((child) => {
+    if (!(child instanceof THREE.Mesh || child instanceof THREE.SkinnedMesh)) return;
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    for (const material of materials) {
+      material.opacity = opacity;
+      material.transparent = opacity < 1;
+      material.needsUpdate = true;
+    }
+  });
 }
 
 export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions): TitleIntroHandle {
@@ -245,39 +246,49 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     },
   });
 
-  // Backdrop: NATIVE captured title/desk frame (instant paint + fallback).
-  const backdrop = el("div", { class: "gf-title-intro-backdrop" });
-  backdrop.style.backgroundImage = `url(${TITLE_CAPTURE_URL})`;
-  root.appendChild(backdrop);
-
-  // 3D scene host: authored tl00 diorama + both desk actors through ONE authored camera.
+  // 3D scene host: authored tl00 diorama + both desk actors through its authored camera.
   const sceneHost = createUiSceneHost("gf-ui-scene gf-title-intro-scene");
   root.appendChild(sceneHost);
 
-  // Full-screen FX layers driven by the VM (fade-to-black, screen-color tint, overlay).
-  const fadeLayer = el("div", { class: "gf-title-intro-fade" });
-  fadeLayer.style.cssText =
-    "position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:5;";
-  root.appendChild(fadeLayer);
+  // Full-screen color is opcode 0x01. Opcodes 0x07/0x08 drive the selected HSD COBJ
+  // animation and must never be converted into an invented DOM fade.
   const tintLayer = el("div", { class: "gf-title-intro-tint" });
   tintLayer.style.cssText =
     "position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0;";
   root.appendChild(tintLayer);
 
-  const sourceTitle = el("div", { class: "gf-title-intro-source-title", text: "GOTCHA FORCE" });
+  // Title logo. The ROM spawns this as a textured drawable via opcode 0x13
+  // (widget id 27) from the DAT_8031a074 chain, which is not yet exported — so
+  // this remains an HLE placeholder until that drawable chain lands. The element
+  // is marked source-missing so the gap is visible, never silent.
+  const sourceTitle = el("div", { class: "gf-title-intro-source-title" });
+  sourceTitle.hidden = true;
+  sourceTitle.dataset["gfHle"] = "title-logo:DAT_8031a074[27]-drawable-not-exported";
   root.appendChild(sourceTitle);
   const lightBar = el("div", { class: "gf-title-intro-lightbar" });
   root.appendChild(lightBar);
-  const prompt = el("div", { class: "gf-title-intro-prompt", text: "PRESS START" });
-  root.appendChild(prompt);
+  // PRESS START — rendered with the REAL exported ascii.tpl bitmap font (the
+  // game's own font atlas, same one the HUD uses), not a CSS typeface.
+  const prompt = bitmapText("gf-title-intro-prompt");
+  setBitmapText(prompt as HTMLSpanElement, "PRESS START", { bold: true, scale: 4 });
+  (prompt as HTMLElement).hidden = true;
+  root.appendChild(prompt as HTMLElement);
 
   // ---- Renderer state populated by the async loader; the sink mutates it. ----------
   let actors: ActorRenderState[] = [];
+  let props: PropRenderState[] = [];
+  let archivesReady = false;
+  let cameraReady = false;
+  let selectedTdcIndex = -1;
+  let selectedSceneFrame = 0;
+  let applyTdcFrame: ((index: number, frame: number) => void) | null = null;
 
   // The VM is created UPFRONT and ticks every fixed frame; its sink methods no-op until
   // the async scene load populates `actors` (the script's attachDeskArchives cue fires
   // before the first actorControl opcode, so actors are ready by then).
   const sink: TitleEffectSink = {
+    isArchiveReady: () => archivesReady,
+    isCameraReady: () => cameraReady,
     attachDeskArchives: () => {
       sceneHost.dataset["gfIntroAttach"] = "1";
     },
@@ -291,18 +302,41 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     },
     selectWidgetOrEffect: (effectIndex) => {
       sceneHost.dataset["gfIntroEffect"] = String(effectIndex);
+      // zz_0042a58_ loads tdc00..09 into resource slots 12..21. The script's
+      // opcode-0x06 payload is that resource slot, not a synthetic effect id.
+      if (effectIndex >= 12 && effectIndex <= 21) {
+        selectedTdcIndex = effectIndex - 12;
+      } else if (effectIndex === 0xff) {
+        selectedTdcIndex = -1;
+      }
+    },
+    getSelectedSceneEndFrame: () =>
+      selectedTdcIndex < 0
+        ? TL00_BASE_SCENE_STATE.endFrame
+        : (TDC_SCENE_STATES[selectedTdcIndex]?.endFrame ?? 0),
+    applySelectedSceneFrame: (frame) => {
+      selectedSceneFrame = frame;
+      sceneHost.dataset["gfIntroSceneFrame"] = String(frame);
+      applyTdcFrame?.(selectedTdcIndex, frame);
     },
     setCameraMode: (mode) => {
       sceneHost.dataset["gfIntroCam"] = String(mode);
     },
-    setAudioCue: (cue) => {
-      sceneHost.dataset["gfIntroAudioCue"] = String(cue);
+    setSceneAuxMode: (mode) => {
+      sceneHost.dataset["gfIntroSceneAux"] = String(mode);
     },
     actorPlayAnim: (slot, _groupSel, animId) => {
       const actor = actors.find((a) => a.slot === slot);
-      if (!actor) return;
+      if (!actor) {
+        sourceMissing(`opcode 0x0d: actor slot ${slot} not materialized`, { slots: actors.map((a) => a.slot) });
+        return;
+      }
       const clip = actor.clips.get(animId);
       if (!clip) {
+        // ROM: zz_0057ff8_(actor, 5, animId) → zz_004beb8_ resolves the actor's +0x1d80
+        // group-5 stream. A missing baked clip means the source animation is not
+        // exported for this id — stop visibly rather than inventing motion.
+        sourceMissing(`opcode 0x0d: slot ${slot} (${actor.borgId}) anim id ${animId} has no baked clip`, { borgId: actor.borgId, animId });
         sceneHost.dataset[`gfIntroMissingAnim_${slot}`] = String(animId);
         return;
       }
@@ -312,7 +346,6 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       action.clampWhenFinished = true;
       action.play();
       actor.activeAction = action;
-      applyActorAnimMotion(animId, actor.motion, actor.physics);
       sceneHost.dataset[`gfIntroAnim_${slot}`] = String(animId);
     },
     actorReset: (slot) => {
@@ -320,10 +353,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       if (!actor) return;
       actor.mixer.stopAllAction();
       actor.activeAction = null;
-      actor.motion.position.copy(LOCAL_START);
-      actor.motion.velocity.set(0, 0, 0);
-      actor.motion.grounded = true;
-      actor.modelRoot.position.copy(actor.motion.position);
+      actor.modelRoot.position.set(0, 0, 0);
     },
     actorSetVisible: (slot, visible) => {
       const actor = actors.find((a) => a.slot === slot);
@@ -340,16 +370,31 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     },
     spawnTitleWidget: (id) => {
       sceneHost.dataset["gfIntroWidget"] = String(id);
+      root.dataset["gfTitleSpawned"] = String(id);
+      // The DAT_8031a074 drawable chain is not exported; ids 27 (title logo) and
+      // 29 (press-start) are the only widget spawns in this script and are HLE'd
+      // here as DOM layers pending that export. Any OTHER id is an unhandled
+      // source command — surface it loudly rather than swallowing it.
+      if (id === 27) {
+        sourceTitle.hidden = false;
+      } else if (id === 29) {
+        (prompt as HTMLElement).hidden = false;
+      } else {
+        sourceMissing(`opcode 0x13: spawnTitleWidget id ${id} has no drawable binding`, { id });
+      }
     },
     setTitleWidgetMode: (mode) => {
       sceneHost.dataset["gfIntroWidgetMode"] = String(mode);
+      root.dataset["gfTitleMode"] = String(mode);
     },
     playSound: (cue) => {
       sceneHost.dataset["gfIntroSound"] = String(cue);
+      opts.onSound(cue);
     },
   };
 
   const vm: TitleVm = createTitleVm(sink);
+  const propController = createTitlePropController();
 
   let sceneDisposed = false;
   let sceneFrame = 0;
@@ -363,17 +408,61 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       renderer.setClearColor(0x000000, 0);
 
       const scene3 = new THREE.Scene();
-      // AUTHORED scene lights (DERIVED, tl00-scene-camera-2026-07-04.md).
-      scene3.add(new THREE.AmbientLight(new THREE.Color(152 / 255, 140 / 255, 178 / 255), 1.0));
-      const dir1 = new THREE.DirectionalLight(new THREE.Color(0.5, 0.5, 0.5), 1.0);
-      dir1.position.set(2.7812777, 1.9665543, -1.140989);
-      scene3.add(dir1);
-      const dir2 = new THREE.DirectionalLight(new THREE.Color(0.5, 0.5, 0.5), 1.0);
-      dir2.position.set(-0.9624716, 2.0371425, 0.698656);
-      scene3.add(dir2);
+      const lightRig = new THREE.Group();
+      lightRig.name = "TitleIntro_TdcLightRig";
+      scene3.add(lightRig);
+      const camera = new THREE.PerspectiveCamera(41.539, 1, 0.1, 32768);
+      const cameraTarget = new THREE.Vector3();
+      let cameraRoll = 0;
 
-      const camera = new THREE.PerspectiveCamera(41.538998, 1, 1, 32768);
-      camera.position.copy(SCENE_CAMERA_EYE);
+      const cameraAnimationsResponse = await fetch("/ui/scenes/tl00/tdc-camera-anims.json");
+      if (!cameraAnimationsResponse.ok) {
+        throw new Error(`Failed to load exact TDC camera tracks: ${cameraAnimationsResponse.status}`);
+      }
+      const cameraAnimations = (await cameraAnimationsResponse.json()) as TdcCameraAnimation[];
+
+      const setTdcLights = (state: TdcSceneState): void => {
+        lightRig.clear();
+        lightRig.add(
+          new THREE.AmbientLight(new THREE.Color(152 / 255, 140 / 255, 178 / 255), 1),
+        );
+        const directions =
+          state.lightProfile === "base"
+            ? BASE_DIRECTIONS
+            : state.lightProfile === "character"
+              ? CHARACTER_DIRECTIONS
+              : [...CHARACTER_DIRECTIONS, ...BASE_DIRECTIONS];
+        for (const source of directions) {
+          const [r, g, b] = source.color;
+          const [x, y, z] = source.position;
+          const light = new THREE.DirectionalLight(new THREE.Color(r / 255, g / 255, b / 255), 1);
+          light.position.set(x, y, z);
+          lightRig.add(light);
+        }
+      };
+
+      applyTdcFrame = (index, frame): void => {
+        const state = index < 0 ? TL00_BASE_SCENE_STATE : TDC_SCENE_STATES[index];
+        if (!state) return;
+        const animation = cameraAnimations[index];
+        const sampled = index < 0
+          ? undefined
+          : animation?.frames[Math.max(0, Math.min(Math.round(frame), animation.frames.length - 1))];
+        const eye = sampled?.eye ?? state.eye;
+        const target = sampled?.target ?? state.target;
+        camera.position.set(eye[0], eye[1], eye[2]);
+        cameraTarget.set(target[0], target[1], target[2]);
+        cameraRoll = sampled?.roll ?? 0;
+        camera.fov = sampled?.fov ?? state.fov;
+        camera.near = sampled?.near ?? 0.1;
+        camera.far = sampled?.far ?? 32768;
+        camera.updateProjectionMatrix();
+        setTdcLights(state);
+        sceneHost.dataset["gfIntroTdc"] = state.archive;
+        sceneHost.dataset["gfIntroTdcSlot"] = String(state.resourceSlot);
+        sceneHost.dataset["gfIntroFog"] = state.fog ? "1" : "0";
+      };
+      applyTdcFrame(selectedTdcIndex, selectedSceneFrame);
 
       const loader = createThreeAssetLoader({ enableFileCache: true });
 
@@ -391,6 +480,39 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
         mountedTl00 += 1;
       }
 
+      // Exact stff objects created by zz_01c84a8_: CAPCOM plate, fade quad, four
+      // screws, and four nuts/washers. Their source JOBJ_0 transforms are retained.
+      const propModels = await Promise.all(
+        propController.frames.map((frame) =>
+          loader.loadGlbScene(
+            `/stages/stff/model/model_${String(frame.modelId).padStart(2, "0")}.glb`,
+          ),
+        ),
+      );
+      props = propModels.map((model, index) => {
+        const source = propController.frames[index]!;
+        prepareImportedModel(model, {
+          materialSide: THREE.DoubleSide,
+          metalness: 0,
+          culling: "disabled",
+        });
+        const group = new THREE.Group();
+        group.name = `TitleIntro_StffProp_${source.modelId}_Variant${source.variant}`;
+        group.add(model);
+        group.visible = source.visible;
+        scene3.add(group);
+        const motionNode = model.getObjectByName("JOBJ_0") ?? model;
+        setObjectOpacity(model, source.opacity);
+        return {
+          index: source.index,
+          group,
+          motionNode,
+          baseY: motionNode.position.y,
+          baseYaw: motionNode.rotation.y,
+          lastOpacity: source.opacity,
+        };
+      });
+
       // Desk actors from the VM's seeded slots (G RED pl0615 + Sasuke pl000a).
       const actorLoads = await Promise.all(
         vm.state.actors.map(async (vmActor) => {
@@ -404,18 +526,15 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       if (sceneDisposed) return;
 
       actors = actorLoads.map(({ vmActor, model, clips }) => {
-        const stageBase = stageBaseForSlot(vmActor.slot);
         const group = new THREE.Group();
         group.name = `TitleIntro_Actor_${vmActor.borgId}_Slot${vmActor.slot}`;
-        group.position.copy(stageBase);
-        group.rotation.y = ACTOR_YAW;
+        const anchor = INTRO_ACTOR_ANCHORS[vmActor.slot];
+        if (anchor) group.position.set(anchor[0], anchor[1], anchor[2]);
         group.visible = false; // hidden until the VM's actorControl makes it visible
 
         const modelRoot = new THREE.Group();
         modelRoot.name = `TitleIntro_${vmActor.borgId}_MotionRoot`;
         prepareImportedModel(model, {
-          centerXZ: true,
-          groundY: true,
           materialSide: THREE.DoubleSide,
           metalness: 0,
           culling: "skinned-disabled",
@@ -427,9 +546,6 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
         return {
           slot: vmActor.slot,
           borgId: vmActor.borgId,
-          physics: sourceActorPhysicsForBorgId(vmActor.borgId),
-          motion: createInitialActorMotion(),
-          stageBase,
           group,
           modelRoot,
           mixer: new THREE.AnimationMixer(model),
@@ -438,7 +554,12 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
         };
       });
       sceneHost.dataset["gfDeskModels"] = String(mountedTl00);
+      sceneHost.dataset["gfIntroProps"] = props.map((prop) => String(prop.index)).join(",");
+      sceneHost.dataset["gfIntroCameraSource"] = "tdc00..09.arc:scene_data.cameras[0]:opcode-0x06";
+      sceneHost.dataset["gfIntroActorPlacement"] = "tdc08+tdc09-character-targets";
       sceneHost.dataset["gfIntroActors"] = actors.map((a) => a.borgId).join(",");
+      archivesReady = true;
+      cameraReady = true;
 
       const resize = (): void => {
         const rect = sceneHost.getBoundingClientRect();
@@ -454,46 +575,36 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       resize();
       teardown.push(() => observer.disconnect());
 
-      let sourceFrame = 0;
+      let sourceFrame = -1;
       let frameAccumulator = 0;
       let lastNow = performance.now();
-
-      const stepActorPhysics = (actor: ActorRenderState): void => {
-        actor.motion.position.x += actor.motion.velocity.x;
-        actor.motion.position.y += actor.motion.velocity.y;
-        actor.motion.position.z += actor.motion.velocity.z;
-        if (!actor.motion.grounded || actor.motion.velocity.y !== 0) {
-          actor.motion.velocity.y -= actor.physics.gravity;
-        }
-        if (actor.motion.position.y <= 0) {
-          actor.motion.position.y = 0;
-          actor.motion.velocity.y = 0;
-          actor.motion.grounded = true;
-        }
-        actor.modelRoot.position.copy(actor.motion.position);
-      };
 
       const stepFixedFrame = (): void => {
         if (vm.state.endRequested === 0) {
           sourceFrame += 1;
         }
-        vm.tick(); // run the ROM script dispatcher (fires sink methods + integrates fade/overlay)
-        for (const actor of actors) stepActorPhysics(actor);
+        vm.tick(); // run the ROM dispatcher and integrate the selected COBJ/overlay timelines
+        const propSounds = propController.tick(vm.state.sceneStep);
+        for (const soundId of propSounds) opts.onSound(soundId);
+        for (const prop of props) {
+          const source = propController.frames[prop.index]!;
+          prop.group.visible = source.visible && !source.destroyed;
+          prop.motionNode.position.y = prop.baseY + source.yOffset;
+          prop.motionNode.rotation.y = prop.baseYaw + source.yawRadians;
+          if (prop.lastOpacity !== source.opacity) {
+            setObjectOpacity(prop.group, source.opacity);
+            prop.lastOpacity = source.opacity;
+          }
+        }
         for (const actor of actors) actor.mixer.update(FIXED_FRAME_SECONDS);
       };
 
       const syncFxLayers = (): void => {
-        // Fade overlay: alpha derived from the VM fade accumulator (current/target ratio).
-        // TUNED interpretation pending the zz_00088a4_ consumer decode.
-        const fade = vm.state.fade;
-        if (fade.target > 0 && fade.current > 0) {
-          fadeLayer.style.opacity = String(Math.max(0, Math.min(1, fade.current / fade.target)));
-        } else if (fade.current === 0) {
-          fadeLayer.style.opacity = "0";
-        }
         root.dataset["gfIntroFrame"] = String(sourceFrame);
         root.dataset["gfIntroPc"] = String(vm.state.pc);
+        root.dataset["gfIntroStep"] = String(vm.state.sceneStep);
         root.dataset["gfIntroEnd"] = String(vm.state.endRequested);
+        root.dataset["gfIntroDone"] = String(vm.state.endRequested === 1);
       };
 
       const render = (now = performance.now()): void => {
@@ -506,7 +617,8 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
           frameAccumulator -= FIXED_FRAME_SECONDS;
         }
         syncFxLayers();
-        camera.lookAt(SCENE_CAMERA_TARGET);
+        camera.lookAt(cameraTarget);
+        camera.rotateZ(cameraRoll);
         renderer.render(scene3, camera);
         sceneFrame = requestAnimationFrame(render);
       };
@@ -519,12 +631,12 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       });
     } catch (err) {
       sceneHost.dataset["gfModelStatus"] = "failed";
-      console.warn("[title] tl00 3D desk scene unavailable, keeping capture:", err);
+      console.warn("[title] source tl00 3D desk scene unavailable:", err);
     }
   })();
 
   function enter(): void {
-    if (destroyed) return;
+    if (destroyed || vm.state.endRequested === 0) return;
     opts.onEnter();
   }
 
@@ -532,13 +644,11 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
   // window keydown is kept (broader than the bus's mapped vocabulary), stopImmediatePropagation
   // prevents a double-advance, and the host-routed target covers gamepad confirm/start.
   function onKey(ev: KeyboardEvent): void {
-    vm.notifyInput(); // feed the input edge to the VM (the end opcode tests state[+0x2d])
     enter();
     ev.preventDefault();
     ev.stopImmediatePropagation();
   }
   function onClick(): void {
-    vm.notifyInput();
     enter();
   }
 
@@ -550,7 +660,6 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       // Keyboard remains on the raw listener so every key (not just mapped actions)
       // has identical behavior. The semantic target supplies the gamepad path.
       if (event.source !== "gamepad") return;
-      vm.notifyInput();
       enter();
     },
     destroy: () => {
