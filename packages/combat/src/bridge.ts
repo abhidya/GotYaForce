@@ -94,6 +94,9 @@ import { configurePhoenixDragonFamily } from "./families/phoenix-dragon.js";
 import { configureSiriusFamily } from "./families/sirius.js";
 import { configureVehicleFamily } from "./families/vehicle-borg.js";
 import { configureVictoryJetFamily } from "./families/victory-jet.js";
+import { configureVictoryKingFamily } from "./families/victory-king.js";
+import { configureAccelerationNinjaFamily } from "./families/acceleration-ninja.js";
+import { configureWingSoldierFamily } from "./families/wing-soldier.js";
 import { configureDeathBorgChiFamily } from "./families/death-borg-chi.js";
 import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
 import { HERO_X_BUFF } from "./constants.js";
@@ -327,10 +330,13 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // FUN_8015ad10 delegates all arms to zz_017a374_ (no bespoke family phase machine).
       // X group-4 seed slot per borg (actionStreamTables): pl0610 gnd 0 / air 1,
       // pl0621 slot 0, pl0623 slot 1; pl061e has no action 2.
-      pl0610: makeVictoryKingFamilyRegistration(0),
-      pl061e: makeVictoryKingFamilyRegistration(null),
-      pl0621: makeVictoryKingFamilyRegistration(0),
-      pl0623: makeVictoryKingFamilyRegistration(1),
+      // VICTORY KING family (ctor 0x8015a494) — bespoke action-0 dash + action-3
+      // B-charge flurry (tables @0x804346f8 / @0x803448b0); see families/victory-king.ts.
+      // Action 2 (X-special) routes through the shared engine zz_017a374_.
+      pl0610: makeSimpleRegistration("pl0610", (a, ctx) => configureVictoryKingFamily(a, "pl0610", ctx)),
+      pl061e: makeSimpleRegistration("pl061e", (a, ctx) => configureVictoryKingFamily(a, "pl061e", ctx)),
+      pl0621: makeSimpleRegistration("pl0621", (a, ctx) => configureVictoryKingFamily(a, "pl0621", ctx)),
+      pl0623: makeSimpleRegistration("pl0623", (a, ctx) => configureVictoryKingFamily(a, "pl0623", ctx)),
       // SWORD KNIGHT family (ctor 0x80073b70) — cue table @0x802d4b50. NORMAL KNIGHT
       // (pl020a) and DEATH BORG GAMMA II (pl020f) share the entire family module (the
       // ctor block-copies word @0x802d47b8 to all three; only pl0200 wires command
@@ -561,6 +567,9 @@ pl020c: {
       // phases route d00 to action 1 (hardpoint spawn) and d04 to action 2 (dual-port).
       pl0d00: makeSimpleRegistration("pl0d00", (a, ctx) => configureFighterFamily(a, "pl0d00", ctx)),
       pl0d04: makeSimpleRegistration("pl0d04", (a, ctx) => configureFighterFamily(a, "pl0d04", ctx)),
+      // ACCELERATION NINJA (pl0004, ctor 0x80162128) — bespoke 3-action melee/dash
+      // (tables @0x8034c750/c770/c7a8); see families/acceleration-ninja.ts.
+      pl0004: makeSimpleRegistration("pl0004", (a, ctx) => configureAccelerationNinjaFamily(a, ctx)),
       // VICTORY JET (pl0620, ctor 0x8015bd74) — bespoke action-3 spawn machine
       // (table @0x80346284); see families/victory-jet.ts.
       pl0620: makeSimpleRegistration("pl0620", (a, ctx) => configureVictoryJetFamily(a, ctx)),
@@ -599,6 +608,9 @@ pl020c: {
       pl0202: makeSimpleRegistration("pl0202", (a, ctx) => configureWaveBFamily(a, "pl0202", ctx)),
       pl020b: makeSimpleRegistration("pl020b", (a, ctx) => configureWaveBFamily(a, "pl020b", ctx)),
       pl0a02: makeSimpleRegistration("pl0a02", (a, ctx) => configureWaveBFamily(a, "pl0a02", ctx)),
+      // WING SOLDIER (pl0a00, ctor 0x80091824) — bespoke hover-volley + variant dives
+      // (tables @0x802db468/db48c, X @0x8033ecb8); see families/wing-soldier.ts.
+      pl0a00: makeSimpleRegistration("pl0a00", (a, ctx) => configureWingSoldierFamily(a, ctx)),
       pl0a07: makeSimpleRegistration("pl0a07", (a, ctx) => configureWaveBFamily(a, "pl0a07", ctx)),
       pl0a04: makeSimpleRegistration("pl0a04", (a, ctx) => configureWaveBFamily(a, "pl0a04", ctx)),
       pl0a08: makeSimpleRegistration("pl0a08", (a, ctx) => configureWaveBFamily(a, "pl0a08", ctx)),
@@ -920,28 +932,10 @@ function makeStarHeroFamilyRegistration(): FamilyRegistration {
   };
 }
 
-// VICTORY KING family (ctor 0x8015a494) — cue table @0x80344b50. The X-special ROUTES
-// THROUGH THE SHARED ENGINE zz_017a374_ (phase table 0x804347b0, chunk_0044.c:4322):
-// action-2 handler FUN_8015ad10 (chunk_0040.c:4103) is a thin borg-switch whose every
-// arm (pl0610→zz_015ad5c_, pl0621→zz_015ad84_, pl0623→zz_015adac_) tail-calls
-// zz_017a374_ — the same cross-family engine reused by Panther Robot + 2 others. No
-// bespoke family phase logic (contrast G RED's family-specific 4-phase G Crash chain),
-// so this is a SHARED registration: cue table + shared-engine X config, no family module.
-// pl061e (PROTO KING) has NO action 2 (FUN_8015ad10 falls through for 0x61e) → xSpecial
-// left null so its rootAction defers entirely to the generic combat layer.
-function makeVictoryKingFamilyRegistration(xSeedSlot: number | null): FamilyRegistration {
-  return {
-    configure: (actor) => {
-      actor.borgNumber = 0x610;
-      actor.rootAction = createSharedEngineRootAction({
-        xSpecial: xSeedSlot === null ? null : DEFAULT_CONFIGS.dashAttack(xSeedSlot),
-      });
-      actor.defaultGroup = 0;
-      actor.streamSlot = 0;
-    },
-    cueTable: cueTableForBorg("pl0610")!,
-  };
-}
+// VICTORY KING family (ctor 0x8015a494) — bespoke action-0 dash + action-3 B-charge
+// flurry ported in families/victory-king.ts (tables @0x804346f8 / @0x803448b0). The
+// X-special (action 2) routes through the shared engine zz_017a374_, wired inside
+// configureVictoryKingFamily with the per-borg seed slot.
 
 function makeSwordKnightFamilyRegistration(): FamilyRegistration {
   return {
