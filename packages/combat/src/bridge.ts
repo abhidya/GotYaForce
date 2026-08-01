@@ -97,6 +97,9 @@ import { configureVictoryJetFamily } from "./families/victory-jet.js";
 import { configureVictoryKingFamily } from "./families/victory-king.js";
 import { configureAccelerationNinjaFamily } from "./families/acceleration-ninja.js";
 import { configureWingSoldierFamily } from "./families/wing-soldier.js";
+import { configureCosmicDragonFamily } from "./families/cosmic-dragon.js";
+import { configureGoldHeroFamily } from "./families/gold-hero.js";
+import { configureCyberHeroFamily } from "./families/cyber-hero.js";
 import { configureDeathBorgChiFamily } from "./families/death-borg-chi.js";
 import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
 import { HERO_X_BUFF } from "./constants.js";
@@ -325,6 +328,11 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // shares the entire family module (status-effects-decode §A verified chain).
       pl0804: makeStarHeroFamilyRegistration(),
       pl080c: makeStarHeroFamilyRegistration(),
+      // GOLD HERO (pl0802, ctor 0x8013c714) — bespoke blast/melee (tables @0x803399f8…);
+      // CYBER HERO (pl0808, ctor 0x801d9314) — bespoke blink-dash/charge-flurry/recovery
+      // (tables @0x8038a6d8…); see families/gold-hero.ts + families/cyber-hero.ts.
+      pl0802: makeSimpleRegistration("pl0802", (a, ctx) => configureGoldHeroFamily(a, ctx)),
+      pl0808: makeSimpleRegistration("pl0808", (a, ctx) => configureCyberHeroFamily(a, ctx)),
       // VICTORY KING family (ctor 0x8015a494) — cue table @0x80344b50. X-special routes
       // through the shared engine zz_017a374_ (phase table 0x804347b0): action-2 handler
       // FUN_8015ad10 delegates all arms to zz_017a374_ (no bespoke family phase machine).
@@ -599,8 +607,8 @@ pl020c: {
       pl000b: makeSimpleRegistration("pl000b", (a, ctx) => configureArrowNinjaFamily(a, "pl000b", ctx)),
       pl0005: makeSimpleRegistration("pl0005", (a, ctx) => configureWaveBFamily(a, "pl0005", ctx)),
       pl0009: makeSimpleRegistration("pl0009", (a, ctx) => configureWaveBFamily(a, "pl0009", ctx)),
-      pl0504: makeSimpleRegistration("pl0504", (a, ctx) => configureWaveBFamily(a, "pl0504", ctx)),
-      pl0510: makeSimpleRegistration("pl0510", (a, ctx) => configureWaveBFamily(a, "pl0510", ctx)),
+      pl0504: makeSimpleRegistration("pl0504", (a, ctx) => configureCosmicDragonFamily(a, "pl0504", ctx)),
+      pl0510: makeSimpleRegistration("pl0510", (a, ctx) => configureCosmicDragonFamily(a, "pl0510", ctx)),
       pl0502: makeSimpleRegistration("pl0502", (a, ctx) => configurePhoenixDragonFamily(a, "pl0502", ctx)),
       pl050e: makeSimpleRegistration("pl050e", (a, ctx) => configurePhoenixDragonFamily(a, "pl050e", ctx)),
       pl0505: makeSimpleRegistration("pl0505", (a, ctx) => configureWaveBFamily(a, "pl0505", ctx)),

@@ -120,6 +120,9 @@ import { runVictoryJetSelfTests } from "../families/victory-jet.js";
 import { runVictoryKingSelfTests } from "../families/victory-king.js";
 import { runAccelerationNinjaSelfTests } from "../families/acceleration-ninja.js";
 import { runWingSoldierSelfTests } from "../families/wing-soldier.js";
+import { runCosmicDragonSelfTests } from "../families/cosmic-dragon.js";
+import { runGoldHeroSelfTests } from "../families/gold-hero.js";
+import { runCyberHeroSelfTests } from "../families/cyber-hero.js";
 import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
@@ -3840,7 +3843,7 @@ function runFighterCraftTests(): void {
  *  vehicle-borg, victory-jet, death-borg-chi). Each family module exports its own
  *  runXxxSelfTests(assert); this wires them into the main selfcheck flow. */
 function runSubagentPortTests(): void {
-  console.log("\n[rom.selfcheck] Subagent-ported families — phoenix-dragon / sirius / vehicle / victory-jet / death-borg-chi / victory-king / acceleration-ninja / wing-soldier:");
+  console.log("\n[rom.selfcheck] Subagent-ported families — wave 1+2+3:");
   runPhoenixDragonSelfTests(assert);
   runSiriusSelfTests(assert);
   runVehicleSelfTests(assert);
@@ -3849,6 +3852,9 @@ function runSubagentPortTests(): void {
   runVictoryKingSelfTests(assert);
   runAccelerationNinjaSelfTests(assert);
   runWingSoldierSelfTests(assert);
+  runCosmicDragonSelfTests(assert);
+  runGoldHeroSelfTests(assert);
+  runCyberHeroSelfTests(assert);
 }
 
 function runGirlClusterTests(): void {
