@@ -131,6 +131,8 @@ import { runGunmanClusterSelfTests } from "../families/gunman-cluster.js";
 import { runKnightClusterSelfTests } from "../families/knight-cluster.js";
 import { runKungFuMasterSelfTests } from "../families/kung-fu-master.js";
 import { runTaoMasterSelfTests } from "../families/tao-master.js";
+import { runWingBlobClusterSelfTests } from "../families/wing-blob-cluster.js";
+import { runUnregisteredClusterSelfTests } from "../families/unregistered-cluster.js";
 import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
@@ -3871,6 +3873,8 @@ function runSubagentPortTests(): void {
   runKnightClusterSelfTests(assert);
   runKungFuMasterSelfTests(assert);
   runTaoMasterSelfTests(assert);
+  runWingBlobClusterSelfTests(assert);
+  runUnregisteredClusterSelfTests(assert);
 }
 
 function runGirlClusterTests(): void {
