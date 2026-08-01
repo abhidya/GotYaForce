@@ -83,7 +83,14 @@ import { configureNurseFamily } from "./families/nurse-wizard-idol.js";
 import { configureTankFamily } from "./families/tank-borg.js";
 import { configureArrowNinjaFamily } from "./families/arrow-ninja.js";
 import { configureFortressFamily } from "./families/fortress-borg.js";
-import { configureNuFamily } from "./families/death-borg-nu.js";
+import {
+  configureDeathBorgMuFamily,
+  configureDeathBorgNuFamily,
+  configureDeathEyeFamily,
+  configureNuFamily,
+  configureRoachFamily,
+} from "./families/death-borg-nu.js";
+import { configureFighterFamily } from "./families/fighter-craft.js";
 import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
 import { HERO_X_BUFF } from "./constants.js";
 import { applyActorParamTierDelta127 } from "./paramTier.js";
@@ -544,6 +551,12 @@ pl020c: {
       pl0e03: makeSimpleRegistration("pl0e03", (a, ctx) => configureFortressFamily(a, "pl0e03", ctx)),
       pl0e04: makeSimpleRegistration("pl0e04", (a, ctx) => configureFortressFamily(a, "pl0e04", ctx)),
       pl0e05: makeSimpleRegistration("pl0e05", (a, ctx) => configureFortressFamily(a, "pl0e05", ctx)),
+      // BLUE STRIKER (pl0d00, ctor 0x800f7580) + ORANGE FIGHTER (pl0d04, ctor
+      // 0x800f7660) fighter-craft family — shared 4-action root dispatching 4 phase
+      // tables (@0x8031d130/d140/d14c/d158); see families/fighter-craft.ts. Borg-gated
+      // phases route d00 to action 1 (hardpoint spawn) and d04 to action 2 (dual-port).
+      pl0d00: makeSimpleRegistration("pl0d00", (a, ctx) => configureFighterFamily(a, "pl0d00", ctx)),
+      pl0d04: makeSimpleRegistration("pl0d04", (a, ctx) => configureFighterFamily(a, "pl0d04", ctx)),
       // DEATH BORG LAMBDA / DEATH BORG LAMBDA II family (ctor 0x8019e414) — valkrie-
       // cluster machines (families/valkrie.ts): action 0 = table-A B volley, action 1 =
       // table-B melee / table-C air lunge. NO action 2 in ROM (tables A-C only) — the
@@ -611,14 +624,22 @@ pl020c: {
 pl040b: withRobotDash(makeOmega2FamilyRegistration(), ROBOT_ACTION0_CONFIGS.pl040b),
 pl040c: withRobotDash(makeOmega2FamilyRegistration(), ROBOT_ACTION0_CONFIGS.pl040c),
 pl040d: withRobotDash(makeOmega2FamilyRegistration(), ROBOT_ACTION0_CONFIGS.pl040d),
-      // DEATH BORG NU family (ctor 0x801b3598)
-      pl0f01: makeSimpleRegistration("pl0f01", (a, ctx) => configureNuFamily(a, "pl0f01", ctx)),
-      pl0f02: makeSimpleRegistration("pl0f02", (a, ctx) => configureNuFamily(a, "pl0f02", ctx)),
-      pl0f03: makeSimpleRegistration("pl0f03", (a, ctx) => configureNuFamily(a, "pl0f03", ctx)),
-      pl0f00: makeSimpleRegistration("pl0f00", (a, ctx) => configureNuFamily(a, "pl0f00", ctx)),
+      // DEATH BORG NU family (ctor 0x801b3598) — bespoke 4-phase ammo-gated spawn
+      // machine (table @0x80380ee8; zz_01b3768_/zz_01b3798_/zz_01b3824_/zz_01b3990_).
+      // DEATH EYE (ctor 0x801e43f8) shares the identical machine (table @0x80391cd8;
+      // FUN_801e460c/463c/46c8/47f8) — see families/death-borg-nu.ts. pl0f01 loops
+      // (shot 0x4a), pl0f02/pl0f03 single-shot (effect 0x3d/0xb), pl0f06 loops
+      // (shot 0x7a). DEATH BORG MU (pl0f00, ctor 0x801b289c, table @0x80380a80) and
+      // ROACH (pl0f05, ctor 0x801e7d78, table @0x803929a8) have their own single-shot
+      // machines in the same module. pl0f04 (Death Borg Chi) stays on configureNuFamily
+      // (null rootAction → generic layer).
+      pl0f01: makeSimpleRegistration("pl0f01", (a, ctx) => configureDeathBorgNuFamily(a, "pl0f01", ctx)),
+      pl0f02: makeSimpleRegistration("pl0f02", (a, ctx) => configureDeathBorgNuFamily(a, "pl0f02", ctx)),
+      pl0f03: makeSimpleRegistration("pl0f03", (a, ctx) => configureDeathBorgNuFamily(a, "pl0f03", ctx)),
+      pl0f00: makeSimpleRegistration("pl0f00", (a, ctx) => configureDeathBorgMuFamily(a, ctx)),
       pl0f04: makeSimpleRegistration("pl0f04", (a, ctx) => configureNuFamily(a, "pl0f04", ctx)),
-      pl0f05: makeSimpleRegistration("pl0f05", (a, ctx) => configureNuFamily(a, "pl0f05", ctx)),
-      pl0f06: makeSimpleRegistration("pl0f06", (a, ctx) => configureNuFamily(a, "pl0f06", ctx)),
+      pl0f05: makeSimpleRegistration("pl0f05", (a, ctx) => configureRoachFamily(a, ctx)),
+      pl0f06: makeSimpleRegistration("pl0f06", (a, ctx) => configureDeathEyeFamily(a, ctx)),
       // ---- Valkrie cluster (2026-07-06): 6 valkrie families on the 4 shared phase-table
       // machines ported in families/valkrie.ts (tables @0x8033ed68/ed78/ed88/0x804346b8;
       // engines zz_014a200_/zz_014a8c0_/zz_014ad94_/zz_014b22c_, chunk_0038.c). Action 0 =

@@ -91,6 +91,28 @@ import {
   createSharedMorphXSpecial,
   TITAN_MORPH_CONFIG,
 } from "../families/shared-morph-x.js";
+import {
+  configureDeathBorgMuFamily,
+  configureDeathBorgNuFamily,
+  configureDeathEyeFamily,
+  configureRoachFamily,
+  createNuFamilyRootAction,
+  NU_FAMILY_CONSTANTS,
+  NU_SHOT_HELPER,
+  NU_EFFECT_SPAWNER_C3BE0,
+  NU_EFFECT_SPAWNER_16CC24,
+  type MuScratch,
+  type NuFamilyScratch,
+} from "../families/death-borg-nu.js";
+import {
+  configureFighterFamily,
+  FIGHTER_CONSTANTS,
+  FIGHTER_SHOT_HELPER,
+  FIGHTER_EFFECT_SPAWNER,
+  FIGHTER_BLUE_HARDPOINT_SPAWNER,
+  FIGHTER_ORANGE_DUAL_SPAWNER,
+  type FighterScratch,
+} from "../families/fighter-craft.js";
 import type { BorgRuntime } from "../types.js";
 import {
   configureGirlClusterFamily,
@@ -3388,6 +3410,8 @@ export function runSelfTest(): number {
   }
 
   runGirlClusterTests();
+  runDeathBorgNuClusterTests();
+  runFighterCraftTests();
 
   if (failures > 0) {
     console.error(`\n[rom.selfcheck] ${failures} FAILURES`);
@@ -3395,6 +3419,412 @@ export function runSelfTest(): number {
   }
   console.log("\n[rom.selfcheck] ALL PASS — foundation composes correctly.");
   return 0;
+}
+
+function runDeathBorgNuClusterTests(): void {
+  console.log("\n[rom.selfcheck] Death Borg Nu / Death Eye — 4-phase spawn machine:");
+  type Shot = { addr: number; type: number };
+
+  // --- pl0f01 (DB NU looping, shot 0x4a): one shot then cooldown exit. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & NuFamilyScratch;
+    configureDeathBorgNuFamily(a, "pl0f01", sctx);
+    assert(a.borgNumber === 0xf01, "pl0f01 borgNumber stamped 0xf01");
+    assert(a.rootAction !== null, "pl0f01 bespoke rootAction wired");
+    const root = a.rootAction!;
+    // phase 0: seeds main timer 20.0, cooldown 0.0, advances phase.
+    root(a);
+    assert(a.fbPhaseSlots[0] === 1 && a.handlerTimer === NU_FAMILY_CONSTANTS.MAIN_TIMER_SEED
+      && a.nuCooldownTimer === NU_FAMILY_CONSTANTS.THRESHOLD,
+      "phase 0 seeds +0x558=20.0 / +0x55c=0.0 and advances to phase 1");
+    // phase 1: tick until +0x558 <= 0.0 (dt=1 → 20 frames).
+    for (let i = 0; i < 19; i += 1) root(a);
+    assert(a.fbPhaseSlots[0] === 1, "phase 1 waits while +0x558 > 0.0 threshold");
+    root(a);
+    assert(a.fbPhaseSlots[0] === 2, "phase 1 advances when +0x558 <= 0.0");
+    // phase 2: first tick fires shot 0x4a, then exit-loop-or-continue (count 1 > 0) → phase 3.
+    root(a);
+    assert(shots.length === 1 && shots[0]!.addr === NU_SHOT_HELPER && shots[0]!.type === 0x4a,
+      `phase 2 pl0f01 fires zz_0082824_(0x4a) once (got ${JSON.stringify(shots)})`);
+    assert(a.fbPhaseSlots[0] === 3 && a.handlerTimer === NU_FAMILY_CONSTANTS.EXIT_TIMER_SEED,
+      "phase 2 pl0f01 advances to cooldown with +0x558=40.0 (single shot, no burst)");
+    // phase 3: cooldown decrements +0x558; at <= 0.0 clears housekeeping + action bits.
+    a.controlWord = 0x3;
+    a.housekeeping73f = 1;
+    for (let i = 0; i < 40; i += 1) root(a);
+    assert(a.fbPhaseSlots[0] === 3, "phase 3 stays at phase 3 (no further advance)");
+    assert(a.housekeeping73f === 0 && a.controlWord === 0,
+      "phase 3 clears +0x73f and strips +0x5e0 action-mode bits when +0x558 <= 0.0");
+  }
+
+  // --- pl0f01 burst mode (+0x5bc & 0x200): fires up to 5 shots. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, _addr, _type) => shots.push({ addr: _addr, type: _type }),
+    };
+    const a = createRomActor() as RomActor & NuFamilyScratch;
+    configureDeathBorgNuFamily(a, "pl0f01", sctx);
+    a.statusWord5bc = NU_FAMILY_CONSTANTS.BURST_STATUS_BIT;
+    const root = a.rootAction!;
+    root(a);                                                    // phase 0
+    for (let i = 0; i < 20; i += 1) root(a);                    // phase 1 drain
+    assert(a.fbPhaseSlots[0] === 2, "phase 1 → 2 after timer drain (burst)");
+    // Burst: 1 shot per SHOT_INTERVAL (12) frames; exit when shot count > 4 (5th shot).
+    // Each shot tick resets cooldown to 12, so fire on frames 0, 13, 26, 39, 52.
+    for (let i = 0; i < 70 && a.fbPhaseSlots[0] === 2; i += 1) root(a);
+    assert(shots.length === 5, `burst mode fires 5 shots before exit (got ${shots.length})`);
+    assert(a.fbPhaseSlots[0] === 3, "burst mode exits to cooldown after the 5th shot");
+  }
+
+  // --- pl0f02 (DB NU single-shot): effect spawner 0x3d, immediate cooldown, +0x55c re-seed 20.0. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & NuFamilyScratch;
+    configureDeathBorgNuFamily(a, "pl0f02", sctx);
+    assert(a.borgNumber === 0xf02, "pl0f02 borgNumber stamped 0xf02");
+    const root = a.rootAction!;
+    root(a);                                                    // phase 0
+    for (let i = 0; i < 20; i += 1) root(a);                    // phase 1 drain
+    root(a);                                                    // phase 2 single-shot
+    assert(shots.length === 1 && shots[0]!.addr === NU_EFFECT_SPAWNER_C3BE0 && shots[0]!.type === 0x3d,
+      `phase 2 pl0f02 spawns zz_00c3be0_(0x3d) (got ${JSON.stringify(shots)})`);
+    assert(a.fbPhaseSlots[0] === 3, "phase 2 pl0f02 advances to cooldown immediately");
+    assert(a.handlerTimer === NU_FAMILY_CONSTANTS.EXIT_TIMER_SEED
+      && a.nuCooldownTimer === NU_FAMILY_CONSTANTS.SINGLE_SHOT_CD_RESEED,
+      "phase 2 pl0f02 re-seeds +0x558=40.0 and +0x55c=20.0 (NU single-shot branch)");
+  }
+
+  // --- pl0f03 (DB NU single-shot): effect spawner 0xb. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & NuFamilyScratch;
+    configureDeathBorgNuFamily(a, "pl0f03", sctx);
+    assert(a.borgNumber === 0xf03, "pl0f03 borgNumber stamped 0xf03");
+    const root = a.rootAction!;
+    root(a);
+    for (let i = 0; i < 20; i += 1) root(a);
+    root(a);
+    assert(shots.length === 1 && shots[0]!.addr === NU_EFFECT_SPAWNER_16CC24 && shots[0]!.type === 0xb,
+      `phase 2 pl0f03 spawns zz_016cc24_(0xb) (got ${JSON.stringify(shots)})`);
+  }
+
+  // --- pl0f02 ammo failure: no spawn, still advances (ROM gates spawn, not advance). ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => false,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & NuFamilyScratch;
+    configureDeathBorgNuFamily(a, "pl0f02", sctx);
+    const root = a.rootAction!;
+    root(a);
+    for (let i = 0; i < 20; i += 1) root(a);
+    root(a);
+    assert(shots.length === 0 && a.fbPhaseSlots[0] === 3,
+      "ammo gate (zz_006dbe0_ → onAllocateResource false) suppresses spawn but phase still advances");
+  }
+
+  // --- pl0f06 (DEATH EYE looping, shot 0x7a): one shot then cooldown exit. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & NuFamilyScratch;
+    configureDeathEyeFamily(a, sctx);
+    assert(a.borgNumber === 0xf06, "pl0f06 borgNumber stamped 0xf06");
+    assert(a.rootAction !== null, "pl0f06 bespoke rootAction wired");
+    const root = a.rootAction!;
+    root(a);                                                    // phase 0
+    for (let i = 0; i < 20; i += 1) root(a);                    // phase 1 drain
+    assert(a.fbPhaseSlots[0] === 2, "phase 1 → 2 (EYE) after timer drain");
+    root(a);                                                    // phase 2 first shot
+    assert(shots.length === 1 && shots[0]!.addr === NU_SHOT_HELPER && shots[0]!.type === 0x7a,
+      `phase 2 pl0f06 fires zz_0082824_(0x7a) once (got ${JSON.stringify(shots)})`);
+    assert(a.fbPhaseSlots[0] === 3, "phase 2 pl0f06 advances to cooldown after single shot");
+    // EYE never re-seeds +0x55c: stays at the setup 0.0.
+    assert(a.nuCooldownTimer === NU_FAMILY_CONSTANTS.THRESHOLD,
+      "phase 2 pl0f06 leaves +0x55c at 0.0 (EYE never re-seeds)");
+  }
+
+  // --- Shared machine directly: config dispatch matches the per-family configure. ---
+  {
+    const sctx: StreamContext = { onAllocateResource: () => true, onFamilyProjectile: () => {} };
+    const nuRoot = createNuFamilyRootAction(sctx, {
+      spawnPhase: () => {},
+      waitStreamParams: [2, 1],
+    });
+    const a = createRomActor();
+    nuRoot(a);
+    assert(a.fbPhaseSlots[0] === 1 && a.handlerTimer === NU_FAMILY_CONSTANTS.MAIN_TIMER_SEED,
+      "createNuFamilyRootAction runs phase 0 setup independent of configure closure");
+  }
+
+  // --- DEATH BORG MU (pl0f00): 4-phase linear single-shot (effect 0x3c, 40-frame exit). ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & NuFamilyScratch & MuScratch;
+    configureDeathBorgMuFamily(a, sctx);
+    assert(a.borgNumber === 0xf00, "pl0f00 borgNumber stamped 0xf00");
+    const root = a.rootAction!;
+    root(a);                                             // ph0 setup
+    assert(a.fbPhaseSlots[0] === 1 && a.handlerTimer === 20.0,
+      "MU ph0 seeds +0x558=20.0 (FLOAT_8043b920)");
+    for (let i = 0; i < 20; i += 1) root(a);            // ph1 drain
+    assert(a.fbPhaseSlots[0] === 2, "MU ph1 advances when +0x558 <= 0.0");
+    root(a);                                             // ph2 fire
+    assert(shots.length === 1 && shots[0]!.addr === NU_EFFECT_SPAWNER_C3BE0 && shots[0]!.type === 0x3c,
+      `MU ph2 spawns zz_00c3be0_(0x3c) (got ${JSON.stringify(shots)})`);
+    assert(a.fbPhaseSlots[0] === 3 && a.muExitCountdown === 40,
+      "MU ph2 advances to ph3 with +0x548 = 40 (0x28)");
+    a.controlWord = 0x3; a.housekeeping73f = 1;
+    for (let i = 0; i < 39; i += 1) root(a);            // ph3 countdown
+    assert(a.housekeeping73f === 1, "MU ph3 waits while +0x548 >= 1");
+    root(a);                                             // 40th decrement → exit
+    assert((a.muExitCountdown ?? 0) < 1 && a.housekeeping73f === 0 && a.controlWord === 0,
+      "MU ph3 exits (clears +0x73f, strips +0x5e0) when +0x548 < 1");
+  }
+
+  // --- ROACH (pl0f05): 3-phase single-shot (effect + sound cue 0xeb, 10-frame exit). ---
+  {
+    let fxSpawn = 0;
+    const cues: number[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: () => { fxSpawn += 1; },
+      onPlayCue: (_a, cue) => cues.push(cue),
+    };
+    const a = createRomActor();
+    configureRoachFamily(a, sctx);
+    assert(a.borgNumber === 0xf05, "pl0f05 borgNumber stamped 0xf05");
+    const root = a.rootAction!;
+    root(a);                                             // ph0 advance
+    assert(a.fbPhaseSlots[0] === 1, "ROACH ph0 advances to ph1");
+    root(a);                                             // ph1 fire
+    assert(a.fbPhaseSlots[0] === 2 && a.handlerTimer === 10.0,
+      "ROACH ph1 advances to ph2 and seeds +0x558=10.0 (FLOAT_8043c2d8)");
+    assert(fxSpawn === 1 && cues.length === 1 && cues[0] === 0xeb,
+      `ROACH ph1 spawns effect + plays cue 0xeb (got fx=${fxSpawn}, cues=${JSON.stringify(cues)})`);
+    a.controlWord = 0x3; a.housekeeping73f = 1;
+    for (let i = 0; i < 10; i += 1) root(a);           // ph2 drain (10→0)
+    assert(a.housekeeping73f === 1, "ROACH ph2 waits while +0x558 >= threshold");
+    root(a);                                             // 11th decrement → +0x558 = -1.0 < 0.0 → exit
+    assert(a.handlerTimer < 0 && a.housekeeping73f === 0 && a.controlWord === 0,
+      "ROACH ph2 exits (clears +0x73f, strips +0x5e0) when +0x558 < 0.0");
+  }
+}
+
+function runFighterCraftTests(): void {
+  console.log("\n[rom.selfcheck] BLUE STRIKER / ORANGE FIGHTER — 4-action fighter-craft machine:");
+  type Shot = { addr: number; type: number };
+
+  // --- pl0d00 action 0: burst volley, alternating shots 0xe/0xf, 1 shot then cooldown. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d00", sctx);
+    assert(a.borgNumber === 0xd00, "pl0d00 borgNumber stamped 0xd00");
+    assert(a.rootAction !== null, "fighter bespoke rootAction wired");
+    const root = a.rootAction!;
+    a.actionIndex = 0;
+    root(a); // ph0 setup
+    assert(a.fbPhaseSlots[0] === 1 && a.handlerTimer === FIGHTER_CONSTANTS.MAIN_TIMER_SEED,
+      "action 0 ph0 seeds +0x558=30.0 and advances");
+    for (let i = 0; i < 30; i += 1) root(a); // ph1 drain (+0x558 30→0)
+    assert(a.fbPhaseSlots[0] === 2, "action 0 ph1 advances when +0x558 <= 0.0");
+    root(a); // ph2 first shot
+    assert(shots.length === 1 && shots[0]!.addr === FIGHTER_SHOT_HELPER && shots[0]!.type === 0xe,
+      `action 0 ph2 d00 fires zz_0082824_(0xe) first (got ${JSON.stringify(shots)})`);
+    assert(a.fbPhaseSlots[0] === 3 && a.handlerTimer === FIGHTER_CONSTANTS.MAIN_TIMER_SEED,
+      "action 0 ph2 advances to cooldown after single shot (no burst)");
+    // ph3 cooldown drains +0x558; exit dispatches cue 0x1b.
+    a.controlWord = 0x3; a.housekeeping73f = 1;
+    for (let i = 0; i < 30; i += 1) root(a);
+    assert(a.housekeeping73f === 0 && a.controlWord === 0,
+      "action 0 ph3 exit clears +0x73f and strips +0x5e0 action bits");
+  }
+
+  // --- pl0d00 action 0 burst: fires 10 shots, alternating 0xe/0xf. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d00", sctx);
+    a.statusWord5bc = FIGHTER_CONSTANTS.BURST_STATUS_BIT;
+    const root = a.rootAction!;
+    a.actionIndex = 0;
+    root(a);
+    for (let i = 0; i < 30; i += 1) root(a); // ph1
+    assert(a.fbPhaseSlots[0] === 2, "action 0 ph1 → ph2 (burst)");
+    for (let i = 0; i < 200 && a.fbPhaseSlots[0] === 2; i += 1) root(a);
+    assert(shots.length === 10, `burst mode fires 10 shots before exit (got ${shots.length})`);
+    // Alternating toggle: 0xe,0xf,0xe,0xf,...
+    const altOk = shots.every((s, i) => s.type === (i % 2 === 0 ? 0xe : 0xf));
+    assert(altOk, "action 0 burst alternates shot type 0xe/0xf via +0x149 toggle");
+    assert(a.fbPhaseSlots[0] === 3, "burst exits to cooldown after the 10th shot");
+  }
+
+  // --- pl0d04 action 0: shot type 0x42/0x43 (ORANGE branch). ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d04", sctx);
+    assert(a.borgNumber === 0xd04, "pl0d04 borgNumber stamped 0xd04");
+    const root = a.rootAction!;
+    a.actionIndex = 0;
+    root(a);
+    for (let i = 0; i < 30; i += 1) root(a);
+    root(a);
+    assert(shots.length === 1 && shots[0]!.type === 0x42,
+      `action 0 ph2 d04 fires zz_0082824_(0x42) (got ${JSON.stringify(shots)})`);
+  }
+
+  // --- pl0d00 action 1: BLUE hardpoint spawn, cursor cycles 0,1,2,3. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d00", sctx);
+    const root = a.rootAction!;
+    a.actionIndex = 1;
+    root(a); // ph0
+    assert(a.fbPhaseSlots[0] === 1 && a.handlerTimer === FIGHTER_CONSTANTS.THRESHOLD,
+      "action 1 ph0 seeds +0x558=0.0 (immediate next-tick advance)");
+    root(a); // ph1 spawn-once
+    assert(shots.length === 1 && shots[0]!.addr === FIGHTER_BLUE_HARDPOINT_SPAWNER && shots[0]!.type === 0,
+      `action 1 ph1 d00 spawns zz_00f9400_(hardpoint 0) (got ${JSON.stringify(shots)})`);
+    assert(a.fbPhaseSlots[0] === 2 && a.fighterHardpointBlue === 1,
+      "action 1 ph1 advances to cooldown and cycles hardpoint cursor to 1");
+    // Re-arm a second action to confirm cursor wrap to 0 after 4 spawns.
+    for (let n = 1; n < 4; n += 1) {
+      a.fbPhaseSlots[0] = 1;
+      root(a);
+    }
+    assert(a.fighterHardpointBlue === 0, "BLUE hardpoint cursor wraps (& 3) after 4 spawns");
+  }
+
+  // --- pl0d04 action 2: ORANGE dual-port spawn, cursor cycles 0,1. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d04", sctx);
+    const root = a.rootAction!;
+    a.actionIndex = 2;
+    root(a); root(a);
+    assert(shots.length === 1 && shots[0]!.addr === FIGHTER_ORANGE_DUAL_SPAWNER && shots[0]!.type === 0,
+      `action 2 ph1 d04 spawns zz_00fcd38_(2, port 0) (got ${JSON.stringify(shots)})`);
+    assert(a.fbPhaseSlots[0] === 2 && a.fighterHardpointOrange === 1,
+      "action 2 ph1 advances to cooldown and cycles dual-port cursor to 1");
+    a.fbPhaseSlots[0] = 1; root(a);
+    assert(a.fighterHardpointOrange === 0, "ORANGE dual-port cursor wraps (& 1) after 2 spawns");
+  }
+
+  // --- pl0d00 action 3: aimed burst, fires effect 0x14. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d00", sctx);
+    const root = a.rootAction!;
+    a.actionIndex = 3;
+    root(a); // ph0
+    for (let i = 0; i < 30; i += 1) root(a); // ph1 drain
+    assert(a.fbPhaseSlots[0] === 2, "action 3 ph1 advances when +0x558 <= 0.0");
+    root(a); // ph2 fire
+    assert(shots.length === 1 && shots[0]!.addr === FIGHTER_EFFECT_SPAWNER && shots[0]!.type === 0x14,
+      `action 3 ph2 d00 spawns zz_00c3be0_(0x14) (got ${JSON.stringify(shots)})`);
+    assert(a.fbPhaseSlots[0] === 3, "action 3 ph2 advances to cooldown");
+  }
+
+  // --- pl0d04 action 3: fires effect 0x38 (ORANGE branch). ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => true,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d04", sctx);
+    const root = a.rootAction!;
+    a.actionIndex = 3;
+    root(a);
+    for (let i = 0; i < 30; i += 1) root(a);
+    root(a);
+    assert(shots.length === 1 && shots[0]!.type === 0x38,
+      `action 3 ph2 d04 spawns zz_00c3be0_(0x38) (got ${JSON.stringify(shots)})`);
+  }
+
+  // --- bob wobble decay: +0x1922/+0x1924 decay by ×0.9 per frame (dt=1). ---
+  {
+    const sctx: StreamContext = { onAllocateResource: () => true, onFamilyProjectile: () => {} };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d00", sctx);
+    a.bobYaw1922 = 100; a.bobPitch1924 = -50;
+    a.actionIndex = 0;
+    a.rootAction!(a); // ph0 + applyBob
+    assert(a.bobYaw1922 === 90 && a.bobPitch1924 === -45,
+      `bob wobble decays ×0.9 per frame (yaw=${a.bobYaw1922}, pitch=${a.bobPitch1924})`);
+  }
+
+  // --- ammo gate failure: action 0 ph2 suppresses spawn but still advances. ---
+  {
+    const shots: Shot[] = [];
+    const sctx: StreamContext = {
+      onAllocateResource: () => false,
+      onFamilyProjectile: (_a, addr, type) => shots.push({ addr, type }),
+    };
+    const a = createRomActor() as RomActor & FighterScratch;
+    configureFighterFamily(a, "pl0d00", sctx);
+    const root = a.rootAction!;
+    a.actionIndex = 0;
+    root(a);
+    for (let i = 0; i < 30; i += 1) root(a);
+    root(a);
+    assert(shots.length === 0 && a.fbPhaseSlots[0] === 3,
+      "ammo gate (zz_006dbe0_ → false) suppresses action-0 spawn but phase still advances");
+  }
 }
 
 function runGirlClusterTests(): void {
