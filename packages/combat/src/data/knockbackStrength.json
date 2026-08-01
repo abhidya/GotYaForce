@@ -1,0 +1,53 @@
+{
+  "provenance": {
+    "bootDolPath": "user-data/GG4E/disc/sys/boot.dol",
+    "bootDolSha1": "91b32873d62ae25c0a9b08d665e1e8c19ae38a5f",
+    "generatedBy": "gen-knockback-strength-tables.mjs",
+    "evidence": "zz_005ec20_ @0x8005ec20 reads *(float*)(&DAT_802dd8a0 + strength*4) (chunk_0007.c:5568); FUN_8005ed38 @0x8005ed38 reads *(float*)(&DAT_802d3664 + strength*4) (chunk_0007.c:5630); strength = actor+0x702 (the hit record +0x0d severity byte, clamped 0..15).",
+    "addresses": {
+      "horizontalLaunch": "0x802dd8a0",
+      "velocityMagnitude": "0x802d3664"
+    },
+    "entryCount": 16,
+    "expectedForm": {
+      "horizontalLaunch": "strength * 7.0  (0,7,14,...,105)",
+      "velocityMagnitude": "(strength + 1) * 8.0  (8,16,...,128)"
+    }
+  },
+  "horizontalLaunch": [
+    0,
+    7,
+    14,
+    21,
+    28,
+    35,
+    42,
+    49,
+    56,
+    63,
+    70,
+    77,
+    84,
+    91,
+    98,
+    105
+  ],
+  "velocityMagnitude": [
+    8,
+    16,
+    24,
+    32,
+    40,
+    48,
+    56,
+    64,
+    72,
+    80,
+    88,
+    96,
+    104,
+    112,
+    120,
+    128
+  ]
+}
