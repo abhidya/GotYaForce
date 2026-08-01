@@ -600,6 +600,16 @@ export interface Projectile {
      *  0x802fafd0/0x802faef8) or null when the row's byte is -1 (no launch flash). */
     launchFxId: number | null;
   };
+  /** The resolved ROM shot KIND that armed this projectile (attackHitData.ts
+   *  shotKindForBorgId's guarded fire-site attribution when the shooter's fire fn was traced
+   *  to a proven spawner-table row, else the ROM-family driver's kind arg, else kind 0). Set
+   *  by battle.ts addRomProjectile for ROM-family borgs (G RED beam, ninja shurikens, …) so
+   *  the renderer can pick the right flight visual/impact for the per-borg subtype; absent on
+   *  archetype-path projectiles (combat.ts spawnProjectile), whose visual stays the existing
+   *  `visualKind`/`flightVisual`. Same kind space as borgShotKinds (shotVariantKinds.json) and
+   *  the per-borg pl####hit.bin remap — the renderer may join it to efctBankMeshes.json /
+   *  the family damage record's impactEffectId. Renderer-facing only; no sim-side read. */
+  romShotKind?: number;
 }
 
 /**

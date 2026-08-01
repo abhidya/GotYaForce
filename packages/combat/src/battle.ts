@@ -10,7 +10,7 @@
 // For the multi-team result we report from the perspective of the lowest team id that still
 // has a human owner; "win"/"lose"/"draw"/"ongoing".
 
-import { isFiniteVec, yAtTriangleXZ, type Vec3 } from "@gf/physics";
+import { isFiniteVec, len, scale, sub, yAtTriangleXZ, type Vec3 } from "@gf/physics";
 import { stepAI } from "./ai.js";
 import { stepRomAI, hasRomAiParams } from "./romAi.js";
 import { RomDriverBridge, type RomBattleRuntime } from "./bridge.js";
@@ -27,7 +27,9 @@ import {
 } from "./burst.js";
 import {
   activeSourceTargetUid,
+  findVariantByKind,
   isBusy,
+  projectileVisualKindForProfile,
   refreshSourceTargetLock,
   sourceReleaseAllyLock,
   resetProjectileCounter,
@@ -47,12 +49,18 @@ import {
   useWeaponCell,
   stepVampireDrain,
 } from "./combat.js";
+import {
+  shotKindForBorgId,
+  shotFlightVisualForBorgId,
+  shotHitRadiusForBorgId,
+  attackHitRecordsForKind,
+} from "./attackHitData.js";
 import { challengeSideRanksForMode } from "./damageFormula.js";
 import { setBootConfigByte } from "./bootGlobals.js";
 import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { stepStatus } from "./status.js";
-import { DEFAULT_BOUNDS, JUMP, SIM } from "./constants.js";
+import { DEFAULT_BOUNDS, HOMING, JUMP, MUZZLE_OFFSET, SHOT, SIM } from "./constants.js";
 import { floorSurfaceYAt } from "@gf/physics";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
 import { resetActorParamTier } from "./paramTier.js";
@@ -81,6 +89,54 @@ const SPAWN_RADIUS_FRACTION = 0.35;
 const SPAWN_RADIUS_MAX = 3200;
 const SPAWN_FLOOR_NORMAL_MIN_Y = 0.5;
 const SPAWN_LOW_SURFACE_Y_BAND = 640;
+
+// ROM-projectile source fidelity gate — mirrors combat.ts's readSourceStrictFlag (which itself
+// mirrors TitleIntro.ts:41). When set, addRomProjectile's per-borg resolvers FAIL VISIBLY
+// (re-throw) on a missing ROM record instead of silently degrading to the documented stub
+// fallback. Same contract: <html data-gf-source-strict> (browser) OR GF_SOURCE_STRICT env
+// (node/headless selfcheck).
+const ROM_STRICT = readRomStrictFlag();
+function readRomStrictFlag(): boolean {
+  const g = globalThis as {
+    document?: { documentElement?: { dataset?: Record<string, string> } };
+    process?: { env?: Record<string, string> };
+  };
+  try {
+    return (
+      g.document?.documentElement?.dataset?.["gfSourceStrict"] !== undefined ||
+      g.process?.env?.GF_SOURCE_STRICT !== undefined
+    );
+  } catch {
+    return false;
+  }
+}
+
+// Deterministic uid counter for ROM-family projectiles (combat.ts's projCounter is
+// module-private; a ROM-side counter keeps uids unique + deterministic — Date.now() in the old
+// stub broke determinism). Reset in createBattle alongside resetProjectileCounter.
+let romProjCounter = 0;
+
+/** Spawn-time aim-cone gate for ROM-family projectiles — a 1:1 port of combat.ts's private
+ *  homingTargetForSpawn (FUN_8006c334, chunk_0009.c:1995): a shot only aims/homes at the
+ *  shooter's locked target when that target lies inside the muzzle aim cone around the
+ *  projectile's INITIAL facing direction; otherwise it flies straight. Replicated here because
+ *  the original is module-private to combat.ts; the cone half-angle is the same TUNED
+ *  HOMING.AIM_CONE_HALF_ANGLE_RAD (FLOAT_8043768c identified but UNDUMPED). */
+function romAimConeTarget(
+  b: BorgRuntime,
+  all: readonly BorgRuntime[],
+  muzzlePos: Vec3,
+  dir: Vec3,
+): string | null {
+  if (!b.lockTarget) return null;
+  const tgt = all.find((o) => o.uid === b.lockTarget);
+  if (!tgt || !tgt.alive || tgt.hp <= 0 || tgt.state === "death") return null;
+  const to = sub(tgt.pos, muzzlePos);
+  const dist = len(to);
+  if (dist <= 1e-6) return b.lockTarget; // muzzle on top of the target: trivially in-cone
+  const cos = (to.x * dir.x + to.y * dir.y + to.z * dir.z) / dist;
+  return cos >= Math.cos(HOMING.AIM_CONE_HALF_ANGLE_RAD) ? b.lockTarget : null;
+}
 
 // W17 (wiki-mechanics-queue.md): a player whose force is exhausted while a same-team ally
 // still fights respawns as a hidden 1-HP husk borg, and keeps respawning until the ally
@@ -175,6 +231,7 @@ class BattleImpl implements Battle {
     this.useRomAi = cfg.useRomAi !== false;
     setBootConfigByte(cfg.bootConfigByte ?? 0);
     resetProjectileCounter();
+    romProjCounter = 0;
 
     let cpuIdx = 0;
     cfg.forces.forEach((f, fi) => {
@@ -465,12 +522,149 @@ class BattleImpl implements Battle {
       { burstMeters: this.state.burstMeterByPlayer, telemetry: this.state.telemetry, energyByTeam: this.state.energy, energyMaxByTeam: this.state.energyMax, cpuHalvingEnabled: this.isChallengeMode });
   }
 
-  /** Spawn a projectile via the ROM family spawner. Placeholder — routes to the
-   *  bridge's native fireChild path until the family spawner tables are extracted. */
+  /** Spawn a REAL per-borg projectile via the ROM family spawner. Mirrors combat.ts's
+   *  archetype spawnProjectile (lines ~2776-2896): resolve the borg's shot HIT kind → flight
+   *  visual → hit radius → ROM variant (speed/drop/lifetime/scale) → family damage record →
+   *  muzzle position + fire-time aim → build a Projectile. Every per-borg resolver falls back
+   *  to a TUNED/archetype default when it returns null, so an UNRESOLVED borg still spawns a
+   *  moving/damaging/visible shot instead of the old zero-vel/zero-dmg stub. The stub itself
+   *  survives below as addRomProjectileStub — the documented fallback when resolution as a
+   *  whole is disabled or (under GF_SOURCE_STRICT) gaps must be surfaced loudly.
+   *
+   *  Data gaps that force the per-field fallbacks (not crashes): the spawner-table row's
+   *  muzzleOffset f32[3]@+4 / speed@+0x10 are NOT decoded by attackHitData.ts (undumped row
+   *  fields), so muzzle position uses the shared MUZZLE_OFFSET constant and speed comes from
+   *  the variant table (DAT_802f3dda) via findVariantByKind; borgs without a guarded
+   *  borgShotKinds attribution (shotKindForBorgId null) fall back to the driver's `kind` arg
+   *  and the SHOT.* tuned constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number): void {
-    void spawnerAddr;
+    void spawnerAddr; // row identity carried implicitly via the resolved kind (see romShotKind).
+
+    const profile = this.profiles.get(b.uid);
+
+    // 1) Shot HIT kind: guarded fire-site attribution first (proven), else the driver's kind
+    //    arg, else 0 — same precedence as combat.ts shotFamilyRecordSpread.
+    const resolvedKind = shotKindForBorgId(b.borgId) ?? kind;
+    const shotKind = resolvedKind ?? 0;
+
+    // 2) ROM variant (speed/drop/lifetime/scale) from DAT_802f3dda via the resolved HIT kind.
+    const romVariant = findVariantByKind(shotKind);
+    const romSpeed = romVariant?.hSpeed ?? null;
+    const romDrop = romVariant?.drop ?? null;
+    const romLife = romVariant?.lifetimeFrames ?? null;
+    const romScale = romVariant?.scale ?? null;
+
+    // 3) Flight visual + hit radius from the SAME guarded attribution as the kind.
+    const flightVisual = shotFlightVisualForBorgId(b.borgId);
+    const romHitRadius = shotHitRadiusForBorgId(b.borgId);
+
+    // 4) Damage record: the resolved kind's first hitbox record's damageRecordIndex into the
+    //    borg's family table (damage-records-802d46e0.json via familyDamageData.ts) — same
+    //    chain as combat.ts shotFamilyRecordSpread. null when either half is missing.
+    const firstHit = attackHitRecordsForKind(b.borgId, shotKind)[0];
+    const familyRecord = firstHit
+      ? familyDamageRecordForBorg(b.borgId, firstHit.damageRecordIndex)
+      : null;
+    const attributed = shotKindForBorgId(b.borgId) !== null;
+
+    // EXPLICIT-FAILURE FALLBACK + strict gate. A borg with NO proven per-borg data at all (no
+    // guarded shot-kind attribution AND no family damage record for the resolved kind) is the
+    // honest "unresolved" case: under GF_SOURCE_STRICT the gap FAILS VISIBLY (re-throw so CI
+    // catches it); otherwise log a console.warn and fall back to the documented zero-effect
+    // stub so the game never crashes. Bborgs WITH attribution always build the REAL projectile
+    // below (per-field fallbacks cover any individual null resolver, mirroring spawnProjectile).
+    if (!attributed && familyRecord === null) {
+      const msg = `addRomProjectile: no per-borg ROM data for ${b.borgId} (kind ${shotKind}) — using stub`;
+      if (ROM_STRICT) throw new Error(msg);
+      console.warn(msg);
+      this.addRomProjectileStub(b, kind);
+      return;
+    }
+    if (ROM_STRICT) {
+      // Stricter per-field gates for attributed borgs: surface individual resolver gaps loudly.
+      if (romVariant === null) {
+        throw new Error(`addRomProjectile: no ROM variant for kind ${shotKind} (${b.borgId})`);
+      }
+      if (romHitRadius === null) {
+        throw new Error(`addRomProjectile: no hit radius for ${b.borgId} (kind ${shotKind})`);
+      }
+      if (familyRecord === null) {
+        throw new Error(`addRomProjectile: no family damage record for ${b.borgId} kind ${shotKind}`);
+      }
+    }
+
+    // 5) Muzzle world position: owner pos + shared muzzle offset along facing (the spawner
+    //    row's per-record muzzleOffset f32[3]@+4 is undumped — same TUNED MUZZLE_OFFSET
+    //    fallback the archetype spawnProjectile uses when a shotDef has no per-borg offset).
+    const fwd = { x: Math.sin(b.rotY), y: 0, z: Math.cos(b.rotY) };
+    const muzzlePos = {
+      x: b.pos.x + fwd.x * MUZZLE_OFFSET.forward,
+      y: b.pos.y + MUZZLE_OFFSET.up,
+      z: b.pos.z + fwd.z * MUZZLE_OFFSET.forward,
+    };
+
+    // 6) Fire-time aim: fly straight along facing, UNLESS the shooter's locked target sits in
+    //    the muzzle aim cone — then aim the full 3D muzzle->target direction (mirrors
+    //    spawnProjectile's aimUid/yawOffset===0 branch + homingTargetForSpawn cone gate).
+    const all = this.state.borgs;
+    const aimUid = romAimConeTarget(b, all, muzzlePos, fwd);
+    let flightDir = fwd;
+    if (aimUid) {
+      const tgt = all.find((o) => o.uid === aimUid);
+      if (tgt) {
+        const to = sub({ x: tgt.pos.x, y: tgt.pos.y + SHOT.AIM_TARGET_Y, z: tgt.pos.z }, muzzlePos);
+        const d = len(to);
+        if (d > 1e-6) flightDir = scale(to, 1 / d);
+      }
+    }
+
+    // 7) Visual kind: prefer the profile's ROM asset family; "energy" last resort.
+    const visualKind = profile ? projectileVisualKindForProfile(profile) : "energy";
+
+    // damage is a MULTIPLIER on the record's hpDamage (applyHit: basePower = record.hpDamage ×
+    // damageScale). 1.0 = apply the family table's authored value unchanged.
+    const damageRecord = familyRecord ?? damageRecordByIndex(DAMAGE_RECORD_INDEX.SHOT);
+
     const p: Projectile = {
-      uid: `rom-family-${kind}-${Date.now()}`,
+      uid: `proj_rom_${romProjCounter++}`,
+      ownerUid: b.uid,
+      team: b.team,
+      pos: muzzlePos,
+      vel: scale(flightDir, romSpeed ?? SHOT.SPEED),
+      damage: 1,
+      hitstun: SHOT.HITSTUN,
+      // Per-move MULTIPLIER (applyHit derives the base magnitude from the damage record's
+      // strength byte). 1 = the family record's authored knockback.
+      knockback: 1,
+      homingTurn: 0,
+      // Spawn-time aim-cone gate (FUN_8006c334) — ROM-family shots fly straight post-spawn.
+      homingTarget: aimUid,
+      aimedTargetUid: activeSourceTargetUid(b),
+      life: romLife ?? SHOT.LIFETIME,
+      hitRadius: romHitRadius ?? SHOT.HIT_RADIUS,
+      visualKind,
+      damageRecordIndex: DAMAGE_RECORD_INDEX.SHOT,
+      // Exact per-borg family record when it resolved (stepProjectiles prefers it over the
+      // archetype index above); absent keeps the SHOT archetype fallback bit-for-bit.
+      ...(familyRecord ? { damageRecord } : {}),
+      // ROM variant drop (per-frame gravity). SIGN: the ROM field is NEGATIVE-down; Projectile.drop
+      // is POSITIVE-down (stepProjectiles does vel.y -= drop), so negate at this boundary.
+      ...(romDrop !== null ? { drop: -romDrop } : {}),
+      ...(romScale ? { romScale } : {}),
+      ...(flightVisual ? { flightVisual } : {}),
+      // Carry the resolved ROM shot kind to the renderer (per-borg flight/impact subtype).
+      romShotKind: shotKind,
+    };
+    this.state.projectiles.push(p);
+  }
+
+  /** The documented zero-velocity/zero-damage stub — the LAST-RESORT fallback for a ROM-family
+   *  projectile whose resolution is intentionally disabled. Kept bit-for-bit from the original
+   *  addRomProjectile so callers/tests that need the old blob shape can opt into it; the
+   *  production path (addRomProjectile above) no longer routes here. */
+  private addRomProjectileStub(b: BorgRuntime, kind: number): void {
+    const p: Projectile = {
+      uid: `rom-family-${kind}-${romProjCounter++}`,
       ownerUid: b.uid,
       team: b.team,
       pos: { x: b.pos.x, y: b.pos.y, z: b.pos.z },

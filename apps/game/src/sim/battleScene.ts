@@ -949,7 +949,7 @@ export class BattleScene {
     // release's charge leaf (startMeleeAttack / startShotAttack respectively) — same field,
     // reused per the renderer bridge's original design (borgPresentationAssets.ts doc).
     const streamRef =
-      (slot === "melee" || slot === "melee_alt" || slot === "charge_shot") && meleeAnimStream ? meleeAnimStream : null;
+      (slot === "melee" || slot === "melee_alt" || slot === "charge_shot" || slot === "special") && meleeAnimStream ? meleeAnimStream : null;
     const streamKey = streamRef ? `${slot}@g${streamRef.group}s${streamRef.slot}` : null;
     const clipKey = streamKey ?? slot;
     if (actor.current === slot && actor.lastMeleeClipKey === clipKey) return;

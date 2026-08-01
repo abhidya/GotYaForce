@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs-site/**'
       - 'research/**'
+      - 'apps/game/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -47,13 +48,32 @@ jobs:
           GH_PAGES_BASE: '/GotYaForce/'
         run: pnpm build
 
+      - name: Build game
+        run: pnpm --filter game build
+
+      - name: Assemble Pages artifact
+        run: |
+          set -euo pipefail
+          STAGE="${{ runner.temp }}/pages-stage"
+          mkdir -p "$STAGE"
+          # Research Atlas -> Pages root
+          cp -r docs-site/.vitepress/dist/. "$STAGE/"
+          # Game app -> /game/ subpath
+          mkdir -p "$STAGE/game"
+          cp -r apps/game/dist/. "$STAGE/game/"
+          # Disable Jekyll so underscore-prefixed / hashed asset dirs survive
+          touch "$STAGE/.nojekyll"
+          touch "$STAGE/game/.nojekyll"
+          echo "Staged tree:"
+          find "$STAGE" -maxdepth 2 -mindepth 1 | sort
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs-site/.vitepress/dist
+          path: ${{ runner.temp }}/pages-stage
 
   deploy:
     needs: build

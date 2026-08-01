@@ -1688,6 +1688,12 @@ export class RomDriverBridge implements RomFamilyDriver {
         orig(a, group, slot, blend);
         this.onPlayAnim(group, slot);
       };
+    } else {
+      // No host hook — wire the bridge's own onPlayAnim (sets runtime.anim +
+      // meleeAnimStream so the renderer receives the attack clip slot). Without
+      // this else branch, attack animations never reach the renderer.
+      const bridge = this;
+      host.onPlayAnim = (a, group, slot, blend) => { bridge.onPlayAnim(group, slot); void a; void blend; };
     }
     if (host.onFireChild) {
       const orig = host.onFireChild;
@@ -1695,6 +1701,12 @@ export class RomDriverBridge implements RomFamilyDriver {
         orig(a, variant);
         this.onFireChild(variant);
       };
+    } else {
+      // No host hook — wire the bridge's own onFireChild (spawns the projectile
+      // child via spawnRomProjectile). Without this else branch, beam/child
+      // spawns (G RED beam, etc.) never create a projectile entity.
+      const bridge = this;
+      host.onFireChild = (a, variant) => { bridge.onFireChild(variant); void a; };
     }
     if (host.onParamTierDelta) {
       const orig = host.onParamTierDelta;
@@ -1883,8 +1895,13 @@ export class RomDriverBridge implements RomFamilyDriver {
     // Fire frame-0 events immediately (armHit + playAnim).
     this.dispatchEvent(0);
     this.streamFrame = 1;
-    // Don't change runtime.state/anim — let stepAttacks/stepMovement handle those.
-    // The bridge layers hitbox/anim ON TOP of normal movement, not replacing it.
+    // The ROM-owned special path owns this borg for the move's duration (tick()
+    // returns true → battle.ts skips stepAttacks/stepMovement, which are the
+    // normal state/anim setters). So the bridge MUST set runtime.state/anim here
+    // or the renderer's slotForBorg keys off stale state and never plays the
+    // attack clip. X-special → state "special" (slotForBorg returns "special").
+    runtime.state = "special";
+    runtime.anim = "special";
     this.romOwnedSpecial = true;
     this.specialActive = true;
     this.actor.controlWord = (this.actor.controlWord & ~0x3) | 0x1;
@@ -1958,6 +1975,11 @@ export class RomDriverBridge implements RomFamilyDriver {
     this.dispatchEvent(0);
     this.streamFrame = 1;
     runtime.cooldowns["romSpecialActive"] = 1;
+    // B-charge ROM-owned path: set state "attack" + anim "charge_shot" so
+    // slotForBorg selects the charge slot AND playSlot routes through
+    // loadClipByStreamRef (the charge_shot slot is in the stream-ref allow-list).
+    runtime.state = "attack";
+    runtime.anim = "charge_shot";
     this.specialActive = true;
     this.syncActionInput(null, true);
     // Arm the action-mode bits so the phase-3 exit (controlWord &= ~0x3) can signal
@@ -2057,6 +2079,11 @@ export class RomDriverBridge implements RomFamilyDriver {
         this.streamEvents = null;
         this.streamSchedules = [];
         runtime.cooldowns["romSpecialActive"] = 0;
+        // Return to idle so the renderer stops selecting the attack slot now
+        // that the ROM no longer owns the borg (stepMovement will take over and
+        // re-derive state from velocity next frame).
+        runtime.state = "idle";
+        runtime.anim = "idle";
       }
       return true; // ROM owns this frame — skip stepMovement/stepAttacks
     }
