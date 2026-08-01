@@ -123,6 +123,14 @@ import { runWingSoldierSelfTests } from "../families/wing-soldier.js";
 import { runCosmicDragonSelfTests } from "../families/cosmic-dragon.js";
 import { runGoldHeroSelfTests } from "../families/gold-hero.js";
 import { runCyberHeroSelfTests } from "../families/cyber-hero.js";
+import { runNinjaClusterSelfTests } from "../families/ninja-cluster.js";
+import { runFlameCyberNinjaSelfTests } from "../families/flame-cyber-ninja.js";
+import { runTeleportNinjaSelfTests } from "../families/teleport-ninja.js";
+import { runWitchClusterSelfTests } from "../families/witch-cluster.js";
+import { runGunmanClusterSelfTests } from "../families/gunman-cluster.js";
+import { runKnightClusterSelfTests } from "../families/knight-cluster.js";
+import { runKungFuMasterSelfTests } from "../families/kung-fu-master.js";
+import { runTaoMasterSelfTests } from "../families/tao-master.js";
 import { runDeathBorgChiSelfTests } from "../families/death-borg-chi.js";
 import type { BorgRuntime } from "../types.js";
 import {
@@ -3855,6 +3863,14 @@ function runSubagentPortTests(): void {
   runCosmicDragonSelfTests(assert);
   runGoldHeroSelfTests(assert);
   runCyberHeroSelfTests(assert);
+  runNinjaClusterSelfTests(assert);
+  runFlameCyberNinjaSelfTests(assert);
+  runTeleportNinjaSelfTests(assert);
+  runWitchClusterSelfTests(assert);
+  runGunmanClusterSelfTests(assert);
+  runKnightClusterSelfTests(assert);
+  runKungFuMasterSelfTests(assert);
+  runTaoMasterSelfTests(assert);
 }
 
 function runGirlClusterTests(): void {

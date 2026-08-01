@@ -29,7 +29,6 @@ import {
   dispatchFullBodyCue,
 } from "./rom/dispatch.js";
 import { configureGRedFamily, type GRedFamilyCtx } from "./families/gred.js";
-import { configureNinjaFamily } from "./families/ninja.js";
 import { configureDeathBorgFamily } from "./families/death-borg.js";
 import { configureClawRobotFamily, configureDeathBorgOmegaFamily } from "./families/shared-aerial-dive-x.js";
 import { configureSamuraiClusterFamily, type SamuraiClusterBorgId } from "./families/samurai.js";
@@ -100,6 +99,27 @@ import { configureWingSoldierFamily } from "./families/wing-soldier.js";
 import { configureCosmicDragonFamily } from "./families/cosmic-dragon.js";
 import { configureGoldHeroFamily } from "./families/gold-hero.js";
 import { configureCyberHeroFamily } from "./families/cyber-hero.js";
+import { configureNormalNinjaFamily, configureDoubleNinjaFamily, configureShurikenNinjaFamily } from "./families/ninja-cluster.js";
+import { configureFlameNinjaFamily, configureCyberNinjaFamily } from "./families/flame-cyber-ninja.js";
+import { configureTeleportNinjaFamily } from "./families/teleport-ninja.js";
+import {
+  configurePatraWitchFamily,
+  configureBastetWitchFamily,
+  configureBugWitchFamily,
+  configureGuardWitchFamily,
+} from "./families/witch-cluster.js";
+import {
+  configureRevolverGunmanFamily,
+  configureBeamGunnerFamily,
+  configureGatlingGunnerFamily,
+  configurePoweredGunmanFamily,
+} from "./families/gunman-cluster.js";
+import {
+  configureDarkKnightFamily,
+  configureChainsawKnightFamily,
+} from "./families/knight-cluster.js";
+import { configureKungFuMasterFamily } from "./families/kung-fu-master.js";
+import { configureTaoMasterFamily } from "./families/tao-master.js";
 import { configureDeathBorgChiFamily } from "./families/death-borg-chi.js";
 import { configureWaveBFamily } from "./families/wave-b-catch-all.js";
 import { HERO_X_BUFF } from "./constants.js";
@@ -255,10 +275,18 @@ function familyRegistry(): Record<string, FamilyRegistration> {
       pl0615: makeGRedFamilyRegistration(),
       pl0629: makeGRedFamilyRegistration(),
       pl062a: makeGRedFamilyRegistration(),
-      // NORMAL NINJA family (ctor 0x8006f4f8) — cue table @0x802d3ff8. SASUKE (pl000a)
-      // shares the entire family: the ctor differs only in the +0x4b0 descriptor.
-      pl0000: makeNinjaFamilyRegistration(),
-      pl000a: makeNinjaFamilyRegistration(),
+      // NORMAL NINJA family (ctor 0x8006f4f8) — bespoke action 0/1 ported in
+      // families/ninja-cluster.ts (composes ninja.ts action-2 X via shared zz_00ff2bc_).
+      pl0000: makeSimpleRegistration("pl0000", (a, ctx) => configureNormalNinjaFamily(a, "pl0000", ctx)),
+      pl000a: makeSimpleRegistration("pl000a", (a, ctx) => configureNormalNinjaFamily(a, "pl000a", ctx)),
+      // DOUBLE NINJA (pl0003, ctor 0x8006f60c) + SHURIKEN NINJA (pl0001, ctor 0x800ea500)
+      // — bespoke melee/X ports in families/ninja-cluster.ts.
+      pl0003: makeSimpleRegistration("pl0003", (a, ctx) => configureDoubleNinjaFamily(a, ctx)),
+      pl0001: makeSimpleRegistration("pl0001", (a, ctx) => configureShurikenNinjaFamily(a, ctx)),
+      // FLAME NINJA (pl0006, ctor 0x800b2ef8) + CYBER NINJA (pl0007, ctor 0x800a6f4c)
+      // — bespoke multi-action ports in families/flame-cyber-ninja.ts.
+      pl0006: makeSimpleRegistration("pl0006", (a, ctx) => configureFlameNinjaFamily(a, ctx)),
+      pl0007: makeSimpleRegistration("pl0007", (a, ctx) => configureCyberNinjaFamily(a, ctx)),
       // DEATH BORG ALPHA family (ctor 0x8019e9a4) — third family on the shared-X
       // machine (config @0x80435750). pl000c ONLY: pl0008's X command is descriptor-
       // disabled in the ROM (+0xba mode 0xff) — it keeps the generic fallback.
@@ -333,6 +361,10 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
       // (tables @0x8038a6d8…); see families/gold-hero.ts + families/cyber-hero.ts.
       pl0802: makeSimpleRegistration("pl0802", (a, ctx) => configureGoldHeroFamily(a, ctx)),
       pl0808: makeSimpleRegistration("pl0808", (a, ctx) => configureCyberHeroFamily(a, ctx)),
+      // KUNG-FU MASTER (pl0800, ctor 0x80076784) + TAO MASTER (pl0801, ctor 0x800a3b34)
+      // — hero melee archetype; see families/kung-fu-master.ts + tao-master.ts.
+      pl0800: makeSimpleRegistration("pl0800", (a, ctx) => configureKungFuMasterFamily(a, ctx)),
+      pl0801: makeSimpleRegistration("pl0801", (a, ctx) => configureTaoMasterFamily(a, ctx)),
       // VICTORY KING family (ctor 0x8015a494) — cue table @0x80344b50. X-special routes
       // through the shared engine zz_017a374_ (phase table 0x804347b0): action-2 handler
       // FUN_8015ad10 delegates all arms to zz_017a374_ (no bespoke family phase machine).
@@ -504,6 +536,10 @@ pl061a: makeSimpleRegistration("pl061a", (a, ctx) => configureEagleRobotFamily(a
         },
         cueTable: cueTableForBorg("pl0209")!,
       },
+      // DARK KNIGHT (pl0205, ctor 0x801567f0) + CHAINSAW KNIGHT (pl0201, ctor 0x800c8560)
+      // — bespoke knight-cluster ports (DARK fully ported; CHAINSAW shared fallback).
+      pl0205: makeSimpleRegistration("pl0205", (a, ctx) => configureDarkKnightFamily(a, "pl0205", ctx)),
+      pl0201: makeSimpleRegistration("pl0201", (a, ctx) => configureChainsawKnightFamily(a, "pl0201", ctx)),
 // DRILL ROBOT family (ctor 0x800e67d4) — bespoke 5-phase X-special
 // (FUN_800d81f8 → PTR_FUN_803109b4 phase machine); see families/drill-robot.ts.
 // X handler at action 2; action 0 gets the shared robot-dash via withRobotDash.
@@ -554,11 +590,13 @@ pl020c: {
       // TELEPORT NINJA / SWITCHING NINJA family (ctor 0x801456d4) — both members not yet in registry.
       // DEMON WING / DEATH WING family (ctor 0x8014bd68) — both members not yet in registry.
       // GUARD WITCH / SHIELD WITCH family (ctor 0x80151790)
-      pl0903: makeSimpleRegistration("pl0903", (a, ctx) => configureNurseFamily(a, "pl0903", ctx)),
-      pl090a: makeSimpleRegistration("pl090a", (a, ctx) => configureNurseFamily(a, "pl090a", ctx)),
+      pl0903: makeSimpleRegistration("pl0903", (a, ctx) => configureGuardWitchFamily(a, "pl0903", ctx)),
+      pl090a: makeSimpleRegistration("pl090a", (a, ctx) => configureGuardWitchFamily(a, "pl090a", ctx)),
       // PATRA WITCH / ISIS WITCH family (ctor 0x8015d674)
-      pl0902: makeSimpleRegistration("pl0902", (a, ctx) => configureNurseFamily(a, "pl0902", ctx)),
-      pl0909: makeSimpleRegistration("pl0909", (a, ctx) => configureNurseFamily(a, "pl0909", ctx)),
+      pl0902: makeSimpleRegistration("pl0902", (a, ctx) => configurePatraWitchFamily(a, "pl0902", ctx)),
+      pl0909: makeSimpleRegistration("pl0909", (a, ctx) => configurePatraWitchFamily(a, "pl0909", ctx)),
+      // BUG WITCH (pl0901, ctor 0x8014d200) — shared witch action-0 machine.
+      pl0901: makeSimpleRegistration("pl0901", (a, ctx) => configureBugWitchFamily(a, "pl0901", ctx)),
       // SAMURAI SHOGUN / CHRONO SAMURAI family (ctor 0x80174d88) — registered in the
       // samurai cluster block above (families/samurai.ts): bespoke action-1 tables
       // @0x80351908/14/24 + bespoke X @0x80351950 (borg-switched slot + payload).
@@ -591,8 +629,8 @@ pl020c: {
       pl0906: makeSimpleRegistration("pl0906", (a, ctx) => configureNurseFamily(a, "pl0906", ctx)),
       pl090b: makeSimpleRegistration("pl090b", (a, ctx) => configureNurseFamily(a, "pl090b", ctx)),
       // BASTET WITCH / SEKHMET WITCH family (ctor 0x801b3c6c)
-      pl0907: makeSimpleRegistration("pl0907", (a, ctx) => configureNurseFamily(a, "pl0907", ctx)),
-      pl090c: makeSimpleRegistration("pl090c", (a, ctx) => configureNurseFamily(a, "pl090c", ctx)),
+      pl0907: makeSimpleRegistration("pl0907", (a, ctx) => configureBastetWitchFamily(a, "pl0907", ctx)),
+      pl090c: makeSimpleRegistration("pl090c", (a, ctx) => configureBastetWitchFamily(a, "pl090c", ctx)),
       // ---- Wave-B: batch-register 6 three-borg families (2026-07-06) ----
       // Each family's ctor was searched in the corpus (actionStreamTables.json) to find
       // the X-special engine. Shared-vs-bespoke determination: leaf == engine in family
@@ -601,12 +639,12 @@ pl020c: {
       // shared-engine fallback (cue table + createSharedEngineRootAction).
 
       // Wave-B catch-all borgs (no dedicated family file yet)
-      pl0100: makeSimpleRegistration("pl0100", (a, ctx) => configureWaveBFamily(a, "pl0100", ctx)),
-      pl0108: makeSimpleRegistration("pl0108", (a, ctx) => configureWaveBFamily(a, "pl0108", ctx)),
+      pl0100: makeSimpleRegistration("pl0100", (a, ctx) => configureRevolverGunmanFamily(a, "pl0100", ctx)),
+      pl0108: makeSimpleRegistration("pl0108", (a, ctx) => configureRevolverGunmanFamily(a, "pl0108", ctx)),
       pl0002: makeSimpleRegistration("pl0002", (a, ctx) => configureArrowNinjaFamily(a, "pl0002", ctx)),
       pl000b: makeSimpleRegistration("pl000b", (a, ctx) => configureArrowNinjaFamily(a, "pl000b", ctx)),
-      pl0005: makeSimpleRegistration("pl0005", (a, ctx) => configureWaveBFamily(a, "pl0005", ctx)),
-      pl0009: makeSimpleRegistration("pl0009", (a, ctx) => configureWaveBFamily(a, "pl0009", ctx)),
+      pl0005: makeSimpleRegistration("pl0005", (a, ctx) => configureTeleportNinjaFamily(a, "pl0005", ctx)),
+      pl0009: makeSimpleRegistration("pl0009", (a, ctx) => configureTeleportNinjaFamily(a, "pl0009", ctx)),
       pl0504: makeSimpleRegistration("pl0504", (a, ctx) => configureCosmicDragonFamily(a, "pl0504", ctx)),
       pl0510: makeSimpleRegistration("pl0510", (a, ctx) => configureCosmicDragonFamily(a, "pl0510", ctx)),
       pl0502: makeSimpleRegistration("pl0502", (a, ctx) => configurePhoenixDragonFamily(a, "pl0502", ctx)),
@@ -625,6 +663,12 @@ pl020c: {
       pl0a09: makeSimpleRegistration("pl0a09", (a, ctx) => configureWaveBFamily(a, "pl0a09", ctx)),
       pl0105: makeSimpleRegistration("pl0105", (a, ctx) => configureWaveBFamily(a, "pl0105", ctx)),
       pl010a: makeSimpleRegistration("pl010a", (a, ctx) => configureWaveBFamily(a, "pl010a", ctx)),
+      // GATLING GUNNER (pl0102, ctor 0x80134d68), BEAM GUNNER (pl0104, ctor 0x80102824),
+      // POWERED GUNMAN (pl0101, ctor 0x80165f64) — bespoke ranged-burst ports in
+      // families/gunman-cluster.ts.
+      pl0102: makeSimpleRegistration("pl0102", (a, ctx) => configureGatlingGunnerFamily(a, ctx)),
+      pl0104: makeSimpleRegistration("pl0104", (a, ctx) => configureBeamGunnerFamily(a, ctx)),
+      pl0101: makeSimpleRegistration("pl0101", (a, ctx) => configurePoweredGunmanFamily(a, ctx)),
       pl0a05: makeSimpleRegistration("pl0a05", (a, ctx) => configureWaveBFamily(a, "pl0a05", ctx)),
       pl0a0a: makeSimpleRegistration("pl0a0a", (a, ctx) => configureWaveBFamily(a, "pl0a0a", ctx)),
       pl0d06: makeSimpleRegistration("pl0d06", (a, ctx) => configureWaveBFamily(a, "pl0d06", ctx)),
@@ -917,16 +961,6 @@ function makeDeathBorgFamilyRegistration(): FamilyRegistration {
   return {
     configure: (actor, ctx) => configureDeathBorgFamily(actor, "pl000c", ctx),
     cueTable: cueTableForBorg("pl000c")!,
-  };
-}
-
-function makeNinjaFamilyRegistration(): FamilyRegistration {
-  return {
-    configure: (actor, ctx) => {
-      const id = actor.borgNumber === 0x00a ? "pl000a" : "pl0000";
-      configureNinjaFamily(actor, id as "pl0000" | "pl000a", ctx);
-    },
-    cueTable: cueTableForBorg("pl0000")!,
   };
 }
 
