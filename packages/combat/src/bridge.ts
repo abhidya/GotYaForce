@@ -154,6 +154,7 @@ import attackHitTablesData from "./data/attackHitTables.json" with { type: "json
 import actionStreamTablesData from "./data/actionStreamTables.json" with { type: "json" };
 import meleeAnimKindsData from "./data/meleeAnimKinds.json" with { type: "json" };
 import familyCueTablesFullData from "./data/familyCueTablesFull.json" with { type: "json" };
+import animMetadataHopData from "./data/animMetadataHop.generated.json" with { type: "json" };
 
 const TAU = Math.PI * 2;
 const BAM_FULL = 0x10000;
@@ -225,6 +226,36 @@ const ACTION_STREAM_BANKS: Record<string, { bank: string; group: number; seedSlo
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MELEE_ANIM_BANKS: Record<string, any> = (meleeAnimKindsData as { banks?: Record<string, unknown> }).banks ?? {};
+
+// --- +0x1d88 anim-metadata hop (animMetadataHop.generated.json) ---
+// The playAnim stream op's operands are (metaBank, metaAnim) — NOT the motion-file
+// (group, slot). Each borg's familyAnimDescBank (+0x1d88) remaps (metaBank, metaAnim)
+// → (motionFile, animInFile) via a two-hop s16 table (DOL-dumped by
+// scripts/gen-anim-metadata-hop.mjs). Borgs without a remap entry (ctor has no
+// metadata bank, or the specific (metaBank, metaAnim) pair isn't in the bank) fall
+// back to the direct (group, slot) lookup — preserving the 24 already-working borgs
+// and G RED. See research/decomp/title-intro-residuals-decode-2026-07-06.md §1.
+type AnimMetaEntry = { motionFile: number; animInFile: number; shared: boolean };
+const ANIM_META_HOP: Record<string, Record<string, Record<string, AnimMetaEntry>>> =
+  (animMetadataHopData as { borgs?: Record<string, Record<string, Record<string, AnimMetaEntry>>> }).borgs ?? {};
+
+/** Resolve a playAnim (metaBank, metaAnim) pair to the motion-file (group, slot) the
+ *  renderer should load. Returns null when no remap exists (caller falls back to the
+ *  raw metaBank/metaAnim as motion-file group/slot — the legacy behavior). */
+function resolveAnimMetaHop(
+  borgId: string,
+  metaBank: number,
+  metaAnim: number,
+): { group: number; slot: number } | null {
+  const entry = ANIM_META_HOP[borgId]?.[String(metaBank)]?.[String(metaAnim)];
+  if (!entry) return null;
+  // motionFile bit7 selects the SHARED motion set (+0x1d7c). Shared-motion entries
+  // should resolve into the shared borg's baked clips; until the shared motion-set
+  // owner is ported, approximate with the borg's own g0 (TODO: shared motion set).
+  // TODO(shared-motion-set): resolve motionFile bit7 entries via +0x1d7c / DAT_80436254.
+  const group = entry.shared ? 0 : entry.motionFile;
+  return { group, slot: entry.animInFile };
+}
 
 /** Look up the pre-decoded stream events for a borg's X-special. Returns null when
  *  the borg has no decoded action-stream data (uncommon — 156/208 borgs have it). */
@@ -2115,11 +2146,19 @@ export class RomDriverBridge implements RomFamilyDriver {
 
   /** Called by the stream VM when a playAnim op fires. Sets the BorgRuntime's anim
    *  label + meleeAnimStream ref so the renderer (borgPresentationAssets) plays the
-   *  decoded (group, slot) clip. For G RED's G Crash this is (4, 0) = g04_s00. */
+   *  decoded clip. The (group, slot) args are the playAnim op's (metaBank, metaAnim)
+   *  operands — NOT the motion-file group/slot. The +0x1d88 anim-metadata hop
+   *  (animMetadataHop.generated.json) remaps them to the real motion-file
+   *  (group, slot) that anim_index.json exports. Borgs without a remap entry fall
+   *  back to the raw (group, slot) (legacy behavior — works for identity-mapped
+   *  borgs and the 24 hand-tuned borgs). */
   private onPlayAnim(group: number, slot: number): void {
     if (this.runtime) {
       this.runtime.anim = "special";
-      this.runtime.meleeAnimStream = { group, slot };
+      const remapped = this.runtime.borgId
+        ? resolveAnimMetaHop(this.runtime.borgId, group, slot)
+        : null;
+      this.runtime.meleeAnimStream = remapped ?? { group, slot };
     }
   }
 
