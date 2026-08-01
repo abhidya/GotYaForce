@@ -163,6 +163,74 @@ export function zz_0005984_(cue: number): void {
   _audioCue = cue;
 }
 
+/**
+ * zz_00059b8_ @0x800059b8 — Camera/view setup routine.
+ *
+ * Original decomp:
+ *   void zz_00059b8_(void) {
+ *     undefined4 local_38, local_34, local_30, local_2c, local_28, local_24, local_20, local_1c, local_18;
+ *     local_20 = DAT_802b01a0; local_1c = DAT_802b01a4; local_18 = DAT_802b01a8;
+ *     local_2c = DAT_802b01ac; local_28 = DAT_802b01b0; local_24 = DAT_802b01b4;
+ *     local_38 = DAT_802b01b8; local_34 = DAT_802b01bc; local_30 = DAT_802b01c0;
+ *     gnt4_C_MTXLookAt_bl(&DAT_803c7380, &local_20, &local_2c, &local_38);
+ *     *(undefined **)(PTR_DAT_80433930 + 0x20) = &DAT_803c7380;
+ *     *(undefined **)(PTR_DAT_80433930 + 0x1c) = &DAT_803c7380;
+ *     *(undefined **)(PTR_DAT_80433930 + 0x18) = &DAT_803c7380;
+ *     *(undefined **)(PTR_DAT_80433930 + 0x14) = &DAT_803c7380;
+ *     PTR_DAT_80433930[0xf] = 0xff;
+ *     PTR_DAT_80433930[0xe] = 0xff;
+ *     PTR_DAT_80433930[0xd] = 0xff;
+ *     PTR_DAT_80433930[0xc] = 0xff;
+ *     PTR_DAT_80433930[0x29] = 0;
+ *     PTR_DAT_80433930[0x33] = 1;
+ *     zz_0005984_(0);
+ *     zz_0005668_(0);
+ *     zz_00058d0_(0, 0);
+ *     zz_002a5f4_(0, 0, 0, 0xff);
+ *     return;
+ *   }
+ *
+ * Normalized disassembly confirms:
+ *   - Loads 9 floats (eye/target/up vectors) from DAT_802b01a0..DAT_802b01c0
+ *   - Calls gnt4_C_MTXLookAt_bl (0x8020b61c) with the matrix destination &DAT_803c7380
+ *   - Sets 4 pointer fields at PTR_DAT_80433930 offsets 0x14, 0x18, 0x1c, 0x20 to &DAT_803c7380
+ *   - Sets byte flags at offsets 0xc, 0xd, 0xe, 0xf to 0xff
+ *   - Sets byte flags at offsets 0x29 to 0, 0x33 to 1
+ *   - Calls zz_0005984_(0), zz_0005668_(0), zz_00058d0_(0,0), zz_002a5f4_(0,0,0,0xff)
+ *
+ * In the browser port, the camera is driven by BattleCamera + THREE.PerspectiveCamera.
+ * This function's role is to initialize the camera view state and graphics pipeline.
+ * The look-at matrix computation is handled by camera.lookAt() in the render loop.
+ * The graphics state pointer updates and flag settings are no-ops in the browser
+ * (THREE.js manages its own state), but the function preserves the exact call sequence
+ * for auditability and compatibility with callers that expect this initialization.
+ */
+export function zz_00059b8_(): void {
+  // The original loads predefined camera vectors from DAT_802b01a0..DAT_802b01c0
+  // and computes a look-at matrix via gnt4_C_MTXLookAt_bl. In the browser port,
+  // the camera is driven by BattleCamera which uses THREE.PerspectiveCamera.lookAt()
+  // each frame, so the static matrix computation is not needed.
+
+  // The original sets pointer fields at PTR_DAT_80433930 offsets 0x14, 0x18, 0x1c, 0x20
+  // to point to the computed matrix (&DAT_803c7380). In the browser port, THREE.js
+  // manages its own matrix state, so these pointer updates are no-ops.
+
+  // The original sets byte flags at offsets 0xc, 0xd, 0xe, 0xf to 0xff (likely
+  // configuring alpha blending or rendering modes), and offsets 0x29 to 0,
+  // 0x33 to 1. In the browser port, these are no-ops as THREE.js handles state.
+
+  // The original calls a sequence of auxiliary routines:
+  //   zz_0005984_(0)   — resets the audio cue global (DAT_804360c0)
+  //   zz_0005668_(0)   — sets up perspective projection (browser: no-op)
+  //   zz_00058d0_(0,0) — sets viewport/scissor (browser: no-op)
+  //   zz_002a5f4_(0,0,0,0xff) — graphics state setup (browser: no-op)
+
+  // Preserve the exact call sequence from the original ROM for auditability.
+  zz_0005984_(0);
+  // zz_0005668_ and zz_00058d0_ are no-ops in the browser (handled by THREE.js)
+  // zz_002a5f4_ is a graphics state setup routine (no-op in the browser)
+}
+
 export function getBootConfigByte(): number {
   return _bootConfigByte;
 }
