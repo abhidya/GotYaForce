@@ -10,7 +10,8 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
-    "@gf/physics": "workspace:*"
+    "@gf/physics": "workspace:*",
+    "@gf/render": "workspace:*"
   },
   "module": "src/index.ts"
 }

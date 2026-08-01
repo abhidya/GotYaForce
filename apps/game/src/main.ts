@@ -36,7 +36,13 @@ import {
   type PlayerInput,
   type RectStageBounds,
 } from "@gf/combat";
-import { createAudioManager, loadAudioManifest, type GotchaAudioManager } from "@gf/audio";
+import {
+  collectManifestPlayKeys,
+  createAudioManager,
+  loadAudioManifest,
+  resolveCueToAsset,
+  type GotchaAudioManager,
+} from "@gf/audio";
 import {
   createChallengeRun,
   createGotchaBoxSettlement,
@@ -126,6 +132,15 @@ const AUDIO_CUES = {
   back: "se00_04",
   edit: "se00_04",
 } as const;
+
+// DERIVED: the stff prop controller emits 0x17a/0x17b and title opcode 0x15 invokes
+// zz_00f036c_(0, 0x017c) at source frame 120. The exporter resolves all three literal
+// ids through snd_com03.tsb/chd/dpk.
+const TITLE_SOUND_IDS: Readonly<Record<number, string>> = {
+  0x017a: "se_17a",
+  0x017b: "se_17b",
+  0x017c: "se_17c",
+};
 // Combat SFX default ON since the export-duration fix; ?noCombatSfx=1 is the debugging opt-out
 // (replaces the old opt-in ?tunedCombatSfx=1 gate, whose rationale — 12s clips — is gone).
 const DISABLE_COMBAT_SFX = new URLSearchParams(window.location.search).has("noCombatSfx");
@@ -528,6 +543,10 @@ void closeSocket; // referenced so the dormant hook isn't tree-shaken/flagged.
 let audioManagerPromise: Promise<GotchaAudioManager | null> | null = null;
 let activeBgmKey: string | null = null;
 let pendingBgmKey: string | null = null;
+// Manifest play-keys for the ROM cue resolver (resolveCueToAsset). Built once
+// from the merged audio manifest in initAudio; sfx+voice keys only. Replaces the
+// hand-tuned TITLE_SOUND_IDS arithmetic at the title onSound boundary.
+let sfxKeys: ReadonlySet<string> = new Set();
 
 function initAudio(): Promise<GotchaAudioManager | null> {
   if (!audioManagerPromise) {
@@ -543,6 +562,11 @@ function initAudio(): Promise<GotchaAudioManager | null> {
       } catch {
         // combat-SE manifest not exported; fall through with the base manifest only
       }
+      // Build the resolver keyset once from the merged manifest. resolveCueToAsset
+      // intersects the ROM guard (soundId < 0x180, bank/sample arithmetic from
+      // zz_00efb3c_) with the exported se_* keys; TITLE_SOUND_IDS stays as the
+      // last-resort fallback at the onSound call site so this never regresses.
+      sfxKeys = collectManifestPlayKeys(manifest);
       return createAudioManager({ manifest });
     })().catch(() => null);
   }
@@ -694,9 +718,12 @@ function renderSessionScreen(): void {
     case "loading": queueBgm(AUDIO_CUES.battleBgm); screenHost.clear(); return;
     case "title":
       queueBgm(AUDIO_CUES.menuBgm);
-      mountScreen((root) => createTitleIntro(root, { onEnter: () => {
-        playConfirmSfx(); dispatchSession({ type: "title-enter" });
-      } }));
+      mountScreen((root) => createTitleIntro(root, {
+        onSound: (soundId) => playSfx(resolveCueToAsset(soundId, sfxKeys) ?? TITLE_SOUND_IDS[soundId] ?? null),
+        onEnter: () => {
+          playConfirmSfx(); dispatchSession({ type: "title-enter" });
+        },
+      }));
       return;
     case "menu":
       queueBgm(AUDIO_CUES.menuBgm);

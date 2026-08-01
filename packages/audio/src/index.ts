@@ -236,3 +236,7 @@ function clampVolume(value: number): number {
   }
   return Math.min(1, Math.max(0, value));
 }
+
+// ROM-faithful cue→sound resolver (replaces hand-tuned TITLE_SOUND_IDS / COMBAT_SFX
+// arithmetic at the host boundary). Re-exported so hosts import from "@gf/audio".
+export * from "./cueResolver.js";

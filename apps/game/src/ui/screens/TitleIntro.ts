@@ -19,8 +19,8 @@
  */
 
 import * as THREE from "three";
-import { createThreeAssetLoader } from "@gf/render";
-import { prepareImportedModel } from "@gf/render";
+import { createSourceCamera, createThreeAssetLoader, prepareImportedModel } from "@gf/render";
+import type { SourceCamera } from "@gf/render";
 
 import { createTitleVm } from "../intro/titleVm.js";
 import type { TitleEffectSink, TitleVm } from "../intro/titleVm.js";
@@ -233,6 +233,18 @@ function setObjectOpacity(object: THREE.Object3D, opacity: number): void {
   });
 }
 
+/**
+ * The source-owned HSD CObj instance for the title screen. applyTdcFrame routes every
+ * tdc00..09 COBJ animation through this (bindAnimation mirrors writing CObj+0x84;
+ * applyFrame is zz_00088a4_ @0x800088a4), reading eye/interest/fov/near/far/roll back
+ * out of state each frame to drive the THREE.PerspectiveCamera. The title VM's
+ * op_setCameraMode (opcode 0x09) can later route through this instance directly.
+ *
+ * Distinct from combat's boot CObj (bootGlobals.getBootSourceCamera), which owns the
+ * zz_00059b8_ boot view; this instance owns the title desk's bound COBJ animations.
+ */
+export const titleSourceCamera: SourceCamera = createSourceCamera();
+
 export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions): TitleIntroHandle {
   const teardown: Array<() => void> = [];
   let destroyed = false;
@@ -444,19 +456,65 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       applyTdcFrame = (index, frame): void => {
         const state = index < 0 ? TL00_BASE_SCENE_STATE : TDC_SCENE_STATES[index];
         if (!state) return;
-        const animation = cameraAnimations[index];
-        const sampled = index < 0
-          ? undefined
-          : animation?.frames[Math.max(0, Math.min(Math.round(frame), animation.frames.length - 1))];
-        const eye = sampled?.eye ?? state.eye;
-        const target = sampled?.target ?? state.target;
-        camera.position.set(eye[0], eye[1], eye[2]);
-        cameraTarget.set(target[0], target[1], target[2]);
-        cameraRoll = sampled?.roll ?? 0;
-        camera.fov = sampled?.fov ?? state.fov;
-        camera.near = sampled?.near ?? 0.1;
-        camera.far = sampled?.far ?? 32768;
-        camera.updateProjectionMatrix();
+
+        // Inline sampler — the original hand-driven path through tdc-camera-anims.json.
+        // Kept as the fallback if the SourceCamera throws, per the wiring contract.
+        const applyInlineCamera = (): void => {
+          const animation = index < 0 ? undefined : cameraAnimations[index];
+          const sampled = index < 0
+            ? undefined
+            : animation?.frames[Math.max(0, Math.min(Math.round(frame), animation.frames.length - 1))];
+          const eye = sampled?.eye ?? state.eye;
+          const target = sampled?.target ?? state.target;
+          camera.position.set(eye[0], eye[1], eye[2]);
+          cameraTarget.set(target[0], target[1], target[2]);
+          cameraRoll = sampled?.roll ?? 0;
+          camera.fov = sampled?.fov ?? state.fov;
+          camera.near = sampled?.near ?? 0.1;
+          camera.far = sampled?.far ?? 32768;
+          camera.updateProjectionMatrix();
+        };
+
+        // Source-owned path: route the COBJ animation through the HSD CObj port. The
+        // same tdc-camera-anims.json drives both paths; at integer frames (the only
+        // values the title VM emits — sceneFrame maps onto the integer SCENE_FRAME_TABLE)
+        // SourceCamera.applyFrame is exact, so the THREE camera receives identical
+        // eye/target/fov values. bindAnimation mirrors writing CObj+0x84; applyFrame
+        // is zz_00088a4_ @0x800088a4.
+        try {
+          const tdcAnim = index >= 0 ? cameraAnimations[index] : undefined;
+          if (tdcAnim) {
+            titleSourceCamera.bindAnimation(tdcAnim);
+            titleSourceCamera.applyFrame(frame);
+          } else {
+            // TL00 base scene (index < 0) has no COBJ animation; seed the CObj state
+            // directly from the scene record so the exported SourceCamera stays the
+            // single source of truth for a future setCameraMode route.
+            titleSourceCamera.bindAnimation(null);
+            titleSourceCamera.state.eye.x = state.eye[0];
+            titleSourceCamera.state.eye.y = state.eye[1];
+            titleSourceCamera.state.eye.z = state.eye[2];
+            titleSourceCamera.state.interest.x = state.target[0];
+            titleSourceCamera.state.interest.y = state.target[1];
+            titleSourceCamera.state.interest.z = state.target[2];
+            titleSourceCamera.state.fov = state.fov;
+            titleSourceCamera.state.roll = 0;
+            titleSourceCamera.state.near = 0.1;
+            titleSourceCamera.state.far = 32768;
+          }
+          const s = titleSourceCamera.state;
+          camera.position.set(s.eye.x, s.eye.y, s.eye.z);
+          cameraTarget.set(s.interest.x, s.interest.y, s.interest.z);
+          cameraRoll = s.roll;
+          camera.fov = s.fov;
+          camera.near = s.near;
+          camera.far = s.far;
+          camera.updateProjectionMatrix();
+        } catch (err) {
+          console.warn("[title] SourceCamera path failed, falling back to inline sampling:", err);
+          applyInlineCamera();
+        }
+
         setTdcLights(state);
         sceneHost.dataset["gfIntroTdc"] = state.archive;
         sceneHost.dataset["gfIntroTdcSlot"] = String(state.resourceSlot);

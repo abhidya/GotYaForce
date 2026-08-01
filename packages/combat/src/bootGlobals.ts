@@ -6,6 +6,12 @@
  * — this byte is the boot configuration flag that enables the MetroTRK debugger.
  */
 
+// Source-owned HSD CObj + the real body of zz_00059b8_ @0x800059b8 (boot view-setup).
+// sourceCamera.ts is pure TS (no three.js), so this import preserves combat's no-three
+// runtime contract; the boot CObj state + C_MTXLookAt live in @gf/render's camera layer.
+import { createSourceCamera, sourceCameraBootViewSetup } from "@gf/render";
+import type { Mtx34, SourceCamera } from "@gf/render";
+
 /**
  * DAT_80436498 — boot configuration byte.
  * The original ROM reads this at 0x8000314c via `lbz r3, -0x5108(r13)`.
@@ -198,37 +204,62 @@ export function zz_0005984_(cue: number): void {
  *   - Sets byte flags at offsets 0x29 to 0, 0x33 to 1
  *   - Calls zz_0005984_(0), zz_0005668_(0), zz_00058d0_(0,0), zz_002a5f4_(0,0,0,0xff)
  *
- * In the browser port, the camera is driven by BattleCamera + THREE.PerspectiveCamera.
- * This function's role is to initialize the camera view state and graphics pipeline.
- * The look-at matrix computation is handled by camera.lookAt() in the render loop.
- * The graphics state pointer updates and flag settings are no-ops in the browser
- * (THREE.js manages its own state), but the function preserves the exact call sequence
- * for auditability and compatibility with callers that expect this initialization.
+ * In the browser port, the boot CObj state and the C_MTXLookAt view matrix are now
+ * materialized via the source-owned SourceCamera (1:1 port of the HSD CObj + the
+ * ROM_BOOT_VIEW_VECTORS blob). The GC GX-pipeline pointer/flag writes have no browser
+ * equivalent (THREE manages its own matrix/state) and remain no-ops, but the camera-
+ * vector + matrix work — the substance of zz_00059b8_ — is now real, and the resulting
+ * CObj + view matrix are exposed via getBootSourceCamera() / getBootViewMatrix().
  */
+
+/**
+ * The boot source-owned CObj, constructed by zz_00059b8_. Other screens (title desk,
+ * menus) share this CObj layer; the title screen keeps its own SourceCamera instance
+ * (apps/game/src/ui/screens/TitleIntro.ts:titleSourceCamera) for its tdc COBJ animations.
+ */
+let _bootSourceCamera: SourceCamera | null = null;
+
+/**
+ * The C_MTXLookAt view matrix computed by zz_00059b8_ (stored at &DAT_803c7380 in the
+ * ROM). GAP: not yet uploaded into a THREE.Matrix4 — THREE cameras derive their view
+ * matrix from position + camera.lookAt() instead. Exposed for a future Mtx34->Matrix4
+ * bridge so the ROM's view matrix can drive the renderer directly.
+ */
+let _bootViewMatrix: Mtx34 | null = null;
+
+/** The source-owned boot CObj constructed by zz_00059b8_, or null before boot runs. */
+export function getBootSourceCamera(): SourceCamera | null {
+  return _bootSourceCamera;
+}
+
+/** The C_MTXLookAt view matrix computed by zz_00059b8_ (&DAT_803c7380 in the ROM). */
+export function getBootViewMatrix(): Mtx34 | null {
+  return _bootViewMatrix;
+}
+
 export function zz_00059b8_(): void {
-  // The original loads predefined camera vectors from DAT_802b01a0..DAT_802b01c0
-  // and computes a look-at matrix via gnt4_C_MTXLookAt_bl. In the browser port,
-  // the camera is driven by BattleCamera which uses THREE.PerspectiveCamera.lookAt()
-  // each frame, so the static matrix computation is not needed.
+  // Real body of zz_00059b8_ @0x800059b8 (chunk_0000.c:559-598): construct the boot
+  // source-owned CObj (module-level singleton), load the boot eye/up/target vectors
+  // from DAT_802b01a0..DAT_802b01c0 (ROM_BOOT_VIEW_VECTORS) into it, and compute the
+  // C_MTXLookAt view matrix. sourceCameraBootViewSetup does the camera-vector + matrix
+  // work; the resulting state lives on _bootSourceCamera and the matrix on _bootViewMatrix.
+  if (_bootSourceCamera === null) {
+    _bootSourceCamera = createSourceCamera();
+  }
+  _bootViewMatrix = sourceCameraBootViewSetup(_bootSourceCamera);
 
-  // The original sets pointer fields at PTR_DAT_80433930 offsets 0x14, 0x18, 0x1c, 0x20
-  // to point to the computed matrix (&DAT_803c7380). In the browser port, THREE.js
-  // manages its own matrix state, so these pointer updates are no-ops.
+  // The ROM then writes the matrix pointer into four graphics-state slots
+  // (PTR_DAT_80433930 + 0x14/0x18/0x1c/0x20 = &DAT_803c7380) and sets byte flags
+  // (+0xc..+0xf = 0xff, +0x29 = 0, +0x33 = 1). These are GC GX-pipeline state with no
+  // browser equivalent (THREE manages its own state), so they remain no-ops here.
 
-  // The original sets byte flags at offsets 0xc, 0xd, 0xe, 0xf to 0xff (likely
-  // configuring alpha blending or rendering modes), and offsets 0x29 to 0,
-  // 0x33 to 1. In the browser port, these are no-ops as THREE.js handles state.
-
-  // The original calls a sequence of auxiliary routines:
-  //   zz_0005984_(0)   — resets the audio cue global (DAT_804360c0)
-  //   zz_0005668_(0)   — sets up perspective projection (browser: no-op)
-  //   zz_00058d0_(0,0) — sets viewport/scissor (browser: no-op)
-  //   zz_002a5f4_(0,0,0,0xff) — graphics state setup (browser: no-op)
-
-  // Preserve the exact call sequence from the original ROM for auditability.
+  // Preserve the exact auxiliary call sequence from the ROM. zz_0005984_(0) resets the
+  // audio cue global (DAT_804360c0). zz_0005668_/zz_00058d0_/zz_002a5f4_ are GC GX
+  // pipeline setup (perspective projection / viewport-scissor / graphics state) with no
+  // browser equivalent, so they remain no-ops.
   zz_0005984_(0);
-  // zz_0005668_ and zz_00058d0_ are no-ops in the browser (handled by THREE.js)
-  // zz_002a5f4_ is a graphics state setup routine (no-op in the browser)
+  // zz_0005668_ (perspective projection), zz_00058d0_ (viewport/scissor), and
+  // zz_002a5f4_ (graphics state) are no-ops in the browser (THREE manages its pipeline).
 }
 
 export function getBootConfigByte(): number {

@@ -8,6 +8,7 @@
 import {
   add,
   angleTrimByteToBam16,
+  bam16YawToXZ,
   candidateTrianglesForSegment,
   clamp,
   distXZ,
@@ -93,6 +94,26 @@ import {
   type ExactMoveLeaf,
 } from "./actionStreamData.js";
 import { computeSourceDamage, forceGaugeRatioIndex } from "./damageFormula.js";
+import {
+  computeBaseDamage,
+  applyHpDamage,
+  type SourceDamageActor,
+  type SourceDamageContext,
+  type SourceDamageTarget,
+} from "./damage/sourceDamage.js";
+import {
+  computeKnockbackLaunchDirection,
+  launchVelocityMagnitude,
+  groundHorizontalSpeed,
+  defaultSourceKnockbackActor,
+} from "./damage/sourceKnockback.js";
+import {
+  borgDeathEntry,
+  killEventEnergyAndScoreAccounting,
+  defaultSourceBattleWork,
+  defaultDeathActor,
+  type SourceDeathActor,
+} from "./sourceDeath.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
 import { statusImmunityMasksForBorgId } from "./movementData.js";
@@ -884,6 +905,137 @@ export function reactionAnimLengthFrames(
   return kind === "launch" ? REACTION.LAUNCH_FALLBACK_FRAMES : REACTION.GROUND_STAGGER_FALLBACK_FRAMES;
 }
 
+// ---------------------------------------------------------------------------------------
+// Source-owned module wiring — sourceDamage.ts / sourceKnockback.ts / sourceDeath.ts are the
+// PRIMARY damage / knockback-direction / death paths inside applyHit. Each delegates to the
+// clean-room 1:1 ROM port; the pre-existing derived path (damageFormula.computeSourceDamage,
+// gauges.knockback*ForRecord, physics.knockbackDirectionFromPositions, enterDeath) is the
+// documented FALLBACK so a source function that throws on unconfirmed input (or returns a
+// sentinel) never regresses the slice. Strict mode mirrors TitleIntro.ts:34-44: when
+// GF_SOURCE_STRICT is set (env or <html data-gf-source-strict>), a source-missing condition
+// FAILS VISIBLY (re-throws) instead of silently degrading to the fallback.
+// ---------------------------------------------------------------------------------------
+const SOURCE_STRICT = readSourceStrictFlag();
+
+function readSourceStrictFlag(): boolean {
+  // Mirror TitleIntro.ts:41. globalThis access keeps this pure-sim module free of DOM/Node
+  // ambient type deps (combat tsconfig sets types: []). Reads <html data-gf-source-strict>
+  // (browser) OR GF_SOURCE_STRICT env (node/headless selfcheck) — same fidelity contract.
+  const g = globalThis as {
+    document?: { documentElement?: { dataset?: Record<string, string> } };
+    process?: { env?: Record<string, string> };
+  };
+  try {
+    return (
+      g.document?.documentElement?.dataset?.["gfSourceStrict"] !== undefined ||
+      g.process?.env?.GF_SOURCE_STRICT !== undefined
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** Parse a borgId "pl####" -> borgNumber 0xNNNN (family high byte, variant low byte).
+ *  Inverse of sourceDamage.borgNumberToBorgId; matches the family-handler convention
+ *  (Number.parseInt(borgId.slice(2), 16) — machine-red-blue.ts:225). Returns 0 on a
+ *  non-hex id so an unmapped synthetic id falls through to the neutral matrix row. */
+function borgNumberFromBorgId(borgId: string): number {
+  const n = Number.parseInt(borgId.slice(2), 16);
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** Map a BorgRuntime + profile to the sourceDamage SourceDamageActor shape (the
+ *  `actorFromRuntime` adapter from sourceDamage.ts's integration spec). Defaults carry the
+ *  same honest ROM-field gaps the spec cites (power +0xc4 / handicap +0x43a init sites
+ *  untraced, so both pass the neutral identity — NOT tuned values). `forceRatioIndex` /
+ *  `sideRank` default to neutral here and are overridden by applyHit with the battle-level
+ *  inputs (DamageRuntimeContext.energyByTeam / sideRank). */
+function sourceDamageActorFromRuntime(b: BorgRuntime): SourceDamageActor {
+  return {
+    borgNumber: borgNumberFromBorgId(b.borgId),
+    team: b.team,
+    heroFlag: b.ownerPlayer === null ? 1 : 0, // +0x3e6 CPU flag (T2 decode)
+    pairAttack: b.burstPaired ? 1 : 0, // +0x6fc side-wide burst (T3)
+    power: 1, // +0xc4 INIT UNCONFIRMED (spec TODO) — 1 is the neutral IDENTITY
+    hp: b.hp, // +0x1c6 mirror
+    maxHp: b.maxHp, // +0x1c4
+    handicap: 3, // +0x43a neutral byte (init site TODO) — table[3] == 1.0
+    comboRank: b.comboRank, // +0x6ca
+    forceRatioIndex: 0, // overridden by applyHit
+    sideRank: 0, // overridden by applyHit
+    isBorg: true,
+    isActive: true, // +0x18 == 1 in normal combat
+  };
+}
+
+/** Map a BorgRuntime to the sourceDeath SourceDeathActor shape (the `actorFromRuntime`
+ *  adapter from sourceDeath.ts's integration spec). BorgRuntime does not yet carry most ROM
+ *  death fields (+0x6fe deathType, +0x272 statusWord, +0x4aa cost, +0x434/+0x435 kills/deaths,
+ *  +0x420/+0x424 costWon/lost), so defaultDeathActor()'s neutral baseline fills them. The
+ *  mapped fields are the ones the runtime actually owns (team, CPU flag, borg eligibility). */
+function deathActorFromRuntime(b: BorgRuntime): SourceDeathActor {
+  return defaultDeathActor(b.team, {
+    eligibility83: 0, // +0x83 == 0 means "is a borg" (gates kill_event accounting)
+    state18: b.state === "death" ? 2 : 1, // +0x18 mirror (2 = death)
+    team88: b.team, // +0x88
+    heroFlag3e6: b.ownerPlayer === null ? 1 : 0, // +0x3e6 CPU flag (T2 decode)
+    slot3e4: 0, // BorgRuntime has no slot field; neutral (slot-swap gate stays inactive)
+    visibilityBit3e5: 1, // +0x3e5 default bit
+  });
+}
+
+/**
+ * Source-owned death wiring for applyHit's lethal branch (sourceDeath.ts integration spec).
+ * Runs `borgDeathEntry` (the ROM death-state writes) + `killEventEnergyAndScoreAccounting`
+ * (force-energy/score accounting) on SHADOW actors built from the runtime. Most ROM offsets
+ * (cited in deathActorFromRuntime) are not on BorgRuntime yet, so the shadow runs on neutral
+ * defaults and the writes land there for audit — only the port-mapped transition is observed
+ * (via enterDeath, which the caller runs unconditionally after this returns).
+ *
+ * Energy/score side effects are deliberately NOT mirrored onto damageContext/BattleState:
+ * battle.ts accountPendingDefeats already depletes BattleState.energy on death (its field doc
+ * cites zz_002f8dc_), and the per-slot kill/score counters are credited there too — mirroring
+ * here would double-count. Falls back to a no-op (console.warn) when the source path throws;
+ * enterDeath always runs regardless. challengeMode lives on BattleConfig (not threaded into
+ * applyHit's DamageRuntimeContext), so the accounting defaults to versus (0); with cost4aa
+ * defaulting to 0 the subtract is 0 regardless of mode, so the mode choice is load-free here.
+ */
+function runSourceDeathPath(
+  victim: BorgRuntime,
+  source: HitSourceContext | undefined,
+  damageContext: DamageRuntimeContext | undefined,
+): void {
+  try {
+    const sideCount =
+      damageContext?.energyByTeam ? Math.max(2, Object.keys(damageContext.energyByTeam).length) : 2;
+    const battleWork = defaultSourceBattleWork(sideCount);
+    if (damageContext?.energyByTeam) {
+      for (const teamStr of Object.keys(damageContext.energyByTeam)) {
+        const team = Number(teamStr);
+        const pool = battleWork.sides[team];
+        if (pool) pool.energy118 = damageContext.energyByTeam[team] ?? 0;
+      }
+    }
+    borgDeathEntry(deathActorFromRuntime(victim), battleWork, undefined);
+    if (source) {
+      const teamScore: Record<number, number> = {};
+      const result = killEventEnergyAndScoreAccounting(
+        deathActorFromRuntime(source.attacker),
+        deathActorFromRuntime(victim),
+        battleWork, // reused seeded shadow; mutations stay local (NOT mirrored — see header)
+        teamScore,
+        0, // challengeMode not on DamageRuntimeContext; versus default is load-free (cost4aa=0)
+      );
+      if (SOURCE_STRICT && result.sideDepleted) {
+        console.warn("[combat] source kill-event: victim side depleted (win/loss owned by battle.ts)");
+      }
+    }
+  } catch (err) {
+    if (SOURCE_STRICT) throw err;
+    console.warn("[combat] source death path failed; continuing to enterDeath:", err);
+  }
+}
+
 /**
  * Apply a hit to `victim`. Respects invincibility. HP damage and knockback velocity always
  * land, but whether the victim is INTERRUPTED is decided by the DERIVED gauge-based stagger
@@ -920,8 +1072,64 @@ export function applyHit(
   victim.lastHitAttackerTeam = source?.attacker.team;
   victim.lastHitAttackerOwner = source ? source.attacker.ownerPlayer : victim.lastHitAttackerOwner;
 
-  const dmg = source
-    ? computeSourceDamage({
+  // --- DAMAGE — source-owned sourceDamage.ts (computeBaseDamage + applyHpDamage) is the
+  //     PRIMARY path; damageFormula.computeSourceDamage / mitigate is the documented FALLBACK
+  //     (integration spec sourceDamage.ts:546-617). Shared inputs are hoisted so both paths
+  //     see identical force-ratio / GUARD-40 / CPU-halving values.
+  const victimImmunityA = statusImmunityMasksForBorgId(victim.borgId).immunityA;
+  const attackerForceRatioIndex = source
+    ? forceGaugeRatioIndex(
+        damageContext?.energyByTeam?.[source.attacker.team] ?? 0,
+        damageContext?.energyMaxByTeam?.[source.attacker.team],
+      )
+    : 0;
+  const defenderForceRatioIndex = source
+    ? forceGaugeRatioIndex(
+        damageContext?.energyByTeam?.[victim.team] ?? 0,
+        damageContext?.energyMaxByTeam?.[victim.team],
+      )
+    : 0;
+
+  let dmg: number;
+  let hpAppliedViaSource = false;
+  if (source) {
+    try {
+      const attackerActor: SourceDamageActor = {
+        ...sourceDamageActorFromRuntime(source.attacker),
+        forceRatioIndex: attackerForceRatioIndex,
+        sideRank: source.attackerSideRank ?? 0,
+      };
+      const defenderActor: SourceDamageActor = {
+        ...sourceDamageActorFromRuntime(victim),
+        forceRatioIndex: defenderForceRatioIndex,
+        sideRank: source.defenderSideRank ?? 0,
+      };
+      // basePower = *param_1 (record +0x00 hpDamage) × the unmapped-hitbox damageScale.
+      const basePower = record.hpDamage * (source.damageScale ?? 1);
+      const sourceCtx: SourceDamageContext = {
+        flagsA: record.flagsA, // +0x10 (incl. blast 0x1000 -> GUARD/40 + same-team bypass)
+        flagsB: record.flagsB, // +0x12 (incl. 0x4000 combo-falloff skip)
+        attackerHpCurveIndex: record.attackerHpCurveIndex, // +0x06
+        attackerForceCurveIndex: record.forceGaugeCurveIndex, // +0x07
+        // GUARD/40 DATA RULE (T1): victim static per-borg resistance mask (pldata+0xa8).
+        victimResistanceMask: victimImmunityA,
+        victimSpawnProtection: false, // +0x5e0 bit 0x4000000 writer untraced (spec TODO)
+        cpuHalvingEnabled: damageContext?.cpuHalvingEnabled === true, // T4 item 3 / T2 gate
+      };
+      const sourceDmg = computeBaseDamage(attackerActor, defenderActor, basePower, sourceCtx);
+      if (!Number.isFinite(sourceDmg) || sourceDmg < 0) {
+        throw new Error(`source computeBaseDamage returned invalid value ${sourceDmg}`);
+      }
+      dmg = sourceDmg;
+      // zz_003d344_ port: subtract+clamp+prevHp-mirror replaces the bare `victim.hp -= dmg`.
+      const hpTarget: SourceDamageTarget = { hp: victim.hp, maxHp: victim.maxHp };
+      applyHpDamage(hpTarget, dmg);
+      victim.hp = hpTarget.hp;
+      hpAppliedViaSource = true;
+    } catch (err) {
+      if (SOURCE_STRICT) throw err;
+      console.warn("[combat] source damage path failed; falling back to computeSourceDamage:", err);
+      dmg = computeSourceDamage({
         attacker: source.attacker,
         attackerProfile: source.attackerProfile,
         victim,
@@ -933,18 +1141,9 @@ export function applyHit(
         // GUARD/40 DATA RULE (T1): the victim's static per-borg resistance mask (pldata+0xa8),
         // the SAME statusImmunityMasksForBorgId() the status-effect gate above already reads —
         // see damageFormula.ts's victimStatusImmunityA doc for the full citation.
-        victimStatusImmunityA: statusImmunityMasksForBorgId(victim.borgId).immunityA,
-        // T4 FORCE-GAUGE: side energy ratio, when the battle wired BattleState.energy/energyMax
-        // through damageContext (see DamageRuntimeContext.energyByTeam/energyMaxByTeam doc).
-        // Absent damageContext/energy data keeps the pre-T4 default (full gauge, index 0).
-        attackerForceRatioIndex: forceGaugeRatioIndex(
-          damageContext?.energyByTeam?.[source.attacker.team] ?? 0,
-          damageContext?.energyMaxByTeam?.[source.attacker.team],
-        ),
-        defenderForceRatioIndex: forceGaugeRatioIndex(
-          damageContext?.energyByTeam?.[victim.team] ?? 0,
-          damageContext?.energyMaxByTeam?.[victim.team],
-        ),
+        victimStatusImmunityA: victimImmunityA,
+        attackerForceRatioIndex,
+        defenderForceRatioIndex,
         // T4 item 3 / T2: CPU-controlled x0.5 halvings, Challenge modes 0/1, side 0 only.
         attackerIsCpuSide0:
           damageContext?.cpuHalvingEnabled === true &&
@@ -952,9 +1151,14 @@ export function applyHit(
           source.attacker.ownerPlayer === null,
         defenderIsCpuSide0:
           damageContext?.cpuHalvingEnabled === true && victim.team === 0 && victim.ownerPlayer === null,
-      })
-    : mitigate(rawDamage, victimProfile.defense);
-  victim.hp -= dmg;
+      });
+    }
+  } else {
+    dmg = mitigate(rawDamage, victimProfile.defense);
+  }
+  if (!hpAppliedViaSource) {
+    victim.hp -= dmg;
+  }
 
   // Vampire lifesteal STEAL (ATK-019, behavior-notes (ay)): a vampire (ids 0x702/0x70a) banks
   // half of every damage point it deals and drains it into its own HP, capped at max. The ROM
@@ -1036,25 +1240,6 @@ export function applyHit(
   // always lands.
   applyHitInflictedStatus(victim, record, source?.attacker);
 
-  // Knockback DIRECTION — ROM-accurate port of zz_00300bc_ (0x800300bc), mode 1 ("attacker to
-  // target" relative-position vector -> atan2 -> BAM16 yaw), the only one of the ROM's 5 vector-
-  // source modes this port has enough data to compute (see packages/physics/src/knockback.ts
-  // header and behavior-notes.md section (p) for the other 4 modes and why they're not wired).
-  // `knockDir` lets a caller override with a more specific vector (e.g. a projectile's travel
-  // direction) when the "attacker position" isn't the right source (fromPos is still passed as
-  // the attacker-position input to the mode-1 calc either way).
-  // T8 ANGLE TRIMS (yaw half): record byte +0x14 (knockbackYawTrim), converted the same way the
-  // ROM does (byte * -0x100 -> BAM16, angleTrimByteToBam16) and only applied on the mode-1
-  // attacker->target path (a caller-supplied knockDir override bypasses the whole BAM16 angle
-  // calc, so there is no yaw to trim there — unchanged from before T8). Yaw trims are rare in
-  // the census (mostly ±128 = 180 degrees, "launch away-side") but wired for real now rather
-  // than hardcoded to 0.
-  const yawTrimBam16 = angleTrimByteToBam16(record.knockbackYawTrim ?? 0);
-  const dir =
-    knockDir.x === 0 && knockDir.z === 0
-      ? knockbackDirectionFromPositions(fromPos, victim.pos, yawTrimBam16)
-      : normalize(knockDir);
-
   // Knockdown determination moved up (was computed after the knockback block below): the T6
   // ground-vs-launch table SELECTION depends on it (a launch reaction uses the pitch-split
   // FUN_8005ed38 table; a ground stagger uses the flat zz_005ec20_ table), so it must be known
@@ -1068,39 +1253,72 @@ export function applyHit(
   const pitchTrimUnits = record.knockbackPitchTrim ?? 0;
   const useLaunchTable = knockdown || pitchTrimUnits !== 0;
 
-  // Knockback MAGNITUDE + INTEGRATION MODEL — DERIVED, T6 (combat-feel-gaps-decode-2026-07-05.md,
-  // replacing the earlier flat-table-only T9 read). Two ROM reaction families, selected by
-  // useLaunchTable above:
-  //   - GROUND (zz_005ec20_): idx*7 horizontal-only table (gauges.ts
-  //     knockbackGroundSpeedForRecord), scaled by the T5 attacker/victim SIZE-SCALE RATIO
-  //     (timescale.ts tierSizeScale — DERIVED end-to-end; ×1.0 at default tier, diverges under
-  //     grow/shrink status + hero X buff). Decel is -speed/20 (REACTION.
-  //     GROUND_DECEL_FRAMES), integrated per-frame in movement.ts while state is a ground
-  //     reaction — see reactionDecelFramesRemaining below.
-  //   - LAUNCH (FUN_8005ed38): (idx+1)*8 table (gauges.ts knockbackVelocityForRecord, the
-  //     table this port already had), split by the T8 pitch trim into horizontal/vertical
-  //     components, decel -0.1/frame horizontal, gravity -1.2/frame (REACTION.LAUNCH_DECEL/
-  //     LAUNCH_GRAVITY) for the reaction's duration.
-  // Both keep KNOCKBACK.PORT_SCALE (1.0, raw-scale anchor) and the caller's per-move multiplier.
-  // T5 size-scale (combat-feel-gaps-decode-2026-07-05.md §T5): ctx+0xc4 (attacker) /
-  // victim+0xb4 are the actor SIZE-SCALE floats, init by zz_0056180_ (chunk_0006.c:8250-8293)
-  // from the param-tier table row [sizeScale,...] (data/paramTierTables.json 0x802dd5a0) at the
-  // effective tier (paramTier.tier + sizeTierDelta, both on BorgRuntime). timescale.ts
-  // tierSizeScale() is the full DERIVED chain: ×1.0 at the default tier 16 for EVERY borg (no
-  // per-borg base variation exists at spawn; actor+0x3ec is the LEVEL byte that feeds HP/ammo
-  // row select + force cost — NOT a size/scale class — so PORT-1TO1-STATUS.md:753's "+0x3ec is
-  // size/scale class 0-4" is STALE, resolved by the T5 decode). The ratio diverges under
-  // grow/shrink hit-status (sizeTierDelta, the _63 path) or the STAR/PLANET HERO X +4-tier
-  // self-buff (applyActorParamTierDelta127). Projectiles inherit the owner's scale at spawn
-  // (chunk_0006.c:2472-2478), so the attacker's CURRENT scale is the right input for in-flight
-  // shots too. No separate BorgRuntime.sizeScale field is added — it would duplicate
-  // tierSizeScale(b) which already reads paramTier.tier (the +0xb4/+0xc4 source).
+  // T5 size-scale ratio (combat-feel-gaps-decode-2026-07-05.md §T5) — shared by both the source
+  // and fallback ground-speed paths. See the long comment that was here (now below the try) for
+  // the full +0xb4/+0xc4 / tierSizeScale derivation; unchanged.
   const attackerScale = source?.attacker ? tierSizeScale(source.attacker) : 1;
   const victimScale = tierSizeScale(victim);
   const scaleRatio = knockbackScaleRatio(attackerScale, victimScale);
-  const baseSpeed = useLaunchTable
-    ? knockbackVelocityForRecord(record)
-    : knockbackGroundSpeedForRecord(record, scaleRatio);
+  // T8 yaw trim (record byte +0x14), pre-converted for the FALLBACK mode-1 direction path.
+  const yawTrimBam16 = angleTrimByteToBam16(record.knockbackYawTrim ?? 0);
+
+  // --- KNOCKBACK DIRECTION + MAGNITUDE — source-owned sourceKnockback.ts
+  //     (computeKnockbackLaunchDirection + launchVelocityMagnitude/groundHorizontalSpeed) is the
+  //     PRIMARY path; physics.knockbackDirectionFromPositions + gauges.knockback*ForRecord is the
+  //     documented FALLBACK (integration spec sourceKnockback.ts:451-501). A caller-supplied
+  //     knockDir override (nonzero XZ) bypasses the ROM mode-1 calc in BOTH paths — unchanged.
+  //
+  // MAGNITUDE MODEL (T6, shared by both paths): two ROM reaction families, selected by
+  // useLaunchTable above:
+  //   - GROUND (zz_005ec20_): idx*7 horizontal-only table, scaled by the T5 size-scale ratio
+  //     above (×1.0 at default tier; diverges under grow/shrink + hero X buff). Decel -speed/20
+  //     over REACTION.GROUND_DECEL_FRAMES (movement.ts integrates while state is a ground react).
+  //   - LAUNCH (FUN_8005ed38): (idx+1)*8 table, pitch-split by the T8 trim into h/v components,
+  //     decel -0.1/frame + gravity -1.2/frame (REACTION.LAUNCH_DECEL/LAUNCH_GRAVITY).
+  // Both keep KNOCKBACK.PORT_SCALE (1.0 anchor) and the caller's per-move multiplier. The source
+  // strength tables (DAT_802dd8a0/DAT_802d3664) are the SAME DOL dump gauges.ts reads, so the two
+  // paths are numerically identical for ground hits; the source path adds the airborne +2 boost
+  // hook (launchVelocityMagnitude arg 2, currently false — +0x6fd bit 0x80 untraced).
+  let dir: Vec3;
+  let baseSpeed: number;
+  try {
+    if (knockDir.x !== 0 || knockDir.z !== 0) {
+      dir = normalize(knockDir);
+    } else {
+      const angle = computeKnockbackLaunchDirection(
+        defaultSourceKnockbackActor(fromPos),
+        defaultSourceKnockbackActor(victim.pos),
+        {
+          mode: 1, // record +0x0e selector untraced (spec TODO) — mode 1 == today's behavior
+          trimYaw: record.knockbackYawTrim ?? 0, // record +0x14 (source applies byte * -0x100)
+          trimPitch: record.knockbackPitchTrim ?? 0, // record +0x15
+        },
+      );
+      if (!Number.isFinite(angle.yaw)) {
+        throw new Error(`source knockback yaw sentinel ${angle.yaw}`);
+      }
+      // BAM16 yaw -> XZ unit direction (same conversion physics.knockbackDirectionFromPositions
+      // uses internally via bam16YawToXZ; the pitch lands separately via the trim block below).
+      dir = bam16YawToXZ(angle.yaw);
+    }
+    const strength = record.reactionAnimVariant; // record +0x0d -> actor+0x702
+    baseSpeed = useLaunchTable
+      ? launchVelocityMagnitude(strength, false) // +0x6fd airborne boost bit untraced (spec TODO)
+      : groundHorizontalSpeed(strength, scaleRatio);
+    if (!Number.isFinite(baseSpeed)) {
+      throw new Error(`source knockback magnitude sentinel ${baseSpeed}`);
+    }
+  } catch (err) {
+    if (SOURCE_STRICT) throw err;
+    console.warn("[combat] source knockback path failed; falling back to TUNED path:", err);
+    dir =
+      knockDir.x === 0 && knockDir.z === 0
+        ? knockbackDirectionFromPositions(fromPos, victim.pos, yawTrimBam16)
+        : normalize(knockDir);
+    baseSpeed = useLaunchTable
+      ? knockbackVelocityForRecord(record)
+      : knockbackGroundSpeedForRecord(record, scaleRatio);
+  }
   const knockback = baseSpeed * KNOCKBACK.PORT_SCALE * knockbackMult;
 
   if (useLaunchTable) {
@@ -1143,6 +1361,12 @@ export function applyHit(
 
   if (victim.hp <= 0) {
     victim.hp = 0;
+    // --- DEATH path — source-owned sourceDeath.ts (borgDeathEntry + killEventEnergyAndScore
+    //     Accounting) runs FIRST on shadow actors; enterDeath then applies the port-mapped
+    //     runtime writes (state/anim/vel) the source function does not own. enterDeath stays
+    //     unconditional so no path skips the port-side transition (see runSourceDeathPath's
+    //     header for why energy/score side effects are NOT mirrored here — battle.ts owns them).
+    runSourceDeathPath(victim, source, damageContext);
     enterDeath(victim);
     return dmg;
   }
