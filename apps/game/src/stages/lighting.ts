@@ -267,6 +267,24 @@ export function applyResolvedStageLighting(
   }
 }
 
+/**
+ * Update the first directional light's position from a source THREE.Vector3.
+ *
+ * Mirrors zz_000584c_ @0x8000584c: copies DAT_802c3470/74/78 (light source X/Y/Z)
+ * into DAT_803c10f4/8/10fc (light destination X/Y/Z) each frame. In the browser
+ * port this is expressed as copying from a source Vector3 into the rig's first
+ * directional light.
+ *
+ * Called from zz_003fc84_ (frame update) in the ROM; wired into the battle render
+ * loop below so the light follows its source position every frame.
+ */
+export function updateLightPosition(rig: StageLightingRig, source: THREE.Vector3): void {
+  const dir = rig.directionals[0];
+  if (dir) {
+    dir.position.set(source.x, source.y, source.z);
+  }
+}
+
 /** Convenience wrapper: resolve exported JSON and apply it in one call at stage mount. */
 export function applyStageRenderStateLighting(
   scene: THREE.Scene,

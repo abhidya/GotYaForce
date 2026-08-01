@@ -402,6 +402,7 @@ import {
   createStageLightingRig,
   resolveStageLighting,
   applyResolvedStageLighting,
+  updateLightPosition,
   type StageRenderState as LightingStageRenderState,
 } from "./stages/lighting";
 import { applyStageReadabilityOverrides } from "./stages/readabilityOverrides";
@@ -1080,6 +1081,13 @@ function followCamera(): void {
       : null;
   const positions = battleLiveActorPositions(session.battle, (uid) => battleScene.positionOf(uid));
   battleCamera.update(primary, positions, session.stageBounds);
+  // zz_000584c_ @0x8000584c: copy light source position (DAT_802c3470/74/78) into
+  // light destination (DAT_803c10f4/8/10fc) each frame. The source is the first
+  // directional light's position from the stage render state.
+  if (session && !session.paused) {
+    const srcPos = stageLighting.directionals[0]?.position ?? null;
+    if (srcPos) updateLightPosition(stageLighting, srcPos);
+  }
 }
 
 function cameraFollowTargetForBorg(
