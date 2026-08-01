@@ -61,6 +61,7 @@ import { gaugeInitForBorgId } from "./gauges.js";
 import { startingAmmoForProfile } from "./actionProfiles.js";
 import { stepStatus } from "./status.js";
 import { DEFAULT_BOUNDS, HOMING, JUMP, MUZZLE_OFFSET, SHOT, SIM } from "./constants.js";
+import shotMuzzleSpeedData from "./data/shotMuzzleSpeed.generated.json" with { type: "json" };
 import { floorSurfaceYAt } from "@gf/physics";
 import { clearJumpLatch, stepMovement, type MoveContext } from "./movement.js";
 import { resetActorParamTier } from "./paramTier.js";
@@ -115,6 +116,31 @@ function readRomStrictFlag(): boolean {
 // module-private; a ROM-side counter keeps uids unique + deterministic — Date.now() in the old
 // stub broke determinism). Reset in createBattle alongside resetProjectileCounter.
 let romProjCounter = 0;
+
+/** Per-record projectile muzzle offset (f32[3]@+0x04) + spawn speed (f32@+0x10) decoded
+ *  straight from the boot.dol spawner-table rows (scripts/gen-shot-muzzle-speed.mjs), keyed by
+ *  the same runtime borg-id guard value shotKindForBorgId uses (borgIdToShotKindKey: pl####'s
+ *  digits ARE the guard's hex digits, e.g. pl0615 G RED <-> 0x615). null when the borg's row
+ *  didn't decode (wrong row shape, e.g. stride-68 tables whose speed lives at a different
+ *  offset) — callers keep the shared MUZZLE_OFFSET constant + findVariantByKind fallback. */
+interface RomMuzzleSpeed {
+  muzzleOffset: readonly [number, number, number];
+  speed: number;
+}
+type ShotMuzzleSpeedRecord = { kind: number; muzzleOffset?: number[]; speed?: number };
+const SHOT_MUZZLE_SPEED_RECORDS = (shotMuzzleSpeedData as { records: Record<string, ShotMuzzleSpeedRecord> }).records;
+function romMuzzleSpeedForBorgId(id: string): RomMuzzleSpeed | null {
+  const digits = id.toLowerCase().replace(/^pl/, "");
+  const n = Number.parseInt(digits, 16);
+  const key = Number.isFinite(n) ? "0x" + n.toString(16) : id.toLowerCase();
+  const rec = SHOT_MUZZLE_SPEED_RECORDS[key];
+  const mo = rec?.muzzleOffset;
+  if (!rec || !Array.isArray(mo) || mo.length !== 3 || typeof rec.speed !== "number") {
+    return null;
+  }
+  const [rx, uy, fz] = mo as [number, number, number];
+  return { muzzleOffset: [rx, uy, fz], speed: rec.speed };
+}
 
 /** Spawn-time aim-cone gate for ROM-family projectiles — a 1:1 port of combat.ts's private
  *  homingTargetForSpawn (FUN_8006c334, chunk_0009.c:1995): a shot only aims/homes at the
@@ -531,12 +557,14 @@ class BattleImpl implements Battle {
    *  survives below as addRomProjectileStub — the documented fallback when resolution as a
    *  whole is disabled or (under GF_SOURCE_STRICT) gaps must be surfaced loudly.
    *
-   *  Data gaps that force the per-field fallbacks (not crashes): the spawner-table row's
-   *  muzzleOffset f32[3]@+4 / speed@+0x10 are NOT decoded by attackHitData.ts (undumped row
-   *  fields), so muzzle position uses the shared MUZZLE_OFFSET constant and speed comes from
-   *  the variant table (DAT_802f3dda) via findVariantByKind; borgs without a guarded
-   *  borgShotKinds attribution (shotKindForBorgId null) fall back to the driver's `kind` arg
-   *  and the SHOT.* tuned constants. */
+    *  Data gaps that force the per-field fallbacks (not crashes): the spawner-table row's
+    *  muzzleOffset f32[3]@+0x04 / speed@+0x10 are decoded per-record from boot.dol by
+    *  scripts/gen-shot-muzzle-speed.mjs (data/shotMuzzleSpeed.generated.json); muzzle position
+    *  = owner pos + per-record offset rotated by rotY, speed = per-record speed. Records that
+    *  didn't decode (wrong row shape, e.g. stride-68 tables; or no guarded borgShotKinds
+    *  attribution — shotKindForBorgId null) fall back to the shared MUZZLE_OFFSET constant +
+    *  the variant table (DAT_802f3dda) via findVariantByKind, and finally the SHOT.* tuned
+    *  constants. */
   private addRomProjectile(b: BorgRuntime, spawnerAddr: number, kind: number): void {
     void spawnerAddr; // row identity carried implicitly via the resolved kind (see romShotKind).
 
@@ -593,15 +621,30 @@ class BattleImpl implements Battle {
       }
     }
 
-    // 5) Muzzle world position: owner pos + shared muzzle offset along facing (the spawner
-    //    row's per-record muzzleOffset f32[3]@+4 is undumped — same TUNED MUZZLE_OFFSET
-    //    fallback the archetype spawnProjectile uses when a shotDef has no per-borg offset).
+    // 5) Muzzle world position: owner pos + the spawner row's per-record muzzleOffset
+    //    f32[3]@+0x04 (decoded from boot.dol by scripts/gen-shot-muzzle-speed.mjs), ROTATED into
+    //    the shooter's facing frame. The ROM offset is a local-space [right, up, forward] vector;
+    //    here forward/right rotate by rotY and up is applied straight. Falls back to the shared
+    //    TUNED MUZZLE_OFFSET constant when the borg's row didn't decode (wrong row shape / no
+    //    attribution) — same fallback spawnProjectile uses when a shotDef has no per-borg offset.
+    const romMuzzleSpeed = romMuzzleSpeedForBorgId(b.borgId);
     const fwd = { x: Math.sin(b.rotY), y: 0, z: Math.cos(b.rotY) };
-    const muzzlePos = {
-      x: b.pos.x + fwd.x * MUZZLE_OFFSET.forward,
-      y: b.pos.y + MUZZLE_OFFSET.up,
-      z: b.pos.z + fwd.z * MUZZLE_OFFSET.forward,
-    };
+    const right: Vec3 = { x: fwd.z, y: 0, z: -fwd.x }; // 90° clockwise of forward (right-hand frame)
+    let muzzlePos: Vec3;
+    if (romMuzzleSpeed) {
+      const [rx, uy, fz] = romMuzzleSpeed.muzzleOffset;
+      muzzlePos = {
+        x: b.pos.x + right.x * rx + fwd.x * fz,
+        y: b.pos.y + uy,
+        z: b.pos.z + right.z * rx + fwd.z * fz,
+      };
+    } else {
+      muzzlePos = {
+        x: b.pos.x + fwd.x * MUZZLE_OFFSET.forward,
+        y: b.pos.y + MUZZLE_OFFSET.up,
+        z: b.pos.z + fwd.z * MUZZLE_OFFSET.forward,
+      };
+    }
 
     // 6) Fire-time aim: fly straight along facing, UNLESS the shooter's locked target sits in
     //    the muzzle aim cone — then aim the full 3D muzzle->target direction (mirrors
@@ -630,7 +673,7 @@ class BattleImpl implements Battle {
       ownerUid: b.uid,
       team: b.team,
       pos: muzzlePos,
-      vel: scale(flightDir, romSpeed ?? SHOT.SPEED),
+      vel: scale(flightDir, romMuzzleSpeed?.speed ?? romSpeed ?? SHOT.SPEED),
       damage: 1,
       hitstun: SHOT.HITSTUN,
       // Per-move MULTIPLIER (applyHit derives the base magnitude from the damage record's

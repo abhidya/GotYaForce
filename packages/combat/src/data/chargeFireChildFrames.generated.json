@@ -1,0 +1,2165 @@
+{
+ "_meta": {
+  "generatedBy": "scripts/gen-charge-firechild-frames.mjs",
+  "source": "user-data/GG4E/disc/sys/boot.dol (raw action-script stream banks)",
+  "inputTables": "packages/combat/src/data/actionStreamTables.json",
+  "method": "Walk raw bank bytes at each B-charge borg's (bank, group, slot) using the op-length table DERIVED from each DOL handler's `*streamPtr += N` (8B for {0x01,0x02,0x03,0x0d}, 4B otherwise; stream-vm.ts:22-41 / gen-melee-anim-kinds.mjs:184). Wait-frame context tracked as in gen-melee-anim-kinds.mjs:191-230 (bit0 terminator, bit1 relEnd, bit2 pct, bit3 timer, mode 0 & val>=0 abs, mode 0 & val<0 animEnd). fireChild.frame = live wait-context frame at op 0x09.",
+  "opcodeFireChild": "op 0x09 fireChild (4B): byte3 sign-extended = child variant; handler FUN_8004c67c -> zz_0099e70_ (stream-vm.ts:319-322, gen-melee-anim-kinds.mjs:30,274-275)",
+  "important": "Most charge streams (incl. G RED pl0615 g4s2 @0x80367144) contain NO op 0x09 fireChild. The beam spawns via the shared-charge engine's cfg+0x14 release callback (FUN_801799bc chunk_0044.c:3985-3987; G RED's cb FUN_8018edc4 chunk_0047.c:1003-1013 -> zz_00e19a8_(actor, 0xf, &+0x6f7)), NOT via stream op. Entries with status 'no_fireChild_in_stream' decode cleanly — they are not failures; the spawn simply is not stream-driven.",
+  "provenance": {
+   "bankLayout": "zz_004beb8_ chunk_0006.c:1431-1492 (s16 group-offset array -> s16 slot-offset array -> byte stream)",
+   "streamWalker": "zz_004cd24_ chunk_0006.c:1996 (per-tick interpreter; op 0x09 dispatch FUN_8004c67c)",
+   "opSizeTable": "PTR_FUN_802d0da0 @0x802d0da0 (18 handlers 0x00-0x11); record sizes verified per-handler in DOL",
+   "action3Resolution": "actionStreamTables.json _meta.evidence (concrete PPC emulation per (borg, actionIndex 3, variantIndex))",
+   "gredChargeStream": "pl0615 family bank 0x80366220 group 4 slot 2 -> stream @0x80367144 (20 events, end=terminated, 0 fireChild)",
+   "gredActualBeamSpawn": "cfg+0x14 cb 0x8018edc4 (chunk_0047.c:1003) fired by FUN_801799bc at phase 1->2 transition (chunk_0044.c:3985-3987)"
+  },
+  "summary": {
+   "chargeBorgs": 53,
+   "streamsWithFireChild": 0,
+   "streamsWithoutFireChild": 50,
+   "streamsWithUnresolvedStaticSlot": 8,
+   "totalFireChildEventsInChargeStreams": 0,
+   "totalFireChildEventsInAdditionalStreams": 0,
+   "observedDecodeEndStates": [
+    "terminated",
+    "fallsThrough"
+   ],
+   "decodeFailures": [],
+   "cleanDecode": true,
+   "opLengthTable": "8B for {0x01,0x02,0x03,0x0d}; 4B for all others (0x00,0x04-0x0b,0x0c,0x0e-0x11) — every handler's record size verified against DOL `*streamPtr += N`; stream-vm.ts:22-41 OP_SIZE"
+  }
+ },
+ "borgs": {
+  "pl0003": {
+   "borgId": "pl0003",
+   "name": "DOUBLE NINJA",
+   "borgNumber": "0x3",
+   "actionHandler": "0x800716d8",
+   "streams": {
+    "0,1,2,3": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3"
+     ],
+     "bank": "0x802bde80",
+     "group": 4,
+     "seedSlot": 2,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x80071714",
+     "phaseTable": "0x802d3c70",
+     "configAddress": "0x802d3c70",
+     "streamAddress": "0x802be6aa",
+     "end": "terminated",
+     "eventCount": 7,
+     "otherRecognizedOps": [
+      {
+       "op": 7,
+       "addr": "0x802be6ce"
+      },
+      {
+       "op": 7,
+       "addr": "0x802be6d6"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0004": {
+   "borgId": "pl0004",
+   "name": "ACCELERATION NINJA",
+   "borgNumber": "0x4",
+   "actionHandler": "0x80162bf4",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8034cc80",
+     "group": 2,
+     "seedSlot": 1,
+     "airSeedSlot": 1,
+     "seedSource": "immediate",
+     "engine": "0x80162c30",
+     "phaseTable": "0x8034c7a8",
+     "configAddress": "0x8034c7a8",
+     "streamAddress": "0x8034cff6",
+     "end": "terminated",
+     "eventCount": 11,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0005": {
+   "borgId": "pl0005",
+   "name": "TELEPORT NINJA",
+   "borgNumber": "0x5",
+   "actionHandler": "0x80147428",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8033d5c0",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": 2,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x80147464",
+     "phaseTable": "0x8033e5b4",
+     "configAddress": "0x8033e5b4",
+     "streamAddress": "0x8033dcf2",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [
+      {
+       "op": 8,
+       "addr": "0x8033dd0a"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0007": {
+   "borgId": "pl0007",
+   "name": "CYBER NINJA",
+   "borgNumber": "0x7",
+   "actionHandler": "0x800a8ecc",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x802f8660",
+     "group": 4,
+     "seedSlot": 8,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x800a8f08",
+     "phaseTable": "0x802f8638",
+     "configAddress": "0x802f8638",
+     "streamAddress": "0x802f8e42",
+     "end": "terminated",
+     "eventCount": 4,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x802f8e5a"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0101": {
+   "borgId": "pl0101",
+   "name": "POWERED GUNMAN",
+   "borgNumber": "0x101",
+   "actionHandler": "0x80166e30",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8034ebe0",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x80166e50",
+     "phaseTable": "0x8034e728",
+     "configAddress": "0x8034e728",
+     "streamAddress": "0x8034f576",
+     "end": "terminated",
+     "eventCount": 10,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0103": {
+   "borgId": "pl0103",
+   "name": "WIRE GUNNER",
+   "borgNumber": "0x103",
+   "actionHandler": "0x80131834",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80334e20",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x801318a8",
+     "phaseTable": "0x80335d2c",
+     "configAddress": "0x80335d2c",
+     "streamAddress": "0x80335460",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0104": {
+   "borgId": "pl0104",
+   "name": "BEAM GUNNER",
+   "borgNumber": "0x104",
+   "actionHandler": "0x80103b9c",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x803209e0",
+     "group": 2,
+     "seedSlot": 13,
+     "airSeedSlot": 12,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x80103c10",
+     "phaseTable": "0x803216a4",
+     "configAddress": "0x803216a4",
+     "streamAddress": "0x80320de8",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0203": {
+   "borgId": "pl0203",
+   "name": "SPIKE KNIGHT",
+   "borgNumber": "0x203",
+   "actionHandler": "0x800e6028",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80317ac0",
+     "group": 4,
+     "seedSlot": 2,
+     "airSeedSlot": 4,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x800e6048",
+     "phaseTable": "0x803188e8",
+     "configAddress": "0x803188e8",
+     "streamAddress": "0x80318110",
+     "end": "fallsThrough",
+     "eventCount": 11,
+     "otherRecognizedOps": [
+      {
+       "op": 8,
+       "addr": "0x8031812c"
+      },
+      {
+       "op": 7,
+       "addr": "0x8031813c"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0205": {
+   "borgId": "pl0205",
+   "name": "DARK KNIGHT",
+   "borgNumber": "0x205",
+   "actionHandler": "0x80158050",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80342f80",
+     "group": 2,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": "runtime-conditional (see slotCandidates)",
+     "engine": "0x80157df8",
+     "phaseTable": "0x80342a2c",
+     "configAddress": "0x80342a2c",
+     "scannedAllCandidates": true,
+     "candidates": [
+      {
+       "slot": 9,
+       "streamAddress": "0x803433a2",
+       "end": "terminated",
+       "eventCount": 10,
+       "decodeFailure": null,
+       "fireChildEvents": [],
+       "fireChildCount": 0
+      },
+      {
+       "slot": 10,
+       "streamAddress": "0x803433e6",
+       "end": "terminated",
+       "eventCount": 10,
+       "decodeFailure": null,
+       "fireChildEvents": [],
+       "fireChildCount": 0
+      }
+     ],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "all candidate slots decoded cleanly; none contains op 0x09 fireChild"
+    }
+   }
+  },
+  "pl0209": {
+   "borgId": "pl0209",
+   "name": "IMPERIAL KNIGHT",
+   "borgNumber": "0x209",
+   "actionHandler": "0x801b881c",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80342f80",
+     "group": 4,
+     "seedSlot": 1,
+     "airSeedSlot": 1,
+     "seedSource": "immediate",
+     "engine": "0x801b883c",
+     "phaseTable": "0x80382228",
+     "configAddress": "0x80382228",
+     "streamAddress": "0x80343896",
+     "end": "terminated",
+     "eventCount": 10,
+     "otherRecognizedOps": [
+      {
+       "op": 17,
+       "addr": "0x803438b6"
+      },
+      {
+       "op": 17,
+       "addr": "0x803438be"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0301": {
+   "borgId": "pl0301",
+   "name": "WIRE GIRL",
+   "borgNumber": "0x301",
+   "actionHandler": "0x8010cdec",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80322060",
+     "group": 2,
+     "seedSlot": 16,
+     "airSeedSlot": 17,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x8010ce60",
+     "phaseTable": "0x80325acc",
+     "configAddress": "0x80325acc",
+     "streamAddress": "0x803224c8",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0302": {
+   "borgId": "pl0302",
+   "name": "BARRIER GIRL",
+   "borgNumber": "0x302",
+   "actionHandler": "0x8010cdec",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80323320",
+     "group": 2,
+     "seedSlot": 16,
+     "airSeedSlot": 17,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x8010ce60",
+     "phaseTable": "0x80325acc",
+     "configAddress": "0x80325acc",
+     "streamAddress": "0x8032378c",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0303": {
+   "borgId": "pl0303",
+   "name": "DEATH BORG DELTA II",
+   "borgNumber": "0x303",
+   "actionHandler": "0x8010cdec",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80372440",
+     "group": 2,
+     "seedSlot": 16,
+     "airSeedSlot": 17,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x8010ce60",
+     "phaseTable": "0x80325acc",
+     "configAddress": "0x80325acc",
+     "streamAddress": "0x80372892",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0306": {
+   "borgId": "pl0306",
+   "name": "COMMAND GIRL",
+   "borgNumber": "0x306",
+   "actionHandler": "0x8010cdec",
+   "streams": {
+    "7,13": {
+     "variants": [
+      "7",
+      "13"
+     ],
+     "bank": null,
+     "group": null,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": null,
+     "engine": null,
+     "phaseTable": null,
+     "configAddress": null,
+     "status": "unresolved_static",
+     "reason": "no stream call reached for this variant (bank/group null in actionStreamTables — variant is dead data or the startStream path was not captured by the concrete emulator; borg familyBank=0x80323320)"
+    }
+   }
+  },
+  "pl0503": {
+   "borgId": "pl0503",
+   "name": "CYBER DEATH DRAGON",
+   "borgNumber": "0x503",
+   "actionHandler": "0x800b8ad0",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x802fdb20",
+     "group": 2,
+     "seedSlot": 0,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x800b8af0",
+     "phaseTable": "0x802ff310",
+     "configAddress": "0x802ff310",
+     "streamAddress": "0x802fddae",
+     "end": "terminated",
+     "eventCount": 8,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0504": {
+   "borgId": "pl0504",
+   "name": "COSMIC DRAGON",
+   "borgNumber": "0x504",
+   "actionHandler": "0x80109ff8",
+   "streams": {
+    "3": {
+     "variants": [
+      "3"
+     ],
+     "bank": "0x80324740",
+     "group": 4,
+     "seedSlot": 7,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x8010a170",
+     "phaseTable": "0x804344f8",
+     "configAddress": "0x804344f8",
+     "streamAddress": "0x80324cb2",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    },
+    "4": {
+     "variants": [
+      "4"
+     ],
+     "bank": "0x80324740",
+     "group": 4,
+     "seedSlot": 8,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x8010a300",
+     "phaseTable": "0x80434500",
+     "configAddress": "0x80434500",
+     "streamAddress": "0x80324cda",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    },
+    "0,1,2": {
+     "variants": [
+      "0",
+      "1",
+      "2"
+     ],
+     "bank": "0x80324740",
+     "group": 4,
+     "seedSlot": 6,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x8010a034",
+     "phaseTable": "0x804344f0",
+     "configAddress": "0x804344f0",
+     "streamAddress": "0x80324c8a",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0506": {
+   "borgId": "pl0506",
+   "name": "CYBER DRAGON",
+   "borgNumber": "0x506",
+   "actionHandler": "0x800b8ad0",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x802fdb20",
+     "group": 2,
+     "seedSlot": 0,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x800b8af0",
+     "phaseTable": "0x802ff310",
+     "configAddress": "0x802ff310",
+     "streamAddress": "0x802fddae",
+     "end": "terminated",
+     "eventCount": 8,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0507": {
+   "borgId": "pl0507",
+   "name": "CYBER DEATH DRAGON",
+   "borgNumber": "0x507",
+   "actionHandler": "0x800b8ad0",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x802fdb20",
+     "group": 2,
+     "seedSlot": 0,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x800b8af0",
+     "phaseTable": "0x802ff310",
+     "configAddress": "0x802ff310",
+     "streamAddress": "0x802fddae",
+     "end": "terminated",
+     "eventCount": 8,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl050f": {
+   "borgId": "pl050f",
+   "name": "MACHINE DRAGON",
+   "borgNumber": "0x50f",
+   "actionHandler": "0x800b8ad0",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x802fdb20",
+     "group": 2,
+     "seedSlot": 0,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x800b8af0",
+     "phaseTable": "0x802ff310",
+     "configAddress": "0x802ff310",
+     "streamAddress": "0x802fddae",
+     "end": "terminated",
+     "eventCount": 8,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0510": {
+   "borgId": "pl0510",
+   "name": "SPACE DRAGON",
+   "borgNumber": "0x510",
+   "actionHandler": "0x80109ff8",
+   "streams": {
+    "3": {
+     "variants": [
+      "3"
+     ],
+     "bank": "0x80324740",
+     "group": 4,
+     "seedSlot": 7,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x8010a170",
+     "phaseTable": "0x804344f8",
+     "configAddress": "0x804344f8",
+     "streamAddress": "0x80324cb2",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    },
+    "4": {
+     "variants": [
+      "4"
+     ],
+     "bank": "0x80324740",
+     "group": 4,
+     "seedSlot": 8,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x8010a300",
+     "phaseTable": "0x80434500",
+     "configAddress": "0x80434500",
+     "streamAddress": "0x80324cda",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    },
+    "0,1,2": {
+     "variants": [
+      "0",
+      "1",
+      "2"
+     ],
+     "bank": "0x80324740",
+     "group": 4,
+     "seedSlot": 6,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x8010a034",
+     "phaseTable": "0x804344f0",
+     "configAddress": "0x804344f0",
+     "streamAddress": "0x80324c8a",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0512": {
+   "borgId": "pl0512",
+   "name": "MECHANICAL DRAGON",
+   "borgNumber": "0x512",
+   "actionHandler": "0x800b8ad0",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x802fdb20",
+     "group": 2,
+     "seedSlot": 0,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x800b8af0",
+     "phaseTable": "0x802ff310",
+     "configAddress": "0x802ff310",
+     "streamAddress": "0x802fddae",
+     "end": "terminated",
+     "eventCount": 8,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0513": {
+   "borgId": "pl0513",
+   "name": "MACHINE DRAGON",
+   "borgNumber": "0x513",
+   "actionHandler": "0x800b8ad0",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x802fdb20",
+     "group": 2,
+     "seedSlot": 0,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x800b8af0",
+     "phaseTable": "0x802ff310",
+     "configAddress": "0x802ff310",
+     "streamAddress": "0x802fddae",
+     "end": "terminated",
+     "eventCount": 8,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0602": {
+   "borgId": "pl0602",
+   "name": "CYBER MACHINE SEIRYU",
+   "borgNumber": "0x602",
+   "actionHandler": "0x800ce138",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8030b260",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": 0,
+     "seedSource": "immediate",
+     "engine": "0x800ce184",
+     "phaseTable": "0x8030cdbc",
+     "configAddress": "0x8030cdbc",
+     "streamAddress": "0x8030b89c",
+     "end": "terminated",
+     "eventCount": 4,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8030b8b4"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0604": {
+   "borgId": "pl0604",
+   "name": "TITAN ROBOT",
+   "borgNumber": "0x604",
+   "actionHandler": "0x801260f0",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8032e8e0",
+     "group": 4,
+     "seedSlot": 1,
+     "airSeedSlot": 2,
+     "seedSource": "config byte @0x8032f498",
+     "engine": "0x80179fcc",
+     "phaseTable": "0x80352b64",
+     "configAddress": "0x8032f498",
+     "streamAddress": "0x8032ee6c",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8032ee84"
+      },
+      {
+       "op": 11,
+       "addr": "0x8032eea8"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0609": {
+   "borgId": "pl0609",
+   "name": "CYBER ATLAS",
+   "borgNumber": "0x609",
+   "actionHandler": "0x800cfb94",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": null,
+     "group": null,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": null,
+     "engine": null,
+     "phaseTable": null,
+     "configAddress": null,
+     "status": "unresolved_static",
+     "reason": "no stream call reached for this variant (bank/group null in actionStreamTables — variant is dead data or the startStream path was not captured by the concrete emulator; borg familyBank=0x8030b90c)"
+    }
+   }
+  },
+  "pl060a": {
+   "borgId": "pl060a",
+   "name": "CYBER MACHINE SUZAKU",
+   "borgNumber": "0x60a",
+   "actionHandler": "0x800ce138",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8030b260",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": 0,
+     "seedSource": "immediate",
+     "engine": "0x800ce184",
+     "phaseTable": "0x8030cdbc",
+     "configAddress": "0x8030cdbc",
+     "streamAddress": "0x8030b89c",
+     "end": "terminated",
+     "eventCount": 4,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8030b8b4"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl060c": {
+   "borgId": "pl060c",
+   "name": "CYBER MACHINE BYAKKO",
+   "borgNumber": "0x60c",
+   "actionHandler": "0x800ce138",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8030b260",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": 0,
+     "seedSource": "immediate",
+     "engine": "0x800ce184",
+     "phaseTable": "0x8030cdbc",
+     "configAddress": "0x8030cdbc",
+     "streamAddress": "0x8030b89c",
+     "end": "terminated",
+     "eventCount": 4,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8030b8b4"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl060e": {
+   "borgId": "pl060e",
+   "name": "CYBER MACHINE GENBU",
+   "borgNumber": "0x60e",
+   "actionHandler": "0x800ce138",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8030b260",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": 0,
+     "seedSource": "immediate",
+     "engine": "0x800ce184",
+     "phaseTable": "0x8030cdbc",
+     "configAddress": "0x8030cdbc",
+     "streamAddress": "0x8030b89c",
+     "end": "terminated",
+     "eventCount": 4,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8030b8b4"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0610": {
+   "borgId": "pl0610",
+   "name": "VICTORY KING",
+   "borgNumber": "0x610",
+   "actionHandler": "0x8015add4",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80343d40",
+     "group": 3,
+     "seedSlot": 0,
+     "airSeedSlot": 2,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x8015ae1c",
+     "phaseTable": "0x803448b0",
+     "configAddress": "0x803448b0",
+     "streamAddress": "0x80344100",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8034411c"
+      },
+      {
+       "op": 7,
+       "addr": "0x80344138"
+      },
+      {
+       "op": 17,
+       "addr": "0x8034413c"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0613": {
+   "borgId": "pl0613",
+   "name": "PANTHER ROBOT",
+   "borgNumber": "0x613",
+   "actionHandler": "0x8018cb48",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x803641c0",
+     "group": 4,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": "runtime-conditional (see slotCandidates)",
+     "engine": "0x80179fcc",
+     "phaseTable": "0x80352b64",
+     "configAddress": "0x8036551c",
+     "scannedAllCandidates": true,
+     "candidates": [
+      {
+       "slot": 1,
+       "streamAddress": "0x80364856",
+       "end": "terminated",
+       "eventCount": 9,
+       "decodeFailure": null,
+       "fireChildEvents": [],
+       "fireChildCount": 0
+      },
+      {
+       "slot": 2,
+       "streamAddress": "0x8036489e",
+       "end": "terminated",
+       "eventCount": 10,
+       "decodeFailure": null,
+       "fireChildEvents": [],
+       "fireChildCount": 0
+      }
+     ],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "all candidate slots decoded cleanly; none contains op 0x09 fireChild"
+    }
+   }
+  },
+  "pl0615": {
+   "borgId": "pl0615",
+   "name": "G RED",
+   "borgNumber": "0x615",
+   "actionHandler": "0x8018ed4c",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80366220",
+     "group": 4,
+     "seedSlot": 2,
+     "airSeedSlot": 2,
+     "seedSource": "config byte @0x80365854",
+     "engine": "0x80179814",
+     "phaseTable": "0x80352b54",
+     "configAddress": "0x80365854",
+     "streamAddress": "0x80367144",
+     "end": "terminated",
+     "eventCount": 18,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x80367160"
+      },
+      {
+       "op": 7,
+       "addr": "0x80367170"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0618": {
+   "borgId": "pl0618",
+   "name": "PROTO TITAN",
+   "borgNumber": "0x618",
+   "actionHandler": "0x801260f0",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8032e8e0",
+     "group": 4,
+     "seedSlot": 1,
+     "airSeedSlot": 2,
+     "seedSource": "config byte @0x8032f498",
+     "engine": "0x80179fcc",
+     "phaseTable": "0x80352b64",
+     "configAddress": "0x8032f498",
+     "streamAddress": "0x8032ee6c",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8032ee84"
+      },
+      {
+       "op": 11,
+       "addr": "0x8032eea8"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0619": {
+   "borgId": "pl0619",
+   "name": "TITAN TANK",
+   "borgNumber": "0x619",
+   "actionHandler": "0x8012750c",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8032faa0",
+     "group": 2,
+     "seedSlot": 1,
+     "airSeedSlot": 1,
+     "seedSource": "config byte @0x803303c8",
+     "engine": "0x80177a3c",
+     "phaseTable": "0x80352af8",
+     "configAddress": "0x803303c8",
+     "streamAddress": "0x8032fdcc",
+     "end": "terminated",
+     "eventCount": 14,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl061d": {
+   "borgId": "pl061d",
+   "name": "PROTO ATLAS",
+   "borgNumber": "0x61d",
+   "actionHandler": "0x800cfb94",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": null,
+     "group": null,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": null,
+     "engine": null,
+     "phaseTable": null,
+     "configAddress": null,
+     "status": "unresolved_static",
+     "reason": "no stream call reached for this variant (bank/group null in actionStreamTables — variant is dead data or the startStream path was not captured by the concrete emulator; borg familyBank=0x8030b90c)"
+    }
+   }
+  },
+  "pl061e": {
+   "borgId": "pl061e",
+   "name": "PROTO KING",
+   "borgNumber": "0x61e",
+   "actionHandler": "0x8015add4",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80343d40",
+     "group": 3,
+     "seedSlot": 0,
+     "airSeedSlot": 2,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x8015ae1c",
+     "phaseTable": "0x803448b0",
+     "configAddress": "0x803448b0",
+     "streamAddress": "0x80344100",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8034411c"
+      },
+      {
+       "op": 7,
+       "addr": "0x80344138"
+      },
+      {
+       "op": 17,
+       "addr": "0x8034413c"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl061f": {
+   "borgId": "pl061f",
+   "name": "VICTORY TANK",
+   "borgNumber": "0x61f",
+   "actionHandler": "0x8015bc50",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80345420",
+     "group": 2,
+     "seedSlot": 1,
+     "airSeedSlot": 1,
+     "seedSource": "config byte @0x80345c34",
+     "engine": "0x80177a3c",
+     "phaseTable": "0x80352af8",
+     "configAddress": "0x80345c34",
+     "streamAddress": "0x8034575a",
+     "end": "terminated",
+     "eventCount": 11,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x80345772"
+      },
+      {
+       "op": 11,
+       "addr": "0x803457a6"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0620": {
+   "borgId": "pl0620",
+   "name": "VICTORY JET",
+   "borgNumber": "0x620",
+   "actionHandler": "0x8015c588",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80344dc0",
+     "group": 2,
+     "seedSlot": 0,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x8015c5a8",
+     "phaseTable": "0x80346284",
+     "configAddress": "0x80346284",
+     "streamAddress": "0x80344e8e",
+     "end": "terminated",
+     "eventCount": 4,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x80344ea6"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0621": {
+   "borgId": "pl0621",
+   "name": "VICTORY DUKE",
+   "borgNumber": "0x621",
+   "actionHandler": "0x8015add4",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80343d40",
+     "group": 3,
+     "seedSlot": 0,
+     "airSeedSlot": 2,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x8015ae1c",
+     "phaseTable": "0x803448b0",
+     "configAddress": "0x803448b0",
+     "streamAddress": "0x80344100",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8034411c"
+      },
+      {
+       "op": 7,
+       "addr": "0x80344138"
+      },
+      {
+       "op": 17,
+       "addr": "0x8034413c"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0623": {
+   "borgId": "pl0623",
+   "name": "VICTORY BARON",
+   "borgNumber": "0x623",
+   "actionHandler": "0x8015add4",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80343d40",
+     "group": 3,
+     "seedSlot": 0,
+     "airSeedSlot": 2,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x8015ae1c",
+     "phaseTable": "0x803448b0",
+     "configAddress": "0x803448b0",
+     "streamAddress": "0x80344100",
+     "end": "terminated",
+     "eventCount": 9,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x8034411c"
+      },
+      {
+       "op": 7,
+       "addr": "0x80344138"
+      },
+      {
+       "op": 17,
+       "addr": "0x8034413c"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0625": {
+   "borgId": "pl0625",
+   "name": "VICTORY MACHINE",
+   "borgNumber": "0x625",
+   "actionHandler": "0x8015bc50",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80345420",
+     "group": 2,
+     "seedSlot": 1,
+     "airSeedSlot": 1,
+     "seedSource": "config byte @0x80345c34",
+     "engine": "0x80177a3c",
+     "phaseTable": "0x80352af8",
+     "configAddress": "0x80345c34",
+     "streamAddress": "0x8034575a",
+     "end": "terminated",
+     "eventCount": 11,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x80345772"
+      },
+      {
+       "op": 11,
+       "addr": "0x803457a6"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0627": {
+   "borgId": "pl0627",
+   "name": "PROTO PANTHER",
+   "borgNumber": "0x627",
+   "actionHandler": "0x8018cb48",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x803641c0",
+     "group": 4,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": "runtime-conditional (see slotCandidates)",
+     "engine": "0x80179fcc",
+     "phaseTable": "0x80352b64",
+     "configAddress": "0x8036551c",
+     "scannedAllCandidates": true,
+     "candidates": [
+      {
+       "slot": 1,
+       "streamAddress": "0x80364856",
+       "end": "terminated",
+       "eventCount": 9,
+       "decodeFailure": null,
+       "fireChildEvents": [],
+       "fireChildCount": 0
+      },
+      {
+       "slot": 2,
+       "streamAddress": "0x8036489e",
+       "end": "terminated",
+       "eventCount": 10,
+       "decodeFailure": null,
+       "fireChildEvents": [],
+       "fireChildCount": 0
+      }
+     ],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "all candidate slots decoded cleanly; none contains op 0x09 fireChild"
+    }
+   }
+  },
+  "pl0628": {
+   "borgId": "pl0628",
+   "name": "PANTHER VEHICLE",
+   "borgNumber": "0x628",
+   "actionHandler": "0x8018c138",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": null,
+     "group": null,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": null,
+     "engine": null,
+     "phaseTable": null,
+     "configAddress": null,
+     "status": "unresolved_static",
+     "reason": "no stream call reached for this variant (bank/group null in actionStreamTables — variant is dead data or the startStream path was not captured by the concrete emulator; borg familyBank=0x80363ba0)"
+    }
+   }
+  },
+  "pl0629": {
+   "borgId": "pl0629",
+   "name": "NEO G RED",
+   "borgNumber": "0x629",
+   "actionHandler": "0x8018ed4c",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80366220",
+     "group": 4,
+     "seedSlot": 2,
+     "airSeedSlot": 2,
+     "seedSource": "config byte @0x80365854",
+     "engine": "0x80179814",
+     "phaseTable": "0x80352b54",
+     "configAddress": "0x80365854",
+     "streamAddress": "0x80367144",
+     "end": "terminated",
+     "eventCount": 18,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x80367160"
+      },
+      {
+       "op": 7,
+       "addr": "0x80367170"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl062a": {
+   "borgId": "pl062a",
+   "name": "G BLACK",
+   "borgNumber": "0x62a",
+   "actionHandler": "0x8018ed4c",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x80366220",
+     "group": 4,
+     "seedSlot": 3,
+     "airSeedSlot": null,
+     "seedSource": "config byte @0x8036586c",
+     "engine": "0x80179d20",
+     "phaseTable": "0x804347a8",
+     "configAddress": "0x8036586c",
+     "streamAddress": "0x803671b8",
+     "end": "terminated",
+     "eventCount": 12,
+     "otherRecognizedOps": [
+      {
+       "op": 12,
+       "addr": "0x803671b8"
+      },
+      {
+       "op": 11,
+       "addr": "0x803671d4"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0808": {
+   "borgId": "pl0808",
+   "name": "CYBER HERO",
+   "borgNumber": "0x808",
+   "actionHandler": "0x801d9e4c",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8038f640",
+     "group": 4,
+     "seedSlot": 1,
+     "airSeedSlot": 1,
+     "seedSource": "config byte @0x8038f124",
+     "engine": "0x801ca34c",
+     "phaseTable": "0x8038a710",
+     "configAddress": "0x8038f124",
+     "streamAddress": "0x8038fe7e",
+     "end": "terminated",
+     "eventCount": 10,
+     "otherRecognizedOps": [
+      {
+       "op": 8,
+       "addr": "0x8038fe96"
+      },
+      {
+       "op": 7,
+       "addr": "0x8038fea6"
+      },
+      {
+       "op": 7,
+       "addr": "0x8038fec2"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0a04": {
+   "borgId": "pl0a04",
+   "name": "ANUBIS WING",
+   "borgNumber": "0xa04",
+   "actionHandler": "0x800f5970",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8031c0e0",
+     "group": 4,
+     "seedSlot": 1,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x80148384",
+     "phaseTable": "0x804346a0",
+     "configAddress": null,
+     "streamAddress": "0x8031c74e",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [
+      {
+       "op": 17,
+       "addr": "0x8031c772"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0a08": {
+   "borgId": "pl0a08",
+   "name": "BLADE WING",
+   "borgNumber": "0xa08",
+   "actionHandler": "0x800f5970",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8031c0e0",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": 0,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x80148384",
+     "phaseTable": "0x804346a0",
+     "configAddress": null,
+     "streamAddress": "0x8031c722",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [
+      {
+       "op": 17,
+       "addr": "0x8031c746"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0a09": {
+   "borgId": "pl0a09",
+   "name": "GARUDA",
+   "borgNumber": "0xa09",
+   "actionHandler": "0x800f5970",
+   "streams": {
+    "0,1,2,3,4": {
+     "variants": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+     ],
+     "bank": "0x8031c0e0",
+     "group": 4,
+     "seedSlot": 1,
+     "airSeedSlot": 1,
+     "seedSource": "runtime actor+0x6ea",
+     "engine": "0x80148384",
+     "phaseTable": "0x804346a0",
+     "configAddress": null,
+     "streamAddress": "0x8031c74e",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [
+      {
+       "op": 17,
+       "addr": "0x8031c772"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0c04": {
+   "borgId": "pl0c04",
+   "name": "ULTIMATE CANNON",
+   "borgNumber": "0xc04",
+   "actionHandler": "0x800b0f18",
+   "streams": {
+    "0": {
+     "variants": [
+      "0"
+     ],
+     "bank": "0x802fb820",
+     "group": 4,
+     "seedSlot": 0,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x800b0f64",
+     "phaseTable": "0x802fc460",
+     "configAddress": "0x802fc460",
+     "streamAddress": "0x802fbb52",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    },
+    "1": {
+     "variants": [
+      "1"
+     ],
+     "bank": "0x802fb820",
+     "group": 4,
+     "seedSlot": 1,
+     "airSeedSlot": null,
+     "seedSource": "immediate",
+     "engine": "0x800b1330",
+     "phaseTable": "0x802fc470",
+     "configAddress": "0x802fc470",
+     "streamAddress": "0x802fbb96",
+     "end": "terminated",
+     "eventCount": 6,
+     "otherRecognizedOps": [
+      {
+       "op": 11,
+       "addr": "0x802fbbae"
+      }
+     ],
+     "decodeFailure": null,
+     "fireChildEvents": [],
+     "fireChildCount": 0,
+     "status": "no_fireChild_in_stream",
+     "reason": "stream decoded cleanly but contains no op 0x09 fireChild — beam (if any) spawns via the engine's cfg+0x14 release callback or cfg+0x10 setup callback, NOT the stream",
+     "additionalStreamFireChild": []
+    }
+   }
+  },
+  "pl0d00": {
+   "borgId": "pl0d00",
+   "name": "BLUE STRIKER",
+   "borgNumber": "0xd00",
+   "actionHandler": "0x800f7f98",
+   "streams": {
+    "0": {
+     "variants": [
+      "0"
+     ],
+     "bank": null,
+     "group": null,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": null,
+     "engine": "0x800f7f98",
+     "phaseTable": "0x8031d158",
+     "configAddress": "0x8031d158",
+     "status": "unresolved_static",
+     "reason": "no stream call reached for this variant (bank/group null in actionStreamTables — variant is dead data or the startStream path was not captured by the concrete emulator; borg familyBank=null)"
+    }
+   }
+  },
+  "pl0d04": {
+   "borgId": "pl0d04",
+   "name": "ORANGE FIGHTER",
+   "borgNumber": "0xd04",
+   "actionHandler": "0x800f7f98",
+   "streams": {
+    "0": {
+     "variants": [
+      "0"
+     ],
+     "bank": null,
+     "group": null,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": null,
+     "engine": "0x800f7f98",
+     "phaseTable": "0x8031d158",
+     "configAddress": "0x8031d158",
+     "status": "unresolved_static",
+     "reason": "no stream call reached for this variant (bank/group null in actionStreamTables — variant is dead data or the startStream path was not captured by the concrete emulator; borg familyBank=null)"
+    }
+   }
+  },
+  "pl0e00": {
+   "borgId": "pl0e00",
+   "name": "SIRIUS",
+   "borgNumber": "0xe00",
+   "actionHandler": "0x8018a348",
+   "streams": {
+    "0": {
+     "variants": [
+      "0"
+     ],
+     "bank": null,
+     "group": null,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": null,
+     "engine": "0x8018a348",
+     "phaseTable": "0x80362d04",
+     "configAddress": null,
+     "status": "unresolved_static",
+     "reason": "no stream call reached for this variant (bank/group null in actionStreamTables — variant is dead data or the startStream path was not captured by the concrete emulator; borg familyBank=null)"
+    }
+   }
+  },
+  "pl0e05": {
+   "borgId": "pl0e05",
+   "name": "DEATH ARC",
+   "borgNumber": "0xe05",
+   "actionHandler": "0x8018a348",
+   "streams": {
+    "0": {
+     "variants": [
+      "0"
+     ],
+     "bank": null,
+     "group": null,
+     "seedSlot": null,
+     "airSeedSlot": null,
+     "seedSource": null,
+     "engine": "0x8018a348",
+     "phaseTable": "0x80362d04",
+     "configAddress": null,
+     "status": "unresolved_static",
+     "reason": "no stream call reached for this variant (bank/group null in actionStreamTables — variant is dead data or the startStream path was not captured by the concrete emulator; borg familyBank=null)"
+    }
+   }
+  }
+ }
+}

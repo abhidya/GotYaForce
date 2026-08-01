@@ -501,6 +501,45 @@ const PROJECTILE_COLORS: Record<ProjectileVisualKind, { ally: number; enemy: num
 };
 
 /**
+ * TUNED per-borg efct00-bank FLIGHT visuals for ROM-family beam shooters whose guarded
+ * shot-variant attribution lands on a differently-shaped table than attackHitData.ts's ONE
+ * proven safe row shape — so packages/combat shotFlightVisualForBorgId honestly resolves null
+ * for them (research/decomp/efct-consumers-decode-2026-07-04.md §3, selfcheck ground-truth
+ * gates selfcheck.ts:1369). Each entry is the PROVEN efct00_mdl.arc texId
+ * (apps/game/src/sim/data/efctBankMeshes.json) the family's B-shot attaches in flight,
+ * decoded from the shot-init row's texId|flags (table 0x802d6d68 variant 6-9, BOTH flags
+ * 0x4000|0x8000 — the 0x4000 team-tint bit selects the matAnim frame 1.0/3.0). Mirrors the
+ * TUNED-override convention of borgPresentationAssets.ts PREFERRED_LABELS: the combat
+ * resolver stays honest-null, the renderer attaches the human-verified visual directly.
+ * Borgs absent here (the rest of the fleet) keep the energy/sprite fallback — see the
+ * data-gap report (only the G RED family row is proven to carry a bank flag today).
+ */
+const TUNED_FLIGHT_VISUALS: Readonly<
+  Record<string, { bankTexId: number; teamTint: boolean; launchFxId: number | null }>
+> = {
+  // G RED family (packages/combat families/gred.ts pl0615/pl0629/pl062a): shared G-Buster
+  // action-script bank (ctor 0x8018ccfc); the B-shot is the team-tinted texId-125 beam.
+  pl0615: { bankTexId: 125, teamTint: true, launchFxId: null },
+  pl0629: { bankTexId: 125, teamTint: true, launchFxId: null },
+  pl062a: { bankTexId: 125, teamTint: true, launchFxId: null },
+};
+
+/** Resolve a projectile's efct00-bank flight visual from the SHOOTER's borgId when the sim
+ *  carried no `flightVisual` (the common fleet-wide case — combat's resolver is honest-null
+ *  outside the one proven table shape). Looks up the owner actor's presentation borgId; null
+ *  when the owner is unknown or has no TUNED entry, so the caller keeps the energy fallback. */
+function resolveTunedFlightVisual(
+  projectile: BattleProjectileObservation,
+  actors: ReadonlyMap<string, { borgId: string }>,
+): { bankTexId: number; teamTint: boolean; launchFxId: number | null } | null {
+  const owner = actors.get(projectile.ownerUid);
+  const borgId = owner?.borgId;
+  if (!borgId) return null;
+  const tuned = TUNED_FLIGHT_VISUALS[borgId];
+  return tuned ? { ...tuned } : null;
+}
+
+/**
  * Projectile end-of-life fade window (frames of remaining `life`). Derived from the DEFAULT
  * projectile lifetime SHOT.LIFETIME (600f, DERIVED_ROM: init FUN_8006f11c seeds the life
  * counter, chunk_0009.c:3907 — see packages/combat constants.ts) instead of the old hardcoded
@@ -1135,7 +1174,10 @@ export class BattleScene {
    * Returns null when the texId has no drawable bank entry so the caller keeps the sprite.
    */
   private buildBankProjectileActor(projectile: BattleProjectileObservation): ProjectileActor | null {
-    const visual = projectile.flightVisual;
+    // flightVisual (sim-resolved, combat shotFlightVisualForBorgId) is preferred; the TUNED
+    // renderer-side table covers the ROM-family beams whose guarded attribution lands on a
+    // different table shape (resolveTunedFlightVisual). Both absent => keep the energy/sprite.
+    const visual = projectile.flightVisual ?? resolveTunedFlightVisual(projectile, this.actors);
     if (!visual) return null;
     const layers = bankFxTemplate(visual.bankTexId);
     if (!layers) return null;
