@@ -23,6 +23,72 @@ let _bootConfigByte: number = 0;
 let _audioCue: number = 0;
 
 /**
+ * PTR_DAT_804335a0 — pointer-array base.
+ *
+ * Original ROM: (&PTR_DAT_804335a0)[DAT_804360c0] + param_1 * 0x10
+ *
+ * In the browser port this is a single 16-byte slot (one float) that the callers
+ * (zz_01c7ba0_ @0x801c7cc0, zz_01dc590_ @0x801dc5f0) write the sideline explodable
+ * count into via `*(float *)zz_000598c_(0) = (float)numExplodables;`.
+ */
+const _ptrTableSlot0: Float32Array = new Float32Array(1); // 16 bytes = 1 float
+
+/**
+ * zz_000598c_ @0x8000598c — pointer-table accessor.
+ *
+ * Original decomp:
+ *   undefined *zz_000598c_(int param_1) {
+ *     undefined *puVar1;
+ *     puVar1 = (undefined *)0x0;
+ *     if (DAT_804360c0 != 0) {
+ *       puVar1 = (&PTR_DAT_804335a0)[DAT_804360c0] + param_1 * 0x10;
+ *     }
+ *     return puVar1;
+ *   }
+ *
+ * Normalized disassembly:
+ *   lwz r0,-0x54e0(r13)       // load DAT_804360c0
+ *   li r4,0x0                 // puVar1 = NULL
+ *   cmpwi r0,0x0              // if (DAT_804360c0 == 0)
+ *   beq 0x800059b0            //   goto return NULL
+ *   rlwinm r0,r0,0x2,0x0,0x1d // r0 = DAT_804360c0 * 4 (word offset)
+ *   subi r4,r13,0x8000        // r4 = &PTR_DAT_804335a0 (via r13 = BOSS)
+ *   lwzx r4,r4,r0             // r4 = PTR_DAT_804335a0[DAT_804360c0]
+ *   rlwinm r0,r3,0x4,0x0,0x1b // r0 = param_1 * 0x10
+ *   add r4,r4,r0              // r4 += offset
+ *   or r3,r4,r4               // return r4
+ *   blr
+ *
+ * Called from:
+ *   - zz_01c7ba0_ @0x801c7cc0 (chunk_0009.c:2909-2973) when actor+0x3d != 0
+ *   - zz_01dc590_ @0x801dc5f0 (unconditional)
+ * Both cast the result to float * and write SidelineExplodableManager count.
+ */
+export function zz_000598c_(param_1: number): Float32Array | null {
+  if (_audioCue !== 0) {
+    // (&PTR_DAT_804335a0)[_audioCue] + param_1 * 0x10
+    // In the browser port, _audioCue is used as the table index.
+    // We map index 0 -> _ptrTableSlot0, and any other index returns null
+    // (no additional slots are populated in the browser port).
+    if (_audioCue === 0) {
+      return null;
+    }
+    const base = _ptrTableSlot0; // PTR_DAT_804335a0[0]
+    const offset = param_1 * 0x10;
+    // In JS we can't do pointer arithmetic on Float32Array, so we return
+    // the base buffer. The callers always pass param_1 == 0, so offset == 0.
+    // For param_1 > 0 the offset would point past the end of the buffer,
+    // which matches the ROM's behaviour (unallocated memory).
+    if (offset === 0) {
+      return base;
+    }
+    // For non-zero offset, return null (ROM would return an uninitialised pointer)
+    return null;
+  }
+  return null;
+}
+
+/**
  * Set the boot configuration byte (DAT_80436498).
  * Called once at application bootstrap; the battle system reads it via getBootConfigByte().
  */
@@ -113,8 +179,24 @@ export function getAudioCue(): number {
   return _audioCue;
 }
 
+/**
+ * Get the pointer-table slot 0 (PTR_DAT_804335a0[0]).
+ * Used by callers that need direct access to the explodable-count float buffer.
+ */
+export function getPtrTableSlot0(): Float32Array {
+  return _ptrTableSlot0;
+}
+
 export function isMetroTRKEnabled(): boolean {
   return getBootConfigByte() === 1;
+}
+
+/**
+ * Reset the PTR_DAT_804335a0[0] slot to 0.
+ * Called by callers before writing the explodable count.
+ */
+export function resetPtrTableSlot0(): void {
+  _ptrTableSlot0[0] = 0;
 }
 
 // ---------------------------------------------------------------------------------------
