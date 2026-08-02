@@ -239,6 +239,16 @@ class BattleImpl implements Battle {
   private uidCounter = 0;
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
+  /**
+   * ROM cue sink — port of zz_00f036c_(actor, cueId). The bridge routes every ported
+   * family's onPlayCue fire (STAR HERO buff, beam-wing loops, magnet/omega/morph spawn
+   * stingers, per-borg dash/voice cues) here through RomBattleRuntime.onRomCue. The
+   * host (apps/game/src/main.ts enterBattle) sets this post-construction to
+   * playSfx(resolveCueToAsset(cueId, sfxKeys)). See packages/audio/src/cueResolver.
+   * Initial value comes from cfg.onRomCue when supplied at construction.
+   */
+  onRomCue?: (cueId: number) => void;
+
   constructor(
     cfg: BattleConfig,
     private readonly statsById: Map<string, BorgStats>,
@@ -319,7 +329,15 @@ class BattleImpl implements Battle {
         this.addRomProjectile(owner, spawnerAddr, kind),
       resolveHit: (attacker, victim, damageRecordIndex, knockbackMult) =>
         this.resolveRomHit(attacker, victim, damageRecordIndex, knockbackMult),
+      // Bridge → Battle.onRomCue: every ported family's ctx.onPlayCue fire flows here
+      // via bridge.ts attachToBattle's hostCtx.onPlayCue. Forward to the host-settable
+      // public field; apps/game/main.ts enterBattle wires it to the audio manager.
+      onRomCue: (_owner, cueId) => this.onRomCue?.(cueId),
     };
+
+    // Seed the host-settable callback from cfg when supplied at construction (apps/game
+    // instead sets it post-construction via session.battle.onRomCue — see enterBattle).
+    if (cfg.onRomCue) this.onRomCue = cfg.onRomCue;
 
     // Deploy each force's first borg.
     this.forces.forEach((force, fi) => this.deployNext(force, this.spawnPosFor(fi)));

@@ -94,6 +94,9 @@ importers:
       '@gf/physics':
         specifier: workspace:*
         version: link:../physics
+      '@gf/render':
+        specifier: workspace:*
+        version: link:../render
 
   packages/core: {}
 

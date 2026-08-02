@@ -114,6 +114,16 @@ import {
   defaultDeathActor,
   type SourceDeathActor,
 } from "./sourceDeath.js";
+import {
+  collisionHitPairPassActiveVsBorgs,
+  collisionHitPairPassActiveVsSecondary,
+  collisionHitPairPassObjectLists,
+  type CollisionHitPair,
+  type SourceCollisionActor,
+  type SourceCollisionContext,
+  type SourceCollisionHitRecord,
+  type SourceCollisionObject,
+} from "./damage/sourceCollision.js";
 import { applyStatusFromRecord } from "./status.js";
 import { creditBurstFill } from "./burst.js";
 import { statusImmunityMasksForBorgId } from "./movementData.js";
@@ -725,6 +735,16 @@ export interface DamageRuntimeContext {
    * damage stays byte-for-byte unchanged. Absent/false = no halving (pre-T4 behavior).
    */
   cpuHalvingEnabled?: boolean | undefined;
+  /**
+   * Per-frame counter that opts the slice INTO the source-owned collision pipeline
+   * (sourceCollision.ts's three hit-pair passes). When present AND GF_SOURCE_STRICT is set,
+   * `stepSourceCollision` runs once per frame (deduped on this value) as the PRIMARY hit
+   * path — forming + resolving every pair through the ROM-faithful pipeline and syncing HP
+   * back onto BorgRuntime — and `applyHit` defers (returns 0) so damage is not double-
+   * applied. Absent (the default today) keeps the existing applyHit path primary bit-for-bit;
+   * battle.ts adoption is the documented wiring target (see stepSourceCollision's header).
+   */
+  frameNumber?: number | undefined;
 }
 
 /** Lazily materialize a player slot's results counters (ROM actor +0x404 block). */
@@ -1036,6 +1056,292 @@ function runSourceDeathPath(
   }
 }
 
+// ---------------------------------------------------------------------------------------
+// Source-owned collision pipeline wiring — sourceCollision.ts is the 1:1 port of the
+// three ROM hit-pair passes (collision_hit_pair_pass_active_vs_borgs / _object_lists /
+// _active_vs_secondary) + the per-pair resolver tail. Per its integration spec, the
+// per-frame step calls the three passes IN ORDER once per frame after the physics/position
+// update. combat.ts invokes them here through `stepSourceCollision` (the once-per-frame
+// entry point, called from stepProjectiles which has the full projectiles list; that one
+// invocation covers melee + special + projectile pairs because the active list is built
+// from ALL attacking borgs + in-flight projectiles).
+//
+// OPT-IN CONTRACT (mirrors the existing GF_SOURCE_STRICT fidelity flag at line SOURCE_STRICT):
+// source-primary hit detection activates ONLY when BOTH GF_SOURCE_STRICT is set AND the
+// caller passes `damageContext.frameNumber`. Under that opt-in the passes form + resolve
+// every pair through the ROM-faithful pipeline, HP is synced back onto BorgRuntime, and
+// `applyHit` defers (returns 0) for that exact frame so damage is not double-applied.
+// Without the opt-in, stepSourceCollision is a no-op and the existing applyHit path stays
+// primary bit-for-bit (today's behavior). On a source-pipeline throw under STRICT, the
+// error re-throws (visible failure); under non-STRICT it console.warns and applyHit runs
+// as the documented fallback.
+//
+// Honest partial port (cited per sourceCollision.ts's own integration spec):
+//  - The +0x28 descriptor / +0x58 shape / +0x98 pos-mirror fields are NOT yet on
+//    BorgRuntime; adapters carry neutral defaults (shapeType=2 gates the immediate-vs-
+//    deferred branch; descriptorFlags=0 admits all pairs).
+//  - The four unsurfaced hitbox-shape queries (zz_002fd7c_ / zz_0039f6c_ / zz_0030348_ /
+//    zz_0030490_) fall back to defaultSourceCollisionHooks (forces all pairs) with ONE
+//    adapter-level addition: a self-pair exclusion (the port's applyHit checks uid; the
+//    source pipeline relies on hitbox geometry the forcing stubs don't model).
+//  - Only HP is synced back onto BorgRuntime. The resolver's per-pair effect-bookkeeping
+//    body (status flags, gauge deltas, reaction-anim selection — sourceCollision.ts:927-
+//    931) is NOT ported; knockback velocity + status + gauge application stay on the
+//    existing applyHit path as documented gaps under the source-primary opt-in.
+// ---------------------------------------------------------------------------------------
+
+/** The frame number stepSourceCollision last successfully ran for (null = never). applyHit
+ *  defers only when the caller's frameNumber matches this exact value, so the defer flag
+ *  can never go stale across frame boundaries. */
+let __sourceCollisionFrame: number | null = null;
+
+/** borgNumber (u16, family high byte | variant low byte) from a "pl####" borgId. Mirrors
+ *  sourceDamage's borgNumberFromBorgId for the collision-actor adapter. */
+function collisionBorgNumberFromBorgId(borgId: string): number {
+  const n = Number.parseInt(borgId.slice(2), 16);
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** Map a port DamageRecord to the sourceCollision SourceCollisionHitRecord shape (the
+ *  0x18-byte per-move record the resolver + sourceDamage consume). Fields not yet on the
+ *  port DamageRecord default to neutral (TODO cited per field). */
+function recordToCollisionHitRecord(record: DamageRecord): SourceCollisionHitRecord {
+  return {
+    hpDamage: record.hpDamage, // record+0x00.
+    scalingWord: 0, // record+0x02 — TODO: gauge/combo scaling word untraced.
+    priorityByte: 0, // TODO: priority byte (+0x71c max-update source) untraced.
+    gaugeByte: record.balanceGaugeDamage, // record+0x04 (closest port field).
+    reactionBits: record.reactionFlags, // record+0x0b.
+    knockbackStrength: record.reactionAnimVariant, // record+0x0d -> actor+0x702.
+    knockbackMode: 1, // record+0x0e — TODO: selector untraced; mode 1 == today's behavior.
+    reactionAnimVariant: record.reactionAnimVariant, // record+0x09.
+    flagsA: record.flagsA, // record+0x10.
+    flagsB: record.flagsB, // record+0x12.
+  };
+}
+
+/** Map a BorgRuntime to the sourceCollision SourceCollisionActor shape. Defaults carry
+ *  the same honest ROM-field gaps sourceDamage's adapter cites (slot, power, handicap,
+ *  comboRank, meters — init sites untraced → neutral identity values). `backRef` records
+ *  the borg so runSourceCollisionPasses can sync HP back after the pass. `reaction1da`
+ *  bit 2 mirrors applyHit's stagger bookkeeping (state hit/down = already staggered this
+ *  frame → resolver zeroes damage on re-hit, matching the ROM's same-frame dedup). */
+function borgToCollisionActor(
+  b: BorgRuntime,
+  backRef: WeakMap<SourceCollisionActor, BorgRuntime>,
+): SourceCollisionActor {
+  const inReaction = b.state === "hit" || b.state === "down";
+  const actor: SourceCollisionActor = {
+    borgNumber: collisionBorgNumberFromBorgId(b.borgId),
+    team: b.team,
+    slot: 0, // TODO: BorgRuntime has no slot field (sourceDeath adapter carries the same gap).
+    eligibility83: 0, // +0x83 == 0 means "is a borg".
+    reaction1da: inReaction ? 2 : 0, // bit 2 = already staggered/processed this frame.
+    ownerFlag1db: 0, // direct melee/special: no linked owner (projectiles set this below).
+    linkedOwner1e4: null,
+    pairAttack6fc: b.burstPaired ? 1 : 0, // +0x6fc side-wide burst (T3).
+    power: 1, // +0xc4 INIT UNCONFIRMED — 1 is the neutral IDENTITY.
+    hp: b.hp,
+    maxHp: b.maxHp,
+    pos: { x: b.pos.x, y: b.pos.y, z: b.pos.z },
+    damageDealt418: 0, // TODO: BorgRuntime carries no per-actor damage meters (battle-level telemetry).
+    friendlyFire42c: 0,
+    damageTaken41c: 0,
+  };
+  backRef.set(actor, b);
+  return actor;
+}
+
+/** Build a SourceCollisionObject (the +0x1e00-stride battle object) wrapping a borg's
+ *  active attack. descriptorFlags/pos98/pos64 carry TODO defaults — BorgRuntime does not
+ *  yet surface the +0x28 descriptor / +0x98 pos-mirror fields. shapeType 2 is the
+ *  collision-active capsule state (gates the resolver's immediate-vs-deferred branch). */
+function borgToCollisionObject(
+  attacker: BorgRuntime,
+  ownerActor: SourceCollisionActor,
+  record: DamageRecord,
+  actionIndex: number,
+): SourceCollisionObject {
+  return {
+    actor: ownerActor, // for direct melee/special the attacker IS the resolved actor.
+    owner: ownerActor, // +0x24 owner === actor for direct attacks.
+    actionIndex,
+    hitRecord: recordToCollisionHitRecord(record),
+    descriptorFlags: 0, // TODO: +0x28 descriptor flags word untraced.
+    shapeType: 2,
+    pos98: { x: attacker.pos.x, y: attacker.pos.y, z: attacker.pos.z },
+    pos64: { x: attacker.pos.x, y: attacker.pos.y, z: attacker.pos.z },
+  };
+}
+
+/** Build a SourceCollisionObject for a projectile. The resolved actor (+0x20) is the
+ *  projectile itself (eligibility83 != 0 = non-borg, so the owner-admissible gate treats
+ *  it as a projectile); the owner (+0x24) is the shooter borg (linkedOwner1e4 = the self-
+ *  hit exclusion pointer). hp/maxHp are infinite — projectiles cannot be damaged. */
+function projectileToCollisionObject(
+  pr: Projectile,
+  shooterActor: SourceCollisionActor,
+  record: DamageRecord,
+): SourceCollisionObject {
+  const projectileActor: SourceCollisionActor = {
+    borgNumber: 0,
+    team: pr.team,
+    slot: 0,
+    eligibility83: 1, // non-borg: owner-admissible gate's projectile branch.
+    reaction1da: 0,
+    ownerFlag1db: 1, // this actor HAS a linked owner (the shooter).
+    linkedOwner1e4: shooterActor, // the self-hit exclusion pointer.
+    pairAttack6fc: 0,
+    power: 1,
+    hp: Number.POSITIVE_INFINITY,
+    maxHp: Number.POSITIVE_INFINITY,
+    pos: { x: pr.pos.x, y: pr.pos.y, z: pr.pos.z },
+    damageDealt418: 0,
+    friendlyFire42c: 0,
+    damageTaken41c: 0,
+  };
+  return {
+    actor: projectileActor,
+    owner: shooterActor,
+    actionIndex: 0,
+    hitRecord: recordToCollisionHitRecord(record),
+    descriptorFlags: 0,
+    shapeType: 2,
+    pos98: { x: pr.pos.x, y: pr.pos.y, z: pr.pos.z },
+    pos64: { x: pr.pos.x, y: pr.pos.y, z: pr.pos.z },
+  };
+}
+
+/**
+ * Run the three ROM hit-pair passes (sourceCollision.ts) over the live borg roster + the
+ * in-flight projectiles. Builds SourceCollisionObject adapters, invokes
+ * collisionHitPairPassActiveVsBorgs → collisionHitPairPassObjectLists →
+ * collisionHitPairPassActiveVsSecondary in the ROM's dispatch order
+ * (chunk_0003.c:6213-6215), syncs resolved-pair HP back onto BorgRuntime, and returns the
+ * resolved pairs (audit / edge-emission). The pair-formation filter chain + the per-pair
+ * resolver delegation (computeBaseDamage + applyHpDamage + computeKnockbackLaunchDirection)
+ * are source-owned; the four unsurfaced hitbox-shape queries fall back to forcing hooks
+ * with a self-pair exclusion (see the wiring header above).
+ */
+function runSourceCollisionPasses(
+  all: readonly BorgRuntime[],
+  profiles: Map<string, BorgProfile>,
+  _damageContext: DamageRuntimeContext,
+  projectiles: readonly Projectile[],
+): CollisionHitPair[] {
+  void _damageContext; // battle-level fields (burst meters, telemetry) not yet routed here.
+  const backRef = new WeakMap<SourceCollisionActor, BorgRuntime>();
+  // Owner-actor cache so the same borg resolves to ONE SourceCollisionActor whether it
+  // appears as an active attacker or a borg-list target — the resolver debits the OWNER's
+  // meters, and shared identity is what lets the self-pair broadPhase exclusion fire.
+  const ownerCache = new Map<string, SourceCollisionActor>();
+  const ownerActorFor = (b: BorgRuntime): SourceCollisionActor => {
+    const cached = ownerCache.get(b.uid);
+    if (cached) return cached;
+    const fresh = borgToCollisionActor(b, backRef);
+    ownerCache.set(b.uid, fresh);
+    return fresh;
+  };
+
+  // Active list (DAT_803c477c): borgs mid-attack + in-flight projectiles.
+  const activeList: SourceCollisionObject[] = [];
+  for (const b of all) {
+    if (b.state !== "attack" && b.state !== "special") continue;
+    if (!profiles.has(b.uid)) continue;
+    const owner = ownerActorFor(b);
+    // Borg's current attack record: the archetype fallback (melee → record 1, special →
+    // record 2). TODO: read the borg's currently-armed exact kind → family record, mirroring
+    // stepAttacks' exact ladder lookup (comboLadderForBorgId / xDamageRecordSpread).
+    const record = damageRecordByIndex(
+      b.state === "special" ? DAMAGE_RECORD_INDEX.CHARGE_OR_SPECIAL : DAMAGE_RECORD_INDEX.MELEE,
+    );
+    activeList.push(borgToCollisionObject(b, owner, record, b.state === "special" ? 2 : 0));
+  }
+  for (const pr of projectiles) {
+    const shooter = all.find((b) => b.uid === pr.ownerUid);
+    if (!shooter) continue;
+    const owner = ownerActorFor(shooter);
+    const record = pr.damageRecord ?? damageRecordByIndex(pr.damageRecordIndex ?? DAMAGE_RECORD_INDEX.SHOT);
+    activeList.push(projectileToCollisionObject(pr, owner, record));
+  }
+
+  // Borg list (DAT_803c2f7c): every targetable borg. Attackers appear here too; the
+  // self-pair broadPhase exclusion (hooks below) skips active-vs-same-borg pairs.
+  const borgList: SourceCollisionObject[] = [];
+  for (const b of all) {
+    if (!isTargetable(b)) continue;
+    const owner = ownerActorFor(b);
+    borgList.push(borgToCollisionObject(b, owner, damageRecordByIndex(DAMAGE_RECORD_INDEX.MELEE), 0));
+  }
+
+  // Default forcing hooks + the adapter-level self-pair exclusion. The ROM relies on the
+  // hitbox-shape overlap test (zz_0030490_) to keep a borg's own attack off its body; the
+  // forcing stub admits every pair, so the exclusion is ported here via owner identity.
+  const ctx: SourceCollisionContext = {
+    hooks: {
+      broadPhase: (active, target) => active.owner !== target.actor,
+      shapeCompat: () => true,
+      transformAndOverlap: (active) => ({
+        overlap: true,
+        contactPoint: { x: active.owner.pos.x, y: active.owner.pos.y, z: active.owner.pos.z },
+        squareDistance: 0,
+      }),
+    },
+  };
+
+  // ROM dispatch order (chunk_0003.c:6213-6215). Pass 1 returns the resolved pairs; passes
+  // 2 + 3 run with empty target lists today (no items/walls/summons modeled as collision
+  // objects yet — TODO when those surfaces land).
+  const pairs = collisionHitPairPassActiveVsBorgs(activeList, borgList, ctx);
+  collisionHitPairPassObjectLists([], [], ctx);
+  collisionHitPairPassActiveVsSecondary(activeList, [], ctx);
+
+  // Sync resolved-pair HP back onto BorgRuntime (the resolver mutated the adapter actors).
+  for (const pair of pairs) {
+    const targetBorg = backRef.get(pair.target.actor);
+    if (targetBorg && targetBorg.hp !== pair.target.actor.hp) {
+      targetBorg.hp = pair.target.actor.hp;
+    }
+  }
+  return pairs;
+}
+
+/**
+ * Per-frame entry point for the source-owned collision pipeline. Dedupes to one run per
+ * `damageContext.frameNumber` (the opt-in counter), projects resolved-pair HP mutations
+ * back onto BorgRuntime, and stamps `__sourceCollisionFrame` so applyHit defers for that
+ * exact frame. OPT-IN: activates only under GF_SOURCE_STRICT + a provided frameNumber;
+ * otherwise returns [] without running (existing applyHit path stays primary). On a
+ * source-pipeline throw under STRICT, re-throws (visible failure); under non-STRICT,
+ * console.warns and returns [] (existing applyHit path = documented fallback).
+ *
+ * battle.ts is the wiring target: call stepSourceCollision once per frame (passing
+ * `frameNumber` in DamageRuntimeContext) so the source pipeline runs BEFORE the per-borg
+ * stepAttacks applyHit loop. combat.ts also invokes it from stepProjectiles (which has the
+ * full projectiles list) to exercise the pipeline structurally and to run source-primary
+ * resolution for projectile pairs when the opt-in is active.
+ */
+export function stepSourceCollision(
+  all: readonly BorgRuntime[],
+  profiles: Map<string, BorgProfile>,
+  damageContext: DamageRuntimeContext,
+  projectiles: readonly Projectile[] = [],
+): CollisionHitPair[] {
+  const frame = damageContext.frameNumber;
+  if (frame === undefined) return []; // legacy: no opt-in → existing applyHit path primary.
+  if (!SOURCE_STRICT) return []; // source pipeline exercised only under the STRICT fidelity flag.
+  if (frame === __sourceCollisionFrame) return []; // already ran this frame.
+  try {
+    const pairs = runSourceCollisionPasses(all, profiles, damageContext, projectiles);
+    __sourceCollisionFrame = frame;
+    return pairs;
+  } catch (err) {
+    if (SOURCE_STRICT) throw err;
+    console.warn("[combat] source collision pass failed; existing applyHit path stays primary:", err);
+    return [];
+  }
+}
+
 /**
  * Apply a hit to `victim`. Respects invincibility. HP damage and knockback velocity always
  * land, but whether the victim is INTERRUPTED is decided by the DERIVED gauge-based stagger
@@ -1063,6 +1369,16 @@ export function applyHit(
   damageContext?: DamageRuntimeContext,
 ): number {
   if (!isTargetable(victim) || isInvincible(victim)) return 0;
+
+  // Source-collision defer gate (GF_SOURCE_STRICT + frameNumber opt-in): when the source
+  // pipeline already resolved this pair this frame (HP synced back via stepSourceCollision),
+  // defer to it so damage is not double-applied. Only fires when the caller's frameNumber
+  // matches the exact frame stepSourceCollision ran for — the defer flag can never go stale
+  // across frame boundaries. Today's melee/special/projectile applyHit calls are the
+  // documented FALLBACK; they run unchanged when the opt-in is off (the default).
+  if (damageContext?.frameNumber !== undefined && damageContext.frameNumber === __sourceCollisionFrame) {
+    return 0;
+  }
 
   // Contact-effect selector for the renderer (DERIVED): the record's u8 +0x09 impactEffectId is
   // what resolve_hitbox_target_effects_and_damage feeds to the impact-spark spawner zz_0019550_
@@ -3000,6 +3316,15 @@ export function stepProjectiles(
   ctx?: ProjectileContext,
   damageContext: DamageRuntimeContext = {},
 ): Projectile[] {
+  // Source-owned collision pipeline invocation (sourceCollision.ts integration spec). This
+  // is combat.ts's per-frame call into the three ROM hit-pair passes — the only hit-
+  // detection site that has the full projectiles list, so the single invocation covers
+  // melee + special + projectile pairs (the active list is built from ALL attacking borgs
+  // + in-flight projectiles). No-op unless GF_SOURCE_STRICT + damageContext.frameNumber
+  // (the source-primary opt-in); otherwise the existing per-projectile applyHit loop below
+  // stays primary bit-for-bit. See stepSourceCollision's header for the full contract.
+  stepSourceCollision(all, profiles, damageContext, projectiles);
+
   const survivors: Projectile[] = [];
   for (const pr of projectiles) {
     pr.hitConfirmedThisFrame = false;

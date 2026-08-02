@@ -824,6 +824,17 @@ async function enterBattle(): Promise<void> {
     (boot) => {
       const { battle, config, localPlayerId, localPlayerIds, stageBounds } = boot;
 
+      // Wire the ROM cue resolver into combat. Every ported family handler's ctx.onPlayCue
+      // fire (STAR HERO buff 0xa5, beam-wing loops, magnet/omega/morph spawn stingers,
+      // per-borg dash/voice cues, etc.) flows through bridge.ts → RomBattleRuntime.onRomCue
+      // → Battle.onRomCue. We intersect the ROM's arithmetic soundId (bank=cue>>7,
+      // sample=cue&0x7f, guard cue<0x180) with the exported se_* manifest keys via
+      // resolveCueToAsset; missing exports honestly drop (matches the ROM's silent TSB
+      // skip). This is the PRIMARY path for cues fired through the stream VM; the
+      // COMBAT_SFX event-driven path below remains as fallback for cues that have NO
+      // ROM cue id (melee swings, death/deploy reaction anims, charge tiers).
+      battle.onRomCue = (cue) => playSfx(resolveCueToAsset(cue, sfxKeys));
+
       // Energy maxima for the HUD meters (team 0 = ally, team 1 = enemy).
       const { allyMax, enemyMax } = battleEnergyMaxima(battle);
 

@@ -18,7 +18,10 @@
 //     countdown +0x54e / accumulator +0x560; reposition glide; reload gravityCoeff from
 //     descriptor+0x6c on +0x1d0f stream event; gravity integrate FUN_80067310(1.0).
 //     EXIT: +0x560 <= 0 AND `+0x1cef < 0` (stream fire-complete event) → +0x540++,
-//     +0x6f7 = 0. The stream's fireChild op (op 0x09) spawns the beam during this phase.
+//     +0x6f7 = 0. NOTE: the beam does NOT spawn via a stream op 0x09 fireChild here —
+//     chargeFireChildFrames.generated.json confirms 0 fireChild ops across all charge
+//     streams. The beam spawns from the cfg+0x14 onRelease callback fired at the phase
+//     1→2 transition (see chargePhase1); phase 2 only counts down the fire duration.
 //   Phase 3 FUN_80179c00 (recovery): steerYaw (+0x18da) × FLOAT_8043ae30 (0.9) decay;
 //     gravity integrate; ground check. EXIT A: grounded AND +0x1cef < 0 → +0x5e0 &= ~3,
 //     upper cue 7, cooldown +0x694 = FLOAT_8043ae34 (8.0) + dt. EXIT B: +0x1cee
@@ -97,14 +100,16 @@ export interface SharedChargeConfig {
    *  reposition leap). Engine ignores its return (verified). NULL = not called. */
   onSetup?: ((actor: RomActor, ctx: StreamContext) => void) | null;
   /** cfg ptr[+0x14] — fired once on the phase-1→2 stream-event transition (the release moment),
-   *  BEFORE the phase byte increments. NULL = not called. */
+   *  AFTER +0x540++ and +0x6f7=2 (chunk_0044.c:3982-3987). This is the beam spawn point.
+   *  NULL = not called. */
   onRelease?: ((actor: RomActor, ctx: StreamContext) => void) | null;
   /** PORT APPROXIMATION (labeled): phase 1 has no ROM timer — the release is the +0x1cef > 0
    *  stream event, authored in the group-4 slot bytecode (op 0x02). Until the bank-byte
    *  extractor lands, the bridge does not drive +0x1cef for B-charge (only X-special action 2
-   *  banks are pre-decoded). After this frame budget with no event, advance to phase 2 WITHOUT
-   *  the onRelease callback (labeled fallback — same caveat class as shared-charge3.whiffFrames
-   *  and gred.ts's 81-frame whiff recovery). TUNED. */
+   *  banks are pre-decoded). After this frame budget with no event, advance to phase 2 AND
+   *  still fire onRelease (the beam must spawn or no charge borg deals damage). Labeled
+   *  fallback — same caveat class as shared-charge3.whiffFrames and gred.ts's 81-frame whiff
+   *  recovery. TUNED. */
   holdFrames?: number;
 }
 
@@ -201,22 +206,32 @@ function chargePhase1(actor: RomActor, cfg: SharedChargeConfig, ctx: StreamConte
   // frame; this is the "stream-event-driven release" that replaces a frame counter.
   // (The task brief's "+0x1cef < 0" prose describes the family of stream-event gates; the
   // decompile's sign for THIS transition is > 0. Phase 2's fire-complete gate is < 0.)
-  if (actor.contactP0 > 0) {
+  //
+  // The cfg+0x14 onRelease callback (chunk_0044.c:3985-3987) fires HERE — it is the beam
+  // spawn point for every charge borg. G RED's FUN_8018edc4 (chunk_0047.c:1003-1013) calls
+  // zz_00e19a8_(actor, variant, &+0x6f7) which allocates the beam projectile; the group-4
+  // stream contains NO op 0x09 fireChild (chargeFireChildFrames.generated.json). Latched so
+  // the spawn fires exactly once per charge even if the transition is re-entered.
+  const latch = actor as RomActor & { chargeReleased?: boolean };
+  let releaseNow = actor.contactP0 > 0;
+  if (!releaseNow) {
+    // PORT APPROXIMATION (labeled — see cfg.holdFrames): without the byte-loaded group-4
+    // slot data the bridge cannot fire the +0x1cef event for B-charge. Advance to phase 2
+    // after the holdFrames budget so the machine does not stall in the windup forever. The
+    // onRelease callback IS fired on this fallback path too — otherwise NO charge borg would
+    // ever spawn its beam (the stream-event branch is unreachable without byte-loaded banks).
+    const scratch = actor as RomActor & { holdFallbackCounter?: number };
+    scratch.holdFallbackCounter = (scratch.holdFallbackCounter ?? 0) + 1;
+    releaseNow = scratch.holdFallbackCounter >= (cfg.holdFrames ?? DEFAULT_HOLD_FRAMES);
+  }
+  if (releaseNow) {
     actor.fbPhaseSlots[0] = 2; // +0x540++
     (actor as RomActor & { phaseState6f7?: number }).phaseState6f7 = 2; // +0x6f7 = 2
-    cfg.onRelease?.(actor, ctx);
+    if (!latch.chargeReleased) {
+      latch.chargeReleased = true;
+      cfg.onRelease?.(actor, ctx);
+    }
     return;
-  }
-
-  // PORT APPROXIMATION (labeled — see cfg.holdFrames): without the byte-loaded group-4 slot
-  // data the bridge cannot fire the +0x1cef event for B-charge. Advance to phase 2 after the
-  // holdFrames budget so the machine does not stall in the windup forever. The onRelease
-  // callback is NOT fired on this fallback path (mirrors shared-charge3.whiffFrames semantics).
-  const scratch = actor as RomActor & { holdFallbackCounter?: number };
-  scratch.holdFallbackCounter = (scratch.holdFallbackCounter ?? 0) + 1;
-  if (scratch.holdFallbackCounter >= (cfg.holdFrames ?? DEFAULT_HOLD_FRAMES)) {
-    actor.fbPhaseSlots[0] = 2;
-    (actor as RomActor & { phaseState6f7?: number }).phaseState6f7 = 2;
   }
 }
 
@@ -328,9 +343,7 @@ function chargePhase3(actor: RomActor, _cfg: SharedChargeConfig, ctx: StreamCont
 //   cfg s16[+0xc] = 0x001e → fire-timer seed 30
 //   cfg u16[+0xe] = 0x001e → countdown seed 30
 //   cfg ptr[+0x10] = 0x8018eda8 → onSetup (FUN_8018eda8)
-//   cfg ptr[+0x14] = 0x8018edc4 → onRelease (FUN_8018edc4)
-// The callbacks (family-code-block addresses) are not ported yet — they carry
-// G RED-specific beam-spawn bookkeeping the stream's fireChild op already covers.
+//   cfg ptr[+0x14] = 0x8018edc4 → onRelease (FUN_8018edc4) — the beam spawn callback.
 // ============================================================================
 /** G RED (pl0615/pl0629/pl062a) shared-charge config — the ROM r4 block @0x80365854. */
 export const GRED_CHARGE_CONFIG: SharedChargeConfig = {
@@ -340,7 +353,19 @@ export const GRED_CHARGE_CONFIG: SharedChargeConfig = {
   repositionScale: 0.949999988079071, // cfg f32[+0x8] (0x3f733333)
   gravityCoeff: 1.0,    // descriptor+0x6c default (G RED ground gravity)
   onSetup: null,        // cfg ptr[+0x10] = FUN_8018eda8 — not yet ported
-  onRelease: null,      // cfg ptr[+0x14] = FUN_8018edc4 — not yet ported
+  // cfg ptr[+0x14] = FUN_8018edc4 (chunk_0047.c:1003-1013). Ports the G RED release
+  // callback: branch on actor borgId (+0x3e8 == 0x62a), then call
+  // zz_00e19a8_(actor, variant, &+0x6f7). zz_00e19a8_ (chunk_0024.c:1582-1612) allocates
+  // the beam projectile and stamps param_2 into child+0x11 — the variant byte that
+  // selects the beam record (parallel to op 0x09 fireChild's onFireChild(variant); the
+  // &+0x6f7 backref goes to child+0x154, NOT the variant). ROM branch:
+  //   borgId == 0x62a (G BLACK) → variant 0x11
+  //   else (G RED 0x615 / NEO G RED 0x629) → variant 0xf
+  // ctx.onFireChild → bridge spawnRomProjectile → real beam projectile.
+  onRelease: (actor, ctx) => {
+    const variant = actor.borgNumber === 0x62a ? 0x11 : 0xf;
+    ctx.onFireChild?.(actor, variant);
+  },
 };
 
 /**

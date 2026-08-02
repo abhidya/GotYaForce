@@ -481,6 +481,16 @@ export interface BattleConfig {
    * In the browser port this is exposed as a battle-level config for testing/debugging.
    */
   bootConfigByte?: number;
+  /**
+   * ROM cue callback — port of zz_00f036c_(actor, cueId). Fired by the stream VM's
+   * onPlayCue hook when a ported family handler triggers a sound (STAR HERO buff cue
+   * 0xa5, per-borg deploy/dash/attack voice cues, etc.). The host wires this to its
+   * audio layer via resolveCueToAsset(cueId, sfxKeys). See packages/audio/src/cueResolver.
+   *
+   * Mutably settable post-construction on the Battle instance (see Battle.onRomCue);
+   * supplied via BattleConfig only when the constructor knows the callback upfront.
+   */
+  onRomCue?: (cueId: number) => void;
 }
 
 export type BattleResult = "ongoing" | "win" | "lose" | "draw";
@@ -833,6 +843,15 @@ export interface Battle {
   /** Advance the sim by one fixed step. `dt` is accepted for API symmetry but the sim is
    *  fixed-step (SIM.DT); pass it through for documentation/compat. */
   step(dt: number, inputs: Record<string, PlayerInput>): BattleObservation;
+  /** ROM cue sink — port of zz_00f036c_(actor, cueId). Fired by the stream VM's
+   *  onPlayCue hook (StreamContext) when a ported family handler triggers a sound:
+   *  STAR HERO buff cue 0xa5, per-borg deploy/dash/attack voice cues, beam-wing
+   *  flight loops, magnet/omega/morph spawn stingers, etc. Set by the host after
+   *  construction (apps/game/src/main.ts enterBattle wires it to
+   *  playSfx(resolveCueToAsset(cueId, sfxKeys)) — see packages/audio/src/cueResolver).
+   *  Undefined → cues fire through the bridge but are silently dropped at this seam
+   *  (the default ctx.onPlayCue no-op in bridge.ts). */
+  onRomCue?: (cueId: number) => void;
 }
 
 /** Internal: a deploy queue entry (a borg not yet on the field). */

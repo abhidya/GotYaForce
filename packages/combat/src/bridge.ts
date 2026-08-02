@@ -1299,6 +1299,11 @@ export interface RomBattleRuntime {
   resolveHit(attacker: BorgRuntime, victim: BorgRuntime, damageRecordIndex: number, knockbackMult: number): void;
   /** Optional observer for zz_01cb750_'s form-change event. */
   postMorphEvent?(owner: BorgRuntime, borgNumber: number, slot: number): void;
+  /** ROM cue sink — port of zz_00f036c_(owner, cueId). Fired by the stream VM's
+   *  onPlayCue hook when a ported family handler triggers a sound. The host (battle.ts)
+   *  routes this through to its own Battle.onRomCue; undefined → cues drop silently
+   *  at this seam (matches the silent no-op the prior attachToBattle produced). */
+  onRomCue?(owner: BorgRuntime, cueId: number): void;
 }
 
 // ============================================================================
@@ -1636,6 +1641,14 @@ export class RomDriverBridge implements RomFamilyDriver {
         battleRuntime.spawnProjectile(runtime, 0, childId);
         return true;
       },
+      // Route the stream VM's onPlayCue (fired by family handlers — STAR HERO buff cue
+      // 0xa5, beam-wing/dragon spawn stingers, magnet/omega/morph cues, etc.) through
+      // the battle runtime's onRomCue sink. battle.ts plumbs this to its Battle.onRomCue
+      // field, which apps/game wires to playSfx(resolveCueToAsset(cueId, sfxKeys)).
+      // Without this override the bridge falls back to the silent default ctx.onPlayCue
+      // no-op (overlayHostCtx's else branch never runs for onPlayCue, so the cue would
+      // never escape the package).
+      onPlayCue: (_actor, cueId) => battleRuntime.onRomCue?.(runtime, cueId),
     };
     return RomDriverBridge.attachWith(runtime, hostCtx, battleRuntime);
   }
