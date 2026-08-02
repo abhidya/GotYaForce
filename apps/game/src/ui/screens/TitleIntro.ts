@@ -246,6 +246,10 @@ function setObjectOpacity(object: THREE.Object3D, opacity: number): void {
  */
 export const titleSourceCamera: SourceCamera = createSourceCamera();
 
+/** Opcode 0x09 camera-mode byte (ROM state[0x3e]). `SourceCameraState` has no mode field,
+ *  so the renderer stores it here; the title VM's setCameraMode routes through this. */
+export const titleCameraState = { mode: 0 };
+
 export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions): TitleIntroHandle {
   const teardown: Array<() => void> = [];
   let destroyed = false;
@@ -270,13 +274,34 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
     "position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0;";
   root.appendChild(tintLayer);
 
-  // Title logo. The ROM spawns this as a textured drawable via opcode 0x13
-  // (widget id 27) from the DAT_8031a074 chain, which is not yet exported — so
-  // this remains an HLE placeholder until that drawable chain lands. The element
-  // is marked source-missing so the gap is visible, never silent.
+  // Full-screen overlay quad (opcodes 0x0f/0x10/0x11). The ROM drives a COBJ overlay
+  // layer via zz_002aee0_(state+0x40) (on) / zz_002affc_ (off); opcode 0x11 ramps
+  // state[0x48] toward state[0x60] and the VM integrates it each tick (titleVm.ts
+  // integrate()). This layer's opacity is read from vm.state.overlay.current EVERY
+  // FRAME in syncFxLayers — not a static dataset flag — so the ramp produces a real,
+  // visible fade driven by the VM's overlay-integration state.
+  const overlayLayer = el("div", { class: "gf-title-intro-overlay" });
+  overlayLayer.style.cssText =
+    "position:absolute;inset:0;pointer-events:none;z-index:5;background:#000;opacity:0;";
+  root.appendChild(overlayLayer);
+
+  // Title logo. Opcode 0x13 spawns this as widget id 27 from the DAT_8031a074 chain.
+  // The chain's texture IS exported: titles.tpl -> /ui/tpl/titles/image_00_I4.png
+  // (640x448 I4; see public/ui/manifest.json sourcePath titles.tpl). The HSD widget is
+  // a screen-space 2D quad, so a DOM layer with the real texture is the faithful render
+  // (a world-space Three.js plane would misrepresent it). The placeholder text styling
+  // in styles.css is inert here — the element has no text node; the real artwork comes
+  // from the texture.
+  const titleLogoTextureUrl = publicUrl("/ui/tpl/titles/image_00_I4.png");
   const sourceTitle = el("div", { class: "gf-title-intro-source-title" });
   sourceTitle.hidden = true;
-  sourceTitle.dataset["gfHle"] = "title-logo:DAT_8031a074[27]-drawable-not-exported";
+  sourceTitle.dataset["gfSource"] = "titles.tpl:image_00_I4.png";
+  sourceTitle.style.backgroundImage = `url("${titleLogoTextureUrl}")`;
+  sourceTitle.style.backgroundSize = "contain";
+  sourceTitle.style.backgroundRepeat = "no-repeat";
+  sourceTitle.style.backgroundPosition = "center";
+  sourceTitle.style.width = "min(92vw, 720px)";
+  sourceTitle.style.aspectRatio = "640 / 448";
   root.appendChild(sourceTitle);
   const lightBar = el("div", { class: "gf-title-intro-lightbar" });
   root.appendChild(lightBar);
@@ -333,6 +358,14 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       applyTdcFrame?.(selectedTdcIndex, frame);
     },
     setCameraMode: (mode) => {
+      // ROM: state[0x3e] = mode. Stored on the title camera (SourceCameraState has no
+      // mode field, so it lives in titleCameraState). The mode byte selects which camera
+      // behavior the desk runs; the cue->behavior mapping is pending decomp, so for now
+      // we log + store and keep the authored tdc COBJ animation driving the view.
+      if (mode !== titleCameraState.mode) {
+        console.info(`[title] opcode 0x09 setCameraMode: ${mode}`);
+        titleCameraState.mode = mode;
+      }
       sceneHost.dataset["gfIntroCam"] = String(mode);
     },
     setSceneAuxMode: (mode) => {
@@ -376,18 +409,28 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       root.dataset["gfOverlay"] = on ? "on" : "off";
     },
     copyOverlayTransform: () => {
+      // ROM: gnt4_memcpy(state+0x40, DAT_8038a550, 0x20) — copies a 32-byte transform
+      // seed that positions the overlay quad. The quad is already full-screen here, so
+      // placement is cosmetic; logged for traceability, no visible effect required.
+      console.info("[title] opcode 0x10 copyOverlayTransform: DAT_8038a550 seed (32 bytes) — overlay placement (cosmetic)");
       sceneHost.dataset["gfIntroCopyXform"] = "1";
     },
     titleLightBar: () => {
+      // ROM: zz_0040d64_(0,6) drives a light-bar sweep. styles.css keys a 700ms sweep
+      // off [data-gf-lightbar="active"]. To allow re-triggering when the opcode fires
+      // again, drop the flag, force a reflow, then re-set it so the CSS animation
+      // restarts from 0% rather than sticking on the completed keyframe.
+      root.dataset["gfLightbar"] = "idle";
+      void root.offsetWidth;
       root.dataset["gfLightbar"] = "active";
     },
     spawnTitleWidget: (id) => {
       sceneHost.dataset["gfIntroWidget"] = String(id);
       root.dataset["gfTitleSpawned"] = String(id);
-      // The DAT_8031a074 drawable chain is not exported; ids 27 (title logo) and
-      // 29 (press-start) are the only widget spawns in this script and are HLE'd
-      // here as DOM layers pending that export. Any OTHER id is an unhandled
-      // source command — surface it loudly rather than swallowing it.
+      // id 27 (title logo): the DAT_8031a074 drawable chain's texture IS exported
+      // (titles.tpl -> sourceTitle's background-image), so this is a real render, not
+      // HLE. id 29 (PRESS START) renders through the real ascii.tpl bitmap font (see
+      // bitmapText above). Any OTHER id is an unhandled source command — surface it.
       if (id === 27) {
         sourceTitle.hidden = false;
       } else if (id === 29) {
@@ -664,6 +707,14 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
         root.dataset["gfIntroStep"] = String(vm.state.sceneStep);
         root.dataset["gfIntroEnd"] = String(vm.state.endRequested);
         root.dataset["gfIntroDone"] = String(vm.state.endRequested === 1);
+        // Overlay (opcodes 0x0f/0x11): the VM integrates state.overlay.current toward
+        // target each tick; mirror it onto the overlay quad's opacity. When toggled off
+        // (opcode 0x0f arg 0 -> zz_002affc_ deallocates the quad), snap to 0 — the ROM
+        // removes the quad from the render list rather than holding a frozen opacity.
+        const overlayOpacity = vm.state.overlay.on !== 0
+          ? Math.max(0, Math.min(1, vm.state.overlay.current))
+          : 0;
+        overlayLayer.style.opacity = String(overlayOpacity);
       };
 
       const render = (now = performance.now()): void => {

@@ -2,16 +2,15 @@ import * as THREE from "three";
 import { createThreeAssetLoader, prepareImportedModel } from "@gf/render";
 
 import {
-  PHYSICAL_MENU_ANGULAR_STEPS,
   PHYSICAL_MENU_CURSOR_MODEL_ID,
   PHYSICAL_MENU_MODEL_TRIPLETS,
 } from "../titleIntroScript.generated.js";
+import { createMenuWidgetSystem, type MenuWidgetEffectSink } from "./menuWidgetSystem.js";
 import { BAM16_TO_RADIANS } from "./titlePropController.js";
 import { publicUrl } from "../../publicUrl.js";
 
 const SOURCE_FPS = 60;
 const FIXED_FRAME_SECONDS = 1 / SOURCE_FPS;
-const CURSOR_BAM_STEP = 0x400;
 // The stff GLBs retain the HSD world space. Keeping the ROM camera unchanged makes
 // positive-X OPTION/Edit Force project right and views the authored text fronts.
 const CAMERA_EYE = new THREE.Vector3(83.785248, 940.888428, 2788.060059);
@@ -28,16 +27,16 @@ export interface PhysicalMenuSceneHandle {
   destroy(): void;
 }
 
-interface MenuDrawable {
-  readonly menuIndex: number;
+/**
+ * GLB plumbing owned by this renderer, keyed by the ROM menu index so the
+ * widget-system sink can address each pivot. The BAM arithmetic that drove
+ * these pivots previously (manual rotation / visibility / cursor copy) is now
+ * the widget system's job; the fields below are pure renderer state.
+ */
+interface MenuEntryPivots {
   readonly basePivot: THREE.Group;
   readonly selectionPivot: THREE.Group;
   readonly labelPivot: THREE.Group;
-  bamAngle: number;
-}
-
-function wrapI16(value: number): number {
-  return (value << 16) >> 16;
 }
 
 function modelPath(modelId: number): string {
@@ -83,14 +82,21 @@ function disposeObject(object: THREE.Object3D): void {
 }
 
 /**
- * Renderer for the physical main-menu task created by FUN_801cd90c.
+ * Renderer for the physical main-menu task created by `FUN_801cd90c`.
  *
- * Source ownership:
- * - DAT_8038a720 creates seven kind-0 objects, one kind-1 cursor, and seven kind-2 labels.
- * - DAT_8038a760 supplies each entry's base/selection/label stff model ids.
- * - kind 1 uses literal model 0x38 and copies the selected kind-0 source position.
- * - DAT_8038a78c supplies each base model's per-frame BAM rotation step.
- * - the camera and lights come from stage 0x11's stff scene archive.
+ * Widget lifecycle ownership is delegated to `createMenuWidgetSystem` — a 1:1 port
+ * of the ROM's 15-descriptor widget runtime. This module owns only the WebGL
+ * plumbing (scene/camera/renderer + GLB loading) and exposes the effect surface
+ * (`MenuWidgetEffectSink`) that the widget system drives. The ROM-side arithmetic
+ * — DAT_8038a78c base-spin steps, the 0x400 cursor spin, selection visibility
+ * gating, and the entry[selection] cursor follow — all live in the widget system.
+ *
+ * Source ownership kept here (renderer plumbing only):
+ * - stage 0x11 stff scene archive (35 environment GLBs) + camera/lights.
+ * - DAT_8038a760 triplet GLB loading per entry (base/selection/label pivots).
+ * - kind-1 cursor GLB (model 0x38) pivot.
+ * - GL draw itself (three.js renders the bound scene each frame; the ROM
+ *   `zz_00097b4_(+0xe0, 0x47)` material-preset draw calls are sink no-ops).
  */
 export function mountPhysicalMenuScene(
   host: HTMLElement,
@@ -123,10 +129,10 @@ export function mountPhysicalMenuScene(
   const sceneRoot = new THREE.Group();
   scene.add(sceneRoot);
 
-  let selectedIndex = initialIndex;
+  // ROM widget-owned GLB pivots, addressed by the sink closures below.
+  const entries = new Map<number, MenuEntryPivots>();
   let cursorPivot: THREE.Group | null = null;
-  let cursorBamAngle = 0;
-  let drawables: MenuDrawable[] = [];
+
   let disposed = false;
   let animationFrame = 0;
   let accumulatedSeconds = 0;
@@ -138,20 +144,78 @@ export function mountPhysicalMenuScene(
     }
   }
 
-  function applySelection(): void {
-    for (const drawable of drawables) {
-      drawable.selectionPivot.visible = drawable.menuIndex === selectedIndex;
-    }
-    const selected = drawables[selectedIndex];
-    if (cursorPivot && selected) cursorPivot.position.copy(selected.basePivot.position);
-  }
+  // =========================================================================
+  // MenuWidgetEffectSink — ROM widget system -> three.js object application.
+  // Every ROM effect (FUN_801cdaec / zz_01cdf08_ / FUN_801cde10 / ...) routes
+  // here. The system computes every argument; this sink only applies it.
+  // =========================================================================
+  const sink: MenuWidgetEffectSink = {
+    // FUN_801cdaec (init kind 0): models already loaded + pivots built by the
+    // async loader; attach base+selection and report the base translation that
+    // the cursor follows (entry+0x144..14c).
+    initEntry(menuIndex) {
+      const entry = entries.get(menuIndex);
+      if (!entry) return { x: 0, y: 0, z: 0 };
+      sceneRoot.add(entry.basePivot, entry.selectionPivot);
+      const p = entry.basePivot.position;
+      return { x: p.x, y: p.y, z: p.z };
+    },
+    // FUN_801cde60 (init kind 1): attach the cursor pivot.
+    initCursor() {
+      if (cursorPivot) sceneRoot.add(cursorPivot);
+    },
+    // FUN_801ce01c (init kind 2): attach the label pivot.
+    initLabel(menuIndex) {
+      const entry = entries.get(menuIndex);
+      if (entry) sceneRoot.add(entry.labelPivot);
+    },
+    // FUN_801cdbe0 (update kind 0): base Y-spin (axis 0x79) + selection-model
+    // visibility (entry+0xe4 -> +0x10, gated by selection + triggerActive).
+    updateEntry(menuIndex, rotationBam, selectionVisible) {
+      const entry = entries.get(menuIndex);
+      if (!entry) return;
+      entry.basePivot.rotation.y = rotationBam * BAM16_TO_RADIANS;
+      entry.selectionPivot.visible = selectionVisible;
+    },
+    // zz_01cdf08_ (update kind 1): cursor follows entry[selection].basePosition
+    // into +0x20..28, applies the Z-spin (axis 0x7a), and respects the ROM
+    // globalState<2 && triggerActive visibility gate.
+    updateCursor(position, rotationBam, cursorVisible) {
+      if (!cursorPivot) return;
+      cursorPivot.position.set(position.x, position.y, position.z);
+      cursorPivot.rotation.z = rotationBam * BAM16_TO_RADIANS;
+      cursorPivot.visible = cursorVisible;
+    },
+    // FUN_801ce084 (update kind 2): [body not yet dumped] only the +0x82 flag is
+    // modelled in-system; no three.js effect to apply yet.
+    updateLabel(_menuIndex) {
+      // intentional no-op until FUN_801ce084 is dumped.
+    },
+    // FUN_801cde10 / FUN_801cdf84 / FUN_801ce0dc (draw-by-kind): the ROM issues
+    // zz_00097b4_(+0xe0, 0x47) per draw to set a material preset. three.js
+    // renders the bound GLB materials directly each frame, so these are no-ops;
+    // GL draw is renderer-owned (kept here, not in the widget system).
+    drawEntry() {
+      /* renderer-owned */
+    },
+    drawCursor() {
+      /* renderer-owned */
+    },
+    drawLabel() {
+      /* renderer-owned */
+    },
+  };
+
+  const widgetSystem = createMenuWidgetSystem(sink);
+  // PTR_DAT_80433930[0x32] seed; init() reads it when the cursor first resolves.
+  widgetSystem.setSelected(initialIndex);
 
   function emitProjections(): void {
     if (!onProjection) return;
-    for (const drawable of drawables) {
-      const point = drawable.basePivot.position.clone().project(camera);
+    for (const [menuIndex, entry] of entries) {
+      const point = entry.basePivot.position.clone().project(camera);
       onProjection({
-        menuIndex: drawable.menuIndex,
+        menuIndex,
         xPercent: (point.x * 0.5 + 0.5) * 100,
         yPercent: (-point.y * 0.5 + 0.5) * 100,
       });
@@ -194,27 +258,25 @@ export function mountPhysicalMenuScene(
         prepareModel(model);
         sceneRoot.add(model);
       }
-      drawables = tripletModels.map(({ triplet, base, selection, label }) => {
+      for (const { triplet, base, selection, label } of tripletModels) {
         prepareModel(base);
         prepareModel(selection);
         prepareModel(label);
-        const basePivot = createSourcePivot(base);
-        const selectionPivot = createSourcePivot(selection);
-        const labelPivot = createSourcePivot(label);
-        sceneRoot.add(basePivot, selectionPivot, labelPivot);
-        return {
-          menuIndex: triplet.menuIndex,
-          basePivot,
-          selectionPivot,
-          labelPivot,
-          bamAngle: 0,
-        };
-      });
+        entries.set(triplet.menuIndex, {
+          basePivot: createSourcePivot(base),
+          selectionPivot: createSourcePivot(selection),
+          labelPivot: createSourcePivot(label),
+        });
+      }
 
       prepareModel(cursorModel);
       cursorPivot = createSourcePivot(cursorModel);
-      sceneRoot.add(cursorPivot);
-      applySelection();
+
+      // ROM widget system owns the lifecycle from here: init() walks all 15
+      // DAT_8038a720 descriptors, binding models via the sink + seeding BAM
+      // accumulators + running one trailing update-by-kind per widget (so the
+      // scene is positioned correctly on the first rendered frame).
+      widgetSystem.init();
       emitProjections();
       host.dataset["gfModelStatus"] = "loaded";
       host.dataset["gfPhysicalMenuModels"] = PHYSICAL_MENU_MODEL_TRIPLETS
@@ -227,13 +289,9 @@ export function mountPhysicalMenuScene(
   })();
 
   function tickSourceFrame(): void {
-    for (const drawable of drawables) {
-      const step = PHYSICAL_MENU_ANGULAR_STEPS[drawable.menuIndex]?.bamStep ?? 0;
-      drawable.bamAngle = wrapI16(drawable.bamAngle + step);
-      drawable.basePivot.rotation.y = drawable.bamAngle * BAM16_TO_RADIANS;
-    }
-    cursorBamAngle = wrapI16(cursorBamAngle + CURSOR_BAM_STEP);
-    if (cursorPivot) cursorPivot.rotation.z = cursorBamAngle * BAM16_TO_RADIANS;
+    // zz_01cda40_ steady-state think: update-by-kind[kind] for every widget,
+    // routed through the sink. Replaces the hand-rolled BAM math + cursor copy.
+    widgetSystem.update();
   }
 
   const render = (time: number): void => {
@@ -252,8 +310,11 @@ export function mountPhysicalMenuScene(
   return {
     setSelected(menuIndex) {
       assertIndex(menuIndex);
-      selectedIndex = menuIndex;
-      applySelection();
+      // PTR_DAT_80433930[0x32] write. The ROM applies this on the next think
+      // tick (cursor follow + entry visibility), so we mirror that: no
+      // synchronous update here, the fixed-step loop picks it up within one
+      // SOURCE_FPS frame.
+      widgetSystem.setSelected(menuIndex);
     },
     destroy() {
       disposed = true;

@@ -72,6 +72,7 @@ import {
   type BattleActorObservation,
   type BattleConfig,
   type BattleObservation,
+  type ForceConfig,
   type BattleProjectileObservation,
   type BattleState,
   type BorgRuntime,
@@ -85,6 +86,18 @@ import {
   type StageCollision,
   normalizeStageBounds,
 } from "./types.js";
+import {
+  createSlotTableState,
+  writeForceToSlotTables,
+  type ForceSlotEntry,
+  type MutableSlotTableState,
+} from "./battle/forceSetup.js";
+import {
+  spawnActiveBorgsFromSlotTables,
+  SLOT_TEAM,
+  ROM_SLOT_COUNT,
+} from "./battle/spawnFromSlotTables.js";
+import type { RomActor } from "./rom/actor.js";
 
 const SPAWN_RADIUS_FRACTION = 0.35;
 const SPAWN_RADIUS_MAX = 3200;
@@ -110,6 +123,22 @@ function readRomStrictFlag(): boolean {
   } catch {
     return false;
   }
+}
+
+/** Convert a pl#### borg id to the ROM's +0x3e8 u16 borg number (reverse of borgNumberToId).
+ *  Mirrors bridge.ts's module-private borgIdToNumber — duplicated here so battle.ts's spawn
+ *  path doesn't depend on bridge.ts's private. attackHitData.ts:141-142 documents the
+ *  pl#### <-> borgNumber identity: the id's hex digits ARE the borgNumber. */
+function borgIdToNumber(borgId: string): number {
+  const m = /^pl([0-9a-f]{4})$/i.exec(borgId);
+  return m ? parseInt(m[1]!, 16) : 0;
+}
+
+/** Convert the ROM's +0x3e8 u16 borg number back to the pl#### borg id (the adapter for
+ *  RomActor → BorgRuntime: spawnFromSlotTables yields borgNumber; BorgRuntime carries the
+ *  pl#### id). Pads to 4 hex digits so pl0008 round-trips to "pl0008", not "pl8". */
+function borgNumberToId(borgNumber: number): string {
+  return "pl" + (borgNumber & 0xffff).toString(16).padStart(4, "0");
 }
 
 // Deterministic uid counter for ROM-family projectiles (combat.ts's projCounter is
@@ -240,6 +269,29 @@ class BattleImpl implements Battle {
   private spawnPlanned = new Set<number>(); // team indices flagged for next spawn this frame
 
   /**
+   * ROM slot-table backing store — the in-memory PTR_DAT_80433934 work block for THIS
+   * battle (the same role the work block plays in the real boot sequence). Mirrors the
+   * exact slice of PTR_DAT_80433934 that build_challenge_battle_setup writes and that
+   * active_borg_spawn_init_from_slot_tables (0x800541ac) reads back. Offsets touched
+   * (see forceSetup.ts / spawnFromSlotTables.ts SLOT_TABLE_OFFSET):
+   *   [0x10]  activeBorgId[slot]   u16  — active borg id per slot (reader + writer)
+   *   [0xa0]  activeVariant[slot]  byte — variant/level per slot (reader + writer)
+   *   [0xcb]  slotTeam[slot]       byte — 0=ally, 1=enemy, 0xff=unused (reader + writer)
+   *   [0x15d9] activeMask          u32  — bit i set => slot i spawns (reader + writer)
+   *   [0x15da] activeCount         byte — staffed-slot count (writer only)
+   *   [0x20]  slotConst20          byte — ROM constant 0x0e (writer only)
+   *   [0x3e]  slotConst3e          byte — ROM constant 0x03 (writer only)
+   *   [0x32]  slotFlag32           byte — DAT_804356ec side flag (writer only)
+   *   [0x54]  slotConst54          byte — ROM constant 0x00 (writer only)
+   *   [0x5a]  slotRosterCount      byte — per-slot roster depth (writer only)
+   * Created once per battle; writeForceToSlotTables populates it from cfg.forces, then
+   * spawnActiveBorgsFromSlotTables reads it back to materialize the active borgs. This is
+   * the PRIMARY initial-deploy path; deployNext's legacy force-list materialization is the
+   * fallback (reader returns empty / throws, or a force has no ROM-mappable slot).
+   */
+  private slotTables: MutableSlotTableState = createSlotTableState();
+
+  /**
    * ROM cue sink — port of zz_00f036c_(actor, cueId). The bridge routes every ported
    * family's onPlayCue fire (STAR HERO buff, beam-wing loops, magnet/omega/morph spawn
    * stingers, per-borg dash/voice cues) here through RomBattleRuntime.onRomCue. The
@@ -339,8 +391,8 @@ class BattleImpl implements Battle {
     // instead sets it post-construction via session.battle.onRomCue — see enterBattle).
     if (cfg.onRomCue) this.onRomCue = cfg.onRomCue;
 
-    // Deploy each force's first borg.
-    this.forces.forEach((force, fi) => this.deployNext(force, this.spawnPosFor(fi)));
+    // Deploy each force's first borg via the ROM slot-table spawn path (fallback inside).
+    this.deployInitial(cfg);
     this.refreshSourceLocks();
     this.recomputeEnergy();
     // T4 force-gauge MAX snapshot: the team's total energy at battle start (all borgs alive +
@@ -396,7 +448,7 @@ class BattleImpl implements Battle {
     });
   }
 
-  private deployNext(force: ForceRuntime, spawn: { pos: Vec3; rotY: number }): void {
+  private deployNext(force: ForceRuntime, spawn: { pos: Vec3; rotY: number }, rom?: RomActor): void {
     // W17: an exhausted force with a fighting ally deploys the husk instead of going dark;
     // the husk's own deaths land back here, so it respawns until the ally falls
     // (owner-observed live behavior; identity/stats live-verified — see HUSK_BORG_ID).
@@ -413,10 +465,23 @@ class BattleImpl implements Battle {
     // VERIFIED per-borg gauge init (pl####data.bin u16[0]/u16[1], chunk_0007.c:47-52) with a
     // DERIVED modal fallback (500/100) for ids missing from the extracted table.
     const gauges = gaugeInitForBorgId(entry.borgId);
+    // ROM slot-table seed (PRIMARY initial-deploy path): when a RomActor is passed, its
+    // team (+0x88) and borg identity (+0x3e8) are the spawn source of truth. The queue
+    // entry is the SAME borg (both built from cfg.forces), so the ids MUST match — under
+    // GF_SOURCE_STRICT a mismatch fails visibly; otherwise warn and keep the queue id (the
+    // profile/gauge source). See deployInitial / spawnFromSlotTables.ts.
+    if (rom) {
+      const romBorgId = borgNumberToId(rom.borgNumber);
+      if (romBorgId !== entry.borgId) {
+        const msg = `ROM slot-table spawn borgId mismatch: rom=${romBorgId} queue=${entry.borgId}`;
+        if (ROM_STRICT) throw new Error(msg);
+        console.warn(msg);
+      }
+    }
     const b: BorgRuntime = {
       uid,
       borgId: entry.borgId,
-      team: force.team,
+      team: rom ? rom.team : force.team,
       ownerPlayer: force.ownerPlayer,
       hp: prof.maxHp,
       maxHp: prof.maxHp,
@@ -466,6 +531,17 @@ class BattleImpl implements Battle {
       fusionPartnerUid: null,
       fusionState: 0,
       defeatAccounted: false,
+      // sourceDeath.ts death/kill-accounting ROM fields (zz_005bbc0_ + zz_002f8dc_).
+      // cost (+0x4aa) = the borg's GF-energy deploy cost from borgs.json (BorgProfile.energy,
+      // the same per-borg value SelectDifficulty's 1500/2000/2500 budget sums). The rest
+      // init to 0 and are written by combat.ts runSourceDeathPath on death. Husk borgs get
+      // cost 0 (buildHuskProfile energy 0) so they never deplete the side pool.
+      cost: prof.energy,
+      deathType: 0,
+      deathFlags: 0,
+      kills: 0,
+      deaths: 0,
+      teamScore: 0,
       alive: true,
       // ROM-family driver sidecar: attaches when the borg's family has been ported to
       // the 1:1 ROM runtime (currently the G RED family). Borgs without a ported family
@@ -497,6 +573,80 @@ class BattleImpl implements Battle {
     if (driver) {
       b.romDriver = driver;
     }
+  }
+
+  /**
+   * Materialize each force's first borg via the ROM slot-table spawn path — the PRIMARY
+   * battle-start deploy. Mirrors the real boot sequence: build_challenge_battle_setup
+   * (0x801962c4) writes the resolved force into the PTR_DAT_80433934 work block, then
+   * active_borg_spawn_init_from_slot_tables (0x800541ac) reads it back per active slot
+   * and materializes one borg with the exact field copies (team/borgNumber/slot).
+   *
+   * Forces with a ROM-representable team (0 or 1) and a staffed first borg get a slot
+   * (up to ROM_SLOT_COUNT=6); their first queue entry is deployed seeded by the RomActor.
+   * Any force the ROM path did not cover (team >= 2, beyond 6 slots, empty first queue,
+   * or the reader threw) falls back to the legacy force-list deployNext. GF_SOURCE_STRICT
+   * re-throws reader errors instead of degrading to the fallback.
+   */
+  private deployInitial(cfg: BattleConfig): void {
+    const { entries, slotToForce } = this.buildForceSlotEntries(cfg.forces);
+    let romActors: readonly RomActor[] = [];
+    if (entries.length > 0) {
+      try {
+        writeForceToSlotTables(this.slotTables, entries);
+        romActors = spawnActiveBorgsFromSlotTables(this.slotTables);
+      } catch (e) {
+        if (ROM_STRICT) throw e;
+        console.warn("battle: ROM slot-table spawn failed, using fallback:", e);
+        romActors = [];
+      }
+    }
+    const deployed = new Set<number>();
+    // ROM path first (ascending slot order = ascending force order, so spawn positions
+    // stay deterministic w.r.t. the original force-indexed spawnPosFor(fi)).
+    for (const actor of romActors) {
+      const fi = slotToForce[actor.slot];
+      if (fi === undefined) continue;
+      const force = this.forces[fi];
+      if (!force) continue;
+      this.deployNext(force, this.spawnPosFor(fi), actor);
+      deployed.add(fi);
+    }
+    // Fallback: every force the ROM path did not deploy.
+    for (let fi = 0; fi < this.forces.length; fi++) {
+      if (!deployed.has(fi)) this.deployNext(this.forces[fi]!, this.spawnPosFor(fi));
+    }
+  }
+
+  /**
+   * Build ForceSlotEntries (one per ROM-mappable force) for writeForceToSlotTables. Maps
+   * force `fi` to slot `slotToForce.length`: borgNumber from the force's first queue borg
+   * id, variant from cfg.forces[fi].borgLevels[0] (the +0x3ec level byte), team from
+   * force.team. Only teams 0/1 are ROM-representable (SLOT_TEAM.PLAYER_ALLY/ENEMY);
+   * forces with team >= 2 are omitted (no slot → deploy via the fallback). Stops at
+   * ROM_SLOT_COUNT (6). slotToForce[i] gives the force index for slot i.
+   */
+  private buildForceSlotEntries(
+    cfgForces: readonly ForceConfig[],
+  ): { entries: ForceSlotEntry[]; slotToForce: number[] } {
+    const entries: ForceSlotEntry[] = [];
+    const slotToForce: number[] = [];
+    for (let fi = 0; fi < this.forces.length; fi++) {
+      if (slotToForce.length >= ROM_SLOT_COUNT) break;
+      const force = this.forces[fi]!;
+      if (force.team !== SLOT_TEAM.PLAYER_ALLY && force.team !== SLOT_TEAM.ENEMY) continue;
+      const firstEntry = force.queue[0];
+      if (!firstEntry) continue;
+      const cfgLevel = cfgForces[fi]?.borgLevels?.[0];
+      const variant = typeof cfgLevel === "number" && Number.isFinite(cfgLevel) ? cfgLevel : 0;
+      entries.push({
+        borgNumber: borgIdToNumber(firstEntry.borgId),
+        variant,
+        team: force.team,
+      });
+      slotToForce.push(fi);
+    }
+    return { entries, slotToForce };
   }
 
   observe(): BattleObservation {
@@ -1193,7 +1343,12 @@ class BattleImpl implements Battle {
       // score/stat counters with unbounded repeat kills.
       if (b.borgId === HUSK_BORG_ID) continue;
       this.state.defeated[b.team] = (this.state.defeated[b.team] ?? 0) + 1;
-      this.state.defeatedEnergy[b.team] = (this.state.defeatedEnergy[b.team] ?? 0) + prof.energy;
+      // Cost routes through the ROM +0x4aa field (BorgRuntime.cost, == prof.energy at
+      // creation) so sourceDeath.ts's kill_event_energy_and_score_accounting and this
+      // persistent layer read the SAME per-borg cost. b.cost is the field sourceDeath
+      // subtracts; prof.energy is the fallback for legacy fakes that predate the field.
+      const victimCost = b.cost ?? prof.energy;
+      this.state.defeatedEnergy[b.team] = (this.state.defeatedEnergy[b.team] ?? 0) + victimCost;
       // Results split for the player side: PLAYER BORGS DEFEATED counts human-owned borgs,
       // ALLY BORGS DEFEATED counts CPU teammates (same team, ownerPlayer null).
       if (b.team === 0) {
@@ -1206,6 +1361,15 @@ class BattleImpl implements Battle {
       // victim's own slot books the cost into costLost(+0x424). Ally losses stay OUT of
       // costLost (they are +0x430/+0x437 — validated by the WIN capture: 1 ally lost,
       // player TOTAL COST still 0 and the no-loss +1000 tier still granted).
+      //
+      // LAYERING with sourceDeath.ts: combat.ts runSourceDeathPath already mirrors the
+      // per-ACTOR ROM writes (BorgRuntime.kills/deaths/teamScore, +0x434/+0x435/+0x420)
+      // from sourceDeath's kill_event_energy_and_score_accounting. This block is the
+      // PERSISTENT per-PLAYER-SLOT layer (SlotTelemetry, survives borg swaps — the ROM
+      // keeps +0x404..+0x437 on the persistent slot actor). The two target DIFFERENT
+      // structs (per-borg vs per-slot), so there is no double-count: sourceDeath owns the
+      // ROM-faithful per-actor mirror, this block owns the Results-screen authority. Cost
+      // threads through the SAME +0x4aa field (victimCost above) in both layers.
       const slots = this.state.telemetry?.slots;
       if (slots) {
         const killerOwner = b.lastHitAttackerOwner;
@@ -1217,10 +1381,10 @@ class BattleImpl implements Battle {
         ) {
           const ks = slotTelemetryFor(slots, killerOwner);
           ks.kills += 1;
-          ks.costWon += prof.energy;
+          ks.costWon += victimCost;
         }
         if (b.ownerPlayer !== null) {
-          slotTelemetryFor(slots, b.ownerPlayer).costLost += prof.energy;
+          slotTelemetryFor(slots, b.ownerPlayer).costLost += victimCost;
         }
       }
     }

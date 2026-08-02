@@ -344,6 +344,32 @@ export interface BorgRuntime {
   fusionState: number;
   /** True once the HP-zero kill event has already removed this borg's force cost. */
   defeatAccounted: boolean;
+  /**
+   * sourceDeath.ts death/kill-accounting fields (zz_005bbc0_ borg_death_entry +
+   * zz_002f8dc_ kill_event_energy_and_score_accounting). Populated at borg creation
+   * (battle.ts deployNext); optional so legacy constructors/fakes self-heal to 0/neutral
+   * (same convention as the other additive fields). combat.ts deathActorFromRuntime maps
+   * these onto SourceDeathActor so sourceDeath.ts runs on real values instead of neutral
+   * shadow defaults.
+   */
+  /** +0x4aa (s16): borg GF-energy cost — the per-borg deploy cost (BorgProfile.energy,
+   *  the same value SelectDifficulty's 1500/2000/2500 budget sums). Subtracted from the
+   *  side force-energy pool on death by kill_event_energy_and_score_accounting. */
+  cost?: number;
+  /** +0x6fe (byte): death-type/state byte. Written by borgDeathEntry (set to 7 when
+   *  ((dt-1)&4)!=0); read by resolveDeathTimer to pick the death state-timer float. */
+  deathType?: number;
+  /** +0x272 (u16): death status bitmask. OR'd with 0x443 by borgDeathEntry on death. */
+  deathFlags?: number;
+  /** +0x434 (byte): kills counter — incremented on a cross-team kill (killer side). */
+  kills?: number;
+  /** +0x435 (byte): deaths counter — incremented unconditionally on death (victim side). */
+  deaths?: number;
+  /** +0x420 (u32): per-actor cost-won/team-score accumulator — killer.costWon420 += cost
+   *  on a cross-team kill (sourceDeath.ts). The ROM's separate global team-score array
+   *  (DAT_80436154[team] += 100) is modeled by TeamScoreMap; the persistent Results mirror
+   *  is SlotTelemetry.costWon. */
+  teamScore?: number;
   alive: boolean;
   /** Live-resolved ROM attack command for this frame (commandDispatch.ts): the transformed
    *  input word, tester command type (actor+0x585 model), the +0x4ec table row it selected,

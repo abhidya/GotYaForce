@@ -989,10 +989,12 @@ function sourceDamageActorFromRuntime(b: BorgRuntime): SourceDamageActor {
 }
 
 /** Map a BorgRuntime to the sourceDeath SourceDeathActor shape (the `actorFromRuntime`
- *  adapter from sourceDeath.ts's integration spec). BorgRuntime does not yet carry most ROM
- *  death fields (+0x6fe deathType, +0x272 statusWord, +0x4aa cost, +0x434/+0x435 kills/deaths,
- *  +0x420/+0x424 costWon/lost), so defaultDeathActor()'s neutral baseline fills them. The
- *  mapped fields are the ones the runtime actually owns (team, CPU flag, borg eligibility). */
+ *  adapter from sourceDeath.ts's integration spec). BorgRuntime now carries the ROM death
+ *  fields (+0x6fe deathType, +0x272 deathFlags/statusWord, +0x4aa cost, +0x434/+0x435
+ *  kills/deaths, +0x420 teamScore/costWon), populated at creation by battle.ts deployNext
+ *  and mirrored back after sourceDeath runs. The `?? 0` defaults keep legacy fakes/constructors
+ *  that predate the fields on a neutral baseline (same self-heal convention as the other
+ *  additive BorgRuntime fields). */
 function deathActorFromRuntime(b: BorgRuntime): SourceDeathActor {
   return defaultDeathActor(b.team, {
     eligibility83: 0, // +0x83 == 0 means "is a borg" (gates kill_event accounting)
@@ -1001,24 +1003,37 @@ function deathActorFromRuntime(b: BorgRuntime): SourceDeathActor {
     heroFlag3e6: b.ownerPlayer === null ? 1 : 0, // +0x3e6 CPU flag (T2 decode)
     slot3e4: 0, // BorgRuntime has no slot field; neutral (slot-swap gate stays inactive)
     visibilityBit3e5: 1, // +0x3e5 default bit
+    deathType6fe: b.deathType ?? 0, // +0x6fe — written by borgDeathEntry on death
+    statusWord272: b.deathFlags ?? 0, // +0x272 — OR'd with 0x443 on death
+    cost4aa: b.cost ?? 0, // +0x4aa — the borg's GF-energy cost (BorgProfile.energy)
+    kills434: b.kills ?? 0, // +0x434 — cross-team kill counter
+    deaths435: b.deaths ?? 0, // +0x435 — death counter
+    costWon420: b.teamScore ?? 0, // +0x420 — per-actor cost-won/team-score accumulator
   });
 }
 
 /**
  * Source-owned death wiring for applyHit's lethal branch (sourceDeath.ts integration spec).
  * Runs `borgDeathEntry` (the ROM death-state writes) + `killEventEnergyAndScoreAccounting`
- * (force-energy/score accounting) on SHADOW actors built from the runtime. Most ROM offsets
- * (cited in deathActorFromRuntime) are not on BorgRuntime yet, so the shadow runs on neutral
- * defaults and the writes land there for audit — only the port-mapped transition is observed
- * (via enterDeath, which the caller runs unconditionally after this returns).
+ * (force-energy/score accounting) on shadow actors built from the runtime — now carrying the
+ * REAL ROM fields (cost/deathType/deathFlags/kills/deaths/teamScore, populated at creation by
+ * battle.ts deployNext). The persistent per-actor writes (deathType, deathFlags, kills,
+ * deaths, teamScore) are mirrored back onto the victim's/killer's BorgRuntime so the port
+ * observes the same per-actor state the ROM writes.
  *
- * Energy/score side effects are deliberately NOT mirrored onto damageContext/BattleState:
- * battle.ts accountPendingDefeats already depletes BattleState.energy on death (its field doc
- * cites zz_002f8dc_), and the per-slot kill/score counters are credited there too — mirroring
- * here would double-count. Falls back to a no-op (console.warn) when the source path throws;
- * enterDeath always runs regardless. challengeMode lives on BattleConfig (not threaded into
- * applyHit's DamageRuntimeContext), so the accounting defaults to versus (0); with cost4aa
- * defaulting to 0 the subtract is 0 regardless of mode, so the mode choice is load-free here.
+ * ENERGY ROUTING / DOUBLE-SUBTRACT GATE: sourceDeath's kill_event computes the faithful side-
+ * pool subtract (victimSide.energy118 -= cost) on the shadow pool, but that subtract is NOT
+ * mirrored onto BattleState.energy — battle.ts recomputeEnergy() is the live-pool authority
+ * and already drops the dead borg's cost (b.cost, == prof.energy) from the sum when the borg
+ * is defeatAccounted. Mirroring the subtract here would be wiped by the next recomputeEnergy
+ * AND is the double-subtract the original wiring avoided. The per-actor COUNTERS (kills/
+ * deaths/teamScore) ARE mirrored (different consumer than the pool); the persistent Results
+ * layer (SlotTelemetry in accountPendingDefeats) consumes the same b.cost for its own
+ * costWon/costLost, so sourceDeath and battle.ts agree on the per-borg cost via +0x4aa.
+ *
+ * Falls back to a no-op (console.warn) when the source path throws; enterDeath always runs
+ * regardless. challengeMode lives on BattleConfig (not threaded into applyHit's
+ * DamageRuntimeContext), so the accounting defaults to versus (0).
  */
 function runSourceDeathPath(
   victim: BorgRuntime,
@@ -1036,16 +1051,33 @@ function runSourceDeathPath(
         if (pool) pool.energy118 = damageContext.energyByTeam[team] ?? 0;
       }
     }
-    borgDeathEntry(deathActorFromRuntime(victim), battleWork, undefined);
+
+    // Build the shadow from the runtime's REAL ROM fields. borgDeathEntry mutates the
+    // shadow in place; we mirror the persistent death-state writes back below.
+    const victimShadow = deathActorFromRuntime(victim);
+    borgDeathEntry(victimShadow, battleWork, undefined);
+    victim.deathType = victimShadow.deathType6fe;
+    victim.deathFlags = victimShadow.statusWord272;
+
     if (source) {
+      const killerShadow = deathActorFromRuntime(source.attacker);
       const teamScore: Record<number, number> = {};
       const result = killEventEnergyAndScoreAccounting(
-        deathActorFromRuntime(source.attacker),
-        deathActorFromRuntime(victim),
-        battleWork, // reused seeded shadow; mutations stay local (NOT mirrored — see header)
+        killerShadow,
+        victimShadow,
+        battleWork, // shadow pool; energy subtract NOT mirrored (recomputeEnergy owns the pool)
         teamScore,
-        0, // challengeMode not on DamageRuntimeContext; versus default is load-free (cost4aa=0)
+        0, // challengeMode not on DamageRuntimeContext; versus default
       );
+      // Mirror the per-actor kill/score writes back onto the real BorgRuntime. victim.deaths
+      // increments unconditionally (borg victim); killer.kills/teamScore increment only on a
+      // cross-team borg kill (result.killerCredited). costLost (+0x424) has no BorgRuntime
+      // field — the persistent Results mirror is SlotTelemetry.costLost (battle.ts).
+      victim.deaths = victimShadow.deaths435;
+      if (result.killerCredited) {
+        source.attacker.kills = killerShadow.kills434;
+        source.attacker.teamScore = killerShadow.costWon420;
+      }
       if (SOURCE_STRICT && result.sideDepleted) {
         console.warn("[combat] source kill-event: victim side depleted (win/loss owned by battle.ts)");
       }
@@ -1678,10 +1710,11 @@ export function applyHit(
   if (victim.hp <= 0) {
     victim.hp = 0;
     // --- DEATH path — source-owned sourceDeath.ts (borgDeathEntry + killEventEnergyAndScore
-    //     Accounting) runs FIRST on shadow actors; enterDeath then applies the port-mapped
-    //     runtime writes (state/anim/vel) the source function does not own. enterDeath stays
-    //     unconditional so no path skips the port-side transition (see runSourceDeathPath's
-    //     header for why energy/score side effects are NOT mirrored here — battle.ts owns them).
+    //     Accounting) runs FIRST on the REAL ROM fields (cost/deathType/deathFlags/kills/
+    //     deaths/teamScore, mirrored back onto BorgRuntime); enterDeath then applies the
+    //     port-mapped runtime writes (state/anim/vel) the source function does not own.
+    //     enterDeath stays unconditional so no path skips the port-side transition (see
+    //     runSourceDeathPath's header for the energy-routing / double-subtract gate).
     runSourceDeathPath(victim, source, damageContext);
     enterDeath(victim);
     return dmg;

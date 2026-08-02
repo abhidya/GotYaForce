@@ -7,7 +7,11 @@ import {
   type RectStageBounds,
 } from "@gf/combat";
 import {
+  CHALLENGE_GROUP_ROSTERS,
+  challengeBattleCount,
+  challengeStageId,
   playerIdFor,
+  selectChallengeStage,
   stageIdForBattleConfig,
   toCombatBattleConfig,
   type BattleResults,
@@ -16,10 +20,12 @@ import {
   type CombatStageCatalog,
   type GetDrop,
   type MissionBattleConfig,
+  type MissionBattleForce,
 } from "@gf/missions";
 import {
   createChallengeFlowVm,
   CHALLENGE_FLOW_MODE,
+  type ChallengeBattleSetup,
   type ChallengeFlowEffectSink,
   type ChallengeFlowVm,
 } from "./ui/intro/challengeFlowVm.js";
@@ -158,15 +164,17 @@ export class InvalidSessionEventError extends Error {
 // dispatch_challenge_flow_state @0x80195f2c and its 8-entry mode table. The
 // global-menu dispatcher (ui/intro/globalMenuDispatcher.ts) owns the 11-entry
 // front-end ROM mode→screen table (ROM_MODE_TO_GAME_SCREEN). This session is
-// EVENT-driven (discrete dispatch() calls); the VM is PER-FRAME. The per-frame
-// battle loop lives in main.ts and @gf/missions owns roster generation, so the
-// VM is wired here as the Challenge mode→screen AUTHORITY: at each Challenge-
-// path transition the host sets the VM mode to the matching ROM phase and
-// resolveChallengeScreen() maps it to a GameScreen. Per-frame VM battle
-// stepping (mode-4 sub-dispatch) and VM-owned roster rolling are documented
-// future wirings — the sink below stubs them honestly (returns defaults /
-// records the build on vm.state.lastSetup without consuming it as the battle
-// roster, since @gf/missions is the verified roster source). See
+// EVENT-driven (discrete dispatch() calls); the VM is PER-FRAME. The VM is
+// wired here as the Challenge mode→screen AUTHORITY AND the battle-roster /
+// win-counter authority: on each battle-build transition the host TICKS the
+// VM's mode 3 (build_challenge_battle_setup) so it rolls the per-slot CPU
+// rosters into vm.state.lastSetup, which applyVmBattleBuild() converts into
+// the MissionBattleConfig.forces prepareBattle consumes (PRIMARY roster
+// source). On each win, advanceVmWin() ticks the VM's mode-4 post-battle gate
+// so vm.state.battleIndex/battleTotal drives the rebuild-vs-clear decision.
+// @gf/missions' createChallengeRun stays as the SCORING owner and the roster
+// FALLBACK (when the VM is absent or throws, gated by GF_SOURCE_STRICT). The
+// per-frame battle loop still lives in main.ts. See
 // research/decomp/index/challenge-flow-vm-integration.md.
 
 const GF_SOURCE_STRICT: boolean = readSourceStrictFlag();
@@ -211,28 +219,65 @@ function playerCountToControllerMask(playerCount: number): number {
   return playerCount >= 2 ? 0x03 : 0x01;
 }
 
+/** ROM numeric borg id (family<<8|variant, e.g. 0x0615 G RED) → pl#### string id
+ *  used by @gf/missions/@gf/combat. Round-trips with parseInt(id.slice(2),16). */
+function borgIdToString(borgId: number): string {
+  return `pl${(borgId >>> 0).toString(16).padStart(4, "0")}`;
+}
+
+/** Mutable stage selection stashed by the sink's rerollStage (zz_0196dac_) so
+ *  buildBattleConfigFromVmSetup can populate meta.stageByte/stageSubtable for
+ *  stage-id family resolution in stageIdForBattleConfig. */
+interface SessionChallengeStageState {
+  stageByte: number;
+  stageSubtable: number;
+  stageVariant: number;
+}
+
 /** Sink for the Challenge VM. The session is event-driven and does NOT own the
- *  per-frame battle loop (main.ts) or roster generation (@gf/missions); the VM
- *  is consulted for mode→screen mapping, so battle-runtime methods return
- *  sensible defaults and the VM's rolled setup is recorded on vm.state.lastSetup
- *  but not consumed as the battle roster (documented partial-port gap). */
-function createSessionChallengeSink(): ChallengeFlowEffectSink {
+ *  per-frame battle loop (main.ts); the VM is consulted for mode→screen mapping
+ *  AND, on mode 3, rolls the authoritative CPU roster via drawBorgFromPool/
+ *  borgCost bridging to @gf/missions' CHALLENGE_GROUP_ROSTERS + the borg energy
+ *  table. spawnBattleSetup records the build on vm.state.lastSetup, which the
+ *  session converts into the battle's MissionBattleConfig.forces (primary roster
+ *  source); @gf/missions' own roster stays as fallback when the VM is absent or
+ *  throws (gated by GF_SOURCE_STRICT). */
+function createSessionChallengeSink(deps: {
+  borgEnergyById: ReadonlyMap<string, number>;
+  stage: SessionChallengeStageState;
+}): ChallengeFlowEffectSink {
   return {
     onEnterChallenge() { /* title/scene stinger owned by main.ts */ },
-    onChallengeWorkInit() { /* @gf/missions owns ChallengeRun seeding */ },
+    onChallengeWorkInit() { /* @gf/missions owns ChallengeRun scoring seeding */ },
     pollMenuResult() { return 0; /* host drives mode via setChallengeVmMode */ },
     onMenuOpened(_selectedIndex) { /* cursor SFX owned by main.ts */ },
     buildBoxPreview(_boxIndex) { /* SelectForce/ForceBuilder render owned by main.ts */ },
     isBoxPreviewReady() { return true; },
-    spawnBattleSetup(_setup) { /* recorded on vm.state.lastSetup; battle uses @gf/missions */ },
+    spawnBattleSetup(_setup) { /* recorded on vm.state.lastSetup; consumed by applyVmBattleBuild */ },
     isBattleSceneReady() { return true; /* main.ts loads stage assets */ },
     stepBattleFrame() { /* main.ts owns the fixed-step battle loop */ },
     isBattleEnded() { return false; /* main.ts resolves battles via events */ },
-    getWinnerMask() { return 1; /* side-0 win default; host maps outcomes via events */ },
-    rerollStage(prev) { return (prev + 1) & 0xff; },
+    getWinnerMask() { return 1; /* side-0 win; battle-resolved(win) advances the VM */ },
+    rerollStage(prev) {
+      // zz_0196dac_: draw a stage byte != prev from the 11-entry CHALLENGE_STAGE_BYTES pool.
+      const sel = selectChallengeStage(Math.random, prev);
+      deps.stage.stageByte = sel.stageByte;
+      deps.stage.stageSubtable = sel.stageSubtable;
+      deps.stage.stageVariant = sel.stageVariant;
+      return sel.stageByte;
+    },
     loadBattleScene(_stageId) { /* main.ts loads stage assets */ },
-    drawBorgFromPool(_poolGroupId) { return 0; /* @gf/missions owns roster draw */ },
-    borgCost(_borgId) { return 0; /* @gf/combat stats own force-energy cost */ },
+    drawBorgFromPool(poolGroupId) {
+      // zz_0196eb8_: draw a borg id from PTR_DAT_80380804[group] (CHALLENGE_GROUP_ROSTERS).
+      const pool = (CHALLENGE_GROUP_ROSTERS as Readonly<Record<number, readonly string[]>>)[poolGroupId];
+      if (!pool || pool.length === 0) return 0;
+      const id = pool[Math.floor(Math.random() * pool.length)] ?? "pl0008";
+      return Number.parseInt(id.slice(2), 16);
+    },
+    borgCost(borgId) {
+      // zz_0066168_: raw force-energy cost; the VM applies floor(cost*2/3) itself.
+      return deps.borgEnergyById.get(borgIdToString(borgId)) ?? 0;
+    },
     showResultsScreen(_mode) { /* Results screen rendered by main.ts */ },
     isResultsDismissed() { return true; /* host advance event drives dismiss */ },
     exitToMenu() { /* host renders the menu screen */ },
@@ -256,6 +301,9 @@ export function createGameSession<TStageRenderState>(
   // Source-owned Challenge flow VM. Constructed on entering Challenge mode; null
   // on non-Challenge paths or when VM entry failed (fallback to hardcoded flow).
   let challengeVm: ChallengeFlowVm | null = null;
+  // Stage selection stashed by the VM sink's rerollStage (mutated, not replaced,
+  // so the sink and builder share one reference); read by buildBattleConfigFromVmSetup.
+  let challengeStageState: SessionChallengeStageState = { stageByte: 0xff, stageSubtable: 0, stageVariant: 0 };
 
   function render(next: GameScreen): readonly GameSessionEffect[] {
     screen = next;
@@ -334,16 +382,131 @@ export function createGameSession<TStageRenderState>(
     return [...effects, { type: "render", screen }];
   }
 
+  /** Human players' chosen forces (ordered by player index), shared by beginRun
+   *  (@gf/missions seeding) and the VM roster converter. Human side-0 slots carry
+   *  no VM-rolled roster — the VM only rolls CPU slots — so their borg ids come
+   *  from the player's selected force. */
+  function humanPlayerForces(): { player: number; borgIds: string[] }[] {
+    const humanPlayerCount = Math.max(1, Math.min(playerCount, 2));
+    return Array.from({ length: humanPlayerCount }, (_, player) => {
+      const slot = player === 0
+        ? selectedSlot()
+        : forceSlots[(selectedForceSlot + player) % forceSlots.length] ?? selectedSlot();
+      return { player, borgIds: dependencies.forceFromSlot(slot) };
+    });
+  }
+
+  /** Convert the VM's mode-3 ChallengeBattleSetup (per-slot sides + CPU rosters)
+   *  into the MissionBattleConfig.forces shape prepareBattle/toCombatBattleConfig
+   *  expect. Human side-0 slots pull from the players' chosen force; CPU ally
+   *  (side 0, non-human) and CPU enemy (side 1) slots pull from the VM roster. */
+  function buildBattleConfigFromVmSetup(setup: ChallengeBattleSetup): MissionBattleConfig {
+    const humanForces = humanPlayerForces();
+    const forces: MissionBattleForce[] = [];
+    let humanIndex = 0;
+    for (const slot of setup.slots) {
+      if (!slot.active) continue;
+      const isHuman = (setup.controllerMask & (1 << slot.slot)) !== 0;
+      if (slot.side === 0 && isHuman) {
+        const pf = humanForces[humanIndex];
+        humanIndex += 1;
+        forces.push({
+          team: "player",
+          ownerPlayer: pf?.player ?? 0,
+          borgIds: pf ? [...pf.borgIds] : [],
+        });
+      } else if (slot.side === 0) {
+        forces.push({
+          team: "player",
+          ownerPlayer: null,
+          borgIds: slot.roster.map((m) => borgIdToString(m.borgId)),
+          cpuAlly: true,
+        });
+      } else if (slot.side === 1) {
+        forces.push({
+          team: "enemy",
+          ownerPlayer: null,
+          borgIds: slot.roster.map((m) => borgIdToString(m.borgId)),
+        });
+      }
+    }
+    return {
+      arena: challengeStageId(setup.stageId),
+      forces,
+      timeLimitFrames: setup.timeLimitFrames,
+      timerFrozen: setup.timerFrozen,
+      label: `BATTLE ${setup.battleIndex + 1} VS`,
+      meta: {
+        mode: "challenge",
+        index: setup.battleIndex,
+        challengeMode: setup.difficulty as 0 | 1 | 2,
+        stageByte: challengeStageState.stageByte,
+        stageSubtable: challengeStageState.stageSubtable,
+        stageVariant: challengeStageState.stageVariant,
+        timeLimitFrames: setup.timeLimitFrames,
+      },
+    };
+  }
+
+  /** Tick the VM through mode 3 (build_challenge_battle_setup) so it rolls the
+   *  per-slot CPU rosters into vm.state.lastSetup, then convert that into the
+   *  pending battle config — PRIMARY roster source. Returns false (caller falls
+   *  back to the @gf/missions config left by beginRun) when the VM is absent,
+   *  lastSetup is null, or the tick throws. */
+  function applyVmBattleBuild(): boolean {
+    if (!challengeVm) return false;
+    try {
+      challengeVm.state.mode = CHALLENGE_FLOW_MODE.BATTLE_BUILD;
+      challengeVm.state.subFlag = 0;
+      challengeVm.tick(); // mode_buildBattle → lastSetup populated, mode→IN_BATTLE
+    } catch (error) {
+      if (GF_SOURCE_STRICT) throw error;
+      console.warn("[challenge-flow] VM battle build failed; using @gf/missions roster", error);
+      return false;
+    }
+    const setup = challengeVm.state.lastSetup;
+    if (!setup) return false;
+    pendingBattleConfig = buildBattleConfigFromVmSetup(setup);
+    return true;
+  }
+
+  /** Tick the VM's mode-4 post-battle gate (sub 2) on a win so it increments
+   *  vm.state.battleIndex and transitions to mode 3 (more battles) or mode 5
+   *  (clear, reached battleTotal). Returns the resulting mode, or null when no
+   *  VM is active (caller uses the @gf/missions results-on-any-win fallback). */
+  function advanceVmWin(): number | null {
+    if (!challengeVm) return null;
+    try {
+      challengeVm.state.battleTotal = challengeBattleCount(challengeVm.state.difficulty as 0 | 1 | 2);
+      challengeVm.state.mode = CHALLENGE_FLOW_MODE.IN_BATTLE;
+      challengeVm.state.subMode = 2; // sub_postBattle gate
+      challengeVm.tick();
+      return challengeVm.state.mode;
+    } catch (error) {
+      if (GF_SOURCE_STRICT) throw error;
+      console.warn("[challenge-flow] VM win-counter advance failed; falling back", error);
+      return null;
+    }
+  }
+
   /** Construct + enter the Challenge VM (INIT → MENU_POLL via one genuine
    *  VM-driven tick). On failure: strict rethrows; default warns + nulls the VM
    *  so the rest of the Challenge path uses the hardcoded fallback. */
   function enterChallengeVm(): void {
     try {
       const difficulty = budgetToDifficulty(budget);
-      challengeVm = createChallengeFlowVm(createSessionChallengeSink(), {
-        controllerMask: playerCountToControllerMask(playerCount),
-        difficulty,
-      });
+      const borgEnergyById = new Map(dependencies.borgStats.map((b) => [b.id, b.energy] as const));
+      challengeStageState.stageByte = 0xff;
+      challengeStageState.stageSubtable = 0;
+      challengeStageState.stageVariant = 0;
+      challengeVm = createChallengeFlowVm(
+        createSessionChallengeSink({ borgEnergyById, stage: challengeStageState }),
+        {
+          controllerMask: playerCountToControllerMask(playerCount),
+          difficulty,
+        },
+      );
+      challengeVm.state.battleTotal = challengeBattleCount(difficulty as 0 | 1 | 2);
       challengeVm.tick(); // onEnterChallenge + mode-0 init → MENU_POLL
     } catch (error) {
       if (GF_SOURCE_STRICT) throw error;
@@ -427,7 +590,12 @@ export function createGameSession<TStageRenderState>(
         case "difficulty-select":
           if (screen !== "difficulty") return reject(event);
           budget = event.budget;
-          if (challengeVm) challengeVm.state.menu.difficulty = budgetToDifficulty(budget);
+          if (challengeVm) {
+            const difficulty = budgetToDifficulty(budget);
+            challengeVm.state.menu.difficulty = difficulty;
+            challengeVm.state.difficulty = difficulty;
+            challengeVm.state.battleTotal = challengeBattleCount(difficulty as 0 | 1 | 2);
+          }
           // "players" is a port-only screen (ROM has no player-count pick;
           // controllerMask comes from the menu) — render directly, no VM consult.
           return render("players");
@@ -456,7 +624,14 @@ export function createGameSession<TStageRenderState>(
           selectSlotByNo(event.slot);
           {
             const target = beginRun();
-            setChallengeVmMode(target === "briefing" ? CHALLENGE_FLOW_MODE.BATTLE_BUILD : CHALLENGE_FLOW_MODE.EXIT);
+            if (target === "briefing") {
+              // VM roster is PRIMARY; beginRun already seeded the @gf/missions
+              // fallback config, overridden here when the VM build succeeds.
+              applyVmBattleBuild();
+              setChallengeVmMode(CHALLENGE_FLOW_MODE.BATTLE_BUILD);
+            } else {
+              setChallengeVmMode(CHALLENGE_FLOW_MODE.EXIT);
+            }
             return render(resolveChallengeScreen(target));
           }
         case "force-slot-edit":
@@ -500,7 +675,40 @@ export function createGameSession<TStageRenderState>(
             battleResults: cloneBattleResults(event.battleResults),
             drops: event.drops.map((drop) => ({ ...drop })),
           };
-          setChallengeVmMode(postBattle.result === "win" ? CHALLENGE_FLOW_MODE.CLEAR : CHALLENGE_FLOW_MODE.FAIL);
+          if (postBattle.result === "win") {
+            // Route the win through the VM's mode-4 post-battle gate so the VM's
+            // battleIndex/battleTotal counter is the progression authority.
+            const nextMode = advanceVmWin();
+            if (nextMode !== CHALLENGE_FLOW_MODE.CLEAR) {
+              // null = no VM active → keep the original results-on-any-win UX.
+              if (nextMode === null) {
+                setChallengeVmMode(CHALLENGE_FLOW_MODE.CLEAR);
+                return render(resolveChallengeScreen("results"));
+              }
+              // VM says rebuild (mode 3): an intermediate win. Score via the run,
+              // tear the battle down, rebuild the next config (VM primary), and go
+              // straight to briefing — the ROM shows no per-battle results here.
+              const progress = run ? run.next(postBattle.battleResults) : null;
+              const effects: GameSessionEffect[] = [{ type: "teardown-battle" }];
+              postBattle = null;
+              const vmBuilt = applyVmBattleBuild();
+              if (!vmBuilt && progress?.action === "advance") {
+                pendingBattleConfig = cloneMissionBattleConfigOrNull(progress.nextBattle);
+              }
+              if (pendingBattleConfig) {
+                setChallengeVmMode(CHALLENGE_FLOW_MODE.BATTLE_BUILD);
+                screen = "briefing";
+                return [...effects, { type: "render", screen: "briefing" }];
+              }
+              menuMode = "challenge";
+              screen = "menu";
+              return [...effects, { type: "render", screen }];
+            }
+            // VM reached battleTotal → mode 5 (clear): show the end-of-run results.
+            setChallengeVmMode(CHALLENGE_FLOW_MODE.CLEAR);
+            return render(resolveChallengeScreen("results"));
+          }
+          setChallengeVmMode(CHALLENGE_FLOW_MODE.FAIL);
           return render(resolveChallengeScreen("results"));
         case "advance":
           if (screen === "results" && (postBattle?.drops.length ?? 0) > 0) return render("gets");
