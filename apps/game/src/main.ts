@@ -18,10 +18,7 @@
 
 import * as THREE from "three";
 
-import {
-  createPublicAssetCatalog,
-  type StageAssets,
-} from "@gf/assets";
+import { type StageAssets } from "@gf/assets";
 import { startFixedStepLoop, startRenderLoop } from "@gf/core";
 import {
   createThreeAssetLoader,
@@ -94,6 +91,8 @@ import {
 import { BattleScene } from "./sim/battleScene.js";
 import { BORG_CATALOG, DEFAULT_LEAD } from "./sim/borgCatalog.js";
 import { createBorgPresentationAssets } from "./sim/borgPresentationAssets.js";
+import { createGameAssetCatalog } from "./assetCatalog.js";
+import { publicUrl } from "./publicUrl.js";
 import { BattleCamera, type CameraFollowTarget } from "./sim/camera.js";
 import { createBrowserGotchaBoxPersistence } from "./sim/getStorage.js";
 import {
@@ -432,7 +431,7 @@ scene.add(stageRoot);
 const battleRoot = new THREE.Group();
 scene.add(battleRoot);
 
-const assetCatalog = createPublicAssetCatalog();
+const assetCatalog = createGameAssetCatalog();
 const borgPresentationAssets = createBorgPresentationAssets({
   assetLoader: renderAssets,
   defaultLeadId: DEFAULT_LEAD,
@@ -551,13 +550,13 @@ let sfxKeys: ReadonlySet<string> = new Set();
 function initAudio(): Promise<GotchaAudioManager | null> {
   if (!audioManagerPromise) {
     audioManagerPromise = (async () => {
-      const manifest = await loadAudioManifest();
+      const manifest = await loadAudioManifest(publicUrl("/audio/manifest.json"));
       // Merge the DERIVED combat-SE manifest (real GameCube soundbank samples, id-keyed
       // se_<hex> cues, exported by scripts/export-combat-se.py from afs_data.afs
       // snd_com01/02/03). Optional: when absent, the se_* COMBAT_SFX entries simply
       // resolve to nothing and playSfx swallows them.
       try {
-        const se = await loadAudioManifest("/audio/se/manifest.json");
+        const se = await loadAudioManifest(publicUrl("/audio/se/manifest.json"));
         manifest.files = [...manifest.files, ...se.files];
       } catch {
         // combat-SE manifest not exported; fall through with the base manifest only

@@ -29,6 +29,7 @@ import { createUiSceneHost } from "../sceneModel.js";
 import { el } from "../dom.js";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import type { MenuInputTarget } from "../menuInput.js";
+import { publicUrl } from "../../publicUrl.js";
 
 /**
  * Source-strict mode: when a VM command cannot be satisfied from source data
@@ -193,7 +194,7 @@ async function loadActorClips(borgId: string): Promise<Map<number, THREE.Animati
   const entries = Object.entries(ANIM_FILES_BY_ID) as Array<[string, string]>;
   const clips = await Promise.all(
     entries.map(async ([idStr, file]) => {
-      const res = await fetch(`/models/${borgId}/${file}`);
+      const res = await fetch(publicUrl(`/models/${borgId}/${file}`));
       if (!res.ok) throw new Error(`Failed to load ${borgId}/${file}: ${res.status}`);
       const json = (await res.json()) as BakedClip;
       return [Number(idStr), buildClip(json)] as const;
@@ -427,7 +428,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       const cameraTarget = new THREE.Vector3();
       let cameraRoll = 0;
 
-      const cameraAnimationsResponse = await fetch("/ui/scenes/tl00/tdc-camera-anims.json");
+      const cameraAnimationsResponse = await fetch(publicUrl("/ui/scenes/tl00/tdc-camera-anims.json"));
       if (!cameraAnimationsResponse.ok) {
         throw new Error(`Failed to load exact TDC camera tracks: ${cameraAnimationsResponse.status}`);
       }
@@ -527,7 +528,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       // tl00 diorama (world-space vertices — mount at identity, no fit/recenter).
       const tl00Models = await Promise.all(
         Array.from({ length: 37 }, (_, i) =>
-          loader.loadGlbScene(`/ui/scenes/tl00/model_${String(i).padStart(2, "0")}.glb`).catch(() => null),
+          loader.loadGlbScene(publicUrl(`/ui/scenes/tl00/model_${String(i).padStart(2, "0")}.glb`)).catch(() => null),
         ),
       );
       let mountedTl00 = 0;
@@ -543,7 +544,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       const propModels = await Promise.all(
         propController.frames.map((frame) =>
           loader.loadGlbScene(
-            `/stages/stff/model/model_${String(frame.modelId).padStart(2, "0")}.glb`,
+            publicUrl(`/stages/stff/model/model_${String(frame.modelId).padStart(2, "0")}.glb`),
           ),
         ),
       );
@@ -575,7 +576,7 @@ export function createTitleIntro(container: HTMLElement, opts: TitleIntroOptions
       const actorLoads = await Promise.all(
         vm.state.actors.map(async (vmActor) => {
           const [model, clips] = await Promise.all([
-            loader.loadGlbScene(`/models/${vmActor.borgId}/model_00.glb`),
+            loader.loadGlbScene(publicUrl(`/models/${vmActor.borgId}/model_00.glb`)),
             loadActorClips(vmActor.borgId),
           ]);
           return { vmActor, model, clips };

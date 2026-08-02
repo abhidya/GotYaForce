@@ -1,8 +1,9 @@
 import * as THREE from "three";
-import { createPublicAssetCatalog } from "@gf/assets";
 import { createThreeAssetLoader, prepareImportedModel } from "@gf/render";
 
-const assetCatalog = createPublicAssetCatalog();
+import { createGameAssetCatalog } from "../assetCatalog.js";
+
+const assetCatalog = createGameAssetCatalog();
 const sceneAssets = createThreeAssetLoader({ enableFileCache: true });
 
 export interface UiSceneModelOptions {

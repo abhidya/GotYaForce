@@ -25,6 +25,7 @@ import {
 } from "./data/arrowMdlGeometry.generated.js";
 import efctBankJson from "./data/efctBankMeshes.json" with { type: "json" };
 import type { BattleActorView } from "./battleView.js";
+import { publicUrl } from "../publicUrl.js";
 
 /** Asset hooks supplied by main.ts so we reuse its loaders/caches. */
 export interface BorgAssets {
@@ -466,21 +467,21 @@ interface FxTextureSource {
 
 const FX_SOURCES = {
   /** ptcl00.txg#5 — blue-violet energy glow quadrant (energy shots). */
-  energy: { url: "/ui/txg/ptcl00/image_05_RGB565.png", fallback: "/fx/energy_dot.png", quadrant: true },
+  energy: { url: publicUrl("/ui/txg/ptcl00/image_05_RGB565.png"), fallback: publicUrl("/fx/energy_dot.png"), quadrant: true },
   /** ptcl00.txg#1 — orange fireball core (flame shots + death-explosion core). */
-  flame: { url: "/ui/txg/ptcl00/image_01_RGB565.png", fallback: "/fx/flame_core.png", quadrant: false },
+  flame: { url: publicUrl("/ui/txg/ptcl00/image_01_RGB565.png"), fallback: publicUrl("/fx/flame_core.png"), quadrant: false },
   /** ptcl00.txg#6 — orange ray-burst quadrant (muzzle flash). */
-  muzzle: { url: "/ui/txg/ptcl00/image_06_RGB565.png", fallback: "/fx/muzzle_flash.png", quadrant: true },
+  muzzle: { url: publicUrl("/ui/txg/ptcl00/image_06_RGB565.png"), fallback: publicUrl("/fx/muzzle_flash.png"), quadrant: true },
   /** ptcl00.txg#2 — white-hot ember gradient quadrant (hit-spark core). */
-  hitSpark: { url: "/ui/txg/ptcl00/image_02_RGB565.png", fallback: "/fx/hit_spark.png", quadrant: true },
+  hitSpark: { url: publicUrl("/ui/txg/ptcl00/image_02_RGB565.png"), fallback: publicUrl("/fx/hit_spark.png"), quadrant: true },
   /** ptcl00.txg#0 — wispy white star burst (dash/boost burst: the white star in captures). TUNED-visual. */
-  dashStar: { url: "/ui/txg/ptcl00/image_00_I4.png", fallback: "/fx/spark_star.png", quadrant: false },
+  dashStar: { url: publicUrl("/ui/txg/ptcl00/image_00_I4.png"), fallback: publicUrl("/fx/spark_star.png"), quadrant: false },
   /** ptcl00.txg#7 — magenta spiral aura (charge-shot glow). TUNED-visual. */
-  chargeGlow: { url: "/ui/txg/ptcl00/image_07_RGB565.png", fallback: "/fx/aura_glow.png", quadrant: false },
+  chargeGlow: { url: publicUrl("/ui/txg/ptcl00/image_07_RGB565.png"), fallback: publicUrl("/fx/aura_glow.png"), quadrant: false },
 } as const satisfies Record<string, FxTextureSource>;
 
 /** efct00.tpl#0 atlas (256x64 RGB5A3, real alpha): ring / puff / smoke cells. */
-const IMPACT_ATLAS_URL = "/fx/efct00_atlas.png";
+const IMPACT_ATLAS_URL = publicUrl("/fx/efct00_atlas.png");
 /** 2x2 block of 16x16 white puff cells at (64,0)-(96,32) in efct00_atlas, read as a
  *  4-frame dissipating-puff sequence and flipbooked on projectile impacts. TUNED-visual. */
 const IMPACT_PUFF_CELLS: ReadonlyArray<readonly [number, number]> = [

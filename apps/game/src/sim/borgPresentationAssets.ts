@@ -4,6 +4,7 @@ import type { ModelManifestEntry } from "@gf/assets";
 import { prepareImportedModel, type ThreeAssetLoader } from "@gf/render";
 
 import type { AnimSlot, BorgAssets } from "./battleScene.js";
+import { publicUrl } from "../publicUrl.js";
 
 export interface BorgPresentationAssets extends BorgAssets {
   setModelManifest(manifest: readonly ModelManifestEntry[]): void;
@@ -110,13 +111,13 @@ function buildClip(json: BakedClip): THREE.AnimationClip {
 
 /** Resolve the production model url for a borg id (pl0615 has a special path; others come from the library). */
 function modelUrlFor(id: string): string {
-  if (INTERNAL_MORPH_PRESENTATION[id]) return `/models/${id}/model_00.glb`;
-  if (id === defaultLeadId) return "/models/pl0615/model_00.glb";
+  if (INTERNAL_MORPH_PRESENTATION[id]) return publicUrl(`/models/${id}/model_00.glb`);
+  if (id === defaultLeadId) return publicUrl("/models/pl0615/model_00.glb");
   if (!libraryIds.has(id)) throw new Error(`No production model is registered for ${id}`);
   const entry = modelManifest.find((e) => e.id === id);
   if (!entry) throw new Error(`No production model manifest entry for ${id}`);
   if (!entry.glb) throw new Error(`No production GLB model file for ${id}`);
-  return `/models/library/${id}/${entry.glb}`;
+  return publicUrl(`/models/library/${id}/${entry.glb}`);
 }
 
 /** Load (and cache) a cloneable SOURCE model for a borg id. Returns a fresh clone per call. */
@@ -456,7 +457,7 @@ async function loadAnimIndex(id: string): Promise<AnimIndex | null> {
   let p = animIndexCache.get(id);
   if (!p) {
     const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
-    p = fetch(`/models/${sourceId}/anim_index.json`)
+    p = fetch(publicUrl(`/models/${sourceId}/anim_index.json`))
       .then((r) => (r.ok ? (r.json() as Promise<AnimIndex>) : null))
       .then((index) => index ? {
         ...index,
@@ -538,7 +539,7 @@ async function loadBorgClip(id: string, slot: AnimSlot): Promise<THREE.Animation
       .then((index) => {
         const bank = index ? pickAnimBank(index, slot) : null;
         const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
-        return bank ? fetch(`/models/${sourceId}/${bank.file}`) : null;
+        return bank ? fetch(publicUrl(`/models/${sourceId}/${bank.file}`)) : null;
       })
       .then((r) => (r?.ok ? (r.json() as Promise<BakedClip>) : null))
       .then((json) => (json ? buildClip(json) : null))
@@ -559,7 +560,7 @@ async function loadBorgClipByStreamRef(
       .then((index) => {
         const bank = index?.banks.find((b) => b.group === ref.group && b.slot === ref.slot) ?? null;
         const sourceId = INTERNAL_MORPH_PRESENTATION[id]?.animationId ?? id;
-        return bank ? fetch(`/models/${sourceId}/${bank.file}`) : null;
+        return bank ? fetch(publicUrl(`/models/${sourceId}/${bank.file}`)) : null;
       })
       .then((r) => (r?.ok ? (r.json() as Promise<BakedClip>) : null))
       .then((json) => (json ? buildClip(json) : null))

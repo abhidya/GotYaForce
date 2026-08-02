@@ -20,7 +20,6 @@
  * bitmap font (see bitmapText.ts) rather than a capture crop of one baked value.
  */
 
-import { createPublicAssetCatalog } from "@gf/assets";
 import { bitmapText, setBitmapText } from "../bitmapText.js";
 import { borgBannerPath, borgMiniPath } from "../assets.js";
 import { captureCropImg } from "../captureCrop.js";
@@ -28,10 +27,11 @@ import { clear, el, legendItem } from "../dom.js";
 import type { MenuAction, MenuInputTarget } from "../menuInput.js";
 import { UI_SCENE_LAYOUTS } from "../layout.generated.js";
 import { createUiSceneHost, mountUiSceneModels } from "../sceneModel.js";
+import { createGameAssetCatalog } from "../../assetCatalog.js";
 import type { ForceBorg } from "./ForceBuilder.js";
 
 const SELECT_FORCE_LAYOUT = UI_SCENE_LAYOUTS.entry00.semantics.selectForce;
-const assetCatalog = createPublicAssetCatalog();
+const assetCatalog = createGameAssetCatalog();
 
 const CAPTURE = new URL(
   "../../../reference/captures/challenge-5-select-a-force.png",

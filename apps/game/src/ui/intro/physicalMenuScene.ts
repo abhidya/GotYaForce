@@ -7,6 +7,7 @@ import {
   PHYSICAL_MENU_MODEL_TRIPLETS,
 } from "../titleIntroScript.generated.js";
 import { BAM16_TO_RADIANS } from "./titlePropController.js";
+import { publicUrl } from "../../publicUrl.js";
 
 const SOURCE_FPS = 60;
 const FIXED_FRAME_SECONDS = 1 / SOURCE_FPS;
@@ -40,7 +41,7 @@ function wrapI16(value: number): number {
 }
 
 function modelPath(modelId: number): string {
-  return `/stages/stff/model/model_${String(modelId).padStart(2, "0")}.glb`;
+  return publicUrl(`/stages/stff/model/model_${String(modelId).padStart(2, "0")}.glb`);
 }
 
 function prepareModel(model: THREE.Object3D): void {
